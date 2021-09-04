@@ -5,6 +5,7 @@ import router from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
 import { logoutUser, User, verifyTwoFactor } from 'services/userService';
+import { PAGES } from 'types';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 
@@ -13,15 +14,15 @@ export default function Home() {
 
     useEffect(() => {
         const main = async () => {
-            router.prefetch('/credentials');
+            router.prefetch(PAGES.CREDENTIALS);
             const user: User = getData(LS_KEYS.USER);
             if (
                 !user.isTwoFactorEnabled &&
                 (user.encryptedToken || user.token)
             ) {
-                router.push('/credential');
+                router.push(PAGES.CREDENTIALS);
             } else if (!user?.email || !user.twoFactorSessionID) {
-                router.push('/');
+                router.push(PAGES.ROOT);
             } else {
                 setSessionID(user.twoFactorSessionID);
             }
@@ -40,7 +41,7 @@ export default function Home() {
                 id,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-            router.push('/credentials');
+            router.push(PAGES.CREDENTIALS);
         } catch (e) {
             if (e.status === 404) {
                 logoutUser();
@@ -70,7 +71,9 @@ export default function Home() {
                         }}>
                         <Button
                             variant="link"
-                            onClick={() => router.push('/two-factor/recover')}>
+                            onClick={() =>
+                                router.push(PAGES.TWO_FACTOR_RECOVER)
+                            }>
                             {constants.LOST_DEVICE}
                         </Button>
                         <Button variant="link" onClick={logoutUser}>

@@ -12,6 +12,7 @@ import constants from 'utils/strings/constants';
 import localForage from 'utils/storage/localForage';
 import IncognitoWarning from 'components/IncognitoWarning';
 import { logError } from 'utils/sentry';
+import { PAGES } from 'types';
 
 const Container = styled.div`
     display: flex;
@@ -81,7 +82,7 @@ const UpperText = styled(TextContainer)`
 `;
 
 const FeatureText = styled.div`
-    color: #2dc262;
+    color: #51cd7c;
     font-weight: bold;
     padding-top: 20px;
     font-size: 24px;
@@ -106,7 +107,7 @@ export default function LandingPage() {
         const main = async () => {
             const user = getData(LS_KEYS.USER);
             if (user?.email) {
-                await router.push('/verify');
+                await router.push(PAGES.VERIFY);
             }
             try {
                 await localForage.ready();
@@ -165,8 +166,8 @@ export default function LandingPage() {
                         <Button
                             variant="outline-success"
                             size="lg"
-                            style={{ color: '#fff', padding: '10px 50px' }}
-                            onClick={() => router.push('signup')}>
+                            style={{ padding: '10px 50px' }}
+                            onClick={() => router.push(PAGES.SIGNUP)}>
                             {constants.SIGN_UP}
                         </Button>
                         <br />
@@ -174,8 +175,8 @@ export default function LandingPage() {
                             variant="link"
                             size="lg"
                             style={{ color: '#fff', padding: '10px 50px' }}
-                            onClick={() => router.push('login')}>
-                            {constants.SIGN_IN}
+                            onClick={() => router.push(PAGES.LOGIN)}>
+                            {constants.LOGIN}
                         </Button>
                     </MobileBox>
                     <DesktopBox>

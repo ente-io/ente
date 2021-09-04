@@ -113,16 +113,19 @@ const getCollections = async (
                         collection,
                         key
                     );
-                    return collectionWithSecrets;
                 } catch (e) {
-                    logError(
-                        e,
-                        `decryption failed for collection with id=${collection.id}`
-                    );
+                    logError(e, `decryption failed for collection`, {
+                        collectionID: collection.id,
+                    });
                 }
+                return collectionWithSecrets;
             }
         );
-        return await Promise.all(promises);
+        // only allow deleted or collection with key, filtering out collection whose decryption failed
+        const collections = (await Promise.all(promises)).filter(
+            (collection) => collection.isDeleted || collection.key
+        );
+        return collections;
     } catch (e) {
         logError(e, 'getCollections failed');
         throw e;
@@ -221,15 +224,20 @@ export const getFavItemIds = async (files: File[]): Promise<Set<number>> => {
     );
 };
 
-export const createAlbum = async (albumName: string) =>
-    createCollection(albumName, CollectionType.album);
+export const createAlbum = async (
+    albumName: string,
+    existingCollection?: Collection[]
+) => createCollection(albumName, CollectionType.album, existingCollection);
 
 export const createCollection = async (
     collectionName: string,
-    type: CollectionType
+    type: CollectionType,
+    existingCollections?: Collection[]
 ): Promise<Collection> => {
     try {
-        const existingCollections = await syncCollections();
+        if (!existingCollections) {
+            existingCollections = await syncCollections();
+        }
         for (const collection of existingCollections) {
             if (collection.name === collectionName) {
                 return collection;

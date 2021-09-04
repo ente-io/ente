@@ -3,11 +3,15 @@ import ExpandMore from 'components/icons/ExpandMore';
 import React, { useState } from 'react';
 import { Button, Modal, ProgressBar } from 'react-bootstrap';
 import { FileRejection } from 'react-dropzone';
-import { FileUploadResults, UPLOAD_STAGES } from 'services/uploadService';
+import {
+    FileUploadResults,
+    UPLOAD_STAGES,
+} from 'services/upload/uploadManager';
 import styled from 'styled-components';
 import { DESKTOP_APP_DOWNLOAD_URL } from 'utils/common';
 import constants from 'utils/strings/constants';
-import AlertBanner from './AlertBanner';
+import { Collapse } from 'react-collapse';
+import { ButtonVariant, getVariantColor } from './LinkButton';
 
 interface Props {
     fileCounter;
@@ -25,25 +29,12 @@ interface FileProgresses {
     progress: number;
 }
 
-const Content = styled.div<{
-    collapsed: boolean;
-    sm?: boolean;
-    height?: number;
-}>`
-    overflow: hidden;
-    height: ${(props) => (props.collapsed ? '0px' : props.height + 'px')};
-    transition: ${(props) => 'height ' + 0.001 * props.height + 's ease-out'};
-    margin-bottom: 20px;
-    & > p {
-        padding-left: 35px;
-        margin: 0;
-    }
-`;
 const FileList = styled.ul`
-    padding-left: 50px;
+    padding-left: 30px;
     margin-top: 5px;
+    margin-bottom: 0px;
     & > li {
-        padding-left: 10px;
+        padding-left: 5px;
         margin-bottom: 10px;
         color: #ccc;
     }
@@ -52,18 +43,41 @@ const FileList = styled.ul`
 const SectionTitle = styled.div`
     display: flex;
     justify-content: space-between;
-    padding: 0 20px;
     color: #eee;
     font-size: 20px;
     cursor: pointer;
 `;
 
+const Section = styled.div`
+    margin: 20px 0;
+    & > .ReactCollapse--collapse {
+        transition: height 200ms;
+    }
+    word-break: break-word;
+    padding: 0 20px;
+`;
+const SectionInfo = styled.div`
+    margin: 4px 0;
+    padding-left: 15px;
+`;
+
+const Content = styled.div`
+    padding-right: 30px;
+`;
+
+const NotUploadSectionHeader = styled.div`
+    margin-top: 30px;
+    text-align: center;
+    color: ${getVariantColor(ButtonVariant.warning)};
+    border-bottom: 1px solid ${getVariantColor(ButtonVariant.warning)};
+    margin: 0 20px;
+`;
+
 interface ResultSectionProps {
     fileUploadResultMap: Map<FileUploadResults, string[]>;
     fileUploadResult: FileUploadResults;
-    sectionTitle;
-    sectionInfo;
-    infoHeight: number;
+    sectionTitle: any;
+    sectionInfo?: any;
 }
 const ResultSection = (props: ResultSectionProps) => {
     const [listView, setListView] = useState(false);
@@ -72,23 +86,61 @@ const ResultSection = (props: ResultSectionProps) => {
         return <></>;
     }
     return (
-        <>
+        <Section>
             <SectionTitle onClick={() => setListView(!listView)}>
-                {' '}
-                {props.sectionTitle}{' '}
+                {props.sectionTitle}
                 {listView ? <ExpandLess /> : <ExpandMore />}
             </SectionTitle>
-            <Content
-                collapsed={!listView}
-                height={fileList.length * 33 + props.infoHeight}>
-                <p>{props.sectionInfo}</p>
-                <FileList>
-                    {fileList.map((fileName) => (
-                        <li key={fileName}>{fileName}</li>
-                    ))}
-                </FileList>
-            </Content>
-        </>
+            <Collapse isOpened={listView}>
+                <Content>
+                    {props.sectionInfo && (
+                        <SectionInfo>{props.sectionInfo}</SectionInfo>
+                    )}
+                    <FileList>
+                        {fileList.map((fileName) => (
+                            <li key={fileName}>{fileName}</li>
+                        ))}
+                    </FileList>
+                </Content>
+            </Collapse>
+        </Section>
+    );
+};
+
+interface InProgressProps {
+    sectionTitle: string;
+    fileProgressStatuses: FileProgresses[];
+}
+const InProgressSection = (props: InProgressProps) => {
+    const [listView, setListView] = useState(true);
+    const fileList = props.fileProgressStatuses;
+    if (!fileList?.length) {
+        return <></>;
+    }
+    if (!fileList?.length) {
+        return <></>;
+    }
+    return (
+        <Section>
+            <SectionTitle onClick={() => setListView(!listView)}>
+                {props.sectionTitle}
+                {listView ? <ExpandLess /> : <ExpandMore />}
+            </SectionTitle>
+            <Collapse isOpened={listView}>
+                <Content>
+                    <FileList>
+                        {fileList.map(({ fileName, progress }) => (
+                            <li key={fileName}>
+                                {constants.FILE_UPLOAD_PROGRESS(
+                                    fileName,
+                                    progress
+                                )}
+                            </li>
+                        ))}
+                    </FileList>
+                </Content>
+            </Collapse>
+        </Section>
     );
 };
 
@@ -152,35 +204,24 @@ export default function UploadProgress(props: Props) {
                         variant="upload-progress-bar"
                     />
                 )}
-                {fileProgressStatuses.length > 0 && (
-                    <FileList>
-                        {fileProgressStatuses.map(({ fileName, progress }) => (
-                            <li key={fileName} style={{ marginTop: '12px' }}>
-                                {props.uploadStage === UPLOAD_STAGES.FINISH
-                                    ? fileName
-                                    : constants.FILE_UPLOAD_PROGRESS(
-                                          fileName,
-                                          progress
-                                      )}
-                            </li>
-                        ))}
-                    </FileList>
-                )}
+                <InProgressSection
+                    fileProgressStatuses={fileProgressStatuses}
+                    sectionTitle={constants.INPROGRESS_UPLOADS}
+                />
 
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.UPLOADED}
                     sectionTitle={constants.SUCCESSFUL_UPLOADS}
-                    sectionInfo={constants.SUCCESS_INFO}
-                    infoHeight={32}
                 />
 
                 {props.uploadStage === UPLOAD_STAGES.FINISH &&
                     filesNotUploaded && (
-                        <AlertBanner variant="warning">
+                        <NotUploadSectionHeader>
                             {constants.FILE_NOT_UPLOADED_LIST}
-                        </AlertBanner>
+                        </NotUploadSectionHeader>
                     )}
+
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.BLOCKED}
@@ -188,54 +229,54 @@ export default function UploadProgress(props: Props) {
                     sectionInfo={constants.ETAGS_BLOCKED(
                         DESKTOP_APP_DOWNLOAD_URL
                     )}
-                    infoHeight={140}
                 />
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.FAILED}
                     sectionTitle={constants.FAILED_UPLOADS}
-                    sectionInfo={constants.FAILED_INFO}
-                    infoHeight={48}
                 />
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.SKIPPED}
                     sectionTitle={constants.SKIPPED_FILES}
                     sectionInfo={constants.SKIPPED_INFO}
-                    infoHeight={32}
                 />
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.UNSUPPORTED}
                     sectionTitle={constants.UNSUPPORTED_FILES}
                     sectionInfo={constants.UNSUPPORTED_INFO}
-                    infoHeight={32}
                 />
-
-                {props.uploadStage === UPLOAD_STAGES.FINISH && (
-                    <Modal.Footer style={{ border: 'none' }}>
-                        {props.uploadStage === UPLOAD_STAGES.FINISH &&
-                            (fileUploadResultMap?.get(FileUploadResults.FAILED)
-                                ?.length > 0 ||
-                            fileUploadResultMap?.get(FileUploadResults.BLOCKED)
-                                ?.length > 0 ? (
-                                <Button
-                                    variant="outline-success"
-                                    style={{ width: '100%' }}
-                                    onClick={props.retryFailed}>
-                                    {constants.RETRY_FAILED}
-                                </Button>
-                            ) : (
-                                <Button
-                                    variant="outline-secondary"
-                                    style={{ width: '100%' }}
-                                    onClick={props.closeModal}>
-                                    {constants.CLOSE}
-                                </Button>
-                            ))}
-                    </Modal.Footer>
-                )}
+                <ResultSection
+                    fileUploadResultMap={fileUploadResultMap}
+                    fileUploadResult={FileUploadResults.TOO_LARGE}
+                    sectionTitle={constants.TOO_LARGE_UPLOADS}
+                    sectionInfo={constants.TOO_LARGE_INFO}
+                />
             </Modal.Body>
+            {props.uploadStage === UPLOAD_STAGES.FINISH && (
+                <Modal.Footer style={{ border: 'none' }}>
+                    {props.uploadStage === UPLOAD_STAGES.FINISH &&
+                        (fileUploadResultMap?.get(FileUploadResults.FAILED)
+                            ?.length > 0 ||
+                        fileUploadResultMap?.get(FileUploadResults.BLOCKED)
+                            ?.length > 0 ? (
+                            <Button
+                                variant="outline-success"
+                                style={{ width: '100%' }}
+                                onClick={props.retryFailed}>
+                                {constants.RETRY_FAILED}
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="outline-secondary"
+                                style={{ width: '100%' }}
+                                onClick={props.closeModal}>
+                                {constants.CLOSE}
+                            </Button>
+                        ))}
+                </Modal.Footer>
+            )}
         </Modal>
     );
 }

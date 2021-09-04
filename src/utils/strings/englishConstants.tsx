@@ -23,6 +23,14 @@ const Logo = styled.img`
     margin-top: -3px;
 `;
 
+const Trigger = styled.span`
+    :hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    color: #51cd7c;
+`;
+
 const englishConstants = {
     HERO_HEADER: () => (
         <div>
@@ -40,9 +48,8 @@ const englishConstants = {
     HERO_SLIDE_3:
         'reliably replicated to a fallout shelter, designed to outlive',
     COMPANY_NAME: 'ente',
-    LOGIN: 'login',
+    LOGIN: 'log in',
     SIGN_UP: 'sign up',
-    SIGN_IN: 'sign in',
     NAME: 'name',
     ENTER_NAME: 'your name',
     EMAIL: 'email',
@@ -63,6 +70,7 @@ const englishConstants = {
     VERIFY: 'verify',
     UNKNOWN_ERROR: 'something went wrong, please try again',
     INVALID_CODE: 'invalid verification code',
+    EXPIRED_CODE: 'your verification code has expired',
     SENDING: 'sending...',
     SENT: 'sent!',
     PASSWORD: 'password',
@@ -87,7 +95,7 @@ const englishConstants = {
     CONSOLE_WARNING_DESC:
         "This is a browser feature intended for developers. Please don't copy-paste unverified code here.",
     SELECT_COLLECTION: 'select an album to upload to',
-    CREATE_COLLECTION: 'create album',
+    CREATE_COLLECTION: 'new album',
     ENTER_ALBUM_NAME: 'album name',
     CLOSE: 'close',
     NO: 'no',
@@ -103,26 +111,36 @@ const englishConstants = {
     FILE_NOT_UPLOADED_LIST: 'the following files were not uploaded',
     FILE_UPLOAD_PROGRESS: (name: string, progress: number) => (
         <div id={name}>
-            <strong>{name}</strong>
+            {name}
             {' - '}
-            {(() => {
-                switch (progress) {
-                    case -1:
-                        return 'failed';
-                    case -2:
-                        return 'already uploaded, skipping...';
-                    case -3:
-                        return ',unsupported file format, skipping....';
-                    default:
-                        return `${progress}%`;
-                }
-            })()}
+            <span style={{ color: '#eee' }}>
+                {(() => {
+                    switch (progress) {
+                        case -1:
+                            return 'failed';
+                        case -2:
+                            return 'already uploaded, skipping...';
+                        case -3:
+                            return 'unsupported file format, skipping....';
+                        default:
+                            return `${progress}%`;
+                    }
+                })()}
+            </span>
         </div>
     ),
-    SUBSCRIPTION_EXPIRED: 'your subscription has expired, please renew it',
-
-    STORAGE_QUOTA_EXCEEDED:
-        'you have exceeded your storage quota, please upgrade your plan',
+    SUBSCRIPTION_EXPIRED: (action) => (
+        <>
+            your subscription has expired, please a{' '}
+            <Trigger onClick={action}>renew</Trigger>
+        </>
+    ),
+    STORAGE_QUOTA_EXCEEDED: (action) => (
+        <>
+            you have exceeded your storage quota, please{' '}
+            <Trigger onClick={action}>upgrade</Trigger> your plan
+        </>
+    ),
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
     USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
     UPLOAD_BUTTON_TEXT: 'upload',
@@ -138,25 +156,24 @@ const englishConstants = {
     NO_INTERNET_CONNECTION:
         'please check your internet connection and try again',
     TITLE: 'ente.io | encrypted photo storage',
-    UPLOAD_FIRST_PHOTO: 'backup your first photo',
+    UPLOAD_FIRST_PHOTO_DESCRIPTION: 'preserve your first memory with ente',
+    UPLOAD_FIRST_PHOTO: 'preserve',
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
     CONFIRM_DELETE_FILE: 'confirm file deletion',
     DELETE_FILE_MESSAGE: 'sure you want to delete selected files?',
     DELETE_FILE: 'delete files',
     DELETE: 'delete',
-    MULTI_FOLDER_UPLOAD: 'choose upload strategy',
-    UPLOAD_STRATEGY_CHOICE:
-        'you are uploading multiple folders, would you like us to create',
-    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
+    MULTI_FOLDER_UPLOAD: 'multiple folders detected',
+    UPLOAD_STRATEGY_CHOICE: 'would you like to upload them into',
+    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album',
     OR: 'or',
-    UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
+    UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums',
     SESSION_EXPIRED_MESSAGE:
         'your session has expired, please login again to continue',
     SESSION_EXPIRED: 'session expired',
-    SYNC_FAILED:
-        'failed to sync with remote server, please refresh page to try again',
+    SYNC_FAILED: 'failed to sync with server, please refresh this page',
     PASSWORD_GENERATION_FAILED:
-        "your browser was unable to generate a strong enough password  that meets ente's encryption standards, please try using the mobile app or another browser",
+        "your browser was unable to generate a strong key that meets ente's encryption standards, please try using the mobile app or another browser",
     CHANGE_PASSWORD: 'change password',
     GO_BACK: 'go back',
     DOWNLOAD_RECOVERY_KEY: 'recovery key',
@@ -165,7 +182,7 @@ const englishConstants = {
     RECOVERY_KEY_DESCRIPTION:
         'if you forget your password, the only way you can recover your data is with this key',
     RECOVER_KEY_GENERATION_FAILED:
-        'recovery code could be generated, please try again',
+        'recovery code could not be generated, please try again',
     KEY_NOT_STORED_DISCLAIMER:
         "we don't store this key, so please save this in a safe place",
     RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
@@ -182,7 +199,7 @@ const englishConstants = {
         <>
             please drop an email to{' '}
             <a href="mailto:support@ente.io">support@ente.io</a> from your
-            registered email
+            registered email address
         </>
     ),
     CONTACT_SUPPORT: 'contact support',
@@ -192,9 +209,22 @@ const englishConstants = {
     SKIP: 'skip',
     CANCEL: 'cancel',
     LOGOUT: 'logout',
+    DELETE_ACCOUNT: 'delete account',
+    DELETE_MESSAGE: () => (
+        <>
+            <p>
+                please send an email to{' '}
+                <a href="mailto:account-deletion@ente.io">
+                    account-deletion@ente.io
+                </a>{' '}
+                from your registered email address.{' '}
+            </p>
+            your request will be processed within 72 hours.
+        </>
+    ),
     LOGOUT_MESSAGE: 'sure you want to logout?',
     CHANGE: 'change',
-    CHANGE_EMAIL: 'change email ?',
+    CHANGE_EMAIL: 'change email?',
     OK: 'ok',
     SUCCESS: 'success',
     ERROR: 'error',
@@ -205,14 +235,14 @@ const englishConstants = {
             <a
                 href="https://play.google.com/store/apps/details?id=io.ente.photos"
                 target="_blank"
-                style={{ color: '#2dc262' }}
+                style={{ color: '#51cd7c' }}
                 rel="noreferrer">
                 android
             </a>{' '}
             or{' '}
             <a
                 href="https://apps.apple.com/in/app/ente-photos/id1542026904"
-                style={{ color: '#2dc262' }}
+                style={{ color: '#51cd7c' }}
                 target="_blank"
                 rel="noreferrer">
                 ios app{' '}
@@ -222,8 +252,10 @@ const englishConstants = {
     ),
     DOWNLOAD_APP_MESSAGE: () => (
         <>
-            <p>sorry, this operation is currently not supported on the web,</p>
-            <p> do you want to download the desktop app</p>
+            <p>
+                sorry, this operation is currently only supported on our desktop
+                app
+            </p>
         </>
     ),
     DOWNLOAD_APP: 'download desktop app',
@@ -265,7 +297,7 @@ const englishConstants = {
 
     USAGE_INFO: (usage, quota) => (
         <p>
-            you have used {usage} out of your {quota} GB quota
+            you have used {usage} out of your {quota} quota
         </p>
     ),
 
@@ -281,10 +313,13 @@ const englishConstants = {
     SUBSCRIPTION_VERIFICATION_FAILED:
         'we were not able to verify your purchase, verification can take few hours',
     SUBSCRIPTION_PURCHASE_FAILED:
-        'subscription purchase failed , please try again later',
-
+        'subscription purchase failed , please try again',
+    SUBSCRIPTION_UPDATE_FAILED:
+        'subscription updated failed , please try again',
     UPDATE_PAYMENT_METHOD_MESSAGE:
         'we are sorry, payment failed when we tried to charge your card, please update your payment method and try again',
+    STRIPE_AUTHENTICATION_FAILED:
+        'we are unable to authenticate your payment method. please choose a different payment method and try again',
     UPDATE_PAYMENT_METHOD: 'update payment method',
     MONTHLY: 'monthly',
     YEARLY: 'yearly',
@@ -319,13 +354,13 @@ const englishConstants = {
     RENAME_COLLECTION: 'rename album',
     CONFIRM_DELETE_COLLECTION: 'confirm album deletion',
     DELETE_COLLECTION: 'delete album',
-    DELETE_COLLECTION_FAILED: 'album deletion failed , please try again',
+    DELETE_COLLECTION_FAILED: 'album deletion failed, please try again',
     DELETE_COLLECTION_MESSAGE: () => (
         <>
             <p>are you sure you want to delete this album?</p>
             <p>
-                all files that are present only in this album will be
-                permanently deleted
+                all files that are unique to this album will be permanently
+                deleted
             </p>
         </>
     ),
@@ -336,7 +371,11 @@ const englishConstants = {
     ZERO_SHAREES: () => (
         <>
             <h6>currently shared with no one 😔</h6>
-            <em style={{ color: '#777' }}>"memories are fonder when shared"</em>
+            <div style={{ marginTop: '16px' }}>
+                <em style={{ color: '#3c3c3c' }}>
+                    memories are fonder when shared
+                </em>
+            </div>
         </>
     ),
     SHARE_WITH_SELF: 'oops, you cannot share with yourself',
@@ -362,10 +401,10 @@ const englishConstants = {
     ),
     CONFIRM_PASSWORD_NOT_SAVED: () => (
         <p>
-            i understand that if i lose my password , i may lose my data since
+            I understand that if I lose my password , I may lose my data since
             my data is{' '}
             <a
-                href="https://ente.io/encryption"
+                href="https://ente.io/architecture"
                 target="_blank"
                 rel="noreferrer">
                 end-to-end encrypted
@@ -375,12 +414,12 @@ const englishConstants = {
     ),
     SEARCH_STATS: ({ resultCount, timeTaken }) => (
         <span>
-            found <span style={{ color: '#2dc262' }}>{resultCount}</span>{' '}
-            memories ( <span style={{ color: '#2dc262' }}> {timeTaken}</span>{' '}
+            found <span style={{ color: '#51cd7c' }}>{resultCount}</span>{' '}
+            memories ( <span style={{ color: '#51cd7c' }}> {timeTaken}</span>{' '}
             seconds )
         </span>
     ),
-    NOT_FILE_OWNER: 'deleting shared collection files is not allowed',
+    NOT_FILE_OWNER: 'you cannot delete files in a shared album',
     ADD_TO_COLLECTION: 'add to collection',
     SELECTED: 'selected',
     VIDEO_PLAYBACK_FAILED: 'video format not supported',
@@ -409,7 +448,7 @@ const englishConstants = {
     FILES_TO_BE_UPLOADED: (count: number) =>
         count === 1
             ? `1 file received. uploading in a jiffy`
-            : `${count} files received. Uploading in a jiffy`,
+            : `${count} files received. uploading in a jiffy`,
     TWO_FACTOR: 'two-factor',
     TWO_FACTOR_AUTHENTICATION: 'two-factor authentication',
     TWO_FACTOR_QR_INSTRUCTION:
@@ -479,7 +518,7 @@ const englishConstants = {
                 using <code>eTags</code> to upload large files, or use our{' '}
                 <a
                     href={url}
-                    style={{ color: '#2dc262', textDecoration: 'underline' }}
+                    style={{ color: '#51cd7c', textDecoration: 'underline' }}
                     target="_blank"
                     rel="noreferrer">
                     desktop app
@@ -491,15 +530,18 @@ const englishConstants = {
 
     RETRY_FAILED: 'retry failed uploads',
     FAILED_UPLOADS: 'failed uploads ',
-    SKIPPED_FILES: 'duplicate files',
+    SKIPPED_FILES: 'ignored uploads',
     UNSUPPORTED_FILES: 'unsupported files',
     SUCCESSFUL_UPLOADS: 'successful uploads',
-    FAILED_INFO:
-        ' unable to upload these files because of network issue, you can retry upload these files',
-    SKIPPED_INFO: 'these files already existed in the album',
-    UNSUPPORTED_INFO: 'these files are currently not supported by ente',
-    SUCCESS_INFO: 'successfully backed-up memories',
+    SKIPPED_INFO:
+        'skipped these as there are files with matching names in the same album',
+    UNSUPPORTED_INFO: 'ente does not support these file formats yet',
     BLOCKED_UPLOADS: 'blocked uploads',
+    INPROGRESS_UPLOADS: 'uploads in progress',
+    TOO_LARGE_UPLOADS: 'large files',
+    TOO_LARGE_INFO:
+        'these files were not uploaded as they exceed the maximum size limit for your storage plan',
+    UPLOAD_TO_COLLECTION: 'upload to album',
 };
 
 export default englishConstants;

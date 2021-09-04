@@ -4,16 +4,16 @@ import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
 import { useRouter } from 'next/router';
 import Container from 'components/Container';
-import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 import EnteSpinner from 'components/EnteSpinner';
 import { logError } from '../utils/sentry';
-import { Workbox } from 'workbox-window';
+// import { Workbox } from 'workbox-window';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
+import Head from 'next/head';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -130,12 +130,12 @@ const GlobalStyles = createGlobalStyle`
         background-color:#202020 !important;
     }
     .modal-dialog{
-        margin:5% auto;
+        margin:5vh auto;
         width:90%;
     }
     .modal-body{
-        max-height:80vh;
-        overflow:auto;
+        max-height:74vh;
+        overflow-y:auto;
     }
     .modal-xl{
         max-width:90% !important;
@@ -176,27 +176,41 @@ const GlobalStyles = createGlobalStyle`
         box-shadow: none;
     }
     .btn-success {
-        background: #2dc262;
-        border-color: #29a354;
+        background: #51cd7c;
+        color: #fff;
+        border-color: #51cd7c;
     }
     .btn-success:hover .btn-success:focus .btn-success:active {
         background-color: #29a354;
-        border-color: #2dc262;
+        border-color: #51cd7c;
+        color: #242424;
     }
     .btn-success:disabled {
         background-color: #69b383;
     }
     .btn-outline-success {
-        color: #2dc262;
-        border-color: #2dc262;
-        border-width: 2px;
+        background: #51cd7c;
+        color: #fff;
+        border-color: #51cd7c;
     }
     .btn-outline-success:hover:enabled {
-        background: #2dc262;
-        color: white;
+        background: #4db76c;
+        color: #fff;
     }
     .btn-outline-danger, .btn-outline-secondary, .btn-outline-primary{
         border-width: 2px;
+    }
+    a {
+        color: #fff;
+    }
+    a:hover {
+        color: #51cd7c;
+    }
+    .btn-link {
+        color: #fff;
+    }
+    .btn-link:hover {
+        color: #51cd7c;
     }
     .btn-link-danger {
         color: #dc3545;
@@ -262,7 +276,7 @@ const GlobalStyles = createGlobalStyle`
         background: rgba(0, 0, 0, 0.8) !important;
     }
     .bg-upload-progress-bar {
-        background-color: #2dc262;
+        background-color: #51cd7c;
     }
     .custom-switch.custom-switch-md .custom-control-label {
         padding-left: 2rem;
@@ -308,9 +322,6 @@ const GlobalStyles = createGlobalStyle`
         text-decoration: none;
         background-color: #e9ecef;
     }
-    .submitButton:hover > .spinner-border{
-        color:white;
-    }
     hr{
         border-top: 1rem solid #444 !important;
     }
@@ -336,7 +347,7 @@ const GlobalStyles = createGlobalStyle`
         margin-right: 12px;
     }
     .carousel-indicators .active {
-        background-color: #2dc262;
+        background-color: #51cd7c;
     }
     div.otp-input input {
         width: 36px !important;
@@ -349,7 +360,7 @@ const GlobalStyles = createGlobalStyle`
     }
 
     div.otp-input input:not(:placeholder-shown) , div.otp-input input:focus{
-        border: 2px solid #2dc262;
+        border: 2px solid #51cd7c;
         border-radius:1px; 
         -webkit-transition: 0.5s;
         transition: 0.5s;
@@ -431,7 +442,6 @@ export default function App({ Component, err }) {
     const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const [redirectName, setRedirectName] = useState<string>(null);
     const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
-    const [pageRootURL, setPageRootURL] = useState<URL>(null);
     useEffect(() => {
         if (
             !('serviceWorker' in navigator) ||
@@ -440,8 +450,8 @@ export default function App({ Component, err }) {
             console.warn('Progressive Web App support is disabled');
             return;
         }
-        const wb = new Workbox('sw.js', { scope: '/' });
-        wb.register();
+        // const wb = new Workbox('sw.js', { scope: '/' });
+        // wb.register();
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.onmessage = (event) => {
@@ -450,12 +460,19 @@ export default function App({ Component, err }) {
                     setSharedFiles(files);
                 }
             };
+            navigator.serviceWorker
+                .getRegistrations()
+                .then(function (registrations) {
+                    for (const registration of registrations) {
+                        registration.unregister();
+                    }
+                });
         }
 
         HTTPService.getInterceptors().response.use(
             (resp) => resp,
             (error) => {
-                logError(error);
+                logError(error, 'Network Error');
                 return Promise.reject(error);
             }
         );
@@ -482,7 +499,6 @@ export default function App({ Component, err }) {
                 setRedirectName(redirect);
             }
         }
-        setPageRootURL(new URL(window.location.href));
 
         router.events.on('routeChangeStart', (url: string) => {
             if (window.location.pathname !== url.split('?')[0]) {
@@ -516,28 +532,11 @@ export default function App({ Component, err }) {
         setFlashMessage(flashMessages);
         setTimeout(() => setFlashMessage(null), 5000);
     };
+    //  ho ja yaar
     return (
         <>
             <Head>
                 <title>{constants.TITLE}</title>
-                {/* Cloudflare Web Analytics */}
-                {pageRootURL?.hostname &&
-                    (pageRootURL.hostname === 'photos.ente.io' ? (
-                        <script
-                            defer
-                            src="https://static.cloudflareinsights.com/beacon.min.js"
-                            data-cf-beacon='{"token": "6a388287b59c439cb2070f78cc89dde1"}'
-                        />
-                    ) : pageRootURL.hostname === 'web.ente.io' ? (
-                        <script
-                            defer
-                            src="https://static.cloudflareinsights.com/beacon.min.js"
-                            data-cf-beacon='{"token": "dfde128b7bb34a618ad34a08f1ba7609"}'
-                        />
-                    ) : (
-                        console.warn('Web analytics is disabled')
-                    ))}
-                {/* End Cloudflare Web Analytics  */}
             </Head>
             <GlobalStyles />
             {showNavbar && (

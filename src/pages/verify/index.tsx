@@ -13,12 +13,15 @@ import {
     logoutUser,
     clearFiles,
     EmailVerificationResponse,
+    User,
+    putAttributes,
 } from 'services/userService';
 import { setIsFirstLogin } from 'utils/storage';
 import SubmitButton from 'components/SubmitButton';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
+import { KeyAttributes, PAGES } from 'types';
 
 interface formValues {
     ott: string;
@@ -33,12 +36,20 @@ export default function Verify() {
 
     useEffect(() => {
         const main = async () => {
-            router.prefetch('/twoFactor/verify');
-            router.prefetch('/credentials');
-            router.prefetch('/generate');
-            const user = getData(LS_KEYS.USER);
+            router.prefetch(PAGES.TWO_FACTOR_VERIFY);
+            router.prefetch(PAGES.CREDENTIALS);
+            router.prefetch(PAGES.GENERATE);
+            const user: User = getData(LS_KEYS.USER);
+            const keyAttributes: KeyAttributes = getData(
+                LS_KEYS.KEY_ATTRIBUTES
+            );
             if (!user?.email) {
-                router.push('/');
+                router.push(PAGES.ROOT);
+            } else if (
+                keyAttributes?.encryptedKey &&
+                (user.token || user.encryptedToken)
+            ) {
+                router.push(PAGES.CREDENTIALS);
             } else {
                 setEmail(user.email);
             }
@@ -68,29 +79,38 @@ export default function Verify() {
                     isTwoFactorEnabled: true,
                 });
                 setIsFirstLogin(true);
-                router.push('/two-factor/verify');
+                router.push(PAGES.TWO_FACTOR_VERIFY);
             } else {
                 setData(LS_KEYS.USER, {
-                    ...getData(LS_KEYS.USER),
                     email,
                     token,
                     encryptedToken,
                     id,
                     isTwoFactorEnabled: false,
                 });
-                keyAttributes && setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+                if (keyAttributes) {
+                    setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+                    setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
+                } else if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
+                    await putAttributes(
+                        token,
+                        getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)
+                    );
+                }
                 clearFiles();
                 setIsFirstLogin(true);
                 if (keyAttributes?.encryptedKey) {
                     clearKeys();
-                    router.push('/credentials');
+                    router.push(PAGES.CREDENTIALS);
                 } else {
-                    router.push('/generate');
+                    router.push(PAGES.GENERATE);
                 }
             }
         } catch (e) {
             if (e?.status === 401) {
                 setFieldError('ott', constants.INVALID_CODE);
+            } else if (e?.status === 410) {
+                setFieldError('ott', constants.EXPIRED_CODE);
             } else {
                 setFieldError('ott', `${constants.UNKNOWN_ERROR} ${e.message}`);
             }

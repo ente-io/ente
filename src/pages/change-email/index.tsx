@@ -8,6 +8,7 @@ import { getToken } from 'utils/common/key';
 import EnteSpinner from 'components/EnteSpinner';
 import ChangeEmailForm from 'components/ChangeEmail';
 import EnteCard from 'components/EnteCard';
+import { PAGES } from 'types';
 
 function ChangeEmailPage() {
     const [email, setEmail] = useState('');
@@ -18,7 +19,7 @@ function ChangeEmailPage() {
     useEffect(() => {
         const token = getToken();
         if (!token) {
-            router.push('/');
+            router.push(PAGES.ROOT);
             return;
         }
         setWaiting(false);

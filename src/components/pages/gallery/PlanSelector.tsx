@@ -143,15 +143,14 @@ function PlanSelector(props: Props) {
         } else {
             try {
                 props.setLoading(true);
-                await billingService.buyPaidSubscription(plan.stripeID);
+                await billingService.buySubscription(plan.stripeID);
             } catch (e) {
+                props.setLoading(false);
                 props.setDialogMessage({
                     title: constants.ERROR,
                     content: constants.SUBSCRIPTION_PURCHASE_FAILED,
                     close: { variant: 'danger' },
                 });
-            } finally {
-                props.setLoading(false);
             }
         }
     }

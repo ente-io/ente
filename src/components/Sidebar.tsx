@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
 import constants from 'utils/strings/constants';
@@ -8,7 +8,6 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { Button } from 'react-bootstrap';
 import {
     isSubscriptionActive,
-    convertBytesToGBs,
     getUserSubscription,
     isOnFreePlan,
     isSubscriptionCancelled,
@@ -28,10 +27,11 @@ import EnteSpinner from './EnteSpinner';
 import RecoveryKeyModal from './RecoveryKeyModal';
 import TwoFactorModal from './TwoFactorModal';
 import ExportModal from './ExportModal';
-import { SetLoading } from 'pages/gallery';
+import { GalleryContext, SetLoading } from 'pages/gallery';
 import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
 import { Subscription } from 'services/billingService';
+import { PAGES } from 'types';
 
 interface Props {
     collections: Collection[];
@@ -51,6 +51,8 @@ export default function Sidebar(props: Props) {
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
     const [exportModalView, setExportModalView] = useState(false);
+    const galleryContext = useContext(GalleryContext);
+    galleryContext.showPlanSelectorModal = props.showPlanSelectorModal;
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -76,13 +78,14 @@ export default function Sidebar(props: Props) {
         const win = window.open(feedbackURL, '_blank');
         win.focus();
     }
-    function openSupportMail() {
-        const a = document.createElement('a');
-        a.href = 'mailto:contact@ente.io';
 
+    function initiateEmail(email: string) {
+        const a = document.createElement('a');
+        a.href = 'mailto:' + email;
         a.rel = 'noreferrer noopener';
         a.click();
     }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function exportFiles() {
         if (isElectron()) {
@@ -185,7 +188,7 @@ export default function Sidebar(props: Props) {
                         {usage ? (
                             constants.USAGE_INFO(
                                 usage,
-                                Number(convertBytesToGBs(subscription?.storage))
+                                convertToHumanReadable(subscription?.storage)
                             )
                         ) : (
                             <div style={{ textAlign: 'center' }}>
@@ -215,7 +218,7 @@ export default function Sidebar(props: Props) {
                 </LinkButton>
                 <LinkButton
                     style={{ marginTop: '30px' }}
-                    onClick={openSupportMail}>
+                    onClick={() => initiateEmail('contact@ente.io')}>
                     {constants.SUPPORT}
                 </LinkButton>
                 <>
@@ -252,16 +255,14 @@ export default function Sidebar(props: Props) {
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={() => {
-                        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-                        router.push('change-password');
+                        router.push(PAGES.CHANGE_PASSWORD);
                     }}>
                     {constants.CHANGE_PASSWORD}
                 </LinkButton>
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={() => {
-                        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-                        router.push('change-email');
+                        router.push(PAGES.CHANGE_EMAIL);
                     }}>
                     {constants.UPDATE_EMAIL}
                 </LinkButton>
@@ -308,6 +309,26 @@ export default function Sidebar(props: Props) {
                         })
                     }>
                     {constants.LOGOUT}
+                </LinkButton>
+                <LinkButton
+                    variant="danger"
+                    style={{ marginTop: '30px' }}
+                    onClick={() =>
+                        props.setDialogMessage({
+                            title: `${constants.DELETE_ACCOUNT}`,
+                            content: constants.DELETE_MESSAGE(),
+                            staticBackdrop: true,
+                            proceed: {
+                                text: constants.DELETE_ACCOUNT,
+                                action: () => {
+                                    initiateEmail('account-deletion@ente.io');
+                                },
+                                variant: 'danger',
+                            },
+                            close: { text: constants.CANCEL },
+                        })
+                    }>
+                    {constants.DELETE_ACCOUNT}
                 </LinkButton>
                 <div
                     style={{

@@ -1,31 +1,29 @@
+import { FlexWrapper } from 'components/Container';
+import WarningIcon from 'components/icons/WarningIcon';
 import React from 'react';
-import Alert from 'react-bootstrap/Alert';
-import { getVariantColor } from './LinkButton';
+import styled from 'styled-components';
+import { ButtonVariant, getVariantColor } from './LinkButton';
 
 interface Props {
     bannerMessage?: any;
     variant?: string;
-    children?: any;
 }
+const Banner = styled.div`
+    border: 1px solid ${getVariantColor(ButtonVariant.warning)};
+    border-radius: 8px;
+    padding: 16px 28px;
+    color: #eee;
+    margin-top: 10px;
+`;
 export default function AlertBanner(props: Props) {
-    return (
-        <Alert
-            variant={props.variant ?? 'danger'}
-            style={{
-                display:
-                    props.bannerMessage || props.children ? 'block' : 'none',
-                textAlign: 'center',
-
-                border: 'none',
-                borderBottom: '1px solid',
-                background: 'none',
-                borderRadius: '0px',
-                color: getVariantColor(props.variant),
-                padding: 0,
-                margin: '0 25px',
-                marginBottom: '10px',
-            }}>
-            {props.bannerMessage ? props.bannerMessage : props.children}
-        </Alert>
+    return props.bannerMessage ? (
+        <FlexWrapper>
+            <Banner>
+                <WarningIcon />
+                {props.bannerMessage && props.bannerMessage}
+            </Banner>
+        </FlexWrapper>
+    ) : (
+        <></>
     );
 }

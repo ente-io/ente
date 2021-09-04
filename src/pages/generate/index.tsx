@@ -10,9 +10,9 @@ import {
     generateKeyAttributes,
 } from 'utils/crypto';
 import SetPasswordForm from 'components/SetPasswordForm';
-import { setJustSignedUp } from 'utils/storage';
+import { justSignedUp, setJustSignedUp } from 'utils/storage';
 import RecoveryKeyModal from 'components/RecoveryKeyModal';
-import { KeyAttributes } from 'types';
+import { KeyAttributes, PAGES } from 'types';
 import Container from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { AppContext } from 'pages/_app';
@@ -28,24 +28,28 @@ export default function Generate() {
     const [token, setToken] = useState<string>();
     const router = useRouter();
     const [recoverModalView, setRecoveryModalView] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const appContext = useContext(AppContext);
     useEffect(() => {
         const main = async () => {
-            setLoading(true);
             const key: string = getKey(SESSION_KEYS.ENCRYPTION_KEY);
             const keyAttributes: KeyAttributes = getData(
                 LS_KEYS.ORIGINAL_KEY_ATTRIBUTES
             );
-            router.prefetch('/gallery');
-            router.prefetch('/credentials');
+            router.prefetch(PAGES.GALLERY);
+            router.prefetch(PAGES.CREDENTIALS);
             const user: User = getData(LS_KEYS.USER);
             if (!user?.token) {
-                router.push('/');
-            } else if (keyAttributes?.encryptedKey) {
-                router.push('/credentials');
+                router.push(PAGES.ROOT);
             } else if (key) {
-                router.push('/gallery');
+                if (justSignedUp()) {
+                    setRecoveryModalView(true);
+                    setLoading(false);
+                } else {
+                    router.push(PAGES.GALLERY);
+                }
+            } else if (keyAttributes?.encryptedKey) {
+                router.push(PAGES.CREDENTIALS);
             } else {
                 setToken(user.token);
                 setLoading(false);
@@ -89,7 +93,7 @@ export default function Generate() {
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);
-                        router.push('/gallery');
+                        router.push(PAGES.GALLERY);
                     }}
                     somethingWentWrong={() => null}
                 />

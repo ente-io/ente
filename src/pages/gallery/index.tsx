@@ -61,6 +61,7 @@ import Upload from 'components/pages/gallery/Upload';
 import Collections from 'components/pages/gallery/Collections';
 import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
+import { PAGES } from 'types';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -98,11 +99,13 @@ export interface SearchStats {
 type GalleryContextType = {
     thumbs: Map<number, string>;
     files: Map<number, string>;
+    showPlanSelectorModal: () => void;
 };
 
 const defaultGalleryContext: GalleryContextType = {
     thumbs: new Map(),
     files: new Map(),
+    showPlanSelectorModal: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -144,7 +147,6 @@ export default function Gallery() {
     } = useDropzone({
         noClick: true,
         noKeyboard: true,
-        accept: ['image/*', 'video/*', '.json'],
         disabled: uploadInProgress,
     });
 
@@ -161,7 +163,7 @@ export default function Gallery() {
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
-            router.push('/');
+            router.push(PAGES.ROOT);
             return;
         }
         const main = async () => {
@@ -175,8 +177,12 @@ export default function Gallery() {
             const collections = await getLocalCollections();
             setFiles(files);
             setCollections(collections);
-            await initDerivativeState(collections, files);
-            await checkSubscriptionPurchase(setDialogMessage, router);
+            await setDerivativeState(collections, files);
+            await checkSubscriptionPurchase(
+                setDialogMessage,
+                router,
+                setLoading
+            );
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -208,8 +214,9 @@ export default function Gallery() {
             !silent && loadingBar.current?.continuousStart();
             await billingService.syncSubscription();
             const collections = await syncCollections();
+            setCollections(collections);
             const { files } = await syncFiles(collections, setFiles);
-            await initDerivativeState(collections, files);
+            await setDerivativeState(collections, files);
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
@@ -228,7 +235,7 @@ export default function Gallery() {
                     break;
                 case CustomError.KEY_MISSING:
                     clearKeys();
-                    router.push('/credentials');
+                    router.push(PAGES.CREDENTIALS);
                     break;
             }
         } finally {
@@ -241,7 +248,7 @@ export default function Gallery() {
         }
     };
 
-    const initDerivativeState = async (collections, files) => {
+    const setDerivativeState = async (collections, files) => {
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
         const collectionsAndTheirLatestFile =
             await getCollectionsAndTheirLatestFile(nonEmptyCollections, files);
@@ -262,7 +269,7 @@ export default function Gallery() {
     };
 
     const selectCollection = (id?: number) => {
-        const href = `/gallery?collection=${id || ''}`;
+        const href = `/gallery${id ? `?collection=${id.toString()}` : ''}`;
         router.push(href, undefined, { shallow: true });
     };
 
@@ -349,7 +356,7 @@ export default function Gallery() {
                         <EnteSpinner />
                     </LoadingOverlay>
                 )}
-                <LoadingBar color="#2dc262" ref={loadingBar} />
+                <LoadingBar color="#51cd7c" ref={loadingBar} />
                 {isFirstLoad && (
                     <AlertContainer>
                         {constants.INITIAL_LOAD_DELAY_WARNING}

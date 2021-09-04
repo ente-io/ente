@@ -2,7 +2,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
 
 import { getToken } from 'utils/common/key';
-import { DataStream, MetadataObject } from './uploadService';
+import { DataStream, MetadataObject } from './upload/uploadService';
 import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
@@ -25,6 +25,17 @@ export enum FILE_TYPE {
     LIVE_PHOTO,
     OTHERS,
 }
+
+/*  Build error occurred
+    ReferenceError: Cannot access 'FILE_TYPE' before initialization
+    when it was placed in readFileService
+*/
+// list of format that were missed by type-detection for some files.
+export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
+    { fileType: FILE_TYPE.IMAGE, exactType: 'jpeg' },
+    { fileType: FILE_TYPE.IMAGE, exactType: 'jpg' },
+    { fileType: FILE_TYPE.VIDEO, exactType: 'webm' },
+];
 
 export interface File {
     id: number;

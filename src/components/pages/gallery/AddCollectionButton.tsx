@@ -15,9 +15,15 @@ const ImageContainer = styled.div`
     cursor: pointer;
 `;
 
-export default function AddCollectionButton({ showNextModal }) {
+export default function AddCollectionButton({
+    showNextModal,
+}: {
+    showNextModal: () => void;
+}) {
     return (
-        <CollectionIcon style={{ margin: '10px' }} onClick={showNextModal}>
+        <CollectionIcon
+            style={{ margin: '10px' }}
+            onClick={() => showNextModal()}>
             <Card>
                 <ImageContainer>+</ImageContainer>
                 <Card.Text style={{ textAlign: 'center' }}>

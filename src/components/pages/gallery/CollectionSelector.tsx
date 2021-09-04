@@ -18,7 +18,7 @@ export const CollectionIcon = styled.div`
 
 export interface CollectionSelectorAttributes {
     callback: (collection) => void;
-    showNextModal: () => void;
+    showNextModal: (firstAlbum?: boolean) => void;
     title: string;
 }
 export type SetCollectionSelectorAttributes = React.Dispatch<
@@ -47,7 +47,7 @@ function CollectionSelector({
     useEffect(() => {
         if (directlyShowNextModal && attributes) {
             props.onHide();
-            attributes.showNextModal();
+            attributes.showNextModal(true);
         }
     }, [attributes]);
 

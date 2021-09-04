@@ -18,6 +18,7 @@ import { B64EncryptionResult } from 'utils/crypto';
 import { encryptWithRecoveryKey } from 'utils/crypto';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
+import { PAGES } from 'types';
 
 enum SetupMode {
     QR_CODE,
@@ -58,7 +59,7 @@ export default function SetupTwoFactor() {
                     message: constants.TWO_FACTOR_SETUP_FAILED,
                     type: FLASH_MESSAGE_TYPE.DANGER,
                 });
-                router.push('/gallery');
+                router.push(PAGES.GALLERY);
             }
         };
         main();
@@ -73,7 +74,7 @@ export default function SetupTwoFactor() {
             message: constants.TWO_FACTOR_SETUP_SUCCESS,
             type: FLASH_MESSAGE_TYPE.SUCCESS,
         });
-        router.push('/gallery');
+        router.push(PAGES.GALLERY);
     };
     return (
         <Container>

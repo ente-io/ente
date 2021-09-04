@@ -1,6 +1,6 @@
 import React from 'react';
 
-enum ButtonVariant {
+export enum ButtonVariant {
     success = 'success',
     danger = 'danger',
     secondary = 'secondary',
@@ -15,7 +15,7 @@ type Props = React.PropsWithChildren<{
 export function getVariantColor(variant: string) {
     switch (variant) {
         case ButtonVariant.success:
-            return '#2dc262';
+            return '#51cd7c';
         case ButtonVariant.danger:
             return '#c93f3f';
         case ButtonVariant.secondary:

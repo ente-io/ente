@@ -1,9 +1,12 @@
 import { Collection } from 'services/collectionService';
-import { File } from 'services/fileService';
+import { File, FILE_TYPE } from 'services/fileService';
+import { decodeMotionPhoto } from 'services/motionPhotoService';
+import { getMimeTypeFromBlob } from 'services/upload/readFileService';
 import { runningInBrowser } from 'utils/common';
 import CryptoWorker from 'utils/crypto';
 
-const TYPE_HEIC = 'heic';
+export const TYPE_HEIC = 'heic';
+export const TYPE_HEIF = 'heif';
 const UNSUPPORTED_FORMATS = ['flv', 'mkv', '3gp', 'avi', 'wmv'];
 
 export function downloadAsFile(filename: string, content: string) {
@@ -31,8 +34,11 @@ export async function convertHEIC2JPEG(fileBlob: Blob): Promise<Blob> {
     });
 }
 
-export function fileIsHEIC(name: string) {
-    return name.toLowerCase().endsWith(TYPE_HEIC);
+export function fileIsHEIC(mimeType: string) {
+    return (
+        mimeType.toLowerCase().endsWith(TYPE_HEIC) ||
+        mimeType.toLowerCase().endsWith(TYPE_HEIF)
+    );
 }
 
 export function sortFilesIntoCollections(files: File[]) {
@@ -136,7 +142,7 @@ export async function decryptFile(file: File, collection: Collection) {
     return file;
 }
 
-export function removeUnneccessaryFileProps(files: File[]): File[] {
+export function removeUnnecessaryFileProps(files: File[]): File[] {
     const stripedFiles = files.map((file) => {
         delete file.src;
         delete file.msrc;
@@ -170,4 +176,23 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
             controller.close();
         },
     });
+}
+
+export async function convertForPreview(file: File, fileBlob: Blob) {
+    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        const originalName = fileNameWithoutExtension(file.metadata.title);
+        const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
+        fileBlob = new Blob([motionPhoto.image]);
+    }
+
+    const typeFromExtension = file.metadata.title.split('.')[-1];
+    const worker = await new CryptoWorker();
+
+    const mimeType =
+        (await getMimeTypeFromBlob(worker, fileBlob)) ?? typeFromExtension;
+
+    if (fileIsHEIC(mimeType)) {
+        fileBlob = await convertHEIC2JPEG(fileBlob);
+    }
+    return fileBlob;
 }

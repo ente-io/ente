@@ -23,7 +23,7 @@ const SubmitButton = ({ loading, buttonText, inline, disabled }: Props) => (
                     width: '22px',
                     height: '22px',
                     borderWidth: '0.20em',
-                    color: '#2dc262',
+                    color: '#51cd7c',
                 }}
             />
         ) : (

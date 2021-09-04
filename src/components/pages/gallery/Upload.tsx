@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
-import UploadService, {
-    FileWithCollection,
-    UPLOAD_STAGES,
-} from 'services/uploadService';
-import { createAlbum } from 'services/collectionService';
-import { getLocalFiles } from 'services/fileService';
+
+import {
+    Collection,
+    syncCollections,
+    createAlbum,
+} from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import { SetDialogMessage } from 'components/MessageDialog';
 import UploadProgress from './UploadProgress';
@@ -12,11 +12,19 @@ import UploadProgress from './UploadProgress';
 import ChoiceModal from './ChoiceModal';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
-import { SetFiles, SetLoading } from 'pages/gallery';
+import { GalleryContext, SetFiles, SetLoading } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { FileRejection } from 'react-dropzone';
+import UploadManager, {
+    FileWithCollection,
+    UPLOAD_STAGES,
+} from 'services/upload/uploadManager';
+import uploadManager from 'services/upload/uploadManager';
 import { METADATA_FOLDER_NAME } from 'services/exportService';
+import { getUserFacingErrorMessage } from 'utils/common/errorUtil';
+
+const FIRST_ALBUM_NAME = 'My First Album';
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
@@ -42,13 +50,25 @@ interface AnalysisResult {
     suggestedCollectionName: string;
     multipleFolders: boolean;
 }
+export interface ProgressUpdater {
+    setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
+    setFileCounter: React.Dispatch<
+        React.SetStateAction<{
+            finished: number;
+            total: number;
+        }>
+    >;
+    setUploadStage: React.Dispatch<React.SetStateAction<UPLOAD_STAGES>>;
+    setFileProgress: React.Dispatch<React.SetStateAction<Map<string, number>>>;
+    setUploadResult: React.Dispatch<React.SetStateAction<Map<string, number>>>;
+}
 
 export default function Upload(props: Props) {
     const [progressView, setProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
         UPLOAD_STAGES.START
     );
-    const [fileCounter, setFileCounter] = useState({ current: 0, total: 0 });
+    const [fileCounter, setFileCounter] = useState({ finished: 0, total: 0 });
     const [fileProgress, setFileProgress] = useState(new Map<string, number>());
     const [uploadResult, setUploadResult] = useState(new Map<string, number>());
     const [percentComplete, setPercentComplete] = useState(0);
@@ -56,7 +76,20 @@ export default function Upload(props: Props) {
     const [fileAnalysisResult, setFileAnalysisResult] =
         useState<AnalysisResult>(null);
     const appContext = useContext(AppContext);
+    const galleryContext = useContext(GalleryContext);
 
+    useEffect(() => {
+        UploadManager.initUploader(
+            {
+                setPercentComplete,
+                setFileCounter,
+                setFileProgress,
+                setUploadResult,
+                setUploadStage,
+            },
+            props.setFiles
+        );
+    });
     useEffect(() => {
         if (
             props.acceptedFiles?.length > 0 ||
@@ -64,7 +97,7 @@ export default function Upload(props: Props) {
         ) {
             props.setLoading(true);
 
-            let fileAnalysisResult;
+            let fileAnalysisResult: AnalysisResult;
             if (props.acceptedFiles?.length > 0) {
                 // File selection by drag and drop or selection of file.
                 fileAnalysisResult = analyseUploadFiles();
@@ -77,7 +110,7 @@ export default function Upload(props: Props) {
             props.setCollectionSelectorAttributes({
                 callback: uploadFilesToExistingCollection,
                 showNextModal: nextModal.bind(null, fileAnalysisResult),
-                title: 'upload to collection',
+                title: constants.UPLOAD_TO_COLLECTION,
             });
             props.setLoading(false);
         }
@@ -85,31 +118,44 @@ export default function Upload(props: Props) {
 
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
-        setFileCounter({ current: 0, total: 0 });
+        setFileCounter({ finished: 0, total: 0 });
         setFileProgress(new Map<string, number>());
         setUploadResult(new Map<string, number>());
         setPercentComplete(0);
         setProgressView(true);
     };
-    const showCreateCollectionModal = (fileAnalysisResult?: AnalysisResult) => {
-        props.setCollectionNamerAttributes({
-            title: constants.CREATE_COLLECTION,
-            buttonText: constants.CREATE,
-            autoFilledName: fileAnalysisResult?.suggestedCollectionName,
-            callback: async (collectionName) => {
-                props.closeCollectionSelector();
-                await uploadFilesToNewCollections(
-                    UPLOAD_STRATEGY.SINGLE_COLLECTION,
-                    collectionName
-                );
-            },
-        });
+    const showCreateCollectionModal = (
+        fileAnalysisResult: AnalysisResult,
+        isFirstAlbum?: boolean
+    ) => {
+        const uploadToNewCollection = async (collectionName: string) => {
+            props.closeCollectionSelector();
+            await uploadFilesToNewCollections(
+                UPLOAD_STRATEGY.SINGLE_COLLECTION,
+                collectionName
+            );
+        };
+        if (fileAnalysisResult.suggestedCollectionName) {
+            uploadToNewCollection(fileAnalysisResult.suggestedCollectionName);
+        } else if (isFirstAlbum) {
+            uploadToNewCollection(FIRST_ALBUM_NAME);
+        } else {
+            props.setCollectionNamerAttributes({
+                title: constants.CREATE_COLLECTION,
+                buttonText: constants.CREATE,
+                autoFilledName: fileAnalysisResult?.suggestedCollectionName,
+                callback: uploadToNewCollection,
+            });
+        }
     };
 
-    const nextModal = (fileAnalysisResult: AnalysisResult) => {
+    const nextModal = (
+        fileAnalysisResult: AnalysisResult,
+        isFirstAlbum: boolean
+    ) => {
         fileAnalysisResult?.multipleFolders
             ? setChoiceModalView(true)
-            : showCreateCollectionModal(fileAnalysisResult);
+            : showCreateCollectionModal(fileAnalysisResult, isFirstAlbum);
     };
 
     function analyseUploadFiles(): AnalysisResult {
@@ -131,6 +177,11 @@ export default function Upload(props: Props) {
                 1,
                 commonPathPrefix.lastIndexOf('/') - 1
             );
+            if (commonPathPrefix) {
+                commonPathPrefix = commonPathPrefix.substr(
+                    commonPathPrefix.lastIndexOf('/') + 1
+                );
+            }
         }
         return {
             suggestedCollectionName: commonPathPrefix,
@@ -163,7 +214,7 @@ export default function Upload(props: Props) {
             const filesWithCollectionToUpload: FileWithCollection[] =
                 props.acceptedFiles.map((file) => ({
                     file,
-                    collection,
+                    collectionID: collection.id,
                 }));
             await uploadFiles(filesWithCollectionToUpload);
         } catch (e) {
@@ -178,7 +229,8 @@ export default function Upload(props: Props) {
         try {
             uploadInit();
 
-            const filesWithCollectionToUpload = [];
+            const filesWithCollectionToUpload: FileWithCollection[] = [];
+            const collections: Collection[] = [];
             let collectionWiseFiles = new Map<string, globalThis.File[]>();
             if (strategy === UPLOAD_STRATEGY.SINGLE_COLLECTION) {
                 collectionWiseFiles.set(collectionName, props.acceptedFiles);
@@ -186,10 +238,18 @@ export default function Upload(props: Props) {
                 collectionWiseFiles = getCollectionWiseFiles();
             }
             try {
+                const existingCollection = await syncCollections();
                 for (const [collectionName, files] of collectionWiseFiles) {
-                    const collection = await createAlbum(collectionName);
+                    const collection = await createAlbum(
+                        collectionName,
+                        existingCollection
+                    );
+                    collections.push(collection);
                     for (const file of files) {
-                        filesWithCollectionToUpload.push({ collection, file });
+                        filesWithCollectionToUpload.push({
+                            collectionID: collection.id,
+                            file,
+                        });
                     }
                 }
             } catch (e) {
@@ -203,34 +263,30 @@ export default function Upload(props: Props) {
                 });
                 throw e;
             }
-            await uploadFiles(filesWithCollectionToUpload);
+            await uploadFiles(filesWithCollectionToUpload, collections);
         } catch (e) {
             logError(e, 'Failed to upload files to new collections');
         }
     };
 
     const uploadFiles = async (
-        filesWithCollectionToUpload: FileWithCollection[]
+        filesWithCollectionToUpload: FileWithCollection[],
+        collections?: Collection[]
     ) => {
         try {
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
             await props.syncWithRemote(true, true);
-            const localFiles = await getLocalFiles();
-            await UploadService.uploadFiles(
+            await uploadManager.queueFilesForUpload(
                 filesWithCollectionToUpload,
-                localFiles,
-                {
-                    setPercentComplete,
-                    setFileCounter,
-                    setUploadStage,
-                    setFileProgress,
-                    setUploadResult,
-                },
-                props.setFiles
+                collections
             );
         } catch (err) {
-            props.setBannerMessage(err.message);
+            const message = getUserFacingErrorMessage(
+                err.message,
+                galleryContext.showPlanSelectorModal
+            );
+            props.setBannerMessage(message);
             setProgressView(false);
             throw err;
         } finally {
@@ -244,12 +300,15 @@ export default function Upload(props: Props) {
             props.setUploadInProgress(true);
             uploadInit();
             await props.syncWithRemote(true, true);
-            const localFiles = await getLocalFiles();
-            await UploadService.retryFailedFiles(localFiles);
+            await uploadManager.retryFailedFiles();
         } catch (err) {
-            props.setBannerMessage(err.message);
+            const message = getUserFacingErrorMessage(
+                err.message,
+                galleryContext.showPlanSelectorModal
+            );
+            appContext.resetSharedFiles();
+            props.setBannerMessage(message);
             setProgressView(false);
-            throw err;
         } finally {
             props.setUploadInProgress(false);
             props.syncWithRemote();

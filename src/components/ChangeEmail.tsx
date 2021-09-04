@@ -9,6 +9,7 @@ import { changeEmail, getOTTForEmailChange } from 'services/userService';
 import styled from 'styled-components';
 import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { PAGES } from 'types';
 
 interface formValues {
     email: string;
@@ -79,7 +80,7 @@ function ChangeEmailForm(props: Props) {
                 message: constants.EMAIL_UDPATE_SUCCESSFUL,
                 type: FLASH_MESSAGE_TYPE.SUCCESS,
             });
-            router.push('/gallery');
+            router.push(PAGES.GALLERY);
         } catch (e) {
             setFieldError('ott', `${constants.INCORRECT_CODE}`);
         }

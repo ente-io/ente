@@ -60,8 +60,8 @@ const Check = styled.input`
     /** checked */
     &:checked::before {
         content: '';
-        background-color: #2dc262;
-        border-color: #2dc262;
+        background-color: #51cd7c;
+        border-color: #51cd7c;
         color: #fff;
     }
     &:checked::after {
@@ -90,7 +90,7 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
         max-width: 100%;
         min-height: 100%;
         flex: 1;
-        ${(props) => props.selected && 'border: 5px solid #2dc262;'}
+        ${(props) => props.selected && 'border: 5px solid #51cd7c;'}
         pointer-events: none;
     }
 

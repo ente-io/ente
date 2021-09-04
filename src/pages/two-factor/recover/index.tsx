@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
@@ -10,6 +10,8 @@ import { Card, Button } from 'react-bootstrap';
 import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
 import { recoverTwoFactor, removeTwoFactor } from 'services/userService';
+import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
+import { PAGES } from 'types';
 
 export default function Recover() {
     const router = useRouter();
@@ -17,13 +19,14 @@ export default function Recover() {
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
         useState<B64EncryptionResult>(null);
     const [sessionID, setSessionID] = useState(null);
+    const appContext = useContext(AppContext);
     useEffect(() => {
-        router.prefetch('/gallery');
+        router.prefetch(PAGES.GALLERY);
         const user = getData(LS_KEYS.USER);
         if (!user.isTwoFactorEnabled && (user.encryptedToken || user.token)) {
-            router.push('/credential');
+            router.push(PAGES.GENERATE);
         } else if (!user.email || !user.twoFactorSessionID) {
-            router.push('/');
+            router.push(PAGES.ROOT);
         } else {
             setSessionID(user.twoFactorSessionID);
         }
@@ -56,9 +59,13 @@ export default function Recover() {
                 isTwoFactorEnabled: false,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-            router.push('/credentials');
+            appContext.setDisappearingFlashMessage({
+                message: constants.TWO_FACTOR_DISABLE_SUCCESS,
+                type: FLASH_MESSAGE_TYPE.INFO,
+            });
+            router.push(PAGES.CREDENTIALS);
         } catch (e) {
-            logError(e);
+            logError(e, 'two factor recovery failed');
             setFieldError('passphrase', constants.INCORRECT_RECOVERY_KEY);
         }
     };

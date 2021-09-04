@@ -101,7 +101,9 @@ function CollectionShare(props: Props) {
             onHide={props.onHide}
             attributes={{ title: constants.SHARE_COLLECTION }}>
             <DeadCenter style={{ width: '85%', margin: 'auto' }}>
-                <h6>{constants.SHARE_WITH_PEOPLE}</h6>
+                <h6 style={{ marginTop: '8px' }}>
+                    {constants.SHARE_WITH_PEOPLE}
+                </h6>
                 <p />
                 <Formik<formValues>
                     initialValues={{ email: '' }}

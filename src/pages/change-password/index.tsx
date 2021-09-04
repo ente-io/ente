@@ -12,6 +12,7 @@ import { setKeys, UpdatedKey } from 'services/userService';
 import SetPasswordForm from 'components/SetPasswordForm';
 import { AppContext } from 'pages/_app';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
+import { PAGES } from 'types';
 
 export interface KEK {
     key: string;
@@ -27,7 +28,7 @@ export default function Generate() {
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
         if (!user?.token) {
-            router.push('/');
+            router.push(PAGES.ROOT);
         } else {
             setToken(user.token);
         }
@@ -69,8 +70,8 @@ export default function Generate() {
         redirectToGallery();
     };
     const redirectToGallery = () => {
-        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
-        router.push('/gallery');
+        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
+        router.push(PAGES.GALLERY);
     };
     return (
         <SetPasswordForm

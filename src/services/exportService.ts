@@ -1,16 +1,13 @@
-import { retryAsyncFunction, runningInBrowser } from 'utils/common';
+import { runningInBrowser } from 'utils/common';
 import {
     getExportPendingFiles,
     getExportFailedFiles,
     getFilesUploadedAfterLastExport,
-    getExportRecordFileUID,
     dedupe,
     getGoogleLikeMetadataFile,
+    getExportRecordFileUID,
 } from 'utils/export';
-import {
-    fileNameWithoutExtension,
-    generateStreamFromArrayBuffer,
-} from 'utils/file';
+import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import {
@@ -21,6 +18,10 @@ import {
 import downloadManager from './downloadManager';
 import { File, FILE_TYPE, getLocalFiles } from './fileService';
 import { decodeMotionPhoto } from './motionPhotoService';
+import {
+    fileNameWithoutExtension,
+    generateStreamFromArrayBuffer,
+} from 'utils/file';
 
 export interface ExportProgress {
     current: number;
@@ -226,7 +227,7 @@ class ExportService {
             }
             return { paused: false };
         } catch (e) {
-            logError(e);
+            logError(e, 'export failed ');
         }
     }
     async addFilesQueuedRecord(folder: string, files: File[]) {
