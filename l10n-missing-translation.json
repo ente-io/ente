@@ -2,6 +2,7 @@
   "hi": [
     "sign_up",
     "log_in",
+    "log_in_code_expired",
     "oops",
     "start_backup",
     "auth_session_expired",

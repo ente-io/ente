@@ -177,16 +177,29 @@ class UserService {
               return page;
             },
           ),
-          (route) => route.isFirst,
+              (route) => route.isFirst,
         );
       } else {
-        showErrorDialog(context, AppLocalizations.of(context).oops,
-            "verification failed, please try again");
+        // should never reach here
+        throw Exception("unexpected response during email verification");
       }
-    } catch (e) {
+    } on DioError catch (e) {
+      await dialog.hide();
+      if (e.response != null && e.response.statusCode == 410) {
+        await showErrorDialog(context, AppLocalizations.of(context).oops,
+            AppLocalizations.of(context).log_in_code_expired);
+        Navigator.of(context).pop();
+      } else {
+        showErrorDialog(context, "incorrect code",
+            "authentication failed, please try again");
+      }
+    }
+    catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showErrorDialog(context, AppLocalizations.of(context).oops,
+      showErrorDialog(context, AppLocalizations
+          .of(context)
+          .oops,
           "verification failed, please try again");
     }
   }
