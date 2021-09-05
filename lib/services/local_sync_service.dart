@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:computer/computer.dart';
 import 'package:logging/logging.dart';
@@ -49,10 +50,19 @@ class LocalSyncService {
     PhotoManager.startChangeNotify();
   }
 
-  Future<void> sync() async {
+  Future<void> sync({bool isAppInBackground = false}) async {
     if (!_prefs.containsKey(kHasGrantedPermissionsKey)) {
       _logger.info("Skipping local sync since permission has not been granted");
       return;
+    }
+
+    if (Platform.isAndroid && !isAppInBackground) {
+      var permissionState = await PhotoManager.requestPermissionExtend();
+      if (permissionState != PermissionState.authorized) {
+        _logger.severe(
+            "sync requested with invalid permission", permissionState);
+        return;
+      }
     }
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
     _logger.info(
