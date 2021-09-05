@@ -141,8 +141,9 @@ class _VideoControlsState extends State<VideoControls> {
               setState(() {
                 _hideStuff = true;
               });
-            } else
+            } else {
               _cancelAndRestartTimer();
+            }
           } else {
             _playPause();
 

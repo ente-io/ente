@@ -329,10 +329,11 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
         .value;
 
     _expanded = !widget.active;
-    if (_expanded)
+    if (_expanded) {
       expandController.reverse();
-    else
+    } else {
       expandController.forward();
+    }
 
     Widget icon = widget.leading ??
         Icon(

@@ -105,12 +105,15 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (error != null && widget.errorBuilder != null)
+    if (error != null && widget.errorBuilder != null) {
       return widget.errorBuilder(context, error);
-    if (widget.totalCount == -1 && widget.waitBuilder != null)
+    }
+    if (widget.totalCount == -1 && widget.waitBuilder != null) {
       return widget.waitBuilder(context);
-    if (widget.totalCount == 0 && widget.emptyResultBuilder != null)
+    }
+    if (widget.totalCount == 0 && widget.emptyResultBuilder != null) {
       return widget.emptyResultBuilder(context);
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {

@@ -30,6 +30,7 @@ analyzer:
   errors:
     avoid_empty_else: error
     exhaustive_cases: error
+    curly_braces_in_flow_control_structures: error
     unused_import: warning
     prefer_is_empty: warning
     use_rethrow_when_possible: info

@@ -112,14 +112,16 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
   }
 
   Widget buildKeyboard() {
-    if (defaultTargetPlatform == TargetPlatform.windows)
+    if (defaultTargetPlatform == TargetPlatform.windows) {
       return RawKeyboardListener(
         focusNode: FocusNode(),
         onKey: keyHandler,
         child: buildThumb(),
       );
-    else
+    } else {
       return buildThumb();
+    }
+
   }
 
   Widget buildThumb() => Container(
@@ -188,26 +190,27 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
 
   void keyHandler(RawKeyEvent value) {
     if (value.runtimeType == RawKeyDownEvent) {
-      if (value.logicalKey == LogicalKeyboardKey.arrowDown)
+      if (value.logicalKey == LogicalKeyboardKey.arrowDown) {
         onDragUpdate(DragUpdateDetails(
           globalPosition: Offset.zero,
           delta: Offset(0, 2),
         ));
-      else if (value.logicalKey == LogicalKeyboardKey.arrowUp)
+      } else if (value.logicalKey == LogicalKeyboardKey.arrowUp) {
         onDragUpdate(DragUpdateDetails(
           globalPosition: Offset.zero,
           delta: Offset(0, -2),
         ));
-      else if (value.logicalKey == LogicalKeyboardKey.pageDown)
+      } else if (value.logicalKey == LogicalKeyboardKey.pageDown) {
         onDragUpdate(DragUpdateDetails(
           globalPosition: Offset.zero,
           delta: Offset(0, 25),
         ));
-      else if (value.logicalKey == LogicalKeyboardKey.pageUp)
+      } else if (value.logicalKey == LogicalKeyboardKey.pageUp) {
         onDragUpdate(DragUpdateDetails(
           globalPosition: Offset.zero,
           delta: Offset(0, -25),
         ));
+      }
     }
   }
 }
