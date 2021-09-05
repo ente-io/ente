@@ -30,6 +30,7 @@ analyzer:
   errors:
     avoid_empty_else: error
     exhaustive_cases: error
+    unused_import: warning
     use_rethrow_when_possible: info
 
     prefer_const_constructors: ignore # too many warnings

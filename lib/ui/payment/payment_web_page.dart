@@ -9,7 +9,6 @@ import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 import '../loading_widget.dart';
 import '../progress_dialog.dart';

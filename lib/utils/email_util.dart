@@ -8,7 +8,6 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/ui/log_file_viewer.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/navigation_util.dart';
 import 'package:share/share.dart';
 import 'package:super_logging/super_logging.dart';
 
