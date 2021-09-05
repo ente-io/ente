@@ -55,12 +55,11 @@ class LocalSyncService {
       _logger.info("Skipping local sync since permission has not been granted");
       return;
     }
-
     if (Platform.isAndroid && !isAppInBackground) {
-      var permissionState = await PhotoManager.requestPermissionExtend();
+      final permissionState = await PhotoManager.requestPermissionExtend();
       if (permissionState != PermissionState.authorized) {
-        _logger.severe(
-            "sync requested with invalid permission", permissionState);
+        _logger.severe("sync requested with invalid permission",
+            permissionState.toString());
         return;
       }
     }
