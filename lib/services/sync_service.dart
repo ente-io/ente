@@ -74,7 +74,7 @@ class SyncService {
     return _existingSync.future;
   }
 
-  Future<bool> sync({bool isAppInBackground = false}) async {
+  Future<bool> sync() async {
     _syncStopRequested = false;
     if (_existingSync != null) {
       _logger.warning("Sync already in progress, skipping.");
@@ -83,7 +83,7 @@ class SyncService {
     _existingSync = Completer<bool>();
     bool successful = false;
     try {
-      await _doSync(isAppInBackground: isAppInBackground);
+      await _doSync();
       if (_lastSyncStatusEvent != null &&
           _lastSyncStatusEvent.status !=
               SyncStatus.completed_first_gallery_import &&
@@ -209,8 +209,8 @@ class SyncService {
     }
   }
 
-  Future<void> _doSync({bool isAppInBackground = false}) async {
-    await _localSyncService.sync(isAppInBackground: isAppInBackground);
+  Future<void> _doSync() async {
+    await _localSyncService.sync();
     if (_localSyncService.hasCompletedFirstImport()) {
       await _remoteSyncService.sync();
       final shouldSync = await _localSyncService.syncAll();

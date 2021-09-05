@@ -161,7 +161,7 @@ Future<void> _sync({bool isAppInBackground = false}) async {
     _logger.info("Syncing in background");
   }
   try {
-    await SyncService.instance.sync(isAppInBackground: isAppInBackground);
+    await SyncService.instance.sync();
   } catch (e, s) {
     _logger.severe("Sync error", e, s);
   }

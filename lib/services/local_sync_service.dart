@@ -50,12 +50,12 @@ class LocalSyncService {
     PhotoManager.startChangeNotify();
   }
 
-  Future<void> sync({bool isAppInBackground = false}) async {
+  Future<void> sync() async {
     if (!_prefs.containsKey(kHasGrantedPermissionsKey)) {
       _logger.info("Skipping local sync since permission has not been granted");
       return;
     }
-    if (Platform.isAndroid && !isAppInBackground) {
+    if (Platform.isAndroid && !_isBackground) {
       final permissionState = await PhotoManager.requestPermissionExtend();
       if (permissionState != PermissionState.authorized) {
         _logger.severe("sync requested with invalid permission",
