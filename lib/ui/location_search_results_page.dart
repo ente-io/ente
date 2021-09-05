@@ -56,7 +56,7 @@ class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
   static List<File> _filterPhotos(Map<String, dynamic> args) {
     List<File> files = args['files'];
     ViewPort viewPort = args['viewPort'];
-    final result = List<File>();
+    final result = <File>[];
     for (final file in files) {
       if (file.location != null &&
           viewPort.northEast.latitude > file.location.latitude &&

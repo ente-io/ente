@@ -33,7 +33,7 @@ class DiffFetcher {
         )
         .catchError((e) => _logger.severe(e))
         .then((response) async {
-          final files = List<File>();
+          final files = <File>[];
           if (response != null) {
             Bus.instance.fire(RemoteSyncEvent(true));
             final diff = response.data["diff"] as List;
@@ -94,7 +94,7 @@ class DiffFetcher {
             return Diff(files, diff.length);
           } else {
             Bus.instance.fire(RemoteSyncEvent(false));
-            return Diff(List<File>(), 0);
+            return Diff(<File>[], 0);
           }
         });
   }

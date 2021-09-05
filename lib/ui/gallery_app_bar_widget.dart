@@ -102,7 +102,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   List<Widget> _getDefaultActions(BuildContext context) {
-    List<Widget> actions = List<Widget>();
+    List<Widget> actions = <Widget>[];
     if (Configuration.instance.hasConfiguredAccount() &&
         (widget.type == GalleryAppBarType.local_folder ||
             widget.type == GalleryAppBarType.collection)) {
@@ -164,7 +164,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   List<Widget> _getActions(BuildContext context) {
-    List<Widget> actions = List<Widget>();
+    List<Widget> actions = <Widget>[];
     if (Configuration.instance.hasConfiguredAccount()) {
       actions.add(IconButton(
         icon:
@@ -270,7 +270,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         containsLocalFile = true;
       }
     }
-    final actions = List<Widget>();
+    final actions = <Widget>[];
     if (containsUploadedFile && containsLocalFile) {
       actions.add(CupertinoActionSheetAction(
         child: Text("this device"),

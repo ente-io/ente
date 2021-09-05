@@ -279,7 +279,7 @@ class OutgoingCollectionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sharees = List<String>();
+    final sharees = <String>[];
     for (int index = 0; index < c.collection.sharees.length; index++) {
       if (index < 2) {
         sharees.add(c.collection.sharees[index].name);
