@@ -26,9 +26,6 @@ const COOP_COEP_Headers = [
 module.exports = withSentryConfig(
     withWorkbox(
         withBundleAnalyzer({
-            future: {
-                webpack5: true,
-            },
             env: {
                 SENTRY_RELEASE: gitSha,
             },
