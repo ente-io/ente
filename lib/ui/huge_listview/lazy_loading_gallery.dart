@@ -146,7 +146,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
   @override
   Widget build(BuildContext context) {
-    if (_files.length == 0) {
+    if (_files.isEmpty) {
       return Container();
     }
     return Padding(

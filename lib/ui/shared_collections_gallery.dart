@@ -65,7 +65,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
           final c =
               CollectionsService.instance.getCollectionByID(file.collectionID);
           if (c.owner.id == Configuration.instance.getUserID()) {
-            if (c.sharees.length > 0) {
+            if (c.sharees.isNotEmpty) {
               outgoing.add(
                 CollectionWithThumbnail(
                   c,
@@ -114,7 +114,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             Padding(padding: EdgeInsets.all(6)),
             SectionTitle("incoming"),
             Padding(padding: EdgeInsets.all(16)),
-            collections.incoming.length > 0
+            collections.incoming.isNotEmpty
                 ? GridView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
@@ -133,7 +133,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             Padding(padding: EdgeInsets.all(14)),
             SectionTitle("outgoing"),
             Padding(padding: EdgeInsets.all(16)),
-            collections.outgoing.length > 0
+            collections.outgoing.isNotEmpty
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
                     child: ListView.builder(
