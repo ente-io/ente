@@ -19,7 +19,7 @@
     "@stripe/stripe-js": "^1.13.2",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
-    "axios": "^0.21.1",
+    "axios": "^0.21.3",
     "bootstrap": "^4.5.2",
     "chrono-node": "^2.2.6",
     "comlink": "^4.3.0",
