@@ -26,6 +26,8 @@ export interface RecoveryKey {
 }
 const ENDPOINT = getEndpoint();
 
+const HAS_SET_KEYS = 'hasSetKeys';
+
 export interface User {
     id: number;
     name: string;
@@ -133,6 +135,9 @@ export const clearFiles = async () => {
 
 export const isTokenValid = async () => {
     try {
+        if (!getToken()) {
+            return false;
+        }
         const resp = await HTTPService.get(
             `${ENDPOINT}/users/session-validity/v2`,
             null,
@@ -141,6 +146,9 @@ export const isTokenValid = async () => {
             }
         );
         try {
+            if (resp.data[HAS_SET_KEYS] === undefined) {
+                throw Error('resp.data.hasSetKey undefined');
+            }
             if (!resp.data['hasSetKeys']) {
                 try {
                     await putAttributes(
