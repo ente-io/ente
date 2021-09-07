@@ -1,6 +1,5 @@
 import { FILE_TYPE } from 'services/fileService';
 import { CustomError, errorWithContext } from 'utils/common/errorUtil';
-import { convertHEIC2JPEG } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
 import FFmpegService from 'services/ffmpegService';
@@ -23,7 +22,7 @@ export async function generateThumbnail(
         let thumbnail: Uint8Array;
         try {
             if (fileType === FILE_TYPE.IMAGE) {
-                canvas = await generateImageThumbnail(file, isHEIC);
+                canvas = await generateImageThumbnail(worker, file, isHEIC);
             } else {
                 try {
                     const thumb = await FFmpegService.generateThumbnail(file);
@@ -52,6 +51,7 @@ export async function generateThumbnail(
 }
 
 export async function generateImageThumbnail(
+    worker,
     file: globalThis.File,
     isHEIC: boolean
 ) {
@@ -62,7 +62,11 @@ export async function generateImageThumbnail(
     let timeout = null;
 
     if (isHEIC) {
-        file = new globalThis.File([await convertHEIC2JPEG(file)], null, null);
+        file = new globalThis.File(
+            [await worker.convertHEIC2JPEG(file)],
+            null,
+            null
+        );
     }
     let image = new Image();
     imageURL = URL.createObjectURL(file);

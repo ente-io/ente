@@ -22,7 +22,8 @@ export interface B64EncryptionResult {
 export const getDedicatedCryptoWorker = (): ComlinkWorker => {
     if (runningInBrowser()) {
         const worker = new Worker(
-            new URL('worker/crypto.worker.js', import.meta.url)
+            new URL('worker/crypto.worker.js', import.meta.url),
+            { name: 'ente-worker' }
         );
         const comlink = Comlink.wrap(worker);
         return { comlink, worker };
