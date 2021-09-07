@@ -2,7 +2,6 @@ import { Collection } from 'services/collectionService';
 import { File, FILE_TYPE } from 'services/fileService';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
-import { runningInBrowser } from 'utils/common';
 import CryptoWorker from 'utils/crypto';
 
 export const TYPE_HEIC = 'heic';
@@ -23,15 +22,6 @@ export function downloadAsFile(filename: string, content: string) {
     a.click();
 
     a.remove();
-}
-
-export async function convertHEIC2JPEG(fileBlob: Blob): Promise<Blob> {
-    const heic2any = runningInBrowser() && require('heic2any');
-    return await heic2any({
-        blob: fileBlob,
-        toType: 'image/jpeg',
-        quality: 1,
-    });
 }
 
 export function fileIsHEIC(mimeType: string) {
@@ -190,9 +180,8 @@ export async function convertForPreview(file: File, fileBlob: Blob) {
 
     const mimeType =
         (await getMimeTypeFromBlob(worker, fileBlob)) ?? typeFromExtension;
-
     if (fileIsHEIC(mimeType)) {
-        fileBlob = await convertHEIC2JPEG(fileBlob);
+        fileBlob = await worker.convertHEIC2JPEG(fileBlob);
     }
     return fileBlob;
 }
