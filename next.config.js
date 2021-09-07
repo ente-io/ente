@@ -34,6 +34,7 @@ module.exports = withSentryConfig(
                 exclude: [/manifest\.json$/i],
             },
 
+            // added to enabled shared Array buffer - https://web.dev/coop-coep/
             headers() {
                 return [
                     {
@@ -43,6 +44,7 @@ module.exports = withSentryConfig(
                     },
                 ];
             },
+            // https://dev.to/marcinwosinek/how-to-add-resolve-fallback-to-webpack-5-in-nextjs-10-i6j
             webpack: (config, { isServer }) => {
                 if (!isServer) {
                     config.resolve.fallback.fs = false;
