@@ -1,9 +1,8 @@
-import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum AlbumSortKey {
   albumName,
-  lastModified,
+  lastUpdated,
   recentPhoto,
 }
 
@@ -20,7 +19,7 @@ class LocalSettings {
 
   AlbumSortKey albumSortKey() {
     return AlbumSortKey.values[_prefs?.getInt(kCollectionSortPref) ?? 0] ??
-        AlbumSortKey.lastModified;
+        AlbumSortKey.lastUpdated;
   }
 
   void setAlbumSortKey(AlbumSortKey key) {
