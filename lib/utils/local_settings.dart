@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum AlbumSortKey {
   albumName,
   lastModified,
-  createdAt,
+  recentPhoto,
 }
 
 class LocalSettings {
@@ -12,8 +12,6 @@ class LocalSettings {
 
   static final LocalSettings instance = LocalSettings._privateConstructor();
   static const kCollectionSortPref = "collection_sort_pref";
-
-  final _logger = Logger("FeatureFlagService");
   SharedPreferences _prefs;
 
   Future<void> init() async {
@@ -21,11 +19,11 @@ class LocalSettings {
   }
 
   AlbumSortKey albumSortKey() {
-    return AlbumSortKey.values[_prefs.getInt(kCollectionSortPref)]
+    return AlbumSortKey.values[_prefs?.getInt(kCollectionSortPref) ?? 0] ??
+        AlbumSortKey.lastModified;
   }
 
   void setAlbumSortKey(AlbumSortKey key) {
-    _prefs.setInt(kCollectionSortPref, key.index);
+    _prefs?.setInt(kCollectionSortPref, key.index);
   }
-
 }

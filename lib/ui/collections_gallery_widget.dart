@@ -20,6 +20,7 @@ import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/device_folder_page.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
+import 'package:photos/utils/local_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -38,6 +39,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
   StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
+  AlbumSortKey sortKey;
 
   @override
   void initState() {
@@ -57,6 +59,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) {
       setState(() {});
     });
+    sortKey = LocalSettings.instance.albumSortKey();
     super.initState();
   }
 
@@ -100,8 +103,16 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       }
     }
     collectionsWithThumbnail.sort((first, second) {
-      return second.thumbnail.updationTime
-          .compareTo(first.thumbnail.updationTime);
+      if (sortKey == AlbumSortKey.albumName) {
+        // alphabetical ASC order
+        return first.collection.name.compareTo(second.collection.name);
+      } else if (sortKey == AlbumSortKey.recentPhoto) {
+        return second.thumbnail.creationTime
+            .compareTo(first.thumbnail.creationTime);
+      } else {
+        return second.collection.updationTime
+            .compareTo(first.collection.updationTime);
+      }
     });
     return CollectionItems(folders, collectionsWithThumbnail);
   }
@@ -139,9 +150,40 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                             ),
                     ),
                   ),
-            Padding(padding: EdgeInsets.all(10)),
+            Padding(padding: EdgeInsets.all(4)),
             Divider(),
-            Padding(padding: EdgeInsets.all(10)),
+            PopupMenuButton(
+              offset: Offset(10, 40),
+              initialValue: sortKey?.index ?? 0,
+              child: Align(
+                  child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(sortKey.toString(),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: Theme.of(context).buttonColor,
+                    ),
+                  ),
+                  Padding(padding: EdgeInsets.only(left: 5.0)),
+                  Icon(Icons.sort_outlined),
+                ],
+              )),
+              onSelected: (int index) {
+                setState(() {
+                  sortKey = AlbumSortKey.values[index];
+                });
+              },
+              itemBuilder: (context) {
+                return List.generate(AlbumSortKey.values.length, (index) {
+                  return PopupMenuItem(
+                    value: index,
+                    child: Text('${AlbumSortKey.values[index]}'),
+                  );
+                });
+              },
+            ),
             SectionTitle("on ente"),
             Padding(padding: EdgeInsets.all(12)),
             Configuration.instance.hasConfiguredAccount()

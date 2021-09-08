@@ -26,6 +26,7 @@ import 'package:photos/ui/home_widget.dart';
 import 'package:photos/ui/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
+import 'package:photos/utils/local_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:super_logging/super_logging.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -147,6 +148,7 @@ Future<void> _init(bool isBackground) async {
   await RemoteSyncService.instance.init();
   await SyncService.instance.init();
   await MemoriesService.instance.init();
+  LocalSettings.instance.init();
   FeatureFlagService.instance.init();
   _logger.info("Initialization done");
   _initializationStatus.complete();
