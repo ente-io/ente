@@ -148,7 +148,7 @@ Future<void> _init(bool isBackground) async {
   await RemoteSyncService.instance.init();
   await SyncService.instance.init();
   await MemoriesService.instance.init();
-  LocalSettings.instance.init();
+  await LocalSettings.instance.init();
   FeatureFlagService.instance.init();
   _logger.info("Initialization done");
   _initializationStatus.complete();
