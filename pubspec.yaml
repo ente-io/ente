@@ -31,7 +31,7 @@ dependencies:
   device_info: ^2.0.2
   dio: ^4.0.0
   dots_indicator: ^2.0.0
-  email_validator: ^1.0.6
+  email_validator: ^2.0.1
   event_bus: ^2.0.0
   exif: ^3.0.0
   expansion_card: ^0.1.0
@@ -51,7 +51,7 @@ dependencies:
   flutter_password_strength: ^0.1.6
   flutter_secure_storage: ^4.2.0
   flutter_sodium: ^0.2.0
-  flutter_typeahead: ^1.8.1
+  flutter_typeahead: ^3.2.0
   flutter_user_agent: ^1.2.2
   flutter_windowmanager: ^0.0.2
   fluttercontactpicker: ^4.4.0
