@@ -152,8 +152,14 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                   ),
             Padding(padding: EdgeInsets.all(4)),
             Divider(),
-            _sortMenu(),
-            SectionTitle("on ente"),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                SectionTitle("on ente"),
+                _sortMenu(),
+              ],
+            ),
             Padding(padding: EdgeInsets.all(12)),
             Configuration.instance.hasConfiguredAccount()
                 ? GridView.builder(
@@ -178,50 +184,65 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     );
   }
 
-  PopupMenuButton<int> _sortMenu() {
-    String sortOptionText(AlbumSortKey key) {
+  Widget _sortMenu() {
+    Text sortOptionText(AlbumSortKey key) {
+      String text = key.toString();
       switch (key) {
         case AlbumSortKey.albumName:
-          return "album name";
+          text = "album name";
+          break;
         case AlbumSortKey.lastUpdated:
-          return "last updated";
+          text = "last updated";
+          break;
         case AlbumSortKey.recentPhoto:
-          return "recent photo";
+          text = "recent photo";
+          break;
       }
-      return key.toString();
+      return Text(
+        text,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+          color: Colors.white.withOpacity(0.6),
+        ),
+      );
     }
-    return PopupMenuButton(
-            offset: Offset(10, 40),
-            initialValue: sortKey?.index ?? 0,
-            child: Align(
-                child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(sortOptionText(sortKey),
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Theme.of(context).buttonColor,
-                  ),
-                ),
-                Padding(padding: EdgeInsets.only(left: 5.0)),
-                Icon(Icons.sort_outlined),
-              ],
-            )),
-            onSelected: (int index) {
-              setState(() {
-                sortKey = AlbumSortKey.values[index];
-              });
-            },
-            itemBuilder: (context) {
-              return List.generate(AlbumSortKey.values.length, (index) {
-                return PopupMenuItem(
-                  value: index,
-                  child: Text(sortOptionText(AlbumSortKey.values[index])),
-                );
-              });
-            },
-          );
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 24),
+      child: PopupMenuButton(
+        offset: Offset(10, 40),
+        initialValue: sortKey?.index ?? 0,
+        child: Align(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              sortOptionText(sortKey),
+              Padding(padding: EdgeInsets.only(left: 5.0)),
+              Icon(
+                Icons.sort,
+                color: Theme.of(context).buttonColor,
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+        onSelected: (int index) {
+          setState(() {
+            sortKey = AlbumSortKey.values[index];
+          });
+        },
+        itemBuilder: (context) {
+          return List.generate(AlbumSortKey.values.length, (index) {
+            return PopupMenuItem(
+              value: index,
+              child: sortOptionText(AlbumSortKey.values[index]),
+            );
+          });
+        },
+      ),
+    );
   }
 
   Widget _buildCollection(BuildContext context,
