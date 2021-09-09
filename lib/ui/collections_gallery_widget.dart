@@ -152,38 +152,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                   ),
             Padding(padding: EdgeInsets.all(4)),
             Divider(),
-            PopupMenuButton(
-              offset: Offset(10, 40),
-              initialValue: sortKey?.index ?? 0,
-              child: Align(
-                  child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(sortKey.toString(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: Theme.of(context).buttonColor,
-                    ),
-                  ),
-                  Padding(padding: EdgeInsets.only(left: 5.0)),
-                  Icon(Icons.sort_outlined),
-                ],
-              )),
-              onSelected: (int index) {
-                setState(() {
-                  sortKey = AlbumSortKey.values[index];
-                });
-              },
-              itemBuilder: (context) {
-                return List.generate(AlbumSortKey.values.length, (index) {
-                  return PopupMenuItem(
-                    value: index,
-                    child: Text('${AlbumSortKey.values[index]}'),
-                  );
-                });
-              },
-            ),
+            _sortMenu(),
             SectionTitle("on ente"),
             Padding(padding: EdgeInsets.all(12)),
             Configuration.instance.hasConfiguredAccount()
@@ -207,6 +176,52 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         ),
       ),
     );
+  }
+
+  PopupMenuButton<int> _sortMenu() {
+    String sortOptionText(AlbumSortKey key) {
+      switch (key) {
+        case AlbumSortKey.albumName:
+          return "album name";
+        case AlbumSortKey.lastUpdated:
+          return "last updated";
+        case AlbumSortKey.recentPhoto:
+          return "recent photo";
+      }
+      return key.toString();
+    }
+    return PopupMenuButton(
+            offset: Offset(10, 40),
+            initialValue: sortKey?.index ?? 0,
+            child: Align(
+                child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(sortOptionText(sortKey),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Theme.of(context).buttonColor,
+                  ),
+                ),
+                Padding(padding: EdgeInsets.only(left: 5.0)),
+                Icon(Icons.sort_outlined),
+              ],
+            )),
+            onSelected: (int index) {
+              setState(() {
+                sortKey = AlbumSortKey.values[index];
+              });
+            },
+            itemBuilder: (context) {
+              return List.generate(AlbumSortKey.values.length, (index) {
+                return PopupMenuItem(
+                  value: index,
+                  child: Text(sortOptionText(AlbumSortKey.values[index])),
+                );
+              });
+            },
+          );
   }
 
   Widget _buildCollection(BuildContext context,
