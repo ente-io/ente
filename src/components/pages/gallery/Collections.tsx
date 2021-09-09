@@ -126,7 +126,7 @@ export default function Collections(props: CollectionProps) {
         collectionRef.current.scrollBy(250 * direction, 0);
     };
     const renderTooltip = (collectionID) => {
-        const fileCount = props.collectionFilesCount?.get(collectionID);
+        const fileCount = props.collectionFilesCount?.get(collectionID) ?? 0;
         return (
             <Tooltip
                 style={{
