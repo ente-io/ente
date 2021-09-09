@@ -274,7 +274,10 @@ Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
           "/" +
           id.replaceAll(kSharedMediaIdentifier, '');
       try {
-        await io.File(localPath).delete();
+        // verify the file exists as the OS may have already deleted it from cache
+        if (io.File(localPath).existsSync()) {
+          await io.File(localPath).delete();
+        }
         actuallyDeletedIDs.add(id);
       } catch (e, s) {
         _logger.warning("Could not delete file " + id, e, s);

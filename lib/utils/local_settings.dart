@@ -18,11 +18,11 @@ class LocalSettings {
   }
 
   AlbumSortKey albumSortKey() {
-    return AlbumSortKey.values[_prefs?.getInt(kCollectionSortPref) ?? 0] ??
+    return AlbumSortKey.values[_prefs.getInt(kCollectionSortPref) ?? 0] ??
         AlbumSortKey.lastUpdated;
   }
 
   void setAlbumSortKey(AlbumSortKey key) {
-    _prefs?.setInt(kCollectionSortPref, key.index);
+    _prefs.setInt(kCollectionSortPref, key.index);
   }
 }
