@@ -23,6 +23,7 @@ enum GalleryAppBarType {
   shared_collection,
   collection,
   search_results,
+  incoming_collection,
 }
 
 class GalleryAppBarWidget extends StatefulWidget {
@@ -165,7 +166,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = <Widget>[];
-    if (Configuration.instance.hasConfiguredAccount()) {
+    // skip add button for incoming collection till this feature is implemented
+    if (Configuration.instance.hasConfiguredAccount() &&
+        widget.type != GalleryAppBarType.incoming_collection) {
       actions.add(IconButton(
         icon:
             Icon(Platform.isAndroid ? Icons.add_outlined : CupertinoIcons.add),
