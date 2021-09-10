@@ -184,6 +184,10 @@ export const syncCollections = async () => {
     return collections;
 };
 
+export const setLocalCollection = async (collections: Collection[]) => {
+    await localForage.setItem(COLLECTIONS, collections);
+};
+
 export const getCollectionsAndTheirLatestFile = (
     collections: Collection[],
     files: File[]

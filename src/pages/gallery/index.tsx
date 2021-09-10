@@ -23,6 +23,7 @@ import {
     getFavItemIds,
     getLocalCollections,
     getNonEmptyCollections,
+    setLocalCollection,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import billingService from 'services/billingService';
@@ -258,6 +259,7 @@ export default function Gallery() {
             collectionFilesCount.set(id, files.length);
         }
         setCollections(nonEmptyCollections);
+        setLocalCollection(nonEmptyCollections);
         setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
         setCollectionFilesCount(collectionFilesCount);
         const favItemIds = await getFavItemIds(files);
