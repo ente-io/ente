@@ -32,6 +32,7 @@ class _SharingDialogState extends State<SharingDialog> {
   bool _showEntryField = false;
   List<User> _sharees;
   String _email;
+  final Logger _logger = Logger("SharingDialogState");
 
   @override
   Widget build(BuildContext context) {
@@ -208,14 +209,14 @@ class _SharingDialogState extends State<SharingDialog> {
       final dialog = createProgressDialog(context, "sharing...");
       await dialog.show();
       final collection = widget.collection;
-      if (collection.type == CollectionType.folder) {
-        final path =
-            CollectionsService.instance.decryptCollectionPath(collection);
-        if (!Configuration.instance.getPathsToBackUp().contains(path)) {
-          await Configuration.instance.addPathToFoldersToBeBackedUp(path);
-        }
-      }
       try {
+        if (collection.type == CollectionType.folder) {
+          final path =
+              CollectionsService.instance.decryptCollectionPath(collection);
+          if (!Configuration.instance.getPathsToBackUp().contains(path)) {
+            await Configuration.instance.addPathToFoldersToBeBackedUp(path);
+          }
+        }
         await CollectionsService.instance
             .share(widget.collection.id, email, publicKey);
         await dialog.hide();
@@ -260,6 +261,7 @@ class _SharingDialogState extends State<SharingDialog> {
             },
           );
         } else {
+          _logger.severe("failed to share collection", e);
           showGenericErrorDialog(context);
         }
       }

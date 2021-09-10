@@ -14,6 +14,7 @@ import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/collection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
+import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -346,6 +347,7 @@ class OutgoingCollectionItem extends StatelessWidget {
       onTap: () {
         final page = CollectionPage(
           c,
+          appBarType: GalleryAppBarType.owned_collection,
           tagPrefix: "outgoing_collection",
         );
         routeToPage(context, page);
@@ -418,7 +420,11 @@ class IncomingCollectionItem extends StatelessWidget {
         ],
       ),
       onTap: () {
-        routeToPage(context, CollectionPage(c, tagPrefix: "shared_collection"));
+        routeToPage(
+            context,
+            CollectionPage(c,
+                appBarType: GalleryAppBarType.shared_collection,
+                tagPrefix: "shared_collection"));
       },
     );
   }

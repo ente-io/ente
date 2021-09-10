@@ -20,9 +20,10 @@ import 'package:photos/utils/toast_util.dart';
 enum GalleryAppBarType {
   homepage,
   local_folder,
+  // indicator for gallery view of collections shared with the user
   shared_collection,
-  collection,
-  search_results,
+  owned_collection,
+  search_results
 }
 
 class GalleryAppBarWidget extends StatefulWidget {
@@ -105,7 +106,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     List<Widget> actions = <Widget>[];
     if (Configuration.instance.hasConfiguredAccount() &&
         (widget.type == GalleryAppBarType.local_folder ||
-            widget.type == GalleryAppBarType.collection)) {
+            widget.type == GalleryAppBarType.owned_collection)) {
       actions.add(IconButton(
         icon: Icon(Icons.person_add),
         onPressed: () {
@@ -165,7 +166,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = <Widget>[];
-    if (Configuration.instance.hasConfiguredAccount()) {
+    // skip add button for incoming collection till this feature is implemented
+    if (Configuration.instance.hasConfiguredAccount() &&
+        widget.type != GalleryAppBarType.shared_collection) {
       actions.add(IconButton(
         icon:
             Icon(Platform.isAndroid ? Icons.add_outlined : CupertinoIcons.add),
@@ -190,9 +193,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           _showDeleteSheet(context);
         },
       ));
-    } else if (widget.type == GalleryAppBarType.collection ||
-        (widget.type == GalleryAppBarType.shared_collection &&
-            widget.collection.owner.id == Configuration.instance.getUserID())) {
+    } else if (widget.type == GalleryAppBarType.owned_collection) {
       if (widget.collection.type == CollectionType.folder) {
         actions.add(IconButton(
           icon: Icon(Platform.isAndroid
