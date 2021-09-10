@@ -19,7 +19,7 @@ class CollectionPage extends StatelessWidget {
 
   CollectionPage(this.c,
       {this.tagPrefix = "collection",
-      this.appBarType = GalleryAppBarType.collection,
+      this.appBarType = GalleryAppBarType.owned_collection,
       Key key})
       : super(key: key);
 

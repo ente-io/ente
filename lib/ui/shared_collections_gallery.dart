@@ -347,6 +347,7 @@ class OutgoingCollectionItem extends StatelessWidget {
       onTap: () {
         final page = CollectionPage(
           c,
+          appBarType: GalleryAppBarType.owned_collection,
           tagPrefix: "outgoing_collection",
         );
         routeToPage(context, page);
@@ -422,7 +423,7 @@ class IncomingCollectionItem extends StatelessWidget {
         routeToPage(
             context,
             CollectionPage(c,
-                appBarType: GalleryAppBarType.incoming_collection,
+                appBarType: GalleryAppBarType.shared_collection,
                 tagPrefix: "shared_collection"));
       },
     );
