@@ -1,4 +1,4 @@
-import EXIF from 'exif-js';
+import exifr from 'exifr';
 
 import { logError } from 'utils/sentry';
 import { NULL_LOCATION, Location } from './metadataService';
@@ -19,7 +19,7 @@ export async function getExifData(
         const fileChunk = await worker.getUint8ArrayView(
             receivedFile.slice(0, CHUNK_SIZE_FOR_EXIF_READING)
         );
-        const exifData = EXIF.readFromBinaryFile(fileChunk.buffer);
+        const exifData = await exifr.parse(fileChunk.buffer);
         if (!exifData) {
             return { location: NULL_LOCATION, creationTime: null };
         }
