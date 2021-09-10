@@ -14,9 +14,13 @@ import 'gallery_app_bar_widget.dart';
 class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
+  final GalleryAppBarType appBarType;
   final _selectedFiles = SelectedFiles();
 
-  CollectionPage(this.c, {this.tagPrefix = "collection", Key key})
+  CollectionPage(this.c,
+      {this.tagPrefix = "collection",
+      this.appBarType = GalleryAppBarType.collection,
+      Key key})
       : super(key: key);
 
   @override
@@ -44,7 +48,7 @@ class CollectionPage extends StatelessWidget {
         Container(
           height: Platform.isAndroid ? 80 : 100,
           child: GalleryAppBarWidget(
-            GalleryAppBarType.collection,
+            appBarType,
             c.collection.name,
             _selectedFiles,
             collection: c.collection,
