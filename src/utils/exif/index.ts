@@ -1,24 +1,12 @@
-export function prettyPrintExif(data: Object) {
-    let a;
-
+export function prettyPrintExif(exifData: Object) {
     let strPretty = '';
-    for (a in data) {
-        if (typeof data[a] === 'object') {
-            if (data[a] instanceof Number) {
-                strPretty +=
-                    a +
-                    ' : ' +
-                    data[a] +
-                    ' [' +
-                    data[a].numerator +
-                    '/' +
-                    data[a].denominator +
-                    ']\r\n';
-            } else {
-                strPretty += a + ' : [' + data[a].length + ' values]\r\n';
-            }
+    for (const [tagName, tagValue] of Object.entries(exifData)) {
+        if (tagValue instanceof Uint8Array) {
+            strPretty += tagName + ' : ' + '[' + tagValue + ']' + '\r\n';
+        } else if (tagValue instanceof Date) {
+            strPretty += tagName + ' : ' + tagValue.toDateString() + '\r\n';
         } else {
-            strPretty += a + ' : ' + data[a] + '\r\n';
+            strPretty += tagName + ' : ' + tagValue + '\r\n';
         }
     }
     return strPretty;
