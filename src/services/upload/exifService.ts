@@ -1,4 +1,5 @@
 import exifr from 'exifr';
+import { CustomError } from 'utils/common/errorUtil';
 
 import { logError } from 'utils/sentry';
 import { NULL_LOCATION, Location } from './metadataService';
@@ -34,17 +35,31 @@ export async function getExifData(
 }
 
 function getUNIXTime(exifData: any) {
-    const dateString: string = exifData.DateTimeOriginal || exifData.DateTime;
-    if (!dateString || dateString === '0000:00:00 00:00:00') {
+    try {
+        if (!exifData.DateTimeOriginal) {
+            throw Error(CustomError.MISSING_EXIF_TAG);
+        }
+        if (exifData.DateTimeOriginal instanceof Date) {
+            return exifData.DateTimeOriginal.getTime() * 1000;
+        } else if (typeof exifData.DateTimeOriginal === 'string') {
+            const dateString = exifData.DateTimeOriginal;
+            if (dateString === '0000:00:00 00:00:00') {
+                throw Error(CustomError.MISSING_EXIF_TAG);
+            }
+            const parts = dateString.split(' ')[0].split(':');
+            const date = new Date(
+                Number(parts[0]),
+                Number(parts[1]) - 1,
+                Number(parts[2])
+            );
+            return date.getTime() * 1000;
+        } else {
+            throw Error(CustomError.MISSING_EXIF_TAG);
+        }
+    } catch (e) {
+        logError(e, 'getUnixTime failed', { exifData });
         return null;
     }
-    const parts = dateString.split(' ')[0].split(':');
-    const date = new Date(
-        Number(parts[0]),
-        Number(parts[1]) - 1,
-        Number(parts[2])
-    );
-    return date.getTime() * 1000;
 }
 
 function getEXIFLocation(exifData): Location {
