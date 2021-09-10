@@ -268,7 +268,6 @@ function PhotoSwipe(props: Iprops) {
             );
             if (img) {
                 exifr.parse(img).then(function (exifData) {
-                    console.log(exifData);
                     if (!exifData) {
                         return;
                     }
