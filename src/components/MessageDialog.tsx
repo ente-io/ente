@@ -38,7 +38,7 @@ export default function MessageDialog({
             {...props}
             onHide={attributes.nonClosable ? () => null : props.onHide}
             centered
-            backdrop={attributes.staticBackdrop ? 'static' : 'true'}>
+            backdrop={attributes.staticBackdrop ? 'static' : true}>
             <Modal.Header
                 style={{ borderBottom: 'none' }}
                 closeButton={!attributes.nonClosable}>
