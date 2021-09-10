@@ -57,7 +57,7 @@ function getUNIXTime(exifData: any) {
             throw Error(CustomError.MISSING_EXIF_TAG);
         }
     } catch (e) {
-        logError(e, 'getUnixTime failed', { exifData });
+        logError(e, 'getUnixTime failed');
         return null;
     }
 }
