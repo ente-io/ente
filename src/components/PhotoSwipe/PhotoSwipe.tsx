@@ -18,6 +18,7 @@ import styled from 'styled-components';
 import events from './events';
 import { fileNameWithoutExtension, formatDateTime } from 'utils/file';
 import { FormCheck } from 'react-bootstrap';
+import { prettyPrintExif } from 'utils/exif';
 
 interface Iprops {
     isOpen: boolean;
@@ -271,7 +272,7 @@ function PhotoSwipe(props: Iprops) {
                     if (!exifData) {
                         return;
                     }
-                    exifData.raw = JSON.stringify(exifData, null, 2);
+                    exifData.raw = prettyPrintExif(exifData);
                     if (exifData) {
                         setExif(exifData);
                     }
