@@ -25,6 +25,7 @@ export enum CustomError {
     SESSION_EXPIRED_MESSAGE = 'session expired',
     TYPE_DETECTION_FAILED = 'type detection failed',
     SIGNUP_FAILED = 'signup failed',
+    FAV_COLLECTION_MISSING = 'favorite collection missing',
 }
 
 function parseUploadError(error: AxiosResponse) {

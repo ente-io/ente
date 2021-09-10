@@ -18,7 +18,7 @@ export async function addFilesToCollection(
     existingCollection: Collection
 ) {
     setCollectionSelectorView(false);
-    let collection;
+    let collection: Collection;
     if (!existingCollection) {
         collection = await createCollection(
             collectionName,
