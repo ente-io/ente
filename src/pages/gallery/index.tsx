@@ -295,7 +295,6 @@ export default function Gallery() {
                 collection
             );
         } catch (e) {
-            console.log(e);
             setDialogMessage({
                 title: constants.ERROR,
                 staticBackdrop: true,
