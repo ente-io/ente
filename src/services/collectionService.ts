@@ -11,6 +11,7 @@ import { B64EncryptionResult } from 'utils/crypto';
 import HTTPService from './HTTPService';
 import { File } from './fileService';
 import { logError } from 'utils/sentry';
+import { CustomError } from 'utils/common/errorUtil';
 
 const ENDPOINT = getEndpoint();
 
@@ -311,20 +312,31 @@ const postCollection = async (
 };
 
 export const addToFavorites = async (file: File) => {
-    let favCollection = await getFavCollection();
-    if (!favCollection) {
-        favCollection = await createCollection(
-            'Favorites',
-            CollectionType.favorites
-        );
-        await localForage.setItem(FAV_COLLECTION, favCollection);
+    try {
+        let favCollection = await getFavCollection();
+        if (!favCollection) {
+            favCollection = await createCollection(
+                'Favorites',
+                CollectionType.favorites
+            );
+            await localForage.setItem(FAV_COLLECTION, favCollection);
+        }
+        await addToCollection(favCollection, [file]);
+    } catch (e) {
+        logError(e, 'failed to add to favorite');
     }
-    await addToCollection(favCollection, [file]);
 };
 
 export const removeFromFavorites = async (file: File) => {
-    const favCollection = await getFavCollection();
-    await removeFromCollection(favCollection, [file]);
+    try {
+        const favCollection = await getFavCollection();
+        if (!favCollection) {
+            throw Error(CustomError.FAV_COLLECTION_MISSING);
+        }
+        await removeFromCollection(favCollection, [file]);
+    } catch (e) {
+        logError(e, 'remove from favorite failed');
+    }
 };
 
 export const addToCollection = async (
@@ -362,6 +374,7 @@ export const addToCollection = async (
         );
     } catch (e) {
         logError(e, 'Add to collection Failed ');
+        throw e;
     }
 };
 const removeFromCollection = async (collection: Collection, files: File[]) => {
@@ -385,6 +398,7 @@ const removeFromCollection = async (collection: Collection, files: File[]) => {
         );
     } catch (e) {
         logError(e, 'remove from collection failed ');
+        throw e;
     }
 };
 

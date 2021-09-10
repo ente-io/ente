@@ -278,21 +278,30 @@ export default function Gallery() {
     if (!files) {
         return <div />;
     }
-    const addToCollectionHelper = (
+    const addToCollectionHelper = async (
         collectionName: string,
         collection: Collection
     ) => {
         loadingBar.current?.continuousStart();
-        addFilesToCollection(
-            setCollectionSelectorView,
-            selected,
-            files,
-            clearSelection,
-            syncWithRemote,
-            selectCollection,
-            collectionName,
-            collection
-        );
+        try {
+            await addFilesToCollection(
+                setCollectionSelectorView,
+                selected,
+                files,
+                clearSelection,
+                syncWithRemote,
+                selectCollection,
+                collectionName,
+                collection
+            );
+        } catch (e) {
+            setDialogMessage({
+                title: constants.ERROR,
+                staticBackdrop: true,
+                close: { variant: 'danger' },
+                content: constants.UNKNOWN_ERROR,
+            });
+        }
     };
 
     const showCreateCollectionModal = () =>
