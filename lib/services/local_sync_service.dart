@@ -26,7 +26,9 @@ class LocalSyncService {
   static const kPermissionStateKey = "permission_state";
   static const kEditedFileIDsKey = "edited_file_ids";
   static const kDownloadedFileIDsKey = "downloaded_file_ids";
-  static const kInvalidFileIDsKey = "invalid_file_ids";
+  // Adding `_2` as a suffic to pull files that were earlier ignored due to permission errors
+  // See https://github.com/CaiJingLong/flutter_photo_manager/issues/589
+  static const kInvalidFileIDsKey = "invalid_file_ids_2";
 
   LocalSyncService._privateConstructor();
 
