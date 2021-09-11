@@ -228,10 +228,10 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             ],
           ),
         ),
-        onSelected: (int index) {
-          setState(() {
-            sortKey = AlbumSortKey.values[index];
-          });
+        onSelected: (int index) async {
+          sortKey = AlbumSortKey.values[index];
+          await LocalSettings.instance.setAlbumSortKey(sortKey);
+          setState(() {});
         },
         itemBuilder: (context) {
           return List.generate(AlbumSortKey.values.length, (index) {
