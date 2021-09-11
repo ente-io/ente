@@ -22,7 +22,7 @@ class LocalSettings {
         AlbumSortKey.lastUpdated;
   }
 
-  void setAlbumSortKey(AlbumSortKey key) {
-    _prefs.setInt(kCollectionSortPref, key.index);
+  Future<bool> setAlbumSortKey(AlbumSortKey key) {
+    return _prefs.setInt(kCollectionSortPref, key.index);
   }
 }

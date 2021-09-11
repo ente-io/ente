@@ -228,7 +228,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             ],
           ),
         ),
-        onSelected: (int index) {
+        onSelected: (int index) async {
+          await LocalSettings.instance.setAlbumSortKey(sortKey);
           setState(() {
             sortKey = AlbumSortKey.values[index];
           });
