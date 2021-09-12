@@ -383,7 +383,9 @@ class FileUploader {
       _logger.info("File upload complete for " + remoteFile.toString());
       return remoteFile;
     } catch (e, s) {
-      if (!(e is NoActiveSubscriptionError || e is StorageLimitExceededError)) {
+      if (!(e is NoActiveSubscriptionError ||
+          e is StorageLimitExceededError ||
+          e is FileTooLargeForPlanError)) {
         _logger.severe("File upload failed for " + file.toString(), e, s);
       }
       rethrow;
@@ -593,6 +595,8 @@ class FileUploader {
             final error = StorageLimitExceededError();
             clearQueue(error);
             throw error;
+          } else if (e.response.statusCode == 426) {
+            throw FileTooLargeForPlanError();
           }
         }
         rethrow;

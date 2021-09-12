@@ -14,6 +14,9 @@ class NoActiveSubscriptionError extends Error {}
 
 class StorageLimitExceededError extends Error {}
 
+// error when file size + current usage >= storage plan limit + buffer
+class FileTooLargeForPlanError extends Error {}
+
 class SilentlyCancelUploadsError extends Error {}
 
 class UserCancelledUploadError extends Error {}
