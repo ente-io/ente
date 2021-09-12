@@ -37,13 +37,18 @@ export async function getExifData(
 }
 
 function getUNIXTime(exifData: any) {
-    const dateTime =
+    const dateTime: Date =
         exifData.DateTimeOriginal ?? exifData.CreateDate ?? exifData.ModifyDate;
 
     if (!dateTime) {
         return null;
     }
-    return dateTime.getTime() * 1000;
+    const unixTime = dateTime.getTime() * 1000;
+    if (unixTime <= 0) {
+        return null;
+    } else {
+        return unixTime;
+    }
 }
 
 function getEXIFLocation(exifData): Location {
