@@ -383,7 +383,9 @@ class FileUploader {
       _logger.info("File upload complete for " + remoteFile.toString());
       return remoteFile;
     } catch (e, s) {
-      if (!(e is NoActiveSubscriptionError || e is StorageLimitExceededError)) {
+      if (!(e is NoActiveSubscriptionError ||
+          e is StorageLimitExceededError ||
+          e is FileTooLargeForPlanError)) {
         _logger.severe("File upload failed for " + file.toString(), e, s);
       }
       rethrow;
@@ -465,7 +467,9 @@ class FileUploader {
       file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
     } on DioError catch (e) {
-      if (e.response?.statusCode == 426) {
+      if (e.response?.statusCode == 413) {
+        throw FileTooLargeForPlanError();
+      } else if (e.response?.statusCode == 426) {
         _onStorageLimitExceeded();
       } else if (attempt < kMaximumUploadAttempts) {
         _logger.info("Upload file failed, will retry in 3 seconds");
