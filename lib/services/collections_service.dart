@@ -339,6 +339,39 @@ class CollectionsService {
     });
   }
 
+  Future<void> moveFilesBetweenCollection(
+      int toCollectionID, int fromCollectionID, List<File> files) {
+    final params = <String, dynamic>{};
+    params["toCollectionID"] = toCollectionID;
+    params["fromCollectionID"] = fromCollectionID;
+    params["files"] = [];
+    for (final file in files) {
+      final fileKey = decryptFileKey(file);
+      file.generatedID = null; // So that a new entry is created in the FilesDB
+      file.collectionID = toCollectionID;
+      final encryptedKeyData =
+          CryptoUtil.encryptSync(fileKey, getCollectionKey(toCollectionID));
+      file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
+      file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
+      params["files"].add(CollectionFileItem(
+              file.uploadedFileID, file.encryptedKey, file.keyDecryptionNonce)
+          .toMap());
+    }
+    return _dio
+        .post(
+      Configuration.instance.getHttpEndpoint() + "/collections/move-files",
+      data: params,
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+    )
+        .then((value) async {
+      // insert files to new collection
+      await _filesDB.insertMultiple(files);
+      Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
+      //  todo: remove files from existing collection. RemoteSync should eventually remote
+    });
+  }
+
   Future<void> removeFromCollection(int collectionID, List<File> files) async {
     final params = <String, dynamic>{};
     params["collectionID"] = collectionID;
