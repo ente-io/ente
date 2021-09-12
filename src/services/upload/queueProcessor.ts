@@ -50,7 +50,7 @@ export default class QueueProcessor<T> {
     public async processQueue() {
         while (this.requestQueue.length > 0) {
             const queueItem = this.requestQueue.pop();
-            let response: string;
+            let response = null;
 
             if (queueItem.isCanceled.status) {
                 response = null;
@@ -62,7 +62,6 @@ export default class QueueProcessor<T> {
                 }
             }
             queueItem.callback(response);
-            await this.processQueue();
         }
     }
 }
