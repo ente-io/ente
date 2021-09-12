@@ -467,7 +467,9 @@ class FileUploader {
       file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
     } on DioError catch (e) {
-      if (e.response?.statusCode == 426) {
+      if (e.response?.statusCode == 413) {
+        throw FileTooLargeForPlanError();
+      } else if (e.response?.statusCode == 426) {
         _onStorageLimitExceeded();
       } else if (attempt < kMaximumUploadAttempts) {
         _logger.info("Upload file failed, will retry in 3 seconds");
@@ -595,8 +597,6 @@ class FileUploader {
             final error = StorageLimitExceededError();
             clearQueue(error);
             throw error;
-          } else if (e.response.statusCode == 426) {
-            throw FileTooLargeForPlanError();
           }
         }
         rethrow;
