@@ -5,7 +5,7 @@ interface RequestQueueItem {
     canceller: { exec: () => void };
 }
 
-interface RequestCanceller {
+export interface RequestCanceller {
     exec: () => void;
 }
 
@@ -16,7 +16,9 @@ export default class QueueProcessor<T> {
 
     constructor(private maxParallelProcesses: number) {}
 
-    public queueUpRequest(request: () => Promise<T>) {
+    public queueUpRequest(
+        request: (canceller?: RequestCanceller) => Promise<T>
+    ) {
         const isCanceled = { status: false };
         const canceller: RequestCanceller = {
             exec: () => {
