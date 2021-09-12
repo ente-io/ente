@@ -1,7 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Card, Modal } from 'react-bootstrap';
 import styled from 'styled-components';
-import { CollectionAndItsLatestFile } from 'services/collectionService';
+import {
+    Collection,
+    CollectionAndItsLatestFile,
+} from 'services/collectionService';
 import AddCollectionButton from './AddCollectionButton';
 import PreviewCard from './PreviewCard';
 
@@ -17,8 +20,8 @@ export const CollectionIcon = styled.div`
 `;
 
 export interface CollectionSelectorAttributes {
-    callback: (collection) => void;
-    showNextModal: (firstAlbum?: boolean) => void;
+    callback: (collection: Collection) => void;
+    showNextModal: () => void;
     title: string;
 }
 export type SetCollectionSelectorAttributes = React.Dispatch<
@@ -34,23 +37,14 @@ const CollectionCard = styled(Card)`
 interface Props {
     show: boolean;
     onHide: (closeBtnClick?: boolean) => void;
-    directlyShowNextModal: boolean;
     collectionsAndTheirLatestFile: CollectionAndItsLatestFile[];
     attributes: CollectionSelectorAttributes;
 }
 function CollectionSelector({
     attributes,
-    directlyShowNextModal,
     collectionsAndTheirLatestFile,
     ...props
 }: Props) {
-    useEffect(() => {
-        if (directlyShowNextModal && attributes) {
-            props.onHide();
-            attributes.showNextModal(true);
-        }
-    }, [attributes]);
-
     if (!attributes) {
         return <Modal />;
     }

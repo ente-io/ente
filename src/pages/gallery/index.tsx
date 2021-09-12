@@ -421,9 +421,6 @@ export default function Gallery() {
                     collectionsAndTheirLatestFile={
                         collectionsAndTheirLatestFile
                     }
-                    directlyShowNextModal={
-                        collectionsAndTheirLatestFile?.length === 0
-                    }
                     attributes={collectionSelectorAttributes}
                 />
                 <Upload
@@ -447,6 +444,7 @@ export default function Gallery() {
                     setUploadInProgress={setUploadInProgress}
                     fileRejections={fileRejections}
                     setFiles={setFiles}
+                    isFirstUpload={collectionsAndTheirLatestFile?.length === 0}
                 />
                 <Sidebar
                     collections={collections}
