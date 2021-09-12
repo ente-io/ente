@@ -26,7 +26,6 @@ export enum CustomError {
     TYPE_DETECTION_FAILED = 'type detection failed',
     SIGNUP_FAILED = 'signup failed',
     FAV_COLLECTION_MISSING = 'favorite collection missing',
-    MISSING_EXIF_TAG = 'missing exif tags',
 }
 
 function parseUploadError(error: AxiosResponse) {

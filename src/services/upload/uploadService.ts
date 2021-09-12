@@ -127,7 +127,6 @@ class UploadService {
     }
 
     async getFileMetadata(
-        worker: any,
         rawFile: File,
         collection: Collection,
         fileTypeInfo: FileTypeInfo
@@ -138,7 +137,6 @@ class UploadService {
                 getMetadataMapKey(collection.id, originalName)
             ) ?? {};
         const extractedMetadata: MetadataObject = await extractMetadata(
-            worker,
             rawFile,
             fileTypeInfo
         );
