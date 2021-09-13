@@ -213,7 +213,7 @@ function PlanSelector(props: Props) {
             onHide={props.closeModal}
             size="xl"
             centered
-            backdrop={hasPaidSubscription(subscription) ? 'true' : 'static'}
+            backdrop={hasPaidSubscription(subscription) ? true : 'static'}
             contentClassName="plan-selector-modal-content">
             <Modal.Header closeButton>
                 <Modal.Title

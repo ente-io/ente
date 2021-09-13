@@ -177,7 +177,7 @@ export default function UploadProgress(props: Props) {
             }
             aria-labelledby="contained-modal-title-vcenter"
             centered
-            backdrop={fileProgressStatuses?.length !== 0 ? 'static' : 'true'}>
+            backdrop={fileProgressStatuses?.length !== 0 ? 'static' : true}>
             <Modal.Header
                 style={{
                     display: 'flex',

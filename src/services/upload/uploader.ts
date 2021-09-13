@@ -54,7 +54,6 @@ export default async function uploader(
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         metadata = await uploadService.getFileMetadata(
-            worker,
             rawFile,
             collection,
             fileTypeInfo

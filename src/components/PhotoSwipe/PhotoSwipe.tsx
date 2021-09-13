@@ -10,7 +10,7 @@ import {
 import { File, FILE_TYPE } from 'services/fileService';
 import constants from 'utils/strings/constants';
 import DownloadManger from 'services/downloadManager';
-import EXIF from 'exif-js';
+import exifr from 'exifr';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -18,6 +18,7 @@ import styled from 'styled-components';
 import events from './events';
 import { fileNameWithoutExtension, formatDateTime } from 'utils/file';
 import { FormCheck } from 'react-bootstrap';
+import { prettyPrintExif } from 'utils/exif';
 
 interface Iprops {
     isOpen: boolean;
@@ -263,17 +264,16 @@ function PhotoSwipe(props: Iprops) {
     const checkExifAvailable = () => {
         setExif(null);
         setTimeout(() => {
-            const img = document.querySelector(
+            const img: HTMLImageElement = document.querySelector(
                 '.pswp__img:not(.pswp__img--placeholder)'
             );
             if (img) {
-                // @ts-expect-error
-                EXIF.getData(img, function () {
-                    const exif = EXIF.getAllTags(this);
-                    exif.raw = EXIF.pretty(this);
-                    if (exif.raw) {
-                        setExif(exif);
+                exifr.parse(img).then(function (exifData) {
+                    if (!exifData) {
+                        return;
                     }
+                    exifData.raw = prettyPrintExif(exifData);
+                    setExif(exifData);
                 });
             }
         }, 100);
