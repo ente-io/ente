@@ -5,7 +5,7 @@ interface RequestQueueItem {
     canceller: { exec: () => void };
 }
 
-interface RequestCanceller {
+export interface RequestCanceller {
     exec: () => void;
 }
 
@@ -16,7 +16,9 @@ export default class QueueProcessor<T> {
 
     constructor(private maxParallelProcesses: number) {}
 
-    public queueUpRequest(request: () => Promise<T>) {
+    public queueUpRequest(
+        request: (canceller?: RequestCanceller) => Promise<T>
+    ) {
         const isCanceled = { status: false };
         const canceller: RequestCanceller = {
             exec: () => {
@@ -48,7 +50,7 @@ export default class QueueProcessor<T> {
     public async processQueue() {
         while (this.requestQueue.length > 0) {
             const queueItem = this.requestQueue.pop();
-            let response: string;
+            let response = null;
 
             if (queueItem.isCanceled.status) {
                 response = null;
@@ -60,7 +62,6 @@ export default class QueueProcessor<T> {
                 }
             }
             queueItem.callback(response);
-            await this.processQueue();
         }
     }
 }
