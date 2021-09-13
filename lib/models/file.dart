@@ -140,10 +140,6 @@ class File {
         metadata["duration"] = duration;
       }
     }
-    if (fileType == FileType.image || fileType == FileType.livePhoto){
-      exif = (await readExifFromFile(sourceFile)).toString();
-      metadata["exif"] = exif;
-    }
     hash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
     metadata["hash"] = hash;
     metadata["version"] = metadataVersion;
