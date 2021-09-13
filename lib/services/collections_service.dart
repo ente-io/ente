@@ -340,7 +340,7 @@ class CollectionsService {
     });
   }
 
-  Future<void> moveFilesBetweenCollection(
+  Future<void> move(
       int toCollectionID, int fromCollectionID, List<File> files) {
     _validateMoveRequest(toCollectionID, fromCollectionID, files);
     final params = <String, dynamic>{};

@@ -27,8 +27,7 @@ class CreateCollectionPage extends StatefulWidget {
   final CollectionActionType actionType;
 
   const CreateCollectionPage(this.selectedFiles, this.sharedFiles,
-      {Key key,
-      this.actionType = CollectionActionType.addFiles})
+      {Key key, this.actionType = CollectionActionType.addFiles})
       : super(key: key);
 
   @override
@@ -241,16 +240,19 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     await dialog.show();
     try {
       int fromCollectionID = widget.selectedFiles.files?.first?.collectionID;
-      await CollectionsService.instance.moveFilesBetweenCollection(toCollectionID, fromCollectionID, widget.selectedFiles.files?.toList());
+      await CollectionsService.instance.move(
+          toCollectionID,
+          fromCollectionID,
+          widget.selectedFiles.files?.toList());
       RemoteSyncService.instance.sync(silently: true);
       widget.selectedFiles?.clearAll();
       await dialog.hide();
       return true;
     } on AssertionError catch (e, s) {
       await dialog.hide();
-      showErrorDialog(context, "something went wrong", e.message);
+      showErrorDialog(context, "oops", e.message);
       return false;
-    } catch(e, s) {
+    } catch (e, s) {
       _logger.severe("Could not move to album", e, s);
       showGenericErrorDialog(context);
       return false;
