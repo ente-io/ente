@@ -178,17 +178,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = <Widget>[];
-    if (Configuration.instance.hasConfiguredAccount() &&
-        widget.type == GalleryAppBarType.owned_collection) {
-      actions.add(IconButton(
-        icon: Icon(Platform.isAndroid
-            ? Icons.arrow_right_alt_rounded
-            : CupertinoIcons.arrow_right),
-        onPressed: () {
-          _moveFiles();
-        },
-      ));
-    }
     // skip add button for incoming collection till this feature is implemented
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.type != GalleryAppBarType.shared_collection) {
@@ -197,6 +186,17 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             Icon(Platform.isAndroid ? Icons.add_outlined : CupertinoIcons.add),
         onPressed: () {
           _createAlbum();
+        },
+      ));
+    }
+    if (Configuration.instance.hasConfiguredAccount() &&
+        widget.type == GalleryAppBarType.owned_collection) {
+      actions.add(IconButton(
+        icon: Icon(Platform.isAndroid
+            ? Icons.arrow_right_alt_rounded
+            : CupertinoIcons.arrow_right),
+        onPressed: () {
+          _moveFiles();
         },
       ));
     }
