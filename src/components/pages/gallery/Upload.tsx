@@ -74,7 +74,10 @@ export default function Upload(props: Props) {
     const [uploadResult, setUploadResult] = useState(new Map<string, number>());
     const [percentComplete, setPercentComplete] = useState(0);
     const [choiceModalView, setChoiceModalView] = useState(false);
-    const [analysisResult, setAnalysisResult] = useState<AnalysisResult>(null);
+    const [analysisResult, setAnalysisResult] = useState<AnalysisResult>({
+        suggestedCollectionName: '',
+        multipleFolders: false,
+    });
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
 
