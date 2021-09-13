@@ -192,7 +192,7 @@ export default function Upload(props: Props) {
 
     const uploadFilesToNewCollections = async (
         strategy: UPLOAD_STRATEGY,
-        collectionName
+        collectionName?: string
     ) => {
         try {
             uploadInit();
@@ -302,7 +302,7 @@ export default function Upload(props: Props) {
         analysisResult: AnalysisResult,
         isFirstUpload: boolean
     ) => {
-        if (!analysisResult) {
+        if (!analysisResult.suggestedCollectionName) {
             if (isFirstUpload) {
                 uploadToSingleNewCollection(FIRST_ALBUM_NAME);
             } else {
@@ -329,9 +329,15 @@ export default function Upload(props: Props) {
             <ChoiceModal
                 show={choiceModalView}
                 onHide={() => setChoiceModalView(false)}
-                uploadFiles={uploadFilesToNewCollections}
-                showCollectionCreateModal={() =>
-                    showCollectionCreateModal(analysisResult)
+                uploadToSingleCollection={() =>
+                    uploadToSingleNewCollection(
+                        analysisResult.suggestedCollectionName
+                    )
+                }
+                uploadToMultipleCollection={() =>
+                    uploadFilesToNewCollections(
+                        UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
+                    )
                 }
             />
             <UploadProgress
