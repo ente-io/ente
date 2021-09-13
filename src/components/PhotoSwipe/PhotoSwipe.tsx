@@ -273,9 +273,7 @@ function PhotoSwipe(props: Iprops) {
                         return;
                     }
                     exifData.raw = prettyPrintExif(exifData);
-                    if (exifData) {
-                        setExif(exifData);
-                    }
+                    setExif(exifData);
                 });
             }
         }, 100);
