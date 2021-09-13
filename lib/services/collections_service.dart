@@ -12,6 +12,7 @@ import 'package:photos/core/network.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
@@ -337,6 +338,61 @@ class CollectionsService {
       await _filesDB.insertMultiple(files);
       Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
     });
+  }
+
+  Future<void> move(
+      int toCollectionID, int fromCollectionID, List<File> files) {
+    _validateMoveRequest(toCollectionID, fromCollectionID, files);
+    final params = <String, dynamic>{};
+    params["toCollectionID"] = toCollectionID;
+    params["fromCollectionID"] = fromCollectionID;
+    params["files"] = [];
+    for (final file in files) {
+      final fileKey = decryptFileKey(file);
+      file.generatedID = null; // So that a new entry is created in the FilesDB
+      file.collectionID = toCollectionID;
+      final encryptedKeyData =
+          CryptoUtil.encryptSync(fileKey, getCollectionKey(toCollectionID));
+      file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
+      file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
+      params["files"].add(CollectionFileItem(
+              file.uploadedFileID, file.encryptedKey, file.keyDecryptionNonce)
+          .toMap());
+    }
+    return _dio
+        .post(
+      Configuration.instance.getHttpEndpoint() + "/collections/move-files",
+      data: params,
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+    )
+        .then((value) async {
+      // insert files to new collection
+      await _filesDB.insertMultiple(files);
+      Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
+      //  todo: remove files from existing collection locally.
+      //  Ideally, remoteSync should take care of it.
+      Bus.instance.fire(CollectionUpdatedEvent(fromCollectionID, files,
+          type: EventType.deleted));
+    });
+  }
+
+  void _validateMoveRequest(
+      int toCollectionID, int fromCollectionID, List<File> files) {
+    if (toCollectionID == fromCollectionID) {
+      throw AssertionError("can't move to same album");
+    }
+    for (final file in files) {
+      if (file.uploadedFileID == null) {
+        throw AssertionError("can only move uploaded memories");
+      }
+      if (file.collectionID != fromCollectionID) {
+        throw AssertionError("all memories should belong to the same album");
+      }
+      if (file.ownerID != Configuration.instance.getUserID()) {
+        throw AssertionError("can only move memories uploaded by you");
+      }
+    }
   }
 
   Future<void> removeFromCollection(int collectionID, List<File> files) async {

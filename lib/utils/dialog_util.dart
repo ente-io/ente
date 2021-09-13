@@ -25,13 +25,19 @@ ProgressDialog createProgressDialog(BuildContext context, String message) {
   return dialog;
 }
 
-Future<dynamic> showErrorDialog(BuildContext context, String title, String content) {
+Future<dynamic> showErrorDialog(
+    BuildContext context, String title, String content) {
   AlertDialog alert = AlertDialog(
     title: Text(title),
     content: Text(content),
     actions: [
       TextButton(
-        child: Text("ok"),
+        child: Text(
+          "ok",
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop('dialog');
         },
