@@ -342,6 +342,7 @@ class CollectionsService {
 
   Future<void> moveFilesBetweenCollection(
       int toCollectionID, int fromCollectionID, List<File> files) {
+    _validateMoveRequest(toCollectionID, fromCollectionID, files);
     final params = <String, dynamic>{};
     params["toCollectionID"] = toCollectionID;
     params["fromCollectionID"] = fromCollectionID;
@@ -374,6 +375,24 @@ class CollectionsService {
       Bus.instance.fire(CollectionUpdatedEvent(fromCollectionID, files,
           type: EventType.deleted));
     });
+  }
+
+  void _validateMoveRequest(
+      int toCollectionID, int fromCollectionID, List<File> files) {
+    if (toCollectionID == fromCollectionID) {
+      throw AssertionError("can't move to same album");
+    }
+    for (final file in files) {
+      if (file.uploadedFileID == null) {
+        throw AssertionError("can only move uploaded memories");
+      }
+      if (file.collectionID != fromCollectionID) {
+        throw AssertionError("all memories should belong to the same album");
+      }
+      if (file.ownerID != Configuration.instance.getUserID()) {
+        throw AssertionError("can only move memories uploaded by you");
+      }
+    }
   }
 
   Future<void> removeFromCollection(int collectionID, List<File> files) async {
