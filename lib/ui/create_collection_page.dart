@@ -19,10 +19,16 @@ import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
+enum CollectionActionType { addFiles, moveFiles }
+
 class CreateCollectionPage extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final List<SharedMediaFile> sharedFiles;
-  const CreateCollectionPage(this.selectedFiles, this.sharedFiles, {Key key})
+  final CollectionActionType actionType;
+
+  const CreateCollectionPage(this.selectedFiles, this.sharedFiles,
+      {Key key,
+      this.actionType = CollectionActionType.addFiles})
       : super(key: key);
 
   @override
@@ -140,8 +146,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
           ],
         ),
         onTap: () async {
-          if (await _addToCollection(item.collection.id)) {
-            showToast("added successfully to '" + item.collection.name);
+          if (await _addOrMoveToCollection(item.collection.id)) {
+            showToast(widget.actionType == CollectionActionType.addFiles
+                ? "added successfully to " + item.collection.name
+                : "moved successfully to " + item.collection.name);
             _navigateToCollection(item.collection);
           }
         },
@@ -191,7 +199,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             final collection = await _createAlbum(_albumName);
             if (collection != null) {
-              if (await _addToCollection(collection.id)) {
+              if (await _addOrMoveToCollection(collection.id)) {
                 showToast("album '" + _albumName + "' created.");
                 _navigateToCollection(collection);
               }
@@ -218,6 +226,30 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             child: CollectionPage(
               CollectionWithThumbnail(collection, null),
             )));
+  }
+
+  Future<bool> _addOrMoveToCollection(int collectionID) async {
+    return widget.actionType == CollectionActionType.addFiles
+        ? _addToCollection(collectionID)
+        : _moveFilesToCollection(collectionID);
+  }
+
+  Future<bool> _moveFilesToCollection(int toCollectionID) async {
+    final dialog = createProgressDialog(context, "moving files to album...");
+    await dialog.show();
+    try {
+      int fromCollectionID = widget.selectedFiles.files.first.collectionID;
+      await CollectionsService.instance.moveFilesBetweenCollection(toCollectionID, fromCollectionID, widget.selectedFiles.files.toList());
+      RemoteSyncService.instance.sync(silently: true);
+      widget.selectedFiles?.clearAll();
+      await dialog.hide();
+      return true;
+    } catch(e, s) {
+      _logger.severe("Could not move to album", e, s);
+      await dialog.hide();
+      showGenericErrorDialog(context);
+      return false;
+    }
   }
 
   Future<bool> _addToCollection(int collectionID) async {

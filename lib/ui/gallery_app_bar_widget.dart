@@ -164,8 +164,30 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             )));
   }
 
+  Future<void> _moveFiles() async {
+    Navigator.push(
+        context,
+        PageTransition(
+            type: PageTransitionType.bottomToTop,
+            child: CreateCollectionPage(
+              widget.selectedFiles,
+              null,
+              actionType: CollectionActionType.moveFiles,
+            )));
+  }
+
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = <Widget>[];
+    if (Configuration.instance.hasConfiguredAccount()) {
+      actions.add(IconButton(
+        icon: Icon(Platform.isAndroid
+            ? Icons.arrow_right_alt_rounded
+            : CupertinoIcons.arrow_right),
+        onPressed: () {
+          _moveFiles();
+        },
+      ));
+    }
     // skip add button for incoming collection till this feature is implemented
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.type != GalleryAppBarType.shared_collection) {

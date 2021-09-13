@@ -12,6 +12,7 @@ import 'package:photos/core/network.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
@@ -368,7 +369,10 @@ class CollectionsService {
       // insert files to new collection
       await _filesDB.insertMultiple(files);
       Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
-      //  todo: remove files from existing collection. RemoteSync should eventually remote
+      //  todo: remove files from existing collection locally.
+      //  Ideally, remoteSync should take care of it.
+      Bus.instance.fire(CollectionUpdatedEvent(fromCollectionID, files,
+          type: EventType.deleted));
     });
   }
 
