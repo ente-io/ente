@@ -43,7 +43,9 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("add files"),
+        title: Text(widget.actionType == CollectionActionType.addFiles
+            ? "add files"
+            : "move files"),
       ),
       body: _getBody(context),
     );
