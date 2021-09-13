@@ -28,7 +28,7 @@ const FIRST_ALBUM_NAME = 'My First Album';
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
-    setBannerMessage;
+    setBannerMessage: (message: string | JSX.Element) => void;
     acceptedFiles: globalThis.File[];
     closeCollectionSelector: () => void;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
@@ -39,6 +39,7 @@ interface Props {
     showCollectionSelector: () => void;
     fileRejections: FileRejection[];
     setFiles: SetFiles;
+    isFirstUpload: boolean;
 }
 
 export enum UPLOAD_STRATEGY {
@@ -73,8 +74,10 @@ export default function Upload(props: Props) {
     const [uploadResult, setUploadResult] = useState(new Map<string, number>());
     const [percentComplete, setPercentComplete] = useState(0);
     const [choiceModalView, setChoiceModalView] = useState(false);
-    const [fileAnalysisResult, setFileAnalysisResult] =
-        useState<AnalysisResult>(null);
+    const [analysisResult, setAnalysisResult] = useState<AnalysisResult>({
+        suggestedCollectionName: '',
+        multipleFolders: false,
+    });
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
 
@@ -89,7 +92,8 @@ export default function Upload(props: Props) {
             },
             props.setFiles
         );
-    });
+    }, []);
+
     useEffect(() => {
         if (
             props.acceptedFiles?.length > 0 ||
@@ -97,21 +101,20 @@ export default function Upload(props: Props) {
         ) {
             props.setLoading(true);
 
-            let fileAnalysisResult: AnalysisResult;
+            let analysisResult: AnalysisResult;
             if (props.acceptedFiles?.length > 0) {
                 // File selection by drag and drop or selection of file.
-                fileAnalysisResult = analyseUploadFiles();
-                if (fileAnalysisResult) {
-                    setFileAnalysisResult(fileAnalysisResult);
+                analysisResult = analyseUploadFiles();
+                if (analysisResult) {
+                    setAnalysisResult(analysisResult);
                 }
             } else {
                 props.acceptedFiles = appContext.sharedFiles;
             }
-            props.setCollectionSelectorAttributes({
-                callback: uploadFilesToExistingCollection,
-                showNextModal: nextModal.bind(null, fileAnalysisResult),
-                title: constants.UPLOAD_TO_COLLECTION,
-            });
+            handleCollectionCreationAndUpload(
+                analysisResult,
+                props.isFirstUpload
+            );
             props.setLoading(false);
         }
     }, [props.acceptedFiles, appContext.sharedFiles]);
@@ -122,40 +125,8 @@ export default function Upload(props: Props) {
         setFileProgress(new Map<string, number>());
         setUploadResult(new Map<string, number>());
         setPercentComplete(0);
+        props.closeCollectionSelector();
         setProgressView(true);
-    };
-    const showCreateCollectionModal = (
-        fileAnalysisResult: AnalysisResult,
-        isFirstAlbum?: boolean
-    ) => {
-        const uploadToNewCollection = async (collectionName: string) => {
-            props.closeCollectionSelector();
-            await uploadFilesToNewCollections(
-                UPLOAD_STRATEGY.SINGLE_COLLECTION,
-                collectionName
-            );
-        };
-        if (fileAnalysisResult.suggestedCollectionName) {
-            uploadToNewCollection(fileAnalysisResult.suggestedCollectionName);
-        } else if (isFirstAlbum) {
-            uploadToNewCollection(FIRST_ALBUM_NAME);
-        } else {
-            props.setCollectionNamerAttributes({
-                title: constants.CREATE_COLLECTION,
-                buttonText: constants.CREATE,
-                autoFilledName: fileAnalysisResult?.suggestedCollectionName,
-                callback: uploadToNewCollection,
-            });
-        }
-    };
-
-    const nextModal = (
-        fileAnalysisResult: AnalysisResult,
-        isFirstAlbum: boolean
-    ) => {
-        fileAnalysisResult?.multipleFolders
-            ? setChoiceModalView(true)
-            : showCreateCollectionModal(fileAnalysisResult, isFirstAlbum);
     };
 
     function analyseUploadFiles(): AnalysisResult {
@@ -224,7 +195,7 @@ export default function Upload(props: Props) {
 
     const uploadFilesToNewCollections = async (
         strategy: UPLOAD_STRATEGY,
-        collectionName
+        collectionName?: string
     ) => {
         try {
             uploadInit();
@@ -315,14 +286,61 @@ export default function Upload(props: Props) {
         }
     };
 
+    const uploadToSingleNewCollection = (collectionName: string) => {
+        uploadFilesToNewCollections(
+            UPLOAD_STRATEGY.SINGLE_COLLECTION,
+            collectionName
+        );
+    };
+    const showCollectionCreateModal = (analysisResult: AnalysisResult) => {
+        props.setCollectionNamerAttributes({
+            title: constants.CREATE_COLLECTION,
+            buttonText: constants.CREATE,
+            autoFilledName: analysisResult?.suggestedCollectionName,
+            callback: uploadToSingleNewCollection,
+        });
+    };
+
+    const handleCollectionCreationAndUpload = (
+        analysisResult: AnalysisResult,
+        isFirstUpload: boolean
+    ) => {
+        if (!analysisResult.suggestedCollectionName) {
+            if (isFirstUpload) {
+                uploadToSingleNewCollection(FIRST_ALBUM_NAME);
+            } else {
+                props.setCollectionSelectorAttributes({
+                    callback: uploadFilesToExistingCollection,
+                    showNextModal: () =>
+                        showCollectionCreateModal(analysisResult),
+                    title: constants.UPLOAD_TO_COLLECTION,
+                });
+            }
+        } else {
+            if (analysisResult.multipleFolders) {
+                setChoiceModalView(true);
+            } else if (analysisResult.suggestedCollectionName) {
+                uploadToSingleNewCollection(
+                    analysisResult.suggestedCollectionName
+                );
+            }
+        }
+    };
+
     return (
         <>
             <ChoiceModal
                 show={choiceModalView}
                 onHide={() => setChoiceModalView(false)}
-                uploadFiles={uploadFilesToNewCollections}
-                showCollectionCreateModal={() =>
-                    showCreateCollectionModal(fileAnalysisResult)
+                uploadToSingleCollection={() =>
+                    uploadToSingleNewCollection(
+                        analysisResult.suggestedCollectionName
+                    )
+                }
+                uploadToMultipleCollection={() =>
+                    uploadFilesToNewCollections(
+                        UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
+                    )
                 }
             />
             <UploadProgress

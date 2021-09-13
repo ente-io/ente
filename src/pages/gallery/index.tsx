@@ -120,7 +120,9 @@ export default function Gallery() {
         useState<CollectionAndItsLatestFile[]>([]);
     const [files, setFiles] = useState<File[]>(null);
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
-    const [bannerMessage, setBannerMessage] = useState<string>(null);
+    const [bannerMessage, setBannerMessage] = useState<JSX.Element | string>(
+        null
+    );
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
     const [selected, setSelected] = useState<selectedState>({ count: 0 });
@@ -421,9 +423,6 @@ export default function Gallery() {
                     collectionsAndTheirLatestFile={
                         collectionsAndTheirLatestFile
                     }
-                    directlyShowNextModal={
-                        collectionsAndTheirLatestFile?.length === 0
-                    }
                     attributes={collectionSelectorAttributes}
                 />
                 <Upload
@@ -447,6 +446,7 @@ export default function Gallery() {
                     setUploadInProgress={setUploadInProgress}
                     fileRejections={fileRejections}
                     setFiles={setFiles}
+                    isFirstUpload={collectionsAndTheirLatestFile?.length === 0}
                 />
                 <Sidebar
                     collections={collections}

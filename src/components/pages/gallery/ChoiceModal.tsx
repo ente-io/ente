@@ -2,17 +2,16 @@ import MessageDialog from 'components/MessageDialog';
 import React from 'react';
 import { Button } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
-import { UPLOAD_STRATEGY } from './Upload';
 
 interface Props {
-    uploadFiles;
-    show;
-    onHide;
-    showCollectionCreateModal;
+    uploadToMultipleCollection: () => void;
+    show: boolean;
+    onHide: () => void;
+    uploadToSingleCollection: () => void;
 }
 function ChoiceModal({
-    uploadFiles,
-    showCollectionCreateModal,
+    uploadToMultipleCollection,
+    uploadToSingleCollection,
     ...props
 }: Props) {
     return (
@@ -39,7 +38,7 @@ function ChoiceModal({
                     variant="outline-success"
                     onClick={() => {
                         props.onHide();
-                        showCollectionCreateModal();
+                        uploadToSingleCollection();
                     }}
                     style={{
                         padding: '12px 24px',
@@ -60,7 +59,7 @@ function ChoiceModal({
                     variant="outline-success"
                     onClick={() => {
                         props.onHide();
-                        uploadFiles(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
+                        uploadToMultipleCollection();
                     }}
                     style={{
                         padding: '12px 24px',
