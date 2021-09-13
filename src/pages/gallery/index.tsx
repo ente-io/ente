@@ -120,7 +120,9 @@ export default function Gallery() {
         useState<CollectionAndItsLatestFile[]>([]);
     const [files, setFiles] = useState<File[]>(null);
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
-    const [bannerMessage, setBannerMessage] = useState<string>(null);
+    const [bannerMessage, setBannerMessage] = useState<JSX.Element | string>(
+        null
+    );
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
     const [selected, setSelected] = useState<selectedState>({ count: 0 });
