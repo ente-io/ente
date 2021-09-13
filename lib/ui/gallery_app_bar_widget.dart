@@ -178,7 +178,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = <Widget>[];
-    if (Configuration.instance.hasConfiguredAccount()) {
+    if (Configuration.instance.hasConfiguredAccount() &&
+        widget.type == GalleryAppBarType.owned_collection) {
       actions.add(IconButton(
         icon: Icon(Platform.isAndroid
             ? Icons.arrow_right_alt_rounded
