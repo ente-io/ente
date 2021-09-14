@@ -17,6 +17,7 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/duplicate_files.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/notification_service.dart';
@@ -184,7 +185,7 @@ class SyncService {
     );
   }
 
-  Future<DuplicateFiles> getDuplicateFiles() async {
+  Future<List<DuplicateFiles>> getDuplicateFiles() async {
     try {
       final response = await _dio.get(
         Configuration.instance.getHttpEndpoint() + "/files/duplicates",
@@ -194,7 +195,21 @@ class SyncService {
           },
         ),
       );
-      return DuplicateFiles.fromMap(response.data);
+      final dupes = DuplicateFilesResponse.fromMap(response.data);
+      final ids = <int>[];
+      for (final dupe in dupes.duplicates) {
+        ids.addAll(dupe.fileIDs);
+      }
+      final fileMap = await FilesDB.instance.getFilesFromIDs(ids);
+      final result = <DuplicateFiles>[];
+      for (final dupe in dupes.duplicates) {
+        final files = <File>[];
+        for (final id in dupe.fileIDs) {
+          files.add(fileMap[id]);
+        }
+        result.add(DuplicateFiles(files, dupe.size));
+      }
+      return result;
     } catch (e) {
       _logger.severe(e);
       rethrow;

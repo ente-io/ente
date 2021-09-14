@@ -840,6 +840,25 @@ class FilesDB {
     return rows.isNotEmpty;
   }
 
+  Future<Map<int, File>> getFilesFromIDs(List<int> ids) async {
+    String inParam = "";
+    for (final id in ids) {
+      inParam += "'" + id.toString() + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where: '$columnUploadedFileID IN ($inParam)',
+    );
+    final files = _convertToFiles(results);
+    final result = <int, File>{};
+    for (final file in files) {
+      result[file.uploadedFileID] = file;
+    }
+    return result;
+  }
+
   List<File> _convertToFiles(List<Map<String, dynamic>> results) {
     final List<File> files = [];
     for (final result in results) {
