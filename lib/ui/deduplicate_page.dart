@@ -111,7 +111,7 @@ class DeduplicatePage extends StatelessWidget {
           physics:
               NeverScrollableScrollPhysics(), // to disable GridView's scrolling
           itemBuilder: (context, index) {
-            return _buildFile(context, duplicates.files[index]);
+            return _buildFile(context, duplicates.files[index], index);
           },
           itemCount: duplicates.files.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -123,7 +123,7 @@ class DeduplicatePage extends StatelessWidget {
     );
   }
 
-  Widget _buildFile(BuildContext context, File file) {
+  Widget _buildFile(BuildContext context, File file, int index) {
     return GestureDetector(
       onTap: () {
         // TODO
@@ -135,12 +135,12 @@ class DeduplicatePage extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.all(2.0),
         decoration: BoxDecoration(
-          border: true
-              ? Border.all(
+          border: index == 0
+              ? null
+              : Border.all(
                   width: 4.0,
-                  color: Theme.of(context).buttonColor,
-                )
-              : null,
+                  color: Colors.red,
+                ),
         ),
         child: Hero(
           tag: "deduplicate_" + file.tag(),
