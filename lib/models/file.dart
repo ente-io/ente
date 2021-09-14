@@ -1,4 +1,3 @@
-import 'package:exif/exif.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:path/path.dart';
