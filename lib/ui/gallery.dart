@@ -100,18 +100,29 @@ class _GalleryState extends State<Gallery> {
 
   Future<FileLoadResult> _loadFiles({int limit}) async {
     _logger.info("Loading files");
-    final startTime = DateTime.now().microsecondsSinceEpoch;
-    final result = await widget.asyncLoader(
-        kGalleryLoadStartTime, DateTime.now().microsecondsSinceEpoch,
-        limit: limit);
-    final endTime = DateTime.now().microsecondsSinceEpoch;
-    final duration = Duration(microseconds: endTime - startTime);
-    _logger.info("Time taken to load " +
-        result.files.length.toString() +
-        " files :" +
-        duration.inMilliseconds.toString() +
-        "ms");
-    return result;
+    try {
+      final startTime = DateTime
+          .now()
+          .microsecondsSinceEpoch;
+      final result = await widget.asyncLoader(
+          kGalleryLoadStartTime, DateTime
+          .now()
+          .microsecondsSinceEpoch,
+          limit: limit);
+      final endTime = DateTime
+          .now()
+          .microsecondsSinceEpoch;
+      final duration = Duration(microseconds: endTime - startTime);
+      _logger.info("Time taken to load " +
+          result.files.length.toString() +
+          " files :" +
+          duration.inMilliseconds.toString() +
+          "ms");
+      return result;
+    } catch(e, s) {
+      _logger.severe("failed to load files", e, s);
+      rethrow;
+    }
   }
 
   // Collates files and returns `true` if it resulted in a gallery reload
