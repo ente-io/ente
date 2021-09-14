@@ -17,3 +17,6 @@ const String kSharedMediaIdentifier = 'ente-shared://';
 
 const int kMaxLivePhotoToastCount = 2;
 const String kLivePhotoToastCounterKey = "show_live_photo_toast";
+
+const kThumbnailDiskLoadDeferDuration = Duration(milliseconds: 40);
+const kThumbnailServerLoadDeferDuration = Duration(milliseconds: 80);
