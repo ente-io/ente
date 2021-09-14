@@ -332,14 +332,14 @@ class FilesDB {
   }
 
   Future<FileLoadResult> getAllUploadedFiles(int startTime, int endTime,
-      {int limit, bool asc}) async {
+      int ownerID, {int limit, bool asc}) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)',
-      whereArgs: [startTime, endTime],
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)',
+      whereArgs: [startTime, endTime, ownerID],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
@@ -348,15 +348,15 @@ class FilesDB {
     return FileLoadResult(files, files.length == limit);
   }
 
-  Future<FileLoadResult> getAllLocalAndUploadedFiles(int startTime, int endTime,
+  Future<FileLoadResult> getAllLocalAndUploadedFiles(int startTime, int endTime, int ownerID,
       {int limit, bool asc}) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime],
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+      whereArgs: [startTime, endTime, ownerID],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
@@ -366,7 +366,7 @@ class FilesDB {
   }
 
   Future<FileLoadResult> getImportantFiles(
-      int startTime, int endTime, List<String> paths,
+      int startTime, int endTime, int ownerID, List<String> paths,
       {int limit, bool asc}) async {
     final db = await instance.database;
     String inParam = "";
@@ -378,8 +378,8 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime],
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+      whereArgs: [startTime, endTime, ownerID],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
