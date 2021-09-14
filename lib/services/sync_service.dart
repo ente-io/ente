@@ -209,6 +209,11 @@ class SyncService {
         }
         result.add(DuplicateFiles(files, dupe.size));
       }
+      result.sort((a, b) {
+        final aSize = a.files.length * a.size;
+        final bSize = b.files.length * b.size;
+        return bSize - aSize;
+      });
       return result;
     } catch (e) {
       _logger.severe(e);
