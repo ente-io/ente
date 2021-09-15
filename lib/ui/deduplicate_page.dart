@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file.dart';
@@ -9,6 +8,7 @@ import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/data_util.dart';
+import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class DeduplicatePage extends StatefulWidget {
@@ -145,7 +145,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       color: Colors.red[700],
       onPressed: _selectedFiles.isEmpty
           ? null
-          : () {
+          : () async {
+              await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
               Navigator.of(context).pop(_selectedFiles.length);
             },
     );

@@ -35,11 +35,11 @@ Future<void> deleteFilesFromEverywhere(
   final List<String> localSharedMediaIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
   for (final file in files) {
-    if (file.localID != null)  {
+    if (file.localID != null) {
       if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
         alreadyDeletedIDs.add(file.localID);
-      } else if(file.isSharedMediaToAppSandbox()) {
+      } else if (file.isSharedMediaToAppSandbox()) {
         localSharedMediaIDs.add(file.localID);
       } else {
         localAssetIDs.add(file.localID);
@@ -48,7 +48,8 @@ Future<void> deleteFilesFromEverywhere(
   }
   Set<String> deletedIDs = <String>{};
   try {
-    deletedIDs = (await PhotoManager.editor.deleteWithIds(localAssetIDs)).toSet();
+    deletedIDs =
+        (await PhotoManager.editor.deleteWithIds(localAssetIDs)).toSet();
   } catch (e, s) {
     _logger.severe("Could not delete file", e, s);
   }
@@ -108,6 +109,37 @@ Future<void> deleteFilesFromEverywhere(
   }
 }
 
+Future<void> deleteFilesFromRemoteOnly(
+    BuildContext context, List<File> files) async {
+  final dialog = createProgressDialog(context, "deleting...");
+  await dialog.show();
+  _logger.info("Trying to delete files " + files.toString());
+  final updatedCollectionIDs = <int>{};
+  final List<int> ids = [];
+  for (final file in files) {
+    updatedCollectionIDs.add(file.collectionID);
+    ids.add(file.uploadedFileID);
+  }
+  try {
+    await SyncService.instance.deleteFilesOnServer(ids);
+    await FilesDB.instance.deleteMultipleUploadedFiles(ids);
+  } catch (e) {
+    _logger.severe(e);
+    await dialog.hide();
+    showGenericErrorDialog(context);
+    rethrow;
+  }
+  for (final collectionID in updatedCollectionIDs) {
+    Bus.instance.fire(CollectionUpdatedEvent(
+      collectionID,
+      files.where((file) => file.collectionID == collectionID).toList(),
+      type: EventType.deleted,
+    ));
+  }
+  await dialog.hide();
+  RemoteSyncService.instance.sync(silently: true);
+}
+
 Future<void> deleteFilesOnDeviceOnly(
     BuildContext context, List<File> files) async {
   final dialog = createProgressDialog(context, "deleting...");
@@ -121,7 +153,7 @@ Future<void> deleteFilesOnDeviceOnly(
       if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
         alreadyDeletedIDs.add(file.localID);
-      } else if(file.isSharedMediaToAppSandbox()) {
+      } else if (file.isSharedMediaToAppSandbox()) {
         localSharedMediaIDs.add(file.localID);
       } else {
         localAssetIDs.add(file.localID);
@@ -130,7 +162,8 @@ Future<void> deleteFilesOnDeviceOnly(
   }
   Set<String> deletedIDs = <String>{};
   try {
-    deletedIDs = (await PhotoManager.editor.deleteWithIds(localAssetIDs)).toSet();
+    deletedIDs =
+        (await PhotoManager.editor.deleteWithIds(localAssetIDs)).toSet();
   } catch (e, s) {
     _logger.severe("Could not delete file", e, s);
   }
@@ -169,9 +202,11 @@ Future<bool> deleteLocalFiles(
   if (Platform.isAndroid) {
     final androidInfo = await DeviceInfoPlugin().androidInfo;
     if (androidInfo.version.sdkInt < kAndroid11SDKINT) {
-      deletedIDs.addAll(await _deleteLocalFilesInBatches(context, localAssetIDs));
+      deletedIDs
+          .addAll(await _deleteLocalFilesInBatches(context, localAssetIDs));
     } else {
-      deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
+      deletedIDs
+          .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
     }
   } else {
     deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
@@ -250,7 +285,6 @@ Future<List<String>> _deleteLocalFilesInBatches(
   Navigator.of(dialogKey.currentContext, rootNavigator: true).pop('dialog');
   return deletedIDs;
 }
-
 
 Future<bool> _localFileExist(File file) {
   if (file.isSharedMediaToAppSandbox()) {
