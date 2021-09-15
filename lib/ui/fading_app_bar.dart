@@ -85,6 +85,7 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   AppBar _buildAppBar() {
     final List<Widget> actions = [];
+    // only show fav option for files owned by the user
     if (widget.file.ownerID == null || widget.file.ownerID == widget.userId) {
       actions.add(_getFavoriteButton());
     }
@@ -109,22 +110,26 @@ class FadingAppBarState extends State<FadingAppBar> {
             ),
           );
         }
-        items.add(
-          PopupMenuItem(
-            value: 2,
-            child: Row(
-              children: [
-                Icon(Platform.isAndroid
-                    ? Icons.delete_outline
-                    : CupertinoIcons.delete),
-                Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text("delete"),
-              ],
+        // only show delete option for files owned by the user
+        if (widget.file.ownerID == null ||
+            widget.file.ownerID == widget.userId) {
+          items.add(
+            PopupMenuItem(
+              value: 2,
+              child: Row(
+                children: [
+                  Icon(Platform.isAndroid
+                      ? Icons.delete_outline
+                      : CupertinoIcons.delete),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text("delete"),
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        }
         return items;
       },
       onSelected: (value) {
