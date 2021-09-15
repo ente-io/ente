@@ -200,6 +200,9 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   void _preloadEntries() async {
+    if (widget.config.asyncLoader == null) {
+      return;
+    }
     if (_selectedIndex == 0 && !_hasLoadedTillStart) {
       final result = await widget.config.asyncLoader(
           _files[_selectedIndex].creationTime + 1,

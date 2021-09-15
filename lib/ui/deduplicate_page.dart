@@ -5,8 +5,10 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/data_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class DeduplicatePage extends StatefulWidget {
   final List<DuplicateFiles> duplicates;
@@ -102,7 +104,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               }
               return Padding(
                 padding: const EdgeInsets.only(top: 8, bottom: 8),
-                child: _getGridView(widget.duplicates[index - 1]),
+                child: _getGridView(widget.duplicates[index - 1], index - 1),
               );
             },
             itemCount: widget.duplicates.length,
@@ -124,7 +126,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     );
   }
 
-  Widget _getGridView(DuplicateFiles duplicates) {
+  Widget _getGridView(DuplicateFiles duplicates, int itemIndex) {
     return Column(
       children: [
         Padding(
@@ -144,7 +146,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           physics:
               NeverScrollableScrollPhysics(), // to disable GridView's scrolling
           itemBuilder: (context, index) {
-            return _buildFile(context, duplicates.files[index], index);
+            return _buildFile(context, duplicates.files[index], itemIndex);
           },
           itemCount: duplicates.files.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -168,6 +170,11 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       },
       onLongPress: () {
         HapticFeedback.lightImpact();
+        final files = widget.duplicates[index].files;
+        routeToPage(
+            context,
+            DetailPage(DetailPageConfiguration(
+                files, null, files.indexOf(file), "deduplicate_")));
       },
       child: Container(
         margin: const EdgeInsets.all(2.0),
