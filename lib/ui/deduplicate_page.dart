@@ -79,11 +79,11 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             itemBuilder: (context, index) {
               if (index == 0) {
                 return Padding(
-                  padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
+                  padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
                   child: Column(
                     children: [
                       Text(
-                        "we've clubbed the following files based on their sizes",
+                        "the following files have been clubbed based on their sizes and creation times",
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.6),
                           height: 1.2,
