@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -234,6 +235,36 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           },
         ));
       }
+    }
+
+    if (widget.type == GalleryAppBarType.homepage) {
+      actions.add(PopupMenuButton(
+        itemBuilder: (context) {
+          final List<PopupMenuItem> items = [];
+          items.add(
+            PopupMenuItem(
+              value: 1,
+              child: Row(
+                children: [
+                  Icon(Platform.isAndroid
+                      ? Icons.archive_outlined
+                      : CupertinoIcons.archivebox),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text("archive"),
+                ],
+              ),
+            ),
+          );
+          return items;
+        },
+        onSelected: (value) {
+          if (value == 1) {
+            showToast("coming soon");
+          }
+        },
+      ));
     }
     return actions;
   }
