@@ -139,10 +139,10 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
               showErrorDialog(context, "✨ no duplicates",
                   "you've no duplicate files that can be cleared");
             } else {
-              int result =
+              int cleanedItemCount =
                   await routeToPage(context, DeduplicatePage(duplicates));
-              if (result != null) {
-                _showDuplicateFilesDeletedDialog(result);
+              if (cleanedItemCount != null) {
+                _showDuplicateFilesDeletedDialog(cleanedItemCount);
               }
             }
           },
