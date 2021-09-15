@@ -46,7 +46,19 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     ),
   );
 
-  final Set<File> selectedFiles = <File>{};
+  final Set<File> _selectedFiles = <File>{};
+
+  @override
+  void initState() {
+    super.initState();
+    for (final duplicate in widget.duplicates) {
+      for (int index = 0; index < duplicate.files.length; index++) {
+        if (index != 0) {
+          _selectedFiles.add(duplicate.files[index]);
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +95,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                   child: Column(
                     children: [
                       Text(
-                        "the following files have been clubbed based on their sizes and creation times",
+                        "the following files were clubbed based on their sizes and creation times",
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.6),
                           height: 1.2,
@@ -104,7 +116,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 );
               }
               return Padding(
-                padding: const EdgeInsets.only(top: 8, bottom: 8),
+                padding: const EdgeInsets.only(top: 10, bottom: 10),
                 child: _getGridView(widget.duplicates[index - 1], index - 1),
               );
             },
@@ -121,17 +133,17 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   Widget _getDeleteButton() {
     String text;
-    if (selectedFiles.isEmpty) {
+    if (_selectedFiles.isEmpty) {
       text = "delete";
-    } else if (selectedFiles.length == 1) {
+    } else if (_selectedFiles.length == 1) {
       text = "delete 1 item";
     } else {
-      text = "delete " + selectedFiles.length.toString() + " items";
+      text = "delete " + _selectedFiles.length.toString() + " items";
     }
     return button(
       text,
       color: Colors.red[700],
-      onPressed: selectedFiles.isEmpty ? null : () {},
+      onPressed: _selectedFiles.isEmpty ? null : () {},
     );
   }
 
@@ -139,14 +151,14 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(4, 8, 4, 4),
+          padding: const EdgeInsets.fromLTRB(16, 8, 4, 4),
           child: Text(
             duplicates.files.length.toString() +
                 " files, " +
                 formatBytes(duplicates.size) +
                 " each",
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withOpacity(0.9),
             ),
           ),
         ),
@@ -170,10 +182,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   Widget _buildFile(BuildContext context, File file, int index) {
     return GestureDetector(
       onTap: () {
-        if (selectedFiles.contains(file)) {
-          selectedFiles.remove(file);
+        if (_selectedFiles.contains(file)) {
+          _selectedFiles.remove(file);
         } else {
-          selectedFiles.add(file);
+          _selectedFiles.add(file);
         }
         setState(() {});
       },
@@ -188,7 +200,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       child: Container(
         margin: const EdgeInsets.all(2.0),
         decoration: BoxDecoration(
-          border: selectedFiles.contains(file)
+          border: _selectedFiles.contains(file)
               ? Border.all(
                   width: 3,
                   color: Colors.red[700],
@@ -206,7 +218,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               key: Key("deduplicate_" + file.tag()),
             ),
           ),
-          selectedFiles.contains(file) ? kDeleteIconOverlay : Container(),
+          _selectedFiles.contains(file) ? kDeleteIconOverlay : Container(),
         ]),
       ),
     );
