@@ -143,7 +143,11 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     return button(
       text,
       color: Colors.red[700],
-      onPressed: _selectedFiles.isEmpty ? null : () {},
+      onPressed: _selectedFiles.isEmpty
+          ? null
+          : () {
+              Navigator.of(context).pop(_selectedFiles.length);
+            },
     );
   }
 
