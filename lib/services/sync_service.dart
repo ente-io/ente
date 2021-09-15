@@ -16,8 +16,6 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/models/backup_status.dart';
-import 'package:photos/models/duplicate_files.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/notification_service.dart';
@@ -183,72 +181,6 @@ class SyncService {
         "fileIDs": fileIDs,
       },
     );
-  }
-
-  Future<List<DuplicateFiles>> getDuplicateFiles() async {
-    try {
-      final response = await _dio.get(
-        Configuration.instance.getHttpEndpoint() + "/files/duplicates",
-        options: Options(
-          headers: {
-            "X-Auth-Token": Configuration.instance.getToken(),
-          },
-        ),
-      );
-      final dupes = DuplicateFilesResponse.fromMap(response.data);
-      final ids = <int>[];
-      for (final dupe in dupes.duplicates) {
-        ids.addAll(dupe.fileIDs);
-      }
-      final fileMap = await FilesDB.instance.getFilesFromIDs(ids);
-      final result = <DuplicateFiles>[];
-      for (final dupe in dupes.duplicates) {
-        final files = <File>[];
-        final Map<int, int> creationTimeCounter = {};
-        int mostFrequentCreationTime = 0, mostFrequentCreationTimeCount = 0;
-        for (final id in dupe.fileIDs) {
-          final file = fileMap[id];
-          if (file != null) {
-            if (creationTimeCounter.containsKey(file.creationTime)) {
-              creationTimeCounter[file.creationTime]++;
-            } else {
-              creationTimeCounter[file.creationTime] = 0;
-            }
-            if (creationTimeCounter[file.creationTime] >
-                mostFrequentCreationTimeCount) {
-              mostFrequentCreationTimeCount =
-                  creationTimeCounter[file.creationTime];
-              mostFrequentCreationTime = file.creationTime;
-            }
-            files.add(file);
-          } else {
-            _logger.severe(
-                "Could not find file in local DB",
-                InvalidStateError(
-                    "Could not find file in local DB " + id.toString()));
-          }
-        }
-        final incorrectDuplicates = <File>{};
-        for (final file in files) {
-          if (file.creationTime != mostFrequentCreationTime) {
-            incorrectDuplicates.add(file);
-          }
-        }
-        files.removeWhere((file) => incorrectDuplicates.contains(file));
-        if (files.length > 1) {
-          result.add(DuplicateFiles(files, dupe.size));
-        }
-      }
-      result.sort((a, b) {
-        final aSize = a.files.length * a.size;
-        final bSize = b.files.length * b.size;
-        return bSize - aSize;
-      });
-      return result;
-    } catch (e) {
-      _logger.severe(e);
-      rethrow;
-    }
   }
 
   Future<BackupStatus> getBackupStatus() async {

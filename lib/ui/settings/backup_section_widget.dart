@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/backup_status.dart';
+import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/deduplicate_page.dart';
@@ -132,7 +133,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           onTap: () async {
             final dialog = createProgressDialog(context, "calculating...");
             await dialog.show();
-            final duplicates = await SyncService.instance.getDuplicateFiles();
+            final duplicates =
+                await DeduplicationService.instance.getDuplicateFiles();
             await dialog.hide();
             if (duplicates.isEmpty) {
               showErrorDialog(context, "✨ no duplicates",
