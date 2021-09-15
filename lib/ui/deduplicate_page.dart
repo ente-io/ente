@@ -23,7 +23,7 @@ class DeduplicatePage extends StatefulWidget {
 }
 
 class _DeduplicatePageState extends State<DeduplicatePage> {
-  final kDeleteIconOverlay = Container(
+  static final kDeleteIconOverlay = Container(
     decoration: BoxDecoration(
       gradient: LinearGradient(
         begin: Alignment.topCenter,
