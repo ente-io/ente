@@ -99,6 +99,7 @@ class _DetailPageState extends State<DetailPage> {
       appBar: FadingAppBar(
         _files[_selectedIndex],
         _onFileDeleted,
+        Configuration.instance.getUserID(),
         100,
         key: _appBarKey,
       ),

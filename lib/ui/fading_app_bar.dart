@@ -24,10 +24,12 @@ class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
   final File file;
   final Function(File) onFileDeleted;
   final double height;
+  final int userId;
 
   FadingAppBar(
     this.file,
     this.onFileDeleted,
+    this.userId,
     this.height, {
     Key key,
   }) : super(key: key);
@@ -83,7 +85,9 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   AppBar _buildAppBar() {
     final List<Widget> actions = [];
-    actions.add(_getFavoriteButton());
+    if (widget.file.ownerID == null || widget.file.ownerID == widget.userId) {
+      actions.add(_getFavoriteButton());
+    }
     actions.add(PopupMenuButton(
       itemBuilder: (context) {
         final List<PopupMenuItem> items = [];
