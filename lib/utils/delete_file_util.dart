@@ -46,14 +46,14 @@ Future<void> deleteFilesFromEverywhere(
       }
     }
   }
-  Set<String> deletedIDs = Set<String>();
+  Set<String> deletedIDs = <String>{};
   try {
     deletedIDs = (await PhotoManager.editor.deleteWithIds(localAssetIDs)).toSet();
   } catch (e, s) {
     _logger.severe("Could not delete file", e, s);
   }
   deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
-  final updatedCollectionIDs = Set<int>();
+  final updatedCollectionIDs = <int>{};
   final List<int> uploadedFileIDsToBeDeleted = [];
   final List<File> deletedFiles = [];
   for (final file in files) {
@@ -85,7 +85,7 @@ Future<void> deleteFilesFromEverywhere(
       _logger.severe(e);
       await dialog.hide();
       showGenericErrorDialog(context);
-      throw e;
+      rethrow;
     }
     for (final collectionID in updatedCollectionIDs) {
       Bus.instance.fire(CollectionUpdatedEvent(
@@ -128,7 +128,7 @@ Future<void> deleteFilesOnDeviceOnly(
       }
     }
   }
-  Set<String> deletedIDs = Set<String>();
+  Set<String> deletedIDs = <String>{};
   try {
     deletedIDs = (await PhotoManager.editor.deleteWithIds(localAssetIDs)).toSet();
   } catch (e, s) {
