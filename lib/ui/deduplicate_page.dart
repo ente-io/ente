@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/common_elements.dart';
@@ -147,6 +149,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           ? null
           : () async {
               await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
+              Bus.instance.fire(UserDetailsChangedEvent());
               Navigator.of(context).pop(_selectedFiles.length);
             },
     );
