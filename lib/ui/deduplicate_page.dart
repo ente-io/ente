@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file.dart';
@@ -99,7 +100,7 @@ class DeduplicatePage extends StatelessWidget {
           child: Text(
             duplicates.files.length.toString() +
                 " files, " +
-                convertBytesToReadableFormat(duplicates.size) +
+                formatBytes(duplicates.size) +
                 " each",
             style: TextStyle(
               color: Colors.white.withOpacity(0.8),
@@ -130,7 +131,6 @@ class DeduplicatePage extends StatelessWidget {
       },
       onLongPress: () {
         HapticFeedback.lightImpact();
-        // TODO
       },
       child: Container(
         margin: const EdgeInsets.all(2.0),
@@ -138,7 +138,7 @@ class DeduplicatePage extends StatelessWidget {
           border: index == 0
               ? null
               : Border.all(
-                  width: 4.0,
+                  width: 0,
                   color: Colors.red,
                 ),
         ),
