@@ -136,7 +136,12 @@ class _VideoWidgetState extends State<VideoWidget> {
           size: Size.square(30),
           child: _progress == null || _progress == 1
               ? CupertinoActivityIndicator()
-              : CircularProgressIndicator(value: _progress),
+              : CircularProgressIndicator(
+                  value: _progress,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Color.fromRGBO(45, 194, 98, 1.0),
+                  ),
+                ),
         ),
       ),
     ]);
