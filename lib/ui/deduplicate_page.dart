@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/data_util.dart';
@@ -111,18 +112,26 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             shrinkWrap: true,
           ),
         ),
-        Padding(padding: EdgeInsets.all(4)),
-        Padding(
-          padding: EdgeInsets.all(8),
-          child: Text(
-            "delete",
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              height: 1.2,
-            ),
-          ),
-        ),
+        Padding(padding: EdgeInsets.all(6)),
+        _getDeleteButton(),
+        Padding(padding: EdgeInsets.all(6)),
       ],
+    );
+  }
+
+  Widget _getDeleteButton() {
+    String text;
+    if (selectedFiles.isEmpty) {
+      text = "delete";
+    } else if (selectedFiles.length == 1) {
+      text = "delete 1 item";
+    } else {
+      text = "delete " + selectedFiles.length.toString() + " items";
+    }
+    return button(
+      text,
+      color: Colors.red[700],
+      onPressed: selectedFiles.isEmpty ? null : () {},
     );
   }
 
