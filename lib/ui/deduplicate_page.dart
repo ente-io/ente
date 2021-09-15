@@ -197,9 +197,17 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         HapticFeedback.lightImpact();
         final files = widget.duplicates[index].files;
         routeToPage(
-            context,
-            DetailPage(DetailPageConfiguration(
-                files, null, files.indexOf(file), "deduplicate_")));
+          context,
+          DetailPage(
+            DetailPageConfiguration(
+              files,
+              null,
+              files.indexOf(file),
+              "deduplicate_",
+              mode: DetailPageMode.minimalistic,
+            ),
+          ),
+        );
       },
       child: Container(
         margin: const EdgeInsets.all(2.0),
