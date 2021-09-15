@@ -204,9 +204,23 @@ class SyncService {
       final result = <DuplicateFiles>[];
       for (final dupe in dupes.duplicates) {
         final files = <File>[];
+        final Map<int, int> creationTimeCounter = {};
+        int mostFrequentCreationTime = 0, mostFrequentCreationTimeCount = 0;
         for (final id in dupe.fileIDs) {
-          if (fileMap.containsKey(id)) {
-            files.add(fileMap[id]);
+          final file = fileMap[id];
+          if (file != null) {
+            if (creationTimeCounter.containsKey(file.creationTime)) {
+              creationTimeCounter[file.creationTime]++;
+            } else {
+              creationTimeCounter[file.creationTime] = 0;
+            }
+            if (creationTimeCounter[file.creationTime] >
+                mostFrequentCreationTimeCount) {
+              mostFrequentCreationTimeCount =
+                  creationTimeCounter[file.creationTime];
+              mostFrequentCreationTime = file.creationTime;
+            }
+            files.add(file);
           } else {
             _logger.severe(
                 "Could not find file in local DB",
@@ -214,6 +228,13 @@ class SyncService {
                     "Could not find file in local DB " + id.toString()));
           }
         }
+        final incorrectDuplicates = <File>{};
+        for (final file in files) {
+          if (file.creationTime != mostFrequentCreationTime) {
+            incorrectDuplicates.add(file);
+          }
+        }
+        files.removeWhere((file) => incorrectDuplicates.contains(file));
         if (files.length > 1) {
           result.add(DuplicateFiles(files, dupe.size));
         }
