@@ -92,30 +92,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           child: ListView.builder(
             itemBuilder: (context, index) {
               if (index == 0) {
-                return Padding(
-                  padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  child: Column(
-                    children: [
-                      Text(
-                        "the following files were clubbed based on their sizes and creation times",
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
-                          height: 1.2,
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(4),
-                      ),
-                      Text(
-                        "please review and delete the items you believe are duplicates",
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
-                          height: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
+                return _getHeader();
               }
               return Padding(
                 padding: const EdgeInsets.only(top: 10, bottom: 10),
@@ -130,6 +107,33 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         _getDeleteButton(),
         Padding(padding: EdgeInsets.all(6)),
       ],
+    );
+  }
+
+  Padding _getHeader() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Column(
+        children: [
+          Text(
+            "the following files were clubbed based on their sizes and creation times",
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.6),
+              height: 1.2,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(4),
+          ),
+          Text(
+            "please review and delete the items you believe are duplicates",
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.6),
+              height: 1.2,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
