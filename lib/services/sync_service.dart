@@ -205,9 +205,18 @@ class SyncService {
       for (final dupe in dupes.duplicates) {
         final files = <File>[];
         for (final id in dupe.fileIDs) {
-          files.add(fileMap[id]);
+          if (fileMap.containsKey(id)) {
+            files.add(fileMap[id]);
+          } else {
+            _logger.severe(
+                "Could not find file in local DB",
+                InvalidStateError(
+                    "Could not find file in local DB " + id.toString()));
+          }
         }
-        result.add(DuplicateFiles(files, dupe.size));
+        if (files.length > 1) {
+          result.add(DuplicateFiles(files, dupe.size));
+        }
       }
       result.sort((a, b) {
         final aSize = a.files.length * a.size;
