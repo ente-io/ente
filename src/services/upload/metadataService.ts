@@ -1,3 +1,4 @@
+import { FILE_TYPE } from 'services/fileService';
 import { logError } from 'utils/sentry';
 import { getExifData } from './exifService';
 import { FileTypeInfo } from './readFileService';
@@ -31,7 +32,10 @@ export async function extractMetadata(
     receivedFile: globalThis.File,
     fileTypeInfo: FileTypeInfo
 ) {
-    const exifData = await getExifData(receivedFile);
+    let exifData = null;
+    if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
+        exifData = await getExifData(receivedFile);
+    }
 
     const extractedMetadata: MetadataObject = {
         title: receivedFile.name,
