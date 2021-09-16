@@ -362,7 +362,8 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  $columnOwnerID = ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)',
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  $columnOwnerID = ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+              ' AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = 0)',
       whereArgs: [startTime, endTime, ownerID],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -379,7 +380,8 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = 0)'
+              ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
       whereArgs: [startTime, endTime, ownerID],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -402,7 +404,8 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = 0)'
+              'AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
       whereArgs: [startTime, endTime, ownerID],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,

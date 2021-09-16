@@ -15,6 +15,7 @@ import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/file_magic_sync.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -259,9 +260,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           );
           return items;
         },
-        onSelected: (value) {
+        onSelected: (value) async {
           if (value == 1) {
-            showToast("coming soon");
+            await changeVisibility(widget.selectedFiles.files.toList(), 1);
           }
         },
       ));
