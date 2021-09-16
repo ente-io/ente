@@ -8,17 +8,23 @@ class FileMagicMetadata {
 
   FileMagicMetadata({this.visibility});
 
-  FileMagicMetadata.fromEncodedJson(String encodedJson) {
-    FileMagicMetadata.fromJson(jsonDecode(encodedJson));
-  }
+  factory FileMagicMetadata.fromEncodedJson(String encodedJson) =>
+      FileMagicMetadata.fromJson(jsonDecode(encodedJson));
 
-  FileMagicMetadata.fromJson(dynamic json) {
-    visibility = json['visibility'] ?? 0;
-  }
+  factory FileMagicMetadata.fromJson(dynamic json) =>
+      FileMagicMetadata.fromMap(json);
 
   Map<String, dynamic> toJson() {
     var map = <String, dynamic>{};
     map['visibility'] = visibility;
     return map;
+  }
+
+  factory FileMagicMetadata.fromMap(Map<String, dynamic> map) {
+    if (map == null) return null;
+
+    return FileMagicMetadata(
+      visibility: map['visibility'] ?? 0,
+    );
   }
 }

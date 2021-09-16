@@ -41,6 +41,7 @@ class File {
   FileMagicMetadata _fileMMd;
   FileMagicMetadata get fileMagicMetadata =>
       _fileMMd ?? FileMagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
+  set fileMagicMetadata (val) => _fileMMd = val;
 
   static const kCurrentMetadataVersion = 1;
 
