@@ -263,6 +263,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         onSelected: (value) async {
           if (value == 1) {
             await changeVisibility(widget.selectedFiles.files.toList(), 1);
+            showToast("successfully archived files");
+            _clearSelectedFiles();
           }
         },
       ));
