@@ -51,12 +51,22 @@ class FilesDB {
   static final columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
   static final columnMetadataDecryptionHeader = 'metadata_decryption_header';
 
+  // MMD -> Magic Metadata
+  static final columnMMdEncodedJson = 'mmd_encoded_json';
+  static final columnMMdVersion = 'mmd_ver';
+
+  // part of magic metadata
+  // Only parse & store selected fields from JSON in separate columns if
+  // we need to write query based on that field
+  static final columnMMdVisibility = 'mmd_visibility';
+
   static final initializationScript = [...createTable(table)];
   static final migrationScripts = [
     ...alterDeviceFolderToAllowNULL(),
     ...alterTimestampColumnTypes(),
     ...addIndices(),
     ...addMetadataColumns(),
+    ...addMagicMetadataColumns(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -224,6 +234,20 @@ class FilesDB {
       '''
         ALTER TABLE $table ADD COLUMN $columnMetadataVersion INTEGER;
       ''',
+    ];
+  }
+
+  static List<String> addMagicMetadataColumns() {
+    return [
+      '''
+        ALTER TABLE $table ADD COLUMN $columnMMdEncodedJson Text DEFAULT '{}';
+      ''',
+      '''
+        ALTER TABLE $table ADD COLUMN $columnMMdVersion INTEGER DEFAULT 0;
+      ''',
+      '''
+        ALTER TABLE $table ADD COLUMN $columnMMdVisibility INTEGER DEFAULT 0;
+      '''
     ];
   }
 
@@ -877,6 +901,9 @@ class FilesDB {
     row[columnExif] = file.exif;
     row[columnHash] = file.hash;
     row[columnMetadataVersion] = file.metadataVersion;
+    row[columnMMdVersion] = file.mMdVersion ?? 0;
+    row[columnMMdEncodedJson] = file.mMdEncodedJson ?? '{}';
+    row[columnMMdVisibility] = file.fileMagicMetadata?.visibility ?? 0;
     return row;
   }
 
@@ -903,6 +930,10 @@ class FilesDB {
     row[columnExif] = file.exif;
     row[columnHash] = file.hash;
     row[columnMetadataVersion] = file.metadataVersion;
+
+    row[columnMMdVersion] = file.mMdVersion ?? 0;
+    row[columnMMdEncodedJson] == file.mMdEncodedJson ?? '{}';
+    row[columnMMdVisibility] = file.fileMagicMetadata?.visibility ?? 0;
     return row;
   }
 
@@ -934,6 +965,9 @@ class FilesDB {
     file.exif = row[columnExif];
     file.hash = row[columnHash];
     file.metadataVersion = row[columnMetadataVersion] ?? 0;
+
+    file.mMdVersion = row[columnMMdVersion] ?? 0 ;
+    file.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
     return file;
   }
 }
