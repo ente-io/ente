@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
@@ -268,10 +269,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           if (value == 1) {
             if (showArchive) {
               await changeVisibility(widget.selectedFiles.files.toList(), 1);
-              showToast("successfully archived files");
+              showToast("successfully archived", toastLength: Toast.LENGTH_SHORT);
             } else {
               await changeVisibility(widget.selectedFiles.files.toList(), 0);
-              showToast("successfully unarchived files");
+              showToast("successfully unarchived", toastLength: Toast.LENGTH_SHORT);
             }
             _clearSelectedFiles();
           }

@@ -181,13 +181,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                   )
                 : nothingToSeeHere,
             Divider(),
-            Padding(padding: EdgeInsets.all(12)),
             OutlinedButton(
               style: OutlinedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
                 ),
-                padding: EdgeInsets.all(20),
+                padding: EdgeInsets.fromLTRB(20, 10,20, 10),
                 side: BorderSide(
                   width: 2,
                   color: Colors.white12,
@@ -217,7 +216,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                     ArchivePage(),
                   );
                 }
-            )
+            ),
+            Padding(padding: EdgeInsets.all(12)),
           ],
         ),
       ),
