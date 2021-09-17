@@ -21,6 +21,7 @@ import 'package:photos/utils/toast_util.dart';
 
 enum GalleryAppBarType {
   homepage,
+  archivedPage,
   local_folder,
   // indicator for gallery view of collections shared with the user
   shared_collection,
@@ -210,6 +211,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       },
     ));
     if (widget.type == GalleryAppBarType.homepage ||
+        widget.type == GalleryAppBarType.archivedPage ||
         widget.type == GalleryAppBarType.local_folder) {
       actions.add(IconButton(
         icon: Icon(
@@ -238,7 +240,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       }
     }
 
-    if (widget.type == GalleryAppBarType.homepage) {
+    if (widget.type == GalleryAppBarType.homepage ||
+        widget.type == GalleryAppBarType.archivedPage) {
+      bool showArchive = widget.type == GalleryAppBarType.homepage;
       actions.add(PopupMenuButton(
         itemBuilder: (context) {
           final List<PopupMenuItem> items = [];
@@ -253,7 +257,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   Padding(
                     padding: EdgeInsets.all(8),
                   ),
-                  Text("archive"),
+                  Text(showArchive ? "archive" : "unarchive"),
                 ],
               ),
             ),
@@ -262,8 +266,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
         onSelected: (value) async {
           if (value == 1) {
-            await changeVisibility(widget.selectedFiles.files.toList(), 1);
-            showToast("successfully archived files");
+            if (showArchive) {
+              await changeVisibility(widget.selectedFiles.files.toList(), 1);
+              showToast("successfully archived files");
+            } else {
+              await changeVisibility(widget.selectedFiles.files.toList(), 0);
+              showToast("successfully unarchived files");
+            }
             _clearSelectedFiles();
           }
         },
