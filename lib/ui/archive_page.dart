@@ -27,9 +27,9 @@ class ArchivePage extends StatelessWidget {
   Widget build(Object context) {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return FilesDB.instance.getFilesWithVisibility(creationStartTime,
-            creationEndTime, Configuration.instance.getUserID(), kVisibilityArchive,
-            limit: limit, asc: asc);
+        return FilesDB.instance.getAllUploadedFiles(creationStartTime,
+            creationEndTime, Configuration.instance.getUserID(),
+            visibility: kVisibilityArchive, limit: limit, asc: asc);
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where((event) =>
       event.updatedFiles

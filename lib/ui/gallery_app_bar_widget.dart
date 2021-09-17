@@ -283,12 +283,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     try {
       await changeVisibility(
           widget.selectedFiles.files.toList(), newVisibility);
-      if (newVisibility == kVisibilityArchive) {
-        showToast("successfully archived", toastLength: Toast.LENGTH_SHORT)
-      } else {
-        showToast("successfully unarchived",
-            toastLength: Toast.LENGTH_SHORT);
-      }
+      showToast(
+          newVisibility == kVisibilityArchive
+              ? "successfully archived"
+              : "successfully unarchived",
+          toastLength: Toast.LENGTH_SHORT);
+
       await dialog.hide();
     } catch (e, s) {
       _logger.severe("failed to update file visibility", e, s);

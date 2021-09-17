@@ -247,7 +247,7 @@ class FilesDB {
         ALTER TABLE $table ADD COLUMN $columnMMdVersion INTEGER DEFAULT 0;
       ''',
       '''
-        ALTER TABLE $table ADD COLUMN $columnMMdVisibility INTEGER DEFAULT 0;
+        ALTER TABLE $table ADD COLUMN $columnMMdVisibility INTEGER DEFAULT $kVisibilityVisible;
       '''
     ];
   }
@@ -357,21 +357,22 @@ class FilesDB {
   }
 
   Future<FileLoadResult> getAllUploadedFiles(int startTime, int endTime,
-      int ownerID, {int limit, bool asc}) async {
+      int ownerID, {int limit, bool asc, int visibility = kVisibilityVisible}) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       table,
       where:
           '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  $columnOwnerID = ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-              ' AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)',
-      whereArgs: [startTime, endTime, ownerID, kVisibilityVisible],
+              ' AND $columnMMdVisibility = ?',
+      whereArgs: [startTime, endTime, ownerID, visibility],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
     );
     final files = _convertToFiles(results);
-    return FileLoadResult(files, files.length == limit);
+    List<File> deduplicatedFiles = _deduplicatedFiles(files);
+    return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
   Future<FileLoadResult> getAllLocalAndUploadedFiles(int startTime, int endTime, int ownerID,
@@ -448,25 +449,6 @@ class FilesDB {
     final files = _convertToFiles(results);
     _logger.info("Fetched " + files.length.toString() + " files");
     return FileLoadResult(files, files.length == limit);
-  }
-
-  Future<FileLoadResult> getFilesWithVisibility(int startTime, int endTime,
-      int ownerID, int visibility, {int limit, bool asc}) async {
-    final db = await instance.database;
-    final order = (asc ?? false ? 'ASC' : 'DESC');
-    final results = await db.query(
-      table,
-      where:
-      '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnOwnerID = ? AND $columnMMdVisibility = ?',
-      whereArgs: [startTime, endTime, ownerID, visibility],
-      orderBy:
-      '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
-      limit: limit,
-    );
-    final files = _convertToFiles(results);
-    _logger.info("Fetched " + files.length.toString() + " files");
-    List<File> deduplicatedFiles = _deduplicatedFiles(files);
-    return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
   Future<FileLoadResult> getFilesInPath(String path, int startTime, int endTime,
@@ -931,7 +913,8 @@ class FilesDB {
     row[columnMetadataVersion] = file.metadataVersion;
     row[columnMMdVersion] = file.mMdVersion ?? 0;
     row[columnMMdEncodedJson] = file.mMdEncodedJson ?? '{}';
-    row[columnMMdVisibility] = file.fileMagicMetadata?.visibility ?? 0;
+    row[columnMMdVisibility] =
+        file.fileMagicMetadata?.visibility ?? kVisibilityVisible;
     return row;
   }
 
@@ -961,7 +944,8 @@ class FilesDB {
 
     row[columnMMdVersion] = file.mMdVersion ?? 0;
     row[columnMMdEncodedJson] == file.mMdEncodedJson ?? '{}';
-    row[columnMMdVisibility] = file.fileMagicMetadata?.visibility ?? 0;
+    row[columnMMdVisibility] =
+        file.fileMagicMetadata?.visibility ?? kVisibilityVisible;
     return row;
   }
 
