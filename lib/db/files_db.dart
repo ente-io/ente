@@ -450,14 +450,14 @@ class FilesDB {
   }
 
   Future<FileLoadResult> getFilesWithVisibility(int startTime, int endTime,
-      int visibility, {int limit, bool asc}) async {
+      int ownerID, int visibility, {int limit, bool asc}) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       table,
       where:
-      '$columnMMdVisibility = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?',
-      whereArgs: [visibility, startTime, endTime],
+      '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnOwnerID = ? AND $columnMMdVisibility = ?',
+      whereArgs: [startTime, endTime, ownerID, visibility],
       orderBy:
       '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
