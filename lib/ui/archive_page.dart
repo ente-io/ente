@@ -16,7 +16,7 @@ class ArchivePage extends StatelessWidget {
   final _selectedFiles = SelectedFiles();
 
   ArchivePage(
-      {this.tagPrefix = "archivedPage",
+      {this.tagPrefix = "archived_page",
       this.appBarType = GalleryAppBarType.archivedPage,
       Key key})
       : super(key: key);

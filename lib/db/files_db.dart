@@ -411,8 +411,13 @@ class FilesDB {
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
     );
-    final uploadedFileIDs = <int>{};
     final files = _convertToFiles(results);
+    List<File> deduplicatedFiles = _deduplicatedFiles(files);
+    return FileLoadResult(deduplicatedFiles, files.length == limit);
+  }
+
+  List<File> _deduplicatedFiles(List<File> files) {
+    final uploadedFileIDs = <int>{};
     final List<File> deduplicatedFiles = [];
     for (final file in files) {
       final id = file.uploadedFileID;
@@ -422,7 +427,7 @@ class FilesDB {
       uploadedFileIDs.add(id);
       deduplicatedFiles.add(file);
     }
-    return FileLoadResult(deduplicatedFiles, files.length == limit);
+    return deduplicatedFiles;
   }
 
   Future<FileLoadResult> getFilesInCollection(
@@ -459,7 +464,8 @@ class FilesDB {
     );
     final files = _convertToFiles(results);
     _logger.info("Fetched " + files.length.toString() + " files");
-    return FileLoadResult(files, files.length == limit);
+    List<File> deduplicatedFiles = _deduplicatedFiles(files);
+    return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
   Future<FileLoadResult> getFilesInPath(String path, int startTime, int endTime,
