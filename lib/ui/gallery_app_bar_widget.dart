@@ -10,6 +10,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/models/file_magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/create_collection_page.dart';
@@ -267,7 +268,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
         onSelected: (value) async {
           if (value == 1) {
-            await _handleVisibilityChangeRequest(context, showArchive);
+            await _handleVisibilityChangeRequest(context, showArchive ? kVisibilityArchive : kVisibilityVisible);
           }
         },
       ));
@@ -275,25 +276,24 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     return actions;
   }
 
-  Future<void> _handleVisibilityChangeRequest(BuildContext context, bool showArchive) async {
+  Future<void> _handleVisibilityChangeRequest(BuildContext context,
+      int newVisibility) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
     try {
-      if (showArchive) {
-        await changeVisibility(widget.selectedFiles.files.toList(), 1);
-        showToast("successfully archived",
-            toastLength: Toast.LENGTH_SHORT);
+      await changeVisibility(
+          widget.selectedFiles.files.toList(), newVisibility);
+      if (newVisibility == kVisibilityArchive) {
+        showToast("successfully archived", toastLength: Toast.LENGTH_SHORT)
       } else {
-        await changeVisibility(widget.selectedFiles.files.toList(), 0);
         showToast("successfully unarchived",
             toastLength: Toast.LENGTH_SHORT);
       }
       await dialog.hide();
     } catch (e, s) {
-      _logger.severe("archive/unarchive failed", e, s);
+      _logger.severe("failed to update file visibility", e, s);
       await dialog.hide();
       await showGenericErrorDialog(context);
-
     } finally {
       _clearSelectedFiles();
     }

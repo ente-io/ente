@@ -6,6 +6,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/models/file_magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 
 import 'gallery.dart';
@@ -27,7 +28,7 @@ class ArchivePage extends StatelessWidget {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesWithVisibility(creationStartTime,
-            creationEndTime, Configuration.instance.getUserID(), 1,
+            creationEndTime, Configuration.instance.getUserID(), kVisibilityArchive,
             limit: limit, asc: asc);
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where((event) =>

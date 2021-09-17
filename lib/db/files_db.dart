@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
+import 'package:photos/models/file_magic_metadata.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:sqflite/sqflite.dart';
@@ -363,8 +364,8 @@ class FilesDB {
       table,
       where:
           '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  $columnOwnerID = ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-              ' AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = 0)',
-      whereArgs: [startTime, endTime, ownerID],
+              ' AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)',
+      whereArgs: [startTime, endTime, ownerID, kVisibilityVisible],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
@@ -380,9 +381,9 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = 0)'
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
               ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime, ownerID],
+      whereArgs: [startTime, endTime, ownerID, kVisibilityVisible],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
@@ -404,9 +405,9 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = 0)'
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
               'AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime, ownerID],
+      whereArgs: [startTime, endTime, ownerID, kVisibilityVisible],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,

@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+const kVisibilityVisible = 0;
+const kVisibilityArchive = 1;
+
 class FileMagicMetadata {
   // 0 -> visible
   // 1 -> archived
