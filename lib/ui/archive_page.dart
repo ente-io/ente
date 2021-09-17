@@ -30,8 +30,12 @@ class ArchivePage extends StatelessWidget {
             limit: limit, asc: asc);
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where((event) =>
-          event.updatedFiles.firstWhere(
-              (element) => element.fileMagicMetadata?.visibility == 1) !=
+      event.updatedFiles
+              .firstWhere((element) => element.uploadedFileID != null) !=
+          null),
+      forceReloadEvent: Bus.instance.on<FilesUpdatedEvent>().where((event) =>
+      event.updatedFiles
+          .firstWhere((element) => element.uploadedFileID != null) !=
           null),
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
@@ -43,7 +47,7 @@ class ArchivePage extends StatelessWidget {
           padding: EdgeInsets.only(top: Platform.isAndroid ? 80 : 100),
           child: gallery,
         ),
-        Container(
+        SizedBox(
           height: Platform.isAndroid ? 80 : 100,
           child: GalleryAppBarWidget(
             appBarType,
