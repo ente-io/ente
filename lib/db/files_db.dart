@@ -444,6 +444,24 @@ class FilesDB {
     return FileLoadResult(files, files.length == limit);
   }
 
+  Future<FileLoadResult> getFilesWithVisibility(int startTime, int endTime,
+      int visibility, {int limit, bool asc}) async {
+    final db = await instance.database;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+    final results = await db.query(
+      table,
+      where:
+      '$columnMMdVisibility = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?',
+      whereArgs: [visibility, startTime, endTime],
+      orderBy:
+      '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
+      limit: limit,
+    );
+    final files = _convertToFiles(results);
+    _logger.info("Fetched " + files.length.toString() + " files");
+    return FileLoadResult(files, files.length == limit);
+  }
+
   Future<FileLoadResult> getFilesInPath(String path, int startTime, int endTime,
       {int limit, bool asc}) async {
     final db = await instance.database;

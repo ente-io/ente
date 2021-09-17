@@ -24,6 +24,8 @@ import 'package:photos/utils/local_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
+import 'archive_page.dart';
+
 class CollectionsGalleryWidget extends StatefulWidget {
   const CollectionsGalleryWidget({Key key}) : super(key: key);
 
@@ -178,6 +180,44 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                     ),
                   )
                 : nothingToSeeHere,
+            Divider(),
+            Padding(padding: EdgeInsets.all(12)),
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                padding: EdgeInsets.all(20),
+                side: BorderSide(
+                  width: 2,
+                  color: Colors.white12,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.archive_outlined,
+                    color: Colors.white,
+                  ),
+                  Padding(padding: EdgeInsets.all(6)),
+                  Text(
+                    "archived",
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              onPressed: () async {
+                  routeToPage(
+                    context,
+                    ArchivePage(),
+                  );
+                }
+            )
           ],
         ),
       ),
