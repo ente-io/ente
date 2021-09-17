@@ -267,19 +267,36 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
         onSelected: (value) async {
           if (value == 1) {
-            if (showArchive) {
-              await changeVisibility(widget.selectedFiles.files.toList(), 1);
-              showToast("successfully archived", toastLength: Toast.LENGTH_SHORT);
-            } else {
-              await changeVisibility(widget.selectedFiles.files.toList(), 0);
-              showToast("successfully unarchived", toastLength: Toast.LENGTH_SHORT);
-            }
-            _clearSelectedFiles();
+            await _handleVisibilityChangeRequest(context, showArchive);
           }
         },
       ));
     }
     return actions;
+  }
+
+  Future<void> _handleVisibilityChangeRequest(BuildContext context, bool showArchive) async {
+    final dialog = createProgressDialog(context, "please wait...");
+    await dialog.show();
+    try {
+      if (showArchive) {
+        await changeVisibility(widget.selectedFiles.files.toList(), 1);
+        showToast("successfully archived",
+            toastLength: Toast.LENGTH_SHORT);
+      } else {
+        await changeVisibility(widget.selectedFiles.files.toList(), 0);
+        showToast("successfully unarchived",
+            toastLength: Toast.LENGTH_SHORT);
+      }
+      await dialog.hide();
+    } catch (e, s) {
+      _logger.severe("archive/unarchive failed", e, s);
+      await dialog.hide();
+      await showGenericErrorDialog(context);
+
+    } finally {
+      _clearSelectedFiles();
+    }
   }
 
   void _shareSelected(BuildContext context) {
