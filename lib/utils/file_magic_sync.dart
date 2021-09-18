@@ -27,6 +27,13 @@ class FileMagicService {
       FileMagicService._privateConstructor();
 
   Future<void> changeVisibility(List<File> files, int visibility) async {
+    Map<String, dynamic> update = {};
+    update[kMagicKeyVisibility] = visibility;
+    return _updateMagicData(files, update);
+  }
+
+  Future<void> _updateMagicData(
+      List<File> files, Map<String, dynamic> newMetadataUpdate) async {
     final params = <String, dynamic>{};
     params['metadataList'] = [];
     int ownerID = Configuration.instance.getUserID();
@@ -36,8 +43,13 @@ class FileMagicService {
       } else if (file.ownerID != ownerID) {
         throw AssertionError("can not modify memories not owned by you");
       }
+      // read the existing magic metadata and apply new updates to existing data
+      // current update is simple replace. This will be enhanced in the future,
+      // as required.
       Map<String, dynamic> jsonToUpdate = jsonDecode(file.mMdEncodedJson);
-      jsonToUpdate['visibility'] = visibility;
+      newMetadataUpdate.forEach((key, value) {
+        jsonToUpdate[key] = value;
+      });
 
       // update the local information so that it's reflected on UI
       file.mMdEncodedJson = jsonEncode(jsonToUpdate);
@@ -55,6 +67,7 @@ class FileMagicService {
             header: Sodium.bin2base64(encryptedMMd.header),
           )));
     }
+
     return _dio
         .post(
       Configuration.instance.getHttpEndpoint() + "/files/update-magic-metadata",

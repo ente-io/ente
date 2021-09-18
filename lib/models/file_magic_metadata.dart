@@ -3,6 +3,8 @@ import 'dart:convert';
 const kVisibilityVisible = 0;
 const kVisibilityArchive = 1;
 
+const kMagicKeyVisibility = 'visibility';
+
 class FileMagicMetadata {
   // 0 -> visible
   // 1 -> archived
@@ -19,15 +21,14 @@ class FileMagicMetadata {
 
   Map<String, dynamic> toJson() {
     var map = <String, dynamic>{};
-    map['visibility'] = visibility;
+    map[kMagicKeyVisibility] = visibility;
     return map;
   }
 
   factory FileMagicMetadata.fromMap(Map<String, dynamic> map) {
     if (map == null) return null;
-
     return FileMagicMetadata(
-      visibility: map['visibility'] ?? 0,
+      visibility: map[kMagicKeyVisibility] ?? kVisibilityVisible,
     );
   }
 }
