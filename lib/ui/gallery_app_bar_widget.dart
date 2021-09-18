@@ -281,7 +281,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
     try {
-      await changeVisibility(
+      await FileMagicService.instance.changeVisibility(
           widget.selectedFiles.files.toList(), newVisibility);
       showToast(
           newVisibility == kVisibilityArchive
