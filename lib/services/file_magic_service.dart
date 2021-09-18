@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
@@ -11,10 +12,11 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file_magic_metadata.dart';
 import 'package:photos/services/remote_sync_service.dart';
 
-import 'crypto_util.dart';
-import 'file_download_util.dart';
+import '../utils/crypto_util.dart';
+import '../utils/file_download_util.dart';
 
 class FileMagicService {
+  final _logger = Logger("FileMagicService");
   Dio _dio;
   FilesDB _filesDB;
 
@@ -37,51 +39,60 @@ class FileMagicService {
     final params = <String, dynamic>{};
     params['metadataList'] = [];
     int ownerID = Configuration.instance.getUserID();
-    for (final file in files) {
-      if (file.uploadedFileID == null) {
-        throw AssertionError("operation is only supported on backed up files");
-      } else if (file.ownerID != ownerID) {
-        throw AssertionError("can not modify memories not owned by you");
+    try {
+      for (final file in files) {
+        if (file.uploadedFileID == null) {
+          throw AssertionError(
+              "operation is only supported on backed up files");
+        } else if (file.ownerID != ownerID) {
+          throw AssertionError("can not modify memories not owned by you");
+        }
+        // read the existing magic metadata and apply new updates to existing data
+        // current update is simple replace. This will be enhanced in the future,
+        // as required.
+        Map<String, dynamic> jsonToUpdate = jsonDecode(file.mMdEncodedJson);
+        newMetadataUpdate.forEach((key, value) {
+          jsonToUpdate[key] = value;
+        });
+
+        // update the local information so that it's reflected on UI
+        file.mMdEncodedJson = jsonEncode(jsonToUpdate);
+        file.fileMagicMetadata = FileMagicMetadata.fromJson(jsonToUpdate);
+
+        final fileKey = decryptFileKey(file);
+        final encryptedMMd = await CryptoUtil.encryptChaCha(
+            utf8.encode(jsonEncode(jsonToUpdate)), fileKey);
+        params['metadataList'].add(UpdateMagicMetadata(
+            id: file.uploadedFileID,
+            magicMetadata: MagicMetadata(
+              version: file.mMdVersion,
+              count: jsonToUpdate.length,
+              data: Sodium.bin2base64(encryptedMMd.encryptedData),
+              header: Sodium.bin2base64(encryptedMMd.header),
+            )));
       }
-      // read the existing magic metadata and apply new updates to existing data
-      // current update is simple replace. This will be enhanced in the future,
-      // as required.
-      Map<String, dynamic> jsonToUpdate = jsonDecode(file.mMdEncodedJson);
-      newMetadataUpdate.forEach((key, value) {
-        jsonToUpdate[key] = value;
-      });
 
-      // update the local information so that it's reflected on UI
-      file.mMdEncodedJson = jsonEncode(jsonToUpdate);
-      file.fileMagicMetadata = FileMagicMetadata.fromJson(jsonToUpdate);
-
-      final fileKey = decryptFileKey(file);
-      final encryptedMMd = await CryptoUtil.encryptChaCha(
-          utf8.encode(jsonEncode(jsonToUpdate)), fileKey);
-      params['metadataList'].add(UpdateMagicMetadata(
-          id: file.uploadedFileID,
-          magicMetadata: MagicMetadata(
-            version: file.mMdVersion,
-            count: jsonToUpdate.length,
-            data: Sodium.bin2base64(encryptedMMd.encryptedData),
-            header: Sodium.bin2base64(encryptedMMd.header),
-          )));
-    }
-
-    return _dio
-        .post(
-      Configuration.instance.getHttpEndpoint() + "/files/update-magic-metadata",
-      data: params,
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-    )
-        .then((value) async {
+      await _dio.post(
+        Configuration.instance.getHttpEndpoint() +
+            "/files/update-magic-metadata",
+        data: params,
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
       // update the state of the selected file. Same file in other collection
       // should be eventually synced after remote sync has completed
       await _filesDB.insertMultiple(files);
       Bus.instance.fire(FilesUpdatedEvent(files));
       RemoteSyncService.instance.sync(silently: true);
-    });
+    } on DioError catch (e) {
+      if (e.response != null && e.response.statusCode == 409) {
+        RemoteSyncService.instance.sync(silently: true);
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to sync magic metadata", e, s);
+      rethrow;
+    }
   }
 }
 

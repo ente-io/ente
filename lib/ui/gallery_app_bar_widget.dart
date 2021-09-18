@@ -17,7 +17,7 @@ import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/file_magic_sync.dart';
+import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
