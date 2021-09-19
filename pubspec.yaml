@@ -17,13 +17,13 @@ environment:
   sdk: ">=2.10.0 <3.0.0"
 
 dependencies:
-  animate_do: ^1.7.2
+  animate_do: ^2.0.0
   archive: ^3.1.2
   background_fetch: ^1.0.1
   cached_network_image: ^3.0.0
   chewie: ^1.0.0
-  computer: ^1.0.2
-  confetti: ^0.5.5
+  computer: ^2.0.0
+  confetti: ^0.6.0
   connectivity: ^3.0.3
   crisp:
     git: "https://github.com/kcrebound/flutter-crisp.git"
@@ -53,7 +53,7 @@ dependencies:
   flutter_sodium: ^0.2.0
   flutter_typeahead: ^3.2.0
   flutter_user_agent: ^1.2.2
-  flutter_windowmanager: ^0.0.2
+  flutter_windowmanager: ^0.2.0
   fluttercontactpicker: ^4.4.0
   fluttertoast: ^8.0.6
   google_nav_bar: ^5.0.5
@@ -72,7 +72,7 @@ dependencies:
   move_to_background: ^1.0.2
   open_file: ^3.2.1
   package_info_plus: ^1.0.1
-  page_transition: ^1.1.7+2
+  page_transition: ^2.0.2
   path_provider: ^2.0.1
   pedantic: ^1.9.2
   photo_manager:
@@ -81,7 +81,7 @@ dependencies:
   pie_chart:
     git: "https://github.com/apgapg/pie_chart.git"
   pinput: ^1.2.0
-  provider: ^3.1.0
+  provider: ^6.0.0
   quiver: ^3.0.1
   receive_sharing_intent: ^1.4.5
   scrollable_positioned_list: ^0.1.10
