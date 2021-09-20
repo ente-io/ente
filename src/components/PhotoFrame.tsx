@@ -3,6 +3,7 @@ import {
     DeadCenter,
     GalleryContext,
     Search,
+    SelectedState,
     SetFiles,
     setSearchStats,
 } from 'pages/gallery';
@@ -136,8 +137,10 @@ interface Props {
     setFiles: SetFiles;
     syncWithRemote: () => Promise<void>;
     favItemIds: Set<number>;
-    setSelected;
-    selected;
+    setSelected: (
+        selected: SelectedState | ((selected: SelectedState) => SelectedState)
+    ) => void;
+    selected: SelectedState;
     isFirstLoad;
     openFileUploader;
     loadingBar;
@@ -146,6 +149,7 @@ interface Props {
     setSearchStats: setSearchStats;
     deleted?: number[];
     setDialogMessage: SetDialogMessage;
+    activeCollection: number;
 }
 
 const PhotoFrame = ({
@@ -163,6 +167,7 @@ const PhotoFrame = ({
     setSearchStats,
     deleted,
     setDialogMessage,
+    activeCollection,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -246,10 +251,14 @@ const PhotoFrame = ({
     };
 
     const handleSelect = (id: number) => (checked: boolean) => {
+        if (selected.collectionID !== activeCollection) {
+            setSelected({ count: 0, collectionID: 0 });
+        }
         setSelected((selected) => ({
             ...selected,
             [id]: checked,
             count: checked ? selected.count + 1 : selected.count - 1,
+            collectionID: activeCollection,
         }));
     };
     const getThumbnail = (file: File[], index: number) => (
@@ -260,7 +269,10 @@ const PhotoFrame = ({
             onClick={onThumbnailClick(index)}
             selectable
             onSelect={handleSelect(file[index].id)}
-            selected={selected[file[index].id]}
+            selected={
+                selected.collectionID === activeCollection &&
+                selected[file[index].id]
+            }
             selectOnClick={selected.count > 0}
         />
     );
