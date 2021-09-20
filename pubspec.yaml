@@ -98,6 +98,7 @@ dependencies:
   url_launcher: ^6.0.3
   uuid: ^3.0.4
   video_player: ^2.0.0
+  video_thumbnail: ^0.4.3
   visibility_detector: ^0.2.0
   wallpaper_manager_flutter: ^0.0.2
 
