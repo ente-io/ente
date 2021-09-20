@@ -43,6 +43,14 @@ class _VideoWidgetState extends State<VideoWidget> {
     super.initState();
     if (widget.file.isRemoteFile()) {
       _loadNetworkVideo();
+    } else if (widget.file.isSharedMediaToAppSandbox()) {
+      final localFile = io.File(getSharedMediaFilePath(widget.file));
+      if (localFile.existsSync()) {
+        _logger.info("loading from local source");
+        _setVideoPlayerController(file: localFile);
+      } else if (widget.file.uploadedFileID != null) {
+        _loadNetworkVideo();
+      }
     } else {
       widget.file.getAsset().then((asset) async {
         if (asset == null || !(await asset.exists)) {
@@ -62,12 +70,15 @@ class _VideoWidgetState extends State<VideoWidget> {
     getFileFromServer(
       widget.file,
       progressCallback: (count, total) {
-        setState(() {
-          _progress = count / total;
-          if (_progress == 1) {
-            showToast("decrypting video...", toastLength: Toast.LENGTH_SHORT);
-          }
-        });
+        if (mounted) {
+          setState(() {
+            _logger.info("calling set state");
+            _progress = count / total;
+            if (_progress == 1) {
+              showToast("decrypting video...", toastLength: Toast.LENGTH_SHORT);
+            }
+          });
+        }
       },
     ).then((file) {
       if (file != null) {
