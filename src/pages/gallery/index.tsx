@@ -66,6 +66,7 @@ import {
     copyOrMoveFromCollection,
     COLLECTION_OPS_TYPE,
 } from 'utils/collection';
+import { logError } from 'utils/sentry';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -346,14 +347,41 @@ export default function Gallery() {
         }
     };
 
-    const showCreateCollectionModal = () =>
-        setCollectionNamerAttributes({
-            title: constants.CREATE_COLLECTION,
-            buttonText: constants.CREATE,
-            autoFilledName: '',
-            callback: (collectionName) =>
-                addToCollectionHelper(collectionName, null),
-        });
+    const showCreateCollectionModal = (opsType: COLLECTION_OPS_TYPE) => {
+        try {
+            let callback = null;
+            switch (opsType) {
+                case COLLECTION_OPS_TYPE.ADD:
+                    callback = (collectionName: string) =>
+                        addToCollectionHelper(collectionName, null);
+                    break;
+                case COLLECTION_OPS_TYPE.MOVE:
+                    callback = (collectionName: string) =>
+                        moveToCollectionHelper(collectionName, null);
+                    break;
+                default:
+                    throw Error(CustomError.INVALID_COLLECTION_OPERATION);
+            }
+            return () =>
+                setCollectionNamerAttributes({
+                    title: constants.CREATE_COLLECTION,
+                    buttonText: constants.CREATE,
+                    autoFilledName: '',
+                    callback,
+                });
+        } catch (e) {
+            logError(
+                e,
+                'showCreateCollectionModal called with incorrect attributes'
+            );
+            setDialogMessage({
+                title: constants.ERROR,
+                staticBackdrop: true,
+                close: { variant: 'danger' },
+                content: constants.UNKNOWN_ERROR,
+            });
+        }
+    };
 
     const deleteFileHelper = async () => {
         loadingBar.current?.continuousStart();

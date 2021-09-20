@@ -9,11 +9,12 @@ import AddIcon from 'components/icons/AddIcon';
 import { IconButton } from 'components/Container';
 import constants from 'utils/strings/constants';
 import MoveIcon from 'components/icons/MoveIcon';
+import { COLLECTION_OPS_TYPE } from 'utils/collection';
 
 interface Props {
     addToCollectionHelper: (collectionName, collection) => void;
     moveToCollectionHelper: (collectionName, collection) => void;
-    showCreateCollectionModal: () => void;
+    showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
     setDialogMessage: SetDialogMessage;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     deleteFileHelper: () => void;
@@ -48,7 +49,7 @@ const SelectedFileOptions = ({
     const addToCollection = () =>
         setCollectionSelectorAttributes({
             callback: (collection) => addToCollectionHelper(null, collection),
-            showNextModal: showCreateCollectionModal,
+            showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.ADD),
             title: constants.ADD_TO_COLLECTION,
         });
 
@@ -68,7 +69,7 @@ const SelectedFileOptions = ({
     const moveToCollection = () => {
         setCollectionSelectorAttributes({
             callback: (collection) => moveToCollectionHelper(null, collection),
-            showNextModal: showCreateCollectionModal,
+            showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
             title: constants.MOVE_TO_COLLECTION,
         });
     };
