@@ -58,10 +58,6 @@ export default function FullScreenDropZone(props: Props) {
         <DropDiv
             {...props.getRootProps({
                 onDragEnter,
-                onDrop: (e) => {
-                    e.preventDefault();
-                    props.showCollectionSelector();
-                },
             })}>
             <input {...props.getInputProps()} />
             {isDragActive && (
