@@ -8,9 +8,11 @@ import CrossIcon from 'components/icons/CrossIcon';
 import AddIcon from 'components/icons/AddIcon';
 import { IconButton } from 'components/Container';
 import constants from 'utils/strings/constants';
+import MoveIcon from 'components/icons/MoveIcon';
 
 interface Props {
     addToCollectionHelper: (collectionName, collection) => void;
+    moveToCollectionHelper: (collectionName, collection) => void;
     showCreateCollectionModal: () => void;
     setDialogMessage: SetDialogMessage;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
@@ -35,6 +37,7 @@ const SelectionContainer = styled.div`
 
 const SelectedFileOptions = ({
     addToCollectionHelper,
+    moveToCollectionHelper,
     showCreateCollectionModal,
     setDialogMessage,
     setCollectionSelectorAttributes,
@@ -62,6 +65,14 @@ const SelectedFileOptions = ({
             close: { text: constants.CANCEL },
         });
 
+    const moveToCollection = () => {
+        setCollectionSelectorAttributes({
+            callback: (collection) => moveToCollectionHelper(null, collection),
+            showNextModal: showCreateCollectionModal,
+            title: constants.MOVE_TO_COLLECTION,
+        });
+    };
+
     return (
         <SelectionBar>
             <SelectionContainer>
@@ -72,6 +83,9 @@ const SelectedFileOptions = ({
                     {count} {constants.SELECTED}
                 </div>
             </SelectionContainer>
+            <IconButton onClick={moveToCollection}>
+                <MoveIcon />
+            </IconButton>
             <IconButton onClick={addToCollection}>
                 <AddIcon />
             </IconButton>
