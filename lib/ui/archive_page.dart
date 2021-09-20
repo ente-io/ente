@@ -6,7 +6,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/models/file_magic_metadata.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 
 import 'gallery.dart';
@@ -19,7 +19,7 @@ class ArchivePage extends StatelessWidget {
 
   ArchivePage(
       {this.tagPrefix = "archived_page",
-      this.appBarType = GalleryAppBarType.archivedPage,
+      this.appBarType = GalleryAppBarType.archive,
       Key key})
       : super(key: key);
 

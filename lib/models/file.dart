@@ -6,7 +6,7 @@ import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/models/file_magic_metadata.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/services/feature_flag_service.dart';
@@ -38,10 +38,10 @@ class File {
 
   String mMdEncodedJson;
   int mMdVersion = 0;
-  FileMagicMetadata _fileMMd;
-  FileMagicMetadata get fileMagicMetadata =>
-      _fileMMd ?? FileMagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
-  set fileMagicMetadata (val) => _fileMMd = val;
+  MagicMetadata _mmd;
+  MagicMetadata get magicMetadata =>
+      _mmd ?? MagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
+  set magicMetadata (val) => _mmd = val;
 
   static const kCurrentMetadataVersion = 1;
 

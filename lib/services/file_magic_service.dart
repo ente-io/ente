@@ -9,7 +9,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/models/file_magic_metadata.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/remote_sync_service.dart';
 
 import '../utils/crypto_util.dart';
@@ -38,14 +38,14 @@ class FileMagicService {
       List<File> files, Map<String, dynamic> newMetadataUpdate) async {
     final params = <String, dynamic>{};
     params['metadataList'] = [];
-    int ownerID = Configuration.instance.getUserID();
+    final int ownerID = Configuration.instance.getUserID();
     try {
       for (final file in files) {
         if (file.uploadedFileID == null) {
           throw AssertionError(
               "operation is only supported on backed up files");
         } else if (file.ownerID != ownerID) {
-          throw AssertionError("can not modify memories not owned by you");
+          throw AssertionError("cannot modify memories not owned by you");
         }
         // read the existing magic metadata and apply new updates to existing data
         // current update is simple replace. This will be enhanced in the future,
@@ -57,7 +57,7 @@ class FileMagicService {
 
         // update the local information so that it's reflected on UI
         file.mMdEncodedJson = jsonEncode(jsonToUpdate);
-        file.fileMagicMetadata = FileMagicMetadata.fromJson(jsonToUpdate);
+        file.magicMetadata = MagicMetadata.fromJson(jsonToUpdate);
 
         final fileKey = decryptFileKey(file);
         final encryptedMMd = await CryptoUtil.encryptChaCha(
@@ -110,7 +110,7 @@ class UpdateMagicMetadata {
   }
 
   Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
+    final map = <String, dynamic>{};
     map['id'] = id;
     if (magicMetadata != null) {
       map['magicMetadata'] = magicMetadata.toJson();

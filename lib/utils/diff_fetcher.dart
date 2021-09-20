@@ -11,7 +11,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/models/file_magic_metadata.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
 
@@ -88,7 +88,7 @@ class DiffFetcher {
                     Sodium.base642bin(item['magicMetadata']['header']));
                 file.mMdEncodedJson = utf8.decode(utfEncodedMmd);
                 file.mMdVersion = item['magicMetadata']['version'];
-                file.fileMagicMetadata = FileMagicMetadata.fromEncodedJson(file.mMdEncodedJson);
+                file.magicMetadata = MagicMetadata.fromEncodedJson(file.mMdEncodedJson);
               }
               files.add(file);
             }

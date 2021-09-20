@@ -5,29 +5,29 @@ const kVisibilityArchive = 1;
 
 const kMagicKeyVisibility = 'visibility';
 
-class FileMagicMetadata {
+class MagicMetadata {
   // 0 -> visible
   // 1 -> archived
   // 2 -> hidden etc?
   int visibility;
 
-  FileMagicMetadata({this.visibility});
+  MagicMetadata({this.visibility});
 
-  factory FileMagicMetadata.fromEncodedJson(String encodedJson) =>
-      FileMagicMetadata.fromJson(jsonDecode(encodedJson));
+  factory MagicMetadata.fromEncodedJson(String encodedJson) =>
+      MagicMetadata.fromJson(jsonDecode(encodedJson));
 
-  factory FileMagicMetadata.fromJson(dynamic json) =>
-      FileMagicMetadata.fromMap(json);
+  factory MagicMetadata.fromJson(dynamic json) =>
+      MagicMetadata.fromMap(json);
 
   Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
+    final map = <String, dynamic>{};
     map[kMagicKeyVisibility] = visibility;
     return map;
   }
 
-  factory FileMagicMetadata.fromMap(Map<String, dynamic> map) {
+  factory MagicMetadata.fromMap(Map<String, dynamic> map) {
     if (map == null) return null;
-    return FileMagicMetadata(
+    return MagicMetadata(
       visibility: map[kMagicKeyVisibility] ?? kVisibilityVisible,
     );
   }

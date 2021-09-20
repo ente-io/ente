@@ -6,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
-import 'package:photos/models/file_magic_metadata.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:sqflite/sqflite.dart';
@@ -241,7 +241,7 @@ class FilesDB {
   static List<String> addMagicMetadataColumns() {
     return [
       '''
-        ALTER TABLE $table ADD COLUMN $columnMMdEncodedJson Text DEFAULT '{}';
+        ALTER TABLE $table ADD COLUMN $columnMMdEncodedJson TEXT DEFAULT '{}';
       ''',
       '''
         ALTER TABLE $table ADD COLUMN $columnMMdVersion INTEGER DEFAULT 0;
@@ -914,7 +914,7 @@ class FilesDB {
     row[columnMMdVersion] = file.mMdVersion ?? 0;
     row[columnMMdEncodedJson] = file.mMdEncodedJson ?? '{}';
     row[columnMMdVisibility] =
-        file.fileMagicMetadata?.visibility ?? kVisibilityVisible;
+        file.magicMetadata?.visibility ?? kVisibilityVisible;
     return row;
   }
 
@@ -945,7 +945,7 @@ class FilesDB {
     row[columnMMdVersion] = file.mMdVersion ?? 0;
     row[columnMMdEncodedJson] == file.mMdEncodedJson ?? '{}';
     row[columnMMdVisibility] =
-        file.fileMagicMetadata?.visibility ?? kVisibilityVisible;
+        file.magicMetadata?.visibility ?? kVisibilityVisible;
     return row;
   }
 

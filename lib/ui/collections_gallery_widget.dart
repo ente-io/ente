@@ -23,8 +23,7 @@ import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
-
-import 'archive_page.dart';
+import 'package:photos/ui/archive_page.dart';
 
 class CollectionsGalleryWidget extends StatefulWidget {
   const CollectionsGalleryWidget({Key key}) : super(key: key);

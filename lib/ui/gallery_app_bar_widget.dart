@@ -10,7 +10,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/collection.dart';
-import 'package:photos/models/file_magic_metadata.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/create_collection_page.dart';
@@ -23,7 +23,7 @@ import 'package:photos/utils/toast_util.dart';
 
 enum GalleryAppBarType {
   homepage,
-  archivedPage,
+  archive,
   local_folder,
   // indicator for gallery view of collections shared with the user
   shared_collection,
@@ -213,7 +213,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       },
     ));
     if (widget.type == GalleryAppBarType.homepage ||
-        widget.type == GalleryAppBarType.archivedPage ||
+        widget.type == GalleryAppBarType.archive ||
         widget.type == GalleryAppBarType.local_folder) {
       actions.add(IconButton(
         icon: Icon(
@@ -243,7 +243,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
 
     if (widget.type == GalleryAppBarType.homepage ||
-        widget.type == GalleryAppBarType.archivedPage) {
+        widget.type == GalleryAppBarType.archive) {
       bool showArchive = widget.type == GalleryAppBarType.homepage;
       actions.add(PopupMenuButton(
         itemBuilder: (context) {
