@@ -20,6 +20,7 @@ interface Props {
     deleteFileHelper: () => void;
     count: number;
     clearSelection: () => void;
+    activeCollection: number;
 }
 
 const SelectionBar = styled(Navbar)`
@@ -45,6 +46,7 @@ const SelectedFileOptions = ({
     deleteFileHelper,
     count,
     clearSelection,
+    activeCollection,
 }: Props) => {
     const addToCollection = () =>
         setCollectionSelectorAttributes({
@@ -84,9 +86,11 @@ const SelectedFileOptions = ({
                     {count} {constants.SELECTED}
                 </div>
             </SelectionContainer>
-            <IconButton onClick={moveToCollection}>
-                <MoveIcon />
-            </IconButton>
+            {activeCollection !== 0 && (
+                <IconButton onClick={moveToCollection}>
+                    <MoveIcon />
+                </IconButton>
+            )}
             <IconButton onClick={addToCollection}>
                 <AddIcon />
             </IconButton>
