@@ -163,7 +163,7 @@ Future<Uint8List> getThumbnailFromInAppCacheFile(ente.File file) async {
       imageFormat: ImageFormat.JPEG,
       thumbnailPath: (await getTemporaryDirectory()).path,
       maxWidth: kThumbnailLargeSize,
-      quality: 100,
+      quality: 80,
     );
     localFile = io.File(thumbnailFilePath);
   }
