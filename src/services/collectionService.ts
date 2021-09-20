@@ -387,23 +387,28 @@ export const moveToCollection = async (
     newCollection: Collection,
     files: File[]
 ) => {
-    const token = getToken();
-    const fileKeysEncryptedWithNewCollection =
-        await encryptWithNewCollectionKey(newCollection, files);
+    try {
+        const token = getToken();
+        const fileKeysEncryptedWithNewCollection =
+            await encryptWithNewCollectionKey(newCollection, files);
 
-    const requestBody: MoveToCollectionRequest = {
-        fromCollectionID: oldCollectionID,
-        toCollectionID: newCollection.id,
-        files: fileKeysEncryptedWithNewCollection,
-    };
-    await HTTPService.post(
-        `${ENDPOINT}/collections/move-files`,
-        requestBody,
-        null,
-        {
-            'X-Auth-Token': token,
-        }
-    );
+        const requestBody: MoveToCollectionRequest = {
+            fromCollectionID: oldCollectionID,
+            toCollectionID: newCollection.id,
+            files: fileKeysEncryptedWithNewCollection,
+        };
+        await HTTPService.post(
+            `${ENDPOINT}/collections/move-files`,
+            requestBody,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        logError(e, 'move to collection Failed ');
+        throw e;
+    }
 };
 
 const encryptWithNewCollectionKey = async (
