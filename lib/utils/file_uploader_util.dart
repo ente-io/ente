@@ -148,7 +148,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
   } catch (e, s) {
     _logger.severe("failed to generate thumbnail", e, s);
     throw InvalidFileError(
-        "thumbnail generated failed for fileType: ${file.fileType.toString()}");
+        "thumbnail generation failed for fileType: ${file.fileType.toString()}");
   }
 }
 

@@ -46,7 +46,7 @@ class _VideoWidgetState extends State<VideoWidget> {
     } else if (widget.file.isSharedMediaToAppSandbox()) {
       final localFile = io.File(getSharedMediaFilePath(widget.file));
       if (localFile.existsSync()) {
-        _logger.info("loading from local source");
+        _logger.fine("loading from app cache");
         _setVideoPlayerController(file: localFile);
       } else if (widget.file.uploadedFileID != null) {
         _loadNetworkVideo();
@@ -72,7 +72,6 @@ class _VideoWidgetState extends State<VideoWidget> {
       progressCallback: (count, total) {
         if (mounted) {
           setState(() {
-            _logger.info("calling set state");
             _progress = count / total;
             if (_progress == 1) {
               showToast("decrypting video...", toastLength: Toast.LENGTH_SHORT);
