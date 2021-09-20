@@ -72,9 +72,9 @@ class FileMagicService {
             )));
       }
 
-      await _dio.post(
+      await _dio.put(
         Configuration.instance.getHttpEndpoint() +
-            "/files/update-magic-metadata",
+            "/files/magic-metadata",
         data: params,
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
