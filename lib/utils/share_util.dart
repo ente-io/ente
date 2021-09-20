@@ -49,26 +49,31 @@ Future<List<File>> convertIncomingSharedMediaToFile(
     var enteFile = File();
     // fileName: img_x.jpg
     enteFile.title = basename(media.path);
-
     var ioFile = dartio.File(media.path);
-    ioFile = ioFile.renameSync(Configuration.instance.getSharedMediaCacheDirectory() +
-        "/" +
-        enteFile.title);
+    ioFile = ioFile.renameSync(
+        Configuration.instance.getSharedMediaCacheDirectory() +
+            "/" +
+            enteFile.title);
     enteFile.localID = kSharedMediaIdentifier + enteFile.title;
     enteFile.collectionID = collectionID;
-    enteFile.fileType = FileType.image;
+    enteFile.fileType =
+        media.type == SharedMediaType.IMAGE ? FileType.image : FileType.video;
 
-    var exifMap = await readExifFromFile(ioFile);
-    if (exifMap != null &&
-        exifMap["Image DateTime"] != null &&
-        '0000:00:00 00:00:00' != exifMap["Image DateTime"].toString()) {
-      try {
-        final exifTime =
-            _exifDateFormat.parse(exifMap["Image DateTime"].toString());
-        enteFile.creationTime = exifTime.microsecondsSinceEpoch;
-      } catch (e) {
-        //ignore
+    if (enteFile.fileType == FileType.image) {
+      final exifMap = await readExifFromFile(ioFile);
+      if (exifMap != null &&
+          exifMap["Image DateTime"] != null &&
+          '0000:00:00 00:00:00' != exifMap["Image DateTime"].toString()) {
+        try {
+          final exifTime =
+              _exifDateFormat.parse(exifMap["Image DateTime"].toString());
+          enteFile.creationTime = exifTime.microsecondsSinceEpoch;
+        } catch (e) {
+          //ignore
+        }
       }
+    } else if (enteFile.fileType == FileType.video) {
+      enteFile.duration = media.duration ?? 0;
     }
     if (enteFile.creationTime == null || enteFile.creationTime == 0) {
       final parsedDateTime =
