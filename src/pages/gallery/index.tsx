@@ -162,6 +162,7 @@ export default function Gallery() {
     const appContext = useContext(AppContext);
     const [collectionFilesCount, setCollectionFilesCount] =
         useState<Map<number, number>>();
+    const [activeCollection, setActiveCollection] = useState(0);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -196,12 +197,21 @@ export default function Gallery() {
     }, []);
 
     useEffect(() => setDialogView(true), [dialogMessage]);
+
     useEffect(() => {
         if (collectionSelectorAttributes) {
             setCollectionSelectorView(true);
         }
     }, [collectionSelectorAttributes]);
+
     useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
+
+    useEffect(() => {
+        const href = `/gallery${
+            activeCollection ? `?collection=${activeCollection.toString()}` : ''
+        }`;
+        router.push(href, undefined, { shallow: true });
+    }, [activeCollection]);
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
@@ -272,11 +282,6 @@ export default function Gallery() {
         setSelected({ count: 0 });
     };
 
-    const selectCollection = (id?: number) => {
-        const href = `/gallery${id ? `?collection=${id.toString()}` : ''}`;
-        router.push(href, undefined, { shallow: true });
-    };
-
     if (!files) {
         return <div />;
     }
@@ -292,7 +297,7 @@ export default function Gallery() {
                 files,
                 clearSelection,
                 syncWithRemote,
-                selectCollection,
+                setActiveCollection,
                 collectionName,
                 collection
             );
@@ -402,7 +407,7 @@ export default function Gallery() {
                     collections={collections}
                     searchMode={searchMode}
                     selected={Number(router.query.collection)}
-                    selectCollection={selectCollection}
+                    setActiveCollection={setActiveCollection}
                     syncWithRemote={syncWithRemote}
                     setDialogMessage={setDialogMessage}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}

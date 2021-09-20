@@ -13,7 +13,7 @@ export async function addFilesToCollection(
     files: File[],
     clearSelection: () => void,
     syncWithRemote: () => Promise<void>,
-    selectCollection: (id: number) => void,
+    setActiveCollection: (id: number) => void,
     collectionName: string,
     existingCollection: Collection
 ) {
@@ -31,7 +31,7 @@ export async function addFilesToCollection(
     await addToCollection(collection, selectedFiles);
     clearSelection();
     await syncWithRemote();
-    selectCollection(collection.id);
+    setActiveCollection(collection.id);
 }
 
 export function getSelectedCollection(collectionID: number, collections) {
