@@ -7,7 +7,7 @@ packages:
       name: animate_do
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.7.5"
+    version: "2.0.0"
   archive:
     dependency: "direct main"
     description:
@@ -91,14 +91,14 @@ packages:
       name: computer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.1"
+    version: "2.0.0"
   confetti:
     dependency: "direct main"
     description:
       name: confetti
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.5"
+    version: "0.6.0"
   connectivity:
     dependency: "direct main"
     description:
@@ -428,7 +428,7 @@ packages:
       name: flutter_windowmanager
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.2"
+    version: "0.2.0"
   fluttercontactpicker:
     dependency: "direct main"
     description:
@@ -592,6 +592,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.2"
+  nested:
+    dependency: transitive
+    description:
+      name: nested
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   octo_image:
     dependency: transitive
     description:
@@ -654,7 +661,7 @@ packages:
       name: page_transition
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.7+6"
+    version: "2.0.2"
   path:
     dependency: transitive
     description:
@@ -770,7 +777,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.2.0"
+    version: "6.0.0"
   quiver:
     dependency: "direct main"
     description:
@@ -778,13 +785,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.1"
-  random_color:
-    dependency: transitive
-    description:
-      name: random_color
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.5"
   receive_sharing_intent:
     dependency: "direct main"
     description:
