@@ -53,6 +53,7 @@ const SelectedFileOptions = ({
             callback: (collection) => addToCollectionHelper(null, collection),
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.ADD),
             title: constants.ADD_TO_COLLECTION,
+            fromCollection: activeCollection,
         });
 
     const deleteHandler = () =>
@@ -73,6 +74,7 @@ const SelectedFileOptions = ({
             callback: (collection) => moveToCollectionHelper(null, collection),
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
             title: constants.MOVE_TO_COLLECTION,
+            fromCollection: activeCollection,
         });
     };
 

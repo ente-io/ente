@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, Modal } from 'react-bootstrap';
 import styled from 'styled-components';
 import {
@@ -23,6 +23,7 @@ export interface CollectionSelectorAttributes {
     callback: (collection: Collection) => void;
     showNextModal: () => void;
     title: string;
+    fromCollection?: number;
 }
 export type SetCollectionSelectorAttributes = React.Dispatch<
     React.SetStateAction<CollectionSelectorAttributes>
@@ -45,11 +46,25 @@ function CollectionSelector({
     collectionsAndTheirLatestFile,
     ...props
 }: Props) {
+    useEffect(() => {
+        if (!attributes) {
+            return;
+        }
+        const collectionOtherThanFrom = collectionsAndTheirLatestFile?.filter(
+            (item) => !(item.collection.id === attributes.fromCollection)
+        );
+        if (collectionOtherThanFrom.length === 0) {
+            props.onHide();
+            attributes.showNextModal();
+        }
+    }, [props.show]);
+
     if (!attributes) {
         return <Modal />;
     }
-    const CollectionIcons: JSX.Element[] = collectionsAndTheirLatestFile?.map(
-        (item) => (
+    const CollectionIcons: JSX.Element[] = collectionsAndTheirLatestFile
+        ?.filter((item) => !(item.collection.id === attributes.fromCollection))
+        .map((item) => (
             <CollectionIcon
                 key={item.collection.id}
                 onClick={() => {
@@ -67,8 +82,7 @@ function CollectionSelector({
                     </Card.Text>
                 </CollectionCard>
             </CollectionIcon>
-        )
-    );
+        ));
 
     return (
         <Modal
