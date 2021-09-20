@@ -6,6 +6,7 @@ import 'package:archive/archive_io.dart';
 import 'package:logging/logging.dart';
 import 'package:motionphoto/motionphoto.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -13,6 +14,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 import 'file_util.dart';
 
@@ -140,14 +142,30 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
     _logger.warning("File doesn't exist in app sandbox");
     throw InvalidFileError("File doesn't exist in app sandbox");
   }
-  thumbnailData = await getThumbnailFromInAppCacheFile(file);
-  return MediaUploadData(sourceFile, thumbnailData, isDeleted);
+  try {
+    thumbnailData = await getThumbnailFromInAppCacheFile(file);
+    return MediaUploadData(sourceFile, thumbnailData, isDeleted);
+  } catch (e, s) {
+    _logger.severe("failed to generate thumbnail", e, s);
+    throw InvalidFileError(
+        "thumbnail generated failed for fileType: ${file.fileType.toString()}");
+  }
 }
 
 Future<Uint8List> getThumbnailFromInAppCacheFile(ente.File file) async {
   var localFile = io.File(getSharedMediaFilePath(file));
   if (!localFile.existsSync()) {
     return null;
+  }
+  if (file.fileType == FileType.video) {
+    final thumbnailFilePath = await VideoThumbnail.thumbnailFile(
+      video: localFile.path,
+      imageFormat: ImageFormat.JPEG,
+      thumbnailPath: (await getTemporaryDirectory()).path,
+      maxWidth: kThumbnailLargeSize,
+      quality: 100,
+    );
+    localFile = io.File(thumbnailFilePath);
   }
   var thumbnailData = await localFile.readAsBytes();
   int compressionAttempts = 0;
