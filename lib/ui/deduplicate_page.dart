@@ -6,7 +6,6 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/data_util.dart';
@@ -49,6 +48,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   );
 
   final Set<File> _selectedFiles = <File>{};
+  final Map<int, int> _fileSizeMap = {};
 
   SortKey sortKey = SortKey.size;
 
@@ -60,6 +60,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         if (index != 0) {
           _selectedFiles.add(duplicate.files[index]);
         }
+        _fileSizeMap[duplicate.files[index].uploadedFileID] = duplicate.size;
       }
     }
   }
@@ -101,30 +102,36 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   }
 
   Widget _getBody() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
+    return Stack(
       children: [
-        Expanded(
-          child: ListView.builder(
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return _getHeader();
-              } else if (index == 1) {
-                return _getSortMenu();
-              }
-              return Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 10),
-                child: _getGridView(widget.duplicates[index - 2], index - 2),
-              );
-            },
-            itemCount: widget.duplicates.length,
-            shrinkWrap: true,
-          ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return _getHeader();
+                  } else if (index == 1) {
+                    return _getSortMenu();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 10, bottom: 10),
+                    child:
+                        _getGridView(widget.duplicates[index - 2], index - 2),
+                  );
+                },
+                itemCount: widget.duplicates.length,
+                shrinkWrap: true,
+              ),
+            ),
+            // Padding(padding: EdgeInsets.all(6)),
+            // _getDeleteButton(),
+            // Padding(padding: EdgeInsets.all(6)),
+          ],
         ),
-        Padding(padding: EdgeInsets.all(6)),
         _getDeleteButton(),
-        Padding(padding: EdgeInsets.all(6)),
       ],
     );
   }
@@ -234,16 +241,64 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     } else {
       text = "delete " + _selectedFiles.length.toString() + " items";
     }
-    return button(
-      text,
-      color: Colors.red[700],
-      onPressed: _selectedFiles.isEmpty
-          ? null
-          : () async {
-              await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
-              Bus.instance.fire(UserDetailsChangedEvent());
-              Navigator.of(context).pop(_selectedFiles.length);
-            },
+    int size = 0;
+    for (final file in _selectedFiles) {
+      size += _fileSizeMap[file.uploadedFileID];
+    }
+    final onPressed = _selectedFiles.isEmpty
+        ? null
+        : () async {
+            await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
+            Bus.instance.fire(UserDetailsChangedEvent());
+            Navigator.of(context).pop(_selectedFiles.length);
+          };
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Container(
+        padding: EdgeInsets.only(top: 4, bottom: 4),
+        height: 78,
+        color: Colors.transparent,
+        child: Align(
+          alignment: Alignment.center,
+          child: OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
+              side: BorderSide(
+                width: onPressed == null ? 1 : 2,
+                color: onPressed == null
+                    ? Colors.grey
+                    : Theme.of(context).buttonColor,
+              ),
+              backgroundColor: Colors.black.withOpacity(0.9),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  text,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: onPressed == null ? Colors.grey : Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                Padding(padding: EdgeInsets.all(2)),
+                Text(
+                  formatBytes(size),
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.5),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+            onPressed: onPressed,
+          ),
+        ),
+      ),
     );
   }
 
