@@ -11,9 +11,8 @@ import 'package:photos/models/file.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/remote_sync_service.dart';
-
-import '../utils/crypto_util.dart';
-import '../utils/file_download_util.dart';
+import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/utils/file_download_util.dart';
 
 class FileMagicService {
   final _logger = Logger("FileMagicService");
@@ -62,7 +61,7 @@ class FileMagicService {
         final fileKey = decryptFileKey(file);
         final encryptedMMd = await CryptoUtil.encryptChaCha(
             utf8.encode(jsonEncode(jsonToUpdate)), fileKey);
-        params['metadataList'].add(UpdateMagicMetadata(
+        params['metadataList'].add(UpdateMagicMetadataRequest(
             id: file.uploadedFileID,
             magicMetadata: MagicMetadata(
               version: file.mMdVersion,
@@ -96,17 +95,18 @@ class FileMagicService {
   }
 }
 
-class UpdateMagicMetadata {
-  int id;
-  MagicMetadata magicMetadata;
+class UpdateMagicMetadataRequest {
+  final int id;
+  final MagicMetadata magicMetadata;
 
-  UpdateMagicMetadata({this.id, this.magicMetadata});
+  UpdateMagicMetadataRequest({this.id, this.magicMetadata});
 
-  UpdateMagicMetadata.fromJson(dynamic json) {
-    id = json['id'];
-    magicMetadata = json['magicMetadata'] != null
-        ? MagicMetadata.fromJson(json['magicMetadata'])
-        : null;
+  factory UpdateMagicMetadataRequest.fromJson(dynamic json) {
+    return UpdateMagicMetadataRequest(
+        id: json['id'],
+        magicMetadata: json['magicMetadata'] != null
+            ? MagicMetadata.fromJson(json['magicMetadata'])
+            : null);
   }
 
   Map<String, dynamic> toJson() {
