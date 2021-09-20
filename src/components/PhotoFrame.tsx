@@ -53,7 +53,7 @@ const Container = styled.div`
     width: 100%;
     flex-wrap: wrap;
     margin: 0 auto;
-    overflow: hidden;
+    overflow-x: hidden;
     .pswp-thumbnail {
         display: inline-block;
         cursor: pointer;
