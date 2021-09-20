@@ -24,13 +24,7 @@ class DeduplicationService {
         ids.addAll(dupe.fileIDs);
       }
       final fileMap = await FilesDB.instance.getFilesFromIDs(ids);
-      final result = _computeDuplicates(dupes, fileMap);
-      result.sort((a, b) {
-        final aSize = a.files.length * a.size;
-        final bSize = b.files.length * b.size;
-        return bSize - aSize;
-      });
-      return result;
+      return _computeDuplicates(dupes, fileMap);
     } catch (e) {
       _logger.severe(e);
       rethrow;

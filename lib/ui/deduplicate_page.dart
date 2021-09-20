@@ -50,6 +50,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   final Set<File> _selectedFiles = <File>{};
 
+  SortKey sortKey = SortKey.size;
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +66,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   @override
   Widget build(BuildContext context) {
+    _sortDuplicates();
     return Scaffold(
       appBar: AppBar(
         title: Hero(
@@ -83,6 +86,20 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     );
   }
 
+  void _sortDuplicates() {
+    widget.duplicates.sort((first, second) {
+      if (sortKey == SortKey.size) {
+        final aSize = first.files.length * first.size;
+        final bSize = second.files.length * second.size;
+        return bSize - aSize;
+      } else if (sortKey == SortKey.count) {
+        return second.files.length - first.files.length;
+      } else {
+        return second.files.first.creationTime - first.files.first.creationTime;
+      }
+    });
+  }
+
   Widget _getBody() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -93,10 +110,12 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             itemBuilder: (context, index) {
               if (index == 0) {
                 return _getHeader();
+              } else if (index == 1) {
+                return _getSortMenu();
               }
               return Padding(
                 padding: const EdgeInsets.only(top: 10, bottom: 10),
-                child: _getGridView(widget.duplicates[index - 1], index - 1),
+                child: _getGridView(widget.duplicates[index - 2], index - 2),
               );
             },
             itemCount: widget.duplicates.length,
@@ -134,6 +153,75 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _getSortMenu() {
+    Text sortOptionText(SortKey key) {
+      String text = key.toString();
+      switch (key) {
+        case SortKey.count:
+          text = "count";
+          break;
+        case SortKey.size:
+          text = "total size";
+          break;
+        case SortKey.time:
+          text = "time";
+          break;
+      }
+      return Text(
+        text,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+          color: Colors.white.withOpacity(0.6),
+        ),
+      );
+    }
+
+    return Row(
+      // h4ck to align PopupMenuItems to end
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Container(),
+        PopupMenuButton(
+          initialValue: sortKey?.index ?? 0,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 6, 24, 6),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                sortOptionText(sortKey),
+                Padding(padding: EdgeInsets.only(left: 5.0)),
+                Icon(
+                  Icons.sort,
+                  color: Theme.of(context).buttonColor,
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
+          onSelected: (int index) {
+            setState(() {
+              sortKey = SortKey.values[index];
+            });
+          },
+          itemBuilder: (context) {
+            return List.generate(SortKey.values.length, (index) {
+              return PopupMenuItem(
+                value: index,
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: sortOptionText(SortKey.values[index]),
+                ),
+              );
+            });
+          },
+        ),
+      ],
     );
   }
 
@@ -243,4 +331,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       ),
     );
   }
+}
+
+enum SortKey {
+  size,
+  count,
+  time,
 }
