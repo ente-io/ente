@@ -45,7 +45,6 @@ import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
 import { getSelectedFileIds, sortFilesIntoCollections } from 'utils/file';
-import { addFilesToCollection } from 'utils/collection';
 import SearchBar, { DateValue } from 'components/SearchBar';
 import { Bbox } from 'services/searchService';
 import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
@@ -63,6 +62,10 @@ import Collections from 'components/pages/gallery/Collections';
 import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
 import { PAGES } from 'types';
+import {
+    copyOrMoveFromCollection,
+    COLLECTION_OPS_TYPE,
+} from 'utils/collection';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -295,7 +298,35 @@ export default function Gallery() {
     ) => {
         loadingBar.current?.continuousStart();
         try {
-            await addFilesToCollection(
+            await copyOrMoveFromCollection(
+                COLLECTION_OPS_TYPE.ADD,
+                setCollectionSelectorView,
+                selected,
+                files,
+                clearSelection,
+                syncWithRemote,
+                setActiveCollection,
+                collectionName,
+                collection
+            );
+        } catch (e) {
+            setDialogMessage({
+                title: constants.ERROR,
+                staticBackdrop: true,
+                close: { variant: 'danger' },
+                content: constants.UNKNOWN_ERROR,
+            });
+        }
+    };
+
+    const moveToCollectionHelper = async (
+        collectionName: string,
+        collection: Collection
+    ) => {
+        loadingBar.current?.continuousStart();
+        try {
+            await copyOrMoveFromCollection(
+                COLLECTION_OPS_TYPE.MOVE,
                 setCollectionSelectorView,
                 selected,
                 files,
@@ -488,6 +519,7 @@ export default function Gallery() {
                     selected.collectionID === activeCollection && (
                         <SelectedFileOptions
                             addToCollectionHelper={addToCollectionHelper}
+                            moveToCollectionHelper={moveToCollectionHelper}
                             showCreateCollectionModal={
                                 showCreateCollectionModal
                             }
