@@ -383,7 +383,7 @@ export const addToCollection = async (
     }
 };
 export const moveToCollection = async (
-    oldCollection: Collection,
+    oldCollectionID: number,
     newCollection: Collection,
     files: File[]
 ) => {
@@ -392,12 +392,12 @@ export const moveToCollection = async (
         await encryptWithNewCollectionKey(newCollection, files);
 
     const requestBody: MoveToCollectionRequest = {
-        fromCollectionID: oldCollection.id,
+        fromCollectionID: oldCollectionID,
         toCollectionID: newCollection.id,
         files: fileKeysEncryptedWithNewCollection,
     };
     await HTTPService.post(
-        `${ENDPOINT}/collections/add-files`,
+        `${ENDPOINT}/collections/move-files`,
         requestBody,
         null,
         {
