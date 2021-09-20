@@ -50,10 +50,10 @@ function CollectionSelector({
         if (!attributes) {
             return;
         }
-        const collectionOtherThanFrom = collectionsAndTheirLatestFile?.filter(
+        const collectionsOtherThanFrom = collectionsAndTheirLatestFile?.filter(
             (item) => !(item.collection.id === attributes.fromCollection)
         );
-        if (collectionOtherThanFrom.length === 0) {
+        if (collectionsOtherThanFrom.length === 0) {
             props.onHide();
             attributes.showNextModal();
         }
