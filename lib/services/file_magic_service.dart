@@ -63,7 +63,7 @@ class FileMagicService {
             utf8.encode(jsonEncode(jsonToUpdate)), fileKey);
         params['metadataList'].add(UpdateMagicMetadataRequest(
             id: file.uploadedFileID,
-            magicMetadata: MagicMetadata(
+            magicMetadata: MetadataRequest(
               version: file.mMdVersion,
               count: jsonToUpdate.length,
               data: Sodium.bin2base64(encryptedMMd.encryptedData),
@@ -97,7 +97,7 @@ class FileMagicService {
 
 class UpdateMagicMetadataRequest {
   final int id;
-  final MagicMetadata magicMetadata;
+  final MetadataRequest magicMetadata;
 
   UpdateMagicMetadataRequest({this.id, this.magicMetadata});
 
@@ -105,7 +105,7 @@ class UpdateMagicMetadataRequest {
     return UpdateMagicMetadataRequest(
         id: json['id'],
         magicMetadata: json['magicMetadata'] != null
-            ? MagicMetadata.fromJson(json['magicMetadata'])
+            ? MetadataRequest.fromJson(json['magicMetadata'])
             : null);
   }
 
@@ -119,15 +119,15 @@ class UpdateMagicMetadataRequest {
   }
 }
 
-class MagicMetadata {
+class MetadataRequest {
   int version;
   int count;
   String data;
   String header;
 
-  MagicMetadata({this.version, this.count, this.data, this.header});
+  MetadataRequest({this.version, this.count, this.data, this.header});
 
-  MagicMetadata.fromJson(dynamic json) {
+  MetadataRequest.fromJson(dynamic json) {
     version = json['version'];
     count = json['count'];
     data = json['data'];
