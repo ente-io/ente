@@ -40,6 +40,12 @@ Future<List<File>> convertIncomingSharedMediaToFile(
     List<SharedMediaFile> sharedMedia, int collectionID) async {
   List<File> localFiles = [];
   for (var media in sharedMedia) {
+    if (!(media.type == SharedMediaType.IMAGE ||
+        media.type == SharedMediaType.VIDEO)) {
+      _logger.warning(
+          "ignore unsupported file type ${media.type.toString()} path: ${media.path}");
+      continue;
+    }
     var enteFile = File();
     // fileName: img_x.jpg
     enteFile.title = basename(media.path);
