@@ -50,21 +50,22 @@ function CollectionSelector({
         if (!attributes) {
             return;
         }
-        const collectionOtherThanFrom = collectionsAndTheirLatestFile?.filter(
+        const collectionsOtherThanFrom = collectionsAndTheirLatestFile?.filter(
             (item) => !(item.collection.id === attributes.fromCollection)
         );
-        if (collectionOtherThanFrom.length === 0) {
+        if (collectionsOtherThanFrom.length === 0) {
             props.onHide();
             attributes.showNextModal();
+        } else {
+            collectionsAndTheirLatestFile = collectionsOtherThanFrom;
         }
     }, [props.show]);
 
     if (!attributes) {
         return <Modal />;
     }
-    const CollectionIcons: JSX.Element[] = collectionsAndTheirLatestFile
-        ?.filter((item) => !(item.collection.id === attributes.fromCollection))
-        .map((item) => (
+    const CollectionIcons: JSX.Element[] = collectionsAndTheirLatestFile?.map(
+        (item) => (
             <CollectionIcon
                 key={item.collection.id}
                 onClick={() => {
@@ -82,7 +83,8 @@ function CollectionSelector({
                     </Card.Text>
                 </CollectionCard>
             </CollectionIcon>
-        ));
+        )
+    );
 
     return (
         <Modal
