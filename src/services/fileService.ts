@@ -47,7 +47,7 @@ interface MagicMetadataProps {
 interface MagicMetadata {
     version: number;
     count: number;
-    data: MagicMetadataProps;
+    data: string | MagicMetadataProps;
     header: string;
 }
 export interface File {

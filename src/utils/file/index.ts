@@ -1,5 +1,10 @@
 import { Collection } from 'services/collectionService';
-import { File, FILE_TYPE, VISIBILITY_STATE } from 'services/fileService';
+import {
+    File,
+    fileAttribute,
+    FILE_TYPE,
+    VISIBILITY_STATE,
+} from 'services/fileService';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
 import CryptoWorker from 'utils/crypto';
@@ -128,7 +133,17 @@ export async function decryptFile(file: File, collection: Collection) {
         file.keyDecryptionNonce,
         collection.key
     );
-    file.metadata = await worker.decryptMetadata(file);
+    const encryptedMetadata = file.metadata as unknown as fileAttribute;
+    file.metadata = await worker.decryptMetadata(
+        encryptedMetadata.encryptedData,
+        encryptedMetadata.decryptionHeader,
+        file.key
+    );
+    file.magicMetadata.data = await worker.decryptMetadata(
+        file.magicMetadata.data,
+        file.magicMetadata.header,
+        file.key
+    );
     return file;
 }
 
@@ -191,6 +206,7 @@ export function fileIsArchived(file: File) {
         !file ||
         !file.magicMetadata ||
         !file.magicMetadata.data ||
+        typeof file.magicMetadata.data === 'string' ||
         typeof file.magicMetadata.data.visibility === 'undefined'
     ) {
         return false;
