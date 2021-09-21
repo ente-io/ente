@@ -40,6 +40,7 @@ export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
 export interface File {
     id: number;
     collectionID: number;
+    ownerID: number;
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: MetadataObject;
