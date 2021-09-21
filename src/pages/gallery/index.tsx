@@ -481,7 +481,7 @@ export default function Gallery() {
                 <Collections
                     collections={collections}
                     searchMode={searchMode}
-                    selected={Number(router.query.collection)}
+                    selected={activeCollection}
                     setActiveCollection={setActiveCollection}
                     syncWithRemote={syncWithRemote}
                     setDialogMessage={setDialogMessage}

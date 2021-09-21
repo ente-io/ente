@@ -1,4 +1,3 @@
-import router from 'next/router';
 import {
     DeadCenter,
     GalleryContext,
@@ -28,6 +27,7 @@ import {
     MIN_COLUMNS,
     SPACE_BTW_DATES,
 } from 'types';
+import { isSharedFile } from 'utils/file';
 
 const NO_OF_PAGES = 2;
 const A_DAY = 24 * 60 * 60 * 1000;
@@ -404,10 +404,13 @@ const PhotoFrame = ({
             ) {
                 return false;
             }
+            if (isSharedFile(item) && !isSharedCollection) {
+                return false;
+            }
             if (!idSet.has(item.id)) {
                 if (
-                    !router.query.collection ||
-                    router.query.collection === item.collectionID.toString()
+                    !activeCollection ||
+                    activeCollection === item.collectionID
                 ) {
                     idSet.add(item.id);
                     return true;
@@ -709,7 +712,7 @@ const PhotoFrame = ({
 
                             return (
                                 <List
-                                    key={`${columns}-${listItemHeight}-${router.query.collection}`}
+                                    key={`${columns}-${listItemHeight}-${activeCollection}`}
                                     ref={listRef}
                                     itemSize={getItemSize}
                                     height={height}
