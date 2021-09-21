@@ -41,10 +41,10 @@ export enum VISIBILITY_STATE {
     VISIBLE,
     ARCHIVED,
 }
-interface MagicMetadataProps {
-    visibility: VISIBILITY_STATE;
+export interface MagicMetadataProps {
+    visibility?: VISIBILITY_STATE;
 }
-interface MagicMetadata {
+export interface MagicMetadata {
     version: number;
     count: number;
     data: string | MagicMetadataProps;
@@ -69,6 +69,21 @@ export interface File {
     dataIndex: number;
     updationTime: number;
 }
+
+interface UpdateMagicMetadataRequest {
+    metadataList: UpdateMagicMetadata[];
+}
+interface UpdateMagicMetadata {
+    id: number;
+    magicMetadata: MagicMetadata;
+}
+
+export const NEW_MAGIC_METADATA: MagicMetadata = {
+    version: 0,
+    data: {},
+    header: null,
+    count: 0,
+};
 
 export const getLocalFiles = async () => {
     const files: Array<File> = (await localForage.getItem<File[]>(FILES)) || [];
@@ -242,24 +257,19 @@ export const deleteFiles = async (
     }
 };
 
-export const updateMagicMetadata = async (
-    fileID: number,
-    encryptedMagicMetadata: MagicMetadata
-) => {
+export const updateMagicMetadata = async (files: File[]) => {
     const token = getToken();
     if (!token) {
         return;
     }
-    await HTTPService.put(
-        `${ENDPOINT}/files/magic-metadata`,
-        {
-            metadataList: [
-                { id: fileID, magicMetadata: encryptedMagicMetadata },
-            ],
-        },
-        null,
-        {
-            'X-Auth-Token': token,
-        }
-    );
+    const reqBody: UpdateMagicMetadataRequest = { metadataList: [] };
+    for (const file of files) {
+        reqBody.metadataList.push({
+            id: file.id,
+            magicMetadata: file.magicMetadata,
+        });
+    }
+    await HTTPService.put(`${ENDPOINT}/files/magic-metadata`, reqBody, null, {
+        'X-Auth-Token': token,
+    });
 };
