@@ -1,5 +1,5 @@
 import { Collection } from 'services/collectionService';
-import { File, FILE_TYPE } from 'services/fileService';
+import { File, FILE_TYPE, VISIBILITY_STATE } from 'services/fileService';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
 import CryptoWorker from 'utils/crypto';
@@ -184,4 +184,16 @@ export async function convertForPreview(file: File, fileBlob: Blob) {
         fileBlob = await worker.convertHEIC2JPEG(fileBlob);
     }
     return fileBlob;
+}
+
+export function fileIsArchived(file: File) {
+    if (
+        !file ||
+        !file.magicMetadata ||
+        !file.magicMetadata.data ||
+        typeof file.magicMetadata.data.visibility === 'undefined'
+    ) {
+        return false;
+    }
+    return file.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
 }

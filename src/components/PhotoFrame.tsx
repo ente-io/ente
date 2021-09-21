@@ -28,6 +28,7 @@ import {
     MIN_COLUMNS,
     SPACE_BTW_DATES,
 } from 'types';
+import { fileIsArchived } from 'utils/file';
 
 const NO_OF_PAGES = 2;
 const A_DAY = 24 * 60 * 60 * 1000;
@@ -400,6 +401,9 @@ const PhotoFrame = ({
                 search.location &&
                 !isInsideBox(item.metadata, search.location)
             ) {
+                return false;
+            }
+            if (fileIsArchived(item) && activeCollection === 0) {
                 return false;
             }
             if (!idSet.has(item.id)) {

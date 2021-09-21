@@ -37,12 +37,26 @@ export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
     { fileType: FILE_TYPE.VIDEO, exactType: 'webm' },
 ];
 
+export enum VISIBILITY_STATE {
+    VISIBLE,
+    ARCHIVED,
+}
+interface MagicMetadataProps {
+    visibility: VISIBILITY_STATE;
+}
+interface MagicMetadata {
+    version: number;
+    count: number;
+    data: MagicMetadataProps;
+    header: string;
+}
 export interface File {
     id: number;
     collectionID: number;
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: MetadataObject;
+    magicMetadata: MagicMetadata;
     encryptedKey: string;
     keyDecryptionNonce: string;
     key: string;
