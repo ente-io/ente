@@ -79,9 +79,10 @@ const AlertContainer = styled.div`
     text-align: center;
 `;
 
-export type selectedState = {
+export type SelectedState = {
     [k: number]: boolean;
     count: number;
+    collectionID: number;
 };
 export type SetFiles = React.Dispatch<React.SetStateAction<File[]>>;
 export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
@@ -125,7 +126,10 @@ export default function Gallery() {
     );
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
-    const [selected, setSelected] = useState<selectedState>({ count: 0 });
+    const [selected, setSelected] = useState<SelectedState>({
+        count: 0,
+        collectionID: 0,
+    });
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [dialogView, setDialogView] = useState(false);
     const [planModalView, setPlanModalView] = useState(false);
@@ -162,6 +166,7 @@ export default function Gallery() {
     const appContext = useContext(AppContext);
     const [collectionFilesCount, setCollectionFilesCount] =
         useState<Map<number, number>>();
+    const [activeCollection, setActiveCollection] = useState(0);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -196,12 +201,21 @@ export default function Gallery() {
     }, []);
 
     useEffect(() => setDialogView(true), [dialogMessage]);
+
     useEffect(() => {
         if (collectionSelectorAttributes) {
             setCollectionSelectorView(true);
         }
     }, [collectionSelectorAttributes]);
+
     useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
+
+    useEffect(() => {
+        const href = `/gallery${
+            activeCollection ? `?collection=${activeCollection.toString()}` : ''
+        }`;
+        router.push(href, undefined, { shallow: true });
+    }, [activeCollection]);
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
@@ -269,12 +283,7 @@ export default function Gallery() {
     };
 
     const clearSelection = function () {
-        setSelected({ count: 0 });
-    };
-
-    const selectCollection = (id?: number) => {
-        const href = `/gallery${id ? `?collection=${id.toString()}` : ''}`;
-        router.push(href, undefined, { shallow: true });
+        setSelected({ count: 0, collectionID: 0 });
     };
 
     if (!files) {
@@ -292,7 +301,7 @@ export default function Gallery() {
                 files,
                 clearSelection,
                 syncWithRemote,
-                selectCollection,
+                setActiveCollection,
                 collectionName,
                 collection
             );
@@ -402,7 +411,7 @@ export default function Gallery() {
                     collections={collections}
                     searchMode={searchMode}
                     selected={Number(router.query.collection)}
-                    selectCollection={selectCollection}
+                    setActiveCollection={setActiveCollection}
                     syncWithRemote={syncWithRemote}
                     setDialogMessage={setDialogMessage}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
@@ -473,20 +482,24 @@ export default function Gallery() {
                     setSearchStats={setSearchStats}
                     deleted={deleted}
                     setDialogMessage={setDialogMessage}
+                    activeCollection={activeCollection}
                 />
-                {selected.count > 0 && (
-                    <SelectedFileOptions
-                        addToCollectionHelper={addToCollectionHelper}
-                        showCreateCollectionModal={showCreateCollectionModal}
-                        setDialogMessage={setDialogMessage}
-                        setCollectionSelectorAttributes={
-                            setCollectionSelectorAttributes
-                        }
-                        deleteFileHelper={deleteFileHelper}
-                        count={selected.count}
-                        clearSelection={clearSelection}
-                    />
-                )}
+                {selected.count > 0 &&
+                    selected.collectionID === activeCollection && (
+                        <SelectedFileOptions
+                            addToCollectionHelper={addToCollectionHelper}
+                            showCreateCollectionModal={
+                                showCreateCollectionModal
+                            }
+                            setDialogMessage={setDialogMessage}
+                            setCollectionSelectorAttributes={
+                                setCollectionSelectorAttributes
+                            }
+                            deleteFileHelper={deleteFileHelper}
+                            count={selected.count}
+                            clearSelection={clearSelection}
+                        />
+                    )}
             </FullScreenDropZone>
         </GalleryContext.Provider>
     );

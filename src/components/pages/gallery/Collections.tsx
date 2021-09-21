@@ -18,7 +18,7 @@ import OptionIcon, { OptionIconWrapper } from './OptionIcon';
 interface CollectionProps {
     collections: Collection[];
     selected?: number;
-    selectCollection: (id?: number) => void;
+    setActiveCollection: (id?: number) => void;
     setDialogMessage: SetDialogMessage;
     syncWithRemote: () => Promise<void>;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -69,7 +69,7 @@ const Chip = styled.button<{ active: boolean }>`
 `;
 
 export default function Collections(props: CollectionProps) {
-    const { selected, collections, selectCollection } = props;
+    const { selected, collections, setActiveCollection } = props;
     const [selectedCollectionID, setSelectedCollectionID] =
         useState<number>(null);
     const collectionRef = useRef<HTMLDivElement>(null);
@@ -102,7 +102,7 @@ export default function Collections(props: CollectionProps) {
 
     const clickHandler = (collection?: Collection) => () => {
         setSelectedCollectionID(collection?.id);
-        selectCollection(collection?.id);
+        setActiveCollection(collection?.id);
     };
 
     const user: User = getData(LS_KEYS.USER);
@@ -119,7 +119,7 @@ export default function Collections(props: CollectionProps) {
         setDialogMessage: props.setDialogMessage,
         startLoadingBar: props.startLoadingBar,
         showCollectionShareModal: setCollectionShareModalView.bind(null, true),
-        redirectToAll: selectCollection.bind(null, null),
+        redirectToAll: setActiveCollection.bind(null, 0),
     });
 
     const scrollCollection = (direction: SCROLL_DIRECTION) => () => {
