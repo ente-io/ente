@@ -246,7 +246,7 @@ export async function archiveFiles(files: File[], selected: SelectedState) {
         const encryptedMagicMetadata: EncryptionResult =
             await worker.encryptMetadata(updatedMagicMetadataProps, file.key);
         file.magicMetadata = {
-            version: file.magicMetadata.version + 1,
+            version: file.magicMetadata.version,
             count: Object.keys(updatedMagicMetadataProps).length,
             data: encryptedMagicMetadata.file
                 .encryptedData as unknown as string,
