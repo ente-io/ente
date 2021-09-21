@@ -7,6 +7,7 @@ import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { decryptFile, sortFiles } from 'utils/file';
+import QueueProcessor from './upload/queueProcessor';
 
 const ENDPOINT = getEndpoint();
 const DIFF_LIMIT: number = 1000;
@@ -84,6 +85,7 @@ export const NEW_MAGIC_METADATA: MagicMetadata = {
     header: null,
     count: 0,
 };
+const PARALLEL_FILE_DECRYPTION = 20;
 
 export const getLocalFiles = async () => {
     const files: Array<File> = (await localForage.getItem<File[]>(FILES)) || [];
@@ -189,17 +191,18 @@ export const getFiles = async (
                     'X-Auth-Token': token,
                 }
             );
-
-            decryptedFiles.push(
-                ...(await Promise.all(
-                    resp.data.diff.map(async (file: File) => {
-                        if (!file.isDeleted) {
-                            file = await decryptFile(file, collection);
-                        }
-                        return file;
-                    }) as Promise<File>[]
-                ))
-            );
+            const fileDecrypter = new QueueProcessor(PARALLEL_FILE_DECRYPTION);
+            for (let file of resp.data.diff) {
+                if (!file.isDeleted) {
+                    file = await fileDecrypter.queueUpRequest(() =>
+                        decryptFile(file, collection)
+                    ).promise;
+                    if (!file) {
+                        return;
+                    }
+                }
+                decryptedFiles.push(file);
+            }
 
             if (resp.data.diff.length) {
                 time = resp.data.diff.slice(-1)[0].updationTime;
