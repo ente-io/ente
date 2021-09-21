@@ -135,24 +135,30 @@ export function sortFiles(files: File[]) {
 }
 
 export async function decryptFile(file: File, collection: Collection) {
-    const worker = await new CryptoWorker();
-    file.key = await worker.decryptB64(
-        file.encryptedKey,
-        file.keyDecryptionNonce,
-        collection.key
-    );
-    const encryptedMetadata = file.metadata as unknown as fileAttribute;
-    file.metadata = await worker.decryptMetadata(
-        encryptedMetadata.encryptedData,
-        encryptedMetadata.decryptionHeader,
-        file.key
-    );
-    file.magicMetadata.data = await worker.decryptMetadata(
-        file.magicMetadata.data,
-        file.magicMetadata.header,
-        file.key
-    );
-    return file;
+    try {
+        const worker = await new CryptoWorker();
+        file.key = await worker.decryptB64(
+            file.encryptedKey,
+            file.keyDecryptionNonce,
+            collection.key
+        );
+        const encryptedMetadata = file.metadata as unknown as fileAttribute;
+        file.metadata = await worker.decryptMetadata(
+            encryptedMetadata.encryptedData,
+            encryptedMetadata.decryptionHeader,
+            file.key
+        );
+        if (file.magicMetadata?.data) {
+            file.magicMetadata.data = await worker.decryptMetadata(
+                file.magicMetadata.data,
+                file.magicMetadata.header,
+                file.key
+            );
+        }
+        return file;
+    } catch (e) {
+        logError(e, 'file decryption failed');
+    }
 }
 
 export function removeUnnecessaryFileProps(files: File[]): File[] {
@@ -238,7 +244,7 @@ export async function archiveFiles(files: File[], selected: SelectedState) {
             visibility: VISIBILITY_STATE.ARCHIVED,
         };
         const encryptedMagicMetadata: EncryptionResult =
-            await worker.encryptMetadata(updatedMagicMetadataProps);
+            await worker.encryptMetadata(updatedMagicMetadataProps, file.key);
         file.magicMetadata = {
             version: file.magicMetadata.version + 1,
             count: Object.keys(updatedMagicMetadataProps).length,
