@@ -241,3 +241,25 @@ export const deleteFiles = async (
         throw e;
     }
 };
+
+export const updateMagicMetadata = async (
+    fileID: number,
+    encryptedMagicMetadata: MagicMetadata
+) => {
+    const token = getToken();
+    if (!token) {
+        return;
+    }
+    await HTTPService.put(
+        `${ENDPOINT}/files/magic-metadata`,
+        {
+            metadataList: [
+                { id: fileID, magicMetadata: encryptedMagicMetadata },
+            ],
+        },
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+};
