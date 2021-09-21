@@ -363,10 +363,9 @@ export default function Gallery() {
         loadingBar.current?.continuousStart();
         try {
             const fileIds = getSelectedFileIds(selected);
-            await deleteFiles(fileIds, clearSelection, syncWithRemote);
+            await deleteFiles(fileIds);
             setDeleted([...deleted, ...fileIds]);
         } catch (e) {
-            loadingBar.current.complete();
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
@@ -375,8 +374,6 @@ export default function Gallery() {
                         close: { variant: 'danger' },
                         content: constants.NOT_FILE_OWNER,
                     });
-                    loadingBar.current.complete();
-                    return;
             }
             setDialogMessage({
                 title: constants.ERROR,
@@ -384,6 +381,10 @@ export default function Gallery() {
                 close: { variant: 'danger' },
                 content: constants.UNKNOWN_ERROR,
             });
+        } finally {
+            clearSelection();
+            syncWithRemote();
+            loadingBar.current.complete();
         }
     };
 

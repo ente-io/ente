@@ -231,11 +231,7 @@ const removeDeletedCollectionFiles = async (
     return files;
 };
 
-export const deleteFiles = async (
-    filesToDelete: number[],
-    clearSelection: Function,
-    syncWithRemote: Function
-) => {
+export const deleteFiles = async (filesToDelete: number[]) => {
     try {
         const token = getToken();
         if (!token) {
@@ -249,8 +245,6 @@ export const deleteFiles = async (
                 'X-Auth-Token': token,
             }
         );
-        clearSelection();
-        syncWithRemote();
     } catch (e) {
         logError(e, 'delete failed');
         throw e;
