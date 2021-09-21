@@ -65,7 +65,6 @@ import { PAGES } from 'types';
 import {
     copyOrMoveFromCollection,
     COLLECTION_OPS_TYPE,
-    addIsSharedProperty,
     isSharedCollection,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
@@ -285,11 +284,7 @@ export default function Gallery() {
         collections: Collection[],
         files: File[]
     ) => {
-        const collectionsWithIsSharedInfo = addIsSharedProperty(collections);
-        const nonEmptyCollections = getNonEmptyCollections(
-            collectionsWithIsSharedInfo,
-            files
-        );
+        const nonEmptyCollections = getNonEmptyCollections(collections, files);
         const collectionsAndTheirLatestFile = getCollectionsAndTheirLatestFile(
             nonEmptyCollections,
             files

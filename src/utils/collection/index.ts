@@ -61,22 +61,13 @@ export function getSelectedCollection(collectionID: number, collections) {
     return collections.find((collection) => collection.id === collectionID);
 }
 
-export function addIsSharedProperty(collections: Collection[]) {
-    const user: User = getData(LS_KEYS.USER);
-    for (const collection of collections) {
-        if (user.id === collection.owner.id) {
-            collection.isSharedCollection = false;
-        } else {
-            collection.isSharedCollection = true;
-        }
-    }
-    return collections;
-}
-
 export function isSharedCollection(
     collections: Collection[],
     collectionID: number
 ) {
-    return !!collections.find((collection) => collection.id === collectionID)
-        ?.isSharedCollection;
+    const user: User = getData(LS_KEYS.USER);
+    return (
+        collections.find((collection) => collection.id === collectionID)?.owner
+            .id === user.id
+    );
 }
