@@ -32,12 +32,11 @@ import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
 import { Subscription } from 'services/billingService';
 import { PAGES } from 'types';
-
+import { ARCHIVE_COLLECTION } from 'components/pages/gallery/Collections';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
     setLoading: SetLoading;
-    showPlanSelectorModal: () => void;
 }
 export default function Sidebar(props: Props) {
     const [usage, SetUsage] = useState<string>(null);
@@ -52,7 +51,6 @@ export default function Sidebar(props: Props) {
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
     const [exportModalView, setExportModalView] = useState(false);
     const galleryContext = useContext(GalleryContext);
-    galleryContext.showPlanSelectorModal = props.showPlanSelectorModal;
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -110,7 +108,7 @@ export default function Sidebar(props: Props) {
     const router = useRouter();
     function onManageClick() {
         setIsOpen(false);
-        props.showPlanSelectorModal();
+        galleryContext.showPlanSelectorModal();
     }
     return (
         <Menu
@@ -284,6 +282,14 @@ export default function Sidebar(props: Props) {
                         </div>
                     </LinkButton>
                 </>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => {
+                        galleryContext.setActiveCollection(ARCHIVE_COLLECTION);
+                        setIsOpen(false);
+                    }}>
+                    {constants.ARCHIVE}
+                </LinkButton>
                 <div
                     style={{
                         height: '1px',

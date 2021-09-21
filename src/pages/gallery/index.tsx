@@ -107,12 +107,14 @@ type GalleryContextType = {
     thumbs: Map<number, string>;
     files: Map<number, string>;
     showPlanSelectorModal: () => void;
+    setActiveCollection: (collection: number) => void;
 };
 
 const defaultGalleryContext: GalleryContextType = {
     thumbs: new Map(),
     files: new Map(),
     showPlanSelectorModal: () => null,
+    setActiveCollection: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -401,7 +403,12 @@ export default function Gallery() {
     };
 
     return (
-        <GalleryContext.Provider value={defaultGalleryContext}>
+        <GalleryContext.Provider
+            value={{
+                ...defaultGalleryContext,
+                showPlanSelectorModal: () => setPlanModalView(true),
+                setActiveCollection,
+            }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
                 getInputProps={getInputProps}
@@ -497,7 +504,6 @@ export default function Gallery() {
                     collections={collections}
                     setDialogMessage={setDialogMessage}
                     setLoading={setLoading}
-                    showPlanSelectorModal={() => setPlanModalView(true)}
                 />
                 <UploadButton
                     isFirstFetch={isFirstFetch}

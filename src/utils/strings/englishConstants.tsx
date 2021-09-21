@@ -542,6 +542,7 @@ const englishConstants = {
     TOO_LARGE_INFO:
         'these files were not uploaded as they exceed the maximum size limit for your storage plan',
     UPLOAD_TO_COLLECTION: 'upload to album',
+    ARCHIVE: 'archive',
 };
 
 export default englishConstants;

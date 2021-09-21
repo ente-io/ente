@@ -15,6 +15,7 @@ import { SetCollectionNamerAttributes } from './CollectionNamer';
 import CollectionOptions from './CollectionOptions';
 import OptionIcon, { OptionIconWrapper } from './OptionIcon';
 
+export const ARCHIVE_COLLECTION = -1;
 interface CollectionProps {
     collections: Collection[];
     selected?: number;
