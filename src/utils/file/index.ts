@@ -1,13 +1,18 @@
+import { SelectedState } from 'pages/gallery';
 import { Collection } from 'services/collectionService';
 import {
     File,
     fileAttribute,
     FILE_TYPE,
+    MagicMetadataProps,
+    NEW_MAGIC_METADATA,
     VISIBILITY_STATE,
 } from 'services/fileService';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
+import { EncryptionResult } from 'services/upload/uploadService';
 import CryptoWorker from 'utils/crypto';
+import { logError } from 'utils/sentry';
 
 export const TYPE_HEIC = 'heic';
 export const TYPE_HEIF = 'heif';
@@ -47,7 +52,7 @@ export function sortFilesIntoCollections(files: File[]) {
     return collectionWiseFiles;
 }
 
-export function getSelectedFileIds(selectedFiles) {
+export function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
     for (const [key, val] of Object.entries(selectedFiles)) {
         if (typeof val === 'boolean' && val) {
@@ -56,7 +61,10 @@ export function getSelectedFileIds(selectedFiles) {
     }
     return filesIDs;
 }
-export function getSelectedFiles(selectedFiles, files: File[]): File[] {
+export function getSelectedFiles(
+    selectedFiles: SelectedState,
+    files: File[]
+): File[] {
     const filesIDs = new Set(getSelectedFileIds(selectedFiles));
     const filesToDelete: File[] = [];
     for (const file of files) {
@@ -212,4 +220,32 @@ export function fileIsArchived(file: File) {
         return false;
     }
     return file.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
+}
+
+export async function archiveFiles(files: File[], selected: SelectedState) {
+    const worker = await new CryptoWorker();
+    const selectedFiles = getSelectedFiles(selected, files);
+    for (const file of selectedFiles) {
+        if (!file.magicMetadata) {
+            file.magicMetadata = NEW_MAGIC_METADATA;
+        }
+        if (typeof file.magicMetadata.data === 'string') {
+            logError(Error('magic metadata not decrypted'), '');
+            return;
+        }
+        const updatedMagicMetadataProps: MagicMetadataProps = {
+            ...file.magicMetadata.data,
+            visibility: VISIBILITY_STATE.ARCHIVED,
+        };
+        const encryptedMagicMetadata: EncryptionResult =
+            await worker.encryptMetadata(updatedMagicMetadataProps);
+        file.magicMetadata = {
+            version: file.magicMetadata.version + 1,
+            count: Object.keys(updatedMagicMetadataProps).length,
+            data: encryptedMagicMetadata.file
+                .encryptedData as unknown as string,
+            header: encryptedMagicMetadata.file.decryptionHeader,
+        };
+    }
+    return selectedFiles;
 }

@@ -12,6 +12,7 @@ import {
     getLocalFiles,
     deleteFiles,
     syncFiles,
+    updateMagicMetadata,
 } from 'services/fileService';
 import styled from 'styled-components';
 import LoadingBar from 'react-top-loading-bar';
@@ -44,7 +45,11 @@ import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
-import { getSelectedFileIds, sortFilesIntoCollections } from 'utils/file';
+import {
+    archiveFiles,
+    getSelectedFileIds,
+    sortFilesIntoCollections,
+} from 'utils/file';
 import { addFilesToCollection } from 'utils/collection';
 import SearchBar, { DateValue } from 'components/SearchBar';
 import { Bbox } from 'services/searchService';
@@ -314,6 +319,36 @@ export default function Gallery() {
             });
         }
     };
+    const archiveFilesHelper = async () => {
+        loadingBar.current?.continuousStart();
+        try {
+            const archivedFiles = await archiveFiles(files, selected);
+            await updateMagicMetadata(archivedFiles);
+            setDeleted([...deleted, ...archivedFiles.map((file) => file.id)]);
+        } catch (e) {
+            console.log(e);
+            switch (e.status?.toString()) {
+                case ServerErrorCodes.FORBIDDEN:
+                    setDialogMessage({
+                        title: constants.ERROR,
+                        staticBackdrop: true,
+                        close: { variant: 'danger' },
+                        content: constants.NOT_FILE_OWNER,
+                    });
+                    return;
+            }
+            setDialogMessage({
+                title: constants.ERROR,
+                staticBackdrop: true,
+                close: { variant: 'danger' },
+                content: constants.UNKNOWN_ERROR,
+            });
+        } finally {
+            clearSelection();
+            syncWithRemote();
+            loadingBar.current.complete();
+        }
+    };
 
     const showCreateCollectionModal = () =>
         setCollectionNamerAttributes({
@@ -488,6 +523,7 @@ export default function Gallery() {
                     selected.collectionID === activeCollection && (
                         <SelectedFileOptions
                             addToCollectionHelper={addToCollectionHelper}
+                            archiveFilesHelper={archiveFilesHelper}
                             showCreateCollectionModal={
                                 showCreateCollectionModal
                             }

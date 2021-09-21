@@ -8,6 +8,7 @@ import CrossIcon from 'components/icons/CrossIcon';
 import AddIcon from 'components/icons/AddIcon';
 import { IconButton } from 'components/Container';
 import constants from 'utils/strings/constants';
+import Archive from 'components/icons/archive';
 
 interface Props {
     addToCollectionHelper: (collectionName, collection) => void;
@@ -17,6 +18,7 @@ interface Props {
     deleteFileHelper: () => void;
     count: number;
     clearSelection: () => void;
+    archiveFilesHelper: () => void;
 }
 
 const SelectionBar = styled(Navbar)`
@@ -41,6 +43,7 @@ const SelectedFileOptions = ({
     deleteFileHelper,
     count,
     clearSelection,
+    archiveFilesHelper,
 }: Props) => {
     const addToCollection = () =>
         setCollectionSelectorAttributes({
@@ -72,6 +75,9 @@ const SelectedFileOptions = ({
                     {count} {constants.SELECTED}
                 </div>
             </SelectionContainer>
+            <IconButton onClick={archiveFilesHelper}>
+                <Archive />
+            </IconButton>
             <IconButton onClick={addToCollection}>
                 <AddIcon />
             </IconButton>
