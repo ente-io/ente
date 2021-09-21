@@ -66,8 +66,12 @@ export function isSharedCollection(
     collectionID: number
 ) {
     const user: User = getData(LS_KEYS.USER);
-    return (
-        collections.find((collection) => collection.id === collectionID)?.owner
-            .id !== user.id
+
+    const collection = collections.find(
+        (collection) => collection.id === collectionID
     );
+    if (!collection) {
+        return false;
+    }
+    return collection?.owner.id !== user.id;
 }
