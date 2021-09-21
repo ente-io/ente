@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Modal } from 'react-bootstrap';
 import styled from 'styled-components';
 import {
@@ -46,6 +46,9 @@ function CollectionSelector({
     collectionsAndTheirLatestFile,
     ...props
 }: Props) {
+    const [collectionToShow, setCollectionToShow] = useState<
+        CollectionAndItsLatestFile[]
+    >([]);
     useEffect(() => {
         if (!attributes) {
             return;
@@ -57,34 +60,32 @@ function CollectionSelector({
             props.onHide();
             attributes.showNextModal();
         } else {
-            collectionsAndTheirLatestFile = collectionsOtherThanFrom;
+            setCollectionToShow(collectionsOtherThanFrom);
         }
     }, [props.show]);
 
     if (!attributes) {
         return <Modal />;
     }
-    const CollectionIcons: JSX.Element[] = collectionsAndTheirLatestFile?.map(
-        (item) => (
-            <CollectionIcon
-                key={item.collection.id}
-                onClick={() => {
-                    attributes.callback(item.collection);
-                    props.onHide();
-                }}>
-                <CollectionCard>
-                    <PreviewCard
-                        file={item.file}
-                        updateUrl={() => {}}
-                        forcedEnable
-                    />
-                    <Card.Text className="text-center">
-                        {item.collection.name}
-                    </Card.Text>
-                </CollectionCard>
-            </CollectionIcon>
-        )
-    );
+    const CollectionIcons: JSX.Element[] = collectionToShow?.map((item) => (
+        <CollectionIcon
+            key={item.collection.id}
+            onClick={() => {
+                attributes.callback(item.collection);
+                props.onHide();
+            }}>
+            <CollectionCard>
+                <PreviewCard
+                    file={item.file}
+                    updateUrl={() => {}}
+                    forcedEnable
+                />
+                <Card.Text className="text-center">
+                    {item.collection.name}
+                </Card.Text>
+            </CollectionCard>
+        </CollectionIcon>
+    ));
 
     return (
         <Modal

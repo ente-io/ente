@@ -443,11 +443,7 @@ export default function Gallery() {
         <GalleryContext.Provider value={defaultGalleryContext}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
-                getInputProps={getInputProps}
-                showCollectionSelector={setCollectionSelectorView.bind(
-                    null,
-                    true
-                )}>
+                getInputProps={getInputProps}>
                 {loading && (
                     <LoadingOverlay>
                         <EnteSpinner />
