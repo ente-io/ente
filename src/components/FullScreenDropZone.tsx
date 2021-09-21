@@ -39,7 +39,6 @@ const Overlay = styled.div`
 type Props = React.PropsWithChildren<{
     getRootProps: any;
     getInputProps: any;
-    showCollectionSelector;
 }>;
 
 export default function FullScreenDropZone(props: Props) {
