@@ -176,7 +176,6 @@ export default function Gallery() {
     const syncInProgress = useRef(true);
     const resync = useRef(false);
     const [deleted, setDeleted] = useState<number[]>([]);
-    const [archived, setArchived] = useState<number[]>([]);
     const appContext = useContext(AppContext);
     const [collectionFilesCount, setCollectionFilesCount] =
         useState<Map<number, number>>();
@@ -380,7 +379,6 @@ export default function Gallery() {
                 VISIBILITY_STATE.ARCHIVED
             );
             await updateMagicMetadata(archivedFiles);
-            setArchived([...archived, ...archivedFiles.map((file) => file.id)]);
         } catch (e) {
             console.log(e);
             switch (e.status?.toString()) {
@@ -415,10 +413,6 @@ export default function Gallery() {
                 VISIBILITY_STATE.VISIBLE
             );
             await updateMagicMetadata(unarchiveFiles);
-            const unarchiveFileIds = unarchiveFiles.map((file) => file.id);
-            setArchived(
-                archived.filter((id) => !unarchiveFileIds.includes(id))
-            );
         } catch (e) {
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
@@ -637,7 +631,6 @@ export default function Gallery() {
                     search={search}
                     setSearchStats={setSearchStats}
                     deleted={deleted}
-                    archived={archived}
                     setDialogMessage={setDialogMessage}
                     activeCollection={activeCollection}
                     isSharedCollection={isSharedCollectionActive}
