@@ -150,6 +150,7 @@ interface Props {
     search: Search;
     setSearchStats: setSearchStats;
     deleted?: number[];
+    archived?: number[];
     setDialogMessage: SetDialogMessage;
     activeCollection: number;
     isSharedCollection: boolean;
@@ -169,6 +170,7 @@ const PhotoFrame = ({
     search,
     setSearchStats,
     deleted,
+    archived,
     setDialogMessage,
     activeCollection,
     isSharedCollection,
@@ -406,7 +408,10 @@ const PhotoFrame = ({
             ) {
                 return false;
             }
-            if (activeCollection === 0 && fileIsArchived(item)) {
+            if (
+                activeCollection === 0 &&
+                (fileIsArchived(item) || archived.includes(item.id))
+            ) {
                 return false;
             }
             if (activeCollection === ARCHIVE_SECTION && !fileIsArchived(item)) {

@@ -175,6 +175,7 @@ export default function Gallery() {
     const syncInProgress = useRef(true);
     const resync = useRef(false);
     const [deleted, setDeleted] = useState<number[]>([]);
+    const [archived, setArchived] = useState<number[]>([]);
     const appContext = useContext(AppContext);
     const [collectionFilesCount, setCollectionFilesCount] =
         useState<Map<number, number>>();
@@ -374,7 +375,7 @@ export default function Gallery() {
         try {
             const archivedFiles = await archiveFiles(files, selected);
             await updateMagicMetadata(archivedFiles);
-            setDeleted([...deleted, ...archivedFiles.map((file) => file.id)]);
+            setArchived([...archived, ...archivedFiles.map((file) => file.id)]);
         } catch (e) {
             console.log(e);
             switch (e.status?.toString()) {
@@ -594,6 +595,7 @@ export default function Gallery() {
                     search={search}
                     setSearchStats={setSearchStats}
                     deleted={deleted}
+                    archived={archived}
                     setDialogMessage={setDialogMessage}
                     activeCollection={activeCollection}
                     isSharedCollection={isSharedCollectionActive}
