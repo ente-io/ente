@@ -16,7 +16,7 @@ import { SetCollectionNamerAttributes } from './CollectionNamer';
 import CollectionOptions from './CollectionOptions';
 import OptionIcon, { OptionIconWrapper } from './OptionIcon';
 
-export const ARCHIVE_COLLECTION = -1;
+export const ARCHIVE_SECTION = -1;
 export const ALL_SECTION = 0;
 
 interface CollectionProps {
@@ -221,8 +221,8 @@ export default function Collections(props: CollectionProps) {
                             </OverlayTrigger>
                         ))}
                         <Chip
-                            active={activeCollection === ARCHIVE_COLLECTION}
-                            onClick={clickHandler(ARCHIVE_COLLECTION)}>
+                            active={activeCollection === ARCHIVE_SECTION}
+                            onClick={clickHandler(ARCHIVE_SECTION)}>
                             {constants.ARCHIVE}
                             <div
                                 style={{

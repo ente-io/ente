@@ -32,7 +32,7 @@ import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
 import { Subscription } from 'services/billingService';
 import { PAGES } from 'types';
-import { ARCHIVE_COLLECTION } from 'components/pages/gallery/Collections';
+import { ARCHIVE_SECTION } from 'components/pages/gallery/Collections';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -285,7 +285,7 @@ export default function Sidebar(props: Props) {
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={() => {
-                        galleryContext.setActiveCollection(ARCHIVE_COLLECTION);
+                        galleryContext.setActiveCollection(ARCHIVE_SECTION);
                         setIsOpen(false);
                     }}>
                     {constants.ARCHIVE}

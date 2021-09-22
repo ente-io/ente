@@ -29,7 +29,7 @@ import {
     SPACE_BTW_DATES,
 } from 'types';
 import { fileIsArchived } from 'utils/file';
-import { ARCHIVE_COLLECTION } from './pages/gallery/Collections';
+import { ARCHIVE_SECTION } from './pages/gallery/Collections';
 
 const NO_OF_PAGES = 2;
 const A_DAY = 24 * 60 * 60 * 1000;
@@ -407,10 +407,7 @@ const PhotoFrame = ({
             if (activeCollection === 0 && fileIsArchived(item)) {
                 return false;
             }
-            if (
-                activeCollection === ARCHIVE_COLLECTION &&
-                !fileIsArchived(item)
-            ) {
+            if (activeCollection === ARCHIVE_SECTION && !fileIsArchived(item)) {
                 return false;
             }
 
