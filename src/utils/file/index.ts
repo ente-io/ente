@@ -191,7 +191,7 @@ export async function convertForPreview(file: File, fileBlob: Blob) {
 export function isSharedFile(file: File) {
     const user: User = getData(LS_KEYS.USER);
 
-    if (!user.id || !file.ownerID) {
+    if (!user?.id || !file?.ownerID) {
         return false;
     }
     return file.ownerID !== user.id;
