@@ -24,20 +24,21 @@ class DeduplicationService {
         ids.addAll(dupe.fileIDs);
       }
       final fileMap = await FilesDB.instance.getFilesFromIDs(ids);
-      return _computeDuplicates(dupes, fileMap);
+      return _filterDuplicatesByCreationTime(dupes, fileMap);
     } catch (e) {
       _logger.severe(e);
       rethrow;
     }
   }
 
-  List<DuplicateFiles> _computeDuplicates(
+  List<DuplicateFiles> _filterDuplicatesByCreationTime(
       DuplicateFilesResponse dupes, Map<int, File> fileMap) {
     final result = <DuplicateFiles>[];
     for (final dupe in dupes.duplicates) {
       final files = <File>[];
       final Map<int, int> creationTimeCounter = {};
       int mostFrequentCreationTime = 0, mostFrequentCreationTimeCount = 0;
+      // Counts the frequency of creationTimes within the supposed duplicates
       for (final id in dupe.fileIDs) {
         final file = fileMap[id];
         if (file != null) {
@@ -60,6 +61,7 @@ class DeduplicationService {
                   "Could not find file in local DB " + id.toString()));
         }
       }
+      // Ignores those files that were not created within the most common creationTime
       final incorrectDuplicates = <File>{};
       for (final file in files) {
         if (file.creationTime != mostFrequentCreationTime) {
