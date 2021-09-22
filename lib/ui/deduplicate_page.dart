@@ -102,36 +102,28 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   }
 
   Widget _getBody() {
-    return Stack(
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return _getHeader();
-                  } else if (index == 1) {
-                    return _getSortMenu();
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 10, bottom: 10),
-                    child:
-                        _getGridView(widget.duplicates[index - 2], index - 2),
-                  );
-                },
-                itemCount: widget.duplicates.length,
-                shrinkWrap: true,
-              ),
-            ),
-            // Padding(padding: EdgeInsets.all(6)),
-            // _getDeleteButton(),
-            // Padding(padding: EdgeInsets.all(6)),
-          ],
+        Expanded(
+          child: ListView.builder(
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return _getHeader();
+              } else if (index == 1) {
+                return _getSortMenu();
+              }
+              return Padding(
+                padding: const EdgeInsets.only(top: 10, bottom: 10),
+                child: _getGridView(widget.duplicates[index - 2], index - 2),
+              );
+            },
+            itemCount: widget.duplicates.length,
+            shrinkWrap: true,
+          ),
         ),
-        _getDeleteButton(),
+        _selectedFiles.isEmpty ? Container() : _getDeleteButton(),
       ],
     );
   }
@@ -234,9 +226,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   Widget _getDeleteButton() {
     String text;
-    if (_selectedFiles.isEmpty) {
-      text = "delete";
-    } else if (_selectedFiles.length == 1) {
+    if (_selectedFiles.length == 1) {
       text = "delete 1 item";
     } else {
       text = "delete " + _selectedFiles.length.toString() + " items";
@@ -252,52 +242,36 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             Bus.instance.fire(UserDetailsChangedEvent());
             Navigator.of(context).pop(_selectedFiles.length);
           };
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Container(
-        padding: EdgeInsets.only(top: 4, bottom: 4),
-        height: 78,
-        color: Colors.transparent,
-        child: Align(
-          alignment: Alignment.center,
-          child: OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
-              side: BorderSide(
-                width: onPressed == null ? 1 : 2,
-                color: onPressed == null
-                    ? Colors.grey
-                    : Theme.of(context).buttonColor,
-              ),
-              backgroundColor: Colors.black.withOpacity(0.9),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  text,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: onPressed == null ? Colors.grey : Colors.white,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                Padding(padding: EdgeInsets.all(2)),
-                Text(
-                  formatBytes(size),
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-            onPressed: onPressed,
-          ),
+    return SizedBox(
+      width: double.infinity,
+      child: TextButton(
+        style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.red[700],
         ),
+        child: Column(
+          children: [
+            Padding(padding: EdgeInsets.all(2)),
+            Text(
+              text,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: onPressed == null ? Colors.grey : Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            Padding(padding: EdgeInsets.all(2)),
+            Text(
+              formatBytes(size),
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+                fontSize: 12,
+              ),
+            ),
+            Padding(padding: EdgeInsets.all(2)),
+          ],
+        ),
+        onPressed: onPressed,
       ),
     );
   }
