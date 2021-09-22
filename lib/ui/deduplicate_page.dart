@@ -57,9 +57,11 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     super.initState();
     for (final duplicate in widget.duplicates) {
       for (int index = 0; index < duplicate.files.length; index++) {
+        // Select all items but the first
         if (index != 0) {
           _selectedFiles.add(duplicate.files[index]);
         }
+        // Maintain a map of fileID to fileSize for quick "space freed" computation
         _fileSizeMap[duplicate.files[index].uploadedFileID] = duplicate.size;
       }
     }
