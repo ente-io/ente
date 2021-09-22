@@ -19,7 +19,6 @@ Widget button(
   VoidCallback onPressed,
   double lineHeight,
   EdgeInsets padding,
-  Color color,
 }) {
   return InkWell(
     child: OutlinedButton(
@@ -32,7 +31,7 @@ Widget button(
           width: onPressed == null ? 1 : 2,
           color: onPressed == null
               ? Colors.grey
-              : color ?? Color.fromRGBO(45, 194, 98, 1.0),
+              : Color.fromRGBO(45, 194, 98, 1.0),
         ),
       ),
       child: Text(
