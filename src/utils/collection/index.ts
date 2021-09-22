@@ -9,6 +9,8 @@ import { getSelectedFiles } from 'utils/file';
 import { File } from 'services/fileService';
 import { CustomError } from 'utils/common/errorUtil';
 import { SelectedState } from 'pages/gallery';
+import { User } from 'services/userService';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -57,4 +59,19 @@ export async function copyOrMoveFromCollection(
 
 export function getSelectedCollection(collectionID: number, collections) {
     return collections.find((collection) => collection.id === collectionID);
+}
+
+export function isSharedCollection(
+    collections: Collection[],
+    collectionID: number
+) {
+    const user: User = getData(LS_KEYS.USER);
+
+    const collection = collections.find(
+        (collection) => collection.id === collectionID
+    );
+    if (!collection) {
+        return false;
+    }
+    return collection?.owner.id !== user.id;
 }

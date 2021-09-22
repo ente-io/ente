@@ -65,6 +65,7 @@ import { PAGES } from 'types';
 import {
     copyOrMoveFromCollection,
     COLLECTION_OPS_TYPE,
+    isSharedCollection,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 
@@ -172,6 +173,9 @@ export default function Gallery() {
         useState<Map<number, number>>();
     const [activeCollection, setActiveCollection] = useState(0);
 
+    const [isSharedCollectionActive, setIsSharedCollectionActive] =
+        useState(false);
+
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
@@ -220,6 +224,13 @@ export default function Gallery() {
         }`;
         router.push(href, undefined, { shallow: true });
     }, [activeCollection]);
+    useEffect(
+        () =>
+            setIsSharedCollectionActive(
+                isSharedCollection(collections, activeCollection)
+            ),
+        [activeCollection]
+    );
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
@@ -269,10 +280,15 @@ export default function Gallery() {
         }
     };
 
-    const setDerivativeState = async (collections, files) => {
+    const setDerivativeState = async (
+        collections: Collection[],
+        files: File[]
+    ) => {
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
-        const collectionsAndTheirLatestFile =
-            await getCollectionsAndTheirLatestFile(nonEmptyCollections, files);
+        const collectionsAndTheirLatestFile = getCollectionsAndTheirLatestFile(
+            nonEmptyCollections,
+            files
+        );
         const collectionWiseFiles = sortFilesIntoCollections(files);
         const collectionFilesCount = new Map<number, number>();
         for (const [id, files] of collectionWiseFiles) {
@@ -465,7 +481,7 @@ export default function Gallery() {
                 <Collections
                     collections={collections}
                     searchMode={searchMode}
-                    selected={Number(router.query.collection)}
+                    selected={activeCollection}
                     setActiveCollection={setActiveCollection}
                     syncWithRemote={syncWithRemote}
                     setDialogMessage={setDialogMessage}
@@ -538,6 +554,7 @@ export default function Gallery() {
                     deleted={deleted}
                     setDialogMessage={setDialogMessage}
                     activeCollection={activeCollection}
+                    isSharedCollection={isSharedCollectionActive}
                 />
                 {selected.count > 0 &&
                     selected.collectionID === activeCollection && (

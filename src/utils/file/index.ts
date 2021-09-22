@@ -2,7 +2,9 @@ import { Collection } from 'services/collectionService';
 import { File, FILE_TYPE } from 'services/fileService';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
+import { User } from 'services/userService';
 import CryptoWorker from 'utils/crypto';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 export const TYPE_HEIC = 'heic';
 export const TYPE_HEIF = 'heif';
@@ -184,4 +186,13 @@ export async function convertForPreview(file: File, fileBlob: Blob) {
         fileBlob = await worker.convertHEIC2JPEG(fileBlob);
     }
     return fileBlob;
+}
+
+export function isSharedFile(file: File) {
+    const user: User = getData(LS_KEYS.USER);
+
+    if (!user?.id || !file?.ownerID) {
+        return false;
+    }
+    return file.ownerID !== user.id;
 }
