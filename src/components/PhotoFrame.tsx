@@ -1,4 +1,3 @@
-import router from 'next/router';
 import {
     DeadCenter,
     GalleryContext,
@@ -30,6 +29,7 @@ import {
 } from 'types';
 import { fileIsArchived } from 'utils/file';
 import { ARCHIVE_SECTION } from './pages/gallery/Collections';
+import { isSharedFile } from 'utils/file';
 
 const NO_OF_PAGES = 2;
 const A_DAY = 24 * 60 * 60 * 1000;
@@ -152,6 +152,7 @@ interface Props {
     deleted?: number[];
     setDialogMessage: SetDialogMessage;
     activeCollection: number;
+    isSharedCollection: boolean;
 }
 
 const PhotoFrame = ({
@@ -170,6 +171,7 @@ const PhotoFrame = ({
     deleted,
     setDialogMessage,
     activeCollection,
+    isSharedCollection,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -269,7 +271,7 @@ const PhotoFrame = ({
             file={file[index]}
             updateUrl={updateUrl(file[index].dataIndex)}
             onClick={onThumbnailClick(index)}
-            selectable
+            selectable={!isSharedCollection}
             onSelect={handleSelect(file[index].id)}
             selected={
                 selected.collectionID === activeCollection &&
@@ -411,10 +413,13 @@ const PhotoFrame = ({
                 return false;
             }
 
+            if (isSharedFile(item) && !isSharedCollection) {
+                return false;
+            }
             if (!idSet.has(item.id)) {
                 if (
-                    !router.query.collection ||
-                    router.query.collection === item.collectionID.toString()
+                    !activeCollection ||
+                    activeCollection === item.collectionID
                 ) {
                     idSet.add(item.id);
                     return true;
@@ -716,7 +721,7 @@ const PhotoFrame = ({
 
                             return (
                                 <List
-                                    key={`${columns}-${listItemHeight}-${router.query.collection}`}
+                                    key={`${columns}-${listItemHeight}-${activeCollection}`}
                                     ref={listRef}
                                     itemSize={getItemSize}
                                     height={height}
@@ -749,6 +754,7 @@ const PhotoFrame = ({
                         gettingData={getSlideData}
                         favItemIds={favItemIds}
                         loadingBar={loadingBar}
+                        isSharedCollection={isSharedCollection}
                     />
                 </Container>
             ) : (

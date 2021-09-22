@@ -3,13 +3,23 @@ import {
     Collection,
     CollectionType,
     createCollection,
+    moveToCollection,
 } from 'services/collectionService';
 import { getSelectedFiles } from 'utils/file';
 import { File } from 'services/fileService';
+import { CustomError } from 'utils/common/errorUtil';
+import { SelectedState } from 'pages/gallery';
+import { User } from 'services/userService';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
-export async function addFilesToCollection(
+export enum COLLECTION_OPS_TYPE {
+    ADD,
+    MOVE,
+}
+export async function copyOrMoveFromCollection(
+    type: COLLECTION_OPS_TYPE,
     setCollectionSelectorView: (value: boolean) => void,
-    selected: any,
+    selected: SelectedState,
     files: File[],
     clearSelection: () => void,
     syncWithRemote: () => Promise<void>,
@@ -28,7 +38,20 @@ export async function addFilesToCollection(
         collection = existingCollection;
     }
     const selectedFiles = getSelectedFiles(selected, files);
-    await addToCollection(collection, selectedFiles);
+    switch (type) {
+        case COLLECTION_OPS_TYPE.ADD:
+            await addToCollection(collection, selectedFiles);
+            break;
+        case COLLECTION_OPS_TYPE.MOVE:
+            await moveToCollection(
+                selected.collectionID,
+                collection,
+                selectedFiles
+            );
+            break;
+        default:
+            throw Error(CustomError.INVALID_COLLECTION_OPERATION);
+    }
     clearSelection();
     await syncWithRemote();
     setActiveCollection(collection.id);
@@ -36,4 +59,19 @@ export async function addFilesToCollection(
 
 export function getSelectedCollection(collectionID: number, collections) {
     return collections.find((collection) => collection.id === collectionID);
+}
+
+export function isSharedCollection(
+    collections: Collection[],
+    collectionID: number
+) {
+    const user: User = getData(LS_KEYS.USER);
+
+    const collection = collections.find(
+        (collection) => collection.id === collectionID
+    );
+    if (!collection) {
+        return false;
+    }
+    return collection?.owner.id !== user.id;
 }

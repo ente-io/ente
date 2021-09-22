@@ -11,8 +11,10 @@ import {
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
 import { EncryptionResult } from 'services/upload/uploadService';
-import CryptoWorker from 'utils/crypto';
 import { logError } from 'utils/sentry';
+import { User } from 'services/userService';
+import CryptoWorker from 'utils/crypto';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 export const TYPE_HEIC = 'heic';
 export const TYPE_HEIF = 'heif';
@@ -254,4 +256,12 @@ export async function archiveFiles(files: File[], selected: SelectedState) {
         };
     }
     return selectedFiles;
+}
+export function isSharedFile(file: File) {
+    const user: User = getData(LS_KEYS.USER);
+
+    if (!user?.id || !file?.ownerID) {
+        return false;
+    }
+    return file.ownerID !== user.id;
 }

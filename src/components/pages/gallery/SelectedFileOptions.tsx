@@ -9,16 +9,20 @@ import AddIcon from 'components/icons/AddIcon';
 import { IconButton } from 'components/Container';
 import constants from 'utils/strings/constants';
 import Archive from 'components/icons/Archive';
+import MoveIcon from 'components/icons/MoveIcon';
+import { COLLECTION_OPS_TYPE } from 'utils/collection';
 
 interface Props {
     addToCollectionHelper: (collectionName, collection) => void;
-    showCreateCollectionModal: () => void;
+    moveToCollectionHelper: (collectionName, collection) => void;
+    showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
     setDialogMessage: SetDialogMessage;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     deleteFileHelper: () => void;
     count: number;
     clearSelection: () => void;
     archiveFilesHelper: () => void;
+    activeCollection: number;
 }
 
 const SelectionBar = styled(Navbar)`
@@ -37,6 +41,7 @@ const SelectionContainer = styled.div`
 
 const SelectedFileOptions = ({
     addToCollectionHelper,
+    moveToCollectionHelper,
     showCreateCollectionModal,
     setDialogMessage,
     setCollectionSelectorAttributes,
@@ -44,12 +49,14 @@ const SelectedFileOptions = ({
     count,
     clearSelection,
     archiveFilesHelper,
+    activeCollection,
 }: Props) => {
     const addToCollection = () =>
         setCollectionSelectorAttributes({
             callback: (collection) => addToCollectionHelper(null, collection),
-            showNextModal: showCreateCollectionModal,
+            showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.ADD),
             title: constants.ADD_TO_COLLECTION,
+            fromCollection: activeCollection,
         });
 
     const deleteHandler = () =>
@@ -65,6 +72,15 @@ const SelectedFileOptions = ({
             close: { text: constants.CANCEL },
         });
 
+    const moveToCollection = () => {
+        setCollectionSelectorAttributes({
+            callback: (collection) => moveToCollectionHelper(null, collection),
+            showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
+            title: constants.MOVE_TO_COLLECTION,
+            fromCollection: activeCollection,
+        });
+    };
+
     return (
         <SelectionBar>
             <SelectionContainer>
@@ -78,6 +94,11 @@ const SelectedFileOptions = ({
             <IconButton onClick={archiveFilesHelper}>
                 <Archive />
             </IconButton>
+            {activeCollection !== 0 && (
+                <IconButton onClick={moveToCollection}>
+                    <MoveIcon />
+                </IconButton>
+            )}
             <IconButton onClick={addToCollection}>
                 <AddIcon />
             </IconButton>

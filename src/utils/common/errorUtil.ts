@@ -26,6 +26,7 @@ export enum CustomError {
     TYPE_DETECTION_FAILED = 'type detection failed',
     SIGNUP_FAILED = 'signup failed',
     FAV_COLLECTION_MISSING = 'favorite collection missing',
+    INVALID_COLLECTION_OPERATION = 'invalid collection operation',
 }
 
 function parseUploadError(error: AxiosResponse) {

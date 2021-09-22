@@ -544,6 +544,7 @@ const englishConstants = {
     UPLOAD_TO_COLLECTION: 'upload to album',
     ARCHIVE: 'archive',
     ALL: 'all',
+    MOVE_TO_COLLECTION: 'move to collection',
 };
 
 export default englishConstants;

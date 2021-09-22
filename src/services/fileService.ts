@@ -54,6 +54,7 @@ export interface MagicMetadata {
 export interface File {
     id: number;
     collectionID: number;
+    ownerID: number;
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: MetadataObject;
