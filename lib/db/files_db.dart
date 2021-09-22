@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:sqflite/sqflite.dart';
@@ -51,12 +52,22 @@ class FilesDB {
   static final columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
   static final columnMetadataDecryptionHeader = 'metadata_decryption_header';
 
+  // MMD -> Magic Metadata
+  static final columnMMdEncodedJson = 'mmd_encoded_json';
+  static final columnMMdVersion = 'mmd_ver';
+
+  // part of magic metadata
+  // Only parse & store selected fields from JSON in separate columns if
+  // we need to write query based on that field
+  static final columnMMdVisibility = 'mmd_visibility';
+
   static final initializationScript = [...createTable(table)];
   static final migrationScripts = [
     ...alterDeviceFolderToAllowNULL(),
     ...alterTimestampColumnTypes(),
     ...addIndices(),
     ...addMetadataColumns(),
+    ...addMagicMetadataColumns(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -227,6 +238,20 @@ class FilesDB {
     ];
   }
 
+  static List<String> addMagicMetadataColumns() {
+    return [
+      '''
+        ALTER TABLE $table ADD COLUMN $columnMMdEncodedJson TEXT DEFAULT '{}';
+      ''',
+      '''
+        ALTER TABLE $table ADD COLUMN $columnMMdVersion INTEGER DEFAULT 0;
+      ''',
+      '''
+        ALTER TABLE $table ADD COLUMN $columnMMdVisibility INTEGER DEFAULT $kVisibilityVisible;
+      '''
+    ];
+  }
+
   Future<void> clearTable() async {
     final db = await instance.database;
     await db.delete(table);
@@ -332,20 +357,22 @@ class FilesDB {
   }
 
   Future<FileLoadResult> getAllUploadedFiles(int startTime, int endTime,
-      int ownerID, {int limit, bool asc}) async {
+      int ownerID, {int limit, bool asc, int visibility = kVisibilityVisible}) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  $columnOwnerID = ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)',
-      whereArgs: [startTime, endTime, ownerID],
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  $columnOwnerID = ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+              ' AND $columnMMdVisibility = ?',
+      whereArgs: [startTime, endTime, ownerID, visibility],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
     );
     final files = _convertToFiles(results);
-    return FileLoadResult(files, files.length == limit);
+    List<File> deduplicatedFiles = _deduplicatedFiles(files);
+    return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
   Future<FileLoadResult> getAllLocalAndUploadedFiles(int startTime, int endTime, int ownerID,
@@ -355,8 +382,9 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime, ownerID],
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+              ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+      whereArgs: [startTime, endTime, ownerID, kVisibilityVisible],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
@@ -378,14 +406,20 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime, ownerID],
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+              'AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+      whereArgs: [startTime, endTime, ownerID, kVisibilityVisible],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
     );
-    final uploadedFileIDs = <int>{};
     final files = _convertToFiles(results);
+    List<File> deduplicatedFiles = _deduplicatedFiles(files);
+    return FileLoadResult(deduplicatedFiles, files.length == limit);
+  }
+
+  List<File> _deduplicatedFiles(List<File> files) {
+    final uploadedFileIDs = <int>{};
     final List<File> deduplicatedFiles = [];
     for (final file in files) {
       final id = file.uploadedFileID;
@@ -395,7 +429,7 @@ class FilesDB {
       uploadedFileIDs.add(id);
       deduplicatedFiles.add(file);
     }
-    return FileLoadResult(deduplicatedFiles, files.length == limit);
+    return deduplicatedFiles;
   }
 
   Future<FileLoadResult> getFilesInCollection(
@@ -877,6 +911,10 @@ class FilesDB {
     row[columnExif] = file.exif;
     row[columnHash] = file.hash;
     row[columnMetadataVersion] = file.metadataVersion;
+    row[columnMMdVersion] = file.mMdVersion ?? 0;
+    row[columnMMdEncodedJson] = file.mMdEncodedJson ?? '{}';
+    row[columnMMdVisibility] =
+        file.magicMetadata?.visibility ?? kVisibilityVisible;
     return row;
   }
 
@@ -903,6 +941,11 @@ class FilesDB {
     row[columnExif] = file.exif;
     row[columnHash] = file.hash;
     row[columnMetadataVersion] = file.metadataVersion;
+
+    row[columnMMdVersion] = file.mMdVersion ?? 0;
+    row[columnMMdEncodedJson] == file.mMdEncodedJson ?? '{}';
+    row[columnMMdVisibility] =
+        file.magicMetadata?.visibility ?? kVisibilityVisible;
     return row;
   }
 
@@ -934,6 +977,9 @@ class FilesDB {
     file.exif = row[columnExif];
     file.hash = row[columnHash];
     file.metadataVersion = row[columnMetadataVersion] ?? 0;
+
+    file.mMdVersion = row[columnMMdVersion] ?? 0 ;
+    file.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
     return file;
   }
 }
