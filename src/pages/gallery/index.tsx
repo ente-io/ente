@@ -473,9 +473,9 @@ export default function Gallery() {
                     setOpen={setSearchMode}
                     loadingBar={loadingBar}
                     isFirstFetch={isFirstFetch}
-                    setCollections={setCollections}
+                    collections={collections}
+                    setActiveCollection={setActiveCollection}
                     setSearch={updateSearch}
-                    files={files}
                     searchStats={searchStats}
                 />
                 <Collections

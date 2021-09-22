@@ -1,15 +1,15 @@
-import { Search, SearchStats, SetCollections } from 'pages/gallery';
+import { Search, SearchStats } from 'pages/gallery';
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
 import { components } from 'react-select';
 import debounce from 'debounce-promise';
-import { File } from 'services/fileService';
 import {
     Bbox,
     getHolidaySuggestion,
     getYearSuggestion,
     parseHumanDate,
+    searchCollection,
     searchLocation,
 } from 'services/searchService';
 import { getFormattedDate } from 'utils/search';
@@ -18,6 +18,8 @@ import LocationIcon from './icons/LocationIcon';
 import DateIcon from './icons/DateIcon';
 import SearchIcon from './icons/SearchIcon';
 import CrossIcon from './icons/CrossIcon';
+import { Collection } from 'services/collectionService';
+import CollectionIcon from './icons/CollectionIcon';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -71,6 +73,7 @@ const SearchInput = styled.div`
 export enum SuggestionType {
     DATE,
     LOCATION,
+    COLLECTION,
 }
 export interface DateValue {
     date?: number;
@@ -80,17 +83,17 @@ export interface DateValue {
 export interface Suggestion {
     type: SuggestionType;
     label: string;
-    value: Bbox | DateValue;
+    value: Bbox | DateValue | number;
 }
 interface Props {
     isOpen: boolean;
     isFirstFetch: boolean;
     setOpen: (value) => void;
     loadingBar: any;
-    setCollections: SetCollections;
     setSearch: (search: Search) => void;
-    files: File[];
     searchStats: SearchStats;
+    collections: Collection[];
+    setActiveCollection: (id: number) => void;
 }
 export default function SearchBar(props: Props) {
     const selectRef = useRef(null);
@@ -125,9 +128,23 @@ export default function SearchBar(props: Props) {
             }))
         );
 
-        const searchResults = await searchLocation(searchPhrase);
+        const collectionResults = searchCollection(
+            searchPhrase,
+            props.collections
+        );
         option.push(
-            ...searchResults.map(
+            ...collectionResults.map(
+                (searchResult) =>
+                    ({
+                        type: SuggestionType.COLLECTION,
+                        value: searchResult.id,
+                        label: searchResult.name,
+                    } as Suggestion)
+            )
+        );
+        const locationResults = await searchLocation(searchPhrase);
+        option.push(
+            ...locationResults.map(
                 (searchResult) =>
                     ({
                         type: SuggestionType.LOCATION,
@@ -136,6 +153,7 @@ export default function SearchBar(props: Props) {
                     } as Suggestion)
             )
         );
+
         return option;
     };
 
@@ -159,6 +177,9 @@ export default function SearchBar(props: Props) {
                     location: selectedOption.value as Bbox,
                 });
                 break;
+            case SuggestionType.COLLECTION:
+                props.setActiveCollection(selectedOption.value as number);
+                break;
         }
     };
     const resetSearch = () => {
@@ -178,8 +199,18 @@ export default function SearchBar(props: Props) {
     // UI
     // = =========================
 
-    const getIconByType = (type: SuggestionType) =>
-        type === SuggestionType.DATE ? <DateIcon /> : <LocationIcon />;
+    const getIconByType = (type: SuggestionType) => {
+        switch (type) {
+            case SuggestionType.DATE:
+                return <DateIcon />;
+            case SuggestionType.LOCATION:
+                return <LocationIcon />;
+            case SuggestionType.COLLECTION:
+                return <CollectionIcon />;
+            default:
+                return null;
+        }
+    };
 
     const LabelWithIcon = (props: { type: SuggestionType; label: string }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
