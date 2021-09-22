@@ -101,6 +101,7 @@ DateTime parseDateFromFileName(String fileName) {
   } else {
     return DateTime.tryParse((fileName)
         .replaceAll("IMG_", "")
+        .replaceAll("VID_", "")
         .replaceAll("DCIM_", "")
         .replaceAll("_", " "));
   }
