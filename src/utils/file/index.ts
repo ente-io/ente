@@ -230,7 +230,11 @@ export function fileIsArchived(file: File) {
     return file.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
 }
 
-export async function archiveFiles(files: File[], selected: SelectedState) {
+export async function changeFilesVisibility(
+    files: File[],
+    selected: SelectedState,
+    visibility: VISIBILITY_STATE
+) {
     const worker = await new CryptoWorker();
     const selectedFiles = getSelectedFiles(selected, files);
     for (const file of selectedFiles) {
@@ -243,7 +247,7 @@ export async function archiveFiles(files: File[], selected: SelectedState) {
         }
         const updatedMagicMetadataProps: MagicMetadataProps = {
             ...file.magicMetadata.data,
-            visibility: VISIBILITY_STATE.ARCHIVED,
+            visibility,
         };
         const encryptedMagicMetadata: EncryptionResult =
             await worker.encryptMetadata(updatedMagicMetadataProps, file.key);

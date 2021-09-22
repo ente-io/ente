@@ -13,6 +13,7 @@ import {
     deleteFiles,
     syncFiles,
     updateMagicMetadata,
+    VISIBILITY_STATE,
 } from 'services/fileService';
 import styled from 'styled-components';
 import LoadingBar from 'react-top-loading-bar';
@@ -46,7 +47,7 @@ import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
 import {
-    archiveFiles,
+    changeFilesVisibility,
     getSelectedFileIds,
     sortFilesIntoCollections,
 } from 'utils/file';
@@ -373,11 +374,52 @@ export default function Gallery() {
     const archiveFilesHelper = async () => {
         loadingBar.current?.continuousStart();
         try {
-            const archivedFiles = await archiveFiles(files, selected);
+            const archivedFiles = await changeFilesVisibility(
+                files,
+                selected,
+                VISIBILITY_STATE.ARCHIVED
+            );
             await updateMagicMetadata(archivedFiles);
             setArchived([...archived, ...archivedFiles.map((file) => file.id)]);
         } catch (e) {
             console.log(e);
+            switch (e.status?.toString()) {
+                case ServerErrorCodes.FORBIDDEN:
+                    setDialogMessage({
+                        title: constants.ERROR,
+                        staticBackdrop: true,
+                        close: { variant: 'danger' },
+                        content: constants.NOT_FILE_OWNER,
+                    });
+                    return;
+            }
+            setDialogMessage({
+                title: constants.ERROR,
+                staticBackdrop: true,
+                close: { variant: 'danger' },
+                content: constants.UNKNOWN_ERROR,
+            });
+        } finally {
+            clearSelection();
+            syncWithRemote();
+            loadingBar.current.complete();
+        }
+    };
+
+    const unArchiveFilesHelper = async () => {
+        loadingBar.current?.continuousStart();
+        try {
+            const unarchiveFiles = await changeFilesVisibility(
+                files,
+                selected,
+                VISIBILITY_STATE.VISIBLE
+            );
+            await updateMagicMetadata(unarchiveFiles);
+            const unarchiveFileIds = unarchiveFiles.map((file) => file.id);
+            setArchived(
+                archived.filter((id) => !unarchiveFileIds.includes(id))
+            );
+        } catch (e) {
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
@@ -605,6 +647,7 @@ export default function Gallery() {
                         <SelectedFileOptions
                             addToCollectionHelper={addToCollectionHelper}
                             archiveFilesHelper={archiveFilesHelper}
+                            unArchiveFilesHelper={unArchiveFilesHelper}
                             moveToCollectionHelper={moveToCollectionHelper}
                             showCreateCollectionModal={
                                 showCreateCollectionModal

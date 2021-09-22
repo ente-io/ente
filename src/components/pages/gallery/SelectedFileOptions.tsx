@@ -11,6 +11,8 @@ import constants from 'utils/strings/constants';
 import Archive from 'components/icons/Archive';
 import MoveIcon from 'components/icons/MoveIcon';
 import { COLLECTION_OPS_TYPE } from 'utils/collection';
+import { ALL_SECTION, ARCHIVE_SECTION } from './Collections';
+import UnArchive from 'components/icons/UnArchive';
 
 interface Props {
     addToCollectionHelper: (collectionName, collection) => void;
@@ -22,6 +24,7 @@ interface Props {
     count: number;
     clearSelection: () => void;
     archiveFilesHelper: () => void;
+    unArchiveFilesHelper: () => void;
     activeCollection: number;
 }
 
@@ -49,6 +52,7 @@ const SelectedFileOptions = ({
     count,
     clearSelection,
     archiveFilesHelper,
+    unArchiveFilesHelper,
     activeCollection,
 }: Props) => {
     const addToCollection = () =>
@@ -91,20 +95,30 @@ const SelectedFileOptions = ({
                     {count} {constants.SELECTED}
                 </div>
             </SelectionContainer>
-            <IconButton onClick={archiveFilesHelper}>
-                <Archive />
-            </IconButton>
-            {activeCollection !== 0 && (
-                <IconButton onClick={moveToCollection}>
-                    <MoveIcon />
+            {activeCollection === ARCHIVE_SECTION ? (
+                <IconButton onClick={unArchiveFilesHelper}>
+                    <UnArchive />
                 </IconButton>
+            ) : (
+                <>
+                    {activeCollection === ALL_SECTION && (
+                        <IconButton onClick={archiveFilesHelper}>
+                            <Archive />
+                        </IconButton>
+                    )}
+                    {activeCollection !== ALL_SECTION && (
+                        <IconButton onClick={moveToCollection}>
+                            <MoveIcon />
+                        </IconButton>
+                    )}
+                    <IconButton onClick={addToCollection}>
+                        <AddIcon />
+                    </IconButton>
+                    <IconButton onClick={deleteHandler}>
+                        <DeleteIcon />
+                    </IconButton>
+                </>
             )}
-            <IconButton onClick={addToCollection}>
-                <AddIcon />
-            </IconButton>
-            <IconButton onClick={deleteHandler}>
-                <DeleteIcon />
-            </IconButton>
         </SelectionBar>
     );
 };
