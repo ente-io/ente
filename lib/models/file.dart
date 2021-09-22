@@ -60,6 +60,7 @@ class File {
         final parsedDateTime = DateTime.parse(
             basenameWithoutExtension(file.title)
                 .replaceAll("IMG_", "")
+                .replaceAll("VID_", "")
                 .replaceAll("DCIM_", "")
                 .replaceAll("_", " "));
         file.creationTime = parsedDateTime.microsecondsSinceEpoch;
