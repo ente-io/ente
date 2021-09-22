@@ -32,12 +32,14 @@ class ArchivePage extends StatelessWidget {
             visibility: kVisibilityArchive, limit: limit, asc: asc);
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where((event) =>
-      event.updatedFiles
-              .firstWhere((element) => element.uploadedFileID != null) !=
+      event.updatedFiles.firstWhere(
+              (element) => element.uploadedFileID != null,
+              orElse: () => null) !=
           null),
       forceReloadEvent: Bus.instance.on<FilesUpdatedEvent>().where((event) =>
-      event.updatedFiles
-          .firstWhere((element) => element.uploadedFileID != null) !=
+          event.updatedFiles.firstWhere(
+              (element) => element.uploadedFileID != null,
+              orElse: () => null) !=
           null),
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
