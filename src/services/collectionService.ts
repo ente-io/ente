@@ -384,18 +384,18 @@ export const addToCollection = async (
     }
 };
 export const moveToCollection = async (
-    oldCollectionID: number,
-    newCollection: Collection,
+    fromCollectionID: number,
+    toCollection: Collection,
     files: File[]
 ) => {
     try {
         const token = getToken();
         const fileKeysEncryptedWithNewCollection =
-            await encryptWithNewCollectionKey(newCollection, files);
+            await encryptWithNewCollectionKey(toCollection, files);
 
         const requestBody: MoveToCollectionRequest = {
-            fromCollectionID: oldCollectionID,
-            toCollectionID: newCollection.id,
+            fromCollectionID: fromCollectionID,
+            toCollectionID: toCollection.id,
             files: fileKeysEncryptedWithNewCollection,
         };
         await HTTPService.post(
