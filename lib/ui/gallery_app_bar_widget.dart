@@ -13,6 +13,7 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/change_collection_name_dialog.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
@@ -85,11 +86,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         elevation: 0,
         title: widget.type == GalleryAppBarType.homepage
             ? Container()
-            : Text(
-                widget.title,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.80),
+            : TextButton(
+                child: Text(
+                  widget.title,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.80),
+                  ),
                 ),
+                onPressed: () => _renameAlbum(context),
               ),
         actions: _getDefaultActions(context),
       );
@@ -105,6 +109,33 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       title: Text(widget.selectedFiles.files.length.toString()),
       actions: _getActions(context),
     );
+  }
+
+  Future<dynamic> _renameAlbum(BuildContext context) async {
+    if (widget.type != GalleryAppBarType.owned_collection) {
+      return;
+    }
+    var result = await showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return ChangeCollectionNameDialog(name: widget.title);
+                },
+                barrierColor: Colors.black.withOpacity(0.85),
+                // barrierDismissible: false,
+              );
+    if (result == null) {
+      return;
+    }
+
+    final dialog = createProgressDialog(context, "changing name...");
+    await dialog.show();
+    try {
+      await CollectionsService.instance.renameCollection(widget.collection, result);
+      await dialog.hide();
+    } catch(e,s) {
+      await dialog.hide();
+      showGenericErrorDialog(context);
+    }
   }
 
   List<Widget> _getDefaultActions(BuildContext context) {
@@ -268,7 +299,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
         onSelected: (value) async {
           if (value == 1) {
-            await _handleVisibilityChangeRequest(context, showArchive ? kVisibilityArchive : kVisibilityVisible);
+            await _handleVisibilityChangeRequest(
+                context, showArchive ? kVisibilityArchive : kVisibilityVisible);
           }
         },
       ));
@@ -276,13 +308,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     return actions;
   }
 
-  Future<void> _handleVisibilityChangeRequest(BuildContext context,
-      int newVisibility) async {
+  Future<void> _handleVisibilityChangeRequest(
+      BuildContext context, int newVisibility) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
     try {
-      await FileMagicService.instance.changeVisibility(
-          widget.selectedFiles.files.toList(), newVisibility);
+      await FileMagicService.instance
+          .changeVisibility(widget.selectedFiles.files.toList(), newVisibility);
       showToast(
           newVisibility == kVisibilityArchive
               ? "successfully archived"

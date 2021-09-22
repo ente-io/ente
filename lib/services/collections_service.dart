@@ -231,6 +231,25 @@ class CollectionsService {
     }
   }
 
+  Future<void> renameCollection(Collection collection, String newName) async {
+    try {
+      final encryptedName = CryptoUtil.encryptSync(utf8.encode(newName), getCollectionKey(collection.id));
+      await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/collections/rename",
+        data: {
+          "collectionID": collection.id,
+          "encryptedName": Sodium.bin2base64(encryptedName.encryptedData),
+          "nameDecryptionNonce": Sodium.bin2base64(encryptedName.nonce)
+        },
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
+    } catch (e, s) {
+      _logger.severe("failed to rename collection", e, s);
+      rethrow;
+    }
+  }
+
   Future<List<Collection>> _fetchCollections(int sinceTime) async {
     try {
       final response = await _dio.get(
