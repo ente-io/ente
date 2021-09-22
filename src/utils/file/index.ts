@@ -246,6 +246,9 @@ export async function changeFilesVisibility(
             logError(Error('magic metadata not decrypted'), '');
             return;
         }
+        // read the existing magic metadata and apply new updates to existing data
+        // current update is simple replace. This will be enhanced in the future,
+        // as required.
         const updatedMagicMetadataProps: MagicMetadataProps = {
             ...file.magicMetadata.data,
             visibility,
