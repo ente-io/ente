@@ -237,6 +237,7 @@ export async function changeFilesVisibility(
 ) {
     const worker = await new CryptoWorker();
     const selectedFiles = getSelectedFiles(selected, files);
+    const updatedFiles: File[] = [];
     for (const file of selectedFiles) {
         if (!file.magicMetadata) {
             file.magicMetadata = NEW_MAGIC_METADATA;
@@ -251,15 +252,18 @@ export async function changeFilesVisibility(
         };
         const encryptedMagicMetadata: EncryptionResult =
             await worker.encryptMetadata(updatedMagicMetadataProps, file.key);
-        file.magicMetadata = {
-            version: file.magicMetadata.version,
-            count: Object.keys(updatedMagicMetadataProps).length,
-            data: encryptedMagicMetadata.file
-                .encryptedData as unknown as string,
-            header: encryptedMagicMetadata.file.decryptionHeader,
-        };
+        updatedFiles.push({
+            ...file,
+            magicMetadata: {
+                version: file.magicMetadata.version,
+                count: Object.keys(updatedMagicMetadataProps).length,
+                data: encryptedMagicMetadata.file
+                    .encryptedData as unknown as string,
+                header: encryptedMagicMetadata.file.decryptionHeader,
+            },
+        });
     }
-    return selectedFiles;
+    return updatedFiles;
 }
 export function isSharedFile(file: File) {
     const user: User = getData(LS_KEYS.USER);
