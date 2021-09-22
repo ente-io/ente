@@ -58,7 +58,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     for (final duplicate in widget.duplicates) {
       for (int index = 0; index < duplicate.files.length; index++) {
         if (index != 0) {
-          _selectedFiles.add(duplicate.files[index]);
+          // _selectedFiles.add(duplicate.files[index]);
         }
         _fileSizeMap[duplicate.files[index].uploadedFileID] = duplicate.size;
       }
@@ -235,13 +235,6 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     for (final file in _selectedFiles) {
       size += _fileSizeMap[file.uploadedFileID];
     }
-    final onPressed = _selectedFiles.isEmpty
-        ? null
-        : () async {
-            await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
-            Bus.instance.fire(UserDetailsChangedEvent());
-            Navigator.of(context).pop(_selectedFiles.length);
-          };
     return SizedBox(
       width: double.infinity,
       child: TextButton(
@@ -256,7 +249,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
-                color: onPressed == null ? Colors.grey : Colors.white,
+                color: Colors.white,
               ),
               textAlign: TextAlign.center,
             ),
@@ -271,7 +264,12 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             Padding(padding: EdgeInsets.all(2)),
           ],
         ),
-        onPressed: onPressed,
+        onPressed: () async {
+          await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
+          Bus.instance.fire(UserDetailsChangedEvent());
+          Navigator.of(context)
+              .pop(DeduplicationResult(_selectedFiles.length, size));
+        },
       ),
     );
   }
@@ -366,4 +364,11 @@ enum SortKey {
   size,
   count,
   time,
+}
+
+class DeduplicationResult {
+  final int count;
+  final int size;
+
+  DeduplicationResult(this.count, this.size);
 }

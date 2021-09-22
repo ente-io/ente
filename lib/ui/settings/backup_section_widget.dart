@@ -139,10 +139,10 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
               showErrorDialog(context, "✨ no duplicates",
                   "you've no duplicate files that can be cleared");
             } else {
-              int cleanedItemCount =
+              DeduplicationResult result =
                   await routeToPage(context, DeduplicatePage(duplicates));
-              if (cleanedItemCount != null) {
-                _showDuplicateFilesDeletedDialog(cleanedItemCount);
+              if (result != null) {
+                _showDuplicateFilesDeletedDialog(result);
               }
             }
           },
@@ -206,11 +206,17 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
     );
   }
 
-  void _showDuplicateFilesDeletedDialog(int itemCount) {
+  void _showDuplicateFilesDeletedDialog(DeduplicationResult result) {
+    String countText = result.count.toString() +
+        " duplicate file" +
+        (result.count == 1 ? "" : "s");
     AlertDialog alert = AlertDialog(
       title: Text("✨ success"),
-      content: Text(
-          "you have cleaned up " + itemCount.toString() + " duplicate files!"),
+      content: Text("you have cleaned up " +
+          countText +
+          ", saving " +
+          formatBytes(result.size) +
+          "!"),
       actions: [
         TextButton(
           child: Text(
@@ -237,8 +243,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             ),
           ),
           onPressed: () {
-            showToast(
-                "also empty your \"Trash\" from to claim the freed space");
+            showToast("also empty your \"Trash\" to claim the freed up space");
             Navigator.of(context, rootNavigator: true).pop('dialog');
           },
         ),
