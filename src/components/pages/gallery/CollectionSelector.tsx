@@ -99,7 +99,6 @@ function CollectionSelector({
             <Modal.Body
                 style={{
                     display: 'flex',
-                    justifyContent: 'space-around',
                     flexWrap: 'wrap',
                 }}>
                 <AddCollectionButton showNextModal={attributes.showNextModal} />
