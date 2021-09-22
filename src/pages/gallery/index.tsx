@@ -370,49 +370,17 @@ export default function Gallery() {
             });
         }
     };
-    const archiveFilesHelper = async () => {
+    const changeFilesVisibilityHelper = async (
+        visibility: VISIBILITY_STATE
+    ) => {
         loadingBar.current?.continuousStart();
         try {
-            const archivedFiles = await changeFilesVisibility(
+            const updatedFiles = await changeFilesVisibility(
                 files,
                 selected,
-                VISIBILITY_STATE.ARCHIVED
+                visibility
             );
-            await updateMagicMetadata(archivedFiles);
-        } catch (e) {
-            console.log(e);
-            switch (e.status?.toString()) {
-                case ServerErrorCodes.FORBIDDEN:
-                    setDialogMessage({
-                        title: constants.ERROR,
-                        staticBackdrop: true,
-                        close: { variant: 'danger' },
-                        content: constants.NOT_FILE_OWNER,
-                    });
-                    return;
-            }
-            setDialogMessage({
-                title: constants.ERROR,
-                staticBackdrop: true,
-                close: { variant: 'danger' },
-                content: constants.UNKNOWN_ERROR,
-            });
-        } finally {
-            clearSelection();
-            syncWithRemote();
-            loadingBar.current.complete();
-        }
-    };
-
-    const unArchiveFilesHelper = async () => {
-        loadingBar.current?.continuousStart();
-        try {
-            const unarchiveFiles = await changeFilesVisibility(
-                files,
-                selected,
-                VISIBILITY_STATE.VISIBLE
-            );
-            await updateMagicMetadata(unarchiveFiles);
+            await updateMagicMetadata(updatedFiles);
         } catch (e) {
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
@@ -639,8 +607,16 @@ export default function Gallery() {
                     selected.collectionID === activeCollection && (
                         <SelectedFileOptions
                             addToCollectionHelper={addToCollectionHelper}
-                            archiveFilesHelper={archiveFilesHelper}
-                            unArchiveFilesHelper={unArchiveFilesHelper}
+                            archiveFilesHelper={() =>
+                                changeFilesVisibilityHelper(
+                                    VISIBILITY_STATE.ARCHIVED
+                                )
+                            }
+                            unArchiveFilesHelper={() =>
+                                changeFilesVisibilityHelper(
+                                    VISIBILITY_STATE.VISIBLE
+                                )
+                            }
                             moveToCollectionHelper={moveToCollectionHelper}
                             showCreateCollectionModal={
                                 showCreateCollectionModal
