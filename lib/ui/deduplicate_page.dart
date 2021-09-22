@@ -142,7 +142,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       child: Column(
         children: [
           Text(
-            "the following files were clubbed based on their sizes and creation times",
+            "the following files were clubbed based on their sizes and timestamps",
             style: TextStyle(
               color: Colors.white.withOpacity(0.6),
               height: 1.2,
