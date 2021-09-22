@@ -41,6 +41,23 @@ export interface Collection {
     isDeleted: boolean;
 }
 
+interface EncryptedFileKey {
+    id: number;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+}
+
+interface AddToCollectionRequest {
+    collectionID: number;
+    files: EncryptedFileKey[];
+}
+
+interface MoveToCollectionRequest {
+    fromCollectionID: number;
+    toCollectionID: number;
+    files: EncryptedFileKey[];
+}
+
 interface collectionAttributes {
     encryptedPath?: string;
     pathDecryptionNonce?: string;
@@ -344,38 +361,77 @@ export const addToCollection = async (
     files: File[]
 ) => {
     try {
-        const params = {};
-        const worker = await new CryptoWorker();
         const token = getToken();
-        params['collectionID'] = collection.id;
-        await Promise.all(
-            files.map(async (file) => {
-                file.collectionID = collection.id;
-                const newEncryptedKey: B64EncryptionResult =
-                    await worker.encryptToB64(file.key, collection.key);
-                file.encryptedKey = newEncryptedKey.encryptedData;
-                file.keyDecryptionNonce = newEncryptedKey.nonce;
-                if (params['files'] === undefined) {
-                    params['files'] = [];
-                }
-                params['files'].push({
-                    id: file.id,
-                    encryptedKey: file.encryptedKey,
-                    keyDecryptionNonce: file.keyDecryptionNonce,
-                });
-                return file;
-            })
-        );
+        const fileKeysEncryptedWithNewCollection =
+            await encryptWithNewCollectionKey(collection, files);
+
+        const requestBody: AddToCollectionRequest = {
+            collectionID: collection.id,
+            files: fileKeysEncryptedWithNewCollection,
+        };
         await HTTPService.post(
             `${ENDPOINT}/collections/add-files`,
-            params,
+            requestBody,
             null,
-            { 'X-Auth-Token': token }
+            {
+                'X-Auth-Token': token,
+            }
         );
     } catch (e) {
         logError(e, 'Add to collection Failed ');
         throw e;
     }
+};
+export const moveToCollection = async (
+    fromCollectionID: number,
+    toCollection: Collection,
+    files: File[]
+) => {
+    try {
+        const token = getToken();
+        const fileKeysEncryptedWithNewCollection =
+            await encryptWithNewCollectionKey(toCollection, files);
+
+        const requestBody: MoveToCollectionRequest = {
+            fromCollectionID: fromCollectionID,
+            toCollectionID: toCollection.id,
+            files: fileKeysEncryptedWithNewCollection,
+        };
+        await HTTPService.post(
+            `${ENDPOINT}/collections/move-files`,
+            requestBody,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        logError(e, 'move to collection Failed ');
+        throw e;
+    }
+};
+
+const encryptWithNewCollectionKey = async (
+    newCollection: Collection,
+    files: File[]
+): Promise<EncryptedFileKey[]> => {
+    const fileKeysEncryptedWithNewCollection: EncryptedFileKey[] = [];
+    const worker = await new CryptoWorker();
+    for (const file of files) {
+        const newEncryptedKey: B64EncryptionResult = await worker.encryptToB64(
+            file.key,
+            newCollection.key
+        );
+        file.encryptedKey = newEncryptedKey.encryptedData;
+        file.keyDecryptionNonce = newEncryptedKey.nonce;
+
+        fileKeysEncryptedWithNewCollection.push({
+            id: file.id,
+            encryptedKey: file.encryptedKey,
+            keyDecryptionNonce: file.keyDecryptionNonce,
+        });
+    }
+    return fileKeysEncryptedWithNewCollection;
 };
 const removeFromCollection = async (collection: Collection, files: File[]) => {
     try {

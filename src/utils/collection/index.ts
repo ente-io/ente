@@ -3,13 +3,21 @@ import {
     Collection,
     CollectionType,
     createCollection,
+    moveToCollection,
 } from 'services/collectionService';
 import { getSelectedFiles } from 'utils/file';
 import { File } from 'services/fileService';
+import { CustomError } from 'utils/common/errorUtil';
+import { SelectedState } from 'pages/gallery';
 
-export async function addFilesToCollection(
+export enum COLLECTION_OPS_TYPE {
+    ADD,
+    MOVE,
+}
+export async function copyOrMoveFromCollection(
+    type: COLLECTION_OPS_TYPE,
     setCollectionSelectorView: (value: boolean) => void,
-    selected: any,
+    selected: SelectedState,
     files: File[],
     clearSelection: () => void,
     syncWithRemote: () => Promise<void>,
@@ -28,7 +36,20 @@ export async function addFilesToCollection(
         collection = existingCollection;
     }
     const selectedFiles = getSelectedFiles(selected, files);
-    await addToCollection(collection, selectedFiles);
+    switch (type) {
+        case COLLECTION_OPS_TYPE.ADD:
+            await addToCollection(collection, selectedFiles);
+            break;
+        case COLLECTION_OPS_TYPE.MOVE:
+            await moveToCollection(
+                selected.collectionID,
+                collection,
+                selectedFiles
+            );
+            break;
+        default:
+            throw Error(CustomError.INVALID_COLLECTION_OPERATION);
+    }
     clearSelection();
     await syncWithRemote();
     setActiveCollection(collection.id);
