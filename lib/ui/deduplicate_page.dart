@@ -22,6 +22,7 @@ class DeduplicatePage extends StatefulWidget {
 }
 
 class _DeduplicatePageState extends State<DeduplicatePage> {
+  static final kHeaderRowCount = 2;
   static final kDeleteIconOverlay = Container(
     decoration: BoxDecoration(
       gradient: LinearGradient(
@@ -118,10 +119,11 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               }
               return Padding(
                 padding: const EdgeInsets.only(top: 10, bottom: 10),
-                child: _getGridView(widget.duplicates[index - 2], index - 2),
+                child: _getGridView(widget.duplicates[index - kHeaderRowCount],
+                    index - kHeaderRowCount),
               );
             },
-            itemCount: widget.duplicates.length,
+            itemCount: widget.duplicates.length + kHeaderRowCount,
             shrinkWrap: true,
           ),
         ),
@@ -293,8 +295,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         ),
         GridView.builder(
           shrinkWrap: true,
-          physics:
-              NeverScrollableScrollPhysics(), // to disable GridView's scrolling
+          physics: NeverScrollableScrollPhysics(),
+          // to disable GridView's scrolling
           itemBuilder: (context, index) {
             return _buildFile(context, duplicates.files[index], itemIndex);
           },
