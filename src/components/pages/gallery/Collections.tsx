@@ -15,6 +15,8 @@ import { SetCollectionNamerAttributes } from './CollectionNamer';
 import CollectionOptions from './CollectionOptions';
 import OptionIcon, { OptionIconWrapper } from './OptionIcon';
 
+export const ALL_SECTION = 0;
+
 interface CollectionProps {
     collections: Collection[];
     selected?: number;
@@ -100,9 +102,9 @@ export default function Collections(props: CollectionProps) {
         collectionRef.current.scrollLeft = 0;
     }, [collections]);
 
-    const clickHandler = (collection?: Collection) => () => {
-        setSelectedCollectionID(collection?.id);
-        setActiveCollection(collection?.id);
+    const clickHandler = (collectionID?: number) => () => {
+        setSelectedCollectionID(collectionID);
+        setActiveCollection(collectionID ?? ALL_SECTION);
     };
 
     const user: User = getData(LS_KEYS.USER);
@@ -119,7 +121,7 @@ export default function Collections(props: CollectionProps) {
         setDialogMessage: props.setDialogMessage,
         startLoadingBar: props.startLoadingBar,
         showCollectionShareModal: setCollectionShareModalView.bind(null, true),
-        redirectToAll: setActiveCollection.bind(null, 0),
+        redirectToAll: setActiveCollection.bind(null, ALL_SECTION),
     });
 
     const scrollCollection = (direction: SCROLL_DIRECTION) => () => {
@@ -171,7 +173,9 @@ export default function Collections(props: CollectionProps) {
                         />
                     )}
                     <Wrapper ref={collectionRef} onScroll={updateScrollObj}>
-                        <Chip active={!selected} onClick={clickHandler()}>
+                        <Chip
+                            active={!selected}
+                            onClick={clickHandler(ALL_SECTION)}>
                             All
                             <div
                                 style={{
@@ -188,7 +192,7 @@ export default function Collections(props: CollectionProps) {
                                 overlay={renderTooltip(item.id)}>
                                 <Chip
                                     active={selected === item.id}
-                                    onClick={clickHandler(item)}>
+                                    onClick={clickHandler(item.id)}>
                                     {item.name}
                                     {item.type !== CollectionType.favorites &&
                                     item.owner.id === user?.id ? (
