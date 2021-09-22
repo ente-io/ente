@@ -418,7 +418,7 @@ const PhotoFrame = ({
             }
             if (!idSet.has(item.id)) {
                 if (
-                    !activeCollection ||
+                    activeCollection <= 0 ||
                     activeCollection === item.collectionID
                 ) {
                     idSet.add(item.id);
