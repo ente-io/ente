@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { IMAGE_CONTAINER_MAX_WIDTH } from 'types';
 import { getSelectedCollection } from 'utils/collection';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import CollectionOptions from './CollectionOptions';
 import OptionIcon, { OptionIconWrapper } from './OptionIcon';
@@ -173,9 +174,9 @@ export default function Collections(props: CollectionProps) {
                     )}
                     <Wrapper ref={collectionRef} onScroll={updateScrollObj}>
                         <Chip
-                            active={activeCollection === 0}
+                            active={activeCollection === ALL_SECTION}
                             onClick={clickHandler(ALL_SECTION)}>
-                            All
+                            {constants.ALL}
                             <div
                                 style={{
                                     display: 'inline-block',
@@ -219,6 +220,17 @@ export default function Collections(props: CollectionProps) {
                                 </Chip>
                             </OverlayTrigger>
                         ))}
+                        <Chip
+                            active={activeCollection === ARCHIVE_COLLECTION}
+                            onClick={clickHandler(ARCHIVE_COLLECTION)}>
+                            {constants.ARCHIVE}
+                            <div
+                                style={{
+                                    display: 'inline-block',
+                                    width: '24px',
+                                }}
+                            />
+                        </Chip>
                     </Wrapper>
                     {scrollObj.scrollLeft <
                         scrollObj.scrollWidth - scrollObj.clientWidth && (
