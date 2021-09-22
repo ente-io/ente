@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
@@ -15,6 +16,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/change_collection_name_dialog.dart';
 import 'package:photos/ui/create_collection_page.dart';
+import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -55,6 +57,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   final _logger = Logger("GalleryAppBar");
   StreamSubscription _userAuthEventSubscription;
   Function() _selectedFilesListener;
+  String appBarTitle;
 
   @override
   void initState() {
@@ -66,6 +69,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
+    appBarTitle = widget.title;
     super.initState();
   }
 
@@ -88,7 +92,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             ? Container()
             : TextButton(
                 child: Text(
-                  widget.title,
+                  appBarTitle,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.80),
                   ),
@@ -116,13 +120,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       return;
     }
     var result = await showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return ChangeCollectionNameDialog(name: widget.title);
-                },
-                barrierColor: Colors.black.withOpacity(0.85),
-                // barrierDismissible: false,
-              );
+      context: context,
+      builder: (BuildContext context) {
+        return ChangeCollectionNameDialog(name: appBarTitle);
+      },
+      barrierColor: Colors.black.withOpacity(0.85),
+    );
     if (result == null) {
       return;
     }
@@ -130,9 +133,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final dialog = createProgressDialog(context, "changing name...");
     await dialog.show();
     try {
-      await CollectionsService.instance.renameCollection(widget.collection, result);
+      await CollectionsService.instance
+          .renameCollection(widget.collection, result);
       await dialog.hide();
-    } catch(e,s) {
+      if (mounted) {
+        appBarTitle = result;
+        setState(() {});
+      }
+    } catch (e) {
       await dialog.hide();
       showGenericErrorDialog(context);
     }

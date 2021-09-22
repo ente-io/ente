@@ -244,6 +244,7 @@ class CollectionsService {
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
       );
+      sync();
     } catch (e, s) {
       _logger.severe("failed to rename collection", e, s);
       rethrow;
