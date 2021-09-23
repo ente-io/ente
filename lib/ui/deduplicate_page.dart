@@ -11,6 +11,7 @@ import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class DeduplicatePage extends StatefulWidget {
   final List<DuplicateFiles> duplicates;
@@ -66,6 +67,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         _fileSizeMap[duplicate.files[index].uploadedFileID] = duplicate.size;
       }
     }
+    showToast("long-press on an item to view in full-screen");
   }
 
   @override
