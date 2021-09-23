@@ -134,7 +134,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     await dialog.show();
     try {
       await CollectionsService.instance
-          .renameCollection(widget.collection, result);
+          .rename(widget.collection, result);
       await dialog.hide();
       if (mounted) {
         appBarTitle = result;

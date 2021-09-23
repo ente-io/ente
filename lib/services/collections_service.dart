@@ -231,7 +231,7 @@ class CollectionsService {
     }
   }
 
-  Future<void> renameCollection(Collection collection, String newName) async {
+  Future<void> rename(Collection collection, String newName) async {
     try {
       final encryptedName = CryptoUtil.encryptSync(utf8.encode(newName), getCollectionKey(collection.id));
       await _dio.post(
@@ -244,6 +244,7 @@ class CollectionsService {
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
       );
+      // trigger sync to fetch the latest name from server
       sync();
     } catch (e, s) {
       _logger.severe("failed to rename collection", e, s);
