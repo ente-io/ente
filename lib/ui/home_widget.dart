@@ -13,7 +13,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/account_configured_event.dart';
-import 'package:photos/events/archive_status_updated_event.dart';
+import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
@@ -358,6 +358,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       forceReloadEvents: [
         Bus.instance.on<BackupFoldersUpdatedEvent>(),
+        Bus.instance.on<ForceReloadHomeGalleryEvent>(),
       ],
       tagPrefix: "home_gallery",
       selectedFiles: _selectedFiles,
