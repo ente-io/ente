@@ -6,7 +6,9 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/magic_metadata.dart';
@@ -30,7 +32,14 @@ class FileMagicService {
   Future<void> changeVisibility(List<File> files, int visibility) async {
     Map<String, dynamic> update = {};
     update[kMagicKeyVisibility] = visibility;
-    return _updateMagicData(files, update);
+    await _updateMagicData(files, update);
+    // h4ck: Remove archived elements from the UI. If this was an archival,
+    // ArchivePage will reload the new items anyway
+    Bus.instance.fire(LocalPhotosUpdatedEvent(files, type: EventType.deleted));
+    if (visibility == kVisibilityVisible) {
+      // Force reload home gallery to pull in the now unarchived files
+      Bus.instance.fire(ForceReloadHomeGalleryEvent());
+    }
   }
 
   Future<void> _updateMagicData(
@@ -69,11 +78,11 @@ class FileMagicService {
               data: Sodium.bin2base64(encryptedMMd.encryptedData),
               header: Sodium.bin2base64(encryptedMMd.header),
             )));
+        file.mMdVersion = file.mMdVersion + 1;
       }
 
       await _dio.put(
-        Configuration.instance.getHttpEndpoint() +
-            "/files/magic-metadata",
+        Configuration.instance.getHttpEndpoint() + "/files/magic-metadata",
         data: params,
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
@@ -81,7 +90,6 @@ class FileMagicService {
       // update the state of the selected file. Same file in other collection
       // should be eventually synced after remote sync has completed
       await _filesDB.insertMultiple(files);
-      Bus.instance.fire(FilesUpdatedEvent(files));
       RemoteSyncService.instance.sync(silently: true);
     } on DioError catch (e) {
       if (e.response != null && e.response.statusCode == 409) {

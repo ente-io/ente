@@ -31,16 +31,22 @@ class ArchivePage extends StatelessWidget {
             creationEndTime, Configuration.instance.getUserID(),
             visibility: kVisibilityArchive, limit: limit, asc: asc);
       },
-      reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where((event) =>
-      event.updatedFiles.firstWhere(
-              (element) => element.uploadedFileID != null,
-              orElse: () => null) !=
-          null),
-      forceReloadEvent: Bus.instance.on<FilesUpdatedEvent>().where((event) =>
-          event.updatedFiles.firstWhere(
-              (element) => element.uploadedFileID != null,
-              orElse: () => null) !=
-          null),
+      reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
+            (event) =>
+                event.updatedFiles.firstWhere(
+                    (element) => element.uploadedFileID != null,
+                    orElse: () => null) !=
+                null,
+          ),
+      forceReloadEvents: [
+        Bus.instance.on<FilesUpdatedEvent>().where(
+              (event) =>
+                  event.updatedFiles.firstWhere(
+                      (element) => element.uploadedFileID != null,
+                      orElse: () => null) !=
+                  null,
+            ),
+      ],
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: null,
@@ -55,7 +61,7 @@ class ArchivePage extends StatelessWidget {
           height: Platform.isAndroid ? 80 : 100,
           child: GalleryAppBarWidget(
             appBarType,
-            "archived memories",
+            "archive",
             _selectedFiles,
           ),
         )

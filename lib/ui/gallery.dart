@@ -24,7 +24,7 @@ class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
   final List<File> initialFiles;
   final Stream<FilesUpdatedEvent> reloadEvent;
-  final Stream<Event> forceReloadEvent;
+  final List<Stream<Event>> forceReloadEvents;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
   final Widget header;
@@ -36,10 +36,11 @@ class Gallery extends StatefulWidget {
     @required this.tagPrefix,
     this.initialFiles,
     this.reloadEvent,
-    this.forceReloadEvent,
+    this.forceReloadEvents,
     this.header,
     this.footer,
-  });
+    Key key,
+  }) : super(key: key);
 
   @override
   _GalleryState createState() {
@@ -53,11 +54,10 @@ class _GalleryState extends State<Gallery> {
   final _hugeListViewKey = GlobalKey<HugeListViewState>();
 
   Logger _logger;
-  int _index = 0;
   List<List<File>> _collatedFiles = [];
   bool _hasLoadedFiles = false;
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
-  StreamSubscription<Event> _forceReloadEventSubscription;
+  final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
 
   @override
   void initState() {
@@ -70,13 +70,14 @@ class _GalleryState extends State<Gallery> {
         _onFilesLoaded(result.files);
       });
     }
-    if (widget.forceReloadEvent != null) {
-      _forceReloadEventSubscription =
-          widget.forceReloadEvent.listen((event) async {
-        _logger.info("Force reload triggered");
-        final result = await _loadFiles();
-        _setFilesAndReload(result.files);
-      });
+    if (widget.forceReloadEvents != null) {
+      for (final event in widget.forceReloadEvents) {
+        _forceReloadEventSubscriptions.add(event.listen((event) async {
+          _logger.info("Force reload triggered");
+          final result = await _loadFiles();
+          _setFilesAndReload(result.files);
+        }));
+      }
     }
     if (widget.initialFiles != null) {
       _onFilesLoaded(widget.initialFiles);
@@ -101,17 +102,11 @@ class _GalleryState extends State<Gallery> {
   Future<FileLoadResult> _loadFiles({int limit}) async {
     _logger.info("Loading files");
     try {
-      final startTime = DateTime
-          .now()
-          .microsecondsSinceEpoch;
+      final startTime = DateTime.now().microsecondsSinceEpoch;
       final result = await widget.asyncLoader(
-          kGalleryLoadStartTime, DateTime
-          .now()
-          .microsecondsSinceEpoch,
+          kGalleryLoadStartTime, DateTime.now().microsecondsSinceEpoch,
           limit: limit);
-      final endTime = DateTime
-          .now()
-          .microsecondsSinceEpoch;
+      final endTime = DateTime.now().microsecondsSinceEpoch;
       final duration = Duration(microseconds: endTime - startTime);
       _logger.info("Time taken to load " +
           result.files.length.toString() +
@@ -119,7 +114,7 @@ class _GalleryState extends State<Gallery> {
           duration.inMilliseconds.toString() +
           "ms");
       return result;
-    } catch(e, s) {
+    } catch (e, s) {
       _logger.severe("failed to load files", e, s);
       rethrow;
     }
@@ -146,7 +141,9 @@ class _GalleryState extends State<Gallery> {
   @override
   void dispose() {
     _reloadEventSubscription?.cancel();
-    _forceReloadEventSubscription?.cancel();
+    for (final subscription in _forceReloadEventSubscriptions) {
+      subscription.cancel();
+    }
     super.dispose();
   }
 
@@ -163,7 +160,7 @@ class _GalleryState extends State<Gallery> {
     return HugeListView<List<File>>(
       key: _hugeListViewKey,
       controller: ItemScrollController(),
-      startIndex: _index,
+      startIndex: 0,
       totalCount: _collatedFiles.length,
       isDraggableScrollbarEnabled: _collatedFiles.length > 30,
       waitBuilder: (_) {
@@ -174,7 +171,7 @@ class _GalleryState extends State<Gallery> {
         if (widget.header != null) {
           children.add(widget.header);
         }
-        children.add(nothingToSeeHere);
+        children.add(Expanded(child: nothingToSeeHere));
         if (widget.footer != null) {
           children.add(widget.footer);
         }
@@ -184,7 +181,7 @@ class _GalleryState extends State<Gallery> {
         );
       },
       itemBuilder: (context, index) {
-        var gallery;
+        Widget gallery;
         gallery = LazyLoadingGallery(
           _collatedFiles[index],
           index,
