@@ -123,8 +123,8 @@ Future<void> deleteFilesFromRemoteOnly(
   try {
     await SyncService.instance.deleteFilesOnServer(ids);
     await FilesDB.instance.deleteMultipleUploadedFiles(ids);
-  } catch (e) {
-    _logger.severe(e);
+  } catch (e, s) {
+    _logger.severe("Failed to delete files from remote", e, s);
     await dialog.hide();
     showGenericErrorDialog(context);
     rethrow;
