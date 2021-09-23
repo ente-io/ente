@@ -55,6 +55,13 @@ class DiffFetcher {
                 }
                 continue;
               }
+              if (existingFiles.contains(file.uploadedFileID)) {
+                final existingFile = await FilesDB.instance
+                    .getUploadedFile(file.uploadedFileID, file.collectionID);
+                if (existingFile != null) {
+                  file.generatedID = existingFile.generatedID;
+                }
+              }
               file.updationTime = item["updationTime"];
               file.ownerID = item["ownerID"];
               file.encryptedKey = item["encryptedKey"];
