@@ -19,18 +19,25 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
+enum DetailPageMode {
+  minimalistic,
+  full,
+}
+
 class DetailPageConfiguration {
   final List<File> files;
   final GalleryLoader asyncLoader;
   final int selectedIndex;
   final String tagPrefix;
+  final DetailPageMode mode;
 
   DetailPageConfiguration(
     this.files,
     this.asyncLoader,
     this.selectedIndex,
-    this.tagPrefix,
-  );
+    this.tagPrefix, {
+    this.mode = DetailPageMode.full,
+  });
 
   DetailPageConfiguration copyWith({
     List<File> files,
@@ -101,6 +108,7 @@ class _DetailPageState extends State<DetailPage> {
         _onFileDeleted,
         Configuration.instance.getUserID(),
         100,
+        widget.config.mode == DetailPageMode.full,
         key: _appBarKey,
       ),
       extendBodyBehindAppBar: true,
@@ -111,6 +119,7 @@ class _DetailPageState extends State<DetailPage> {
             FadingBottomBar(
               _files[_selectedIndex],
               _onEditFileRequested,
+              widget.config.mode == DetailPageMode.minimalistic,
               key: _bottomBarKey,
             ),
           ],
@@ -201,6 +210,9 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   void _preloadEntries() async {
+    if (widget.config.asyncLoader == null) {
+      return;
+    }
     if (_selectedIndex == 0 && !_hasLoadedTillStart) {
       final result = await widget.config.asyncLoader(
           _files[_selectedIndex].creationTime + 1,

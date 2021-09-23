@@ -32,3 +32,7 @@ class InvalidSyncStatusError extends AssertionError {
 }
 
 class UnauthorizedEditError extends AssertionError {}
+
+class InvalidStateError extends AssertionError {
+  InvalidStateError(String message) : super(message);
+}

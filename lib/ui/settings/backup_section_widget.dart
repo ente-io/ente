@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/backup_status.dart';
+import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
+import 'package:photos/ui/deduplicate_page.dart';
 import 'package:photos/ui/free_space_page.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
@@ -118,6 +120,37 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             icon: Icons.navigate_next,
           ),
         ),
+        Platform.isIOS
+            ? Padding(padding: EdgeInsets.all(4))
+            : Padding(padding: EdgeInsets.all(2)),
+        Divider(height: 4),
+        Platform.isIOS
+            ? Padding(padding: EdgeInsets.all(2))
+            : Padding(padding: EdgeInsets.all(2)),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            final dialog = createProgressDialog(context, "calculating...");
+            await dialog.show();
+            final duplicates =
+                await DeduplicationService.instance.getDuplicateFiles();
+            await dialog.hide();
+            if (duplicates.isEmpty) {
+              showErrorDialog(context, "✨ no duplicates",
+                  "you've no duplicate files that can be cleared");
+            } else {
+              DeduplicationResult result =
+                  await routeToPage(context, DeduplicatePage(duplicates));
+              if (result != null) {
+                _showDuplicateFilesDeletedDialog(result);
+              }
+            }
+          },
+          child: SettingsTextItem(
+            text: "deduplicate files",
+            icon: Icons.navigate_next,
+          ),
+        ),
       ],
     );
   }
@@ -137,6 +170,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           ),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
+            // TODO: Replace with https://pub.dev/packages/in_app_review
             if (Platform.isAndroid) {
               launch(
                   "https://play.google.com/store/apps/details?id=io.ente.photos");
@@ -157,6 +191,61 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
               showToast(
                   "also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space");
             }
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+          },
+        ),
+      ],
+    );
+    showConfettiDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+      barrierColor: Colors.black87,
+      confettiAlignment: Alignment.topCenter,
+      useRootNavigator: true,
+    );
+  }
+
+  void _showDuplicateFilesDeletedDialog(DeduplicationResult result) {
+    String countText = result.count.toString() +
+        " duplicate file" +
+        (result.count == 1 ? "" : "s");
+    AlertDialog alert = AlertDialog(
+      title: Text("✨ success"),
+      content: Text("you have cleaned up " +
+          countText +
+          ", saving " +
+          formatBytes(result.size) +
+          "!"),
+      actions: [
+        TextButton(
+          child: Text(
+            "rate us",
+            style: TextStyle(
+              color: Theme.of(context).buttonColor,
+            ),
+          ),
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+            // TODO: Replace with https://pub.dev/packages/in_app_review
+            if (Platform.isAndroid) {
+              launch(
+                  "https://play.google.com/store/apps/details?id=io.ente.photos");
+            } else {
+              launch("https://apps.apple.com/in/app/ente-photos/id1542026904");
+            }
+          },
+        ),
+        TextButton(
+          child: Text(
+            "ok",
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          onPressed: () {
+            showToast("also empty your \"Trash\" to claim the freed up space");
             Navigator.of(context, rootNavigator: true).pop('dialog');
           },
         ),

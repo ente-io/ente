@@ -10,10 +10,12 @@ import 'package:photos/utils/share_util.dart';
 class FadingBottomBar extends StatefulWidget {
   final File file;
   final Function(File) onEditRequested;
+  final bool showOnlyInfoButton;
 
   FadingBottomBar(
     this.file,
-    this.onEditRequested, {
+    this.onEditRequested,
+    this.showOnlyInfoButton, {
     Key key,
   }) : super(key: key);
 
@@ -55,54 +57,56 @@ class FadingBottomBarState extends State<FadingBottomBar> {
         ),
       ),
     );
-    if (widget.file.fileType == FileType.image ||
-        widget.file.fileType == FileType.livePhoto
-    ) {
+    if (!widget.showOnlyInfoButton) {
+      if (widget.file.fileType == FileType.image ||
+          widget.file.fileType == FileType.livePhoto) {
+        children.add(
+          Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 12),
+            child: IconButton(
+              icon: Icon(Icons.tune_outlined),
+              onPressed: () {
+                widget.onEditRequested(widget.file);
+              },
+            ),
+          ),
+        );
+      }
       children.add(
         Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(
-            icon: Icon(Icons.tune_outlined),
+            icon: Icon(Platform.isAndroid
+                ? Icons.share_outlined
+                : CupertinoIcons.share),
             onPressed: () {
-              widget.onEditRequested(widget.file);
+              share(context, [widget.file]);
             },
           ),
         ),
       );
     }
-    children.add(
-      Padding(
-        padding: const EdgeInsets.only(top: 12, bottom: 12),
-        child: IconButton(
-          icon: Icon(
-              Platform.isAndroid ? Icons.share_outlined : CupertinoIcons.share),
-          onPressed: () {
-            share(context, [widget.file]);
-          },
-        ),
-      ),
-    );
     return AnimatedOpacity(
       child: Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.5),
-                  Colors.black.withOpacity(0.64),
-                ],
-                stops: [0, 0.8, 1],
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: children,
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.transparent,
+                Colors.black.withOpacity(0.5),
+                Colors.black.withOpacity(0.64),
+              ],
+              stops: const [0, 0.8, 1],
             ),
           ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: children,
+          ),
+        ),
       ),
       opacity: _shouldHide ? 0 : 1,
       duration: Duration(milliseconds: 150),

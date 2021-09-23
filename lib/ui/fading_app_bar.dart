@@ -24,13 +24,15 @@ class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
   final File file;
   final Function(File) onFileDeleted;
   final double height;
+  final bool shouldShowActions;
   final int userID;
 
   FadingAppBar(
     this.file,
     this.onFileDeleted,
     this.userID,
-    this.height, {
+    this.height,
+    this.shouldShowActions, {
     Key key,
   }) : super(key: key);
 
@@ -147,7 +149,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           fontSize: 14,
         ),
       ),
-      actions: actions,
+      actions: widget.shouldShowActions ? actions : [],
       backgroundColor: Color(0x00000000),
       elevation: 0,
     );
@@ -265,7 +267,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     final savedAsset = type == FileType.video
         ? (await PhotoManager.editor.saveVideo(fileToSave, title: file.title))
         : (await PhotoManager.editor
-        .saveImageWithPath(fileToSave.path, title: file.title));
+            .saveImageWithPath(fileToSave.path, title: file.title));
     // immediately track assetID to avoid duplicate upload
     await LocalSyncService.instance.trackDownloadedFile(savedAsset.id);
     file.localID = savedAsset.id;

@@ -9,7 +9,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/public_keys_db.dart';
-import 'package:photos/events/email_changed_event.dart';
+import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
@@ -230,7 +230,7 @@ class UserService {
         showToast("email changed to " + email);
         _config.setEmail(email);
         Navigator.of(context).popUntil((route) => route.isFirst);
-        Bus.instance.fire(EmailChangedEvent());
+        Bus.instance.fire(UserDetailsChangedEvent());
         return;
       }
       showErrorDialog(context, AppLocalizations.of(context).oops,

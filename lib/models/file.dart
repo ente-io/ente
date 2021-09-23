@@ -1,5 +1,4 @@
 import 'dart:io' as io;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:path/path.dart';
@@ -41,7 +40,7 @@ class File {
   MagicMetadata _mmd;
   MagicMetadata get magicMetadata =>
       _mmd ?? MagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
-  set magicMetadata (val) => _mmd = val;
+  set magicMetadata(val) => _mmd = val;
 
   static const kCurrentMetadataVersion = 1;
 
