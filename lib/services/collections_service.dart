@@ -331,7 +331,22 @@ class CollectionsService {
     return collection;
   }
 
-  Future<void> addToCollection(int collectionID, List<File> files) {
+  Future<void> addToCollection(int collectionID, List<File> files) async {
+    final shouldDedupeWithExistingUploadIDs = files.firstWhere(
+        (element) => element.uploadedFileID != null,
+        orElse: () => null) != null;
+    if (shouldDedupeWithExistingUploadIDs) {
+      final existingUploadedIDs =
+          await FilesDB.instance.getUploadedFileIDs(collectionID);
+      files.removeWhere((element) =>
+          element.uploadedFileID != null &&
+          existingUploadedIDs.contains(element.uploadedFileID));
+      if (files.isEmpty) {
+        _logger.info("nothing to add to the collection");
+        return;
+      }
+    }
+
     final params = <String, dynamic>{};
     params["collectionID"] = collectionID;
     for (final file in files) {
@@ -349,17 +364,19 @@ class CollectionsService {
               file.uploadedFileID, file.encryptedKey, file.keyDecryptionNonce)
           .toMap());
     }
-    return _dio
-        .post(
-      Configuration.instance.getHttpEndpoint() + "/collections/add-files",
-      data: params,
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-    )
-        .then((value) async {
+
+    try {
+      await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/collections/add-files",
+        data: params,
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
       await _filesDB.insertMultiple(files);
       Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
-    });
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> move(

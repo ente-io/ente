@@ -272,7 +272,6 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         await FilesDB.instance.insertMultiple(localFiles);
       } else {
         for (final file in widget.selectedFiles.files) {
-          await FilesDB.instance.insert(file);
           final currentFile = await FilesDB.instance.getFile(file.generatedID);
           if (currentFile.uploadedFileID == null) {
             final uploadedFile = (await FileUploader.instance
