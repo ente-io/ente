@@ -28,7 +28,7 @@ class _ChangeCollectionNameDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("enter new album name"),
+      title: Text("enter a new name"),
       content: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -81,7 +81,7 @@ class _ChangeCollectionNameDialogState
               return;
             }
             if (_newCollectionName.trim().length > 100) {
-              showErrorDialog(context, "too large",
+              showErrorDialog(context, "name too large",
                   "album name should be less than 100 characters");
               return;
             }

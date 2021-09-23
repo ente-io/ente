@@ -57,7 +57,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   final _logger = Logger("GalleryAppBar");
   StreamSubscription _userAuthEventSubscription;
   Function() _selectedFilesListener;
-  String appBarTitle;
+  String _appBarTitle;
 
   @override
   void initState() {
@@ -69,7 +69,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
-    appBarTitle = widget.title;
+    _appBarTitle = widget.title;
     super.initState();
   }
 
@@ -92,7 +92,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             ? Container()
             : TextButton(
                 child: Text(
-                  appBarTitle,
+                  _appBarTitle,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.80),
                   ),
@@ -119,13 +119,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (widget.type != GalleryAppBarType.owned_collection) {
       return;
     }
-    var result = await showDialog(
+    final result = await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return ChangeCollectionNameDialog(name: appBarTitle);
+        return ChangeCollectionNameDialog(name: _appBarTitle);
       },
       barrierColor: Colors.black.withOpacity(0.85),
     );
+    // indicates user cancelled the rename request
     if (result == null) {
       return;
     }
@@ -137,7 +138,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           .rename(widget.collection, result);
       await dialog.hide();
       if (mounted) {
-        appBarTitle = result;
+        _appBarTitle = result;
         setState(() {});
       }
     } catch (e) {
