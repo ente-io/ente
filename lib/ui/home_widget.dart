@@ -13,6 +13,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/account_configured_event.dart';
+import 'package:photos/events/archive_status_updated_event.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
@@ -129,7 +130,8 @@ class _HomeWidgetState extends State<HomeWidget> {
             ),
             onPressed: () async {
               Navigator.of(context, rootNavigator: true).pop('dialog');
-              final dialog = createProgressDialog(context, AppLocalizations.of(context).auth_logging_out);
+              final dialog = createProgressDialog(
+                  context, AppLocalizations.of(context).auth_logging_out);
               await dialog.show();
               await Configuration.instance.logout();
               await dialog.hide();
@@ -338,8 +340,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         final importantPaths = Configuration.instance.getPathsToBackUp();
         final ownerID = Configuration.instance.getUserID();
         if (importantPaths.isNotEmpty) {
-          return FilesDB.instance.getImportantFiles(
-              creationStartTime, creationEndTime, ownerID, importantPaths.toList(),
+          return FilesDB.instance.getImportantFiles(creationStartTime,
+              creationEndTime, ownerID, importantPaths.toList(),
               limit: limit, asc: asc);
         } else {
           if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
@@ -354,7 +356,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-      forceReloadEvent: Bus.instance.on<BackupFoldersUpdatedEvent>(),
+      forceReloadEvents: [
+        Bus.instance.on<BackupFoldersUpdatedEvent>(),
+      ],
       tagPrefix: "home_gallery",
       selectedFiles: _selectedFiles,
       header: header,

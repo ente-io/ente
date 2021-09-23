@@ -24,7 +24,7 @@ class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
   final List<File> initialFiles;
   final Stream<FilesUpdatedEvent> reloadEvent;
-  final Stream<Event> forceReloadEvent;
+  final List<Stream<Event>> forceReloadEvents;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
   final Widget header;
@@ -36,10 +36,11 @@ class Gallery extends StatefulWidget {
     @required this.tagPrefix,
     this.initialFiles,
     this.reloadEvent,
-    this.forceReloadEvent,
+    this.forceReloadEvents,
     this.header,
     this.footer,
-  });
+    Key key,
+  }) : super(key: key);
 
   @override
   _GalleryState createState() {
@@ -53,11 +54,10 @@ class _GalleryState extends State<Gallery> {
   final _hugeListViewKey = GlobalKey<HugeListViewState>();
 
   Logger _logger;
-  int _index = 0;
   List<List<File>> _collatedFiles = [];
   bool _hasLoadedFiles = false;
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
-  StreamSubscription<Event> _forceReloadEventSubscription;
+  final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
 
   @override
   void initState() {
@@ -70,13 +70,14 @@ class _GalleryState extends State<Gallery> {
         _onFilesLoaded(result.files);
       });
     }
-    if (widget.forceReloadEvent != null) {
-      _forceReloadEventSubscription =
-          widget.forceReloadEvent.listen((event) async {
-        _logger.info("Force reload triggered");
-        final result = await _loadFiles();
-        _setFilesAndReload(result.files);
-      });
+    if (widget.forceReloadEvents != null) {
+      for (final event in widget.forceReloadEvents) {
+        _forceReloadEventSubscriptions.add(event.listen((event) async {
+          _logger.info("Force reload triggered");
+          final result = await _loadFiles();
+          _setFilesAndReload(result.files);
+        }));
+      }
     }
     if (widget.initialFiles != null) {
       _onFilesLoaded(widget.initialFiles);
@@ -140,7 +141,9 @@ class _GalleryState extends State<Gallery> {
   @override
   void dispose() {
     _reloadEventSubscription?.cancel();
-    _forceReloadEventSubscription?.cancel();
+    for (final subscription in _forceReloadEventSubscriptions) {
+      subscription.cancel();
+    }
     super.dispose();
   }
 
@@ -157,7 +160,7 @@ class _GalleryState extends State<Gallery> {
     return HugeListView<List<File>>(
       key: _hugeListViewKey,
       controller: ItemScrollController(),
-      startIndex: _index,
+      startIndex: 0,
       totalCount: _collatedFiles.length,
       isDraggableScrollbarEnabled: _collatedFiles.length > 30,
       waitBuilder: (_) {
