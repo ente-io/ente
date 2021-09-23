@@ -40,11 +40,14 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final titleSuffix = (widget.selectedFiles.files.length == 1 ? "" : "s");
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.actionType == CollectionActionType.addFiles
-            ? "add files"
-            : "move files"),
+        title: Text(
+          widget.actionType == CollectionActionType.addFiles
+              ? "add file" + titleSuffix
+              : "move file" + titleSuffix,
+        ),
       ),
       body: _getBody(context),
     );
@@ -240,9 +243,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     await dialog.show();
     try {
       int fromCollectionID = widget.selectedFiles.files?.first?.collectionID;
-      await CollectionsService.instance.move(
-          toCollectionID,
-          fromCollectionID,
+      await CollectionsService.instance.move(toCollectionID, fromCollectionID,
           widget.selectedFiles.files?.toList());
       RemoteSyncService.instance.sync(silently: true);
       widget.selectedFiles?.clearAll();
