@@ -100,26 +100,21 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         final result = await widget.asyncLoader(
             dayStartTime.microsecondsSinceEpoch,
             dayStartTime.microsecondsSinceEpoch + kMicroSecondsInDay - 1);
-        if (result.files.isEmpty) {
-          // All files on this day were deleted, let gallery trigger the reload
-        } else {
-          if (mounted) {
-            setState(() {
-              _files = result.files;
-            });
-          }
+        if (mounted) {
+          setState(() {
+            _files = result.files;
+          });
         }
       } else {
         // Files were deleted
-        final updateFileIDs = Set<int>();
+        final updateFileIDs = <int>{};
         for (final file in filesUpdatedThisDay) {
           updateFileIDs.add(file.generatedID);
         }
         final List<File> files = [];
         files.addAll(_files);
         files.removeWhere((file) => updateFileIDs.contains(file.generatedID));
-        if (files.isNotEmpty && mounted) {
-          // If all files on this day were deleted, ignore and let the gallery reload itself
+        if (mounted) {
           setState(() {
             _files = files;
           });
