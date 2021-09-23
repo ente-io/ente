@@ -245,7 +245,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             ),
           ),
           onPressed: () {
-            showToast("also empty your \"Trash\" to claim the freed up space");
+            // TODO: After trash implementation - showToast("also empty your \"Trash\" to claim the freed up space");
             Navigator.of(context, rootNavigator: true).pop('dialog');
           },
         ),
