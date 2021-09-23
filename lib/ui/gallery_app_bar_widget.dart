@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
@@ -16,7 +15,6 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/change_collection_name_dialog.dart';
 import 'package:photos/ui/create_collection_page.dart';
-import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -137,8 +135,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final dialog = createProgressDialog(context, "changing name...");
     await dialog.show();
     try {
-      await CollectionsService.instance
-          .rename(widget.collection, result);
+      await CollectionsService.instance.rename(widget.collection, result);
       await dialog.hide();
       if (mounted) {
         _appBarTitle = result;
@@ -167,7 +164,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
-    if (widget.type == GalleryAppBarType.owned_collection) {
+    if (widget.type == GalleryAppBarType.owned_collection &&
+        widget.collection.type == CollectionType.album) {
       actions.add(PopupMenuButton(
         itemBuilder: (context) {
           final List<PopupMenuItem> items = [];
@@ -175,8 +173,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             PopupMenuItem(
               value: 1,
               child: Row(
-                children: [
-                  Icon(Icons.drive_file_rename_outline),
+                children: const [
+                  Icon(Icons.edit),
                   Padding(
                     padding: EdgeInsets.all(8),
                   ),
