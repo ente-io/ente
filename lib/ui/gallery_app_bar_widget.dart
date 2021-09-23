@@ -198,7 +198,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         widget.type == GalleryAppBarType.owned_collection) {
       actions.add(IconButton(
         icon: Icon(Platform.isAndroid
-            ? Icons.arrow_right_alt_rounded
+            ? Icons.arrow_forward
             : CupertinoIcons.arrow_right),
         onPressed: () {
           _moveFiles();
@@ -268,7 +268,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
         onSelected: (value) async {
           if (value == 1) {
-            await _handleVisibilityChangeRequest(context, showArchive ? kVisibilityArchive : kVisibilityVisible);
+            await _handleVisibilityChangeRequest(
+                context, showArchive ? kVisibilityArchive : kVisibilityVisible);
           }
         },
       ));
@@ -276,13 +277,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     return actions;
   }
 
-  Future<void> _handleVisibilityChangeRequest(BuildContext context,
-      int newVisibility) async {
+  Future<void> _handleVisibilityChangeRequest(
+      BuildContext context, int newVisibility) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
     try {
-      await FileMagicService.instance.changeVisibility(
-          widget.selectedFiles.files.toList(), newVisibility);
+      await FileMagicService.instance
+          .changeVisibility(widget.selectedFiles.files.toList(), newVisibility);
       showToast(
           newVisibility == kVisibilityArchive
               ? "successfully archived"
