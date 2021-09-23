@@ -78,6 +78,7 @@ class FileMagicService {
               data: Sodium.bin2base64(encryptedMMd.encryptedData),
               header: Sodium.bin2base64(encryptedMMd.header),
             )));
+        file.mMdVersion = file.mMdVersion + 1;
       }
 
       await _dio.put(
