@@ -264,7 +264,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   Future<void> _handleVisibilityChangeRequest(
       BuildContext context, int newVisibility) async {
-    final dialog = createProgressDialog(context, "please wait...");
+    final dialog = createProgressDialog(
+        context,
+        newVisibility == kVisibilityArchive
+            ? "archiving..."
+            : "unarchiving...");
     await dialog.show();
     try {
       await FileMagicService.instance
