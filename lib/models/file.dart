@@ -1,14 +1,15 @@
+import 'dart:io' as io;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/utils/crypto_util.dart';
-import 'dart:io' as io;
 
 class File {
   int generatedID;
@@ -34,6 +35,13 @@ class File {
   String thumbnailDecryptionHeader;
   String metadataDecryptionHeader;
 
+  String mMdEncodedJson;
+  int mMdVersion = 0;
+  MagicMetadata _mmd;
+  MagicMetadata get magicMetadata =>
+      _mmd ?? MagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
+  set magicMetadata(val) => _mmd = val;
+
   static const kCurrentMetadataVersion = 1;
 
   File();
@@ -51,6 +59,7 @@ class File {
         final parsedDateTime = DateTime.parse(
             basenameWithoutExtension(file.title)
                 .replaceAll("IMG_", "")
+                .replaceAll("VID_", "")
                 .replaceAll("DCIM_", "")
                 .replaceAll("_", " "));
         file.creationTime = parsedDateTime.microsecondsSinceEpoch;

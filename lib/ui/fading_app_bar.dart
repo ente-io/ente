@@ -25,10 +25,12 @@ class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Function(File) onFileDeleted;
   final double height;
   final bool shouldShowActions;
+  final int userID;
 
   FadingAppBar(
     this.file,
     this.onFileDeleted,
+    this.userID,
     this.height,
     this.shouldShowActions, {
     Key key,
@@ -85,7 +87,10 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   AppBar _buildAppBar() {
     final List<Widget> actions = [];
-    actions.add(_getFavoriteButton());
+    // only show fav option for files owned by the user
+    if (widget.file.ownerID == null || widget.file.ownerID == widget.userID) {
+      actions.add(_getFavoriteButton());
+    }
     actions.add(PopupMenuButton(
       itemBuilder: (context) {
         final List<PopupMenuItem> items = [];
@@ -107,22 +112,26 @@ class FadingAppBarState extends State<FadingAppBar> {
             ),
           );
         }
-        items.add(
-          PopupMenuItem(
-            value: 2,
-            child: Row(
-              children: [
-                Icon(Platform.isAndroid
-                    ? Icons.delete_outline
-                    : CupertinoIcons.delete),
-                Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text("delete"),
-              ],
+        // only show delete option for files owned by the user
+        if (widget.file.ownerID == null ||
+            widget.file.ownerID == widget.userID) {
+          items.add(
+            PopupMenuItem(
+              value: 2,
+              child: Row(
+                children: [
+                  Icon(Platform.isAndroid
+                      ? Icons.delete_outline
+                      : CupertinoIcons.delete),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text("delete"),
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        }
         return items;
       },
       onSelected: (value) {

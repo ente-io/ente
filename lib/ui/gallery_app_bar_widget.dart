@@ -1,24 +1,29 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 enum GalleryAppBarType {
   homepage,
+  archive,
   local_folder,
   // indicator for gallery view of collections shared with the user
   shared_collection,
@@ -208,6 +213,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       },
     ));
     if (widget.type == GalleryAppBarType.homepage ||
+        widget.type == GalleryAppBarType.archive ||
         widget.type == GalleryAppBarType.local_folder) {
       actions.add(IconButton(
         icon: Icon(
@@ -235,7 +241,62 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ));
       }
     }
+
+    if (widget.type == GalleryAppBarType.homepage ||
+        widget.type == GalleryAppBarType.archive) {
+      bool showArchive = widget.type == GalleryAppBarType.homepage;
+      actions.add(PopupMenuButton(
+        itemBuilder: (context) {
+          final List<PopupMenuItem> items = [];
+          items.add(
+            PopupMenuItem(
+              value: 1,
+              child: Row(
+                children: [
+                  Icon(Platform.isAndroid
+                      ? Icons.archive_outlined
+                      : CupertinoIcons.archivebox),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text(showArchive ? "archive" : "unarchive"),
+                ],
+              ),
+            ),
+          );
+          return items;
+        },
+        onSelected: (value) async {
+          if (value == 1) {
+            await _handleVisibilityChangeRequest(context, showArchive ? kVisibilityArchive : kVisibilityVisible);
+          }
+        },
+      ));
+    }
     return actions;
+  }
+
+  Future<void> _handleVisibilityChangeRequest(BuildContext context,
+      int newVisibility) async {
+    final dialog = createProgressDialog(context, "please wait...");
+    await dialog.show();
+    try {
+      await FileMagicService.instance.changeVisibility(
+          widget.selectedFiles.files.toList(), newVisibility);
+      showToast(
+          newVisibility == kVisibilityArchive
+              ? "successfully archived"
+              : "successfully unarchived",
+          toastLength: Toast.LENGTH_SHORT);
+
+      await dialog.hide();
+    } catch (e, s) {
+      _logger.severe("failed to update file visibility", e, s);
+      await dialog.hide();
+      await showGenericErrorDialog(context);
+    } finally {
+      _clearSelectedFiles();
+    }
   }
 
   void _shareSelected(BuildContext context) {

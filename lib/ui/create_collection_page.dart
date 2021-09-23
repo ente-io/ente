@@ -254,6 +254,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       return false;
     } catch (e, s) {
       _logger.severe("Could not move to album", e, s);
+      await dialog.hide();
       showGenericErrorDialog(context);
       return false;
     }

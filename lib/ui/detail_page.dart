@@ -106,6 +106,7 @@ class _DetailPageState extends State<DetailPage> {
       appBar: FadingAppBar(
         _files[_selectedIndex],
         _onFileDeleted,
+        Configuration.instance.getUserID(),
         100,
         widget.config.mode == DetailPageMode.full,
         key: _appBarKey,

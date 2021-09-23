@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -45,7 +46,6 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({Key key}) : super(key: key);
@@ -336,18 +336,19 @@ class _HomeWidgetState extends State<HomeWidget> {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         final importantPaths = Configuration.instance.getPathsToBackUp();
+        final ownerID = Configuration.instance.getUserID();
         if (importantPaths.isNotEmpty) {
           return FilesDB.instance.getImportantFiles(
-              creationStartTime, creationEndTime, importantPaths.toList(),
+              creationStartTime, creationEndTime, ownerID, importantPaths.toList(),
               limit: limit, asc: asc);
         } else {
           if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
             return FilesDB.instance.getAllLocalAndUploadedFiles(
-                creationStartTime, creationEndTime,
+                creationStartTime, creationEndTime, ownerID,
                 limit: limit, asc: asc);
           } else {
             return FilesDB.instance.getAllUploadedFiles(
-                creationStartTime, creationEndTime,
+                creationStartTime, creationEndTime, ownerID,
                 limit: limit, asc: asc);
           }
         }
