@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -16,6 +17,7 @@ import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RemoteSyncService {
   final _logger = Logger("RemoteSyncService");
@@ -24,22 +26,46 @@ class RemoteSyncService {
   final _collectionsService = CollectionsService.instance;
   final _diffFetcher = DiffFetcher();
   int _completedUploads = 0;
+  SharedPreferences _prefs;
 
   static const kDiffLimit = 2500;
+  static const kHasSyncedArchiveKey = "has_synced_archive";
+  static const kArchiveFeatureReleaseTime = 1632100000000000;
 
   static final RemoteSyncService instance =
       RemoteSyncService._privateConstructor();
 
   RemoteSyncService._privateConstructor();
 
-  Future<void> init() async {}
+  Future<void> init() async {
+    _prefs = await SharedPreferences.getInstance();
+  }
 
   Future<void> sync({bool silently = false}) async {
     if (!Configuration.instance.hasConfiguredAccount()) {
       _logger.info("Skipping remote sync since account is not configured");
       return;
     }
+
+    bool isFirstSync = !_collectionsService.hasSyncedCollections();
     await _collectionsService.sync();
+
+    if (isFirstSync || _hasSyncedArchive()) {
+      await _syncUpdatedCollections(silently);
+    } else {
+      await _resyncAllCollectionsSinceTime(kArchiveFeatureReleaseTime);
+    }
+    if (!_hasSyncedArchive()) {
+      await _markArchiveAsSynced();
+    }
+
+    bool hasUploadedFiles = await _uploadDiff();
+    if (hasUploadedFiles) {
+      sync(silently: true);
+    }
+  }
+
+  Future<void> _syncUpdatedCollections(bool silently) async {
     final updatedCollections =
         await _collectionsService.getCollectionsToBeSynced();
 
@@ -47,21 +73,24 @@ class RemoteSyncService {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.applying_remote_diff));
     }
     for (final c in updatedCollections) {
-      await _syncCollectionDiff(c.id);
-      _collectionsService.setCollectionSyncTime(c.id, c.updationTime);
-    }
-    bool hasUploadedFiles = await _uploadDiff();
-    if (hasUploadedFiles) {
-      sync(silently: true);
+      await _syncCollectionDiff(
+          c.id, _collectionsService.getCollectionSyncTime(c.id));
+      await _collectionsService.setCollectionSyncTime(c.id, c.updationTime);
     }
   }
 
-  Future<void> _syncCollectionDiff(int collectionID) async {
+  Future<void> _resyncAllCollectionsSinceTime(int sinceTime) async {
+    final collections = _collectionsService.getCollections();
+    for (final c in collections) {
+      await _syncCollectionDiff(c.id,
+          min(_collectionsService.getCollectionSyncTime(c.id), sinceTime));
+      await _collectionsService.setCollectionSyncTime(c.id, c.updationTime);
+    }
+  }
+
+  Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
     final diff = await _diffFetcher.getEncryptedFilesDiff(
-      collectionID,
-      _collectionsService.getCollectionSyncTime(collectionID),
-      kDiffLimit,
-    );
+        collectionID, sinceTime, kDiffLimit);
     if (diff.updatedFiles.isNotEmpty) {
       await _storeDiff(diff.updatedFiles, collectionID);
       _logger.info("Updated " +
@@ -71,9 +100,10 @@ class RemoteSyncService {
       Bus.instance.fire(LocalPhotosUpdatedEvent(diff.updatedFiles));
       Bus.instance
           .fire(CollectionUpdatedEvent(collectionID, diff.updatedFiles));
-      if (diff.fetchCount == kDiffLimit) {
-        return await _syncCollectionDiff(collectionID);
-      }
+    }
+    if (diff.fetchCount == kDiffLimit) {
+      return await _syncCollectionDiff(collectionID,
+          _collectionsService.getCollectionSyncTime(collectionID));
     }
   }
 
@@ -252,5 +282,13 @@ class RemoteSyncService {
           localButAddedToNewCollectionOnRemote.toString() +
           " was uploaded from device but added to a new collection on remote.",
     );
+  }
+
+  bool _hasSyncedArchive() {
+    return _prefs.containsKey(kHasSyncedArchiveKey);
+  }
+
+  Future<bool> _markArchiveAsSynced() {
+    return _prefs.setBool(kHasSyncedArchiveKey, true);
   }
 }

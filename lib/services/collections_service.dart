@@ -233,7 +233,8 @@ class CollectionsService {
 
   Future<void> rename(Collection collection, String newName) async {
     try {
-      final encryptedName = CryptoUtil.encryptSync(utf8.encode(newName), getCollectionKey(collection.id));
+      final encryptedName = CryptoUtil.encryptSync(
+          utf8.encode(newName), getCollectionKey(collection.id));
       await _dio.post(
         Configuration.instance.getHttpEndpoint() + "/collections/rename",
         data: {
@@ -469,6 +470,10 @@ class CollectionsService {
         Sodium.base642bin(collection.attributes.encryptedPath),
         key,
         Sodium.base642bin(collection.attributes.pathDecryptionNonce)));
+  }
+
+  bool hasSyncedCollections() {
+    return _prefs.containsKey(_collectionsSyncTimeKey);
   }
 
   Collection _getCollectionWithDecryptedName(Collection collection) {
