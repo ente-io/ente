@@ -49,21 +49,13 @@ class DiffFetcher {
                 if (existingFiles.contains(file.uploadedFileID)) {
                   await FilesDB.instance.deleteFromCollection(
                       file.uploadedFileID, file.collectionID);
-                  Bus.instance.fire(
-                      CollectionUpdatedEvent(file.collectionID, [file]));
+                  Bus.instance
+                      .fire(CollectionUpdatedEvent(file.collectionID, [file]));
                   Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
                 }
                 continue;
               }
               file.updationTime = item["updationTime"];
-              if (existingFiles.contains(file.uploadedFileID)) {
-                final existingFile = await FilesDB.instance
-                    .getUploadedFile(file.uploadedFileID, file.collectionID);
-                if (existingFile != null &&
-                    existingFile.updationTime == file.updationTime) {
-                  continue;
-                }
-              }
               file.ownerID = item["ownerID"];
               file.encryptedKey = item["encryptedKey"];
               file.keyDecryptionNonce = item["keyDecryptionNonce"];
@@ -84,11 +76,13 @@ class DiffFetcher {
               file.applyMetadata(metadata);
               if (item['magicMetadata'] != null) {
                 final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-                    Sodium.base642bin(item['magicMetadata']['data']), fileDecryptionKey,
+                    Sodium.base642bin(item['magicMetadata']['data']),
+                    fileDecryptionKey,
                     Sodium.base642bin(item['magicMetadata']['header']));
                 file.mMdEncodedJson = utf8.decode(utfEncodedMmd);
                 file.mMdVersion = item['magicMetadata']['version'];
-                file.magicMetadata = MagicMetadata.fromEncodedJson(file.mMdEncodedJson);
+                file.magicMetadata =
+                    MagicMetadata.fromEncodedJson(file.mMdEncodedJson);
               }
               files.add(file);
             }
