@@ -158,6 +158,33 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
       ));
     }
+    if (widget.type == GalleryAppBarType.owned_collection) {
+      actions.add(PopupMenuButton(
+        itemBuilder: (context) {
+          final List<PopupMenuItem> items = [];
+          items.add(
+            PopupMenuItem(
+              value: 1,
+              child: Row(
+                children: [
+                  Icon(Icons.drive_file_rename_outline),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text("rename"),
+                ],
+              ),
+            ),
+          );
+          return items;
+        },
+        onSelected: (value) async {
+          if (value == 1) {
+            await _renameAlbum(context);
+          }
+        },
+      ));
+    }
     return actions;
   }
 
