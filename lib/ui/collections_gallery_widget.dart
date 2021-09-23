@@ -180,42 +180,42 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                   )
                 : nothingToSeeHere,
             Divider(),
+            Padding(padding: EdgeInsets.all(8)),
             OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                padding: EdgeInsets.fromLTRB(20, 10,20, 10),
-                side: BorderSide(
-                  width: 2,
-                  color: Colors.white12,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.archive_outlined,
-                    color: Colors.white,
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
                   ),
-                  Padding(padding: EdgeInsets.all(6)),
-                  Text(
-                    "archived",
-                    style: TextStyle(
+                  padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                  side: BorderSide(
+                    width: 2,
+                    color: Colors.white12,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(
+                      Icons.archive_outlined,
                       color: Colors.white,
                     ),
-                  ),
-                ],
-              ),
-              onPressed: () async {
+                    Padding(padding: EdgeInsets.all(6)),
+                    Text(
+                      "archive",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                onPressed: () async {
                   routeToPage(
                     context,
                     ArchivePage(),
                   );
-                }
-            ),
+                }),
             Padding(padding: EdgeInsets.all(12)),
           ],
         ),
