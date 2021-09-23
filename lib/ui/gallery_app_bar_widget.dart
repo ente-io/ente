@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
@@ -13,7 +14,9 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/change_collection_name_dialog.dart';
 import 'package:photos/ui/create_collection_page.dart';
+import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -54,6 +57,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   final _logger = Logger("GalleryAppBar");
   StreamSubscription _userAuthEventSubscription;
   Function() _selectedFilesListener;
+  String _appBarTitle;
 
   @override
   void initState() {
@@ -65,6 +69,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
+    _appBarTitle = widget.title;
     super.initState();
   }
 
@@ -85,11 +90,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         elevation: 0,
         title: widget.type == GalleryAppBarType.homepage
             ? Container()
-            : Text(
-                widget.title,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.80),
+            : TextButton(
+                child: Text(
+                  _appBarTitle,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.80),
+                  ),
                 ),
+                onPressed: () => _renameAlbum(context),
               ),
         actions: _getDefaultActions(context),
       );
@@ -107,6 +115,38 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     );
   }
 
+  Future<dynamic> _renameAlbum(BuildContext context) async {
+    if (widget.type != GalleryAppBarType.owned_collection) {
+      return;
+    }
+    final result = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ChangeCollectionNameDialog(name: _appBarTitle);
+      },
+      barrierColor: Colors.black.withOpacity(0.85),
+    );
+    // indicates user cancelled the rename request
+    if (result == null) {
+      return;
+    }
+
+    final dialog = createProgressDialog(context, "changing name...");
+    await dialog.show();
+    try {
+      await CollectionsService.instance
+          .rename(widget.collection, result);
+      await dialog.hide();
+      if (mounted) {
+        _appBarTitle = result;
+        setState(() {});
+      }
+    } catch (e) {
+      await dialog.hide();
+      showGenericErrorDialog(context);
+    }
+  }
+
   List<Widget> _getDefaultActions(BuildContext context) {
     List<Widget> actions = <Widget>[];
     if (Configuration.instance.hasConfiguredAccount() &&
@@ -116,6 +156,33 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         icon: Icon(Icons.person_add),
         onPressed: () {
           _showShareCollectionDialog();
+        },
+      ));
+    }
+    if (widget.type == GalleryAppBarType.owned_collection) {
+      actions.add(PopupMenuButton(
+        itemBuilder: (context) {
+          final List<PopupMenuItem> items = [];
+          items.add(
+            PopupMenuItem(
+              value: 1,
+              child: Row(
+                children: [
+                  Icon(Icons.drive_file_rename_outline),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text("rename"),
+                ],
+              ),
+            ),
+          );
+          return items;
+        },
+        onSelected: (value) async {
+          if (value == 1) {
+            await _renameAlbum(context);
+          }
         },
       ));
     }
@@ -268,7 +335,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
         onSelected: (value) async {
           if (value == 1) {
-            await _handleVisibilityChangeRequest(context, showArchive ? kVisibilityArchive : kVisibilityVisible);
+            await _handleVisibilityChangeRequest(
+                context, showArchive ? kVisibilityArchive : kVisibilityVisible);
           }
         },
       ));
@@ -276,13 +344,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     return actions;
   }
 
-  Future<void> _handleVisibilityChangeRequest(BuildContext context,
-      int newVisibility) async {
+  Future<void> _handleVisibilityChangeRequest(
+      BuildContext context, int newVisibility) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
     try {
-      await FileMagicService.instance.changeVisibility(
-          widget.selectedFiles.files.toList(), newVisibility);
+      await FileMagicService.instance
+          .changeVisibility(widget.selectedFiles.files.toList(), newVisibility);
       showToast(
           newVisibility == kVisibilityArchive
               ? "successfully archived"
