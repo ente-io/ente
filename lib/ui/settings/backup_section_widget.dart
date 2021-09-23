@@ -170,6 +170,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           ),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
+            // TODO: Replace with https://pub.dev/packages/in_app_review
             if (Platform.isAndroid) {
               launch(
                   "https://play.google.com/store/apps/details?id=io.ente.photos");
@@ -227,6 +228,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           ),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
+            // TODO: Replace with https://pub.dev/packages/in_app_review
             if (Platform.isAndroid) {
               launch(
                   "https://play.google.com/store/apps/details?id=io.ente.photos");
