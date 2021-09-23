@@ -245,34 +245,17 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (widget.type == GalleryAppBarType.homepage ||
         widget.type == GalleryAppBarType.archive) {
       bool showArchive = widget.type == GalleryAppBarType.homepage;
-      actions.add(PopupMenuButton(
-        itemBuilder: (context) {
-          final List<PopupMenuItem> items = [];
-          items.add(
-            PopupMenuItem(
-              value: 1,
-              child: Row(
-                children: [
-                  Icon(Platform.isAndroid
-                      ? (showArchive
-                          ? Icons.archive_outlined
-                          : Icons.unarchive_outlined)
-                      : CupertinoIcons.archivebox),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text(showArchive ? "archive" : "unarchive"),
-                ],
-              ),
-            ),
-          );
-          return items;
-        },
-        onSelected: (value) async {
-          if (value == 1) {
-            await _handleVisibilityChangeRequest(
-                context, showArchive ? kVisibilityArchive : kVisibilityVisible);
-          }
+      actions.add(IconButton(
+        icon: Icon(
+          Platform.isAndroid
+              ? (showArchive
+                  ? Icons.archive_outlined
+                  : Icons.unarchive_outlined)
+              : CupertinoIcons.archivebox,
+        ),
+        onPressed: () {
+          _handleVisibilityChangeRequest(
+              context, showArchive ? kVisibilityArchive : kVisibilityVisible);
         },
       ));
     }
