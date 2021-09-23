@@ -254,7 +254,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               child: Row(
                 children: [
                   Icon(Platform.isAndroid
-                      ? Icons.archive_outlined
+                      ? (showArchive
+                          ? Icons.archive_outlined
+                          : Icons.unarchive_outlined)
                       : CupertinoIcons.archivebox),
                   Padding(
                     padding: EdgeInsets.all(8),
