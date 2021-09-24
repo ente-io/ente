@@ -20,6 +20,7 @@ import SearchIcon from './icons/SearchIcon';
 import CrossIcon from './icons/CrossIcon';
 import { Collection } from 'services/collectionService';
 import CollectionIcon from './icons/CollectionIcon';
+import { sleep } from 'utils/common';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -164,27 +165,28 @@ export default function SearchBar(props: Props) {
             return;
         }
         // const startTime = Date.now();
-        props.setOpen(true);
 
         switch (selectedOption.type) {
             case SuggestionType.DATE:
                 props.setSearch({
                     date: selectedOption.value as DateValue,
                 });
+                props.setOpen(true);
                 break;
             case SuggestionType.LOCATION:
                 props.setSearch({
                     location: selectedOption.value as Bbox,
                 });
+                props.setOpen(true);
                 break;
             case SuggestionType.COLLECTION:
                 props.setActiveCollection(selectedOption.value as number);
+                resetSearch(true);
                 break;
         }
     };
-    const resetSearch = () => {
-        if (props.isOpen) {
-            selectRef.current.select.state.value = null;
+    const resetSearch = async (force?: boolean) => {
+        if (props.isOpen || force) {
             props.loadingBar.current?.continuousStart();
             // props.setFiles(allFiles);
             props.setSearch({});
@@ -192,6 +194,9 @@ export default function SearchBar(props: Props) {
                 props.loadingBar.current?.complete();
             }, 10);
             props.setOpen(false);
+            await sleep(250);
+            selectRef.current.select.state.value = null;
+            props.setSearch({});
         }
     };
 
@@ -325,7 +330,7 @@ export default function SearchBar(props: Props) {
                         {props.isOpen && (
                             <div
                                 style={{ cursor: 'pointer' }}
-                                onClick={resetSearch}>
+                                onClick={() => resetSearch()}>
                                 <CrossIcon />
                             </div>
                         )}
