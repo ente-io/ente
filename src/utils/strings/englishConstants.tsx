@@ -420,7 +420,7 @@ const englishConstants = {
         </span>
     ),
     NOT_FILE_OWNER: 'you cannot delete files in a shared album',
-    ADD_TO_COLLECTION: 'add to collection',
+    ADD_TO_COLLECTION: 'add to album',
     SELECTED: 'selected',
     VIDEO_PLAYBACK_FAILED: 'video format not supported',
     VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD:
@@ -544,7 +544,7 @@ const englishConstants = {
     UPLOAD_TO_COLLECTION: 'upload to album',
     ARCHIVE: 'archive',
     ALL: 'all',
-    MOVE_TO_COLLECTION: 'move to collection',
+    MOVE_TO_COLLECTION: 'move to album',
     UNARCHIVE: 'un-archive',
     MOVE: 'move',
     ADD: 'add',
