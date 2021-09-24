@@ -1,5 +1,5 @@
 import { Search, SearchStats } from 'pages/gallery';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
 import { components } from 'react-select';
@@ -20,7 +20,6 @@ import SearchIcon from './icons/SearchIcon';
 import CrossIcon from './icons/CrossIcon';
 import { Collection } from 'services/collectionService';
 import CollectionIcon from './icons/CollectionIcon';
-import { sleep } from 'utils/common';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -97,14 +96,13 @@ interface Props {
     setActiveCollection: (id: number) => void;
 }
 export default function SearchBar(props: Props) {
-    const selectRef = useRef(null);
-    useEffect(() => {
-        if (props.isOpen) {
-            setTimeout(() => {
-                selectRef.current?.focus();
-            }, 250);
-        }
-    }, [props.isOpen]);
+    const [value, setValue] = useState<Suggestion>(null);
+
+    const handleChange = (value) => {
+        setValue(value);
+    };
+
+    useEffect(() => search(value), [value]);
 
     // = =========================
     // Functionality
@@ -159,7 +157,7 @@ export default function SearchBar(props: Props) {
 
     const getOptions = debounce(getAutoCompleteSuggestions, 250);
 
-    const filterFiles = (selectedOption: Suggestion) => {
+    const search = (selectedOption: Suggestion) => {
         if (!selectedOption) {
             return;
         }
@@ -191,9 +189,7 @@ export default function SearchBar(props: Props) {
                 props.loadingBar.current?.complete();
             }, 10);
             props.setOpen(false);
-            await sleep(250);
-            selectRef.current.select.state.value = null;
-            props.setSearch({});
+            setValue(null);
         }
     };
 
@@ -309,14 +305,14 @@ export default function SearchBar(props: Props) {
                             margin: '10px',
                         }}>
                         <AsyncSelect
+                            value={value}
                             components={{
                                 Option: OptionWithIcon,
                                 Control: ControlWithIcon,
                             }}
-                            ref={selectRef}
                             placeholder={constants.SEARCH_HINT()}
                             loadOptions={getOptions}
-                            onChange={filterFiles}
+                            onChange={handleChange}
                             isClearable
                             escapeClearsValue
                             styles={customStyles}
