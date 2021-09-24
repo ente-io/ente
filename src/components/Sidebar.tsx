@@ -110,6 +110,17 @@ export default function Sidebar(props: Props) {
         setIsOpen(false);
         galleryContext.showPlanSelectorModal();
     }
+
+    const Divider = () => (
+        <div
+            style={{
+                height: '1px',
+                marginTop: '40px',
+                background: '#242424',
+                width: '100%',
+            }}
+        />
+    );
     return (
         <Menu
             isOpen={isOpen}
@@ -201,23 +212,14 @@ export default function Sidebar(props: Props) {
                         )}
                     </div>
                 </div>
-                <div
-                    style={{
-                        height: '1px',
-                        marginTop: '40px',
-                        background: '#242424',
-                        width: '100%',
-                    }}
-                />
+                <Divider />
                 <LinkButton
                     style={{ marginTop: '30px' }}
-                    onClick={openFeedbackURL}>
-                    {constants.REQUEST_FEATURE}
-                </LinkButton>
-                <LinkButton
-                    style={{ marginTop: '30px' }}
-                    onClick={() => initiateEmail('contact@ente.io')}>
-                    {constants.SUPPORT}
+                    onClick={() => {
+                        galleryContext.setActiveCollection(ARCHIVE_SECTION);
+                        setIsOpen(false);
+                    }}>
+                    {constants.ARCHIVE}
                 </LinkButton>
                 <>
                     <RecoveryKeyModal
@@ -264,6 +266,17 @@ export default function Sidebar(props: Props) {
                     }}>
                     {constants.UPDATE_EMAIL}
                 </LinkButton>
+                <Divider />
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={openFeedbackURL}>
+                    {constants.REQUEST_FEATURE}
+                </LinkButton>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => initiateEmail('contact@ente.io')}>
+                    {constants.SUPPORT}
+                </LinkButton>
                 <>
                     <ExportModal
                         show={exportModalView}
@@ -282,22 +295,7 @@ export default function Sidebar(props: Props) {
                         </div>
                     </LinkButton>
                 </>
-                <LinkButton
-                    style={{ marginTop: '30px' }}
-                    onClick={() => {
-                        galleryContext.setActiveCollection(ARCHIVE_SECTION);
-                        setIsOpen(false);
-                    }}>
-                    {constants.ARCHIVE}
-                </LinkButton>
-                <div
-                    style={{
-                        height: '1px',
-                        marginTop: '40px',
-                        background: '#242424',
-                        width: '100%',
-                    }}
-                />
+                <Divider />
                 <LinkButton
                     variant="danger"
                     style={{ marginTop: '30px' }}
