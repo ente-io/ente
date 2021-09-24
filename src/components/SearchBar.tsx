@@ -208,7 +208,7 @@ export default function SearchBar(props: Props) {
             case SuggestionType.COLLECTION:
                 return <CollectionIcon />;
             default:
-                return null;
+                return <SearchIcon />;
         }
     };
 
@@ -235,13 +235,7 @@ export default function SearchBar(props: Props) {
                     paddingLeft: '10px',
                     paddingBottom: '4px',
                 }}>
-                {props.getValue().length === 0 || props.menuIsOpen ? (
-                    <SearchIcon />
-                ) : props.getValue()[0].type === SuggestionType.DATE ? (
-                    <DateIcon />
-                ) : (
-                    <LocationIcon />
-                )}
+                {getIconByType(props.getValue()[0]?.type)}
             </span>
             {props.children}
         </Control>
