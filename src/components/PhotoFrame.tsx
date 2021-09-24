@@ -27,6 +27,8 @@ import {
     MIN_COLUMNS,
     SPACE_BTW_DATES,
 } from 'types';
+import { fileIsArchived } from 'utils/file';
+import { ALL_SECTION, ARCHIVE_SECTION } from './pages/gallery/Collections';
 import { isSharedFile } from 'utils/file';
 
 const NO_OF_PAGES = 2;
@@ -404,12 +406,20 @@ const PhotoFrame = ({
             ) {
                 return false;
             }
+            if (activeCollection === ALL_SECTION && fileIsArchived(item)) {
+                return false;
+            }
+            if (activeCollection === ARCHIVE_SECTION && !fileIsArchived(item)) {
+                return false;
+            }
+
             if (isSharedFile(item) && !isSharedCollection) {
                 return false;
             }
             if (!idSet.has(item.id)) {
                 if (
-                    !activeCollection ||
+                    activeCollection === ALL_SECTION ||
+                    activeCollection === ARCHIVE_SECTION ||
                     activeCollection === item.collectionID
                 ) {
                     idSet.add(item.id);
