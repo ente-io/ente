@@ -333,8 +333,9 @@ class CollectionsService {
 
   Future<void> addToCollection(int collectionID, List<File> files) async {
     final shouldDedupeWithExistingUploadIDs = files.firstWhere(
-        (element) => element.uploadedFileID != null,
-        orElse: () => null) != null;
+            (element) => element.uploadedFileID != null,
+            orElse: () => null) !=
+        null;
     if (shouldDedupeWithExistingUploadIDs) {
       final existingUploadedIDs =
           await FilesDB.instance.getUploadedFileIDs(collectionID);
@@ -380,8 +381,17 @@ class CollectionsService {
   }
 
   Future<void> move(
-      int toCollectionID, int fromCollectionID, List<File> files) {
+      int toCollectionID, int fromCollectionID, List<File> files) async {
     _validateMoveRequest(toCollectionID, fromCollectionID, files);
+    final existingUploadedIDs =
+        await FilesDB.instance.getUploadedFileIDs(toCollectionID);
+    files.removeWhere((element) =>
+        element.uploadedFileID != null &&
+        existingUploadedIDs.contains(element.uploadedFileID));
+    if (files.isEmpty) {
+      _logger.info("nothing to move to collection");
+      return;
+    }
     final params = <String, dynamic>{};
     params["toCollectionID"] = toCollectionID;
     params["fromCollectionID"] = fromCollectionID;
