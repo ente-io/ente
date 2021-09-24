@@ -68,6 +68,7 @@ class FilesDB {
     ...addIndices(),
     ...addMetadataColumns(),
     ...addMagicMetadataColumns(),
+    ...addUniqueConstraintOnCollectionFiles(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -248,6 +249,29 @@ class FilesDB {
       ''',
       '''
         ALTER TABLE $table ADD COLUMN $columnMMdVisibility INTEGER DEFAULT $kVisibilityVisible;
+      '''
+    ];
+  }
+
+  static List<String> addUniqueConstraintOnCollectionFiles() {
+    return [
+      '''
+      DELETE from $table where ($columnCollectionID, $columnUploadedFileID) IN 
+      (SELECT $columnCollectionID, $columnUploadedFileID from $table WHERE 
+        $columnCollectionID is not NULL AND $columnUploadedFileID is NOT NULL
+        AND $columnCollectionID != -1 AND $columnUploadedFileID  != -1
+        GROUP BY $columnCollectionID, $columnUploadedFileID HAVING count(*) > 1)
+      AND  ($columnCollectionID, $columnUploadedFileID,$columnGeneratedID) NOT IN 
+      (SELECT $columnCollectionID, $columnUploadedFileID, max($columnGeneratedID)
+       from $table WHERE 
+       $columnCollectionID is not NULL AND $columnUploadedFileID is NOT NULL
+       AND $columnCollectionID != -1 AND $columnUploadedFileID  != -1 GROUP BY 
+       $columnCollectionID, $columnUploadedFileID HAVING count(*) > 1);
+      ''',
+      '''
+      CREATE UNIQUE INDEX cid_uid ON $table ($columnCollectionID, $columnUploadedFileID) 
+      WHERE $columnCollectionID is not NULL AND $columnUploadedFileID is not NULL
+      AND $columnCollectionID != -1 AND $columnUploadedFileID  != -1;
       '''
     ];
   }
