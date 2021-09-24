@@ -108,7 +108,7 @@ export default function SearchBar(props: Props) {
     // Functionality
     // = =========================
     const getAutoCompleteSuggestions = async (searchPhrase: string) => {
-        searchPhrase = searchPhrase.trim();
+        searchPhrase = searchPhrase.trim().toLowerCase();
         if (!searchPhrase?.length) {
             return [];
         }

@@ -78,7 +78,7 @@ export function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
             type: SuggestionType.DATE,
         },
     ].filter((suggestion) =>
-        suggestion.label.toLowerCase().includes(searchPhrase.toLowerCase())
+        suggestion.label.toLowerCase().includes(searchPhrase)
     );
 }
 
@@ -107,6 +107,6 @@ export function searchCollection(
     collections: Collection[]
 ): Collection[] {
     return collections.filter((collection) =>
-        collection.name.toLowerCase().includes(searchPhrase.toLowerCase())
+        collection.name.toLowerCase().includes(searchPhrase)
     );
 }
