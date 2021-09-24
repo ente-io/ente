@@ -74,7 +74,14 @@ export default function Collections(props: CollectionProps) {
     const { selected, collections, setActiveCollection } = props;
     const [selectedCollectionID, setSelectedCollectionID] =
         useState<number>(null);
-    const collectionRef = useRef<HTMLDivElement>(null);
+    const collectionWrapperRef = useRef<HTMLDivElement>(null);
+    const collectionChipsRef = props.collections.reduce(
+        (refMap, collection) => {
+            refMap[collection.id] = React.createRef();
+            return refMap;
+        },
+        {}
+    );
     const [collectionShareModalView, setCollectionShareModalView] =
         useState(false);
     const [scrollObj, setScrollObj] = useState<{
@@ -84,23 +91,29 @@ export default function Collections(props: CollectionProps) {
     }>({});
 
     const updateScrollObj = () => {
-        if (collectionRef.current) {
+        if (collectionWrapperRef.current) {
             const { scrollLeft, scrollWidth, clientWidth } =
-                collectionRef.current;
+                collectionWrapperRef.current;
             setScrollObj({ scrollLeft, scrollWidth, clientWidth });
         }
     };
 
     useEffect(() => {
         updateScrollObj();
-    }, [collectionRef.current]);
+    }, [collectionWrapperRef.current]);
 
     useEffect(() => {
-        if (!collectionRef?.current) {
+        if (!collectionWrapperRef?.current) {
             return;
         }
-        collectionRef.current.scrollLeft = 0;
+        collectionWrapperRef.current.scrollLeft = 0;
     }, [collections]);
+
+    useEffect(() => {
+        collectionChipsRef[selected]?.current.scrollIntoView({
+            inline: 'center',
+        });
+    }, [selected]);
 
     const clickHandler = (collectionID?: number) => () => {
         setSelectedCollectionID(collectionID);
@@ -125,7 +138,7 @@ export default function Collections(props: CollectionProps) {
     });
 
     const scrollCollection = (direction: SCROLL_DIRECTION) => () => {
-        collectionRef.current.scrollBy(250 * direction, 0);
+        collectionWrapperRef.current.scrollBy(250 * direction, 0);
     };
     const renderTooltip = (collectionID) => {
         const fileCount = props.collectionFilesCount?.get(collectionID) ?? 0;
@@ -135,10 +148,8 @@ export default function Collections(props: CollectionProps) {
                     padding: '0',
                     paddingBottom: '5px',
                 }}
-                id="button-tooltip"
-                {...props}>
+                id="button-tooltip">
                 <div
-                    {...props}
                     style={{
                         backgroundColor: '#282828',
                         padding: '2px 10px',
@@ -172,7 +183,9 @@ export default function Collections(props: CollectionProps) {
                             onClick={scrollCollection(SCROLL_DIRECTION.LEFT)}
                         />
                     )}
-                    <Wrapper ref={collectionRef} onScroll={updateScrollObj}>
+                    <Wrapper
+                        ref={collectionWrapperRef}
+                        onScroll={updateScrollObj}>
                         <Chip
                             active={!selected}
                             onClick={clickHandler(ALL_SECTION)}>
@@ -191,6 +204,7 @@ export default function Collections(props: CollectionProps) {
                                 delay={{ show: 250, hide: 400 }}
                                 overlay={renderTooltip(item.id)}>
                                 <Chip
+                                    ref={collectionChipsRef[item.id]}
                                     active={selected === item.id}
                                     onClick={clickHandler(item.id)}>
                                     {item.name}
