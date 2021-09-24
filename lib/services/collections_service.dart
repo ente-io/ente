@@ -332,16 +332,16 @@ class CollectionsService {
   }
 
   Future<void> addToCollection(int collectionID, List<File> files) async {
-    final shouldDedupeWithExistingUploadIDs = files.firstWhere(
+    final containsUploadedFile = files.firstWhere(
             (element) => element.uploadedFileID != null,
             orElse: () => null) !=
         null;
-    if (shouldDedupeWithExistingUploadIDs) {
-      final existingUploadedIDs =
+    if (containsUploadedFile) {
+      final existingFileIDsInCollection =
           await FilesDB.instance.getUploadedFileIDs(collectionID);
       files.removeWhere((element) =>
           element.uploadedFileID != null &&
-          existingUploadedIDs.contains(element.uploadedFileID));
+          existingFileIDsInCollection.contains(element.uploadedFileID));
       if (files.isEmpty) {
         _logger.info("nothing to add to the collection");
         return;
