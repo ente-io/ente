@@ -899,6 +899,10 @@ class FilesDB {
   }
 
   Future<Map<int, File>> getFilesFromIDs(List<int> ids) async {
+    final result = <int, File>{};
+    if (ids.isEmpty) {
+      return result;
+    }
     String inParam = "";
     for (final id in ids) {
       inParam += "'" + id.toString() + "',";
@@ -910,7 +914,6 @@ class FilesDB {
       where: '$columnUploadedFileID IN ($inParam)',
     );
     final files = _convertToFiles(results);
-    final result = <int, File>{};
     for (final file in files) {
       result[file.uploadedFileID] = file;
     }
