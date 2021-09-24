@@ -89,7 +89,7 @@ export interface Suggestion {
 interface Props {
     isOpen: boolean;
     isFirstFetch: boolean;
-    setOpen: (value) => void;
+    setOpen: (value: boolean) => void;
     loadingBar: any;
     setSearch: (search: Search) => void;
     searchStats: SearchStats;
@@ -154,7 +154,6 @@ export default function SearchBar(props: Props) {
                     } as Suggestion)
             )
         );
-
         return option;
     };
 
@@ -164,7 +163,6 @@ export default function SearchBar(props: Props) {
         if (!selectedOption) {
             return;
         }
-        // const startTime = Date.now();
 
         switch (selectedOption.type) {
             case SuggestionType.DATE:
@@ -188,7 +186,6 @@ export default function SearchBar(props: Props) {
     const resetSearch = async (force?: boolean) => {
         if (props.isOpen || force) {
             props.loadingBar.current?.continuousStart();
-            // props.setFiles(allFiles);
             props.setSearch({});
             setTimeout(() => {
                 props.loadingBar.current?.complete();
