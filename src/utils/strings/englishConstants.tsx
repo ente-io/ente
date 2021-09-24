@@ -545,6 +545,9 @@ const englishConstants = {
     ARCHIVE: 'archive',
     ALL: 'all',
     MOVE_TO_COLLECTION: 'move to collection',
+    UNARCHIVE: 'un-archive',
+    MOVE: 'move',
+    ADD: 'add',
 };
 
 export default englishConstants;
