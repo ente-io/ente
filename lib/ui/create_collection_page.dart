@@ -40,7 +40,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final titleSuffix = (widget.selectedFiles.files.length == 1 ? "" : "s");
+    final filesCount = widget.sharedFiles != null
+        ? widget.sharedFiles.length
+        : widget.selectedFiles.files.length;
+    final titleSuffix = (filesCount == 1 ? "" : "s");
     return Scaffold(
       appBar: AppBar(
         title: Text(
