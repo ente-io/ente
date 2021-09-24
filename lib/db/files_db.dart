@@ -258,17 +258,20 @@ class FilesDB {
       '''
       DELETE from $table where ($columnCollectionID, $columnUploadedFileID) IN 
       (SELECT $columnCollectionID, $columnUploadedFileID from $table WHERE 
-        $columnCollectionID is not NULL and $columnUploadedFileID is NOT NULL
+        $columnCollectionID is not NULL AND $columnUploadedFileID is NOT NULL
+        AND $columnCollectionID != -1 AND $columnUploadedFileID  != -1
         GROUP BY $columnCollectionID, $columnUploadedFileID HAVING count(*) > 1)
       AND  ($columnCollectionID, $columnUploadedFileID,$columnGeneratedID) NOT IN 
       (SELECT $columnCollectionID, $columnUploadedFileID, max($columnGeneratedID)
-       from $table WHERE $columnCollectionID is not NULL 
-       AND $columnUploadedFileID is NOT NULL GROUP BY 
+       from $table WHERE 
+       $columnCollectionID is not NULL AND $columnUploadedFileID is NOT NULL
+       AND $columnCollectionID != -1 AND $columnUploadedFileID  != -1 GROUP BY 
        $columnCollectionID, $columnUploadedFileID HAVING count(*) > 1);
       ''',
       '''
       CREATE UNIQUE INDEX cid_uid ON $table ($columnCollectionID, $columnUploadedFileID) 
-      WHERE $columnCollectionID is not NULL AND $columnUploadedFileID is not NULL;
+      WHERE $columnCollectionID is not NULL AND $columnUploadedFileID is not NULL
+      AND $columnCollectionID != -1 AND $columnUploadedFileID  != -1;
       '''
     ];
   }
