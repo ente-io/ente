@@ -233,7 +233,8 @@ class CollectionsService {
 
   Future<void> rename(Collection collection, String newName) async {
     try {
-      final encryptedName = CryptoUtil.encryptSync(utf8.encode(newName), getCollectionKey(collection.id));
+      final encryptedName = CryptoUtil.encryptSync(
+          utf8.encode(newName), getCollectionKey(collection.id));
       await _dio.post(
         Configuration.instance.getHttpEndpoint() + "/collections/rename",
         data: {
@@ -330,7 +331,23 @@ class CollectionsService {
     return collection;
   }
 
-  Future<void> addToCollection(int collectionID, List<File> files) {
+  Future<void> addToCollection(int collectionID, List<File> files) async {
+    final containsUploadedFile = files.firstWhere(
+            (element) => element.uploadedFileID != null,
+            orElse: () => null) !=
+        null;
+    if (containsUploadedFile) {
+      final existingFileIDsInCollection =
+          await FilesDB.instance.getUploadedFileIDs(collectionID);
+      files.removeWhere((element) =>
+          element.uploadedFileID != null &&
+          existingFileIDsInCollection.contains(element.uploadedFileID));
+      if (files.isEmpty) {
+        _logger.info("nothing to add to the collection");
+        return;
+      }
+    }
+
     final params = <String, dynamic>{};
     params["collectionID"] = collectionID;
     for (final file in files) {
@@ -348,22 +365,33 @@ class CollectionsService {
               file.uploadedFileID, file.encryptedKey, file.keyDecryptionNonce)
           .toMap());
     }
-    return _dio
-        .post(
-      Configuration.instance.getHttpEndpoint() + "/collections/add-files",
-      data: params,
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-    )
-        .then((value) async {
+
+    try {
+      await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/collections/add-files",
+        data: params,
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
       await _filesDB.insertMultiple(files);
       Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
-    });
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> move(
-      int toCollectionID, int fromCollectionID, List<File> files) {
+      int toCollectionID, int fromCollectionID, List<File> files) async {
     _validateMoveRequest(toCollectionID, fromCollectionID, files);
+    final existingUploadedIDs =
+        await FilesDB.instance.getUploadedFileIDs(toCollectionID);
+    files.removeWhere((element) =>
+        element.uploadedFileID != null &&
+        existingUploadedIDs.contains(element.uploadedFileID));
+    if (files.isEmpty) {
+      _logger.info("nothing to move to collection");
+      return;
+    }
     final params = <String, dynamic>{};
     params["toCollectionID"] = toCollectionID;
     params["fromCollectionID"] = fromCollectionID;
@@ -469,6 +497,10 @@ class CollectionsService {
         Sodium.base642bin(collection.attributes.encryptedPath),
         key,
         Sodium.base642bin(collection.attributes.pathDecryptionNonce)));
+  }
+
+  bool hasSyncedCollections() {
+    return _prefs.containsKey(_collectionsSyncTimeKey);
   }
 
   Collection _getCollectionWithDecryptedName(Collection collection) {
