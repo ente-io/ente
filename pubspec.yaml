@@ -76,7 +76,7 @@ dependencies:
   pedantic: ^1.9.2
   photo_manager:
     git: "https://github.com/ente-io/flutter_photo_manager.git"
-  photo_view: ^0.11.1
+  photo_view: ^0.12.0
   pie_chart:
     git: "https://github.com/apgapg/pie_chart.git"
   pinput: ^1.2.0

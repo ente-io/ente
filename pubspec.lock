@@ -733,7 +733,7 @@ packages:
       name: photo_view
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.11.1"
+    version: "0.12.0"
   pie_chart:
     dependency: "direct main"
     description:
