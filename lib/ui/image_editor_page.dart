@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_editor/image_editor.dart';
@@ -84,22 +84,20 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 ]
               : [],
         ),
-        body: Container(
-          child: Column(
-            children: [
-              Expanded(child: _buildImage()),
-              Padding(padding: EdgeInsets.all(4)),
-              Column(
-                children: [
-                  _buildBrightness(),
-                  _buildSat(),
-                ],
-              ),
-              Padding(padding: EdgeInsets.all(8)),
-              _buildBottomBar(),
-              Padding(padding: EdgeInsets.all(Platform.isIOS ? 16 : 6)),
-            ],
-          ),
+        body: Column(
+          children: [
+            Expanded(child: _buildImage()),
+            Padding(padding: EdgeInsets.all(4)),
+            Column(
+              children: [
+                _buildBrightness(),
+                _buildSat(),
+              ],
+            ),
+            Padding(padding: EdgeInsets.all(8)),
+            _buildBottomBar(),
+            Padding(padding: EdgeInsets.all(Platform.isIOS ? 16 : 6)),
+          ],
         ),
       ),
     );
@@ -154,7 +152,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       onTap: () {
         flip();
       },
-      child: Container(
+      child: SizedBox(
         width: 80,
         child: Column(
           children: [
@@ -187,7 +185,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       onTap: () {
         rotate(false);
       },
-      child: Container(
+      child: SizedBox(
         width: 80,
         child: Column(
           children: [
@@ -213,7 +211,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       onTap: () {
         rotate(true);
       },
-      child: Container(
+      child: SizedBox(
         width: 80,
         child: Column(
           children: [
@@ -239,7 +237,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       onTap: () {
         _saveEdits();
       },
-      child: Container(
+      child: SizedBox(
         width: 80,
         child: Column(
           children: [
@@ -296,8 +294,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     option.addOption(ColorOption.brightness(_brightness));
 
     option.outputFormat = const OutputFormat.png(88);
-
-    print(const JsonEncoder.withIndent('  ').convert(option.toJson()));
 
     final DateTime start = DateTime.now();
     final Uint8List result = await ImageEditor.editImage(
@@ -377,7 +373,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Row(
         children: [
-          Container(
+          SizedBox(
             width: 40,
             child: Text(
               "color",
@@ -422,7 +418,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Row(
         children: [
-          Container(
+          SizedBox(
             width: 40,
             child: Text(
               "light",
