@@ -38,12 +38,19 @@ class ImageEditorPage extends StatefulWidget {
 }
 
 class _ImageEditorPageState extends State<ImageEditorPage> {
+  static const double kBrightnessDefault = 1;
+  static const double kBrightnessMin = 0;
+  static const double kBrightnessMax = 2;
+  static const double kSaturationDefault = 1;
+  static const double kSaturationMin = 0;
+  static const double kSaturationMax = 2;
+
   final _logger = Logger("ImageEditor");
   final GlobalKey<ExtendedImageEditorState> editorKey =
       GlobalKey<ExtendedImageEditorState>();
 
-  double _brightness = 0;
-  double _saturation = 0;
+  double _brightness = kBrightnessDefault;
+  double _saturation = kSaturationDefault;
   bool _hasEdited = false;
 
   @override
@@ -68,8 +75,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                     onPressed: () {
                       editorKey.currentState.reset();
                       setState(() {
-                        _brightness = 0;
-                        _saturation = 0;
+                        _brightness = kBrightnessDefault;
+                        _saturation = kSaturationDefault;
                       });
                     },
                     icon: Icon(Icons.history),
@@ -99,7 +106,9 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   bool _hasBeenEdited() {
-    return _hasEdited || _saturation != 0 || _brightness != 0;
+    return _hasEdited ||
+        _saturation != kSaturationDefault ||
+        _brightness != kBrightnessDefault;
   }
 
   Widget _buildImage() {
@@ -283,8 +292,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       option.addOption(RotateOption(radian.toInt()));
     }
 
-    option.addOption(ColorOption.saturation(_saturation + 1));
-    option.addOption(ColorOption.brightness(_brightness + 1));
+    option.addOption(ColorOption.saturation(_saturation));
+    option.addOption(ColorOption.brightness(_brightness));
 
     option.outputFormat = const OutputFormat.png(88);
 
@@ -398,8 +407,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 value: _saturation,
                 enableTooltip: true,
                 stepSize: 0.01,
-                min: -1.0,
-                max: 1.0,
+                min: kSaturationMin,
+                max: kSaturationMax,
               ),
             ),
           ),
@@ -443,8 +452,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 value: _brightness,
                 enableTooltip: true,
                 stepSize: 0.01,
-                min: -1.0,
-                max: 1.0,
+                min: kBrightnessMin,
+                max: kBrightnessMax,
               ),
             ),
           ),
