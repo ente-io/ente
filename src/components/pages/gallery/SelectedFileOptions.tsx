@@ -51,6 +51,14 @@ const SelectionContainer = styled.div`
     display: flex;
 `;
 
+export const IconWithMessage = (props) => (
+    <OverlayTrigger
+        placement="bottom"
+        overlay={<p style={{ zIndex: 1002 }}>{props.message}</p>}>
+        {props.children}
+    </OverlayTrigger>
+);
+
 const SelectedFileOptions = ({
     addToCollectionHelper,
     moveToCollectionHelper,
@@ -93,14 +101,6 @@ const SelectedFileOptions = ({
             fromCollection: activeCollection,
         });
     };
-
-    const IconWithMessage = (props) => (
-        <OverlayTrigger
-            placement="bottom"
-            overlay={<p style={{ zIndex: 1002 }}>{props.message}</p>}>
-            {props.children}
-        </OverlayTrigger>
-    );
 
     return (
         <SelectionBar>
