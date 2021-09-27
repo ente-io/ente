@@ -85,17 +85,21 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   FutureOr onWebPaymentGoBack(dynamic value) async {
-    if (widget.isOnboarding) {
+    // refresh subscription
+    await _dialog.show();
+    try {
+      await _fetchSub();
+    } catch (e) {
+      showToast("failed to refresh subscription");
+    }
+    await _dialog.hide();
+
+    // verify user has subscribed before redirecting to main page
+    if (widget.isOnboarding &&
+        _currentSubscription != null &&
+        _currentSubscription.isValid() &&
+        _currentSubscription.productID != kFreeProductID) {
       Navigator.of(context).popUntil((route) => route.isFirst);
-    } else {
-      // refresh subscription
-      await _dialog.show();
-      try {
-        await _fetchSub();
-      } catch (e) {
-        showToast("failed to refresh subscription");
-      }
-      await _dialog.hide();
     }
   }
 
