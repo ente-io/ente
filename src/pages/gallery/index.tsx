@@ -326,8 +326,7 @@ export default function Gallery() {
                 setCollectionSelectorView,
                 selected,
                 files,
-                clearSelection,
-                syncWithRemote,
+
                 setActiveCollection,
                 collectionName,
                 collection
@@ -339,6 +338,10 @@ export default function Gallery() {
                 close: { variant: 'danger' },
                 content: constants.UNKNOWN_ERROR,
             });
+        } finally {
+            clearSelection();
+            syncWithRemote(false, true);
+            loadingBar.current.complete();
         }
     };
 
@@ -353,8 +356,7 @@ export default function Gallery() {
                 setCollectionSelectorView,
                 selected,
                 files,
-                clearSelection,
-                syncWithRemote,
+
                 setActiveCollection,
                 collectionName,
                 collection
@@ -366,6 +368,10 @@ export default function Gallery() {
                 close: { variant: 'danger' },
                 content: constants.UNKNOWN_ERROR,
             });
+        } finally {
+            clearSelection();
+            syncWithRemote(false, true);
+            loadingBar.current.complete();
         }
     };
     const changeFilesVisibilityHelper = async (
@@ -463,7 +469,7 @@ export default function Gallery() {
             });
         } finally {
             clearSelection();
-            syncWithRemote();
+            syncWithRemote(false, true);
             loadingBar.current.complete();
         }
     };
