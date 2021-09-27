@@ -9,6 +9,7 @@ import { IconWithMessage } from './SelectedFileOptions';
 
 interface Props {
     setCollectionSortBy: (sortBy: COLLECTION_SORT_BY) => void;
+    collectionSortBy: COLLECTION_SORT_BY;
 }
 export default function CollectionSort(props: Props) {
     const collectionSortOptions = CollectionSortOptions(props);

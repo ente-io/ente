@@ -1,12 +1,14 @@
+import { Label, Value } from 'components/Container';
 import TickIcon from 'components/icons/TickIcon';
 import React from 'react';
-import { ListGroup, Popover } from 'react-bootstrap';
+import { ListGroup, Popover, Row } from 'react-bootstrap';
 import { COLLECTION_SORT_BY } from 'services/collectionService';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 import { MenuItem, MenuLink } from './CollectionOptions';
 
 interface Props {
+    collectionSortBy: COLLECTION_SORT_BY;
     setCollectionSortBy: (sortBy: COLLECTION_SORT_BY) => void;
 }
 
@@ -14,44 +16,46 @@ const TickWrapper = styled.span`
     color: #aaa;
     margin-left: 5px;
 `;
+
 const CollectionSortOptions = (props: Props) => {
-    return (
-        <Popover id="collection-sort-options" style={{ borderRadius: '10px' }}>
-            <Popover.Content style={{ padding: 0, border: 'none' }}>
-                <ListGroup style={{ borderRadius: '8px' }}>
-                    <MenuItem>
+    const { setCollectionSortBy, collectionSortBy: activeSortBy } = props;
+    const SortByOption = (props: {
+        sortBy: COLLECTION_SORT_BY;
+        children: any;
+    }) => (
+        <MenuItem>
+            <Row>
+                <Label width="20px">
+                    {activeSortBy === props.sortBy && (
                         <TickWrapper>
                             <TickIcon />
                         </TickWrapper>
-                        <MenuLink
-                            onClick={() =>
-                                props.setCollectionSortBy(
-                                    COLLECTION_SORT_BY.LATEST_FILE
-                                )
-                            }>
-                            {constants.SORT_BY_CREATION_TIME}
-                        </MenuLink>
-                    </MenuItem>
-                    <MenuItem>
-                        <MenuLink
-                            onClick={() =>
-                                props.setCollectionSortBy(
-                                    COLLECTION_SORT_BY.MODIFICATION_TIME
-                                )
-                            }>
-                            {constants.SORT_BY_MODIFICATION_TIME}
-                        </MenuLink>
-                    </MenuItem>
-                    <MenuItem>
-                        <MenuLink
-                            onClick={() =>
-                                props.setCollectionSortBy(
-                                    COLLECTION_SORT_BY.NAME
-                                )
-                            }>
-                            {constants.SORT_BY_COLLECTION_NAME}
-                        </MenuLink>
-                    </MenuItem>
+                    )}
+                </Label>
+                <Value width="165px">
+                    <MenuLink
+                        onClick={() => setCollectionSortBy(props.sortBy)}
+                        variant={activeSortBy === props.sortBy && 'success'}>
+                        {props.children}
+                    </MenuLink>
+                </Value>
+            </Row>
+        </MenuItem>
+    );
+    return (
+        <Popover id="collection-sort-options" style={{ borderRadius: '10px' }}>
+            <Popover.Content
+                style={{ padding: 0, border: 'none', width: '185px' }}>
+                <ListGroup style={{ borderRadius: '8px' }}>
+                    <SortByOption sortBy={COLLECTION_SORT_BY.LATEST_FILE}>
+                        {constants.SORT_BY_LATEST_PHOTO}
+                    </SortByOption>
+                    <SortByOption sortBy={COLLECTION_SORT_BY.MODIFICATION_TIME}>
+                        {constants.SORT_BY_MODIFICATION_TIME}
+                    </SortByOption>
+                    <SortByOption sortBy={COLLECTION_SORT_BY.NAME}>
+                        {constants.SORT_BY_COLLECTION_NAME}
+                    </SortByOption>
                 </ListGroup>
             </Popover.Content>
         </Popover>

@@ -549,7 +549,7 @@ const englishConstants = {
     MOVE: 'move',
     ADD: 'add',
     SORT: 'sort',
-    SORT_BY_CREATION_TIME: 'most recent photo',
+    SORT_BY_LATEST_PHOTO: 'most recent photo',
     SORT_BY_MODIFICATION_TIME: 'last modified',
     SORT_BY_COLLECTION_NAME: 'album title',
 };

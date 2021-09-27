@@ -267,7 +267,10 @@ export default function Collections(props: CollectionProps) {
                             />
                         )}
                     </CollectionContainer>
-                    <CollectionSort setCollectionSortBy={setCollectionSortBy} />
+                    <CollectionSort
+                        setCollectionSortBy={setCollectionSortBy}
+                        collectionSortBy={collectionSortBy}
+                    />
                 </CollectionBar>
             </>
         )
