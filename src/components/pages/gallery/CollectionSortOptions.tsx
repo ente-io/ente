@@ -7,8 +7,8 @@ import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 import { MenuItem, MenuLink } from './CollectionOptions';
 
-interface Props {
-    collectionSortBy: COLLECTION_SORT_BY;
+interface OptionProps {
+    activeSortBy: COLLECTION_SORT_BY;
     setCollectionSortBy: (sortBy: COLLECTION_SORT_BY) => void;
 }
 
@@ -17,31 +17,35 @@ const TickWrapper = styled.span`
     margin-left: 5px;
 `;
 
-const CollectionSortOptions = (props: Props) => {
-    const { setCollectionSortBy, collectionSortBy: activeSortBy } = props;
-    const SortByOption = (props: {
-        sortBy: COLLECTION_SORT_BY;
-        children: any;
-    }) => (
-        <MenuItem>
-            <Row>
-                <Label width="20px">
-                    {activeSortBy === props.sortBy && (
-                        <TickWrapper>
-                            <TickIcon />
-                        </TickWrapper>
-                    )}
-                </Label>
-                <Value width="165px">
-                    <MenuLink
-                        onClick={() => setCollectionSortBy(props.sortBy)}
-                        variant={activeSortBy === props.sortBy && 'success'}>
-                        {props.children}
-                    </MenuLink>
-                </Value>
-            </Row>
-        </MenuItem>
-    );
+const SortByOptionCreator =
+    ({ setCollectionSortBy, activeSortBy }: OptionProps) =>
+    (props: { sortBy: COLLECTION_SORT_BY; children: any }) =>
+        (
+            <MenuItem>
+                <Row>
+                    <Label width="20px">
+                        {activeSortBy === props.sortBy && (
+                            <TickWrapper>
+                                <TickIcon />
+                            </TickWrapper>
+                        )}
+                    </Label>
+                    <Value width="165px">
+                        <MenuLink
+                            onClick={() => setCollectionSortBy(props.sortBy)}
+                            variant={
+                                activeSortBy === props.sortBy && 'success'
+                            }>
+                            {props.children}
+                        </MenuLink>
+                    </Value>
+                </Row>
+            </MenuItem>
+        );
+
+const CollectionSortOptions = (props: OptionProps) => {
+    const SortByOption = SortByOptionCreator(props);
+
     return (
         <Popover id="collection-sort-options" style={{ borderRadius: '10px' }}>
             <Popover.Content
