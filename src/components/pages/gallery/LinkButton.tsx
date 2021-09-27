@@ -6,10 +6,10 @@ export enum ButtonVariant {
     secondary = 'secondary',
     warning = 'warning',
 }
-type Props = React.PropsWithChildren<{
-    onClick: any;
-    variant?: string;
-    style?: any;
+export type LinkButtonProps = React.PropsWithChildren<{
+    onClick: () => void;
+    variant?: ButtonVariant;
+    style?: React.CSSProperties;
 }>;
 
 export function getVariantColor(variant: string) {
@@ -26,7 +26,7 @@ export function getVariantColor(variant: string) {
             return '#d1d1d1';
     }
 }
-export default function LinkButton(props: Props) {
+export default function LinkButton(props: LinkButtonProps) {
     return (
         <h5
             style={{

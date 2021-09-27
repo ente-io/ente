@@ -9,7 +9,7 @@ import {
 import { getSelectedCollection } from 'utils/collection';
 import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
-import LinkButton from './LinkButton';
+import LinkButton, { ButtonVariant, LinkButtonProps } from './LinkButton';
 
 interface Props {
     syncWithRemote: () => Promise<void>;
@@ -22,15 +22,15 @@ interface Props {
     redirectToAll: () => void;
 }
 
-export const MenuLink = (props) => (
+export const MenuLink = ({ children, ...props }: LinkButtonProps) => (
     <LinkButton
         style={{ fontSize: '14px', fontWeight: 700, padding: '8px 1em' }}
         {...props}>
-        {props.children}
+        {children}
     </LinkButton>
 );
 
-export const MenuItem = (props) => (
+export const MenuItem = (props: { children: any }) => (
     <ListGroup.Item
         style={{
             display: 'flex',
@@ -113,7 +113,7 @@ const CollectionOptions = (props: Props) => {
                     </MenuItem>
                     <MenuItem>
                         <MenuLink
-                            variant="danger"
+                            variant={ButtonVariant.danger}
                             onClick={confirmDeleteCollection}>
                             {constants.DELETE}
                         </MenuLink>
