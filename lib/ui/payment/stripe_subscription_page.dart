@@ -154,7 +154,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       widgets.add(SubFaqWidget());
     }
 
-    if (_hasActiveSubscription && _isActiveStripeSubscriber) {
+    if (_currentSubscription.paymentProvider == kStripe) {
       widgets.add(_stripeRenewOrCancelButton());
     }
 
