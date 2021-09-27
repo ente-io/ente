@@ -5,16 +5,22 @@ import NavigationButton, {
 } from 'components/NavigationButton';
 import React, { useEffect, useRef, useState } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { Collection, CollectionType } from 'services/collectionService';
+import {
+    Collection,
+    CollectionAndItsLatestFile,
+    CollectionType,
+    COLLECTION_SORT_BY,
+    sortCollections,
+} from 'services/collectionService';
 import { User } from 'services/userService';
 import styled from 'styled-components';
 import { IMAGE_CONTAINER_MAX_WIDTH } from 'types';
-import { getSelectedCollection, sortCollections } from 'utils/collection';
+import { getSelectedCollection } from 'utils/collection';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import CollectionOptions from './CollectionOptions';
-import CollectionSort, { COLLECTION_SORT_BY } from './CollectionSort';
+import CollectionSort from './CollectionSort';
 import OptionIcon, { OptionIconWrapper } from './OptionIcon';
 
 export const ARCHIVE_SECTION = -1;
@@ -22,6 +28,7 @@ export const ALL_SECTION = 0;
 
 interface CollectionProps {
     collections: Collection[];
+    collectionAndTheirLatestFile: CollectionAndItsLatestFile[];
     activeCollection?: number;
     setActiveCollection: (id?: number) => void;
     setDialogMessage: SetDialogMessage;
@@ -197,47 +204,47 @@ export default function Collections(props: CollectionProps) {
                                     }}
                                 />
                             </Chip>
-                            {sortCollections(collections, collectionSortBy).map(
-                                (item) => (
-                                    <OverlayTrigger
-                                        key={item.id}
-                                        placement="top"
-                                        delay={{ show: 250, hide: 400 }}
-                                        overlay={renderTooltip(item.id)}>
-                                        <Chip
-                                            active={
-                                                activeCollection === item.id
-                                            }
-                                            onClick={clickHandler(item.id)}>
-                                            {item.name}
-                                            {item.type !==
-                                                CollectionType.favorites &&
-                                            item.owner.id === user?.id ? (
-                                                <OverlayTrigger
-                                                    rootClose
-                                                    trigger="click"
-                                                    placement="bottom"
-                                                    overlay={collectionOptions}>
-                                                    <OptionIcon
-                                                        onClick={() =>
-                                                            setSelectedCollectionID(
-                                                                item.id
-                                                            )
-                                                        }
-                                                    />
-                                                </OverlayTrigger>
-                                            ) : (
-                                                <div
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        width: '24px',
-                                                    }}
+                            {sortCollections(
+                                collections,
+                                props.collectionAndTheirLatestFile,
+                                collectionSortBy
+                            ).map((item) => (
+                                <OverlayTrigger
+                                    key={item.id}
+                                    placement="top"
+                                    delay={{ show: 250, hide: 400 }}
+                                    overlay={renderTooltip(item.id)}>
+                                    <Chip
+                                        active={activeCollection === item.id}
+                                        onClick={clickHandler(item.id)}>
+                                        {item.name}
+                                        {item.type !==
+                                            CollectionType.favorites &&
+                                        item.owner.id === user?.id ? (
+                                            <OverlayTrigger
+                                                rootClose
+                                                trigger="click"
+                                                placement="bottom"
+                                                overlay={collectionOptions}>
+                                                <OptionIcon
+                                                    onClick={() =>
+                                                        setSelectedCollectionID(
+                                                            item.id
+                                                        )
+                                                    }
                                                 />
-                                            )}
-                                        </Chip>
-                                    </OverlayTrigger>
-                                )
-                            )}
+                                            </OverlayTrigger>
+                                        ) : (
+                                            <div
+                                                style={{
+                                                    display: 'inline-block',
+                                                    width: '24px',
+                                                }}
+                                            />
+                                        )}
+                                    </Chip>
+                                </OverlayTrigger>
+                            ))}
                             <Chip
                                 active={activeCollection === ARCHIVE_SECTION}
                                 onClick={clickHandler(ARCHIVE_SECTION)}>

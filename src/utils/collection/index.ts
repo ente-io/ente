@@ -11,7 +11,6 @@ import { CustomError } from 'utils/common/errorUtil';
 import { SelectedState } from 'pages/gallery';
 import { User } from 'services/userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { COLLECTION_SORT_BY } from 'components/pages/gallery/CollectionSort';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -75,18 +74,4 @@ export function isSharedCollection(
         return false;
     }
     return collection?.owner.id !== user.id;
-}
-export function sortCollections(
-    collections: Collection[],
-    sortBy: COLLECTION_SORT_BY
-) {
-    console.log(sortBy, collections[0]);
-    return collections.sort((collection1, collection2) => {
-        const a = collection1[sortBy];
-        const b = collection2[sortBy];
-        if (typeof a === 'string') return a.localeCompare(b);
-        else {
-            return b - a;
-        }
-    });
 }

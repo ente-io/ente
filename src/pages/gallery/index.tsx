@@ -526,6 +526,7 @@ export default function Gallery() {
                 />
                 <Collections
                     collections={collections}
+                    collectionAndTheirLatestFile={collectionsAndTheirLatestFile}
                     searchMode={searchMode}
                     activeCollection={activeCollection}
                     setActiveCollection={setActiveCollection}
