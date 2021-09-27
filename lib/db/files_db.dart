@@ -269,7 +269,7 @@ class FilesDB {
        $columnCollectionID, $columnUploadedFileID HAVING count(*) > 1);
       ''',
       '''
-      CREATE UNIQUE INDEX cid_uid ON $table ($columnCollectionID, $columnUploadedFileID) 
+      CREATE UNIQUE INDEX IF NOT EXISTS cid_uid ON $table ($columnCollectionID, $columnUploadedFileID)
       WHERE $columnCollectionID is not NULL AND $columnUploadedFileID is not NULL
       AND $columnCollectionID != -1 AND $columnUploadedFileID  != -1;
       '''
