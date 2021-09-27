@@ -1,10 +1,10 @@
 import TickIcon from 'components/icons/TickIcon';
 import React from 'react';
 import { ListGroup, Popover } from 'react-bootstrap';
+import { COLLECTION_SORT_BY } from 'services/collectionService';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 import { MenuItem, MenuLink } from './CollectionOptions';
-import { COLLECTION_SORT_BY } from './CollectionSort';
 
 interface Props {
     setCollectionSortBy: (sortBy: COLLECTION_SORT_BY) => void;
@@ -26,7 +26,7 @@ const CollectionSortOptions = (props: Props) => {
                         <MenuLink
                             onClick={() =>
                                 props.setCollectionSortBy(
-                                    COLLECTION_SORT_BY.CREATION_TIME
+                                    COLLECTION_SORT_BY.LATEST_FILE
                                 )
                             }>
                             {constants.SORT_BY_CREATION_TIME}
