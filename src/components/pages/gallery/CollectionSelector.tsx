@@ -7,6 +7,8 @@ import {
 } from 'services/collectionService';
 import AddCollectionButton from './AddCollectionButton';
 import PreviewCard from './PreviewCard';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { User } from 'services/userService';
 
 export const CollectionIcon = styled.div`
     width: 200px;
@@ -53,14 +55,18 @@ function CollectionSelector({
         if (!attributes) {
             return;
         }
-        const collectionsOtherThanFrom = collectionsAndTheirLatestFile?.filter(
-            (item) => !(item.collection.id === attributes.fromCollection)
-        );
-        if (collectionsOtherThanFrom.length === 0) {
+        const user: User = getData(LS_KEYS.USER);
+        const personalCollectionsOtherThanFrom =
+            collectionsAndTheirLatestFile?.filter(
+                (item) =>
+                    item.collection.id !== attributes.fromCollection &&
+                    item.collection.owner.id === user?.id
+            );
+        if (personalCollectionsOtherThanFrom.length === 0) {
             props.onHide();
             attributes.showNextModal();
         } else {
-            setCollectionToShow(collectionsOtherThanFrom);
+            setCollectionToShow(personalCollectionsOtherThanFrom);
         }
     }, [props.show]);
 

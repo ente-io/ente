@@ -219,13 +219,9 @@ export const getCollectionsAndTheirLatestFile = (
         }
     });
     const collectionsAndTheirLatestFile: CollectionAndItsLatestFile[] = [];
-    const userID = getData(LS_KEYS.USER)?.id;
 
     for (const collection of collections) {
-        if (
-            collection.owner.id !== userID ||
-            collection.type === CollectionType.favorites
-        ) {
+        if (collection.type === CollectionType.favorites) {
             continue;
         }
         collectionsAndTheirLatestFile.push({
