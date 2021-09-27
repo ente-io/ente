@@ -152,7 +152,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       widgets.add(SubFaqWidget());
     }
 
-    if (_currentSubscription.paymentProvider == kStripe) {
+    // only active subscription can be renewed/canceled
+    if (_hasActiveSubscription && _isStripeSubscriber) {
       widgets.add(_stripeRenewOrCancelButton());
     }
 
@@ -301,7 +302,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               if (isActive) {
                 return;
               }
-              if (_currentSubscription.paymentProvider != kStripe &&
+              // prompt user to cancel their active subscription form other
+              // payment providers
+              if (!_isStripeSubscriber &&
                   _hasActiveSubscription &&
                   _currentSubscription.productID != kFreeProductID) {
                 showErrorDialog(context, "sorry",
