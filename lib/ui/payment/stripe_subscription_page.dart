@@ -304,7 +304,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               if (isActive) {
                 return;
               }
-              if (!_isActiveStripeSubscriber &&
+              if (_currentSubscription.paymentProvider != kStripe &&
+                  _hasActiveSubscription &&
                   _currentSubscription.productID != kFreeProductID) {
                 showErrorDialog(context, "sorry",
                     "please cancel your existing subscription from ${_currentSubscription.paymentProvider} first");
