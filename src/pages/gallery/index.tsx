@@ -340,7 +340,7 @@ export default function Gallery() {
             });
         } finally {
             clearSelection();
-            syncWithRemote(false, true);
+            await syncWithRemote(false, true);
             loadingBar.current.complete();
         }
     };
@@ -370,7 +370,7 @@ export default function Gallery() {
             });
         } finally {
             clearSelection();
-            syncWithRemote(false, true);
+            await syncWithRemote(false, true);
             loadingBar.current.complete();
         }
     };
@@ -404,7 +404,7 @@ export default function Gallery() {
             });
         } finally {
             clearSelection();
-            syncWithRemote(false, true);
+            await syncWithRemote(false, true);
             loadingBar.current.complete();
         }
     };
@@ -469,7 +469,7 @@ export default function Gallery() {
             });
         } finally {
             clearSelection();
-            syncWithRemote(false, true);
+            await syncWithRemote(false, true);
             loadingBar.current.complete();
         }
     };
