@@ -8,7 +8,7 @@ export enum ButtonVariant {
 }
 export type LinkButtonProps = React.PropsWithChildren<{
     onClick: () => void;
-    variant?: ButtonVariant;
+    variant?: string;
     style?: React.CSSProperties;
 }>;
 
