@@ -54,11 +54,7 @@ const SelectionContainer = styled.div`
 export const IconWithMessage = (props) => (
     <OverlayTrigger
         placement="bottom"
-        overlay={
-            <>
-                <p style={{ zIndex: 1002 }}>{props.message}</p>
-            </>
-        }>
+        overlay={<p style={{ zIndex: 1002 }}>{props.message}</p>}>
         {props.children}
     </OverlayTrigger>
 );
