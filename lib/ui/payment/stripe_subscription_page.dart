@@ -44,7 +44,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   FreePlan _freePlan;
   List<BillingPlan> _plans = [];
   bool _hasLoadedData = false;
-  bool _isActiveStripeSubscriber;
+  bool _isStripeSubscriber = false;
   bool _showYearlyPlan = false;
 
   @override
@@ -59,9 +59,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       _currentSubscription = subscription;
       _showYearlyPlan = _currentSubscription.isYearlyPlan();
       _hasActiveSubscription = _currentSubscription.isValid();
-      _isActiveStripeSubscriber =
-          _currentSubscription.paymentProvider == kStripe &&
-              _currentSubscription.isValid();
+      _isStripeSubscriber = _currentSubscription.paymentProvider == kStripe;
       _usageFuture = _billingService.fetchUsage();
       return _filterStripeForUI().then((value) {
         _hasLoadedData = true;
@@ -85,17 +83,21 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   FutureOr onWebPaymentGoBack(dynamic value) async {
-    if (widget.isOnboarding) {
+    // refresh subscription
+    await _dialog.show();
+    try {
+      await _fetchSub();
+    } catch (e) {
+      showToast("failed to refresh subscription");
+    }
+    await _dialog.hide();
+
+    // verify user has subscribed before redirecting to main page
+    if (widget.isOnboarding &&
+        _currentSubscription != null &&
+        _currentSubscription.isValid() &&
+        _currentSubscription.productID != kFreeProductID) {
       Navigator.of(context).popUntil((route) => route.isFirst);
-    } else {
-      // refresh subscription
-      await _dialog.show();
-      try {
-        await _fetchSub();
-      } catch (e) {
-        showToast("failed to refresh subscription");
-      }
-      await _dialog.hide();
     }
   }
 
@@ -150,12 +152,12 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       widgets.add(SubFaqWidget());
     }
 
-    if (_hasActiveSubscription && _isActiveStripeSubscriber) {
+    // only active subscription can be renewed/canceled
+    if (_hasActiveSubscription && _isStripeSubscriber) {
       widgets.add(_stripeRenewOrCancelButton());
     }
 
-    if (_hasActiveSubscription &&
-        _currentSubscription.productID != kFreeProductID) {
+    if (_currentSubscription.productID != kFreeProductID) {
       widgets.addAll([
         Align(
           alignment: Alignment.center,
@@ -185,11 +187,11 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 children: [
                   RichText(
                     text: TextSpan(
-                      text: !_isActiveStripeSubscriber
+                      text: !_isStripeSubscriber
                           ? "visit ${_currentSubscription.paymentProvider} to manage your subscription"
                           : "payment details",
                       style: TextStyle(
-                        color: _isActiveStripeSubscriber
+                        color: _isStripeSubscriber
                             ? Colors.blue
                             : Colors.white,
                         fontFamily: 'Ubuntu',
@@ -300,7 +302,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               if (isActive) {
                 return;
               }
-              if (!_isActiveStripeSubscriber &&
+              // prompt user to cancel their active subscription form other
+              // payment providers
+              if (!_isStripeSubscriber &&
+                  _hasActiveSubscription &&
                   _currentSubscription.productID != kFreeProductID) {
                 showErrorDialog(context, "sorry",
                     "please cancel your existing subscription from ${_currentSubscription.paymentProvider} first");
@@ -317,7 +322,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 }
               }
               String stripPurChaseAction = 'buy';
-              if (_isActiveStripeSubscriber) {
+              if (_isStripeSubscriber && _hasActiveSubscription) {
                 // confirm if user wants to change plan or not
                 var result = await showChoiceDialog(
                     context,
