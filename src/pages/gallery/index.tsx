@@ -404,7 +404,7 @@ export default function Gallery() {
             });
         } finally {
             clearSelection();
-            syncWithRemote();
+            syncWithRemote(false, true);
             loadingBar.current.complete();
         }
     };
