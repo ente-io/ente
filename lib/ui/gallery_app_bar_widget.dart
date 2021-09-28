@@ -273,7 +273,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       );
     }
     if (Configuration.instance.hasConfiguredAccount() &&
-        widget.type == GalleryAppBarType.owned_collection) {
+        widget.type == GalleryAppBarType.owned_collection &&
+        widget.collection.type != CollectionType.favorites) {
       actions.add(
         Tooltip(
           message: "move",
