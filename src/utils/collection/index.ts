@@ -21,8 +21,6 @@ export async function handleCollectionOps(
     setCollectionSelectorView: (value: boolean) => void,
     selected: SelectedState,
     files: File[],
-    clearSelection: () => void,
-    syncWithRemote: () => Promise<void>,
     setActiveCollection: (id: number) => void,
     collection: Collection
 ) {
@@ -45,8 +43,6 @@ export async function handleCollectionOps(
         default:
             throw Error(CustomError.INVALID_COLLECTION_OPERATION);
     }
-    clearSelection();
-    await syncWithRemote();
     setActiveCollection(collection.id);
 }
 
