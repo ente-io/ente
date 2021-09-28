@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_editor/image_editor.dart';
@@ -38,12 +38,19 @@ class ImageEditorPage extends StatefulWidget {
 }
 
 class _ImageEditorPageState extends State<ImageEditorPage> {
+  static const double kBrightnessDefault = 1;
+  static const double kBrightnessMin = 0;
+  static const double kBrightnessMax = 2;
+  static const double kSaturationDefault = 1;
+  static const double kSaturationMin = 0;
+  static const double kSaturationMax = 2;
+
   final _logger = Logger("ImageEditor");
   final GlobalKey<ExtendedImageEditorState> editorKey =
       GlobalKey<ExtendedImageEditorState>();
 
-  double _brightness = 0;
-  double _saturation = 0;
+  double _brightness = kBrightnessDefault;
+  double _saturation = kSaturationDefault;
   bool _hasEdited = false;
 
   @override
@@ -68,8 +75,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                     onPressed: () {
                       editorKey.currentState.reset();
                       setState(() {
-                        _brightness = 0;
-                        _saturation = 0;
+                        _brightness = kBrightnessDefault;
+                        _saturation = kSaturationDefault;
                       });
                     },
                     icon: Icon(Icons.history),
@@ -77,29 +84,29 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 ]
               : [],
         ),
-        body: Container(
-          child: Column(
-            children: [
-              Expanded(child: _buildImage()),
-              Padding(padding: EdgeInsets.all(4)),
-              Column(
-                children: [
-                  _buildBrightness(),
-                  _buildSat(),
-                ],
-              ),
-              Padding(padding: EdgeInsets.all(8)),
-              _buildBottomBar(),
-              Padding(padding: EdgeInsets.all(Platform.isIOS ? 16 : 6)),
-            ],
-          ),
+        body: Column(
+          children: [
+            Expanded(child: _buildImage()),
+            Padding(padding: EdgeInsets.all(4)),
+            Column(
+              children: [
+                _buildBrightness(),
+                _buildSat(),
+              ],
+            ),
+            Padding(padding: EdgeInsets.all(8)),
+            _buildBottomBar(),
+            Padding(padding: EdgeInsets.all(Platform.isIOS ? 16 : 6)),
+          ],
         ),
       ),
     );
   }
 
   bool _hasBeenEdited() {
-    return _hasEdited || _saturation != 0 || _brightness != 0;
+    return _hasEdited ||
+        _saturation != kSaturationDefault ||
+        _brightness != kBrightnessDefault;
   }
 
   Widget _buildImage() {
@@ -145,7 +152,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       onTap: () {
         flip();
       },
-      child: Container(
+      child: SizedBox(
         width: 80,
         child: Column(
           children: [
@@ -178,7 +185,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       onTap: () {
         rotate(false);
       },
-      child: Container(
+      child: SizedBox(
         width: 80,
         child: Column(
           children: [
@@ -204,7 +211,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       onTap: () {
         rotate(true);
       },
-      child: Container(
+      child: SizedBox(
         width: 80,
         child: Column(
           children: [
@@ -230,7 +237,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       onTap: () {
         _saveEdits();
       },
-      child: Container(
+      child: SizedBox(
         width: 80,
         child: Column(
           children: [
@@ -283,12 +290,10 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       option.addOption(RotateOption(radian.toInt()));
     }
 
-    option.addOption(ColorOption.saturation(_saturation + 1));
-    option.addOption(ColorOption.brightness(_brightness + 1));
+    option.addOption(ColorOption.saturation(_saturation));
+    option.addOption(ColorOption.brightness(_brightness));
 
     option.outputFormat = const OutputFormat.png(88);
-
-    print(const JsonEncoder.withIndent('  ').convert(option.toJson()));
 
     final DateTime start = DateTime.now();
     final Uint8List result = await ImageEditor.editImage(
@@ -368,7 +373,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Row(
         children: [
-          Container(
+          SizedBox(
             width: 40,
             child: Text(
               "color",
@@ -398,8 +403,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 value: _saturation,
                 enableTooltip: true,
                 stepSize: 0.01,
-                min: -1.0,
-                max: 1.0,
+                min: kSaturationMin,
+                max: kSaturationMax,
               ),
             ),
           ),
@@ -413,7 +418,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Row(
         children: [
-          Container(
+          SizedBox(
             width: 40,
             child: Text(
               "light",
@@ -443,8 +448,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 value: _brightness,
                 enableTooltip: true,
                 stepSize: 0.01,
-                min: -1.0,
-                max: 1.0,
+                min: kBrightnessMin,
+                max: kBrightnessMax,
               ),
             ),
           ),

@@ -484,7 +484,7 @@ packages:
       name: image_editor
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   implicitly_animated_reorderable_list:
     dependency: "direct main"
     description:
