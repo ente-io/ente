@@ -1,8 +1,6 @@
 import {
     addToCollection,
     Collection,
-    CollectionType,
-    createCollection,
     moveToCollection,
 } from 'services/collectionService';
 import { getSelectedFiles } from 'utils/file';
@@ -15,8 +13,9 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 export enum COLLECTION_OPS_TYPE {
     ADD,
     MOVE,
+    REMOVE,
 }
-export async function copyOrMoveFromCollection(
+export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
     setCollectionSelectorView: (value: boolean) => void,
     selected: SelectedState,
@@ -24,19 +23,9 @@ export async function copyOrMoveFromCollection(
     clearSelection: () => void,
     syncWithRemote: () => Promise<void>,
     setActiveCollection: (id: number) => void,
-    collectionName: string,
-    existingCollection: Collection
+    collection: Collection
 ) {
     setCollectionSelectorView(false);
-    let collection: Collection;
-    if (!existingCollection) {
-        collection = await createCollection(
-            collectionName,
-            CollectionType.album
-        );
-    } else {
-        collection = existingCollection;
-    }
     const selectedFiles = getSelectedFiles(selected, files);
     switch (type) {
         case COLLECTION_OPS_TYPE.ADD:
@@ -48,6 +37,8 @@ export async function copyOrMoveFromCollection(
                 collection,
                 selectedFiles
             );
+            break;
+        case COLLECTION_OPS_TYPE.REMOVE:
             break;
         default:
             throw Error(CustomError.INVALID_COLLECTION_OPERATION);

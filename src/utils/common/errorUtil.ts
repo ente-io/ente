@@ -27,6 +27,7 @@ export enum CustomError {
     SIGNUP_FAILED = 'signup failed',
     FAV_COLLECTION_MISSING = 'favorite collection missing',
     INVALID_COLLECTION_OPERATION = 'invalid collection operation',
+    INVALID_COLLECTION = 'invalid collection attribute',
 }
 
 function parseUploadError(error: AxiosResponse) {

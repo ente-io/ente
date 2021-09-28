@@ -18,14 +18,8 @@ import { Collection } from 'services/collectionService';
 import RemoveIcon from 'components/icons/RemoveIcon';
 
 interface Props {
-    addToCollectionHelper: (
-        collectionName: string,
-        collection: Collection
-    ) => void;
-    moveToCollectionHelper: (
-        collectionName: string,
-        collection: Collection
-    ) => void;
+    addToCollectionHelper: (collection: Collection) => void;
+    moveToCollectionHelper: (collection: Collection) => void;
     showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
     setDialogMessage: SetDialogMessage;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
@@ -75,7 +69,7 @@ const SelectedFileOptions = ({
 }: Props) => {
     const addToCollection = () =>
         setCollectionSelectorAttributes({
-            callback: (collection) => addToCollectionHelper(null, collection),
+            callback: addToCollectionHelper,
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.ADD),
             title: constants.ADD_TO_COLLECTION,
             fromCollection: activeCollection,
@@ -109,7 +103,7 @@ const SelectedFileOptions = ({
 
     const moveToCollection = () => {
         setCollectionSelectorAttributes({
-            callback: (collection) => moveToCollectionHelper(null, collection),
+            callback: moveToCollectionHelper,
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
             title: constants.MOVE_TO_COLLECTION,
             fromCollection: activeCollection,

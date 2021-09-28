@@ -25,6 +25,8 @@ import {
     getFavItemIds,
     getLocalCollections,
     getNonEmptyCollections,
+    createCollection,
+    CollectionType,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import billingService from 'services/billingService';
@@ -68,9 +70,9 @@ import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
 import { PAGES } from 'types';
 import {
-    copyOrMoveFromCollection,
     COLLECTION_OPS_TYPE,
     isSharedCollection,
+    handleCollectionOps,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 
@@ -315,59 +317,30 @@ export default function Gallery() {
     if (!files) {
         return <div />;
     }
-    const addToCollectionHelper = async (
-        collectionName: string,
-        collection: Collection
-    ) => {
-        loadingBar.current?.continuousStart();
-        try {
-            await copyOrMoveFromCollection(
-                COLLECTION_OPS_TYPE.ADD,
-                setCollectionSelectorView,
-                selected,
-                files,
-                clearSelection,
-                syncWithRemote,
-                setActiveCollection,
-                collectionName,
-                collection
-            );
-        } catch (e) {
-            setDialogMessage({
-                title: constants.ERROR,
-                staticBackdrop: true,
-                close: { variant: 'danger' },
-                content: constants.UNKNOWN_ERROR,
-            });
-        }
-    };
+    const collectionOpsHelper =
+        (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
+            loadingBar.current?.continuousStart();
+            try {
+                await handleCollectionOps(
+                    ops,
+                    setCollectionSelectorView,
+                    selected,
+                    files,
+                    clearSelection,
+                    syncWithRemote,
+                    setActiveCollection,
+                    collection
+                );
+            } catch (e) {
+                setDialogMessage({
+                    title: constants.ERROR,
+                    staticBackdrop: true,
+                    close: { variant: 'danger' },
+                    content: constants.UNKNOWN_ERROR,
+                });
+            }
+        };
 
-    const moveToCollectionHelper = async (
-        collectionName: string,
-        collection: Collection
-    ) => {
-        loadingBar.current?.continuousStart();
-        try {
-            await copyOrMoveFromCollection(
-                COLLECTION_OPS_TYPE.MOVE,
-                setCollectionSelectorView,
-                selected,
-                files,
-                clearSelection,
-                syncWithRemote,
-                setActiveCollection,
-                collectionName,
-                collection
-            );
-        } catch (e) {
-            setDialogMessage({
-                title: constants.ERROR,
-                staticBackdrop: true,
-                close: { variant: 'danger' },
-                content: constants.UNKNOWN_ERROR,
-            });
-        }
-    };
     const changeFilesVisibilityHelper = async (
         visibility: VISIBILITY_STATE
     ) => {
@@ -403,40 +376,33 @@ export default function Gallery() {
         }
     };
 
-    const showCreateCollectionModal = (opsType: COLLECTION_OPS_TYPE) => {
-        try {
-            let callback = null;
-            switch (opsType) {
-                case COLLECTION_OPS_TYPE.ADD:
-                    callback = (collectionName: string) =>
-                        addToCollectionHelper(collectionName, null);
-                    break;
-                case COLLECTION_OPS_TYPE.MOVE:
-                    callback = (collectionName: string) =>
-                        moveToCollectionHelper(collectionName, null);
-                    break;
-                default:
-                    throw Error(CustomError.INVALID_COLLECTION_OPERATION);
-            }
-            return () =>
-                setCollectionNamerAttributes({
-                    title: constants.CREATE_COLLECTION,
-                    buttonText: constants.CREATE,
-                    autoFilledName: '',
-                    callback,
+    const showCreateCollectionModal = (ops: COLLECTION_OPS_TYPE) => {
+        const callback = async (collectionName: string) => {
+            try {
+                const collection = await createCollection(
+                    collectionName,
+                    CollectionType.album,
+                    collections
+                );
+
+                await collectionOpsHelper(ops)(collection);
+            } catch (e) {
+                logError(e, 'create and collection ops failed');
+                setDialogMessage({
+                    title: constants.ERROR,
+                    staticBackdrop: true,
+                    close: { variant: 'danger' },
+                    content: constants.UNKNOWN_ERROR,
                 });
-        } catch (e) {
-            logError(
-                e,
-                'showCreateCollectionModal called with incorrect attributes'
-            );
-            setDialogMessage({
-                title: constants.ERROR,
-                staticBackdrop: true,
-                close: { variant: 'danger' },
-                content: constants.UNKNOWN_ERROR,
+            }
+        };
+        return () =>
+            setCollectionNamerAttributes({
+                title: constants.CREATE_COLLECTION,
+                buttonText: constants.CREATE,
+                autoFilledName: '',
+                callback,
             });
-        }
     };
 
     const deleteFileHelper = async () => {
@@ -605,7 +571,9 @@ export default function Gallery() {
                 {selected.count > 0 &&
                     selected.collectionID === activeCollection && (
                         <SelectedFileOptions
-                            addToCollectionHelper={addToCollectionHelper}
+                            addToCollectionHelper={collectionOpsHelper(
+                                COLLECTION_OPS_TYPE.ADD
+                            )}
                             archiveFilesHelper={() =>
                                 changeFilesVisibilityHelper(
                                     VISIBILITY_STATE.ARCHIVED
@@ -616,7 +584,9 @@ export default function Gallery() {
                                     VISIBILITY_STATE.VISIBLE
                                 )
                             }
-                            moveToCollectionHelper={moveToCollectionHelper}
+                            moveToCollectionHelper={collectionOpsHelper(
+                                COLLECTION_OPS_TYPE.ADD
+                            )}
                             showCreateCollectionModal={
                                 showCreateCollectionModal
                             }
