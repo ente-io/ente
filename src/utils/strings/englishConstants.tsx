@@ -552,6 +552,10 @@ const englishConstants = {
     SORT_BY_LATEST_PHOTO: 'most recent photo',
     SORT_BY_MODIFICATION_TIME: 'last modified',
     SORT_BY_COLLECTION_NAME: 'album title',
+    REMOVE: 'remove',
+    CONFIRM_REMOVE: 'confirm removal',
+    CONFIRM_REMOVE_MESSAGE:
+        'are you sure you want to remove these files from the collection',
 };
 
 export default englishConstants;

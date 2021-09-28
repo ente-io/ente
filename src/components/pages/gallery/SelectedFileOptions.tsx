@@ -15,6 +15,7 @@ import { ALL_SECTION, ARCHIVE_SECTION } from './Collections';
 import UnArchive from 'components/icons/UnArchive';
 import { OverlayTrigger } from 'react-bootstrap';
 import { Collection } from 'services/collectionService';
+import RemoveIcon from 'components/icons/RemoveIcon';
 
 interface Props {
     addToCollectionHelper: (
@@ -93,6 +94,19 @@ const SelectedFileOptions = ({
             close: { text: constants.CANCEL },
         });
 
+    const removeFromCollectionHandler = () =>
+        setDialogMessage({
+            title: constants.CONFIRM_REMOVE,
+            content: constants.CONFIRM_REMOVE_MESSAGE,
+            staticBackdrop: true,
+            proceed: {
+                action: deleteFileHelper,
+                text: constants.REMOVE,
+                variant: 'danger',
+            },
+            close: { text: constants.CANCEL },
+        });
+
     const moveToCollection = () => {
         setCollectionSelectorAttributes({
             callback: (collection) => moveToCollectionHelper(null, collection),
@@ -139,6 +153,13 @@ const SelectedFileOptions = ({
                             <AddIcon />
                         </IconButton>
                     </IconWithMessage>
+                    {activeCollection !== ALL_SECTION && (
+                        <IconWithMessage message={constants.REMOVE}>
+                            <IconButton onClick={removeFromCollectionHandler}>
+                                <RemoveIcon />
+                            </IconButton>
+                        </IconWithMessage>
+                    )}
                     <IconWithMessage message={constants.DELETE}>
                         <IconButton onClick={deleteHandler}>
                             <DeleteIcon />
