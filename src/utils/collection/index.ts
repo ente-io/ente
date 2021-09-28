@@ -2,6 +2,7 @@ import {
     addToCollection,
     Collection,
     moveToCollection,
+    removeFromCollection,
 } from 'services/collectionService';
 import { getSelectedFiles } from 'utils/file';
 import { File } from 'services/fileService';
@@ -39,7 +40,7 @@ export async function handleCollectionOps(
             );
             break;
         case COLLECTION_OPS_TYPE.REMOVE:
-            // todo add remove logic
+            await removeFromCollection(collection, selectedFiles);
             break;
         default:
             throw Error(CustomError.INVALID_COLLECTION_OPERATION);

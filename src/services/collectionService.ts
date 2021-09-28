@@ -75,6 +75,11 @@ export enum COLLECTION_SORT_BY {
     NAME,
 }
 
+interface RemoveFromCollectionRequest {
+    collectionID: number;
+    fileIDs: number[];
+}
+
 const getCollectionWithSecrets = async (
     collection: Collection,
     masterKey: string
@@ -436,22 +441,20 @@ const encryptWithNewCollectionKey = async (
     }
     return fileKeysEncryptedWithNewCollection;
 };
-const removeFromCollection = async (collection: Collection, files: File[]) => {
+export const removeFromCollection = async (
+    collection: Collection,
+    files: File[]
+) => {
     try {
-        const params = {};
         const token = getToken();
-        params['collectionID'] = collection.id;
-        await Promise.all(
-            files.map(async (file) => {
-                if (params['fileIDs'] === undefined) {
-                    params['fileIDs'] = [];
-                }
-                params['fileIDs'].push(file.id);
-            })
-        );
+        const request: RemoveFromCollectionRequest = {
+            collectionID: collection.id,
+            fileIDs: files.map((file) => file.id),
+        };
+
         await HTTPService.post(
-            `${ENDPOINT}/collections/remove-files`,
-            params,
+            `${ENDPOINT}/collections/v2/remove-files`,
+            request,
             null,
             { 'X-Auth-Token': token }
         );
