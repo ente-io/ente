@@ -588,7 +588,7 @@ export default function Gallery() {
                                 )
                             }
                             moveToCollectionHelper={collectionOpsHelper(
-                                COLLECTION_OPS_TYPE.ADD
+                                COLLECTION_OPS_TYPE.MOVE
                             )}
                             showCreateCollectionModal={
                                 showCreateCollectionModal
