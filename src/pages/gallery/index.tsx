@@ -73,6 +73,7 @@ import {
     COLLECTION_OPS_TYPE,
     isSharedCollection,
     handleCollectionOps,
+    getSelectedCollection,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 
@@ -595,6 +596,14 @@ export default function Gallery() {
                                 setCollectionSelectorAttributes
                             }
                             deleteFileHelper={deleteFileHelper}
+                            removeFromCollectionHelper={() =>
+                                collectionOpsHelper(COLLECTION_OPS_TYPE.REMOVE)(
+                                    getSelectedCollection(
+                                        activeCollection,
+                                        collections
+                                    )
+                                )
+                            }
                             count={selected.count}
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}

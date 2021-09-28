@@ -39,6 +39,7 @@ export async function handleCollectionOps(
             );
             break;
         case COLLECTION_OPS_TYPE.REMOVE:
+            // todo add remove logic
             break;
         default:
             throw Error(CustomError.INVALID_COLLECTION_OPERATION);

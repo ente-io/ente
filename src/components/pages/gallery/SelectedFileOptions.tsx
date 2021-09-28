@@ -24,6 +24,7 @@ interface Props {
     setDialogMessage: SetDialogMessage;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     deleteFileHelper: () => void;
+    removeFromCollectionHelper: () => void;
     count: number;
     clearSelection: () => void;
     archiveFilesHelper: () => void;
@@ -58,6 +59,7 @@ const SelectedFileOptions = ({
     addToCollectionHelper,
     moveToCollectionHelper,
     showCreateCollectionModal,
+    removeFromCollectionHelper,
     setDialogMessage,
     setCollectionSelectorAttributes,
     deleteFileHelper,
@@ -94,7 +96,7 @@ const SelectedFileOptions = ({
             content: constants.CONFIRM_REMOVE_MESSAGE,
             staticBackdrop: true,
             proceed: {
-                action: deleteFileHelper,
+                action: removeFromCollectionHelper,
                 text: constants.REMOVE,
                 variant: 'danger',
             },
