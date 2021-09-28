@@ -30,7 +30,8 @@ class RemoteSyncService {
 
   static const kDiffLimit = 2500;
   static const kHasSyncedArchiveKey = "has_synced_archive";
-  static const kArchiveFeatureReleaseTime = 1632100000000000;
+  // 28 Sept, 2021 9:03:20 AM IST
+  static const kArchiveFeatureReleaseTime = 1632800000000000;
 
   static final RemoteSyncService instance =
       RemoteSyncService._privateConstructor();
