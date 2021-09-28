@@ -8,18 +8,31 @@ import CrossIcon from 'components/icons/CrossIcon';
 import AddIcon from 'components/icons/AddIcon';
 import { IconButton } from 'components/Container';
 import constants from 'utils/strings/constants';
+import Archive from 'components/icons/Archive';
 import MoveIcon from 'components/icons/MoveIcon';
 import { COLLECTION_OPS_TYPE } from 'utils/collection';
+import { ALL_SECTION, ARCHIVE_SECTION } from './Collections';
+import UnArchive from 'components/icons/UnArchive';
+import { OverlayTrigger } from 'react-bootstrap';
+import { Collection } from 'services/collectionService';
 
 interface Props {
-    addToCollectionHelper: (collectionName, collection) => void;
-    moveToCollectionHelper: (collectionName, collection) => void;
+    addToCollectionHelper: (
+        collectionName: string,
+        collection: Collection
+    ) => void;
+    moveToCollectionHelper: (
+        collectionName: string,
+        collection: Collection
+    ) => void;
     showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
     setDialogMessage: SetDialogMessage;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     deleteFileHelper: () => void;
     count: number;
     clearSelection: () => void;
+    archiveFilesHelper: () => void;
+    unArchiveFilesHelper: () => void;
     activeCollection: number;
 }
 
@@ -29,6 +42,7 @@ const SelectionBar = styled(Navbar)`
     color: #fff;
     z-index: 1001;
     width: 100%;
+    padding: 0 16px;
 `;
 
 const SelectionContainer = styled.div`
@@ -36,6 +50,14 @@ const SelectionContainer = styled.div`
     align-items: center;
     display: flex;
 `;
+
+export const IconWithMessage = (props) => (
+    <OverlayTrigger
+        placement="bottom"
+        overlay={<p style={{ zIndex: 1002 }}>{props.message}</p>}>
+        {props.children}
+    </OverlayTrigger>
+);
 
 const SelectedFileOptions = ({
     addToCollectionHelper,
@@ -46,6 +68,8 @@ const SelectedFileOptions = ({
     deleteFileHelper,
     count,
     clearSelection,
+    archiveFilesHelper,
+    unArchiveFilesHelper,
     activeCollection,
 }: Props) => {
     const addToCollection = () =>
@@ -88,17 +112,40 @@ const SelectedFileOptions = ({
                     {count} {constants.SELECTED}
                 </div>
             </SelectionContainer>
-            {activeCollection !== 0 && (
-                <IconButton onClick={moveToCollection}>
-                    <MoveIcon />
-                </IconButton>
+            {activeCollection === ARCHIVE_SECTION ? (
+                <IconWithMessage message={constants.UNARCHIVE}>
+                    <IconButton onClick={unArchiveFilesHelper}>
+                        <UnArchive />
+                    </IconButton>
+                </IconWithMessage>
+            ) : (
+                <>
+                    {activeCollection === ALL_SECTION && (
+                        <IconWithMessage message={constants.ARCHIVE}>
+                            <IconButton onClick={archiveFilesHelper}>
+                                <Archive />
+                            </IconButton>
+                        </IconWithMessage>
+                    )}
+                    {activeCollection !== ALL_SECTION && (
+                        <IconWithMessage message={constants.MOVE}>
+                            <IconButton onClick={moveToCollection}>
+                                <MoveIcon />
+                            </IconButton>
+                        </IconWithMessage>
+                    )}
+                    <IconWithMessage message={constants.ADD}>
+                        <IconButton onClick={addToCollection}>
+                            <AddIcon />
+                        </IconButton>
+                    </IconWithMessage>
+                    <IconWithMessage message={constants.DELETE}>
+                        <IconButton onClick={deleteHandler}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </IconWithMessage>
+                </>
             )}
-            <IconButton onClick={addToCollection}>
-                <AddIcon />
-            </IconButton>
-            <IconButton onClick={deleteHandler}>
-                <DeleteIcon />
-            </IconButton>
         </SelectionBar>
     );
 };

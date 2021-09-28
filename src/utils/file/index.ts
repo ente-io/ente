@@ -1,7 +1,17 @@
+import { SelectedState } from 'pages/gallery';
 import { Collection } from 'services/collectionService';
-import { File, FILE_TYPE } from 'services/fileService';
+import {
+    File,
+    fileAttribute,
+    FILE_TYPE,
+    MagicMetadataProps,
+    NEW_MAGIC_METADATA,
+    VISIBILITY_STATE,
+} from 'services/fileService';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
+import { EncryptionResult } from 'services/upload/uploadService';
+import { logError } from 'utils/sentry';
 import { User } from 'services/userService';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -44,7 +54,7 @@ export function sortFilesIntoCollections(files: File[]) {
     return collectionWiseFiles;
 }
 
-export function getSelectedFileIds(selectedFiles) {
+export function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
     for (const [key, val] of Object.entries(selectedFiles)) {
         if (typeof val === 'boolean' && val) {
@@ -53,7 +63,10 @@ export function getSelectedFileIds(selectedFiles) {
     }
     return filesIDs;
 }
-export function getSelectedFiles(selectedFiles, files: File[]): File[] {
+export function getSelectedFiles(
+    selectedFiles: SelectedState,
+    files: File[]
+): File[] {
     const filesIDs = new Set(getSelectedFileIds(selectedFiles));
     const filesToDelete: File[] = [];
     for (const file of files) {
@@ -124,14 +137,30 @@ export function sortFiles(files: File[]) {
 }
 
 export async function decryptFile(file: File, collection: Collection) {
-    const worker = await new CryptoWorker();
-    file.key = await worker.decryptB64(
-        file.encryptedKey,
-        file.keyDecryptionNonce,
-        collection.key
-    );
-    file.metadata = await worker.decryptMetadata(file);
-    return file;
+    try {
+        const worker = await new CryptoWorker();
+        file.key = await worker.decryptB64(
+            file.encryptedKey,
+            file.keyDecryptionNonce,
+            collection.key
+        );
+        const encryptedMetadata = file.metadata as unknown as fileAttribute;
+        file.metadata = await worker.decryptMetadata(
+            encryptedMetadata.encryptedData,
+            encryptedMetadata.decryptionHeader,
+            file.key
+        );
+        if (file.magicMetadata?.data) {
+            file.magicMetadata.data = await worker.decryptMetadata(
+                file.magicMetadata.data,
+                file.magicMetadata.header,
+                file.key
+            );
+        }
+        return file;
+    } catch (e) {
+        logError(e, 'file decryption failed');
+    }
 }
 
 export function removeUnnecessaryFileProps(files: File[]): File[] {
@@ -188,6 +217,56 @@ export async function convertForPreview(file: File, fileBlob: Blob) {
     return fileBlob;
 }
 
+export function fileIsArchived(file: File) {
+    if (
+        !file ||
+        !file.magicMetadata ||
+        !file.magicMetadata.data ||
+        typeof file.magicMetadata.data === 'string' ||
+        typeof file.magicMetadata.data.visibility === 'undefined'
+    ) {
+        return false;
+    }
+    return file.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
+}
+
+export async function changeFilesVisibility(
+    files: File[],
+    selected: SelectedState,
+    visibility: VISIBILITY_STATE
+) {
+    const worker = await new CryptoWorker();
+    const selectedFiles = getSelectedFiles(selected, files);
+    const updatedFiles: File[] = [];
+    for (const file of selectedFiles) {
+        if (!file.magicMetadata) {
+            file.magicMetadata = NEW_MAGIC_METADATA;
+        }
+        if (typeof file.magicMetadata.data === 'string') {
+            logError(Error('magic metadata not decrypted'), '');
+            return;
+        }
+        // copies the existing magic metadata properties of the files and updates the visibility value
+        // The expected behaviour while updating magic metadata is to let the existing property as it is and update/add the property you want
+        const updatedMagicMetadataProps: MagicMetadataProps = {
+            ...file.magicMetadata.data,
+            visibility,
+        };
+        const encryptedMagicMetadata: EncryptionResult =
+            await worker.encryptMetadata(updatedMagicMetadataProps, file.key);
+        updatedFiles.push({
+            ...file,
+            magicMetadata: {
+                version: file.magicMetadata.version,
+                count: Object.keys(updatedMagicMetadataProps).length,
+                data: encryptedMagicMetadata.file
+                    .encryptedData as unknown as string,
+                header: encryptedMagicMetadata.file.decryptionHeader,
+            },
+        });
+    }
+    return updatedFiles;
+}
 export function isSharedFile(file: File) {
     const user: User = getData(LS_KEYS.USER);
 
