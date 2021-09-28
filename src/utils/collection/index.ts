@@ -21,8 +21,6 @@ export async function copyOrMoveFromCollection(
     setCollectionSelectorView: (value: boolean) => void,
     selected: SelectedState,
     files: File[],
-    clearSelection: () => void,
-    syncWithRemote: () => Promise<void>,
     setActiveCollection: (id: number) => void,
     collectionName: string,
     existingCollection: Collection
@@ -52,8 +50,6 @@ export async function copyOrMoveFromCollection(
         default:
             throw Error(CustomError.INVALID_COLLECTION_OPERATION);
     }
-    clearSelection();
-    await syncWithRemote();
     setActiveCollection(collection.id);
 }
 
