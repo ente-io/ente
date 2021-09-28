@@ -259,12 +259,21 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     // skip add button for incoming collection till this feature is implemented
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.type != GalleryAppBarType.shared_collection) {
+      String msg = "add";
+      IconData iconData =
+          Platform.isAndroid ? Icons.add_outlined : CupertinoIcons.add;
+      // show upload icon instead of add for files selected in local gallery
+      if (widget.type == GalleryAppBarType.local_folder) {
+        msg = "upload";
+        iconData = Platform.isAndroid
+            ? Icons.cloud_upload
+            : CupertinoIcons.cloud_upload;
+      }
       actions.add(
         Tooltip(
-          message: "add",
+          message: msg,
           child: IconButton(
-            icon: Icon(
-                Platform.isAndroid ? Icons.add_outlined : CupertinoIcons.add),
+            icon: Icon(iconData),
             onPressed: () {
               _createAlbum();
             },
@@ -273,7 +282,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       );
     }
     if (Configuration.instance.hasConfiguredAccount() &&
-        widget.type == GalleryAppBarType.owned_collection) {
+        widget.type == GalleryAppBarType.owned_collection &&
+        widget.collection.type != CollectionType.favorites) {
       actions.add(
         Tooltip(
           message: "move",

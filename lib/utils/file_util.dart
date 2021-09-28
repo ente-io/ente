@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io' as io;
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
@@ -46,7 +47,11 @@ Future<io.File> getFile(
         liveVideo: liveVideo,
         isOrigin: isOrigin,
       );
-      FileLruCache.put(key, diskFile);
+      // do not cache origin file for IOS as they are immediately deleted
+      // after usage
+      if (!(isOrigin && Platform.isIOS)) {
+        FileLruCache.put(key, diskFile);
+      }
       return diskFile;
     }
     return cachedFile;

@@ -216,7 +216,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                     ArchivePage(),
                   );
                 }),
-            Padding(padding: EdgeInsets.all(12)),
+            Padding(padding: EdgeInsets.fromLTRB(12, 12, 12, 36)),
           ],
         ),
       ),

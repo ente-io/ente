@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_user_agent/flutter_user_agent.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-int kConnectTimeout = 5000;
+int kConnectTimeout = 15000;
 class Network {
   Dio _dio;
 
