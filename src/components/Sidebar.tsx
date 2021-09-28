@@ -32,7 +32,10 @@ import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
 import { Subscription } from 'services/billingService';
 import { PAGES } from 'types';
-import { ARCHIVE_SECTION } from 'components/pages/gallery/Collections';
+import {
+    ARCHIVE_SECTION,
+    TRASH_SECTION,
+} from 'components/pages/gallery/Collections';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -220,6 +223,14 @@ export default function Sidebar(props: Props) {
                         setIsOpen(false);
                     }}>
                     {constants.ARCHIVE}
+                </LinkButton>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => {
+                        galleryContext.setActiveCollection(TRASH_SECTION);
+                        setIsOpen(false);
+                    }}>
+                    {constants.TRASH}
                 </LinkButton>
                 <>
                     <RecoveryKeyModal

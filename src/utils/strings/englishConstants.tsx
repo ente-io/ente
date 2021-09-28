@@ -556,6 +556,7 @@ const englishConstants = {
     CONFIRM_REMOVE: 'confirm removal',
     CONFIRM_REMOVE_MESSAGE:
         'are you sure you want to remove these files from the collection',
+    TRASH: 'trash',
 };
 
 export default englishConstants;
