@@ -54,7 +54,7 @@ export function sortFilesIntoCollections(files: File[]) {
     return collectionWiseFiles;
 }
 
-export function getSelectedFileIds(selectedFiles: SelectedState) {
+function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
     for (const [key, val] of Object.entries(selectedFiles)) {
         if (typeof val === 'boolean' && val) {

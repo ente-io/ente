@@ -86,6 +86,14 @@ export const NEW_MAGIC_METADATA: MagicMetadata = {
     count: 0,
 };
 
+interface TrashRequest {
+    items: TrashRequestItems[];
+}
+
+interface TrashRequestItems {
+    fileID: number;
+    collectionID: number;
+}
 export const getLocalFiles = async () => {
     const files: Array<File> = (await localForage.getItem<File[]>(FILES)) || [];
     return files;
@@ -232,22 +240,23 @@ const removeDeletedCollectionFiles = async (
     return files;
 };
 
-export const deleteFiles = async (filesToDelete: number[]) => {
+export const trashFiles = async (filesToTrash: File[]) => {
     try {
         const token = getToken();
         if (!token) {
             return;
         }
-        await HTTPService.post(
-            `${ENDPOINT}/files/delete`,
-            { fileIDs: filesToDelete },
-            null,
-            {
-                'X-Auth-Token': token,
-            }
-        );
+        const trashRequest: TrashRequest = {
+            items: filesToTrash.map((file) => ({
+                fileID: file.id,
+                collectionID: file.collectionID,
+            })),
+        };
+        await HTTPService.post(`${ENDPOINT}/files/trash`, trashRequest, null, {
+            'X-Auth-Token': token,
+        });
     } catch (e) {
-        logError(e, 'delete failed');
+        logError(e, 'trash file failed');
         throw e;
     }
 };

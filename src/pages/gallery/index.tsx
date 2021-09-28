@@ -10,10 +10,10 @@ import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
     File,
     getLocalFiles,
-    deleteFiles,
     syncFiles,
     updateMagicMetadata,
     VISIBILITY_STATE,
+    trashFiles,
 } from 'services/fileService';
 import styled from 'styled-components';
 import LoadingBar from 'react-top-loading-bar';
@@ -49,7 +49,7 @@ import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
 import {
     changeFilesVisibility,
-    getSelectedFileIds,
+    getSelectedFiles,
     sortFilesIntoCollections,
 } from 'utils/file';
 import SearchBar, { DateValue } from 'components/SearchBar';
@@ -413,10 +413,9 @@ export default function Gallery() {
     const deleteFileHelper = async () => {
         loadingBar.current?.continuousStart();
         try {
-            const fileIds = getSelectedFileIds(selected);
-            await deleteFiles(fileIds);
-            setDeleted([...deleted, ...fileIds]);
-            clearSelection();
+            const selectedFiles = getSelectedFiles(selected, files);
+            await trashFiles(selectedFiles);
+            setDeleted([...deleted, ...selectedFiles.map((file) => file.id)]);
         } catch (e) {
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
