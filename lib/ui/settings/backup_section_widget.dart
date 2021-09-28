@@ -132,18 +132,23 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           onTap: () async {
             final dialog = createProgressDialog(context, "calculating...");
             await dialog.show();
-            final duplicates =
-                await DeduplicationService.instance.getDuplicateFiles();
-            await dialog.hide();
-            if (duplicates.isEmpty) {
-              showErrorDialog(context, "✨ no duplicates",
-                  "you've no duplicate files that can be cleared");
-            } else {
-              DeduplicationResult result =
-                  await routeToPage(context, DeduplicatePage(duplicates));
-              if (result != null) {
-                _showDuplicateFilesDeletedDialog(result);
+            try {
+              final duplicates =
+                  await DeduplicationService.instance.getDuplicateFiles();
+              await dialog.hide();
+              if (duplicates.isEmpty) {
+                showErrorDialog(context, "✨ no duplicates",
+                    "you've no duplicate files that can be cleared");
+              } else {
+                DeduplicationResult result =
+                    await routeToPage(context, DeduplicatePage(duplicates));
+                if (result != null) {
+                  _showDuplicateFilesDeletedDialog(result);
+                }
               }
+            } catch (e) {
+              await dialog.hide();
+              showGenericErrorDialog(context);
             }
           },
           child: SettingsTextItem(
