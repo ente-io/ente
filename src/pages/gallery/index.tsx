@@ -331,6 +331,7 @@ export default function Gallery() {
                 collectionName,
                 collection
             );
+            clearSelection();
         } catch (e) {
             setDialogMessage({
                 title: constants.ERROR,
@@ -339,7 +340,6 @@ export default function Gallery() {
                 content: constants.UNKNOWN_ERROR,
             });
         } finally {
-            clearSelection();
             await syncWithRemote(false, true);
             loadingBar.current.complete();
         }
@@ -361,6 +361,7 @@ export default function Gallery() {
                 collectionName,
                 collection
             );
+            clearSelection();
         } catch (e) {
             setDialogMessage({
                 title: constants.ERROR,
@@ -369,7 +370,6 @@ export default function Gallery() {
                 content: constants.UNKNOWN_ERROR,
             });
         } finally {
-            clearSelection();
             await syncWithRemote(false, true);
             loadingBar.current.complete();
         }
@@ -385,6 +385,7 @@ export default function Gallery() {
                 visibility
             );
             await updateMagicMetadata(updatedFiles);
+            clearSelection();
         } catch (e) {
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
@@ -403,7 +404,6 @@ export default function Gallery() {
                 content: constants.UNKNOWN_ERROR,
             });
         } finally {
-            clearSelection();
             await syncWithRemote(false, true);
             loadingBar.current.complete();
         }
@@ -451,6 +451,7 @@ export default function Gallery() {
             const fileIds = getSelectedFileIds(selected);
             await deleteFiles(fileIds);
             setDeleted([...deleted, ...fileIds]);
+            clearSelection();
         } catch (e) {
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
@@ -468,7 +469,6 @@ export default function Gallery() {
                 content: constants.UNKNOWN_ERROR,
             });
         } finally {
-            clearSelection();
             await syncWithRemote(false, true);
             loadingBar.current.complete();
         }
