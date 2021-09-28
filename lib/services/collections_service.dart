@@ -418,9 +418,10 @@ class CollectionsService {
         .then((value) async {
       // insert files to new collection
       await _filesDB.insertMultiple(files);
+      // remove files from old collection
+      await _filesDB.removeFromCollection(
+          fromCollectionID, files.map((e) => e.uploadedFileID).toList());
       Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
-      //  todo: remove files from existing collection locally.
-      //  Ideally, remoteSync should take care of it.
       Bus.instance.fire(CollectionUpdatedEvent(fromCollectionID, files,
           type: EventType.deleted));
     });
