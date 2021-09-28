@@ -360,8 +360,7 @@ const englishConstants = {
         <>
             <p>are you sure you want to delete this album?</p>
             <p>
-                all files that are unique to this album will be permanently
-                deleted
+                all files that are unique to this album will be moved to trash
             </p>
         </>
     ),

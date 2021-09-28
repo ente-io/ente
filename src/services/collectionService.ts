@@ -474,7 +474,7 @@ export const deleteCollection = async (
         const token = getToken();
 
         await HTTPService.delete(
-            `${ENDPOINT}/collections/${collectionID}`,
+            `${ENDPOINT}/collections/v2/${collectionID}`,
             null,
             null,
             { 'X-Auth-Token': token }
