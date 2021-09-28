@@ -88,6 +88,22 @@ const Chip = styled.button<{ active: boolean }>`
     }
 `;
 
+const SectionChipCreater =
+    ({ activeCollection, clickHandler }) =>
+    ({ section, label }) =>
+        (
+            <Chip
+                active={activeCollection === section}
+                onClick={clickHandler(section)}>
+                {label}
+                <div
+                    style={{
+                        display: 'inline-block',
+                        width: '24px',
+                    }}
+                />
+            </Chip>
+        );
 export default function Collections(props: CollectionProps) {
     const { activeCollection, collections, setActiveCollection } = props;
     const [selectedCollectionID, setSelectedCollectionID] =
@@ -171,6 +187,8 @@ export default function Collections(props: CollectionProps) {
         );
     };
 
+    const SectionChip = SectionChipCreater({ activeCollection, clickHandler });
+
     return (
         !props.searchMode && (
             <>
@@ -194,17 +212,10 @@ export default function Collections(props: CollectionProps) {
                             />
                         )}
                         <Wrapper ref={collectionRef} onScroll={updateScrollObj}>
-                            <Chip
-                                active={activeCollection === ALL_SECTION}
-                                onClick={clickHandler(ALL_SECTION)}>
-                                {constants.ALL}
-                                <div
-                                    style={{
-                                        display: 'inline-block',
-                                        width: '24px',
-                                    }}
-                                />
-                            </Chip>
+                            <SectionChip
+                                section={ALL_SECTION}
+                                label={constants.ALL}
+                            />
                             {sortCollections(
                                 collections,
                                 props.collectionAndTheirLatestFile,
@@ -246,17 +257,18 @@ export default function Collections(props: CollectionProps) {
                                     </Chip>
                                 </OverlayTrigger>
                             ))}
-                            <Chip
-                                active={activeCollection === ARCHIVE_SECTION}
-                                onClick={clickHandler(ARCHIVE_SECTION)}>
-                                {constants.ARCHIVE}
-                                <div
-                                    style={{
-                                        display: 'inline-block',
-                                        width: '24px',
-                                    }}
+                            {activeCollection === ARCHIVE_SECTION && (
+                                <SectionChip
+                                    section={ARCHIVE_SECTION}
+                                    label={constants.ARCHIVE}
                                 />
-                            </Chip>
+                            )}
+                            {activeCollection === TRASH_SECTION && (
+                                <SectionChip
+                                    section={TRASH_SECTION}
+                                    label={constants.TRASH}
+                                />
+                            )}
                         </Wrapper>
                         {scrollObj.scrollLeft <
                             scrollObj.scrollWidth - scrollObj.clientWidth && (
