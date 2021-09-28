@@ -12,6 +12,7 @@ import HTTPService from './HTTPService';
 import { File } from './fileService';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/common/errorUtil';
+import { sortFiles } from 'utils/file';
 
 const ENDPOINT = getEndpoint();
 
@@ -628,10 +629,19 @@ function compareCollectionsLatestFile(
         collectionAndTheirLatestFile,
         collectionB
     );
-
-    return (
-        CollectionBLatestFile.updationTime - CollectionALatestFile.updationTime
-    );
+    if (!CollectionALatestFile || !CollectionBLatestFile) {
+        return 0;
+    } else {
+        const sortedFiles = sortFiles([
+            CollectionALatestFile,
+            CollectionBLatestFile,
+        ]);
+        if (sortedFiles[0].id !== CollectionALatestFile.id) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
 }
 
 function getCollectionLatestFile(
@@ -649,6 +659,5 @@ function getCollectionLatestFile(
             Error('collection missing from collectionLatestFile list'),
             ''
         );
-        return { updationTime: 0 };
     }
 }
