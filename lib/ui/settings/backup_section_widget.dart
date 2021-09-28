@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/backup_status.dart';
+import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
@@ -132,23 +133,26 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           onTap: () async {
             final dialog = createProgressDialog(context, "calculating...");
             await dialog.show();
+            List<DuplicateFiles> duplicates;
             try {
-              final duplicates =
+              duplicates =
                   await DeduplicationService.instance.getDuplicateFiles();
-              await dialog.hide();
-              if (duplicates.isEmpty) {
-                showErrorDialog(context, "✨ no duplicates",
-                    "you've no duplicate files that can be cleared");
-              } else {
-                DeduplicationResult result =
-                    await routeToPage(context, DeduplicatePage(duplicates));
-                if (result != null) {
-                  _showDuplicateFilesDeletedDialog(result);
-                }
-              }
             } catch (e) {
               await dialog.hide();
               showGenericErrorDialog(context);
+              return;
+            }
+
+            await dialog.hide();
+            if (duplicates.isEmpty) {
+              showErrorDialog(context, "✨ no duplicates",
+                  "you've no duplicate files that can be cleared");
+            } else {
+              DeduplicationResult result =
+                  await routeToPage(context, DeduplicatePage(duplicates));
+              if (result != null) {
+                _showDuplicateFilesDeletedDialog(result);
+              }
             }
           },
           child: SettingsTextItem(
