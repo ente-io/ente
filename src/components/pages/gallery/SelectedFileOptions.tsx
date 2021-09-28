@@ -79,12 +79,12 @@ const SelectedFileOptions = ({
 
     const deleteHandler = () =>
         setDialogMessage({
-            title: constants.CONFIRM_DELETE_FILE,
-            content: constants.DELETE_FILE_MESSAGE,
+            title: constants.CONFIRM_DELETE,
+            content: constants.DELETE_MESSAGE,
             staticBackdrop: true,
             proceed: {
                 action: deleteFileHelper,
-                text: constants.DELETE,
+                text: constants.MOVE_TO_TRASH,
                 variant: 'danger',
             },
             close: { text: constants.CANCEL },

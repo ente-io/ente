@@ -331,7 +331,7 @@ export default function Sidebar(props: Props) {
                     onClick={() =>
                         props.setDialogMessage({
                             title: `${constants.DELETE_ACCOUNT}`,
-                            content: constants.DELETE_MESSAGE(),
+                            content: constants.DELETE_ACCOUNT_MESSAGE(),
                             staticBackdrop: true,
                             proceed: {
                                 text: constants.DELETE_ACCOUNT,

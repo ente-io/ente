@@ -159,8 +159,9 @@ const englishConstants = {
     UPLOAD_FIRST_PHOTO_DESCRIPTION: 'preserve your first memory with ente',
     UPLOAD_FIRST_PHOTO: 'preserve',
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
-    CONFIRM_DELETE_FILE: 'confirm file deletion',
-    DELETE_FILE_MESSAGE: 'sure you want to delete selected files?',
+    CONFIRM_DELETE: 'confirm deletion',
+    DELETE_MESSAGE:
+        'the selected files will be removed from all collection and moved to trash ',
     DELETE_FILE: 'delete files',
     DELETE: 'delete',
     MULTI_FOLDER_UPLOAD: 'multiple folders detected',
@@ -210,7 +211,7 @@ const englishConstants = {
     CANCEL: 'cancel',
     LOGOUT: 'logout',
     DELETE_ACCOUNT: 'delete account',
-    DELETE_MESSAGE: () => (
+    DELETE_ACCOUNT_MESSAGE: () => (
         <>
             <p>
                 please send an email to{' '}
@@ -557,6 +558,7 @@ const englishConstants = {
     CONFIRM_REMOVE_MESSAGE:
         'are you sure you want to remove these files from the collection',
     TRASH: 'trash',
+    MOVE_TO_TRASH: 'move to trash',
 };
 
 export default englishConstants;
