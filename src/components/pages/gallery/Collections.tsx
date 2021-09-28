@@ -107,7 +107,7 @@ export default function Collections(props: CollectionProps) {
         clientWidth?: number;
     }>({});
     const [collectionSortBy, setCollectionSortBy] =
-        useState<COLLECTION_SORT_BY>(COLLECTION_SORT_BY.MODIFICATION_TIME);
+        useState<COLLECTION_SORT_BY>(COLLECTION_SORT_BY.LATEST_FILE);
 
     const updateScrollObj = () => {
         if (collectionWrapperRef.current) {
