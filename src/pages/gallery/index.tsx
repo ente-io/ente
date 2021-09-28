@@ -332,6 +332,7 @@ export default function Gallery() {
                 );
                 clearSelection();
             } catch (e) {
+                logError(e, 'collection ops failed', { ops });
                 setDialogMessage({
                     title: constants.ERROR,
                     staticBackdrop: true,
@@ -357,6 +358,7 @@ export default function Gallery() {
             await updateMagicMetadata(updatedFiles);
             clearSelection();
         } catch (e) {
+            logError(e, 'change file visibility failed');
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
