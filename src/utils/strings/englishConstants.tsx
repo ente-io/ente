@@ -548,6 +548,10 @@ const englishConstants = {
     UNARCHIVE: 'un-archive',
     MOVE: 'move',
     ADD: 'add',
+    SORT: 'sort',
+    SORT_BY_LATEST_PHOTO: 'most recent photo',
+    SORT_BY_MODIFICATION_TIME: 'last modified',
+    SORT_BY_COLLECTION_NAME: 'album title',
 };
 
 export default englishConstants;

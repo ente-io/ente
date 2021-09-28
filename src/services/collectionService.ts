@@ -69,6 +69,12 @@ export interface CollectionAndItsLatestFile {
     file: File;
 }
 
+export enum COLLECTION_SORT_BY {
+    LATEST_FILE,
+    MODIFICATION_TIME,
+    NAME,
+}
+
 const getCollectionWithSecrets = async (
     collection: Collection,
     masterKey: string
@@ -219,13 +225,9 @@ export const getCollectionsAndTheirLatestFile = (
         }
     });
     const collectionsAndTheirLatestFile: CollectionAndItsLatestFile[] = [];
-    const userID = getData(LS_KEYS.USER)?.id;
 
     for (const collection of collections) {
-        if (
-            collection.owner.id !== userID ||
-            collection.type === CollectionType.favorites
-        ) {
+        if (collection.type === CollectionType.favorites) {
             continue;
         }
         collectionsAndTheirLatestFile.push({
@@ -591,3 +593,62 @@ export const getNonEmptyCollections = (
         nonEmptyCollectionsIds.has(collection.id)
     );
 };
+
+export function sortCollections(
+    collections: Collection[],
+    collectionAndTheirLatestFile: CollectionAndItsLatestFile[],
+    sortBy: COLLECTION_SORT_BY
+) {
+    return collections.sort((collectionA, collectionB) => {
+        switch (sortBy) {
+            case COLLECTION_SORT_BY.LATEST_FILE:
+                return compareCollectionsLatestFile(
+                    collectionAndTheirLatestFile,
+                    collectionA,
+                    collectionB
+                );
+            case COLLECTION_SORT_BY.MODIFICATION_TIME:
+                return collectionB.updationTime - collectionA.updationTime;
+            case COLLECTION_SORT_BY.NAME:
+                return collectionA.name.localeCompare(collectionB.name);
+        }
+    });
+}
+
+function compareCollectionsLatestFile(
+    collectionAndTheirLatestFile: CollectionAndItsLatestFile[],
+    collectionA: Collection,
+    collectionB: Collection
+) {
+    const CollectionALatestFile = getCollectionLatestFile(
+        collectionAndTheirLatestFile,
+        collectionA
+    );
+    const CollectionBLatestFile = getCollectionLatestFile(
+        collectionAndTheirLatestFile,
+        collectionB
+    );
+
+    return (
+        CollectionBLatestFile.updationTime - CollectionALatestFile.updationTime
+    );
+}
+
+function getCollectionLatestFile(
+    collectionAndTheirLatestFile: CollectionAndItsLatestFile[],
+    collection: Collection
+) {
+    const collectionAndItsLatestFile = collectionAndTheirLatestFile.filter(
+        (collectionAndItsLatestFile) =>
+            collectionAndItsLatestFile.collection.id === collection.id
+    );
+    if (collectionAndItsLatestFile.length === 1) {
+        return collectionAndItsLatestFile[0].file;
+    } else {
+        logError(
+            Error('collection missing from collectionLatestFile list'),
+            ''
+        );
+        return { updationTime: 0 };
+    }
+}
