@@ -218,15 +218,32 @@ class RemoteSyncService {
       final existingFiles = file.deviceFolder == null
           ? null
           : await _db.getMatchingFiles(file.title, file.deviceFolder);
-      if (existingFiles == null) {
-        // File uploaded from a different device
+      if (existingFiles == null || existingFiles.isEmpty) {
+        // File uploaded from a different device.
+        // Other rare possibilities : The local file is present on
+        // device but it's not imported in local db due to missing permission
+        // after reinstall (iOS selected file permissions or user revoking
+        // permissions, or issue/delay in importing devices files.
         file.localID = null;
         toBeInserted.add(file);
         remote++;
       } else {
-        // File exists on device
-        file.localID = existingFiles[0]
-            .localID; // File should ideally have the same localID
+        // File exists in ente db with same title & device folder
+        // Note: The file.generatedID might be already set inside
+        // [DiffFetcher.getEncryptedFilesDiff]
+
+        final fileWithLocalID = existingFiles
+            .firstWhere((e) => e.localID != null, orElse: () => null);
+        if (fileWithLocalID != null) {
+          // File should ideally have the same localID
+          if (file.localID != null && file.localID != fileWithLocalID.localID) {
+            _logger.severe(
+                "unexpected mismatch in localIDs remote: ${file.toString()} and existing: ${fileWithLocalID.toString()}");
+          }
+          file.localID = fileWithLocalID.localID;
+        } else {
+          file.localID = null;
+        }
         bool wasUploadedOnAPreviousInstallation =
             existingFiles.length == 1 && existingFiles[0].collectionID == null;
         if (wasUploadedOnAPreviousInstallation) {
