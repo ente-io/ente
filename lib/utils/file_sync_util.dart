@@ -104,10 +104,7 @@ Future<List<AssetPathEntity>> _getGalleryList(
   final filterOptionGroup = FilterOptionGroup();
   filterOptionGroup.setOption(AssetType.image, FilterOption(needTitle: true));
   filterOptionGroup.setOption(AssetType.video, FilterOption(needTitle: true));
-  filterOptionGroup.createTimeCond = DateTimeCond(
-    min: DateTime.fromMicrosecondsSinceEpoch(fromTime),
-    max: DateTime.fromMicrosecondsSinceEpoch(toTime),
-  );
+
   filterOptionGroup.updateTimeCond = DateTimeCond(
     min: DateTime.fromMicrosecondsSinceEpoch(fromTime),
     max: DateTime.fromMicrosecondsSinceEpoch(toTime),
