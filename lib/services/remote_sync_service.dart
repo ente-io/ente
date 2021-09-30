@@ -98,8 +98,10 @@ class RemoteSyncService {
       final deletedFiles =
           (await FilesDB.instance.getFilesFromIDs(fileIDs)).values.toList();
       await FilesDB.instance.deleteFilesFromCollection(collectionID, fileIDs);
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID, deletedFiles));
-      Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID, deletedFiles,
+          type: EventType.deleted));
+      Bus.instance
+          .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
     }
     if (diff.updatedFiles.isNotEmpty) {
       await _storeDiff(diff.updatedFiles, collectionID);
@@ -107,10 +109,9 @@ class RemoteSyncService {
           diff.updatedFiles.length.toString() +
           " files in collection " +
           collectionID.toString());
-      Bus.instance.fire(
-          LocalPhotosUpdatedEvent(diff.updatedFiles, type: EventType.deleted));
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID, diff.updatedFiles,
-          type: EventType.deleted));
+      Bus.instance.fire(LocalPhotosUpdatedEvent(diff.updatedFiles));
+      Bus.instance
+          .fire(CollectionUpdatedEvent(collectionID, diff.updatedFiles));
     }
     if (diff.fetchCount == kDiffLimit) {
       return await _syncCollectionDiff(collectionID,
