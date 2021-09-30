@@ -659,8 +659,6 @@ function getCollectionLatestFile(
     );
     if (collectionAndItsLatestFile.length === 1) {
         return collectionAndItsLatestFile[0].file;
-    } else {
-        logError(Error(), 'collection missing from collectionLatestFile list');
     }
 }
 

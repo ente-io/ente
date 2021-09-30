@@ -205,7 +205,6 @@ export default function Gallery() {
             const files = await getLocalFiles();
             const collections = await getLocalCollections();
             setFiles(files);
-            setCollections(collections);
             await setDerivativeState(collections, files);
             await checkSubscriptionPurchase(
                 setDialogMessage,
