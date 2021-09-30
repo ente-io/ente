@@ -34,6 +34,7 @@ interface Props {
     archiveFilesHelper: () => void;
     unArchiveFilesHelper: () => void;
     activeCollection: number;
+    isFavoriteCollection: boolean;
 }
 
 const SelectionBar = styled(Navbar)`
@@ -71,6 +72,7 @@ const SelectedFileOptions = ({
     archiveFilesHelper,
     unArchiveFilesHelper,
     activeCollection,
+    isFavoriteCollection,
 }: Props) => {
     const addToCollection = () =>
         setCollectionSelectorAttributes({
@@ -127,7 +129,7 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </IconWithMessage>
                     )}
-                    {activeCollection !== ALL_SECTION && (
+                    {activeCollection !== ALL_SECTION && !isFavoriteCollection && (
                         <IconWithMessage message={constants.MOVE}>
                             <IconButton onClick={moveToCollection}>
                                 <MoveIcon />
