@@ -63,7 +63,10 @@ import AlertBanner from 'components/pages/gallery/AlertBanner';
 import UploadButton from 'components/pages/gallery/UploadButton';
 import PlanSelector from 'components/pages/gallery/PlanSelector';
 import Upload from 'components/pages/gallery/Upload';
-import Collections from 'components/pages/gallery/Collections';
+import Collections, {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+} from 'components/pages/gallery/Collections';
 import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
 import { PAGES } from 'types';
@@ -226,9 +229,16 @@ export default function Gallery() {
     useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
 
     useEffect(() => {
-        const href = `/gallery${
-            activeCollection ? `?collection=${activeCollection.toString()}` : ''
-        }`;
+        let collectionURL = '';
+        if (activeCollection !== ALL_SECTION) {
+            collectionURL += '?collection=';
+            if (activeCollection === ARCHIVE_SECTION) {
+                collectionURL += constants.ARCHIVE;
+            } else {
+                collectionURL += activeCollection;
+            }
+        }
+        const href = `/gallery${collectionURL}`;
         router.push(href, undefined, { shallow: true });
     }, [activeCollection]);
     useEffect(
