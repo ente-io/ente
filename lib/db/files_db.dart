@@ -380,15 +380,16 @@ class FilesDB {
     return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
   }
 
-  Future<FileLoadResult> getAllUploadedFiles(int startTime, int endTime,
-      int ownerID, {int limit, bool asc, int visibility = kVisibilityVisible}) async {
+  Future<FileLoadResult> getAllUploadedFiles(
+      int startTime, int endTime, int ownerID,
+      {int limit, bool asc, int visibility = kVisibilityVisible}) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       table,
       where:
           '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  $columnOwnerID = ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-              ' AND $columnMMdVisibility = ?',
+          ' AND $columnMMdVisibility = ?',
       whereArgs: [startTime, endTime, ownerID, visibility],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -399,7 +400,8 @@ class FilesDB {
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
-  Future<FileLoadResult> getAllLocalAndUploadedFiles(int startTime, int endTime, int ownerID,
+  Future<FileLoadResult> getAllLocalAndUploadedFiles(
+      int startTime, int endTime, int ownerID,
       {int limit, bool asc}) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -407,7 +409,7 @@ class FilesDB {
       table,
       where:
           '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
-              ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+          ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
       whereArgs: [startTime, endTime, ownerID, kVisibilityVisible],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -431,7 +433,7 @@ class FilesDB {
       table,
       where:
           '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
-              'AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+          'AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
       whereArgs: [startTime, endTime, ownerID, kVisibilityVisible],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -778,6 +780,17 @@ class FilesDB {
     );
   }
 
+  Future<int> deleteFilesFromCollection(
+      int collectionID, List<int> uploadedFileIDs) async {
+    final db = await instance.database;
+    return db.delete(
+      table,
+      where:
+          '$columnCollectionID = ? AND $columnUploadedFileID IN (${uploadedFileIDs.join(', ')})',
+      whereArgs: [collectionID],
+    );
+  }
+
   Future<int> deleteCollection(int collectionID) async {
     final db = await instance.database;
     return db.delete(
@@ -1024,7 +1037,7 @@ class FilesDB {
     file.hash = row[columnHash];
     file.metadataVersion = row[columnMetadataVersion] ?? 0;
 
-    file.mMdVersion = row[columnMMdVersion] ?? 0 ;
+    file.mMdVersion = row[columnMMdVersion] ?? 0;
     file.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
     return file;
   }
