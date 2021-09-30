@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import {
     Collection,
     CollectionAndItsLatestFile,
+    CollectionType,
 } from 'services/collectionService';
 import AddCollectionButton from './AddCollectionButton';
 import PreviewCard from './PreviewCard';
@@ -60,7 +61,8 @@ function CollectionSelector({
             collectionsAndTheirLatestFile?.filter(
                 (item) =>
                     item.collection.id !== attributes.fromCollection &&
-                    item.collection.owner.id === user?.id
+                    item.collection.owner.id === user?.id &&
+                    item.collection.type !== CollectionType.favorites
             );
         if (personalCollectionsOtherThanFrom.length === 0) {
             props.onHide();
