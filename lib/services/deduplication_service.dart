@@ -69,6 +69,16 @@ class DeduplicationService {
         }
       }
       files.removeWhere((file) => incorrectDuplicates.contains(file));
+      // Place files that are available locally at first to minimize the chances
+      // of a deletion followed by a re-upload
+      files.sort((first, second) {
+        if (first.localID != null && second.localID == null) {
+          return -1;
+        } else if (first.localID == null && second.localID != null) {
+          return 1;
+        }
+        return 0;
+      });
       if (files.length > 1) {
         result.add(DuplicateFiles(files, dupe.size));
       }
