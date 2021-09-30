@@ -114,40 +114,40 @@ const SelectedFileOptions = ({
                     {count} {constants.SELECTED}
                 </div>
             </SelectionContainer>
-            {activeCollection === ARCHIVE_SECTION ? (
+            {activeCollection === ARCHIVE_SECTION && (
                 <IconWithMessage message={constants.UNARCHIVE}>
                     <IconButton onClick={unArchiveFilesHelper}>
                         <UnArchive />
                     </IconButton>
                 </IconWithMessage>
-            ) : (
-                <>
-                    {activeCollection === ALL_SECTION && (
-                        <IconWithMessage message={constants.ARCHIVE}>
-                            <IconButton onClick={archiveFilesHelper}>
-                                <Archive />
-                            </IconButton>
-                        </IconWithMessage>
-                    )}
-                    {activeCollection !== ALL_SECTION && !isFavoriteCollection && (
-                        <IconWithMessage message={constants.MOVE}>
-                            <IconButton onClick={moveToCollection}>
-                                <MoveIcon />
-                            </IconButton>
-                        </IconWithMessage>
-                    )}
-                    <IconWithMessage message={constants.ADD}>
-                        <IconButton onClick={addToCollection}>
-                            <AddIcon />
-                        </IconButton>
-                    </IconWithMessage>
-                    <IconWithMessage message={constants.DELETE}>
-                        <IconButton onClick={deleteHandler}>
-                            <DeleteIcon />
-                        </IconButton>
-                    </IconWithMessage>
-                </>
             )}
+
+            {activeCollection === ALL_SECTION && (
+                <IconWithMessage message={constants.ARCHIVE}>
+                    <IconButton onClick={archiveFilesHelper}>
+                        <Archive />
+                    </IconButton>
+                </IconWithMessage>
+            )}
+            {activeCollection !== ALL_SECTION &&
+                activeCollection !== ARCHIVE_SECTION &&
+                !isFavoriteCollection && (
+                    <IconWithMessage message={constants.MOVE}>
+                        <IconButton onClick={moveToCollection}>
+                            <MoveIcon />
+                        </IconButton>
+                    </IconWithMessage>
+                )}
+            <IconWithMessage message={constants.ADD}>
+                <IconButton onClick={addToCollection}>
+                    <AddIcon />
+                </IconButton>
+            </IconWithMessage>
+            <IconWithMessage message={constants.DELETE}>
+                <IconButton onClick={deleteHandler}>
+                    <DeleteIcon />
+                </IconButton>
+            </IconWithMessage>
         </SelectionBar>
     );
 };
