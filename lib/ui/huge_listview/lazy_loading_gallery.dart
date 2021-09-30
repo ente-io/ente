@@ -80,11 +80,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   Future _onReload(FilesUpdatedEvent event) async {
     final galleryDate =
         DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime);
-    final filesUpdatedThisDay = event.updatedFiles
-        .where((file) =>
-            file.creationTime !=
-            null) // Filtering out noise of deleted files diff from server
-        .where((file) {
+    final filesUpdatedThisDay = event.updatedFiles.where((file) {
       final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
       return fileDate.year == galleryDate.year &&
           fileDate.month == galleryDate.month &&

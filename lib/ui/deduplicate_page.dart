@@ -136,11 +136,11 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   Padding _getHeader() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
+      padding: EdgeInsets.fromLTRB(20, 12, 20, 12),
       child: Column(
         children: [
           Text(
-            "the following files were clubbed based on their sizes and timestamps",
+            "the following files were clubbed based on their sizes and capture times",
             style: TextStyle(
               color: Colors.white.withOpacity(0.6),
               height: 1.2,

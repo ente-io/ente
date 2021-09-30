@@ -8,6 +8,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
@@ -92,15 +93,24 @@ class RemoteSyncService {
   Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
     final diff = await _diffFetcher.getEncryptedFilesDiff(
         collectionID, sinceTime, kDiffLimit);
+    if (diff.deletedFiles.isNotEmpty) {
+      final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID).toList();
+      final deletedFiles =
+          (await FilesDB.instance.getFilesFromIDs(fileIDs)).values.toList();
+      await FilesDB.instance.deleteFilesFromCollection(collectionID, fileIDs);
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID, deletedFiles));
+      Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
+    }
     if (diff.updatedFiles.isNotEmpty) {
       await _storeDiff(diff.updatedFiles, collectionID);
       _logger.info("Updated " +
           diff.updatedFiles.length.toString() +
           " files in collection " +
           collectionID.toString());
-      Bus.instance.fire(LocalPhotosUpdatedEvent(diff.updatedFiles));
-      Bus.instance
-          .fire(CollectionUpdatedEvent(collectionID, diff.updatedFiles));
+      Bus.instance.fire(
+          LocalPhotosUpdatedEvent(diff.updatedFiles, type: EventType.deleted));
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID, diff.updatedFiles,
+          type: EventType.deleted));
     }
     if (diff.fetchCount == kDiffLimit) {
       return await _syncCollectionDiff(collectionID,

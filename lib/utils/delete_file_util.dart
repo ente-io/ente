@@ -113,7 +113,8 @@ Future<void> deleteFilesFromRemoteOnly(
     BuildContext context, List<File> files) async {
   final dialog = createProgressDialog(context, "deleting...");
   await dialog.show();
-  _logger.info("Trying to delete files " + files.toString());
+  _logger.info("Trying to delete files " +
+      files.map((f) => f.uploadedFileID).toString());
   final updatedCollectionIDs = <int>{};
   final List<int> ids = [];
   for (final file in files) {
