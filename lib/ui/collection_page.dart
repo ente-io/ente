@@ -45,7 +45,7 @@ class CollectionPage extends StatelessWidget {
           padding: EdgeInsets.only(top: Platform.isAndroid ? 80 : 100),
           child: gallery,
         ),
-        Container(
+        SizedBox(
           height: Platform.isAndroid ? 80 : 100,
           child: GalleryAppBarWidget(
             appBarType,
