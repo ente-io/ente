@@ -7,11 +7,8 @@ export default function MoveIcon(props) {
             height={props.height}
             viewBox={props.viewBox}
             width={props.width}>
-            <path
-                d="M13.025 1l-2.847 2.828 6.176 6.176h-16.354v3.992h16.354l-6.176 6.176 2.847 2.828 10.975-11z"
-                strokeWidth="2"
-                stroke="black"
-            />
+            <path d="M0 0h24v24H0V0z" fill="none" />
+            <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
         </svg>
     );
 }
