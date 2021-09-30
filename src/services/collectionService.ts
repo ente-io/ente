@@ -192,7 +192,7 @@ export const syncCollections = async () => {
         }
     });
 
-    const collections: Collection[] = [];
+    let collections: Collection[] = [];
     let updationTime = await localForage.getItem<number>(
         COLLECTION_UPDATION_TIME
     );
@@ -203,8 +203,11 @@ export const syncCollections = async () => {
             updationTime = Math.max(updationTime, collection.updationTime);
         }
     }
-    collections.sort((a, b) => b.updationTime - a.updationTime);
-    collections.sort((a, b) => (b.type === CollectionType.favorites ? 1 : 0));
+    collections = sortCollections(
+        collections,
+        [],
+        COLLECTION_SORT_BY.MODIFICATION_TIME
+    );
     await localForage.setItem(COLLECTIONS, collections);
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
     return collections;
@@ -228,9 +231,6 @@ export const getCollectionsAndTheirLatestFile = (
     const collectionsAndTheirLatestFile: CollectionAndItsLatestFile[] = [];
 
     for (const collection of collections) {
-        if (collection.type === CollectionType.favorites) {
-            continue;
-        }
         collectionsAndTheirLatestFile.push({
             collection,
             file: latestFile.get(collection.id),
@@ -600,20 +600,22 @@ export function sortCollections(
     collectionAndTheirLatestFile: CollectionAndItsLatestFile[],
     sortBy: COLLECTION_SORT_BY
 ) {
-    return collections.sort((collectionA, collectionB) => {
-        switch (sortBy) {
-            case COLLECTION_SORT_BY.LATEST_FILE:
-                return compareCollectionsLatestFile(
-                    collectionAndTheirLatestFile,
-                    collectionA,
-                    collectionB
-                );
-            case COLLECTION_SORT_BY.MODIFICATION_TIME:
-                return collectionB.updationTime - collectionA.updationTime;
-            case COLLECTION_SORT_BY.NAME:
-                return collectionA.name.localeCompare(collectionB.name);
-        }
-    });
+    return moveFavCollectionToFront(
+        collections.sort((collectionA, collectionB) => {
+            switch (sortBy) {
+                case COLLECTION_SORT_BY.LATEST_FILE:
+                    return compareCollectionsLatestFile(
+                        collectionAndTheirLatestFile,
+                        collectionA,
+                        collectionB
+                    );
+                case COLLECTION_SORT_BY.MODIFICATION_TIME:
+                    return collectionB.updationTime - collectionA.updationTime;
+                case COLLECTION_SORT_BY.NAME:
+                    return collectionA.name.localeCompare(collectionB.name);
+            }
+        })
+    );
 }
 
 function compareCollectionsLatestFile(
@@ -621,6 +623,9 @@ function compareCollectionsLatestFile(
     collectionA: Collection,
     collectionB: Collection
 ) {
+    if (!collectionAndTheirLatestFile?.length) {
+        return 0;
+    }
     const CollectionALatestFile = getCollectionLatestFile(
         collectionAndTheirLatestFile,
         collectionA
@@ -655,9 +660,16 @@ function getCollectionLatestFile(
     if (collectionAndItsLatestFile.length === 1) {
         return collectionAndItsLatestFile[0].file;
     } else {
-        logError(
-            Error('collection missing from collectionLatestFile list'),
-            ''
-        );
+        logError(Error(), 'collection missing from collectionLatestFile list');
     }
+}
+
+function moveFavCollectionToFront(collections: Collection[]) {
+    return collections.sort((collectionA, collectionB) =>
+        collectionA.type === CollectionType.favorites
+            ? -1
+            : collectionB.type === CollectionType.favorites
+            ? 1
+            : 0
+    );
 }

@@ -53,21 +53,34 @@ export async function copyOrMoveFromCollection(
     setActiveCollection(collection.id);
 }
 
-export function getSelectedCollection(collectionID: number, collections) {
+export function getSelectedCollection(
+    collectionID: number,
+    collections: Collection[]
+) {
     return collections.find((collection) => collection.id === collectionID);
 }
 
 export function isSharedCollection(
-    collections: Collection[],
-    collectionID: number
+    collectionID: number,
+    collections: Collection[]
 ) {
     const user: User = getData(LS_KEYS.USER);
 
-    const collection = collections.find(
-        (collection) => collection.id === collectionID
-    );
+    const collection = getSelectedCollection(collectionID, collections);
     if (!collection) {
         return false;
     }
     return collection?.owner.id !== user.id;
+}
+
+export function isFavoriteCollection(
+    collectionID: number,
+    collections: Collection[]
+) {
+    const collection = getSelectedCollection(collectionID, collections);
+    if (!collection) {
+        return false;
+    } else {
+        return collection.type === CollectionType.favorites;
+    }
 }

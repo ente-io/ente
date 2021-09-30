@@ -8,6 +8,9 @@ export const logError = (
     info?: Record<string, unknown>
 ) => {
     const err = errorWithContext(e, msg);
+    if (!process.env.NEXT_PUBLIC_SENTRY_ENV) {
+        console.log(err);
+    }
     Sentry.captureException(err, {
         level: Sentry.Severity.Info,
         user: { id: getUserAnonymizedID() },

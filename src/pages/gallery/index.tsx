@@ -74,6 +74,7 @@ import {
     copyOrMoveFromCollection,
     COLLECTION_OPS_TYPE,
     isSharedCollection,
+    isFavoriteCollection,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 
@@ -186,6 +187,8 @@ export default function Gallery() {
     const [isSharedCollectionActive, setIsSharedCollectionActive] =
         useState(false);
 
+    const [isFavCollectionActive, setIsFavCollectionActive] = useState(false);
+
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
@@ -240,14 +243,15 @@ export default function Gallery() {
         }
         const href = `/gallery${collectionURL}`;
         router.push(href, undefined, { shallow: true });
+
+        setIsSharedCollectionActive(
+            isSharedCollection(activeCollection, collections)
+        );
+
+        setIsFavCollectionActive(
+            isFavoriteCollection(activeCollection, collections)
+        );
     }, [activeCollection]);
-    useEffect(
-        () =>
-            setIsSharedCollectionActive(
-                isSharedCollection(collections, activeCollection)
-            ),
-        [activeCollection]
-    );
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
@@ -644,6 +648,7 @@ export default function Gallery() {
                             count={selected.count}
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}
+                            isFavoriteCollection={isFavCollectionActive}
                         />
                     )}
             </FullScreenDropZone>
