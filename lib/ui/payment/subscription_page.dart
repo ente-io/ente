@@ -270,7 +270,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       );
     }
-    if (!foundActivePlan) {
+    if (!foundActivePlan && _hasActiveSubscription) {
       _addCurrentPlanWidget(planWidgets);
     }
     return planWidgets;
