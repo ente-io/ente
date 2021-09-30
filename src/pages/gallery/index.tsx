@@ -182,7 +182,7 @@ export default function Gallery() {
     const appContext = useContext(AppContext);
     const [collectionFilesCount, setCollectionFilesCount] =
         useState<Map<number, number>>();
-    const [activeCollection, setActiveCollection] = useState(0);
+    const [activeCollection, setActiveCollection] = useState<number>(undefined);
 
     const [isSharedCollectionActive, setIsSharedCollectionActive] =
         useState(false);
@@ -196,6 +196,7 @@ export default function Gallery() {
             return;
         }
         const main = async () => {
+            setActiveCollection(ALL_SECTION);
             setIsFirstLoad(isFirstLogin());
             setIsFirstFetch(true);
             if (justSignedUp()) {
@@ -231,6 +232,9 @@ export default function Gallery() {
     useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
 
     useEffect(() => {
+        if (typeof activeCollection === 'undefined') {
+            return;
+        }
         let collectionURL = '';
         if (activeCollection !== ALL_SECTION) {
             collectionURL += '?collection=';
