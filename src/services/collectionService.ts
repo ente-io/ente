@@ -621,6 +621,9 @@ function compareCollectionsLatestFile(
     collectionA: Collection,
     collectionB: Collection
 ) {
+    if (collectionAndTheirLatestFile?.length) {
+        return 0;
+    }
     const CollectionALatestFile = getCollectionLatestFile(
         collectionAndTheirLatestFile,
         collectionA
