@@ -115,11 +115,18 @@ const SelectedFileOptions = ({
                 </div>
             </SelectionContainer>
             {activeCollection === ARCHIVE_SECTION ? (
-                <IconWithMessage message={constants.UNARCHIVE}>
-                    <IconButton onClick={unArchiveFilesHelper}>
-                        <UnArchive />
-                    </IconButton>
-                </IconWithMessage>
+                <>
+                    <IconWithMessage message={constants.UNARCHIVE}>
+                        <IconButton onClick={unArchiveFilesHelper}>
+                            <UnArchive />
+                        </IconButton>
+                    </IconWithMessage>
+                    <IconWithMessage message={constants.DELETE}>
+                        <IconButton onClick={deleteHandler}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </IconWithMessage>
+                </>
             ) : (
                 <>
                     {activeCollection === ALL_SECTION && (
