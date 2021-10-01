@@ -19,18 +19,17 @@ class DiffFetcher {
 
   Future<Diff> getEncryptedFilesDiff(
       int collectionID, int sinceTime, int limit) async {
-    return _dio.get(
-      Configuration.instance.getHttpEndpoint() + "/collections/diff",
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-      queryParameters: {
-        "collectionID": collectionID,
-        "sinceTime": sinceTime,
-        "limit": limit,
-      },
-    ).catchError((e) {
-      _logger.severe(e);
-    }).then((response) async {
+    try {
+      final response = await _dio.get(
+        Configuration.instance.getHttpEndpoint() + "/collections/diff",
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        queryParameters: {
+          "collectionID": collectionID,
+          "sinceTime": sinceTime,
+          "limit": limit,
+        },
+      );
       final files = <File>[];
       if (response != null) {
         Bus.instance.fire(RemoteSyncEvent(true));
@@ -101,7 +100,10 @@ class DiffFetcher {
         Bus.instance.fire(RemoteSyncEvent(false));
         return Diff(<File>[], <File>[], 0);
       }
-    });
+    } catch (e, s) {
+      _logger.severe(e, s);
+      rethrow;
+    }
   }
 }
 
