@@ -76,6 +76,11 @@ import {
     getSelectedCollection,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
+import {
+    getLocalTrash,
+    getTrashedFiles,
+    syncTrash,
+} from 'services/trashService';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -201,7 +206,9 @@ export default function Gallery() {
             setIsFirstLogin(false);
             const files = await getLocalFiles();
             const collections = await getLocalCollections();
-            setFiles(files);
+            const trash = await getLocalTrash();
+            const trashedFile = getTrashedFiles(trash);
+            setFiles([...files, ...trashedFile]);
             setCollections(collections);
             await setDerivativeState(collections, files);
             await checkSubscriptionPurchase(
@@ -257,8 +264,9 @@ export default function Gallery() {
             await billingService.syncSubscription();
             const collections = await syncCollections();
             setCollections(collections);
-            const { files } = await syncFiles(collections, setFiles);
+            const files = await syncFiles(collections, setFiles);
             await setDerivativeState(collections, files);
+            await syncTrash(collections, setFiles);
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
@@ -416,6 +424,7 @@ export default function Gallery() {
             const selectedFiles = getSelectedFiles(selected, files);
             await trashFiles(selectedFiles);
             setDeleted([...deleted, ...selectedFiles.map((file) => file.id)]);
+            clearSelection();
         } catch (e) {
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
