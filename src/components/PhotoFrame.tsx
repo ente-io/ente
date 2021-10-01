@@ -28,7 +28,11 @@ import {
     SPACE_BTW_DATES,
 } from 'types';
 import { fileIsArchived } from 'utils/file';
-import { ALL_SECTION, ARCHIVE_SECTION } from './pages/gallery/Collections';
+import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    TRASH_SECTION,
+} from './pages/gallery/Collections';
 import { isSharedFile } from 'utils/file';
 
 const NO_OF_PAGES = 2;
@@ -416,10 +420,17 @@ const PhotoFrame = ({
             if (isSharedFile(item) && !isSharedCollection) {
                 return false;
             }
+            if (activeCollection === TRASH_SECTION && !item.isTrashed) {
+                return false;
+            }
+            if (activeCollection !== TRASH_SECTION && item.isTrashed) {
+                return false;
+            }
             if (!idSet.has(item.id)) {
                 if (
                     activeCollection === ALL_SECTION ||
                     activeCollection === ARCHIVE_SECTION ||
+                    activeCollection === TRASH_SECTION ||
                     activeCollection === item.collectionID
                 ) {
                     idSet.add(item.id);
