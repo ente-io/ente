@@ -21,7 +21,7 @@ class DiffFetcher {
       int collectionID, int sinceTime, int limit) async {
     try {
       final response = await _dio.get(
-        Configuration.instance.getHttpEndpoint() + "/collections/diffwa",
+        Configuration.instance.getHttpEndpoint() + "/collections/diff",
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         queryParameters: {
