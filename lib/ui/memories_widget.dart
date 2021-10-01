@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/models/file_type.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/ui/blurred_file_backdrop.dart';
 import 'package:photos/ui/extents_page_view.dart';
+import 'package:photos/ui/file_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
-import 'package:photos/ui/video_widget.dart';
-import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -223,6 +220,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   int _index = 0;
   double _opacity = 1;
   PageController _pageController;
+  bool _shouldDisableScroll = false;
 
   @override
   void initState() {
@@ -318,7 +316,19 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
           preloadFile(nextFile);
         }
         final file = widget.memories[index].file;
-        return MemoryItem(file);
+        return FileWidget(
+          file,
+          autoPlay: false,
+          tagPrefix: "memories",
+          shouldDisableScroll: (value) {
+            setState(() {
+              _shouldDisableScroll = value;
+            });
+          },
+          backgroundDecoration: BoxDecoration(
+            color: Colors.transparent,
+          ),
+        );
       },
       itemCount: widget.memories.length,
       controller: _pageController,
@@ -329,32 +339,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
           _index = index;
         });
       },
+      physics: _shouldDisableScroll
+          ? NeverScrollableScrollPhysics()
+          : PageScrollPhysics(),
     );
-  }
-}
-
-class MemoryItem extends StatelessWidget {
-  final File file;
-  const MemoryItem(this.file, {Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final view = file.fileType == FileType.image
-        ? ZoomableImage(
-            file,
-            tagPrefix: "memories",
-            backgroundDecoration: BoxDecoration(
-              color: Colors.transparent,
-            ),
-          )
-        : VideoWidget(
-            file,
-            tagPrefix: "memories",
-            autoPlay: false,
-          );
-    return Stack(children: [
-      // BlurredFileBackdrop(file),
-      view,
-    ]);
   }
 }
