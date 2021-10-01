@@ -67,6 +67,7 @@ export interface File {
     w: number;
     h: number;
     isDeleted: boolean;
+    isTrashed?: boolean;
     dataIndex: number;
     updationTime: number;
 }
@@ -159,13 +160,11 @@ export const syncFiles = async (
             }))
         );
     }
-    return {
-        files: files.map((item) => ({
-            ...item,
-            w: window.innerWidth,
-            h: window.innerHeight,
-        })),
-    };
+    return files.map((item) => ({
+        ...item,
+        w: window.innerWidth,
+        h: window.innerHeight,
+    }));
 };
 
 export const getFiles = async (
