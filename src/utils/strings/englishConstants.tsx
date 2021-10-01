@@ -420,7 +420,7 @@ const englishConstants = {
         </span>
     ),
     NOT_FILE_OWNER: 'you cannot delete files in a shared album',
-    ADD_TO_COLLECTION: 'add to collection',
+    ADD_TO_COLLECTION: 'add to album',
     SELECTED: 'selected',
     VIDEO_PLAYBACK_FAILED: 'video format not supported',
     VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD:
@@ -542,6 +542,16 @@ const englishConstants = {
     TOO_LARGE_INFO:
         'these files were not uploaded as they exceed the maximum size limit for your storage plan',
     UPLOAD_TO_COLLECTION: 'upload to album',
+    ARCHIVE: 'archive',
+    ALL: 'all',
+    MOVE_TO_COLLECTION: 'move to album',
+    UNARCHIVE: 'un-archive',
+    MOVE: 'move',
+    ADD: 'add',
+    SORT: 'sort',
+    SORT_BY_LATEST_PHOTO: 'recent photo',
+    SORT_BY_MODIFICATION_TIME: 'last updated',
+    SORT_BY_COLLECTION_NAME: 'album name',
 };
 
 export default englishConstants;

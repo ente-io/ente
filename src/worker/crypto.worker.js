@@ -3,11 +3,11 @@ import * as libsodium from 'utils/crypto/libsodium';
 import { convertHEIC2JPEG } from 'utils/file/convertHEIC';
 
 export class Crypto {
-    async decryptMetadata(file) {
+    async decryptMetadata(encryptedMetadata, header, key) {
         const encodedMetadata = await libsodium.decryptChaChaOneShot(
-            await libsodium.fromB64(file.metadata.encryptedData),
-            await libsodium.fromB64(file.metadata.decryptionHeader),
-            file.key
+            await libsodium.fromB64(encryptedMetadata),
+            await libsodium.fromB64(header),
+            key
         );
         return JSON.parse(new TextDecoder().decode(encodedMetadata));
     }

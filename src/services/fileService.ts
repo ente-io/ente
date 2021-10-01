@@ -37,12 +37,27 @@ export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
     { fileType: FILE_TYPE.VIDEO, exactType: 'webm' },
 ];
 
+export enum VISIBILITY_STATE {
+    VISIBLE,
+    ARCHIVED,
+}
+export interface MagicMetadataProps {
+    visibility?: VISIBILITY_STATE;
+}
+export interface MagicMetadata {
+    version: number;
+    count: number;
+    data: string | MagicMetadataProps;
+    header: string;
+}
 export interface File {
     id: number;
     collectionID: number;
+    ownerID: number;
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: MetadataObject;
+    magicMetadata: MagicMetadata;
     encryptedKey: string;
     keyDecryptionNonce: string;
     key: string;
@@ -55,6 +70,21 @@ export interface File {
     dataIndex: number;
     updationTime: number;
 }
+
+interface UpdateMagicMetadataRequest {
+    metadataList: UpdateMagicMetadata[];
+}
+interface UpdateMagicMetadata {
+    id: number;
+    magicMetadata: MagicMetadata;
+}
+
+export const NEW_MAGIC_METADATA: MagicMetadata = {
+    version: 0,
+    data: {},
+    header: null,
+    count: 0,
+};
 
 export const getLocalFiles = async () => {
     const files: Array<File> = (await localForage.getItem<File[]>(FILES)) || [];
@@ -202,11 +232,7 @@ const removeDeletedCollectionFiles = async (
     return files;
 };
 
-export const deleteFiles = async (
-    filesToDelete: number[],
-    clearSelection: Function,
-    syncWithRemote: Function
-) => {
+export const deleteFiles = async (filesToDelete: number[]) => {
     try {
         const token = getToken();
         if (!token) {
@@ -220,10 +246,25 @@ export const deleteFiles = async (
                 'X-Auth-Token': token,
             }
         );
-        clearSelection();
-        syncWithRemote();
     } catch (e) {
         logError(e, 'delete failed');
         throw e;
     }
+};
+
+export const updateMagicMetadata = async (files: File[]) => {
+    const token = getToken();
+    if (!token) {
+        return;
+    }
+    const reqBody: UpdateMagicMetadataRequest = { metadataList: [] };
+    for (const file of files) {
+        reqBody.metadataList.push({
+            id: file.id,
+            magicMetadata: file.magicMetadata,
+        });
+    }
+    await HTTPService.put(`${ENDPOINT}/files/magic-metadata`, reqBody, null, {
+        'X-Auth-Token': token,
+    });
 };

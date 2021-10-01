@@ -9,7 +9,7 @@ import {
 import { getSelectedCollection } from 'utils/collection';
 import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
-import LinkButton from './LinkButton';
+import LinkButton, { ButtonVariant, LinkButtonProps } from './LinkButton';
 
 interface Props {
     syncWithRemote: () => Promise<void>;
@@ -21,6 +21,28 @@ interface Props {
     showCollectionShareModal: () => void;
     redirectToAll: () => void;
 }
+
+export const MenuLink = ({ children, ...props }: LinkButtonProps) => (
+    <LinkButton
+        style={{ fontSize: '14px', fontWeight: 700, padding: '8px 1em' }}
+        {...props}>
+        {children}
+    </LinkButton>
+);
+
+export const MenuItem = (props: { children: any }) => (
+    <ListGroup.Item
+        style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#282828',
+            padding: 0,
+        }}>
+        {props.children}
+    </ListGroup.Item>
+);
+
 const CollectionOptions = (props: Props) => {
     const collectionRename = async (
         selectedCollection: Collection,
@@ -75,23 +97,6 @@ const CollectionOptions = (props: Props) => {
         });
     };
 
-    const MenuLink = (props) => (
-        <LinkButton
-            style={{ fontSize: '14px', fontWeight: 700, padding: '8px 1em' }}
-            {...props}>
-            {props.children}
-        </LinkButton>
-    );
-
-    const MenuItem = (props) => (
-        <ListGroup.Item
-            style={{
-                background: '#282828',
-                padding: 0,
-            }}>
-            {props.children}
-        </ListGroup.Item>
-    );
     return (
         <Popover id="collection-options" style={{ borderRadius: '10px' }}>
             <Popover.Content style={{ padding: 0, border: 'none' }}>
@@ -108,7 +113,7 @@ const CollectionOptions = (props: Props) => {
                     </MenuItem>
                     <MenuItem>
                         <MenuLink
-                            variant="danger"
+                            variant={ButtonVariant.danger}
                             onClick={confirmDeleteCollection}>
                             {constants.DELETE}
                         </MenuLink>

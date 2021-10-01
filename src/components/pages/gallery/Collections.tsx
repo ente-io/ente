@@ -5,20 +5,32 @@ import NavigationButton, {
 } from 'components/NavigationButton';
 import React, { useEffect, useRef, useState } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { Collection, CollectionType } from 'services/collectionService';
+import {
+    Collection,
+    CollectionAndItsLatestFile,
+    CollectionType,
+    COLLECTION_SORT_BY,
+    sortCollections,
+} from 'services/collectionService';
 import { User } from 'services/userService';
 import styled from 'styled-components';
 import { IMAGE_CONTAINER_MAX_WIDTH } from 'types';
 import { getSelectedCollection } from 'utils/collection';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import CollectionOptions from './CollectionOptions';
+import CollectionSort from './CollectionSort';
 import OptionIcon, { OptionIconWrapper } from './OptionIcon';
+
+export const ARCHIVE_SECTION = -1;
+export const ALL_SECTION = 0;
 
 interface CollectionProps {
     collections: Collection[];
-    selected?: number;
-    selectCollection: (id?: number) => void;
+    collectionAndTheirLatestFile: CollectionAndItsLatestFile[];
+    activeCollection?: number;
+    setActiveCollection: (id?: number) => void;
     setDialogMessage: SetDialogMessage;
     syncWithRemote: () => Promise<void>;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -27,12 +39,11 @@ interface CollectionProps {
     collectionFilesCount: Map<number, number>;
 }
 
-const Container = styled.div`
-    margin: 10px auto;
+const CollectionContainer = styled.div`
     overflow-y: hidden;
     height: 40px;
     display: flex;
-    width: 100%;
+    width: calc(100% - 80px);
     position: relative;
     padding: 0 24px;
 
@@ -48,6 +59,14 @@ const Wrapper = styled.div`
     overflow: auto;
     max-width: 100%;
     scroll-behavior: smooth;
+`;
+
+const CollectionBar = styled.div`
+    width: 100%;
+    margin: 10px auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
 `;
 
 const Chip = styled.button<{ active: boolean }>`
@@ -69,10 +88,17 @@ const Chip = styled.button<{ active: boolean }>`
 `;
 
 export default function Collections(props: CollectionProps) {
-    const { selected, collections, selectCollection } = props;
+    const { activeCollection, collections, setActiveCollection } = props;
     const [selectedCollectionID, setSelectedCollectionID] =
         useState<number>(null);
-    const collectionRef = useRef<HTMLDivElement>(null);
+    const collectionWrapperRef = useRef<HTMLDivElement>(null);
+    const collectionChipsRef = props.collections.reduce(
+        (refMap, collection) => {
+            refMap[collection.id] = React.createRef();
+            return refMap;
+        },
+        {}
+    );
     const [collectionShareModalView, setCollectionShareModalView] =
         useState(false);
     const [scrollObj, setScrollObj] = useState<{
@@ -80,29 +106,37 @@ export default function Collections(props: CollectionProps) {
         scrollWidth?: number;
         clientWidth?: number;
     }>({});
+    const [collectionSortBy, setCollectionSortBy] =
+        useState<COLLECTION_SORT_BY>(COLLECTION_SORT_BY.LATEST_FILE);
 
     const updateScrollObj = () => {
-        if (collectionRef.current) {
+        if (collectionWrapperRef.current) {
             const { scrollLeft, scrollWidth, clientWidth } =
-                collectionRef.current;
+                collectionWrapperRef.current;
             setScrollObj({ scrollLeft, scrollWidth, clientWidth });
         }
     };
 
     useEffect(() => {
         updateScrollObj();
-    }, [collectionRef.current]);
+    }, [collectionWrapperRef.current]);
 
     useEffect(() => {
-        if (!collectionRef?.current) {
+        if (!collectionWrapperRef?.current) {
             return;
         }
-        collectionRef.current.scrollLeft = 0;
+        collectionWrapperRef.current.scrollLeft = 0;
     }, [collections]);
 
-    const clickHandler = (collection?: Collection) => () => {
-        setSelectedCollectionID(collection?.id);
-        selectCollection(collection?.id);
+    useEffect(() => {
+        collectionChipsRef[activeCollection]?.current.scrollIntoView({
+            inline: 'center',
+        });
+    }, [activeCollection]);
+
+    const clickHandler = (collectionID?: number) => () => {
+        setSelectedCollectionID(collectionID);
+        setActiveCollection(collectionID ?? ALL_SECTION);
     };
 
     const user: User = getData(LS_KEYS.USER);
@@ -119,13 +153,13 @@ export default function Collections(props: CollectionProps) {
         setDialogMessage: props.setDialogMessage,
         startLoadingBar: props.startLoadingBar,
         showCollectionShareModal: setCollectionShareModalView.bind(null, true),
-        redirectToAll: selectCollection.bind(null, null),
+        redirectToAll: setActiveCollection.bind(null, ALL_SECTION),
     });
 
     const scrollCollection = (direction: SCROLL_DIRECTION) => () => {
-        collectionRef.current.scrollBy(250 * direction, 0);
+        collectionWrapperRef.current.scrollBy(250 * direction, 0);
     };
-    const renderTooltip = (collectionID) => {
+    const renderTooltip = (collectionID: number) => {
         const fileCount = props.collectionFilesCount?.get(collectionID) ?? 0;
         return (
             <Tooltip
@@ -133,10 +167,8 @@ export default function Collections(props: CollectionProps) {
                     padding: '0',
                     paddingBottom: '5px',
                 }}
-                id="button-tooltip"
-                {...props}>
+                id="button-tooltip">
                 <div
-                    {...props}
                     style={{
                         backgroundColor: '#282828',
                         padding: '2px 10px',
@@ -163,68 +195,99 @@ export default function Collections(props: CollectionProps) {
                     )}
                     syncWithRemote={props.syncWithRemote}
                 />
-                <Container>
-                    {scrollObj.scrollLeft > 0 && (
-                        <NavigationButton
-                            scrollDirection={SCROLL_DIRECTION.LEFT}
-                            onClick={scrollCollection(SCROLL_DIRECTION.LEFT)}
-                        />
-                    )}
-                    <Wrapper ref={collectionRef} onScroll={updateScrollObj}>
-                        <Chip active={!selected} onClick={clickHandler()}>
-                            All
-                            <div
-                                style={{
-                                    display: 'inline-block',
-                                    width: '24px',
-                                }}
+                <CollectionBar>
+                    <CollectionContainer>
+                        {scrollObj.scrollLeft > 0 && (
+                            <NavigationButton
+                                scrollDirection={SCROLL_DIRECTION.LEFT}
+                                onClick={scrollCollection(
+                                    SCROLL_DIRECTION.LEFT
+                                )}
                             />
-                        </Chip>
-                        {collections?.map((item) => (
-                            <OverlayTrigger
-                                key={item.id}
-                                placement="top"
-                                delay={{ show: 250, hide: 400 }}
-                                overlay={renderTooltip(item.id)}>
-                                <Chip
-                                    active={selected === item.id}
-                                    onClick={clickHandler(item)}>
-                                    {item.name}
-                                    {item.type !== CollectionType.favorites &&
-                                    item.owner.id === user?.id ? (
-                                        <OverlayTrigger
-                                            rootClose
-                                            trigger="click"
-                                            placement="bottom"
-                                            overlay={collectionOptions}>
-                                            <OptionIcon
-                                                onClick={() =>
-                                                    setSelectedCollectionID(
-                                                        item.id
-                                                    )
-                                                }
+                        )}
+                        <Wrapper
+                            ref={collectionWrapperRef}
+                            onScroll={updateScrollObj}>
+                            <Chip
+                                active={activeCollection === ALL_SECTION}
+                                onClick={clickHandler(ALL_SECTION)}>
+                                {constants.ALL}
+                                <div
+                                    style={{
+                                        display: 'inline-block',
+                                        width: '24px',
+                                    }}
+                                />
+                            </Chip>
+                            {sortCollections(
+                                collections,
+                                props.collectionAndTheirLatestFile,
+                                collectionSortBy
+                            ).map((item) => (
+                                <OverlayTrigger
+                                    key={item.id}
+                                    placement="top"
+                                    delay={{ show: 250, hide: 400 }}
+                                    overlay={renderTooltip(item.id)}>
+                                    <Chip
+                                        ref={collectionChipsRef[item.id]}
+                                        active={activeCollection === item.id}
+                                        onClick={clickHandler(item.id)}>
+                                        {item.name}
+                                        {item.type !==
+                                            CollectionType.favorites &&
+                                        item.owner.id === user?.id ? (
+                                            <OverlayTrigger
+                                                rootClose
+                                                trigger="click"
+                                                placement="bottom"
+                                                overlay={collectionOptions}>
+                                                <OptionIcon
+                                                    onClick={() =>
+                                                        setSelectedCollectionID(
+                                                            item.id
+                                                        )
+                                                    }
+                                                />
+                                            </OverlayTrigger>
+                                        ) : (
+                                            <div
+                                                style={{
+                                                    display: 'inline-block',
+                                                    width: '24px',
+                                                }}
                                             />
-                                        </OverlayTrigger>
-                                    ) : (
-                                        <div
-                                            style={{
-                                                display: 'inline-block',
-                                                width: '24px',
-                                            }}
-                                        />
-                                    )}
-                                </Chip>
-                            </OverlayTrigger>
-                        ))}
-                    </Wrapper>
-                    {scrollObj.scrollLeft <
-                        scrollObj.scrollWidth - scrollObj.clientWidth && (
-                        <NavigationButton
-                            scrollDirection={SCROLL_DIRECTION.RIGHT}
-                            onClick={scrollCollection(SCROLL_DIRECTION.RIGHT)}
-                        />
-                    )}
-                </Container>
+                                        )}
+                                    </Chip>
+                                </OverlayTrigger>
+                            ))}
+                            <Chip
+                                active={activeCollection === ARCHIVE_SECTION}
+                                onClick={clickHandler(ARCHIVE_SECTION)}>
+                                {constants.ARCHIVE}
+                                <div
+                                    style={{
+                                        display: 'inline-block',
+                                        width: '24px',
+                                    }}
+                                />
+                            </Chip>
+                        </Wrapper>
+                        {scrollObj.scrollLeft <
+                            scrollObj.scrollWidth - scrollObj.clientWidth && (
+                            <NavigationButton
+                                scrollDirection={SCROLL_DIRECTION.RIGHT}
+                                onClick={scrollCollection(
+                                    SCROLL_DIRECTION.RIGHT
+                                )}
+                            />
+                        )}
+                    </CollectionContainer>
+                    <CollectionSort
+                        setCollectionSortBy={setCollectionSortBy}
+                        activeSortBy={collectionSortBy}
+                    />
+                </CollectionBar>
             </>
         )
     );

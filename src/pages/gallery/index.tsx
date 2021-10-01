@@ -12,6 +12,8 @@ import {
     getLocalFiles,
     deleteFiles,
     syncFiles,
+    updateMagicMetadata,
+    VISIBILITY_STATE,
 } from 'services/fileService';
 import styled from 'styled-components';
 import LoadingBar from 'react-top-loading-bar';
@@ -23,7 +25,6 @@ import {
     getFavItemIds,
     getLocalCollections,
     getNonEmptyCollections,
-    setLocalCollection,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import billingService from 'services/billingService';
@@ -44,8 +45,11 @@ import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
-import { getSelectedFileIds, sortFilesIntoCollections } from 'utils/file';
-import { addFilesToCollection } from 'utils/collection';
+import {
+    changeFilesVisibility,
+    getSelectedFileIds,
+    sortFilesIntoCollections,
+} from 'utils/file';
 import SearchBar, { DateValue } from 'components/SearchBar';
 import { Bbox } from 'services/searchService';
 import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
@@ -59,10 +63,20 @@ import AlertBanner from 'components/pages/gallery/AlertBanner';
 import UploadButton from 'components/pages/gallery/UploadButton';
 import PlanSelector from 'components/pages/gallery/PlanSelector';
 import Upload from 'components/pages/gallery/Upload';
-import Collections from 'components/pages/gallery/Collections';
+import Collections, {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+} from 'components/pages/gallery/Collections';
 import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
 import { PAGES } from 'types';
+import {
+    copyOrMoveFromCollection,
+    COLLECTION_OPS_TYPE,
+    isSharedCollection,
+    isFavoriteCollection,
+} from 'utils/collection';
+import { logError } from 'utils/sentry';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -79,9 +93,10 @@ const AlertContainer = styled.div`
     text-align: center;
 `;
 
-export type selectedState = {
+export type SelectedState = {
     [k: number]: boolean;
     count: number;
+    collectionID: number;
 };
 export type SetFiles = React.Dispatch<React.SetStateAction<File[]>>;
 export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
@@ -101,12 +116,14 @@ type GalleryContextType = {
     thumbs: Map<number, string>;
     files: Map<number, string>;
     showPlanSelectorModal: () => void;
+    setActiveCollection: (collection: number) => void;
 };
 
 const defaultGalleryContext: GalleryContextType = {
     thumbs: new Map(),
     files: new Map(),
     showPlanSelectorModal: () => null,
+    setActiveCollection: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -125,7 +142,10 @@ export default function Gallery() {
     );
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
-    const [selected, setSelected] = useState<selectedState>({ count: 0 });
+    const [selected, setSelected] = useState<SelectedState>({
+        count: 0,
+        collectionID: 0,
+    });
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [dialogView, setDialogView] = useState(false);
     const [planModalView, setPlanModalView] = useState(false);
@@ -162,6 +182,12 @@ export default function Gallery() {
     const appContext = useContext(AppContext);
     const [collectionFilesCount, setCollectionFilesCount] =
         useState<Map<number, number>>();
+    const [activeCollection, setActiveCollection] = useState<number>(undefined);
+
+    const [isSharedCollectionActive, setIsSharedCollectionActive] =
+        useState(false);
+
+    const [isFavCollectionActive, setIsFavCollectionActive] = useState(false);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -170,6 +196,7 @@ export default function Gallery() {
             return;
         }
         const main = async () => {
+            setActiveCollection(ALL_SECTION);
             setIsFirstLoad(isFirstLogin());
             setIsFirstFetch(true);
             if (justSignedUp()) {
@@ -179,7 +206,6 @@ export default function Gallery() {
             const files = await getLocalFiles();
             const collections = await getLocalCollections();
             setFiles(files);
-            setCollections(collections);
             await setDerivativeState(collections, files);
             await checkSubscriptionPurchase(
                 setDialogMessage,
@@ -196,12 +222,39 @@ export default function Gallery() {
     }, []);
 
     useEffect(() => setDialogView(true), [dialogMessage]);
+
     useEffect(() => {
         if (collectionSelectorAttributes) {
             setCollectionSelectorView(true);
         }
     }, [collectionSelectorAttributes]);
+
     useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
+
+    useEffect(() => {
+        if (typeof activeCollection === 'undefined') {
+            return;
+        }
+        let collectionURL = '';
+        if (activeCollection !== ALL_SECTION) {
+            collectionURL += '?collection=';
+            if (activeCollection === ARCHIVE_SECTION) {
+                collectionURL += constants.ARCHIVE;
+            } else {
+                collectionURL += activeCollection;
+            }
+        }
+        const href = `/gallery${collectionURL}`;
+        router.push(href, undefined, { shallow: true });
+
+        setIsSharedCollectionActive(
+            isSharedCollection(activeCollection, collections)
+        );
+
+        setIsFavCollectionActive(
+            isFavoriteCollection(activeCollection, collections)
+        );
+    }, [activeCollection]);
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
@@ -251,17 +304,21 @@ export default function Gallery() {
         }
     };
 
-    const setDerivativeState = async (collections, files) => {
+    const setDerivativeState = async (
+        collections: Collection[],
+        files: File[]
+    ) => {
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
-        const collectionsAndTheirLatestFile =
-            await getCollectionsAndTheirLatestFile(nonEmptyCollections, files);
+        const collectionsAndTheirLatestFile = getCollectionsAndTheirLatestFile(
+            nonEmptyCollections,
+            files
+        );
         const collectionWiseFiles = sortFilesIntoCollections(files);
         const collectionFilesCount = new Map<number, number>();
         for (const [id, files] of collectionWiseFiles) {
             collectionFilesCount.set(id, files.length);
         }
         setCollections(nonEmptyCollections);
-        setLocalCollection(nonEmptyCollections);
         setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
         setCollectionFilesCount(collectionFilesCount);
         const favItemIds = await getFavItemIds(files);
@@ -269,12 +326,7 @@ export default function Gallery() {
     };
 
     const clearSelection = function () {
-        setSelected({ count: 0 });
-    };
-
-    const selectCollection = (id?: number) => {
-        const href = `/gallery${id ? `?collection=${id.toString()}` : ''}`;
-        router.push(href, undefined, { shallow: true });
+        setSelected({ count: 0, collectionID: 0 });
     };
 
     if (!files) {
@@ -286,17 +338,121 @@ export default function Gallery() {
     ) => {
         loadingBar.current?.continuousStart();
         try {
-            await addFilesToCollection(
+            await copyOrMoveFromCollection(
+                COLLECTION_OPS_TYPE.ADD,
                 setCollectionSelectorView,
                 selected,
                 files,
-                clearSelection,
-                syncWithRemote,
-                selectCollection,
+
+                setActiveCollection,
                 collectionName,
                 collection
             );
+            clearSelection();
         } catch (e) {
+            setDialogMessage({
+                title: constants.ERROR,
+                staticBackdrop: true,
+                close: { variant: 'danger' },
+                content: constants.UNKNOWN_ERROR,
+            });
+        } finally {
+            await syncWithRemote(false, true);
+            loadingBar.current.complete();
+        }
+    };
+
+    const moveToCollectionHelper = async (
+        collectionName: string,
+        collection: Collection
+    ) => {
+        loadingBar.current?.continuousStart();
+        try {
+            await copyOrMoveFromCollection(
+                COLLECTION_OPS_TYPE.MOVE,
+                setCollectionSelectorView,
+                selected,
+                files,
+
+                setActiveCollection,
+                collectionName,
+                collection
+            );
+            clearSelection();
+        } catch (e) {
+            setDialogMessage({
+                title: constants.ERROR,
+                staticBackdrop: true,
+                close: { variant: 'danger' },
+                content: constants.UNKNOWN_ERROR,
+            });
+        } finally {
+            await syncWithRemote(false, true);
+            loadingBar.current.complete();
+        }
+    };
+    const changeFilesVisibilityHelper = async (
+        visibility: VISIBILITY_STATE
+    ) => {
+        loadingBar.current?.continuousStart();
+        try {
+            const updatedFiles = await changeFilesVisibility(
+                files,
+                selected,
+                visibility
+            );
+            await updateMagicMetadata(updatedFiles);
+            clearSelection();
+        } catch (e) {
+            switch (e.status?.toString()) {
+                case ServerErrorCodes.FORBIDDEN:
+                    setDialogMessage({
+                        title: constants.ERROR,
+                        staticBackdrop: true,
+                        close: { variant: 'danger' },
+                        content: constants.NOT_FILE_OWNER,
+                    });
+                    return;
+            }
+            setDialogMessage({
+                title: constants.ERROR,
+                staticBackdrop: true,
+                close: { variant: 'danger' },
+                content: constants.UNKNOWN_ERROR,
+            });
+        } finally {
+            await syncWithRemote(false, true);
+            loadingBar.current.complete();
+        }
+    };
+
+    const showCreateCollectionModal = (opsType: COLLECTION_OPS_TYPE) => {
+        try {
+            let callback = null;
+            switch (opsType) {
+                case COLLECTION_OPS_TYPE.ADD:
+                    callback = (collectionName: string) =>
+                        addToCollectionHelper(collectionName, null);
+                    break;
+                case COLLECTION_OPS_TYPE.MOVE:
+                    callback = (collectionName: string) =>
+                        moveToCollectionHelper(collectionName, null);
+                    break;
+                default:
+                    throw Error(CustomError.INVALID_COLLECTION_OPERATION);
+            }
+            return () =>
+                setCollectionNamerAttributes({
+                    title: constants.CREATE_COLLECTION,
+                    buttonText: constants.CREATE,
+                    autoFilledName: '',
+                    callback,
+                });
+        } catch (e) {
+            logError(
+                e,
+                'showCreateCollectionModal called with incorrect attributes'
+            );
             setDialogMessage({
                 title: constants.ERROR,
                 staticBackdrop: true,
@@ -306,23 +462,14 @@ export default function Gallery() {
         }
     };
 
-    const showCreateCollectionModal = () =>
-        setCollectionNamerAttributes({
-            title: constants.CREATE_COLLECTION,
-            buttonText: constants.CREATE,
-            autoFilledName: '',
-            callback: (collectionName) =>
-                addToCollectionHelper(collectionName, null),
-        });
-
     const deleteFileHelper = async () => {
         loadingBar.current?.continuousStart();
         try {
             const fileIds = getSelectedFileIds(selected);
-            await deleteFiles(fileIds, clearSelection, syncWithRemote);
+            await deleteFiles(fileIds);
             setDeleted([...deleted, ...fileIds]);
+            clearSelection();
         } catch (e) {
-            loadingBar.current.complete();
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
@@ -331,8 +478,6 @@ export default function Gallery() {
                         close: { variant: 'danger' },
                         content: constants.NOT_FILE_OWNER,
                     });
-                    loadingBar.current.complete();
-                    return;
             }
             setDialogMessage({
                 title: constants.ERROR,
@@ -340,6 +485,9 @@ export default function Gallery() {
                 close: { variant: 'danger' },
                 content: constants.UNKNOWN_ERROR,
             });
+        } finally {
+            await syncWithRemote(false, true);
+            loadingBar.current.complete();
         }
     };
 
@@ -356,14 +504,15 @@ export default function Gallery() {
     };
 
     return (
-        <GalleryContext.Provider value={defaultGalleryContext}>
+        <GalleryContext.Provider
+            value={{
+                ...defaultGalleryContext,
+                showPlanSelectorModal: () => setPlanModalView(true),
+                setActiveCollection,
+            }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
-                getInputProps={getInputProps}
-                showCollectionSelector={setCollectionSelectorView.bind(
-                    null,
-                    true
-                )}>
+                getInputProps={getInputProps}>
                 {loading && (
                     <LoadingOverlay>
                         <EnteSpinner />
@@ -393,16 +542,17 @@ export default function Gallery() {
                     setOpen={setSearchMode}
                     loadingBar={loadingBar}
                     isFirstFetch={isFirstFetch}
-                    setCollections={setCollections}
+                    collections={collections}
+                    setActiveCollection={setActiveCollection}
                     setSearch={updateSearch}
-                    files={files}
                     searchStats={searchStats}
                 />
                 <Collections
                     collections={collections}
+                    collectionAndTheirLatestFile={collectionsAndTheirLatestFile}
                     searchMode={searchMode}
-                    selected={Number(router.query.collection)}
-                    selectCollection={selectCollection}
+                    activeCollection={activeCollection}
+                    setActiveCollection={setActiveCollection}
                     syncWithRemote={syncWithRemote}
                     setDialogMessage={setDialogMessage}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
@@ -452,7 +602,6 @@ export default function Gallery() {
                     collections={collections}
                     setDialogMessage={setDialogMessage}
                     setLoading={setLoading}
-                    showPlanSelectorModal={() => setPlanModalView(true)}
                 />
                 <UploadButton
                     isFirstFetch={isFirstFetch}
@@ -473,20 +622,38 @@ export default function Gallery() {
                     setSearchStats={setSearchStats}
                     deleted={deleted}
                     setDialogMessage={setDialogMessage}
+                    activeCollection={activeCollection}
+                    isSharedCollection={isSharedCollectionActive}
                 />
-                {selected.count > 0 && (
-                    <SelectedFileOptions
-                        addToCollectionHelper={addToCollectionHelper}
-                        showCreateCollectionModal={showCreateCollectionModal}
-                        setDialogMessage={setDialogMessage}
-                        setCollectionSelectorAttributes={
-                            setCollectionSelectorAttributes
-                        }
-                        deleteFileHelper={deleteFileHelper}
-                        count={selected.count}
-                        clearSelection={clearSelection}
-                    />
-                )}
+                {selected.count > 0 &&
+                    selected.collectionID === activeCollection && (
+                        <SelectedFileOptions
+                            addToCollectionHelper={addToCollectionHelper}
+                            archiveFilesHelper={() =>
+                                changeFilesVisibilityHelper(
+                                    VISIBILITY_STATE.ARCHIVED
+                                )
+                            }
+                            unArchiveFilesHelper={() =>
+                                changeFilesVisibilityHelper(
+                                    VISIBILITY_STATE.VISIBLE
+                                )
+                            }
+                            moveToCollectionHelper={moveToCollectionHelper}
+                            showCreateCollectionModal={
+                                showCreateCollectionModal
+                            }
+                            setDialogMessage={setDialogMessage}
+                            setCollectionSelectorAttributes={
+                                setCollectionSelectorAttributes
+                            }
+                            deleteFileHelper={deleteFileHelper}
+                            count={selected.count}
+                            clearSelection={clearSelection}
+                            activeCollection={activeCollection}
+                            isFavoriteCollection={isFavCollectionActive}
+                        />
+                    )}
             </FullScreenDropZone>
         </GalleryContext.Provider>
     );

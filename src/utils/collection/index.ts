@@ -3,17 +3,25 @@ import {
     Collection,
     CollectionType,
     createCollection,
+    moveToCollection,
 } from 'services/collectionService';
 import { getSelectedFiles } from 'utils/file';
 import { File } from 'services/fileService';
+import { CustomError } from 'utils/common/errorUtil';
+import { SelectedState } from 'pages/gallery';
+import { User } from 'services/userService';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
-export async function addFilesToCollection(
+export enum COLLECTION_OPS_TYPE {
+    ADD,
+    MOVE,
+}
+export async function copyOrMoveFromCollection(
+    type: COLLECTION_OPS_TYPE,
     setCollectionSelectorView: (value: boolean) => void,
-    selected: any,
+    selected: SelectedState,
     files: File[],
-    clearSelection: () => void,
-    syncWithRemote: () => Promise<void>,
-    selectCollection: (id: number) => void,
+    setActiveCollection: (id: number) => void,
     collectionName: string,
     existingCollection: Collection
 ) {
@@ -28,12 +36,51 @@ export async function addFilesToCollection(
         collection = existingCollection;
     }
     const selectedFiles = getSelectedFiles(selected, files);
-    await addToCollection(collection, selectedFiles);
-    clearSelection();
-    await syncWithRemote();
-    selectCollection(collection.id);
+    switch (type) {
+        case COLLECTION_OPS_TYPE.ADD:
+            await addToCollection(collection, selectedFiles);
+            break;
+        case COLLECTION_OPS_TYPE.MOVE:
+            await moveToCollection(
+                selected.collectionID,
+                collection,
+                selectedFiles
+            );
+            break;
+        default:
+            throw Error(CustomError.INVALID_COLLECTION_OPERATION);
+    }
+    setActiveCollection(collection.id);
 }
 
-export function getSelectedCollection(collectionID: number, collections) {
+export function getSelectedCollection(
+    collectionID: number,
+    collections: Collection[]
+) {
     return collections.find((collection) => collection.id === collectionID);
+}
+
+export function isSharedCollection(
+    collectionID: number,
+    collections: Collection[]
+) {
+    const user: User = getData(LS_KEYS.USER);
+
+    const collection = getSelectedCollection(collectionID, collections);
+    if (!collection) {
+        return false;
+    }
+    return collection?.owner.id !== user.id;
+}
+
+export function isFavoriteCollection(
+    collectionID: number,
+    collections: Collection[]
+) {
+    const collection = getSelectedCollection(collectionID, collections);
+    if (!collection) {
+        return false;
+    } else {
+        return collection.type === CollectionType.favorites;
+    }
 }
