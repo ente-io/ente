@@ -7,14 +7,11 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/models/file_type.dart';
 import 'package:photos/ui/fading_app_bar.dart';
 import 'package:photos/ui/fading_bottom_bar.dart';
+import 'package:photos/ui/file_widget.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/image_editor_page.dart';
-import 'package:photos/ui/video_widget.dart';
-import 'package:photos/ui/zoomable_live_image.dart';
-import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -135,40 +132,20 @@ class _DetailPageState extends State<DetailPage> {
     return PageView.builder(
       itemBuilder: (context, index) {
         final file = _files[index];
-        Widget content;
-        if (file.fileType == FileType.image) {
-          content = ZoomableImage(
-            file,
-            shouldDisableScroll: (value) {
-              setState(() {
-                _shouldDisableScroll = value;
-              });
-            },
-            tagPrefix: widget.config.tagPrefix,
-          );
-        } else if (file.fileType == FileType.livePhoto) {
-          content = ZoomableLiveImage(
-            file,
-            shouldDisableScroll: (value) {
-              setState(() {
-                _shouldDisableScroll = value;
-              });
-            },
-            tagPrefix: widget.config.tagPrefix,
-          );
-        } else if (file.fileType == FileType.video) {
-          content = VideoWidget(
-            file,
-            autoPlay: !_hasPageChanged, // Autoplay if it was opened directly
-            tagPrefix: widget.config.tagPrefix,
-            playbackCallback: (isPlaying) {
-              _shouldHideAppBar = isPlaying;
-              _toggleFullScreen();
-            },
-          );
-        } else {
-          content = Icon(Icons.error);
-        }
+        Widget content = FileWidget(
+          file,
+          autoPlay: !_hasPageChanged,
+          tagPrefix: widget.config.tagPrefix,
+          shouldDisableScroll: (value) {
+            setState(() {
+              _shouldDisableScroll = value;
+            });
+          },
+          playbackCallback: (isPlaying) {
+            _shouldHideAppBar = isPlaying;
+            _toggleFullScreen();
+          },
+        );
         _preloadFiles(index);
         return GestureDetector(
           onTap: () {
