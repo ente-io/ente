@@ -214,8 +214,23 @@ export const syncCollections = async () => {
     return collections;
 };
 
-export const setLocalCollection = async (collections: Collection[]) => {
-    await localForage.setItem(COLLECTIONS, collections);
+export const getCollection = async (
+    collectionID: number
+): Promise<Collection> => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return;
+        }
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/collections/${collectionID}`,
+            null,
+            { 'X-Auth-Token': token }
+        );
+        return resp.data;
+    } catch (e) {
+        logError(e, 'failed to get collection', { collectionID });
+    }
 };
 
 export const getCollectionsAndTheirLatestFile = (
