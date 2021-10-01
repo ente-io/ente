@@ -131,7 +131,7 @@ class _ZoomableImageState extends State<ZoomableImage>
       _loadingLargeThumbnail = true;
       getThumbnailFromLocal(_photo, size: kThumbnailLargeSize, quality: 100)
           .then((cachedThumbnail) {
-        if(cachedThumbnail != null) {
+        if (cachedThumbnail != null) {
           _onLargeThumbnailLoaded(Image.memory(cachedThumbnail).image, context);
         }
       });
