@@ -4,7 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/ui/file_info_dialog.dart';
+import 'package:photos/utils/archive_util.dart';
 import 'package:photos/utils/share_util.dart';
 
 class FadingBottomBar extends StatefulWidget {
@@ -72,6 +74,27 @@ class FadingBottomBarState extends State<FadingBottomBar> {
           ),
         );
       }
+      bool isArchived =
+          widget.file.magicMetadata.visibility == kVisibilityArchive;
+      children.add(Tooltip(
+        message: isArchived ? "unarchive" : "archive",
+        child: IconButton(
+          icon: Icon(
+            Platform.isAndroid
+                ? (isArchived
+                    ? Icons.unarchive_outlined
+                    : Icons.archive_outlined)
+                : CupertinoIcons.archivebox,
+          ),
+          onPressed: () {
+            changeVisibility(
+              context,
+              [widget.file],
+              isArchived ? kVisibilityVisible : kVisibilityArchive,
+            );
+          },
+        ),
+      ));
       children.add(
         Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
