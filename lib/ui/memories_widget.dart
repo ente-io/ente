@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/ui/blurred_file_backdrop.dart';
@@ -12,44 +11,11 @@ import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
 
-class MemoriesWidget extends StatefulWidget {
+class MemoriesWidget extends StatelessWidget {
   const MemoriesWidget({Key key}) : super(key: key);
-  @override
-  _MemoriesWidgetState createState() => _MemoriesWidgetState();
-}
-
-class _MemoriesWidgetState extends State<MemoriesWidget>
-    with AutomaticKeepAliveClientMixin {
-  final _logger = Logger("MemoriesWidget");
-
-  Function _listener;
-
-  @override
-  void initState() {
-    _listener = () {
-      if (mounted) {
-        setState(() {
-          _logger.info("Building because memories listener fired");
-        });
-      }
-    };
-    MemoriesService.instance.addListener(_listener);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    MemoriesService.instance.removeListener(_listener);
-    super.dispose();
-  }
-
-  @override
-  bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
-    _logger.info("Building memories");
-    super.build(context);
     return FutureBuilder<List<Memory>>(
       future: MemoriesService.instance.getMemories(),
       builder: (context, snapshot) {
@@ -105,7 +71,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget>
   }
 }
 
-class MemoryWidget extends StatelessWidget {
+class MemoryWidget extends StatefulWidget {
   const MemoryWidget({
     Key key,
     @required this.memories,
@@ -114,12 +80,19 @@ class MemoryWidget extends StatelessWidget {
   final List<Memory> memories;
 
   @override
+  State<MemoryWidget> createState() => _MemoryWidgetState();
+}
+
+class _MemoryWidgetState extends State<MemoryWidget> {
+  @override
   Widget build(BuildContext context) {
     final index = _getNextMemoryIndex();
-    final title = _getTitle(memories[index]);
+    final title = _getTitle(widget.memories[index]);
     return GestureDetector(
-      onTap: () {
-        routeToPage(context, FullScreenMemory(title, memories, index));
+      onTap: () async {
+        await routeToPage(
+            context, FullScreenMemory(title, widget.memories, index));
+        setState(() {});
       },
       child: SizedBox(
         width: 100,
@@ -152,7 +125,8 @@ class MemoryWidget extends StatelessWidget {
   }
 
   Container _buildMemoryItem(BuildContext context, int index) {
-    final isSeen = memories[index].isSeen();
+    final memory = widget.memories[index];
+    final isSeen = memory.isSeen();
     return Container(
       decoration: BoxDecoration(
         border: isSeen
@@ -168,11 +142,11 @@ class MemoryWidget extends StatelessWidget {
           width: isSeen ? 76 : 72,
           height: isSeen ? 76 : 72,
           child: Hero(
-            tag: "memories" + memories[index].file.tag(),
+            tag: "memories" + memory.file.tag(),
             child: ThumbnailWidget(
-              memories[index].file,
+              memory.file,
               shouldShowSyncStatus: false,
-              key: Key("memories" + memories[index].file.tag()),
+              key: Key("memories" + memory.file.tag()),
             ),
           ),
         ),
@@ -182,8 +156,8 @@ class MemoryWidget extends StatelessWidget {
 
   int _getNextMemoryIndex() {
     int lastSeenIndex = 0;
-    for (var index = memories.length - 1; index >= 0; index--) {
-      if (!memories[index].isSeen()) {
+    for (var index = widget.memories.length - 1; index >= 0; index--) {
+      if (!widget.memories[index].isSeen()) {
         lastSeenIndex = index;
       } else {
         break;
