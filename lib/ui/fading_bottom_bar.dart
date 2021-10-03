@@ -76,25 +76,30 @@ class FadingBottomBarState extends State<FadingBottomBar> {
       }
       bool isArchived =
           widget.file.magicMetadata.visibility == kVisibilityArchive;
-      children.add(Tooltip(
-        message: isArchived ? "unarchive" : "archive",
-        child: IconButton(
-          icon: Icon(
-            Platform.isAndroid
-                ? (isArchived
-                    ? Icons.unarchive_outlined
-                    : Icons.archive_outlined)
-                : CupertinoIcons.archivebox,
+      children.add(
+        Tooltip(
+          message: isArchived ? "unarchive" : "archive",
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 12),
+            child: IconButton(
+              icon: Icon(
+                Platform.isAndroid
+                    ? (isArchived
+                        ? Icons.unarchive_outlined
+                        : Icons.archive_outlined)
+                    : CupertinoIcons.archivebox,
+              ),
+              onPressed: () {
+                changeVisibility(
+                  context,
+                  [widget.file],
+                  isArchived ? kVisibilityVisible : kVisibilityArchive,
+                );
+              },
+            ),
           ),
-          onPressed: () {
-            changeVisibility(
-              context,
-              [widget.file],
-              isArchived ? kVisibilityVisible : kVisibilityArchive,
-            );
-          },
         ),
-      ));
+      );
       children.add(
         Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
