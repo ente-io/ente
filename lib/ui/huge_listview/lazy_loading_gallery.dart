@@ -323,7 +323,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
 
   void _routeToDetailPage(File file, BuildContext context) {
     final page = DetailPage(DetailPageConfiguration(
-      widget.files,
+      List.unmodifiable(widget.files),
       widget.asyncLoader,
       widget.files.indexOf(file),
       widget.tag,
