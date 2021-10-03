@@ -79,7 +79,9 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   void initState() {
-    _files = widget.config.files;
+    _files = [
+      ...widget.config.files
+    ]; // Make a copy since we append preceding and succeeding entries to this
     _selectedIndex = widget.config.selectedIndex;
     _preloadEntries();
     super.initState();
