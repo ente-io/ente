@@ -1,18 +1,19 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_user_agent/flutter_user_agent.dart';
+import 'package:fk_user_agent/fk_user_agent.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 int kConnectTimeout = 15000;
+
 class Network {
   Dio _dio;
 
   Future<void> init() async {
-    await FlutterUserAgent.init();
+    await FkUserAgent.init();
     final packageInfo = await PackageInfo.fromPlatform();
     _dio = Dio(BaseOptions(connectTimeout: kConnectTimeout, headers: {
-      HttpHeaders.userAgentHeader: FlutterUserAgent.userAgent,
+      HttpHeaders.userAgentHeader: FkUserAgent.userAgent,
       'X-Client-Version': packageInfo.version,
       'X-Client-Package': packageInfo.packageName,
     }));

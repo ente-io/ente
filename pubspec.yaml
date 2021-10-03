@@ -43,7 +43,7 @@ dependencies:
     sdk: flutter
   flutter_cache_manager: ^3.0.1
   flutter_easyloading: ^3.0.0
-  flutter_email_sender: ^5.0.0
+  flutter_email_sender: ^5.0.2
   flutter_image_compress:
     path: thirdparty/flutter_image_compress
   flutter_inappwebview: ^5.3.2
@@ -52,7 +52,7 @@ dependencies:
   flutter_secure_storage: ^4.2.0
   flutter_sodium: ^0.2.0
   flutter_typeahead: ^3.2.0
-  flutter_user_agent: ^1.2.2
+  fk_user_agent: ^2.0.1
   flutter_windowmanager: ^0.2.0
   fluttercontactpicker: ^4.4.0
   fluttertoast: ^8.0.6
