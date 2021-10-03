@@ -48,14 +48,17 @@ class FadingBottomBarState extends State<FadingBottomBar> {
   Widget _getBottomBar() {
     List<Widget> children = [];
     children.add(
-      Padding(
-        padding: const EdgeInsets.only(top: 12, bottom: 12),
-        child: IconButton(
-          icon: Icon(
-              Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info),
-          onPressed: () {
-            _displayInfo(widget.file);
-          },
+      Tooltip(
+        message: "info",
+        child: Padding(
+          padding: const EdgeInsets.only(top: 12, bottom: 12),
+          child: IconButton(
+            icon: Icon(
+                Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info),
+            onPressed: () {
+              _displayInfo(widget.file);
+            },
+          ),
         ),
       ),
     );
@@ -63,13 +66,16 @@ class FadingBottomBarState extends State<FadingBottomBar> {
       if (widget.file.fileType == FileType.image ||
           widget.file.fileType == FileType.livePhoto) {
         children.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 12),
-            child: IconButton(
-              icon: Icon(Icons.tune_outlined),
-              onPressed: () {
-                widget.onEditRequested(widget.file);
-              },
+          Tooltip(
+            message: "edit",
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 12),
+              child: IconButton(
+                icon: Icon(Icons.tune_outlined),
+                onPressed: () {
+                  widget.onEditRequested(widget.file);
+                },
+              ),
             ),
           ),
         );
@@ -101,15 +107,18 @@ class FadingBottomBarState extends State<FadingBottomBar> {
         ),
       );
       children.add(
-        Padding(
-          padding: const EdgeInsets.only(top: 12, bottom: 12),
-          child: IconButton(
-            icon: Icon(Platform.isAndroid
-                ? Icons.share_outlined
-                : CupertinoIcons.share),
-            onPressed: () {
-              share(context, [widget.file]);
-            },
+        Tooltip(
+          message: "share",
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 12),
+            child: IconButton(
+              icon: Icon(Platform.isAndroid
+                  ? Icons.share_outlined
+                  : CupertinoIcons.share),
+              onPressed: () {
+                share(context, [widget.file]);
+              },
+            ),
           ),
         ),
       );
