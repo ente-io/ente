@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/file.dart';
@@ -13,21 +12,13 @@ class BlurredFileBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FadeIn(
-      duration: Duration(milliseconds: 500),
-      child: Stack(children: [
-        ThumbnailWidget(
-          file,
-          fit: BoxFit.cover,
-          key: Key("memory_backdrop" + file.tag()),
-        ),
-        BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 64.0, sigmaY: 64.0),
-          child: Container(
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.0)),
-          ),
-        ),
-      ]),
+    return ImageFiltered(
+      imageFilter: ImageFilter.blur(sigmaX: 64.0, sigmaY: 64.0),
+      child: ThumbnailWidget(
+        file,
+        fit: BoxFit.cover,
+        key: Key("memory_backdrop" + file.tag()),
+      ),
     );
   }
 }
