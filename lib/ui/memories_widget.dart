@@ -154,16 +154,26 @@ class _MemoryWidgetState extends State<MemoryWidget> {
     );
   }
 
+  // Returns either the first unseen memory or the memory that succeeds the
+  // last seen memory
   int _getNextMemoryIndex() {
     int lastSeenIndex = 0;
-    for (var index = widget.memories.length - 1; index >= 0; index--) {
-      if (!widget.memories[index].isSeen()) {
-        lastSeenIndex = index;
+    int lastSeenTimestamp = 0;
+    for (var index = 0; index < widget.memories.length; index++) {
+      final memory = widget.memories[index];
+      if (!memory.isSeen()) {
+        return index;
       } else {
-        break;
+        if (memory.seenTime() > lastSeenTimestamp) {
+          lastSeenIndex = index;
+          lastSeenTimestamp = memory.seenTime();
+        }
       }
     }
-    return lastSeenIndex;
+    if (lastSeenIndex == widget.memories.length - 1) {
+      return 0;
+    }
+    return lastSeenIndex + 1;
   }
 
   String _getTitle(Memory memory) {
