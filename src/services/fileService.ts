@@ -260,6 +260,26 @@ export const trashFiles = async (filesToTrash: File[]) => {
     }
 };
 
+export const deleteFromTrash = async (filesToDelete: number[]) => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return;
+        }
+        await HTTPService.post(
+            `${ENDPOINT}/trash/delete`,
+            { fileIDs: filesToDelete },
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        logError(e, 'delete from trash failed');
+        throw e;
+    }
+};
+
 export const updateMagicMetadata = async (files: File[]) => {
     const token = getToken();
     if (!token) {

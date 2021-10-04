@@ -14,6 +14,7 @@ import {
     updateMagicMetadata,
     VISIBILITY_STATE,
     trashFiles,
+    deleteFromTrash,
 } from 'services/fileService';
 import styled from 'styled-components';
 import LoadingBar from 'react-top-loading-bar';
@@ -418,11 +419,15 @@ export default function Gallery() {
             });
     };
 
-    const deleteFileHelper = async () => {
+    const deleteFileHelper = async (permanent?: boolean) => {
         loadingBar.current?.continuousStart();
         try {
             const selectedFiles = getSelectedFiles(selected, files);
-            await trashFiles(selectedFiles);
+            if (permanent) {
+                await deleteFromTrash(selectedFiles.map((file) => file.id));
+            } else {
+                await trashFiles(selectedFiles);
+            }
             setDeleted([...deleted, ...selectedFiles.map((file) => file.id)]);
             clearSelection();
         } catch (e) {

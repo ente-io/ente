@@ -160,8 +160,7 @@ const englishConstants = {
     UPLOAD_FIRST_PHOTO: 'preserve',
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
     CONFIRM_DELETE: 'confirm deletion',
-    DELETE_MESSAGE:
-        'the selected files will be removed from all collection and moved to trash ',
+    DELETE_MESSAGE: `the selected files will be permanently deleted and can't be restored `,
     DELETE_FILE: 'delete files',
     DELETE: 'delete',
     MULTI_FOLDER_UPLOAD: 'multiple folders detected',
@@ -558,6 +557,12 @@ const englishConstants = {
         'are you sure you want to remove these files from the collection',
     TRASH: 'trash',
     MOVE_TO_TRASH: 'move to trash',
+    TRASH_MESSAGE:
+        'the selected files will be removed from all collection and moved to trash ',
+    DELETE_PERMANENTLY: 'delete permanently',
+    RESTORE: 'restore',
+    CONFIRM_RESTORE: 'confirm restoration',
+    RESTORE_MESSAGE: 'restore selected files ?',
 };
 
 export default englishConstants;

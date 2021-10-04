@@ -11,7 +11,7 @@ import constants from 'utils/strings/constants';
 import Archive from 'components/icons/Archive';
 import MoveIcon from 'components/icons/MoveIcon';
 import { COLLECTION_OPS_TYPE } from 'utils/collection';
-import { ALL_SECTION, ARCHIVE_SECTION } from './Collections';
+import { ALL_SECTION, ARCHIVE_SECTION, TRASH_SECTION } from './Collections';
 import UnArchive from 'components/icons/UnArchive';
 import { OverlayTrigger } from 'react-bootstrap';
 import { Collection } from 'services/collectionService';
@@ -23,7 +23,7 @@ interface Props {
     showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
     setDialogMessage: SetDialogMessage;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
-    deleteFileHelper: () => void;
+    deleteFileHelper: (permanent?: boolean) => void;
     removeFromCollectionHelper: () => void;
     count: number;
     clearSelection: () => void;
@@ -77,14 +77,27 @@ const SelectedFileOptions = ({
             fromCollection: activeCollection,
         });
 
-    const deleteHandler = () =>
+    const trashHandler = () =>
+        setDialogMessage({
+            title: constants.CONFIRM_DELETE,
+            content: constants.TRASH_MESSAGE,
+            staticBackdrop: true,
+            proceed: {
+                action: deleteFileHelper,
+                text: constants.MOVE_TO_TRASH,
+                variant: 'danger',
+            },
+            close: { text: constants.CANCEL },
+        });
+
+    const permanentlyDeleteHandler = () =>
         setDialogMessage({
             title: constants.CONFIRM_DELETE,
             content: constants.DELETE_MESSAGE,
             staticBackdrop: true,
             proceed: {
-                action: deleteFileHelper,
-                text: constants.MOVE_TO_TRASH,
+                action: () => deleteFileHelper(true),
+                text: constants.DELETE,
                 variant: 'danger',
             },
             close: { text: constants.CANCEL },
@@ -128,6 +141,12 @@ const SelectedFileOptions = ({
                         <UnArchive />
                     </IconButton>
                 </IconWithMessage>
+            ) : activeCollection === TRASH_SECTION ? (
+                <IconWithMessage message={constants.DELETE_PERMANENTLY}>
+                    <IconButton onClick={permanentlyDeleteHandler}>
+                        <DeleteIcon />
+                    </IconButton>
+                </IconWithMessage>
             ) : (
                 <>
                     {activeCollection === ALL_SECTION && (
@@ -157,7 +176,7 @@ const SelectedFileOptions = ({
                         </IconWithMessage>
                     )}
                     <IconWithMessage message={constants.DELETE}>
-                        <IconButton onClick={deleteHandler}>
+                        <IconButton onClick={trashHandler}>
                             <DeleteIcon />
                         </IconButton>
                     </IconWithMessage>
