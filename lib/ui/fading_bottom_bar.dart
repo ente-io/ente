@@ -46,6 +46,12 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     });
   }
 
+  void safeRefresh() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   Widget _getBottomBar() {
     List<Widget> children = [];
     children.add(
@@ -98,12 +104,13 @@ class FadingBottomBarState extends State<FadingBottomBar> {
                           : Icons.archive_outlined)
                       : CupertinoIcons.archivebox,
                 ),
-                onPressed: () {
-                  changeVisibility(
+                onPressed: () async {
+                  await changeVisibility(
                     context,
                     [widget.file],
                     isArchived ? kVisibilityVisible : kVisibilityArchive,
                   );
+                  safeRefresh();
                 },
               ),
             ),
