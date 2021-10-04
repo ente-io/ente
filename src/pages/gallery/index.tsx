@@ -529,10 +529,7 @@ export default function Gallery() {
                     attributes={collectionNamerAttributes}
                 />
                 <CollectionSelector
-                    show={
-                        collectionSelectorView &&
-                        !(collectionsAndTheirLatestFile?.length === 0)
-                    }
+                    show={collectionSelectorView}
                     onHide={closeCollectionSelector}
                     collectionsAndTheirLatestFile={
                         collectionsAndTheirLatestFile
