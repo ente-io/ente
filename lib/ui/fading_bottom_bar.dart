@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/magic_metadata.dart';
@@ -80,32 +81,35 @@ class FadingBottomBarState extends State<FadingBottomBar> {
           ),
         );
       }
-      bool isArchived =
-          widget.file.magicMetadata.visibility == kVisibilityArchive;
-      children.add(
-        Tooltip(
-          message: isArchived ? "unarchive" : "archive",
-          child: Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 12),
-            child: IconButton(
-              icon: Icon(
-                Platform.isAndroid
-                    ? (isArchived
-                        ? Icons.unarchive_outlined
-                        : Icons.archive_outlined)
-                    : CupertinoIcons.archivebox,
+      if (widget.file.uploadedFileID != null &&
+          widget.file.ownerID == Configuration.instance.getUserID()) {
+        bool isArchived =
+            widget.file.magicMetadata.visibility == kVisibilityArchive;
+        children.add(
+          Tooltip(
+            message: isArchived ? "unarchive" : "archive",
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 12),
+              child: IconButton(
+                icon: Icon(
+                  Platform.isAndroid
+                      ? (isArchived
+                          ? Icons.unarchive_outlined
+                          : Icons.archive_outlined)
+                      : CupertinoIcons.archivebox,
+                ),
+                onPressed: () {
+                  changeVisibility(
+                    context,
+                    [widget.file],
+                    isArchived ? kVisibilityVisible : kVisibilityArchive,
+                  );
+                },
               ),
-              onPressed: () {
-                changeVisibility(
-                  context,
-                  [widget.file],
-                  isArchived ? kVisibilityVisible : kVisibilityArchive,
-                );
-              },
             ),
           ),
-        ),
-      );
+        );
+      }
       children.add(
         Tooltip(
           message: "share",
