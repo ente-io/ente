@@ -118,7 +118,7 @@ Future<io.File> getFileFromServer(
   if (!fileDownloadsInProgress.containsKey(downloadID)) {
     if (file.fileType == FileType.livePhoto) {
       fileDownloadsInProgress[downloadID] = _getLivePhotoFromServer(file,
-              progressCallback: progressCallback, liveVideo: liveVideo)
+              progressCallback: progressCallback, needLiveVideo: liveVideo)
           .whenComplete(() => fileDownloadsInProgress.remove(downloadID));
     } else {
       fileDownloadsInProgress[downloadID] = _downloadAndCache(
@@ -135,19 +135,19 @@ final Map<int, Future<_LivePhoto>> livePhotoDownloadsTracker =
     <int, Future<_LivePhoto>>{};
 
 Future<io.File> _getLivePhotoFromServer(ente.File file,
-    {ProgressCallback progressCallback, bool liveVideo}) async {
+    {ProgressCallback progressCallback, bool needLiveVideo}) async {
   final downloadID = file.uploadedFileID;
   try {
     if (!livePhotoDownloadsTracker.containsKey(downloadID)) {
       livePhotoDownloadsTracker[downloadID] =
           _downloadLivePhoto(file, progressCallback: progressCallback);
     }
-    var _livePhoto = await livePhotoDownloadsTracker[file.uploadedFileID];
+    final _livePhoto = await livePhotoDownloadsTracker[file.uploadedFileID];
     livePhotoDownloadsTracker.remove(downloadID);
     if (_livePhoto == null) {
       return null;
     }
-    return liveVideo ? _livePhoto.video : _livePhoto.image;
+    return needLiveVideo ? _livePhoto.video : _livePhoto.image;
   } catch (e) {
     livePhotoDownloadsTracker.remove(downloadID);
     return null;
