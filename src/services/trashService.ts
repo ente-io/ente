@@ -77,7 +77,7 @@ export const updateTrash = async (
     currentTrash: Trash
 ): Promise<Trash> => {
     try {
-        let updatedTrash: Trash = currentTrash;
+        let updatedTrash: Trash = [...currentTrash];
         let time = sinceTime;
 
         let resp;
@@ -109,7 +109,7 @@ export const updateTrash = async (
                 if (!trashItem.isDeleted && !trashItem.isRestored) {
                     trashItem.file = await decryptFile(
                         trashItem.file,
-                        collections.get(trashItem.file.collectionID)
+                        collection
                     );
                 }
                 updatedTrash.push(trashItem);
@@ -121,7 +121,7 @@ export const updateTrash = async (
             updatedTrash = removeDuplicates(updatedTrash);
 
             setFiles((files) =>
-                sortFiles([...files, ...getTrashedFiles(updatedTrash)])
+                sortFiles([...(files ?? []), ...getTrashedFiles(updatedTrash)])
             );
             localForage.setItem(TRASH, updatedTrash);
             localForage.setItem(TRASH_TIME, time);

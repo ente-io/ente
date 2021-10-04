@@ -160,6 +160,7 @@ export async function decryptFile(file: File, collection: Collection) {
         return file;
     } catch (e) {
         logError(e, 'file decryption failed');
+        throw e;
     }
 }
 
