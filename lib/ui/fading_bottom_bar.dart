@@ -102,8 +102,9 @@ class FadingBottomBarState extends State<FadingBottomBar> {
                       ? (isArchived
                           ? Icons.unarchive_outlined
                           : Icons.archive_outlined)
-                      : CupertinoIcons.archivebox,
-                ),
+                    : (isArchived
+                        ? CupertinoIcons.archivebox_fill
+                        : CupertinoIcons.archivebox)),
                 onPressed: () async {
                   await changeVisibility(
                     context,
