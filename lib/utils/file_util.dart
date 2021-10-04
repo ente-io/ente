@@ -213,7 +213,8 @@ Future<_LivePhoto> _downloadLivePhoto(ente.File file,
     }
     return _LivePhoto(imageFileCache, videoFileCache);
   }).catchError((e) {
-    _logger.warning("failed to download live photos" + e.toString());
+    _logger.warning(
+        "failed to download live photos : ${file.tag()}", e);
     throw e;
   });
 }
@@ -247,7 +248,8 @@ Future<io.File> _downloadAndCache(ente.File file, BaseCacheManager cacheManager,
     await outputFile.delete();
     return cachedFile;
   }).catchError((e) {
-    _logger.warning(e, "failed to download file");
+    _logger.warning("failed to download file : ${file.tag()}", e);
+    throw e;
   });
 }
 
