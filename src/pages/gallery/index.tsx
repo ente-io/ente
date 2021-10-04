@@ -69,6 +69,7 @@ import Upload from 'components/pages/gallery/Upload';
 import Collections, {
     ALL_SECTION,
     ARCHIVE_SECTION,
+    TRASH_SECTION,
 } from 'components/pages/gallery/Collections';
 import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
@@ -252,6 +253,8 @@ export default function Gallery() {
             collectionURL += '?collection=';
             if (activeCollection === ARCHIVE_SECTION) {
                 collectionURL += constants.ARCHIVE;
+            } else if (activeCollection === TRASH_SECTION) {
+                collectionURL += constants.TRASH;
             } else {
                 collectionURL += activeCollection;
             }
