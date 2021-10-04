@@ -1,6 +1,7 @@
 import {
     addToCollection,
     Collection,
+    CollectionType,
     moveToCollection,
     removeFromCollection,
 } from 'services/collectionService';
