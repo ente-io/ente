@@ -145,10 +145,6 @@ export default function Collections(props: CollectionProps) {
 
     const user: User = getData(LS_KEYS.USER);
 
-    if (!collections || collections.length === 0) {
-        return null;
-    }
-
     const collectionOptions = CollectionOptions({
         syncWithRemote: props.syncWithRemote,
         setCollectionNamerAttributes: props.setCollectionNamerAttributes,
@@ -257,18 +253,14 @@ export default function Collections(props: CollectionProps) {
                                     </Chip>
                                 </OverlayTrigger>
                             ))}
-                            {activeCollection === ARCHIVE_SECTION && (
-                                <SectionChip
-                                    section={ARCHIVE_SECTION}
-                                    label={constants.ARCHIVE}
-                                />
-                            )}
-                            {activeCollection === TRASH_SECTION && (
-                                <SectionChip
-                                    section={TRASH_SECTION}
-                                    label={constants.TRASH}
-                                />
-                            )}
+                            <SectionChip
+                                section={ARCHIVE_SECTION}
+                                label={constants.ARCHIVE}
+                            />
+                            <SectionChip
+                                section={TRASH_SECTION}
+                                label={constants.TRASH}
+                            />
                         </Wrapper>
                         {scrollObj.scrollLeft <
                             scrollObj.scrollWidth - scrollObj.clientWidth && (
