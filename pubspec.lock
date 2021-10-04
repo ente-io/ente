@@ -262,6 +262,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "6.1.1"
+  fk_user_agent:
+    dependency: "direct main"
+    description:
+      name: fk_user_agent
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -294,7 +301,7 @@ packages:
       name: flutter_email_sender
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.0"
+    version: "5.0.2"
   flutter_image_compress:
     dependency: "direct main"
     description:
@@ -410,13 +417,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.2.1"
-  flutter_user_agent:
-    dependency: "direct main"
-    description:
-      name: flutter_user_agent
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.2.2"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
