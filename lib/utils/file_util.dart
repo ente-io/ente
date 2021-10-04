@@ -98,8 +98,8 @@ void preloadThumbnail(ente.File file) {
   }
 }
 
-final Map<int, Future<io.File>> fileDownloadsInProgress =
-    Map<int, Future<io.File>>();
+final Map<String, Future<io.File>> fileDownloadsInProgress =
+    <String, Future<io.File>>{};
 
 Future<io.File> getFileFromServer(
   ente.File file, {
@@ -109,31 +109,53 @@ Future<io.File> getFileFromServer(
   final cacheManager = (file.fileType == FileType.video || liveVideo)
       ? VideoCacheManager.instance
       : DefaultCacheManager();
-  return cacheManager.getFileFromCache(file.getDownloadUrl()).then((info) {
-    if (info == null) {
-      if (!fileDownloadsInProgress.containsKey(file.uploadedFileID)) {
-        if (file.fileType == FileType.livePhoto) {
-          fileDownloadsInProgress[file.uploadedFileID] = _downloadLivePhoto(
-              file,
-              progressCallback: progressCallback,
-              liveVideo: liveVideo);
-        } else {
-          fileDownloadsInProgress[file.uploadedFileID] = _downloadAndCache(
-            file,
-            cacheManager,
-            progressCallback: progressCallback,
-          );
-        }
-      }
-      return fileDownloadsInProgress[file.uploadedFileID];
+  final fileFromCache =
+      await cacheManager.getFileFromCache(file.getDownloadUrl());
+  if (fileFromCache != null) {
+    return fileFromCache.file;
+  }
+  final downloadID = file.uploadedFileID.toString() + liveVideo.toString();
+  if (!fileDownloadsInProgress.containsKey(downloadID)) {
+    if (file.fileType == FileType.livePhoto) {
+      fileDownloadsInProgress[downloadID] = _getLivePhotoFromServer(file,
+              progressCallback: progressCallback, liveVideo: liveVideo)
+          .whenComplete(() => fileDownloadsInProgress.remove(downloadID));
     } else {
-      return info.file;
+      fileDownloadsInProgress[downloadID] = _downloadAndCache(
+        file,
+        cacheManager,
+        progressCallback: progressCallback,
+      ).whenComplete(() => fileDownloadsInProgress.remove(downloadID));
     }
-  });
+  }
+  return fileDownloadsInProgress[downloadID];
 }
 
-Future<io.File> _downloadLivePhoto(ente.File file,
-    {ProgressCallback progressCallback, bool liveVideo = false}) async {
+final Map<int, Future<_LivePhoto>> livePhotoDownloadsTracker =
+    <int, Future<_LivePhoto>>{};
+
+Future<io.File> _getLivePhotoFromServer(ente.File file,
+    {ProgressCallback progressCallback, bool liveVideo}) async {
+  final downloadID = file.uploadedFileID;
+  try {
+    if (!livePhotoDownloadsTracker.containsKey(downloadID)) {
+      livePhotoDownloadsTracker[downloadID] =
+          _downloadLivePhoto(file, progressCallback: progressCallback);
+    }
+    var _livePhoto = await livePhotoDownloadsTracker[file.uploadedFileID];
+    livePhotoDownloadsTracker.remove(downloadID);
+    if (_livePhoto == null) {
+      return null;
+    }
+    return liveVideo ? _livePhoto.video : _livePhoto.image;
+  } catch (e) {
+    livePhotoDownloadsTracker.remove(downloadID);
+    return null;
+  }
+}
+
+Future<_LivePhoto> _downloadLivePhoto(ente.File file,
+    {ProgressCallback progressCallback}) async {
   return downloadAndDecrypt(file, progressCallback: progressCallback)
       .then((decryptedFile) async {
     if (decryptedFile == null) {
@@ -189,11 +211,10 @@ Future<io.File> _downloadLivePhoto(ente.File file,
         }
       }
     }
-    fileDownloadsInProgress.remove(file.uploadedFileID);
-    return liveVideo ? videoFileCache : imageFileCache;
+    return _LivePhoto(imageFileCache, videoFileCache);
   }).catchError((e) {
-    fileDownloadsInProgress.remove(file.uploadedFileID);
     _logger.warning("failed to download live photos" + e.toString());
+    throw e;
   });
 }
 
@@ -224,10 +245,9 @@ Future<io.File> _downloadAndCache(ente.File file, BaseCacheManager cacheManager,
       fileExtension: fileExtension,
     );
     await outputFile.delete();
-    fileDownloadsInProgress.remove(file.uploadedFileID);
     return cachedFile;
   }).catchError((e) {
-    fileDownloadsInProgress.remove(file.uploadedFileID);
+    _logger.warning(e, "failed to download file");
   });
 }
 
@@ -263,4 +283,11 @@ Future<void> clearCache(ente.File file) async {
   if (cachedThumbnail.existsSync()) {
     await cachedThumbnail.delete();
   }
+}
+
+class _LivePhoto {
+  final io.File image;
+  final io.File video;
+
+  _LivePhoto(this.image, this.video);
 }
