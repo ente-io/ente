@@ -564,6 +564,8 @@ const englishConstants = {
     CONFIRM_RESTORE: 'confirm restoration',
     RESTORE_MESSAGE: 'restore selected files ?',
     RESTORE_TO_COLLECTION: 'restore to album',
+    AUTOMATIC_BIN_DELETE_MESSAGE: (relativeTime: string) =>
+        `permanently deleted ${relativeTime}`,
 };
 
 export default englishConstants;

@@ -19,7 +19,7 @@ export interface TrashItem {
     file: File;
     isDeleted: boolean;
     isRestored: boolean;
-    deletedBy: boolean;
+    deleteBy: number;
     createdAt: number;
     updatedAt: number;
 }
@@ -159,6 +159,7 @@ export function getTrashedFiles(trash: Trash) {
             ...trashedFile.file,
             updationTime: trashedFile.updatedAt,
             isTrashed: true,
+            deleteBy: trashedFile.deleteBy,
         }))
     );
 }

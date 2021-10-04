@@ -68,6 +68,7 @@ export interface File {
     h: number;
     isDeleted: boolean;
     isTrashed?: boolean;
+    deleteBy?: number;
     dataIndex: number;
     updationTime: number;
 }
