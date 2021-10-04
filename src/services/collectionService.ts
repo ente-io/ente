@@ -405,6 +405,33 @@ export const addToCollection = async (
         throw e;
     }
 };
+
+export const restoreToCollection = async (
+    collection: Collection,
+    files: File[]
+) => {
+    try {
+        const token = getToken();
+        const fileKeysEncryptedWithNewCollection =
+            await encryptWithNewCollectionKey(collection, files);
+
+        const requestBody: AddToCollectionRequest = {
+            collectionID: collection.id,
+            files: fileKeysEncryptedWithNewCollection,
+        };
+        await HTTPService.post(
+            `${ENDPOINT}/collections/restore-files`,
+            requestBody,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        logError(e, 'restore to collection Failed ');
+        throw e;
+    }
+};
 export const moveToCollection = async (
     fromCollectionID: number,
     toCollection: Collection,
