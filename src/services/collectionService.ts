@@ -227,7 +227,12 @@ export const getCollection = async (
             null,
             { 'X-Auth-Token': token }
         );
-        return resp.data;
+        const key = await getActualKey();
+        const collectionWithSecrets = await getCollectionWithSecrets(
+            resp.data?.collection,
+            key
+        );
+        return collectionWithSecrets;
     } catch (e) {
         logError(e, 'failed to get collection', { collectionID });
     }
