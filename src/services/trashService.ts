@@ -120,12 +120,9 @@ export const updateTrash = async (
             }
             updatedTrash = removeDuplicates(updatedTrash);
 
-            setFiles((files) => [
-                ...files,
-                ...appendPhotoSwipeProps(
-                    sortFiles(getTrashedFiles(updatedTrash))
-                ),
-            ]);
+            setFiles((files) =>
+                sortFiles([...files, ...getTrashedFiles(updatedTrash)])
+            );
             localForage.setItem(TRASH, updatedTrash);
             localForage.setItem(TRASH_TIME, time);
         } while (resp.data.diff.length === SYNC_LIMIT);
@@ -157,9 +154,11 @@ function removeDuplicates(trash: Trash) {
 }
 
 export function getTrashedFiles(trash: Trash) {
-    return trash.map((trashedFile) => ({
-        ...trashedFile.file,
-        updationTime: trashedFile.updatedAt,
-        isTrashed: true,
-    })) as File[];
+    return appendPhotoSwipeProps(
+        trash.map((trashedFile) => ({
+            ...trashedFile.file,
+            updationTime: trashedFile.updatedAt,
+            isTrashed: true,
+        }))
+    );
 }
