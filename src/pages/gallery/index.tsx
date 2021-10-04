@@ -65,7 +65,10 @@ import AlertBanner from 'components/pages/gallery/AlertBanner';
 import UploadButton from 'components/pages/gallery/UploadButton';
 import PlanSelector from 'components/pages/gallery/PlanSelector';
 import Upload from 'components/pages/gallery/Upload';
-import Collections from 'components/pages/gallery/Collections';
+import Collections, {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+} from 'components/pages/gallery/Collections';
 import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
 import { PAGES } from 'types';
@@ -74,6 +77,7 @@ import {
     isSharedCollection,
     handleCollectionOps,
     getSelectedCollection,
+    isFavoriteCollection,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 
@@ -181,10 +185,12 @@ export default function Gallery() {
     const appContext = useContext(AppContext);
     const [collectionFilesCount, setCollectionFilesCount] =
         useState<Map<number, number>>();
-    const [activeCollection, setActiveCollection] = useState(0);
+    const [activeCollection, setActiveCollection] = useState<number>(undefined);
 
     const [isSharedCollectionActive, setIsSharedCollectionActive] =
         useState(false);
+
+    const [isFavCollectionActive, setIsFavCollectionActive] = useState(false);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -193,6 +199,7 @@ export default function Gallery() {
             return;
         }
         const main = async () => {
+            setActiveCollection(ALL_SECTION);
             setIsFirstLoad(isFirstLogin());
             setIsFirstFetch(true);
             if (justSignedUp()) {
@@ -202,7 +209,6 @@ export default function Gallery() {
             const files = await getLocalFiles();
             const collections = await getLocalCollections();
             setFiles(files);
-            setCollections(collections);
             await setDerivativeState(collections, files);
             await checkSubscriptionPurchase(
                 setDialogMessage,
@@ -229,18 +235,29 @@ export default function Gallery() {
     useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
 
     useEffect(() => {
-        const href = `/gallery${
-            activeCollection ? `?collection=${activeCollection.toString()}` : ''
-        }`;
+        if (typeof activeCollection === 'undefined') {
+            return;
+        }
+        let collectionURL = '';
+        if (activeCollection !== ALL_SECTION) {
+            collectionURL += '?collection=';
+            if (activeCollection === ARCHIVE_SECTION) {
+                collectionURL += constants.ARCHIVE;
+            } else {
+                collectionURL += activeCollection;
+            }
+        }
+        const href = `/gallery${collectionURL}`;
         router.push(href, undefined, { shallow: true });
+
+        setIsSharedCollectionActive(
+            isSharedCollection(activeCollection, collections)
+        );
+
+        setIsFavCollectionActive(
+            isFavoriteCollection(activeCollection, collections)
+        );
     }, [activeCollection]);
-    useEffect(
-        () =>
-            setIsSharedCollectionActive(
-                isSharedCollection(collections, activeCollection)
-            ),
-        [activeCollection]
-    );
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
@@ -490,9 +507,9 @@ export default function Gallery() {
                     setOpen={setSearchMode}
                     loadingBar={loadingBar}
                     isFirstFetch={isFirstFetch}
-                    setCollections={setCollections}
+                    collections={collections}
+                    setActiveCollection={setActiveCollection}
                     setSearch={updateSearch}
-                    files={files}
                     searchStats={searchStats}
                 />
                 <Collections
@@ -611,6 +628,7 @@ export default function Gallery() {
                             count={selected.count}
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}
+                            isFavoriteCollection={isFavCollectionActive}
                         />
                     )}
             </FullScreenDropZone>
