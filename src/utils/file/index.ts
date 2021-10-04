@@ -244,8 +244,11 @@ export async function changeFilesVisibility(
             file.magicMetadata = NEW_MAGIC_METADATA;
         }
         if (typeof file.magicMetadata.data === 'string') {
-            logError(Error('magic metadata not decrypted'), '');
-            return;
+            file.magicMetadata.data = (await worker.decryptMetadata(
+                file.magicMetadata.data,
+                file.magicMetadata.header,
+                file.key
+            )) as MagicMetadataProps;
         }
         // copies the existing magic metadata properties of the files and updates the visibility value
         // The expected behaviour while updating magic metadata is to let the existing property as it is and update/add the property you want

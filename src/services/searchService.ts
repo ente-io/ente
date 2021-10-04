@@ -3,6 +3,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { DateValue, Suggestion, SuggestionType } from 'components/SearchBar';
 import HTTPService from './HTTPService';
+import { Collection } from './collectionService';
 
 const ENDPOINT = getEndpoint();
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
@@ -77,7 +78,7 @@ export function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
             type: SuggestionType.DATE,
         },
     ].filter((suggestion) =>
-        suggestion.label.toLowerCase().includes(searchPhrase.toLowerCase())
+        suggestion.label.toLowerCase().includes(searchPhrase)
     );
 }
 
@@ -99,4 +100,13 @@ export function getYearSuggestion(searchPhrase: string): Suggestion[] {
         }
     }
     return [];
+}
+
+export function searchCollection(
+    searchPhrase: string,
+    collections: Collection[]
+): Collection[] {
+    return collections.filter((collection) =>
+        collection.name.toLowerCase().includes(searchPhrase)
+    );
 }
