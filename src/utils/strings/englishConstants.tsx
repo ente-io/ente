@@ -563,6 +563,7 @@ const englishConstants = {
     RESTORE: 'restore',
     CONFIRM_RESTORE: 'confirm restoration',
     RESTORE_MESSAGE: 'restore selected files ?',
+    RESTORE_TO_COLLECTION: 'restore to album',
 };
 
 export default englishConstants;

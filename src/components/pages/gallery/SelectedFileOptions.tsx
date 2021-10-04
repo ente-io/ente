@@ -16,10 +16,12 @@ import UnArchive from 'components/icons/UnArchive';
 import { OverlayTrigger } from 'react-bootstrap';
 import { Collection } from 'services/collectionService';
 import RemoveIcon from 'components/icons/RemoveIcon';
+import RestoreIcon from 'components/icons/RestoreIcon';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
     moveToCollectionHelper: (collection: Collection) => void;
+    restoreToCollectionHelper: (collection: Collection) => void;
     showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
     setDialogMessage: SetDialogMessage;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
@@ -58,6 +60,7 @@ export const IconWithMessage = (props) => (
 const SelectedFileOptions = ({
     addToCollectionHelper,
     moveToCollectionHelper,
+    restoreToCollectionHelper,
     showCreateCollectionModal,
     removeFromCollectionHelper,
     setDialogMessage,
@@ -103,6 +106,15 @@ const SelectedFileOptions = ({
             close: { text: constants.CANCEL },
         });
 
+    const restoreHandler = () =>
+        setCollectionSelectorAttributes({
+            callback: restoreToCollectionHelper,
+            showNextModal: showCreateCollectionModal(
+                COLLECTION_OPS_TYPE.RESTORE
+            ),
+            title: constants.RESTORE_TO_COLLECTION,
+        });
+
     const removeFromCollectionHandler = () =>
         setDialogMessage({
             title: constants.CONFIRM_REMOVE,
@@ -142,11 +154,19 @@ const SelectedFileOptions = ({
                     </IconButton>
                 </IconWithMessage>
             ) : activeCollection === TRASH_SECTION ? (
-                <IconWithMessage message={constants.DELETE_PERMANENTLY}>
-                    <IconButton onClick={permanentlyDeleteHandler}>
-                        <DeleteIcon />
-                    </IconButton>
-                </IconWithMessage>
+                <>
+                    <IconWithMessage message={constants.DELETE_PERMANENTLY}>
+                        <IconButton onClick={permanentlyDeleteHandler}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </IconWithMessage>
+
+                    <IconWithMessage message={constants.RESTORE}>
+                        <IconButton onClick={restoreHandler}>
+                            <RestoreIcon />
+                        </IconButton>
+                    </IconWithMessage>
+                </>
             ) : (
                 <>
                     {activeCollection === ALL_SECTION && (

@@ -605,6 +605,9 @@ export default function Gallery() {
                             moveToCollectionHelper={collectionOpsHelper(
                                 COLLECTION_OPS_TYPE.MOVE
                             )}
+                            restoreToCollectionHelper={collectionOpsHelper(
+                                COLLECTION_OPS_TYPE.RESTORE
+                            )}
                             showCreateCollectionModal={
                                 showCreateCollectionModal
                             }

@@ -15,6 +15,7 @@ export enum COLLECTION_OPS_TYPE {
     ADD,
     MOVE,
     REMOVE,
+    RESTORE,
 }
 export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
