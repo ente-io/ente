@@ -425,10 +425,13 @@ export default function Gallery() {
             const selectedFiles = getSelectedFiles(selected, files);
             if (permanent) {
                 await deleteFromTrash(selectedFiles.map((file) => file.id));
+                setDeleted([
+                    ...deleted,
+                    ...selectedFiles.map((file) => file.id),
+                ]);
             } else {
                 await trashFiles(selectedFiles);
             }
-            setDeleted([...deleted, ...selectedFiles.map((file) => file.id)]);
             clearSelection();
         } catch (e) {
             switch (e.status?.toString()) {
