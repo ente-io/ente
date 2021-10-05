@@ -22,7 +22,10 @@ Future<void> share(BuildContext context, List<File> files) async {
   await dialog.show();
   final List<Future<String>> pathFutures = [];
   for (File file in files) {
-    pathFutures.add(getFile(file).then((file) => file.path));
+    // Note: We are requesting the origin file for performance reasons on iOS.
+    // This will eat up storage, which will be reset only when the app restarts.
+    // We could have cleared the cache had there been a callback to the share API.
+    pathFutures.add(getFile(file, isOrigin: true).then((file) => file.path));
     if (file.fileType == FileType.livePhoto) {
       pathFutures.add(getFile(file, liveVideo: true).then((file) => file.path));
     }
