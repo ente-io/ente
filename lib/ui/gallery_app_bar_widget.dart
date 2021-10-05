@@ -364,7 +364,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         message: showArchive ? "archive" : "unarchive",
         child: IconButton(
           icon: Icon(
-            Platform.isIOS
+            Platform.isAndroid
                 ? (showArchive
                     ? Icons.archive_outlined
                     : Icons.unarchive_outlined)
