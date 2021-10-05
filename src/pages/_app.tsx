@@ -79,10 +79,31 @@ const GlobalStyles = createGlobalStyle`
         height: 100%;
     }
 
-    .video-loading > div {
+    .video-loading > div.spinner-border {
         position: relative;
         top: -50vh;
         left: 50vw;
+    }
+
+    
+
+    .video-loading > div.download-message {
+        position: relative;
+        top: -60vh;
+        left: 0;
+        height: 20vh;
+        padding:2vh 0;
+        background-color: #151414;
+        color:#ddd;
+        display: flex;
+        flex-direction:column;
+        align-items: center;
+        justify-content: space-around;
+        opacity: 0.8;
+        font-size:20px;
+    }
+    .download-message > a{
+        width: 130px;
     }
 
     :root {
