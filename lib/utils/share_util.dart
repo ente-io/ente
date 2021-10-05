@@ -7,7 +7,7 @@ import 'package:exif/exif.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/file.dart';

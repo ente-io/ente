@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 
 class RecoveryKeyDialog extends StatefulWidget {
   final String recoveryKey;
