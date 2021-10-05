@@ -19,6 +19,7 @@ class ZoomableLiveImage extends StatefulWidget {
   final String tagPrefix;
   final Decoration backgroundDecoration;
 
+
   ZoomableLiveImage(
     this.photo, {
     Key key,
@@ -35,7 +36,8 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     with SingleTickerProviderStateMixin {
   final Logger _logger = Logger("ZoomableLiveImage");
   File _livePhoto;
-  bool _loadLivePhotoVideo = false;
+  bool _showLiveVideo = false;
+  bool _isLoadingVideoPlayer = false;
 
   VideoPlayerController _videoPlayerController;
   ChewieController _chewieController;
@@ -55,7 +57,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     }
     if (mounted) {
       setState(() {
-        _loadLivePhotoVideo = isPressed;
+        _showLiveVideo = isPressed;
       });
     }
   }
@@ -64,13 +66,14 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   Widget build(BuildContext context) {
     Widget content;
     // check is long press is selected but videoPlayer is not configured yet
-    if (_loadLivePhotoVideo &&
+    if (_showLiveVideo &&
         _videoPlayerController == null &&
         _livePhoto.isRemoteFile()) {
       showToast("downloading... ", toastLength: Toast.LENGTH_SHORT);
+      _loadLiveVideo();
     }
 
-    if (_loadLivePhotoVideo && _videoPlayerController != null) {
+    if (_showLiveVideo && _videoPlayerController != null) {
       content = _getVideoPlayer();
     } else {
       content = ZoomableImage(_livePhoto,
@@ -109,28 +112,39 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     return Chewie(controller: _chewieController);
   }
 
-  void _loadLiveVideo() {
-    // todo: add wrapper to download file from server if local is missing
-    getFile(widget.photo, liveVideo: true).then((file) {
-      if (file != null && file.existsSync()) {
-        _logger.fine("loading  from local");
-        _setVideoPlayerController(file: file);
-      } else if (widget.photo.uploadedFileID != null) {
-        _logger.fine("loading from remote");
-        getFileFromServer(widget.photo, liveVideo: true).then((file) {
-          if (file != null && file.existsSync()) {
-            _setVideoPlayerController(file: file);
-          } else {
-            showToast("failed to download live photo",
-                toastLength: Toast.LENGTH_SHORT);
-            _logger.warning("failed to load from remote" + widget.photo.tag());
-          }
-        });
-      }
+  Future<void> _loadLiveVideo() async {
+    // do nothing is already loading or loaded
+    if (_isLoadingVideoPlayer || _videoPlayerController != null) {
+      return;
+    }
+    _isLoadingVideoPlayer = true;
+    var videoFile = await getFile(widget.photo, liveVideo: true)
+        .timeout(Duration(seconds: 5))
+        .onError((e, s) {
+      _logger.info("getFile failed ${_livePhoto.tag()}", e);
+      return null;
     });
+
+    if ((videoFile == null || !videoFile.existsSync()) &&
+        _livePhoto.isRemoteFile()) {
+      videoFile = await getFileFromServer(widget.photo, liveVideo: true)
+          .timeout(Duration(seconds: 10))
+          .onError((e, s) {
+        _logger.info("getRemoteFile failed ${_livePhoto.tag()}", e);
+        return null;
+      });
+    }
+
+    if (videoFile != null && videoFile.existsSync()) {
+      _setVideoPlayerController(file: videoFile);
+    } else {
+      showToast("download failed", toastLength: Toast.LENGTH_SHORT);
+    }
+    _isLoadingVideoPlayer = false;
   }
 
   VideoPlayerController _setVideoPlayerController({io.File file}) {
+    _logger.fine("configuring video player for ${_livePhoto.tag()}");
     var videoPlayerController = VideoPlayerController.file(file);
     return _videoPlayerController = videoPlayerController
       ..initialize().whenComplete(() {
