@@ -142,12 +142,12 @@ Future<io.File> _getLivePhotoFromServer(ente.File file,
       livePhotoDownloadsTracker[downloadID] =
           _downloadLivePhoto(file, progressCallback: progressCallback);
     }
-    final _livePhoto = await livePhotoDownloadsTracker[file.uploadedFileID];
+    final livePhoto = await livePhotoDownloadsTracker[file.uploadedFileID];
     livePhotoDownloadsTracker.remove(downloadID);
-    if (_livePhoto == null) {
+    if (livePhoto == null) {
       return null;
     }
-    return needLiveVideo ? _livePhoto.video : _livePhoto.image;
+    return needLiveVideo ? livePhoto.video : livePhoto.image;
   } catch (e) {
     livePhotoDownloadsTracker.remove(downloadID);
     return null;
