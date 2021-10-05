@@ -88,7 +88,6 @@ class MemoriesService extends ChangeNotifier {
   }
 
   Future markMemoryAsSeen(Memory memory) async {
-    _logger.info("Marking memory " + memory.file.title + " as seen");
     memory.markSeen();
     await _memoriesDB.markMemoryAsSeen(
         memory, DateTime.now().microsecondsSinceEpoch);

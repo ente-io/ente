@@ -2,9 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/ui/file_info_dialog.dart';
+import 'package:photos/utils/archive_util.dart';
 import 'package:photos/utils/share_util.dart';
 
 class FadingBottomBar extends StatefulWidget {
@@ -43,17 +46,26 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     });
   }
 
+  void safeRefresh() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   Widget _getBottomBar() {
     List<Widget> children = [];
     children.add(
-      Padding(
-        padding: const EdgeInsets.only(top: 12, bottom: 12),
-        child: IconButton(
-          icon: Icon(
-              Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info),
-          onPressed: () {
-            _displayInfo(widget.file);
-          },
+      Tooltip(
+        message: "info",
+        child: Padding(
+          padding: const EdgeInsets.only(top: 12, bottom: 12),
+          child: IconButton(
+            icon: Icon(
+                Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info),
+            onPressed: () {
+              _displayInfo(widget.file);
+            },
+          ),
         ),
       ),
     );
@@ -61,27 +73,64 @@ class FadingBottomBarState extends State<FadingBottomBar> {
       if (widget.file.fileType == FileType.image ||
           widget.file.fileType == FileType.livePhoto) {
         children.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 12),
-            child: IconButton(
-              icon: Icon(Icons.tune_outlined),
-              onPressed: () {
-                widget.onEditRequested(widget.file);
-              },
+          Tooltip(
+            message: "edit",
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 12),
+              child: IconButton(
+                icon: Icon(Icons.tune_outlined),
+                onPressed: () {
+                  widget.onEditRequested(widget.file);
+                },
+              ),
+            ),
+          ),
+        );
+      }
+      if (widget.file.uploadedFileID != null &&
+          widget.file.ownerID == Configuration.instance.getUserID()) {
+        bool isArchived =
+            widget.file.magicMetadata.visibility == kVisibilityArchive;
+        children.add(
+          Tooltip(
+            message: isArchived ? "unarchive" : "archive",
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 12),
+              child: IconButton(
+                icon: Icon(
+                  Platform.isAndroid
+                      ? (isArchived
+                          ? Icons.unarchive_outlined
+                          : Icons.archive_outlined)
+                    : (isArchived
+                        ? CupertinoIcons.archivebox_fill
+                        : CupertinoIcons.archivebox)),
+                onPressed: () async {
+                  await changeVisibility(
+                    context,
+                    [widget.file],
+                    isArchived ? kVisibilityVisible : kVisibilityArchive,
+                  );
+                  safeRefresh();
+                },
+              ),
             ),
           ),
         );
       }
       children.add(
-        Padding(
-          padding: const EdgeInsets.only(top: 12, bottom: 12),
-          child: IconButton(
-            icon: Icon(Platform.isAndroid
-                ? Icons.share_outlined
-                : CupertinoIcons.share),
-            onPressed: () {
-              share(context, [widget.file]);
-            },
+        Tooltip(
+          message: "share",
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 12),
+            child: IconButton(
+              icon: Icon(Platform.isAndroid
+                  ? Icons.share_outlined
+                  : CupertinoIcons.share),
+              onPressed: () {
+                share(context, [widget.file]);
+              },
+            ),
           ),
         ),
       );

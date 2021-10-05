@@ -16,6 +16,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/change_collection_name_dialog.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/share_collection_widget.dart';
+import 'package:photos/utils/archive_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/services/file_magic_service.dart';
@@ -367,7 +368,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 ? (showArchive
                     ? Icons.archive_outlined
                     : Icons.unarchive_outlined)
-                : CupertinoIcons.archivebox,
+                : (showArchive
+                    ? CupertinoIcons.archivebox
+                    : CupertinoIcons.archivebox_fill),
           ),
           onPressed: () {
             _handleVisibilityChangeRequest(
@@ -381,25 +384,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   Future<void> _handleVisibilityChangeRequest(
       BuildContext context, int newVisibility) async {
-    final dialog = createProgressDialog(
-        context,
-        newVisibility == kVisibilityArchive
-            ? "archiving..."
-            : "unarchiving...");
-    await dialog.show();
     try {
-      await FileMagicService.instance
-          .changeVisibility(widget.selectedFiles.files.toList(), newVisibility);
-      showToast(
-          newVisibility == kVisibilityArchive
-              ? "successfully archived"
-              : "successfully unarchived",
-          toastLength: Toast.LENGTH_SHORT);
-
-      await dialog.hide();
+      await changeVisibility(
+          context, widget.selectedFiles.files.toList(), newVisibility);
     } catch (e, s) {
       _logger.severe("failed to update file visibility", e, s);
-      await dialog.hide();
       await showGenericErrorDialog(context);
     } finally {
       _clearSelectedFiles();
