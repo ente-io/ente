@@ -91,7 +91,7 @@ const GlobalStyles = createGlobalStyle`
         position: relative;
         top: -60vh;
         left: 0;
-        height: 20vh;
+        height: 16vh;
         padding:2vh 0;
         background-color: #151414;
         color:#ddd;
