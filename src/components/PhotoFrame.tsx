@@ -243,7 +243,7 @@ const PhotoFrame = ({
                     <img src="${files[index].msrc}" />
                     <div class="download-message" >
                         ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                        <a class="btn btn-outline-success" href=${url} download=${files[index].metadata.title}>Download</button>
+                        <a class="btn btn-outline-success" href=${url} download="${files[index].metadata.title}"">Download</button>
                     </div>
                 </div>
                 `;
