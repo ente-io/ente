@@ -184,11 +184,6 @@ export default function Gallery() {
         useState<Map<number, number>>();
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
 
-    const [isSharedCollectionActive, setIsSharedCollectionActive] =
-        useState(false);
-
-    const [isFavCollectionActive, setIsFavCollectionActive] = useState(false);
-
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
@@ -246,14 +241,6 @@ export default function Gallery() {
         }
         const href = `/gallery${collectionURL}`;
         router.push(href, undefined, { shallow: true });
-
-        setIsSharedCollectionActive(
-            isSharedCollection(activeCollection, collections)
-        );
-
-        setIsFavCollectionActive(
-            isFavoriteCollection(activeCollection, collections)
-        );
     }, [activeCollection]);
 
     const syncWithRemote = async (force = false, silent = false) => {
@@ -623,7 +610,10 @@ export default function Gallery() {
                     deleted={deleted}
                     setDialogMessage={setDialogMessage}
                     activeCollection={activeCollection}
-                    isSharedCollection={isSharedCollectionActive}
+                    isSharedCollection={isSharedCollection(
+                        activeCollection,
+                        collections
+                    )}
                 />
                 {selected.count > 0 &&
                     selected.collectionID === activeCollection && (
@@ -651,7 +641,10 @@ export default function Gallery() {
                             count={selected.count}
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}
-                            isFavoriteCollection={isFavCollectionActive}
+                            isFavoriteCollection={isFavoriteCollection(
+                                activeCollection,
+                                collections
+                            )}
                         />
                     )}
             </FullScreenDropZone>
