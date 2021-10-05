@@ -3,6 +3,7 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
@@ -62,6 +63,13 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   @override
   Widget build(BuildContext context) {
     Widget content;
+    // check is long press is selected but videoPlayer is not configured yet
+    if (_loadLivePhotoVideo &&
+        _videoPlayerController == null &&
+        _livePhoto.isRemoteFile()) {
+      showToast("downloading... ", toastLength: Toast.LENGTH_SHORT);
+    }
+
     if (_loadLivePhotoVideo && _videoPlayerController != null) {
       content = _getVideoPlayer();
     } else {
@@ -113,6 +121,8 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
           if (file != null && file.existsSync()) {
             _setVideoPlayerController(file: file);
           } else {
+            showToast("failed to download live photo",
+                toastLength: Toast.LENGTH_SHORT);
             _logger.warning("failed to load from remote" + widget.photo.tag());
           }
         });
