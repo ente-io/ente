@@ -14,6 +14,7 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/custom_app_bar.dart';
+import 'package:photos/ui/progress_dialog.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -61,7 +62,7 @@ class FadingAppBarState extends State<FadingAppBar> {
                 Colors.black.withOpacity(0.5),
                 Colors.transparent,
               ],
-              stops: [0, 0.2, 1],
+              stops: const [0, 0.2, 1],
             ),
           ),
           child: _buildAppBar(),
@@ -80,9 +81,11 @@ class FadingAppBarState extends State<FadingAppBar> {
   }
 
   void show() {
-    setState(() {
-      _shouldHide = false;
-    });
+    if (mounted) {
+      setState(() {
+        _shouldHide = false;
+      });
+    }
   }
 
   AppBar _buildAppBar() {
@@ -176,7 +179,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         bool hasError = false;
         if (isLiked) {
           final shouldBlockUser = file.uploadedFileID == null;
-          var dialog;
+          ProgressDialog dialog;
           if (shouldBlockUser) {
             dialog = createProgressDialog(context, "adding to favorites...");
             await dialog.show();
