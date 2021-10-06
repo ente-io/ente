@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:chewie/chewie.dart';
-import 'package:chewie/src/material_progress_bar.dart';
+import 'package:chewie/src/material/material_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:video_player/video_player.dart';
