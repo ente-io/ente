@@ -119,5 +119,6 @@ export function searchFiles(searchPhrase: string, files: File[]) {
             index: idx,
             type: file.metadata.fileType,
         }))
-        .filter(({ title }) => title.toLowerCase().includes(searchPhrase));
+        .filter(({ title }) => title.toLowerCase().includes(searchPhrase))
+        .slice(0, 4);
 }
