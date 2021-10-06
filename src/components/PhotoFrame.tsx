@@ -188,7 +188,12 @@ const PhotoFrame = ({
             });
         }
         if (search.fileIndex || search.fileIndex === 0) {
-            onThumbnailClick(search.fileIndex)();
+            const filteredDataIdx = filteredData.findIndex(
+                (data) => data.dataIndex === search.fileIndex
+            );
+            if (filteredDataIdx) {
+                onThumbnailClick(filteredDataIdx)();
+            }
         }
     }, [search]);
 
