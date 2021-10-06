@@ -32,7 +32,7 @@ class VideoWidget extends StatefulWidget {
 }
 
 class _VideoWidgetState extends State<VideoWidget> {
-  Logger _logger = Logger("VideoWidget");
+  final _logger = Logger("VideoWidget");
   VideoPlayerController _videoPlayerController;
   ChewieController _chewieController;
   double _progress;
@@ -98,7 +98,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   VideoPlayerController _setVideoPlayerController({String url, io.File file}) {
-    var videoPlayerController;
+    VideoPlayerController videoPlayerController;
     if (url != null) {
       videoPlayerController = VideoPlayerController.network(url);
     } else {
