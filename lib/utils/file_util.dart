@@ -119,16 +119,28 @@ Future<io.File> getFileFromServer(
     if (file.fileType == FileType.livePhoto) {
       fileDownloadsInProgress[downloadID] = _getLivePhotoFromServer(file,
               progressCallback: progressCallback, needLiveVideo: liveVideo)
-          .whenComplete(() => fileDownloadsInProgress.remove(downloadID));
+          .whenComplete(() {
+        fileDownloadsInProgress.remove(downloadID);
+      });
     } else {
       fileDownloadsInProgress[downloadID] = _downloadAndCache(
-        file,
-        cacheManager,
-        progressCallback: progressCallback,
-      ).whenComplete(() => fileDownloadsInProgress.remove(downloadID));
+              file, cacheManager,
+              progressCallback: progressCallback)
+          .whenComplete(() {
+        fileDownloadsInProgress.remove(downloadID);
+      });
     }
   }
   return fileDownloadsInProgress[downloadID];
+}
+
+Future<bool> isFileCached(ente.File file,
+    {bool liveVideo = false}) async {
+  final cacheManager = (file.fileType == FileType.video || liveVideo)
+      ? VideoCacheManager.instance
+      : DefaultCacheManager();
+  final fileInfo = await cacheManager.getFileFromCache(file.getDownloadUrl());
+  return fileInfo != null;
 }
 
 final Map<int, Future<_LivePhoto>> livePhotoDownloadsTracker =
@@ -148,7 +160,8 @@ Future<io.File> _getLivePhotoFromServer(ente.File file,
       return null;
     }
     return needLiveVideo ? livePhoto.video : livePhoto.image;
-  } catch (e) {
+  } catch (e,s) {
+    _logger.warning("live photo get failed", e, s);
     livePhotoDownloadsTracker.remove(downloadID);
     return null;
   }

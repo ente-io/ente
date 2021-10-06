@@ -14,14 +14,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
 class ZoomableLiveImage extends StatefulWidget {
-  final File photo;
+  final File file;
   final Function(bool) shouldDisableScroll;
   final String tagPrefix;
   final Decoration backgroundDecoration;
 
 
   ZoomableLiveImage(
-    this.photo, {
+    this.file, {
     Key key,
     this.shouldDisableScroll,
     @required this.tagPrefix,
@@ -35,8 +35,8 @@ class ZoomableLiveImage extends StatefulWidget {
 class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     with SingleTickerProviderStateMixin {
   final Logger _logger = Logger("ZoomableLiveImage");
-  File _livePhoto;
-  bool _showLiveVideo = false;
+  File _file;
+  bool _showVideo = false;
   bool _isLoadingVideoPlayer = false;
 
   VideoPlayerController _videoPlayerController;
@@ -44,8 +44,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
 
   @override
   void initState() {
-    _livePhoto = widget.photo;
-    _loadLiveVideo();
+    _file = widget.file;
     _showLivePhotoToast();
     super.initState();
   }
@@ -57,7 +56,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     }
     if (mounted) {
       setState(() {
-        _showLiveVideo = isPressed;
+        _showVideo = isPressed;
       });
     }
   }
@@ -66,17 +65,14 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   Widget build(BuildContext context) {
     Widget content;
     // check is long press is selected but videoPlayer is not configured yet
-    if (_showLiveVideo &&
-        _videoPlayerController == null &&
-        _livePhoto.isRemoteFile()) {
-      showToast("downloading... ", toastLength: Toast.LENGTH_SHORT);
+    if (_showVideo && _videoPlayerController == null) {
       _loadLiveVideo();
     }
 
-    if (_showLiveVideo && _videoPlayerController != null) {
+    if (_showVideo && _videoPlayerController != null) {
       content = _getVideoPlayer();
     } else {
-      content = ZoomableImage(_livePhoto,
+      content = ZoomableImage(_file,
           tagPrefix: widget.tagPrefix,
           shouldDisableScroll: widget.shouldDisableScroll,
           backgroundDecoration: widget.backgroundDecoration);
@@ -118,19 +114,23 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       return;
     }
     _isLoadingVideoPlayer = true;
-    var videoFile = await getFile(widget.photo, liveVideo: true)
-        .timeout(Duration(seconds: 5))
+    if (_file.isRemoteFile() && !(await isFileCached(_file, liveVideo: true))) {
+      showToast("downloading...", toastLength: Toast.LENGTH_LONG);
+    }
+
+    var videoFile = await getFile(widget.file, liveVideo: true)
+        .timeout(Duration(seconds: 15))
         .onError((e, s) {
-      _logger.info("getFile failed ${_livePhoto.tag()}", e);
+      _logger.info("getFile failed ${_file.tag()}", e);
       return null;
     });
 
     if ((videoFile == null || !videoFile.existsSync()) &&
-        _livePhoto.isRemoteFile()) {
-      videoFile = await getFileFromServer(widget.photo, liveVideo: true)
-          .timeout(Duration(seconds: 10))
+        _file.isRemoteFile()) {
+      videoFile = await getFileFromServer(widget.file, liveVideo: true)
+          .timeout(Duration(seconds: 15))
           .onError((e, s) {
-        _logger.info("getRemoteFile failed ${_livePhoto.tag()}", e);
+        _logger.info("getRemoteFile failed ${_file.tag()}", e);
         return null;
       });
     }
@@ -144,12 +144,13 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   }
 
   VideoPlayerController _setVideoPlayerController({io.File file}) {
-    _logger.fine("configuring video player for ${_livePhoto.tag()}");
     var videoPlayerController = VideoPlayerController.file(file);
     return _videoPlayerController = videoPlayerController
       ..initialize().whenComplete(() {
         if (mounted) {
-          setState(() {});
+          setState(() {
+            _showVideo = true;
+          });
         }
       });
   }
