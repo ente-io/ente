@@ -67,9 +67,9 @@ packages:
   chewie:
     dependency: "direct main"
     description:
-      name: chewie
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "thirdparty/chewie"
+      relative: true
+    source: path
     version: "1.2.2"
   clock:
     dependency: transitive
@@ -1122,24 +1122,24 @@ packages:
   video_player:
     dependency: "direct main"
     description:
-      name: video_player
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "thirdparty/plugins/packages/video_player/video_player"
+      relative: true
+    source: path
     version: "2.2.5"
   video_player_platform_interface:
     dependency: transitive
     description:
-      name: video_player_platform_interface
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "thirdparty/plugins/packages/video_player/video_player_platform_interface"
+      relative: true
+    source: path
     version: "4.2.0"
   video_player_web:
     dependency: transitive
     description:
-      name: video_player_web
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.0"
+      path: "thirdparty/plugins/packages/video_player/video_player_web"
+      relative: true
+    source: path
+    version: "2.0.4"
   video_thumbnail:
     dependency: "direct main"
     description:
