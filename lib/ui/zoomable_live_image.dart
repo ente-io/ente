@@ -102,7 +102,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
         aspectRatio: _videoPlayerController.value.aspectRatio,
         autoPlay: true,
         autoInitialize: true,
-        looping: false,
+        looping: true,
         allowFullScreen: false,
         showControls: false);
     return Chewie(controller: _chewieController);
