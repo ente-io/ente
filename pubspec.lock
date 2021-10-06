@@ -70,7 +70,7 @@ packages:
       name: chewie
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.2.2"
   clock:
     dependency: transitive
     description:
@@ -164,6 +164,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.1"
+  csslib:
+    dependency: transitive
+    description:
+      name: csslib
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.17.1"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -450,6 +457,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "5.0.5"
+  html:
+    dependency: transitive
+    description:
+      name: html
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.15.0"
   http:
     dependency: transitive
     description:
@@ -777,7 +791,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.0.0"
+    version: "6.0.1"
   quiver:
     dependency: "direct main"
     description:
@@ -1111,14 +1125,14 @@ packages:
       name: video_player
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.4"
+    version: "2.2.5"
   video_player_platform_interface:
     dependency: transitive
     description:
       name: video_player_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.0"
+    version: "4.2.0"
   video_player_web:
     dependency: transitive
     description:
@@ -1146,28 +1160,35 @@ packages:
       name: wakelock
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.0"
+    version: "0.5.6"
   wakelock_macos:
     dependency: transitive
     description:
       name: wakelock_macos
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.0+1"
+    version: "0.4.0"
   wakelock_platform_interface:
     dependency: transitive
     description:
       name: wakelock_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.1+1"
+    version: "0.3.0"
   wakelock_web:
     dependency: transitive
     description:
       name: wakelock_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.0+1"
+    version: "0.4.0"
+  wakelock_windows:
+    dependency: transitive
+    description:
+      name: wakelock_windows
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.0"
   wallpaper_manager_flutter:
     dependency: "direct main"
     description:
@@ -1204,5 +1225,5 @@ packages:
     source: hosted
     version: "3.1.0"
 sdks:
-  dart: ">=2.12.0 <3.0.0"
-  flutter: ">=2.0.0"
+  dart: ">=2.14.0 <3.0.0"
+  flutter: ">=2.5.0"
