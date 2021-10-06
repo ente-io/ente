@@ -145,7 +145,9 @@ class _DetailPageState extends State<DetailPage> {
           },
           playbackCallback: (isPlaying) {
             _shouldHideAppBar = isPlaying;
-            _toggleFullScreen();
+            Future.delayed(Duration.zero, () {
+              _toggleFullScreen();
+            });
           },
         );
         _preloadFiles(index);
