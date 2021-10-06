@@ -21,7 +21,8 @@ dependencies:
   archive: ^3.1.2
   background_fetch: ^1.0.1
   cached_network_image: ^3.0.0
-  chewie: ^1.2.2
+  chewie:
+    path: thirdparty/chewie
   computer: ^2.0.0
   confetti: ^0.6.0
   connectivity: ^3.0.3
@@ -96,7 +97,8 @@ dependencies:
   uni_links: ^0.5.1
   url_launcher: ^6.0.3
   uuid: ^3.0.4
-  video_player: ^2.2.5
+  video_player:
+    path: thirdparty/plugins/packages/video_player/video_player
   video_thumbnail: ^0.4.3
   visibility_detector: ^0.2.0
   wallpaper_manager_flutter: ^0.0.2
