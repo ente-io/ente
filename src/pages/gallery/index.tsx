@@ -107,6 +107,7 @@ export type Search = {
     date?: DateValue;
     location?: Bbox;
     prevCollection?: number;
+    fileIndex?: number;
 };
 export interface SearchStats {
     resultCount: number;
@@ -161,6 +162,7 @@ export default function Gallery() {
         date: null,
         location: null,
         prevCollection: ALL_SECTION,
+        fileIndex: null,
     });
     const [uploadInProgress, setUploadInProgress] = useState(false);
     const {
@@ -548,6 +550,7 @@ export default function Gallery() {
                     loadingBar={loadingBar}
                     isFirstFetch={isFirstFetch}
                     collections={collections}
+                    files={files}
                     setActiveCollection={setActiveCollection}
                     setSearch={updateSearch}
                     searchStats={searchStats}

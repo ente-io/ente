@@ -187,6 +187,9 @@ const PhotoFrame = ({
                 timeTaken: (Date.now() - startTime) / 1000,
             });
         }
+        if (search.fileIndex || search.fileIndex === 0) {
+            onThumbnailClick(search.fileIndex)();
+        }
     }, [search]);
 
     useEffect(() => {
