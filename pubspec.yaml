@@ -38,7 +38,8 @@ dependencies:
   expansion_card: ^0.1.0
   extended_image:
     path: thirdparty/extended_image
-  firebase_messaging: "^10.0.8"
+  firebase_core: ^1.7.0
+  firebase_messaging: ^10.0.8
   flutter:
     sdk: flutter
   flutter_localizations:

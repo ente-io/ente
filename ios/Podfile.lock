@@ -6,6 +6,41 @@ PODS:
     - Reachability
   - device_info (0.0.1):
     - Flutter
+  - Firebase/CoreOnly (8.7.0):
+    - FirebaseCore (= 8.7.0)
+  - Firebase/Messaging (8.7.0):
+    - Firebase/CoreOnly
+    - FirebaseMessaging (~> 8.7.0)
+  - firebase_core (1.7.0):
+    - Firebase/CoreOnly (= 8.7.0)
+    - Flutter
+  - firebase_messaging (10.0.8):
+    - Firebase/Messaging (= 8.7.0)
+    - firebase_core
+    - Flutter
+  - FirebaseCore (8.7.0):
+    - FirebaseCoreDiagnostics (~> 8.0)
+    - GoogleUtilities/Environment (~> 7.4)
+    - GoogleUtilities/Logger (~> 7.4)
+  - FirebaseCoreDiagnostics (8.8.0):
+    - GoogleDataTransport (~> 9.0)
+    - GoogleUtilities/Environment (~> 7.4)
+    - GoogleUtilities/Logger (~> 7.4)
+    - nanopb (~> 2.30908.0)
+  - FirebaseInstallations (8.8.0):
+    - FirebaseCore (~> 8.0)
+    - GoogleUtilities/Environment (~> 7.4)
+    - GoogleUtilities/UserDefaults (~> 7.4)
+    - PromisesObjC (< 3.0, >= 1.2)
+  - FirebaseMessaging (8.7.0):
+    - FirebaseCore (~> 8.0)
+    - FirebaseInstallations (~> 8.0)
+    - GoogleDataTransport (~> 9.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.4)
+    - GoogleUtilities/Environment (~> 7.4)
+    - GoogleUtilities/Reachability (~> 7.4)
+    - GoogleUtilities/UserDefaults (~> 7.4)
+    - nanopb (~> 2.30908.0)
   - fk_user_agent (2.0.0):
     - Flutter
   - Flutter (1.0.0)
@@ -38,6 +73,27 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
+  - GoogleDataTransport (9.1.0):
+    - GoogleUtilities/Environment (~> 7.2)
+    - nanopb (~> 2.30908.0)
+    - PromisesObjC (< 3.0, >= 1.2)
+  - GoogleUtilities/AppDelegateSwizzler (7.5.2):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Network
+  - GoogleUtilities/Environment (7.5.2):
+    - PromisesObjC (< 3.0, >= 1.2)
+  - GoogleUtilities/Logger (7.5.2):
+    - GoogleUtilities/Environment
+  - GoogleUtilities/Network (7.5.2):
+    - GoogleUtilities/Logger
+    - "GoogleUtilities/NSData+zlib"
+    - GoogleUtilities/Reachability
+  - "GoogleUtilities/NSData+zlib (7.5.2)"
+  - GoogleUtilities/Reachability (7.5.2):
+    - GoogleUtilities/Logger
+  - GoogleUtilities/UserDefaults (7.5.2):
+    - GoogleUtilities/Logger
   - image_editor (0.0.1):
     - Flutter
   - in_app_purchase (0.0.1):
@@ -60,6 +116,11 @@ PODS:
     - Flutter
   - move_to_background (0.0.1):
     - Flutter
+  - nanopb (2.30908.0):
+    - nanopb/decode (= 2.30908.0)
+    - nanopb/encode (= 2.30908.0)
+  - nanopb/decode (2.30908.0)
+  - nanopb/encode (2.30908.0)
   - open_file (0.0.1):
     - Flutter
   - OrderedSet (5.0.0)
@@ -70,6 +131,7 @@ PODS:
   - photo_manager (1.0.0):
     - Flutter
     - FlutterMacOS
+  - PromisesObjC (2.0.0)
   - Reachability (3.2)
   - receive_sharing_intent (0.0.1):
     - Flutter
@@ -108,6 +170,8 @@ DEPENDENCIES:
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - connectivity (from `.symlinks/plugins/connectivity/ios`)
   - device_info (from `.symlinks/plugins/device_info/ios`)
+  - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
+  - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - fk_user_agent (from `.symlinks/plugins/fk_user_agent/ios`)
   - Flutter (from `Flutter`)
   - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
@@ -141,10 +205,19 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - Firebase
+    - FirebaseCore
+    - FirebaseCoreDiagnostics
+    - FirebaseInstallations
+    - FirebaseMessaging
     - FMDB
+    - GoogleDataTransport
+    - GoogleUtilities
     - libwebp
     - Mantle
+    - nanopb
     - OrderedSet
+    - PromisesObjC
     - Reachability
     - SDWebImage
     - SDWebImageWebPCoder
@@ -158,6 +231,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/connectivity/ios"
   device_info:
     :path: ".symlinks/plugins/device_info/ios"
+  firebase_core:
+    :path: ".symlinks/plugins/firebase_core/ios"
+  firebase_messaging:
+    :path: ".symlinks/plugins/firebase_messaging/ios"
   fk_user_agent:
     :path: ".symlinks/plugins/fk_user_agent/ios"
   Flutter:
@@ -223,6 +300,13 @@ SPEC CHECKSUMS:
   background_fetch: 2edffc19a5a465c47f073efa35db57f7910738fa
   connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
+  Firebase: bc9325d5ee2041524bac78a5213d0e530c651309
+  firebase_core: f5ac1f2726a2bd0468cea0161eddeea3d83d7e3e
+  firebase_messaging: cfee8830477d2f1875e027a65cce7f6239ebf583
+  FirebaseCore: f4804c1d3f4bbbefc88904d15653038f2c99ddf7
+  FirebaseCoreDiagnostics: fe77f42da6329d6d83d21fd9d621a6b704413bfc
+  FirebaseInstallations: 2563cb18a723ef9c6ef18318a49519b75dce613c
+  FirebaseMessaging: 93227dd71d7888e200baef65043f81acb2b6596e
   fk_user_agent: 1f47ec39291e8372b1d692b50084b0d54103c545
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   flutter_email_sender: 02d7443217d8c41483223627972bfdc09f74276b
@@ -235,6 +319,8 @@ SPEC CHECKSUMS:
   fluttercontactpicker: 36cf7811f583f3c5aec3c53efcbf366b9cdfdf51
   fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  GoogleDataTransport: 85fd18ff3019bb85d3f2c551d04c481dedf71fc9
+  GoogleUtilities: 8de2a97a17e15b6b98e38e8770e2d129a57c0040
   image_editor: c1d038630eedea60d2dee9c14f36aa66c7f9cfab
   in_app_purchase: 3e2155afa9d03d4fa32d9e62d567885080ce97d6
   libwebp: 946cb3063cea9236285f7e9a8505d806d30e07f3
@@ -242,11 +328,13 @@ SPEC CHECKSUMS:
   Mantle: 35238ae6f2e2b2d474fa7b67fee82a59fea71915
   motionphoto: d4a432b8c8f22fb3ad966258597c0103c9c5ff16
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
+  nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   photo_manager: 84fa94fbeb82e607333ea9a13c43b58e0903a463
+  PromisesObjC: 68159ce6952d93e17b2dfe273b8c40907db5ba58
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   receive_sharing_intent: c0d87310754e74c0f9542947e7cbdf3a0335a3b1
   SDWebImage: 97351f6582ceca541ea294ba66a1fcb342a331c2
