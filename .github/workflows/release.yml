@@ -42,7 +42,7 @@ jobs:
 
       # Build independent apk.
       - name: Build
-        run: flutter build apk --release --flavor independent
+        run: flutter build apk --release --flavor independent && mv build/app/outputs/flutter-apk/app-independent-release.apk build/app/outputs/flutter-apk/ente.apk
         env:
           SIGNING_KEY_PATH: '/home/runner/work/_temp/keystore/ente_photos_key.jks'
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
@@ -53,10 +53,10 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: release-apk
-          path: build/app/outputs/flutter-apk/app-independent-release.apk
+          path: build/app/outputs/flutter-apk/ente.apk
 
       # Create a Github release
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/app/outputs/flutter-apk/app-independent-release.apk"
+          artifacts: "build/app/outputs/flutter-apk/ente.apk"
           token: ${{ secrets.GITHUB_TOKEN }}
