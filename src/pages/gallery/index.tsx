@@ -106,6 +106,7 @@ export type setSearchStats = React.Dispatch<React.SetStateAction<SearchStats>>;
 export type Search = {
     date?: DateValue;
     location?: Bbox;
+    prevCollection?: number;
 };
 export interface SearchStats {
     resultCount: number;
@@ -491,9 +492,11 @@ export default function Gallery() {
         }
     };
 
-    const updateSearch = (search: Search) => {
-        setActiveCollection(ALL_SECTION);
-        setSearch(search);
+    const updateSearch = (newSearch: Search) => {
+        const prevCollection = search.prevCollection ?? ALL_SECTION;
+        const currentCollection = activeCollection;
+        setActiveCollection(prevCollection);
+        setSearch({ ...newSearch, prevCollection: currentCollection });
         setSearchStats(null);
     };
 
