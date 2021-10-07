@@ -174,7 +174,7 @@ export default function Gallery() {
     });
 
     const loadingBar = useRef(null);
-    const [searchMode, setSearchMode] = useState(false);
+    const [isInSearchMode, setIsInSearchMode] = useState(false);
     const [searchStats, setSearchStats] = useState(null);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
@@ -539,8 +539,8 @@ export default function Gallery() {
                     attributes={dialogMessage}
                 />
                 <SearchBar
-                    isOpen={searchMode}
-                    setOpen={setSearchMode}
+                    isOpen={isInSearchMode}
+                    setOpen={setIsInSearchMode}
                     loadingBar={loadingBar}
                     isFirstFetch={isFirstFetch}
                     collections={collections}
@@ -551,7 +551,7 @@ export default function Gallery() {
                 <Collections
                     collections={collections}
                     collectionAndTheirLatestFile={collectionsAndTheirLatestFile}
-                    searchMode={searchMode}
+                    isInSearchMode={isInSearchMode}
                     activeCollection={activeCollection}
                     setActiveCollection={setActiveCollection}
                     syncWithRemote={syncWithRemote}
@@ -618,7 +618,7 @@ export default function Gallery() {
                     isFirstLoad={isFirstLoad}
                     openFileUploader={openFileUploader}
                     loadingBar={loadingBar}
-                    searchMode={searchMode}
+                    isInSearchMode={isInSearchMode}
                     search={search}
                     setSearchStats={setSearchStats}
                     deleted={deleted}

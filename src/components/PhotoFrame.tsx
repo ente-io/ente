@@ -146,7 +146,7 @@ interface Props {
     isFirstLoad;
     openFileUploader;
     loadingBar;
-    searchMode: boolean;
+    isInSearchMode: boolean;
     search: Search;
     setSearchStats: setSearchStats;
     deleted?: number[];
@@ -165,7 +165,7 @@ const PhotoFrame = ({
     isFirstLoad,
     openFileUploader,
     loadingBar,
-    searchMode,
+    isInSearchMode,
     search,
     setSearchStats,
     deleted,
@@ -181,7 +181,7 @@ const PhotoFrame = ({
     const listRef = useRef(null);
 
     useEffect(() => {
-        if (searchMode) {
+        if (isInSearchMode) {
             setSearchStats({
                 resultCount: filteredData.length,
                 timeTaken: (Date.now() - startTime) / 1000,
@@ -515,7 +515,7 @@ const PhotoFrame = ({
 
     return (
         <>
-            {!isFirstLoad && files.length === 0 && !searchMode ? (
+            {!isFirstLoad && files.length === 0 && !isInSearchMode ? (
                 <EmptyScreen>
                     <img height={150} src="/images/gallery.png" />
                     <div style={{ color: '#a6a6a6', marginTop: '16px' }}>
@@ -635,7 +635,7 @@ const PhotoFrame = ({
                                 return sum;
                             })();
                             files.length < 30 &&
-                                !searchMode &&
+                                !isInSearchMode &&
                                 timeStampList.push({
                                     itemType: ITEM_TYPE.BANNER,
                                     banner: (

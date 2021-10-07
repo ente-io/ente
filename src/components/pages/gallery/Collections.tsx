@@ -35,7 +35,7 @@ interface CollectionProps {
     syncWithRemote: () => Promise<void>;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     startLoadingBar: () => void;
-    searchMode: boolean;
+    isInSearchMode: boolean;
     collectionFilesCount: Map<number, number>;
 }
 
@@ -119,7 +119,7 @@ export default function Collections(props: CollectionProps) {
 
     useEffect(() => {
         updateScrollObj();
-    }, [collectionWrapperRef.current, props.searchMode]);
+    }, [collectionWrapperRef.current, props.isInSearchMode]);
 
     useEffect(() => {
         if (!collectionWrapperRef?.current) {
@@ -184,7 +184,7 @@ export default function Collections(props: CollectionProps) {
     };
 
     return (
-        !props.searchMode && (
+        !props.isInSearchMode && (
             <>
                 <CollectionShare
                     show={collectionShareModalView}
