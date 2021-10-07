@@ -117,12 +117,13 @@ export function searchCollection(
 export function searchFiles(searchPhrase: string, files: File[]) {
     const user: User = getData(LS_KEYS.USER) ?? {};
     return files
-        .filter((file) => file.ownerID === user.id)
         .map((file, idx) => ({
             title: file.metadata.title,
             index: idx,
             type: file.metadata.fileType,
+            ownerID: file.ownerID,
         }))
+        .filter((file) => file.ownerID === user.id)
         .filter(({ title }) => title.toLowerCase().includes(searchPhrase))
         .slice(0, 4);
 }
