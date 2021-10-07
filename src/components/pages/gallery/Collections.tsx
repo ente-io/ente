@@ -119,7 +119,7 @@ export default function Collections(props: CollectionProps) {
 
     useEffect(() => {
         updateScrollObj();
-    }, [collectionWrapperRef.current]);
+    }, [collectionWrapperRef.current, props.searchMode]);
 
     useEffect(() => {
         if (!collectionWrapperRef?.current) {

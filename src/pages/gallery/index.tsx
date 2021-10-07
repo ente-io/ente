@@ -492,6 +492,7 @@ export default function Gallery() {
     };
 
     const updateSearch = (search: Search) => {
+        setActiveCollection(ALL_SECTION);
         setSearch(search);
         setSearchStats(null);
     };
