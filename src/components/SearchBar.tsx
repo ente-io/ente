@@ -177,12 +177,12 @@ export default function SearchBar(props: Props) {
                 break;
             case SuggestionType.COLLECTION:
                 props.setActiveCollection(selectedOption.value as number);
-                resetSearch(true);
+                setValue(null);
                 break;
         }
     };
-    const resetSearch = async (force?: boolean) => {
-        if (props.isOpen || force) {
+    const resetSearch = () => {
+        if (props.isOpen) {
             props.loadingBar.current?.continuousStart();
             props.setSearch({});
             setTimeout(() => {
