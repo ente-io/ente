@@ -5,6 +5,8 @@ import { DateValue, Suggestion, SuggestionType } from 'components/SearchBar';
 import HTTPService from './HTTPService';
 import { Collection } from './collectionService';
 import { File } from './fileService';
+import { User } from './userService';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 const ENDPOINT = getEndpoint();
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
@@ -113,7 +115,9 @@ export function searchCollection(
 }
 
 export function searchFiles(searchPhrase: string, files: File[]) {
+    const user: User = getData(LS_KEYS.USER) ?? {};
     return files
+        .filter((file) => file.ownerID === user.id)
         .map((file, idx) => ({
             title: file.metadata.title,
             index: idx,
