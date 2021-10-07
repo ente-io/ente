@@ -494,10 +494,8 @@ export default function Gallery() {
     };
 
     const updateSearch = (newSearch: Search) => {
-        const prevCollection = search.prevCollection;
-        const currentCollection = activeCollection;
-        setActiveCollection(prevCollection);
-        setSearch({ ...newSearch, prevCollection: currentCollection });
+        setActiveCollection(ALL_SECTION);
+        setSearch(newSearch);
         setSearchStats(null);
     };
 
