@@ -191,7 +191,7 @@ const PhotoFrame = ({
             const filteredDataIdx = filteredData.findIndex(
                 (data) => data.dataIndex === search.fileIndex
             );
-            if (filteredDataIdx) {
+            if (filteredDataIdx || filteredDataIdx === 0) {
                 onThumbnailClick(filteredDataIdx)();
             }
         }

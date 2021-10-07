@@ -116,14 +116,22 @@ export function searchCollection(
 
 export function searchFiles(searchPhrase: string, files: File[]) {
     const user: User = getData(LS_KEYS.USER) ?? {};
+    const idSet = new Set();
     return files
         .map((file, idx) => ({
             title: file.metadata.title,
             index: idx,
             type: file.metadata.fileType,
             ownerID: file.ownerID,
+            id: file.id,
         }))
-        .filter((file) => file.ownerID === user.id)
+        .filter((file) => {
+            if (file.ownerID === user.id && !idSet.has(file.id)) {
+                idSet.add(file.id);
+                return true;
+            }
+            return false;
+        })
         .filter(({ title }) => title.toLowerCase().includes(searchPhrase))
         .slice(0, 4);
 }
