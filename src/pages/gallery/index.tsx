@@ -106,7 +106,6 @@ export type setSearchStats = React.Dispatch<React.SetStateAction<SearchStats>>;
 export type Search = {
     date?: DateValue;
     location?: Bbox;
-    prevCollection?: number;
     fileIndex?: number;
 };
 export interface SearchStats {
@@ -161,7 +160,6 @@ export default function Gallery() {
     const [search, setSearch] = useState<Search>({
         date: null,
         location: null,
-        prevCollection: ALL_SECTION,
         fileIndex: null,
     });
     const [uploadInProgress, setUploadInProgress] = useState(false);
@@ -496,10 +494,8 @@ export default function Gallery() {
     };
 
     const updateSearch = (newSearch: Search) => {
-        const prevCollection = search.prevCollection;
-        const currentCollection = activeCollection;
-        setActiveCollection(prevCollection);
-        setSearch({ ...newSearch, prevCollection: currentCollection });
+        setActiveCollection(ALL_SECTION);
+        setSearch(newSearch);
         setSearchStats(null);
     };
 
