@@ -160,6 +160,7 @@ export default function Gallery() {
     const [search, setSearch] = useState<Search>({
         date: null,
         location: null,
+        prevCollection: ALL_SECTION,
     });
     const [uploadInProgress, setUploadInProgress] = useState(false);
     const {
@@ -493,7 +494,7 @@ export default function Gallery() {
     };
 
     const updateSearch = (newSearch: Search) => {
-        const prevCollection = search.prevCollection ?? ALL_SECTION;
+        const prevCollection = search.prevCollection;
         const currentCollection = activeCollection;
         setActiveCollection(prevCollection);
         setSearch({ ...newSearch, prevCollection: currentCollection });
