@@ -7,16 +7,15 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from 'services/collectionService';
-import { File, FILE_TYPE } from 'services/fileService';
+import { File } from 'services/fileService';
 import constants from 'utils/strings/constants';
-import DownloadManger from 'services/downloadManager';
 import exifr from 'exifr';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import styled from 'styled-components';
 import events from './events';
-import { fileNameWithoutExtension, formatDateTime } from 'utils/file';
+import { downloadFile, formatDateTime } from 'utils/file';
 import { FormCheck } from 'react-bootstrap';
 import { prettyPrintExif } from 'utils/exif';
 
@@ -296,21 +295,11 @@ function PhotoSwipe(props: Iprops) {
         setShowInfo(true);
     };
 
-    const downloadFile = async (file) => {
+    const downloadFileHelper = async (file) => {
         const { loadingBar } = props;
-        const a = document.createElement('a');
-        a.style.display = 'none';
         loadingBar.current.continuousStart();
-        a.href = await DownloadManger.getFile(file);
+        await downloadFile(file);
         loadingBar.current.complete();
-        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            a.download = fileNameWithoutExtension(file.metadata.title) + '.zip';
-        } else {
-            a.download = file.metadata.title;
-        }
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
     };
     const { id } = props;
     let { className } = props;
@@ -344,7 +333,7 @@ function PhotoSwipe(props: Iprops) {
                                 className="pswp-custom download-btn"
                                 title={constants.DOWNLOAD}
                                 onClick={() =>
-                                    downloadFile(photoSwipe.currItem)
+                                    downloadFileHelper(photoSwipe.currItem)
                                 }
                             />
 
