@@ -1,3 +1,11 @@
+[submodule "thirdparty/chewie"]
+	path = thirdparty/chewie
+	url = https://github.com/ente-io/chewie.git
+
 [submodule "thirdparty/extended_image"]
 	path = thirdparty/extended_image
 	url = https://github.com/ente-io/extended_image.git
+
+[submodule "thirdparty/plugins"]
+	path = thirdparty/plugins
+	url = https://github.com/ente-io/plugins.git
