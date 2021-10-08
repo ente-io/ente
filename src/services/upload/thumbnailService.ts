@@ -6,7 +6,7 @@ import FFmpegService from 'services/ffmpegService';
 
 const THUMBNAIL_HEIGHT = 720;
 const MAX_ATTEMPTS = 3;
-const MIN_THUMBNAIL_SIZE = 50000;
+export const MAX_THUMBNAIL_SIZE = 50000;
 
 const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
 
@@ -171,7 +171,7 @@ export async function generateVideoThumbnail(file: globalThis.File) {
 }
 
 async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
-    let thumbnailBlob = null;
+    let thumbnailBlob: Blob = null;
     let attempts = 0;
     let quality = 1;
 
@@ -189,7 +189,7 @@ async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
         attempts++;
         quality /= 2;
     } while (
-        thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
+        thumbnailBlob.size > MAX_THUMBNAIL_SIZE &&
         attempts <= MAX_ATTEMPTS
     );
 
