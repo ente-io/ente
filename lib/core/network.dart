@@ -13,7 +13,7 @@ class Network {
   Alice _alice;
 
   Future<void> init() async {
-    _alice = Alice(darkTheme: true);
+    _alice = Alice(darkTheme: true, showNotification: kDebugMode);
     await FkUserAgent.init();
     final packageInfo = await PackageInfo.fromPlatform();
     _dio = Dio(BaseOptions(connectTimeout: kConnectTimeout, headers: {
