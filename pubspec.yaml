@@ -11,12 +11,13 @@ description: ente photos application
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.3.34+244
+version: 0.3.36+246
 
 environment:
   sdk: ">=2.10.0 <3.0.0"
 
 dependencies:
+  alice: ^0.2.4
   animate_do: ^2.0.0
   archive: ^3.1.2
   background_fetch: ^1.0.1
@@ -105,6 +106,7 @@ dependencies:
 
 dependency_overrides:
   provider: ^6.0.1 # for chewie 1.2.2 https://github.com/brianegan/chewie/issues/530
+  flutter_local_notifications: ^8.1.1
 
 dev_dependencies:
   flutter_launcher_icons: "0.9.0"
