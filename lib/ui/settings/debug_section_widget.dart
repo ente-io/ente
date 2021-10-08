@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/network.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 
@@ -21,6 +22,14 @@ class DebugSectionWidget extends StatelessWidget {
           child: SettingsTextItem(
               text: "key attributes", icon: Icons.navigate_next),
         ),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            Network.instance.getAlice().showInspector();
+          },
+          child: SettingsTextItem(
+              text: "network requests", icon: Icons.navigate_next),
+        )
       ]),
     );
   }
