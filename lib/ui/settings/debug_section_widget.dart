@@ -10,28 +10,26 @@ class DebugSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(children: [
-        Padding(padding: EdgeInsets.all(12)),
-        SettingsSectionTitle("debug"),
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () async {
-            _showKeyAttributesDialog(context);
-          },
-          child: SettingsTextItem(
-              text: "key attributes", icon: Icons.navigate_next),
-        ),
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () async {
-            Network.instance.getAlice().showInspector();
-          },
-          child: SettingsTextItem(
-              text: "network requests", icon: Icons.navigate_next),
-        )
-      ]),
-    );
+    return Column(children: [
+      Padding(padding: EdgeInsets.all(12)),
+      SettingsSectionTitle("debug"),
+      GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () async {
+          _showKeyAttributesDialog(context);
+        },
+        child:
+            SettingsTextItem(text: "key attributes", icon: Icons.navigate_next),
+      ),
+      GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () async {
+          Network.instance.getAlice().showInspector();
+        },
+        child: SettingsTextItem(
+            text: "network requests", icon: Icons.navigate_next),
+      )
+    ]);
   }
 
   void _showKeyAttributesDialog(BuildContext context) {
