@@ -24,8 +24,6 @@ class Network {
     }));
     _dio.interceptors.add(RequestIdInterceptor());
     _dio.interceptors.add(_alice.getDioInterceptor());
-
-
   }
 
   Network._privateConstructor();
@@ -44,4 +42,3 @@ class RequestIdInterceptor extends Interceptor {
     return super.onRequest(options, handler);
   }
 }
-
