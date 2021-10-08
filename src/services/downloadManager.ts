@@ -43,6 +43,19 @@ class DownloadManager {
         thumbnailCache: Cache,
         file: File
     ) => {
+        const thumb = await this.getThumbnail(token, file);
+        try {
+            await thumbnailCache.put(
+                file.id.toString(),
+                new Response(new Blob([thumb]))
+            );
+        } catch (e) {
+            // TODO: handle storage full exception.
+        }
+        return URL.createObjectURL(new Blob([thumb]));
+    };
+
+    getThumbnail = async (token: string, file: File) => {
         const resp = await HTTPService.get(
             getThumbnailUrl(file.id),
             null,
@@ -50,20 +63,12 @@ class DownloadManager {
             { responseType: 'arraybuffer' }
         );
         const worker = await new CryptoWorker();
-        const decrypted: any = await worker.decryptThumbnail(
+        const decrypted: Uint8Array = await worker.decryptThumbnail(
             new Uint8Array(resp.data),
             await worker.fromB64(file.thumbnail.decryptionHeader),
             file.key
         );
-        try {
-            await thumbnailCache.put(
-                file.id.toString(),
-                new Response(new Blob([decrypted]))
-            );
-        } catch (e) {
-            // TODO: handle storage full exception.
-        }
-        return URL.createObjectURL(new Blob([decrypted]));
+        return decrypted;
     };
 
     getFile = async (file: File, forPreview = false) => {
