@@ -11,11 +11,6 @@ class AppVersionWidget extends StatefulWidget {
 
   @override
   State<AppVersionWidget> createState() => _AppVersionWidgetState();
-
-  static Future<String> _getAppVersion() async {
-    var pkgInfo = await PackageInfo.fromPlatform();
-    return pkgInfo.version;
-  }
 }
 
 class _AppVersionWidgetState extends State<AppVersionWidget> {
@@ -49,7 +44,7 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
         _lastTap = now;
       },
       child: FutureBuilder(
-        future: AppVersionWidget._getAppVersion(),
+        future: _getAppVersion(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return Padding(
@@ -67,5 +62,10 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
         },
       ),
     );
+  }
+
+  Future<String> _getAppVersion() async {
+    final pkgInfo = await PackageInfo.fromPlatform();
+    return pkgInfo.version;
   }
 }
