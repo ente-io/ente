@@ -11,8 +11,9 @@ int kConnectTimeout = 15000;
 class Network {
   Dio _dio;
   Alice _alice;
+
   Future<void> init() async {
-    _alice = Alice(darkTheme: true, showInspectorOnShake: true);
+    _alice = Alice(darkTheme: true);
     await FkUserAgent.init();
     final packageInfo = await PackageInfo.fromPlatform();
     _dio = Dio(BaseOptions(connectTimeout: kConnectTimeout, headers: {
