@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:fk_user_agent/fk_user_agent.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:uuid/uuid.dart';
 
 int kConnectTimeout = 15000;
 
@@ -21,6 +22,7 @@ class Network {
       'X-Client-Version': packageInfo.version,
       'X-Client-Package': packageInfo.packageName,
     }));
+    _dio.interceptors.add(RequestIdInterceptor());
     _dio.interceptors.add(_alice.getDioInterceptor());
   }
 
@@ -29,5 +31,14 @@ class Network {
   static Network instance = Network._privateConstructor();
 
   Dio getDio() => _dio;
+
   Alice getAlice() => _alice;
+}
+
+class RequestIdInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    options.headers.putIfAbsent("x-request-id", () => Uuid().v4().toString());
+    return super.onRequest(options, handler);
+  }
 }
