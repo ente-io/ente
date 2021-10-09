@@ -17,8 +17,8 @@ export const logError = (
         contexts: {
             ...(info && {
                 info: info,
-                rootCause: { message: e?.message },
             }),
+            rootCause: { message: e?.message },
         },
     });
 };
