@@ -261,7 +261,7 @@ packages:
       path: "thirdparty/extended_image"
       relative: true
     source: path
-    version: "5.0.0"
+    version: "5.1.2"
   extended_image_library:
     dependency: transitive
     description:
