@@ -552,6 +552,7 @@ const englishConstants = {
     SORT_BY_LATEST_PHOTO: 'recent photo',
     SORT_BY_MODIFICATION_TIME: 'last updated',
     SORT_BY_COLLECTION_NAME: 'album name',
+    FIX_LARGE_THUMBNAILS: 'fix large thumbnails',
 };
 
 export default englishConstants;
