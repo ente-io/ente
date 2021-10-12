@@ -250,7 +250,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       debugShowCheckedModeBanner: false,
       builder: EasyLoading.init(),
       supportedLocales: L10n.all,
-      localizationsDelegates: [
+      localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
