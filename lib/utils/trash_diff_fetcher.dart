@@ -8,7 +8,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/events/remote_sync_event.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
@@ -29,48 +28,46 @@ class TrashDiffFetcher {
         },
       );
       int latestUpdatedAtTime = 0;
-      final trashedFiles = <Trash>[];
-      final deletedFiles = <Trash>[];
-      final restoredFiles = <Trash>[];
+      final trashedFiles = <TrashFile>[];
+      final deletedFiles = <TrashFile>[];
+      final restoredFiles = <TrashFile>[];
       if (response != null) {
         Bus.instance.fire(RemoteSyncEvent(true));
         final diff = response.data["diff"] as List;
         final startTime = DateTime.now();
         for (final item in diff) {
-          final trash = Trash();
+          final trash = TrashFile();
           trash.createdAt = item['createdAt'];
           trash.updateAt = item['updatedAt'];
           latestUpdatedAtTime = max(latestUpdatedAtTime, trash.updateAt);
           trash.deleteBy = item['deleteBy'];
-          trash.file = File();
-          trash.file.uploadedFileID = item["file"]["id"];
-          trash.file.collectionID = item["file"]["collectionID"];
-          trash.file.updationTime = item["file"]["updationTime"];
-          trash.file.ownerID = item["file"]["ownerID"];
-          trash.file.encryptedKey = item["file"]["encryptedKey"];
-          trash.file.keyDecryptionNonce = item["file"]["keyDecryptionNonce"];
-          trash.file.fileDecryptionHeader =
-              item["file"]["file"]["decryptionHeader"];
-          trash.file.thumbnailDecryptionHeader =
+          trash.uploadedFileID = item["file"]["id"];
+          trash.collectionID = item["file"]["collectionID"];
+          trash.updationTime = item["file"]["updationTime"];
+          trash.ownerID = item["file"]["ownerID"];
+          trash.encryptedKey = item["file"]["encryptedKey"];
+          trash.keyDecryptionNonce = item["file"]["keyDecryptionNonce"];
+          trash.fileDecryptionHeader = item["file"]["file"]["decryptionHeader"];
+          trash.thumbnailDecryptionHeader =
               item["file"]["thumbnail"]["decryptionHeader"];
-          trash.file.metadataDecryptionHeader =
+          trash.metadataDecryptionHeader =
               item["file"]["metadata"]["decryptionHeader"];
-          final fileDecryptionKey = decryptFileKey(trash.file);
+          final fileDecryptionKey = decryptFileKey(trash);
           final encodedMetadata = await CryptoUtil.decryptChaCha(
             Sodium.base642bin(item["file"]["metadata"]["encryptedData"]),
             fileDecryptionKey,
-            Sodium.base642bin(trash.file.metadataDecryptionHeader),
+            Sodium.base642bin(trash.metadataDecryptionHeader),
           );
           Map<String, dynamic> metadata =
               jsonDecode(utf8.decode(encodedMetadata));
-          trash.file.applyMetadata(metadata);
+          trash.applyMetadata(metadata);
           if (item["file"]['magicMetadata'] != null) {
             final utfEncodedMmd = await CryptoUtil.decryptChaCha(
                 Sodium.base642bin(item["file"]['magicMetadata']['data']),
                 fileDecryptionKey,
                 Sodium.base642bin(item["file"]['magicMetadata']['header']));
-            trash.file.mMdEncodedJson = utf8.decode(utfEncodedMmd);
-            trash.file.mMdVersion = item["file"]['magicMetadata']['version'];
+            trash.mMdEncodedJson = utf8.decode(utfEncodedMmd);
+            trash.mMdVersion = item["file"]['magicMetadata']['version'];
           }
           if (item["isDeleted"]) {
             deletedFiles.add(trash);
@@ -96,7 +93,7 @@ class TrashDiffFetcher {
             latestUpdatedAtTime);
       } else {
         Bus.instance.fire(RemoteSyncEvent(false));
-        return Diff(<Trash>[], <Trash>[], <Trash>[], 0, 0);
+        return Diff(<TrashFile>[], <TrashFile>[], <TrashFile>[], 0, 0);
       }
     } catch (e, s) {
       _logger.severe(e, s);
@@ -106,9 +103,9 @@ class TrashDiffFetcher {
 }
 
 class Diff {
-  final List<Trash> trashedFiles;
-  final List<Trash> restoredFiles;
-  final List<Trash> deletedFiles;
+  final List<TrashFile> trashedFiles;
+  final List<TrashFile> restoredFiles;
+  final List<TrashFile> deletedFiles;
   final int fetchCount;
   final int lastSyncedTimeStamp;
 

@@ -38,12 +38,12 @@ class TrashSyncService {
     if (diff.deletedFiles.isNotEmpty) {
       _logger.fine("discard ${diff.deletedFiles.length} deleted items");
       await _trashDB
-          .delete(diff.deletedFiles.map((e) => e.file.uploadedFileID).toList());
+          .delete(diff.deletedFiles.map((e) => e.uploadedFileID).toList());
     }
     if (diff.restoredFiles.isNotEmpty) {
       _logger.fine("discard ${diff.restoredFiles.length} restored items");
       await _trashDB.delete(
-          diff.restoredFiles.map((e) => e.file.uploadedFileID).toList());
+          diff.restoredFiles.map((e) => e.uploadedFileID).toList());
     }
     if (diff.lastSyncedTimeStamp != 0) {
       await setSyncTime(diff.lastSyncedTimeStamp);
@@ -66,9 +66,14 @@ class TrashSyncService {
 
   Future<void> trashFilesOnServer(List<TrashRequest> trashRequestItems) async {
     final params = <String, dynamic>{};
+    final includedFileIDs = <int>{};
     params["items"] = [];
+
     for (final item in trashRequestItems) {
-      params["items"].add(item.toJson());
+      if (!includedFileIDs.contains(item.fileID)) {
+        params["items"].add(item.toJson());
+        includedFileIDs.add(item.fileID);
+      }
     }
     return await _dio.post(
       Configuration.instance.getHttpEndpoint() + "/files/trash",

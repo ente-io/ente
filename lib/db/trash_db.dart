@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
@@ -107,12 +106,12 @@ class TrashDB {
     await db.delete(tableName);
   }
 
-  Future<void> insertMultiple(List<Trash> trashFiles) async {
+  Future<void> insertMultiple(List<TrashFile> trashFiles) async {
     final startTime = DateTime.now();
     final db = await instance.database;
     var batch = db.batch();
     int batchCounter = 0;
-    for (Trash trash in trashFiles) {
+    for (TrashFile trash in trashFiles) {
       if (batchCounter == 400) {
         await batch.commit(noResult: true);
         batch = db.batch();
@@ -129,7 +128,7 @@ class TrashDB {
     final endTime = DateTime.now();
     final duration = Duration(
         microseconds:
-        endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
+            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
     _logger.info("Batch insert of " +
         trashFiles.length.toString() +
         " took " +
@@ -137,7 +136,7 @@ class TrashDB {
         "ms.");
   }
 
-  Future<int> insert(Trash trash) async {
+  Future<int> insert(TrashFile trash) async {
     final db = await instance.database;
     return db.insert(
       tableName,
@@ -160,88 +159,85 @@ class TrashDB {
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       tableName,
-      where:
-      '$columnCreationTime >= ? AND $columnCreationTime <= ?',
+      where: '$columnCreationTime >= ? AND $columnCreationTime <= ?',
       whereArgs: [startTime, endTime],
       orderBy:
-      '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
+          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
     );
     final files = _convertToFiles(results);
     return FileLoadResult(files, files.length == limit);
   }
 
-  List<File> _convertToFiles(List<Map<String, dynamic>> results) {
-    final List<File> files = [];
+  List<TrashFile> _convertToFiles(List<Map<String, dynamic>> results) {
+    final List<TrashFile> trashedFiles = [];
     for (final result in results) {
-      files.add(_getTrashFromRow(result).file);
+      trashedFiles.add(_getTrashFromRow(result));
     }
-    return files;
+    return trashedFiles;
   }
 
-  Trash _getTrashFromRow(Map<String, dynamic> row) {
-    final trash = Trash();
-    final file = File();
-    file.uploadedFileID =
-    row[columnUploadedFileID] == -1 ? null : row[columnUploadedFileID];
-    file.localID = row[columnLocalID];
-    file.ownerID = row[columnOwnerID];
-    file.collectionID =
-    row[columnCollectionID] == -1 ? null : row[columnCollectionID];
-    file.title = row[columnTitle];
-    file.deviceFolder = row[columnDeviceFolder];
+  TrashFile _getTrashFromRow(Map<String, dynamic> row) {
+    final trashFile = TrashFile();
+    trashFile.updateAt = row[columnTrashUpdatedAt];
+    trashFile.deleteBy = row[columnTrashDeleteBy];
+    trashFile.uploadedFileID =
+        row[columnUploadedFileID] == -1 ? null : row[columnUploadedFileID];
+    trashFile.localID = row[columnLocalID];
+    trashFile.ownerID = row[columnOwnerID];
+    trashFile.collectionID =
+        row[columnCollectionID] == -1 ? null : row[columnCollectionID];
+    trashFile.title = row[columnTitle];
+    trashFile.deviceFolder = row[columnDeviceFolder];
     if (row[columnLatitude] != null && row[columnLongitude] != null) {
-      file.location = Location(row[columnLatitude], row[columnLongitude]);
+      trashFile.location = Location(row[columnLatitude], row[columnLongitude]);
     }
-    file.fileType = getFileType(row[columnFileType]);
-    file.creationTime = row[columnCreationTime];
-    file.modificationTime = row[columnModificationTime];
-    file.encryptedKey = row[columnEncryptedKey];
-    file.keyDecryptionNonce = row[columnKeyDecryptionNonce];
-    file.fileDecryptionHeader = row[columnFileDecryptionHeader];
-    file.thumbnailDecryptionHeader = row[columnThumbnailDecryptionHeader];
-    file.fileSubType = row[columnFileSubType] ?? -1;
-    file.duration = row[columnDuration] ?? 0;
-    file.hash = row[columnHash];
-    file.metadataVersion = row[columnMetadataVersion] ?? 0;
-    file.mMdVersion = row[columnMMdVersion] ?? 0;
-    file.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
-    trash.file = file;
-    trash.updateAt = row[columnTrashUpdatedAt];
-    trash.deleteBy = row[columnTrashDeleteBy];
-    return trash;
+    trashFile.fileType = getFileType(row[columnFileType]);
+    trashFile.creationTime = row[columnCreationTime];
+    trashFile.modificationTime = row[columnModificationTime];
+    trashFile.encryptedKey = row[columnEncryptedKey];
+    trashFile.keyDecryptionNonce = row[columnKeyDecryptionNonce];
+    trashFile.fileDecryptionHeader = row[columnFileDecryptionHeader];
+    trashFile.thumbnailDecryptionHeader = row[columnThumbnailDecryptionHeader];
+    trashFile.fileSubType = row[columnFileSubType] ?? -1;
+    trashFile.duration = row[columnDuration] ?? 0;
+    trashFile.hash = row[columnHash];
+    trashFile.metadataVersion = row[columnMetadataVersion] ?? 0;
+    trashFile.mMdVersion = row[columnMMdVersion] ?? 0;
+    trashFile.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
+
+    return trashFile;
   }
 
-  Map<String, dynamic> _getRowForTrash(Trash trash) {
-    final file = trash.file;
+  Map<String, dynamic> _getRowForTrash(TrashFile trash) {
     final row = <String, dynamic>{};
     row[columnTrashUpdatedAt] = trash.updateAt;
     row[columnTrashDeleteBy] = trash.deleteBy;
-    row[columnUploadedFileID] = file.uploadedFileID;
-    row[columnCollectionID] = file.collectionID;
-    row[columnOwnerID] = file.ownerID;
-    row[columnLocalID] = file.localID;
-    row[columnTitle] = file.title;
-    row[columnDeviceFolder] = file.deviceFolder;
-    if (file.location != null) {
-      row[columnLatitude] = file.location.latitude;
-      row[columnLongitude] = file.location.longitude;
+    row[columnUploadedFileID] = trash.uploadedFileID;
+    row[columnCollectionID] = trash.collectionID;
+    row[columnOwnerID] = trash.ownerID;
+    row[columnLocalID] = trash.localID;
+    row[columnTitle] = trash.title;
+    row[columnDeviceFolder] = trash.deviceFolder;
+    if (trash.location != null) {
+      row[columnLatitude] = trash.location.latitude;
+      row[columnLongitude] = trash.location.longitude;
     }
-    row[columnFileType] = getInt(file.fileType);
-    row[columnCreationTime] = file.creationTime;
-    row[columnModificationTime] = file.modificationTime;
-    row[columnEncryptedKey] = file.encryptedKey;
-    row[columnKeyDecryptionNonce] = file.keyDecryptionNonce;
-    row[columnFileDecryptionHeader] = file.fileDecryptionHeader;
-    row[columnThumbnailDecryptionHeader] = file.thumbnailDecryptionHeader;
-    row[columnFileSubType] = file.fileSubType ?? -1;
-    row[columnDuration] = file.duration ?? 0;
-    row[columnHash] = file.hash;
-    row[columnMetadataVersion] = file.metadataVersion;
-    row[columnMMdVersion] = file.mMdVersion ?? 0;
-    row[columnMMdEncodedJson] = file.mMdEncodedJson ?? '{}';
+    row[columnFileType] = getInt(trash.fileType);
+    row[columnCreationTime] = trash.creationTime;
+    row[columnModificationTime] = trash.modificationTime;
+    row[columnEncryptedKey] = trash.encryptedKey;
+    row[columnKeyDecryptionNonce] = trash.keyDecryptionNonce;
+    row[columnFileDecryptionHeader] = trash.fileDecryptionHeader;
+    row[columnThumbnailDecryptionHeader] = trash.thumbnailDecryptionHeader;
+    row[columnFileSubType] = trash.fileSubType ?? -1;
+    row[columnDuration] = trash.duration ?? 0;
+    row[columnHash] = trash.hash;
+    row[columnMetadataVersion] = trash.metadataVersion;
+    row[columnMMdVersion] = trash.mMdVersion ?? 0;
+    row[columnMMdEncodedJson] = trash.mMdEncodedJson ?? '{}';
     row[columnMMdVisibility] =
-        file.magicMetadata?.visibility ?? kVisibilityVisible;
+        trash.magicMetadata?.visibility ?? kVisibilityVisible;
     return row;
   }
 }
