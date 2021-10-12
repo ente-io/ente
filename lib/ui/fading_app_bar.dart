@@ -11,6 +11,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/models/trash_file.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/custom_app_bar.dart';
@@ -90,6 +91,8 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   AppBar _buildAppBar() {
     final List<Widget> actions = [];
+    final shouldShowActions =
+        widget.shouldShowActions && widget.file is! TrashFile;
     // only show fav option for files owned by the user
     if (widget.file.ownerID == null || widget.file.ownerID == widget.userID) {
       actions.add(_getFavoriteButton());
@@ -152,7 +155,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           fontSize: 14,
         ),
       ),
-      actions: widget.shouldShowActions ? actions : [],
+      actions: shouldShowActions ? actions : [],
       backgroundColor: Color(0x00000000),
       elevation: 0,
     );

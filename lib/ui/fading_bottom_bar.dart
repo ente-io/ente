@@ -6,9 +6,11 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/models/trash_file.dart';
 import 'package:photos/ui/file_info_dialog.dart';
 import 'package:photos/utils/archive_util.dart';
 import 'package:photos/utils/share_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class FadingBottomBar extends StatefulWidget {
   final File file;
@@ -69,7 +71,10 @@ class FadingBottomBarState extends State<FadingBottomBar> {
         ),
       ),
     );
-    if (!widget.showOnlyInfoButton) {
+    if (widget.file is TrashFile) {
+      _addTrashOptions(children);
+    }
+    if (!widget.showOnlyInfoButton && widget.file is! TrashFile) {
       if (widget.file.fileType == FileType.image ||
           widget.file.fileType == FileType.livePhoto) {
         children.add(
@@ -159,6 +164,38 @@ class FadingBottomBarState extends State<FadingBottomBar> {
       ),
       opacity: _shouldHide ? 0 : 1,
       duration: Duration(milliseconds: 150),
+    );
+  }
+
+  void _addTrashOptions(List<Widget> children) {
+    children.add(
+      Tooltip(
+        message: "restore",
+        child: Padding(
+          padding: const EdgeInsets.only(top: 12, bottom: 12),
+          child: IconButton(
+            icon: Icon(Icons.restore_outlined),
+            onPressed: () {
+              showToast("coming soon");
+            },
+          ),
+        ),
+      ),
+    );
+
+    children.add(
+      Tooltip(
+        message: "delete",
+        child: Padding(
+          padding: const EdgeInsets.only(top: 12, bottom: 12),
+          child: IconButton(
+            icon: Icon(Icons.delete_forever_outlined),
+            onPressed: () {
+              showToast("coming soon");
+            },
+          ),
+        ),
+      ),
     );
   }
 
