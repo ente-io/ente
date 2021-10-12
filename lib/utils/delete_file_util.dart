@@ -16,8 +16,10 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/trash_item_request.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/ui/linear_progress_dialog.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -55,16 +57,22 @@ Future<void> deleteFilesFromEverywhere(
   }
   deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
   final updatedCollectionIDs = <int>{};
-  final List<int> uploadedFileIDsToBeDeleted = [];
+  final List<TrashRequest> uploadedFilesToBeTrashed = [];
   final List<File> deletedFiles = [];
   for (final file in files) {
     if (file.localID != null) {
+      if (file.uploadedFileID != null && file.collectionID != null) {
+        uploadedFilesToBeTrashed.add(TrashRequest(file.uploadedFileID, file.collectionID));
+        updatedCollectionIDs.add(file.collectionID);
+      } else {
+        await FilesDB.instance.deleteLocalFile(file);
+      }
       // Remove only those files that have already been removed from disk
       if (deletedIDs.contains(file.localID) ||
           alreadyDeletedIDs.contains(file.localID)) {
         deletedFiles.add(file);
-        if (file.uploadedFileID != null) {
-          uploadedFileIDsToBeDeleted.add(file.uploadedFileID);
+        if (file.uploadedFileID != null && file.collectionID != null) {
+          uploadedFilesToBeTrashed.add(TrashRequest(file.uploadedFileID, file.collectionID));
           updatedCollectionIDs.add(file.collectionID);
         } else {
           await FilesDB.instance.deleteLocalFile(file);
@@ -73,15 +81,16 @@ Future<void> deleteFilesFromEverywhere(
     } else {
       updatedCollectionIDs.add(file.collectionID);
       deletedFiles.add(file);
-      uploadedFileIDsToBeDeleted.add(file.uploadedFileID);
+      uploadedFilesToBeTrashed.add(TrashRequest(file.uploadedFileID, file.collectionID));
     }
   }
-  if (uploadedFileIDsToBeDeleted.isNotEmpty) {
+  if (uploadedFilesToBeTrashed.isNotEmpty) {
     try {
-      await SyncService.instance
-          .deleteFilesOnServer(uploadedFileIDsToBeDeleted);
-      await FilesDB.instance
-          .deleteMultipleUploadedFiles(uploadedFileIDsToBeDeleted);
+      final fileIDs = uploadedFilesToBeTrashed.map((item) => item.fileID).toList();
+      await TrashSyncService.instance.trashFilesOnServer(uploadedFilesToBeTrashed);
+      // await SyncService.instance
+      //     .deleteFilesOnServer(fileIDs);
+       await FilesDB.instance.deleteMultipleUploadedFiles(fileIDs);
     } catch (e) {
       _logger.severe(e);
       await dialog.hide();
@@ -104,7 +113,7 @@ Future<void> deleteFilesFromEverywhere(
   }
   await dialog.hide();
   showToast("deleted from everywhere");
-  if (uploadedFileIDsToBeDeleted.isNotEmpty) {
+  if (uploadedFilesToBeTrashed.isNotEmpty) {
     RemoteSyncService.instance.sync(silently: true);
   }
 }
