@@ -40,21 +40,16 @@ class CollectionPage extends StatelessWidget {
       initialFiles: initialFiles,
     );
     return Scaffold(
-      body: Stack(children: [
-        Padding(
-          padding: EdgeInsets.only(top: Platform.isAndroid ? 80 : 100),
-          child: gallery,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(50.0),
+        child: GalleryAppBarWidget(
+          appBarType,
+          c.collection.name,
+          _selectedFiles,
+          collection: c.collection,
         ),
-        SizedBox(
-          height: Platform.isAndroid ? 80 : 100,
-          child: GalleryAppBarWidget(
-            appBarType,
-            c.collection.name,
-            _selectedFiles,
-            collection: c.collection,
-          ),
-        )
-      ]),
+      ),
+      body: gallery,
     );
   }
 }
