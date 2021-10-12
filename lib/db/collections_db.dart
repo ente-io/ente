@@ -25,12 +25,14 @@ class CollectionsDB {
   static final columnVersion = 'version';
   static final columnSharees = 'sharees';
   static final columnUpdationTime = 'updation_time';
+  static final columnIsDeleted = 'is_deleted';
 
   static final intitialScript = [...createTable(table)];
   static final migrationScripts = [
     ...alterNameToAllowNULL(),
     ...addEncryptedName(),
     ...addVersion(),
+    ...addIsDeleted(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -113,6 +115,15 @@ class CollectionsDB {
     ];
   }
 
+  static List<String> addIsDeleted() {
+    return [
+      '''
+        ALTER TABLE $table
+        ADD COLUMN $columnIsDeleted INTEGER DEFAULT 0;
+      '''
+    ];
+  }
+
   Future<List<dynamic>> insert(List<Collection> collections) async {
     final db = await instance.database;
     var batch = db.batch();
@@ -172,6 +183,11 @@ class CollectionsDB {
     row[columnSharees] =
         json.encode(collection.sharees?.map((x) => x?.toMap())?.toList());
     row[columnUpdationTime] = collection.updationTime;
+    if (collection.isDeleted == null || collection.isDeleted == false) {
+      row[columnIsDeleted] = 0;
+    } else {
+      row[columnIsDeleted] = 1;
+    }
     return row;
   }
 
@@ -193,6 +209,7 @@ class CollectionsDB {
       List<User>.from((json.decode(row[columnSharees]) as List)
           .map((x) => User.fromMap(x))),
       int.parse(row[columnUpdationTime]),
+      isDeleted: (row[columnIsDeleted] ?? 0) != 0,
     );
   }
 }
