@@ -18,6 +18,7 @@ import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/notification_service.dart';
+import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
@@ -149,6 +150,7 @@ Future<void> _init(bool isBackground) async {
   await SyncService.instance.init();
   await MemoriesService.instance.init();
   await LocalSettings.instance.init();
+  await PushService.instance.init();
   FeatureFlagService.instance.init();
   _logger.info("Initialization done");
   _initializationStatus.complete();

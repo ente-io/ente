@@ -1,0 +1,50 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:logging/logging.dart';
+
+class PushService {
+  static final PushService instance = PushService._privateConstructor();
+  static final _logger = Logger("PushService");
+
+  PushService._privateConstructor();
+
+  Future<void> init() async {
+    await Firebase.initializeApp();
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      _logger.info('Got a message whilst in the foreground!');
+      _logger.info('Message data: ${message.data}');
+
+      if (message.notification != null) {
+        _logger.info(
+            'Message also contained a notification: ${message.notification}');
+      }
+    });
+    _logger.info("token " + await FirebaseMessaging.instance.getToken());
+    _logger
+        .info("APNS token " + await FirebaseMessaging.instance.getAPNSToken());
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    _logger.info('init complete');
+  }
+}
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  final logger = Logger("PushService");
+  logger.info("Handling a background message: ${message.messageId}");
+  logger.info('Message data: ${message.data}');
+
+  if (message.notification != null) {
+    logger
+        .info('Message also contained a notification: ${message.notification}');
+  }
+}
