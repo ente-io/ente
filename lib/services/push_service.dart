@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/services/sync_service.dart';
 
 class PushService {
   static final PushService instance = PushService._privateConstructor();
@@ -22,12 +23,7 @@ class PushService {
     );
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       _logger.info('Got a message whilst in the foreground!');
-      _logger.info('Message data: ${message.data}');
-
-      if (message.notification != null) {
-        _logger.info(
-            'Message also contained a notification: ${message.notification}');
-      }
+      _handlePushMessage(message);
     });
     _logger.info("token " + await FirebaseMessaging.instance.getToken());
     _logger
@@ -37,14 +33,21 @@ class PushService {
   }
 }
 
+final _logger = Logger("PushService");
+
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  final logger = Logger("PushService");
-  logger.info("Handling a background message: ${message.messageId}");
-  logger.info('Message data: ${message.data}');
+  _logger.info("Handling a background message: ${message.messageId}");
+  _handlePushMessage(message);
+}
 
+void _handlePushMessage(RemoteMessage message) {
+  _logger.info('Message data: ${message.data}');
   if (message.notification != null) {
-    logger
+    _logger
         .info('Message also contained a notification: ${message.notification}');
+  }
+  if (message.data != null && message.data["purpose"] == "sync") {
+    SyncService.instance.sync();
   }
 }
