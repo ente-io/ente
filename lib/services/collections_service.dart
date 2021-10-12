@@ -65,14 +65,14 @@ class CollectionsService {
     });
   }
 
-  Future<List<Collection>> sync() async {
+  Future<List<Collection>> sync({bool isBackground = false}) async {
     _logger.info("Syncing");
     final lastCollectionUpdationTime =
         _prefs.getInt(_collectionsSyncTimeKey) ?? 0;
 
     // Might not have synced the collection fully
     final fetchedCollections =
-        await _fetchCollections(lastCollectionUpdationTime ?? 0);
+        await _fetchCollections(lastCollectionUpdationTime ?? 0, isBackground);
     final updatedCollections = <Collection>[];
     int maxUpdationTime = lastCollectionUpdationTime;
     for (final collection in fetchedCollections) {
@@ -253,12 +253,14 @@ class CollectionsService {
     }
   }
 
-  Future<List<Collection>> _fetchCollections(int sinceTime) async {
+  Future<List<Collection>> _fetchCollections(
+      int sinceTime, bool isBackground) async {
     try {
       final response = await _dio.get(
         Configuration.instance.getHttpEndpoint() + "/collections",
         queryParameters: {
           "sinceTime": sinceTime,
+          "source": isBackground ? "bg" : "fg",
         },
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),

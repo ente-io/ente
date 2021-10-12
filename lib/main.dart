@@ -146,7 +146,7 @@ Future<void> _init(bool isBackground) async {
   await CollectionsService.instance.init();
   await FileUploader.instance.init(isBackground);
   await LocalSyncService.instance.init(isBackground);
-  await RemoteSyncService.instance.init();
+  await RemoteSyncService.instance.init(isBackground);
   await SyncService.instance.init();
   await MemoriesService.instance.init();
   await LocalSettings.instance.init();
