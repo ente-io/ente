@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/models/trash_file.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TrashDB {
@@ -30,7 +32,6 @@ class TrashDB {
   static final columnFileType = 'file_type';
   static final columnFileSubType = 'file_sub_type';
   static final columnDuration = 'duration';
-  static final columnExif = 'exif';
   static final columnHash = 'hash';
   static final columnMetadataVersion = 'metadata_version';
   static final columnModificationTime = 'modification_time';
@@ -97,9 +98,89 @@ class TrashDB {
       onCreate: _onCreate,
     );
   }
+
   Future<void> clearTable() async {
     final db = await instance.database;
     await db.delete(tableName);
   }
 
+  Future<void> insertMultiple(List<Trash> trashFiles) async {
+    final startTime = DateTime.now();
+    final db = await instance.database;
+    var batch = db.batch();
+    int batchCounter = 0;
+    for (Trash trash in trashFiles) {
+      if (batchCounter == 400) {
+        await batch.commit(noResult: true);
+        batch = db.batch();
+        batchCounter = 0;
+      }
+      batch.insert(
+        tableName,
+        _getRowForTrash(trash),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      batchCounter++;
+    }
+    await batch.commit(noResult: true);
+    final endTime = DateTime.now();
+    final duration = Duration(
+        microseconds:
+            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
+    _logger.info("Batch insert of " +
+        trashFiles.length.toString() +
+        " took " +
+        duration.inMilliseconds.toString() +
+        "ms.");
+  }
+
+  Future<int> insert(Trash trash) async {
+    final db = await instance.database;
+    return db.insert(
+      tableName,
+      _getRowForTrash(trash),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<int> delete(List<int> uploadedFileIDs) async {
+    final db = await instance.database;
+    return db.delete(
+      tableName,
+      where: '$columnUploadedFileID IN (${uploadedFileIDs.join(', ')})',
+    );
+  }
+
+  Map<String, dynamic> _getRowForTrash(Trash trash) {
+    final file = trash.file;
+    final row = <String, dynamic>{};
+    row[columnTrashUpdatedAt] = trash.updateAt;
+    row[columnTrashDeleteBy] = trash.deleteBy;
+    row[columnUploadedFileID] = file.uploadedFileID;
+    row[columnCollectionID] = file.collectionID;
+    row[columnOwnerID] = file.ownerID;
+    row[columnLocalID] = file.localID;
+    row[columnTitle] = file.title;
+    row[columnDeviceFolder] = file.deviceFolder;
+    if (file.location != null) {
+      row[columnLatitude] = file.location.latitude;
+      row[columnLongitude] = file.location.longitude;
+    }
+    row[columnFileType] = getInt(file.fileType);
+    row[columnCreationTime] = file.creationTime;
+    row[columnModificationTime] = file.modificationTime;
+    row[columnEncryptedKey] = file.encryptedKey;
+    row[columnKeyDecryptionNonce] = file.keyDecryptionNonce;
+    row[columnFileDecryptionHeader] = file.fileDecryptionHeader;
+    row[columnThumbnailDecryptionHeader] = file.thumbnailDecryptionHeader;
+    row[columnFileSubType] = file.fileSubType ?? -1;
+    row[columnDuration] = file.duration ?? 0;
+    row[columnHash] = file.hash;
+    row[columnMetadataVersion] = file.metadataVersion;
+    row[columnMMdVersion] = file.mMdVersion ?? 0;
+    row[columnMMdEncodedJson] = file.mMdEncodedJson ?? '{}';
+    row[columnMMdVisibility] =
+        file.magicMetadata?.visibility ?? kVisibilityVisible;
+    return row;
+  }
 }

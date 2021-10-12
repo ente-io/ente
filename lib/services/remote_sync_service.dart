@@ -15,6 +15,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/local_sync_service.dart';
+import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
@@ -61,6 +62,7 @@ class RemoteSyncService {
       await _markArchiveAsSynced();
     }
 
+    await TrashSyncService.instance.syncTrash();
     bool hasUploadedFiles = await _uploadDiff();
     if (hasUploadedFiles) {
       sync(silently: true);
