@@ -9,8 +9,11 @@ import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/ui/file_info_dialog.dart';
 import 'package:photos/utils/archive_util.dart';
+import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
+
+import 'common/dialogs.dart';
 
 class FadingBottomBar extends StatefulWidget {
   final File file;
@@ -190,8 +193,10 @@ class FadingBottomBarState extends State<FadingBottomBar> {
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(
             icon: Icon(Icons.delete_forever_outlined),
-            onPressed: () {
-              showToast("coming soon");
+            onPressed: () async {
+              final trashedFile = <TrashFile>[];
+              trashedFile.add(widget.file);
+              await deleteFromTrash(context, trashedFile);
             },
           ),
         ),

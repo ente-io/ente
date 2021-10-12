@@ -16,10 +16,12 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/trash_file.dart';
 import 'package:photos/models/trash_item_request.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
+import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/linear_progress_dialog.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -193,6 +195,28 @@ Future<void> deleteFilesOnDeviceOnly(
         .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
   }
   await dialog.hide();
+}
+
+Future<void> deleteFromTrash(
+    BuildContext context, List<TrashFile> files) async {
+  final result = await showChoiceDialog(context, "delete permanently?",
+      "the files will be permanently removed from your ente account",
+      firstAction: "delete", actionType: ActionType.critical);
+  if( result != DialogUserChoice.firstChoice) {
+    return;
+  }
+  final dialog = createProgressDialog(context, "permanently deleting...");
+  await dialog.show();
+  try {
+    await TrashSyncService.instance.deleteFromTrash(files);
+    await dialog.hide();
+    showToast("successfully deleted");
+    Bus.instance.fire(FilesUpdatedEvent(files, type: EventType.deleted));
+  } catch (e, s) {
+    Logger("TrashUtil").info("failed to delete from trash", e, s);
+    await dialog.hide();
+    await showGenericErrorDialog(context);
+  }
 }
 
 Future<bool> deleteLocalFiles(

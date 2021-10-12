@@ -4,6 +4,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/trash_db.dart';
+import 'package:photos/models/trash_file.dart';
 import 'package:photos/models/trash_item_request.dart';
 import 'package:photos/utils/trash_diff_fetcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,8 +43,8 @@ class TrashSyncService {
     }
     if (diff.restoredFiles.isNotEmpty) {
       _logger.fine("discard ${diff.restoredFiles.length} restored items");
-      await _trashDB.delete(
-          diff.restoredFiles.map((e) => e.uploadedFileID).toList());
+      await _trashDB
+          .delete(diff.restoredFiles.map((e) => e.uploadedFileID).toList());
     }
     if (diff.lastSyncedTimeStamp != 0) {
       await setSyncTime(diff.lastSyncedTimeStamp);
@@ -68,7 +69,6 @@ class TrashSyncService {
     final params = <String, dynamic>{};
     final includedFileIDs = <int>{};
     params["items"] = [];
-
     for (final item in trashRequestItems) {
       if (!includedFileIDs.contains(item.fileID)) {
         params["items"].add(item.toJson());
@@ -84,5 +84,30 @@ class TrashSyncService {
       ),
       data: params,
     );
+  }
+
+  Future<void> deleteFromTrash(List<TrashFile> trashedFiles) async {
+    final params = <String, dynamic>{};
+    final uniqueFileIds =
+        trashedFiles.map((e) => e.uploadedFileID).toSet().toList();
+    params["fileIDs"] = [];
+    for (final fileID in uniqueFileIds) {
+      params["fileIDs"].add(fileID);
+    }
+    try {
+      await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/trash/delete",
+        options: Options(
+          headers: {
+            "X-Auth-Token": Configuration.instance.getToken(),
+          },
+        ),
+        data: params,
+      );
+      _trashDB.delete(uniqueFileIds);
+    } catch (e, s) {
+      _logger.severe("failed to delete from trash", e, s);
+      rethrow;
+    }
   }
 }
