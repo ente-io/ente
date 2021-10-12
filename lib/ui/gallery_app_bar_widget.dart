@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
@@ -19,13 +18,13 @@ import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/archive_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 enum GalleryAppBarType {
   homepage,
   archive,
+  trash,
   local_folder,
   // indicator for gallery view of collections shared with the user
   shared_collection,

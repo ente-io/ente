@@ -15,15 +15,16 @@ import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/archive_page.dart';
 import 'package:photos/ui/collection_page.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/device_folder_page.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
+import 'package:photos/ui/trash_page.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:photos/ui/archive_page.dart';
 
 class CollectionsGalleryWidget extends StatefulWidget {
   const CollectionsGalleryWidget({Key key}) : super(key: key);
@@ -214,6 +215,42 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                   routeToPage(
                     context,
                     ArchivePage(),
+                  );
+                }),
+            Padding(padding: EdgeInsets.all(8)),
+            OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                  side: BorderSide(
+                    width: 2,
+                    color: Colors.white12,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(
+                      Icons.delete_sharp,
+                      color: Colors.white,
+                    ),
+                    Padding(padding: EdgeInsets.all(6)),
+                    Text(
+                      "trash",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                onPressed: () async {
+                  routeToPage(
+                    context,
+                    TrashPage(),
                   );
                 }),
             Padding(padding: EdgeInsets.fromLTRB(12, 12, 12, 36)),

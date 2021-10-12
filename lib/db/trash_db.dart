@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/models/file.dart';
+import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:sqflite/sqflite.dart';
@@ -126,7 +129,7 @@ class TrashDB {
     final endTime = DateTime.now();
     final duration = Duration(
         microseconds:
-            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
+        endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
     _logger.info("Batch insert of " +
         trashFiles.length.toString() +
         " took " +
@@ -149,6 +152,64 @@ class TrashDB {
       tableName,
       where: '$columnUploadedFileID IN (${uploadedFileIDs.join(', ')})',
     );
+  }
+
+  Future<FileLoadResult> getTrashedFiles(int startTime, int endTime,
+      {int limit, bool asc}) async {
+    final db = await instance.database;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+    final results = await db.query(
+      tableName,
+      where:
+      '$columnCreationTime >= ? AND $columnCreationTime <= ?',
+      whereArgs: [startTime, endTime],
+      orderBy:
+      '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
+      limit: limit,
+    );
+    final files = _convertToFiles(results);
+    return FileLoadResult(files, files.length == limit);
+  }
+
+  List<File> _convertToFiles(List<Map<String, dynamic>> results) {
+    final List<File> files = [];
+    for (final result in results) {
+      files.add(_getTrashFromRow(result).file);
+    }
+    return files;
+  }
+
+  Trash _getTrashFromRow(Map<String, dynamic> row) {
+    final trash = Trash();
+    final file = File();
+    file.uploadedFileID =
+    row[columnUploadedFileID] == -1 ? null : row[columnUploadedFileID];
+    file.localID = row[columnLocalID];
+    file.ownerID = row[columnOwnerID];
+    file.collectionID =
+    row[columnCollectionID] == -1 ? null : row[columnCollectionID];
+    file.title = row[columnTitle];
+    file.deviceFolder = row[columnDeviceFolder];
+    if (row[columnLatitude] != null && row[columnLongitude] != null) {
+      file.location = Location(row[columnLatitude], row[columnLongitude]);
+    }
+    file.fileType = getFileType(row[columnFileType]);
+    file.creationTime = row[columnCreationTime];
+    file.modificationTime = row[columnModificationTime];
+    file.encryptedKey = row[columnEncryptedKey];
+    file.keyDecryptionNonce = row[columnKeyDecryptionNonce];
+    file.fileDecryptionHeader = row[columnFileDecryptionHeader];
+    file.thumbnailDecryptionHeader = row[columnThumbnailDecryptionHeader];
+    file.fileSubType = row[columnFileSubType] ?? -1;
+    file.duration = row[columnDuration] ?? 0;
+    file.hash = row[columnHash];
+    file.metadataVersion = row[columnMetadataVersion] ?? 0;
+    file.mMdVersion = row[columnMMdVersion] ?? 0;
+    file.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
+    trash.file = file;
+    trash.updateAt = row[columnTrashUpdatedAt];
+    trash.deleteBy = row[columnTrashDeleteBy];
+    return trash;
   }
 
   Map<String, dynamic> _getRowForTrash(Trash trash) {
