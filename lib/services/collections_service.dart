@@ -455,7 +455,7 @@ class CollectionsService {
       params["fileIDs"].add(file.uploadedFileID);
     }
     await _dio.post(
-      Configuration.instance.getHttpEndpoint() + "/collections/remove-files",
+      Configuration.instance.getHttpEndpoint() + "/collections/v2/remove-files",
       data: params,
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
