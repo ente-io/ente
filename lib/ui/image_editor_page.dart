@@ -13,6 +13,7 @@ import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/editor/filtered_image.dart';
+import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -129,12 +130,15 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             });
           },
         ),
-        imageDecoration: (image) {
-          return FilteredImage(
-            child: image,
-            brightness: _brightness,
-            saturation: _saturation,
-          );
+        loadStateChanged: (state) {
+          if (state.extendedImageLoadState == LoadState.completed) {
+            return FilteredImage(
+              child: state.completedWidget,
+              brightness: _brightness,
+              saturation: _saturation,
+            );
+          }
+          return loadWidget;
         },
       ),
     );
