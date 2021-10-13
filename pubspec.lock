@@ -258,10 +258,10 @@ packages:
   extended_image:
     dependency: "direct main"
     description:
-      path: "thirdparty/extended_image"
-      relative: true
-    source: path
-    version: "5.0.0"
+      name: extended_image
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.1.2"
   extended_image_library:
     dependency: transitive
     description:
