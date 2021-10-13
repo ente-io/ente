@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:background_fetch/background_fetch.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -151,6 +152,7 @@ Future<void> _init(bool isBackground) async {
   await MemoriesService.instance.init();
   await LocalSettings.instance.init();
   await PushService.instance.init();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   FeatureFlagService.instance.init();
   _logger.info("Initialization done");
   _initializationStatus.complete();
@@ -290,5 +292,19 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     }).catchError((e) {
       _logger.info('[BackgroundFetch] configure ERROR: $e');
     });
+  }
+}
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  if (_initializationStatus == null) {
+    // App is dead
+    _runWithLogs(() async {
+      _logger.info("Background push received");
+      await _init(true);
+      UpdateService.instance.showUpdateNotification();
+      await _sync(isAppInBackground: true);
+    }, prefix: "[bg]");
+  } else {
+    // App has already been initialized, will let foreground handle everything
   }
 }
