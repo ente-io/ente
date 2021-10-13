@@ -197,8 +197,9 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             onPressed: () async {
               final trashedFile = <TrashFile>[];
               trashedFile.add(widget.file);
-              await deleteFromTrash(context, trashedFile);
-              Navigator.pop(context);
+              if (await deleteFromTrash(context, trashedFile) == true) {
+                Navigator.pop(context);
+              }
             },
           ),
         ),

@@ -197,13 +197,13 @@ Future<void> deleteFilesOnDeviceOnly(
   await dialog.hide();
 }
 
-Future<void> deleteFromTrash(
+Future<bool> deleteFromTrash(
     BuildContext context, List<TrashFile> files) async {
   final result = await showChoiceDialog(context, "delete permanently?",
       "the files will be permanently removed from your ente account",
       firstAction: "delete", actionType: ActionType.critical);
-  if( result != DialogUserChoice.firstChoice) {
-    return;
+  if (result != DialogUserChoice.firstChoice) {
+    return false;
   }
   final dialog = createProgressDialog(context, "permanently deleting...");
   await dialog.show();
@@ -212,10 +212,12 @@ Future<void> deleteFromTrash(
     showToast("successfully deleted");
     await dialog.hide();
     Bus.instance.fire(FilesUpdatedEvent(files, type: EventType.deleted));
+    return true;
   } catch (e, s) {
-    Logger("TrashUtil").info("failed to delete from trash", e, s);
+    _logger.info("failed to delete from trash", e, s);
     await dialog.hide();
     await showGenericErrorDialog(context);
+    return false;
   }
 }
 
