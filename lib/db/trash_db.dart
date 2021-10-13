@@ -183,6 +183,7 @@ class TrashDB {
     trashFile.deleteBy = row[columnTrashDeleteBy];
     trashFile.uploadedFileID =
         row[columnUploadedFileID] == -1 ? null : row[columnUploadedFileID];
+    trashFile.generatedID = -1 * trashFile.uploadedFileID;
     trashFile.localID = row[columnLocalID];
     trashFile.ownerID = row[columnOwnerID];
     trashFile.collectionID =

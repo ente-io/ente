@@ -30,8 +30,22 @@ class TrashPage extends StatelessWidget {
             creationStartTime, creationEndTime,
             limit: limit, asc: asc);
       },
-      reloadEvent: Bus.instance.on<CollectionUpdatedEvent>(),
-      forceReloadEvents: [Bus.instance.on<CollectionUpdatedEvent>()],
+      reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
+            (event) =>
+        event.updatedFiles.firstWhere(
+                (element) => element.uploadedFileID != null,
+            orElse: () => null) !=
+            null,
+      ),
+      forceReloadEvents: [
+        Bus.instance.on<FilesUpdatedEvent>().where(
+              (event) =>
+          event.updatedFiles.firstWhere(
+                  (element) => element.uploadedFileID != null,
+              orElse: () => null) !=
+              null,
+        ),
+      ],
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: null,

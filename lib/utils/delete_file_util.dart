@@ -209,8 +209,8 @@ Future<void> deleteFromTrash(
   await dialog.show();
   try {
     await TrashSyncService.instance.deleteFromTrash(files);
-    await dialog.hide();
     showToast("successfully deleted");
+    await dialog.hide();
     Bus.instance.fire(FilesUpdatedEvent(files, type: EventType.deleted));
   } catch (e, s) {
     Logger("TrashUtil").info("failed to delete from trash", e, s);

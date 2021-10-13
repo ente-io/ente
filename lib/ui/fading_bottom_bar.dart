@@ -180,6 +180,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             icon: Icon(Icons.restore_outlined),
             onPressed: () {
               showToast("coming soon");
+              Navigator.pop(context);
             },
           ),
         ),
@@ -197,6 +198,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
               final trashedFile = <TrashFile>[];
               trashedFile.add(widget.file);
               await deleteFromTrash(context, trashedFile);
+              Navigator.pop(context);
             },
           ),
         ),
