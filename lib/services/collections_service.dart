@@ -380,6 +380,37 @@ class CollectionsService {
     }
   }
 
+  Future<void> restore(int toCollectionID, List<File> files) async {
+    final params = <String, dynamic>{};
+    params["collectionID"] = toCollectionID;
+    params["files"] = [];
+    for (final file in files) {
+      final key = decryptFileKey(file);
+      file.generatedID = null; // So that a new entry is created in the FilesDB
+      file.collectionID = toCollectionID;
+      final encryptedKeyData =
+          CryptoUtil.encryptSync(key, getCollectionKey(toCollectionID));
+      file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
+      file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
+      params["files"].add(CollectionFileItem(
+              file.uploadedFileID, file.encryptedKey, file.keyDecryptionNonce)
+          .toMap());
+    }
+    try {
+      await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/collections/restore-files",
+        data: params,
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
+      await _filesDB.insertMultiple(files);
+      Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
+    } catch (e, s) {
+      _logger.severe("failed to restore files", e, s);
+      rethrow;
+    }
+  }
+
   Future<void> move(
       int toCollectionID, int fromCollectionID, List<File> files) async {
     _validateMoveRequest(toCollectionID, fromCollectionID, files);
@@ -426,6 +457,8 @@ class CollectionsService {
           type: EventType.deleted));
     });
   }
+
+
 
   void _validateMoveRequest(
       int toCollectionID, int fromCollectionID, List<File> files) {

@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/ui/file_info_dialog.dart';
 import 'package:photos/utils/archive_util.dart';
@@ -14,6 +16,7 @@ import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 import 'common/dialogs.dart';
+import 'create_collection_page.dart';
 
 class FadingBottomBar extends StatefulWidget {
   final File file;
@@ -180,7 +183,17 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             icon: Icon(Icons.restore_outlined),
             onPressed: () {
               showToast("coming soon");
-              Navigator.pop(context);
+              final _selectedFiles = SelectedFiles();
+              _selectedFiles.toggleSelection(widget.file);
+              Navigator.push(
+                  context,
+                  PageTransition(
+                      type: PageTransitionType.bottomToTop,
+                      child: CreateCollectionPage(
+                        _selectedFiles,
+                        null,
+                        actionType: CollectionActionType.restoreFiles,
+                      )));
             },
           ),
         ),
