@@ -286,7 +286,8 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     final dialog = createProgressDialog(context, "restoring files...");
     await dialog.show();
     try {
-      await CollectionsService.instance.restore(toCollectionID, widget.selectedFiles.files?.toList());
+      await CollectionsService.instance
+          .restore(toCollectionID, widget.selectedFiles.files?.toList());
       RemoteSyncService.instance.sync(silently: true);
       widget.selectedFiles?.clearAll();
       await dialog.hide();

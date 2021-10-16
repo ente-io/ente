@@ -213,6 +213,9 @@ class CollectionsService {
   Uint8List getCollectionKey(int collectionID) {
     if (!_cachedKeys.containsKey(collectionID)) {
       final collection = _collectionIDToCollections[collectionID];
+      if (collection == null) {
+        throw AssertionError('collectionID $collectionID is not cached');
+      }
       _cachedKeys[collectionID] = _getDecryptedKey(collection);
     }
     return _cachedKeys[collectionID];
@@ -457,8 +460,6 @@ class CollectionsService {
           type: EventType.deleted));
     });
   }
-
-
 
   void _validateMoveRequest(
       int toCollectionID, int fromCollectionID, List<File> files) {
