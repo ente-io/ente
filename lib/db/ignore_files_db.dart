@@ -103,7 +103,31 @@ class IgnoreFilesDB {
     );
   }
 
+  // return map of localID to set of titles associated with the given localIDs
+  // Note: localIDs can easily clash across devices for Android. The set of titles
+  // is to handle that case. In iOS, for selected permissions, we may not always
+  // get correct deviceFolder.
+  Future<Map<String, Set<String>>> getIgnoredFiles() async {
+    final db = await instance.database;
+    final rows = await db.query(tableName);
+    final result = <String, Set<String>>{};
+    for (final row in rows) {
+      final ignoredFile = _getIgnoredFileFromRow(row);
+      result
+          .putIfAbsent(ignoredFile.localID, () => <String>{})
+          .add(ignoredFile.title);
+    }
+    return result;
+  }
+
+  IgnoredFile _getIgnoredFileFromRow(Map<String, dynamic> row) {
+    return IgnoredFile(row[columnLocalID], row[columnDeviceFolder],
+        row[columnTitle], row[columnReason]);
+  }
+
   Map<String, dynamic> _getRowForIgnoredFile(IgnoredFile ignoredFile) {
+    assert(ignoredFile.title != null);
+    assert(ignoredFile.localID != null);
     final row = <String, dynamic>{};
     row[columnLocalID] = ignoredFile.localID;
     row[columnTitle] = ignoredFile.title;

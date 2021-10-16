@@ -7,6 +7,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/ignore_files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -125,6 +126,23 @@ class RemoteSyncService {
     }
   }
 
+  bool _shouldIgnoreFileUpload(
+      Map<String, Set<String>> ignoredFilesMap, File file) {
+    if (file.localID == null || file.localID.isEmpty) {
+      return false;
+    }
+    if (!ignoredFilesMap.containsKey(file.localID)) {
+      return false;
+    }
+    // only compare title in Android because title may be missing in IOS
+    // and iOS anyways use uuid for localIDs of file, so collision should be
+    // rate.
+    if (Platform.isAndroid) {
+      return ignoredFilesMap[file.localID].contains(file.title ?? '');
+    }
+    return true;
+  }
+
   Future<bool> _uploadDiff() async {
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     List<File> filesToBeUploaded;
@@ -138,6 +156,16 @@ class RemoteSyncService {
     if (!Configuration.instance.shouldBackupVideos()) {
       filesToBeUploaded
           .removeWhere((element) => element.fileType == FileType.video);
+    }
+    if (filesToBeUploaded.isNotEmpty) {
+      final ignoredFilesMap = await IgnoreFilesDB.instance.getIgnoredFiles();
+      int prevCount = filesToBeUploaded.length;
+      filesToBeUploaded.removeWhere(
+          (file) => _shouldIgnoreFileUpload(ignoredFilesMap, file));
+      if (prevCount != filesToBeUploaded.length) {
+        _logger.info((prevCount - filesToBeUploaded.length).toString() +
+            " files were ignored for upload");
+      }
     }
     _logger.info(
         filesToBeUploaded.length.toString() + " new files to be uploaded.");
