@@ -3,7 +3,9 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/ignore_files_db.dart';
 import 'package:photos/db/trash_db.dart';
+import 'package:photos/models/ignored_file.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/models/trash_item_request.dart';
 import 'package:photos/utils/trash_diff_fetcher.dart';
@@ -15,7 +17,7 @@ class TrashSyncService {
   final _filesDB = FilesDB.instance;
   final _trashDB = TrashDB.instance;
   static const kDiffLimit = 2500;
-  static const kLastTrashSyncTime = "last_trash_sync_time";
+  static const kLastTrashSyncTime = "last_trash_sync_timex";
   SharedPreferences _prefs;
 
   TrashSyncService._privateConstructor();
@@ -46,11 +48,34 @@ class TrashSyncService {
       await _trashDB
           .delete(diff.restoredFiles.map((e) => e.uploadedFileID).toList());
     }
+
+    await _updateIgnoredFiles(diff);
+
     if (diff.lastSyncedTimeStamp != 0) {
       await setSyncTime(diff.lastSyncedTimeStamp);
     }
     if (diff.fetchCount == kDiffLimit) {
       return await syncTrash();
+    }
+  }
+
+  Future<void> _updateIgnoredFiles(Diff diff) async {
+    final ignoredFiles = <IgnoredFile>[];
+    for (TrashFile t in diff.trashedFiles) {
+      final file = IgnoredFile.fromTrashItem(t);
+      if (file != null) {
+        ignoredFiles.add(file);
+      }
+    }
+    for (TrashFile t in diff.deletedFiles) {
+      final file = IgnoredFile.fromTrashItem(t);
+      if (file != null) {
+        ignoredFiles.add(file);
+      }
+    }
+    if (ignoredFiles.isNotEmpty) {
+      _logger.fine('updating ${ignoredFiles.length} ignored files ');
+      await IgnoreFilesDB.instance.insertMultiple(ignoredFiles);
     }
   }
 

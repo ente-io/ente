@@ -61,8 +61,12 @@ class RemoteSyncService {
     if (!_hasSyncedArchive()) {
       await _markArchiveAsSynced();
     }
-
-    await TrashSyncService.instance.syncTrash();
+    // sync trash but consume error during initial launch.
+    // this is to ensure that we don't pause upload due to any error during
+    // the trash sync. Impact: We may end up re-uploading a file which was
+    // recently trashed.
+    await TrashSyncService.instance.syncTrash()
+    .onError((e, s) => _logger.severe('trash sync failed', e, s));
     bool hasUploadedFiles = await _uploadDiff();
     if (hasUploadedFiles) {
       sync(silently: true);

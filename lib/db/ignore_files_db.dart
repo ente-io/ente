@@ -11,9 +11,6 @@ import 'package:sqflite/sqflite.dart';
 // when they delete a file from web/another device, we should not automatically
 // upload the files.
 class IgnoreFilesDB {
-  static const kIgnoreReasonTrash = "trash";
-  static const kIgnoreReasonInvalidFile = "invalidFile";
-
   static final _databaseName = "ente.ignore_files.db";
   static final _databaseVersion = 1;
   static final Logger _logger = Logger("IgnoreFilesDB");
