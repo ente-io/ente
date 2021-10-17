@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'package:logging/logging.dart';
+import 'package:flutter/widgets.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
@@ -10,6 +12,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/ui/common_elements.dart';
+import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
@@ -30,8 +33,19 @@ class ThumbnailWidget extends StatefulWidget {
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
   }) : super(key: key ?? Key(file.tag()));
+
   @override
   _ThumbnailWidgetState createState() => _ThumbnailWidgetState();
+}
+
+Widget getFileInfoContainer(File file) {
+  if (file is TrashFile) {
+    return Container(
+      child: Text(daysLeft(file.deleteBy)),
+      alignment: Alignment.bottomCenter,
+    );
+  }
+  return emptyContainer;
 }
 
 class _ThumbnailWidgetState extends State<ThumbnailWidget> {
@@ -165,7 +179,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         ),
         widget.shouldShowSyncStatus && widget.file.uploadedFileID == null
             ? kUnsyncedIconOverlay
-            : emptyContainer,
+            : getFileInfoContainer(widget.file),
       ],
       fit: StackFit.expand,
     );
@@ -198,7 +212,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   Future _getThumbnailFromDisk() async {
     getThumbnailFromLocal(widget.file).then((thumbData) async {
       if (thumbData == null) {
-        if (widget.file.uploadedFileID != null ) {
+        if (widget.file.uploadedFileID != null) {
           if (widget.file is! TrashFile) {
             _logger.fine("Removing localID reference for " + widget.file.tag());
             widget.file.localID = null;
