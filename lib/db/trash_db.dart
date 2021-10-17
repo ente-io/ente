@@ -67,8 +67,6 @@ class TrashDB {
           $columnModificationTime INTEGER NOT NULL,
           $columnFileSubType INTEGER,
           $columnDuration INTEGER,
-          $columnHash TEXT,
-          $columnMetadataVersion INTEGER,
           $columnMMdEncodedJson TEXT DEFAULT '{}',
           $columnMMdVersion INTEGER DEFAULT 0,
         );
