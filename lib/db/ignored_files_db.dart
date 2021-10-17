@@ -5,19 +5,17 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/ignored_file.dart';
 import 'package:sqflite/sqflite.dart';
 
-// Keeps track of local fileIDs which should be not uploaded to ente without
-// user's intervention, even if they marked the folder for backup.
-// Common cases: when a user deletes a file just from ente on current device or
-// when they delete a file from web/another device, we should not automatically
-// upload the files.
+// Keeps track of localIDs which should be not uploaded to ente without
+// user's intervention.
+// Common use case:
+// when a user deletes a file just from ente on current or different device.
 class IgnoreFilesDB {
-  static final _databaseName = "ente.ignore_files.db";
+  static final _databaseName = "ente.ignored_files.db";
   static final _databaseVersion = 1;
-  static final Logger _logger = Logger("IgnoreFilesDB");
+  static final Logger _logger = Logger("IgnoredFilesDB");
   static final tableName = 'ignored_files';
 
   static final columnLocalID = 'local_id';
-  static final columnDeviceFolder = 'device_folder';
   static final columnTitle = 'title';
   static final columnReason = 'reason';
 
@@ -26,12 +24,10 @@ class IgnoreFilesDB {
         CREATE TABLE $tableName (
           $columnLocalID TEXT NOT NULL,
           $columnTitle TEXT NOT NULL,
-          $columnDeviceFolder TEXT,
           $columnReason TEXT DEFAULT $kIgnoreReasonTrash,
-          UNIQUE($columnLocalID, $columnDeviceFolder, $columnDeviceFolder)
+          UNIQUE($columnLocalID, $columnTitle)
         );
       CREATE INDEX IF NOT EXISTS local_id_index ON $tableName($columnLocalID);
-      CREATE INDEX IF NOT EXISTS device_folder_index ON $tableName($columnDeviceFolder);
       ''');
   }
 
@@ -104,9 +100,10 @@ class IgnoreFilesDB {
   }
 
   // return map of localID to set of titles associated with the given localIDs
-  // Note: localIDs can easily clash across devices for Android. The set of titles
-  // is to handle that case. In iOS, for selected permissions, we may not always
-  // get correct deviceFolder.
+  // Note: localIDs can easily clash across devices for Android, so we should
+  // always compare both localID & title in Android before ignoring the file for upload.
+  // iOS: localID is usually UUID and the title in localDB may be missing (before upload) as the
+  // photo manager library doesn't always fetch the title by default.
   Future<Map<String, Set<String>>> getIgnoredFiles() async {
     final db = await instance.database;
     final rows = await db.query(tableName);
@@ -121,8 +118,7 @@ class IgnoreFilesDB {
   }
 
   IgnoredFile _getIgnoredFileFromRow(Map<String, dynamic> row) {
-    return IgnoredFile(row[columnLocalID], row[columnDeviceFolder],
-        row[columnTitle], row[columnReason]);
+    return IgnoredFile(row[columnLocalID], row[columnTitle], row[columnReason]);
   }
 
   Map<String, dynamic> _getRowForIgnoredFile(IgnoredFile ignoredFile) {
@@ -131,10 +127,7 @@ class IgnoreFilesDB {
     final row = <String, dynamic>{};
     row[columnLocalID] = ignoredFile.localID;
     row[columnTitle] = ignoredFile.title;
-    row[columnDeviceFolder] = ignoredFile.deviceFolder;
-    if (ignoredFile.reason != null && ignoredFile.reason != "") {
-      row[columnReason] = ignoredFile.reason;
-    }
+    row[columnReason] = ignoredFile.reason;
     return row;
   }
 }

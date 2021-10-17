@@ -2,13 +2,13 @@ import 'package:photos/models/trash_file.dart';
 
 const kIgnoreReasonTrash = "trash";
 const kIgnoreReasonInvalidFile = "invalidFile";
+
 class IgnoredFile {
   final String localID;
-  final String deviceFolder;
   final String title;
   String reason;
 
-  IgnoredFile(this.localID, this.deviceFolder, this.title, this.reason);
+  IgnoredFile(this.localID, this.title, this.reason);
 
   factory IgnoredFile.fromTrashItem(TrashFile trashFile) {
     if (trashFile == null) return null;
@@ -19,7 +19,6 @@ class IgnoredFile {
       return null;
     }
 
-    return IgnoredFile(trashFile.localID, trashFile.deviceFolder,
-        trashFile.title, kIgnoreReasonTrash);
+    return IgnoredFile(trashFile.localID, trashFile.title, kIgnoreReasonTrash);
   }
 }

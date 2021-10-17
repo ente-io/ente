@@ -3,7 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/db/ignore_files_db.dart';
+import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/models/ignored_file.dart';
 import 'package:photos/models/trash_file.dart';

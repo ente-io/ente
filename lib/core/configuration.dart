@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/db/ignore_files_db.dart';
+import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/db/memories_db.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/db/trash_db.dart';
