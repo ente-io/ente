@@ -113,7 +113,7 @@ class CollectionsDB {
     return [
       '''
         ALTER TABLE $table
-        ADD COLUMN $columnVersion INTEGER DEFAULT $_sqlBoolFalse;
+        ADD COLUMN $columnVersion INTEGER DEFAULT 0;
       '''
     ];
   }
@@ -122,7 +122,7 @@ class CollectionsDB {
     return [
       '''
         ALTER TABLE $table
-        ADD COLUMN $columnIsDeleted INTEGER DEFAULT 0;
+        ADD COLUMN $columnIsDeleted INTEGER DEFAULT $_sqlBoolFalse;
       '''
     ];
   }
