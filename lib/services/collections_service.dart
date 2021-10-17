@@ -111,7 +111,7 @@ class CollectionsService {
     final collections = await _db.getAllCollections();
     final updatedCollections = <Collection>[];
     for (final c in collections) {
-      if (c.updationTime > getCollectionSyncTime(c.id)) {
+      if (c.updationTime > getCollectionSyncTime(c.id) && !c.isDeleted) {
         updatedCollections.add(c);
       }
     }
@@ -141,8 +141,11 @@ class CollectionsService {
     return _localCollections[path];
   }
 
-  List<Collection> getCollections() {
-    return _collectionIDToCollections.values.toList();
+  // getActiveCollections returns list of collections which are not deleted yet
+  List<Collection> getActiveCollections() {
+    return _collectionIDToCollections.values
+        .toList()
+        .where((element) => element.isDeleted);
   }
 
   Future<List<User>> getSharees(int collectionID) {
@@ -214,6 +217,8 @@ class CollectionsService {
     if (!_cachedKeys.containsKey(collectionID)) {
       final collection = _collectionIDToCollections[collectionID];
       if (collection == null) {
+        // trigger async fetch for collection
+        fetchCollectionByID(collectionID);
         throw AssertionError('collectionID $collectionID is not cached');
       }
       _cachedKeys[collectionID] = _getDecryptedKey(collection);
@@ -315,10 +320,10 @@ class CollectionsService {
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
       );
       assert(response != null && response.data != null);
-      final c = response.data["collection"];
-      await _db.insert(List.of(c));
-      _cacheCollectionAttributes(c);
-      return Collection.fromMap(c);
+      final collection = Collection.fromMap(response.data["collection"]);
+      await _db.insert(List.from([collection]));
+      _cacheCollectionAttributes(collection);
+      return collection;
     } catch (e) {
       if (e is DioError && e.response?.statusCode == 401) {
         throw UnauthorizedError();
@@ -538,7 +543,7 @@ class CollectionsService {
   Collection _cacheCollectionAttributes(Collection collection) {
     final collectionWithDecryptedName =
         _getCollectionWithDecryptedName(collection);
-    if (collection.attributes.encryptedPath != null) {
+    if (collection.attributes.encryptedPath != null && !(collection.isDeleted)) {
       _localCollections[decryptCollectionPath(collection)] =
           collectionWithDecryptedName;
     }

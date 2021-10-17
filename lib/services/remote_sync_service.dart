@@ -89,7 +89,7 @@ class RemoteSyncService {
   }
 
   Future<void> _resyncAllCollectionsSinceTime(int sinceTime) async {
-    final collections = _collectionsService.getCollections();
+    final collections = _collectionsService.getActiveCollections();
     for (final c in collections) {
       await _syncCollectionDiff(c.id,
           min(_collectionsService.getCollectionSyncTime(c.id), sinceTime));
