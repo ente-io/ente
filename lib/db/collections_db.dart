@@ -11,6 +11,8 @@ class CollectionsDB {
   static final _databaseName = "ente.collections.db";
   static final table = 'collections';
   static final tempTable = 'temp_collections';
+  static final _sqlBoolTrue = 1;
+  static final _sqlBoolFalse = 0;
 
   static final columnID = 'collection_id';
   static final columnOwner = 'owner';
@@ -39,6 +41,7 @@ class CollectionsDB {
       initializationScript: intitialScript, migrationScripts: migrationScripts);
 
   CollectionsDB._privateConstructor();
+
   static final CollectionsDB instance = CollectionsDB._privateConstructor();
 
   static Future<Database> _dbFuture;
@@ -110,7 +113,7 @@ class CollectionsDB {
     return [
       '''
         ALTER TABLE $table
-        ADD COLUMN $columnVersion INTEGER DEFAULT 0;
+        ADD COLUMN $columnVersion INTEGER DEFAULT $_sqlBoolFalse;
       '''
     ];
   }
@@ -183,10 +186,10 @@ class CollectionsDB {
     row[columnSharees] =
         json.encode(collection.sharees?.map((x) => x?.toMap())?.toList());
     row[columnUpdationTime] = collection.updationTime;
-    if (collection.isDeleted == null || collection.isDeleted == false) {
-      row[columnIsDeleted] = 0;
+    if (collection.isDeleted ?? false) {
+      row[columnIsDeleted] = _sqlBoolTrue;
     } else {
-      row[columnIsDeleted] = 1;
+      row[columnIsDeleted] = _sqlBoolTrue;
     }
     return row;
   }
@@ -209,7 +212,8 @@ class CollectionsDB {
       List<User>.from((json.decode(row[columnSharees]) as List)
           .map((x) => User.fromMap(x))),
       int.parse(row[columnUpdationTime]),
-      isDeleted: (row[columnIsDeleted] ?? 0) != 0,
+      // default to False is columnIsDeleted is not set
+      isDeleted: (row[columnIsDeleted] ?? _sqlBoolFalse) == _sqlBoolTrue,
     );
   }
 }

@@ -10,6 +10,10 @@ import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:sqflite/sqflite.dart';
 
+// The TrashDB doesn't need to flatten and store all attributes of a file.
+// Before adding any other column, we should evaluate if we need to query on that
+// column or not while showing trashed items. Even if we miss storing any new attributes,
+// during restore, all file attributes will be fetched & stored as required.
 class TrashDB {
   static final _databaseName = "ente.trash.db";
   static final _databaseVersion = 1;
@@ -26,6 +30,9 @@ class TrashDB {
   static final columnFileDecryptionHeader = 'file_decryption_header';
   static final columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
 
+  static final columnModificationTime = 'modification_time';
+  static final columnCreationTime = 'creation_time';
+
   static final columnLocalID = 'local_id';
   static final columnTitle = 'title';
   static final columnDeviceFolder = 'device_folder';
@@ -34,13 +41,9 @@ class TrashDB {
   static final columnFileType = 'file_type';
   static final columnFileSubType = 'file_sub_type';
   static final columnDuration = 'duration';
-  static final columnHash = 'hash';
-  static final columnMetadataVersion = 'metadata_version';
-  static final columnModificationTime = 'modification_time';
-  static final columnCreationTime = 'creation_time';
+
   static final columnMMdEncodedJson = 'mmd_encoded_json';
   static final columnMMdVersion = 'mmd_ver';
-  static final columnMMdVisibility = 'mmd_visibility';
 
   Future _onCreate(Database db, int version) async {
     await db.execute('''
@@ -68,7 +71,6 @@ class TrashDB {
           $columnMetadataVersion INTEGER,
           $columnMMdEncodedJson TEXT DEFAULT '{}',
           $columnMMdVersion INTEGER DEFAULT 0,
-          $columnMMdVisibility INTEGER DEFAULT $kVisibilityVisible
         );
       CREATE INDEX IF NOT EXISTS creation_time_index ON $tableName($columnCreationTime); 
       CREATE INDEX IF NOT EXISTS creation_time_index ON $tableName($columnTrashDeleteBy);
@@ -208,8 +210,6 @@ class TrashDB {
     trashFile.thumbnailDecryptionHeader = row[columnThumbnailDecryptionHeader];
     trashFile.fileSubType = row[columnFileSubType] ?? -1;
     trashFile.duration = row[columnDuration] ?? 0;
-    trashFile.hash = row[columnHash];
-    trashFile.metadataVersion = row[columnMetadataVersion] ?? 0;
     trashFile.mMdVersion = row[columnMMdVersion] ?? 0;
     trashFile.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
 
@@ -223,6 +223,11 @@ class TrashDB {
     row[columnUploadedFileID] = trash.uploadedFileID;
     row[columnCollectionID] = trash.collectionID;
     row[columnOwnerID] = trash.ownerID;
+    row[columnEncryptedKey] = trash.encryptedKey;
+    row[columnKeyDecryptionNonce] = trash.keyDecryptionNonce;
+    row[columnFileDecryptionHeader] = trash.fileDecryptionHeader;
+    row[columnThumbnailDecryptionHeader] = trash.thumbnailDecryptionHeader;
+
     row[columnLocalID] = trash.localID;
     row[columnTitle] = trash.title;
     row[columnDeviceFolder] = trash.deviceFolder;
@@ -233,18 +238,10 @@ class TrashDB {
     row[columnFileType] = getInt(trash.fileType);
     row[columnCreationTime] = trash.creationTime;
     row[columnModificationTime] = trash.modificationTime;
-    row[columnEncryptedKey] = trash.encryptedKey;
-    row[columnKeyDecryptionNonce] = trash.keyDecryptionNonce;
-    row[columnFileDecryptionHeader] = trash.fileDecryptionHeader;
-    row[columnThumbnailDecryptionHeader] = trash.thumbnailDecryptionHeader;
     row[columnFileSubType] = trash.fileSubType ?? -1;
     row[columnDuration] = trash.duration ?? 0;
-    row[columnHash] = trash.hash;
-    row[columnMetadataVersion] = trash.metadataVersion;
     row[columnMMdVersion] = trash.mMdVersion ?? 0;
     row[columnMMdEncodedJson] = trash.mMdEncodedJson ?? '{}';
-    row[columnMMdVisibility] =
-        trash.magicMetadata?.visibility ?? kVisibilityVisible;
     return row;
   }
 }
