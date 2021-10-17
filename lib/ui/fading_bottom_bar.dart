@@ -9,14 +9,11 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
+import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/file_info_dialog.dart';
 import 'package:photos/utils/archive_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/share_util.dart';
-import 'package:photos/utils/toast_util.dart';
-
-import 'common/dialogs.dart';
-import 'create_collection_page.dart';
 
 class FadingBottomBar extends StatefulWidget {
   final File file;
@@ -108,11 +105,10 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             child: Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 12),
               child: IconButton(
-                icon: Icon(
-                  Platform.isAndroid
-                      ? (isArchived
-                          ? Icons.unarchive_outlined
-                          : Icons.archive_outlined)
+                icon: Icon(Platform.isAndroid
+                    ? (isArchived
+                        ? Icons.unarchive_outlined
+                        : Icons.archive_outlined)
                     : (isArchived
                         ? CupertinoIcons.archivebox_fill
                         : CupertinoIcons.archivebox)),
@@ -182,7 +178,6 @@ class FadingBottomBarState extends State<FadingBottomBar> {
           child: IconButton(
             icon: Icon(Icons.restore_outlined),
             onPressed: () {
-              showToast("coming soon");
               final _selectedFiles = SelectedFiles();
               _selectedFiles.toggleSelection(widget.file);
               Navigator.push(

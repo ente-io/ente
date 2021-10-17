@@ -106,6 +106,12 @@ class TrashDB {
     await db.delete(tableName);
   }
 
+  Future<bool> isEmpty() async {
+    final db = await instance.database;
+    var rows = await db.query(tableName, limit: 1);
+    return rows == null || rows.isEmpty;
+  }
+
   Future<void> insertMultiple(List<TrashFile> trashFiles) async {
     final startTime = DateTime.now();
     final db = await instance.database;

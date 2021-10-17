@@ -43,6 +43,7 @@ Widget getFileInfoContainer(File file) {
     return Container(
       child: Text(daysLeft(file.deleteBy)),
       alignment: Alignment.bottomCenter,
+      padding: EdgeInsets.fromLTRB(0, 0, 0, 5),
     );
   }
   return emptyContainer;

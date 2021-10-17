@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/trash_db.dart';
-import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/selected_files.dart';
 
@@ -25,31 +24,35 @@ class TrashPage extends StatelessWidget {
   @override
   Widget build(Object context) {
     final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return TrashDB.instance.getTrashedFiles(
-            creationStartTime, creationEndTime,
-            limit: limit, asc: asc);
-      },
-      reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
-            (event) =>
-        event.updatedFiles.firstWhere(
-                (element) => element.uploadedFileID != null,
-            orElse: () => null) !=
-            null,
-      ),
-      forceReloadEvents: [
-        Bus.instance.on<FilesUpdatedEvent>().where(
+        asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
+          return TrashDB.instance.getTrashedFiles(
+              creationStartTime, creationEndTime,
+              limit: limit, asc: asc);
+        },
+        reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
               (event) =>
-          event.updatedFiles.firstWhere(
-                  (element) => element.uploadedFileID != null,
-              orElse: () => null) !=
-              null,
-        ),
-      ],
-      tagPrefix: tagPrefix,
-      selectedFiles: _selectedFiles,
-      initialFiles: null,
-    );
+                  event.updatedFiles.firstWhere(
+                      (element) => element.uploadedFileID != null,
+                      orElse: () => null) !=
+                  null,
+            ),
+        forceReloadEvents: [
+          Bus.instance.on<FilesUpdatedEvent>().where(
+                (event) =>
+                    event.updatedFiles.firstWhere(
+                        (element) => element.uploadedFileID != null,
+                        orElse: () => null) !=
+                    null,
+              ),
+        ],
+        tagPrefix: tagPrefix,
+        selectedFiles: _selectedFiles,
+        initialFiles: null,
+        footer: Padding(
+          padding: EdgeInsets.all(15),
+          child: Text(
+              'memories shows the number the days after which they will be permanently deleted.'),
+        ));
     return Scaffold(
       body: Stack(children: [
         Padding(
