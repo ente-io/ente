@@ -75,13 +75,19 @@ class CollectionsService {
         await _fetchCollections(lastCollectionUpdationTime ?? 0);
     final updatedCollections = <Collection>[];
     int maxUpdationTime = lastCollectionUpdationTime;
+    final ownerID = _config.getUserID();
     for (final collection in fetchedCollections) {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
-        await _db.deleteCollection(collection.id);
         await setCollectionSyncTime(collection.id, null);
         Bus.instance.fire(LocalPhotosUpdatedEvent(List<File>.empty()));
+      }
+      // remove reference for incoming collections when unshared/deleted
+      if (collection.isDeleted && ownerID != collection?.owner?.id) {
+        await _db.deleteCollection(collection.id);
       } else {
+        // keep entry for deletedCollection as collectionKey may be used during
+        // trash file decryption
         updatedCollections.add(collection);
       }
       maxUpdationTime = collection.updationTime > maxUpdationTime
@@ -543,7 +549,8 @@ class CollectionsService {
   Collection _cacheCollectionAttributes(Collection collection) {
     final collectionWithDecryptedName =
         _getCollectionWithDecryptedName(collection);
-    if (collection.attributes.encryptedPath != null && !(collection.isDeleted)) {
+    if (collection.attributes.encryptedPath != null &&
+        !(collection.isDeleted)) {
       _localCollections[decryptCollectionPath(collection)] =
           collectionWithDecryptedName;
     }
