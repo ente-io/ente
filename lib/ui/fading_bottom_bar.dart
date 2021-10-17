@@ -178,14 +178,14 @@ class FadingBottomBarState extends State<FadingBottomBar> {
           child: IconButton(
             icon: Icon(Icons.restore_outlined),
             onPressed: () {
-              final _selectedFiles = SelectedFiles();
-              _selectedFiles.toggleSelection(widget.file);
+              final selectedFiles = SelectedFiles();
+              selectedFiles.toggleSelection(widget.file);
               Navigator.push(
                   context,
                   PageTransition(
                       type: PageTransitionType.bottomToTop,
                       child: CreateCollectionPage(
-                        _selectedFiles,
+                        selectedFiles,
                         null,
                         actionType: CollectionActionType.restoreFiles,
                       )));

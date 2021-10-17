@@ -5,6 +5,7 @@ import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/db/trash_db.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/ignored_file.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/models/trash_item_request.dart';
@@ -111,10 +112,9 @@ class TrashSyncService {
     );
   }
 
-  Future<void> deleteFromTrash(List<TrashFile> trashedFiles) async {
+  Future<void> deleteFromTrash(List<File> files) async {
     final params = <String, dynamic>{};
-    final uniqueFileIds =
-        trashedFiles.map((e) => e.uploadedFileID).toSet().toList();
+    final uniqueFileIds = files.map((e) => e.uploadedFileID).toSet().toList();
     params["fileIDs"] = [];
     for (final fileID in uniqueFileIds) {
       params["fileIDs"].add(fileID);

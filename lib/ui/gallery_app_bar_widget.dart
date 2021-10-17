@@ -256,6 +256,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = <Widget>[];
+    if (widget.type == GalleryAppBarType.trash) {
+      _addTrashAction(actions);
+      return actions;
+    }
     // skip add button for incoming collection till this feature is implemented
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.type != GalleryAppBarType.shared_collection) {
@@ -379,6 +383,38 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       ));
     }
     return actions;
+  }
+
+  void _addTrashAction(List<Widget> actions) {
+    actions.add(Tooltip(
+      message: "restore",
+      child: IconButton(
+        icon: Icon(Icons.restore_outlined),
+        onPressed: () {
+          Navigator.push(
+              context,
+              PageTransition(
+                  type: PageTransitionType.bottomToTop,
+                  child: CreateCollectionPage(
+                    widget.selectedFiles,
+                    null,
+                    actionType: CollectionActionType.restoreFiles,
+                  )));
+        },
+      ),
+    ));
+    actions.add(Tooltip(
+      message: "delete permanently",
+      child: IconButton(
+        icon: Icon(Icons.delete_forever_outlined),
+        onPressed: () async {
+          if (await deleteFromTrash(
+              context, widget.selectedFiles.files.toList())) {
+            _clearSelectedFiles();
+          }
+        },
+      ),
+    ));
   }
 
   Future<void> _handleVisibilityChangeRequest(

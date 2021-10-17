@@ -198,7 +198,7 @@ Future<void> deleteFilesOnDeviceOnly(
 }
 
 Future<bool> deleteFromTrash(
-    BuildContext context, List<TrashFile> files) async {
+    BuildContext context, List<File> files) async {
   final result = await showChoiceDialog(context, "delete permanently?",
       "the files will be permanently removed from your ente account",
       firstAction: "delete", actionType: ActionType.critical);

@@ -91,8 +91,8 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   AppBar _buildAppBar() {
     final List<Widget> actions = [];
-    final shouldShowActions =
-        widget.shouldShowActions && widget.file is! TrashFile;
+    final isTrashedFile =  widget.file is TrashFile;
+    final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
     // only show fav option for files owned by the user
     if (widget.file.ownerID == null || widget.file.ownerID == widget.userID) {
       actions.add(_getFavoriteButton());
