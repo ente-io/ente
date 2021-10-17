@@ -306,6 +306,28 @@ class CollectionsService {
     return collection;
   }
 
+  Future<Collection> fetchCollectionByID(int collectionID) async {
+    try {
+      _logger.fine('fetching collectionByID $collectionID');
+      final response = await _dio.get(
+        Configuration.instance.getHttpEndpoint() + "/collections/$collectionID",
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
+      assert(response != null && response.data != null);
+      final c = response.data["collection"];
+      await _db.insert(List.of(c));
+      _cacheCollectionAttributes(c);
+      return Collection.fromMap(c);
+    } catch (e) {
+      if (e is DioError && e.response?.statusCode == 401) {
+        throw UnauthorizedError();
+      }
+      _logger.severe('failed to fetch collection: $collectionID', e);
+      rethrow;
+    }
+  }
+
   Future<Collection> getOrCreateForPath(String path) async {
     if (_localCollections.containsKey(path) &&
         _localCollections[path].owner.id == _config.getUserID()) {
