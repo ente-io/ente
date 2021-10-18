@@ -1,10 +1,10 @@
 import constants from 'utils/strings/constants';
 import MessageDialog from './MessageDialog';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ProgressBar, Button } from 'react-bootstrap';
 import { ComfySpan } from './ExportInProgress';
-import { replaceThumbnail } from 'services/migrate';
-import { LS_KEYS, setData } from 'utils/storage/localStorage';
+import { getLargeThumbnailFiles, replaceThumbnail } from 'services/migrate';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 
 export type SetProgressTracker = React.Dispatch<
     React.SetStateAction<{
@@ -13,7 +13,8 @@ export type SetProgressTracker = React.Dispatch<
     }>
 >;
 interface Props {
-    show: boolean;
+    isOpen: boolean;
+    show: () => void;
     hide: () => void;
 }
 export enum FIX_STATE {
@@ -47,10 +48,31 @@ export default function FixLargeThumbnails(props: Props) {
         current: 0,
         total: 0,
     });
+    const [largeThumbnailFiles, setLargeThumbnailFiles] = useState<number[]>(
+        []
+    );
 
+    useEffect(() => {
+        const main = async () => {
+            const largeThumbnailFiles = await getLargeThumbnailFiles();
+            if (largeThumbnailFiles?.length > 0) {
+                props.show();
+            }
+            setLargeThumbnailFiles(largeThumbnailFiles);
+        };
+        if (props.isOpen) {
+            const fixState = getData(LS_KEYS.THUMBNAIL_FIX_STATE)?.state;
+            console.log(fixState);
+            setFixState(fixState ?? FIX_STATE.NOT_STARTED);
+            main();
+        }
+    }, [props.isOpen]);
     const startFix = async () => {
         updateFixState(FIX_STATE.RUNNING);
-        const completedWithError = await replaceThumbnail(setProgressTracker);
+        const completedWithError = await replaceThumbnail(
+            setProgressTracker,
+            new Set(largeThumbnailFiles)
+        );
         updateFixState(
             completedWithError ? FIX_STATE.RAN_WITH_ERROR : FIX_STATE.COMPLETED
         );
@@ -62,7 +84,7 @@ export default function FixLargeThumbnails(props: Props) {
     };
     return (
         <MessageDialog
-            show={props.show}
+            show={props.isOpen}
             onHide={props.hide}
             attributes={{
                 title: constants.FIX_LARGE_THUMBNAILS,

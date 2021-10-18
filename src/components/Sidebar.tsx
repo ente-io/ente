@@ -51,7 +51,7 @@ export default function Sidebar(props: Props) {
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
     const [exportModalView, setExportModalView] = useState(false);
-    const [fixLargeThumbsView, setFixLargeThumbsView] = useState(true);
+    const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
     const galleryContext = useContext(GalleryContext);
     useEffect(() => {
         const main = async () => {
@@ -271,8 +271,9 @@ export default function Sidebar(props: Props) {
                 <Divider />
                 <>
                     <FixLargeThumbnails
-                        show={fixLargeThumbsView}
+                        isOpen={fixLargeThumbsView}
                         hide={() => setFixLargeThumbsView(false)}
+                        show={() => setFixLargeThumbsView(true)}
                     />
                     <LinkButton
                         style={{ marginTop: '30px' }}

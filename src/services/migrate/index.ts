@@ -36,14 +36,14 @@ export async function getLargeThumbnailFiles() {
         throw e;
     }
 }
-export async function replaceThumbnail(setProgressTracker: SetProgressTracker) {
+export async function replaceThumbnail(
+    setProgressTracker: SetProgressTracker,
+    largeThumbnailFileIDs: Set<number>
+) {
     let completedWithError = false;
     try {
         const token = getToken();
         const worker = await new CryptoWorker();
-        const largeThumbnailFileIDs = new Set(
-            (await getLargeThumbnailFiles()) ?? []
-        );
         const files = await getLocalFiles();
         const largeThumbnailFiles = files.filter((file) =>
             largeThumbnailFileIDs.has(file.id)
