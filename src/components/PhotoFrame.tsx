@@ -185,6 +185,14 @@ const PhotoFrame = ({
                 timeTaken: (Date.now() - startTime) / 1000,
             });
         }
+        if (search.fileIndex || search.fileIndex === 0) {
+            const filteredDataIdx = filteredData.findIndex(
+                (data) => data.dataIndex === search.fileIndex
+            );
+            if (filteredDataIdx || filteredDataIdx === 0) {
+                onThumbnailClick(filteredDataIdx)();
+            }
+        }
     }, [search]);
 
     useEffect(() => {
