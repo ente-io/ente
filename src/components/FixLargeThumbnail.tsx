@@ -23,7 +23,7 @@ export enum FIX_STATE {
     RAN_WITH_ERROR,
 }
 function Message(props: { fixState: FIX_STATE }) {
-    let message = <></>;
+    let message = null;
     switch (props.fixState) {
         case FIX_STATE.NOT_STARTED:
             message = constants.REPLACE_THUMBNAIL_NOT_STARTED();
@@ -35,7 +35,11 @@ function Message(props: { fixState: FIX_STATE }) {
             message = constants.REPLACE_THUMBNAIL_RAN_WITH_ERROR();
             break;
     }
-    return <div style={{ marginBottom: '30px' }}>{message}</div>;
+    return message ? (
+        <div style={{ marginBottom: '30px' }}>{message}</div>
+    ) : (
+        <></>
+    );
 }
 export default function FixLargeThumbnails(props: Props) {
     const [fixState, setFixState] = useState(FIX_STATE.NOT_STARTED);
@@ -87,7 +91,12 @@ export default function FixLargeThumbnails(props: Props) {
                                 files exported
                             </span>
                         </div>
-                        <div style={{ width: '100%', marginTop: '10px' }}>
+                        <div
+                            style={{
+                                width: '100%',
+                                marginTop: '10px',
+                                marginBottom: '20px',
+                            }}>
                             <ProgressBar
                                 now={Math.round(
                                     (progressTracker.current * 100) /
@@ -111,15 +120,18 @@ export default function FixLargeThumbnails(props: Props) {
                         onClick={props.hide}>
                         {constants.CLOSE}
                     </Button>
-                    <div style={{ width: '30px' }} />
                     {(fixState === FIX_STATE.NOT_STARTED ||
                         fixState === FIX_STATE.RAN_WITH_ERROR) && (
-                        <Button
-                            block
-                            variant={'outline-success'}
-                            onClick={startFix}>
-                            {constants.UPDATE}
-                        </Button>
+                        <>
+                            <div style={{ width: '30px' }} />
+
+                            <Button
+                                block
+                                variant={'outline-success'}
+                                onClick={startFix}>
+                                {constants.UPDATE}
+                            </Button>
+                        </>
                     )}
                 </div>
             </div>
