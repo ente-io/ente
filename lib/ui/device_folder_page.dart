@@ -34,23 +34,16 @@ class DeviceFolderPage extends StatelessWidget {
       initialFiles: [folder.thumbnail],
     );
     return Scaffold(
-      body: Stack(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(top: Platform.isAndroid ? 80 : 100),
-            child: gallery,
-          ),
-          SizedBox(
-            height: Platform.isAndroid ? 80 : 100,
-            child: GalleryAppBarWidget(
-              GalleryAppBarType.local_folder,
-              folder.name,
-              _selectedFiles,
-              path: folder.thumbnail.deviceFolder,
-            ),
-          )
-        ],
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(50.0),
+        child: GalleryAppBarWidget(
+          GalleryAppBarType.local_folder,
+          folder.name,
+          _selectedFiles,
+          path: folder.thumbnail.deviceFolder,
+        ),
       ),
+      body: gallery,
     );
   }
 
