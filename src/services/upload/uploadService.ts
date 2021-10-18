@@ -7,7 +7,7 @@ import {
     getMetadataMapKey,
     ParsedMetaDataJSON,
 } from './metadataService';
-// import { generateThumbnail } from './thumbnailService';
+import { generateThumbnail } from './thumbnailService';
 import {
     getFileOriginalName,
     getFileData,
@@ -109,17 +109,15 @@ class UploadService {
         fileTypeInfo: FileTypeInfo
     ): Promise<FileInMemory> {
         const isHEIC = fileIsHEIC(fileTypeInfo.exactType);
-        console.log(isHEIC);
-        // const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-        //     worker,
-        //     rawFile,
-        //     fileTypeInfo.fileType,
-        //     isHEIC
-        // );
+
+        const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
+            worker,
+            rawFile,
+            fileTypeInfo.fileType,
+            isHEIC
+        );
 
         const filedata = await getFileData(worker, rawFile);
-        const hasStaticThumbnail = false;
-        const thumbnail = filedata as Uint8Array;
 
         return {
             filedata,
