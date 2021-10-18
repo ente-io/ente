@@ -553,6 +553,22 @@ const englishConstants = {
     SORT_BY_MODIFICATION_TIME: 'last updated',
     SORT_BY_COLLECTION_NAME: 'album name',
     FIX_LARGE_THUMBNAILS: 'fix large thumbnails',
+    REPLACE_THUMBNAIL_NOT_STARTED: () => (
+        <>
+            Some of your files have been upload with very large thumbnail due to
+            bug in web client the thumbnails. do you want to update them with
+            low res version to save space
+        </>
+    ),
+    REPLACE_THUMBNAIL_COMPLETED: () => (
+        <>your thumbnails have been successfully updated</>
+    ),
+    REPLACE_THUMBNAIL_RAN_WITH_ERROR: () => (
+        <>
+            thumbnail update for some of your files failed ,please try to fix
+            them
+        </>
+    ),
 };
 
 export default englishConstants;

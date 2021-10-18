@@ -1,5 +1,5 @@
 import downloadManager from 'services/downloadManager';
-import { File, fileAttribute, FILE_TYPE } from 'services/fileService';
+import { fileAttribute, FILE_TYPE, getLocalFiles } from 'services/fileService';
 import {
     generateThumbnail,
     MAX_THUMBNAIL_SIZE,
@@ -9,9 +9,9 @@ import { logError } from 'utils/sentry';
 import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from 'services/HTTPService';
 import CryptoWorker from 'utils/crypto';
-import { convertToHumanReadable } from 'utils/billingUtil';
 import uploadHttpClient from 'services/upload/uploadHttpClient';
 import { EncryptionResult, UploadURL } from 'services/upload/uploadService';
+import { SetProgressTracker } from 'components/FixLargeThumbnail';
 
 const ENDPOINT = getEndpoint();
 
@@ -36,22 +36,33 @@ export async function getLargeThumbnailFiles() {
         throw e;
     }
 }
-export async function regenerateThumbnail(files: File[]) {
+export async function regenerateThumbnail(
+    setProgressTracker: SetProgressTracker
+) {
     try {
         const token = getToken();
         const worker = await new CryptoWorker();
         const largeThumbnailFileIDs = new Set(
             (await getLargeThumbnailFiles()) ?? []
         );
+        const files = await getLocalFiles();
         const largeThumbnailFiles = files.filter((file) =>
             largeThumbnailFileIDs.has(file.id)
         );
+        if (largeThumbnailFiles.length === 0) {
+            return;
+        }
+        setProgressTracker({ current: 0, total: largeThumbnailFiles.length });
         const uploadURLs: UploadURL[] = [];
         uploadHttpClient.fetchUploadURLs(
             largeThumbnailFiles.length,
             uploadURLs
         );
-        for (const file of largeThumbnailFiles) {
+        for (const [idx, file] of largeThumbnailFiles.entries()) {
+            setProgressTracker({
+                current: idx,
+                total: largeThumbnailFiles.length,
+            });
             const originalThumbnail = await downloadManager.getThumbnail(
                 token,
                 file
@@ -73,10 +84,6 @@ export async function regenerateThumbnail(files: File[]) {
                 uploadURLs.pop()
             );
             await updateThumbnail(file.id, newUploadedThumbnail);
-            console.log(
-                URL.createObjectURL(new Blob([newThumbnail])),
-                convertToHumanReadable(newThumbnail.length)
-            );
         }
     } catch (e) {
         logError(e, 'failed to regenerate thumbnail');
