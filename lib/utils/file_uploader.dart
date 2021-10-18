@@ -246,6 +246,13 @@ class FileUploader {
     if (!canUploadUnderCurrentNetworkConditions && !forcedUpload) {
       throw WiFiUnavailableError();
     }
+    final fileOnDisk = await FilesDB.instance.getFile(file.generatedID);
+    final wasAlreadyUploadedElseWhere = fileOnDisk.uploadedFileID != null &&
+        fileOnDisk.updationTime != null &&
+        fileOnDisk.collectionID == collectionID;
+    if (wasAlreadyUploadedElseWhere) {
+      return fileOnDisk;
+    }
 
     try {
       await _uploadLocks.acquireLock(
@@ -285,8 +292,9 @@ class FileUploader {
         }
       }
       Uint8List key;
-      var isAlreadyUploadedFile = file.uploadedFileID != null;
-      if (isAlreadyUploadedFile) {
+      bool isUpdatedFile =
+          file.uploadedFileID != null && file.updationTime == null;
+      if (isUpdatedFile) {
         key = decryptFileKey(file);
       } else {
         key = null;
@@ -333,7 +341,7 @@ class FileUploader {
         throw SyncStopRequestedError();
       }
       File remoteFile;
-      if (isAlreadyUploadedFile) {
+      if (isUpdatedFile) {
         remoteFile = await _updateFile(
           file,
           fileObjectKey,
@@ -407,7 +415,8 @@ class FileUploader {
 
   Future _onInvalidFileError(File file, InvalidFileError e) async {
     String ext = file.title == null ? "no title" : extension(file.title);
-    _logger.severe("Invalid file: (ext: $ext) encountered: " + file.toString(), e);
+    _logger.severe(
+        "Invalid file: (ext: $ext) encountered: " + file.toString(), e);
     await FilesDB.instance.deleteLocalFile(file);
     await LocalSyncService.instance.trackInvalidFile(file);
     throw e;
