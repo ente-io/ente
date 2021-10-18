@@ -19,6 +19,7 @@ interface Props {
 }
 export enum FIX_STATE {
     NOT_STARTED,
+    FIX_LATER,
     RUNNING,
     COMPLETED,
     COMPLETED_WITH_ERRORS,
@@ -28,6 +29,7 @@ function Message(props: { fixState: FIX_STATE }) {
     let message = null;
     switch (props.fixState) {
         case FIX_STATE.NOT_STARTED:
+        case FIX_STATE.FIX_LATER:
             message = constants.REPLACE_THUMBNAIL_NOT_STARTED();
             break;
         case FIX_STATE.COMPLETED:
@@ -56,38 +58,52 @@ export default function FixLargeThumbnails(props: Props) {
         []
     );
 
+    const main = async () => {
+        const largeThumbnailFiles = await getLargeThumbnailFiles();
+        if (largeThumbnailFiles?.length > 0) {
+            setLargeThumbnailFiles(largeThumbnailFiles);
+        }
+        let fixState =
+            getData(LS_KEYS.THUMBNAIL_FIX_STATE)?.state ??
+            FIX_STATE.NOT_STARTED;
+        if (
+            fixState === FIX_STATE.COMPLETED &&
+            largeThumbnailFiles.length > 0
+        ) {
+            fixState = FIX_STATE.COMPLETED_BUT_HAS_MORE;
+        }
+        setFixState(fixState);
+        if (fixState === FIX_STATE.RUNNING) {
+            startFix(largeThumbnailFiles);
+        }
+        if (fixState === FIX_STATE.NOT_STARTED) {
+            props.show();
+        }
+    };
     useEffect(() => {
-        const main = async () => {
-            const largeThumbnailFiles = await getLargeThumbnailFiles();
-            if (largeThumbnailFiles?.length > 0) {
-                setLargeThumbnailFiles(largeThumbnailFiles);
-            }
-            let fixState =
-                getData(LS_KEYS.THUMBNAIL_FIX_STATE)?.state ??
-                FIX_STATE.NOT_STARTED;
-            if (
-                fixState === FIX_STATE.COMPLETED &&
-                largeThumbnailFiles.length > 0
-            ) {
-                fixState = FIX_STATE.COMPLETED_BUT_HAS_MORE;
-            }
-            setFixState(fixState);
-        };
-        if (props.isOpen) {
+        if (props.isOpen && fixState !== FIX_STATE.RUNNING) {
             main();
         }
     }, [props.isOpen]);
-    const startFix = async () => {
+
+    useEffect(() => {
+        main();
+    }, []);
+    const startFix = async (newlyFetchedLargeThumbnailFiles?: number[]) => {
         updateFixState(FIX_STATE.RUNNING);
         const completedWithError = await replaceThumbnail(
             setProgressTracker,
-            new Set(largeThumbnailFiles)
+            new Set(
+                newlyFetchedLargeThumbnailFiles ?? largeThumbnailFiles ?? []
+            )
         );
-        updateFixState(
-            completedWithError
-                ? FIX_STATE.COMPLETED_WITH_ERRORS
-                : FIX_STATE.COMPLETED
-        );
+        if (typeof completedWithError !== 'undefined') {
+            updateFixState(
+                completedWithError
+                    ? FIX_STATE.COMPLETED_WITH_ERRORS
+                    : FIX_STATE.COMPLETED
+            );
+        }
     };
 
     const updateFixState = (fixState: FIX_STATE) => {
@@ -148,13 +164,26 @@ export default function FixLargeThumbnails(props: Props) {
                         display: 'flex',
                         justifyContent: 'space-around',
                     }}>
-                    <Button
-                        block
-                        variant={'outline-secondary'}
-                        onClick={props.hide}>
-                        {constants.CLOSE}
-                    </Button>
+                    {fixState === FIX_STATE.NOT_STARTED ? (
+                        <Button
+                            block
+                            variant={'outline-secondary'}
+                            onClick={() => {
+                                updateFixState(FIX_STATE.FIX_LATER);
+                                props.hide();
+                            }}>
+                            {constants.FIX_LATER}
+                        </Button>
+                    ) : (
+                        <Button
+                            block
+                            variant={'outline-secondary'}
+                            onClick={props.hide}>
+                            {constants.CLOSE}
+                        </Button>
+                    )}
                     {(fixState === FIX_STATE.NOT_STARTED ||
+                        fixState === FIX_STATE.FIX_LATER ||
                         fixState === FIX_STATE.COMPLETED_WITH_ERRORS ||
                         fixState === FIX_STATE.COMPLETED_BUT_HAS_MORE) && (
                         <>
@@ -163,7 +192,7 @@ export default function FixLargeThumbnails(props: Props) {
                             <Button
                                 block
                                 variant={'outline-success'}
-                                onClick={startFix}>
+                                onClick={() => startFix()}>
                                 {constants.FIX}
                             </Button>
                         </>
