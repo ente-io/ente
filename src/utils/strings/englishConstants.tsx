@@ -554,6 +554,7 @@ const englishConstants = {
     SORT_BY_COLLECTION_NAME: 'album name',
     FIX_LARGE_THUMBNAILS: 'fix large thumbnails',
     THUMBNAIL_REPLACED: 'thumbnail replaced',
+    FIX: 'fix',
     REPLACE_THUMBNAIL_NOT_STARTED: () => (
         <>
             Some of your files have been upload with very large thumbnail due to
@@ -564,9 +565,15 @@ const englishConstants = {
     REPLACE_THUMBNAIL_COMPLETED: () => (
         <>your thumbnails have been successfully updated</>
     ),
-    REPLACE_THUMBNAIL_RAN_WITH_ERROR: () => (
+    REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR: () => (
         <>
-            thumbnail update for some of your files failed ,please try to fix
+            thumbnail update for some of your files failed, please run again to
+            fix them
+        </>
+    ),
+    REPLACE_THUMBNAIL_COMPLETED_BUT_HAS_MORE: () => (
+        <>
+            thumbnail update pending for some files, please run again to fix
             them
         </>
     ),

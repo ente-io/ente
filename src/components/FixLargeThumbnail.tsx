@@ -21,7 +21,8 @@ export enum FIX_STATE {
     NOT_STARTED,
     RUNNING,
     COMPLETED,
-    RAN_WITH_ERROR,
+    COMPLETED_WITH_ERRORS,
+    COMPLETED_BUT_HAS_MORE,
 }
 function Message(props: { fixState: FIX_STATE }) {
     let message = null;
@@ -32,8 +33,11 @@ function Message(props: { fixState: FIX_STATE }) {
         case FIX_STATE.COMPLETED:
             message = constants.REPLACE_THUMBNAIL_COMPLETED();
             break;
-        case FIX_STATE.RAN_WITH_ERROR:
-            message = constants.REPLACE_THUMBNAIL_RAN_WITH_ERROR();
+        case FIX_STATE.COMPLETED_WITH_ERRORS:
+            message = constants.REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR();
+            break;
+        case FIX_STATE.COMPLETED_BUT_HAS_MORE:
+            message = constants.REPLACE_THUMBNAIL_COMPLETED_BUT_HAS_MORE();
             break;
     }
     return message ? (
@@ -56,14 +60,20 @@ export default function FixLargeThumbnails(props: Props) {
         const main = async () => {
             const largeThumbnailFiles = await getLargeThumbnailFiles();
             if (largeThumbnailFiles?.length > 0) {
-                props.show();
+                setLargeThumbnailFiles(largeThumbnailFiles);
             }
-            setLargeThumbnailFiles(largeThumbnailFiles);
+            let fixState =
+                getData(LS_KEYS.THUMBNAIL_FIX_STATE)?.state ??
+                FIX_STATE.NOT_STARTED;
+            if (
+                fixState === FIX_STATE.COMPLETED &&
+                largeThumbnailFiles.length > 0
+            ) {
+                fixState = FIX_STATE.COMPLETED_BUT_HAS_MORE;
+            }
+            setFixState(fixState);
         };
         if (props.isOpen) {
-            const fixState = getData(LS_KEYS.THUMBNAIL_FIX_STATE)?.state;
-            console.log(fixState);
-            setFixState(fixState ?? FIX_STATE.NOT_STARTED);
             main();
         }
     }, [props.isOpen]);
@@ -74,7 +84,9 @@ export default function FixLargeThumbnails(props: Props) {
             new Set(largeThumbnailFiles)
         );
         updateFixState(
-            completedWithError ? FIX_STATE.RAN_WITH_ERROR : FIX_STATE.COMPLETED
+            completedWithError
+                ? FIX_STATE.COMPLETED_WITH_ERRORS
+                : FIX_STATE.COMPLETED
         );
     };
 
@@ -143,7 +155,8 @@ export default function FixLargeThumbnails(props: Props) {
                         {constants.CLOSE}
                     </Button>
                     {(fixState === FIX_STATE.NOT_STARTED ||
-                        fixState === FIX_STATE.RAN_WITH_ERROR) && (
+                        fixState === FIX_STATE.COMPLETED_WITH_ERRORS ||
+                        fixState === FIX_STATE.COMPLETED_BUT_HAS_MORE) && (
                         <>
                             <div style={{ width: '30px' }} />
 
@@ -151,7 +164,7 @@ export default function FixLargeThumbnails(props: Props) {
                                 block
                                 variant={'outline-success'}
                                 onClick={startFix}>
-                                {constants.UPDATE}
+                                {constants.FIX}
                             </Button>
                         </>
                     )}
