@@ -247,10 +247,10 @@ class FileUploader {
       throw WiFiUnavailableError();
     }
     final fileOnDisk = await FilesDB.instance.getFile(file.generatedID);
-    final wasAlreadyUploadedElseWhere = fileOnDisk.uploadedFileID != null &&
+    final wasAlreadyUploaded = fileOnDisk.uploadedFileID != null &&
         fileOnDisk.updationTime != null &&
         fileOnDisk.collectionID == collectionID;
-    if (wasAlreadyUploadedElseWhere) {
+    if (wasAlreadyUploaded) {
       return fileOnDisk;
     }
 
@@ -295,6 +295,7 @@ class FileUploader {
       bool isUpdatedFile =
           file.uploadedFileID != null && file.updationTime == null;
       if (isUpdatedFile) {
+        _logger.info("File was updated " + file.toString());
         key = decryptFileKey(file);
       } else {
         key = null;
