@@ -26,7 +26,6 @@ export enum FIX_STATE {
     RUNNING,
     COMPLETED,
     COMPLETED_WITH_ERRORS,
-    COMPLETED_BUT_HAS_MORE,
 }
 function Message(props: { fixState: FIX_STATE }) {
     let message = null;
@@ -40,9 +39,6 @@ function Message(props: { fixState: FIX_STATE }) {
             break;
         case FIX_STATE.COMPLETED_WITH_ERRORS:
             message = constants.REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR();
-            break;
-        case FIX_STATE.COMPLETED_BUT_HAS_MORE:
-            message = constants.REPLACE_THUMBNAIL_COMPLETED_BUT_HAS_MORE();
             break;
     }
     return message ? (
@@ -64,15 +60,9 @@ export default function FixLargeThumbnails(props: Props) {
     const main = async () => {
         const largeThumbnailFiles = await getLargeThumbnailFiles();
         setLargeThumbnailFiles(largeThumbnailFiles ?? []);
-        let fixState =
+        const fixState =
             getData(LS_KEYS.THUMBNAIL_FIX_STATE)?.state ??
             FIX_STATE.NOT_STARTED;
-        if (
-            fixState === FIX_STATE.COMPLETED &&
-            largeThumbnailFiles.length > 0
-        ) {
-            fixState = FIX_STATE.COMPLETED_BUT_HAS_MORE;
-        }
         setFixState(fixState);
         if (fixState === FIX_STATE.RUNNING) {
             startFix(largeThumbnailFiles);
@@ -185,8 +175,7 @@ export default function FixLargeThumbnails(props: Props) {
                     )}
                     {(fixState === FIX_STATE.NOT_STARTED ||
                         fixState === FIX_STATE.FIX_LATER ||
-                        fixState === FIX_STATE.COMPLETED_WITH_ERRORS ||
-                        fixState === FIX_STATE.COMPLETED_BUT_HAS_MORE) && (
+                        fixState === FIX_STATE.COMPLETED_WITH_ERRORS) && (
                         <>
                             <div style={{ width: '30px' }} />
 
