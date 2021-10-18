@@ -26,7 +26,12 @@ export async function generateThumbnail(
             } else {
                 try {
                     const thumb = await FFmpegService.generateThumbnail(file);
-                    return { thumbnail: thumb, hasStaticThumbnail: false };
+                    const dummyImageFile = new File([thumb], file.name);
+                    canvas = await generateImageThumbnail(
+                        worker,
+                        dummyImageFile,
+                        isHEIC
+                    );
                 } catch (e) {
                     canvas = await generateVideoThumbnail(file);
                 }
