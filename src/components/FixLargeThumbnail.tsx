@@ -60,9 +60,7 @@ export default function FixLargeThumbnails(props: Props) {
 
     const main = async () => {
         const largeThumbnailFiles = await getLargeThumbnailFiles();
-        if (largeThumbnailFiles?.length > 0) {
-            setLargeThumbnailFiles(largeThumbnailFiles);
-        }
+        setLargeThumbnailFiles(largeThumbnailFiles ?? []);
         let fixState =
             getData(LS_KEYS.THUMBNAIL_FIX_STATE)?.state ??
             FIX_STATE.NOT_STARTED;
