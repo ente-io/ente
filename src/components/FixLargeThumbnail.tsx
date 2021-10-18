@@ -3,7 +3,10 @@ import MessageDialog from './MessageDialog';
 import React, { useEffect, useState } from 'react';
 import { ProgressBar, Button } from 'react-bootstrap';
 import { ComfySpan } from './ExportInProgress';
-import { getLargeThumbnailFiles, replaceThumbnail } from 'services/migrate';
+import {
+    getLargeThumbnailFiles,
+    replaceThumbnail,
+} from 'services/migrateThumbnailService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 
 export type SetProgressTracker = React.Dispatch<
