@@ -552,31 +552,21 @@ const englishConstants = {
     SORT_BY_LATEST_PHOTO: 'recent photo',
     SORT_BY_MODIFICATION_TIME: 'last updated',
     SORT_BY_COLLECTION_NAME: 'album name',
-    FIX_LARGE_THUMBNAILS: 'fix large thumbnails',
-    THUMBNAIL_REPLACED: 'thumbnail replaced',
+    FIX_LARGE_THUMBNAILS: 'compress thumbnails',
+    THUMBNAIL_REPLACED: 'thumbnails compressed',
     FIX: 'fix',
     FIX_LATER: 'fix later',
     REPLACE_THUMBNAIL_NOT_STARTED: () => (
         <>
-            Some of your files have been upload with very large thumbnail due to
-            bug in web client the thumbnails. do you want to update them with
-            low res version to save space
+            some of your videos thumbnails can be compressed to save space.
+            would you like ente to compress them?
         </>
     ),
     REPLACE_THUMBNAIL_COMPLETED: () => (
-        <>your thumbnails have been successfully updated</>
+        <>successfully compressed all thumbnails</>
     ),
     REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR: () => (
-        <>
-            thumbnail update for some of your files failed, please run again to
-            fix them
-        </>
-    ),
-    REPLACE_THUMBNAIL_COMPLETED_BUT_HAS_MORE: () => (
-        <>
-            thumbnail update pending for some files, please run again to fix
-            them
-        </>
+        <>could not compress some of your thumbnails, please retry</>
     ),
 };
 
