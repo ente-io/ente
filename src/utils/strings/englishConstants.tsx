@@ -555,6 +555,7 @@ const englishConstants = {
     FIX_LARGE_THUMBNAILS: 'fix large thumbnails',
     THUMBNAIL_REPLACED: 'thumbnail replaced',
     FIX: 'fix',
+    FIX_LATER: 'fix later',
     REPLACE_THUMBNAIL_NOT_STARTED: () => (
         <>
             Some of your files have been upload with very large thumbnail due to
