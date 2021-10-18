@@ -88,7 +88,7 @@ export default function FixLargeThumbnails(props: Props) {
                             </ComfySpan>{' '}
                             <span style={{ marginLeft: '10px' }}>
                                 {' '}
-                                files exported
+                                {constants.THUMBNAIL_REPLACED}
                             </span>
                         </div>
                         <div

@@ -553,6 +553,7 @@ const englishConstants = {
     SORT_BY_MODIFICATION_TIME: 'last updated',
     SORT_BY_COLLECTION_NAME: 'album name',
     FIX_LARGE_THUMBNAILS: 'fix large thumbnails',
+    THUMBNAIL_REPLACED: 'thumbnail replaced',
     REPLACE_THUMBNAIL_NOT_STARTED: () => (
         <>
             Some of your files have been upload with very large thumbnail due to
