@@ -3,7 +3,8 @@ import MessageDialog from './MessageDialog';
 import React, { useState } from 'react';
 import { ProgressBar, Button } from 'react-bootstrap';
 import { ComfySpan } from './ExportInProgress';
-import { regenerateThumbnail } from 'services/migrate';
+import { replaceThumbnail } from 'services/migrate';
+import { LS_KEYS, setData } from 'utils/storage/localStorage';
 
 export type SetProgressTracker = React.Dispatch<
     React.SetStateAction<{
@@ -34,7 +35,7 @@ function Message(props: { fixState: FIX_STATE }) {
             message = constants.REPLACE_THUMBNAIL_RAN_WITH_ERROR();
             break;
     }
-    return <div style={{ marginBottom: '10px' }}>{message}</div>;
+    return <div style={{ marginBottom: '30px' }}>{message}</div>;
 }
 export default function FixLargeThumbnails(props: Props) {
     const [fixState, setFixState] = useState(FIX_STATE.NOT_STARTED);
@@ -44,8 +45,16 @@ export default function FixLargeThumbnails(props: Props) {
     });
 
     const startFix = async () => {
-        setFixState(FIX_STATE.RUNNING);
-        regenerateThumbnail(setProgressTracker);
+        updateFixState(FIX_STATE.RUNNING);
+        const completedWithError = await replaceThumbnail(setProgressTracker);
+        updateFixState(
+            completedWithError ? FIX_STATE.RAN_WITH_ERROR : FIX_STATE.COMPLETED
+        );
+    };
+
+    const updateFixState = (fixState: FIX_STATE) => {
+        setFixState(fixState);
+        setData(LS_KEYS.THUMBNAIL_FIX_STATE, { state: fixState });
     };
     return (
         <MessageDialog
@@ -57,13 +66,15 @@ export default function FixLargeThumbnails(props: Props) {
             }}>
             <div
                 style={{
-                    marginBottom: '30px',
+                    marginBottom: '20px',
                     padding: '0 5%',
                     display: 'flex',
                     alignItems: 'center',
                     flexDirection: 'column',
                 }}>
-                {fixState === FIX_STATE.RUNNING ? (
+                <Message fixState={fixState} />
+
+                {fixState === FIX_STATE.RUNNING && (
                     <>
                         <div style={{ marginBottom: '10px' }}>
                             <ComfySpan>
@@ -87,32 +98,30 @@ export default function FixLargeThumbnails(props: Props) {
                             />
                         </div>
                     </>
-                ) : (
-                    <>
-                        <Message fixState={fixState} />
-                        <div
-                            style={{
-                                width: '100%',
-                                display: 'flex',
-                                justifyContent: 'space-around',
-                            }}>
-                            <Button
-                                block
-                                variant={'outline-secondary'}
-                                onClick={props.hide}>
-                                {constants.CLOSE}
-                            </Button>
-                            <div style={{ width: '30px' }} />
-
-                            <Button
-                                block
-                                variant={'outline-success'}
-                                onClick={startFix}>
-                                {constants.UPDATE}
-                            </Button>
-                        </div>
-                    </>
                 )}
+                <div
+                    style={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-around',
+                    }}>
+                    <Button
+                        block
+                        variant={'outline-secondary'}
+                        onClick={props.hide}>
+                        {constants.CLOSE}
+                    </Button>
+                    <div style={{ width: '30px' }} />
+                    {(fixState === FIX_STATE.NOT_STARTED ||
+                        fixState === FIX_STATE.RAN_WITH_ERROR) && (
+                        <Button
+                            block
+                            variant={'outline-success'}
+                            onClick={startFix}>
+                            {constants.UPDATE}
+                        </Button>
+                    )}
+                </div>
             </div>
         </MessageDialog>
     );

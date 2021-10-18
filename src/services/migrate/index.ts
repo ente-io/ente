@@ -36,9 +36,8 @@ export async function getLargeThumbnailFiles() {
         throw e;
     }
 }
-export async function regenerateThumbnail(
-    setProgressTracker: SetProgressTracker
-) {
+export async function replaceThumbnail(setProgressTracker: SetProgressTracker) {
+    let completedWithError = false;
     try {
         const token = getToken();
         const worker = await new CryptoWorker();
@@ -49,8 +48,9 @@ export async function regenerateThumbnail(
         const largeThumbnailFiles = files.filter((file) =>
             largeThumbnailFileIDs.has(file.id)
         );
+
         if (largeThumbnailFiles.length === 0) {
-            return;
+            return completedWithError;
         }
         setProgressTracker({ current: 0, total: largeThumbnailFiles.length });
         const uploadURLs: UploadURL[] = [];
@@ -59,35 +59,42 @@ export async function regenerateThumbnail(
             uploadURLs
         );
         for (const [idx, file] of largeThumbnailFiles.entries()) {
-            setProgressTracker({
-                current: idx,
-                total: largeThumbnailFiles.length,
-            });
-            const originalThumbnail = await downloadManager.getThumbnail(
-                token,
-                file
-            );
-            const dummyImageFile = new globalThis.File(
-                [originalThumbnail],
-                file.metadata.title
-            );
-            const { thumbnail: newThumbnail } = await generateThumbnail(
-                worker,
-                dummyImageFile,
-                FILE_TYPE.IMAGE,
-                false
-            );
-            const newUploadedThumbnail = await uploadThumbnail(
-                worker,
-                file.key,
-                newThumbnail,
-                uploadURLs.pop()
-            );
-            await updateThumbnail(file.id, newUploadedThumbnail);
+            try {
+                setProgressTracker({
+                    current: idx,
+                    total: largeThumbnailFiles.length,
+                });
+                const originalThumbnail = await downloadManager.getThumbnail(
+                    token,
+                    file
+                );
+                const dummyImageFile = new globalThis.File(
+                    [originalThumbnail],
+                    file.metadata.title
+                );
+                const { thumbnail: newThumbnail } = await generateThumbnail(
+                    worker,
+                    dummyImageFile,
+                    FILE_TYPE.IMAGE,
+                    false
+                );
+                const newUploadedThumbnail = await uploadThumbnail(
+                    worker,
+                    file.key,
+                    newThumbnail,
+                    uploadURLs.pop()
+                );
+                await updateThumbnail(file.id, newUploadedThumbnail);
+            } catch (e) {
+                logError(e, 'failed to replace a thumbnail');
+                completedWithError = true;
+            }
         }
     } catch (e) {
-        logError(e, 'failed to regenerate thumbnail');
+        logError(e, 'replace Thumbnail function failed');
+        completedWithError = true;
     }
+    return completedWithError;
 }
 
 export async function uploadThumbnail(
