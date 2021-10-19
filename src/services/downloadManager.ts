@@ -69,16 +69,16 @@ class DownloadManager {
     getFile = async (file: File, forPreview = false) => {
         const fileUID = `${file.id}_${forPreview}`;
         try {
-            const getFilePromise = (async () => {
+            const getFilePromise = async () => {
                 const fileStream = await this.downloadFile(file);
                 let fileBlob = await new Response(fileStream).blob();
                 if (forPreview) {
                     fileBlob = await convertForPreview(file, fileBlob);
                 }
                 return URL.createObjectURL(fileBlob);
-            })();
+            };
             if (!this.fileObjectUrlPromise.get(fileUID)) {
-                this.fileObjectUrlPromise.set(fileUID, getFilePromise);
+                this.fileObjectUrlPromise.set(fileUID, getFilePromise());
             }
             return await this.fileObjectUrlPromise.get(fileUID);
         } catch (e) {
