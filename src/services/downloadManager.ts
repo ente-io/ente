@@ -24,7 +24,7 @@ class DownloadManager {
                 return URL.createObjectURL(await cacheResp.blob());
             }
             if (!this.thumbnailObjectUrlPromise.get(file.id)) {
-                const downloadPromise = this._downloadThumb(
+                const downloadPromise = this.downloadThumb(
                     token,
                     thumbnailCache,
                     file
@@ -38,7 +38,7 @@ class DownloadManager {
         }
     }
 
-    _downloadThumb = async (
+    private downloadThumb = async (
         token: string,
         thumbnailCache: Cache,
         file: File
