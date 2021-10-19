@@ -67,6 +67,7 @@ class DownloadManager {
     };
 
     getFile = async (file: File, forPreview = false) => {
+        const fileUID = `${file.id}_${forPreview}`;
         try {
             const getFilePromise = (async () => {
                 const fileStream = await this.downloadFile(file);
@@ -76,16 +77,12 @@ class DownloadManager {
                 }
                 return URL.createObjectURL(fileBlob);
             })();
-            if (!this.fileObjectUrlPromise.get(`${file.id}_${forPreview}`)) {
-                this.fileObjectUrlPromise.set(
-                    `${file.id}_${forPreview}`,
-                    getFilePromise
-                );
+            if (!this.fileObjectUrlPromise.get(fileUID)) {
+                this.fileObjectUrlPromise.set(fileUID, getFilePromise);
             }
-            return await this.fileObjectUrlPromise.get(
-                `${file.id}_${forPreview}`
-            );
+            return await this.fileObjectUrlPromise.get(fileUID);
         } catch (e) {
+            this.fileObjectUrlPromise.delete(fileUID);
             logError(e, 'Failed to get File');
         }
     };
