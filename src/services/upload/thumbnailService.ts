@@ -189,8 +189,9 @@ async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
             );
         });
         thumbnailBlob = thumbnailBlob ?? new Blob([]);
-        quality /= 2;
+        quality -= 0.1;
     } while (
+        quality > 0 &&
         thumbnailBlob.size > MAX_THUMBNAIL_SIZE &&
         percentageSizeDiff(thumbnailBlob.size, prevSize) >=
             MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF
