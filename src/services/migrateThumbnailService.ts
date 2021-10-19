@@ -1,9 +1,6 @@
 import downloadManager from 'services/downloadManager';
 import { fileAttribute, FILE_TYPE, getLocalFiles } from 'services/fileService';
-import {
-    generateThumbnail,
-    MAX_THUMBNAIL_SIZE,
-} from 'services/upload/thumbnailService';
+import { generateThumbnail } from 'services/upload/thumbnailService';
 import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
 import { getEndpoint } from 'utils/common/apiUtil';
@@ -14,7 +11,7 @@ import { EncryptionResult, UploadURL } from 'services/upload/uploadService';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
 
 const ENDPOINT = getEndpoint();
-
+const REPLACE_THUMBNAIL_THRESHOLD = 500 * 1024; // 500KB
 export async function getLargeThumbnailFiles() {
     try {
         const token = getToken();
@@ -24,7 +21,7 @@ export async function getLargeThumbnailFiles() {
         const resp = await HTTPService.get(
             `${ENDPOINT}/files/large-thumbnails`,
             {
-                threshold: 2 * MAX_THUMBNAIL_SIZE,
+                threshold: REPLACE_THUMBNAIL_THRESHOLD,
             },
             {
                 'X-Auth-Token': token,
