@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
 
 import 'gallery.dart';
@@ -48,26 +49,35 @@ class TrashPage extends StatelessWidget {
         tagPrefix: tagPrefix,
         selectedFiles: _selectedFiles,
         initialFiles: null,
-        footer: Padding(
-          padding: EdgeInsets.all(15),
-          child: Text(
-              'memories shows the number the days after which they will be permanently deleted.'),
-        ));
+        footer: footerWidget());
+
     return Scaffold(
-      body: Stack(children: [
-        Padding(
-          padding: EdgeInsets.only(top: Platform.isAndroid ? 80 : 100),
-          child: gallery,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(50.0),
+        child: GalleryAppBarWidget(
+          appBarType,
+          "trash",
+          _selectedFiles,
         ),
-        SizedBox(
-          height: Platform.isAndroid ? 80 : 100,
-          child: GalleryAppBarWidget(
-            appBarType,
-            "trash",
-            _selectedFiles,
-          ),
-        )
-      ]),
+      ),
+      body: gallery,
     );
+  }
+
+  StatefulWidget footerWidget() {
+    return FutureBuilder<FileLoadResult>(
+        future: TrashDB.instance
+            .getTrashedFiles(0, DateTime.now().microsecondsSinceEpoch),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data.files.isNotEmpty) {
+            return Padding(
+              padding: EdgeInsets.all(15),
+              child: Text(
+                  'memories shows the number the days after which they will be permanently deleted.'),
+            );
+          } else {
+            return Container();
+          }
+        });
   }
 }
