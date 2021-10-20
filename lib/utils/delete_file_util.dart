@@ -157,6 +157,7 @@ Future<void> deleteFilesFromRemoteOnly(
   }
   Bus.instance
         .fire(LocalPhotosUpdatedEvent(files, type: EventType.deleted));
+  SyncService.instance.sync();
   await dialog.hide();
   RemoteSyncService.instance.sync(silently: true);
 }
