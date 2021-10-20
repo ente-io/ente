@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
@@ -224,6 +225,7 @@ Future<void> _killBGTask(String taskId) async {
   final prefs = await SharedPreferences.getInstance();
   prefs.remove(kLastBGTaskHeartBeatTime);
   BackgroundFetch.finish(taskId);
+  Isolate.current.kill(priority: Isolate.immediate);
 }
 
 class EnteApp extends StatefulWidget {

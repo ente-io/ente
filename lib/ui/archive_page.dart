@@ -52,20 +52,15 @@ class ArchivePage extends StatelessWidget {
       initialFiles: null,
     );
     return Scaffold(
-      body: Stack(children: [
-        Padding(
-          padding: EdgeInsets.only(top: Platform.isAndroid ? 80 : 100),
-          child: gallery,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(50.0),
+        child: GalleryAppBarWidget(
+          appBarType,
+          "archive",
+          _selectedFiles,
         ),
-        SizedBox(
-          height: Platform.isAndroid ? 80 : 100,
-          child: GalleryAppBarWidget(
-            appBarType,
-            "archive",
-            _selectedFiles,
-          ),
-        )
-      ]),
+      ),
+      body: gallery,
     );
   }
 }
