@@ -533,7 +533,7 @@ class CollectionsService {
       await _db.insert(collections);
     } catch (e) {
       if (attempt < kMaximumWriteAttempts) {
-        return _updateDB(collections, attempt: attempt++);
+        return _updateDB(collections, attempt: ++attempt);
       } else {
         rethrow;
       }
