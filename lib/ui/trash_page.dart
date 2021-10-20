@@ -73,7 +73,11 @@ class TrashPage extends StatelessWidget {
             return Padding(
               padding: EdgeInsets.all(15),
               child: Text(
-                  'memories shows the number the days after which they will be permanently deleted.'),
+                'memories shows the number the days after which they will be permanently deleted.',
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
             );
           } else {
             return Container();
