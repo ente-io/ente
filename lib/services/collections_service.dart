@@ -14,6 +14,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
@@ -441,9 +442,9 @@ class CollectionsService {
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
       );
       await _filesDB.insertMultiple(files);
-      Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
       await TrashDB.instance
           .delete(files.map((e) => e.uploadedFileID).toList());
+      Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
       Bus.instance.fire(FilesUpdatedEvent(files));
       // Remove imported local files which are imported but not uploaded.
       // This handles the case where local file was trashed -> imported again
@@ -456,6 +457,8 @@ class CollectionsService {
       if (localIDs.isNotEmpty) {
         await _filesDB.deleteUnSyncedLocalFiles(localIDs);
       }
+      // Force reload home gallery to pull in the restored files
+      Bus.instance.fire(ForceReloadHomeGalleryEvent());
     } catch (e, s) {
       _logger.severe("failed to restore files", e, s);
       rethrow;
@@ -544,6 +547,7 @@ class CollectionsService {
     );
     await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
     Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
+    Bus.instance.fire(LocalPhotosUpdatedEvent(files));
     RemoteSyncService.instance.sync(silently: true);
   }
 
@@ -616,7 +620,7 @@ class CollectionsService {
       await _db.insert(collections);
     } catch (e) {
       if (attempt < kMaximumWriteAttempts) {
-        return _updateDB(collections, attempt: attempt++);
+        return _updateDB(collections, attempt: ++attempt);
       } else {
         rethrow;
       }

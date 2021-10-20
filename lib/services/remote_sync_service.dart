@@ -136,7 +136,7 @@ class RemoteSyncService {
     }
     // only compare title in Android because title may be missing in IOS
     // and iOS anyways use uuid for localIDs of file, so collision should be
-    // rate.
+    // rare.
     if (Platform.isAndroid) {
       return ignoredFilesMap[file.localID].contains(file.title ?? '');
     }

@@ -188,8 +188,8 @@ class TrashDB {
     final trashFile = TrashFile();
     trashFile.updateAt = row[columnTrashUpdatedAt];
     trashFile.deleteBy = row[columnTrashDeleteBy];
-    trashFile.uploadedFileID =
-        row[columnUploadedFileID] == -1 ? null : row[columnUploadedFileID];
+    trashFile.uploadedFileID = row[columnUploadedFileID];
+    // dirty hack to ensure that the file_downloads & cache mechanism works
     trashFile.generatedID = -1 * trashFile.uploadedFileID;
     trashFile.localID = row[columnLocalID];
     trashFile.ownerID = row[columnOwnerID];
