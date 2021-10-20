@@ -11,6 +11,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -66,7 +67,7 @@ class CollectionsService {
   }
 
   Future<List<Collection>> sync() async {
-    _logger.info("Syncing");
+    _logger.info("Syncing collections");
     final lastCollectionUpdationTime =
         _prefs.getInt(_collectionsSyncTimeKey) ?? 0;
 
@@ -441,6 +442,20 @@ class CollectionsService {
       );
       await _filesDB.insertMultiple(files);
       Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
+      await TrashDB.instance
+          .delete(files.map((e) => e.uploadedFileID).toList());
+      Bus.instance.fire(FilesUpdatedEvent(files));
+      // Remove imported local files which are imported but not uploaded.
+      // This handles the case where local file was trashed -> imported again
+      // but not uploaded automatically as it was trashed.
+      final localIDs = files
+          .where((e) => e.localID != null)
+          .map((e) => e.localID)
+          .toSet()
+          .toList();
+      if (localIDs.isNotEmpty) {
+        await _filesDB.deleteUnSyncedLocalFiles(localIDs);
+      }
     } catch (e, s) {
       _logger.severe("failed to restore files", e, s);
       rethrow;

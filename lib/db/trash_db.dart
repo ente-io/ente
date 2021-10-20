@@ -6,7 +6,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
-import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -32,6 +31,7 @@ class TrashDB {
 
   static final columnModificationTime = 'modification_time';
   static final columnCreationTime = 'creation_time';
+  static final columnUpdationTime = 'updation_time';
 
   static final columnLocalID = 'local_id';
   static final columnTitle = 'title';
@@ -65,14 +65,15 @@ class TrashDB {
           $columnFileType INTEGER,
           $columnCreationTime INTEGER NOT NULL,
           $columnModificationTime INTEGER NOT NULL,
+          $columnUpdationTime INTEGER,
           $columnFileSubType INTEGER,
           $columnDuration INTEGER,
           $columnMMdEncodedJson TEXT DEFAULT '{}',
-          $columnMMdVersion INTEGER DEFAULT 0,
+          $columnMMdVersion INTEGER DEFAULT 0
         );
       CREATE INDEX IF NOT EXISTS creation_time_index ON $tableName($columnCreationTime); 
-      CREATE INDEX IF NOT EXISTS creation_time_index ON $tableName($columnTrashDeleteBy);
-      CREATE INDEX IF NOT EXISTS creation_time_index ON $tableName($columnTrashUpdatedAt);
+      CREATE INDEX IF NOT EXISTS delete_by_time_index ON $tableName($columnTrashDeleteBy);
+      CREATE INDEX IF NOT EXISTS updated_at_time_index ON $tableName($columnTrashUpdatedAt);
       ''');
   }
 
@@ -202,6 +203,7 @@ class TrashDB {
     trashFile.fileType = getFileType(row[columnFileType]);
     trashFile.creationTime = row[columnCreationTime];
     trashFile.modificationTime = row[columnModificationTime];
+    trashFile.updationTime = row[columnUpdationTime] ?? 0;
     trashFile.encryptedKey = row[columnEncryptedKey];
     trashFile.keyDecryptionNonce = row[columnKeyDecryptionNonce];
     trashFile.fileDecryptionHeader = row[columnFileDecryptionHeader];
@@ -236,6 +238,8 @@ class TrashDB {
     row[columnFileType] = getInt(trash.fileType);
     row[columnCreationTime] = trash.creationTime;
     row[columnModificationTime] = trash.modificationTime;
+    row[columnUpdationTime] = trash.updationTime;
+
     row[columnFileSubType] = trash.fileSubType ?? -1;
     row[columnDuration] = trash.duration ?? 0;
     row[columnMMdVersion] = trash.mMdVersion ?? 0;

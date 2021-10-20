@@ -306,6 +306,7 @@ class SuperLogging {
       try {
         var date = config.dateFmt.parse(basename(file.path));
         dates[file] = date;
+        files.add(file);
       } on FormatException {}
     }
 
@@ -318,7 +319,9 @@ class SuperLogging {
       var toDelete = files.sublist(0, extra);
 
       for (var file in toDelete) {
-        await file.delete();
+        try {
+          await file.delete();
+        } catch (ignore) {}
       }
     }
 
