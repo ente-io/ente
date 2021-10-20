@@ -123,6 +123,10 @@ Future<void> deleteFilesFromEverywhere(
 Future<void> deleteFilesFromRemoteOnly(
     BuildContext context, List<File> files) async {
   files.removeWhere((element) => element.uploadedFileID == null);
+  if(files.isEmpty) {
+    showToast("selected files are not uploaded on ente");
+    return;
+  }
   final dialog = createProgressDialog(context, "deleting...");
   await dialog.show();
   _logger.info("Trying to delete files " +
@@ -151,6 +155,8 @@ Future<void> deleteFilesFromRemoteOnly(
       type: EventType.deleted,
     ));
   }
+  Bus.instance
+        .fire(LocalPhotosUpdatedEvent(files, type: EventType.deleted));
   await dialog.hide();
   RemoteSyncService.instance.sync(silently: true);
 }
