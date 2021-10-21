@@ -35,6 +35,7 @@ class DownloadManager {
         } catch (e) {
             this.thumbnailObjectUrlPromise.delete(file.id);
             logError(e, 'get preview Failed');
+            throw e;
         }
     }
 
@@ -84,6 +85,7 @@ class DownloadManager {
         } catch (e) {
             this.fileObjectUrlPromise.delete(fileUID);
             logError(e, 'Failed to get File');
+            throw e;
         }
     };
 
