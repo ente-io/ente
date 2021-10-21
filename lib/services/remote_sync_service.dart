@@ -158,8 +158,8 @@ class RemoteSyncService {
           .removeWhere((element) => element.fileType == FileType.video);
     }
     if (filesToBeUploaded.isNotEmpty) {
-      final ignoredFilesMap = await IgnoreFilesDB.instance.getIgnoredFiles();
-      int prevCount = filesToBeUploaded.length;
+      final ignoredFilesMap = await IgnoredFilesDB.instance.getIgnoredFiles();
+      final int prevCount = filesToBeUploaded.length;
       filesToBeUploaded.removeWhere(
           (file) => _shouldIgnoreFileUpload(ignoredFilesMap, file));
       if (prevCount != filesToBeUploaded.length) {

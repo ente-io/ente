@@ -135,7 +135,7 @@ class Configuration {
     await MemoriesDB.instance.clearTable();
     await PublicKeysDB.instance.clearTable();
     await UploadLocksDB.instance.clearTable();
-    await IgnoreFilesDB.instance.clearTable();
+    await IgnoredFilesDB.instance.clearTable();
     await TrashDB.instance.clearTable();
     CollectionsService.instance.clearCache();
     FavoritesService.instance.clearCache();

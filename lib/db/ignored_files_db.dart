@@ -9,7 +9,7 @@ import 'package:sqflite/sqflite.dart';
 // user's intervention.
 // Common use case:
 // when a user deletes a file just from ente on current or different device.
-class IgnoreFilesDB {
+class IgnoredFilesDB {
   static final _databaseName = "ente.ignored_files.db";
   static final _databaseVersion = 1;
   static final Logger _logger = Logger("IgnoredFilesDB");
@@ -31,9 +31,9 @@ class IgnoreFilesDB {
       ''');
   }
 
-  IgnoreFilesDB._privateConstructor();
+  IgnoredFilesDB._privateConstructor();
 
-  static final IgnoreFilesDB instance = IgnoreFilesDB._privateConstructor();
+  static final IgnoredFilesDB instance = IgnoredFilesDB._privateConstructor();
 
   // only have a single app-wide reference to the database
   static Future<Database> _dbFuture;

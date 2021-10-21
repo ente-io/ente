@@ -32,9 +32,9 @@ class TrashSyncService {
   }
 
   Future<void> syncTrash() async {
-    final lastSyncTime = getSyncTime();
+    final lastSyncTime = _getSyncTime();
     _logger.fine('sync trash sinceTime : $lastSyncTime');
-    var diff = await _diffFetcher.getTrashFilesDiff(lastSyncTime, kDiffLimit);
+    final diff = await _diffFetcher.getTrashFilesDiff(lastSyncTime, kDiffLimit);
     if (diff.trashedFiles.isNotEmpty) {
       _logger.fine("inserting ${diff.trashedFiles.length} items in trash");
       await _trashDB.insertMultiple(diff.trashedFiles);
@@ -53,7 +53,7 @@ class TrashSyncService {
     await _updateIgnoredFiles(diff);
 
     if (diff.lastSyncedTimeStamp != 0) {
-      await setSyncTime(diff.lastSyncedTimeStamp);
+      await _setSyncTime(diff.lastSyncedTimeStamp);
     }
     if (diff.fetchCount == kDiffLimit) {
       return await syncTrash();
@@ -76,18 +76,15 @@ class TrashSyncService {
     }
     if (ignoredFiles.isNotEmpty) {
       _logger.fine('updating ${ignoredFiles.length} ignored files ');
-      await IgnoreFilesDB.instance.insertMultiple(ignoredFiles);
+      await IgnoredFilesDB.instance.insertMultiple(ignoredFiles);
     }
   }
 
-  Future<void> setSyncTime(int time) async {
-    if (time == null) {
-      return _prefs.remove(kLastTrashSyncTime);
-    }
+  Future<void> _setSyncTime(int time) async {
     return _prefs.setInt(kLastTrashSyncTime, time);
   }
 
-  int getSyncTime() {
+  int _getSyncTime() {
     return _prefs.getInt(kLastTrashSyncTime) ?? 0;
   }
 

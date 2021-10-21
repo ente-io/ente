@@ -49,7 +49,7 @@ class TrashPage extends StatelessWidget {
         tagPrefix: tagPrefix,
         selectedFiles: _selectedFiles,
         initialFiles: null,
-        footer: footerWidget());
+        footer: _footerWidget());
 
     return Scaffold(
       appBar: PreferredSize(
@@ -64,7 +64,7 @@ class TrashPage extends StatelessWidget {
     );
   }
 
-  StatefulWidget footerWidget() {
+  Widget _footerWidget() {
     return FutureBuilder<FileLoadResult>(
         future: TrashDB.instance
             .getTrashedFiles(0, DateTime.now().microsecondsSinceEpoch),

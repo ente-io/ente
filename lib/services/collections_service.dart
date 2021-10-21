@@ -225,7 +225,9 @@ class CollectionsService {
     if (!_cachedKeys.containsKey(collectionID)) {
       final collection = _collectionIDToCollections[collectionID];
       if (collection == null) {
-        // trigger async fetch for collection
+        // Async fetch for collection. A collection might be
+        // missing from older clients when we used to delete the collection
+        // from db. For trashed files, we need collection data for decryption.
         fetchCollectionByID(collectionID);
         throw AssertionError('collectionID $collectionID is not cached');
       }
@@ -422,12 +424,12 @@ class CollectionsService {
     final params = <String, dynamic>{};
     params["collectionID"] = toCollectionID;
     params["files"] = [];
+    final toCollectionKey = getCollectionKey(toCollectionID);
     for (final file in files) {
       final key = decryptFileKey(file);
       file.generatedID = null; // So that a new entry is created in the FilesDB
       file.collectionID = toCollectionID;
-      final encryptedKeyData =
-          CryptoUtil.encryptSync(key, getCollectionKey(toCollectionID));
+      final encryptedKeyData = CryptoUtil.encryptSync(key, toCollectionKey);
       file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
       file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
       params["files"].add(CollectionFileItem(
