@@ -63,17 +63,11 @@ Future<void> deleteFilesFromEverywhere(
   final List<File> deletedFiles = [];
   for (final file in files) {
     if (file.localID != null) {
-      if (file.uploadedFileID != null && file.collectionID != null) {
-        uploadedFilesToBeTrashed.add(TrashRequest(file.uploadedFileID, file.collectionID));
-        updatedCollectionIDs.add(file.collectionID);
-      } else {
-        await FilesDB.instance.deleteLocalFile(file);
-      }
       // Remove only those files that have already been removed from disk
       if (deletedIDs.contains(file.localID) ||
           alreadyDeletedIDs.contains(file.localID)) {
         deletedFiles.add(file);
-        if (file.uploadedFileID != null && file.collectionID != null) {
+        if (file.uploadedFileID != null) {
           uploadedFilesToBeTrashed.add(TrashRequest(file.uploadedFileID, file.collectionID));
           updatedCollectionIDs.add(file.collectionID);
         } else {
