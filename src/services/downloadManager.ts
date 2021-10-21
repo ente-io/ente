@@ -68,7 +68,12 @@ class DownloadManager {
     };
 
     getFile = async (file: File, forPreview = false) => {
-        const fileUID = `${file.id}_${forPreview}`;
+        let fileUID: string;
+        if (file.metadata.fileType === FILE_TYPE.VIDEO) {
+            fileUID = file.id.toString();
+        } else {
+            fileUID = `${file.id}_forPreview=${forPreview}`;
+        }
         try {
             const getFilePromise = async () => {
                 const fileStream = await this.downloadFile(file);
