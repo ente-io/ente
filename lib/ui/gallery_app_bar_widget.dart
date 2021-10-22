@@ -500,6 +500,17 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
       ));
       actions.add(CupertinoActionSheetAction(
+        child: Text("ente"),
+        isDestructiveAction: true,
+        onPressed: () async {
+          Navigator.of(context, rootNavigator: true).pop();
+          await deleteFilesFromRemoteOnly(
+              context, widget.selectedFiles.files.toList());
+          _clearSelectedFiles();
+          showToast("deleted files are moved to trash");
+        },
+      ));
+      actions.add(CupertinoActionSheetAction(
         child: Text("everywhere"),
         isDestructiveAction: true,
         onPressed: () async {

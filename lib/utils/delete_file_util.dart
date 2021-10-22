@@ -116,19 +116,26 @@ Future<void> deleteFilesFromEverywhere(
 
 Future<void> deleteFilesFromRemoteOnly(
     BuildContext context, List<File> files) async {
+  files.removeWhere((element) => element.uploadedFileID == null);
+  if(files.isEmpty) {
+    showToast("selected files are not on ente");
+    return;
+  }
   final dialog = createProgressDialog(context, "deleting...");
   await dialog.show();
   _logger.info("Trying to delete files " +
       files.map((f) => f.uploadedFileID).toString());
   final updatedCollectionIDs = <int>{};
-  final List<int> ids = [];
+  final List<int> uploadedFileIDs = [];
+  final List<TrashRequest> trashRequests = [];
   for (final file in files) {
     updatedCollectionIDs.add(file.collectionID);
-    ids.add(file.uploadedFileID);
+    uploadedFileIDs.add(file.uploadedFileID);
+    trashRequests.add(TrashRequest(file.uploadedFileID, file.collectionID));
   }
   try {
-    await SyncService.instance.deleteFilesOnServer(ids);
-    await FilesDB.instance.deleteMultipleUploadedFiles(ids);
+    await TrashSyncService.instance.trashFilesOnServer(trashRequests);
+    await FilesDB.instance.deleteMultipleUploadedFiles(uploadedFileIDs);
   } catch (e, s) {
     _logger.severe("Failed to delete files from remote", e, s);
     await dialog.hide();
@@ -142,6 +149,9 @@ Future<void> deleteFilesFromRemoteOnly(
       type: EventType.deleted,
     ));
   }
+  Bus.instance
+        .fire(LocalPhotosUpdatedEvent(files, type: EventType.deleted));
+  SyncService.instance.sync();
   await dialog.hide();
   RemoteSyncService.instance.sync(silently: true);
 }
