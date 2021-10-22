@@ -82,6 +82,7 @@ const getTemplateColumns = (columns: number, groups?: number[]): string => {
 };
 
 const ListContainer = styled.div<{ columns: number; groups?: number[] }>`
+    user-select: none;
     display: grid;
     grid-template-columns: ${({ columns, groups }) =>
         getTemplateColumns(columns, groups)};
@@ -96,6 +97,7 @@ const ListContainer = styled.div<{ columns: number; groups?: number[] }>`
 `;
 
 const DateContainer = styled.div<{ span: number }>`
+    user-select: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
