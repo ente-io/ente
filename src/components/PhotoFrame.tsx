@@ -222,6 +222,12 @@ const PhotoFrame = ({
         setFetching({});
     }, [files, search, deleted]);
 
+    useEffect(() => {
+        if (selected.count === 0) {
+            setLastSelected(null);
+        }
+    }, [selected]);
+
     const updateUrl = (index: number) => (url: string) => {
         files[index] = {
             ...files[index],
