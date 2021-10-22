@@ -21,7 +21,8 @@ interface IProps {
 const Check = styled.input`
     appearance: none;
     position: absolute;
-    right: 0;
+    z-index: 10;
+    left: 0;
     opacity: 0;
     outline: none;
     cursor: pointer;
@@ -34,7 +35,7 @@ const Check = styled.input`
         width: 16px;
         height: 16px;
         border: 2px solid #fff;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: #ddd;
         display: inline-block;
         border-radius: 50%;
         vertical-align: bottom;
@@ -43,18 +44,19 @@ const Check = styled.input`
         line-height: 16px;
         transition: background-color 0.3s ease;
         pointer-events: inherit;
+        color: #aaa;
     }
     &::after {
         content: '';
         width: 5px;
         height: 10px;
-        border-right: 2px solid #fff;
-        border-bottom: 2px solid #fff;
+        border-right: 2px solid #000;
+        border-bottom: 2px solid #000;
         transform: translate(-18px, 8px);
-        opacity: 0;
         transition: transform 0.3s ease;
         position: absolute;
         pointer-events: inherit;
+        transform: translate(-18px, 10px) rotate(45deg);
     }
 
     /** checked */
@@ -65,13 +67,32 @@ const Check = styled.input`
         color: #fff;
     }
     &:checked::after {
-        opacity: 1;
-        transform: translate(-18px, 10px) rotate(45deg);
+        content: '';
+        border-right: 2px solid #ddd;
+        border-bottom: 2px solid #ddd;
     }
 
     &:checked {
-        opacity: 1;
+        opacity: 1 !important;
     }
+`;
+
+export const HoverOverlay = styled.div<{ checked: boolean }>`
+    opacity: 0;
+    left: 0;
+    top: 0;
+    outline: none;
+    height: 40%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-weight: 900;
+    position: absolute;
+    ${(props) =>
+        !props.checked &&
+        'background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))'};
 `;
 
 const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
@@ -107,6 +128,9 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
     }
 
     &:hover ${Check} {
+        opacity: 0.5;
+    }
+    &:hover ${HoverOverlay} {
         opacity: 1;
     }
 `;
@@ -194,6 +218,7 @@ export default function PreviewCard(props: IProps) {
             )}
             {(file?.msrc || imgSrc) && <img src={file?.msrc || imgSrc} />}
             {file?.metadata.fileType === 1 && <PlayCircleOutline />}
+            <HoverOverlay checked={selected} />
         </Cont>
     );
 }
