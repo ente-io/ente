@@ -6,9 +6,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
-import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
@@ -769,6 +769,20 @@ class FilesDB {
       where: '$columnLocalID IN ($inParam)',
     );
     return _convertToFiles(results);
+  }
+
+  Future<int> deleteUnSyncedLocalFiles(List<String> localIDs) async {
+    String inParam = "";
+    for (final localID in localIDs) {
+      inParam += "'" + localID + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    return db.delete(
+      table,
+      where:
+          '($columnUploadedFileID is NULL OR $columnUploadedFileID = -1 ) AND $columnLocalID IN ($inParam)',
+    );
   }
 
   Future<int> deleteFromCollection(int uploadedFileID, int collectionID) async {

@@ -124,7 +124,20 @@ class File {
     metadataVersion = metadata["version"] ?? 0;
   }
 
-  Future<Map<String, dynamic>> getMetadata(io.File sourceFile) async {
+  Future<Map<String, dynamic>> getMetadataForUpload(io.File sourceFile) async {
+    final asset = await getAsset();
+    // asset can be null for files shared to app
+    if (asset != null) {
+      fileSubType = asset.subTypes;
+      if (fileType == FileType.video) {
+        duration = asset.duration;
+      }
+    }
+    hash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
+    return getMetadata();
+  }
+
+  Map<String, dynamic> getMetadata() {
     final metadata = <String, dynamic>{};
     metadata["localID"] = isSharedMediaToAppSandbox() ? null : localID;
     metadata["title"] = title;
@@ -137,20 +150,18 @@ class File {
       metadata["latitude"] = location.latitude;
       metadata["longitude"] = location.longitude;
     }
-    metadata["fileType"] = fileType.index;
-    final asset = await getAsset();
-    // asset can be null for files shared to app
-    if (asset != null) {
-      fileSubType = asset.subTypes;
+    if (fileSubType != null) {
       metadata["subType"] = fileSubType;
-      if (fileType == FileType.video) {
-        duration = asset.duration;
-        metadata["duration"] = duration;
-      }
     }
-    hash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
-    metadata["hash"] = hash;
-    metadata["version"] = metadataVersion;
+    if (duration != null) {
+      metadata["duration"] = duration;
+    }
+    if (hash != null) {
+      metadata["hash"] = hash;
+    }
+    if (metadataVersion != null) {
+      metadata["version"] = metadataVersion;
+    }
     return metadata;
   }
 

@@ -63,7 +63,7 @@ class FavoritesService {
 
   Future<Collection> _getFavoritesCollection() async {
     if (_cachedFavoritesCollectionID == null) {
-      final collections = _collectionsService.getCollections();
+      final collections = _collectionsService.getActiveCollections();
       for (final collection in collections) {
         if (collection.owner.id == _config.getUserID() &&
             collection.type == CollectionType.favorites) {

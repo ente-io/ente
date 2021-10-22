@@ -11,6 +11,8 @@ class CollectionsDB {
   static final _databaseName = "ente.collections.db";
   static final table = 'collections';
   static final tempTable = 'temp_collections';
+  static final _sqlBoolTrue = 1;
+  static final _sqlBoolFalse = 0;
 
   static final columnID = 'collection_id';
   static final columnOwner = 'owner';
@@ -25,18 +27,21 @@ class CollectionsDB {
   static final columnVersion = 'version';
   static final columnSharees = 'sharees';
   static final columnUpdationTime = 'updation_time';
+  static final columnIsDeleted = 'is_deleted';
 
   static final intitialScript = [...createTable(table)];
   static final migrationScripts = [
     ...alterNameToAllowNULL(),
     ...addEncryptedName(),
     ...addVersion(),
+    ...addIsDeleted(),
   ];
 
   final dbConfig = MigrationConfig(
       initializationScript: intitialScript, migrationScripts: migrationScripts);
 
   CollectionsDB._privateConstructor();
+
   static final CollectionsDB instance = CollectionsDB._privateConstructor();
 
   static Future<Database> _dbFuture;
@@ -113,6 +118,15 @@ class CollectionsDB {
     ];
   }
 
+  static List<String> addIsDeleted() {
+    return [
+      '''
+        ALTER TABLE $table
+        ADD COLUMN $columnIsDeleted INTEGER DEFAULT $_sqlBoolFalse;
+      '''
+    ];
+  }
+
   Future<List<dynamic>> insert(List<Collection> collections) async {
     final db = await instance.database;
     var batch = db.batch();
@@ -172,6 +186,11 @@ class CollectionsDB {
     row[columnSharees] =
         json.encode(collection.sharees?.map((x) => x?.toMap())?.toList());
     row[columnUpdationTime] = collection.updationTime;
+    if (collection.isDeleted ?? false) {
+      row[columnIsDeleted] = _sqlBoolTrue;
+    } else {
+      row[columnIsDeleted] = _sqlBoolTrue;
+    }
     return row;
   }
 
@@ -193,6 +212,8 @@ class CollectionsDB {
       List<User>.from((json.decode(row[columnSharees]) as List)
           .map((x) => User.fromMap(x))),
       int.parse(row[columnUpdationTime]),
+      // default to False is columnIsDeleted is not set
+      isDeleted: (row[columnIsDeleted] ?? _sqlBoolFalse) == _sqlBoolTrue,
     );
   }
 }
