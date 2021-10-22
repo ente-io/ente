@@ -23,7 +23,6 @@ export enum CollectionType {
 }
 
 const COLLECTION_UPDATION_TIME = 'collection-updation-time';
-const FAV_COLLECTION = 'fav-collection';
 const COLLECTIONS = 'collections';
 
 export interface Collection {
@@ -340,7 +339,11 @@ export const addToFavorites = async (file: File) => {
                 'Favorites',
                 CollectionType.favorites
             );
-            await localForage.setItem(FAV_COLLECTION, favCollection);
+            const localCollections = await getLocalCollections();
+            await localForage.setItem(COLLECTIONS, [
+                ...localCollections,
+                favCollection,
+            ]);
         }
         await addToCollection(favCollection, [file]);
     } catch (e) {
