@@ -308,7 +308,7 @@ const PhotoFrame = ({
         }
         if (rangeStart || rangeStart === 0) {
             setRangeStart(null);
-        } else {
+        } else if (checked) {
             setRangeStart(index);
         }
 
