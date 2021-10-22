@@ -39,10 +39,10 @@ class FeatureFlagService {
     try {
       _featureFlags ??=
           FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey));
-      return _featureFlags != null ? _featureFlags.enableStripe : false;
+      return _featureFlags != null ? _featureFlags.enableStripe : true;
     } catch (e) {
       _logger.severe(e);
-      return false;
+      return true;
     }
   }
 
