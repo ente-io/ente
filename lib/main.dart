@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:background_fetch/background_fetch.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
@@ -22,6 +24,7 @@ import 'package:photos/services/notification_service.dart';
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/app_lock.dart';
 import 'package:photos/ui/home_widget.dart';
@@ -31,7 +34,6 @@ import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:super_logging/super_logging.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'l10n/l10n.dart';
 
@@ -147,6 +149,7 @@ Future<void> _init(bool isBackground) async {
   await CollectionsService.instance.init();
   await FileUploader.instance.init(isBackground);
   await LocalSyncService.instance.init(isBackground);
+  await TrashSyncService.instance.init();
   await RemoteSyncService.instance.init(isBackground);
   await SyncService.instance.init();
   await MemoriesService.instance.init();
@@ -226,6 +229,7 @@ Future<void> _killBGTask(String taskId) async {
   final prefs = await SharedPreferences.getInstance();
   prefs.remove(kLastBGTaskHeartBeatTime);
   BackgroundFetch.finish(taskId);
+  Isolate.current.kill(priority: Isolate.immediate);
 }
 
 class EnteApp extends StatefulWidget {
@@ -250,6 +254,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       theme: themeData,
       home: EnteApp._homeWidget,
       debugShowCheckedModeBanner: false,
+      navigatorKey: Network.instance.getAlice().getNavigatorKey(),
       builder: EasyLoading.init(),
       supportedLocales: L10n.all,
       localizationsDelegates: const [

@@ -137,7 +137,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     if (_isImage && _exif != null) {
       items.add(_getExifWidgets(_exif));
     }
-    if (widget.file.uploadedFileID != null) {
+    if (widget.file.uploadedFileID != null && widget.file.updationTime != null) {
       items.addAll(
         [
           Row(

@@ -7,6 +7,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -15,6 +16,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/local_sync_service.dart';
+import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
@@ -62,7 +64,12 @@ class RemoteSyncService {
     if (!_hasSyncedArchive()) {
       await _markArchiveAsSynced();
     }
-
+    // sync trash but consume error during initial launch.
+    // this is to ensure that we don't pause upload due to any error during
+    // the trash sync. Impact: We may end up re-uploading a file which was
+    // recently trashed.
+    await TrashSyncService.instance.syncTrash()
+    .onError((e, s) => _logger.severe('trash sync failed', e, s));
     bool hasUploadedFiles = await _uploadDiff();
     if (hasUploadedFiles) {
       sync(silently: true);
@@ -84,7 +91,7 @@ class RemoteSyncService {
   }
 
   Future<void> _resyncAllCollectionsSinceTime(int sinceTime) async {
-    final collections = _collectionsService.getCollections();
+    final collections = _collectionsService.getActiveCollections();
     for (final c in collections) {
       await _syncCollectionDiff(c.id,
           min(_collectionsService.getCollectionSyncTime(c.id), sinceTime));
@@ -121,6 +128,23 @@ class RemoteSyncService {
     }
   }
 
+  bool _shouldIgnoreFileUpload(
+      Map<String, Set<String>> ignoredFilesMap, File file) {
+    if (file.localID == null || file.localID.isEmpty) {
+      return false;
+    }
+    if (!ignoredFilesMap.containsKey(file.localID)) {
+      return false;
+    }
+    // only compare title in Android because title may be missing in IOS
+    // and iOS anyways use uuid for localIDs of file, so collision should be
+    // rare.
+    if (Platform.isAndroid) {
+      return ignoredFilesMap[file.localID].contains(file.title ?? '');
+    }
+    return true;
+  }
+
   Future<bool> _uploadDiff() async {
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     List<File> filesToBeUploaded;
@@ -134,6 +158,16 @@ class RemoteSyncService {
     if (!Configuration.instance.shouldBackupVideos()) {
       filesToBeUploaded
           .removeWhere((element) => element.fileType == FileType.video);
+    }
+    if (filesToBeUploaded.isNotEmpty) {
+      final ignoredFilesMap = await IgnoredFilesDB.instance.getIgnoredFiles();
+      final int prevCount = filesToBeUploaded.length;
+      filesToBeUploaded.removeWhere(
+          (file) => _shouldIgnoreFileUpload(ignoredFilesMap, file));
+      if (prevCount != filesToBeUploaded.length) {
+        _logger.info((prevCount - filesToBeUploaded.length).toString() +
+            " files were ignored for upload");
+      }
     }
     _logger.info(
         filesToBeUploaded.length.toString() + " new files to be uploaded.");

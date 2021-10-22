@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
+import 'package:photos/ui/settings/app_version_widget.dart';
 import 'package:photos/ui/settings/backup_section_widget.dart';
 import 'package:photos/ui/settings/danger_section_widget.dart';
 import 'package:photos/ui/settings/debug_section_widget.dart';
@@ -51,26 +51,7 @@ class SettingsPage extends StatelessWidget {
         DangerSectionWidget(),
       ]);
     }
-    contents.add(
-      FutureBuilder(
-        future: _getAppVersion(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                "app version: " + snapshot.data,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.white.withOpacity(0.6),
-                ),
-              ),
-            );
-          }
-          return Container();
-        },
-      ),
-    );
+    contents.add(AppVersionWidget());
     if (kDebugMode && hasLoggedIn) {
       contents.add(DebugSectionWidget());
     }
@@ -82,10 +63,5 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  static Future<String> _getAppVersion() async {
-    var pkgInfo = await PackageInfo.fromPlatform();
-    return "${pkgInfo.version}";
   }
 }

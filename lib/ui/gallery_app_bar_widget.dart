@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
@@ -19,13 +18,13 @@ import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/archive_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 enum GalleryAppBarType {
   homepage,
   archive,
+  trash,
   local_folder,
   // indicator for gallery view of collections shared with the user
   shared_collection,
@@ -257,6 +256,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = <Widget>[];
+    if (widget.type == GalleryAppBarType.trash) {
+      _addTrashAction(actions);
+      return actions;
+    }
     // skip add button for incoming collection till this feature is implemented
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.type != GalleryAppBarType.shared_collection) {
@@ -382,6 +385,38 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     return actions;
   }
 
+  void _addTrashAction(List<Widget> actions) {
+    actions.add(Tooltip(
+      message: "restore",
+      child: IconButton(
+        icon: Icon(Icons.restore_outlined),
+        onPressed: () {
+          Navigator.push(
+              context,
+              PageTransition(
+                  type: PageTransitionType.bottomToTop,
+                  child: CreateCollectionPage(
+                    widget.selectedFiles,
+                    null,
+                    actionType: CollectionActionType.restoreFiles,
+                  )));
+        },
+      ),
+    ));
+    actions.add(Tooltip(
+      message: "delete permanently",
+      child: IconButton(
+        icon: Icon(Icons.delete_forever_outlined),
+        onPressed: () async {
+          if (await deleteFromTrash(
+              context, widget.selectedFiles.files.toList())) {
+            _clearSelectedFiles();
+          }
+        },
+      ),
+    ));
+  }
+
   Future<void> _handleVisibilityChangeRequest(
       BuildContext context, int newVisibility) async {
     try {
@@ -462,6 +497,17 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
           showToast("files deleted from device");
+        },
+      ));
+      actions.add(CupertinoActionSheetAction(
+        child: Text("ente"),
+        isDestructiveAction: true,
+        onPressed: () async {
+          Navigator.of(context, rootNavigator: true).pop();
+          await deleteFilesFromRemoteOnly(
+              context, widget.selectedFiles.files.toList());
+          _clearSelectedFiles();
+          showToast("deleted files are moved to trash");
         },
       ));
       actions.add(CupertinoActionSheetAction(

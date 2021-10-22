@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 Map<int, String> _months = {
   1: "Jan",
   2: "Feb",
@@ -102,6 +101,13 @@ String getFormattedDate(DateTime dateTime) {
       dateTime.day.toString() +
       ", " +
       dateTime.year.toString();
+}
+
+String daysLeft(int futureTime) {
+  int daysLeft = ((futureTime - DateTime.now().microsecondsSinceEpoch) /
+          Duration.microsecondsPerDay)
+      .ceil();
+  return '$daysLeft day' + (daysLeft <= 1 ? "" : "s");
 }
 
 String formatDuration(Duration position) {

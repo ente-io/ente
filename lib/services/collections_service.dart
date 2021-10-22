@@ -11,8 +11,10 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
@@ -66,7 +68,7 @@ class CollectionsService {
   }
 
   Future<List<Collection>> sync({bool isBackground = false}) async {
-    _logger.info("Syncing");
+    _logger.info("Syncing collections");
     final lastCollectionUpdationTime =
         _prefs.getInt(_collectionsSyncTimeKey) ?? 0;
 
@@ -75,13 +77,19 @@ class CollectionsService {
         await _fetchCollections(lastCollectionUpdationTime ?? 0, isBackground);
     final updatedCollections = <Collection>[];
     int maxUpdationTime = lastCollectionUpdationTime;
+    final ownerID = _config.getUserID();
     for (final collection in fetchedCollections) {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
-        await _db.deleteCollection(collection.id);
         await setCollectionSyncTime(collection.id, null);
         Bus.instance.fire(LocalPhotosUpdatedEvent(List<File>.empty()));
+      }
+      // remove reference for incoming collections when unshared/deleted
+      if (collection.isDeleted && ownerID != collection?.owner?.id) {
+        await _db.deleteCollection(collection.id);
       } else {
+        // keep entry for deletedCollection as collectionKey may be used during
+        // trash file decryption
         updatedCollections.add(collection);
       }
       maxUpdationTime = collection.updationTime > maxUpdationTime
@@ -111,7 +119,7 @@ class CollectionsService {
     final collections = await _db.getAllCollections();
     final updatedCollections = <Collection>[];
     for (final c in collections) {
-      if (c.updationTime > getCollectionSyncTime(c.id)) {
+      if (c.updationTime > getCollectionSyncTime(c.id) && !c.isDeleted) {
         updatedCollections.add(c);
       }
     }
@@ -141,8 +149,11 @@ class CollectionsService {
     return _localCollections[path];
   }
 
-  List<Collection> getCollections() {
-    return _collectionIDToCollections.values.toList();
+  // getActiveCollections returns list of collections which are not deleted yet
+  List<Collection> getActiveCollections() {
+    return _collectionIDToCollections.values
+        .toList()
+        .where((element) => !element.isDeleted);
   }
 
   Future<List<User>> getSharees(int collectionID) {
@@ -213,6 +224,13 @@ class CollectionsService {
   Uint8List getCollectionKey(int collectionID) {
     if (!_cachedKeys.containsKey(collectionID)) {
       final collection = _collectionIDToCollections[collectionID];
+      if (collection == null) {
+        // Async fetch for collection. A collection might be
+        // missing from older clients when we used to delete the collection
+        // from db. For trashed files, we need collection data for decryption.
+        fetchCollectionByID(collectionID);
+        throw AssertionError('collectionID $collectionID is not cached');
+      }
       _cachedKeys[collectionID] = _getDecryptedKey(collection);
     }
     return _cachedKeys[collectionID];
@@ -305,6 +323,28 @@ class CollectionsService {
     return collection;
   }
 
+  Future<Collection> fetchCollectionByID(int collectionID) async {
+    try {
+      _logger.fine('fetching collectionByID $collectionID');
+      final response = await _dio.get(
+        Configuration.instance.getHttpEndpoint() + "/collections/$collectionID",
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
+      assert(response != null && response.data != null);
+      final collection = Collection.fromMap(response.data["collection"]);
+      await _db.insert(List.from([collection]));
+      _cacheCollectionAttributes(collection);
+      return collection;
+    } catch (e) {
+      if (e is DioError && e.response?.statusCode == 401) {
+        throw UnauthorizedError();
+      }
+      _logger.severe('failed to fetch collection: $collectionID', e);
+      rethrow;
+    }
+  }
+
   Future<Collection> getOrCreateForPath(String path) async {
     if (_localCollections.containsKey(path) &&
         _localCollections[path].owner.id == _config.getUserID()) {
@@ -378,6 +418,53 @@ class CollectionsService {
       await _filesDB.insertMultiple(files);
       Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
     } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> restore(int toCollectionID, List<File> files) async {
+    final params = <String, dynamic>{};
+    params["collectionID"] = toCollectionID;
+    params["files"] = [];
+    final toCollectionKey = getCollectionKey(toCollectionID);
+    for (final file in files) {
+      final key = decryptFileKey(file);
+      file.generatedID = null; // So that a new entry is created in the FilesDB
+      file.collectionID = toCollectionID;
+      final encryptedKeyData = CryptoUtil.encryptSync(key, toCollectionKey);
+      file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
+      file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
+      params["files"].add(CollectionFileItem(
+              file.uploadedFileID, file.encryptedKey, file.keyDecryptionNonce)
+          .toMap());
+    }
+    try {
+      await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/collections/restore-files",
+        data: params,
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
+      await _filesDB.insertMultiple(files);
+      await TrashDB.instance
+          .delete(files.map((e) => e.uploadedFileID).toList());
+      Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
+      Bus.instance.fire(FilesUpdatedEvent(files));
+      // Remove imported local files which are imported but not uploaded.
+      // This handles the case where local file was trashed -> imported again
+      // but not uploaded automatically as it was trashed.
+      final localIDs = files
+          .where((e) => e.localID != null)
+          .map((e) => e.localID)
+          .toSet()
+          .toList();
+      if (localIDs.isNotEmpty) {
+        await _filesDB.deleteUnSyncedLocalFiles(localIDs);
+      }
+      // Force reload home gallery to pull in the restored files
+      Bus.instance.fire(ForceReloadHomeGalleryEvent());
+    } catch (e, s) {
+      _logger.severe("failed to restore files", e, s);
       rethrow;
     }
   }
@@ -457,13 +544,14 @@ class CollectionsService {
       params["fileIDs"].add(file.uploadedFileID);
     }
     await _dio.post(
-      Configuration.instance.getHttpEndpoint() + "/collections/remove-files",
+      Configuration.instance.getHttpEndpoint() + "/collections/v2/remove-files",
       data: params,
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
     );
     await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
     Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
+    Bus.instance.fire(LocalPhotosUpdatedEvent(files));
     RemoteSyncService.instance.sync(silently: true);
   }
 
@@ -484,7 +572,8 @@ class CollectionsService {
   Collection _cacheCollectionAttributes(Collection collection) {
     final collectionWithDecryptedName =
         _getCollectionWithDecryptedName(collection);
-    if (collection.attributes.encryptedPath != null) {
+    if (collection.attributes.encryptedPath != null &&
+        !(collection.isDeleted)) {
       _localCollections[decryptCollectionPath(collection)] =
           collectionWithDecryptedName;
     }
@@ -535,7 +624,7 @@ class CollectionsService {
       await _db.insert(collections);
     } catch (e) {
       if (attempt < kMaximumWriteAttempts) {
-        return _updateDB(collections, attempt: attempt++);
+        return _updateDB(collections, attempt: ++attempt);
       } else {
         rethrow;
       }

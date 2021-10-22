@@ -246,6 +246,13 @@ class FileUploader {
     if (!canUploadUnderCurrentNetworkConditions && !forcedUpload) {
       throw WiFiUnavailableError();
     }
+    final fileOnDisk = await FilesDB.instance.getFile(file.generatedID);
+    final wasAlreadyUploaded = fileOnDisk.uploadedFileID != null &&
+        fileOnDisk.updationTime != null &&
+        fileOnDisk.collectionID == collectionID;
+    if (wasAlreadyUploaded) {
+      return fileOnDisk;
+    }
 
     try {
       await _uploadLocks.acquireLock(
@@ -285,8 +292,10 @@ class FileUploader {
         }
       }
       Uint8List key;
-      var isAlreadyUploadedFile = file.uploadedFileID != null;
-      if (isAlreadyUploadedFile) {
+      bool isUpdatedFile =
+          file.uploadedFileID != null && file.updationTime == null;
+      if (isUpdatedFile) {
+        _logger.info("File was updated " + file.toString());
         key = decryptFileKey(file);
       } else {
         key = null;
@@ -319,7 +328,7 @@ class FileUploader {
       final fileUploadURL = await _getUploadURL();
       String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
 
-      final metadata = await file.getMetadata(mediaUploadData.sourceFile);
+      final metadata = await file.getMetadataForUpload(mediaUploadData.sourceFile);
       final encryptedMetadataData = await CryptoUtil.encryptChaCha(
           utf8.encode(jsonEncode(metadata)), fileAttributes.key);
       final fileDecryptionHeader = Sodium.bin2base64(fileAttributes.header);
@@ -333,7 +342,7 @@ class FileUploader {
         throw SyncStopRequestedError();
       }
       File remoteFile;
-      if (isAlreadyUploadedFile) {
+      if (isUpdatedFile) {
         remoteFile = await _updateFile(
           file,
           fileObjectKey,
@@ -407,7 +416,8 @@ class FileUploader {
 
   Future _onInvalidFileError(File file, InvalidFileError e) async {
     String ext = file.title == null ? "no title" : extension(file.title);
-    _logger.severe("Invalid file: (ext: $ext) encountered: " + file.toString(), e);
+    _logger.severe(
+        "Invalid file: (ext: $ext) encountered: " + file.toString(), e);
     await FilesDB.instance.deleteLocalFile(file);
     await LocalSyncService.instance.trackInvalidFile(file);
     throw e;

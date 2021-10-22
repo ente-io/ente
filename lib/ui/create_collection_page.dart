@@ -19,7 +19,24 @@ import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
-enum CollectionActionType { addFiles, moveFiles }
+enum CollectionActionType { addFiles, moveFiles, restoreFiles }
+
+String _actionName(CollectionActionType type, bool plural) {
+  final titleSuffix = (plural ? "s" : "");
+  String text = "";
+  switch (type) {
+    case CollectionActionType.addFiles:
+      text = "add file";
+      break;
+    case CollectionActionType.moveFiles:
+      text = "move file";
+      break;
+    case CollectionActionType.restoreFiles:
+      text = "restore file";
+      break;
+  }
+  return text + titleSuffix;
+}
 
 class CreateCollectionPage extends StatefulWidget {
   final SelectedFiles selectedFiles;
@@ -43,14 +60,9 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     final filesCount = widget.sharedFiles != null
         ? widget.sharedFiles.length
         : widget.selectedFiles.files.length;
-    final titleSuffix = (filesCount == 1 ? "" : "s");
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.actionType == CollectionActionType.addFiles
-              ? "add file" + titleSuffix
-              : "move file" + titleSuffix,
-        ),
+        title: Text(_actionName(widget.actionType, filesCount > 1)),
       ),
       body: _getBody(context),
     );
@@ -153,7 +165,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
           ],
         ),
         onTap: () async {
-          if (await _addOrMoveToCollection(item.collection.id)) {
+          if (await _runCollectionAction(item.collection.id)) {
             showToast(widget.actionType == CollectionActionType.addFiles
                 ? "added successfully to " + item.collection.name
                 : "moved successfully to " + item.collection.name);
@@ -206,8 +218,12 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             final collection = await _createAlbum(_albumName);
             if (collection != null) {
-              if (await _addOrMoveToCollection(collection.id)) {
-                showToast("album '" + _albumName + "' created.");
+              if (await _runCollectionAction(collection.id)) {
+                if (widget.actionType == CollectionActionType.restoreFiles) {
+                  showToast('restored files to album ' + _albumName);
+                } else {
+                  showToast("album '" + _albumName + "' created.");
+                }
                 _navigateToCollection(collection);
               }
             }
@@ -235,10 +251,16 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             )));
   }
 
-  Future<bool> _addOrMoveToCollection(int collectionID) async {
-    return widget.actionType == CollectionActionType.addFiles
-        ? _addToCollection(collectionID)
-        : _moveFilesToCollection(collectionID);
+  Future<bool> _runCollectionAction(int collectionID) async {
+    switch (widget.actionType) {
+      case CollectionActionType.addFiles:
+        return _addToCollection(collectionID);
+      case CollectionActionType.moveFiles:
+        return _moveFilesToCollection(collectionID);
+      case CollectionActionType.restoreFiles:
+        return _restoreFilesToCollection(collectionID);
+    }
+    throw AssertionError("unexpected actionType ${widget.actionType}");
   }
 
   Future<bool> _moveFilesToCollection(int toCollectionID) async {
@@ -248,6 +270,28 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       int fromCollectionID = widget.selectedFiles.files?.first?.collectionID;
       await CollectionsService.instance.move(toCollectionID, fromCollectionID,
           widget.selectedFiles.files?.toList());
+      RemoteSyncService.instance.sync(silently: true);
+      widget.selectedFiles?.clearAll();
+      await dialog.hide();
+      return true;
+    } on AssertionError catch (e, s) {
+      await dialog.hide();
+      showErrorDialog(context, "oops", e.message);
+      return false;
+    } catch (e, s) {
+      _logger.severe("Could not move to album", e, s);
+      await dialog.hide();
+      showGenericErrorDialog(context);
+      return false;
+    }
+  }
+
+  Future<bool> _restoreFilesToCollection(int toCollectionID) async {
+    final dialog = createProgressDialog(context, "restoring files...");
+    await dialog.show();
+    try {
+      await CollectionsService.instance
+          .restore(toCollectionID, widget.selectedFiles.files?.toList());
       RemoteSyncService.instance.sync(silently: true);
       widget.selectedFiles?.clearAll();
       await dialog.hide();
