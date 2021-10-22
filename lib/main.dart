@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:background_fetch/background_fetch.dart';
@@ -44,6 +45,8 @@ const kLastBGTaskHeartBeatTime = "bg_task_hb_time";
 const kLastFGTaskHeartBeatTime = "fg_task_hb_time";
 const kHeartBeatFrequency = Duration(seconds: 1);
 const kFGSyncFrequency = Duration(minutes: 5);
+const kBGTaskTimeout = Duration(seconds: 25);
+const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 
 final themeData = ThemeData(
@@ -118,6 +121,9 @@ void _backgroundTask(String taskId) async {
   }
   _logger.info("[BackgroundFetch] Event received: $taskId");
   _scheduleBGTaskKill(taskId);
+  if (Platform.isIOS) {
+    _scheduleSuicide(kBGTaskTimeout); // To prevent OS from punishing us
+  }
   await _init(true);
   UpdateService.instance.showUpdateNotification();
   await _sync(isAppInBackground: true);
@@ -223,12 +229,14 @@ Future<bool> _isRunningInForeground() async {
       (currentTime - kFGTaskDeathTimeoutInMicroseconds);
 }
 
-Future<void> _killBGTask(String taskId) async {
+Future<void> _killBGTask([String taskId]) async {
   await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
       ProcessType.background.toString(), DateTime.now().microsecondsSinceEpoch);
   final prefs = await SharedPreferences.getInstance();
   prefs.remove(kLastBGTaskHeartBeatTime);
-  BackgroundFetch.finish(taskId);
+  if (taskId != null) {
+    BackgroundFetch.finish(taskId);
+  }
   Isolate.current.kill(priority: Isolate.immediate);
 }
 
@@ -305,6 +313,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     // App is dead
     _runWithLogs(() async {
       _logger.info("Background push received");
+      if (Platform.isIOS) {
+        _scheduleSuicide(kBGPushTimeout); // To prevent OS from punishing us
+      }
       await _init(true);
       UpdateService.instance.showUpdateNotification();
       await _sync(isAppInBackground: true);
@@ -312,4 +323,11 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   } else {
     // App has already been initialized, will let foreground handle everything
   }
+}
+
+void _scheduleSuicide(Duration duration, [String taskID]) {
+  Future.delayed(duration, () {
+    _logger.warning("TLE");
+    _killBGTask(taskID);
+  });
 }
