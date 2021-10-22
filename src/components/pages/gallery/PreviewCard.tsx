@@ -15,10 +15,14 @@ interface IProps {
     selectable?: boolean;
     selected?: boolean;
     onSelect?: (checked: boolean) => void;
+    onHover?: () => void;
+    onRangeSelect?: () => void;
+    isRangeSelectActive: boolean;
     selectOnClick?: boolean;
+    isInsSelectRange: boolean;
 }
 
-const Check = styled.input`
+const Check = styled.input<{ active: boolean }>`
     appearance: none;
     position: absolute;
     z-index: 10;
@@ -50,8 +54,8 @@ const Check = styled.input`
         content: '';
         width: 5px;
         height: 10px;
-        border-right: 2px solid #000;
-        border-bottom: 2px solid #000;
+        border-right: 2px solid #333;
+        border-bottom: 2px solid #333;
         transform: translate(-18px, 8px);
         transition: transform 0.3s ease;
         position: absolute;
@@ -71,7 +75,7 @@ const Check = styled.input`
         border-right: 2px solid #ddd;
         border-bottom: 2px solid #ddd;
     }
-
+    ${(props) => props.active && 'opacity: 0.5 '};
     &:checked {
         opacity: 1 !important;
     }
@@ -93,6 +97,22 @@ export const HoverOverlay = styled.div<{ checked: boolean }>`
     ${(props) =>
         !props.checked &&
         'background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))'};
+`;
+
+export const InSelectRangeOverLay = styled.div<{ active: boolean }>`
+    opacity: ${(props) => (!props.active ? 0 : 1)});
+    left: 0;
+    top: 0;
+    outline: none;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-weight: 900;
+    position: absolute;
+    ${(props) => props.active && 'background:rgba(4, 251, 0, 0.26)'};
 `;
 
 const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
@@ -147,6 +167,10 @@ export default function PreviewCard(props: IProps) {
         selected,
         onSelect,
         selectOnClick,
+        onHover,
+        onRangeSelect,
+        isRangeSelectActive,
+        isInsSelectRange,
     } = props;
     const isMounted = useRef(true);
     useLayoutEffect(() => {
@@ -187,13 +211,18 @@ export default function PreviewCard(props: IProps) {
 
     const handleClick = () => {
         if (selectOnClick) {
-            onSelect?.(!selected);
+            if (isRangeSelectActive) {
+                onRangeSelect();
+            } else {
+                onSelect?.(!selected);
+            }
         } else if (file?.msrc || imgSrc) {
             onClick?.();
         }
     };
 
     const handleSelect: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+        onRangeSelect?.();
         onSelect?.(e.target.checked);
     };
 
@@ -205,6 +234,7 @@ export default function PreviewCard(props: IProps) {
         <Cont
             id={`thumb-${file?.id}`}
             onClick={handleClick}
+            onMouseOver={() => isRangeSelectActive && onHover()}
             disabled={!forcedEnable && !file?.msrc && !imgSrc}
             selected={selected}
             {...(selectable ? useLongPress(longPressCallback, 500) : {})}>
@@ -213,12 +243,16 @@ export default function PreviewCard(props: IProps) {
                     type="checkbox"
                     checked={selected}
                     onChange={handleSelect}
+                    active={isRangeSelectActive && isInsSelectRange}
                     onClick={(e) => e.stopPropagation()}
                 />
             )}
             {(file?.msrc || imgSrc) && <img src={file?.msrc || imgSrc} />}
             {file?.metadata.fileType === 1 && <PlayCircleOutline />}
             <HoverOverlay checked={selected} />
+            <InSelectRangeOverLay
+                active={isRangeSelectActive && isInsSelectRange}
+            />
         </Cont>
     );
 }

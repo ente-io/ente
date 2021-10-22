@@ -177,6 +177,28 @@ const PhotoFrame = ({
     const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
     const listRef = useRef(null);
+    const [lastSelected, setLastSelected] = useState(null);
+    const [currentHover, setCurrentHover] = useState(null);
+    const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Shift') {
+                setIsShiftKeyPressed(true);
+            }
+        };
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.key === 'Shift') {
+                setIsShiftKeyPressed(false);
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown, false);
+        document.addEventListener('keyup', handleKeyUp, false);
+        return () => {
+            document.addEventListener('keydown', handleKeyDown, false);
+            document.addEventListener('keyup', handleKeyUp, false);
+        };
+    }, []);
 
     useEffect(() => {
         if (isInSearchMode) {
@@ -283,6 +305,26 @@ const PhotoFrame = ({
             collectionID: activeCollection,
         }));
     };
+
+    const handleRangeSelect = (index: number) => () => {
+        if (lastSelected === index) {
+            setLastSelected(null);
+        } else {
+            setLastSelected(index);
+            let st = -1;
+            let lt = -1;
+            if (index < lastSelected) {
+                st = index;
+                lt = lastSelected - 1;
+            } else {
+                st = lastSelected + 1;
+                lt = index;
+            }
+            for (let i = st; i <= lt; i++) {
+                handleSelect(filteredData[i].id)(true);
+            }
+        }
+    };
     const getThumbnail = (file: File[], index: number) => (
         <PreviewCard
             key={`tile-${file[index].id}`}
@@ -296,6 +338,15 @@ const PhotoFrame = ({
                 selected[file[index].id]
             }
             selectOnClick={selected.count > 0}
+            onHover={() => setCurrentHover(index)}
+            onRangeSelect={handleRangeSelect(index)}
+            isRangeSelectActive={
+                isShiftKeyPressed && (lastSelected || lastSelected === 0)
+            }
+            isInsSelectRange={
+                (index >= lastSelected + 1 && index <= currentHover) ||
+                (index >= currentHover && index <= lastSelected - 1)
+            }
         />
     );
 
