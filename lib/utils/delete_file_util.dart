@@ -124,7 +124,7 @@ Future<void> deleteFilesFromRemoteOnly(
     BuildContext context, List<File> files) async {
   files.removeWhere((element) => element.uploadedFileID == null);
   if(files.isEmpty) {
-    showToast("selected files are not uploaded on ente");
+    showToast("selected files are not on ente");
     return;
   }
   final dialog = createProgressDialog(context, "deleting...");
