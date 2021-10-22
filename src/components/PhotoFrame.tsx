@@ -177,7 +177,7 @@ const PhotoFrame = ({
     const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
     const listRef = useRef(null);
-    const [lastSelected, setLastSelected] = useState(null);
+    const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
 
@@ -224,7 +224,7 @@ const PhotoFrame = ({
 
     useEffect(() => {
         if (selected.count === 0) {
-            setLastSelected(null);
+            setRangeStart(null);
         }
     }, [selected]);
 
@@ -300,10 +300,16 @@ const PhotoFrame = ({
         setOpen(true);
     };
 
-    const handleSelect = (id: number) => (checked: boolean) => {
+    const handleSelect = (id: number, index?: number) => (checked: boolean) => {
         if (selected.collectionID !== activeCollection) {
             setSelected({ count: 0, collectionID: 0 });
         }
+        if (rangeStart || rangeStart === 0) {
+            setRangeStart(null);
+        } else {
+            setRangeStart(index);
+        }
+
         setSelected((selected) => ({
             ...selected,
             [id]: checked,
@@ -311,22 +317,18 @@ const PhotoFrame = ({
             collectionID: activeCollection,
         }));
     };
-
     const handleRangeSelect = (index: number) => () => {
-        if (lastSelected === index) {
-            setLastSelected(null);
-        } else {
-            setLastSelected(index);
-            let st = -1;
-            let lt = -1;
-            if (index < lastSelected) {
-                st = index;
-                lt = lastSelected - 1;
+        if (rangeStart !== index) {
+            let leftEnd = -1;
+            let rightEnd = -1;
+            if (index < rangeStart) {
+                leftEnd = index;
+                rightEnd = rangeStart;
             } else {
-                st = lastSelected + 1;
-                lt = index;
+                leftEnd = rangeStart;
+                rightEnd = index;
             }
-            for (let i = st; i <= lt; i++) {
+            for (let i = leftEnd; i <= rightEnd; i++) {
                 handleSelect(filteredData[i].id)(true);
             }
         }
@@ -338,7 +340,7 @@ const PhotoFrame = ({
             updateUrl={updateUrl(file[index].dataIndex)}
             onClick={onThumbnailClick(index)}
             selectable={!isSharedCollection}
-            onSelect={handleSelect(file[index].id)}
+            onSelect={handleSelect(file[index].id, index)}
             selected={
                 selected.collectionID === activeCollection &&
                 selected[file[index].id]
@@ -347,11 +349,11 @@ const PhotoFrame = ({
             onHover={() => setCurrentHover(index)}
             onRangeSelect={handleRangeSelect(index)}
             isRangeSelectActive={
-                isShiftKeyPressed && (lastSelected || lastSelected === 0)
+                isShiftKeyPressed && (rangeStart || rangeStart === 0)
             }
             isInsSelectRange={
-                (index >= lastSelected + 1 && index <= currentHover) ||
-                (index >= currentHover && index <= lastSelected - 1)
+                (index >= rangeStart + 1 && index <= currentHover) ||
+                (index >= currentHover && index <= rangeStart - 1)
             }
         />
     );

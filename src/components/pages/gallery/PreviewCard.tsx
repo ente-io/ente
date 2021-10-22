@@ -222,7 +222,9 @@ export default function PreviewCard(props: IProps) {
     };
 
     const handleSelect: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-        onRangeSelect?.();
+        if (isRangeSelectActive) {
+            onRangeSelect?.();
+        }
         onSelect?.(e.target.checked);
     };
 
