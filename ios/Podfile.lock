@@ -223,6 +223,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - CocoaAsyncSocket
     - Firebase
     - FirebaseCore
     - FirebaseCoreDiagnostics
@@ -231,8 +232,6 @@ SPEC REPOS:
     - FMDB
     - GoogleDataTransport
     - GoogleUtilities
-    - CocoaAsyncSocket
-    - FMDB
     - KTVCocoaHTTPServer
     - KTVHTTPCache
     - libwebp
