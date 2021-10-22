@@ -17,9 +17,9 @@ interface IProps {
     onSelect?: (checked: boolean) => void;
     onHover?: () => void;
     onRangeSelect?: () => void;
-    isRangeSelectActive: boolean;
+    isRangeSelectActive?: boolean;
     selectOnClick?: boolean;
-    isInsSelectRange: boolean;
+    isInsSelectRange?: boolean;
 }
 
 const Check = styled.input<{ active: boolean }>`
