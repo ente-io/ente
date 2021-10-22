@@ -219,7 +219,11 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             final collection = await _createAlbum(_albumName);
             if (collection != null) {
               if (await _runCollectionAction(collection.id)) {
-                showToast("album '" + _albumName + "' created.");
+                if (widget.actionType == CollectionActionType.restoreFiles) {
+                  showToast('restored files to album ' + _albumName);
+                } else {
+                  showToast("album '" + _albumName + "' created.");
+                }
                 _navigateToCollection(collection);
               }
             }
