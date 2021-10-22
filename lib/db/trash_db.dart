@@ -1,11 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/file_load_result.dart';
-import 'package:photos/models/file_type.dart';
-import 'package:photos/models/location.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -28,19 +27,13 @@ class TrashDB {
   static final columnKeyDecryptionNonce = 'key_decryption_nonce';
   static final columnFileDecryptionHeader = 'file_decryption_header';
   static final columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
-
-  static final columnModificationTime = 'modification_time';
-  static final columnCreationTime = 'creation_time';
   static final columnUpdationTime = 'updation_time';
 
+  static final columnCreationTime = 'creation_time';
   static final columnLocalID = 'local_id';
-  static final columnTitle = 'title';
-  static final columnDeviceFolder = 'device_folder';
-  static final columnLatitude = 'latitude';
-  static final columnLongitude = 'longitude';
-  static final columnFileType = 'file_type';
-  static final columnFileSubType = 'file_sub_type';
-  static final columnDuration = 'duration';
+
+  // standard file metadata, which isn't editable
+  static final columnFileMetadata = 'file_metadata';
 
   static final columnMMdEncodedJson = 'mmd_encoded_json';
   static final columnMMdVersion = 'mmd_ver';
@@ -57,17 +50,10 @@ class TrashDB {
           $columnKeyDecryptionNonce TEXT,
           $columnFileDecryptionHeader TEXT,
           $columnThumbnailDecryptionHeader TEXT,
-          $columnLocalID TEXT,
-          $columnTitle TEXT NOT NULL,
-          $columnDeviceFolder TEXT,
-          $columnLatitude REAL,
-          $columnLongitude REAL,
-          $columnFileType INTEGER,
-          $columnCreationTime INTEGER NOT NULL,
-          $columnModificationTime INTEGER NOT NULL,
           $columnUpdationTime INTEGER,
-          $columnFileSubType INTEGER,
-          $columnDuration INTEGER,
+          $columnLocalID TEXT,
+          $columnCreationTime INTEGER NOT NULL,
+          $columnFileMetadata TEXT DEFAULT '{}',
           $columnMMdEncodedJson TEXT DEFAULT '{}',
           $columnMMdVersion INTEGER DEFAULT 0
         );
@@ -169,7 +155,7 @@ class TrashDB {
       where: '$columnCreationTime >= ? AND $columnCreationTime <= ?',
       whereArgs: [startTime, endTime],
       orderBy:
-          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
+          '$columnCreationTime ' + order ,
       limit: limit,
     );
     final files = _convertToFiles(results);
@@ -191,25 +177,20 @@ class TrashDB {
     trashFile.uploadedFileID = row[columnUploadedFileID];
     // dirty hack to ensure that the file_downloads & cache mechanism works
     trashFile.generatedID = -1 * trashFile.uploadedFileID;
-    trashFile.localID = row[columnLocalID];
     trashFile.ownerID = row[columnOwnerID];
     trashFile.collectionID =
         row[columnCollectionID] == -1 ? null : row[columnCollectionID];
-    trashFile.title = row[columnTitle];
-    trashFile.deviceFolder = row[columnDeviceFolder];
-    if (row[columnLatitude] != null && row[columnLongitude] != null) {
-      trashFile.location = Location(row[columnLatitude], row[columnLongitude]);
-    }
-    trashFile.fileType = getFileType(row[columnFileType]);
-    trashFile.creationTime = row[columnCreationTime];
-    trashFile.modificationTime = row[columnModificationTime];
-    trashFile.updationTime = row[columnUpdationTime] ?? 0;
     trashFile.encryptedKey = row[columnEncryptedKey];
     trashFile.keyDecryptionNonce = row[columnKeyDecryptionNonce];
     trashFile.fileDecryptionHeader = row[columnFileDecryptionHeader];
     trashFile.thumbnailDecryptionHeader = row[columnThumbnailDecryptionHeader];
-    trashFile.fileSubType = row[columnFileSubType] ?? -1;
-    trashFile.duration = row[columnDuration] ?? 0;
+    trashFile.updationTime = row[columnUpdationTime] ?? 0;
+
+    trashFile.localID = row[columnLocalID];
+    trashFile.creationTime = row[columnCreationTime];
+    final fileMetadata = row[columnFileMetadata] ?? '{}';
+    trashFile.applyMetadata(jsonDecode(fileMetadata));
+
     trashFile.mMdVersion = row[columnMMdVersion] ?? 0;
     trashFile.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
 
@@ -227,21 +208,12 @@ class TrashDB {
     row[columnKeyDecryptionNonce] = trash.keyDecryptionNonce;
     row[columnFileDecryptionHeader] = trash.fileDecryptionHeader;
     row[columnThumbnailDecryptionHeader] = trash.thumbnailDecryptionHeader;
-
-    row[columnLocalID] = trash.localID;
-    row[columnTitle] = trash.title;
-    row[columnDeviceFolder] = trash.deviceFolder;
-    if (trash.location != null) {
-      row[columnLatitude] = trash.location.latitude;
-      row[columnLongitude] = trash.location.longitude;
-    }
-    row[columnFileType] = getInt(trash.fileType);
-    row[columnCreationTime] = trash.creationTime;
-    row[columnModificationTime] = trash.modificationTime;
     row[columnUpdationTime] = trash.updationTime;
 
-    row[columnFileSubType] = trash.fileSubType ?? -1;
-    row[columnDuration] = trash.duration ?? 0;
+    row[columnLocalID] = trash.localID;
+    row[columnCreationTime] = trash.creationTime;
+    row[columnFileMetadata] = jsonEncode(trash.getMetadata());
+
     row[columnMMdVersion] = trash.mMdVersion ?? 0;
     row[columnMMdEncodedJson] = trash.mMdEncodedJson ?? '{}';
     return row;

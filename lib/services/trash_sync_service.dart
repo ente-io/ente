@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/models/file.dart';
@@ -15,10 +14,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 class TrashSyncService {
   final _logger = Logger("TrashSyncService");
   final _diffFetcher = TrashDiffFetcher();
-  final _filesDB = FilesDB.instance;
   final _trashDB = TrashDB.instance;
   static const kDiffLimit = 2500;
-  static const kLastTrashSyncTime = "last_trash_sync_timex";
+  static const kLastTrashSyncTime = "last_trash_sync_time";
   SharedPreferences _prefs;
 
   TrashSyncService._privateConstructor();
