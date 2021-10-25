@@ -192,6 +192,19 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
       ));
     }
+    if(widget.type == GalleryAppBarType.trash) {
+      actions.add(
+        Tooltip(
+          message: "empty trash",
+          child: IconButton(
+            icon: Icon(Icons.delete_forever),
+            onPressed: () async {
+              await emptyTrash(context);
+            },
+          ),
+        ),
+      );
+    }
     return actions;
   }
 

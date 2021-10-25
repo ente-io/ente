@@ -129,4 +129,24 @@ class TrashSyncService {
       rethrow;
     }
   }
+
+  Future<void> emptyTrash() async {
+    final params = <String, dynamic>{};
+    params["lastUpdatedAt"] = _getSyncTime();
+    try {
+      await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/trash/empty",
+        options: Options(
+          headers: {
+            "X-Auth-Token": Configuration.instance.getToken(),
+          },
+        ),
+        data: params,
+      );
+      await _trashDB.clearTable();
+    } catch (e, s) {
+      _logger.severe("failed to empty trash", e, s);
+      rethrow;
+    }
+  }
 }

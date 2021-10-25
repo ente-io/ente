@@ -225,6 +225,30 @@ Future<bool> deleteFromTrash(
   }
 }
 
+
+Future<bool> emptyTrash(BuildContext context) async {
+  final result = await showChoiceDialog(context, "empty trash?",
+      "all files will be permanently removed from your ente account",
+      firstAction: "yes", actionType: ActionType.critical);
+  if (result != DialogUserChoice.firstChoice) {
+    return false;
+  }
+  final dialog = createProgressDialog(context, "please wait...");
+  await dialog.show();
+  try {
+    await TrashSyncService.instance.emptyTrash();
+    showToast("done");
+    await dialog.hide();
+    Bus.instance.fire(FilesUpdatedEvent((List<File>.empty()), type: EventType.deleted));
+    return true;
+  } catch (e, s) {
+    _logger.info("failed empty trash", e, s);
+    await dialog.hide();
+    await showGenericErrorDialog(context);
+    return false;
+  }
+}
+
 Future<bool> deleteLocalFiles(
     BuildContext context, List<String> localIDs) async {
   final List<String> deletedIDs = [];
