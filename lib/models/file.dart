@@ -144,6 +144,7 @@ class File {
     metadata["deviceFolder"] = deviceFolder;
     metadata["creationTime"] = creationTime;
     metadata["modificationTime"] = modificationTime;
+    metadata["fileType"] = fileType.index;
     if (location != null &&
         location.latitude != null &&
         location.longitude != null) {
