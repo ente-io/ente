@@ -337,7 +337,9 @@ const PhotoFrame = ({
     };
     const getThumbnail = (file: File[], index: number) => (
         <PreviewCard
-            key={`tile-${file[index].id}`}
+            key={`tile-${file[index].id}-selected-${
+                selected[file[index].id] ?? false
+            }`}
             file={file[index]}
             updateUrl={updateUrl(file[index].dataIndex)}
             onClick={onThumbnailClick(index)}
