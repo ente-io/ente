@@ -15,7 +15,6 @@ class TrashSyncService {
   final _logger = Logger("TrashSyncService");
   final _diffFetcher = TrashDiffFetcher();
   final _trashDB = TrashDB.instance;
-  static const kDiffLimit = 2500;
   static const kLastTrashSyncTime = "last_trash_sync_time";
   SharedPreferences _prefs;
 
@@ -32,7 +31,7 @@ class TrashSyncService {
   Future<void> syncTrash() async {
     final lastSyncTime = _getSyncTime();
     _logger.fine('sync trash sinceTime : $lastSyncTime');
-    final diff = await _diffFetcher.getTrashFilesDiff(lastSyncTime, kDiffLimit);
+    final diff = await _diffFetcher.getTrashFilesDiff(lastSyncTime);
     if (diff.trashedFiles.isNotEmpty) {
       _logger.fine("inserting ${diff.trashedFiles.length} items in trash");
       await _trashDB.insertMultiple(diff.trashedFiles);
@@ -53,7 +52,7 @@ class TrashSyncService {
     if (diff.lastSyncedTimeStamp != 0) {
       await _setSyncTime(diff.lastSyncedTimeStamp);
     }
-    if (diff.fetchCount == kDiffLimit) {
+    if (diff.hasMore) {
       return await syncTrash();
     }
   }

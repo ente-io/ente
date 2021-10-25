@@ -16,7 +16,7 @@ class TrashDiffFetcher {
   final _logger = Logger("TrashDiffFetcher");
   final _dio = Network.instance.getDio();
 
-  Future<Diff> getTrashFilesDiff(int sinceTime, int limit) async {
+  Future<Diff> getTrashFilesDiff(int sinceTime) async {
     try {
       final response = await _dio.get(
         Configuration.instance.getHttpEndpoint() + "/trash/diff",
@@ -24,7 +24,6 @@ class TrashDiffFetcher {
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         queryParameters: {
           "sinceTime": sinceTime,
-          "limit": limit,
         },
       );
       int latestUpdatedAtTime = 0;
@@ -34,6 +33,7 @@ class TrashDiffFetcher {
       if (response != null) {
         Bus.instance.fire(RemoteSyncEvent(true));
         final diff = response.data["diff"] as List;
+        final bool hasMore = response.data["hasMore"] as bool;
         final startTime = DateTime.now();
         for (final item in diff) {
           final trash = TrashFile();
@@ -89,11 +89,11 @@ class TrashDiffFetcher {
                         startTime.microsecondsSinceEpoch))
                 .inMilliseconds
                 .toString());
-        return Diff(trashedFiles, restoredFiles, deletedFiles, diff.length,
+        return Diff(trashedFiles, restoredFiles, deletedFiles, hasMore,
             latestUpdatedAtTime);
       } else {
         Bus.instance.fire(RemoteSyncEvent(false));
-        return Diff(<TrashFile>[], <TrashFile>[], <TrashFile>[], 0, 0);
+        return Diff(<TrashFile>[], <TrashFile>[], <TrashFile>[], false, 0);
       }
     } catch (e, s) {
       _logger.severe(e, s);
@@ -106,9 +106,9 @@ class Diff {
   final List<TrashFile> trashedFiles;
   final List<TrashFile> restoredFiles;
   final List<TrashFile> deletedFiles;
-  final int fetchCount;
+  final bool hasMore;
   final int lastSyncedTimeStamp;
 
   Diff(this.trashedFiles, this.restoredFiles, this.deletedFiles,
-      this.fetchCount, this.lastSyncedTimeStamp);
+      this.hasMore, this.lastSyncedTimeStamp);
 }
