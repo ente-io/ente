@@ -231,12 +231,16 @@ export default function PreviewCard(props: IProps) {
     const longPressCallback = () => {
         onSelect(!selected);
     };
-
+    const handleHover = () => {
+        if (isRangeSelectActive) {
+            onHover();
+        }
+    };
     return (
         <Cont
             id={`thumb-${file?.id}`}
             onClick={handleClick}
-            onMouseOver={() => isRangeSelectActive && onHover()}
+            onMouseEnter={handleHover}
             disabled={!forcedEnable && !file?.msrc && !imgSrc}
             selected={selected}
             {...(selectable ? useLongPress(longPressCallback, 500) : {})}>
