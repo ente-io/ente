@@ -335,6 +335,7 @@ const PhotoFrame = ({
             }
         }
     };
+    console.log('re-render gallery');
     const getThumbnail = (file: File[], index: number) => (
         <PreviewCard
             key={`tile-${file[index].id}-selected-${
