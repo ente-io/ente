@@ -11,7 +11,6 @@ import HTTPService from './HTTPService';
 const TRASH = 'file-trash';
 const TRASH_TIME = 'trash-time';
 const DELETED_COLLECTION = 'deleted-collection';
-const SYNC_LIMIT = 1000;
 
 const ENDPOINT = getEndpoint();
 
@@ -90,7 +89,6 @@ export const updateTrash = async (
                 `${ENDPOINT}/trash/diff`,
                 {
                     sinceTime: time,
-                    limit: SYNC_LIMIT,
                 },
                 {
                     'X-Auth-Token': token,
@@ -125,7 +123,7 @@ export const updateTrash = async (
             );
             localForage.setItem(TRASH, updatedTrash);
             localForage.setItem(TRASH_TIME, time);
-        } while (resp.data.diff.length === SYNC_LIMIT);
+        } while (resp.data.hasMore);
         return updatedTrash;
     } catch (e) {
         logError(e, 'Get trash files failed');
