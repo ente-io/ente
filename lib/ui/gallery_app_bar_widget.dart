@@ -504,7 +504,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final actions = <Widget>[];
     if (containsUploadedFile && containsLocalFile) {
       actions.add(CupertinoActionSheetAction(
-        child: Text("this device"),
+        child: Text("device"),
         isDestructiveAction: true,
         onPressed: () async {
           Navigator.of(context, rootNavigator: true).pop();
