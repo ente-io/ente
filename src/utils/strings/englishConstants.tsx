@@ -557,9 +557,7 @@ const englishConstants = {
 
     CONFIRM_REMOVE_MESSAGE: () => (
         <>
-            <p>
-                are you sure you want to remove these files from the collection?
-            </p>
+            <p>are you sure you want to remove these files from the album?</p>
             <p>
                 all files that are unique to this album will be moved to trash
             </p>
