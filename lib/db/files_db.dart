@@ -56,6 +56,9 @@ class FilesDB {
   static final columnMMdEncodedJson = 'mmd_encoded_json';
   static final columnMMdVersion = 'mmd_ver';
 
+  static final columnPubMMdEncodedJson = 'pub_mmd_encoded_json';
+  static final columnPubMMdVersion = 'pub_mmd_ver';
+
   // part of magic metadata
   // Only parse & store selected fields from JSON in separate columns if
   // we need to write query based on that field
@@ -69,6 +72,7 @@ class FilesDB {
     ...addMetadataColumns(),
     ...addMagicMetadataColumns(),
     ...addUniqueConstraintOnCollectionFiles(),
+    ...addPubMagicMetadataColumns()
   ];
 
   final dbConfig = MigrationConfig(
@@ -272,6 +276,17 @@ class FilesDB {
       CREATE UNIQUE INDEX IF NOT EXISTS cid_uid ON $table ($columnCollectionID, $columnUploadedFileID)
       WHERE $columnCollectionID is not NULL AND $columnUploadedFileID is not NULL
       AND $columnCollectionID != -1 AND $columnUploadedFileID  != -1;
+      '''
+    ];
+  }
+
+  static List<String> addPubMagicMetadataColumns() {
+    return [
+      '''
+        ALTER TABLE $table ADD COLUMN $columnPubMMdEncodedJson TEXT DEFAULT '{}';
+      ''',
+      '''
+        ALTER TABLE $table ADD COLUMN $columnPubMMdVersion INTEGER DEFAULT 0;
       '''
     ];
   }
@@ -1019,7 +1034,15 @@ class FilesDB {
     row[columnMMdEncodedJson] == file.mMdEncodedJson ?? '{}';
     row[columnMMdVisibility] =
         file.magicMetadata?.visibility ?? kVisibilityVisible;
-    return row;
+
+    row[columnPubMMdVersion] = file.pubMmdVersion ?? 0;
+    row[columnPubMMdEncodedJson] == file.pubMmdEncodedJson ?? '{}';
+    if (file.pubMagicMetadata != null &&
+        file.pubMagicMetadata.editedTime != null) {
+      // override existing creationTime to avoid re-writing all queries related
+      // to loading the gallery
+      row[columnCreationTime] = file.pubMagicMetadata.editedTime;
+    }
   }
 
   File _getFileFromRow(Map<String, dynamic> row) {
@@ -1053,6 +1076,9 @@ class FilesDB {
 
     file.mMdVersion = row[columnMMdVersion] ?? 0;
     file.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
+
+    file.pubMmdVersion = row[columnPubMMdVersion] ?? 0;
+    file.pubMmdEncodedJson = row[columnPubMMdEncodedJson] ?? '{}';
     return file;
   }
 }
