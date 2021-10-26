@@ -93,6 +93,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   _appBarTitle,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.80),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
                 onPressed: () => _renameAlbum(context),
