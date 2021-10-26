@@ -248,7 +248,7 @@ class FileUploader {
     }
     final fileOnDisk = await FilesDB.instance.getFile(file.generatedID);
     final wasAlreadyUploaded = fileOnDisk.uploadedFileID != null &&
-        fileOnDisk.updationTime != null &&
+        fileOnDisk.updationTime != -1 &&
         fileOnDisk.collectionID == collectionID;
     if (wasAlreadyUploaded) {
       return fileOnDisk;
@@ -293,7 +293,7 @@ class FileUploader {
       }
       Uint8List key;
       bool isUpdatedFile =
-          file.uploadedFileID != null && file.updationTime == null;
+          file.uploadedFileID != null && file.updationTime == -1;
       if (isUpdatedFile) {
         _logger.info("File was updated " + file.toString());
         key = decryptFileKey(file);
