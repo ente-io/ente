@@ -68,9 +68,14 @@ export default function FixLargeThumbnails(props: Props) {
         return fixState;
     };
 
+    const fetchLargeThumbnail = async () => {
+        const largeThumbnailFiles = (await getLargeThumbnailFiles()) ?? [];
+        setLargeThumbnailFiles(largeThumbnailFiles);
+        return largeThumbnailFiles;
+    };
+
     const main = async () => {
-        const largeThumbnailFiles = await getLargeThumbnailFiles();
-        setLargeThumbnailFiles(largeThumbnailFiles ?? []);
+        const largeThumbnailFiles = await fetchLargeThumbnail();
         if (
             fixState === FIX_STATE.NOT_STARTED &&
             largeThumbnailFiles.length > 0
@@ -115,6 +120,7 @@ export default function FixLargeThumbnails(props: Props) {
                     : FIX_STATE.COMPLETED
             );
         }
+        await fetchLargeThumbnail();
     };
 
     const updateFixState = (fixState: FIX_STATE) => {
