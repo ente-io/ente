@@ -233,7 +233,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     } else {
       if (file.localID != null) {
         actions.add(CupertinoActionSheetAction(
-          child: Text("on this device"),
+          child: Text("device"),
           isDestructiveAction: true,
           onPressed: () async {
             await deleteFilesOnDeviceOnly(context, [file]);
