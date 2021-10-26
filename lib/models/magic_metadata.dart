@@ -37,7 +37,6 @@ class MagicMetadata {
 }
 
 class PubMagicMetadata {
-  //
   int editedTime;
 
   PubMagicMetadata({this.editedTime});
@@ -50,7 +49,7 @@ class PubMagicMetadata {
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
-    map[kMagicKeyVisibility] = editedTime;
+    map[kPubMagicKeyEditedTime] = editedTime;
     return map;
   }
 
