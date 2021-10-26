@@ -46,6 +46,9 @@ export async function cleanTrashCollections(fileTrash: Trash) {
     await localForage.setItem(DELETED_COLLECTION, filterCollections);
 }
 
+async function getLastSyncTime() {
+    return (await localForage.getItem<number>(TRASH_TIME)) ?? 0;
+}
 export async function syncTrash(
     collections: Collection[],
     setFiles: SetFiles
@@ -58,7 +61,7 @@ export async function syncTrash(
     if (!getToken()) {
         return trash;
     }
-    const lastSyncTime = (await localForage.getItem<number>(TRASH_TIME)) ?? 0;
+    const lastSyncTime = await getLastSyncTime();
 
     const updatedTrash = await updateTrash(
         collectionMap,
@@ -161,3 +164,25 @@ export function getTrashedFiles(trash: Trash) {
         }))
     );
 }
+
+export const emptyTrash = async () => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return;
+        }
+        const lastUpdatedAt = await getLastSyncTime();
+
+        await HTTPService.post(
+            `${ENDPOINT}/trash/empty`,
+            { lastUpdatedAt },
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        logError(e, 'empty trash failed');
+        throw e;
+    }
+};
