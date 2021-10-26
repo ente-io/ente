@@ -83,10 +83,12 @@ import {
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 import {
+    emptyTrash,
     getLocalTrash,
     getTrashedFiles,
     syncTrash,
 } from 'services/trashService';
+import DeleteBtn from 'components/DeleteBtn';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -488,6 +490,35 @@ export default function Gallery() {
         setCollectionSelectorView(false);
     };
 
+    const emptyTrashHandler = () =>
+        setDialogMessage({
+            title: constants.CONFIRM_EMPTY_TRASH,
+            content: constants.EMPTY_TRASH_MESSAGE,
+            staticBackdrop: true,
+            proceed: {
+                action: emptyTrashHelper,
+                text: constants.EMPTY_TRASH,
+                variant: 'danger',
+            },
+            close: { text: constants.CANCEL },
+        });
+    const emptyTrashHelper = async () => {
+        loadingBar.current?.continuousStart();
+        try {
+            await emptyTrash();
+        } catch (e) {
+            setDialogMessage({
+                title: constants.ERROR,
+                staticBackdrop: true,
+                close: { variant: 'danger' },
+                content: constants.UNKNOWN_ERROR,
+            });
+        } finally {
+            await syncWithRemote(false, true);
+            loadingBar.current.complete();
+        }
+    };
+
     return (
         <GalleryContext.Provider
             value={{
@@ -651,6 +682,9 @@ export default function Gallery() {
                             isFavoriteCollection={isFavCollectionActive}
                         />
                     )}
+                {activeCollection === TRASH_SECTION && (
+                    <DeleteBtn onClick={emptyTrashHandler} />
+                )}
             </FullScreenDropZone>
         </GalleryContext.Provider>
     );
