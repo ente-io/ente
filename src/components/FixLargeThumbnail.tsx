@@ -57,13 +57,19 @@ export default function FixLargeThumbnails(props: Props) {
         []
     );
 
+    const init = (): FIX_STATE => {
+        let fixState = getData(LS_KEYS.THUMBNAIL_FIX_STATE)?.state;
+        if (!fixState) {
+            fixState = FIX_STATE.NOT_STARTED;
+            updateFixState(fixState);
+        }
+        setFixState(fixState);
+        return fixState;
+    };
+
     const main = async () => {
         const largeThumbnailFiles = await getLargeThumbnailFiles();
         setLargeThumbnailFiles(largeThumbnailFiles ?? []);
-        const fixState =
-            getData(LS_KEYS.THUMBNAIL_FIX_STATE)?.state ??
-            FIX_STATE.NOT_STARTED;
-        setFixState(fixState);
         if (fixState === FIX_STATE.RUNNING) {
             startFix(largeThumbnailFiles);
         }
@@ -78,7 +84,10 @@ export default function FixLargeThumbnails(props: Props) {
     }, [props.isOpen]);
 
     useEffect(() => {
-        main();
+        const fixState = init();
+        if (fixState === FIX_STATE.NOT_STARTED) {
+            main();
+        }
     }, []);
     const startFix = async (newlyFetchedLargeThumbnailFiles?: number[]) => {
         updateFixState(FIX_STATE.RUNNING);
