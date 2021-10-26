@@ -38,6 +38,11 @@ class TrashDB {
   static final columnMMdEncodedJson = 'mmd_encoded_json';
   static final columnMMdVersion = 'mmd_ver';
 
+  static final columnPubMMdEncodedJson = 'pub_mmd_encoded_json';
+  static final columnPubMMdVersion = 'pub_mmd_ver';
+
+
+
   Future _onCreate(Database db, int version) async {
     await db.execute('''
         CREATE TABLE $tableName (
@@ -55,7 +60,9 @@ class TrashDB {
           $columnCreationTime INTEGER NOT NULL,
           $columnFileMetadata TEXT DEFAULT '{}',
           $columnMMdEncodedJson TEXT DEFAULT '{}',
-          $columnMMdVersion INTEGER DEFAULT 0
+          $columnMMdVersion INTEGER DEFAULT 0,
+          $columnPubMMdEncodedJson TEXT DEFAULT '{}',
+          $columnPubMMdVersion INTEGER DEFAULT 0
         );
       CREATE INDEX IF NOT EXISTS creation_time_index ON $tableName($columnCreationTime); 
       CREATE INDEX IF NOT EXISTS delete_by_time_index ON $tableName($columnTrashDeleteBy);
@@ -194,6 +201,16 @@ class TrashDB {
     trashFile.mMdVersion = row[columnMMdVersion] ?? 0;
     trashFile.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
 
+    trashFile.pubMmdVersion = row[columnPubMMdVersion] ?? 0;
+    trashFile.pubMmdEncodedJson = row[columnPubMMdEncodedJson] ?? '{}';
+
+    if (trashFile.pubMagicMetadata != null &&
+        trashFile.pubMagicMetadata.editedTime != null) {
+      // override existing creationTime to avoid re-writing all queries related
+      // to loading the gallery
+      row[columnCreationTime] = trashFile.pubMagicMetadata.editedTime;
+    }
+
     return trashFile;
   }
 
@@ -216,6 +233,9 @@ class TrashDB {
 
     row[columnMMdVersion] = trash.mMdVersion ?? 0;
     row[columnMMdEncodedJson] = trash.mMdEncodedJson ?? '{}';
+
+    row[columnPubMMdVersion] = trash.pubMmdVersion ?? 0;
+    row[columnPubMMdEncodedJson] == trash.pubMmdEncodedJson ?? '{}';
     return row;
   }
 }
