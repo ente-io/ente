@@ -59,7 +59,7 @@ export default function FixLargeThumbnails(props: Props) {
 
     const init = (): FIX_STATE => {
         let fixState = getData(LS_KEYS.THUMBNAIL_FIX_STATE)?.state;
-        if (!fixState) {
+        if (!fixState || fixState === FIX_STATE.RUNNING) {
             fixState = FIX_STATE.NOT_STARTED;
             updateFixState(fixState);
         }
@@ -70,9 +70,6 @@ export default function FixLargeThumbnails(props: Props) {
     const main = async () => {
         const largeThumbnailFiles = await getLargeThumbnailFiles();
         setLargeThumbnailFiles(largeThumbnailFiles ?? []);
-        if (fixState === FIX_STATE.RUNNING) {
-            startFix(largeThumbnailFiles);
-        }
         if (fixState === FIX_STATE.NOT_STARTED) {
             props.show();
         }
