@@ -319,6 +319,10 @@ const PhotoFrame = ({
             collectionID: activeCollection,
         }));
     };
+    const onHoverOver = (index: number) => () => {
+        setCurrentHover(index);
+    };
+
     const handleRangeSelect = (index: number) => () => {
         if (rangeStart !== index) {
             let leftEnd = -1;
@@ -351,7 +355,7 @@ const PhotoFrame = ({
                 selected[file[index].id]
             }
             selectOnClick={selected.count > 0}
-            onHover={() => setCurrentHover(index)}
+            onHover={onHoverOver(index)}
             onRangeSelect={handleRangeSelect(index)}
             isRangeSelectActive={
                 isShiftKeyPressed && (rangeStart || rangeStart === 0)
