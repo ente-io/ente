@@ -123,26 +123,10 @@ class FadingAppBarState extends State<FadingAppBar> {
         // options for files owned by the user
         if (widget.file.ownerID == null ||
             widget.file.ownerID == widget.userID) {
-          items.add(
-            PopupMenuItem(
-              value: 2,
-              child: Row(
-                children: [
-                  Icon(Platform.isAndroid
-                      ? Icons.delete_outline
-                      : CupertinoIcons.delete),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text("delete"),
-                ],
-              ),
-            ),
-          );
           if(widget.file.uploadedFileID != null) {
             items.add(
               PopupMenuItem(
-                value: 3,
+                value: 2,
                 child: Row(
                   children: [
                     Icon(Platform.isAndroid
@@ -157,6 +141,23 @@ class FadingAppBarState extends State<FadingAppBar> {
               ),
             );
           }
+
+          items.add(
+            PopupMenuItem(
+              value: 3,
+              child: Row(
+                children: [
+                  Icon(Platform.isAndroid
+                      ? Icons.delete_outline
+                      : CupertinoIcons.delete),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text("delete"),
+                ],
+              ),
+            ),
+          );
         }
         return items;
       },
@@ -164,9 +165,9 @@ class FadingAppBarState extends State<FadingAppBar> {
         if (value == 1) {
           _download(widget.file);
         } else if (value == 2) {
-          _showDeleteSheet(widget.file);
-        } else if(value == 3) {
           _showDateTimePicker(widget.file);
+        } else if (value == 3) {
+          _showDeleteSheet(widget.file);
         }
       },
     ));
