@@ -290,7 +290,7 @@ export default function Gallery() {
             setCollections(collections);
             const files = await syncFiles(collections, setFiles);
             await setDerivativeState(collections, files);
-            await syncTrash(collections, setFiles);
+            await syncTrash(collections, setFiles, files);
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:

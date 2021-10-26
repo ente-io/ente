@@ -51,7 +51,8 @@ async function getLastSyncTime() {
 }
 export async function syncTrash(
     collections: Collection[],
-    setFiles: SetFiles
+    setFiles: SetFiles,
+    files: File[]
 ): Promise<Trash> {
     const trash = await getLocalTrash();
     collections = [...collections, ...(await getLocalDeletedCollections())];
@@ -67,6 +68,7 @@ export async function syncTrash(
         collectionMap,
         lastSyncTime,
         setFiles,
+        files,
         trash
     );
     cleanTrashCollections(updatedTrash);
@@ -76,6 +78,7 @@ export const updateTrash = async (
     collections: Map<number, Collection>,
     sinceTime: number,
     setFiles: SetFiles,
+    files: File[],
     currentTrash: Trash
 ): Promise<Trash> => {
     try {
@@ -120,8 +123,9 @@ export const updateTrash = async (
                 time = resp.data.diff.slice(-1)[0].updatedAt;
             }
             updatedTrash = removeDuplicates(updatedTrash);
+            updatedTrash = removeRestoredOrDeletedTrashItems(updatedTrash);
 
-            setFiles((files) =>
+            setFiles(
                 sortFiles([...(files ?? []), ...getTrashedFiles(updatedTrash)])
             );
             localForage.setItem(TRASH, updatedTrash);
@@ -146,12 +150,13 @@ function removeDuplicates(trash: Trash) {
     trash = [];
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [_, trashedFile] of latestVersionTrashItems) {
-        if (trashedFile.isDeleted || trashedFile.isRestored) {
-            continue;
-        }
         trash.push(trashedFile);
     }
     return trash;
+}
+
+function removeRestoredOrDeletedTrashItems(trash: Trash) {
+    return trash.filter((item) => !item.isDeleted && !item.isRestored);
 }
 
 export function getTrashedFiles(trash: Trash) {
