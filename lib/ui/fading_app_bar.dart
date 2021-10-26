@@ -91,7 +91,7 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   AppBar _buildAppBar() {
     final List<Widget> actions = [];
-    final isTrashedFile =  widget.file is TrashFile;
+    final isTrashedFile = widget.file is TrashFile;
     final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
     // only show fav option for files owned by the user
     if (widget.file.ownerID == null || widget.file.ownerID == widget.userID) {
@@ -221,7 +221,7 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   void _showDeleteSheet(File file) {
     final List<Widget> actions = [];
-    if (file.uploadedFileID == null) {
+    if (file.uploadedFileID == null || file.localID == null) {
       actions.add(CupertinoActionSheetAction(
         child: Text("everywhere"),
         isDestructiveAction: true,
@@ -231,17 +231,27 @@ class FadingAppBarState extends State<FadingAppBar> {
         },
       ));
     } else {
-      if (file.localID != null) {
-        actions.add(CupertinoActionSheetAction(
-          child: Text("device"),
-          isDestructiveAction: true,
-          onPressed: () async {
-            await deleteFilesOnDeviceOnly(context, [file]);
-            showToast("file deleted from device");
-            Navigator.of(context, rootNavigator: true).pop();
-          },
-        ));
-      }
+      // uploaded file which is present locally too
+      actions.add(CupertinoActionSheetAction(
+        child: Text("device"),
+        isDestructiveAction: true,
+        onPressed: () async {
+          await deleteFilesOnDeviceOnly(context, [file]);
+          showToast("file deleted from device");
+          Navigator.of(context, rootNavigator: true).pop();
+        },
+      ));
+
+      actions.add(CupertinoActionSheetAction(
+        child: Text("ente"),
+        isDestructiveAction: true,
+        onPressed: () async {
+          await deleteFilesFromRemoteOnly(context, [file]);
+          showToast("moved to trash");
+          Navigator.of(context, rootNavigator: true).pop();
+        },
+      ));
+
       actions.add(CupertinoActionSheetAction(
         child: Text("everywhere"),
         isDestructiveAction: true,
