@@ -71,7 +71,10 @@ export default function FixLargeThumbnails(props: Props) {
     const main = async () => {
         const largeThumbnailFiles = await getLargeThumbnailFiles();
         setLargeThumbnailFiles(largeThumbnailFiles ?? []);
-        if (fixState === FIX_STATE.NOT_STARTED) {
+        if (
+            fixState === FIX_STATE.NOT_STARTED &&
+            largeThumbnailFiles.length > 0
+        ) {
             props.show();
         }
         if (
@@ -80,6 +83,9 @@ export default function FixLargeThumbnails(props: Props) {
         ) {
             updateFixState(FIX_STATE.NOT_STARTED);
             logError(Error(), 'large thumbnail files left after migration');
+        }
+        if (largeThumbnailFiles.length === 0) {
+            updateFixState(FIX_STATE.COMPLETED);
         }
     };
     useEffect(() => {
