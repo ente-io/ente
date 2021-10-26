@@ -201,7 +201,9 @@ class _DetailPageState extends State<DetailPage> {
           limit: kLoadLimit,
           asc: true);
       setState(() {
-        final files = result.files.reversed.toList();
+        // Returned result could be a subtype of File
+        // ignore: unnecessary_cast
+        final files = result.files.reversed.map((e) => e as File).toList();
         if (!result.hasMore) {
           _hasLoadedTillStart = true;
         }
