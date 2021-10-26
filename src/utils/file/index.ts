@@ -64,17 +64,19 @@ function getSelectedFileIds(selectedFiles: SelectedState) {
     return filesIDs;
 }
 export function getSelectedFiles(
-    selectedFiles: SelectedState,
+    selected: SelectedState,
     files: File[]
 ): File[] {
-    const filesIDs = new Set(getSelectedFileIds(selectedFiles));
-    const filesToDelete: File[] = [];
+    const filesIDs = new Set(getSelectedFileIds(selected));
+    const selectedFiles: File[] = [];
+    const foundFiles = new Set<number>();
     for (const file of files) {
-        if (filesIDs.has(file.id)) {
-            filesToDelete.push(file);
+        if (filesIDs.has(file.id) && !foundFiles.has(file.id)) {
+            selectedFiles.push(file);
+            foundFiles.add(file.id);
         }
     }
-    return filesToDelete;
+    return selectedFiles;
 }
 
 export function checkFileFormatSupport(name: string) {
