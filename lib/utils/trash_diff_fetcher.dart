@@ -120,6 +120,6 @@ class Diff {
   final bool hasMore;
   final int lastSyncedTimeStamp;
 
-  Diff(this.trashedFiles, this.restoredFiles, this.deletedFiles,
-      this.hasMore, this.lastSyncedTimeStamp);
+  Diff(this.trashedFiles, this.restoredFiles, this.deletedFiles, this.hasMore,
+      this.lastSyncedTimeStamp);
 }

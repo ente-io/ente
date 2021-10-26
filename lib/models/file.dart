@@ -39,16 +39,20 @@ class File {
   String mMdEncodedJson;
   int mMdVersion = 0;
   MagicMetadata _mmd;
+
   MagicMetadata get magicMetadata =>
       _mmd ?? MagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
+
   set magicMetadata(val) => _mmd = val;
 
   // public magic metadata is shared if during file/album sharing
   String pubMmdEncodedJson;
   int pubMmdVersion = 0;
   PubMagicMetadata _pubMmd;
+
   PubMagicMetadata get pubMagicMetadata =>
       _pubMmd ?? PubMagicMetadata.fromEncodedJson(pubMmdEncodedJson ?? '{}');
+
   set pubMagicMetadata(val) => _pubMmd = val;
 
   static const kCurrentMetadataVersion = 1;

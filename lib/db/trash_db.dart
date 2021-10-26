@@ -41,8 +41,6 @@ class TrashDB {
   static final columnPubMMdEncodedJson = 'pub_mmd_encoded_json';
   static final columnPubMMdVersion = 'pub_mmd_ver';
 
-
-
   Future _onCreate(Database db, int version) async {
     await db.execute('''
         CREATE TABLE $tableName (
@@ -161,8 +159,7 @@ class TrashDB {
       tableName,
       where: '$columnCreationTime >= ? AND $columnCreationTime <= ?',
       whereArgs: [startTime, endTime],
-      orderBy:
-          '$columnCreationTime ' + order ,
+      orderBy: '$columnCreationTime ' + order,
       limit: limit,
     );
     final files = _convertToFiles(results);

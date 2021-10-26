@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -41,8 +41,8 @@ class FileMagicService {
     }
   }
 
-  Future<void> updatePublicMagicMetadata(List<File> files, Map<String, dynamic> newMetadataUpdate) async
-  {
+  Future<void> updatePublicMagicMetadata(
+      List<File> files, Map<String, dynamic> newMetadataUpdate) async {
     final params = <String, dynamic>{};
     params['metadataList'] = [];
     final int ownerID = Configuration.instance.getUserID();
@@ -81,7 +81,8 @@ class FileMagicService {
       }
 
       await _dio.put(
-        Configuration.instance.getHttpEndpoint() + "/files/public-magic-metadata",
+        Configuration.instance.getHttpEndpoint() +
+            "/files/public-magic-metadata",
         data: params,
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
@@ -99,8 +100,8 @@ class FileMagicService {
       _logger.severe("failed to sync magic metadata", e, s);
       rethrow;
     }
-
   }
+
   Future<void> _updateMagicData(
       List<File> files, Map<String, dynamic> newMetadataUpdate) async {
     final params = <String, dynamic>{};

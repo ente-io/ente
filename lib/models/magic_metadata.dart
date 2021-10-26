@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 const kVisibilityVisible = 0;
@@ -19,8 +18,7 @@ class MagicMetadata {
   factory MagicMetadata.fromEncodedJson(String encodedJson) =>
       MagicMetadata.fromJson(jsonDecode(encodedJson));
 
-  factory MagicMetadata.fromJson(dynamic json) =>
-      MagicMetadata.fromMap(json);
+  factory MagicMetadata.fromJson(dynamic json) => MagicMetadata.fromMap(json);
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};

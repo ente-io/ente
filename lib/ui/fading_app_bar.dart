@@ -1,13 +1,13 @@
 import 'dart:io';
-
 import 'dart:io' as io;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:like_button/like_button.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
@@ -93,7 +93,7 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   AppBar _buildAppBar() {
     final List<Widget> actions = [];
-    final isTrashedFile =  widget.file is TrashFile;
+    final isTrashedFile = widget.file is TrashFile;
     final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
     // only show fav option for files owned by the user
     if (widget.file.ownerID == null || widget.file.ownerID == widget.userID) {
@@ -123,7 +123,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         // options for files owned by the user
         if (widget.file.ownerID == null ||
             widget.file.ownerID == widget.userID) {
-          if(widget.file.uploadedFileID != null) {
+          if (widget.file.uploadedFileID != null) {
             items.add(
               PopupMenuItem(
                 value: 2,

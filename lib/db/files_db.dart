@@ -78,8 +78,10 @@ class FilesDB {
   final dbConfig = MigrationConfig(
       initializationScript: initializationScript,
       migrationScripts: migrationScripts);
+
   // make this a singleton class
   FilesDB._privateConstructor();
+
   static final FilesDB instance = FilesDB._privateConstructor();
 
   // only have a single app-wide reference to the database
