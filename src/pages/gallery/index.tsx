@@ -87,6 +87,7 @@ import {
     getLocalTrash,
     getTrashedFiles,
     syncTrash,
+    Trash,
 } from 'services/trashService';
 import DeleteBtn from 'components/DeleteBtn';
 
@@ -200,6 +201,7 @@ export default function Gallery() {
         useState(false);
 
     const [isFavCollectionActive, setIsFavCollectionActive] = useState(false);
+    const [trash, setTrash] = useState<Trash>([]);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -221,6 +223,7 @@ export default function Gallery() {
             const trashedFile = getTrashedFiles(trash);
             setFiles([...files, ...trashedFile]);
             setCollections(collections);
+            setTrash(trash);
             await setDerivativeState(collections, files);
             await checkSubscriptionPurchase(
                 setDialogMessage,
@@ -290,7 +293,8 @@ export default function Gallery() {
             setCollections(collections);
             const files = await syncFiles(collections, setFiles);
             await setDerivativeState(collections, files);
-            await syncTrash(collections, setFiles, files);
+            const trash = await syncTrash(collections, setFiles, files);
+            setTrash(trash);
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
@@ -506,6 +510,9 @@ export default function Gallery() {
         loadingBar.current?.continuousStart();
         try {
             await emptyTrash();
+            if (selected.collectionID === TRASH_SECTION) {
+                clearSelection();
+            }
         } catch (e) {
             setDialogMessage({
                 title: constants.ERROR,
@@ -682,7 +689,7 @@ export default function Gallery() {
                             isFavoriteCollection={isFavCollectionActive}
                         />
                     )}
-                {activeCollection === TRASH_SECTION && (
+                {activeCollection === TRASH_SECTION && trash?.length > 0 && (
                     <DeleteBtn onClick={emptyTrashHandler} />
                 )}
             </FullScreenDropZone>

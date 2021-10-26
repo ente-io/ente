@@ -72,6 +72,7 @@ export async function syncTrash(
         trash
     );
     cleanTrashCollections(updatedTrash);
+    return updatedTrash;
 }
 
 export const updateTrash = async (
