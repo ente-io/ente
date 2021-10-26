@@ -124,7 +124,7 @@ const SelectedFileOptions = ({
     const removeFromCollectionHandler = () =>
         setDialogMessage({
             title: constants.CONFIRM_REMOVE,
-            content: constants.CONFIRM_REMOVE_MESSAGE,
+            content: constants.CONFIRM_REMOVE_MESSAGE(),
             staticBackdrop: true,
             proceed: {
                 action: removeFromCollectionHelper,
