@@ -50,7 +50,11 @@ const SelectionContainer = styled.div`
     display: flex;
 `;
 
-export const IconWithMessage = (props) => (
+interface IconWithMessageProps {
+    children?: any;
+    message: string;
+}
+export const IconWithMessage = (props: IconWithMessageProps) => (
     <OverlayTrigger
         placement="bottom"
         overlay={<p style={{ zIndex: 1002 }}>{props.message}</p>}>
