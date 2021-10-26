@@ -554,8 +554,17 @@ const englishConstants = {
     SORT_BY_COLLECTION_NAME: 'album title',
     REMOVE: 'remove',
     CONFIRM_REMOVE: 'confirm removal',
-    CONFIRM_REMOVE_MESSAGE:
-        'are you sure you want to remove these files from the collection',
+
+    CONFIRM_REMOVE_MESSAGE: () => (
+        <>
+            <p>
+                are you sure you want to remove these files from the collection?
+            </p>
+            <p>
+                all files that are unique to this album will be moved to trash
+            </p>
+        </>
+    ),
 };
 
 export default englishConstants;
