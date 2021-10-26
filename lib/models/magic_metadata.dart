@@ -6,7 +6,7 @@ const kVisibilityArchive = 1;
 
 const kMagicKeyVisibility = 'visibility';
 
-const kPubMagicKeyEditedTime = 'et';
+const kPubMagicKeyEditedTime = 'editedTime';
 
 class MagicMetadata {
   // 0 -> visible

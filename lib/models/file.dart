@@ -48,7 +48,7 @@ class File {
   int pubMmdVersion = 0;
   PubMagicMetadata _pubMmd;
   PubMagicMetadata get pubMagicMetadata =>
-      _pubMmd ?? MagicMetadata.fromEncodedJson(pubMmdEncodedJson ?? '{}');
+      _pubMmd ?? PubMagicMetadata.fromEncodedJson(pubMmdEncodedJson ?? '{}');
   set pubMagicMetadata(val) => _pubMmd = val;
 
   static const kCurrentMetadataVersion = 1;

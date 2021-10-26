@@ -7,6 +7,7 @@ import 'package:like_button/like_button.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
@@ -20,6 +21,7 @@ import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -118,7 +120,7 @@ class FadingAppBarState extends State<FadingAppBar> {
             ),
           );
         }
-        // only show delete option for files owned by the user
+        // options for files owned by the user
         if (widget.file.ownerID == null ||
             widget.file.ownerID == widget.userID) {
           items.add(
@@ -137,6 +139,24 @@ class FadingAppBarState extends State<FadingAppBar> {
               ),
             ),
           );
+          if(widget.file.uploadedFileID != null) {
+            items.add(
+              PopupMenuItem(
+                value: 3,
+                child: Row(
+                  children: [
+                    Icon(Platform.isAndroid
+                        ? Icons.access_time_rounded
+                        : CupertinoIcons.time),
+                    Padding(
+                      padding: EdgeInsets.all(8),
+                    ),
+                    Text("edit date"),
+                  ],
+                ),
+              ),
+            );
+          }
         }
         return items;
       },
@@ -145,6 +165,8 @@ class FadingAppBarState extends State<FadingAppBar> {
           _download(widget.file);
         } else if (value == 2) {
           _showDeleteSheet(widget.file);
+        } else if(value == 3) {
+          _showDatePicker(widget.file);
         }
       },
     ));
@@ -217,6 +239,22 @@ class FadingAppBarState extends State<FadingAppBar> {
         );
       },
     );
+  }
+
+  void _showDatePicker(File file) {
+    DatePicker.showDatePicker(context,
+        showTitleActions: true,
+        minTime: DateTime(1900, 1, 1),
+        maxTime: DateTime.now().add(Duration(days: 1)),
+        onConfirm: (date) async {
+      if (await editTime(
+          context, List.of([widget.file]), date.microsecondsSinceEpoch)) {
+        widget.file.creationTime = date.microsecondsSinceEpoch;
+        setState(() {});
+      }
+    },
+        currentTime: DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
+        locale: LocaleType.en);
   }
 
   void _showDeleteSheet(File file) {

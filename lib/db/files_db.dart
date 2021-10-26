@@ -1003,6 +1003,14 @@ class FilesDB {
     row[columnMMdEncodedJson] = file.mMdEncodedJson ?? '{}';
     row[columnMMdVisibility] =
         file.magicMetadata?.visibility ?? kVisibilityVisible;
+    row[columnPubMMdVersion] = file.pubMmdVersion ?? 0;
+    row[columnPubMMdEncodedJson] = file.pubMmdEncodedJson ?? '{}';
+    if (file.pubMagicMetadata != null &&
+        file.pubMagicMetadata.editedTime != null) {
+      // override existing creationTime to avoid re-writing all queries related
+      // to loading the gallery
+      row[columnCreationTime] = file.pubMagicMetadata.editedTime;
+    }
     return row;
   }
 
@@ -1036,7 +1044,7 @@ class FilesDB {
         file.magicMetadata?.visibility ?? kVisibilityVisible;
 
     row[columnPubMMdVersion] = file.pubMmdVersion ?? 0;
-    row[columnPubMMdEncodedJson] == file.pubMmdEncodedJson ?? '{}';
+    row[columnPubMMdEncodedJson] = file.pubMmdEncodedJson ?? '{}';
     if (file.pubMagicMetadata != null &&
         file.pubMagicMetadata.editedTime != null) {
       // override existing creationTime to avoid re-writing all queries related
