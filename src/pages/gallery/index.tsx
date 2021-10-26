@@ -83,6 +83,7 @@ import {
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 import {
+    clearLocalTrash,
     emptyTrash,
     getLocalTrash,
     getTrashedFiles,
@@ -513,6 +514,7 @@ export default function Gallery() {
             if (selected.collectionID === TRASH_SECTION) {
                 clearSelection();
             }
+            await clearLocalTrash();
         } catch (e) {
             setDialogMessage({
                 title: constants.ERROR,

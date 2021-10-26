@@ -129,8 +129,8 @@ export const updateTrash = async (
             setFiles(
                 sortFiles([...(files ?? []), ...getTrashedFiles(updatedTrash)])
             );
-            localForage.setItem(TRASH, updatedTrash);
-            localForage.setItem(TRASH_TIME, time);
+            await localForage.setItem(TRASH, updatedTrash);
+            await localForage.setItem(TRASH_TIME, time);
         } while (resp.data.hasMore);
         return updatedTrash;
     } catch (e) {
@@ -191,4 +191,8 @@ export const emptyTrash = async () => {
         logError(e, 'empty trash failed');
         throw e;
     }
+};
+
+export const clearLocalTrash = async () => {
+    await localForage.setItem(TRASH, []);
 };
