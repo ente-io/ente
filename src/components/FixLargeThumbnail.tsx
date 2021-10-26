@@ -8,6 +8,7 @@ import {
     replaceThumbnail,
 } from 'services/migrateThumbnailService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { logError } from 'utils/sentry';
 
 export type SetProgressTracker = React.Dispatch<
     React.SetStateAction<{
@@ -72,6 +73,13 @@ export default function FixLargeThumbnails(props: Props) {
         setLargeThumbnailFiles(largeThumbnailFiles ?? []);
         if (fixState === FIX_STATE.NOT_STARTED) {
             props.show();
+        }
+        if (
+            fixState === FIX_STATE.COMPLETED &&
+            largeThumbnailFiles.length > 0
+        ) {
+            updateFixState(FIX_STATE.NOT_STARTED);
+            logError(Error(), 'large thumbnail files left after migration');
         }
     };
     useEffect(() => {
