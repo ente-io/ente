@@ -151,7 +151,7 @@ class FadingAppBarState extends State<FadingAppBar> {
                     Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    Text("edit date"),
+                    Text("edit time"),
                   ],
                 ),
               ),
@@ -166,7 +166,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         } else if (value == 2) {
           _showDeleteSheet(widget.file);
         } else if(value == 3) {
-          _showDatePicker(widget.file);
+          _showDateTimePicker(widget.file);
         }
       },
     ));
@@ -241,20 +241,24 @@ class FadingAppBarState extends State<FadingAppBar> {
     );
   }
 
-  void _showDatePicker(File file) {
-    DatePicker.showDatePicker(context,
-        showTitleActions: true,
-        minTime: DateTime(1900, 1, 1),
+  void _showDateTimePicker(File file) async {
+    final dateResult = await DatePicker.showDatePicker(context,
+        minTime: DateTime(1800, 1, 1),
         maxTime: DateTime.now().add(Duration(days: 1)),
-        onConfirm: (date) async {
-      if (await editTime(
-          context, List.of([widget.file]), date.microsecondsSinceEpoch)) {
-        widget.file.creationTime = date.microsecondsSinceEpoch;
-        setState(() {});
-      }
-    },
         currentTime: DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
         locale: LocaleType.en);
+    if (dateResult == null) {
+      return;
+    }
+    final dateWithTimeResult = await DatePicker.showTime12hPicker(context,
+        showTitleActions: true, currentTime: dateResult, locale: LocaleType.en);
+    if (dateWithTimeResult != null) {
+      if (await editTime(context, List.of([widget.file]),
+          dateWithTimeResult.microsecondsSinceEpoch)) {
+        widget.file.creationTime = dateWithTimeResult.microsecondsSinceEpoch;
+        setState(() {});
+      }
+    }
   }
 
   void _showDeleteSheet(File file) {
