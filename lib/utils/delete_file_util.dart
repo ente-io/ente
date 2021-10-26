@@ -228,8 +228,8 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
 
 Future<bool> emptyTrash(BuildContext context) async {
   final result = await showChoiceDialog(context, "empty trash?",
-      "all files will be permanently removed from your ente account",
-      firstAction: "yes", actionType: ActionType.critical);
+      "these files will be permanently removed from your ente account",
+      firstAction: "empty", actionType: ActionType.critical);
   if (result != DialogUserChoice.firstChoice) {
     return false;
   }
@@ -237,7 +237,7 @@ Future<bool> emptyTrash(BuildContext context) async {
   await dialog.show();
   try {
     await TrashSyncService.instance.emptyTrash();
-    showToast("done");
+    showToast("trash emptied");
     await dialog.hide();
     Bus.instance
         .fire(FilesUpdatedEvent((List<File>.empty()), type: EventType.deleted));

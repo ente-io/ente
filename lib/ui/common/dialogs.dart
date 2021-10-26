@@ -1,10 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-enum DialogUserChoice {
-  firstChoice,
-  secondChoice
-}
+enum DialogUserChoice { firstChoice, secondChoice }
 
 enum ActionType {
   confirm,
@@ -20,19 +17,25 @@ Future<T> showChoiceDialog<T>(
   ActionType actionType = ActionType.confirm,
 }) {
   AlertDialog alert = AlertDialog(
-    title: Text(title,
+    title: Text(
+      title,
       style: TextStyle(
-        color:
-            actionType == ActionType.critical ? Colors.red : Colors.white,
+        color: actionType == ActionType.critical ? Colors.red : Colors.white,
       ),
     ),
-    content: Text(content),
+    content: Text(
+      content,
+      style: TextStyle(
+        height: 1.4,
+      ),
+    ),
     actions: [
       TextButton(
         child: Text(
           firstAction,
           style: TextStyle(
-            color: actionType == ActionType.critical ? Colors.red : Colors.white,
+            color:
+                actionType == ActionType.critical ? Colors.red : Colors.white,
           ),
         ),
         onPressed: () {
