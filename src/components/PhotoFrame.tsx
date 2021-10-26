@@ -301,46 +301,56 @@ const PhotoFrame = ({
 
     const getSlideData = async (instance: any, index: number, item: File) => {
         if (!item.msrc) {
-            let url: string;
-            if (galleryContext.thumbs.has(item.id)) {
-                url = galleryContext.thumbs.get(item.id);
-            } else {
-                url = await DownloadManager.getPreview(item);
-                galleryContext.thumbs.set(item.id, url);
-            }
-            updateUrl(item.dataIndex)(url);
-            item.msrc = url;
-            if (!item.src) {
-                item.src = url;
-            }
-            item.w = window.innerWidth;
-            item.h = window.innerHeight;
             try {
-                instance.invalidateCurrItems();
-                instance.updateSize(true);
+                let url: string;
+                if (galleryContext.thumbs.has(item.id)) {
+                    url = galleryContext.thumbs.get(item.id);
+                } else {
+                    url = await DownloadManager.getPreview(item);
+                    galleryContext.thumbs.set(item.id, url);
+                }
+                updateUrl(item.dataIndex)(url);
+                item.msrc = url;
+                if (!item.src) {
+                    item.src = url;
+                }
+                item.w = window.innerWidth;
+                item.h = window.innerHeight;
+                try {
+                    instance.invalidateCurrItems();
+                    instance.updateSize(true);
+                } catch (e) {
+                    // ignore
+                }
             } catch (e) {
-                // ignore
+                // no-op
             }
         }
         if (!fetching[item.dataIndex]) {
-            fetching[item.dataIndex] = true;
-            let url: string;
-            if (galleryContext.files.has(item.id)) {
-                url = galleryContext.files.get(item.id);
-            } else {
-                url = await DownloadManager.getFile(item, true);
-                galleryContext.files.set(item.id, url);
-            }
-            await updateSrcUrl(item.dataIndex, url);
-            item.html = files[item.dataIndex].html;
-            item.src = files[item.dataIndex].src;
-            item.w = files[item.dataIndex].w;
-            item.h = files[item.dataIndex].h;
             try {
-                instance.invalidateCurrItems();
-                instance.updateSize(true);
+                fetching[item.dataIndex] = true;
+                let url: string;
+                if (galleryContext.files.has(item.id)) {
+                    url = galleryContext.files.get(item.id);
+                } else {
+                    url = await DownloadManager.getFile(item, true);
+                    galleryContext.files.set(item.id, url);
+                }
+                await updateSrcUrl(item.dataIndex, url);
+                item.html = files[item.dataIndex].html;
+                item.src = files[item.dataIndex].src;
+                item.w = files[item.dataIndex].w;
+                item.h = files[item.dataIndex].h;
+                try {
+                    instance.invalidateCurrItems();
+                    instance.updateSize(true);
+                } catch (e) {
+                    // ignore
+                }
             } catch (e) {
-                // ignore
+                // no-op
+            } finally {
+                fetching[item.dataIndex] = false;
             }
         }
     };
