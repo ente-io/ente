@@ -18,6 +18,7 @@ export const logError = (
             ...(info && {
                 info: info,
             }),
+            rootCause: { message: e?.message },
         },
     });
 };

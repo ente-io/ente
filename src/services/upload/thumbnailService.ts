@@ -5,8 +5,11 @@ import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b
 import FFmpegService from 'services/ffmpegService';
 
 const THUMBNAIL_HEIGHT = 720;
-const MAX_ATTEMPTS = 3;
-export const MAX_THUMBNAIL_SIZE = 50000;
+
+const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
+export const MAX_THUMBNAIL_SIZE = 100 * 1024;
+const MIN_QUALITY = 0.5;
+const MAX_QUALITY = 0.7;
 
 const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
 
@@ -172,10 +175,13 @@ export async function generateVideoThumbnail(file: globalThis.File) {
 
 async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
     let thumbnailBlob: Blob = null;
-    let attempts = 0;
-    let quality = 1;
-
+    let prevSize = Number.MAX_SAFE_INTEGER;
+    let quality = MAX_QUALITY;
+  
     do {
+        if (thumbnailBlob) {
+            prevSize = thumbnailBlob.size;
+        }
         thumbnailBlob = await new Promise((resolve) => {
             canvas.toBlob(
                 function (blob) {
@@ -186,12 +192,26 @@ async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
             );
         });
         thumbnailBlob = thumbnailBlob ?? new Blob([]);
-        attempts++;
-        quality /= 2;
+        quality -= 0.1;
     } while (
+        quality >= MIN_QUALITY &&
         thumbnailBlob.size > MAX_THUMBNAIL_SIZE &&
-        attempts <= MAX_ATTEMPTS
+        percentageSizeDiff(thumbnailBlob.size, prevSize) >=
+            MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF
     );
+    if (thumbnailBlob.size > MAX_THUMBNAIL_SIZE) {
+        logError(
+            Error('thumbnail_too_large'),
+            'thumbnail greater than max limit'
+        );
+    }
 
     return thumbnailBlob;
+}
+
+function percentageSizeDiff(
+    newThumbnailSize: number,
+    oldThumbnailSize: number
+) {
+    return ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
 }

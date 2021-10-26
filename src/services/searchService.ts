@@ -4,6 +4,9 @@ import { getToken } from 'utils/common/key';
 import { DateValue, Suggestion, SuggestionType } from 'components/SearchBar';
 import HTTPService from './HTTPService';
 import { Collection } from './collectionService';
+import { File } from './fileService';
+import { User } from './userService';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 const ENDPOINT = getEndpoint();
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
@@ -109,4 +112,26 @@ export function searchCollection(
     return collections.filter((collection) =>
         collection.name.toLowerCase().includes(searchPhrase)
     );
+}
+
+export function searchFiles(searchPhrase: string, files: File[]) {
+    const user: User = getData(LS_KEYS.USER) ?? {};
+    const idSet = new Set();
+    return files
+        .map((file, idx) => ({
+            title: file.metadata.title,
+            index: idx,
+            type: file.metadata.fileType,
+            ownerID: file.ownerID,
+            id: file.id,
+        }))
+        .filter((file) => {
+            if (file.ownerID === user.id && !idSet.has(file.id)) {
+                idSet.add(file.id);
+                return true;
+            }
+            return false;
+        })
+        .filter(({ title }) => title.toLowerCase().includes(searchPhrase))
+        .slice(0, 4);
 }
