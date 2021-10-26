@@ -1,11 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
 
 import 'gallery.dart';
@@ -25,31 +22,31 @@ class TrashPage extends StatelessWidget {
   @override
   Widget build(Object context) {
     final gallery = Gallery(
-        asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-          return TrashDB.instance.getTrashedFiles(
-              creationStartTime, creationEndTime,
-              limit: limit, asc: asc);
-        },
-        reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
+      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
+        return TrashDB.instance.getTrashedFiles(
+            creationStartTime, creationEndTime,
+            limit: limit, asc: asc);
+      },
+      reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
+            (event) =>
+                event.updatedFiles.firstWhere(
+                    (element) => element.uploadedFileID != null,
+                    orElse: () => null) !=
+                null,
+          ),
+      forceReloadEvents: [
+        Bus.instance.on<FilesUpdatedEvent>().where(
               (event) =>
                   event.updatedFiles.firstWhere(
                       (element) => element.uploadedFileID != null,
                       orElse: () => null) !=
                   null,
             ),
-        forceReloadEvents: [
-          Bus.instance.on<FilesUpdatedEvent>().where(
-                (event) =>
-                    event.updatedFiles.firstWhere(
-                        (element) => element.uploadedFileID != null,
-                        orElse: () => null) !=
-                    null,
-              ),
-        ],
-        tagPrefix: tagPrefix,
-        selectedFiles: _selectedFiles,
-        initialFiles: null,
-        footer: _footerWidget());
+      ],
+      tagPrefix: tagPrefix,
+      selectedFiles: _selectedFiles,
+      initialFiles: null,
+    );
 
     return Scaffold(
       appBar: PreferredSize(
@@ -62,26 +59,5 @@ class TrashPage extends StatelessWidget {
       ),
       body: gallery,
     );
-  }
-
-  Widget _footerWidget() {
-    return FutureBuilder<FileLoadResult>(
-        future: TrashDB.instance
-            .getTrashedFiles(0, DateTime.now().microsecondsSinceEpoch),
-        builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data.files.isNotEmpty) {
-            return Padding(
-              padding: EdgeInsets.all(15),
-              child: Text(
-                'memories shows the number the days after which they will be permanently deleted.',
-                style: TextStyle(
-                  fontSize: 16,
-                ),
-              ),
-            );
-          } else {
-            return Container();
-          }
-        });
   }
 }
