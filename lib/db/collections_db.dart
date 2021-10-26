@@ -189,7 +189,7 @@ class CollectionsDB {
     if (collection.isDeleted ?? false) {
       row[columnIsDeleted] = _sqlBoolTrue;
     } else {
-      row[columnIsDeleted] = _sqlBoolTrue;
+      row[columnIsDeleted] = _sqlBoolFalse;
     }
     return row;
   }
