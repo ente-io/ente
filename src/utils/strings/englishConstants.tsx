@@ -556,7 +556,7 @@ const englishConstants = {
     TRASH: 'trash',
     MOVE_TO_TRASH: 'move to trash',
     TRASH_MESSAGE:
-        'the selected files will be removed from all collection and moved to trash ',
+        'the selected files will be removed from all albums and moved to trash ',
     DELETE_PERMANENTLY: 'delete permanently',
     RESTORE: 'restore',
     CONFIRM_RESTORE: 'confirm restoration',
@@ -564,10 +564,10 @@ const englishConstants = {
     RESTORE_TO_COLLECTION: 'restore to album',
     AUTOMATIC_BIN_DELETE_MESSAGE: (relativeTime: string) =>
         `permanently deleted ${relativeTime}`,
-    EMPTY_TRASH: 'empty trash',
+    EMPTY_TRASH: 'empty trash?',
     CONFIRM_EMPTY_TRASH: 'confirm empty trash',
     EMPTY_TRASH_MESSAGE:
-        "all trash files will be permanently deleted and can't be restored",
+        'all files will be permanently removed from your ente account',
 
     CONFIRM_REMOVE_MESSAGE: () => (
         <>
