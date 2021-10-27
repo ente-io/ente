@@ -134,9 +134,11 @@ class File {
         duration = asset.duration;
       }
     }
-    final exifTime = await getCreationTimeFromEXIF(sourceFile);
-    if (exifTime != null && exifTime.microsecondsSinceEpoch > 0) {
-      creationTime = exifTime.microsecondsSinceEpoch;
+    if (fileType == FileType.image) {
+      final exifTime = await getCreationTimeFromEXIF(sourceFile);
+      if (exifTime != null && exifTime.microsecondsSinceEpoch > 0) {
+        creationTime = exifTime.microsecondsSinceEpoch;
+      }
     }
     hash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
     return getMetadata();
