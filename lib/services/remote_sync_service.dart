@@ -141,16 +141,10 @@ class RemoteSyncService {
     if (Platform.isIOS) {
       return ignoredLocalIDs.contains(file.localID);
     }
-    if (!ignoredFilesMap.containsKey(file.localID)) {
-      return false;
-    }
-    // only compare title in Android because title may be missing in IOS
-    // and iOS anyways use uuid for localIDs of file, so collision should be
-    // rare.
-    if (Platform.isAndroid) {
-      return ignoredFilesMap[file.localID].contains(file.title ?? '');
-    }
-    return true;
+    // For android, check if there's any ignored file with same device folder
+    // and title.
+    return ignoredFilesMap.containsKey(file.deviceFolder) &&
+        ignoredFilesMap[file.deviceFolder].contains(file.title);
   }
 
   Future<bool> _uploadDiff() async {
@@ -170,7 +164,8 @@ class RemoteSyncService {
     if (filesToBeUploaded.isNotEmpty) {
       final int prevCount = filesToBeUploaded.length;
       if (Platform.isAndroid) {
-        final ignoredFilesMap = await IgnoredFilesDB.instance.getIgnoredFiles();
+        final ignoredFilesMap = await IgnoredFilesDB.instance
+            .getFilenamesForDeviceFolders(foldersToBackUp);
         filesToBeUploaded.removeWhere((file) =>
             _shouldIgnoreFileUpload(file, ignoredFilesMap: ignoredFilesMap));
       } else {

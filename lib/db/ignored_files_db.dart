@@ -100,19 +100,27 @@ class IgnoredFilesDB {
     );
   }
 
-  // return map of localID to set of titles associated with the given localIDs
-  // Note: localIDs can easily clash across devices for Android, so we should
-  // always compare both localID & title in Android before ignoring the file for upload.
-  // iOS: localID is usually UUID and the title in localDB may be missing (before upload) as the
-  // photo manager library doesn't always fetch the title by default.
-  Future<Map<String, Set<String>>> getIgnoredFiles() async {
-    final db = await instance.database;
-    final rows = await db.query(tableName);
+  // returns a  map of device folder to set of title/filenames which exist
+  // in the particular device folder.
+  Future<Map<String, Set<String>>> getFilenamesForDeviceFolders(
+      Set<String> folders) async {
     final result = <String, Set<String>>{};
+    final db = await instance.database;
+
+    if (folders.isEmpty) {
+      return result;
+    }
+    String inParam = "";
+    for (final folder in folders) {
+      inParam += "'" + folder.replaceAll("'", "''") + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final rows =
+        await db.query(tableName, where: '$columnDeviceFolder IN ($inParam)');
     for (final row in rows) {
       final ignoredFile = _getIgnoredFileFromRow(row);
       result
-          .putIfAbsent(ignoredFile.localID, () => <String>{})
+          .putIfAbsent(ignoredFile.deviceFolder, () => <String>{})
           .add(ignoredFile.title);
     }
     return result;
