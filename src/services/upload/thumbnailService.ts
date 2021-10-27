@@ -5,8 +5,7 @@ import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b
 import FFmpegService from 'services/ffmpegService';
 import { convertToHumanReadable } from 'utils/billingUtil';
 
-const MAX_THUMBNAIL_HEIGHT = 720;
-const MAX_THUMBNAIL_WIDTH = 1280;
+const MAX_THUMBNAIL_DIMENSION: Dimension = { width: 1280, height: 720 };
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
 export const MAX_THUMBNAIL_SIZE = 100 * 1024;
 const MIN_QUALITY = 0.5;
@@ -86,10 +85,14 @@ export async function generateImageThumbnail(
     await new Promise((resolve, reject) => {
         image.onload = () => {
             try {
-                const thumbnailDimension = calculateThumbnailDimension({
+                const imageDimension = {
                     width: image.width,
                     height: image.height,
-                });
+                };
+                const thumbnailDimension = calculateThumbnailDimension(
+                    imageDimension,
+                    MAX_THUMBNAIL_DIMENSION
+                );
                 canvas.width = thumbnailDimension.width;
                 canvas.height = thumbnailDimension.height;
                 canvasCTX.drawImage(
@@ -140,10 +143,14 @@ export async function generateVideoThumbnail(file: globalThis.File) {
                 if (!video) {
                     throw Error('video load failed');
                 }
-                const thumbnailDimension = calculateThumbnailDimension({
+                const videoDimension = {
                     width: video.videoWidth,
                     height: video.videoHeight,
-                });
+                };
+                const thumbnailDimension = calculateThumbnailDimension(
+                    videoDimension,
+                    MAX_THUMBNAIL_DIMENSION
+                );
                 canvas.width = thumbnailDimension.width;
                 canvas.height = thumbnailDimension.height;
                 canvasCTX.drawImage(
@@ -225,12 +232,15 @@ function percentageSizeDiff(
     return ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
 }
 
-function calculateThumbnailDimension(OriginalDimension: Dimension): Dimension {
+function calculateThumbnailDimension(
+    OriginalDimension: Dimension,
+    maxDimension: Dimension
+): Dimension {
     if (OriginalDimension.height === 0 || OriginalDimension.width === 0) {
         return { width: 0, height: 0 };
     }
-    const widthScaleFactor = MAX_THUMBNAIL_WIDTH / OriginalDimension.width;
-    const heightScaleFactor = MAX_THUMBNAIL_HEIGHT / OriginalDimension.height;
+    const widthScaleFactor = maxDimension.width / OriginalDimension.width;
+    const heightScaleFactor = maxDimension.height / OriginalDimension.height;
     const scaleFactor = Math.min(widthScaleFactor, heightScaleFactor);
     const thumbnailDimension = {
         width: Math.round(OriginalDimension.width * scaleFactor),
