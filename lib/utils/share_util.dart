@@ -4,6 +4,7 @@ import 'package:path/path.dart';
 import 'dart:io' as dartio;
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/utils/exif_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:photos/core/configuration.dart';
@@ -58,7 +59,12 @@ Future<List<File>> convertIncomingSharedMediaToFile(
     enteFile.collectionID = collectionID;
     enteFile.fileType =
         media.type == SharedMediaType.IMAGE ? FileType.image : FileType.video;
-
+    if (enteFile.fileType == FileType.image) {
+      final exifTime = await getCreationTimeFromEXIF(ioFile);
+      if (exifTime != null) {
+        enteFile.creationTime = exifTime.microsecondsSinceEpoch;
+      }
+    }
     if (enteFile.creationTime == null || enteFile.creationTime == 0) {
       final parsedDateTime =
           parseDateFromFileName(basenameWithoutExtension(media.path));
