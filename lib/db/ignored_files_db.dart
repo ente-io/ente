@@ -1,6 +1,7 @@
 import 'dart:io';
-import 'package:path/path.dart';
+
 import 'package:logging/logging.dart';
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/ignored_file.dart';
 import 'package:sqflite/sqflite.dart';
@@ -17,6 +18,7 @@ class IgnoredFilesDB {
 
   static final columnLocalID = 'local_id';
   static final columnTitle = 'title';
+  static final columnDeviceFolder = 'device_folder';
   static final columnReason = 'reason';
 
   Future _onCreate(Database db, int version) async {
@@ -24,10 +26,12 @@ class IgnoredFilesDB {
         CREATE TABLE $tableName (
           $columnLocalID TEXT NOT NULL,
           $columnTitle TEXT NOT NULL,
+          $columnDeviceFolder TEXT NOT NULL,
           $columnReason TEXT DEFAULT $kIgnoreReasonTrash,
-          UNIQUE($columnLocalID, $columnTitle)
+          UNIQUE($columnLocalID, $columnTitle, $columnDeviceFolder)
         );
       CREATE INDEX IF NOT EXISTS local_id_index ON $tableName($columnLocalID);
+      CREATE INDEX IF NOT EXISTS device_folder_index ON $tableName($columnDeviceFolder);
       ''');
   }
 
@@ -118,7 +122,8 @@ class IgnoredFilesDB {
   }
 
   IgnoredFile _getIgnoredFileFromRow(Map<String, dynamic> row) {
-    return IgnoredFile(row[columnLocalID], row[columnTitle], row[columnReason]);
+    return IgnoredFile(row[columnLocalID], row[columnTitle],
+        row[columnDeviceFolder], row[columnReason]);
   }
 
   Map<String, dynamic> _getRowForIgnoredFile(IgnoredFile ignoredFile) {
@@ -127,6 +132,7 @@ class IgnoredFilesDB {
     final row = <String, dynamic>{};
     row[columnLocalID] = ignoredFile.localID;
     row[columnTitle] = ignoredFile.title;
+    row[columnDeviceFolder] = ignoredFile.deviceFolder;
     row[columnReason] = ignoredFile.reason;
     return row;
   }
