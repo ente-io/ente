@@ -4,6 +4,8 @@ import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
 import FFmpegService from 'services/ffmpegService';
 import { convertToHumanReadable } from 'utils/billingUtil';
+import { fileIsHEIC } from 'utils/file';
+import { FileTypeInfo } from './readFileService';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
@@ -21,15 +23,15 @@ interface Dimension {
 export async function generateThumbnail(
     worker,
     file: globalThis.File,
-    fileType: FILE_TYPE,
-    isHEIC: boolean
+    fileTypeInfo: FileTypeInfo
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
         let hasStaticThumbnail = false;
         let canvas = document.createElement('canvas');
         let thumbnail: Uint8Array;
         try {
-            if (fileType === FILE_TYPE.IMAGE) {
+            if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
+                const isHEIC = fileIsHEIC(fileTypeInfo.exactType);
                 canvas = await generateImageThumbnail(worker, file, isHEIC);
             } else {
                 try {
@@ -38,9 +40,12 @@ export async function generateThumbnail(
                     canvas = await generateImageThumbnail(
                         worker,
                         dummyImageFile,
-                        isHEIC
+                        false
                     );
                 } catch (e) {
+                    logError(e, 'failed to generate thumbnail using ffmpeg', {
+                        type: fileTypeInfo.exactType,
+                    });
                     canvas = await generateVideoThumbnail(file);
                 }
             }
@@ -50,7 +55,9 @@ export async function generateThumbnail(
                 throw Error('EMPTY THUMBNAIL');
             }
         } catch (e) {
-            logError(e, 'uploading static thumbnail');
+            logError(e, 'uploading static thumbnail', {
+                type: fileTypeInfo.exactType,
+            });
             thumbnail = Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) =>
                 c.charCodeAt(0)
             );
@@ -116,14 +123,7 @@ export async function generateImageThumbnail(
             }
         };
         timeout = setTimeout(
-            () =>
-                reject(
-                    Error(
-                        `wait time exceeded for format ${
-                            file.name.split('.').slice(-1)[0]
-                        }`
-                    )
-                ),
+            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
             WAIT_TIME_THUMBNAIL_GENERATION
         );
     });
@@ -176,14 +176,7 @@ export async function generateVideoThumbnail(file: globalThis.File) {
         video.preload = 'metadata';
         video.src = videoURL;
         timeout = setTimeout(
-            () =>
-                reject(
-                    Error(
-                        `wait time exceeded for format ${
-                            file.name.split('.').slice(-1)[0]
-                        }`
-                    )
-                ),
+            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
             WAIT_TIME_THUMBNAIL_GENERATION
         );
     });

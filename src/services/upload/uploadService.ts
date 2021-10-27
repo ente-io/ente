@@ -19,7 +19,6 @@ import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
 import { handleUploadError } from 'utils/common/errorUtil';
 import { MetadataMap } from './uploadManager';
-import { fileIsHEIC } from 'utils/file';
 
 // this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
 export const MULTIPART_PART_SIZE = 20 * 1024 * 1024;
@@ -108,13 +107,10 @@ class UploadService {
         rawFile: globalThis.File,
         fileTypeInfo: FileTypeInfo
     ): Promise<FileInMemory> {
-        const isHEIC = fileIsHEIC(fileTypeInfo.exactType);
-
         const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
             worker,
             rawFile,
-            fileTypeInfo.fileType,
-            isHEIC
+            fileTypeInfo
         );
 
         const filedata = await getFileData(worker, rawFile);
