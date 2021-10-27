@@ -548,6 +548,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.17.0"
+  jiffy:
+    dependency: "direct main"
+    description:
+      name: jiffy
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.1.0"
   js:
     dependency: transitive
     description:

@@ -102,6 +102,7 @@ dependencies:
   video_thumbnail: ^0.4.3
   visibility_detector: ^0.2.0
   wallpaper_manager_flutter: ^0.0.2
+  jiffy: ^4.1.0
 
 dependency_overrides:
   provider: ^6.0.1 # for chewie 1.2.2 https://github.com/brianegan/chewie/issues/530

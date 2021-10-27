@@ -10,6 +10,7 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/utils/exif_util.dart';
 
 class File {
   int generatedID;
@@ -132,6 +133,10 @@ class File {
       if (fileType == FileType.video) {
         duration = asset.duration;
       }
+    }
+    final exifTime = await getCreationTimeFromEXIF(sourceFile);
+    if (exifTime != null && exifTime.microsecondsSinceEpoch > 0) {
+      creationTime = exifTime.microsecondsSinceEpoch;
     }
     hash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
     return getMetadata();
