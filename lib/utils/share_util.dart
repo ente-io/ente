@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'package:logging/logging.dart';
-import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'dart:io' as dartio;
-import 'package:exif/exif.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -14,7 +12,6 @@ import 'package:photos/models/file.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 
-DateFormat _exifDateFormat = DateFormat('yyyy:MM:dd HH:mm:ss');
 final _logger = Logger("ShareUtil");
 // share is used to share media/files from ente to other apps
 Future<void> share(BuildContext context, List<File> files) async {
@@ -62,22 +59,6 @@ Future<List<File>> convertIncomingSharedMediaToFile(
     enteFile.fileType =
         media.type == SharedMediaType.IMAGE ? FileType.image : FileType.video;
 
-    if (enteFile.fileType == FileType.image) {
-      final exifMap = await readExifFromFile(ioFile);
-      if (exifMap != null &&
-          exifMap["Image DateTime"] != null &&
-          '0000:00:00 00:00:00' != exifMap["Image DateTime"].toString()) {
-        try {
-          final exifTime =
-              _exifDateFormat.parse(exifMap["Image DateTime"].toString());
-          enteFile.creationTime = exifTime.microsecondsSinceEpoch;
-        } catch (e) {
-          //ignore
-        }
-      }
-    } else if (enteFile.fileType == FileType.video) {
-      enteFile.duration = media.duration ?? 0;
-    }
     if (enteFile.creationTime == null || enteFile.creationTime == 0) {
       final parsedDateTime =
           parseDateFromFileName(basenameWithoutExtension(media.path));
