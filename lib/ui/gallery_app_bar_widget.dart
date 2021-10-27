@@ -93,6 +93,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   _appBarTitle,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.80),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
                 onPressed: () => _renameAlbum(context),
@@ -192,7 +194,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
       ));
     }
-    if(widget.type == GalleryAppBarType.trash) {
+    if (widget.type == GalleryAppBarType.trash) {
       actions.add(
         Tooltip(
           message: "empty trash",
@@ -416,18 +418,20 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
       ),
     ));
-    actions.add(Tooltip(
-      message: "delete permanently",
-      child: IconButton(
-        icon: Icon(Icons.delete_forever_outlined),
-        onPressed: () async {
-          if (await deleteFromTrash(
-              context, widget.selectedFiles.files.toList())) {
-            _clearSelectedFiles();
-          }
-        },
+    actions.add(
+      Tooltip(
+        message: "delete permanently",
+        child: IconButton(
+          icon: Icon(Icons.delete_forever_outlined),
+          onPressed: () async {
+            if (await deleteFromTrash(
+                context, widget.selectedFiles.files.toList())) {
+              _clearSelectedFiles();
+            }
+          },
+        ),
       ),
-    ));
+    );
   }
 
   Future<void> _handleVisibilityChangeRequest(
@@ -502,7 +506,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final actions = <Widget>[];
     if (containsUploadedFile && containsLocalFile) {
       actions.add(CupertinoActionSheetAction(
-        child: Text("this device"),
+        child: Text("device"),
         isDestructiveAction: true,
         onPressed: () async {
           Navigator.of(context, rootNavigator: true).pop();
@@ -520,7 +524,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           await deleteFilesFromRemoteOnly(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          showToast("deleted files are moved to trash");
+          showToast("moved to trash");
         },
       ));
       actions.add(CupertinoActionSheetAction(
@@ -535,7 +539,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       ));
     } else {
       actions.add(CupertinoActionSheetAction(
-        child: Text("delete forever"),
+        child: Text("delete"),
         isDestructiveAction: true,
         onPressed: () async {
           Navigator.of(context, rootNavigator: true).pop();
