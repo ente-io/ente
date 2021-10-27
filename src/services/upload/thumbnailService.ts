@@ -3,6 +3,7 @@ import { CustomError, errorWithContext } from 'utils/common/errorUtil';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
 import FFmpegService from 'services/ffmpegService';
+import { convertToHumanReadable } from 'utils/billingUtil';
 
 const MAX_THUMBNAIL_HEIGHT = 720;
 const MAX_THUMBNAIL_WIDTH = 1280;
@@ -209,7 +210,8 @@ async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
     if (thumbnailBlob.size > MAX_THUMBNAIL_SIZE) {
         logError(
             Error('thumbnail_too_large'),
-            'thumbnail greater than max limit'
+            'thumbnail greater than max limit',
+            { thumbnailSize: convertToHumanReadable(thumbnailBlob.size) }
         );
     }
 
