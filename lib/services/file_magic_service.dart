@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -30,8 +30,7 @@ class FileMagicService {
       FileMagicService._privateConstructor();
 
   Future<void> changeVisibility(List<File> files, int visibility) async {
-    Map<String, dynamic> update = {};
-    update[kMagicKeyVisibility] = visibility;
+    Map<String, dynamic> update = {kMagicKeyVisibility: visibility};
     await _updateMagicData(files, update);
     // h4ck: Remove archived elements from the UI. If this was an archival,
     // ArchivePage will reload the new items anyway
@@ -39,6 +38,67 @@ class FileMagicService {
     if (visibility == kVisibilityVisible) {
       // Force reload home gallery to pull in the now unarchived files
       Bus.instance.fire(ForceReloadHomeGalleryEvent());
+    }
+  }
+
+  Future<void> updatePublicMagicMetadata(
+      List<File> files, Map<String, dynamic> newMetadataUpdate) async {
+    final params = <String, dynamic>{};
+    params['metadataList'] = [];
+    final int ownerID = Configuration.instance.getUserID();
+    try {
+      for (final file in files) {
+        if (file.uploadedFileID == null) {
+          throw AssertionError(
+              "operation is only supported on backed up files");
+        } else if (file.ownerID != ownerID) {
+          throw AssertionError("cannot modify memories not owned by you");
+        }
+        // read the existing magic metadata and apply new updates to existing data
+        // current update is simple replace. This will be enhanced in the future,
+        // as required.
+        Map<String, dynamic> jsonToUpdate = jsonDecode(file.pubMmdEncodedJson);
+        newMetadataUpdate.forEach((key, value) {
+          jsonToUpdate[key] = value;
+        });
+
+        // update the local information so that it's reflected on UI
+        file.pubMmdEncodedJson = jsonEncode(jsonToUpdate);
+        file.pubMagicMetadata = PubMagicMetadata.fromJson(jsonToUpdate);
+
+        final fileKey = decryptFileKey(file);
+        final encryptedMMd = await CryptoUtil.encryptChaCha(
+            utf8.encode(jsonEncode(jsonToUpdate)), fileKey);
+        params['metadataList'].add(UpdateMagicMetadataRequest(
+            id: file.uploadedFileID,
+            magicMetadata: MetadataRequest(
+              version: file.pubMmdVersion,
+              count: jsonToUpdate.length,
+              data: Sodium.bin2base64(encryptedMMd.encryptedData),
+              header: Sodium.bin2base64(encryptedMMd.header),
+            )));
+        file.pubMmdVersion = file.pubMmdVersion + 1;
+      }
+
+      await _dio.put(
+        Configuration.instance.getHttpEndpoint() +
+            "/files/public-magic-metadata",
+        data: params,
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
+      // update the state of the selected file. Same file in other collection
+      // should be eventually synced after remote sync has completed
+      await _filesDB.insertMultiple(files);
+      RemoteSyncService.instance.sync(silently: true);
+    } on DioError catch (e) {
+      if (e.response != null && e.response.statusCode == 409) {
+        RemoteSyncService.instance.sync(silently: true);
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to sync magic metadata", e, s);
+      rethrow;
     }
   }
 

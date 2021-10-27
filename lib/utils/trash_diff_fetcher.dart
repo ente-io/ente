@@ -8,6 +8,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/events/remote_sync_event.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
@@ -69,6 +70,16 @@ class TrashDiffFetcher {
             trash.mMdEncodedJson = utf8.decode(utfEncodedMmd);
             trash.mMdVersion = item["file"]['magicMetadata']['version'];
           }
+          if (item["file"]['pubMagicMetadata'] != null) {
+            final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+                Sodium.base642bin(item["file"]['pubMagicMetadata']['data']),
+                fileDecryptionKey,
+                Sodium.base642bin(item["file"]['pubMagicMetadata']['header']));
+            trash.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
+            trash.pubMmdVersion = item["file"]['pubMagicMetadata']['version'];
+            trash.pubMagicMetadata =
+                PubMagicMetadata.fromEncodedJson(trash.pubMmdEncodedJson);
+          }
           if (item["isDeleted"]) {
             deletedFiles.add(trash);
             continue;
@@ -109,6 +120,6 @@ class Diff {
   final bool hasMore;
   final int lastSyncedTimeStamp;
 
-  Diff(this.trashedFiles, this.restoredFiles, this.deletedFiles,
-      this.hasMore, this.lastSyncedTimeStamp);
+  Diff(this.trashedFiles, this.restoredFiles, this.deletedFiles, this.hasMore,
+      this.lastSyncedTimeStamp);
 }
