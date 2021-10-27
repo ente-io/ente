@@ -49,7 +49,7 @@ Future<void> _updatePublicMetadata(
   if (files.isEmpty) {
     return;
   }
-  final dialog = createProgressDialog(context, 'please wait');
+  final dialog = createProgressDialog(context, 'please wait...');
   await dialog.show();
   try {
     Map<String, dynamic> update = {key: value};
