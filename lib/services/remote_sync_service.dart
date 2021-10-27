@@ -127,10 +127,19 @@ class RemoteSyncService {
     }
   }
 
+  // This method checks for deviceFolder + title for Android.
+  // For iOS, we rely on localIDs as they are uuid as title or deviceFolder (aka
+  // album name) can be missing due to various reasons.
   bool _shouldIgnoreFileUpload(
-      Map<String, Set<String>> ignoredFilesMap, File file) {
+    File file, {
+    Map<String, Set<String>> ignoredFilesMap,
+    Set<String> ignoredLocalIDs,
+  }) {
     if (file.localID == null || file.localID.isEmpty) {
       return false;
+    }
+    if (Platform.isIOS) {
+      return ignoredLocalIDs.contains(file.localID);
     }
     if (!ignoredFilesMap.containsKey(file.localID)) {
       return false;
@@ -159,10 +168,16 @@ class RemoteSyncService {
           .removeWhere((element) => element.fileType == FileType.video);
     }
     if (filesToBeUploaded.isNotEmpty) {
-      final ignoredFilesMap = await IgnoredFilesDB.instance.getIgnoredFiles();
       final int prevCount = filesToBeUploaded.length;
-      filesToBeUploaded.removeWhere(
-          (file) => _shouldIgnoreFileUpload(ignoredFilesMap, file));
+      if (Platform.isAndroid) {
+        final ignoredFilesMap = await IgnoredFilesDB.instance.getIgnoredFiles();
+        filesToBeUploaded.removeWhere((file) =>
+            _shouldIgnoreFileUpload(file, ignoredFilesMap: ignoredFilesMap));
+      } else {
+        final ignoredLocalIDs = await IgnoredFilesDB.instance.getAllLocalIDs();
+        filesToBeUploaded.removeWhere((file) =>
+            _shouldIgnoreFileUpload(file, ignoredLocalIDs: ignoredLocalIDs));
+      }
       if (prevCount != filesToBeUploaded.length) {
         _logger.info((prevCount - filesToBeUploaded.length).toString() +
             " files were ignored for upload");
