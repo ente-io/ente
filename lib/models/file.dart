@@ -136,7 +136,7 @@ class File {
     }
     if (fileType == FileType.image) {
       final exifTime = await getCreationTimeFromEXIF(sourceFile);
-      if (exifTime != null && exifTime.microsecondsSinceEpoch > 0) {
+      if (exifTime != null) {
         creationTime = exifTime.microsecondsSinceEpoch;
       }
     }

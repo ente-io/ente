@@ -1,14 +1,15 @@
 import 'dart:io' as io;
 
 import 'package:exif/exif.dart';
-import 'package:jiffy/jiffy.dart';
+import 'package:intl/intl.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:logging/logging.dart';
 
 const kDateTimeOriginal = "EXIF DateTimeOriginal";
 const kImageDateTime = "Image DateTime";
-const kExifDateTimePattern = "yyyy:MM:dd h:mm:s";
+const kExifDateTimePattern = "yyyy:MM:dd HH:mm:ss";
+const kEmptyExifDateTime = "0000:00:00 00:00:00";
 
 final _logger = Logger("ExifUtil");
 
@@ -28,16 +29,18 @@ Future<Map<String, IfdTag>> getExif(File file) async {
 
 Future<DateTime> getCreationTimeFromEXIF(io.File file) async {
   final exif = await readExifFromFile(file);
-  final exifTime = exif.containsKey(kDateTimeOriginal)
-      ? exif[kDateTimeOriginal].printable
-      : exif.containsKey(kImageDateTime)
-          ? exif[kImageDateTime].printable
-          : null;
-  if (exifTime != null) {
-    try {
-      return Jiffy(exifTime, kExifDateTimePattern).dateTime;
-    } catch (e) {
-      _logger.severe(e);
+  if (exif != null) {
+    final exifTime = exif.containsKey(kDateTimeOriginal)
+        ? exif[kDateTimeOriginal].printable
+        : exif.containsKey(kImageDateTime)
+            ? exif[kImageDateTime].printable
+            : null;
+    if (exifTime != null && exifTime != kEmptyExifDateTime) {
+      try {
+        return DateFormat(kExifDateTimePattern).parse(exifTime);
+      } catch (e) {
+        return null;
+      }
     }
   }
   return null;
