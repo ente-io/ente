@@ -1,6 +1,7 @@
 import 'dart:io';
-import 'package:path/path.dart';
+
 import 'package:logging/logging.dart';
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/ignored_file.dart';
 import 'package:sqflite/sqflite.dart';
@@ -17,6 +18,7 @@ class IgnoredFilesDB {
 
   static final columnLocalID = 'local_id';
   static final columnTitle = 'title';
+  static final columnDeviceFolder = 'device_folder';
   static final columnReason = 'reason';
 
   Future _onCreate(Database db, int version) async {
@@ -24,10 +26,12 @@ class IgnoredFilesDB {
         CREATE TABLE $tableName (
           $columnLocalID TEXT NOT NULL,
           $columnTitle TEXT NOT NULL,
+          $columnDeviceFolder TEXT NOT NULL,
           $columnReason TEXT DEFAULT $kIgnoreReasonTrash,
-          UNIQUE($columnLocalID, $columnTitle)
+          UNIQUE($columnLocalID, $columnTitle, $columnDeviceFolder)
         );
       CREATE INDEX IF NOT EXISTS local_id_index ON $tableName($columnLocalID);
+      CREATE INDEX IF NOT EXISTS device_folder_index ON $tableName($columnDeviceFolder);
       ''');
   }
 
@@ -83,11 +87,8 @@ class IgnoredFilesDB {
     final duration = Duration(
         microseconds:
             endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
-    _logger.info("Batch insert of " +
-        ignoredFiles.length.toString() +
-        " took " +
-        duration.inMilliseconds.toString() +
-        "ms.");
+    _logger.info("Batch insert of ${ignoredFiles.length} "
+        "took ${duration.inMilliseconds} ms.");
   }
 
   Future<int> insert(IgnoredFile ignoredFile) async {
@@ -99,26 +100,45 @@ class IgnoredFilesDB {
     );
   }
 
-  // return map of localID to set of titles associated with the given localIDs
-  // Note: localIDs can easily clash across devices for Android, so we should
-  // always compare both localID & title in Android before ignoring the file for upload.
-  // iOS: localID is usually UUID and the title in localDB may be missing (before upload) as the
-  // photo manager library doesn't always fetch the title by default.
-  Future<Map<String, Set<String>>> getIgnoredFiles() async {
-    final db = await instance.database;
-    final rows = await db.query(tableName);
+  // returns a  map of device folder to set of title/filenames which exist
+  // in the particular device folder.
+  Future<Map<String, Set<String>>> getFilenamesForDeviceFolders(
+      Set<String> folders) async {
     final result = <String, Set<String>>{};
+    final db = await instance.database;
+
+    if (folders.isEmpty) {
+      return result;
+    }
+    String inParam = "";
+    for (final folder in folders) {
+      inParam += "'" + folder.replaceAll("'", "''") + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final rows =
+        await db.query(tableName, where: '$columnDeviceFolder IN ($inParam)');
     for (final row in rows) {
       final ignoredFile = _getIgnoredFileFromRow(row);
       result
-          .putIfAbsent(ignoredFile.localID, () => <String>{})
+          .putIfAbsent(ignoredFile.deviceFolder, () => <String>{})
           .add(ignoredFile.title);
     }
     return result;
   }
 
+  Future<Set<String>> getAllLocalIDs() async {
+    final db = await instance.database;
+    final rows = await db.query(tableName);
+    final result = <String>{};
+    for (final row in rows) {
+      result.add(row[columnLocalID]);
+    }
+    return result;
+  }
+
   IgnoredFile _getIgnoredFileFromRow(Map<String, dynamic> row) {
-    return IgnoredFile(row[columnLocalID], row[columnTitle], row[columnReason]);
+    return IgnoredFile(row[columnLocalID], row[columnTitle],
+        row[columnDeviceFolder], row[columnReason]);
   }
 
   Map<String, dynamic> _getRowForIgnoredFile(IgnoredFile ignoredFile) {
@@ -127,6 +147,7 @@ class IgnoredFilesDB {
     final row = <String, dynamic>{};
     row[columnLocalID] = ignoredFile.localID;
     row[columnTitle] = ignoredFile.title;
+    row[columnDeviceFolder] = ignoredFile.deviceFolder;
     row[columnReason] = ignoredFile.reason;
     return row;
   }
