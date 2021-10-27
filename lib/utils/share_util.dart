@@ -64,6 +64,8 @@ Future<List<File>> convertIncomingSharedMediaToFile(
       if (exifTime != null) {
         enteFile.creationTime = exifTime.microsecondsSinceEpoch;
       }
+    } else if (enteFile.fileType == FileType.video) {
+      enteFile.duration = media.duration ?? 0;
     }
     if (enteFile.creationTime == null || enteFile.creationTime == 0) {
       final parsedDateTime =
