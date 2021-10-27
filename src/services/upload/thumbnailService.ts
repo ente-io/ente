@@ -5,17 +5,19 @@ import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b
 import FFmpegService from 'services/ffmpegService';
 import { convertToHumanReadable } from 'utils/billingUtil';
 
-const MAX_THUMBNAIL_DIMENSION: Dimension = { width: 1280, height: 720 };
+const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
 export const MAX_THUMBNAIL_SIZE = 100 * 1024;
 const MIN_QUALITY = 0.5;
 const MAX_QUALITY = 0.7;
 
 const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
+
 interface Dimension {
     width: number;
     height: number;
 }
+
 export async function generateThumbnail(
     worker,
     file: globalThis.File,
@@ -236,13 +238,13 @@ function percentageSizeDiff(
 // returns {0,0} for invalid inputs
 function calculateThumbnailDimension(
     OriginalDimension: Dimension,
-    maxDimension: Dimension
+    maxDimension: number
 ): Dimension {
     if (OriginalDimension.height === 0 || OriginalDimension.width === 0) {
         return { width: 0, height: 0 };
     }
-    const widthScaleFactor = maxDimension.width / OriginalDimension.width;
-    const heightScaleFactor = maxDimension.height / OriginalDimension.height;
+    const widthScaleFactor = maxDimension / OriginalDimension.width;
+    const heightScaleFactor = maxDimension / OriginalDimension.height;
     const scaleFactor = Math.min(widthScaleFactor, heightScaleFactor);
     const thumbnailDimension = {
         width: Math.round(OriginalDimension.width * scaleFactor),
