@@ -14,11 +14,11 @@ class TrashPage extends StatelessWidget {
   final GalleryAppBarType appBarType;
   final _selectedFiles = SelectedFiles();
 
-  TrashPage(
-      {this.tagPrefix = "trash_page",
-      this.appBarType = GalleryAppBarType.trash,
-      Key key})
-      : super(key: key);
+  TrashPage({
+    this.tagPrefix = "trash_page",
+    this.appBarType = GalleryAppBarType.trash,
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(Object context) {
@@ -70,7 +70,7 @@ class TrashPage extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data.files.isNotEmpty) {
           return Padding(
-            padding: EdgeInsets.all(15),
+            padding: EdgeInsets.all(16),
             child: Text(
               'items show the number the days remaining before permanent deletion',
               style: TextStyle(
