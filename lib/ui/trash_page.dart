@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
 
 import 'gallery.dart';
@@ -45,6 +46,7 @@ class TrashPage extends StatelessWidget {
       ],
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
+      header: _headerWidget(),
       initialFiles: null,
     );
 
@@ -59,5 +61,26 @@ class TrashPage extends StatelessWidget {
       ),
       body: gallery,
     );
+  }
+
+  Widget _headerWidget() {
+    return FutureBuilder<FileLoadResult>(
+        future: TrashDB.instance
+            .getTrashedFiles(0, DateTime.now().microsecondsSinceEpoch),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data.files.isNotEmpty) {
+            return Padding(
+              padding: EdgeInsets.all(15),
+              child: Text(
+                'memories shows the number the days after which they will be permanently deleted.',
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+            );
+          } else {
+            return Container();
+          }
+        });
   }
 }
