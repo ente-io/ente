@@ -83,6 +83,16 @@ class DiffFetcher {
             file.magicMetadata =
                 MagicMetadata.fromEncodedJson(file.mMdEncodedJson);
           }
+          if (item['pubMagicMetadata'] != null) {
+            final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+                Sodium.base642bin(item['pubMagicMetadata']['data']),
+                fileDecryptionKey,
+                Sodium.base642bin(item['pubMagicMetadata']['header']));
+            file.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
+            file.pubMmdVersion = item['pubMagicMetadata']['version'];
+            file.pubMagicMetadata =
+                PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson);
+          }
           files.add(file);
         }
 

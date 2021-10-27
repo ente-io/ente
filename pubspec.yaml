@@ -45,6 +45,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_cache_manager: ^3.0.1
+  flutter_datetime_picker: ^1.5.1
   flutter_easyloading: ^3.0.0
   flutter_email_sender: ^5.0.2
   flutter_image_compress:

@@ -1,8 +1,9 @@
 import 'dart:io';
-
 import 'dart:io' as io;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:like_button/like_button.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -20,6 +21,7 @@ import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -118,12 +120,31 @@ class FadingAppBarState extends State<FadingAppBar> {
             ),
           );
         }
-        // only show delete option for files owned by the user
+        // options for files owned by the user
         if (widget.file.ownerID == null ||
             widget.file.ownerID == widget.userID) {
+          if (widget.file.uploadedFileID != null) {
+            items.add(
+              PopupMenuItem(
+                value: 2,
+                child: Row(
+                  children: [
+                    Icon(Platform.isAndroid
+                        ? Icons.access_time_rounded
+                        : CupertinoIcons.time),
+                    Padding(
+                      padding: EdgeInsets.all(8),
+                    ),
+                    Text("edit time"),
+                  ],
+                ),
+              ),
+            );
+          }
+
           items.add(
             PopupMenuItem(
-              value: 2,
+              value: 3,
               child: Row(
                 children: [
                   Icon(Platform.isAndroid
@@ -144,6 +165,8 @@ class FadingAppBarState extends State<FadingAppBar> {
         if (value == 1) {
           _download(widget.file);
         } else if (value == 2) {
+          _showDateTimePicker(widget.file);
+        } else if (value == 3) {
           _showDeleteSheet(widget.file);
         }
       },
@@ -217,6 +240,34 @@ class FadingAppBarState extends State<FadingAppBar> {
         );
       },
     );
+  }
+
+  void _showDateTimePicker(File file) async {
+    final dateResult = await DatePicker.showDatePicker(
+      context,
+      minTime: DateTime(1, 1, 1),
+      maxTime: DateTime.now(),
+      currentTime: DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
+      locale: LocaleType.en,
+      theme: kDatePickerTheme,
+    );
+    if (dateResult == null) {
+      return;
+    }
+    final dateWithTimeResult = await DatePicker.showTime12hPicker(
+      context,
+      showTitleActions: true,
+      currentTime: dateResult,
+      locale: LocaleType.en,
+      theme: kDatePickerTheme,
+    );
+    if (dateWithTimeResult != null) {
+      if (await editTime(context, List.of([widget.file]),
+          dateWithTimeResult.microsecondsSinceEpoch)) {
+        widget.file.creationTime = dateWithTimeResult.microsecondsSinceEpoch;
+        setState(() {});
+      }
+    }
   }
 
   void _showDeleteSheet(File file) {
@@ -310,3 +361,13 @@ class FadingAppBarState extends State<FadingAppBar> {
     }
   }
 }
+
+const kDatePickerTheme = DatePickerTheme(
+  backgroundColor: Colors.black,
+  itemStyle: TextStyle(
+    color: Colors.white,
+  ),
+  cancelStyle: TextStyle(
+    color: Colors.white,
+  ),
+);
