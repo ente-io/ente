@@ -4,14 +4,18 @@ import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
 import FFmpegService from 'services/ffmpegService';
 
-const THUMBNAIL_HEIGHT = 720;
+const MAX_THUMBNAIL_HEIGHT = 720;
+const MAX_THUMBNAIL_WIDTH = 1280;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
 export const MAX_THUMBNAIL_SIZE = 100 * 1024;
 const MIN_QUALITY = 0.5;
 const MAX_QUALITY = 0.7;
 
 const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
-
+interface Dimension {
+    width: number;
+    height: number;
+}
 export async function generateThumbnail(
     worker,
     file: globalThis.File,
@@ -81,16 +85,18 @@ export async function generateImageThumbnail(
     await new Promise((resolve, reject) => {
         image.onload = () => {
             try {
-                const thumbnailWidth =
-                    (image.width * THUMBNAIL_HEIGHT) / image.height;
-                canvas.width = thumbnailWidth;
-                canvas.height = THUMBNAIL_HEIGHT;
+                const thumbnailDimension = calculateThumbnailDimension({
+                    width: image.width,
+                    height: image.height,
+                });
+                canvas.width = thumbnailDimension.width;
+                canvas.height = thumbnailDimension.height;
                 canvasCTX.drawImage(
                     image,
                     0,
                     0,
-                    thumbnailWidth,
-                    THUMBNAIL_HEIGHT
+                    thumbnailDimension.width,
+                    thumbnailDimension.height
                 );
                 image = null;
                 clearTimeout(timeout);
@@ -133,16 +139,18 @@ export async function generateVideoThumbnail(file: globalThis.File) {
                 if (!video) {
                     throw Error('video load failed');
                 }
-                const thumbnailWidth =
-                    (video.videoWidth * THUMBNAIL_HEIGHT) / video.videoHeight;
-                canvas.width = thumbnailWidth;
-                canvas.height = THUMBNAIL_HEIGHT;
+                const thumbnailDimension = calculateThumbnailDimension({
+                    width: video.videoWidth,
+                    height: video.videoHeight,
+                });
+                canvas.width = thumbnailDimension.width;
+                canvas.height = thumbnailDimension.height;
                 canvasCTX.drawImage(
                     video,
                     0,
                     0,
-                    thumbnailWidth,
-                    THUMBNAIL_HEIGHT
+                    thumbnailDimension.width,
+                    thumbnailDimension.height
                 );
                 video = null;
                 clearTimeout(timeout);
@@ -213,4 +221,21 @@ function percentageSizeDiff(
     oldThumbnailSize: number
 ) {
     return ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
+}
+
+function calculateThumbnailDimension(OriginalDimension: Dimension): Dimension {
+    if (OriginalDimension.height === 0 || OriginalDimension.width === 0) {
+        return { width: 0, height: 0 };
+    }
+    const widthScaleFactor = MAX_THUMBNAIL_WIDTH / OriginalDimension.width;
+    const heightScaleFactor = MAX_THUMBNAIL_HEIGHT / OriginalDimension.height;
+    const scaleFactor = Math.min(widthScaleFactor, heightScaleFactor);
+    const thumbnailDimension = {
+        width: Math.round(OriginalDimension.width * scaleFactor),
+        height: Math.round(OriginalDimension.height * scaleFactor),
+    };
+    if (thumbnailDimension.width === 0 || thumbnailDimension.height === 0) {
+        return { width: 0, height: 0 };
+    }
+    return thumbnailDimension;
 }
