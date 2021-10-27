@@ -87,11 +87,8 @@ class IgnoredFilesDB {
     final duration = Duration(
         microseconds:
             endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
-    _logger.info("Batch insert of " +
-        ignoredFiles.length.toString() +
-        " took " +
-        duration.inMilliseconds.toString() +
-        "ms.");
+    _logger.info("Batch insert of ${ignoredFiles.length} "
+        "took ${duration.inMilliseconds} ms.");
   }
 
   Future<int> insert(IgnoredFile ignoredFile) async {
