@@ -243,16 +243,24 @@ class FadingAppBarState extends State<FadingAppBar> {
   }
 
   void _showDateTimePicker(File file) async {
-    final dateResult = await DatePicker.showDatePicker(context,
-        minTime: DateTime(1800, 1, 1),
-        maxTime: DateTime.now().add(Duration(days: 1)),
-        currentTime: DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
-        locale: LocaleType.en);
+    final dateResult = await DatePicker.showDatePicker(
+      context,
+      minTime: DateTime(1800, 1, 1),
+      maxTime: DateTime.now().add(Duration(days: 1)),
+      currentTime: DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
+      locale: LocaleType.en,
+      theme: kDatePickerTheme,
+    );
     if (dateResult == null) {
       return;
     }
-    final dateWithTimeResult = await DatePicker.showTime12hPicker(context,
-        showTitleActions: true, currentTime: dateResult, locale: LocaleType.en);
+    final dateWithTimeResult = await DatePicker.showTime12hPicker(
+      context,
+      showTitleActions: true,
+      currentTime: dateResult,
+      locale: LocaleType.en,
+      theme: kDatePickerTheme,
+    );
     if (dateWithTimeResult != null) {
       if (await editTime(context, List.of([widget.file]),
           dateWithTimeResult.microsecondsSinceEpoch)) {
@@ -343,3 +351,13 @@ class FadingAppBarState extends State<FadingAppBar> {
     }
   }
 }
+
+const kDatePickerTheme = DatePickerTheme(
+  backgroundColor: Colors.black,
+  itemStyle: TextStyle(
+    color: Colors.white,
+  ),
+  cancelStyle: TextStyle(
+    color: Colors.white,
+  ),
+);
