@@ -321,6 +321,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       await _sync(isAppInBackground: true);
     }, prefix: "[bg]");
   } else {
+    _logger
+        .info("Background push received, but app is already in the foreground");
     // App has already been initialized, will let foreground handle everything
   }
 }
