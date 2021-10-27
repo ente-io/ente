@@ -237,18 +237,18 @@ function percentageSizeDiff(
 // method to calculate new size of image for limiting it to maximum width and height, maintaining aspect ratio
 // returns {0,0} for invalid inputs
 function calculateThumbnailDimension(
-    OriginalDimension: Dimension,
+    originalDimension: Dimension,
     maxDimension: number
 ): Dimension {
-    if (OriginalDimension.height === 0 || OriginalDimension.width === 0) {
+    if (originalDimension.height === 0 || originalDimension.width === 0) {
         return { width: 0, height: 0 };
     }
-    const widthScaleFactor = maxDimension / OriginalDimension.width;
-    const heightScaleFactor = maxDimension / OriginalDimension.height;
+    const widthScaleFactor = maxDimension / originalDimension.width;
+    const heightScaleFactor = maxDimension / originalDimension.height;
     const scaleFactor = Math.min(widthScaleFactor, heightScaleFactor);
     const thumbnailDimension = {
-        width: Math.round(OriginalDimension.width * scaleFactor),
-        height: Math.round(OriginalDimension.height * scaleFactor),
+        width: Math.round(originalDimension.width * scaleFactor),
+        height: Math.round(originalDimension.height * scaleFactor),
     };
     if (thumbnailDimension.width === 0 || thumbnailDimension.height === 0) {
         return { width: 0, height: 0 };
