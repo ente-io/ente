@@ -232,6 +232,8 @@ function percentageSizeDiff(
     return ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
 }
 
+// method to calculate new size of image for limiting it to maximum width and height, maintaining aspect ratio
+// returns {0,0} for invalid inputs
 function calculateThumbnailDimension(
     OriginalDimension: Dimension,
     maxDimension: Dimension
