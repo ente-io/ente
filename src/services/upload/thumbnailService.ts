@@ -3,15 +3,20 @@ import { CustomError, errorWithContext } from 'utils/common/errorUtil';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
 import FFmpegService from 'services/ffmpegService';
+import { convertToHumanReadable } from 'utils/billingUtil';
 
-const THUMBNAIL_HEIGHT = 720;
-
+const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
 export const MAX_THUMBNAIL_SIZE = 100 * 1024;
 const MIN_QUALITY = 0.5;
 const MAX_QUALITY = 0.7;
 
 const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
+
+interface Dimension {
+    width: number;
+    height: number;
+}
 
 export async function generateThumbnail(
     worker,
@@ -82,16 +87,22 @@ export async function generateImageThumbnail(
     await new Promise((resolve, reject) => {
         image.onload = () => {
             try {
-                const thumbnailWidth =
-                    (image.width * THUMBNAIL_HEIGHT) / image.height;
-                canvas.width = thumbnailWidth;
-                canvas.height = THUMBNAIL_HEIGHT;
+                const imageDimension = {
+                    width: image.width,
+                    height: image.height,
+                };
+                const thumbnailDimension = calculateThumbnailDimension(
+                    imageDimension,
+                    MAX_THUMBNAIL_DIMENSION
+                );
+                canvas.width = thumbnailDimension.width;
+                canvas.height = thumbnailDimension.height;
                 canvasCTX.drawImage(
                     image,
                     0,
                     0,
-                    thumbnailWidth,
-                    THUMBNAIL_HEIGHT
+                    thumbnailDimension.width,
+                    thumbnailDimension.height
                 );
                 image = null;
                 clearTimeout(timeout);
@@ -134,16 +145,22 @@ export async function generateVideoThumbnail(file: globalThis.File) {
                 if (!video) {
                     throw Error('video load failed');
                 }
-                const thumbnailWidth =
-                    (video.videoWidth * THUMBNAIL_HEIGHT) / video.videoHeight;
-                canvas.width = thumbnailWidth;
-                canvas.height = THUMBNAIL_HEIGHT;
+                const videoDimension = {
+                    width: video.videoWidth,
+                    height: video.videoHeight,
+                };
+                const thumbnailDimension = calculateThumbnailDimension(
+                    videoDimension,
+                    MAX_THUMBNAIL_DIMENSION
+                );
+                canvas.width = thumbnailDimension.width;
+                canvas.height = thumbnailDimension.height;
                 canvasCTX.drawImage(
                     video,
                     0,
                     0,
-                    thumbnailWidth,
-                    THUMBNAIL_HEIGHT
+                    thumbnailDimension.width,
+                    thumbnailDimension.height
                 );
                 video = null;
                 clearTimeout(timeout);
@@ -177,7 +194,7 @@ async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
     let thumbnailBlob: Blob = null;
     let prevSize = Number.MAX_SAFE_INTEGER;
     let quality = MAX_QUALITY;
-  
+
     do {
         if (thumbnailBlob) {
             prevSize = thumbnailBlob.size;
@@ -202,7 +219,8 @@ async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
     if (thumbnailBlob.size > MAX_THUMBNAIL_SIZE) {
         logError(
             Error('thumbnail_too_large'),
-            'thumbnail greater than max limit'
+            'thumbnail greater than max limit',
+            { thumbnailSize: convertToHumanReadable(thumbnailBlob.size) }
         );
     }
 
@@ -214,4 +232,26 @@ function percentageSizeDiff(
     oldThumbnailSize: number
 ) {
     return ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
+}
+
+// method to calculate new size of image for limiting it to maximum width and height, maintaining aspect ratio
+// returns {0,0} for invalid inputs
+function calculateThumbnailDimension(
+    originalDimension: Dimension,
+    maxDimension: number
+): Dimension {
+    if (originalDimension.height === 0 || originalDimension.width === 0) {
+        return { width: 0, height: 0 };
+    }
+    const widthScaleFactor = maxDimension / originalDimension.width;
+    const heightScaleFactor = maxDimension / originalDimension.height;
+    const scaleFactor = Math.min(widthScaleFactor, heightScaleFactor);
+    const thumbnailDimension = {
+        width: Math.round(originalDimension.width * scaleFactor),
+        height: Math.round(originalDimension.height * scaleFactor),
+    };
+    if (thumbnailDimension.width === 0 || thumbnailDimension.height === 0) {
+        return { width: 0, height: 0 };
+    }
+    return thumbnailDimension;
 }
