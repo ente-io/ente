@@ -68,8 +68,9 @@ class RemoteSyncService {
     // this is to ensure that we don't pause upload due to any error during
     // the trash sync. Impact: We may end up re-uploading a file which was
     // recently trashed.
-    await TrashSyncService.instance.syncTrash()
-    .onError((e, s) => _logger.severe('trash sync failed', e, s));
+    await TrashSyncService.instance
+        .syncTrash()
+        .onError((e, s) => _logger.severe('trash sync failed', e, s));
     bool hasUploadedFiles = await _uploadDiff();
     if (hasUploadedFiles) {
       sync(silently: true);
@@ -128,21 +129,24 @@ class RemoteSyncService {
     }
   }
 
+  // This method checks for deviceFolder + title for Android.
+  // For iOS, we rely on localIDs as they are uuid as title or deviceFolder (aka
+  // album name) can be missing due to various reasons.
   bool _shouldIgnoreFileUpload(
-      Map<String, Set<String>> ignoredFilesMap, File file) {
+    File file, {
+    Map<String, Set<String>> ignoredFilesMap,
+    Set<String> ignoredLocalIDs,
+  }) {
     if (file.localID == null || file.localID.isEmpty) {
       return false;
     }
-    if (!ignoredFilesMap.containsKey(file.localID)) {
-      return false;
+    if (Platform.isIOS) {
+      return ignoredLocalIDs.contains(file.localID);
     }
-    // only compare title in Android because title may be missing in IOS
-    // and iOS anyways use uuid for localIDs of file, so collision should be
-    // rare.
-    if (Platform.isAndroid) {
-      return ignoredFilesMap[file.localID].contains(file.title ?? '');
-    }
-    return true;
+    // For android, check if there's any ignored file with same device folder
+    // and title.
+    return ignoredFilesMap.containsKey(file.deviceFolder) &&
+        ignoredFilesMap[file.deviceFolder].contains(file.title);
   }
 
   Future<bool> _uploadDiff() async {
@@ -160,10 +164,17 @@ class RemoteSyncService {
           .removeWhere((element) => element.fileType == FileType.video);
     }
     if (filesToBeUploaded.isNotEmpty) {
-      final ignoredFilesMap = await IgnoredFilesDB.instance.getIgnoredFiles();
       final int prevCount = filesToBeUploaded.length;
-      filesToBeUploaded.removeWhere(
-          (file) => _shouldIgnoreFileUpload(ignoredFilesMap, file));
+      if (Platform.isAndroid) {
+        final ignoredFilesMap = await IgnoredFilesDB.instance
+            .getFilenamesForDeviceFolders(foldersToBackUp);
+        filesToBeUploaded.removeWhere((file) =>
+            _shouldIgnoreFileUpload(file, ignoredFilesMap: ignoredFilesMap));
+      } else {
+        final ignoredLocalIDs = await IgnoredFilesDB.instance.getAllLocalIDs();
+        filesToBeUploaded.removeWhere((file) =>
+            _shouldIgnoreFileUpload(file, ignoredLocalIDs: ignoredLocalIDs));
+      }
       if (prevCount != filesToBeUploaded.length) {
         _logger.info((prevCount - filesToBeUploaded.length).toString() +
             " files were ignored for upload");
@@ -242,12 +253,10 @@ class RemoteSyncService {
     if (_completedUploads > toBeUploadedInThisSession ||
         _completedUploads < 0 ||
         toBeUploadedInThisSession < 0) {
-      _logger.severe(
+      _logger.info(
           "Incorrect sync status",
-          InvalidSyncStatusError("Tried to report " +
-              _completedUploads.toString() +
-              " as uploaded out of " +
-              toBeUploadedInThisSession.toString()));
+          InvalidSyncStatusError("Tried to report $_completedUploads as "
+              "uploaded out of $toBeUploadedInThisSession"));
       return;
     }
     Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,

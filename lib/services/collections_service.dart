@@ -153,7 +153,8 @@ class CollectionsService {
   List<Collection> getActiveCollections() {
     return _collectionIDToCollections.values
         .toList()
-        .where((element) => !element.isDeleted);
+        .where((element) => !element.isDeleted)
+        .toList();
   }
 
   Future<List<User>> getSharees(int collectionID) {
