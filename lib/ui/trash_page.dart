@@ -65,22 +65,24 @@ class TrashPage extends StatelessWidget {
 
   Widget _headerWidget() {
     return FutureBuilder<FileLoadResult>(
-        future: TrashDB.instance
-            .getTrashedFiles(0, DateTime.now().microsecondsSinceEpoch),
-        builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data.files.isNotEmpty) {
-            return Padding(
-              padding: EdgeInsets.all(15),
-              child: Text(
-                'memories shows the number the days after which they will be permanently deleted.',
-                style: TextStyle(
-                  fontSize: 16,
-                ),
+      future: TrashDB.instance
+          .getTrashedFiles(0, DateTime.now().microsecondsSinceEpoch),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data.files.isNotEmpty) {
+          return Padding(
+            padding: EdgeInsets.all(15),
+            child: Text(
+              'items show the number the days remaining before permanent deletion',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white.withOpacity(0.6),
               ),
-            );
-          } else {
-            return Container();
-          }
-        });
+            ),
+          );
+        } else {
+          return Container();
+        }
+      },
+    );
   }
 }
