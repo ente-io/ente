@@ -63,7 +63,7 @@ async function generateThumbnailHelper(ffmpeg: FFmpeg, file: File) {
                     '-vframes',
                     '1',
                     '-vf',
-                    'scale=512:512',
+                    'scale=-1:720',
                     thumbFileName
                 );
                 thumb = ffmpeg.FS('readFile', thumbFileName);
