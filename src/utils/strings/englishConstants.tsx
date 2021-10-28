@@ -552,6 +552,22 @@ const englishConstants = {
     SORT_BY_LATEST_PHOTO: 'recent photo',
     SORT_BY_MODIFICATION_TIME: 'last updated',
     SORT_BY_COLLECTION_NAME: 'album name',
+    FIX_LARGE_THUMBNAILS: 'compress thumbnails',
+    THUMBNAIL_REPLACED: 'thumbnails compressed',
+    FIX: 'compress',
+    FIX_LATER: 'compress later',
+    REPLACE_THUMBNAIL_NOT_STARTED: () => (
+        <>
+            some of your videos thumbnails can be compressed to save space.
+            would you like ente to compress them?
+        </>
+    ),
+    REPLACE_THUMBNAIL_COMPLETED: () => (
+        <>successfully compressed all thumbnails</>
+    ),
+    REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR: () => (
+        <>could not compress some of your thumbnails, please retry</>
+    ),
 };
 
 export default englishConstants;
