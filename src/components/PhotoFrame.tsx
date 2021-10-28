@@ -182,7 +182,8 @@ const PhotoFrame = ({
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
-
+    const filteredDataRef = useRef([]);
+    const filteredData = filteredDataRef?.current ?? [];
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Shift') {
@@ -229,6 +230,59 @@ const PhotoFrame = ({
             setRangeStart(null);
         }
     }, [selected]);
+
+    useEffect(() => {
+        const idSet = new Set();
+        filteredDataRef.current = files
+            .map((item, index) => ({
+                ...item,
+                dataIndex: index,
+            }))
+            .filter((item) => {
+                if (deleted.includes(item.id)) {
+                    return false;
+                }
+                if (
+                    search.date &&
+                    !isSameDayAnyYear(search.date)(
+                        new Date(item.metadata.creationTime / 1000)
+                    )
+                ) {
+                    return false;
+                }
+                if (
+                    search.location &&
+                    !isInsideBox(item.metadata, search.location)
+                ) {
+                    return false;
+                }
+                if (activeCollection === ALL_SECTION && fileIsArchived(item)) {
+                    return false;
+                }
+                if (
+                    activeCollection === ARCHIVE_SECTION &&
+                    !fileIsArchived(item)
+                ) {
+                    return false;
+                }
+
+                if (isSharedFile(item) && !isSharedCollection) {
+                    return false;
+                }
+                if (!idSet.has(item.id)) {
+                    if (
+                        activeCollection === ALL_SECTION ||
+                        activeCollection === ARCHIVE_SECTION ||
+                        activeCollection === item.collectionID
+                    ) {
+                        idSet.add(item.id);
+                        return true;
+                    }
+                    return false;
+                }
+                return false;
+            });
+    }, [files, deleted, search, activeCollection]);
 
     const updateUrl = (index: number) => (url: string) => {
         files[index] = {
@@ -411,54 +465,6 @@ const PhotoFrame = ({
             }
         }
     };
-
-    const idSet = new Set();
-    const filteredData = files
-        .map((item, index) => ({
-            ...item,
-            dataIndex: index,
-        }))
-        .filter((item) => {
-            if (deleted.includes(item.id)) {
-                return false;
-            }
-            if (
-                search.date &&
-                !isSameDayAnyYear(search.date)(
-                    new Date(item.metadata.creationTime / 1000)
-                )
-            ) {
-                return false;
-            }
-            if (
-                search.location &&
-                !isInsideBox(item.metadata, search.location)
-            ) {
-                return false;
-            }
-            if (activeCollection === ALL_SECTION && fileIsArchived(item)) {
-                return false;
-            }
-            if (activeCollection === ARCHIVE_SECTION && !fileIsArchived(item)) {
-                return false;
-            }
-
-            if (isSharedFile(item) && !isSharedCollection) {
-                return false;
-            }
-            if (!idSet.has(item.id)) {
-                if (
-                    activeCollection === ALL_SECTION ||
-                    activeCollection === ARCHIVE_SECTION ||
-                    activeCollection === item.collectionID
-                ) {
-                    idSet.add(item.id);
-                    return true;
-                }
-                return false;
-            }
-            return false;
-        });
 
     const isSameDay = (first, second) =>
         first.getFullYear() === second.getFullYear() &&
