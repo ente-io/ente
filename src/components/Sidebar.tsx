@@ -33,6 +33,7 @@ import exportService from 'services/exportService';
 import { Subscription } from 'services/billingService';
 import { PAGES } from 'types';
 import { ARCHIVE_SECTION } from 'components/pages/gallery/Collections';
+import FixLargeThumbnails from './FixLargeThumbnail';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -50,6 +51,7 @@ export default function Sidebar(props: Props) {
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
     const [exportModalView, setExportModalView] = useState(false);
+    const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
     const galleryContext = useContext(GalleryContext);
     useEffect(() => {
         const main = async () => {
@@ -267,6 +269,18 @@ export default function Sidebar(props: Props) {
                     {constants.UPDATE_EMAIL}
                 </LinkButton>
                 <Divider />
+                <>
+                    <FixLargeThumbnails
+                        isOpen={fixLargeThumbsView}
+                        hide={() => setFixLargeThumbsView(false)}
+                        show={() => setFixLargeThumbsView(true)}
+                    />
+                    <LinkButton
+                        style={{ marginTop: '30px' }}
+                        onClick={() => setFixLargeThumbsView(true)}>
+                        {constants.FIX_LARGE_THUMBNAILS}
+                    </LinkButton>
+                </>
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={openFeedbackURL}>
