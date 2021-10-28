@@ -35,6 +35,9 @@ class RemoteSyncService {
   static const kHasSyncedArchiveKey = "has_synced_archive";
   // 28 Sept, 2021 9:03:20 AM IST
   static const kArchiveFeatureReleaseTime = 1632800000000000;
+  static const kHasSyncedEditTime = "has_synced_edit_time";
+  // 29 October, 2021 3:56:40 AM IST
+  static const kEditTimeFeatureReleaseTime = 1635460000000000;
 
   static final RemoteSyncService instance =
       RemoteSyncService._privateConstructor();
@@ -54,13 +57,14 @@ class RemoteSyncService {
     bool isFirstSync = !_collectionsService.hasSyncedCollections();
     await _collectionsService.sync();
 
-    if (isFirstSync || _hasSyncedArchive()) {
+    if (isFirstSync || _hasReSynced()) {
       await _syncUpdatedCollections(silently);
     } else {
-      await _resyncAllCollectionsSinceTime(kArchiveFeatureReleaseTime);
+      final syncSinceTime = _getSinceTimeForReSync();
+      await _resyncAllCollectionsSinceTime(syncSinceTime);
     }
-    if (!_hasSyncedArchive()) {
-      await _markArchiveAsSynced();
+    if (!_hasReSynced()) {
+      await _markReSyncAsDone();
     }
     // sync trash but consume error during initial launch.
     // this is to ensure that we don't pause upload due to any error during
@@ -90,6 +94,7 @@ class RemoteSyncService {
   }
 
   Future<void> _resyncAllCollectionsSinceTime(int sinceTime) async {
+    _logger.info('re-sync collections sinceTime: $sinceTime');
     final collections = _collectionsService.getActiveCollections();
     for (final c in collections) {
       await _syncCollectionDiff(c.id,
@@ -356,11 +361,24 @@ class RemoteSyncService {
     );
   }
 
-  bool _hasSyncedArchive() {
-    return _prefs.containsKey(kHasSyncedArchiveKey);
+  // return true if the client needs to re-sync the collections from previous
+  // version
+  bool _hasReSynced() {
+    return _prefs.containsKey(kHasSyncedEditTime) &&
+        _prefs.containsKey(kHasSyncedArchiveKey);
   }
 
-  Future<bool> _markArchiveAsSynced() {
-    return _prefs.setBool(kHasSyncedArchiveKey, true);
+  Future<void> _markReSyncAsDone() async {
+    await _prefs.setBool(kHasSyncedArchiveKey, true);
+    await _prefs.setBool(kHasSyncedEditTime, true);
+  }
+
+  int _getSinceTimeForReSync() {
+    // re-sync from archive feature time if the client still hasn't synced
+    // since the feature release.
+    if (!_prefs.containsKey(kHasSyncedArchiveKey)) {
+      return kArchiveFeatureReleaseTime;
+    }
+    return kEditTimeFeatureReleaseTime;
   }
 }
