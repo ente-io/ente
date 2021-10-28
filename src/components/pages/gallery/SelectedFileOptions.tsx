@@ -15,20 +15,16 @@ import { ALL_SECTION, ARCHIVE_SECTION } from './Collections';
 import UnArchive from 'components/icons/UnArchive';
 import { OverlayTrigger } from 'react-bootstrap';
 import { Collection } from 'services/collectionService';
+import RemoveIcon from 'components/icons/RemoveIcon';
 
 interface Props {
-    addToCollectionHelper: (
-        collectionName: string,
-        collection: Collection
-    ) => void;
-    moveToCollectionHelper: (
-        collectionName: string,
-        collection: Collection
-    ) => void;
+    addToCollectionHelper: (collection: Collection) => void;
+    moveToCollectionHelper: (collection: Collection) => void;
     showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
     setDialogMessage: SetDialogMessage;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     deleteFileHelper: () => void;
+    removeFromCollectionHelper: () => void;
     count: number;
     clearSelection: () => void;
     archiveFilesHelper: () => void;
@@ -64,6 +60,7 @@ const SelectedFileOptions = ({
     addToCollectionHelper,
     moveToCollectionHelper,
     showCreateCollectionModal,
+    removeFromCollectionHelper,
     setDialogMessage,
     setCollectionSelectorAttributes,
     deleteFileHelper,
@@ -76,7 +73,7 @@ const SelectedFileOptions = ({
 }: Props) => {
     const addToCollection = () =>
         setCollectionSelectorAttributes({
-            callback: (collection) => addToCollectionHelper(null, collection),
+            callback: addToCollectionHelper,
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.ADD),
             title: constants.ADD_TO_COLLECTION,
             fromCollection: activeCollection,
@@ -95,9 +92,22 @@ const SelectedFileOptions = ({
             close: { text: constants.CANCEL },
         });
 
+    const removeFromCollectionHandler = () =>
+        setDialogMessage({
+            title: constants.CONFIRM_REMOVE,
+            content: constants.CONFIRM_REMOVE_MESSAGE(),
+            staticBackdrop: true,
+            proceed: {
+                action: removeFromCollectionHelper,
+                text: constants.REMOVE,
+                variant: 'danger',
+            },
+            close: { text: constants.CANCEL },
+        });
+
     const moveToCollection = () => {
         setCollectionSelectorAttributes({
-            callback: (collection) => moveToCollectionHelper(null, collection),
+            callback: moveToCollectionHelper,
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
             title: constants.MOVE_TO_COLLECTION,
             fromCollection: activeCollection,
@@ -121,7 +131,6 @@ const SelectedFileOptions = ({
                     </IconButton>
                 </IconWithMessage>
             )}
-
             {activeCollection === ALL_SECTION && (
                 <IconWithMessage message={constants.ARCHIVE}>
                     <IconButton onClick={archiveFilesHelper}>
@@ -132,11 +141,19 @@ const SelectedFileOptions = ({
             {activeCollection !== ALL_SECTION &&
                 activeCollection !== ARCHIVE_SECTION &&
                 !isFavoriteCollection && (
-                    <IconWithMessage message={constants.MOVE}>
-                        <IconButton onClick={moveToCollection}>
-                            <MoveIcon />
-                        </IconButton>
-                    </IconWithMessage>
+                    <>
+                        <IconWithMessage message={constants.MOVE}>
+                            <IconButton onClick={moveToCollection}>
+                                <MoveIcon />
+                            </IconButton>
+                        </IconWithMessage>
+
+                        <IconWithMessage message={constants.REMOVE}>
+                            <IconButton onClick={removeFromCollectionHandler}>
+                                <RemoveIcon />
+                            </IconButton>
+                        </IconWithMessage>
+                    </>
                 )}
             <IconWithMessage message={constants.ADD}>
                 <IconButton onClick={addToCollection}>

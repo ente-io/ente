@@ -549,6 +549,17 @@ const englishConstants = {
     MOVE: 'move',
     ADD: 'add',
     SORT: 'sort',
+    REMOVE: 'remove',
+    CONFIRM_REMOVE: 'confirm removal',
+
+    CONFIRM_REMOVE_MESSAGE: () => (
+        <>
+            <p>are you sure you want to remove these files from the album?</p>
+            <p>
+                all files that are unique to this album will be moved to trash
+            </p>
+        </>
+    ),
     SORT_BY_LATEST_PHOTO: 'recent photo',
     SORT_BY_MODIFICATION_TIME: 'last updated',
     SORT_BY_COLLECTION_NAME: 'album name',
