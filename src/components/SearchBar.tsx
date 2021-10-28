@@ -10,6 +10,7 @@ import {
     getYearSuggestion,
     parseHumanDate,
     searchCollection,
+    searchFiles,
     searchLocation,
 } from 'services/searchService';
 import { getFormattedDate } from 'utils/search';
@@ -20,6 +21,9 @@ import SearchIcon from './icons/SearchIcon';
 import CrossIcon from './icons/CrossIcon';
 import { Collection } from 'services/collectionService';
 import CollectionIcon from './icons/CollectionIcon';
+import { File, FILE_TYPE } from 'services/fileService';
+import ImageIcon from './icons/ImageIcon';
+import VideoIcon from './icons/VideoIcon';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -74,6 +78,8 @@ export enum SuggestionType {
     DATE,
     LOCATION,
     COLLECTION,
+    IMAGE,
+    VIDEO,
 }
 export interface DateValue {
     date?: number;
@@ -94,6 +100,7 @@ interface Props {
     searchStats: SearchStats;
     collections: Collection[];
     setActiveCollection: (id: number) => void;
+    files: File[];
 }
 export default function SearchBar(props: Props) {
     const [value, setValue] = useState<Suggestion>(null);
@@ -112,14 +119,14 @@ export default function SearchBar(props: Props) {
         if (!searchPhrase?.length) {
             return [];
         }
-        const option = [
+        const options = [
             ...getHolidaySuggestion(searchPhrase),
             ...getYearSuggestion(searchPhrase),
         ];
 
         const searchedDates = parseHumanDate(searchPhrase);
 
-        option.push(
+        options.push(
             ...searchedDates.map((searchedDate) => ({
                 type: SuggestionType.DATE,
                 value: searchedDate,
@@ -131,7 +138,7 @@ export default function SearchBar(props: Props) {
             searchPhrase,
             props.collections
         );
-        option.push(
+        options.push(
             ...collectionResults.map(
                 (searchResult) =>
                     ({
@@ -141,8 +148,20 @@ export default function SearchBar(props: Props) {
                     } as Suggestion)
             )
         );
+        const fileResults = searchFiles(searchPhrase, props.files);
+        options.push(
+            ...fileResults.map((file) => ({
+                type:
+                    file.type === FILE_TYPE.IMAGE
+                        ? SuggestionType.IMAGE
+                        : SuggestionType.VIDEO,
+                value: file.index,
+                label: file.title,
+            }))
+        );
+
         const locationResults = await searchLocation(searchPhrase);
-        option.push(
+        options.push(
             ...locationResults.map(
                 (searchResult) =>
                     ({
@@ -152,7 +171,7 @@ export default function SearchBar(props: Props) {
                     } as Suggestion)
             )
         );
-        return option;
+        return options;
     };
 
     const getOptions = debounce(getAutoCompleteSuggestions, 250);
@@ -161,7 +180,6 @@ export default function SearchBar(props: Props) {
         if (!selectedOption) {
             return;
         }
-
         switch (selectedOption.type) {
             case SuggestionType.DATE:
                 props.setSearch({
@@ -177,12 +195,17 @@ export default function SearchBar(props: Props) {
                 break;
             case SuggestionType.COLLECTION:
                 props.setActiveCollection(selectedOption.value as number);
-                resetSearch(true);
+                setValue(null);
+                break;
+            case SuggestionType.IMAGE:
+            case SuggestionType.VIDEO:
+                props.setSearch({ fileIndex: selectedOption.value as number });
+                setValue(null);
                 break;
         }
     };
-    const resetSearch = async (force?: boolean) => {
-        if (props.isOpen || force) {
+    const resetSearch = () => {
+        if (props.isOpen) {
             props.loadingBar.current?.continuousStart();
             props.setSearch({});
             setTimeout(() => {
@@ -205,6 +228,10 @@ export default function SearchBar(props: Props) {
                 return <LocationIcon />;
             case SuggestionType.COLLECTION:
                 return <CollectionIcon />;
+            case SuggestionType.IMAGE:
+                return <ImageIcon />;
+            case SuggestionType.VIDEO:
+                return <VideoIcon />;
             default:
                 return <SearchIcon />;
         }

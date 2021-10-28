@@ -18,7 +18,6 @@ import { VariableSizeList as List } from 'react-window';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
 import { SetDialogMessage } from './MessageDialog';
-import { CustomError } from 'utils/common/errorUtil';
 import {
     GAP_BTW_TILES,
     DATE_CONTAINER_HEIGHT,
@@ -30,10 +29,10 @@ import {
 import { fileIsArchived } from 'utils/file';
 import { ALL_SECTION, ARCHIVE_SECTION } from './pages/gallery/Collections';
 import { isSharedFile } from 'utils/file';
+import { isPlaybackPossible } from 'utils/photoFrame';
 
 const NO_OF_PAGES = 2;
 const A_DAY = 24 * 60 * 60 * 1000;
-const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 
 interface TimeStampListItem {
     itemType: ITEM_TYPE;
@@ -146,7 +145,7 @@ interface Props {
     isFirstLoad;
     openFileUploader;
     loadingBar;
-    searchMode: boolean;
+    isInSearchMode: boolean;
     search: Search;
     setSearchStats: setSearchStats;
     deleted?: number[];
@@ -165,11 +164,10 @@ const PhotoFrame = ({
     isFirstLoad,
     openFileUploader,
     loadingBar,
-    searchMode,
+    isInSearchMode,
     search,
     setSearchStats,
     deleted,
-    setDialogMessage,
     activeCollection,
     isSharedCollection,
 }: Props) => {
@@ -181,11 +179,19 @@ const PhotoFrame = ({
     const listRef = useRef(null);
 
     useEffect(() => {
-        if (searchMode) {
+        if (isInSearchMode) {
             setSearchStats({
                 resultCount: filteredData.length,
                 timeTaken: (Date.now() - startTime) / 1000,
             });
+        }
+        if (search.fileIndex || search.fileIndex === 0) {
+            const filteredDataIdx = filteredData.findIndex(
+                (data) => data.dataIndex === search.fileIndex
+            );
+            if (filteredDataIdx || filteredDataIdx === 0) {
+                onThumbnailClick(filteredDataIdx)();
+            }
         }
     }, [search]);
 
@@ -225,21 +231,33 @@ const PhotoFrame = ({
         setFiles(files);
     };
 
-    const updateSrcUrl = (index: number, url: string) => {
+    const updateSrcUrl = async (index: number, url: string) => {
         files[index] = {
             ...files[index],
-            src: url,
             w: window.innerWidth,
             h: window.innerHeight,
         };
         if (files[index].metadata.fileType === FILE_TYPE.VIDEO) {
-            files[index].html = `
+            if (await isPlaybackPossible(url)) {
+                files[index].html = `
                 <video controls>
                     <source src="${url}" />
                     Your browser does not support the video tag.
                 </video>
             `;
-            delete files[index].src;
+            } else {
+                files[index].html = `
+                <div class="video-loading">
+                    <img src="${files[index].msrc}" />
+                    <div class="download-message" >
+                        ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
+                        <a class="btn btn-outline-success" href=${url} download="${files[index].metadata.title}"">Download</button>
+                    </div>
+                </div>
+                `;
+            }
+        } else {
+            files[index].src = url;
         }
         setFiles(files);
     };
@@ -283,101 +301,56 @@ const PhotoFrame = ({
 
     const getSlideData = async (instance: any, index: number, item: File) => {
         if (!item.msrc) {
-            let url: string;
-            if (galleryContext.thumbs.has(item.id)) {
-                url = galleryContext.thumbs.get(item.id);
-            } else {
-                url = await DownloadManager.getPreview(item);
-                galleryContext.thumbs.set(item.id, url);
-            }
-            updateUrl(item.dataIndex)(url);
-            item.msrc = url;
-            if (!item.src) {
-                item.src = url;
-            }
-            item.w = window.innerWidth;
-            item.h = window.innerHeight;
             try {
-                instance.invalidateCurrItems();
-                instance.updateSize(true);
+                let url: string;
+                if (galleryContext.thumbs.has(item.id)) {
+                    url = galleryContext.thumbs.get(item.id);
+                } else {
+                    url = await DownloadManager.getPreview(item);
+                    galleryContext.thumbs.set(item.id, url);
+                }
+                updateUrl(item.dataIndex)(url);
+                item.msrc = url;
+                if (!item.src) {
+                    item.src = url;
+                }
+                item.w = window.innerWidth;
+                item.h = window.innerHeight;
+                try {
+                    instance.invalidateCurrItems();
+                    instance.updateSize(true);
+                } catch (e) {
+                    // ignore
+                }
             } catch (e) {
-                // ignore
+                // no-op
             }
         }
         if (!fetching[item.dataIndex]) {
-            fetching[item.dataIndex] = true;
-            let url: string;
-            if (galleryContext.files.has(item.id)) {
-                url = galleryContext.files.get(item.id);
-            } else {
-                url = await DownloadManager.getFile(item, true);
-                galleryContext.files.set(item.id, url);
-            }
-            updateSrcUrl(item.dataIndex, url);
-            if (item.metadata.fileType === FILE_TYPE.VIDEO) {
-                try {
-                    await new Promise((resolve, reject) => {
-                        const video = document.createElement('video');
-                        video.addEventListener('timeupdate', function () {
-                            clearTimeout(t);
-                            resolve(null);
-                        });
-                        video.preload = 'metadata';
-                        video.src = url;
-                        video.currentTime = 3;
-                        const t = setTimeout(() => {
-                            reject(
-                                Error(
-                                    `${CustomError.VIDEO_PLAYBACK_FAILED} err: wait time exceeded`
-                                )
-                            );
-                        }, WAIT_FOR_VIDEO_PLAYBACK);
-                    });
-                    item.html = `
-                        <video width="320" height="240" controls>
-                            <source src="${url}" />
-                            Your browser does not support the video tag.
-                        </video>
-                    `;
-                    delete item.src;
-                } catch (e) {
-                    const downloadFile = async () => {
-                        const a = document.createElement('a');
-                        a.style.display = 'none';
-                        a.href = url;
-                        a.download = item.metadata.title;
-                        document.body.appendChild(a);
-                        a.click();
-                        a.remove();
-                        setOpen(false);
-                    };
-                    setDialogMessage({
-                        title: constants.VIDEO_PLAYBACK_FAILED,
-                        content:
-                            constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD,
-                        staticBackdrop: true,
-                        proceed: {
-                            text: constants.DOWNLOAD,
-                            action: downloadFile,
-                            variant: 'success',
-                        },
-                        close: {
-                            text: constants.CLOSE,
-                            action: () => setOpen(false),
-                        },
-                    });
-                    return;
-                }
-            } else {
-                item.src = url;
-            }
-            item.w = window.innerWidth;
-            item.h = window.innerHeight;
             try {
-                instance.invalidateCurrItems();
-                instance.updateSize(true);
+                fetching[item.dataIndex] = true;
+                let url: string;
+                if (galleryContext.files.has(item.id)) {
+                    url = galleryContext.files.get(item.id);
+                } else {
+                    url = await DownloadManager.getFile(item, true);
+                    galleryContext.files.set(item.id, url);
+                }
+                await updateSrcUrl(item.dataIndex, url);
+                item.html = files[item.dataIndex].html;
+                item.src = files[item.dataIndex].src;
+                item.w = files[item.dataIndex].w;
+                item.h = files[item.dataIndex].h;
+                try {
+                    instance.invalidateCurrItems();
+                    instance.updateSize(true);
+                } catch (e) {
+                    // ignore
+                }
             } catch (e) {
-                // ignore
+                // no-op
+            } finally {
+                fetching[item.dataIndex] = false;
             }
         }
     };
@@ -515,7 +488,7 @@ const PhotoFrame = ({
 
     return (
         <>
-            {!isFirstLoad && files.length === 0 && !searchMode ? (
+            {!isFirstLoad && files.length === 0 && !isInSearchMode ? (
                 <EmptyScreen>
                     <img height={150} src="/images/gallery.png" />
                     <div style={{ color: '#a6a6a6', marginTop: '16px' }}>
@@ -635,7 +608,7 @@ const PhotoFrame = ({
                                 return sum;
                             })();
                             files.length < 30 &&
-                                !searchMode &&
+                                !isInSearchMode &&
                                 timeStampList.push({
                                     itemType: ITEM_TYPE.BANNER,
                                     banner: (

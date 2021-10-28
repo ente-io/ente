@@ -11,6 +11,7 @@ import {
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
 import { EncryptionResult } from 'services/upload/uploadService';
+import DownloadManger from 'services/downloadManager';
 import { logError } from 'utils/sentry';
 import { User } from 'services/userService';
 import CryptoWorker from 'utils/crypto';
@@ -33,6 +34,20 @@ export function downloadAsFile(filename: string, content: string) {
 
     a.click();
 
+    a.remove();
+}
+
+export async function downloadFile(file) {
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = await DownloadManger.getFile(file);
+    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        a.download = fileNameWithoutExtension(file.metadata.title) + '.zip';
+    } else {
+        a.download = file.metadata.title;
+    }
+    document.body.appendChild(a);
+    a.click();
     a.remove();
 }
 

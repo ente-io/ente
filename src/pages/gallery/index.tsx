@@ -109,6 +109,7 @@ export type setSearchStats = React.Dispatch<React.SetStateAction<SearchStats>>;
 export type Search = {
     date?: DateValue;
     location?: Bbox;
+    fileIndex?: number;
 };
 export interface SearchStats {
     resultCount: number;
@@ -162,6 +163,7 @@ export default function Gallery() {
     const [search, setSearch] = useState<Search>({
         date: null,
         location: null,
+        fileIndex: null,
     });
     const [uploadInProgress, setUploadInProgress] = useState(false);
     const {
@@ -177,7 +179,7 @@ export default function Gallery() {
     });
 
     const loadingBar = useRef(null);
-    const [searchMode, setSearchMode] = useState(false);
+    const [isInSearchMode, setIsInSearchMode] = useState(false);
     const [searchStats, setSearchStats] = useState(null);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
@@ -186,11 +188,6 @@ export default function Gallery() {
     const [collectionFilesCount, setCollectionFilesCount] =
         useState<Map<number, number>>();
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
-
-    const [isSharedCollectionActive, setIsSharedCollectionActive] =
-        useState(false);
-
-    const [isFavCollectionActive, setIsFavCollectionActive] = useState(false);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -249,14 +246,6 @@ export default function Gallery() {
         }
         const href = `/gallery${collectionURL}`;
         router.push(href, undefined, { shallow: true });
-
-        setIsSharedCollectionActive(
-            isSharedCollection(activeCollection, collections)
-        );
-
-        setIsFavCollectionActive(
-            isFavoriteCollection(activeCollection, collections)
-        );
     }, [activeCollection]);
 
     const syncWithRemote = async (force = false, silent = false) => {
@@ -456,8 +445,9 @@ export default function Gallery() {
         }
     };
 
-    const updateSearch = (search: Search) => {
-        setSearch(search);
+    const updateSearch = (newSearch: Search) => {
+        setActiveCollection(ALL_SECTION);
+        setSearch(newSearch);
         setSearchStats(null);
     };
 
@@ -503,11 +493,12 @@ export default function Gallery() {
                     attributes={dialogMessage}
                 />
                 <SearchBar
-                    isOpen={searchMode}
-                    setOpen={setSearchMode}
+                    isOpen={isInSearchMode}
+                    setOpen={setIsInSearchMode}
                     loadingBar={loadingBar}
                     isFirstFetch={isFirstFetch}
                     collections={collections}
+                    files={files}
                     setActiveCollection={setActiveCollection}
                     setSearch={updateSearch}
                     searchStats={searchStats}
@@ -515,7 +506,7 @@ export default function Gallery() {
                 <Collections
                     collections={collections}
                     collectionAndTheirLatestFile={collectionsAndTheirLatestFile}
-                    searchMode={searchMode}
+                    isInSearchMode={isInSearchMode}
                     activeCollection={activeCollection}
                     setActiveCollection={setActiveCollection}
                     syncWithRemote={syncWithRemote}
@@ -582,13 +573,16 @@ export default function Gallery() {
                     isFirstLoad={isFirstLoad}
                     openFileUploader={openFileUploader}
                     loadingBar={loadingBar}
-                    searchMode={searchMode}
+                    isInSearchMode={isInSearchMode}
                     search={search}
                     setSearchStats={setSearchStats}
                     deleted={deleted}
                     setDialogMessage={setDialogMessage}
                     activeCollection={activeCollection}
-                    isSharedCollection={isSharedCollectionActive}
+                    isSharedCollection={isSharedCollection(
+                        activeCollection,
+                        collections
+                    )}
                 />
                 {selected.count > 0 &&
                     selected.collectionID === activeCollection && (
@@ -628,7 +622,10 @@ export default function Gallery() {
                             count={selected.count}
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}
-                            isFavoriteCollection={isFavCollectionActive}
+                            isFavoriteCollection={isFavoriteCollection(
+                                activeCollection,
+                                collections
+                            )}
                         />
                     )}
             </FullScreenDropZone>
