@@ -236,7 +236,6 @@ export default function PreviewCard(props: IProps) {
             onHover();
         }
     };
-    console.log('re-render tile');
     return (
         <Cont
             id={`thumb-${file?.id}`}
