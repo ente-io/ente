@@ -44,7 +44,7 @@ import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
 import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
-import PhotoFrame from 'components/PhotoWall';
+import PhotoFrame from 'components/PhotoFrame';
 import {
     changeFilesVisibility,
     getSelectedFileIds,

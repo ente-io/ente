@@ -70,7 +70,7 @@ interface Props {
     isSharedCollection: boolean;
 }
 
-const PhotoWall = ({
+const PhotoFrame = ({
     files,
     setFiles,
     syncWithRemote,
@@ -437,4 +437,4 @@ const PhotoWall = ({
     );
 };
 
-export default PhotoWall;
+export default PhotoFrame;
