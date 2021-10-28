@@ -239,8 +239,6 @@ Future<bool> emptyTrash(BuildContext context) async {
     await TrashSyncService.instance.emptyTrash();
     showToast("trash emptied");
     await dialog.hide();
-    Bus.instance
-        .fire(FilesUpdatedEvent((List<File>.empty()), type: EventType.deleted));
     return true;
   } catch (e, s) {
     _logger.info("failed empty trash", e, s);
