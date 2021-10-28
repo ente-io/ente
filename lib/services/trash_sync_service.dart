@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/db/trash_db.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/ignored_file.dart';
 import 'package:photos/models/trash_file.dart';
@@ -143,7 +145,12 @@ class TrashSyncService {
         ),
         data: params,
       );
+      var recentlyTrashedFile = await _trashDB.getRecentlyTrashedFile();
       await _trashDB.clearTable();
+      if (recentlyTrashedFile != null) {
+        Bus.instance.fire(FilesUpdatedEvent(List.of([recentlyTrashedFile]),
+            type: EventType.deleted));
+      }
     } catch (e, s) {
       _logger.severe("failed to empty trash", e, s);
       rethrow;
