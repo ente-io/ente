@@ -92,7 +92,6 @@ const PhotoWall = ({
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
     const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
-    const listRef = useRef(null);
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
@@ -134,10 +133,9 @@ const PhotoWall = ({
         }
     }, [search]);
 
-    useEffect(() => {
-        listRef.current?.resetAfterIndex(0);
+    const resetFetching = () => {
         setFetching({});
-    }, [files, search, deleted]);
+    };
 
     useEffect(() => {
         if (selected.count === 0) {
@@ -415,6 +413,7 @@ const PhotoWall = ({
                                 showBanner={
                                     files.length < 30 && !isInSearchMode
                                 }
+                                resetFetching={resetFetching}
                             />
                         )}
                     </AutoSizer>

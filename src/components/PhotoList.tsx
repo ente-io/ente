@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import styled from 'styled-components';
-
+import { File } from 'services/fileService';
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
     IMAGE_CONTAINER_MAX_HEIGHT,
@@ -90,6 +90,16 @@ const BannerContainer = styled.div<{ span: number }>`
     align-items: flex-end;
 `;
 
+interface Props {
+    height: number;
+    width: number;
+    filteredData: File[];
+    showBanner: boolean;
+    getThumbnail: (file: File[], index: number) => JSX.Element;
+    activeCollection: number;
+    resetFetching: () => void;
+}
+
 export function PhotoList({
     height,
     width,
@@ -97,11 +107,20 @@ export function PhotoList({
     showBanner,
     getThumbnail,
     activeCollection,
-}) {
-    let columns = Math.floor(width / IMAGE_CONTAINER_MAX_WIDTH);
-    let listItemHeight = IMAGE_CONTAINER_MAX_HEIGHT;
+    resetFetching,
+}: Props) {
     const timeStampListRef = useRef([]);
     const timeStampList = timeStampListRef?.current ?? [];
+    const listRef = useRef(null);
+
+    let columns = Math.floor(width / IMAGE_CONTAINER_MAX_WIDTH);
+    let listItemHeight = IMAGE_CONTAINER_MAX_HEIGHT;
+
+    useEffect(() => {
+        listRef.current?.resetAfterIndex(0);
+        resetFetching();
+    }, [filteredData]);
+
     useEffect(() => {
         let skipMerge = false;
         if (columns < MIN_COLUMNS) {
@@ -335,7 +354,7 @@ export function PhotoList({
     return (
         <List
             key={`${columns}-${listItemHeight}-${activeCollection}`}
-            // ref={listRef}
+            ref={listRef}
             itemSize={getItemSize}
             height={height}
             width={width}
