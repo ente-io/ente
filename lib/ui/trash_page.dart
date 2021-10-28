@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/events/force_reload_trash_page_event.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
 
@@ -36,13 +37,7 @@ class TrashPage extends StatelessWidget {
                 null,
           ),
       forceReloadEvents: [
-        Bus.instance.on<FilesUpdatedEvent>().where(
-              (event) =>
-                  event.updatedFiles.firstWhere(
-                      (element) => element.uploadedFileID != null,
-                      orElse: () => null) !=
-                  null,
-            ),
+        Bus.instance.on<ForceReloadTrashPageEvent>(),
       ],
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
