@@ -111,6 +111,8 @@ export function PhotoList({
 }: Props) {
     const timeStampListRef = useRef([]);
     const timeStampList = timeStampListRef?.current ?? [];
+    const filteredDataCopyRef = useRef([]);
+    const filteredDataCopy = filteredDataCopyRef.current ?? [];
     const listRef = useRef(null);
 
     let columns = Math.floor(width / IMAGE_CONTAINER_MAX_WIDTH);
@@ -185,6 +187,7 @@ export function PhotoList({
         showBanner && appendBanner();
 
         timeStampListRef.current = timeStampList;
+        filteredDataCopyRef.current = filteredData;
     }, [width, height, filteredData, showBanner]);
 
     const isSameDay = (first, second) =>
@@ -336,7 +339,10 @@ export function PhotoList({
                 return listItem.banner;
             default: {
                 const ret = listItem.items.map((item, idx) =>
-                    getThumbnail(filteredData, listItem.itemStartIndex + idx)
+                    getThumbnail(
+                        filteredDataCopy,
+                        listItem.itemStartIndex + idx
+                    )
                 );
                 if (listItem.groups) {
                     let sum = 0;
