@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/ui/video_widget.dart';
@@ -13,6 +14,7 @@ class FileWidget extends StatelessWidget {
   final Function(bool) playbackCallback;
   final BoxDecoration backgroundDecoration;
   final bool autoPlay;
+  final Logger _logger = Logger('FileWidget');
 
   const FileWidget(
     this.file, {
@@ -48,6 +50,7 @@ class FileWidget extends StatelessWidget {
         playbackCallback: playbackCallback,
       );
     } else {
+      _logger.severe('unsupported file type ${file.fileType}');
       return Icon(Icons.error);
     }
   }
