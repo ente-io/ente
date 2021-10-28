@@ -32,7 +32,10 @@ import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
 import { Subscription } from 'services/billingService';
 import { PAGES } from 'types';
-import { ARCHIVE_SECTION } from 'components/pages/gallery/Collections';
+import {
+    ARCHIVE_SECTION,
+    TRASH_SECTION,
+} from 'components/pages/gallery/Collections';
 import FixLargeThumbnails from './FixLargeThumbnail';
 interface Props {
     collections: Collection[];
@@ -223,6 +226,14 @@ export default function Sidebar(props: Props) {
                     }}>
                     {constants.ARCHIVE}
                 </LinkButton>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => {
+                        galleryContext.setActiveCollection(TRASH_SECTION);
+                        setIsOpen(false);
+                    }}>
+                    {constants.TRASH}
+                </LinkButton>
                 <>
                     <RecoveryKeyModal
                         show={recoverModalView}
@@ -334,7 +345,7 @@ export default function Sidebar(props: Props) {
                     onClick={() =>
                         props.setDialogMessage({
                             title: `${constants.DELETE_ACCOUNT}`,
-                            content: constants.DELETE_MESSAGE(),
+                            content: constants.DELETE_ACCOUNT_MESSAGE(),
                             staticBackdrop: true,
                             proceed: {
                                 text: constants.DELETE_ACCOUNT,

@@ -26,8 +26,12 @@ import {
     MIN_COLUMNS,
     SPACE_BTW_DATES,
 } from 'types';
-import { fileIsArchived } from 'utils/file';
-import { ALL_SECTION, ARCHIVE_SECTION } from './pages/gallery/Collections';
+import { fileIsArchived, formatDateRelative } from 'utils/file';
+import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    TRASH_SECTION,
+} from './pages/gallery/Collections';
 import { isSharedFile } from 'utils/file';
 import { isPlaybackPossible } from 'utils/photoFrame';
 
@@ -360,6 +364,11 @@ const PhotoFrame = ({
         .map((item, index) => ({
             ...item,
             dataIndex: index,
+            ...(item.deleteBy && {
+                title: constants.AUTOMATIC_BIN_DELETE_MESSAGE(
+                    formatDateRelative(item.deleteBy / 1000)
+                ),
+            }),
         }))
         .filter((item) => {
             if (deleted.includes(item.id)) {
@@ -389,10 +398,17 @@ const PhotoFrame = ({
             if (isSharedFile(item) && !isSharedCollection) {
                 return false;
             }
+            if (activeCollection === TRASH_SECTION && !item.isTrashed) {
+                return false;
+            }
+            if (activeCollection !== TRASH_SECTION && item.isTrashed) {
+                return false;
+            }
             if (!idSet.has(item.id)) {
                 if (
                     activeCollection === ALL_SECTION ||
                     activeCollection === ARCHIVE_SECTION ||
+                    activeCollection === TRASH_SECTION ||
                     activeCollection === item.collectionID
                 ) {
                     idSet.add(item.id);
@@ -729,6 +745,7 @@ const PhotoFrame = ({
                         favItemIds={favItemIds}
                         loadingBar={loadingBar}
                         isSharedCollection={isSharedCollection}
+                        isTrashCollection={activeCollection === TRASH_SECTION}
                     />
                 </Container>
             ) : (

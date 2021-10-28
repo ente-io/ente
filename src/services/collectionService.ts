@@ -217,8 +217,28 @@ export const syncCollections = async () => {
     return collections;
 };
 
-export const setLocalCollection = async (collections: Collection[]) => {
-    await localForage.setItem(COLLECTIONS, collections);
+export const getCollection = async (
+    collectionID: number
+): Promise<Collection> => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return;
+        }
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/collections/${collectionID}`,
+            null,
+            { 'X-Auth-Token': token }
+        );
+        const key = await getActualKey();
+        const collectionWithSecrets = await getCollectionWithSecrets(
+            resp.data?.collection,
+            key
+        );
+        return collectionWithSecrets;
+    } catch (e) {
+        logError(e, 'failed to get collection', { collectionID });
+    }
 };
 
 export const getCollectionsAndTheirLatestFile = (
@@ -394,6 +414,33 @@ export const addToCollection = async (
         throw e;
     }
 };
+
+export const restoreToCollection = async (
+    collection: Collection,
+    files: File[]
+) => {
+    try {
+        const token = getToken();
+        const fileKeysEncryptedWithNewCollection =
+            await encryptWithNewCollectionKey(collection, files);
+
+        const requestBody: AddToCollectionRequest = {
+            collectionID: collection.id,
+            files: fileKeysEncryptedWithNewCollection,
+        };
+        await HTTPService.post(
+            `${ENDPOINT}/collections/restore-files`,
+            requestBody,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        logError(e, 'restore to collection Failed ');
+        throw e;
+    }
+};
 export const moveToCollection = async (
     fromCollectionID: number,
     toCollection: Collection,
@@ -478,7 +525,7 @@ export const deleteCollection = async (
         const token = getToken();
 
         await HTTPService.delete(
-            `${ENDPOINT}/collections/${collectionID}`,
+            `${ENDPOINT}/collections/v2/${collectionID}`,
             null,
             null,
             { 'X-Auth-Token': token }

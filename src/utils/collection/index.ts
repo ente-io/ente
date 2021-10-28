@@ -4,6 +4,7 @@ import {
     CollectionType,
     moveToCollection,
     removeFromCollection,
+    restoreToCollection,
 } from 'services/collectionService';
 import { getSelectedFiles } from 'utils/file';
 import { File } from 'services/fileService';
@@ -16,6 +17,7 @@ export enum COLLECTION_OPS_TYPE {
     ADD,
     MOVE,
     REMOVE,
+    RESTORE,
 }
 export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
@@ -40,6 +42,9 @@ export async function handleCollectionOps(
             break;
         case COLLECTION_OPS_TYPE.REMOVE:
             await removeFromCollection(collection, selectedFiles);
+            break;
+        case COLLECTION_OPS_TYPE.RESTORE:
+            await restoreToCollection(collection, selectedFiles);
             break;
         default:
             throw Error(CustomError.INVALID_COLLECTION_OPERATION);

@@ -159,8 +159,8 @@ const englishConstants = {
     UPLOAD_FIRST_PHOTO_DESCRIPTION: 'preserve your first memory with ente',
     UPLOAD_FIRST_PHOTO: 'preserve',
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
-    CONFIRM_DELETE_FILE: 'confirm file deletion',
-    DELETE_FILE_MESSAGE: 'sure you want to delete selected files?',
+    CONFIRM_DELETE: 'confirm deletion',
+    DELETE_MESSAGE: `the selected files will be permanently deleted and can't be restored `,
     DELETE_FILE: 'delete files',
     DELETE: 'delete',
     MULTI_FOLDER_UPLOAD: 'multiple folders detected',
@@ -210,7 +210,7 @@ const englishConstants = {
     CANCEL: 'cancel',
     LOGOUT: 'logout',
     DELETE_ACCOUNT: 'delete account',
-    DELETE_MESSAGE: () => (
+    DELETE_ACCOUNT_MESSAGE: () => (
         <>
             <p>
                 please send an email to{' '}
@@ -359,8 +359,7 @@ const englishConstants = {
         <>
             <p>are you sure you want to delete this album?</p>
             <p>
-                all files that are unique to this album will be permanently
-                deleted
+                all files that are unique to this album will be moved to trash
             </p>
         </>
     ),
@@ -551,6 +550,21 @@ const englishConstants = {
     SORT: 'sort',
     REMOVE: 'remove',
     CONFIRM_REMOVE: 'confirm removal',
+    TRASH: 'trash',
+    MOVE_TO_TRASH: 'move to trash',
+    TRASH_MESSAGE:
+        'the selected files will be removed from all albums and moved to trash ',
+    DELETE_PERMANENTLY: 'delete permanently',
+    RESTORE: 'restore',
+    CONFIRM_RESTORE: 'confirm restoration',
+    RESTORE_MESSAGE: 'restore selected files ?',
+    RESTORE_TO_COLLECTION: 'restore to album',
+    AUTOMATIC_BIN_DELETE_MESSAGE: (relativeTime: string) =>
+        `permanently deleted ${relativeTime}`,
+    EMPTY_TRASH: 'empty trash?',
+    CONFIRM_EMPTY_TRASH: 'confirm empty trash',
+    EMPTY_TRASH_MESSAGE:
+        'all files will be permanently removed from your ente account',
 
     CONFIRM_REMOVE_MESSAGE: () => (
         <>
