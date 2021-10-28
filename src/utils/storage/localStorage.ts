@@ -12,6 +12,7 @@ export enum LS_KEYS {
     SHOW_BACK_BUTTON = 'showBackButton',
     EXPORT = 'export',
     AnonymizeUserID = 'anonymizedUserID',
+    THUMBNAIL_FIX_STATE = 'thumbnailFixState',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {

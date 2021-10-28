@@ -36,7 +36,7 @@ interface CollectionProps {
     syncWithRemote: () => Promise<void>;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     startLoadingBar: () => void;
-    searchMode: boolean;
+    isInSearchMode: boolean;
     collectionFilesCount: Map<number, number>;
 }
 
@@ -104,6 +104,11 @@ const SectionChipCreater =
                 />
             </Chip>
         );
+const Hider = styled.div<{ hide: boolean }>`
+    opacity: ${(props) => (props.hide ? '0' : '100')};
+    height: ${(props) => (props.hide ? '0' : 'auto')};
+`;
+
 export default function Collections(props: CollectionProps) {
     const { activeCollection, collections, setActiveCollection } = props;
     const [selectedCollectionID, setSelectedCollectionID] =
@@ -136,7 +141,7 @@ export default function Collections(props: CollectionProps) {
 
     useEffect(() => {
         updateScrollObj();
-    }, [collectionWrapperRef.current]);
+    }, [collectionWrapperRef.current, props.isInSearchMode, collections]);
 
     useEffect(() => {
         if (!collectionWrapperRef?.current) {
@@ -199,101 +204,94 @@ export default function Collections(props: CollectionProps) {
     const SectionChip = SectionChipCreater({ activeCollection, clickHandler });
 
     return (
-        !props.searchMode && (
-            <>
-                <CollectionShare
-                    show={collectionShareModalView}
-                    onHide={() => setCollectionShareModalView(false)}
-                    collection={getSelectedCollection(
-                        selectedCollectionID,
-                        props.collections
+        <Hider hide={props.isInSearchMode}>
+            <CollectionShare
+                show={collectionShareModalView}
+                onHide={() => setCollectionShareModalView(false)}
+                collection={getSelectedCollection(
+                    selectedCollectionID,
+                    props.collections
+                )}
+                syncWithRemote={props.syncWithRemote}
+            />
+            <CollectionBar>
+                <CollectionContainer>
+                    {scrollObj.scrollLeft > 0 && (
+                        <NavigationButton
+                            scrollDirection={SCROLL_DIRECTION.LEFT}
+                            onClick={scrollCollection(SCROLL_DIRECTION.LEFT)}
+                        />
                     )}
-                    syncWithRemote={props.syncWithRemote}
-                />
-                <CollectionBar>
-                    <CollectionContainer>
-                        {scrollObj.scrollLeft > 0 && (
-                            <NavigationButton
-                                scrollDirection={SCROLL_DIRECTION.LEFT}
-                                onClick={scrollCollection(
-                                    SCROLL_DIRECTION.LEFT
-                                )}
-                            />
-                        )}
-                        <Wrapper
-                            ref={collectionWrapperRef}
-                            onScroll={updateScrollObj}>
-                            <SectionChip
-                                section={ALL_SECTION}
-                                label={constants.ALL}
-                            />
-                            {sortCollections(
-                                collections,
-                                props.collectionAndTheirLatestFile,
-                                collectionSortBy
-                            ).map((item) => (
-                                <OverlayTrigger
-                                    key={item.id}
-                                    placement="top"
-                                    delay={{ show: 250, hide: 400 }}
-                                    overlay={renderTooltip(item.id)}>
-                                    <Chip
-                                        ref={collectionChipsRef[item.id]}
-                                        active={activeCollection === item.id}
-                                        onClick={clickHandler(item.id)}>
-                                        {item.name}
-                                        {item.type !==
-                                            CollectionType.favorites &&
-                                        item.owner.id === user?.id ? (
-                                            <OverlayTrigger
-                                                rootClose
-                                                trigger="click"
-                                                placement="bottom"
-                                                overlay={collectionOptions}>
-                                                <OptionIcon
-                                                    onClick={() =>
-                                                        setSelectedCollectionID(
-                                                            item.id
-                                                        )
-                                                    }
-                                                />
-                                            </OverlayTrigger>
-                                        ) : (
-                                            <div
-                                                style={{
-                                                    display: 'inline-block',
-                                                    width: '24px',
-                                                }}
+                    <Wrapper
+                        ref={collectionWrapperRef}
+                        onScroll={updateScrollObj}>
+                        <SectionChip
+                            section={ALL_SECTION}
+                            label={constants.ALL}
+                        />
+                        {sortCollections(
+                            collections,
+                            props.collectionAndTheirLatestFile,
+                            collectionSortBy
+                        ).map((item) => (
+                            <OverlayTrigger
+                                key={item.id}
+                                placement="top"
+                                delay={{ show: 250, hide: 400 }}
+                                overlay={renderTooltip(item.id)}>
+                                <Chip
+                                    ref={collectionChipsRef[item.id]}
+                                    active={activeCollection === item.id}
+                                    onClick={clickHandler(item.id)}>
+                                    {item.name}
+                                    {item.type !== CollectionType.favorites &&
+                                    item.owner.id === user?.id ? (
+                                        <OverlayTrigger
+                                            rootClose
+                                            trigger="click"
+                                            placement="bottom"
+                                            overlay={collectionOptions}>
+                                            <OptionIcon
+                                                onClick={() =>
+                                                    setSelectedCollectionID(
+                                                        item.id
+                                                    )
+                                                }
                                             />
-                                        )}
-                                    </Chip>
-                                </OverlayTrigger>
-                            ))}
-                            <SectionChip
-                                section={ARCHIVE_SECTION}
-                                label={constants.ARCHIVE}
-                            />
-                            <SectionChip
-                                section={TRASH_SECTION}
-                                label={constants.TRASH}
-                            />
-                        </Wrapper>
-                        {scrollObj.scrollLeft <
-                            scrollObj.scrollWidth - scrollObj.clientWidth && (
-                            <NavigationButton
-                                scrollDirection={SCROLL_DIRECTION.RIGHT}
-                                onClick={scrollCollection(
-                                    SCROLL_DIRECTION.RIGHT
-                                )}
-                            />
-                        )}
-                    </CollectionContainer>
-                    <CollectionSort
-                        setCollectionSortBy={setCollectionSortBy}
-                        activeSortBy={collectionSortBy}
-                    />
-                </CollectionBar>
-            </>
-        )
+                                        </OverlayTrigger>
+                                    ) : (
+                                        <div
+                                            style={{
+                                                display: 'inline-block',
+                                                width: '24px',
+                                            }}
+                                        />
+                                    )}
+                                </Chip>
+                            </OverlayTrigger>
+                        ))}
+                        <SectionChip
+                            section={ARCHIVE_SECTION}
+                            label={constants.ARCHIVE}
+                        />
+                        <SectionChip
+                            section={TRASH_SECTION}
+                            label={constants.TRASH}
+                        />
+                    </Wrapper>
+                    {scrollObj.scrollLeft <
+                        scrollObj.scrollWidth - scrollObj.clientWidth && (
+                        <NavigationButton
+                            scrollDirection={SCROLL_DIRECTION.RIGHT}
+                            onClick={scrollCollection(SCROLL_DIRECTION.RIGHT)}
+                        />
+                    )}
+                </CollectionContainer>
+                <CollectionSort
+                    setCollectionSortBy={setCollectionSortBy}
+                    activeSortBy={collectionSortBy}
+                />
+            </CollectionBar>
+        </Hider>
     );
 }

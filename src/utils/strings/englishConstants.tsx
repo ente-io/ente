@@ -548,9 +548,6 @@ const englishConstants = {
     MOVE: 'move',
     ADD: 'add',
     SORT: 'sort',
-    SORT_BY_LATEST_PHOTO: 'most recent photo',
-    SORT_BY_MODIFICATION_TIME: 'last modified',
-    SORT_BY_COLLECTION_NAME: 'album title',
     REMOVE: 'remove',
     CONFIRM_REMOVE: 'confirm removal',
     TRASH: 'trash',
@@ -571,13 +568,30 @@ const englishConstants = {
 
     CONFIRM_REMOVE_MESSAGE: () => (
         <>
-            <p>
-                are you sure you want to remove these files from the collection?
-            </p>
+            <p>are you sure you want to remove these files from the album?</p>
             <p>
                 all files that are unique to this album will be moved to trash
             </p>
         </>
+    ),
+    SORT_BY_LATEST_PHOTO: 'recent photo',
+    SORT_BY_MODIFICATION_TIME: 'last updated',
+    SORT_BY_COLLECTION_NAME: 'album name',
+    FIX_LARGE_THUMBNAILS: 'compress thumbnails',
+    THUMBNAIL_REPLACED: 'thumbnails compressed',
+    FIX: 'compress',
+    FIX_LATER: 'compress later',
+    REPLACE_THUMBNAIL_NOT_STARTED: () => (
+        <>
+            some of your videos thumbnails can be compressed to save space.
+            would you like ente to compress them?
+        </>
+    ),
+    REPLACE_THUMBNAIL_COMPLETED: () => (
+        <>successfully compressed all thumbnails</>
+    ),
+    REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR: () => (
+        <>could not compress some of your thumbnails, please retry</>
     ),
 };
 
