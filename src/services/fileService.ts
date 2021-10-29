@@ -2,11 +2,16 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
 
 import { getToken } from 'utils/common/key';
-import { DataStream, MetadataObject } from './upload/uploadService';
+import {
+    DataStream,
+    EncryptionResult,
+    MetadataObject,
+} from './upload/uploadService';
 import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { decryptFile, sortFiles } from 'utils/file';
+import CryptoWorker from 'utils/crypto';
 
 const ENDPOINT = getEndpoint();
 const DIFF_LIMIT: number = 1000;
@@ -280,10 +285,18 @@ export const updateMagicMetadata = async (files: File[]) => {
         return;
     }
     const reqBody: UpdateMagicMetadataRequest = { metadataList: [] };
+    const worker = await new CryptoWorker();
     for (const file of files) {
+        const { file: encryptedMagicMetadata }: EncryptionResult =
+            await worker.encryptMetadata(file.magicMetadata.data, file.key);
         reqBody.metadataList.push({
             id: file.id,
-            magicMetadata: file.magicMetadata as EncryptedMagicMetadataCore,
+            magicMetadata: {
+                version: file.pubMagicMetadata.version,
+                count: file.pubMagicMetadata.count,
+                data: encryptedMagicMetadata.encryptedData as unknown as string,
+                header: encryptedMagicMetadata.decryptionHeader,
+            },
         });
     }
     await HTTPService.put(`${ENDPOINT}/files/magic-metadata`, reqBody, null, {

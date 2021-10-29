@@ -10,7 +10,6 @@ import {
 } from 'services/fileService';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
-import { EncryptionResult } from 'services/upload/uploadService';
 import DownloadManger from 'services/downloadManager';
 import { logError } from 'utils/sentry';
 import { User } from 'services/userService';
@@ -245,46 +244,61 @@ export function fileIsArchived(file: File) {
     return file.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
 }
 
+export async function updateMagicMetadata(
+    file: File,
+    magicMetadataUpdates: MagicMetadataProps
+) {
+    const worker = await new CryptoWorker();
+
+    if (!file.magicMetadata) {
+        file.magicMetadata = NEW_MAGIC_METADATA;
+    }
+    if (typeof file.magicMetadata.data === 'string') {
+        file.magicMetadata.data = (await worker.decryptMetadata(
+            file.magicMetadata.data,
+            file.magicMetadata.header,
+            file.key
+        )) as MagicMetadataProps;
+    }
+    if (magicMetadataUpdates) {
+        // copies the existing magic metadata properties of the files and updates the visibility value
+        // The expected behaviour while updating magic metadata is to let the existing property as it is and update/add the property you want
+        const magicMetadataProps: MagicMetadataProps = {
+            ...file.magicMetadata.data,
+            ...magicMetadataUpdates,
+        };
+
+        return {
+            ...file,
+            magicMetadata: {
+                ...file.pubMagicMetadata,
+                data: magicMetadataProps,
+            },
+        };
+    } else {
+        return file;
+    }
+}
+
 export async function changeFilesVisibility(
     files: File[],
     selected: SelectedState,
     visibility: VISIBILITY_STATE
 ) {
-    const worker = await new CryptoWorker();
     const selectedFiles = getSelectedFiles(selected, files);
     const updatedFiles: File[] = [];
     for (const file of selectedFiles) {
-        if (!file.magicMetadata) {
-            file.magicMetadata = NEW_MAGIC_METADATA;
-        }
-        if (typeof file.magicMetadata.data === 'string') {
-            file.magicMetadata.data = (await worker.decryptMetadata(
-                file.magicMetadata.data,
-                file.magicMetadata.header,
-                file.key
-            )) as MagicMetadataProps;
-        }
-        // copies the existing magic metadata properties of the files and updates the visibility value
-        // The expected behaviour while updating magic metadata is to let the existing property as it is and update/add the property you want
         const updatedMagicMetadataProps: MagicMetadataProps = {
-            ...file.magicMetadata.data,
             visibility,
         };
-        const encryptedMagicMetadata: EncryptionResult =
-            await worker.encryptMetadata(updatedMagicMetadataProps, file.key);
-        updatedFiles.push({
-            ...file,
-            magicMetadata: {
-                version: file.magicMetadata.version,
-                count: Object.keys(updatedMagicMetadataProps).length,
-                data: encryptedMagicMetadata.file
-                    .encryptedData as unknown as string,
-                header: encryptedMagicMetadata.file.decryptionHeader,
-            },
-        });
+
+        updatedFiles.push(
+            await updateMagicMetadata(file, updatedMagicMetadataProps)
+        );
     }
     return updatedFiles;
 }
+
 export function isSharedFile(file: File) {
     const user: User = getData(LS_KEYS.USER);
 
