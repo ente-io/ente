@@ -14,6 +14,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
@@ -365,6 +366,11 @@ class _HomeWidgetState extends State<HomeWidget> {
         return result;
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+      removalEventTypes: const {
+        EventType.deleted_from_remote,
+        EventType.deleted_from_everywhere,
+        EventType.archived,
+      },
       forceReloadEvents: [
         Bus.instance.on<BackupFoldersUpdatedEvent>(),
         Bus.instance.on<ForceReloadHomeGalleryEvent>(),

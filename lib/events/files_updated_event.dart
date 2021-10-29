@@ -13,5 +13,9 @@ class FilesUpdatedEvent extends Event {
 
 enum EventType {
   added_or_updated,
-  deleted,
+  deleted_from_device,
+  deleted_from_remote,
+  deleted_from_everywhere,
+  archived,
+  unarchived,
 }

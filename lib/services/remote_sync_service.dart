@@ -113,9 +113,9 @@ class RemoteSyncService {
           (await FilesDB.instance.getFilesFromIDs(fileIDs)).values.toList();
       await FilesDB.instance.deleteFilesFromCollection(collectionID, fileIDs);
       Bus.instance.fire(CollectionUpdatedEvent(collectionID, deletedFiles,
-          type: EventType.deleted));
-      Bus.instance
-          .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
+          type: EventType.deleted_from_remote));
+      Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles,
+          type: EventType.deleted_from_remote));
     }
     if (diff.updatedFiles.isNotEmpty) {
       await _storeDiff(diff.updatedFiles, collectionID);
