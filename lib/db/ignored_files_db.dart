@@ -91,15 +91,6 @@ class IgnoredFilesDB {
         "took ${duration.inMilliseconds} ms.");
   }
 
-  Future<int> insert(IgnoredFile ignoredFile) async {
-    final db = await instance.database;
-    return db.insert(
-      tableName,
-      _getRowForIgnoredFile(ignoredFile),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
   // returns a  map of device folder to set of title/filenames which exist
   // in the particular device folder.
   Future<Map<String, Set<String>>> getFilenamesForDeviceFolders(
