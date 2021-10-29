@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
@@ -17,23 +18,23 @@ class DiffFetcher {
   final _logger = Logger("DiffFetcher");
   final _dio = Network.instance.getDio();
 
-  Future<Diff> getEncryptedFilesDiff(
-      int collectionID, int sinceTime, int limit) async {
+  Future<Diff> getEncryptedFilesDiff(int collectionID, int sinceTime) async {
     try {
       final response = await _dio.get(
-        Configuration.instance.getHttpEndpoint() + "/collections/diff",
+        Configuration.instance.getHttpEndpoint() + "/collections/v2/diff",
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         queryParameters: {
           "collectionID": collectionID,
           "sinceTime": sinceTime,
-          "limit": limit,
         },
       );
       final files = <File>[];
+      int latestUpdatedAtTime = 0;
       if (response != null) {
         Bus.instance.fire(RemoteSyncEvent(true));
         final diff = response.data["diff"] as List;
+        final bool hasMore = response.data["hasMore"] as bool;
         final startTime = DateTime.now();
         final existingFiles =
             await FilesDB.instance.getUploadedFileIDs(collectionID);
@@ -42,6 +43,8 @@ class DiffFetcher {
           final file = File();
           file.uploadedFileID = item["id"];
           file.collectionID = item["collectionID"];
+          file.updationTime = item["updationTime"];
+          latestUpdatedAtTime = max(latestUpdatedAtTime, file.updationTime);
           if (item["isDeleted"]) {
             if (existingFiles.contains(file.uploadedFileID)) {
               deletedFiles.add(file);
@@ -55,7 +58,6 @@ class DiffFetcher {
               file.generatedID = existingFile.generatedID;
             }
           }
-          file.updationTime = item["updationTime"];
           file.ownerID = item["ownerID"];
           file.encryptedKey = item["encryptedKey"];
           file.keyDecryptionNonce = item["keyDecryptionNonce"];
@@ -105,10 +107,10 @@ class DiffFetcher {
                         startTime.microsecondsSinceEpoch))
                 .inMilliseconds
                 .toString());
-        return Diff(files, deletedFiles, diff.length);
+        return Diff(files, deletedFiles, hasMore, latestUpdatedAtTime);
       } else {
         Bus.instance.fire(RemoteSyncEvent(false));
-        return Diff(<File>[], <File>[], 0);
+        return Diff(<File>[], <File>[], false, 0);
       }
     } catch (e, s) {
       _logger.severe(e, s);
@@ -120,7 +122,9 @@ class DiffFetcher {
 class Diff {
   final List<File> updatedFiles;
   final List<File> deletedFiles;
-  final int fetchCount;
+  final bool hasMore;
+  final int latestUpdatedAtTime;
 
-  Diff(this.updatedFiles, this.deletedFiles, this.fetchCount);
+  Diff(this.updatedFiles, this.deletedFiles, this.hasMore,
+      this.latestUpdatedAtTime);
 }
