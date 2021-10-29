@@ -62,3 +62,11 @@ export const FlexWrapper = styled.div`
     text-align: center;
     justify-content: center;
 `;
+
+export const HighLightWrapper = styled.div`
+    &:hover {
+        background-color: #555;
+    }
+    border-radius: 50%;
+    padding: 5px;
+`;
