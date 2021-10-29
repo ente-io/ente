@@ -25,13 +25,18 @@ class IgnoredFilesService {
 
   Future<void> cacheAndInsert(List<IgnoredFile> ignoredFiles) async {
     final existingIDs = await ignoredIDs;
-    existingIDs.addAll(ignoredFiles.map((e) => _iDForIgnoredFile(e)).toSet());
+    existingIDs.addAll(ignoredFiles
+        .map((e) => _idForIgnoredFile(e))
+        .where((id) => id != null)
+        .toSet());
     return _db.insertMultiple(ignoredFiles);
   }
 
   // shouldSkipUpload takes IDs to ignore and file for which it will return
   // whether either true or false. This helper method takes ignoredIDs as input
   // to avoid making it async in nature.
+  // This syntax is intentional as we want to ensure that ignoredIDs are loaded
+  // from the DB before calling this method.
   bool shouldSkipUpload(Set<String> ignoredIDs, File file) {
     final id = _getIgnoreID(file.localID, file.deviceFolder, file.title);
     if (id != null && id.isNotEmpty) {
@@ -43,16 +48,20 @@ class IgnoredFilesService {
   Future<Set<String>> _loadExistingIDs() async {
     _logger.fine('loading existing IDs');
     final result = await _db.getAll();
-    return result.map((e) => _iDForIgnoredFile(e)).toSet();
+    return result
+        .map((e) => _idForIgnoredFile(e))
+        .where((id) => id != null)
+        .toSet();
   }
 
-  String _iDForIgnoredFile(IgnoredFile ignoredFile) {
+  String _idForIgnoredFile(IgnoredFile ignoredFile) {
     return _getIgnoreID(
         ignoredFile.localID, ignoredFile.deviceFolder, ignoredFile.title);
   }
 
   // _computeIgnoreID will return null if don't have sufficient information
-  // to ignore the file based on the platform.
+  // to ignore the file based on the platform. Uploads from web or files shared to
+  // end usually don't have local id.
   // For Android: It returns deviceFolder-title as ID for Android.
   // For iOS, it returns localID as localID is uuid and the title or deviceFolder (aka
   // album name) can be missing due to various reasons.
