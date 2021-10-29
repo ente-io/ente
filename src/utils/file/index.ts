@@ -6,6 +6,7 @@ import {
     FILE_TYPE,
     MagicMetadataProps,
     NEW_MAGIC_METADATA,
+    PublicMagicMetadataProps,
     VISIBILITY_STATE,
 } from 'services/fileService';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
@@ -171,6 +172,13 @@ export async function decryptFile(file: File, collection: Collection) {
                 file.key
             );
         }
+        if (file.pubMagicMetadata?.data) {
+            file.pubMagicMetadata.data = await worker.decryptMetadata(
+                file.pubMagicMetadata.data,
+                file.pubMagicMetadata.header,
+                file.key
+            );
+        }
         return file;
     } catch (e) {
         logError(e, 'file decryption failed');
@@ -279,6 +287,39 @@ export async function updateMagicMetadata(
         return file;
     }
 }
+export async function updatePublicMagicMetadata(
+    file: File,
+    publicMetadataUpdates: PublicMagicMetadataProps
+) {
+    const worker = await new CryptoWorker();
+
+    if (!file.pubMagicMetadata) {
+        file.pubMagicMetadata = NEW_MAGIC_METADATA;
+    }
+    if (typeof file.pubMagicMetadata.data === 'string') {
+        file.pubMagicMetadata.data = (await worker.decryptMetadata(
+            file.pubMagicMetadata.data,
+            file.pubMagicMetadata.header,
+            file.key
+        )) as PublicMagicMetadataProps;
+    }
+
+    if (publicMetadataUpdates) {
+        const publicMetadataProps = {
+            ...file.pubMagicMetadata.data,
+            ...publicMetadataUpdates,
+        };
+        return {
+            ...file,
+            pubMagicMetadata: {
+                ...file.pubMagicMetadata,
+                data: publicMetadataProps,
+            },
+        };
+    } else {
+        return file;
+    }
+}
 
 export async function changeFilesVisibility(
     files: File[],
@@ -297,6 +338,17 @@ export async function changeFilesVisibility(
         );
     }
     return updatedFiles;
+}
+
+export async function changeFileCreationTime(file: File, creationTime: number) {
+    const updatedPublicMagicMetadataProps: PublicMagicMetadataProps = {
+        creationTime,
+    };
+
+    return await updatePublicMagicMetadata(
+        file,
+        updatedPublicMagicMetadataProps
+    );
 }
 
 export function isSharedFile(file: File) {

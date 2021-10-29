@@ -303,3 +303,33 @@ export const updateMagicMetadata = async (files: File[]) => {
         'X-Auth-Token': token,
     });
 };
+
+export const updatePublicMagicMetadata = async (files: File[]) => {
+    const token = getToken();
+    if (!token) {
+        return;
+    }
+    const reqBody: UpdateMagicMetadataRequest = { metadataList: [] };
+    const worker = await new CryptoWorker();
+    for (const file of files) {
+        const { file: encryptedPubMagicMetadata }: EncryptionResult =
+            await worker.encryptMetadata(file.pubMagicMetadata.data, file.key);
+        reqBody.metadataList.push({
+            id: file.id,
+            magicMetadata: {
+                version: file.pubMagicMetadata.version,
+                count: file.pubMagicMetadata.count,
+                data: encryptedPubMagicMetadata.encryptedData as unknown as string,
+                header: encryptedPubMagicMetadata.decryptionHeader,
+            },
+        });
+    }
+    await HTTPService.put(
+        `${ENDPOINT}/files/public-magic-metadata`,
+        reqBody,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+};
