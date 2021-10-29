@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:photos/db/ignored_files_db.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/ignored_file.dart';
 
 class IgnoredFilesService {
@@ -28,19 +29,33 @@ class IgnoredFilesService {
     return _db.insertMultiple(ignoredFiles);
   }
 
+  // shouldSkipUpload takes IDs to ignore and file for which it will return
+  // whether either true or false. This helper method takes ignoredIDs as input
+  // to avoid making it async in nature.
+  bool shouldSkipUpload(Set<String> ignoredIDs, File file) {
+    final id = _getIgnoreID(file.localID, file.deviceFolder, file.title);
+    if (id != null && id.isNotEmpty) {
+      return ignoredIDs.contains(id);
+    }
+    return false;
+  }
+
   Future<Set<String>> _loadExistingIDs() async {
     final result = await _db.getAll();
     return result.map((e) => _iDForIgnoredFile(e)).toSet();
   }
 
   String _iDForIgnoredFile(IgnoredFile ignoredFile) {
-    return _geIgnoreID(
+    return _getIgnoreID(
         ignoredFile.localID, ignoredFile.deviceFolder, ignoredFile.title);
   }
 
   // _computeIgnoreID will return null if don't have sufficient information
-  // to ignore the file based on the platform
-  String _geIgnoreID(String localID, String deviceFolder, String title) {
+  // to ignore the file based on the platform.
+  // For Android: It returns deviceFolder-title as ID for Android.
+  // For iOS, it returns localID as localID is uuid and the title or deviceFolder (aka
+  // album name) can be missing due to various reasons.
+  String _getIgnoreID(String localID, String deviceFolder, String title) {
     // file was not uploaded from mobile device
     if (localID == null || localID.isEmpty) {
       return null;
