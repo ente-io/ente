@@ -341,29 +341,28 @@ class _HomeWidgetState extends State<HomeWidget> {
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final importantPaths = Configuration.instance.getPathsToBackUp();
         final ownerID = Configuration.instance.getUserID();
-        Future<FileLoadResult> result;
+        FileLoadResult result;
         if (importantPaths.isNotEmpty) {
-          result = FilesDB.instance.getImportantFiles(creationStartTime,
+          result = await FilesDB.instance.getImportantFiles(creationStartTime,
               creationEndTime, ownerID, importantPaths.toList(),
               limit: limit, asc: asc);
         } else {
           if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
-            result = FilesDB.instance.getAllLocalAndUploadedFiles(
+            result = await FilesDB.instance.getAllLocalAndUploadedFiles(
                 creationStartTime, creationEndTime, ownerID,
                 limit: limit, asc: asc);
           } else {
-            result = FilesDB.instance.getAllUploadedFiles(
+            result = await FilesDB.instance.getAllUploadedFiles(
                 creationStartTime, creationEndTime, ownerID,
                 limit: limit, asc: asc);
           }
         }
-        final fileLoadResult = await result;
         // hide ignored files from home page UI
         final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
-        fileLoadResult.files.removeWhere((f) =>
+        result.files.removeWhere((f) =>
             f.uploadedFileID == null &&
             IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f));
-        return fileLoadResult;
+        return result;
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       forceReloadEvents: [
