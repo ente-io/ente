@@ -118,6 +118,7 @@ type GalleryContextType = {
     files: Map<number, string>;
     showPlanSelectorModal: () => void;
     setActiveCollection: (collection: number) => void;
+    syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
 };
 
 const defaultGalleryContext: GalleryContextType = {
@@ -125,6 +126,7 @@ const defaultGalleryContext: GalleryContextType = {
     files: new Map(),
     showPlanSelectorModal: () => null,
     setActiveCollection: () => null,
+    syncWithRemote: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -499,6 +501,7 @@ export default function Gallery() {
                 ...defaultGalleryContext,
                 showPlanSelectorModal: () => setPlanModalView(true),
                 setActiveCollection,
+                syncWithRemote,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
