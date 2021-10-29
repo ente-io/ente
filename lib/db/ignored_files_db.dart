@@ -91,47 +91,12 @@ class IgnoredFilesDB {
         "took ${duration.inMilliseconds} ms.");
   }
 
-  Future<int> insert(IgnoredFile ignoredFile) async {
-    final db = await instance.database;
-    return db.insert(
-      tableName,
-      _getRowForIgnoredFile(ignoredFile),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  // returns a  map of device folder to set of title/filenames which exist
-  // in the particular device folder.
-  Future<Map<String, Set<String>>> getFilenamesForDeviceFolders(
-      Set<String> folders) async {
-    final result = <String, Set<String>>{};
-    final db = await instance.database;
-
-    if (folders.isEmpty) {
-      return result;
-    }
-    String inParam = "";
-    for (final folder in folders) {
-      inParam += "'" + folder.replaceAll("'", "''") + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
-    final rows =
-        await db.query(tableName, where: '$columnDeviceFolder IN ($inParam)');
-    for (final row in rows) {
-      final ignoredFile = _getIgnoredFileFromRow(row);
-      result
-          .putIfAbsent(ignoredFile.deviceFolder, () => <String>{})
-          .add(ignoredFile.title);
-    }
-    return result;
-  }
-
-  Future<Set<String>> getAllLocalIDs() async {
+  Future<List<IgnoredFile>> getAll() async {
     final db = await instance.database;
     final rows = await db.query(tableName);
-    final result = <String>{};
+    final result = <IgnoredFile>[];
     for (final row in rows) {
-      result.add(row[columnLocalID]);
+      result.add(_getIgnoredFileFromRow(row));
     }
     return result;
   }

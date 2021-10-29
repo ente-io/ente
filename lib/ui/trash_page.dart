@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/models/file_load_result.dart';
+import 'package:photos/events/force_reload_trash_page_event.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/models/trash_file.dart';
 
 import 'gallery.dart';
 import 'gallery_app_bar_widget.dart';
@@ -36,13 +37,7 @@ class TrashPage extends StatelessWidget {
                 null,
           ),
       forceReloadEvents: [
-        Bus.instance.on<FilesUpdatedEvent>().where(
-              (event) =>
-                  event.updatedFiles.firstWhere(
-                      (element) => element.uploadedFileID != null,
-                      orElse: () => null) !=
-                  null,
-            ),
+        Bus.instance.on<ForceReloadTrashPageEvent>(),
       ],
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
@@ -64,11 +59,10 @@ class TrashPage extends StatelessWidget {
   }
 
   Widget _headerWidget() {
-    return FutureBuilder<FileLoadResult>(
-      future: TrashDB.instance
-          .getTrashedFiles(0, DateTime.now().microsecondsSinceEpoch),
+    return FutureBuilder<TrashFile>(
+      future: TrashDB.instance.getRecentlyTrashedFile(),
       builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data.files.isNotEmpty) {
+        if (snapshot.hasData) {
           return Padding(
             padding: EdgeInsets.all(16),
             child: Text(

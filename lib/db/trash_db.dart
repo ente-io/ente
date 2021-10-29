@@ -98,10 +98,15 @@ class TrashDB {
     await db.delete(tableName);
   }
 
-  Future<bool> isEmpty() async {
+  // getRecentlyTrashedFile returns the file which was trashed recently
+  Future<TrashFile> getRecentlyTrashedFile() async {
     final db = await instance.database;
-    var rows = await db.query(tableName, limit: 1);
-    return rows == null || rows.isEmpty;
+    var rows = await db.query(tableName,
+        orderBy: '$columnTrashDeleteBy DESC', limit: 1);
+    if (rows == null || rows.isEmpty) {
+      return null;
+    }
+    return _getTrashFromRow(rows[0]);
   }
 
   Future<void> insertMultiple(List<TrashFile> trashFiles) async {

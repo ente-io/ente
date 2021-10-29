@@ -1053,6 +1053,7 @@ class FilesDB {
       // to loading the gallery
       row[columnCreationTime] = file.pubMagicMetadata.editedTime;
     }
+    return row;
   }
 
   File _getFileFromRow(Map<String, dynamic> row) {

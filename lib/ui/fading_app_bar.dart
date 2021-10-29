@@ -245,7 +245,7 @@ class FadingAppBarState extends State<FadingAppBar> {
   void _showDateTimePicker(File file) async {
     final dateResult = await DatePicker.showDatePicker(
       context,
-      minTime: DateTime(1, 1, 1),
+      minTime: DateTime(1800, 1, 1),
       maxTime: DateTime.now(),
       currentTime: DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
       locale: LocaleType.en,

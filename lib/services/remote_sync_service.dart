@@ -7,7 +7,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -15,6 +14,7 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
@@ -32,10 +32,14 @@ class RemoteSyncService {
   SharedPreferences _prefs;
   bool _isBackground;
 
-  static const kDiffLimit = 2500;
   static const kHasSyncedArchiveKey = "has_synced_archive";
+
   // 28 Sept, 2021 9:03:20 AM IST
   static const kArchiveFeatureReleaseTime = 1632800000000000;
+  static const kHasSyncedEditTime = "has_synced_edit_time";
+
+  // 29 October, 2021 3:56:40 AM IST
+  static const kEditTimeFeatureReleaseTime = 1635460000000000;
 
   static final RemoteSyncService instance =
       RemoteSyncService._privateConstructor();
@@ -56,13 +60,14 @@ class RemoteSyncService {
     bool isFirstSync = !_collectionsService.hasSyncedCollections();
     await _collectionsService.sync(isBackground: _isBackground);
 
-    if (isFirstSync || _hasSyncedArchive()) {
+    if (isFirstSync || _hasReSynced()) {
       await _syncUpdatedCollections(silently);
     } else {
-      await _resyncAllCollectionsSinceTime(kArchiveFeatureReleaseTime);
+      final syncSinceTime = _getSinceTimeForReSync();
+      await _resyncAllCollectionsSinceTime(syncSinceTime);
     }
-    if (!_hasSyncedArchive()) {
-      await _markArchiveAsSynced();
+    if (!_hasReSynced()) {
+      await _markReSyncAsDone();
     }
     // sync trash but consume error during initial launch.
     // this is to ensure that we don't pause upload due to any error during
@@ -92,6 +97,7 @@ class RemoteSyncService {
   }
 
   Future<void> _resyncAllCollectionsSinceTime(int sinceTime) async {
+    _logger.info('re-sync collections sinceTime: $sinceTime');
     final collections = _collectionsService.getActiveCollections();
     for (final c in collections) {
       await _syncCollectionDiff(c.id,
@@ -101,8 +107,8 @@ class RemoteSyncService {
   }
 
   Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
-    final diff = await _diffFetcher.getEncryptedFilesDiff(
-        collectionID, sinceTime, kDiffLimit);
+    final diff =
+        await _diffFetcher.getEncryptedFilesDiff(collectionID, sinceTime);
     if (diff.deletedFiles.isNotEmpty) {
       final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID).toList();
       final deletedFiles =
@@ -123,15 +129,17 @@ class RemoteSyncService {
       Bus.instance
           .fire(CollectionUpdatedEvent(collectionID, diff.updatedFiles));
     }
-    if (diff.fetchCount == kDiffLimit) {
+
+    if (diff.latestUpdatedAtTime > 0) {
+      await _collectionsService.setCollectionSyncTime(
+          collectionID, diff.latestUpdatedAtTime);
+    }
+    if (diff.hasMore) {
       return await _syncCollectionDiff(collectionID,
           _collectionsService.getCollectionSyncTime(collectionID));
     }
   }
 
-  // This method checks for deviceFolder + title for Android.
-  // For iOS, we rely on localIDs as they are uuid as title or deviceFolder (aka
-  // album name) can be missing due to various reasons.
   bool _shouldIgnoreFileUpload(
     File file, {
     Map<String, Set<String>> ignoredFilesMap,
@@ -165,16 +173,9 @@ class RemoteSyncService {
     }
     if (filesToBeUploaded.isNotEmpty) {
       final int prevCount = filesToBeUploaded.length;
-      if (Platform.isAndroid) {
-        final ignoredFilesMap = await IgnoredFilesDB.instance
-            .getFilenamesForDeviceFolders(foldersToBackUp);
-        filesToBeUploaded.removeWhere((file) =>
-            _shouldIgnoreFileUpload(file, ignoredFilesMap: ignoredFilesMap));
-      } else {
-        final ignoredLocalIDs = await IgnoredFilesDB.instance.getAllLocalIDs();
-        filesToBeUploaded.removeWhere((file) =>
-            _shouldIgnoreFileUpload(file, ignoredLocalIDs: ignoredLocalIDs));
-      }
+      final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
+      filesToBeUploaded.removeWhere((file) =>
+          IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file));
       if (prevCount != filesToBeUploaded.length) {
         _logger.info((prevCount - filesToBeUploaded.length).toString() +
             " files were ignored for upload");
@@ -337,10 +338,6 @@ class RemoteSyncService {
       }
     }
     await _db.insertMultiple(toBeInserted);
-    if (toBeInserted.isNotEmpty) {
-      await _collectionsService.setCollectionSyncTime(
-          collectionID, toBeInserted[toBeInserted.length - 1].updationTime);
-    }
     _logger.info(
       "Diff to be deduplicated was: " +
           diff.length.toString() +
@@ -358,11 +355,24 @@ class RemoteSyncService {
     );
   }
 
-  bool _hasSyncedArchive() {
-    return _prefs.containsKey(kHasSyncedArchiveKey);
+  // return true if the client needs to re-sync the collections from previous
+  // version
+  bool _hasReSynced() {
+    return _prefs.containsKey(kHasSyncedEditTime) &&
+        _prefs.containsKey(kHasSyncedArchiveKey);
   }
 
-  Future<bool> _markArchiveAsSynced() {
-    return _prefs.setBool(kHasSyncedArchiveKey, true);
+  Future<void> _markReSyncAsDone() async {
+    await _prefs.setBool(kHasSyncedArchiveKey, true);
+    await _prefs.setBool(kHasSyncedEditTime, true);
+  }
+
+  int _getSinceTimeForReSync() {
+    // re-sync from archive feature time if the client still hasn't synced
+    // since the feature release.
+    if (!_prefs.containsKey(kHasSyncedArchiveKey)) {
+      return kArchiveFeatureReleaseTime;
+    }
+    return kEditTimeFeatureReleaseTime;
   }
 }
