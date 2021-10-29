@@ -258,7 +258,6 @@ class _DetailPageState extends State<DetailPage> {
         _files.remove(file);
       });
     }
-    Navigator.of(context, rootNavigator: true).pop(); // Close dialog
   }
 
   Future<void> _onEditFileRequested(File file) async {
