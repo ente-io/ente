@@ -9,6 +9,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/services/ignored_files_service.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
@@ -433,7 +434,9 @@ class FilesDB {
       limit: limit,
     );
     final files = _convertToFiles(results);
-    return FileLoadResult(files, files.length == limit);
+    final hasMore = files.length == limit;
+    await _removeLocalIgnoredFiles(files);
+    return FileLoadResult(files, hasMore);
   }
 
   Future<FileLoadResult> getImportantFiles(
@@ -457,8 +460,17 @@ class FilesDB {
       limit: limit,
     );
     final files = _convertToFiles(results);
+    final hasMore = files.length == limit;
     List<File> deduplicatedFiles = _deduplicatedFiles(files);
-    return FileLoadResult(deduplicatedFiles, files.length == limit);
+    await _removeLocalIgnoredFiles(deduplicatedFiles);
+    return FileLoadResult(deduplicatedFiles, hasMore);
+  }
+
+  Future<void> _removeLocalIgnoredFiles(List<File> files) async {
+    final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
+    files.removeWhere((f) =>
+        f.uploadedFileID == null &&
+        IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f));
   }
 
   List<File> _deduplicatedFiles(List<File> files) {

@@ -41,6 +41,7 @@ class IgnoredFilesService {
   }
 
   Future<Set<String>> _loadExistingIDs() async {
+    _logger.fine('loading existing IDs');
     final result = await _db.getAll();
     return result.map((e) => _iDForIgnoredFile(e)).toSet();
   }
