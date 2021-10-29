@@ -41,15 +41,35 @@ export enum VISIBILITY_STATE {
     VISIBLE,
     ARCHIVED,
 }
+
+export interface MagicMetadataCore {
+    version: number;
+    count: number;
+    header: string;
+    data: Record<string, any>;
+}
+
+export interface EncryptedMagicMetadataCore
+    extends Omit<MagicMetadataCore, 'data'> {
+    data: string;
+}
+
 export interface MagicMetadataProps {
     visibility?: VISIBILITY_STATE;
 }
-export interface MagicMetadata {
-    version: number;
-    count: number;
-    data: string | MagicMetadataProps;
-    header: string;
+
+export interface MagicMetadata extends Omit<MagicMetadataCore, 'data'> {
+    data: MagicMetadataProps;
 }
+
+export interface PublicMagicMetadataProps {
+    creationTime?: number;
+}
+
+export interface PublicMagicMetadata extends Omit<MagicMetadataCore, 'data'> {
+    data: PublicMagicMetadataProps;
+}
+
 export interface File {
     id: number;
     collectionID: number;
@@ -58,6 +78,7 @@ export interface File {
     thumbnail: fileAttribute;
     metadata: MetadataObject;
     magicMetadata: MagicMetadata;
+    pubMagicMetadata: PublicMagicMetadata;
     encryptedKey: string;
     keyDecryptionNonce: string;
     key: string;
@@ -74,12 +95,13 @@ export interface File {
 interface UpdateMagicMetadataRequest {
     metadataList: UpdateMagicMetadata[];
 }
+
 interface UpdateMagicMetadata {
     id: number;
-    magicMetadata: MagicMetadata;
+    magicMetadata: EncryptedMagicMetadataCore;
 }
 
-export const NEW_MAGIC_METADATA: MagicMetadata = {
+export const NEW_MAGIC_METADATA: MagicMetadataCore = {
     version: 0,
     data: {},
     header: null,
@@ -261,7 +283,7 @@ export const updateMagicMetadata = async (files: File[]) => {
     for (const file of files) {
         reqBody.metadataList.push({
             id: file.id,
-            magicMetadata: file.magicMetadata,
+            magicMetadata: file.magicMetadata as EncryptedMagicMetadataCore,
         });
     }
     await HTTPService.put(`${ENDPOINT}/files/magic-metadata`, reqBody, null, {
