@@ -298,7 +298,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesFromRemoteOnly(context, [file]);
-          showToast("moved to trash");
+          showShortToast("moved to trash");
           Navigator.of(context, rootNavigator: true).pop();
         },
       ));

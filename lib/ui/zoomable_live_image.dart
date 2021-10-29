@@ -19,7 +19,6 @@ class ZoomableLiveImage extends StatefulWidget {
   final String tagPrefix;
   final Decoration backgroundDecoration;
 
-
   ZoomableLiveImage(
     this.file, {
     Key key,
@@ -138,7 +137,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     if (videoFile != null && videoFile.existsSync()) {
       _setVideoPlayerController(file: videoFile);
     } else {
-      showToast("download failed", toastLength: Toast.LENGTH_SHORT);
+      showShortToast("download failed");
     }
     _isLoadingVideoPlayer = false;
   }

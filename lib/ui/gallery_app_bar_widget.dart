@@ -524,7 +524,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           await deleteFilesFromRemoteOnly(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          showToast("moved to trash");
+          showShortToast("moved to trash");
         },
       ));
       actions.add(CupertinoActionSheetAction(

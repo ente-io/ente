@@ -18,11 +18,9 @@ Future<void> changeVisibility(
   await dialog.show();
   try {
     await FileMagicService.instance.changeVisibility(files, newVisibility);
-    showToast(
-        newVisibility == kVisibilityArchive
-            ? "successfully archived"
-            : "successfully unarchived",
-        toastLength: Toast.LENGTH_SHORT);
+    showShortToast(newVisibility == kVisibilityArchive
+        ? "successfully archived"
+        : "successfully unarchived");
 
     await dialog.hide();
   } catch (e, s) {
@@ -54,7 +52,7 @@ Future<void> _updatePublicMetadata(
   try {
     Map<String, dynamic> update = {key: value};
     await FileMagicService.instance.updatePublicMagicMetadata(files, update);
-    showToast('done', toastLength: Toast.LENGTH_SHORT);
+    showShortToast('done');
     await dialog.hide();
     if (_shouldReloadGallery(key)) {
       Bus.instance.fire(ForceReloadHomeGalleryEvent());
