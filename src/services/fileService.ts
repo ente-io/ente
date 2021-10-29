@@ -233,12 +233,11 @@ export const getFiles = async (
                 time = resp.data.diff.slice(-1)[0].updationTime;
             }
             setFiles(
-                [...(files || []), ...decryptedFiles]
-                    .filter((item) => !item.isDeleted)
-                    .sort(
-                        (a, b) =>
-                            b.metadata.creationTime - a.metadata.creationTime
+                sortFiles(
+                    [...(files || []), ...decryptedFiles].filter(
+                        (item) => !item.isDeleted
                     )
+                )
             );
         } while (resp.data.diff.length === limit);
         return decryptedFiles;
