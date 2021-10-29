@@ -291,6 +291,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           await deleteFilesOnDeviceOnly(context, [file]);
           showToast("file deleted from device");
           Navigator.of(context, rootNavigator: true).pop();
+          // TODO: Fix behavior when inside a device folder
         },
       ));
 
@@ -301,6 +302,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           await deleteFilesFromRemoteOnly(context, [file]);
           showShortToast("moved to trash");
           Navigator.of(context, rootNavigator: true).pop();
+          // TODO: Fix behavior when inside a collection
         },
       ));
 
