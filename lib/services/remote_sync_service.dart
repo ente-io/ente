@@ -7,7 +7,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -15,6 +14,7 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
@@ -132,9 +132,6 @@ class RemoteSyncService {
     }
   }
 
-  // This method checks for deviceFolder + title for Android.
-  // For iOS, we rely on localIDs as they are uuid as title or deviceFolder (aka
-  // album name) can be missing due to various reasons.
   bool _shouldIgnoreFileUpload(
     File file, {
     Map<String, Set<String>> ignoredFilesMap,
@@ -168,16 +165,9 @@ class RemoteSyncService {
     }
     if (filesToBeUploaded.isNotEmpty) {
       final int prevCount = filesToBeUploaded.length;
-      if (Platform.isAndroid) {
-        final ignoredFilesMap = await IgnoredFilesDB.instance
-            .getFilenamesForDeviceFolders(foldersToBackUp);
-        filesToBeUploaded.removeWhere((file) =>
-            _shouldIgnoreFileUpload(file, ignoredFilesMap: ignoredFilesMap));
-      } else {
-        final ignoredLocalIDs = await IgnoredFilesDB.instance.getAllLocalIDs();
-        filesToBeUploaded.removeWhere((file) =>
-            _shouldIgnoreFileUpload(file, ignoredLocalIDs: ignoredLocalIDs));
-      }
+      final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
+      filesToBeUploaded.removeWhere((file) =>
+          IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file));
       if (prevCount != filesToBeUploaded.length) {
         _logger.info((prevCount - filesToBeUploaded.length).toString() +
             " files were ignored for upload");

@@ -3,13 +3,13 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
-import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/ignored_file.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/models/trash_item_request.dart';
+import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/utils/trash_diff_fetcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -75,7 +75,7 @@ class TrashSyncService {
     }
     if (ignoredFiles.isNotEmpty) {
       _logger.fine('updating ${ignoredFiles.length} ignored files ');
-      await IgnoredFilesDB.instance.insertMultiple(ignoredFiles);
+      await IgnoredFilesService.instance.cacheAndInsert(ignoredFiles);
     }
   }
 
