@@ -279,6 +279,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         onPressed: () async {
           await deleteFilesFromEverywhere(context, [file]);
           widget.onFileDeleted(file);
+          Navigator.of(context, rootNavigator: true).pop();
         },
       ));
     } else {
@@ -309,6 +310,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         onPressed: () async {
           await deleteFilesFromEverywhere(context, [file]);
           widget.onFileDeleted(file);
+          Navigator.of(context, rootNavigator: true).pop();
         },
       ));
     }
