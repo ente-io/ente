@@ -32,9 +32,11 @@ class RemoteSyncService {
   SharedPreferences _prefs;
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
+
   // 28 Sept, 2021 9:03:20 AM IST
   static const kArchiveFeatureReleaseTime = 1632800000000000;
   static const kHasSyncedEditTime = "has_synced_edit_time";
+
   // 29 October, 2021 3:56:40 AM IST
   static const kEditTimeFeatureReleaseTime = 1635460000000000;
 
@@ -124,6 +126,11 @@ class RemoteSyncService {
       Bus.instance.fire(LocalPhotosUpdatedEvent(diff.updatedFiles));
       Bus.instance
           .fire(CollectionUpdatedEvent(collectionID, diff.updatedFiles));
+    }
+
+    if (diff.latestUpdatedAtTime > 0) {
+      await _collectionsService.setCollectionSyncTime(
+          collectionID, diff.latestUpdatedAtTime);
     }
     if (diff.hasMore) {
       return await _syncCollectionDiff(collectionID,
@@ -329,10 +336,6 @@ class RemoteSyncService {
       }
     }
     await _db.insertMultiple(toBeInserted);
-    if (toBeInserted.isNotEmpty) {
-      await _collectionsService.setCollectionSyncTime(
-          collectionID, toBeInserted[toBeInserted.length - 1].updationTime);
-    }
     _logger.info(
       "Diff to be deduplicated was: " +
           diff.length.toString() +

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
@@ -29,6 +30,7 @@ class DiffFetcher {
         },
       );
       final files = <File>[];
+      int latestUpdatedAtTime = 0;
       if (response != null) {
         Bus.instance.fire(RemoteSyncEvent(true));
         final diff = response.data["diff"] as List;
@@ -41,6 +43,8 @@ class DiffFetcher {
           final file = File();
           file.uploadedFileID = item["id"];
           file.collectionID = item["collectionID"];
+          file.updationTime = item["updationTime"];
+          latestUpdatedAtTime = max(latestUpdatedAtTime, file.updationTime);
           if (item["isDeleted"]) {
             if (existingFiles.contains(file.uploadedFileID)) {
               deletedFiles.add(file);
@@ -54,7 +58,6 @@ class DiffFetcher {
               file.generatedID = existingFile.generatedID;
             }
           }
-          file.updationTime = item["updationTime"];
           file.ownerID = item["ownerID"];
           file.encryptedKey = item["encryptedKey"];
           file.keyDecryptionNonce = item["keyDecryptionNonce"];
@@ -104,10 +107,10 @@ class DiffFetcher {
                         startTime.microsecondsSinceEpoch))
                 .inMilliseconds
                 .toString());
-        return Diff(files, deletedFiles, hasMore);
+        return Diff(files, deletedFiles, hasMore, latestUpdatedAtTime);
       } else {
         Bus.instance.fire(RemoteSyncEvent(false));
-        return Diff(<File>[], <File>[], false);
+        return Diff(<File>[], <File>[], false, 0);
       }
     } catch (e, s) {
       _logger.severe(e, s);
@@ -120,6 +123,8 @@ class Diff {
   final List<File> updatedFiles;
   final List<File> deletedFiles;
   final bool hasMore;
+  final int latestUpdatedAtTime;
 
-  Diff(this.updatedFiles, this.deletedFiles, this.hasMore);
+  Diff(this.updatedFiles, this.deletedFiles, this.hasMore,
+      this.latestUpdatedAtTime);
 }
