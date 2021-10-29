@@ -7,15 +7,15 @@ class FilesUpdatedEvent extends Event {
 
   FilesUpdatedEvent(
     this.updatedFiles, {
-    this.type = EventType.added_or_updated,
+    this.type = EventType.addedOrUpdated,
   });
 }
 
 enum EventType {
-  added_or_updated,
-  deleted_from_device,
-  deleted_from_remote,
-  deleted_from_everywhere,
+  addedOrUpdated,
+  deletedFromDevice,
+  deletedFromRemote,
+  deletedFromEverywhere,
   archived,
   unarchived,
 }

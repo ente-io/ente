@@ -367,8 +367,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       removalEventTypes: const {
-        EventType.deleted_from_remote,
-        EventType.deleted_from_everywhere,
+        EventType.deletedFromRemote,
+        EventType.deletedFromEverywhere,
         EventType.archived,
       },
       forceReloadEvents: [

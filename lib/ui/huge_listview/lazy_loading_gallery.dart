@@ -92,7 +92,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       _logger.info(filesUpdatedThisDay.length.toString() +
           " files were updated on " +
           getDayTitle(galleryDate.microsecondsSinceEpoch));
-      if (event.type == EventType.added_or_updated) {
+      if (event.type == EventType.addedOrUpdated) {
         final dayStartTime =
             DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
         final result = await widget.asyncLoader(

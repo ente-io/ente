@@ -35,8 +35,8 @@ class CollectionPage extends StatelessWidget {
           .on<CollectionUpdatedEvent>()
           .where((event) => event.collectionID == c.collection.id),
       removalEventTypes: const {
-        EventType.deleted_from_remote,
-        EventType.deleted_from_everywhere,
+        EventType.deletedFromRemote,
+        EventType.deletedFromEverywhere,
       },
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,

@@ -26,8 +26,8 @@ class DeviceFolderPage extends StatelessWidget {
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       removalEventTypes: const {
-        EventType.deleted_from_device,
-        EventType.deleted_from_everywhere,
+        EventType.deletedFromDevice,
+        EventType.deletedFromEverywhere,
       },
       tagPrefix: "device_folder:" + folder.path,
       selectedFiles: _selectedFiles,
