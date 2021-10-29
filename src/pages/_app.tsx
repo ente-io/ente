@@ -404,6 +404,8 @@ const GlobalStyles = createGlobalStyle`
     .tooltip-inner{
         padding:0px;
     }
+    .react-datetime-picker__inputGroup__input {
+        color:#ddd;
 `;
 
 export const LogoImage = styled.img`
