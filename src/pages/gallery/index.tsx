@@ -48,6 +48,7 @@ import PhotoFrame from 'components/PhotoFrame';
 import {
     changeFilesVisibility,
     getSelectedFileIds,
+    mergeMetadata,
     sortFilesIntoCollections,
 } from 'utils/file';
 import SearchBar, { DateValue } from 'components/SearchBar';
@@ -299,21 +300,23 @@ export default function Gallery() {
         collections: Collection[],
         files: File[]
     ) => {
+        const filesWithMergedMetadata = mergeMetadata(files);
+        setFiles(filesWithMergedMetadata);
+        const favItemIds = await getFavItemIds(files);
+        setFavItemIds(favItemIds);
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
+        setCollections(nonEmptyCollections);
         const collectionsAndTheirLatestFile = getCollectionsAndTheirLatestFile(
             nonEmptyCollections,
             files
         );
+        setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
         const collectionWiseFiles = sortFilesIntoCollections(files);
         const collectionFilesCount = new Map<number, number>();
         for (const [id, files] of collectionWiseFiles) {
             collectionFilesCount.set(id, files.length);
         }
-        setCollections(nonEmptyCollections);
-        setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
         setCollectionFilesCount(collectionFilesCount);
-        const favItemIds = await getFavItemIds(files);
-        setFavItemIds(favItemIds);
     };
 
     const clearSelection = function () {

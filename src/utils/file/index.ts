@@ -364,3 +364,14 @@ export function isSharedFile(file: File) {
     }
     return file.ownerID !== user.id;
 }
+
+export function mergeMetadata(files: File[]): File[] {
+    return files.map((file) => ({
+        ...file,
+        metadata: {
+            ...file.metadata,
+            ...(file.pubMagicMetadata?.data ? file.pubMagicMetadata.data : {}),
+            ...(file.magicMetadata?.data ? file.magicMetadata.data : {}),
+        },
+    }));
+}
