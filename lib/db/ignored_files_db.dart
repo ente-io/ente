@@ -127,6 +127,16 @@ class IgnoredFilesDB {
     return result;
   }
 
+  Future<List<IgnoredFile>> getAll() async {
+    final db = await instance.database;
+    final rows = await db.query(tableName);
+    final result = <IgnoredFile>[];
+    for (final row in rows) {
+      result.add(_getIgnoredFileFromRow(row));
+    }
+    return result;
+  }
+
   IgnoredFile _getIgnoredFileFromRow(Map<String, dynamic> row) {
     return IgnoredFile(row[columnLocalID], row[columnTitle],
         row[columnDeviceFolder], row[columnReason]);
