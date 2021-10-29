@@ -31,7 +31,6 @@ class RemoteSyncService {
   int _completedUploads = 0;
   SharedPreferences _prefs;
 
-  static const kDiffLimit = 2500;
   static const kHasSyncedArchiveKey = "has_synced_archive";
   // 28 Sept, 2021 9:03:20 AM IST
   static const kArchiveFeatureReleaseTime = 1632800000000000;
@@ -104,8 +103,8 @@ class RemoteSyncService {
   }
 
   Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
-    final diff = await _diffFetcher.getEncryptedFilesDiff(
-        collectionID, sinceTime, kDiffLimit);
+    final diff =
+        await _diffFetcher.getEncryptedFilesDiff(collectionID, sinceTime);
     if (diff.deletedFiles.isNotEmpty) {
       final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID).toList();
       final deletedFiles =
@@ -126,7 +125,7 @@ class RemoteSyncService {
       Bus.instance
           .fire(CollectionUpdatedEvent(collectionID, diff.updatedFiles));
     }
-    if (diff.fetchCount == kDiffLimit) {
+    if (diff.hasMore) {
       return await _syncCollectionDiff(collectionID,
           _collectionsService.getCollectionSyncTime(collectionID));
     }

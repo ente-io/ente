@@ -17,23 +17,22 @@ class DiffFetcher {
   final _logger = Logger("DiffFetcher");
   final _dio = Network.instance.getDio();
 
-  Future<Diff> getEncryptedFilesDiff(
-      int collectionID, int sinceTime, int limit) async {
+  Future<Diff> getEncryptedFilesDiff(int collectionID, int sinceTime) async {
     try {
       final response = await _dio.get(
-        Configuration.instance.getHttpEndpoint() + "/collections/diff",
+        Configuration.instance.getHttpEndpoint() + "/collections/v2/diff",
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         queryParameters: {
           "collectionID": collectionID,
           "sinceTime": sinceTime,
-          "limit": limit,
         },
       );
       final files = <File>[];
       if (response != null) {
         Bus.instance.fire(RemoteSyncEvent(true));
         final diff = response.data["diff"] as List;
+        final bool hasMore = response.data["hasMore"] as bool;
         final startTime = DateTime.now();
         final existingFiles =
             await FilesDB.instance.getUploadedFileIDs(collectionID);
@@ -105,10 +104,10 @@ class DiffFetcher {
                         startTime.microsecondsSinceEpoch))
                 .inMilliseconds
                 .toString());
-        return Diff(files, deletedFiles, diff.length);
+        return Diff(files, deletedFiles, hasMore);
       } else {
         Bus.instance.fire(RemoteSyncEvent(false));
-        return Diff(<File>[], <File>[], 0);
+        return Diff(<File>[], <File>[], false);
       }
     } catch (e, s) {
       _logger.severe(e, s);
@@ -120,7 +119,7 @@ class DiffFetcher {
 class Diff {
   final List<File> updatedFiles;
   final List<File> deletedFiles;
-  final int fetchCount;
+  final bool hasMore;
 
-  Diff(this.updatedFiles, this.deletedFiles, this.fetchCount);
+  Diff(this.updatedFiles, this.deletedFiles, this.hasMore);
 }
