@@ -13,8 +13,8 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/account_configured_event.dart';
-import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
+import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
@@ -22,7 +22,9 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
+import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
@@ -336,24 +338,32 @@ class _HomeWidgetState extends State<HomeWidget> {
       header = _headerWidget;
     }
     final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
+      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final importantPaths = Configuration.instance.getPathsToBackUp();
         final ownerID = Configuration.instance.getUserID();
+        Future<FileLoadResult> result;
         if (importantPaths.isNotEmpty) {
-          return FilesDB.instance.getImportantFiles(creationStartTime,
+          result = FilesDB.instance.getImportantFiles(creationStartTime,
               creationEndTime, ownerID, importantPaths.toList(),
               limit: limit, asc: asc);
         } else {
           if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
-            return FilesDB.instance.getAllLocalAndUploadedFiles(
+            result = FilesDB.instance.getAllLocalAndUploadedFiles(
                 creationStartTime, creationEndTime, ownerID,
                 limit: limit, asc: asc);
           } else {
-            return FilesDB.instance.getAllUploadedFiles(
+            result = FilesDB.instance.getAllUploadedFiles(
                 creationStartTime, creationEndTime, ownerID,
                 limit: limit, asc: asc);
           }
         }
+        final fileLoadResult = await result;
+        // hide ignored files from home page UI
+        final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
+        fileLoadResult.files.removeWhere((f) =>
+            f.uploadedFileID == null &&
+            IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f));
+        return fileLoadResult;
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       forceReloadEvents: [
