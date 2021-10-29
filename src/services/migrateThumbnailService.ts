@@ -1,5 +1,5 @@
 import downloadManager from 'services/downloadManager';
-import { fileAttribute, FILE_TYPE, getLocalFiles } from 'services/fileService';
+import { fileAttribute, getLocalFiles } from 'services/fileService';
 import { generateThumbnail } from 'services/upload/thumbnailService';
 import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
@@ -9,6 +9,7 @@ import CryptoWorker from 'utils/crypto';
 import uploadHttpClient from 'services/upload/uploadHttpClient';
 import { EncryptionResult, UploadURL } from 'services/upload/uploadService';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
+import { getFileType } from './upload/readFileService';
 
 const ENDPOINT = getEndpoint();
 const REPLACE_THUMBNAIL_THRESHOLD = 500 * 1024; // 500KB
@@ -69,11 +70,11 @@ export async function replaceThumbnail(
                     [originalThumbnail],
                     file.metadata.title
                 );
+                const fileTypeInfo = await getFileType(worker, dummyImageFile);
                 const { thumbnail: newThumbnail } = await generateThumbnail(
                     worker,
                     dummyImageFile,
-                    FILE_TYPE.IMAGE,
-                    false
+                    fileTypeInfo
                 );
                 const newUploadedThumbnail = await uploadThumbnail(
                     worker,
