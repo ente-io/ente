@@ -109,9 +109,9 @@ Future<void> deleteFilesFromEverywhere(
   if (deletedFiles.isNotEmpty) {
     Bus.instance
         .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
+    showShortToast("moved to trash");
   }
   await dialog.hide();
-  showShortToast("moved to trash");
   if (uploadedFilesToBeTrashed.isNotEmpty) {
     RemoteSyncService.instance.sync(silently: true);
   }
