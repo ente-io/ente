@@ -14,9 +14,8 @@ import 'package:photos/core/network.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
+import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
-
-import 'file_uploader_util.dart';
 
 final _logger = Logger("ThumbnailUtil");
 final _map = <int, FileDownloadItem>{};

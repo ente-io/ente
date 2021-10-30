@@ -8,8 +8,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:photos/services/collections_service.dart';
-
-import 'crypto_util.dart';
+import 'package:photos/utils/crypto_util.dart';
 
 final _logger = Logger("file_download_util");
 

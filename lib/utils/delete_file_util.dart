@@ -23,9 +23,8 @@ import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/linear_progress_dialog.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
-
-import 'file_util.dart';
 
 final _logger = Logger("DeleteFileUtil");
 

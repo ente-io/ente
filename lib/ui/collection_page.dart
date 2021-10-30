@@ -6,9 +6,8 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/selected_files.dart';
-
-import 'gallery.dart';
-import 'gallery_app_bar_widget.dart';
+import 'package:photos/ui/gallery.dart';
+import 'package:photos/ui/gallery_app_bar_widget.dart';
 
 class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
