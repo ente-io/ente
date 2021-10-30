@@ -18,6 +18,7 @@ import {
     changeFileCreationTime,
     downloadFile,
     formatDateTime,
+    mergeMetadata,
 } from 'utils/file';
 import { FormCheck } from 'react-bootstrap';
 import { prettyPrintExif } from 'utils/exif';
@@ -91,6 +92,7 @@ function RenderCreationTime({
             );
             await updatePublicMagicMetadata([updatedFile]);
             file.pubMagicMetadata = updatedFile.pubMagicMetadata;
+            file.metadata = mergeMetadata([file])[0].metadata;
             syncWithRemote(false, true);
         }
         setIsInEditMode(false);
