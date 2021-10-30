@@ -138,23 +138,6 @@ class RemoteSyncService {
     }
   }
 
-  bool _shouldIgnoreFileUpload(
-    File file, {
-    Map<String, Set<String>> ignoredFilesMap,
-    Set<String> ignoredLocalIDs,
-  }) {
-    if (file.localID == null || file.localID.isEmpty) {
-      return false;
-    }
-    if (Platform.isIOS) {
-      return ignoredLocalIDs.contains(file.localID);
-    }
-    // For android, check if there's any ignored file with same device folder
-    // and title.
-    return ignoredFilesMap.containsKey(file.deviceFolder) &&
-        ignoredFilesMap[file.deviceFolder].contains(file.title);
-  }
-
   Future<bool> _uploadDiff() async {
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     List<File> filesToBeUploaded;
