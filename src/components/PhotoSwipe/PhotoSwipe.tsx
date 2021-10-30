@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Photoswipe from 'photoswipe';
 import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
 import classnames from 'classnames';
@@ -29,8 +29,8 @@ import DateTimePicker from 'react-datetime-picker/dist/entry.nostyle';
 import 'react-calendar/dist/Calendar.css';
 import 'react-clock/dist/Clock.css';
 import 'react-datetime-picker/dist/DateTimePicker.css';
-import { GalleryContext } from 'pages/gallery';
 import CrossIcon from 'components/icons/CrossIcon';
+import { logError } from 'utils/sentry';
 interface Iprops {
     isOpen: boolean;
     items: any[];
@@ -71,10 +71,10 @@ const renderInfoItem = (label: string, value: string | JSX.Element) => (
 
 function RenderCreationTime({
     file,
-    syncWithRemote,
+    scheduleUpdate,
 }: {
     file: File;
-    syncWithRemote: (force?: boolean, silent?: boolean) => void;
+    scheduleUpdate: () => void;
 }) {
     const originalCreationTime = new Date(file.metadata.creationTime / 1000);
     const [isInEditMode, setIsInEditMode] = useState(false);
@@ -84,16 +84,21 @@ function RenderCreationTime({
     const openEditMode = () => setIsInEditMode(true);
 
     const saveEdits = async () => {
-        if (isInEditMode && file) {
-            const unixTimeInMicroSec = pickedTime.getTime() * 1000;
-            const updatedFile = await changeFileCreationTime(
-                file,
-                unixTimeInMicroSec
-            );
-            await updatePublicMagicMetadata([updatedFile]);
-            file.pubMagicMetadata = updatedFile.pubMagicMetadata;
-            file.metadata = mergeMetadata([file])[0].metadata;
-            syncWithRemote(false, true);
+        try {
+            if (isInEditMode && file) {
+                const unixTimeInMicroSec = pickedTime.getTime() * 1000;
+                const updatedFile = await changeFileCreationTime(
+                    file,
+                    unixTimeInMicroSec
+                );
+                await updatePublicMagicMetadata([updatedFile]);
+                updatedFile.pubMagicMetadata.version += 1;
+                file.pubMagicMetadata = updatedFile.pubMagicMetadata;
+                file.metadata = mergeMetadata([file])[0].metadata;
+                scheduleUpdate();
+            }
+        } catch (e) {
+            logError(e, 'failed to update creationTime');
         }
         setIsInEditMode(false);
     };
@@ -204,7 +209,7 @@ function InfoModal({
     photoSwipe,
     metadata,
     exif,
-    syncWithRemote,
+    scheduleUpdate,
 }) {
     return (
         <Modal show={showInfo} onHide={handleCloseInfo}>
@@ -224,7 +229,7 @@ function InfoModal({
                 {metadata?.creationTime && (
                     <RenderCreationTime
                         file={items[photoSwipe?.getCurrentIndex()]}
-                        syncWithRemote={syncWithRemote}
+                        scheduleUpdate={scheduleUpdate}
                     />
                 )}
                 {metadata?.modificationTime &&
@@ -268,7 +273,6 @@ function PhotoSwipe(props: Iprops) {
     const [metadata, setMetaData] = useState<File['metadata']>(null);
     const [exif, setExif] = useState<any>(null);
     const needUpdate = useRef(false);
-    const galleryContext = useContext(GalleryContext);
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -454,6 +458,7 @@ function PhotoSwipe(props: Iprops) {
         await downloadFile(file);
         loadingBar.current.complete();
     };
+    const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;
     let { className } = props;
     className = classnames(['pswp', className]).trim();
@@ -544,7 +549,7 @@ function PhotoSwipe(props: Iprops) {
                 photoSwipe={photoSwipe}
                 metadata={metadata}
                 exif={exif}
-                syncWithRemote={galleryContext.syncWithRemote}
+                scheduleUpdate={scheduleUpdate}
             />
         </>
     );
