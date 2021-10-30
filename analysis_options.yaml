@@ -26,6 +26,7 @@ linter:
     - use_rethrow_when_possible
     - prefer_double_quotes
     - directives_ordering
+    - always_use_package_imports
 
 analyzer:
   errors:
@@ -33,6 +34,7 @@ analyzer:
     exhaustive_cases: error
     curly_braces_in_flow_control_structures: error
     directives_ordering: error
+    always_use_package_imports: error
     unused_import: warning
     prefer_is_empty: warning
     use_rethrow_when_possible: info
