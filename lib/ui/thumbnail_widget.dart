@@ -309,7 +309,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   void _reset() {
     _hasLoadedThumbnail = false;
     _isLoadingLocalThumbnail = false;
+    _isLoadingRemoteThumbnail = false;
     _errorLoadingLocalThumbnail = false;
+    _errorLoadingRemoteThumbnail = false;
     _imageProvider = null;
   }
 }
