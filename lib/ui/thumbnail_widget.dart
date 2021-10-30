@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
-import 'package:logging/logging.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
