@@ -588,7 +588,7 @@ const englishConstants = {
         </>
     ),
     REPLACE_THUMBNAIL_COMPLETED: () => (
-        <>successfully compressed all thumbnails</>
+        <>you have no thumbnails that can be compressed further</>
     ),
     REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR: () => (
         <>could not compress some of your thumbnails, please retry</>
