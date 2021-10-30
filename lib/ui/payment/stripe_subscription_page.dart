@@ -14,11 +14,10 @@ import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import 'package:photos/ui/progress_dialog.dart';
+import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../web_page.dart';
 
 class StripeSubscriptionPage extends StatefulWidget {
   final bool isOnboarding;
@@ -191,9 +190,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                           ? "visit ${_currentSubscription.paymentProvider} to manage your subscription"
                           : "payment details",
                       style: TextStyle(
-                        color: _isStripeSubscriber
-                            ? Colors.blue
-                            : Colors.white,
+                        color: _isStripeSubscriber ? Colors.blue : Colors.white,
                         fontFamily: 'Ubuntu',
                         fontSize: 15,
                       ),

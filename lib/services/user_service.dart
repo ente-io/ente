@@ -3,14 +3,15 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/public_keys_db.dart';
-import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
+import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/public_key.dart';
@@ -28,7 +29,7 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 class UserService {
   final _dio = Network.instance.getDio();
   final _logger = Logger("UserAuthenticator");
@@ -177,7 +178,7 @@ class UserService {
               return page;
             },
           ),
-              (route) => route.isFirst,
+          (route) => route.isFirst,
         );
       } else {
         // should never reach here
@@ -198,9 +199,7 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showErrorDialog(context, AppLocalizations
-          .of(context)
-          .oops,
+      showErrorDialog(context, AppLocalizations.of(context).oops,
           "verification failed, please try again");
     }
   }
@@ -241,8 +240,10 @@ class UserService {
         showErrorDialog(context, AppLocalizations.of(context).oops,
             AppLocalizations.of(context).email_already_claimed);
       } else {
-        showErrorDialog(context, AppLocalizations.of(context).incorrect_code_title,
-          AppLocalizations.of(context).incorrect_code_msg);
+        showErrorDialog(
+            context,
+            AppLocalizations.of(context).incorrect_code_title,
+            AppLocalizations.of(context).incorrect_code_msg);
       }
     } catch (e) {
       await dialog.hide();
@@ -370,8 +371,7 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showErrorDialog(
-          context, AppLocalizations.of(context).oops,
+      showErrorDialog(context, AppLocalizations.of(context).oops,
           "authentication failed, please try again");
     }
   }
@@ -412,14 +412,12 @@ class UserService {
           (route) => route.isFirst,
         );
       } else {
-        showErrorDialog(
-            context, AppLocalizations.of(context).oops,
+        showErrorDialog(context, AppLocalizations.of(context).oops,
             "something went wrong, please try again");
       }
     } catch (e) {
       _logger.severe(e);
-      showErrorDialog(
-          context, AppLocalizations.of(context).oops,
+      showErrorDialog(context, AppLocalizations.of(context).oops,
           "something went wrong, please try again");
     } finally {
       await dialog.hide();
@@ -480,14 +478,12 @@ class UserService {
           (route) => route.isFirst,
         );
       } else {
-        showErrorDialog(
-            context, AppLocalizations.of(context).oops,
+        showErrorDialog(context, AppLocalizations.of(context).oops,
             "something went wrong, please try again");
       }
     } catch (e) {
       _logger.severe(e);
-      showErrorDialog(
-          context, AppLocalizations.of(context).oops,
+      showErrorDialog(context, AppLocalizations.of(context).oops,
           "something went wrong, please try again");
     } finally {
       await dialog.hide();

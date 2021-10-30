@@ -6,9 +6,8 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
-
-import 'gallery.dart';
-import 'gallery_app_bar_widget.dart';
+import 'package:photos/ui/gallery.dart';
+import 'package:photos/ui/gallery_app_bar_widget.dart';
 
 class TrashPage extends StatelessWidget {
   final String tagPrefix;
