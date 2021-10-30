@@ -31,7 +31,7 @@ class SharedCollectionGallery extends StatefulWidget {
 
 class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
     with AutomaticKeepAliveClientMixin {
-  Logger _logger = Logger("SharedCollectionGallery");
+  final Logger _logger = Logger("SharedCollectionGallery");
   StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
   StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;

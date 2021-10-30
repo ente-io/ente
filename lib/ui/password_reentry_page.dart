@@ -18,7 +18,7 @@ class PasswordReentryPage extends StatefulWidget {
 
 class _PasswordReentryPageState extends State<PasswordReentryPage> {
   final _passwordController = TextEditingController();
-  FocusNode _passwordFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
   bool _passwordInFocus = false;
   bool _passwordVisible = false;
 
