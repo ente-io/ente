@@ -188,16 +188,18 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               mainAxisSize: MainAxisSize.min,
               children: [
                 OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                      side: BorderSide(
-                        width: 2,
-                        color: Colors.white12,
-                      ),
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
                     ),
+                    padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                    side: BorderSide(
+                      width: 2,
+                      color: Colors.white12,
+                    ),
+                  ),
+                  child: SizedBox(
+                    width: 100,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -216,24 +218,28 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                         ),
                       ],
                     ),
-                    onPressed: () async {
-                      routeToPage(
-                        context,
-                        ArchivePage(),
-                      );
-                    }),
-                Padding(padding: EdgeInsets.fromLTRB(18,0,18,0)),
+                  ),
+                  onPressed: () async {
+                    routeToPage(
+                      context,
+                      ArchivePage(),
+                    );
+                  },
+                ),
+                Padding(padding: EdgeInsets.fromLTRB(18, 0, 18, 0)),
                 OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                      side: BorderSide(
-                        width: 2,
-                        color: Colors.white12,
-                      ),
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
                     ),
+                    padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                    side: BorderSide(
+                      width: 2,
+                      color: Colors.white12,
+                    ),
+                  ),
+                  child: SizedBox(
+                    width: 100,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -252,12 +258,14 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                         ),
                       ],
                     ),
-                    onPressed: () async {
-                      routeToPage(
-                        context,
-                        TrashPage(),
-                      );
-                    }),
+                  ),
+                  onPressed: () async {
+                    routeToPage(
+                      context,
+                      TrashPage(),
+                    );
+                  },
+                ),
               ],
             ),
             Padding(padding: EdgeInsets.fromLTRB(12, 12, 12, 72)),

@@ -142,6 +142,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     return Container(
       padding: EdgeInsets.only(left: 24, bottom: 16),
       child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
         child: Row(
           children: <Widget>[
             ClipRRect(

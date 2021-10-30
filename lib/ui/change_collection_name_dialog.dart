@@ -1,9 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/services/user_service.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/email_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class ChangeCollectionNameDialog extends StatefulWidget {
   final String name;
