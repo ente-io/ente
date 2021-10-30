@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/selected_files.dart';
@@ -26,6 +25,10 @@ class DeviceFolderPage extends StatelessWidget {
             limit: limit, asc: asc);
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+      removalEventTypes: const {
+        EventType.deletedFromDevice,
+        EventType.deletedFromEverywhere,
+      },
       tagPrefix: "device_folder:" + folder.path,
       selectedFiles: _selectedFiles,
       header: Configuration.instance.hasConfiguredAccount()

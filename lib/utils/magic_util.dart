@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
@@ -18,11 +17,9 @@ Future<void> changeVisibility(
   await dialog.show();
   try {
     await FileMagicService.instance.changeVisibility(files, newVisibility);
-    showToast(
-        newVisibility == kVisibilityArchive
-            ? "successfully archived"
-            : "successfully unarchived",
-        toastLength: Toast.LENGTH_SHORT);
+    showShortToast(newVisibility == kVisibilityArchive
+        ? "successfully archived"
+        : "successfully unarchived");
 
     await dialog.hide();
   } catch (e, s) {
@@ -54,7 +51,7 @@ Future<void> _updatePublicMetadata(
   try {
     Map<String, dynamic> update = {key: value};
     await FileMagicService.instance.updatePublicMagicMetadata(files, update);
-    showToast('done', toastLength: Toast.LENGTH_SHORT);
+    showShortToast('done');
     await dialog.hide();
     if (_shouldReloadGallery(key)) {
       Bus.instance.fire(ForceReloadHomeGalleryEvent());

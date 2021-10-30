@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-Future<void> showToast(String message, {toastLength = Toast.LENGTH_LONG}) async {
+Future<void> showToast(String message,
+    {toastLength = Toast.LENGTH_LONG}) async {
   if (Platform.isAndroid) {
     await Fluttertoast.cancel();
     return Fluttertoast.showToast(
@@ -24,8 +25,12 @@ Future<void> showToast(String message, {toastLength = Toast.LENGTH_LONG}) async 
       ..loadingStyle = EasyLoadingStyle.custom;
     return EasyLoading.showToast(
       message,
-      duration: Duration(seconds: (toastLength == Toast.LENGTH_LONG ? 5 : 3)),
+      duration: Duration(seconds: (toastLength == Toast.LENGTH_LONG ? 5 : 2)),
       toastPosition: EasyLoadingToastPosition.bottom,
     );
   }
+}
+
+Future<void> showShortToast(String message) {
+  return showToast(message, toastLength: Toast.LENGTH_SHORT);
 }

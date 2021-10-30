@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
 import 'package:logging/logging.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';

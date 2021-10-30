@@ -14,6 +14,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
@@ -341,31 +342,35 @@ class _HomeWidgetState extends State<HomeWidget> {
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final importantPaths = Configuration.instance.getPathsToBackUp();
         final ownerID = Configuration.instance.getUserID();
-        Future<FileLoadResult> result;
+        FileLoadResult result;
         if (importantPaths.isNotEmpty) {
-          result = FilesDB.instance.getImportantFiles(creationStartTime,
+          result = await FilesDB.instance.getImportantFiles(creationStartTime,
               creationEndTime, ownerID, importantPaths.toList(),
               limit: limit, asc: asc);
         } else {
           if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
-            result = FilesDB.instance.getAllLocalAndUploadedFiles(
+            result = await FilesDB.instance.getAllLocalAndUploadedFiles(
                 creationStartTime, creationEndTime, ownerID,
                 limit: limit, asc: asc);
           } else {
-            result = FilesDB.instance.getAllUploadedFiles(
+            result = await FilesDB.instance.getAllUploadedFiles(
                 creationStartTime, creationEndTime, ownerID,
                 limit: limit, asc: asc);
           }
         }
-        final fileLoadResult = await result;
         // hide ignored files from home page UI
         final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
-        fileLoadResult.files.removeWhere((f) =>
+        result.files.removeWhere((f) =>
             f.uploadedFileID == null &&
             IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f));
-        return fileLoadResult;
+        return result;
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+      removalEventTypes: const {
+        EventType.deletedFromRemote,
+        EventType.deletedFromEverywhere,
+        EventType.archived,
+      },
       forceReloadEvents: [
         Bus.instance.on<BackupFoldersUpdatedEvent>(),
         Bus.instance.on<ForceReloadHomeGalleryEvent>(),

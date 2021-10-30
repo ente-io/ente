@@ -5,10 +5,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -19,6 +17,10 @@ class DiffFetcher {
   final _dio = Network.instance.getDio();
 
   Future<Diff> getEncryptedFilesDiff(int collectionID, int sinceTime) async {
+    _logger.info("Fetching diff in collection " +
+        collectionID.toString() +
+        " since " +
+        sinceTime.toString());
     try {
       final response = await _dio.get(
         Configuration.instance.getHttpEndpoint() + "/collections/v2/diff",
@@ -32,7 +34,6 @@ class DiffFetcher {
       final files = <File>[];
       int latestUpdatedAtTime = 0;
       if (response != null) {
-        Bus.instance.fire(RemoteSyncEvent(true));
         final diff = response.data["diff"] as List;
         final bool hasMore = response.data["hasMore"] as bool;
         final startTime = DateTime.now();
@@ -101,6 +102,8 @@ class DiffFetcher {
         final endTime = DateTime.now();
         _logger.info("time for parsing " +
             files.length.toString() +
+            " items within collection " +
+            collectionID.toString() +
             ": " +
             Duration(
                     microseconds: (endTime.microsecondsSinceEpoch -
@@ -109,7 +112,6 @@ class DiffFetcher {
                 .toString());
         return Diff(files, deletedFiles, hasMore, latestUpdatedAtTime);
       } else {
-        Bus.instance.fire(RemoteSyncEvent(false));
         return Diff(<File>[], <File>[], false, 0);
       }
     } catch (e, s) {

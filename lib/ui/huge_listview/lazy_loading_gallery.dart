@@ -21,6 +21,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final List<File> files;
   final int index;
   final Stream<FilesUpdatedEvent> reloadEvent;
+  final Set<EventType> removalEventTypes;
   final GalleryLoader asyncLoader;
   final SelectedFiles selectedFiles;
   final String tag;
@@ -30,6 +31,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.files,
     this.index,
     this.reloadEvent,
+    this.removalEventTypes,
     this.asyncLoader,
     this.selectedFiles,
     this.tag,
@@ -90,7 +92,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       _logger.info(filesUpdatedThisDay.length.toString() +
           " files were updated on " +
           getDayTitle(galleryDate.microsecondsSinceEpoch));
-      if (event.type == EventType.added_or_updated) {
+      if (event.type == EventType.addedOrUpdated) {
         final dayStartTime =
             DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
         final result = await widget.asyncLoader(
@@ -101,8 +103,8 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             _files = result.files;
           });
         }
-      } else {
-        // Files were deleted
+      } else if (widget.removalEventTypes.contains(event.type)) {
+        // Files were removed
         final updateFileIDs = <int>{};
         for (final file in filesUpdatedThisDay) {
           updateFileIDs.add(file.generatedID);

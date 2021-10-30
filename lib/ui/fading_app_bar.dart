@@ -278,6 +278,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesFromEverywhere(context, [file]);
+          Navigator.of(context, rootNavigator: true).pop();
           widget.onFileDeleted(file);
         },
       ));
@@ -290,6 +291,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           await deleteFilesOnDeviceOnly(context, [file]);
           showToast("file deleted from device");
           Navigator.of(context, rootNavigator: true).pop();
+          // TODO: Fix behavior when inside a device folder
         },
       ));
 
@@ -298,8 +300,9 @@ class FadingAppBarState extends State<FadingAppBar> {
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesFromRemoteOnly(context, [file]);
-          showToast("moved to trash");
+          showShortToast("moved to trash");
           Navigator.of(context, rootNavigator: true).pop();
+          // TODO: Fix behavior when inside a collection
         },
       ));
 
@@ -308,6 +311,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesFromEverywhere(context, [file]);
+          Navigator.of(context, rootNavigator: true).pop();
           widget.onFileDeleted(file);
         },
       ));

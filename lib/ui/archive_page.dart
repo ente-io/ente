@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
@@ -38,6 +36,7 @@ class ArchivePage extends StatelessWidget {
                     orElse: () => null) !=
                 null,
           ),
+      removalEventTypes: const {EventType.unarchived},
       forceReloadEvents: [
         Bus.instance.on<FilesUpdatedEvent>().where(
               (event) =>

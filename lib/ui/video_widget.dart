@@ -3,7 +3,6 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
@@ -74,7 +73,7 @@ class _VideoWidgetState extends State<VideoWidget> {
           setState(() {
             _progress = count / total;
             if (_progress == 1) {
-              showToast("decrypting video...", toastLength: Toast.LENGTH_SHORT);
+              showShortToast("decrypting video...");
             }
           });
         }

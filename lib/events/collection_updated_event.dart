@@ -4,5 +4,5 @@ class CollectionUpdatedEvent extends FilesUpdatedEvent {
   final int collectionID;
 
   CollectionUpdatedEvent(this.collectionID, updatedFiles, {type})
-      : super(updatedFiles, type: type ?? EventType.added_or_updated);
+      : super(updatedFiles, type: type ?? EventType.addedOrUpdated);
 }
