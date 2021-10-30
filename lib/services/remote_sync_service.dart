@@ -9,6 +9,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
@@ -259,6 +260,7 @@ class RemoteSyncService {
         remote = 0,
         localButUpdatedOnRemote = 0,
         localButAddedToNewCollectionOnRemote = 0;
+    bool hasAnyCreationTimeChanged = false;
     List<File> toBeInserted = [];
     for (File file in diff) {
       final existingFiles = file.deviceFolder == null
@@ -310,6 +312,9 @@ class RemoteSyncService {
             if (file.collectionID == existingFile.collectionID &&
                 file.uploadedFileID == existingFile.uploadedFileID) {
               // File was updated on remote
+              if (file.creationTime != existingFile.creationTime) {
+                hasAnyCreationTimeChanged = true;
+              }
               foundMatchingCollection = true;
               file.generatedID = existingFile.generatedID;
               toBeInserted.add(file);
@@ -342,6 +347,9 @@ class RemoteSyncService {
           localButAddedToNewCollectionOnRemote.toString() +
           " was uploaded from device but added to a new collection on remote.",
     );
+    if (hasAnyCreationTimeChanged) {
+      Bus.instance.fire(ForceReloadHomeGalleryEvent());
+    }
   }
 
   // return true if the client needs to re-sync the collections from previous
