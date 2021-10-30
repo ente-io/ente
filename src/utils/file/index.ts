@@ -279,7 +279,7 @@ export async function updateMagicMetadata(
         return {
             ...file,
             magicMetadata: {
-                ...file.pubMagicMetadata,
+                ...file.magicMetadata,
                 data: magicMetadataProps,
             },
         };

@@ -293,8 +293,8 @@ export const updateMagicMetadata = async (files: File[]) => {
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
-                version: file.pubMagicMetadata.version,
-                count: file.pubMagicMetadata.count,
+                version: file.magicMetadata.version,
+                count: file.magicMetadata.count,
                 data: encryptedMagicMetadata.encryptedData as unknown as string,
                 header: encryptedMagicMetadata.decryptionHeader,
             },
