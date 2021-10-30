@@ -10,7 +10,7 @@ import {
 import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
-import { decryptFile, sortFiles } from 'utils/file';
+import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
 import CryptoWorker from 'utils/crypto';
 
 const ENDPOINT = getEndpoint();
@@ -164,12 +164,12 @@ export const syncFiles = async (
             }
             files.push(file);
         }
-        files = sortFiles(files);
         await localForage.setItem('files', files);
         await localForage.setItem(
             `${collection.id}-time`,
             collection.updationTime
         );
+        files = sortFiles(mergeMetadata(files));
         setFiles(
             files.map((item) => ({
                 ...item,
@@ -234,8 +234,10 @@ export const getFiles = async (
             }
             setFiles(
                 sortFiles(
-                    [...(files || []), ...decryptedFiles].filter(
-                        (item) => !item.isDeleted
+                    mergeMetadata(
+                        [...(files || []), ...decryptedFiles].filter(
+                            (item) => !item.isDeleted
+                        )
                     )
                 )
             );

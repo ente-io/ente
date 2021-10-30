@@ -140,13 +140,8 @@ export function sortFiles(files: File[]) {
     files = files
         .map((file, index) => ({ index, file }))
         .sort((a, b) => {
-            const fileACreationTime =
-                a.file.pubMagicMetadata?.data.editedTime ??
-                a.file.metadata.creationTime;
-            const fileBCreationTime =
-                b.file.pubMagicMetadata?.data.editedTime ??
-                a.file.metadata.creationTime;
-            let diff = fileBCreationTime - fileACreationTime;
+            let diff =
+                b.file.metadata.creationTime - a.file.metadata.creationTime;
             if (diff === 0) {
                 diff = a.index - b.index;
             }
