@@ -588,6 +588,9 @@ const englishConstants = {
         </>
     ),
     REPLACE_THUMBNAIL_COMPLETED: () => (
+        <>successfully compressed all thumbnails</>
+    ),
+    REPLACE_THUMBNAIL_NOOP: () => (
         <>you have no thumbnails that can be compressed further</>
     ),
     REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR: () => (
