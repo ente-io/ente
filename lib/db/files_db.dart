@@ -433,7 +433,8 @@ class FilesDB {
       limit: limit,
     );
     final files = _convertToFiles(results);
-    return FileLoadResult(files, files.length == limit);
+    List<File> deduplicatedFiles = _deduplicatedFiles(files);
+    return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
   Future<FileLoadResult> getImportantFiles(

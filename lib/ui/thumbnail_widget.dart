@@ -6,6 +6,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
@@ -103,8 +104,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   );
 
   bool _hasLoadedThumbnail = false;
-  bool _isLoadingThumbnail = false;
-  bool _encounteredErrorLoadingThumbnail = false;
+  bool _isLoadingLocalThumbnail = false;
+  bool _errorLoadingLocalThumbnail = false;
+  bool _isLoadingRemoteThumbnail = false;
+  bool _errorLoadingRemoteThumbnail = false;
   ImageProvider _imageProvider;
 
   @override
@@ -187,9 +190,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   void _loadLocalImage(BuildContext context) {
     if (!_hasLoadedThumbnail &&
-        !_encounteredErrorLoadingThumbnail &&
-        !_isLoadingThumbnail) {
-      _isLoadingThumbnail = true;
+        !_errorLoadingLocalThumbnail &&
+        !_isLoadingLocalThumbnail) {
+      _isLoadingLocalThumbnail = true;
       final cachedSmallThumbnail =
           ThumbnailLruCache.get(widget.file, kThumbnailSmallSize);
       if (cachedSmallThumbnail != null) {
@@ -213,9 +216,11 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     getThumbnailFromLocal(widget.file).then((thumbData) async {
       if (thumbData == null) {
         if (widget.file.uploadedFileID != null) {
-          if (widget.file is! TrashFile) {
-            _logger.fine("Removing localID reference for " + widget.file.tag());
-            widget.file.localID = null;
+          _logger.fine("Removing localID reference for " + widget.file.tag());
+          widget.file.localID = null;
+          if (widget.file is TrashFile) {
+            TrashDB.instance.update(widget.file);
+          } else {
             FilesDB.instance.update(widget.file);
           }
           _loadNetworkImage();
@@ -236,15 +241,15 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       ThumbnailLruCache.put(widget.file, thumbData, kThumbnailSmallSize);
     }).catchError((e) {
       _logger.warning("Could not load image: ", e);
-      _encounteredErrorLoadingThumbnail = true;
+      _errorLoadingLocalThumbnail = true;
     });
   }
 
   void _loadNetworkImage() {
     if (!_hasLoadedThumbnail &&
-        !_encounteredErrorLoadingThumbnail &&
-        !_isLoadingThumbnail) {
-      _isLoadingThumbnail = true;
+        !_errorLoadingRemoteThumbnail &&
+        !_isLoadingRemoteThumbnail) {
+      _isLoadingRemoteThumbnail = true;
       final cachedThumbnail = ThumbnailLruCache.get(widget.file);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
@@ -280,7 +285,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         }
       } else {
         _logger.severe("Could not load image " + widget.file.toString(), e);
-        _encounteredErrorLoadingThumbnail = true;
+        _errorLoadingRemoteThumbnail = true;
       }
     }
   }
@@ -303,8 +308,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   void _reset() {
     _hasLoadedThumbnail = false;
-    _isLoadingThumbnail = false;
-    _encounteredErrorLoadingThumbnail = false;
+    _isLoadingLocalThumbnail = false;
+    _isLoadingRemoteThumbnail = false;
+    _errorLoadingLocalThumbnail = false;
+    _errorLoadingRemoteThumbnail = false;
     _imageProvider = null;
   }
 }
