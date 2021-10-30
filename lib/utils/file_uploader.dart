@@ -4,12 +4,12 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:math';
 import 'dart:typed_data';
-import 'package:path/path.dart';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
@@ -328,7 +328,8 @@ class FileUploader {
       final fileUploadURL = await _getUploadURL();
       String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
 
-      final metadata = await file.getMetadataForUpload(mediaUploadData.sourceFile);
+      final metadata =
+          await file.getMetadataForUpload(mediaUploadData.sourceFile);
       final encryptedMetadataData = await CryptoUtil.encryptChaCha(
           utf8.encode(jsonEncode(metadata)), fileAttributes.key);
       final fileDecryptionHeader = Sodium.bin2base64(fileAttributes.header);

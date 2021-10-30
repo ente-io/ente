@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -7,7 +8,6 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/recovery_page.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PasswordReentryPage extends StatefulWidget {
   PasswordReentryPage({Key key}) : super(key: key);

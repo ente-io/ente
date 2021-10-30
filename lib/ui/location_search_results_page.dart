@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/models/location.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/location.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/gallery.dart';
 
