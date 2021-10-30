@@ -7,6 +7,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
@@ -214,9 +215,11 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     getThumbnailFromLocal(widget.file).then((thumbData) async {
       if (thumbData == null) {
         if (widget.file.uploadedFileID != null) {
-          if (widget.file is! TrashFile) {
-            _logger.fine("Removing localID reference for " + widget.file.tag());
-            widget.file.localID = null;
+          _logger.fine("Removing localID reference for " + widget.file.tag());
+          widget.file.localID = null;
+          if (widget.file is TrashFile) {
+            TrashDB.instance.update(widget.file);
+          } else {
             FilesDB.instance.update(widget.file);
           }
           _loadNetworkImage();
