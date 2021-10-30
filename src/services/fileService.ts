@@ -68,7 +68,7 @@ export interface MagicMetadata extends Omit<MagicMetadataCore, 'data'> {
 }
 
 export interface PublicMagicMetadataProps {
-    creationTime?: number;
+    editedTime?: number;
 }
 
 export interface PublicMagicMetadata extends Omit<MagicMetadataCore, 'data'> {

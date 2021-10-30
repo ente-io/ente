@@ -141,10 +141,10 @@ export function sortFiles(files: File[]) {
         .map((file, index) => ({ index, file }))
         .sort((a, b) => {
             const fileACreationTime =
-                a.file.pubMagicMetadata?.data.creationTime ??
+                a.file.pubMagicMetadata?.data.editedTime ??
                 a.file.metadata.creationTime;
             const fileBCreationTime =
-                b.file.pubMagicMetadata?.data.creationTime ??
+                b.file.pubMagicMetadata?.data.editedTime ??
                 a.file.metadata.creationTime;
             let diff = fileBCreationTime - fileACreationTime;
             if (diff === 0) {
@@ -345,9 +345,9 @@ export async function changeFilesVisibility(
     return updatedFiles;
 }
 
-export async function changeFileCreationTime(file: File, creationTime: number) {
+export async function changeFileCreationTime(file: File, editedTime: number) {
     const updatedPublicMagicMetadataProps: PublicMagicMetadataProps = {
-        creationTime,
+        editedTime,
     };
 
     return await updatePublicMagicMetadata(
@@ -370,7 +370,13 @@ export function mergeMetadata(files: File[]): File[] {
         ...file,
         metadata: {
             ...file.metadata,
-            ...(file.pubMagicMetadata?.data ? file.pubMagicMetadata.data : {}),
+            ...(file.pubMagicMetadata?.data
+                ? {
+                      ...(file.pubMagicMetadata?.data.editedTime && {
+                          creationTime: file.pubMagicMetadata.data.editedTime,
+                      }),
+                  }
+                : {}),
             ...(file.magicMetadata?.data ? file.magicMetadata.data : {}),
         },
     }));
