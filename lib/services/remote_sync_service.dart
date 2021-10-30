@@ -30,6 +30,7 @@ class RemoteSyncService {
   final _diffFetcher = DiffFetcher();
   int _completedUploads = 0;
   SharedPreferences _prefs;
+  Completer<void> _existingSync;
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
 
@@ -54,6 +55,11 @@ class RemoteSyncService {
       _logger.info("Skipping remote sync since account is not configured");
       return;
     }
+    if (_existingSync != null) {
+      _logger.info("Remote sync already in progress, skipping");
+      return _existingSync.future;
+    }
+    _existingSync = Completer<void>();
 
     bool isFirstSync = !_collectionsService.hasSyncedCollections();
     await _collectionsService.sync();
@@ -75,6 +81,8 @@ class RemoteSyncService {
         .syncTrash()
         .onError((e, s) => _logger.severe('trash sync failed', e, s));
     bool hasUploadedFiles = await _uploadDiff();
+    _existingSync.complete();
+    _existingSync = null;
     if (hasUploadedFiles) {
       sync(silently: true);
     }
