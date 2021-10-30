@@ -5,9 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
-import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -32,7 +30,6 @@ class TrashDiffFetcher {
       final deletedFiles = <TrashFile>[];
       final restoredFiles = <TrashFile>[];
       if (response != null) {
-        Bus.instance.fire(RemoteSyncEvent(true));
         final diff = response.data["diff"] as List;
         final bool hasMore = response.data["hasMore"] as bool;
         final startTime = DateTime.now();
@@ -103,7 +100,6 @@ class TrashDiffFetcher {
         return Diff(trashedFiles, restoredFiles, deletedFiles, hasMore,
             latestUpdatedAtTime);
       } else {
-        Bus.instance.fire(RemoteSyncEvent(false));
         return Diff(<TrashFile>[], <TrashFile>[], <TrashFile>[], false, 0);
       }
     } catch (e, s) {
