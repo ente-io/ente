@@ -340,10 +340,10 @@ packages:
   flutter_image_compress:
     dependency: "direct main"
     description:
-      path: "thirdparty/flutter_image_compress"
-      relative: true
-    source: path
-    version: "0.7.0"
+      name: flutter_image_compress
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.0"
   flutter_inappwebview:
     dependency: "direct main"
     description:
