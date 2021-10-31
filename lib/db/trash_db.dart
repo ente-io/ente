@@ -247,7 +247,7 @@ class TrashDB {
     row[columnMMdEncodedJson] = trash.mMdEncodedJson ?? '{}';
 
     row[columnPubMMdVersion] = trash.pubMmdVersion ?? 0;
-    row[columnPubMMdEncodedJson] == trash.pubMmdEncodedJson ?? '{}';
+    row[columnPubMMdEncodedJson] = trash.pubMmdEncodedJson ?? '{}';
     return row;
   }
 }
