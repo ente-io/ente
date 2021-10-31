@@ -184,7 +184,9 @@ export function PhotoList({
             timeStampList = mergeTimeStampList(timeStampList, columns);
         }
 
-        showBanner && appendBanner();
+        if (showBanner) {
+            timeStampList.push(getBannerItem(timeStampList));
+        }
 
         timeStampListRef.current = timeStampList;
         filteredDataCopyRef.current = filteredData;
@@ -195,15 +197,16 @@ export function PhotoList({
         first.getMonth() === second.getMonth() &&
         first.getDate() === second.getDate();
 
-    const appendBanner = () => {
+    const getBannerItem = (timeStampList) => {
         const photoFrameHeight = (() => {
             let sum = 0;
+            const getCurrentItemSize = getItemSize(timeStampList);
             for (let i = 0; i < timeStampList.length; i++) {
-                sum += getItemSize(i);
+                sum += getCurrentItemSize(i);
             }
             return sum;
         })();
-        timeStampList.push({
+        return {
             itemType: ITEM_TYPE.BANNER,
             banner: (
                 <BannerContainer span={columns}>
@@ -212,7 +215,7 @@ export function PhotoList({
             ),
             id: 'install-banner',
             height: Math.max(48, height - photoFrameHeight),
-        });
+        };
     };
     /**
      * Checks and merge multiple dates into a single row.
@@ -292,7 +295,7 @@ export function PhotoList({
         return newList;
     };
 
-    const getItemSize = (index) => {
+    const getItemSize = (timeStampList) => (index) => {
         switch (timeStampList[index].itemType) {
             case ITEM_TYPE.TIME:
                 return DATE_CONTAINER_HEIGHT;
@@ -361,7 +364,7 @@ export function PhotoList({
         <List
             key={`${columns}-${listItemHeight}-${activeCollection}`}
             ref={listRef}
-            itemSize={getItemSize}
+            itemSize={getItemSize(timeStampList)}
             height={height}
             width={width}
             itemCount={timeStampList.length}
