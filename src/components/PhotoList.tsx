@@ -118,19 +118,19 @@ export function PhotoList({
     let columns = Math.floor(width / IMAGE_CONTAINER_MAX_WIDTH);
     let listItemHeight = IMAGE_CONTAINER_MAX_HEIGHT;
 
-    useEffect(() => {
+    let skipMerge = false;
+    if (columns < MIN_COLUMNS) {
+        columns = MIN_COLUMNS;
+        listItemHeight = width / MIN_COLUMNS;
+        skipMerge = true;
+    }
+
+    const refreshList = () => {
         listRef.current?.resetAfterIndex(0);
         resetFetching();
-    }, [filteredData]);
+    };
 
     useEffect(() => {
-        let skipMerge = false;
-        if (columns < MIN_COLUMNS) {
-            columns = MIN_COLUMNS;
-            listItemHeight = width / MIN_COLUMNS;
-            skipMerge = true;
-        }
-
         let timeStampList: TimeStampListItem[] = [];
         let listItemIndex = 0;
         let currentDate = -1;
@@ -190,6 +190,7 @@ export function PhotoList({
 
         timeStampListRef.current = timeStampList;
         filteredDataCopyRef.current = filteredData;
+        refreshList();
     }, [width, height, filteredData, showBanner]);
 
     const isSameDay = (first, second) =>
