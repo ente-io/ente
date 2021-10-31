@@ -232,7 +232,7 @@ export default function PreviewCard(props: IProps) {
         onSelect(!selected);
     };
     const handleHover = () => {
-        if (isRangeSelectActive) {
+        if (selectOnClick) {
             onHover();
         }
     };
