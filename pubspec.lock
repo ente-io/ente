@@ -868,7 +868,7 @@ packages:
       name: scrollable_positioned_list
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.10"
+    version: "0.2.2"
   sensors:
     dependency: transitive
     description:
