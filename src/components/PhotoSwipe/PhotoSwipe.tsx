@@ -42,6 +42,7 @@ interface Iprops {
     favItemIds: Set<number>;
     loadingBar: any;
     isSharedCollection: boolean;
+    isTrashCollection: boolean;
 }
 
 const LegendContainer = styled.div`
@@ -503,15 +504,16 @@ function PhotoSwipe(props: Iprops) {
                                 className="pswp__button pswp__button--zoom"
                                 title={constants.ZOOM_IN_OUT}
                             />
-                            {!props.isSharedCollection && (
-                                <FavButton
-                                    size={44}
-                                    isClick={isFav}
-                                    onClick={() => {
-                                        onFavClick(photoSwipe?.currItem);
-                                    }}
-                                />
-                            )}
+                            {!props.isSharedCollection &&
+                                !props.isTrashCollection && (
+                                    <FavButton
+                                        size={44}
+                                        isClick={isFav}
+                                        onClick={() => {
+                                            onFavClick(photoSwipe?.currItem);
+                                        }}
+                                    />
+                                )}
                             <button
                                 className="pswp-custom info-btn"
                                 title={constants.INFO}
@@ -537,7 +539,7 @@ function PhotoSwipe(props: Iprops) {
                             title={constants.NEXT}
                         />
                         <div className="pswp__caption">
-                            <div className="pswp__caption__center" />
+                            <div />
                         </div>
                     </div>
                 </div>

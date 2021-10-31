@@ -93,6 +93,8 @@ export interface File {
     w: number;
     h: number;
     isDeleted: boolean;
+    isTrashed?: boolean;
+    deleteBy?: number;
     dataIndex: number;
     updationTime: number;
 }
@@ -113,6 +115,14 @@ export const NEW_MAGIC_METADATA: MagicMetadataCore = {
     count: 0,
 };
 
+interface TrashRequest {
+    items: TrashRequestItems[];
+}
+
+interface TrashRequestItems {
+    fileID: number;
+    collectionID: number;
+}
 export const getLocalFiles = async () => {
     const files: Array<File> = (await localForage.getItem<File[]>(FILES)) || [];
     return files;
@@ -178,13 +188,11 @@ export const syncFiles = async (
             }))
         );
     }
-    return {
-        files: files.map((item) => ({
-            ...item,
-            w: window.innerWidth,
-            h: window.innerHeight,
-        })),
-    };
+    return files.map((item) => ({
+        ...item,
+        w: window.innerWidth,
+        h: window.innerHeight,
+    }));
 };
 
 export const getFiles = async (
@@ -260,14 +268,35 @@ const removeDeletedCollectionFiles = async (
     return files;
 };
 
-export const deleteFiles = async (filesToDelete: number[]) => {
+export const trashFiles = async (filesToTrash: File[]) => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return;
+        }
+        const trashRequest: TrashRequest = {
+            items: filesToTrash.map((file) => ({
+                fileID: file.id,
+                collectionID: file.collectionID,
+            })),
+        };
+        await HTTPService.post(`${ENDPOINT}/files/trash`, trashRequest, null, {
+            'X-Auth-Token': token,
+        });
+    } catch (e) {
+        logError(e, 'trash file failed');
+        throw e;
+    }
+};
+
+export const deleteFromTrash = async (filesToDelete: number[]) => {
     try {
         const token = getToken();
         if (!token) {
             return;
         }
         await HTTPService.post(
-            `${ENDPOINT}/files/delete`,
+            `${ENDPOINT}/trash/delete`,
             { fileIDs: filesToDelete },
             null,
             {
@@ -275,7 +304,7 @@ export const deleteFiles = async (filesToDelete: number[]) => {
             }
         );
     } catch (e) {
-        logError(e, 'delete failed');
+        logError(e, 'delete from trash failed');
         throw e;
     }
 };

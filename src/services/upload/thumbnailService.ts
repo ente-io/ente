@@ -3,25 +3,35 @@ import { CustomError, errorWithContext } from 'utils/common/errorUtil';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
 import FFmpegService from 'services/ffmpegService';
+import { convertToHumanReadable } from 'utils/billingUtil';
+import { fileIsHEIC } from 'utils/file';
+import { FileTypeInfo } from './readFileService';
 
-const THUMBNAIL_HEIGHT = 720;
-const MAX_ATTEMPTS = 3;
-const MIN_THUMBNAIL_SIZE = 50000;
+const MAX_THUMBNAIL_DIMENSION = 720;
+const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
+export const MAX_THUMBNAIL_SIZE = 100 * 1024;
+const MIN_QUALITY = 0.5;
+const MAX_QUALITY = 0.7;
 
 const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
+
+interface Dimension {
+    width: number;
+    height: number;
+}
 
 export async function generateThumbnail(
     worker,
     file: globalThis.File,
-    fileType: FILE_TYPE,
-    isHEIC: boolean
+    fileTypeInfo: FileTypeInfo
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
         let hasStaticThumbnail = false;
         let canvas = document.createElement('canvas');
         let thumbnail: Uint8Array;
         try {
-            if (fileType === FILE_TYPE.IMAGE) {
+            if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
+                const isHEIC = fileIsHEIC(fileTypeInfo.exactType);
                 canvas = await generateImageThumbnail(worker, file, isHEIC);
             } else {
                 try {
@@ -30,9 +40,12 @@ export async function generateThumbnail(
                     canvas = await generateImageThumbnail(
                         worker,
                         dummyImageFile,
-                        isHEIC
+                        false
                     );
                 } catch (e) {
+                    logError(e, 'failed to generate thumbnail using ffmpeg', {
+                        type: fileTypeInfo.exactType,
+                    });
                     canvas = await generateVideoThumbnail(file);
                 }
             }
@@ -42,7 +55,9 @@ export async function generateThumbnail(
                 throw Error('EMPTY THUMBNAIL');
             }
         } catch (e) {
-            logError(e, 'uploading static thumbnail');
+            logError(e, 'uploading static thumbnail', {
+                type: fileTypeInfo.exactType,
+            });
             thumbnail = Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) =>
                 c.charCodeAt(0)
             );
@@ -79,16 +94,22 @@ export async function generateImageThumbnail(
     await new Promise((resolve, reject) => {
         image.onload = () => {
             try {
-                const thumbnailWidth =
-                    (image.width * THUMBNAIL_HEIGHT) / image.height;
-                canvas.width = thumbnailWidth;
-                canvas.height = THUMBNAIL_HEIGHT;
+                const imageDimension = {
+                    width: image.width,
+                    height: image.height,
+                };
+                const thumbnailDimension = calculateThumbnailDimension(
+                    imageDimension,
+                    MAX_THUMBNAIL_DIMENSION
+                );
+                canvas.width = thumbnailDimension.width;
+                canvas.height = thumbnailDimension.height;
                 canvasCTX.drawImage(
                     image,
                     0,
                     0,
-                    thumbnailWidth,
-                    THUMBNAIL_HEIGHT
+                    thumbnailDimension.width,
+                    thumbnailDimension.height
                 );
                 image = null;
                 clearTimeout(timeout);
@@ -102,14 +123,7 @@ export async function generateImageThumbnail(
             }
         };
         timeout = setTimeout(
-            () =>
-                reject(
-                    Error(
-                        `wait time exceeded for format ${
-                            file.name.split('.').slice(-1)[0]
-                        }`
-                    )
-                ),
+            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
             WAIT_TIME_THUMBNAIL_GENERATION
         );
     });
@@ -131,16 +145,22 @@ export async function generateVideoThumbnail(file: globalThis.File) {
                 if (!video) {
                     throw Error('video load failed');
                 }
-                const thumbnailWidth =
-                    (video.videoWidth * THUMBNAIL_HEIGHT) / video.videoHeight;
-                canvas.width = thumbnailWidth;
-                canvas.height = THUMBNAIL_HEIGHT;
+                const videoDimension = {
+                    width: video.videoWidth,
+                    height: video.videoHeight,
+                };
+                const thumbnailDimension = calculateThumbnailDimension(
+                    videoDimension,
+                    MAX_THUMBNAIL_DIMENSION
+                );
+                canvas.width = thumbnailDimension.width;
+                canvas.height = thumbnailDimension.height;
                 canvasCTX.drawImage(
                     video,
                     0,
                     0,
-                    thumbnailWidth,
-                    THUMBNAIL_HEIGHT
+                    thumbnailDimension.width,
+                    thumbnailDimension.height
                 );
                 video = null;
                 clearTimeout(timeout);
@@ -156,14 +176,7 @@ export async function generateVideoThumbnail(file: globalThis.File) {
         video.preload = 'metadata';
         video.src = videoURL;
         timeout = setTimeout(
-            () =>
-                reject(
-                    Error(
-                        `wait time exceeded for format ${
-                            file.name.split('.').slice(-1)[0]
-                        }`
-                    )
-                ),
+            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
             WAIT_TIME_THUMBNAIL_GENERATION
         );
     });
@@ -171,11 +184,14 @@ export async function generateVideoThumbnail(file: globalThis.File) {
 }
 
 async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
-    let thumbnailBlob = null;
-    let attempts = 0;
-    let quality = 1;
+    let thumbnailBlob: Blob = null;
+    let prevSize = Number.MAX_SAFE_INTEGER;
+    let quality = MAX_QUALITY;
 
     do {
+        if (thumbnailBlob) {
+            prevSize = thumbnailBlob.size;
+        }
         thumbnailBlob = await new Promise((resolve) => {
             canvas.toBlob(
                 function (blob) {
@@ -186,12 +202,49 @@ async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
             );
         });
         thumbnailBlob = thumbnailBlob ?? new Blob([]);
-        attempts++;
-        quality /= 2;
+        quality -= 0.1;
     } while (
-        thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
-        attempts <= MAX_ATTEMPTS
+        quality >= MIN_QUALITY &&
+        thumbnailBlob.size > MAX_THUMBNAIL_SIZE &&
+        percentageSizeDiff(thumbnailBlob.size, prevSize) >=
+            MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF
     );
+    if (thumbnailBlob.size > MAX_THUMBNAIL_SIZE) {
+        logError(
+            Error('thumbnail_too_large'),
+            'thumbnail greater than max limit',
+            { thumbnailSize: convertToHumanReadable(thumbnailBlob.size) }
+        );
+    }
 
     return thumbnailBlob;
+}
+
+function percentageSizeDiff(
+    newThumbnailSize: number,
+    oldThumbnailSize: number
+) {
+    return ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
+}
+
+// method to calculate new size of image for limiting it to maximum width and height, maintaining aspect ratio
+// returns {0,0} for invalid inputs
+function calculateThumbnailDimension(
+    originalDimension: Dimension,
+    maxDimension: number
+): Dimension {
+    if (originalDimension.height === 0 || originalDimension.width === 0) {
+        return { width: 0, height: 0 };
+    }
+    const widthScaleFactor = maxDimension / originalDimension.width;
+    const heightScaleFactor = maxDimension / originalDimension.height;
+    const scaleFactor = Math.min(widthScaleFactor, heightScaleFactor);
+    const thumbnailDimension = {
+        width: Math.round(originalDimension.width * scaleFactor),
+        height: Math.round(originalDimension.height * scaleFactor),
+    };
+    if (thumbnailDimension.width === 0 || thumbnailDimension.height === 0) {
+        return { width: 0, height: 0 };
+    }
+    return thumbnailDimension;
 }

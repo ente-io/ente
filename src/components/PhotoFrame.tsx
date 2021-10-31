@@ -26,8 +26,12 @@ import {
     MIN_COLUMNS,
     SPACE_BTW_DATES,
 } from 'types';
-import { fileIsArchived } from 'utils/file';
-import { ALL_SECTION, ARCHIVE_SECTION } from './pages/gallery/Collections';
+import { fileIsArchived, formatDateRelative } from 'utils/file';
+import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    TRASH_SECTION,
+} from './pages/gallery/Collections';
 import { isSharedFile } from 'utils/file';
 import { isPlaybackPossible } from 'utils/photoFrame';
 
@@ -301,46 +305,56 @@ const PhotoFrame = ({
 
     const getSlideData = async (instance: any, index: number, item: File) => {
         if (!item.msrc) {
-            let url: string;
-            if (galleryContext.thumbs.has(item.id)) {
-                url = galleryContext.thumbs.get(item.id);
-            } else {
-                url = await DownloadManager.getPreview(item);
-                galleryContext.thumbs.set(item.id, url);
-            }
-            updateUrl(item.dataIndex)(url);
-            item.msrc = url;
-            if (!item.src) {
-                item.src = url;
-            }
-            item.w = window.innerWidth;
-            item.h = window.innerHeight;
             try {
-                instance.invalidateCurrItems();
-                instance.updateSize(true);
+                let url: string;
+                if (galleryContext.thumbs.has(item.id)) {
+                    url = galleryContext.thumbs.get(item.id);
+                } else {
+                    url = await DownloadManager.getPreview(item);
+                    galleryContext.thumbs.set(item.id, url);
+                }
+                updateUrl(item.dataIndex)(url);
+                item.msrc = url;
+                if (!item.src) {
+                    item.src = url;
+                }
+                item.w = window.innerWidth;
+                item.h = window.innerHeight;
+                try {
+                    instance.invalidateCurrItems();
+                    instance.updateSize(true);
+                } catch (e) {
+                    // ignore
+                }
             } catch (e) {
-                // ignore
+                // no-op
             }
         }
         if (!fetching[item.dataIndex]) {
-            fetching[item.dataIndex] = true;
-            let url: string;
-            if (galleryContext.files.has(item.id)) {
-                url = galleryContext.files.get(item.id);
-            } else {
-                url = await DownloadManager.getFile(item, true);
-                galleryContext.files.set(item.id, url);
-            }
-            await updateSrcUrl(item.dataIndex, url);
-            item.html = files[item.dataIndex].html;
-            item.src = files[item.dataIndex].src;
-            item.w = files[item.dataIndex].w;
-            item.h = files[item.dataIndex].h;
             try {
-                instance.invalidateCurrItems();
-                instance.updateSize(true);
+                fetching[item.dataIndex] = true;
+                let url: string;
+                if (galleryContext.files.has(item.id)) {
+                    url = galleryContext.files.get(item.id);
+                } else {
+                    url = await DownloadManager.getFile(item, true);
+                    galleryContext.files.set(item.id, url);
+                }
+                await updateSrcUrl(item.dataIndex, url);
+                item.html = files[item.dataIndex].html;
+                item.src = files[item.dataIndex].src;
+                item.w = files[item.dataIndex].w;
+                item.h = files[item.dataIndex].h;
+                try {
+                    instance.invalidateCurrItems();
+                    instance.updateSize(true);
+                } catch (e) {
+                    // ignore
+                }
             } catch (e) {
-                // ignore
+                // no-op
+            } finally {
+                fetching[item.dataIndex] = false;
             }
         }
     };
@@ -350,6 +364,11 @@ const PhotoFrame = ({
         .map((item, index) => ({
             ...item,
             dataIndex: index,
+            ...(item.deleteBy && {
+                title: constants.AUTOMATIC_BIN_DELETE_MESSAGE(
+                    formatDateRelative(item.deleteBy / 1000)
+                ),
+            }),
         }))
         .filter((item) => {
             if (deleted.includes(item.id)) {
@@ -379,10 +398,17 @@ const PhotoFrame = ({
             if (isSharedFile(item) && !isSharedCollection) {
                 return false;
             }
+            if (activeCollection === TRASH_SECTION && !item.isTrashed) {
+                return false;
+            }
+            if (activeCollection !== TRASH_SECTION && item.isTrashed) {
+                return false;
+            }
             if (!idSet.has(item.id)) {
                 if (
                     activeCollection === ALL_SECTION ||
                     activeCollection === ARCHIVE_SECTION ||
+                    activeCollection === TRASH_SECTION ||
                     activeCollection === item.collectionID
                 ) {
                     idSet.add(item.id);
@@ -719,6 +745,7 @@ const PhotoFrame = ({
                         favItemIds={favItemIds}
                         loadingBar={loadingBar}
                         isSharedCollection={isSharedCollection}
+                        isTrashCollection={activeCollection === TRASH_SECTION}
                     />
                 </Container>
             ) : (
