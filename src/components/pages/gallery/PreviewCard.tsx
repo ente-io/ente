@@ -112,7 +112,7 @@ export const InSelectRangeOverLay = styled.div<{ active: boolean }>`
     color: #fff;
     font-weight: 900;
     position: absolute;
-    ${(props) => props.active && 'background:rgba(4, 251, 0, 0.26)'};
+    ${(props) => props.active && 'background:rgba(81, 205, 124, 0.25)'};
 `;
 
 const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
