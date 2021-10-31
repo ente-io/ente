@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/network.dart';
-import 'package:photos/ui/expansion_card.dart';
 import 'package:photos/ui/loading_widget.dart';
 
 class BillingQuestionsWidget extends StatelessWidget {
@@ -65,9 +65,10 @@ class FaqWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ExpansionCard(
+    return ExpansionTileCard(
       title: Text(faq.q),
-      color: Theme.of(context).buttonColor,
+      expandedTextColor: Theme.of(context).buttonColor,
+      baseColor: Theme.of(context).cardColor,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 16, right: 16),
