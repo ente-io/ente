@@ -363,7 +363,7 @@ export function PhotoList({
 
     return (
         <List
-            key={`${columns}-${listItemHeight}-${activeCollection}`}
+            key={`${activeCollection}`}
             ref={listRef}
             itemSize={getItemSize(timeStampList)}
             height={height}
