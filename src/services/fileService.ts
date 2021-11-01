@@ -14,7 +14,6 @@ import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
 import CryptoWorker from 'utils/crypto';
 
 const ENDPOINT = getEndpoint();
-const DIFF_LIMIT: number = 1000;
 
 const FILES = 'files';
 
@@ -148,13 +147,7 @@ export const syncFiles = async (
             continue;
         }
         const fetchedFiles =
-            (await getFiles(
-                collection,
-                lastSyncTime,
-                DIFF_LIMIT,
-                files,
-                setFiles
-            )) ?? [];
+            (await getFiles(collection, lastSyncTime, files, setFiles)) ?? [];
         files.push(...fetchedFiles);
         const latestVersionFiles = new Map<string, File>();
         files.forEach((file) => {
@@ -198,7 +191,6 @@ export const syncFiles = async (
 export const getFiles = async (
     collection: Collection,
     sinceTime: number,
-    limit: number,
     files: File[],
     setFiles: (files: File[]) => void
 ): Promise<File[]> => {
@@ -215,11 +207,10 @@ export const getFiles = async (
                 break;
             }
             resp = await HTTPService.get(
-                `${ENDPOINT}/collections/diff`,
+                `${ENDPOINT}/collections/v2/diff`,
                 {
                     collectionID: collection.id,
                     sinceTime: time,
-                    limit,
                 },
                 {
                     'X-Auth-Token': token,
@@ -249,7 +240,7 @@ export const getFiles = async (
                     )
                 )
             );
-        } while (resp.data.diff.length === limit);
+        } while (resp.data.hasMore);
         return decryptedFiles;
     } catch (e) {
         logError(e, 'Get files failed');

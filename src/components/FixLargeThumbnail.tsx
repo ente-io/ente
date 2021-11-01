@@ -24,6 +24,7 @@ interface Props {
 export enum FIX_STATE {
     NOT_STARTED,
     FIX_LATER,
+    NOOP,
     RUNNING,
     COMPLETED,
     COMPLETED_WITH_ERRORS,
@@ -37,6 +38,9 @@ function Message(props: { fixState: FIX_STATE }) {
             break;
         case FIX_STATE.COMPLETED:
             message = constants.REPLACE_THUMBNAIL_COMPLETED();
+            break;
+        case FIX_STATE.NOOP:
+            message = constants.REPLACE_THUMBNAIL_NOOP();
             break;
         case FIX_STATE.COMPLETED_WITH_ERRORS:
             message = constants.REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR();
@@ -64,6 +68,10 @@ export default function FixLargeThumbnails(props: Props) {
             fixState = FIX_STATE.NOT_STARTED;
             updateFixState(fixState);
         }
+        if (fixState === FIX_STATE.COMPLETED) {
+            fixState = FIX_STATE.NOOP;
+            updateFixState(fixState);
+        }
         setFixState(fixState);
         return fixState;
     };
@@ -83,14 +91,14 @@ export default function FixLargeThumbnails(props: Props) {
             props.show();
         }
         if (
-            fixState === FIX_STATE.COMPLETED &&
+            (fixState === FIX_STATE.COMPLETED || fixState === FIX_STATE.NOOP) &&
             largeThumbnailFiles.length > 0
         ) {
             updateFixState(FIX_STATE.NOT_STARTED);
             logError(Error(), 'large thumbnail files left after migration');
         }
-        if (largeThumbnailFiles.length === 0) {
-            updateFixState(FIX_STATE.COMPLETED);
+        if (largeThumbnailFiles.length === 0 && fixState !== FIX_STATE.NOOP) {
+            updateFixState(FIX_STATE.NOOP);
         }
     };
     useEffect(() => {
