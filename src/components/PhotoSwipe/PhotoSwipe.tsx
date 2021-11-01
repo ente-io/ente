@@ -7,7 +7,11 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from 'services/collectionService';
-import { File, updatePublicMagicMetadata } from 'services/fileService';
+import {
+    File,
+    MIN_EDITED_CREATION_TIME,
+    updatePublicMagicMetadata,
+} from 'services/fileService';
 import constants from 'utils/strings/constants';
 import exifr from 'exifr';
 import Modal from 'react-bootstrap/Modal';
@@ -125,6 +129,8 @@ function RenderCreationTime({
                             timeInputLabel="Time:"
                             dateFormat="dd/MM/yyyy h:mm aa"
                             showTimeInput
+                            minDate={new Date(MIN_EDITED_CREATION_TIME)}
+                            maxDate={new Date()}
                         />
                     ) : (
                         formatDateTime(pickedTime)
