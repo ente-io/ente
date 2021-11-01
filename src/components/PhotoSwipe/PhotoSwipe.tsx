@@ -149,7 +149,7 @@ function RenderCreationTime({
                     )}
                 </Value>
             </Row>
-            {isInEditMode && <div style={{ height: '200px' }} />}
+            {isInEditMode && <div style={{ height: '205px' }} />}
         </>
     );
 }
