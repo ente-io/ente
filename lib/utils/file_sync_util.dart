@@ -6,7 +6,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/models/file.dart';
 
 final _logger = Logger("FileSyncUtil");
-
+final ignoreSizeConstraint = SizeConstraint(ignoreSize: true);
 Future<List<File>> getDeviceFiles(
     int fromTime, int toTime, Computer computer) async {
   final pathEntities = await _getGalleryList(fromTime, toTime);
@@ -28,7 +28,10 @@ Future<List<File>> getDeviceFiles(
 }
 
 Future<List<LocalAsset>> getAllLocalAssets() async {
-  final filterOptionGroup = FilterOptionGroup();
+  final filterOptionGroup = FilterOptionGroup(
+      imageOption: FilterOption(sizeConstraint: ignoreSizeConstraint),
+      videoOption: FilterOption(sizeConstraint: ignoreSizeConstraint),
+      createTimeCond: DateTimeCond.def().copyWith(ignore: true));
   final assetPaths = await PhotoManager.getAssetPathList(
     hasAll: true,
     type: RequestType.common,
@@ -102,8 +105,10 @@ Future<List<File>> _convertToFiles(
 Future<List<AssetPathEntity>> _getGalleryList(
     final int fromTime, final int toTime) async {
   final filterOptionGroup = FilterOptionGroup();
-  filterOptionGroup.setOption(AssetType.image, FilterOption(needTitle: true));
-  filterOptionGroup.setOption(AssetType.video, FilterOption(needTitle: true));
+  filterOptionGroup.setOption(AssetType.image,
+      FilterOption(needTitle: true, sizeConstraint: ignoreSizeConstraint));
+  filterOptionGroup.setOption(AssetType.video,
+      FilterOption(needTitle: true, sizeConstraint: ignoreSizeConstraint));
 
   filterOptionGroup.updateTimeCond = DateTimeCond(
     min: DateTime.fromMicrosecondsSinceEpoch(fromTime),
