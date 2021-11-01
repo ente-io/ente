@@ -11,24 +11,22 @@ import constants from 'utils/strings/constants';
 import Archive from 'components/icons/Archive';
 import MoveIcon from 'components/icons/MoveIcon';
 import { COLLECTION_OPS_TYPE } from 'utils/collection';
-import { ALL_SECTION, ARCHIVE_SECTION } from './Collections';
+import { ALL_SECTION, ARCHIVE_SECTION, TRASH_SECTION } from './Collections';
 import UnArchive from 'components/icons/UnArchive';
 import { OverlayTrigger } from 'react-bootstrap';
 import { Collection } from 'services/collectionService';
+import RemoveIcon from 'components/icons/RemoveIcon';
+import RestoreIcon from 'components/icons/RestoreIcon';
 
 interface Props {
-    addToCollectionHelper: (
-        collectionName: string,
-        collection: Collection
-    ) => void;
-    moveToCollectionHelper: (
-        collectionName: string,
-        collection: Collection
-    ) => void;
+    addToCollectionHelper: (collection: Collection) => void;
+    moveToCollectionHelper: (collection: Collection) => void;
+    restoreToCollectionHelper: (collection: Collection) => void;
     showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
     setDialogMessage: SetDialogMessage;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
-    deleteFileHelper: () => void;
+    deleteFileHelper: (permanent?: boolean) => void;
+    removeFromCollectionHelper: () => void;
     count: number;
     clearSelection: () => void;
     archiveFilesHelper: () => void;
@@ -52,7 +50,11 @@ const SelectionContainer = styled.div`
     display: flex;
 `;
 
-export const IconWithMessage = (props) => (
+interface IconWithMessageProps {
+    children?: any;
+    message: string;
+}
+export const IconWithMessage = (props: IconWithMessageProps) => (
     <OverlayTrigger
         placement="bottom"
         overlay={<p style={{ zIndex: 1002 }}>{props.message}</p>}>
@@ -63,7 +65,9 @@ export const IconWithMessage = (props) => (
 const SelectedFileOptions = ({
     addToCollectionHelper,
     moveToCollectionHelper,
+    restoreToCollectionHelper,
     showCreateCollectionModal,
+    removeFromCollectionHelper,
     setDialogMessage,
     setCollectionSelectorAttributes,
     deleteFileHelper,
@@ -76,20 +80,55 @@ const SelectedFileOptions = ({
 }: Props) => {
     const addToCollection = () =>
         setCollectionSelectorAttributes({
-            callback: (collection) => addToCollectionHelper(null, collection),
+            callback: addToCollectionHelper,
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.ADD),
             title: constants.ADD_TO_COLLECTION,
             fromCollection: activeCollection,
         });
 
-    const deleteHandler = () =>
+    const trashHandler = () =>
         setDialogMessage({
-            title: constants.CONFIRM_DELETE_FILE,
-            content: constants.DELETE_FILE_MESSAGE,
+            title: constants.CONFIRM_DELETE,
+            content: constants.TRASH_MESSAGE,
             staticBackdrop: true,
             proceed: {
                 action: deleteFileHelper,
+                text: constants.MOVE_TO_TRASH,
+                variant: 'danger',
+            },
+            close: { text: constants.CANCEL },
+        });
+
+    const permanentlyDeleteHandler = () =>
+        setDialogMessage({
+            title: constants.CONFIRM_DELETE,
+            content: constants.DELETE_MESSAGE,
+            staticBackdrop: true,
+            proceed: {
+                action: () => deleteFileHelper(true),
                 text: constants.DELETE,
+                variant: 'danger',
+            },
+            close: { text: constants.CANCEL },
+        });
+
+    const restoreHandler = () =>
+        setCollectionSelectorAttributes({
+            callback: restoreToCollectionHelper,
+            showNextModal: showCreateCollectionModal(
+                COLLECTION_OPS_TYPE.RESTORE
+            ),
+            title: constants.RESTORE_TO_COLLECTION,
+        });
+
+    const removeFromCollectionHandler = () =>
+        setDialogMessage({
+            title: constants.CONFIRM_REMOVE,
+            content: constants.CONFIRM_REMOVE_MESSAGE(),
+            staticBackdrop: true,
+            proceed: {
+                action: removeFromCollectionHelper,
+                text: constants.REMOVE,
                 variant: 'danger',
             },
             close: { text: constants.CANCEL },
@@ -97,7 +136,7 @@ const SelectedFileOptions = ({
 
     const moveToCollection = () => {
         setCollectionSelectorAttributes({
-            callback: (collection) => moveToCollectionHelper(null, collection),
+            callback: moveToCollectionHelper,
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
             title: constants.MOVE_TO_COLLECTION,
             fromCollection: activeCollection,
@@ -114,40 +153,65 @@ const SelectedFileOptions = ({
                     {count} {constants.SELECTED}
                 </div>
             </SelectionContainer>
-            {activeCollection === ARCHIVE_SECTION && (
-                <IconWithMessage message={constants.UNARCHIVE}>
-                    <IconButton onClick={unArchiveFilesHelper}>
-                        <UnArchive />
-                    </IconButton>
-                </IconWithMessage>
-            )}
-
-            {activeCollection === ALL_SECTION && (
-                <IconWithMessage message={constants.ARCHIVE}>
-                    <IconButton onClick={archiveFilesHelper}>
-                        <Archive />
-                    </IconButton>
-                </IconWithMessage>
-            )}
-            {activeCollection !== ALL_SECTION &&
-                activeCollection !== ARCHIVE_SECTION &&
-                !isFavoriteCollection && (
-                    <IconWithMessage message={constants.MOVE}>
-                        <IconButton onClick={moveToCollection}>
-                            <MoveIcon />
+            {activeCollection === TRASH_SECTION ? (
+                <>
+                    <IconWithMessage message={constants.RESTORE}>
+                        <IconButton onClick={restoreHandler}>
+                            <RestoreIcon />
                         </IconButton>
                     </IconWithMessage>
-                )}
-            <IconWithMessage message={constants.ADD}>
-                <IconButton onClick={addToCollection}>
-                    <AddIcon />
-                </IconButton>
-            </IconWithMessage>
-            <IconWithMessage message={constants.DELETE}>
-                <IconButton onClick={deleteHandler}>
-                    <DeleteIcon />
-                </IconButton>
-            </IconWithMessage>
+                    <IconWithMessage message={constants.DELETE_PERMANENTLY}>
+                        <IconButton onClick={permanentlyDeleteHandler}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </IconWithMessage>
+                </>
+            ) : (
+                <>
+                    {activeCollection === ARCHIVE_SECTION && (
+                        <IconWithMessage message={constants.UNARCHIVE}>
+                            <IconButton onClick={unArchiveFilesHelper}>
+                                <UnArchive />
+                            </IconButton>
+                        </IconWithMessage>
+                    )}
+                    {activeCollection === ALL_SECTION && (
+                        <IconWithMessage message={constants.ARCHIVE}>
+                            <IconButton onClick={archiveFilesHelper}>
+                                <Archive />
+                            </IconButton>
+                        </IconWithMessage>
+                    )}
+                    <IconWithMessage message={constants.ADD}>
+                        <IconButton onClick={addToCollection}>
+                            <AddIcon />
+                        </IconButton>
+                    </IconWithMessage>
+                    {activeCollection !== ALL_SECTION &&
+                        activeCollection !== ARCHIVE_SECTION &&
+                        !isFavoriteCollection && (
+                            <>
+                                <IconWithMessage message={constants.MOVE}>
+                                    <IconButton onClick={moveToCollection}>
+                                        <MoveIcon />
+                                    </IconButton>
+                                </IconWithMessage>
+
+                                <IconWithMessage message={constants.REMOVE}>
+                                    <IconButton
+                                        onClick={removeFromCollectionHandler}>
+                                        <RemoveIcon />
+                                    </IconButton>
+                                </IconWithMessage>
+                            </>
+                        )}
+                    <IconWithMessage message={constants.DELETE}>
+                        <IconButton onClick={trashHandler}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </IconWithMessage>
+                </>
+            )}
         </SelectionBar>
     );
 };

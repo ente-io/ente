@@ -69,7 +69,7 @@ export function sortFilesIntoCollections(files: File[]) {
     return collectionWiseFiles;
 }
 
-export function getSelectedFileIds(selectedFiles: SelectedState) {
+function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
     for (const [key, val] of Object.entries(selectedFiles)) {
         if (typeof val === 'boolean' && val) {
@@ -79,17 +79,19 @@ export function getSelectedFileIds(selectedFiles: SelectedState) {
     return filesIDs;
 }
 export function getSelectedFiles(
-    selectedFiles: SelectedState,
+    selected: SelectedState,
     files: File[]
 ): File[] {
-    const filesIDs = new Set(getSelectedFileIds(selectedFiles));
-    const filesToDelete: File[] = [];
+    const filesIDs = new Set(getSelectedFileIds(selected));
+    const selectedFiles: File[] = [];
+    const foundFiles = new Set<number>();
     for (const file of files) {
-        if (filesIDs.has(file.id)) {
-            filesToDelete.push(file);
+        if (filesIDs.has(file.id) && !foundFiles.has(file.id)) {
+            selectedFiles.push(file);
+            foundFiles.add(file.id);
         }
     }
-    return filesToDelete;
+    return selectedFiles;
 }
 
 export function checkFileFormatSupport(name: string) {
@@ -121,6 +123,31 @@ export function formatDateTime(date: number | Date) {
         timeStyle: 'medium',
     });
     return `${dateTimeFormat.format(date)} ${timeFormat.format(date)}`;
+}
+
+export function formatDateRelative(date: number) {
+    const units = {
+        year: 24 * 60 * 60 * 1000 * 365,
+        month: (24 * 60 * 60 * 1000 * 365) / 12,
+        day: 24 * 60 * 60 * 1000,
+        hour: 60 * 60 * 1000,
+        minute: 60 * 1000,
+        second: 1000,
+    };
+    const relativeDateFormat = new Intl.RelativeTimeFormat('en-IN', {
+        localeMatcher: 'best fit',
+        numeric: 'always',
+        style: 'long',
+    });
+    const elapsed = date - Date.now();
+
+    // "Math.abs" accounts for both "past" & "future" scenarios
+    for (const u in units)
+        if (Math.abs(elapsed) > units[u] || u === 'second')
+            return relativeDateFormat.format(
+                Math.round(elapsed / units[u]),
+                u as Intl.RelativeTimeFormatUnit
+            );
 }
 
 export function sortFiles(files: File[]) {
@@ -175,6 +202,7 @@ export async function decryptFile(file: File, collection: Collection) {
         return file;
     } catch (e) {
         logError(e, 'file decryption failed');
+        throw e;
     }
 }
 
@@ -292,4 +320,12 @@ export function isSharedFile(file: File) {
         return false;
     }
     return file.ownerID !== user.id;
+}
+
+export function appendPhotoSwipeProps(files: File[]) {
+    return files.map((file) => ({
+        ...file,
+        w: window.innerWidth,
+        h: window.innerHeight,
+    })) as File[];
 }

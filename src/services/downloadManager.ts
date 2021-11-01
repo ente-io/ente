@@ -24,7 +24,7 @@ class DownloadManager {
                 return URL.createObjectURL(await cacheResp.blob());
             }
             if (!this.thumbnailObjectUrlPromise.get(file.id)) {
-                const downloadPromise = this._downloadThumb(
+                const downloadPromise = this.downloadThumb(
                     token,
                     thumbnailCache,
                     file
@@ -35,14 +35,28 @@ class DownloadManager {
         } catch (e) {
             this.thumbnailObjectUrlPromise.delete(file.id);
             logError(e, 'get preview Failed');
+            throw e;
         }
     }
 
-    _downloadThumb = async (
+    private downloadThumb = async (
         token: string,
         thumbnailCache: Cache,
         file: File
     ) => {
+        const thumb = await this.getThumbnail(token, file);
+        try {
+            await thumbnailCache.put(
+                file.id.toString(),
+                new Response(new Blob([thumb]))
+            );
+        } catch (e) {
+            // TODO: handle storage full exception.
+        }
+        return URL.createObjectURL(new Blob([thumb]));
+    };
+
+    getThumbnail = async (token: string, file: File) => {
         const resp = await HTTPService.get(
             getThumbnailUrl(file.id),
             null,
@@ -50,43 +64,38 @@ class DownloadManager {
             { responseType: 'arraybuffer' }
         );
         const worker = await new CryptoWorker();
-        const decrypted: any = await worker.decryptThumbnail(
+        const decrypted: Uint8Array = await worker.decryptThumbnail(
             new Uint8Array(resp.data),
             await worker.fromB64(file.thumbnail.decryptionHeader),
             file.key
         );
-        try {
-            await thumbnailCache.put(
-                file.id.toString(),
-                new Response(new Blob([decrypted]))
-            );
-        } catch (e) {
-            // TODO: handle storage full exception.
-        }
-        return URL.createObjectURL(new Blob([decrypted]));
+        return decrypted;
     };
 
     getFile = async (file: File, forPreview = false) => {
+        let fileUID: string;
+        if (file.metadata.fileType === FILE_TYPE.VIDEO) {
+            fileUID = file.id.toString();
+        } else {
+            fileUID = `${file.id}_forPreview=${forPreview}`;
+        }
         try {
-            const getFilePromise = (async () => {
+            const getFilePromise = async () => {
                 const fileStream = await this.downloadFile(file);
                 let fileBlob = await new Response(fileStream).blob();
                 if (forPreview) {
                     fileBlob = await convertForPreview(file, fileBlob);
                 }
                 return URL.createObjectURL(fileBlob);
-            })();
-            if (!this.fileObjectUrlPromise.get(`${file.id}_${forPreview}`)) {
-                this.fileObjectUrlPromise.set(
-                    `${file.id}_${forPreview}`,
-                    getFilePromise
-                );
+            };
+            if (!this.fileObjectUrlPromise.get(fileUID)) {
+                this.fileObjectUrlPromise.set(fileUID, getFilePromise());
             }
-            return await this.fileObjectUrlPromise.get(
-                `${file.id}_${forPreview}`
-            );
+            return await this.fileObjectUrlPromise.get(fileUID);
         } catch (e) {
+            this.fileObjectUrlPromise.delete(fileUID);
             logError(e, 'Failed to get File');
+            throw e;
         }
     };
 

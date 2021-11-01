@@ -27,6 +27,7 @@ export enum CustomError {
     SIGNUP_FAILED = 'signup failed',
     FAV_COLLECTION_MISSING = 'favorite collection missing',
     INVALID_COLLECTION_OPERATION = 'invalid collection operation',
+    WAIT_TIME_EXCEEDED = 'thumbnail generation wait time exceeded',
 }
 
 function parseUploadError(error: AxiosResponse) {

@@ -9,7 +9,6 @@ import { logError } from 'utils/sentry';
 import { decryptFile, sortFiles } from 'utils/file';
 
 const ENDPOINT = getEndpoint();
-const DIFF_LIMIT: number = 1000;
 
 const FILES = 'files';
 
@@ -67,6 +66,8 @@ export interface File {
     w: number;
     h: number;
     isDeleted: boolean;
+    isTrashed?: boolean;
+    deleteBy?: number;
     dataIndex: number;
     updationTime: number;
 }
@@ -86,6 +87,14 @@ export const NEW_MAGIC_METADATA: MagicMetadata = {
     count: 0,
 };
 
+interface TrashRequest {
+    items: TrashRequestItems[];
+}
+
+interface TrashRequestItems {
+    fileID: number;
+    collectionID: number;
+}
 export const getLocalFiles = async () => {
     const files: Array<File> = (await localForage.getItem<File[]>(FILES)) || [];
     return files;
@@ -111,13 +120,7 @@ export const syncFiles = async (
             continue;
         }
         const fetchedFiles =
-            (await getFiles(
-                collection,
-                lastSyncTime,
-                DIFF_LIMIT,
-                files,
-                setFiles
-            )) ?? [];
+            (await getFiles(collection, lastSyncTime, files, setFiles)) ?? [];
         files.push(...fetchedFiles);
         const latestVersionFiles = new Map<string, File>();
         files.forEach((file) => {
@@ -151,19 +154,16 @@ export const syncFiles = async (
             }))
         );
     }
-    return {
-        files: files.map((item) => ({
-            ...item,
-            w: window.innerWidth,
-            h: window.innerHeight,
-        })),
-    };
+    return files.map((item) => ({
+        ...item,
+        w: window.innerWidth,
+        h: window.innerHeight,
+    }));
 };
 
 export const getFiles = async (
     collection: Collection,
     sinceTime: number,
-    limit: number,
     files: File[],
     setFiles: (files: File[]) => void
 ): Promise<File[]> => {
@@ -180,11 +180,10 @@ export const getFiles = async (
                 break;
             }
             resp = await HTTPService.get(
-                `${ENDPOINT}/collections/diff`,
+                `${ENDPOINT}/collections/v2/diff`,
                 {
                     collectionID: collection.id,
                     sinceTime: time,
-                    limit,
                 },
                 {
                     'X-Auth-Token': token,
@@ -213,7 +212,7 @@ export const getFiles = async (
                             b.metadata.creationTime - a.metadata.creationTime
                     )
             );
-        } while (resp.data.diff.length === limit);
+        } while (resp.data.hasMore);
         return decryptedFiles;
     } catch (e) {
         logError(e, 'Get files failed');
@@ -232,14 +231,35 @@ const removeDeletedCollectionFiles = async (
     return files;
 };
 
-export const deleteFiles = async (filesToDelete: number[]) => {
+export const trashFiles = async (filesToTrash: File[]) => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return;
+        }
+        const trashRequest: TrashRequest = {
+            items: filesToTrash.map((file) => ({
+                fileID: file.id,
+                collectionID: file.collectionID,
+            })),
+        };
+        await HTTPService.post(`${ENDPOINT}/files/trash`, trashRequest, null, {
+            'X-Auth-Token': token,
+        });
+    } catch (e) {
+        logError(e, 'trash file failed');
+        throw e;
+    }
+};
+
+export const deleteFromTrash = async (filesToDelete: number[]) => {
     try {
         const token = getToken();
         if (!token) {
             return;
         }
         await HTTPService.post(
-            `${ENDPOINT}/files/delete`,
+            `${ENDPOINT}/trash/delete`,
             { fileIDs: filesToDelete },
             null,
             {
@@ -247,7 +267,7 @@ export const deleteFiles = async (filesToDelete: number[]) => {
             }
         );
     } catch (e) {
-        logError(e, 'delete failed');
+        logError(e, 'delete from trash failed');
         throw e;
     }
 };

@@ -117,6 +117,12 @@ const GlobalStyles = createGlobalStyle`
     .pswp__img {
         object-fit: contain;
     }
+    .pswp__caption{
+        font-size:20px;
+        height:10%;
+        padding-left:5%;
+        color:#eee;
+    }
 
     .modal {
         z-index: 2000;

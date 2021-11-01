@@ -24,6 +24,7 @@ import CollectionSort from './CollectionSort';
 import OptionIcon, { OptionIconWrapper } from './OptionIcon';
 
 export const ARCHIVE_SECTION = -1;
+export const TRASH_SECTION = -2;
 export const ALL_SECTION = 0;
 
 interface CollectionProps {
@@ -87,6 +88,22 @@ const Chip = styled.button<{ active: boolean }>`
     }
 `;
 
+const SectionChipCreater =
+    ({ activeCollection, clickHandler }) =>
+    ({ section, label }) =>
+        (
+            <Chip
+                active={activeCollection === section}
+                onClick={clickHandler(section)}>
+                {label}
+                <div
+                    style={{
+                        display: 'inline-block',
+                        width: '24px',
+                    }}
+                />
+            </Chip>
+        );
 const Hider = styled.div<{ hide: boolean }>`
     opacity: ${(props) => (props.hide ? '0' : '100')};
     height: ${(props) => (props.hide ? '0' : 'auto')};
@@ -124,7 +141,7 @@ export default function Collections(props: CollectionProps) {
 
     useEffect(() => {
         updateScrollObj();
-    }, [collectionWrapperRef.current, props.isInSearchMode]);
+    }, [collectionWrapperRef.current, props.isInSearchMode, collections]);
 
     useEffect(() => {
         if (!collectionWrapperRef?.current) {
@@ -145,10 +162,6 @@ export default function Collections(props: CollectionProps) {
     };
 
     const user: User = getData(LS_KEYS.USER);
-
-    if (!collections || collections.length === 0) {
-        return null;
-    }
 
     const collectionOptions = CollectionOptions({
         syncWithRemote: props.syncWithRemote,
@@ -188,6 +201,8 @@ export default function Collections(props: CollectionProps) {
         );
     };
 
+    const SectionChip = SectionChipCreater({ activeCollection, clickHandler });
+
     return (
         <Hider hide={props.isInSearchMode}>
             <CollectionShare
@@ -210,17 +225,10 @@ export default function Collections(props: CollectionProps) {
                     <Wrapper
                         ref={collectionWrapperRef}
                         onScroll={updateScrollObj}>
-                        <Chip
-                            active={activeCollection === ALL_SECTION}
-                            onClick={clickHandler(ALL_SECTION)}>
-                            {constants.ALL}
-                            <div
-                                style={{
-                                    display: 'inline-block',
-                                    width: '24px',
-                                }}
-                            />
-                        </Chip>
+                        <SectionChip
+                            section={ALL_SECTION}
+                            label={constants.ALL}
+                        />
                         {sortCollections(
                             collections,
                             props.collectionAndTheirLatestFile,
@@ -262,17 +270,14 @@ export default function Collections(props: CollectionProps) {
                                 </Chip>
                             </OverlayTrigger>
                         ))}
-                        <Chip
-                            active={activeCollection === ARCHIVE_SECTION}
-                            onClick={clickHandler(ARCHIVE_SECTION)}>
-                            {constants.ARCHIVE}
-                            <div
-                                style={{
-                                    display: 'inline-block',
-                                    width: '24px',
-                                }}
-                            />
-                        </Chip>
+                        <SectionChip
+                            section={ARCHIVE_SECTION}
+                            label={constants.ARCHIVE}
+                        />
+                        <SectionChip
+                            section={TRASH_SECTION}
+                            label={constants.TRASH}
+                        />
                     </Wrapper>
                     {scrollObj.scrollLeft <
                         scrollObj.scrollWidth - scrollObj.clientWidth && (
