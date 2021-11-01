@@ -25,12 +25,12 @@ import { prettyPrintExif } from 'utils/exif';
 import EditIcon from 'components/icons/EditIcon';
 import { FlexWrapper, Label, Row, Value } from 'components/Container';
 import TickIcon from 'components/icons/TickIcon';
-import DateTimePicker from 'react-datetime-picker/dist/entry.nostyle';
-import 'react-calendar/dist/Calendar.css';
-import 'react-clock/dist/Clock.css';
-import 'react-datetime-picker/dist/DateTimePicker.css';
 import CrossIcon from 'components/icons/CrossIcon';
 import { logError } from 'utils/sentry';
+
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+
 interface Iprops {
     isOpen: boolean;
     items: any[];
@@ -107,23 +107,25 @@ function RenderCreationTime({
         setPickedTime(originalCreationTime);
         setIsInEditMode(false);
     };
+    const handleChange = (newDate) => {
+        if (newDate instanceof Date) {
+            setPickedTime(newDate);
+        }
+    };
     return (
         <>
             <Row>
                 <Label width="30%">{constants.CREATION_TIME}</Label>
                 <Value width={isInEditMode ? '50%' : '60%'}>
                     {isInEditMode ? (
-                        <>
-                            <DateTimePicker
-                                autoFocus
-                                disableCalendar
-                                disableClock
-                                clearIcon={null}
-                                onChange={setPickedTime}
-                                value={pickedTime}
-                                format={'d MMM y h:mm a'}
-                            />
-                        </>
+                        <DatePicker
+                            open={isInEditMode}
+                            selected={pickedTime}
+                            onChange={handleChange}
+                            timeInputLabel="Time:"
+                            dateFormat="dd/MM/yyyy h:mm aa"
+                            showTimeInput
+                        />
                     ) : (
                         formatDateTime(pickedTime)
                     )}
@@ -147,6 +149,7 @@ function RenderCreationTime({
                     )}
                 </Value>
             </Row>
+            {isInEditMode && <div style={{ height: '200px' }} />}
         </>
     );
 }
@@ -295,6 +298,7 @@ function PhotoSwipe(props: Iprops) {
     useEffect(() => {
         if (photoSwipe) {
             photoSwipe.options.arrowKeys = !showInfo;
+            photoSwipe.options.escKey = !showInfo;
         }
     }, [showInfo]);
 
