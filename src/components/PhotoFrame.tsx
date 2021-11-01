@@ -86,6 +86,7 @@ const getTemplateColumns = (columns: number, groups?: number[]): string => {
 };
 
 const ListContainer = styled.div<{ columns: number; groups?: number[] }>`
+    user-select: none;
     display: grid;
     grid-template-columns: ${({ columns, groups }) =>
         getTemplateColumns(columns, groups)};
@@ -100,6 +101,7 @@ const ListContainer = styled.div<{ columns: number; groups?: number[] }>`
 `;
 
 const DateContainer = styled.div<{ span: number }>`
+    user-select: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -181,6 +183,28 @@ const PhotoFrame = ({
     const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
     const listRef = useRef(null);
+    const [rangeStart, setRangeStart] = useState(null);
+    const [currentHover, setCurrentHover] = useState(null);
+    const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Shift') {
+                setIsShiftKeyPressed(true);
+            }
+        };
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.key === 'Shift') {
+                setIsShiftKeyPressed(false);
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown, false);
+        document.addEventListener('keyup', handleKeyUp, false);
+        return () => {
+            document.addEventListener('keydown', handleKeyDown, false);
+            document.addEventListener('keyup', handleKeyUp, false);
+        };
+    }, []);
 
     useEffect(() => {
         if (isInSearchMode) {
@@ -203,6 +227,12 @@ const PhotoFrame = ({
         listRef.current?.resetAfterIndex(0);
         setFetching({});
     }, [files, search, deleted]);
+
+    useEffect(() => {
+        if (selected.count === 0) {
+            setRangeStart(null);
+        }
+    }, [selected]);
 
     const updateUrl = (index: number) => (url: string) => {
         files[index] = {
@@ -276,10 +306,16 @@ const PhotoFrame = ({
         setOpen(true);
     };
 
-    const handleSelect = (id: number) => (checked: boolean) => {
+    const handleSelect = (id: number, index?: number) => (checked: boolean) => {
         if (selected.collectionID !== activeCollection) {
             setSelected({ count: 0, collectionID: 0 });
         }
+        if (rangeStart || rangeStart === 0) {
+            setRangeStart(null);
+        } else if (checked) {
+            setRangeStart(index);
+        }
+
         setSelected((selected) => ({
             ...selected,
             [id]: checked,
@@ -287,19 +323,50 @@ const PhotoFrame = ({
             collectionID: activeCollection,
         }));
     };
+    const onHoverOver = (index: number) => () => {
+        setCurrentHover(index);
+    };
+
+    const handleRangeSelect = (index: number) => () => {
+        if (rangeStart !== index) {
+            let leftEnd = -1;
+            let rightEnd = -1;
+            if (index < rangeStart) {
+                leftEnd = index;
+                rightEnd = rangeStart;
+            } else {
+                leftEnd = rangeStart;
+                rightEnd = index;
+            }
+            for (let i = leftEnd; i <= rightEnd; i++) {
+                handleSelect(filteredData[i].id)(true);
+            }
+        }
+    };
     const getThumbnail = (file: File[], index: number) => (
         <PreviewCard
-            key={`tile-${file[index].id}`}
+            key={`tile-${file[index].id}-selected-${
+                selected[file[index].id] ?? false
+            }`}
             file={file[index]}
             updateUrl={updateUrl(file[index].dataIndex)}
             onClick={onThumbnailClick(index)}
             selectable={!isSharedCollection}
-            onSelect={handleSelect(file[index].id)}
+            onSelect={handleSelect(file[index].id, index)}
             selected={
                 selected.collectionID === activeCollection &&
                 selected[file[index].id]
             }
             selectOnClick={selected.count > 0}
+            onHover={onHoverOver(index)}
+            onRangeSelect={handleRangeSelect(index)}
+            isRangeSelectActive={
+                isShiftKeyPressed && (rangeStart || rangeStart === 0)
+            }
+            isInsSelectRange={
+                (index >= rangeStart + 1 && index <= currentHover) ||
+                (index >= currentHover && index <= rangeStart - 1)
+            }
         />
     );
 
