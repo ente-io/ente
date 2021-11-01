@@ -28,8 +28,6 @@ import { FormCheck } from 'react-bootstrap';
 import { prettyPrintExif } from 'utils/exif';
 import EditIcon from 'components/icons/EditIcon';
 import { FlexWrapper, Label, Row, Value } from 'components/Container';
-import TickIcon from 'components/icons/TickIcon';
-import CrossIcon from 'components/icons/CrossIcon';
 import { logError } from 'utils/sentry';
 
 import DatePicker from 'react-datepicker';
@@ -129,9 +127,34 @@ function RenderCreationTime({
                             timeInputLabel="Time:"
                             dateFormat="dd/MM/yyyy h:mm aa"
                             showTimeInput
+                            autoFocus
+                            shouldCloseOnSelect={false}
+                            onClickOutside={discardEdits}
                             minDate={new Date(MIN_EDITED_CREATION_TIME)}
                             maxDate={new Date()}
-                        />
+                            showYearDropdown
+                            showMonthDropdown
+                            withPortal>
+                            <FlexWrapper
+                                style={{
+                                    marginLeft: 'auto',
+                                    width: '200px',
+                                    justifyContent: 'flex-end',
+                                    padding: '5px 10px ',
+                                }}>
+                                <Button
+                                    style={{ marginRight: '20px' }}
+                                    variant="outline-secondary"
+                                    onClick={discardEdits}>
+                                    {constants.CANCEL}
+                                </Button>
+                                <Button
+                                    variant="outline-success"
+                                    onClick={saveEdits}>
+                                    {constants.SAVE}
+                                </Button>
+                            </FlexWrapper>
+                        </DatePicker>
                     ) : (
                         formatDateTime(pickedTime)
                     )}
@@ -139,23 +162,11 @@ function RenderCreationTime({
                 <Value
                     width={isInEditMode ? '20%' : '10%'}
                     style={{ cursor: 'pointer', marginLeft: '10px' }}>
-                    {isInEditMode ? (
-                        <FlexWrapper style={{ justifyContent: 'space-around' }}>
-                            <ClickWrapper onClick={saveEdits}>
-                                <TickIcon width="24px" height="24px" />
-                            </ClickWrapper>
-                            <ClickWrapper onClick={discardEdits}>
-                                <CrossIcon />
-                            </ClickWrapper>
-                        </FlexWrapper>
-                    ) : (
-                        <ClickWrapper onClick={openEditMode}>
-                            <EditIcon />
-                        </ClickWrapper>
-                    )}
+                    <ClickWrapper onClick={openEditMode}>
+                        <EditIcon />
+                    </ClickWrapper>
                 </Value>
             </Row>
-            {isInEditMode && <div style={{ height: '205px' }} />}
         </>
     );
 }
