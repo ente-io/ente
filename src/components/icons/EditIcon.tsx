@@ -17,7 +17,7 @@ export default function AddIcon(props) {
 }
 
 AddIcon.defaultProps = {
-    height: 24,
-    width: 24,
+    height: 20,
+    width: 20,
     viewBox: '0 0 24 24',
 };
