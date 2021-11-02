@@ -309,7 +309,7 @@ export async function updateMagicMetadataProps(
             magicMetadata: {
                 ...file.magicMetadata,
                 data: magicMetadataProps,
-                count: Object.keys(file.pubMagicMetadata).length,
+                count: Object.keys(file.magicMetadata.data).length,
             },
         };
     } else {
