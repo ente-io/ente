@@ -9,6 +9,7 @@ import {
 } from 'services/collectionService';
 import {
     File,
+    MAX_EDITED_FILE_NAME_LENGTH,
     MIN_EDITED_CREATION_TIME,
     updatePublicMagicMetadata,
 } from 'services/fileService';
@@ -76,6 +77,12 @@ const ButtonContainer = styled.div`
     margin-left: auto;
     width: 200px;
     padding: 5px 10px;
+`;
+const WarningMessage = styled.div`
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 80%;
+    color: #dc3545;
 `;
 
 const renderInfoItem = (label: string, value: string | JSX.Element) => (
@@ -224,7 +231,10 @@ function RenderFileName({
         setIsInEditMode(false);
     };
     const handleChange = (event) => {
-        setNewFileName(event.target.value);
+        const newName = event.target.value.replace(/(\r\n|\n|\r)/gm, '');
+        if (newName.length <= MAX_EDITED_FILE_NAME_LENGTH) {
+            setNewFileName(event.target.value);
+        }
     };
     return (
         <>
@@ -232,12 +242,20 @@ function RenderFileName({
                 <Label width="30%">{constants.FILE_NAME}</Label>
                 <Value width={isInEditMode ? '50%' : '60%'}>
                     {isInEditMode ? (
-                        <textarea
-                            value={newFileName}
-                            onChange={handleChange}
-                            style={{
-                                width: '100%',
-                            }}></textarea>
+                        <div>
+                            <textarea
+                                value={newFileName}
+                                onChange={handleChange}
+                                style={{
+                                    width: '100%',
+                                }}></textarea>
+                            {newFileName.length ===
+                                MAX_EDITED_FILE_NAME_LENGTH && (
+                                <WarningMessage>
+                                    {constants.FILE_NAME_CHARACTER_LIMIT}
+                                </WarningMessage>
+                            )}
+                        </div>
                     ) : (
                         <>{newFileName}</>
                     )}

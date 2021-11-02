@@ -24,6 +24,8 @@ const FILES = 'files';
 
 export const MIN_EDITED_CREATION_TIME = '1800-01-01T00:00:00.000Z';
 
+export const MAX_EDITED_FILE_NAME_LENGTH = 100;
+
 export interface fileAttribute {
     encryptedData?: DataStream | Uint8Array;
     objectKey?: string;
