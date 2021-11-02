@@ -1,7 +1,12 @@
 import { SetFiles } from 'pages/gallery';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
-import { appendPhotoSwipeProps, decryptFile, sortFiles } from 'utils/file';
+import {
+    appendPhotoSwipeProps,
+    decryptFile,
+    mergeMetadata,
+    sortFiles,
+} from 'utils/file';
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
 import { Collection, getCollection } from './collectionService';
@@ -161,13 +166,15 @@ function removeRestoredOrDeletedTrashItems(trash: Trash) {
 }
 
 export function getTrashedFiles(trash: Trash) {
-    return appendPhotoSwipeProps(
-        trash.map((trashedFile) => ({
-            ...trashedFile.file,
-            updationTime: trashedFile.updatedAt,
-            isTrashed: true,
-            deleteBy: trashedFile.deleteBy,
-        }))
+    return mergeMetadata(
+        appendPhotoSwipeProps(
+            trash.map((trashedFile) => ({
+                ...trashedFile.file,
+                updationTime: trashedFile.updatedAt,
+                isTrashed: true,
+                deleteBy: trashedFile.deleteBy,
+            }))
+        )
     );
 }
 

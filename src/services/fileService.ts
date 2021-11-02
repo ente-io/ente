@@ -10,7 +10,12 @@ import {
 import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
-import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
+import {
+    appendPhotoSwipeProps,
+    decryptFile,
+    mergeMetadata,
+    sortFiles,
+} from 'utils/file';
 import CryptoWorker from 'utils/crypto';
 
 const ENDPOINT = getEndpoint();
@@ -137,7 +142,7 @@ export const syncFiles = async (
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     if (files.length !== localFiles.length) {
         await localForage.setItem('files', files);
-        setFiles(files);
+        setFiles(sortFiles(mergeMetadata(files)));
     }
     for (const collection of collections) {
         if (!getToken()) {
@@ -174,20 +179,10 @@ export const syncFiles = async (
             `${collection.id}-time`,
             collection.updationTime
         );
-        files = sortFiles(mergeMetadata(files));
-        setFiles(
-            files.map((item) => ({
-                ...item,
-                w: window.innerWidth,
-                h: window.innerHeight,
-            }))
-        );
+        files = sortFiles(mergeMetadata(appendPhotoSwipeProps(files)));
+        setFiles(files);
     }
-    return files.map((item) => ({
-        ...item,
-        w: window.innerWidth,
-        h: window.innerHeight,
-    }));
+    return mergeMetadata(appendPhotoSwipeProps(files));
 };
 
 export const getFiles = async (

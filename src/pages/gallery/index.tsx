@@ -52,6 +52,7 @@ import {
     changeFilesVisibility,
     getSelectedFiles,
     mergeMetadata,
+    sortFiles,
     sortFilesIntoCollections,
 } from 'utils/file';
 import SearchBar, { DateValue } from 'components/SearchBar';
@@ -218,11 +219,11 @@ export default function Gallery() {
                 setPlanModalView(true);
             }
             setIsFirstLogin(false);
-            const files = await getLocalFiles();
+            const files = mergeMetadata(await getLocalFiles());
             const collections = await getLocalCollections();
             const trash = await getLocalTrash();
             const trashedFile = getTrashedFiles(trash);
-            setFiles([...files, ...trashedFile]);
+            setFiles(sortFiles([...files, ...trashedFile]));
             setCollections(collections);
             setTrash(trash);
             await setDerivativeState(collections, files);
