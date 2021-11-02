@@ -410,6 +410,9 @@ const GlobalStyles = createGlobalStyle`
     .tooltip-inner{
         padding:0px;
     }
+    .react-datepicker__input-container > input {
+        width:100%;
+    }
 `;
 
 export const LogoImage = styled.img`

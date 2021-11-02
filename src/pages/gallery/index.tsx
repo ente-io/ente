@@ -51,6 +51,8 @@ import PhotoFrame from 'components/PhotoFrame';
 import {
     changeFilesVisibility,
     getSelectedFiles,
+    mergeMetadata,
+    sortFiles,
     sortFilesIntoCollections,
 } from 'utils/file';
 import SearchBar, { DateValue } from 'components/SearchBar';
@@ -132,6 +134,7 @@ type GalleryContextType = {
     files: Map<number, string>;
     showPlanSelectorModal: () => void;
     setActiveCollection: (collection: number) => void;
+    syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
 };
 
 const defaultGalleryContext: GalleryContextType = {
@@ -139,6 +142,7 @@ const defaultGalleryContext: GalleryContextType = {
     files: new Map(),
     showPlanSelectorModal: () => null,
     setActiveCollection: () => null,
+    syncWithRemote: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -215,11 +219,11 @@ export default function Gallery() {
                 setPlanModalView(true);
             }
             setIsFirstLogin(false);
-            const files = await getLocalFiles();
+            const files = mergeMetadata(await getLocalFiles());
             const collections = await getLocalCollections();
             const trash = await getLocalTrash();
             const trashedFile = getTrashedFiles(trash);
-            setFiles([...files, ...trashedFile]);
+            setFiles(sortFiles([...files, ...trashedFile]));
             setCollections(collections);
             setTrash(trash);
             await setDerivativeState(collections, files);
@@ -320,21 +324,21 @@ export default function Gallery() {
         collections: Collection[],
         files: File[]
     ) => {
+        const favItemIds = await getFavItemIds(files);
+        setFavItemIds(favItemIds);
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
+        setCollections(nonEmptyCollections);
         const collectionsAndTheirLatestFile = getCollectionsAndTheirLatestFile(
             nonEmptyCollections,
             files
         );
+        setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
         const collectionWiseFiles = sortFilesIntoCollections(files);
         const collectionFilesCount = new Map<number, number>();
         for (const [id, files] of collectionWiseFiles) {
             collectionFilesCount.set(id, files.length);
         }
-        setCollections(nonEmptyCollections);
-        setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
         setCollectionFilesCount(collectionFilesCount);
-        const favItemIds = await getFavItemIds(files);
-        setFavItemIds(favItemIds);
     };
 
     const clearSelection = function () {
@@ -524,6 +528,7 @@ export default function Gallery() {
                 ...defaultGalleryContext,
                 showPlanSelectorModal: () => setPlanModalView(true),
                 setActiveCollection,
+                syncWithRemote,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}

@@ -7,17 +7,31 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from 'services/collectionService';
-import { File } from 'services/fileService';
+import {
+    File,
+    MIN_EDITED_CREATION_TIME,
+    updatePublicMagicMetadata,
+} from 'services/fileService';
 import constants from 'utils/strings/constants';
 import exifr from 'exifr';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
 import styled from 'styled-components';
 import events from './events';
-import { downloadFile, formatDateTime } from 'utils/file';
+import {
+    changeFileCreationTime,
+    downloadFile,
+    formatDateTime,
+    updateExistingFilePubMetadata,
+} from 'utils/file';
 import { FormCheck } from 'react-bootstrap';
 import { prettyPrintExif } from 'utils/exif';
+import EditIcon from 'components/icons/EditIcon';
+import { IconButton, Label, Row, Value } from 'components/Container';
+import { logError } from 'utils/sentry';
+
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 interface Iprops {
     isOpen: boolean;
@@ -49,17 +63,120 @@ const Pre = styled.pre`
     padding: 7px 15px;
 `;
 
+const ButtonContainer = styled.div`
+    margin-left: auto;
+    width: 200px;
+    padding: 5px 10px;
+`;
+
 const renderInfoItem = (label: string, value: string | JSX.Element) => (
-    <>
-        <Form.Label column sm="4">
-            {label}
-        </Form.Label>
-        <Form.Label column sm="8">
-            {value}
-        </Form.Label>
-    </>
+    <Row>
+        <Label width="30%">{label}</Label>
+        <Value width="70%">{value}</Value>
+    </Row>
 );
 
+function RenderCreationTime({
+    file,
+    scheduleUpdate,
+}: {
+    file: File;
+    scheduleUpdate: () => void;
+}) {
+    const originalCreationTime = new Date(file.metadata.creationTime / 1000);
+    const [isInEditMode, setIsInEditMode] = useState(false);
+
+    const [pickedTime, setPickedTime] = useState(originalCreationTime);
+
+    const openEditMode = () => setIsInEditMode(true);
+
+    const saveEdits = async () => {
+        try {
+            if (isInEditMode && file) {
+                const unixTimeInMicroSec = pickedTime.getTime() * 1000;
+                if (unixTimeInMicroSec === file.metadata.creationTime) {
+                    return;
+                }
+                let updatedFile = await changeFileCreationTime(
+                    file,
+                    unixTimeInMicroSec
+                );
+                updatedFile = (
+                    await updatePublicMagicMetadata([updatedFile])
+                )[0];
+                updateExistingFilePubMetadata(file, updatedFile);
+                scheduleUpdate();
+            }
+        } catch (e) {
+            logError(e, 'failed to update creationTime');
+        }
+        setIsInEditMode(false);
+    };
+    const discardEdits = () => {
+        setPickedTime(originalCreationTime);
+        setIsInEditMode(false);
+    };
+    const handleChange = (newDate) => {
+        if (newDate instanceof Date) {
+            setPickedTime(newDate);
+        }
+    };
+    return (
+        <>
+            <Row>
+                <Label width="30%">{constants.CREATION_TIME}</Label>
+                <Value width={isInEditMode ? '50%' : '60%'}>
+                    {isInEditMode ? (
+                        <DatePicker
+                            open={isInEditMode}
+                            selected={pickedTime}
+                            onChange={handleChange}
+                            timeInputLabel="Time:"
+                            dateFormat="dd/MM/yyyy h:mm aa"
+                            showTimeInput
+                            autoFocus
+                            shouldCloseOnSelect={false}
+                            onClickOutside={discardEdits}
+                            minDate={new Date(MIN_EDITED_CREATION_TIME)}
+                            maxDate={new Date()}
+                            showYearDropdown
+                            showMonthDropdown
+                            withPortal>
+                            <ButtonContainer
+                                style={{
+                                    marginLeft: 'auto',
+                                    width: '200px',
+                                    justifyContent: 'flex-end',
+                                    padding: '5px 10px ',
+                                }}>
+                                <Button
+                                    style={{ marginRight: '20px' }}
+                                    variant="outline-secondary"
+                                    onClick={discardEdits}>
+                                    {constants.CANCEL}
+                                </Button>
+                                <Button
+                                    variant="outline-success"
+                                    onClick={saveEdits}>
+                                    {constants.SAVE}
+                                </Button>
+                            </ButtonContainer>
+                        </DatePicker>
+                    ) : (
+                        formatDateTime(pickedTime)
+                    )}
+                </Value>
+                <Value
+                    width={isInEditMode ? '20%' : '10%'}
+                    style={{ cursor: 'pointer', marginLeft: '10px' }}>
+                    <IconButton onClick={openEditMode}>
+                        <EditIcon />
+                    </IconButton>
+                </Value>
+            </Row>
+        </>
+    );
+}
 function ExifData(props: { exif: any }) {
     const { exif } = props;
     const [showAll, setShowAll] = useState(false);
@@ -113,6 +230,67 @@ function ExifData(props: { exif: any }) {
     );
 }
 
+function InfoModal({
+    showInfo,
+    handleCloseInfo,
+    items,
+    photoSwipe,
+    metadata,
+    exif,
+    scheduleUpdate,
+}) {
+    return (
+        <Modal show={showInfo} onHide={handleCloseInfo}>
+            <Modal.Header closeButton>
+                <Modal.Title>{constants.INFO}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <div>
+                    <Legend>{constants.METADATA}</Legend>
+                </div>
+                {renderInfoItem(
+                    constants.FILE_ID,
+                    items[photoSwipe?.getCurrentIndex()]?.id
+                )}
+                {metadata?.title &&
+                    renderInfoItem(constants.FILE_NAME, metadata.title)}
+                {metadata?.creationTime && (
+                    <RenderCreationTime
+                        file={items[photoSwipe?.getCurrentIndex()]}
+                        scheduleUpdate={scheduleUpdate}
+                    />
+                )}
+                {metadata?.modificationTime &&
+                    renderInfoItem(
+                        constants.UPDATED_ON,
+                        formatDateTime(metadata.modificationTime / 1000)
+                    )}
+                {metadata?.longitude > 0 &&
+                    metadata?.longitude > 0 &&
+                    renderInfoItem(
+                        constants.LOCATION,
+                        <a
+                            href={`https://www.openstreetmap.org/?mlat=${metadata.latitude}&mlon=${metadata.longitude}#map=15/${metadata.latitude}/${metadata.longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer">
+                            {constants.SHOW_MAP}
+                        </a>
+                    )}
+                {exif && (
+                    <>
+                        <ExifData exif={exif} />
+                    </>
+                )}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="outline-secondary" onClick={handleCloseInfo}>
+                    {constants.CLOSE}
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
+}
+
 function PhotoSwipe(props: Iprops) {
     const pswpElement = useRef<HTMLDivElement>();
     const [photoSwipe, setPhotoSwipe] = useState<Photoswipe<any>>();
@@ -140,6 +318,13 @@ function PhotoSwipe(props: Iprops) {
     useEffect(() => {
         updateItems(items);
     }, [items]);
+
+    useEffect(() => {
+        if (photoSwipe) {
+            photoSwipe.options.arrowKeys = !showInfo;
+            photoSwipe.options.escKey = !showInfo;
+        }
+    }, [showInfo]);
 
     function updateFavButton() {
         setIsFav(isInFav(this?.currItem));
@@ -302,6 +487,7 @@ function PhotoSwipe(props: Iprops) {
         await downloadFile(file);
         loadingBar.current.complete();
     };
+    const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;
     let { className } = props;
     className = classnames(['pswp', className]).trim();
@@ -386,59 +572,15 @@ function PhotoSwipe(props: Iprops) {
                     </div>
                 </div>
             </div>
-            <Modal show={showInfo} onHide={handleCloseInfo}>
-                <Modal.Header closeButton>
-                    <Modal.Title>{constants.INFO}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group>
-                        <div>
-                            <Legend>{constants.METADATA}</Legend>
-                        </div>
-                        {renderInfoItem(
-                            constants.FILE_ID,
-                            items[photoSwipe?.getCurrentIndex()]?.id
-                        )}
-                        {metadata?.title &&
-                            renderInfoItem(constants.FILE_NAME, metadata.title)}
-                        {metadata?.creationTime &&
-                            renderInfoItem(
-                                constants.CREATION_TIME,
-                                formatDateTime(metadata.creationTime / 1000)
-                            )}
-                        {metadata?.modificationTime &&
-                            renderInfoItem(
-                                constants.UPDATED_ON,
-                                formatDateTime(metadata.modificationTime / 1000)
-                            )}
-                        {metadata?.longitude > 0 &&
-                            metadata?.longitude > 0 &&
-                            renderInfoItem(
-                                constants.LOCATION,
-                                <a
-                                    href={`https://www.openstreetmap.org/?mlat=${metadata.latitude}&mlon=${metadata.longitude}#map=15/${metadata.latitude}/${metadata.longitude}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer">
-                                    {constants.SHOW_MAP}
-                                </a>
-                            )}
-                        {exif && (
-                            <>
-                                <br />
-                                <br />
-                                <ExifData exif={exif} />
-                            </>
-                        )}
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button
-                        variant="outline-secondary"
-                        onClick={handleCloseInfo}>
-                        {constants.CLOSE}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            <InfoModal
+                showInfo={showInfo}
+                handleCloseInfo={handleCloseInfo}
+                items={items}
+                photoSwipe={photoSwipe}
+                metadata={metadata}
+                exif={exif}
+                scheduleUpdate={scheduleUpdate}
+            />
         </>
     );
 }

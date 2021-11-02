@@ -2,15 +2,27 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
 
 import { getToken } from 'utils/common/key';
-import { DataStream, MetadataObject } from './upload/uploadService';
+import {
+    DataStream,
+    EncryptionResult,
+    MetadataObject,
+} from './upload/uploadService';
 import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
-import { decryptFile, sortFiles } from 'utils/file';
+import {
+    appendPhotoSwipeProps,
+    decryptFile,
+    mergeMetadata,
+    sortFiles,
+} from 'utils/file';
+import CryptoWorker from 'utils/crypto';
 
 const ENDPOINT = getEndpoint();
 
 const FILES = 'files';
+
+export const MIN_EDITED_CREATION_TIME = '1881-01-01T00:00:00.000Z';
 
 export interface fileAttribute {
     encryptedData?: DataStream | Uint8Array;
@@ -40,15 +52,35 @@ export enum VISIBILITY_STATE {
     VISIBLE,
     ARCHIVED,
 }
+
+export interface MagicMetadataCore {
+    version: number;
+    count: number;
+    header: string;
+    data: Record<string, any>;
+}
+
+export interface EncryptedMagicMetadataCore
+    extends Omit<MagicMetadataCore, 'data'> {
+    data: string;
+}
+
 export interface MagicMetadataProps {
     visibility?: VISIBILITY_STATE;
 }
-export interface MagicMetadata {
-    version: number;
-    count: number;
-    data: string | MagicMetadataProps;
-    header: string;
+
+export interface MagicMetadata extends Omit<MagicMetadataCore, 'data'> {
+    data: MagicMetadataProps;
 }
+
+export interface PublicMagicMetadataProps {
+    editedTime?: number;
+}
+
+export interface PublicMagicMetadata extends Omit<MagicMetadataCore, 'data'> {
+    data: PublicMagicMetadataProps;
+}
+
 export interface File {
     id: number;
     collectionID: number;
@@ -57,6 +89,7 @@ export interface File {
     thumbnail: fileAttribute;
     metadata: MetadataObject;
     magicMetadata: MagicMetadata;
+    pubMagicMetadata: PublicMagicMetadata;
     encryptedKey: string;
     keyDecryptionNonce: string;
     key: string;
@@ -75,12 +108,13 @@ export interface File {
 interface UpdateMagicMetadataRequest {
     metadataList: UpdateMagicMetadata[];
 }
+
 interface UpdateMagicMetadata {
     id: number;
-    magicMetadata: MagicMetadata;
+    magicMetadata: EncryptedMagicMetadataCore;
 }
 
-export const NEW_MAGIC_METADATA: MagicMetadata = {
+export const NEW_MAGIC_METADATA: MagicMetadataCore = {
     version: 0,
     data: {},
     header: null,
@@ -108,7 +142,7 @@ export const syncFiles = async (
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     if (files.length !== localFiles.length) {
         await localForage.setItem('files', files);
-        setFiles(files);
+        setFiles(sortFiles(mergeMetadata(files)));
     }
     for (const collection of collections) {
         if (!getToken()) {
@@ -140,25 +174,15 @@ export const syncFiles = async (
             }
             files.push(file);
         }
-        files = sortFiles(files);
         await localForage.setItem('files', files);
         await localForage.setItem(
             `${collection.id}-time`,
             collection.updationTime
         );
-        setFiles(
-            files.map((item) => ({
-                ...item,
-                w: window.innerWidth,
-                h: window.innerHeight,
-            }))
-        );
+        files = sortFiles(mergeMetadata(appendPhotoSwipeProps(files)));
+        setFiles(files);
     }
-    return files.map((item) => ({
-        ...item,
-        w: window.innerWidth,
-        h: window.innerHeight,
-    }));
+    return mergeMetadata(appendPhotoSwipeProps(files));
 };
 
 export const getFiles = async (
@@ -205,12 +229,13 @@ export const getFiles = async (
                 time = resp.data.diff.slice(-1)[0].updationTime;
             }
             setFiles(
-                [...(files || []), ...decryptedFiles]
-                    .filter((item) => !item.isDeleted)
-                    .sort(
-                        (a, b) =>
-                            b.metadata.creationTime - a.metadata.creationTime
+                sortFiles(
+                    mergeMetadata(
+                        [...(files || []), ...decryptedFiles].filter(
+                            (item) => !item.isDeleted
+                        )
                     )
+                )
             );
         } while (resp.data.hasMore);
         return decryptedFiles;
@@ -278,13 +303,69 @@ export const updateMagicMetadata = async (files: File[]) => {
         return;
     }
     const reqBody: UpdateMagicMetadataRequest = { metadataList: [] };
+    const worker = await new CryptoWorker();
     for (const file of files) {
+        const { file: encryptedMagicMetadata }: EncryptionResult =
+            await worker.encryptMetadata(file.magicMetadata.data, file.key);
         reqBody.metadataList.push({
             id: file.id,
-            magicMetadata: file.magicMetadata,
+            magicMetadata: {
+                version: file.magicMetadata.version,
+                count: file.magicMetadata.count,
+                data: encryptedMagicMetadata.encryptedData as unknown as string,
+                header: encryptedMagicMetadata.decryptionHeader,
+            },
         });
     }
     await HTTPService.put(`${ENDPOINT}/files/magic-metadata`, reqBody, null, {
         'X-Auth-Token': token,
     });
+    return files.map(
+        (file): File => ({
+            ...file,
+            magicMetadata: {
+                ...file.magicMetadata,
+                version: file.magicMetadata.version + 1,
+            },
+        })
+    );
+};
+
+export const updatePublicMagicMetadata = async (files: File[]) => {
+    const token = getToken();
+    if (!token) {
+        return;
+    }
+    const reqBody: UpdateMagicMetadataRequest = { metadataList: [] };
+    const worker = await new CryptoWorker();
+    for (const file of files) {
+        const { file: encryptedPubMagicMetadata }: EncryptionResult =
+            await worker.encryptMetadata(file.pubMagicMetadata.data, file.key);
+        reqBody.metadataList.push({
+            id: file.id,
+            magicMetadata: {
+                version: file.pubMagicMetadata.version,
+                count: file.pubMagicMetadata.count,
+                data: encryptedPubMagicMetadata.encryptedData as unknown as string,
+                header: encryptedPubMagicMetadata.decryptionHeader,
+            },
+        });
+    }
+    await HTTPService.put(
+        `${ENDPOINT}/files/public-magic-metadata`,
+        reqBody,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+    return files.map(
+        (file): File => ({
+            ...file,
+            pubMagicMetadata: {
+                ...file.pubMagicMetadata,
+                version: file.pubMagicMetadata.version + 1,
+            },
+        })
+    );
 };

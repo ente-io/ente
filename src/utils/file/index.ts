@@ -6,11 +6,11 @@ import {
     FILE_TYPE,
     MagicMetadataProps,
     NEW_MAGIC_METADATA,
+    PublicMagicMetadataProps,
     VISIBILITY_STATE,
 } from 'services/fileService';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
-import { EncryptionResult } from 'services/upload/uploadService';
 import DownloadManger from 'services/downloadManager';
 import { logError } from 'utils/sentry';
 import { User } from 'services/userService';
@@ -199,6 +199,13 @@ export async function decryptFile(file: File, collection: Collection) {
                 file.key
             );
         }
+        if (file.pubMagicMetadata?.data) {
+            file.pubMagicMetadata.data = await worker.decryptMetadata(
+                file.pubMagicMetadata.data,
+                file.pubMagicMetadata.header,
+                file.key
+            );
+        }
         return file;
     } catch (e) {
         logError(e, 'file decryption failed');
@@ -273,46 +280,107 @@ export function fileIsArchived(file: File) {
     return file.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
 }
 
+export async function updateMagicMetadataProps(
+    file: File,
+    magicMetadataUpdates: MagicMetadataProps
+) {
+    const worker = await new CryptoWorker();
+
+    if (!file.magicMetadata) {
+        file.magicMetadata = NEW_MAGIC_METADATA;
+    }
+    if (typeof file.magicMetadata.data === 'string') {
+        file.magicMetadata.data = (await worker.decryptMetadata(
+            file.magicMetadata.data,
+            file.magicMetadata.header,
+            file.key
+        )) as MagicMetadataProps;
+    }
+    if (magicMetadataUpdates) {
+        // copies the existing magic metadata properties of the files and updates the visibility value
+        // The expected behaviour while updating magic metadata is to let the existing property as it is and update/add the property you want
+        const magicMetadataProps: MagicMetadataProps = {
+            ...file.magicMetadata.data,
+            ...magicMetadataUpdates,
+        };
+
+        return {
+            ...file,
+            magicMetadata: {
+                ...file.magicMetadata,
+                data: magicMetadataProps,
+                count: Object.keys(file.magicMetadata.data).length,
+            },
+        };
+    } else {
+        return file;
+    }
+}
+export async function updatePublicMagicMetadataProps(
+    file: File,
+    publicMetadataUpdates: PublicMagicMetadataProps
+) {
+    const worker = await new CryptoWorker();
+
+    if (!file.pubMagicMetadata) {
+        file.pubMagicMetadata = NEW_MAGIC_METADATA;
+    }
+    if (typeof file.pubMagicMetadata.data === 'string') {
+        file.pubMagicMetadata.data = (await worker.decryptMetadata(
+            file.pubMagicMetadata.data,
+            file.pubMagicMetadata.header,
+            file.key
+        )) as PublicMagicMetadataProps;
+    }
+
+    if (publicMetadataUpdates) {
+        const publicMetadataProps = {
+            ...file.pubMagicMetadata.data,
+            ...publicMetadataUpdates,
+        };
+        return {
+            ...file,
+            pubMagicMetadata: {
+                ...file.pubMagicMetadata,
+                data: publicMetadataProps,
+                count: Object.keys(file.pubMagicMetadata.data).length,
+            },
+        };
+    } else {
+        return file;
+    }
+}
+
 export async function changeFilesVisibility(
     files: File[],
     selected: SelectedState,
     visibility: VISIBILITY_STATE
 ) {
-    const worker = await new CryptoWorker();
     const selectedFiles = getSelectedFiles(selected, files);
     const updatedFiles: File[] = [];
     for (const file of selectedFiles) {
-        if (!file.magicMetadata) {
-            file.magicMetadata = NEW_MAGIC_METADATA;
-        }
-        if (typeof file.magicMetadata.data === 'string') {
-            file.magicMetadata.data = (await worker.decryptMetadata(
-                file.magicMetadata.data,
-                file.magicMetadata.header,
-                file.key
-            )) as MagicMetadataProps;
-        }
-        // copies the existing magic metadata properties of the files and updates the visibility value
-        // The expected behaviour while updating magic metadata is to let the existing property as it is and update/add the property you want
         const updatedMagicMetadataProps: MagicMetadataProps = {
-            ...file.magicMetadata.data,
             visibility,
         };
-        const encryptedMagicMetadata: EncryptionResult =
-            await worker.encryptMetadata(updatedMagicMetadataProps, file.key);
-        updatedFiles.push({
-            ...file,
-            magicMetadata: {
-                version: file.magicMetadata.version,
-                count: Object.keys(updatedMagicMetadataProps).length,
-                data: encryptedMagicMetadata.file
-                    .encryptedData as unknown as string,
-                header: encryptedMagicMetadata.file.decryptionHeader,
-            },
-        });
+
+        updatedFiles.push(
+            await updateMagicMetadataProps(file, updatedMagicMetadataProps)
+        );
     }
     return updatedFiles;
 }
+
+export async function changeFileCreationTime(file: File, editedTime: number) {
+    const updatedPublicMagicMetadataProps: PublicMagicMetadataProps = {
+        editedTime,
+    };
+
+    return await updatePublicMagicMetadataProps(
+        file,
+        updatedPublicMagicMetadataProps
+    );
+}
+
 export function isSharedFile(file: File) {
     const user: User = getData(LS_KEYS.USER);
 
@@ -322,10 +390,34 @@ export function isSharedFile(file: File) {
     return file.ownerID !== user.id;
 }
 
+export function mergeMetadata(files: File[]): File[] {
+    return files.map((file) => ({
+        ...file,
+        metadata: {
+            ...file.metadata,
+            ...(file.pubMagicMetadata?.data
+                ? {
+                      ...(file.pubMagicMetadata?.data.editedTime && {
+                          creationTime: file.pubMagicMetadata.data.editedTime,
+                      }),
+                  }
+                : {}),
+            ...(file.magicMetadata?.data ? file.magicMetadata.data : {}),
+        },
+    }));
+}
 export function appendPhotoSwipeProps(files: File[]) {
     return files.map((file) => ({
         ...file,
         w: window.innerWidth,
         h: window.innerHeight,
     })) as File[];
+}
+
+export function updateExistingFilePubMetadata(
+    existingFile: File,
+    updatedFile: File
+) {
+    existingFile.pubMagicMetadata = updatedFile.pubMagicMetadata;
+    existingFile.metadata = mergeMetadata([existingFile])[0].metadata;
 }

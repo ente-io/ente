@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function DateIcon(props) {
+export default function CloseIcon(props) {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -12,7 +12,7 @@ export default function DateIcon(props) {
     );
 }
 
-DateIcon.defaultProps = {
+CloseIcon.defaultProps = {
     height: 24,
     width: 24,
     viewBox: '0 0 24 24',
