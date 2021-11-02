@@ -320,6 +320,15 @@ export const updateMagicMetadata = async (files: File[]) => {
     await HTTPService.put(`${ENDPOINT}/files/magic-metadata`, reqBody, null, {
         'X-Auth-Token': token,
     });
+    return files.map(
+        (file): File => ({
+            ...file,
+            magicMetadata: {
+                ...file.magicMetadata,
+                version: file.magicMetadata.version + 1,
+            },
+        })
+    );
 };
 
 export const updatePublicMagicMetadata = async (files: File[]) => {
