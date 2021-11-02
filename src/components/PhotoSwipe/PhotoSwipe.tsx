@@ -100,7 +100,9 @@ function RenderCreationTime({
                     file,
                     unixTimeInMicroSec
                 );
-                updatedFile = await updatePublicMagicMetadata([updatedFile])[0];
+                updatedFile = (
+                    await updatePublicMagicMetadata([updatedFile])
+                )[0];
                 updateExistingFilePubMetadata(file, updatedFile);
                 scheduleUpdate();
             }

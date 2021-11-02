@@ -343,7 +343,7 @@ export async function updatePublicMagicMetadataProps(
             pubMagicMetadata: {
                 ...file.pubMagicMetadata,
                 data: publicMetadataProps,
-                count: Object.keys(file.pubMagicMetadata).length,
+                count: Object.keys(file.pubMagicMetadata.data).length,
             },
         };
     } else {
