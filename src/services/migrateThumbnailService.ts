@@ -49,7 +49,9 @@ export async function replaceThumbnail(
         const largeThumbnailFiles = [...files, ...trashFiles].filter((file) =>
             largeThumbnailFileIDs.has(file.id)
         );
-
+        if (largeThumbnailFileIDs.size !== largeThumbnailFiles.length) {
+            logError(Error(), 'all large thumbnail files not found locally');
+        }
         if (largeThumbnailFiles.length === 0) {
             return completedWithError;
         }
