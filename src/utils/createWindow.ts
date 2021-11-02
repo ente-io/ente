@@ -15,6 +15,7 @@ export function createWindow(): BrowserWindow {
         backgroundColor: '#111111',
         webPreferences: {
             preload: path.join(__dirname, '../preload.js'),
+            contextIsolation: false,
         },
         icon: appIcon,
         show: false, // don't show the main window
@@ -35,7 +36,7 @@ export function createWindow(): BrowserWindow {
         mainWindow.webContents.openDevTools();
     } else {
         splash.loadURL(
-            `file://${path.join(process.resourcesPath, 'splash.html')}`
+            `file://${path.join(process.resourcesPath, 'splash.html')}`,
         );
         mainWindow.loadURL('http://web.ente.io');
     }
@@ -45,8 +46,8 @@ export function createWindow(): BrowserWindow {
         isDev
             ? mainWindow.loadFile(`../build/error.html`)
             : splash.loadURL(
-                `file://${path.join(process.resourcesPath, 'error.html')}`
-            );
+                  `file://${path.join(process.resourcesPath, 'error.html')}`,
+              );
     });
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
@@ -56,12 +57,10 @@ export function createWindow(): BrowserWindow {
         if (!isAppQuitting()) {
             event.preventDefault();
             mainWindow.hide();
-            const isMac = process.platform === 'darwin'
+            const isMac = process.platform === 'darwin';
             isMac && app.dock.hide();
         }
         return false;
     });
     return mainWindow;
 }
-
-
