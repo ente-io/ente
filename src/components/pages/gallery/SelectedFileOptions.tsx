@@ -4,7 +4,7 @@ import { SetCollectionSelectorAttributes } from './CollectionSelector';
 import styled from 'styled-components';
 import Navbar from 'components/Navbar';
 import DeleteIcon from 'components/icons/DeleteIcon';
-import CrossIcon from 'components/icons/CrossIcon';
+import CloseIcon from 'components/icons/CloseIcon';
 import AddIcon from 'components/icons/AddIcon';
 import { IconButton } from 'components/Container';
 import constants from 'utils/strings/constants';
@@ -147,7 +147,7 @@ const SelectedFileOptions = ({
         <SelectionBar>
             <SelectionContainer>
                 <IconButton onClick={clearSelection}>
-                    <CrossIcon />
+                    <CloseIcon />
                 </IconButton>
                 <div>
                     {count} {constants.SELECTED}

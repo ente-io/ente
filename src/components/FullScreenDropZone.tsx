@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
-import CrossIcon from './icons/CrossIcon';
+import CloseIcon from './icons/CloseIcon';
 
 const CloseButtonWrapper = styled.div`
     position: absolute;
@@ -62,7 +62,7 @@ export default function FullScreenDropZone(props: Props) {
             {isDragActive && (
                 <Overlay onDrop={onDragLeave} onDragLeave={onDragLeave}>
                     <CloseButtonWrapper onClick={onDragLeave}>
-                        <CrossIcon />
+                        <CloseIcon />
                     </CloseButtonWrapper>
                     {constants.UPLOAD_DROPZONE_MESSAGE}
                 </Overlay>

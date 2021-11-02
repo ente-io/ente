@@ -22,8 +22,6 @@ export const IconButton = styled.button`
     background: none;
     border: none;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
     padding: 5px;
     color: inherit;
     margin: 0 10px;
@@ -61,12 +59,4 @@ export const FlexWrapper = styled.div`
     display: flex;
     text-align: center;
     justify-content: center;
-`;
-
-export const HighLightWrapper = styled.div`
-    &:hover {
-        background-color: #555;
-    }
-    border-radius: 50%;
-    padding: 5px;
 `;

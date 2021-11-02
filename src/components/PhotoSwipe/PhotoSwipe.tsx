@@ -27,7 +27,7 @@ import {
 import { FormCheck } from 'react-bootstrap';
 import { prettyPrintExif } from 'utils/exif';
 import EditIcon from 'components/icons/EditIcon';
-import { Label, Row, Value } from 'components/Container';
+import { IconButton, Label, Row, Value } from 'components/Container';
 import { logError } from 'utils/sentry';
 
 import DatePicker from 'react-datepicker';
@@ -68,8 +68,6 @@ const ButtonContainer = styled.div`
     width: 200px;
     padding: 5px 10px;
 `;
-
-const ClickWrapper = (props) => <div {...props}></div>;
 
 const renderInfoItem = (label: string, value: string | JSX.Element) => (
     <Row>
@@ -171,9 +169,9 @@ function RenderCreationTime({
                 <Value
                     width={isInEditMode ? '20%' : '10%'}
                     style={{ cursor: 'pointer', marginLeft: '10px' }}>
-                    <ClickWrapper onClick={openEditMode}>
+                    <IconButton onClick={openEditMode}>
                         <EditIcon />
-                    </ClickWrapper>
+                    </IconButton>
                 </Value>
             </Row>
         </>
