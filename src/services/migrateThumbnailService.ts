@@ -10,6 +10,7 @@ import uploadHttpClient from 'services/upload/uploadHttpClient';
 import { EncryptionResult, UploadURL } from 'services/upload/uploadService';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
 import { getFileType } from './upload/readFileService';
+import { getLocalTrash, getTrashedFiles } from './trashService';
 
 const ENDPOINT = getEndpoint();
 const REPLACE_THUMBNAIL_THRESHOLD = 500 * 1024; // 500KB
@@ -43,7 +44,9 @@ export async function replaceThumbnail(
         const token = getToken();
         const worker = await new CryptoWorker();
         const files = await getLocalFiles();
-        const largeThumbnailFiles = files.filter((file) =>
+        const trash = await getLocalTrash();
+        const trashFiles = getTrashedFiles(trash);
+        const largeThumbnailFiles = [...files, ...trashFiles].filter((file) =>
             largeThumbnailFileIDs.has(file.id)
         );
 
