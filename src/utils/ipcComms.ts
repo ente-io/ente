@@ -9,7 +9,6 @@ export default function setupIpcComs(tray: Tray, mainWindow: BrowserWindow): voi
             height: 600,
             webPreferences: {
                 nodeIntegration: false,
-                enableRemoteModule: false,
                 contextIsolation: true,
                 sandbox: true,
             },
