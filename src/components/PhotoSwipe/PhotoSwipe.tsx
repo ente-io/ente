@@ -96,6 +96,9 @@ function RenderCreationTime({
         try {
             if (isInEditMode && file) {
                 const unixTimeInMicroSec = pickedTime.getTime() * 1000;
+                if (unixTimeInMicroSec === file.metadata.creationTime) {
+                    return;
+                }
                 let updatedFile = await changeFileCreationTime(
                     file,
                     unixTimeInMicroSec
