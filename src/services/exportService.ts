@@ -22,6 +22,7 @@ import {
     fileNameWithoutExtension,
     generateStreamFromArrayBuffer,
 } from 'utils/file';
+import { User } from './userService';
 
 export interface ExportProgress {
     current: number;
@@ -111,6 +112,10 @@ class ExportService {
             collections,
             allFiles
         );
+        const user: User = getData(LS_KEYS.USER);
+        const userCollections = nonEmptyCollections.filter(
+            (collection) => collection.owner.id === user?.id
+        );
         const exportRecord = await this.getExportRecord(exportDir);
 
         if (exportType === ExportType.NEW) {
@@ -125,7 +130,7 @@ class ExportService {
         }
         this.exportInProgress = this.fileExporter(
             filesToExport,
-            nonEmptyCollections,
+            userCollections,
             updateProgress,
             exportDir
         );

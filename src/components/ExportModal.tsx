@@ -8,6 +8,7 @@ import exportService, {
     ExportType,
 } from 'services/exportService';
 import { getLocalFiles } from 'services/fileService';
+import { User } from 'services/userService';
 import styled from 'styled-components';
 import { sleep } from 'utils/common';
 import { getExportRecordFileUID } from 'utils/export';
@@ -105,12 +106,16 @@ export default function ExportModal(props: Props) {
             return;
         }
         const main = async () => {
+            const user: User = getData(LS_KEYS.USER);
             if (exportStage === ExportStage.FINISHED) {
                 const localFiles = await getLocalFiles();
+                const userPersonalFiles = localFiles.filter(
+                    (file) => file.ownerID === user?.id
+                );
                 const exportRecord = await exportService.getExportRecord();
                 const exportedFileCnt = exportRecord.exportedFiles.length;
                 const failedFilesCnt = exportRecord.failedFiles.length;
-                const syncedFilesCnt = localFiles.length;
+                const syncedFilesCnt = userPersonalFiles.length;
                 if (syncedFilesCnt > exportedFileCnt + failedFilesCnt) {
                     updateExportProgress({
                         current: exportedFileCnt + failedFilesCnt,
@@ -120,7 +125,7 @@ export default function ExportModal(props: Props) {
                         ...exportRecord.exportedFiles,
                         ...exportRecord.failedFiles,
                     ]);
-                    const unExportedFiles = localFiles.filter(
+                    const unExportedFiles = userPersonalFiles.filter(
                         (file) =>
                             !exportFileUIDs.has(getExportRecordFileUID(file))
                     );
