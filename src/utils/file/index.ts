@@ -280,7 +280,7 @@ export function fileIsArchived(file: File) {
     return file.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
 }
 
-export async function updateMagicMetadata(
+export async function updateMagicMetadataProps(
     file: File,
     magicMetadataUpdates: MagicMetadataProps
 ) {
@@ -315,7 +315,7 @@ export async function updateMagicMetadata(
         return file;
     }
 }
-export async function updatePublicMagicMetadata(
+export async function updatePublicMagicMetadataProps(
     file: File,
     publicMetadataUpdates: PublicMagicMetadataProps
 ) {
@@ -362,7 +362,7 @@ export async function changeFilesVisibility(
         };
 
         updatedFiles.push(
-            await updateMagicMetadata(file, updatedMagicMetadataProps)
+            await updateMagicMetadataProps(file, updatedMagicMetadataProps)
         );
     }
     return updatedFiles;
@@ -373,7 +373,7 @@ export async function changeFileCreationTime(file: File, editedTime: number) {
         editedTime,
     };
 
-    return await updatePublicMagicMetadata(
+    return await updatePublicMagicMetadataProps(
         file,
         updatedPublicMagicMetadataProps
     );
