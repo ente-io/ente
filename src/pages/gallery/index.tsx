@@ -324,8 +324,6 @@ export default function Gallery() {
         collections: Collection[],
         files: File[]
     ) => {
-        const filesWithMergedMetadata = mergeMetadata(files);
-        setFiles(filesWithMergedMetadata);
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
