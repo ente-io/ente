@@ -105,12 +105,13 @@ function RenderCreationTime({
     const [pickedTime, setPickedTime] = useState(originalCreationTime);
 
     const openEditMode = () => setIsInEditMode(true);
-
+    const closeEditMode = () => setIsInEditMode(false);
     const saveEdits = async () => {
         try {
             if (isInEditMode && file) {
                 const unixTimeInMicroSec = pickedTime.getTime() * 1000;
                 if (unixTimeInMicroSec === file.metadata.creationTime) {
+                    closeEditMode();
                     return;
                 }
                 let updatedFile = await changeFileCreationTime(
@@ -126,11 +127,11 @@ function RenderCreationTime({
         } catch (e) {
             logError(e, 'failed to update creationTime');
         }
-        setIsInEditMode(false);
+        closeEditMode();
     };
     const discardEdits = () => {
         setPickedTime(originalCreationTime);
-        setIsInEditMode(false);
+        closeEditMode();
     };
     const handleChange = (newDate) => {
         if (newDate instanceof Date) {
@@ -207,11 +208,13 @@ function RenderFileName({
     const [newFileName, setNewFileName] = useState(originalFileName);
 
     const openEditMode = () => setIsInEditMode(true);
+    const closeEditMode = () => setIsInEditMode(false);
 
     const saveEdits = async () => {
         try {
             if (isInEditMode && file) {
                 if (newFileName === originalFileName) {
+                    closeEditMode();
                     return;
                 }
                 let updatedFile = await changeFileName(file, newFileName);
@@ -224,11 +227,11 @@ function RenderFileName({
         } catch (e) {
             logError(e, 'failed to update file name');
         }
-        setIsInEditMode(false);
+        closeEditMode();
     };
     const discardEdits = () => {
         setNewFileName(originalFileName);
-        setIsInEditMode(false);
+        closeEditMode();
     };
     const handleChange = (event) => {
         const newName = event.target.value.replace(/(\r\n|\n|\r)/gm, '');
