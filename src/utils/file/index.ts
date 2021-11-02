@@ -309,6 +309,7 @@ export async function updateMagicMetadataProps(
             magicMetadata: {
                 ...file.magicMetadata,
                 data: magicMetadataProps,
+                count: Object.keys(file.pubMagicMetadata).length,
             },
         };
     } else {
@@ -342,6 +343,7 @@ export async function updatePublicMagicMetadataProps(
             pubMagicMetadata: {
                 ...file.pubMagicMetadata,
                 data: publicMetadataProps,
+                count: Object.keys(file.pubMagicMetadata).length,
             },
         };
     } else {
@@ -410,4 +412,12 @@ export function appendPhotoSwipeProps(files: File[]) {
         w: window.innerWidth,
         h: window.innerHeight,
     })) as File[];
+}
+
+export function updateExistingFilePubMetadata(
+    existingFile: File,
+    updatedFile: File
+) {
+    existingFile.pubMagicMetadata = updatedFile.pubMagicMetadata;
+    existingFile.metadata = mergeMetadata([existingFile])[0].metadata;
 }

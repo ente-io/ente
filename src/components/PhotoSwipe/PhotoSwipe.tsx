@@ -22,7 +22,7 @@ import {
     changeFileCreationTime,
     downloadFile,
     formatDateTime,
-    mergeMetadata,
+    updateExistingFilePubMetadata,
 } from 'utils/file';
 import { FormCheck } from 'react-bootstrap';
 import { prettyPrintExif } from 'utils/exif';
@@ -96,14 +96,12 @@ function RenderCreationTime({
         try {
             if (isInEditMode && file) {
                 const unixTimeInMicroSec = pickedTime.getTime() * 1000;
-                const updatedFile = await changeFileCreationTime(
+                let updatedFile = await changeFileCreationTime(
                     file,
                     unixTimeInMicroSec
                 );
-                await updatePublicMagicMetadata([updatedFile]);
-                updatedFile.pubMagicMetadata.version += 1;
-                file.pubMagicMetadata = updatedFile.pubMagicMetadata;
-                file.metadata = mergeMetadata([file])[0].metadata;
+                updatedFile = await updatePublicMagicMetadata([updatedFile])[0];
+                updateExistingFilePubMetadata(file, updatedFile);
                 scheduleUpdate();
             }
         } catch (e) {

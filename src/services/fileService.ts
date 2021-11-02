@@ -350,4 +350,13 @@ export const updatePublicMagicMetadata = async (files: File[]) => {
             'X-Auth-Token': token,
         }
     );
+    return files.map(
+        (file): File => ({
+            ...file,
+            pubMagicMetadata: {
+                ...file.pubMagicMetadata,
+                version: file.pubMagicMetadata.version + 1,
+            },
+        })
+    );
 };
