@@ -27,7 +27,7 @@ import {
 import { FormCheck } from 'react-bootstrap';
 import { prettyPrintExif } from 'utils/exif';
 import EditIcon from 'components/icons/EditIcon';
-import { FlexWrapper, Label, Row, Value } from 'components/Container';
+import { Label, Row, Value } from 'components/Container';
 import { logError } from 'utils/sentry';
 
 import DatePicker from 'react-datepicker';
@@ -61,6 +61,12 @@ const Legend = styled.span`
 const Pre = styled.pre`
     color: #aaa;
     padding: 7px 15px;
+`;
+
+const ButtonContainer = styled.div`
+    margin-left: auto;
+    width: 200px;
+    padding: 5px 10px;
 `;
 
 const ClickWrapper = (props) => <div {...props}></div>;
@@ -135,7 +141,7 @@ function RenderCreationTime({
                             showYearDropdown
                             showMonthDropdown
                             withPortal>
-                            <FlexWrapper
+                            <ButtonContainer
                                 style={{
                                     marginLeft: 'auto',
                                     width: '200px',
@@ -153,7 +159,7 @@ function RenderCreationTime({
                                     onClick={saveEdits}>
                                     {constants.SAVE}
                                 </Button>
-                            </FlexWrapper>
+                            </ButtonContainer>
                         </DatePicker>
                     ) : (
                         formatDateTime(pickedTime)
