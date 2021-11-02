@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import events from './events';
 import {
     changeFileCreationTime,
+    changeFileName,
     downloadFile,
     formatDateTime,
     updateExistingFilePubMetadata,
@@ -27,11 +28,19 @@ import {
 import { FormCheck } from 'react-bootstrap';
 import { prettyPrintExif } from 'utils/exif';
 import EditIcon from 'components/icons/EditIcon';
-import { IconButton, Label, Row, Value } from 'components/Container';
+import {
+    FlexWrapper,
+    IconButton,
+    Label,
+    Row,
+    Value,
+} from 'components/Container';
 import { logError } from 'utils/sentry';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import TickIcon from 'components/icons/TickIcon';
+import CloseIcon from 'components/icons/CloseIcon';
 
 interface Iprops {
     isOpen: boolean;
@@ -83,7 +92,7 @@ function RenderCreationTime({
     file: File;
     scheduleUpdate: () => void;
 }) {
-    const originalCreationTime = new Date(file.metadata.creationTime / 1000);
+    const originalCreationTime = new Date(file?.metadata.creationTime / 1000);
     const [isInEditMode, setIsInEditMode] = useState(false);
 
     const [pickedTime, setPickedTime] = useState(originalCreationTime);
@@ -177,6 +186,84 @@ function RenderCreationTime({
         </>
     );
 }
+
+function RenderFileName({
+    file,
+    scheduleUpdate,
+}: {
+    file: File;
+    scheduleUpdate: () => void;
+}) {
+    const originalFileName = file?.metadata.title;
+    const [isInEditMode, setIsInEditMode] = useState(false);
+
+    const [newFileName, setNewFileName] = useState(originalFileName);
+
+    const openEditMode = () => setIsInEditMode(true);
+
+    const saveEdits = async () => {
+        try {
+            if (isInEditMode && file) {
+                if (newFileName === originalFileName) {
+                    return;
+                }
+                let updatedFile = await changeFileName(file, newFileName);
+                updatedFile = (
+                    await updatePublicMagicMetadata([updatedFile])
+                )[0];
+                updateExistingFilePubMetadata(file, updatedFile);
+                scheduleUpdate();
+            }
+        } catch (e) {
+            logError(e, 'failed to update file name');
+        }
+        setIsInEditMode(false);
+    };
+    const discardEdits = () => {
+        setNewFileName(originalFileName);
+        setIsInEditMode(false);
+    };
+    const handleChange = (event) => {
+        setNewFileName(event.target.value);
+    };
+    return (
+        <>
+            <Row>
+                <Label width="30%">{constants.FILE_NAME}</Label>
+                <Value width={isInEditMode ? '50%' : '60%'}>
+                    {isInEditMode ? (
+                        <textarea
+                            value={newFileName}
+                            onChange={handleChange}
+                            style={{
+                                width: '100%',
+                            }}></textarea>
+                    ) : (
+                        <>{newFileName}</>
+                    )}
+                </Value>
+                <Value
+                    width={isInEditMode ? '20%' : '10%'}
+                    style={{ cursor: 'pointer', marginLeft: '10px' }}>
+                    {isInEditMode ? (
+                        <FlexWrapper style={{ justifyContent: 'space-around' }}>
+                            <IconButton onClick={saveEdits}>
+                                <TickIcon width="24px" height="24px" />
+                            </IconButton>
+                            <IconButton onClick={discardEdits}>
+                                <CloseIcon />
+                            </IconButton>
+                        </FlexWrapper>
+                    ) : (
+                        <IconButton onClick={openEditMode}>
+                            <EditIcon />
+                        </IconButton>
+                    )}
+                </Value>
+            </Row>
+        </>
+    );
+}
 function ExifData(props: { exif: any }) {
     const { exif } = props;
     const [showAll, setShowAll] = useState(false);
@@ -252,8 +339,12 @@ function InfoModal({
                     constants.FILE_ID,
                     items[photoSwipe?.getCurrentIndex()]?.id
                 )}
-                {metadata?.title &&
-                    renderInfoItem(constants.FILE_NAME, metadata.title)}
+                {metadata?.title && (
+                    <RenderFileName
+                        file={items[photoSwipe?.getCurrentIndex()]}
+                        scheduleUpdate={scheduleUpdate}
+                    />
+                )}
                 {metadata?.creationTime && (
                     <RenderCreationTime
                         file={items[photoSwipe?.getCurrentIndex()]}
