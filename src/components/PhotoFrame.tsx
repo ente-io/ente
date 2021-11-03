@@ -287,9 +287,7 @@ const PhotoFrame = ({
         if (selected.collectionID !== activeCollection) {
             setSelected({ count: 0, collectionID: 0 });
         }
-        if (rangeStart || rangeStart === 0) {
-            setRangeStart(null);
-        } else if (checked) {
+        if (checked) {
             setRangeStart(index);
         }
 
@@ -309,11 +307,11 @@ const PhotoFrame = ({
             let leftEnd = -1;
             let rightEnd = -1;
             if (index < rangeStart) {
-                leftEnd = index;
-                rightEnd = rangeStart;
+                leftEnd = index + 1;
+                rightEnd = rangeStart - 1;
             } else {
-                leftEnd = rangeStart;
-                rightEnd = index;
+                leftEnd = rangeStart + 1;
+                rightEnd = index - 1;
             }
             for (let i = leftEnd; i <= rightEnd; i++) {
                 handleSelect(filteredData[i].id)(true);
@@ -341,8 +339,8 @@ const PhotoFrame = ({
                 isShiftKeyPressed && (rangeStart || rangeStart === 0)
             }
             isInsSelectRange={
-                (index >= rangeStart + 1 && index <= currentHover) ||
-                (index >= currentHover && index <= rangeStart - 1)
+                (index >= rangeStart && index <= currentHover) ||
+                (index >= currentHover && index <= rangeStart)
             }
         />
     );
