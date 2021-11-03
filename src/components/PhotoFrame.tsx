@@ -339,8 +339,8 @@ const PhotoFrame = ({
                 isShiftKeyPressed && (rangeStart || rangeStart === 0)
             }
             isInsSelectRange={
-                (index >= rangeStart + 1 && index <= currentHover) ||
-                (index >= currentHover && index <= rangeStart - 1)
+                (index >= rangeStart && index <= currentHover) ||
+                (index >= currentHover && index <= rangeStart)
             }
         />
     );
