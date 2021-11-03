@@ -90,6 +90,15 @@ const BannerContainer = styled.div<{ span: number }>`
     align-items: flex-end;
 `;
 
+const NothingContainer = styled.div<{ span: number }>`
+    color: #979797;
+    text-align: center;
+    grid-column: span ${(props) => props.span};
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`;
+
 interface Props {
     height: number;
     width: number;
@@ -183,7 +192,9 @@ export function PhotoList({
         if (!skipMerge) {
             timeStampList = mergeTimeStampList(timeStampList, columns);
         }
-
+        if (timeStampList.length === 0) {
+            timeStampList.push(getEmptyListItem());
+        }
         if (showBanner) {
             timeStampList.push(getBannerItem(timeStampList));
         }
@@ -197,6 +208,19 @@ export function PhotoList({
         first.getFullYear() === second.getFullYear() &&
         first.getMonth() === second.getMonth() &&
         first.getDate() === second.getDate();
+
+    const getEmptyListItem = () => {
+        return {
+            itemType: ITEM_TYPE.BANNER,
+            banner: (
+                <NothingContainer span={columns}>
+                    <div>{constants.NOTHING_HERE}</div>
+                </NothingContainer>
+            ),
+            id: 'empty-list-banner',
+            height: height - 48,
+        };
+    };
 
     const getBannerItem = (timeStampList) => {
         const photoFrameHeight = (() => {
