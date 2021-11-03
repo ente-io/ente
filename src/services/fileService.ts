@@ -14,6 +14,7 @@ import {
     appendPhotoSwipeProps,
     decryptFile,
     mergeMetadata,
+    removeUnnecessaryFileProps,
     sortFiles,
 } from 'utils/file';
 import CryptoWorker from 'utils/crypto';
@@ -131,7 +132,7 @@ interface TrashRequestItems {
 }
 export const getLocalFiles = async () => {
     const files: Array<File> = (await localForage.getItem<File[]>(FILES)) || [];
-    return files;
+    return removeUnnecessaryFileProps(files);
 };
 
 export const syncFiles = async (
