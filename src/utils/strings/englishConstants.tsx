@@ -596,6 +596,23 @@ const englishConstants = {
     REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR: () => (
         <>could not compress some of your thumbnails, please retry</>
     ),
+    FIX_CREATION_TIME: 'fix creation time',
+    CREATION_TIME_UPDATED: `file's creation time updated`,
+
+    UPDATE_CREATION_TIME_NOT_STARTED: () => (
+        <>update creation time with exif values</>
+    ),
+    UPDATE_CREATION_TIME_COMPLETED: () => <>successfully updated all files</>,
+    UPDATE_CREATION_TIME_NOOP: () => (
+        <>
+            you have no files that whose CreationTime is not updated with exif
+            value
+        </>
+    ),
+    UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR: () => (
+        <>updating creation time failed for some files ,try again</>
+    ),
+    FIX_CREATION_TIME_LATER: 'update later',
 };
 
 export default englishConstants;
