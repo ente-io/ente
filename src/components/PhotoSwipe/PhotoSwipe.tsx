@@ -8,7 +8,9 @@ import {
     removeFromFavorites,
 } from 'services/collectionService';
 import {
+    ALL_TIME,
     File,
+    MAX_EDITED_CREATION_TIME,
     MIN_EDITED_CREATION_TIME,
     updatePublicMagicMetadata,
 } from 'services/fileService';
@@ -32,6 +34,8 @@ import { logError } from 'utils/sentry';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import CloseIcon from 'components/icons/CloseIcon';
+import TickIcon from 'components/icons/TickIcon';
 
 interface Iprops {
     isOpen: boolean;
@@ -63,18 +67,17 @@ const Pre = styled.pre`
     padding: 7px 15px;
 `;
 
-const ButtonContainer = styled.div`
-    margin-left: auto;
-    width: 200px;
-    padding: 5px 10px;
-`;
-
 const renderInfoItem = (label: string, value: string | JSX.Element) => (
     <Row>
         <Label width="30%">{label}</Label>
         <Value width="70%">{value}</Value>
     </Row>
 );
+
+const isSameDay = (first, second) =>
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate();
 
 function RenderCreationTime({
     file,
@@ -89,6 +92,7 @@ function RenderCreationTime({
     const [pickedTime, setPickedTime] = useState(originalCreationTime);
 
     const openEditMode = () => setIsInEditMode(true);
+    const closeEditMode = () => setIsInEditMode(false);
 
     const saveEdits = async () => {
         try {
@@ -110,11 +114,11 @@ function RenderCreationTime({
         } catch (e) {
             logError(e, 'failed to update creationTime');
         }
-        setIsInEditMode(false);
+        closeEditMode();
     };
     const discardEdits = () => {
         setPickedTime(originalCreationTime);
-        setIsInEditMode(false);
+        closeEditMode();
     };
     const handleChange = (newDate) => {
         if (newDate instanceof Date) {
@@ -133,35 +137,18 @@ function RenderCreationTime({
                             onChange={handleChange}
                             timeInputLabel="Time:"
                             dateFormat="dd/MM/yyyy h:mm aa"
-                            showTimeInput
+                            showTimeSelect
                             autoFocus
-                            shouldCloseOnSelect={false}
-                            onClickOutside={discardEdits}
-                            minDate={new Date(MIN_EDITED_CREATION_TIME)}
-                            maxDate={new Date()}
-                            showYearDropdown
-                            showMonthDropdown
-                            withPortal>
-                            <ButtonContainer
-                                style={{
-                                    marginLeft: 'auto',
-                                    width: '200px',
-                                    justifyContent: 'flex-end',
-                                    padding: '5px 10px ',
-                                }}>
-                                <Button
-                                    style={{ marginRight: '20px' }}
-                                    variant="outline-secondary"
-                                    onClick={discardEdits}>
-                                    {constants.CANCEL}
-                                </Button>
-                                <Button
-                                    variant="outline-success"
-                                    onClick={saveEdits}>
-                                    {constants.SAVE}
-                                </Button>
-                            </ButtonContainer>
-                        </DatePicker>
+                            minDate={MIN_EDITED_CREATION_TIME}
+                            maxDate={MAX_EDITED_CREATION_TIME}
+                            maxTime={
+                                isSameDay(pickedTime, new Date())
+                                    ? MAX_EDITED_CREATION_TIME
+                                    : ALL_TIME
+                            }
+                            minTime={MIN_EDITED_CREATION_TIME}
+                            fixedHeight
+                            withPortal></DatePicker>
                     ) : (
                         formatDateTime(pickedTime)
                     )}
@@ -169,9 +156,20 @@ function RenderCreationTime({
                 <Value
                     width={isInEditMode ? '20%' : '10%'}
                     style={{ cursor: 'pointer', marginLeft: '10px' }}>
-                    <IconButton onClick={openEditMode}>
-                        <EditIcon />
-                    </IconButton>
+                    {!isInEditMode ? (
+                        <IconButton onClick={openEditMode}>
+                            <EditIcon />
+                        </IconButton>
+                    ) : (
+                        <>
+                            <IconButton onClick={saveEdits}>
+                                <TickIcon />
+                            </IconButton>
+                            <IconButton onClick={discardEdits}>
+                                <CloseIcon />
+                            </IconButton>
+                        </>
+                    )}
                 </Value>
             </Row>
         </>
