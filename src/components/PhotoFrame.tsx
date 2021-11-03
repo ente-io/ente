@@ -287,9 +287,7 @@ const PhotoFrame = ({
         if (selected.collectionID !== activeCollection) {
             setSelected({ count: 0, collectionID: 0 });
         }
-        if (rangeStart || rangeStart === 0) {
-            setRangeStart(null);
-        } else if (checked) {
+        if (checked) {
             setRangeStart(index);
         }
 
