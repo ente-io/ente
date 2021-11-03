@@ -8,7 +8,9 @@ import {
     removeFromFavorites,
 } from 'services/collectionService';
 import {
+    ALL_TIME,
     File,
+    MAX_EDITED_CREATION_TIME,
     MIN_EDITED_CREATION_TIME,
     updatePublicMagicMetadata,
 } from 'services/fileService';
@@ -72,6 +74,11 @@ const renderInfoItem = (label: string, value: string | JSX.Element) => (
     </Row>
 );
 
+const isSameDay = (first, second) =>
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate();
+
 function RenderCreationTime({
     file,
     scheduleUpdate,
@@ -132,8 +139,14 @@ function RenderCreationTime({
                             dateFormat="dd/MM/yyyy h:mm aa"
                             showTimeSelect
                             autoFocus
-                            minDate={new Date(MIN_EDITED_CREATION_TIME)}
-                            maxDate={new Date()}
+                            minDate={MIN_EDITED_CREATION_TIME}
+                            maxDate={MAX_EDITED_CREATION_TIME}
+                            maxTime={
+                                isSameDay(pickedTime, new Date())
+                                    ? MAX_EDITED_CREATION_TIME
+                                    : ALL_TIME
+                            }
+                            minTime={MIN_EDITED_CREATION_TIME}
                             fixedHeight
                             withPortal></DatePicker>
                     ) : (

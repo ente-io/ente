@@ -430,6 +430,13 @@ const GlobalStyles = createGlobalStyle`
     .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item:hover{
         background-color:#686868
     }
+    .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--disabled :hover{
+        background-color: #202020;
+    }
+
+    .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--disabled{
+        color:#5b5656;
+    }
     .react-datepicker{
         padding-bottom:10px;
     }
