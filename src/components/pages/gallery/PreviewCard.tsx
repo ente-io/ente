@@ -217,9 +217,8 @@ export default function PreviewCard(props: IProps) {
         if (selectOnClick) {
             if (isRangeSelectActive) {
                 onRangeSelect();
-            } else {
-                onSelect?.(!selected);
             }
+            onSelect?.(!selected);
         } else if (file?.msrc || imgSrc) {
             onClick?.();
         }
