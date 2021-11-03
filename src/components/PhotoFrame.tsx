@@ -1,5 +1,4 @@
 import {
-    DeadCenter,
     GalleryContext,
     Search,
     SelectedState,
@@ -426,7 +425,7 @@ const PhotoFrame = ({
                         {constants.UPLOAD_FIRST_PHOTO}
                     </Button>
                 </EmptyScreen>
-            ) : filteredData.length ? (
+            ) : (
                 <Container>
                     <AutoSizer>
                         {({ height, width }) => (
@@ -455,10 +454,6 @@ const PhotoFrame = ({
                         isTrashCollection={activeCollection === TRASH_SECTION}
                     />
                 </Container>
-            ) : (
-                <DeadCenter>
-                    <div>{constants.NOTHING_HERE}</div>
-                </DeadCenter>
             )}
         </>
     );

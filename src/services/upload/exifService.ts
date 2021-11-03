@@ -1,6 +1,5 @@
 import exifr from 'exifr';
 
-import { logError } from 'utils/sentry';
 import { NULL_LOCATION, Location } from './metadataService';
 
 const EXIF_TAGS_NEEDED = [
@@ -20,20 +19,15 @@ interface ParsedEXIFData {
 export async function getExifData(
     receivedFile: globalThis.File
 ): Promise<ParsedEXIFData> {
-    try {
-        const exifData = await exifr.parse(receivedFile, EXIF_TAGS_NEEDED);
-        if (!exifData) {
-            return { location: NULL_LOCATION, creationTime: null };
-        }
-        const parsedEXIFData = {
-            location: getEXIFLocation(exifData),
-            creationTime: getUNIXTime(exifData),
-        };
-        return parsedEXIFData;
-    } catch (e) {
-        logError(e, 'error reading exif data');
-        // ignore exif parsing errors
+    const exifData = await exifr.parse(receivedFile, EXIF_TAGS_NEEDED);
+    if (!exifData) {
+        return { location: NULL_LOCATION, creationTime: null };
     }
+    const parsedEXIFData = {
+        location: getEXIFLocation(exifData),
+        creationTime: getUNIXTime(exifData),
+    };
+    return parsedEXIFData;
 }
 
 export async function getExifDataFromURL(url: string): Promise<ParsedEXIFData> {
