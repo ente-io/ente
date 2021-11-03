@@ -579,8 +579,8 @@ const englishConstants = {
     SORT_BY_COLLECTION_NAME: 'album name',
     FIX_LARGE_THUMBNAILS: 'compress thumbnails',
     THUMBNAIL_REPLACED: 'thumbnails compressed',
-    FIX: 'compress',
-    FIX_LATER: 'compress later',
+    FIX_THUMBNAIL: 'compress',
+    FIX_THUMBNAIL_LATER: 'compress later',
     REPLACE_THUMBNAIL_NOT_STARTED: () => (
         <>
             some of your videos thumbnails can be compressed to save space.
