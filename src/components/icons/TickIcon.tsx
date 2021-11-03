@@ -14,7 +14,7 @@ export default function TickIcon(props) {
 }
 
 TickIcon.defaultProps = {
-    height: 28,
+    height: 20,
     width: 20,
     viewBox: '0 0 24 24',
 };
