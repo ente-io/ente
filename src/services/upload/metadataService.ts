@@ -34,7 +34,14 @@ export async function extractMetadata(
 ) {
     let exifData = null;
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
-        exifData = await getExifData(receivedFile);
+        try {
+            exifData = await getExifData(receivedFile);
+        } catch (e) {
+            logError(e, 'file missing exif data ', {
+                fileType: fileTypeInfo.exactType,
+            });
+            // ignore exif parsing errors
+        }
     }
 
     const extractedMetadata: MetadataObject = {
