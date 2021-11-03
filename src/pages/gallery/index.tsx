@@ -509,6 +509,7 @@ export default function Gallery() {
                 clearSelection();
             }
             await clearLocalTrash();
+            setActiveCollection(ALL_SECTION);
         } catch (e) {
             setDialogMessage({
                 title: constants.ERROR,
