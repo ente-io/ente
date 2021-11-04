@@ -75,7 +75,7 @@ class MlService {
             throw Error('Token needed by ml service to sync file');
         }
 
-        const fileUrl = await DownloadManager.getPreview(file);
+        const fileUrl = await DownloadManager.getPreview(file, token);
         console.log('[MLService] Got thumbnail: ', file.id.toString(), fileUrl);
 
         const thumbFile = await fetch(fileUrl);

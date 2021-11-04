@@ -10,15 +10,15 @@ class DownloadManager {
     private fileObjectUrlPromise = new Map<string, Promise<string>>();
     private thumbnailObjectUrlPromise = new Map<number, Promise<string>>();
 
-    public async getPreview(file: File) {
+    public async getPreview(file: File, tokenOverride?: string) {
         try {
-            const token = getToken();
+            const token = tokenOverride || getToken();
             if (!token) {
                 return null;
             }
             const thumbnailCache = await caches.open('thumbs');
             const cacheResp: Response = await thumbnailCache.match(
-                file.id.toString()
+                '/' + file.id.toString()
             );
             if (cacheResp) {
                 return URL.createObjectURL(await cacheResp.blob());
@@ -47,7 +47,7 @@ class DownloadManager {
         const thumb = await this.getThumbnail(token, file);
         try {
             await thumbnailCache.put(
-                file.id.toString(),
+                '/' + file.id.toString(),
                 new Response(new Blob([thumb]))
             );
         } catch (e) {

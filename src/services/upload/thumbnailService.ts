@@ -2,7 +2,7 @@ import { FILE_TYPE } from 'services/fileService';
 import { CustomError, errorWithContext } from 'utils/common/errorUtil';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
-import FFmpegService from 'services/ffmpegService';
+// import FFmpegService from 'services/ffmpegService';
 import { convertToHumanReadable } from 'utils/billingUtil';
 import { fileIsHEIC } from 'utils/file';
 import { FileTypeInfo } from './readFileService';
@@ -34,20 +34,20 @@ export async function generateThumbnail(
                 const isHEIC = fileIsHEIC(fileTypeInfo.exactType);
                 canvas = await generateImageThumbnail(worker, file, isHEIC);
             } else {
-                try {
-                    const thumb = await FFmpegService.generateThumbnail(file);
-                    const dummyImageFile = new File([thumb], file.name);
-                    canvas = await generateImageThumbnail(
-                        worker,
-                        dummyImageFile,
-                        false
-                    );
-                } catch (e) {
-                    logError(e, 'failed to generate thumbnail using ffmpeg', {
-                        type: fileTypeInfo.exactType,
-                    });
-                    canvas = await generateVideoThumbnail(file);
-                }
+                // try {
+                //     const thumb = await FFmpegService.generateThumbnail(file);
+                //     const dummyImageFile = new File([thumb], file.name);
+                //     canvas = await generateImageThumbnail(
+                //         worker,
+                //         dummyImageFile,
+                //         false
+                //     );
+                // } catch (e) {
+                //     logError(e, 'failed to generate thumbnail using ffmpeg', {
+                //         type: fileTypeInfo.exactType,
+                //     });
+                canvas = await generateVideoThumbnail(file);
+                // }
             }
             const thumbnailBlob = await thumbnailCanvasToBlob(canvas);
             thumbnail = await worker.getUint8ArrayView(thumbnailBlob);
