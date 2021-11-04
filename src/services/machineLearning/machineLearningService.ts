@@ -8,16 +8,22 @@ import TFJSFaceEmbeddingService from './tfjsFaceEmbeddingService';
 import { FaceWithEmbedding, MLSyncResult } from 'utils/machineLearning/types';
 
 import * as jpeg from 'jpeg-js';
+import ClusteringService from './clusteringService';
 
 class MlService {
     private faceDetectionService: TFJSFaceDetectionService;
     private faceEmbeddingService: TFJSFaceEmbeddingService;
+    private clusteringService: ClusteringService;
+
+    private clusterFaceDistance = 0.85;
+    private minClusterSize = 3;
 
     public allFaces: FaceWithEmbedding[];
 
     public constructor() {
         this.faceDetectionService = new TFJSFaceDetectionService();
         this.faceEmbeddingService = new TFJSFaceEmbeddingService();
+        this.clusteringService = new ClusteringService();
 
         this.allFaces = [];
     }
@@ -27,7 +33,7 @@ class MlService {
         await this.faceEmbeddingService.init();
     }
 
-    public async sync(token: string) {
+    public async sync(token: string): Promise<MLSyncResult> {
         const existingFiles = await getLocalFiles();
         existingFiles.sort(
             (a, b) => b.metadata.creationTime - a.metadata.creationTime
@@ -50,9 +56,18 @@ class MlService {
         }
         console.log('allFaces: ', this.allFaces);
 
+        const clusterResults = this.clusteringService.clusterUsingDBSCAN(
+            this.allFaces.map((f) => f.embedding),
+            this.clusterFaceDistance,
+            this.minClusterSize
+        );
+
+        console.log('[MLService] Got cluster results: ', clusterResults);
+
         return {
             allFaces: this.allFaces,
-        } as MLSyncResult;
+            clusterResults,
+        };
     }
 
     private async syncFile(file: File, token: string) {
