@@ -406,13 +406,6 @@ export function mergeMetadata(files: File[]): File[] {
         },
     }));
 }
-export function appendPhotoSwipeProps(files: File[]) {
-    return files.map((file) => ({
-        ...file,
-        w: window.innerWidth,
-        h: window.innerHeight,
-    })) as File[];
-}
 
 export function updateExistingFilePubMetadata(
     existingFile: File,
