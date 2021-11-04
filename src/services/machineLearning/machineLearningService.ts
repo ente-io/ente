@@ -1,33 +1,92 @@
-import { MLSyncResult } from 'utils/machineLearning/types';
+import { File, getLocalFiles } from 'services/fileService';
+import DownloadManager from 'services/downloadManager';
+
 import * as tf from '@tensorflow/tfjs';
-import { setWasmPaths } from '@tensorflow/tfjs-backend-wasm';
+
 import TFJSFaceDetectionService from './tfjsFaceDetectionService';
 import TFJSFaceEmbeddingService from './tfjsFaceEmbeddingService';
+import { FaceWithEmbedding, MLSyncResult } from 'utils/machineLearning/types';
 
-class MachineLearningService {
+import * as jpeg from 'jpeg-js';
+
+class MlService {
     private faceDetectionService: TFJSFaceDetectionService;
     private faceEmbeddingService: TFJSFaceEmbeddingService;
+
+    public allFaces: FaceWithEmbedding[];
 
     public constructor() {
         this.faceDetectionService = new TFJSFaceDetectionService();
         this.faceEmbeddingService = new TFJSFaceEmbeddingService();
+
+        this.allFaces = [];
     }
 
     public async init() {
-        await tf.ready();
-        setWasmPaths('/js/tfjs/');
         await this.faceDetectionService.init();
         await this.faceEmbeddingService.init();
     }
 
-    public async sync(token: string): Promise<MLSyncResult> {
-        if (!token) {
-            console.warn('No token provided');
+    public async sync(token: string) {
+        const existingFiles = await getLocalFiles();
+        existingFiles.sort(
+            (a, b) => b.metadata.creationTime - a.metadata.creationTime
+        );
+        const files = existingFiles.slice(0, 50);
+
+        this.allFaces = [];
+        for (const file of files) {
+            try {
+                const result = await this.syncFile(file, token);
+                this.allFaces = this.allFaces.concat(result);
+                console.log('TF Memory stats: ', tf.memory());
+            } catch (e) {
+                console.error(
+                    'Error while syncing file: ',
+                    file.id.toString(),
+                    e
+                );
+            }
         }
+        console.log('allFaces: ', this.allFaces);
+
         return {
-            allFaces: [],
-        };
+            allFaces: this.allFaces,
+        } as MLSyncResult;
+    }
+
+    private async syncFile(file: File, token: string) {
+        if (!token) {
+            throw Error('Token needed by ml service to sync file');
+        }
+
+        const fileUrl = await DownloadManager.getPreview(file);
+        console.log('[MLService] Got thumbnail: ', file.id.toString(), fileUrl);
+
+        const thumbFile = await fetch(fileUrl);
+        const arrayBuffer = await thumbFile.arrayBuffer();
+        const decodedImg = await jpeg.decode(arrayBuffer);
+        console.log('[MLService] decodedImg: ', decodedImg);
+
+        const tfImage = tf.browser.fromPixels(decodedImg);
+
+        const faces = await this.faceDetectionService.estimateFaces(tfImage);
+        const embeddingResults = await this.faceEmbeddingService.getEmbeddings(
+            tfImage,
+            faces
+        );
+        tf.dispose(tfImage);
+        console.log('[MLService] Got faces: ', faces, embeddingResults);
+
+        return faces.map((face, index) => {
+            return {
+                fileId: file.id.toString(),
+                face: face,
+                embedding: embeddingResults.embeddings[index],
+                faceImage: embeddingResults.faceImages[index],
+            } as FaceWithEmbedding;
+        });
     }
 }
 
-export default MachineLearningService;
+export default MlService;
