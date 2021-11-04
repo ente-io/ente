@@ -11,6 +11,8 @@ import TFJSImage from './TFJSImage';
 
 export default function MLDebug() {
     const [token, setToken] = useState<string>();
+    const [clusterFaceDistance, setClusterFaceDistance] = useState<number>(0.8);
+    const [minClusterSize, setMinClusterSize] = useState<number>(4);
     const [mlResult, setMlResult] = useState<MLSyncResult>({
         allFaces: [],
         clusterResults: {
@@ -55,7 +57,11 @@ export default function MLDebug() {
                 console.log('initiated MLWorker');
             }
             const mlWorker = await new MLWorker.comlink();
-            const result = await mlWorker.sync(token);
+            const result = await mlWorker.sync(
+                token,
+                clusterFaceDistance,
+                minClusterSize
+            );
             setMlResult(result);
         } catch (e) {
             console.error(e);
@@ -66,7 +72,25 @@ export default function MLDebug() {
     };
     return (
         <div>
+            <div>ClusterFaceDistance: {clusterFaceDistance}</div>
+            <button onClick={() => setClusterFaceDistance(0.7)}>0.7</button>
+            <button onClick={() => setClusterFaceDistance(0.75)}>0.75</button>
+            <button onClick={() => setClusterFaceDistance(0.8)}>0.8</button>
+            <button onClick={() => setClusterFaceDistance(0.85)}>0.85</button>
+            <button onClick={() => setClusterFaceDistance(0.9)}>0.9</button>
+
+            <p></p>
+            <div>MinClusterSize: {minClusterSize}</div>
+            <button onClick={() => setMinClusterSize(2)}>2</button>
+            <button onClick={() => setMinClusterSize(3)}>3</button>
+            <button onClick={() => setMinClusterSize(4)}>4</button>
+            <button onClick={() => setMinClusterSize(5)}>5</button>
+            <button onClick={() => setMinClusterSize(8)}>8</button>
+            <button onClick={() => setMinClusterSize(12)}>12</button>
+
+            <p></p>
             <button onClick={onSync}>Run ML Sync</button>
+
             <p>{JSON.stringify(mlResult.clusterResults)}</p>
             <div>
                 <p>Clusters: </p>

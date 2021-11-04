@@ -15,8 +15,8 @@ class MlService {
     private faceEmbeddingService: TFJSFaceEmbeddingService;
     private clusteringService: ClusteringService;
 
-    private clusterFaceDistance = 0.85;
-    private minClusterSize = 3;
+    private clusterFaceDistance = 0.8;
+    private minClusterSize = 4;
 
     public allFaces: FaceWithEmbedding[];
 
@@ -28,7 +28,9 @@ class MlService {
         this.allFaces = [];
     }
 
-    public async init() {
+    public async init(clusterFaceDistance: number, minClusterSize: number) {
+        this.clusterFaceDistance = clusterFaceDistance;
+        this.minClusterSize = minClusterSize;
         await this.faceDetectionService.init();
         await this.faceEmbeddingService.init();
     }
