@@ -6,9 +6,18 @@ import { AppContext } from 'pages/_app';
 import { PAGES } from 'types';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
+import { MLSyncResult } from 'utils/machineLearning/types';
+import TFJSImage from './TFJSImage';
 
 export default function MLDebug() {
     const [token, setToken] = useState<string>();
+    const [mlResult, setMlResult] = useState<MLSyncResult>({
+        allFaces: [],
+        clusterResults: {
+            clusters: [],
+            noise: [],
+        },
+    });
     const router = useRouter();
     const appContext = useContext(AppContext);
 
@@ -47,7 +56,7 @@ export default function MLDebug() {
             }
             const mlWorker = await new MLWorker.comlink();
             const result = await mlWorker.sync(token);
-            console.log('MLResult: ', result);
+            setMlResult(result);
         } catch (e) {
             console.error(e);
             throw e;
@@ -58,6 +67,34 @@ export default function MLDebug() {
     return (
         <div>
             <button onClick={onSync}>Run ML Sync</button>
+            <p>{JSON.stringify(mlResult.clusterResults)}</p>
+            <div>
+                <p>Clusters: </p>
+                {mlResult.clusterResults.clusters.map((cluster, index) => (
+                    <div key={index} style={{ display: 'flex' }}>
+                        {cluster.map((faceIndex, ind) => (
+                            <div key={ind}>
+                                <TFJSImage
+                                    faceImage={
+                                        mlResult.allFaces[faceIndex]?.faceImage
+                                    }></TFJSImage>
+                            </div>
+                        ))}
+                    </div>
+                ))}
+
+                <p style={{ marginTop: '1em' }}>Noise: </p>
+                <div style={{ display: 'flex' }}>
+                    {mlResult.clusterResults.noise.map((faceIndex, index) => (
+                        <div key={index}>
+                            <TFJSImage
+                                faceImage={
+                                    mlResult.allFaces[faceIndex]?.faceImage
+                                }></TFJSImage>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }
