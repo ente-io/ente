@@ -23,6 +23,7 @@
     "@tensorflow/tfjs-backend-webgl": "^3.11.0",
     "@tensorflow/tfjs-converter": "^3.11.0",
     "@tensorflow/tfjs-core": "^3.11.0",
+    "@tensorflow/tfjs-tflite": "^0.0.1-alpha.7",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
     "axios": "^0.21.3",
