@@ -7,3 +7,5 @@ export interface MLSyncResult {
 export interface AlignedFace extends NormalizedFace {
     alignedBox: [number, number, number, number];
 }
+
+export declare type FaceEmbedding = Array<number>;
