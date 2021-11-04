@@ -42,6 +42,7 @@
     "heic-convert": "^1.2.4",
     "http-proxy-middleware": "^1.0.5",
     "is-electron": "^2.2.0",
+    "jpeg-js": "^0.4.3",
     "jszip": "3.7.1",
     "libsodium-wrappers": "^0.7.8",
     "localforage": "^1.9.0",
