@@ -183,8 +183,7 @@ export const syncFiles = async (
             `${collection.id}-time`,
             collection.updationTime
         );
-        files = sortFiles(mergeMetadata(files));
-        setFiles(files);
+        setFiles(sortFiles(mergeMetadata(files)));
     }
     return mergeMetadata(files);
 };
