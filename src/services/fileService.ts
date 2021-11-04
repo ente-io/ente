@@ -136,6 +136,9 @@ export const setLocalFiles = async (files: File[]) => {
     await localForage.setItem(FILES_TABLE, files);
 };
 
+export const getCollectionLastSyncTime = async (collection: Collection) =>
+    (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
+
 export const syncFiles = async (
     collections: Collection[],
     setFiles: (files: File[]) => void
@@ -150,8 +153,7 @@ export const syncFiles = async (
         if (!getToken()) {
             continue;
         }
-        const lastSyncTime =
-            (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
+        const lastSyncTime = await getCollectionLastSyncTime(collection);
         if (collection.updationTime === lastSyncTime) {
             continue;
         }
@@ -195,10 +197,7 @@ export const getFiles = async (
 ): Promise<File[]> => {
     try {
         const decryptedFiles: File[] = [];
-        let time =
-            sinceTime ||
-            (await localForage.getItem<number>(`${collection.id}-time`)) ||
-            0;
+        let time = sinceTime;
         let resp;
         do {
             const token = getToken();
