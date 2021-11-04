@@ -299,6 +299,13 @@ export default function Sidebar(props: Props) {
                 </LinkButton>
                 <LinkButton
                     style={{ marginTop: '30px' }}
+                    onClick={() => {
+                        router.push(PAGES.ML_DEBUG);
+                    }}>
+                    {constants.ML_DEBUG}
+                </LinkButton>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
                     onClick={() => initiateEmail('contact@ente.io')}>
                     {constants.SUPPORT}
                 </LinkButton>

@@ -204,6 +204,7 @@ const englishConstants = {
     ),
     CONTACT_SUPPORT: 'contact support',
     REQUEST_FEATURE: 'request feature',
+    ML_DEBUG: 'ML Debug',
     SUPPORT: 'support',
     CONFIRM: 'confirm',
     SKIP: 'skip',

@@ -36,4 +36,5 @@ export enum PAGES {
     TWO_FACTOR_RECOVER = '/two-factor/recover',
     VERIFY = '/verify',
     ROOT = '/',
+    ML_DEBUG = '/ml-debug',
 }
