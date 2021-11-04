@@ -159,8 +159,8 @@ const englishConstants = {
     UPLOAD_FIRST_PHOTO_DESCRIPTION: 'preserve your first memory with ente',
     UPLOAD_FIRST_PHOTO: 'preserve',
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
-    CONFIRM_DELETE_FILE: 'confirm file deletion',
-    DELETE_FILE_MESSAGE: 'sure you want to delete selected files?',
+    CONFIRM_DELETE: 'confirm deletion',
+    DELETE_MESSAGE: `the selected files will be permanently deleted and can't be restored `,
     DELETE_FILE: 'delete files',
     DELETE: 'delete',
     MULTI_FOLDER_UPLOAD: 'multiple folders detected',
@@ -210,7 +210,7 @@ const englishConstants = {
     CANCEL: 'cancel',
     LOGOUT: 'logout',
     DELETE_ACCOUNT: 'delete account',
-    DELETE_MESSAGE: () => (
+    DELETE_ACCOUNT_MESSAGE: () => (
         <>
             <p>
                 please send an email to{' '}
@@ -359,8 +359,7 @@ const englishConstants = {
         <>
             <p>are you sure you want to delete this album?</p>
             <p>
-                all files that are unique to this album will be permanently
-                deleted
+                all files that are unique to this album will be moved to trash
             </p>
         </>
     ),
@@ -549,9 +548,54 @@ const englishConstants = {
     MOVE: 'move',
     ADD: 'add',
     SORT: 'sort',
+    REMOVE: 'remove',
+    CONFIRM_REMOVE: 'confirm removal',
+    TRASH: 'trash',
+    MOVE_TO_TRASH: 'move to trash',
+    TRASH_MESSAGE:
+        'the selected files will be removed from all albums and moved to trash ',
+    DELETE_PERMANENTLY: 'delete permanently',
+    RESTORE: 'restore',
+    CONFIRM_RESTORE: 'confirm restoration',
+    RESTORE_MESSAGE: 'restore selected files ?',
+    RESTORE_TO_COLLECTION: 'restore to album',
+    AUTOMATIC_BIN_DELETE_MESSAGE: (relativeTime: string) =>
+        `permanently deleted ${relativeTime}`,
+    EMPTY_TRASH: 'empty trash',
+    CONFIRM_EMPTY_TRASH: 'empty trash?',
+    EMPTY_TRASH_MESSAGE:
+        'all files will be permanently removed from your ente account',
+
+    CONFIRM_REMOVE_MESSAGE: () => (
+        <>
+            <p>are you sure you want to remove these files from the album?</p>
+            <p>
+                all files that are unique to this album will be moved to trash
+            </p>
+        </>
+    ),
     SORT_BY_LATEST_PHOTO: 'recent photo',
     SORT_BY_MODIFICATION_TIME: 'last updated',
     SORT_BY_COLLECTION_NAME: 'album name',
+    FIX_LARGE_THUMBNAILS: 'compress thumbnails',
+    THUMBNAIL_REPLACED: 'thumbnails compressed',
+    FIX: 'compress',
+    FIX_LATER: 'compress later',
+    REPLACE_THUMBNAIL_NOT_STARTED: () => (
+        <>
+            some of your videos thumbnails can be compressed to save space.
+            would you like ente to compress them?
+        </>
+    ),
+    REPLACE_THUMBNAIL_COMPLETED: () => (
+        <>successfully compressed all thumbnails</>
+    ),
+    REPLACE_THUMBNAIL_NOOP: () => (
+        <>you have no thumbnails that can be compressed further</>
+    ),
+    REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR: () => (
+        <>could not compress some of your thumbnails, please retry</>
+    ),
 };
 
 export default englishConstants;

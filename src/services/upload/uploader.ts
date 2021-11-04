@@ -102,9 +102,9 @@ export default async function uploader(
             file: decryptedFile,
         };
     } catch (e) {
-        const fileFormat =
-            fileTypeInfo.exactType ?? rawFile.name.split('.').pop();
-        logError(e, 'file upload failed', { fileFormat });
+        logError(e, 'file upload failed', {
+            fileFormat: fileTypeInfo.exactType,
+        });
         const error = handleUploadError(e);
         switch (error.message) {
             case CustomError.ETAG_MISSING:

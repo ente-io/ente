@@ -6,11 +6,11 @@ import {
     FILE_TYPE,
     MagicMetadataProps,
     NEW_MAGIC_METADATA,
+    PublicMagicMetadataProps,
     VISIBILITY_STATE,
 } from 'services/fileService';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
-import { EncryptionResult } from 'services/upload/uploadService';
 import DownloadManger from 'services/downloadManager';
 import { logError } from 'utils/sentry';
 import { User } from 'services/userService';
@@ -69,7 +69,7 @@ export function sortFilesIntoCollections(files: File[]) {
     return collectionWiseFiles;
 }
 
-export function getSelectedFileIds(selectedFiles: SelectedState) {
+function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
     for (const [key, val] of Object.entries(selectedFiles)) {
         if (typeof val === 'boolean' && val) {
@@ -79,17 +79,19 @@ export function getSelectedFileIds(selectedFiles: SelectedState) {
     return filesIDs;
 }
 export function getSelectedFiles(
-    selectedFiles: SelectedState,
+    selected: SelectedState,
     files: File[]
 ): File[] {
-    const filesIDs = new Set(getSelectedFileIds(selectedFiles));
-    const filesToDelete: File[] = [];
+    const filesIDs = new Set(getSelectedFileIds(selected));
+    const selectedFiles: File[] = [];
+    const foundFiles = new Set<number>();
     for (const file of files) {
-        if (filesIDs.has(file.id)) {
-            filesToDelete.push(file);
+        if (filesIDs.has(file.id) && !foundFiles.has(file.id)) {
+            selectedFiles.push(file);
+            foundFiles.add(file.id);
         }
     }
-    return filesToDelete;
+    return selectedFiles;
 }
 
 export function checkFileFormatSupport(name: string) {
@@ -121,6 +123,31 @@ export function formatDateTime(date: number | Date) {
         timeStyle: 'medium',
     });
     return `${dateTimeFormat.format(date)} ${timeFormat.format(date)}`;
+}
+
+export function formatDateRelative(date: number) {
+    const units = {
+        year: 24 * 60 * 60 * 1000 * 365,
+        month: (24 * 60 * 60 * 1000 * 365) / 12,
+        day: 24 * 60 * 60 * 1000,
+        hour: 60 * 60 * 1000,
+        minute: 60 * 1000,
+        second: 1000,
+    };
+    const relativeDateFormat = new Intl.RelativeTimeFormat('en-IN', {
+        localeMatcher: 'best fit',
+        numeric: 'always',
+        style: 'long',
+    });
+    const elapsed = date - Date.now();
+
+    // "Math.abs" accounts for both "past" & "future" scenarios
+    for (const u in units)
+        if (Math.abs(elapsed) > units[u] || u === 'second')
+            return relativeDateFormat.format(
+                Math.round(elapsed / units[u]),
+                u as Intl.RelativeTimeFormatUnit
+            );
 }
 
 export function sortFiles(files: File[]) {
@@ -172,9 +199,17 @@ export async function decryptFile(file: File, collection: Collection) {
                 file.key
             );
         }
+        if (file.pubMagicMetadata?.data) {
+            file.pubMagicMetadata.data = await worker.decryptMetadata(
+                file.pubMagicMetadata.data,
+                file.pubMagicMetadata.header,
+                file.key
+            );
+        }
         return file;
     } catch (e) {
         logError(e, 'file decryption failed');
+        throw e;
     }
 }
 
@@ -245,46 +280,107 @@ export function fileIsArchived(file: File) {
     return file.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
 }
 
+export async function updateMagicMetadataProps(
+    file: File,
+    magicMetadataUpdates: MagicMetadataProps
+) {
+    const worker = await new CryptoWorker();
+
+    if (!file.magicMetadata) {
+        file.magicMetadata = NEW_MAGIC_METADATA;
+    }
+    if (typeof file.magicMetadata.data === 'string') {
+        file.magicMetadata.data = (await worker.decryptMetadata(
+            file.magicMetadata.data,
+            file.magicMetadata.header,
+            file.key
+        )) as MagicMetadataProps;
+    }
+    if (magicMetadataUpdates) {
+        // copies the existing magic metadata properties of the files and updates the visibility value
+        // The expected behaviour while updating magic metadata is to let the existing property as it is and update/add the property you want
+        const magicMetadataProps: MagicMetadataProps = {
+            ...file.magicMetadata.data,
+            ...magicMetadataUpdates,
+        };
+
+        return {
+            ...file,
+            magicMetadata: {
+                ...file.magicMetadata,
+                data: magicMetadataProps,
+                count: Object.keys(file.magicMetadata.data).length,
+            },
+        };
+    } else {
+        return file;
+    }
+}
+export async function updatePublicMagicMetadataProps(
+    file: File,
+    publicMetadataUpdates: PublicMagicMetadataProps
+) {
+    const worker = await new CryptoWorker();
+
+    if (!file.pubMagicMetadata) {
+        file.pubMagicMetadata = NEW_MAGIC_METADATA;
+    }
+    if (typeof file.pubMagicMetadata.data === 'string') {
+        file.pubMagicMetadata.data = (await worker.decryptMetadata(
+            file.pubMagicMetadata.data,
+            file.pubMagicMetadata.header,
+            file.key
+        )) as PublicMagicMetadataProps;
+    }
+
+    if (publicMetadataUpdates) {
+        const publicMetadataProps = {
+            ...file.pubMagicMetadata.data,
+            ...publicMetadataUpdates,
+        };
+        return {
+            ...file,
+            pubMagicMetadata: {
+                ...file.pubMagicMetadata,
+                data: publicMetadataProps,
+                count: Object.keys(file.pubMagicMetadata.data).length,
+            },
+        };
+    } else {
+        return file;
+    }
+}
+
 export async function changeFilesVisibility(
     files: File[],
     selected: SelectedState,
     visibility: VISIBILITY_STATE
 ) {
-    const worker = await new CryptoWorker();
     const selectedFiles = getSelectedFiles(selected, files);
     const updatedFiles: File[] = [];
     for (const file of selectedFiles) {
-        if (!file.magicMetadata) {
-            file.magicMetadata = NEW_MAGIC_METADATA;
-        }
-        if (typeof file.magicMetadata.data === 'string') {
-            file.magicMetadata.data = (await worker.decryptMetadata(
-                file.magicMetadata.data,
-                file.magicMetadata.header,
-                file.key
-            )) as MagicMetadataProps;
-        }
-        // copies the existing magic metadata properties of the files and updates the visibility value
-        // The expected behaviour while updating magic metadata is to let the existing property as it is and update/add the property you want
         const updatedMagicMetadataProps: MagicMetadataProps = {
-            ...file.magicMetadata.data,
             visibility,
         };
-        const encryptedMagicMetadata: EncryptionResult =
-            await worker.encryptMetadata(updatedMagicMetadataProps, file.key);
-        updatedFiles.push({
-            ...file,
-            magicMetadata: {
-                version: file.magicMetadata.version,
-                count: Object.keys(updatedMagicMetadataProps).length,
-                data: encryptedMagicMetadata.file
-                    .encryptedData as unknown as string,
-                header: encryptedMagicMetadata.file.decryptionHeader,
-            },
-        });
+
+        updatedFiles.push(
+            await updateMagicMetadataProps(file, updatedMagicMetadataProps)
+        );
     }
     return updatedFiles;
 }
+
+export async function changeFileCreationTime(file: File, editedTime: number) {
+    const updatedPublicMagicMetadataProps: PublicMagicMetadataProps = {
+        editedTime,
+    };
+
+    return await updatePublicMagicMetadataProps(
+        file,
+        updatedPublicMagicMetadataProps
+    );
+}
+
 export function isSharedFile(file: File) {
     const user: User = getData(LS_KEYS.USER);
 
@@ -292,4 +388,29 @@ export function isSharedFile(file: File) {
         return false;
     }
     return file.ownerID !== user.id;
+}
+
+export function mergeMetadata(files: File[]): File[] {
+    return files.map((file) => ({
+        ...file,
+        metadata: {
+            ...file.metadata,
+            ...(file.pubMagicMetadata?.data
+                ? {
+                      ...(file.pubMagicMetadata?.data.editedTime && {
+                          creationTime: file.pubMagicMetadata.data.editedTime,
+                      }),
+                  }
+                : {}),
+            ...(file.magicMetadata?.data ? file.magicMetadata.data : {}),
+        },
+    }));
+}
+
+export function updateExistingFilePubMetadata(
+    existingFile: File,
+    updatedFile: File
+) {
+    existingFile.pubMagicMetadata = updatedFile.pubMagicMetadata;
+    existingFile.metadata = mergeMetadata([existingFile])[0].metadata;
 }

@@ -117,6 +117,12 @@ const GlobalStyles = createGlobalStyle`
     .pswp__img {
         object-fit: contain;
     }
+    .pswp__caption{
+        font-size:20px;
+        height:10%;
+        padding-left:5%;
+        color:#eee;
+    }
 
     .modal {
         z-index: 2000;
@@ -403,6 +409,42 @@ const GlobalStyles = createGlobalStyle`
     }
     .tooltip-inner{
         padding:0px;
+    }
+    .react-datepicker__input-container > input {
+        width:100%;
+    }
+    .react-datepicker__navigation{
+        top:14px;
+    }
+    .react-datepicker, .react-datepicker__header,.react-datepicker__time-container .react-datepicker__time,.react-datepicker-time__header{
+        background-color: #202020;
+        color:#fff;
+        border-color: #444;
+    }
+    .react-datepicker__current-month,.react-datepicker__day-name, .react-datepicker__day, .react-datepicker__time-name{
+         color:#fff;
+     }
+    .react-datepicker__day--disabled{
+        color:#5b5656;
+    }
+    .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item:hover{
+        background-color:#686868
+    }
+    .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--disabled :hover{
+        background-color: #202020;
+    }
+
+    .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--disabled{
+        color:#5b5656;
+    }
+    .react-datepicker{
+        padding-bottom:10px;
+    }
+    .react-datepicker__day:hover {
+        background-color:#686868
+    }
+    .react-datepicker__day--disabled:hover {
+        background-color: #202020;
     }
 `;
 

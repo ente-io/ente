@@ -15,13 +15,18 @@ interface IProps {
     selectable?: boolean;
     selected?: boolean;
     onSelect?: (checked: boolean) => void;
+    onHover?: () => void;
+    onRangeSelect?: () => void;
+    isRangeSelectActive?: boolean;
     selectOnClick?: boolean;
+    isInsSelectRange?: boolean;
 }
 
-const Check = styled.input`
+const Check = styled.input<{ active: boolean }>`
     appearance: none;
     position: absolute;
-    right: 0;
+    z-index: 10;
+    left: 0;
     opacity: 0;
     outline: none;
     cursor: pointer;
@@ -34,7 +39,7 @@ const Check = styled.input`
         width: 16px;
         height: 16px;
         border: 2px solid #fff;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: #ddd;
         display: inline-block;
         border-radius: 50%;
         vertical-align: bottom;
@@ -43,18 +48,19 @@ const Check = styled.input`
         line-height: 16px;
         transition: background-color 0.3s ease;
         pointer-events: inherit;
+        color: #aaa;
     }
     &::after {
         content: '';
         width: 5px;
         height: 10px;
-        border-right: 2px solid #fff;
-        border-bottom: 2px solid #fff;
+        border-right: 2px solid #333;
+        border-bottom: 2px solid #333;
         transform: translate(-18px, 8px);
-        opacity: 0;
         transition: transform 0.3s ease;
         position: absolute;
         pointer-events: inherit;
+        transform: translate(-18px, 10px) rotate(45deg);
     }
 
     /** checked */
@@ -65,13 +71,48 @@ const Check = styled.input`
         color: #fff;
     }
     &:checked::after {
-        opacity: 1;
-        transform: translate(-18px, 10px) rotate(45deg);
+        content: '';
+        border-right: 2px solid #ddd;
+        border-bottom: 2px solid #ddd;
     }
-
+    ${(props) => props.active && 'opacity: 0.5 '};
     &:checked {
-        opacity: 1;
+        opacity: 1 !important;
     }
+`;
+
+export const HoverOverlay = styled.div<{ checked: boolean }>`
+    opacity: 0;
+    left: 0;
+    top: 0;
+    outline: none;
+    height: 40%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-weight: 900;
+    position: absolute;
+    ${(props) =>
+        !props.checked &&
+        'background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))'};
+`;
+
+export const InSelectRangeOverLay = styled.div<{ active: boolean }>`
+    opacity: ${(props) => (!props.active ? 0 : 1)});
+    left: 0;
+    top: 0;
+    outline: none;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-weight: 900;
+    position: absolute;
+    ${(props) => props.active && 'background:rgba(81, 205, 124, 0.25)'};
 `;
 
 const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
@@ -107,6 +148,9 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
     }
 
     &:hover ${Check} {
+        opacity: 0.5;
+    }
+    &:hover ${HoverOverlay} {
         opacity: 1;
     }
 `;
@@ -123,6 +167,10 @@ export default function PreviewCard(props: IProps) {
         selected,
         onSelect,
         selectOnClick,
+        onHover,
+        onRangeSelect,
+        isRangeSelectActive,
+        isInsSelectRange,
     } = props;
     const isMounted = useRef(true);
     useLayoutEffect(() => {
@@ -167,6 +215,9 @@ export default function PreviewCard(props: IProps) {
 
     const handleClick = () => {
         if (selectOnClick) {
+            if (isRangeSelectActive) {
+                onRangeSelect();
+            }
             onSelect?.(!selected);
         } else if (file?.msrc || imgSrc) {
             onClick?.();
@@ -174,17 +225,25 @@ export default function PreviewCard(props: IProps) {
     };
 
     const handleSelect: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+        if (isRangeSelectActive) {
+            onRangeSelect?.();
+        }
         onSelect?.(e.target.checked);
     };
 
     const longPressCallback = () => {
         onSelect(!selected);
     };
-
+    const handleHover = () => {
+        if (selectOnClick) {
+            onHover();
+        }
+    };
     return (
         <Cont
             id={`thumb-${file?.id}`}
             onClick={handleClick}
+            onMouseEnter={handleHover}
             disabled={!forcedEnable && !file?.msrc && !imgSrc}
             selected={selected}
             {...(selectable ? useLongPress(longPressCallback, 500) : {})}>
@@ -193,11 +252,16 @@ export default function PreviewCard(props: IProps) {
                     type="checkbox"
                     checked={selected}
                     onChange={handleSelect}
+                    active={isRangeSelectActive && isInsSelectRange}
                     onClick={(e) => e.stopPropagation()}
                 />
             )}
             {(file?.msrc || imgSrc) && <img src={file?.msrc || imgSrc} />}
             {file?.metadata.fileType === 1 && <PlayCircleOutline />}
+            <HoverOverlay checked={selected} />
+            <InSelectRangeOverLay
+                active={isRangeSelectActive && isInsSelectRange}
+            />
         </Cont>
     );
 }

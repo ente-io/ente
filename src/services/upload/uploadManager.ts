@@ -1,4 +1,4 @@
-import { File, getLocalFiles } from '../fileService';
+import { File, getLocalFiles, setLocalFiles } from '../fileService';
 import { Collection, getLocalCollections } from '../collectionService';
 import { SetFiles } from 'pages/gallery';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
@@ -8,7 +8,6 @@ import {
     removeUnnecessaryFileProps,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
-import localForage from 'utils/storage/localForage';
 import {
     getMetadataMapKey,
     ParsedMetaDataJSON,
@@ -185,8 +184,7 @@ class UploadManager {
             if (fileUploadResult === FileUploadResults.UPLOADED) {
                 this.existingFiles.push(file);
                 this.existingFiles = sortFiles(this.existingFiles);
-                await localForage.setItem(
-                    'files',
+                await setLocalFiles(
                     removeUnnecessaryFileProps(this.existingFiles)
                 );
                 this.setFiles(this.existingFiles);

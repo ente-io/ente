@@ -18,12 +18,13 @@ import constants from 'utils/strings/constants';
 import LocationIcon from './icons/LocationIcon';
 import DateIcon from './icons/DateIcon';
 import SearchIcon from './icons/SearchIcon';
-import CrossIcon from './icons/CrossIcon';
+import CloseIcon from './icons/CloseIcon';
 import { Collection } from 'services/collectionService';
 import CollectionIcon from './icons/CollectionIcon';
 import { File, FILE_TYPE } from 'services/fileService';
 import ImageIcon from './icons/ImageIcon';
 import VideoIcon from './icons/VideoIcon';
+import { IconButton } from './Container';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -346,15 +347,11 @@ export default function SearchBar(props: Props) {
                             noOptionsMessage={() => null}
                         />
                     </div>
-                    <div style={{ width: '24px' }}>
-                        {props.isOpen && (
-                            <div
-                                style={{ cursor: 'pointer' }}
-                                onClick={() => resetSearch()}>
-                                <CrossIcon />
-                            </div>
-                        )}
-                    </div>
+                    {props.isOpen && (
+                        <IconButton onClick={() => resetSearch()}>
+                            <CloseIcon />
+                        </IconButton>
+                    )}
                 </SearchInput>
             </Wrapper>
             <SearchButton
