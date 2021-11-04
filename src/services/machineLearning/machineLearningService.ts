@@ -1,4 +1,6 @@
 import { MLSyncResult } from 'utils/machineLearning/types';
+import * as tf from '@tensorflow/tfjs';
+import { setWasmPaths } from '@tensorflow/tfjs-backend-wasm';
 import TFJSFaceDetectionService from './tfjsFaceDetectionService';
 
 class MachineLearningService {
@@ -9,6 +11,8 @@ class MachineLearningService {
     }
 
     public async init() {
+        await tf.ready();
+        setWasmPaths('/js/tfjs/');
         await this.faceDetectionService.init();
     }
 
