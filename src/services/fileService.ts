@@ -136,7 +136,7 @@ export const setLocalFiles = async (files: File[]) => {
     await localForage.setItem(FILES_TABLE, files);
 };
 
-export const getCollectionLastSyncTime = async (collection: Collection) =>
+const getCollectionLastSyncTime = async (collection: Collection) =>
     (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
 
 export const syncFiles = async (
