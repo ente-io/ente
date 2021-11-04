@@ -1,9 +1,16 @@
 import { MLSyncResult } from 'utils/machineLearning/types';
+import TFJSFaceDetectionService from './tfjsFaceDetectionService';
 
 class MachineLearningService {
-    public constructor() {}
+    private faceDetectionService: TFJSFaceDetectionService;
 
-    public async init() {}
+    public constructor() {
+        this.faceDetectionService = new TFJSFaceDetectionService();
+    }
+
+    public async init() {
+        await this.faceDetectionService.init();
+    }
 
     public async sync(token: string): Promise<MLSyncResult> {
         if (!token) {
