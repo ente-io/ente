@@ -1,6 +1,7 @@
 import {
     load as blazeFaceLoad,
     BlazeFaceModel,
+    NormalizedFace,
 } from '@tensorflow-models/blazeface';
 import * as tf from '@tensorflow/tfjs';
 import { AlignedFace } from 'utils/machineLearning/types';
@@ -32,7 +33,42 @@ class TFJSFaceDetectionService {
         );
     }
 
-    private getAlignedFace(normFace): AlignedFace {
+    private getDlibAlignedFace(normFace: NormalizedFace): AlignedFace {
+        const relX = 0.5;
+        const relY = 0.43;
+        const relScale = 0.45;
+
+        const leftEyeCenter = normFace.landmarks[0];
+        const rightEyeCenter = normFace.landmarks[1];
+        const mountCenter = normFace.landmarks[3];
+
+        const distToMouth = (pt) => {
+            const dy = mountCenter[1] - pt[1];
+            const dx = mountCenter[0] - pt[0];
+            return Math.sqrt(dx * dx + dy * dy);
+        };
+        const eyeToMouthDist =
+            (distToMouth(leftEyeCenter) + distToMouth(rightEyeCenter)) / 2;
+
+        const size = Math.floor(eyeToMouthDist / relScale);
+
+        const center = [
+            (leftEyeCenter[0] + rightEyeCenter[0] + mountCenter[0]) / 3,
+            (leftEyeCenter[1] + rightEyeCenter[1] + mountCenter[1]) / 3,
+        ];
+
+        const sx = center[0] - relX * size;
+        const sy = center[1] - relY * size;
+        const ex = center[0] + relX * size;
+        const ey = center[1] + relY * size;
+
+        return {
+            ...normFace,
+            alignedBox: [sx, sy, ex, ey],
+        };
+    }
+
+    private getAlignedFace(normFace: NormalizedFace): AlignedFace {
         const leftEye = normFace.landmarks[0];
         const rightEye = normFace.landmarks[1];
         // const noseTip = normFace.landmarks[2];
@@ -88,7 +124,7 @@ class TFJSFaceDetectionService {
             image as any
         );
         const alignedFaces = normalizedFaces.map((normFace) =>
-            this.getAlignedFace(normFace)
+            this.getDlibAlignedFace(normFace)
         );
         const filtertedFaces = alignedFaces.filter((face) => {
             return (
