@@ -13,6 +13,7 @@ export default function MLDebug() {
     const [token, setToken] = useState<string>();
     const [clusterFaceDistance, setClusterFaceDistance] = useState<number>(0.5);
     const [minClusterSize, setMinClusterSize] = useState<number>(4);
+    const [minFaceSize, setMinFaceSize] = useState<number>(32);
     const [mlResult, setMlResult] = useState<MLSyncResult>({
         allFaces: [],
         clusterResults: {
@@ -60,7 +61,8 @@ export default function MLDebug() {
             const result = await mlWorker.sync(
                 token,
                 clusterFaceDistance,
-                minClusterSize
+                minClusterSize,
+                minFaceSize
             );
             setMlResult(result);
         } catch (e) {
@@ -73,11 +75,19 @@ export default function MLDebug() {
     return (
         <div>
             <div>ClusterFaceDistance: {clusterFaceDistance}</div>
-            <button onClick={() => setClusterFaceDistance(0.7)}>0.7</button>
-            <button onClick={() => setClusterFaceDistance(0.75)}>0.75</button>
-            <button onClick={() => setClusterFaceDistance(0.8)}>0.8</button>
-            <button onClick={() => setClusterFaceDistance(0.85)}>0.85</button>
-            <button onClick={() => setClusterFaceDistance(0.9)}>0.9</button>
+            <button onClick={() => setClusterFaceDistance(0.4)}>0.4</button>
+            <button onClick={() => setClusterFaceDistance(0.45)}>0.45</button>
+            <button onClick={() => setClusterFaceDistance(0.5)}>0.5</button>
+            <button onClick={() => setClusterFaceDistance(0.55)}>0.55</button>
+            <button onClick={() => setClusterFaceDistance(0.6)}>0.6</button>
+
+            <p></p>
+            <div>MinFaceSize: {minFaceSize}</div>
+            <button onClick={() => setMinFaceSize(20)}>16</button>
+            <button onClick={() => setMinFaceSize(24)}>24</button>
+            <button onClick={() => setMinFaceSize(32)}>32</button>
+            <button onClick={() => setMinFaceSize(64)}>64</button>
+            <button onClick={() => setMinFaceSize(112)}>112</button>
 
             <p></p>
             <div>MinClusterSize: {minClusterSize}</div>

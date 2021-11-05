@@ -13,6 +13,7 @@ import ClusteringService from './clusteringService';
 
 import './faceEnvPatch';
 import * as faceapi from 'face-api.js';
+import { SsdMobilenetv1Options } from 'face-api.js';
 
 class MachineLearningService {
     // private faceDetectionService: TFJSFaceDetectionService;
@@ -21,7 +22,7 @@ class MachineLearningService {
 
     private clusterFaceDistance = 0.5;
     private minClusterSize = 4;
-    // private minFacePixels = 64;
+    private minFaceSize = 32;
 
     public allFaces: faceapi.WithFaceDescriptor<
         faceapi.WithFaceLandmarks<
@@ -42,9 +43,14 @@ class MachineLearningService {
         this.allFaceImages = [];
     }
 
-    public async init(clusterFaceDistance: number, minClusterSize: number) {
+    public async init(
+        clusterFaceDistance: number,
+        minClusterSize: number,
+        minFaceSize: number
+    ) {
         this.clusterFaceDistance = clusterFaceDistance;
         this.minClusterSize = minClusterSize;
+        this.minFaceSize = minFaceSize;
 
         // setWasmPath('/js/tfjs/');
         await tf.ready();
@@ -96,12 +102,10 @@ class MachineLearningService {
                 );
             }
         }
-        console.log(
-            'allFaces: ',
-            this.allFaces[0].alignedRect,
-            this.allFaces[0].alignedRect.box,
-            this.allFaces[0].alignedRect.imageDims
-        );
+        console.log('allFaces: ', this.allFaces);
+        // [0].alignedRect,
+        // this.allFaces[0].alignedRect.box,
+        // this.allFaces[0].alignedRect.imageDims
 
         const clusterResults = this.clusteringService.clusterUsingDBSCAN(
             this.allFaces.map((f) => Array.from(f.descriptor)),
@@ -138,29 +142,36 @@ class MachineLearningService {
 
         // const faces = await this.faceDetectionService.estimateFaces(tfImage);
 
-        // const faceHasMinPixels = (face) => {
-        //     return (
-        //         face.alignedBox[2] - face.alignedBox[0] > this.minFacePixels //&&
-        //         // face.alignedBox[3] - face.alignedBox[1] > this.minFacePixels
-        //     );
-        // }
-        // const filtertedFaces = faces.filter(faceHasMinPixels);
-
         // const embeddingResults = await this.faceEmbeddingService.getEmbeddings(
         //     tfImage,
         //     filtertedFaces
         // );
 
         const faceApiInput = tfImage.expandDims(0) as tf.Tensor4D;
-        const results = await faceapi
-            .detectAllFaces(faceApiInput as any)
+        const faces = await faceapi
+            .detectAllFaces(
+                faceApiInput as any,
+                new SsdMobilenetv1Options({
+                    // minConfidence: 0.6
+                    // maxResults: 10
+                })
+            )
             .withFaceLandmarks()
             .withFaceDescriptors();
+
+        const filtertedFaces = faces.filter((face) => {
+            return (
+                face.alignedRect.box.width > this.minFaceSize // &&
+                // face.alignedBox[3] - face.alignedBox[1] > this.minFacePixels
+            );
+        });
+        console.log('filtertedFaces: ', filtertedFaces);
+
         // const embeddings = results.map(f=>f.descriptor);
         // console.log('embeddings', embeddings);
         let faceImages = [];
-        if (results && results.length > 0) {
-            const faceBoxes = results
+        if (filtertedFaces && filtertedFaces.length > 0) {
+            const faceBoxes = filtertedFaces
                 .map((f) => f.alignedRect.relativeBox)
                 .map((b) => [b.top, b.left, b.bottom, b.right]);
             const normalizedImage = tf.sub(
@@ -180,7 +191,7 @@ class MachineLearningService {
         tf.dispose(tfImage);
 
         return {
-            faceApiResults: results,
+            faceApiResults: filtertedFaces,
             faceImages: faceImages,
         };
 
