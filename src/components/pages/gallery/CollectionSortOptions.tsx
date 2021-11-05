@@ -1,4 +1,4 @@
-import { Label, Value } from 'components/Container';
+import { Value } from 'components/Container';
 import TickIcon from 'components/icons/TickIcon';
 import React from 'react';
 import { ListGroup, Popover, Row } from 'react-bootstrap';
@@ -23,13 +23,13 @@ const SortByOptionCreator =
         (
             <MenuItem>
                 <Row>
-                    <Label width="20px">
+                    <Value width="20px">
                         {activeSortBy === props.sortBy && (
                             <TickWrapper>
                                 <TickIcon />
                             </TickWrapper>
                         )}
-                    </Label>
+                    </Value>
                     <Value width="165px">
                         <MenuLink
                             onClick={() => setCollectionSortBy(props.sortBy)}

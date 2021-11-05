@@ -10,19 +10,16 @@ import {
 import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
-import {
-    appendPhotoSwipeProps,
-    decryptFile,
-    mergeMetadata,
-    sortFiles,
-} from 'utils/file';
+import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
 import CryptoWorker from 'utils/crypto';
 
 const ENDPOINT = getEndpoint();
 
-const FILES = 'files';
+const FILES_TABLE = 'files';
 
-export const MIN_EDITED_CREATION_TIME = '1800-01-01T00:00:00.000Z';
+export const MIN_EDITED_CREATION_TIME = new Date(1800, 0, 1);
+export const MAX_EDITED_CREATION_TIME = new Date();
+export const ALL_TIME = new Date(1800, 0, 1, 23, 59, 59);
 
 export const MAX_EDITED_FILE_NAME_LENGTH = 100;
 
@@ -133,9 +130,17 @@ interface TrashRequestItems {
     collectionID: number;
 }
 export const getLocalFiles = async () => {
-    const files: Array<File> = (await localForage.getItem<File[]>(FILES)) || [];
+    const files: Array<File> =
+        (await localForage.getItem<File[]>(FILES_TABLE)) || [];
     return files;
 };
+
+export const setLocalFiles = async (files: File[]) => {
+    await localForage.setItem(FILES_TABLE, files);
+};
+
+const getCollectionLastSyncTime = async (collection: Collection) =>
+    (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
 
 export const syncFiles = async (
     collections: Collection[],
@@ -144,15 +149,14 @@ export const syncFiles = async (
     const localFiles = await getLocalFiles();
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     if (files.length !== localFiles.length) {
-        await localForage.setItem('files', files);
+        await setLocalFiles(files);
         setFiles(sortFiles(mergeMetadata(files)));
     }
     for (const collection of collections) {
         if (!getToken()) {
             continue;
         }
-        const lastSyncTime =
-            (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
+        const lastSyncTime = await getCollectionLastSyncTime(collection);
         if (collection.updationTime === lastSyncTime) {
             continue;
         }
@@ -177,15 +181,14 @@ export const syncFiles = async (
             }
             files.push(file);
         }
-        await localForage.setItem('files', files);
+        await setLocalFiles(files);
         await localForage.setItem(
             `${collection.id}-time`,
             collection.updationTime
         );
-        files = sortFiles(mergeMetadata(appendPhotoSwipeProps(files)));
-        setFiles(files);
+        setFiles(sortFiles(mergeMetadata(files)));
     }
-    return mergeMetadata(appendPhotoSwipeProps(files));
+    return mergeMetadata(files);
 };
 
 export const getFiles = async (
@@ -196,10 +199,7 @@ export const getFiles = async (
 ): Promise<File[]> => {
     try {
         const decryptedFiles: File[] = [];
-        let time =
-            sinceTime ||
-            (await localForage.getItem<number>(`${collection.id}-time`)) ||
-            0;
+        let time = sinceTime;
         let resp;
         do {
             const token = getToken();
