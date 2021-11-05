@@ -11,9 +11,10 @@ import TFJSImage from './TFJSImage';
 
 export default function MLDebug() {
     const [token, setToken] = useState<string>();
-    const [clusterFaceDistance, setClusterFaceDistance] = useState<number>(0.5);
+    const [clusterFaceDistance, setClusterFaceDistance] =
+        useState<number>(0.45);
     const [minClusterSize, setMinClusterSize] = useState<number>(4);
-    const [minFaceSize, setMinFaceSize] = useState<number>(32);
+    const [minFaceSize, setMinFaceSize] = useState<number>(24);
     const [mlResult, setMlResult] = useState<MLSyncResult>({
         allFaces: [],
         clusterResults: {
@@ -83,7 +84,7 @@ export default function MLDebug() {
 
             <p></p>
             <div>MinFaceSize: {minFaceSize}</div>
-            <button onClick={() => setMinFaceSize(20)}>16</button>
+            <button onClick={() => setMinFaceSize(16)}>16</button>
             <button onClick={() => setMinFaceSize(24)}>24</button>
             <button onClick={() => setMinFaceSize(32)}>32</button>
             <button onClick={() => setMinFaceSize(64)}>64</button>

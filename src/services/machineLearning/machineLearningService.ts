@@ -20,9 +20,9 @@ class MachineLearningService {
     // private faceEmbeddingService: TFJSFaceEmbeddingService;
     private clusteringService: ClusteringService;
 
-    private clusterFaceDistance = 0.5;
+    private clusterFaceDistance = 0.45;
     private minClusterSize = 4;
-    private minFaceSize = 32;
+    private minFaceSize = 24;
 
     public allFaces: faceapi.WithFaceDescriptor<
         faceapi.WithFaceLandmarks<
