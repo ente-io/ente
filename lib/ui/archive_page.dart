@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
@@ -8,9 +6,8 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
-
-import 'gallery.dart';
-import 'gallery_app_bar_widget.dart';
+import 'package:photos/ui/gallery.dart';
+import 'package:photos/ui/gallery_app_bar_widget.dart';
 
 class ArchivePage extends StatelessWidget {
   final String tagPrefix;
@@ -38,6 +35,7 @@ class ArchivePage extends StatelessWidget {
                     orElse: () => null) !=
                 null,
           ),
+      removalEventTypes: const {EventType.unarchived},
       forceReloadEvents: [
         Bus.instance.on<FilesUpdatedEvent>().where(
               (event) =>

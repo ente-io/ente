@@ -240,8 +240,7 @@ class _DetailPageState extends State<DetailPage> {
     final totalFiles = _files.length;
     if (totalFiles == 1) {
       // Deleted the only file
-      Navigator.of(context, rootNavigator: true).pop(); // Close pageview
-      Navigator.of(context, rootNavigator: true).pop(); // Close gallery
+      Navigator.of(context).pop(); // Close pageview
       return;
     }
     if (_selectedIndex == totalFiles - 1) {
@@ -259,7 +258,6 @@ class _DetailPageState extends State<DetailPage> {
         _files.remove(file);
       });
     }
-    Navigator.of(context, rootNavigator: true).pop(); // Close dialog
   }
 
   Future<void> _onEditFileRequested(File file) async {

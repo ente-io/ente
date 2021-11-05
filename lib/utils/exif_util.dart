@@ -2,9 +2,9 @@ import 'dart:io' as io;
 
 import 'package:exif/exif.dart';
 import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:logging/logging.dart';
 
 const kDateTimeOriginal = "EXIF DateTimeOriginal";
 const kImageDateTime = "Image DateTime";

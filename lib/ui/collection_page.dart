@@ -1,15 +1,13 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/selected_files.dart';
-
-import 'gallery.dart';
-import 'gallery_app_bar_widget.dart';
+import 'package:photos/ui/gallery.dart';
+import 'package:photos/ui/gallery_app_bar_widget.dart';
 
 class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
@@ -35,6 +33,10 @@ class CollectionPage extends StatelessWidget {
       reloadEvent: Bus.instance
           .on<CollectionUpdatedEvent>()
           .where((event) => event.collectionID == c.collection.id),
+      removalEventTypes: const {
+        EventType.deletedFromRemote,
+        EventType.deletedFromEverywhere,
+      },
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,

@@ -32,12 +32,14 @@ class FileMagicService {
   Future<void> changeVisibility(List<File> files, int visibility) async {
     Map<String, dynamic> update = {kMagicKeyVisibility: visibility};
     await _updateMagicData(files, update);
-    // h4ck: Remove archived elements from the UI. If this was an archival,
-    // ArchivePage will reload the new items anyway
-    Bus.instance.fire(LocalPhotosUpdatedEvent(files, type: EventType.deleted));
     if (visibility == kVisibilityVisible) {
       // Force reload home gallery to pull in the now unarchived files
       Bus.instance.fire(ForceReloadHomeGalleryEvent());
+      Bus.instance
+          .fire(LocalPhotosUpdatedEvent(files, type: EventType.unarchived));
+    } else {
+      Bus.instance
+          .fire(LocalPhotosUpdatedEvent(files, type: EventType.archived));
     }
   }
 

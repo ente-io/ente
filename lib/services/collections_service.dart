@@ -513,7 +513,7 @@ class CollectionsService {
           fromCollectionID, files.map((e) => e.uploadedFileID).toList());
       Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
       Bus.instance.fire(CollectionUpdatedEvent(fromCollectionID, files,
-          type: EventType.deleted));
+          type: EventType.deletedFromRemote));
     });
   }
 

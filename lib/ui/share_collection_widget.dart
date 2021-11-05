@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:logging/logging.dart';
@@ -17,7 +18,6 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SharingDialog extends StatefulWidget {
   final Collection collection;

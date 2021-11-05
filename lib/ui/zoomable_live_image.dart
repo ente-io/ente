@@ -1,4 +1,5 @@
 import 'dart:io' as io;
+
 import 'package:chewie/chewie.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,6 @@ class ZoomableLiveImage extends StatefulWidget {
   final Function(bool) shouldDisableScroll;
   final String tagPrefix;
   final Decoration backgroundDecoration;
-
 
   ZoomableLiveImage(
     this.file, {
@@ -138,7 +138,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     if (videoFile != null && videoFile.existsSync()) {
       _setVideoPlayerController(file: videoFile);
     } else {
-      showToast("download failed", toastLength: Toast.LENGTH_SHORT);
+      showShortToast("download failed");
     }
     _isLoadingVideoPlayer = false;
   }

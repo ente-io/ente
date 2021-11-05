@@ -180,7 +180,7 @@ class ProgressDialog {
 
 // ignore: must_be_immutable
 class _Body extends StatefulWidget {
-  _BodyState _dialog = _BodyState();
+  final _BodyState _dialog = _BodyState();
 
   update() {
     _dialog.update();

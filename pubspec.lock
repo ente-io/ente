@@ -248,13 +248,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.0"
-  expansion_card:
+  expansion_tile_card:
     dependency: "direct main"
     description:
-      name: expansion_card
+      name: expansion_tile_card
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.0"
+    version: "2.0.0"
   extended_image:
     dependency: "direct main"
     description:
@@ -382,10 +382,10 @@ packages:
   flutter_image_compress:
     dependency: "direct main"
     description:
-      path: "thirdparty/flutter_image_compress"
-      relative: true
-    source: path
-    version: "0.7.0"
+      name: flutter_image_compress
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.0"
   flutter_inappwebview:
     dependency: "direct main"
     description:
@@ -910,7 +910,7 @@ packages:
       name: scrollable_positioned_list
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.10"
+    version: "0.2.2"
   sensors:
     dependency: transitive
     description:

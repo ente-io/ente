@@ -1,17 +1,18 @@
 import 'dart:async';
+import 'dart:io' as dartio;
+
+import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
-import 'dart:io' as dartio;
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/exif_util.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:photos/core/configuration.dart';
-import 'package:flutter/widgets.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/file_util.dart';
 
 final _logger = Logger("ShareUtil");
 // share is used to share media/files from ente to other apps

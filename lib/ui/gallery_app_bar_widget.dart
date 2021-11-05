@@ -15,9 +15,9 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/change_collection_name_dialog.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/share_collection_widget.dart';
-import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -524,7 +524,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           await deleteFilesFromRemoteOnly(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          showToast("moved to trash");
+          showShortToast("moved to trash");
         },
       ));
       actions.add(CupertinoActionSheetAction(

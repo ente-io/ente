@@ -23,9 +23,8 @@ import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/linear_progress_dialog.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
-
-import 'file_util.dart';
 
 final _logger = Logger("DeleteFileUtil");
 
@@ -102,16 +101,16 @@ Future<void> deleteFilesFromEverywhere(
         deletedFiles
             .where((file) => file.collectionID == collectionID)
             .toList(),
-        type: EventType.deleted,
+        type: EventType.deletedFromEverywhere,
       ));
     }
   }
   if (deletedFiles.isNotEmpty) {
-    Bus.instance
-        .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
+    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles,
+        type: EventType.deletedFromEverywhere));
+    showShortToast("moved to trash");
   }
   await dialog.hide();
-  showToast("moved to trash");
   if (uploadedFilesToBeTrashed.isNotEmpty) {
     RemoteSyncService.instance.sync(silently: true);
   }
@@ -149,10 +148,11 @@ Future<void> deleteFilesFromRemoteOnly(
     Bus.instance.fire(CollectionUpdatedEvent(
       collectionID,
       files.where((file) => file.collectionID == collectionID).toList(),
-      type: EventType.deleted,
+      type: EventType.deletedFromRemote,
     ));
   }
-  Bus.instance.fire(LocalPhotosUpdatedEvent(files, type: EventType.deleted));
+  Bus.instance.fire(
+      LocalPhotosUpdatedEvent(files, type: EventType.deletedFromRemote));
   SyncService.instance.sync();
   await dialog.hide();
   RemoteSyncService.instance.sync(silently: true);
@@ -197,8 +197,8 @@ Future<void> deleteFilesOnDeviceOnly(
     }
   }
   if (deletedFiles.isNotEmpty || alreadyDeletedIDs.isNotEmpty) {
-    Bus.instance
-        .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
+    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles,
+        type: EventType.deletedFromDevice));
   }
   await dialog.hide();
 }
@@ -216,7 +216,8 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
     await TrashSyncService.instance.deleteFromTrash(files);
     showToast("successfully deleted");
     await dialog.hide();
-    Bus.instance.fire(FilesUpdatedEvent(files, type: EventType.deleted));
+    Bus.instance.fire(
+        FilesUpdatedEvent(files, type: EventType.deletedFromEverywhere));
     return true;
   } catch (e, s) {
     _logger.info("failed to delete from trash", e, s);

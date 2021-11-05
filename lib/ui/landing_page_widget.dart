@@ -1,13 +1,13 @@
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/login_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
 import 'package:photos/ui/payment/subscription.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LandingPageWidget extends StatefulWidget {
   const LandingPageWidget({Key key}) : super(key: key);

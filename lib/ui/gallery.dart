@@ -25,6 +25,7 @@ class Gallery extends StatefulWidget {
   final List<File> initialFiles;
   final Stream<FilesUpdatedEvent> reloadEvent;
   final List<Stream<Event>> forceReloadEvents;
+  final Set<EventType> removalEventTypes;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
   final Widget header;
@@ -37,6 +38,7 @@ class Gallery extends StatefulWidget {
     this.initialFiles,
     this.reloadEvent,
     this.forceReloadEvents,
+    this.removalEventTypes = const {},
     this.header,
     this.footer,
     Key key,
@@ -186,6 +188,7 @@ class _GalleryState extends State<Gallery> {
           _collatedFiles[index],
           index,
           widget.reloadEvent,
+          widget.removalEventTypes,
           widget.asyncLoader,
           widget.selectedFiles,
           widget.tagPrefix,

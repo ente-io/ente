@@ -156,6 +156,16 @@ class TrashDB {
     );
   }
 
+  Future<int> update(TrashFile file) async {
+    final db = await instance.database;
+    return await db.update(
+      tableName,
+      _getRowForTrash(file),
+      where: '$columnUploadedFileID = ?',
+      whereArgs: [file.uploadedFileID],
+    );
+  }
+
   Future<FileLoadResult> getTrashedFiles(int startTime, int endTime,
       {int limit, bool asc}) async {
     final db = await instance.database;
@@ -237,7 +247,7 @@ class TrashDB {
     row[columnMMdEncodedJson] = trash.mMdEncodedJson ?? '{}';
 
     row[columnPubMMdVersion] = trash.pubMmdVersion ?? 0;
-    row[columnPubMMdEncodedJson] == trash.pubMmdEncodedJson ?? '{}';
+    row[columnPubMMdEncodedJson] = trash.pubMmdEncodedJson ?? '{}';
     return row;
   }
 }

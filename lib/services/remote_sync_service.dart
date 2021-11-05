@@ -9,6 +9,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
@@ -31,6 +32,7 @@ class RemoteSyncService {
   int _completedUploads = 0;
   SharedPreferences _prefs;
   bool _isBackground;
+  Completer<void> _existingSync;
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
 
@@ -56,6 +58,11 @@ class RemoteSyncService {
       _logger.info("Skipping remote sync since account is not configured");
       return;
     }
+    if (_existingSync != null) {
+      _logger.info("Remote sync already in progress, skipping");
+      return _existingSync.future;
+    }
+    _existingSync = Completer<void>();
 
     bool isFirstSync = !_collectionsService.hasSyncedCollections();
     await _collectionsService.sync(isBackground: _isBackground);
@@ -77,6 +84,8 @@ class RemoteSyncService {
         .syncTrash()
         .onError((e, s) => _logger.severe('trash sync failed', e, s));
     bool hasUploadedFiles = await _uploadDiff();
+    _existingSync.complete();
+    _existingSync = null;
     if (hasUploadedFiles) {
       sync(silently: true);
     }
@@ -115,9 +124,9 @@ class RemoteSyncService {
           (await FilesDB.instance.getFilesFromIDs(fileIDs)).values.toList();
       await FilesDB.instance.deleteFilesFromCollection(collectionID, fileIDs);
       Bus.instance.fire(CollectionUpdatedEvent(collectionID, deletedFiles,
-          type: EventType.deleted));
-      Bus.instance
-          .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
+          type: EventType.deletedFromRemote));
+      Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles,
+          type: EventType.deletedFromRemote));
     }
     if (diff.updatedFiles.isNotEmpty) {
       await _storeDiff(diff.updatedFiles, collectionID);
@@ -138,23 +147,6 @@ class RemoteSyncService {
       return await _syncCollectionDiff(collectionID,
           _collectionsService.getCollectionSyncTime(collectionID));
     }
-  }
-
-  bool _shouldIgnoreFileUpload(
-    File file, {
-    Map<String, Set<String>> ignoredFilesMap,
-    Set<String> ignoredLocalIDs,
-  }) {
-    if (file.localID == null || file.localID.isEmpty) {
-      return false;
-    }
-    if (Platform.isIOS) {
-      return ignoredLocalIDs.contains(file.localID);
-    }
-    // For android, check if there's any ignored file with same device folder
-    // and title.
-    return ignoredFilesMap.containsKey(file.deviceFolder) &&
-        ignoredFilesMap[file.deviceFolder].contains(file.title);
   }
 
   Future<bool> _uploadDiff() async {
@@ -270,6 +262,7 @@ class RemoteSyncService {
         remote = 0,
         localButUpdatedOnRemote = 0,
         localButAddedToNewCollectionOnRemote = 0;
+    bool hasAnyCreationTimeChanged = false;
     List<File> toBeInserted = [];
     for (File file in diff) {
       final existingFiles = file.deviceFolder == null
@@ -321,6 +314,9 @@ class RemoteSyncService {
             if (file.collectionID == existingFile.collectionID &&
                 file.uploadedFileID == existingFile.uploadedFileID) {
               // File was updated on remote
+              if (file.creationTime != existingFile.creationTime) {
+                hasAnyCreationTimeChanged = true;
+              }
               foundMatchingCollection = true;
               file.generatedID = existingFile.generatedID;
               toBeInserted.add(file);
@@ -353,6 +349,9 @@ class RemoteSyncService {
           localButAddedToNewCollectionOnRemote.toString() +
           " was uploaded from device but added to a new collection on remote.",
     );
+    if (hasAnyCreationTimeChanged) {
+      Bus.instance.fire(ForceReloadHomeGalleryEvent());
+    }
   }
 
   // return true if the client needs to re-sync the collections from previous

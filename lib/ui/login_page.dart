@@ -2,13 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
