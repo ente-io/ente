@@ -11,7 +11,7 @@ import TFJSImage from './TFJSImage';
 
 export default function MLDebug() {
     const [token, setToken] = useState<string>();
-    const [clusterFaceDistance, setClusterFaceDistance] = useState<number>(0.8);
+    const [clusterFaceDistance, setClusterFaceDistance] = useState<number>(0.5);
     const [minClusterSize, setMinClusterSize] = useState<number>(4);
     const [mlResult, setMlResult] = useState<MLSyncResult>({
         allFaces: [],
@@ -100,7 +100,7 @@ export default function MLDebug() {
                             <div key={ind}>
                                 <TFJSImage
                                     faceImage={
-                                        mlResult.allFaces[faceIndex]?.faceImage
+                                        mlResult.allFaces[faceIndex]
                                     }></TFJSImage>
                             </div>
                         ))}
@@ -113,7 +113,7 @@ export default function MLDebug() {
                         <div key={index}>
                             <TFJSImage
                                 faceImage={
-                                    mlResult.allFaces[faceIndex]?.faceImage
+                                    mlResult.allFaces[faceIndex]
                                 }></TFJSImage>
                         </div>
                     ))}

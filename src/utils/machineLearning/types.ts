@@ -1,7 +1,7 @@
 import { NormalizedFace } from '@tensorflow-models/blazeface';
 
 export interface MLSyncResult {
-    allFaces: FaceWithEmbedding[];
+    allFaces: FaceImage[];
     clusterResults: ClusteringResults;
 }
 
