@@ -1,6 +1,10 @@
 import * as tf from '@tensorflow/tfjs';
 import * as tflite from '@tensorflow/tfjs-tflite';
-import { AlignedFace, FaceEmbedding } from 'utils/machineLearning/types';
+import {
+    AlignedFace,
+    FaceEmbedding,
+    FaceImage,
+} from 'utils/machineLearning/types';
 
 class TFJSFaceEmbeddingService {
     private mobileFaceNetModel: tflite.TFLiteModel;
@@ -95,7 +99,7 @@ class TFJSFaceEmbeddingService {
         // console.log('embeddings: ', embeddings[0]);
         return {
             embeddings: embeddings as FaceEmbedding[],
-            faceImages: faceImages,
+            faceImages: faceImages as FaceImage[],
         };
     }
 }

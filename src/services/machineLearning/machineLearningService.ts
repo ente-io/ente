@@ -2,6 +2,7 @@ import { File, getLocalFiles } from 'services/fileService';
 import DownloadManager from 'services/downloadManager';
 
 import * as tf from '@tensorflow/tfjs';
+import { setWasmPaths } from '@tensorflow/tfjs-backend-wasm';
 
 import TFJSFaceDetectionService from './tfjsFaceDetectionService';
 import TFJSFaceEmbeddingService from './tfjsFaceEmbeddingService';
@@ -10,7 +11,7 @@ import { FaceWithEmbedding, MLSyncResult } from 'utils/machineLearning/types';
 import * as jpeg from 'jpeg-js';
 import ClusteringService from './clusteringService';
 
-class MlService {
+class MachineLearningService {
     private faceDetectionService: TFJSFaceDetectionService;
     private faceEmbeddingService: TFJSFaceEmbeddingService;
     private clusteringService: ClusteringService;
@@ -31,11 +32,19 @@ class MlService {
     public async init(clusterFaceDistance: number, minClusterSize: number) {
         this.clusterFaceDistance = clusterFaceDistance;
         this.minClusterSize = minClusterSize;
+
+        setWasmPaths('/js/tfjs/');
+        await tf.ready();
+
         await this.faceDetectionService.init();
         await this.faceEmbeddingService.init();
     }
 
     public async sync(token: string): Promise<MLSyncResult> {
+        if (!token) {
+            throw Error('Token needed by ml service to sync file');
+        }
+
         const existingFiles = await getLocalFiles();
         existingFiles.sort(
             (a, b) => b.metadata.creationTime - a.metadata.creationTime
@@ -106,4 +115,4 @@ class MlService {
     }
 }
 
-export default MlService;
+export default MachineLearningService;
