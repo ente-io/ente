@@ -40,6 +40,17 @@ class MachineLearningService {
         await this.faceEmbeddingService.init();
     }
 
+    private getUniqueFiles(files: File[], limit: number) {
+        const uniqueFiles: Map<number, File> = new Map<number, File>();
+        for (let i = 0; uniqueFiles.size < limit && i < files.length; i++) {
+            if (!uniqueFiles.has(files[i].id)) {
+                uniqueFiles.set(files[i].id, files[i]);
+            }
+        }
+
+        return uniqueFiles;
+    }
+
     public async sync(token: string): Promise<MLSyncResult> {
         if (!token) {
             throw Error('Token needed by ml service to sync file');
@@ -49,10 +60,11 @@ class MachineLearningService {
         existingFiles.sort(
             (a, b) => b.metadata.creationTime - a.metadata.creationTime
         );
-        const files = existingFiles.slice(0, 50);
+        const files = this.getUniqueFiles(existingFiles, 50);
+        console.log('Got unique files: ', files.size);
 
         this.allFaces = [];
-        for (const file of files) {
+        for (const file of files.values()) {
             try {
                 const result = await this.syncFile(file, token);
                 this.allFaces = this.allFaces.concat(result);
