@@ -57,9 +57,13 @@ class MachineLearningService {
 
         // await this.faceDetectionService.init();
         // await this.faceEmbeddingService.init();
+        console.log('01 TF Memory stats: ', tf.memory());
         await faceapi.nets.ssdMobilenetv1.loadFromUri('/models/face-api/');
+        // console.log('02 TF Memory stats: ', tf.memory());
         await faceapi.nets.faceLandmark68Net.loadFromUri('/models/face-api/');
+        // console.log('03 TF Memory stats: ', tf.memory());
         await faceapi.nets.faceRecognitionNet.loadFromUri('/models/face-api/');
+        console.log('04 TF Memory stats: ', tf.memory());
     }
 
     private getUniqueFiles(files: File[], limit: number) {
@@ -103,6 +107,14 @@ class MachineLearningService {
             }
         }
         console.log('allFaces: ', this.allFaces);
+
+        faceapi.nets.ssdMobilenetv1.dispose();
+        // console.log('11 TF Memory stats: ', tf.memory());
+        await faceapi.nets.faceLandmark68Net.dispose();
+        // console.log('12 TF Memory stats: ', tf.memory());
+        await faceapi.nets.faceRecognitionNet.dispose();
+        console.log('13 TF Memory stats: ', tf.memory());
+
         // [0].alignedRect,
         // this.allFaces[0].alignedRect.box,
         // this.allFaces[0].alignedRect.imageDims
@@ -138,8 +150,9 @@ class MachineLearningService {
         const decodedImg = await jpeg.decode(arrayBuffer);
         console.log('[MLService] decodedImg: ', decodedImg);
 
+        // console.log('1 TF Memory stats: ', tf.memory());
         const tfImage = tf.browser.fromPixels(decodedImg);
-
+        // console.log('2 TF Memory stats: ', tf.memory());
         // const faces = await this.faceDetectionService.estimateFaces(tfImage);
 
         // const embeddingResults = await this.faceEmbeddingService.getEmbeddings(
@@ -147,10 +160,13 @@ class MachineLearningService {
         //     filtertedFaces
         // );
 
-        const faceApiInput = tfImage.expandDims(0) as tf.Tensor4D;
+        // console.log('3 TF Memory stats: ', tf.memory());
+        // const faceApiInput = tfImage.expandDims(0) as tf.Tensor4D;
+        // tf.dispose(tfImage);
+        // console.log('4 TF Memory stats: ', tf.memory());
         const faces = await faceapi
             .detectAllFaces(
-                faceApiInput as any,
+                tfImage as any,
                 new SsdMobilenetv1Options({
                     // minConfidence: 0.6
                     // maxResults: 10
@@ -158,6 +174,8 @@ class MachineLearningService {
             )
             .withFaceLandmarks()
             .withFaceDescriptors();
+
+        // console.log('5 TF Memory stats: ', tf.memory());
 
         const filtertedFaces = faces.filter((face) => {
             return (
@@ -174,21 +192,31 @@ class MachineLearningService {
             const faceBoxes = filtertedFaces
                 .map((f) => f.alignedRect.relativeBox)
                 .map((b) => [b.top, b.left, b.bottom, b.right]);
-            const normalizedImage = tf.sub(
-                tf.div(faceApiInput, 127.5),
-                1.0
-            ) as tf.Tensor4D;
-            const faceImagesTensor = tf.image.cropAndResize(
-                normalizedImage,
-                faceBoxes,
-                tf.fill([faceBoxes.length], 0, 'int32'),
-                [112, 112]
-            );
+            const faceImagesTensor = tf.tidy(() => {
+                // const tfImage = tf.browser.fromPixels(decodedImg);
+                const faceApiInput = tfImage.expandDims(0) as tf.Tensor4D;
+                const normalizedImage = tf.sub(
+                    tf.div(faceApiInput, 127.5),
+                    1.0
+                ) as tf.Tensor4D;
+                // console.log('6 TF Memory stats: ', tf.memory());
+                return tf.image.cropAndResize(
+                    normalizedImage,
+                    faceBoxes,
+                    tf.fill([faceBoxes.length], 0, 'int32'),
+                    [112, 112]
+                );
+            });
+            // console.log('7 TF Memory stats: ', tf.memory());
             faceImages = await faceImagesTensor.array();
             // console.log(JSON.stringify(results));
+            // tf.dispose(normalizedImage);
+            tf.dispose(faceImagesTensor);
+            // tf.dispose(faceApiInput);
         }
 
         tf.dispose(tfImage);
+        // console.log('8 TF Memory stats: ', tf.memory());
 
         return {
             faceApiResults: filtertedFaces,
