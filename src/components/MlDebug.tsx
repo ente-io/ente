@@ -11,8 +11,7 @@ import TFJSImage from './TFJSImage';
 
 export default function MLDebug() {
     const [token, setToken] = useState<string>();
-    const [clusterFaceDistance, setClusterFaceDistance] =
-        useState<number>(0.45);
+    const [clusterFaceDistance, setClusterFaceDistance] = useState<number>(0.4);
     const [minClusterSize, setMinClusterSize] = useState<number>(4);
     const [minFaceSize, setMinFaceSize] = useState<number>(24);
     const [batchSize, setBatchSize] = useState<number>(50);
@@ -78,6 +77,7 @@ export default function MLDebug() {
     return (
         <div>
             <div>ClusterFaceDistance: {clusterFaceDistance}</div>
+            <button onClick={() => setClusterFaceDistance(0.35)}>0.35</button>
             <button onClick={() => setClusterFaceDistance(0.4)}>0.4</button>
             <button onClick={() => setClusterFaceDistance(0.45)}>0.45</button>
             <button onClick={() => setClusterFaceDistance(0.5)}>0.5</button>

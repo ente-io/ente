@@ -25,7 +25,7 @@ class MachineLearningService {
     // private faceEmbeddingService: TFJSFaceEmbeddingService;
     private clusteringService: ClusteringService;
 
-    private clusterFaceDistance = 0.45;
+    private clusterFaceDistance = 0.4;
     private minClusterSize = 4;
     private minFaceSize = 24;
     private batchSize = 50;
