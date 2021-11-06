@@ -15,6 +15,7 @@ export default function MLDebug() {
         useState<number>(0.45);
     const [minClusterSize, setMinClusterSize] = useState<number>(4);
     const [minFaceSize, setMinFaceSize] = useState<number>(24);
+    const [batchSize, setBatchSize] = useState<number>(50);
     const [mlResult, setMlResult] = useState<MLSyncResult>({
         allFaces: [],
         clusterResults: {
@@ -63,7 +64,8 @@ export default function MLDebug() {
                 token,
                 clusterFaceDistance,
                 minClusterSize,
-                minFaceSize
+                minFaceSize,
+                batchSize
             );
             setMlResult(result);
         } catch (e) {
@@ -100,6 +102,13 @@ export default function MLDebug() {
             <button onClick={() => setMinClusterSize(12)}>12</button>
 
             <p></p>
+            <div>Number of Images in Batch: {batchSize}</div>
+            <button onClick={() => setBatchSize(50)}>50</button>
+            <button onClick={() => setBatchSize(100)}>100</button>
+            <button onClick={() => setBatchSize(200)}>200</button>
+            <button onClick={() => setBatchSize(500)}>500</button>
+
+            <p></p>
             <button onClick={onSync}>Run ML Sync</button>
 
             <p>{JSON.stringify(mlResult.clusterResults)}</p>
@@ -111,7 +120,7 @@ export default function MLDebug() {
                             <div key={ind}>
                                 <TFJSImage
                                     faceImage={
-                                        mlResult.allFaces[faceIndex]
+                                        mlResult.allFaces[faceIndex].faceImage
                                     }></TFJSImage>
                             </div>
                         ))}
@@ -124,7 +133,7 @@ export default function MLDebug() {
                         <div key={index}>
                             <TFJSImage
                                 faceImage={
-                                    mlResult.allFaces[faceIndex]
+                                    mlResult.allFaces[faceIndex].faceImage
                                 }></TFJSImage>
                         </div>
                     ))}

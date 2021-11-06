@@ -6,7 +6,12 @@ import * as tf from '@tensorflow/tfjs-core';
 
 // import TFJSFaceDetectionService from './tfjsFaceDetectionService';
 // import TFJSFaceEmbeddingService from './tfjsFaceEmbeddingService';
-import { FaceImage, MLSyncResult } from 'utils/machineLearning/types';
+import {
+    FaceApiResult,
+    FaceImage,
+    FaceWithEmbedding,
+    MLSyncResult,
+} from 'utils/machineLearning/types';
 
 import * as jpeg from 'jpeg-js';
 import ClusteringService from './clusteringService';
@@ -23,15 +28,9 @@ class MachineLearningService {
     private clusterFaceDistance = 0.45;
     private minClusterSize = 4;
     private minFaceSize = 24;
+    private batchSize = 50;
 
-    public allFaces: faceapi.WithFaceDescriptor<
-        faceapi.WithFaceLandmarks<
-            {
-                detection: faceapi.FaceDetection;
-            },
-            faceapi.FaceLandmarks68
-        >
-    >[];
+    public allFaces: FaceWithEmbedding[];
     private allFaceImages: FaceImage[];
 
     public constructor() {
@@ -46,11 +45,13 @@ class MachineLearningService {
     public async init(
         clusterFaceDistance: number,
         minClusterSize: number,
-        minFaceSize: number
+        minFaceSize: number,
+        batchSize: number
     ) {
         this.clusterFaceDistance = clusterFaceDistance;
         this.minClusterSize = minClusterSize;
         this.minFaceSize = minFaceSize;
+        this.batchSize = batchSize;
 
         // setWasmPath('/js/tfjs/');
         await tf.ready();
@@ -86,17 +87,22 @@ class MachineLearningService {
         existingFiles.sort(
             (a, b) => b.metadata.creationTime - a.metadata.creationTime
         );
-        const files = this.getUniqueFiles(existingFiles, 50);
-        console.log('Got unique files: ', files.size);
+        const files = this.getUniqueFiles(existingFiles, this.batchSize);
+        console.log(
+            'Got unique files: ',
+            files.size,
+            'for batchSize: ',
+            this.batchSize
+        );
 
         this.allFaces = [];
         for (const file of files.values()) {
             try {
                 const result = await this.syncFile(file, token);
-                this.allFaces = this.allFaces.concat(result.faceApiResults);
-                this.allFaceImages = this.allFaceImages.concat(
-                    result.faceImages
-                );
+                this.allFaces = this.allFaces.concat(result);
+                // this.allFaceImages = this.allFaceImages.concat(
+                //     result.faceImages
+                // );
                 console.log('TF Memory stats: ', tf.memory());
             } catch (e) {
                 console.error(
@@ -120,7 +126,7 @@ class MachineLearningService {
         // this.allFaces[0].alignedRect.imageDims
 
         const clusterResults = this.clusteringService.clusterUsingDBSCAN(
-            this.allFaces.map((f) => Array.from(f.descriptor)),
+            this.allFaces.map((f) => Array.from(f.face.descriptor)),
             this.clusterFaceDistance,
             this.minClusterSize
         );
@@ -132,7 +138,7 @@ class MachineLearningService {
         console.log('[MLService] Got cluster results: ', clusterResults);
 
         return {
-            allFaces: this.allFaceImages,
+            allFaces: this.allFaces,
             clusterResults,
         };
     }
@@ -164,7 +170,7 @@ class MachineLearningService {
         // const faceApiInput = tfImage.expandDims(0) as tf.Tensor4D;
         // tf.dispose(tfImage);
         // console.log('4 TF Memory stats: ', tf.memory());
-        const faces = await faceapi
+        const faces = (await faceapi
             .detectAllFaces(
                 tfImage as any,
                 new SsdMobilenetv1Options({
@@ -173,7 +179,7 @@ class MachineLearningService {
                 })
             )
             .withFaceLandmarks()
-            .withFaceDescriptors();
+            .withFaceDescriptors()) as FaceApiResult[];
 
         // console.log('5 TF Memory stats: ', tf.memory());
 
@@ -218,10 +224,13 @@ class MachineLearningService {
         tf.dispose(tfImage);
         // console.log('8 TF Memory stats: ', tf.memory());
 
-        return {
-            faceApiResults: filtertedFaces,
-            faceImages: faceImages,
-        };
+        return filtertedFaces.map((ff, index) => {
+            return {
+                fileId: file.id.toString(),
+                face: ff,
+                faceImage: faceImages[index],
+            } as FaceWithEmbedding;
+        });
 
         // console.log('[MLService] Got faces: ', filtertedFaces, embeddingResults);
 

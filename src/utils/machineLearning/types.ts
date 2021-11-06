@@ -1,7 +1,13 @@
 import { NormalizedFace } from '@tensorflow-models/blazeface';
+import {
+    FaceDetection,
+    FaceLandmarks68,
+    WithFaceDescriptor,
+    WithFaceLandmarks,
+} from 'face-api.js';
 
 export interface MLSyncResult {
-    allFaces: FaceImage[];
+    allFaces: FaceWithEmbedding[];
     clusterResults: ClusteringResults;
 }
 
@@ -13,10 +19,20 @@ export declare type FaceEmbedding = Array<number>;
 
 export declare type FaceImage = Array<Array<Array<number>>>;
 
+export declare type FaceApiResult = WithFaceDescriptor<
+    WithFaceLandmarks<
+        {
+            detection: FaceDetection;
+        },
+        FaceLandmarks68
+    >
+>;
+
 export interface FaceWithEmbedding {
     fileId: string;
-    face: AlignedFace;
-    embedding: FaceEmbedding;
+    face: FaceApiResult;
+    // face: AlignedFace;
+    // embedding: FaceEmbedding;
     faceImage: FaceImage;
 }
 
