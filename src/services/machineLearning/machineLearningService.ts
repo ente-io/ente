@@ -32,7 +32,7 @@ class MachineLearningService {
     private clusteringService: ClusteringService;
 
     private clusterFaceDistance = 0.4;
-    private maxFaceDistance = 0.6;
+    private maxFaceDistance = 0.55;
     private minClusterSize = 4;
     private minFaceSize = 24;
     private batchSize = 50;
@@ -63,12 +63,14 @@ class MachineLearningService {
         clusterFaceDistance: number,
         minClusterSize: number,
         minFaceSize: number,
-        batchSize: number
+        batchSize: number,
+        maxFaceDistance: number
     ) {
         this.clusterFaceDistance = clusterFaceDistance;
         this.minClusterSize = minClusterSize;
         this.minFaceSize = minFaceSize;
         this.batchSize = batchSize;
+        this.maxFaceDistance = maxFaceDistance;
 
         // setWasmPath('/js/tfjs/');
         await tf.ready();

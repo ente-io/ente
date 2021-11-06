@@ -15,6 +15,7 @@ export default function MLDebug() {
     const [minClusterSize, setMinClusterSize] = useState<number>(4);
     const [minFaceSize, setMinFaceSize] = useState<number>(24);
     const [batchSize, setBatchSize] = useState<number>(50);
+    const [maxFaceDistance, setMaxFaceDistance] = useState<number>(0.55);
     const [mlResult, setMlResult] = useState<MLSyncResult>({
         allFaces: [],
         clustersWithNoise: {
@@ -64,7 +65,8 @@ export default function MLDebug() {
                 clusterFaceDistance,
                 minClusterSize,
                 minFaceSize,
-                batchSize
+                batchSize,
+                maxFaceDistance
             );
             setMlResult(result);
         } catch (e) {
@@ -107,6 +109,13 @@ export default function MLDebug() {
             <button onClick={() => setBatchSize(100)}>100</button>
             <button onClick={() => setBatchSize(200)}>200</button>
             <button onClick={() => setBatchSize(500)}>500</button>
+
+            <p></p>
+            <div>MaxFaceDistance: {maxFaceDistance}</div>
+            <button onClick={() => setMaxFaceDistance(0.45)}>0.45</button>
+            <button onClick={() => setMaxFaceDistance(0.5)}>0.5</button>
+            <button onClick={() => setMaxFaceDistance(0.55)}>0.55</button>
+            <button onClick={() => setMaxFaceDistance(0.6)}>0.6</button>
 
             <p></p>
             <button onClick={onSync}>Run ML Sync</button>

@@ -7,7 +7,8 @@ export class MachineLearningWorker {
         clusterFaceDistance,
         minClusterSize,
         minFaceSize,
-        batchSize
+        batchSize,
+        maxFaceDistance
     ) {
         if (!(typeof navigator !== 'undefined')) {
             console.log(
@@ -22,7 +23,8 @@ export class MachineLearningWorker {
             clusterFaceDistance,
             minClusterSize,
             minFaceSize,
-            batchSize
+            batchSize,
+            maxFaceDistance
         );
         const results = await mlService.sync(token);
         console.log('Ran machine learning sync from worker', results);
