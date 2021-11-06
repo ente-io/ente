@@ -7,10 +7,16 @@ import * as tf from '@tensorflow/tfjs-core';
 // import TFJSFaceDetectionService from './tfjsFaceDetectionService';
 // import TFJSFaceEmbeddingService from './tfjsFaceEmbeddingService';
 import {
+    Cluster,
+    ClusterFaces,
+    ClusteringResults,
+    ClustersWithNoise,
     FaceApiResult,
+    FaceDescriptor,
     FaceImage,
     FaceWithEmbedding,
     MLSyncResult,
+    NearestCluster,
 } from 'utils/machineLearning/types';
 
 import * as jpeg from 'jpeg-js';
@@ -18,7 +24,7 @@ import ClusteringService from './clusteringService';
 
 import './faceEnvPatch';
 import * as faceapi from 'face-api.js';
-import { SsdMobilenetv1Options } from 'face-api.js';
+import { euclideanDistance, SsdMobilenetv1Options } from 'face-api.js';
 
 class MachineLearningService {
     // private faceDetectionService: TFJSFaceDetectionService;
@@ -26,11 +32,14 @@ class MachineLearningService {
     private clusteringService: ClusteringService;
 
     private clusterFaceDistance = 0.4;
+    private maxFaceDistance = 0.6;
     private minClusterSize = 4;
     private minFaceSize = 24;
     private batchSize = 50;
 
-    public allFaces: FaceWithEmbedding[];
+    private allFaces: FaceWithEmbedding[];
+    private clusteringResults: ClusteringResults;
+    private clustersWithNoise: ClustersWithNoise;
     private allFaceImages: FaceImage[];
 
     public constructor() {
@@ -40,6 +49,14 @@ class MachineLearningService {
 
         this.allFaces = [];
         this.allFaceImages = [];
+        this.clusteringResults = {
+            clusters: [],
+            noise: [],
+        };
+        this.clustersWithNoise = {
+            clusters: [],
+            noise: [],
+        };
     }
 
     public async init(
@@ -65,6 +82,78 @@ class MachineLearningService {
         // console.log('03 TF Memory stats: ', tf.memory());
         await faceapi.nets.faceRecognitionNet.loadFromUri('/models/face-api/');
         console.log('04 TF Memory stats: ', tf.memory());
+    }
+
+    private getClusterSummary(cluster: ClusterFaces): FaceDescriptor {
+        const faceScore = (f) => f.detection.score; // f.alignedRect.box.width *
+
+        return cluster
+            .map((f) => this.allFaces[f].face)
+            .sort((f1, f2) => faceScore(f2) - faceScore(f1))[0].descriptor;
+    }
+
+    private updateClusterSummaries() {
+        if (
+            !this.clusteringResults ||
+            !this.clusteringResults.clusters ||
+            this.clusteringResults.clusters.length < 1
+        ) {
+            return;
+        }
+
+        const resultClusters = this.clusteringResults.clusters;
+
+        resultClusters.forEach((resultCluster) => {
+            this.clustersWithNoise.clusters.push({
+                faces: resultCluster,
+                summary: this.getClusterSummary(resultCluster),
+            });
+        });
+    }
+
+    private getNearestCluster(noise: FaceWithEmbedding): NearestCluster {
+        let nearest: Cluster = null;
+        let nearestDist = 100000;
+        this.clustersWithNoise.clusters.forEach((c) => {
+            const dist = euclideanDistance(noise.face.descriptor, c.summary);
+            if (dist < nearestDist) {
+                nearestDist = dist;
+                nearest = c;
+            }
+        });
+
+        console.log('nearestDist: ', nearestDist);
+        return { cluster: nearest, distance: nearestDist };
+    }
+
+    private assignNoiseWithinLimit() {
+        if (
+            !this.clusteringResults ||
+            !this.clusteringResults.noise ||
+            this.clusteringResults.noise.length < 1
+        ) {
+            return;
+        }
+
+        const noise = this.clusteringResults.noise;
+
+        noise.forEach((n) => {
+            const noiseFace = this.allFaces[n];
+            const nearest = this.getNearestCluster(noiseFace);
+
+            if (nearest.cluster && nearest.distance < this.maxFaceDistance) {
+                console.log('Adding noise to cluser: ', n, nearest.distance);
+                nearest.cluster.faces.push(n);
+            } else {
+                console.log(
+                    'No cluster for noise: ',
+                    n,
+                    'within distance: ',
+                    this.maxFaceDistance
+                );
+                this.clustersWithNoise.noise.push(n);
+            }
+        });
     }
 
     private getUniqueFiles(files: File[], limit: number) {
@@ -125,7 +214,7 @@ class MachineLearningService {
         // this.allFaces[0].alignedRect.box,
         // this.allFaces[0].alignedRect.imageDims
 
-        const clusterResults = this.clusteringService.clusterUsingDBSCAN(
+        this.clusteringResults = this.clusteringService.clusterUsingDBSCAN(
             this.allFaces.map((f) => Array.from(f.face.descriptor)),
             this.clusterFaceDistance,
             this.minClusterSize
@@ -135,11 +224,17 @@ class MachineLearningService {
         //     this.allFaces.map((f) => f.embedding),
         //     10);
 
-        console.log('[MLService] Got cluster results: ', clusterResults);
+        console.log(
+            '[MLService] Got cluster results: ',
+            this.clusteringResults
+        );
+
+        this.updateClusterSummaries();
+        this.assignNoiseWithinLimit();
 
         return {
             allFaces: this.allFaces,
-            clusterResults,
+            clustersWithNoise: this.clustersWithNoise,
         };
     }
 

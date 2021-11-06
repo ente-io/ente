@@ -17,7 +17,7 @@ export default function MLDebug() {
     const [batchSize, setBatchSize] = useState<number>(50);
     const [mlResult, setMlResult] = useState<MLSyncResult>({
         allFaces: [],
-        clusterResults: {
+        clustersWithNoise: {
             clusters: [],
             noise: [],
         },
@@ -111,12 +111,12 @@ export default function MLDebug() {
             <p></p>
             <button onClick={onSync}>Run ML Sync</button>
 
-            <p>{JSON.stringify(mlResult.clusterResults)}</p>
+            <p>{JSON.stringify(mlResult.clustersWithNoise)}</p>
             <div>
                 <p>Clusters: </p>
-                {mlResult.clusterResults.clusters.map((cluster, index) => (
+                {mlResult.clustersWithNoise.clusters.map((cluster, index) => (
                     <div key={index} style={{ display: 'flex' }}>
-                        {cluster.map((faceIndex, ind) => (
+                        {cluster.faces.map((faceIndex, ind) => (
                             <div key={ind}>
                                 <TFJSImage
                                     faceImage={
@@ -129,14 +129,16 @@ export default function MLDebug() {
 
                 <p style={{ marginTop: '1em' }}>Noise: </p>
                 <div style={{ display: 'flex' }}>
-                    {mlResult.clusterResults.noise.map((faceIndex, index) => (
-                        <div key={index}>
-                            <TFJSImage
-                                faceImage={
-                                    mlResult.allFaces[faceIndex].faceImage
-                                }></TFJSImage>
-                        </div>
-                    ))}
+                    {mlResult.clustersWithNoise.noise.map(
+                        (faceIndex, index) => (
+                            <div key={index}>
+                                <TFJSImage
+                                    faceImage={
+                                        mlResult.allFaces[faceIndex].faceImage
+                                    }></TFJSImage>
+                            </div>
+                        )
+                    )}
                 </div>
             </div>
         </div>

@@ -8,7 +8,7 @@ import {
 
 export interface MLSyncResult {
     allFaces: FaceWithEmbedding[];
-    clusterResults: ClusteringResults;
+    clustersWithNoise: ClustersWithNoise;
 }
 
 export interface AlignedFace extends NormalizedFace {
@@ -28,17 +28,34 @@ export declare type FaceApiResult = WithFaceDescriptor<
     >
 >;
 
+export declare type FaceDescriptor = Float32Array;
+
+export declare type ClusterFaces = Array<number>;
+
+export interface Cluster {
+    faces: ClusterFaces;
+    summary: FaceDescriptor;
+}
+
+export interface ClustersWithNoise {
+    clusters: Array<Cluster>;
+    noise: ClusterFaces;
+}
+
+export interface ClusteringResults {
+    clusters: Array<ClusterFaces>;
+    noise: ClusterFaces;
+}
+
+export interface NearestCluster {
+    cluster: Cluster;
+    distance: number;
+}
+
 export interface FaceWithEmbedding {
     fileId: string;
     face: FaceApiResult;
     // face: AlignedFace;
     // embedding: FaceEmbedding;
     faceImage: FaceImage;
-}
-
-export declare type Cluster = Array<number>;
-
-export interface ClusteringResults {
-    clusters: Cluster[];
-    noise: Cluster;
 }

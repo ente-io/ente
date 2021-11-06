@@ -1,4 +1,5 @@
 import { DBSCAN, OPTICS, KMEANS } from 'density-clustering';
+import { ClusteringResults } from 'utils/machineLearning/types';
 
 class ClusteringService {
     private dbscan: DBSCAN;
@@ -15,7 +16,7 @@ class ClusteringService {
         dataset: Array<Array<number>>,
         epsilon: number = 1.0,
         minPts: number = 2
-    ) {
+    ): ClusteringResults {
         // console.log("distanceFunction", DBSCAN._);
         const clusters = this.dbscan.run(dataset, epsilon, minPts);
         const noise = this.dbscan.noise;
