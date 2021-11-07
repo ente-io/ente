@@ -26,6 +26,7 @@ import './faceEnvPatch';
 import * as faceapi from 'face-api.js';
 import { euclideanDistance, SsdMobilenetv1Options } from 'face-api.js';
 import { f32Average } from 'utils/machineLearning';
+import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
 
 class MachineLearningService {
     // private faceDetectionService: TFJSFaceDetectionService;
@@ -241,9 +242,37 @@ class MachineLearningService {
         this.updateClusterSummaries();
         this.assignNoiseWithinLimit();
 
+        const treeRoot = this.clusteringService.clusterUsingHDBSCAN(
+            this.allFaces.map((f) => Array.from(f.face.descriptor))
+            // this.clusterFaceDistance,
+            // this.minClusterSize
+        );
+        const d3Tree = treeRoot && this.toD3Tree(treeRoot);
+        console.log('d3Tree', d3Tree);
+
         return {
             allFaces: this.allFaces,
             clustersWithNoise: this.clustersWithNoise,
+            tree: d3Tree,
+        };
+    }
+
+    private toD3Tree(treeNode): RawNodeDatum {
+        if (!treeNode.left && !treeNode.right) {
+            return {
+                name: treeNode.opt[0],
+                attributes: {
+                    face: treeNode.opt[0],
+                },
+            };
+        }
+        const children = [];
+        treeNode.left && children.push(this.toD3Tree(treeNode.left));
+        treeNode.right && children.push(this.toD3Tree(treeNode.right));
+
+        return {
+            name: treeNode.dist,
+            children: children,
         };
     }
 

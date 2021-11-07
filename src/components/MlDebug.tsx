@@ -8,6 +8,35 @@ import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
 import { MLSyncResult } from 'utils/machineLearning/types';
 import TFJSImage from './TFJSImage';
+import Tree from 'react-d3-tree';
+
+const renderForeignObjectNode = ({
+    nodeDatum,
+    foreignObjectProps,
+    mlResult,
+}) => (
+    <g>
+        <circle r={15}></circle>
+        {/* `foreignObject` requires width & height to be explicitly set. */}
+        <foreignObject {...foreignObjectProps}>
+            <div
+                style={{
+                    border: '1px solid black',
+                    backgroundColor: '#dedede',
+                }}>
+                <h3 style={{ textAlign: 'center', color: 'black' }}>
+                    {nodeDatum.name}
+                </h3>
+                {!nodeDatum.children && nodeDatum.name && (
+                    <TFJSImage
+                        faceImage={
+                            mlResult.allFaces[nodeDatum.name]?.faceImage
+                        }></TFJSImage>
+                )}
+            </div>
+        </foreignObject>
+    </g>
+);
 
 export default function MLDebug() {
     const [token, setToken] = useState<string>();
@@ -22,6 +51,7 @@ export default function MLDebug() {
             clusters: [],
             noise: [],
         },
+        tree: null,
     });
     const router = useRouter();
     const appContext = useContext(AppContext);
@@ -73,9 +103,16 @@ export default function MLDebug() {
             console.error(e);
             throw e;
         } finally {
+            // setTimeout(()=>{
+            //     console.log('terminating ml-worker');
             MLWorker.worker.terminate();
+            // }, 30000);
         }
     };
+
+    const nodeSize = { x: 180, y: 180 };
+    const foreignObjectProps = { width: 112, height: 150, x: -56 };
+
     return (
         <div>
             <div>ClusterFaceDistance: {clusterFaceDistance}</div>
@@ -149,6 +186,31 @@ export default function MLDebug() {
                         )
                     )}
                 </div>
+            </div>
+
+            <p></p>
+            <div
+                id="treeWrapper"
+                style={{
+                    width: '100%',
+                    height: '50em',
+                    backgroundColor: 'white',
+                }}>
+                {mlResult.tree && (
+                    <Tree
+                        data={mlResult.tree}
+                        orientation={'vertical'}
+                        nodeSize={nodeSize}
+                        zoom={0.25}
+                        renderCustomNodeElement={(rd3tProps) =>
+                            renderForeignObjectNode({
+                                ...rd3tProps,
+                                foreignObjectProps,
+                                mlResult,
+                            })
+                        }
+                    />
+                )}
             </div>
         </div>
     );
