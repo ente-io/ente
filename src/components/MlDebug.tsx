@@ -15,7 +15,7 @@ export default function MLDebug() {
     const [minClusterSize, setMinClusterSize] = useState<number>(4);
     const [minFaceSize, setMinFaceSize] = useState<number>(24);
     const [batchSize, setBatchSize] = useState<number>(50);
-    const [maxFaceDistance, setMaxFaceDistance] = useState<number>(0.55);
+    const [maxFaceDistance, setMaxFaceDistance] = useState<number>(0.5);
     const [mlResult, setMlResult] = useState<MLSyncResult>({
         allFaces: [],
         clustersWithNoise: {

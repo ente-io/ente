@@ -25,6 +25,7 @@ import ClusteringService from './clusteringService';
 import './faceEnvPatch';
 import * as faceapi from 'face-api.js';
 import { euclideanDistance, SsdMobilenetv1Options } from 'face-api.js';
+import { f32Average } from 'utils/machineLearning';
 
 class MachineLearningService {
     // private faceDetectionService: TFJSFaceDetectionService;
@@ -32,7 +33,7 @@ class MachineLearningService {
     private clusteringService: ClusteringService;
 
     private clusterFaceDistance = 0.4;
-    private maxFaceDistance = 0.55;
+    private maxFaceDistance = 0.5;
     private minClusterSize = 4;
     private minFaceSize = 24;
     private batchSize = 50;
@@ -87,11 +88,17 @@ class MachineLearningService {
     }
 
     private getClusterSummary(cluster: ClusterFaces): FaceDescriptor {
-        const faceScore = (f) => f.detection.score; // f.alignedRect.box.width *
+        // const faceScore = (f) => f.detection.score; // f.alignedRect.box.width *
 
-        return cluster
-            .map((f) => this.allFaces[f].face)
-            .sort((f1, f2) => faceScore(f2) - faceScore(f1))[0].descriptor;
+        // return cluster
+        //     .map((f) => this.allFaces[f].face)
+        //     .sort((f1, f2) => faceScore(f2) - faceScore(f1))[0].descriptor;
+
+        const descriptors = cluster.map(
+            (f) => this.allFaces[f].face.descriptor
+        );
+
+        return f32Average(descriptors);
     }
 
     private updateClusterSummaries() {
@@ -271,7 +278,7 @@ class MachineLearningService {
             .detectAllFaces(
                 tfImage as any,
                 new SsdMobilenetv1Options({
-                    // minConfidence: 0.6
+                    minConfidence: 0.75,
                     // maxResults: 10
                 })
             )
