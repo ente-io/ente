@@ -44,6 +44,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import CloseIcon from 'components/icons/CloseIcon';
 import TickIcon from 'components/icons/TickIcon';
+import { FreeFlowText } from 'components/RecoveryKeyModal';
 
 interface Iprops {
     isOpen: boolean;
@@ -257,7 +258,7 @@ function RenderFileName({
                             )}
                         </div>
                     ) : (
-                        <>{newFileName}</>
+                        <FreeFlowText>{newFileName}</FreeFlowText>
                     )}
                 </Value>
                 <Value

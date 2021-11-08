@@ -23,6 +23,7 @@ export const FreeFlowText = styled.div`
     word-wrap: break-word;
     overflow-wrap: break-word;
     min-width: 30%;
+    text-align: left;
 `;
 interface Props {
     show: boolean;
