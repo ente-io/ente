@@ -340,11 +340,9 @@ export default function ExportModal(props: Props) {
                             </Button>
                         ) : (
                             <>
-                                {/* <span style={{ overflow: 'hidden', direction: 'rtl', height: '1.5rem', width: '90%', whiteSpace: 'nowrap' }}> */}
                                 <ExportFolderPathContainer>
                                     {exportFolder}
                                 </ExportFolderPathContainer>
-                                {/* </span> */}
                                 {(exportStage === ExportStage.FINISHED ||
                                     exportStage === ExportStage.INIT) && (
                                     <FolderIconWrapper
