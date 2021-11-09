@@ -147,8 +147,9 @@ export const syncFiles = async (
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     if (files.length !== localFiles.length) {
         await setLocalFiles(files);
-        setFiles(sortFiles(mergeMetadata(files)));
     }
+    files = sortFiles(mergeMetadata(files));
+    setFiles([...files]);
     for (const collection of collections) {
         if (!getToken()) {
             continue;
@@ -183,9 +184,10 @@ export const syncFiles = async (
             `${collection.id}-time`,
             collection.updationTime
         );
-        setFiles(sortFiles(mergeMetadata(files)));
+        files = sortFiles(mergeMetadata(files));
+        setFiles([...files]);
     }
-    return mergeMetadata(files);
+    return files;
 };
 
 export const getFiles = async (
