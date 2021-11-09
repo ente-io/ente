@@ -229,8 +229,7 @@ const FileNameEditForm = ({ filename, saveEdits, discardEdits, extension }) => {
                         <Form.Group
                             bsPrefix="ente-form-group"
                             as={Col}
-                            xs={extension ? 7 : 8}
-                            controlId="formHorizontalFileName">
+                            xs={extension ? 7 : 8}>
                             <Form.Control
                                 as="textarea"
                                 placeholder={constants.FILE_NAME}
@@ -257,30 +256,26 @@ const FileNameEditForm = ({ filename, saveEdits, discardEdits, extension }) => {
                                 </FlexWrapper>
                             </Form.Group>
                         )}
-                        <Form.Group
-                            bsPrefix="ente-form-group"
-                            as={Col}
-                            xs={2}
-                            controlId="formHorizontalFileName">
-                            <IconButton type="submit" disabled={loading}>
-                                {loading ? (
-                                    <EnteSpinner
-                                        style={{
-                                            width: '20px',
-                                            height: '20px',
-                                        }}
-                                    />
-                                ) : (
-                                    <TickIcon width="24px" height="24px" />
-                                )}
-                            </IconButton>
-                        </Form.Group>
                         <Form.Group bsPrefix="ente-form-group" as={Col} xs={2}>
-                            <IconButton
-                                onClick={discardEdits}
-                                disabled={loading}>
-                                <CloseIcon />
-                            </IconButton>
+                            <Value width={'16.67%'}>
+                                <IconButton type="submit" disabled={loading}>
+                                    {loading ? (
+                                        <EnteSpinner
+                                            style={{
+                                                width: '20px',
+                                                height: '20px',
+                                            }}
+                                        />
+                                    ) : (
+                                        <TickIcon />
+                                    )}
+                                </IconButton>
+                                <IconButton
+                                    onClick={discardEdits}
+                                    disabled={loading}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </Value>
                         </Form.Group>
                     </Form.Row>
                 </Form>
@@ -298,7 +293,10 @@ function RenderFileName({
 }) {
     const originalTitle = file?.metadata.title;
     const [isInEditMode, setIsInEditMode] = useState(false);
-    const [originalFileName, extension] = originalTitle?.split('.', 2);
+    const [originalFileName, extension] = originalTitle?.split('.', 2) ?? [
+        undefined,
+        undefined,
+    ];
     const [filename, setFilename] = useState(originalFileName);
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
