@@ -12,8 +12,8 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/ui/change_collection_name_dialog.dart';
 import 'package:photos/ui/create_collection_page.dart';
+import 'package:photos/ui/rename_dialog.dart';
 import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -122,15 +122,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (widget.type != GalleryAppBarType.owned_collection) {
       return;
     }
-    final result = await showDialog(
+    final result = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
-        return ChangeCollectionNameDialog(name: _appBarTitle);
+        return RenameDialog(_appBarTitle, 'album');
       },
       barrierColor: Colors.black.withOpacity(0.85),
     );
     // indicates user cancelled the rename request
-    if (result == null) {
+    if (result == null || result.trim() == _appBarTitle.trim()) {
       return;
     }
 
