@@ -77,3 +77,41 @@ export const getGoogleLikeMetadataFile = (
         2
     );
 };
+
+export const getUniqueCollectionFolderPath = (
+    dir: string,
+    collectionName: string,
+    usedCollectionPaths: Set<string>
+): string => {
+    let collectionFolderPath = `${dir}/${sanitizeName(collectionName)}`;
+    let count = 1;
+    while (
+        usedCollectionPaths &&
+        usedCollectionPaths.has(collectionFolderPath)
+    ) {
+        collectionFolderPath = `${dir}/${sanitizeName(
+            collectionName
+        )}(${count})`;
+        count++;
+    }
+    return collectionFolderPath;
+};
+
+export const sanitizeName = (name: string) => {
+    return name.replaceAll('/', '_').replaceAll(' ', '_');
+};
+
+export const getUniqueFileSaveName = (
+    filename: string,
+    usedFileNamesInCollection: Set<string>
+) => {
+    let fileSaveName = filename;
+    const count = 1;
+    while (
+        usedFileNamesInCollection &&
+        usedFileNamesInCollection.has(fileSaveName)
+    ) {
+        fileSaveName = filename + `(${count})`;
+    }
+    return fileSaveName;
+};

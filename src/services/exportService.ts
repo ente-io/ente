@@ -6,6 +6,8 @@ import {
     dedupe,
     getGoogleLikeMetadataFile,
     getExportRecordFileUID,
+    getUniqueCollectionFolderPath,
+    getUniqueFileSaveName,
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
@@ -79,6 +81,7 @@ class ExportService {
     private recordUpdateInProgress = Promise.resolve();
     private stopExport: boolean = false;
     private pauseExport: boolean = false;
+    private usedFilenames = new Map<number, Set<string>>();
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
@@ -96,48 +99,61 @@ class ExportService {
         updateProgress: (progress: ExportProgress) => void,
         exportType: ExportType
     ) {
-        if (this.exportInProgress) {
-            this.ElectronAPIs.sendNotification(ExportNotification.IN_PROGRESS);
-            return this.exportInProgress;
-        }
-        this.ElectronAPIs.showOnTray('starting export');
-        const exportDir = getData(LS_KEYS.EXPORT)?.folder;
-        if (!exportDir) {
-            // no-export folder set
-            return;
-        }
-        let filesToExport: File[];
-        const allFiles = await getLocalFiles();
-        const collections = await getLocalCollections();
-        const nonEmptyCollections = getNonEmptyCollections(
-            collections,
-            allFiles
-        );
-        const user: User = getData(LS_KEYS.USER);
-        const userCollections = nonEmptyCollections.filter(
-            (collection) => collection.owner.id === user?.id
-        );
-        const exportRecord = await this.getExportRecord(exportDir);
-
-        if (exportType === ExportType.NEW) {
-            filesToExport = await getFilesUploadedAfterLastExport(
-                allFiles,
-                exportRecord
+        try {
+            if (this.exportInProgress) {
+                this.ElectronAPIs.sendNotification(
+                    ExportNotification.IN_PROGRESS
+                );
+                return this.exportInProgress;
+            }
+            this.ElectronAPIs.showOnTray('starting export');
+            const exportDir = getData(LS_KEYS.EXPORT)?.folder;
+            if (!exportDir) {
+                // no-export folder set
+                return;
+            }
+            let filesToExport: File[];
+            const allFiles = await getLocalFiles();
+            const collections = await getLocalCollections();
+            const nonEmptyCollections = getNonEmptyCollections(
+                collections,
+                allFiles
             );
-        } else if (exportType === ExportType.RETRY_FAILED) {
-            filesToExport = await getExportFailedFiles(allFiles, exportRecord);
-        } else {
-            filesToExport = await getExportPendingFiles(allFiles, exportRecord);
+            const user: User = getData(LS_KEYS.USER);
+            const userCollections = nonEmptyCollections.filter(
+                (collection) => collection.owner.id === user?.id
+            );
+            const exportRecord = await this.getExportRecord(exportDir);
+
+            if (exportType === ExportType.NEW) {
+                filesToExport = await getFilesUploadedAfterLastExport(
+                    allFiles,
+                    exportRecord
+                );
+            } else if (exportType === ExportType.RETRY_FAILED) {
+                filesToExport = await getExportFailedFiles(
+                    allFiles,
+                    exportRecord
+                );
+            } else {
+                filesToExport = await getExportPendingFiles(
+                    allFiles,
+                    exportRecord
+                );
+            }
+            this.exportInProgress = this.fileExporter(
+                filesToExport,
+                userCollections,
+                updateProgress,
+                exportDir
+            );
+            const resp = await this.exportInProgress;
+            this.exportInProgress = null;
+            return resp;
+        } catch (e) {
+            logError(e, 'exportFiles failed');
+            return { paused: false };
         }
-        this.exportInProgress = this.fileExporter(
-            filesToExport,
-            userCollections,
-            updateProgress,
-            exportDir
-        );
-        const resp = await this.exportInProgress;
-        this.exportInProgress = null;
-        return resp;
     }
 
     async fileExporter(
@@ -166,20 +182,27 @@ class ExportService {
                 total: files.length,
             });
             this.ElectronAPIs.sendNotification(ExportNotification.START);
-
-            const collectionIDMap = new Map<number, string>();
+            collections.sort(
+                (collectionA, collectionB) => collectionA.id - collectionB.id
+            );
+            const collectionIDPathMap = new Map<number, string>();
+            const usedCollectionPaths = new Set<string>();
             for (const collection of collections) {
-                const collectionFolderPath = `${dir}/${
-                    collection.id
-                }_${this.sanitizeName(collection.name)}`;
+                const collectionFolderPath = getUniqueCollectionFolderPath(
+                    dir,
+                    collection.name,
+                    usedCollectionPaths
+                );
+                usedCollectionPaths.add(collectionFolderPath);
+                collectionIDPathMap.set(collection.id, collectionFolderPath);
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
                     collectionFolderPath
                 );
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
                     `${collectionFolderPath}/${METADATA_FOLDER_NAME}`
                 );
-                collectionIDMap.set(collection.id, collectionFolderPath);
             }
+            files.sort((fileA, fileB) => fileA.id - fileB.id);
             for (const [index, file] of files.entries()) {
                 if (this.stopExport || this.pauseExport) {
                     if (this.pauseExport) {
@@ -190,7 +213,9 @@ class ExportService {
                     }
                     break;
                 }
-                const collectionPath = collectionIDMap.get(file.collectionID);
+                const collectionPath = collectionIDPathMap.get(
+                    file.collectionID
+                );
                 try {
                     await this.downloadAndSave(file, collectionPath);
                     await this.addFileExportRecord(
@@ -233,7 +258,8 @@ class ExportService {
             }
             return { paused: false };
         } catch (e) {
-            logError(e, 'export failed ');
+            logError(e, 'fileExporter failed');
+            throw e;
         }
     }
     async addFilesQueuedRecord(folder: string, files: File[]) {
@@ -310,17 +336,23 @@ class ExportService {
     }
 
     async downloadAndSave(file: File, collectionPath: string) {
-        const uid = `${file.id}_${this.sanitizeName(file.metadata.title)}`;
+        const usedFileNamesInCollection = this.usedFilenames.get(
+            file.collectionID
+        );
+        const fileSaveName = getUniqueFileSaveName(
+            file.metadata.title,
+            usedFileNamesInCollection
+        );
         const fileStream = await retryAsyncFunction(() =>
             downloadManager.downloadFile(file)
         );
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             this.exportMotionPhoto(fileStream, file, collectionPath);
         } else {
-            this.saveMediaFile(collectionPath, uid, fileStream);
+            this.saveMediaFile(collectionPath, fileSaveName, fileStream);
             this.saveMetadataFile(
                 collectionPath,
-                uid,
+                fileSaveName,
                 mergeMetadata([file])[0].metadata
             );
         }
@@ -334,14 +366,22 @@ class ExportService {
         const fileBlob = await new Response(fileStream).blob();
         const originalName = fileNameWithoutExtension(file.metadata.title);
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
-
+        const usedFileNamesInCollection = this.usedFilenames.get(
+            file.collectionID
+        );
         const imageStream = generateStreamFromArrayBuffer(motionPhoto.image);
-        const imageUID = `${file.id}_${motionPhoto.imageNameTitle}`;
-        this.saveMediaFile(collectionPath, imageUID, imageStream);
-        this.saveMetadataFile(collectionPath, imageUID, file.metadata);
+        const imageSaveName = getUniqueFileSaveName(
+            motionPhoto.imageNameTitle,
+            usedFileNamesInCollection
+        );
+        this.saveMediaFile(collectionPath, imageSaveName, imageStream);
+        this.saveMetadataFile(collectionPath, imageSaveName, file.metadata);
 
         const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
-        const videoUID = `${file.id}_${motionPhoto.videoNameTitle}`;
+        const videoUID = getUniqueFileSaveName(
+            motionPhoto.videoNameTitle,
+            usedFileNamesInCollection
+        );
         this.saveMediaFile(collectionPath, videoUID, videoStream);
         this.saveMetadataFile(collectionPath, videoUID, file.metadata);
     }
@@ -357,10 +397,6 @@ class ExportService {
             `${collectionPath}/${METADATA_FOLDER_NAME}/${uid}.json`,
             getGoogleLikeMetadataFile(uid, metadata)
         );
-    }
-
-    private sanitizeName(name) {
-        return name.replaceAll('/', '_').replaceAll(' ', '_');
     }
 
     isExportInProgress = () => {
