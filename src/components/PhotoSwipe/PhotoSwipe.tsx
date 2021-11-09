@@ -28,7 +28,7 @@ import {
     formatDateTime,
     updateExistingFilePubMetadata,
 } from 'utils/file';
-import { FormCheck } from 'react-bootstrap';
+import { Col, Form, FormCheck, FormControl } from 'react-bootstrap';
 import { prettyPrintExif } from 'utils/exif';
 import EditIcon from 'components/icons/EditIcon';
 import {
@@ -45,6 +45,11 @@ import 'react-datepicker/dist/react-datepicker.css';
 import CloseIcon from 'components/icons/CloseIcon';
 import TickIcon from 'components/icons/TickIcon';
 import { FreeFlowText } from 'components/RecoveryKeyModal';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import EnteSpinner from 'components/EnteSpinner';
+import { extensions } from 'file-type';
+import { FileExtension } from 'file-type/core';
 
 interface Iprops {
     isOpen: boolean;
@@ -74,13 +79,6 @@ const Legend = styled.span`
 const Pre = styled.pre`
     color: #aaa;
     padding: 7px 15px;
-`;
-
-const WarningMessage = styled.div`
-    width: 100%;
-    margin-top: 0.25rem;
-    font-size: 80%;
-    color: #dc3545;
 `;
 
 const renderInfoItem = (label: string, value: string | JSX.Element) => (
@@ -192,6 +190,106 @@ function RenderCreationTime({
         </>
     );
 }
+const getFileTitle = (filename, extension) => {
+    if (extension) {
+        return filename + '.' + extension;
+    } else {
+        return filename;
+    }
+};
+interface formValues {
+    filename: string;
+}
+
+const FileNameEditForm = ({ filename, saveEdits, discardEdits, extension }) => {
+    const [loading, setLoading] = useState(false);
+
+    const onSubmit = async (values: formValues) => {
+        try {
+            setLoading(true);
+            await saveEdits(values.filename);
+        } finally {
+            setLoading(false);
+        }
+    };
+    return (
+        <Formik<formValues>
+            initialValues={{ filename }}
+            validationSchema={Yup.object().shape({
+                filename: Yup.string()
+                    .required(constants.REQUIRED)
+                    .max(
+                        MAX_EDITED_FILE_NAME_LENGTH,
+                        constants.FILE_NAME_CHARACTER_LIMIT
+                    ),
+            })}
+            validateOnBlur={false}
+            onSubmit={onSubmit}>
+            {({ values, errors, handleChange, handleSubmit }) => (
+                <Form noValidate onSubmit={handleSubmit}>
+                    <Form.Row>
+                        <Form.Group
+                            bsPrefix="ente-form-group"
+                            as={Col}
+                            xs={extension ? 7 : 8}
+                            controlId="formHorizontalFileName">
+                            <Form.Control
+                                as="textarea"
+                                placeholder={constants.FILE_NAME}
+                                value={values.filename}
+                                onChange={handleChange('filename')}
+                                isInvalid={Boolean(errors.filename)}
+                                autoFocus
+                                disabled={loading}
+                            />
+                            <FormControl.Feedback
+                                type="invalid"
+                                style={{ textAlign: 'center' }}>
+                                {errors.filename}
+                            </FormControl.Feedback>
+                        </Form.Group>
+                        {extension && (
+                            <Form.Group
+                                bsPrefix="ente-form-group"
+                                as={Col}
+                                xs={1}
+                                controlId="formHorizontalFileName">
+                                <FlexWrapper style={{ padding: '5px' }}>
+                                    {`.${extension}`}
+                                </FlexWrapper>
+                            </Form.Group>
+                        )}
+                        <Form.Group
+                            bsPrefix="ente-form-group"
+                            as={Col}
+                            xs={2}
+                            controlId="formHorizontalFileName">
+                            <IconButton type="submit" disabled={loading}>
+                                {loading ? (
+                                    <EnteSpinner
+                                        style={{
+                                            width: '20px',
+                                            height: '20px',
+                                        }}
+                                    />
+                                ) : (
+                                    <TickIcon width="24px" height="24px" />
+                                )}
+                            </IconButton>
+                        </Form.Group>
+                        <Form.Group bsPrefix="ente-form-group" as={Col} xs={2}>
+                            <IconButton
+                                onClick={discardEdits}
+                                disabled={loading}>
+                                <CloseIcon />
+                            </IconButton>
+                        </Form.Group>
+                    </Form.Row>
+                </Form>
+            )}
+        </Formik>
+    );
+};
 
 function RenderFileName({
     file,
@@ -200,22 +298,26 @@ function RenderFileName({
     file: File;
     scheduleUpdate: () => void;
 }) {
-    const originalFileName = file?.metadata.title;
+    const originalTitle = file?.metadata.title;
     const [isInEditMode, setIsInEditMode] = useState(false);
-
-    const [newFileName, setNewFileName] = useState(originalFileName);
-
+    let [originalFileName, extension] = originalTitle?.split('.', 2);
+    if (extension && !extensions.has(extension as FileExtension)) {
+        originalFileName = originalTitle;
+    }
+    const [filename, setFilename] = useState(originalFileName);
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
 
-    const saveEdits = async () => {
+    const saveEdits = async (newFilename: string) => {
         try {
-            if (isInEditMode && file) {
-                if (newFileName === originalFileName) {
+            if (file) {
+                if (filename === newFilename) {
                     closeEditMode();
                     return;
                 }
-                let updatedFile = await changeFileName(file, newFileName);
+                setFilename(newFilename);
+                const newTitle = getFileTitle(newFilename, extension);
+                let updatedFile = await changeFileName(file, newTitle);
                 updatedFile = (
                     await updatePublicMagicMetadata([updatedFile])
                 )[0];
@@ -224,61 +326,37 @@ function RenderFileName({
             }
         } catch (e) {
             logError(e, 'failed to update file name');
-        }
-        closeEditMode();
-    };
-    const discardEdits = () => {
-        setNewFileName(originalFileName);
-        closeEditMode();
-    };
-    const handleChange = (event) => {
-        const newName = event.target.value.replace(/(\r\n|\n|\r)/gm, '');
-        if (newName.length <= MAX_EDITED_FILE_NAME_LENGTH) {
-            setNewFileName(event.target.value);
+        } finally {
+            closeEditMode();
         }
     };
     return (
         <>
             <Row>
                 <Label width="30%">{constants.FILE_NAME}</Label>
-                <Value width={isInEditMode ? '50%' : '60%'}>
-                    {isInEditMode ? (
-                        <div>
-                            <textarea
-                                value={newFileName}
-                                onChange={handleChange}
-                                style={{
-                                    width: '100%',
-                                }}></textarea>
-                            {newFileName.length ===
-                                MAX_EDITED_FILE_NAME_LENGTH && (
-                                <WarningMessage>
-                                    {constants.FILE_NAME_CHARACTER_LIMIT}
-                                </WarningMessage>
-                            )}
-                        </div>
-                    ) : (
-                        <FreeFlowText>{newFileName}</FreeFlowText>
-                    )}
-                </Value>
-                <Value
-                    width={isInEditMode ? '20%' : '10%'}
-                    style={{ cursor: 'pointer', marginLeft: '10px' }}>
-                    {isInEditMode ? (
-                        <FlexWrapper style={{ justifyContent: 'space-around' }}>
-                            <IconButton onClick={saveEdits}>
-                                <TickIcon width="24px" height="24px" />
+                {!isInEditMode ? (
+                    <>
+                        <Value width="60%">
+                            <FreeFlowText>
+                                {getFileTitle(filename, extension)}
+                            </FreeFlowText>
+                        </Value>
+                        <Value
+                            width="10%"
+                            style={{ cursor: 'pointer', marginLeft: '10px' }}>
+                            <IconButton onClick={openEditMode}>
+                                <EditIcon />
                             </IconButton>
-                            <IconButton onClick={discardEdits}>
-                                <CloseIcon />
-                            </IconButton>
-                        </FlexWrapper>
-                    ) : (
-                        <IconButton onClick={openEditMode}>
-                            <EditIcon />
-                        </IconButton>
-                    )}
-                </Value>
+                        </Value>
+                    </>
+                ) : (
+                    <FileNameEditForm
+                        extension={extension}
+                        filename={filename}
+                        saveEdits={saveEdits}
+                        discardEdits={closeEditMode}
+                    />
+                )}
             </Row>
         </>
     );
