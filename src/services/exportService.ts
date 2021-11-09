@@ -339,6 +339,7 @@ class ExportService {
         const usedFileNamesInCollection = this.usedFilenames.get(
             file.collectionID
         );
+        file.metadata = mergeMetadata([file])[0].metadata;
         const fileSaveName = getUniqueFileSaveName(
             file.metadata.title,
             usedFileNamesInCollection
@@ -350,11 +351,7 @@ class ExportService {
             this.exportMotionPhoto(fileStream, file, collectionPath);
         } else {
             this.saveMediaFile(collectionPath, fileSaveName, fileStream);
-            this.saveMetadataFile(
-                collectionPath,
-                fileSaveName,
-                mergeMetadata([file])[0].metadata
-            );
+            this.saveMetadataFile(collectionPath, fileSaveName, file.metadata);
         }
     }
 
