@@ -48,8 +48,6 @@ import { FreeFlowText } from 'components/RecoveryKeyModal';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
-import { extensions } from 'file-type';
-import { FileExtension } from 'file-type/core';
 
 interface Iprops {
     isOpen: boolean;
@@ -300,10 +298,7 @@ function RenderFileName({
 }) {
     const originalTitle = file?.metadata.title;
     const [isInEditMode, setIsInEditMode] = useState(false);
-    let [originalFileName, extension] = originalTitle?.split('.', 2);
-    if (extension && !extensions.has(extension as FileExtension)) {
-        originalFileName = originalTitle;
-    }
+    const [originalFileName, extension] = originalTitle?.split('.', 2);
     const [filename, setFilename] = useState(originalFileName);
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
