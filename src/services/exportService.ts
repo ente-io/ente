@@ -21,6 +21,7 @@ import { decodeMotionPhoto } from './motionPhotoService';
 import {
     fileNameWithoutExtension,
     generateStreamFromArrayBuffer,
+    mergeMetadata,
 } from 'utils/file';
 import { User } from './userService';
 
@@ -317,7 +318,11 @@ class ExportService {
             this.exportMotionPhoto(fileStream, file, collectionPath);
         } else {
             this.saveMediaFile(collectionPath, uid, fileStream);
-            this.saveMetadataFile(collectionPath, uid, file.metadata);
+            this.saveMetadataFile(
+                collectionPath,
+                uid,
+                mergeMetadata([file])[0].metadata
+            );
         }
     }
 
