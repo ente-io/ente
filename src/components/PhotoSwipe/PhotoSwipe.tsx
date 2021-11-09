@@ -26,6 +26,7 @@ import {
     changeFileName,
     downloadFile,
     formatDateTime,
+    splitFilenameAndExtension,
     updateExistingFilePubMetadata,
 } from 'utils/file';
 import { Col, Form, FormCheck, FormControl } from 'react-bootstrap';
@@ -293,10 +294,8 @@ function RenderFileName({
 }) {
     const originalTitle = file?.metadata.title;
     const [isInEditMode, setIsInEditMode] = useState(false);
-    const [originalFileName, extension] = originalTitle?.split('.', 2) ?? [
-        undefined,
-        undefined,
-    ];
+    const [originalFileName, extension] =
+        splitFilenameAndExtension(originalTitle);
     const [filename, setFilename] = useState(originalFileName);
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
