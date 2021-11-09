@@ -135,6 +135,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
                   child: TextFormField(
+                    autofillHints: [AutofillHints.password],
                     decoration: InputDecoration(
                       hintText: "password",
                       contentPadding: EdgeInsets.all(20),

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_password_strength/flutter_password_strength.dart';
@@ -94,12 +95,13 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           strengthColors: passwordStrengthColors,
         ),
         Expanded(
-          child: ListView(
+          child: AutofillGroup (child: ListView(
             children: [
               Padding(padding: EdgeInsets.all(40)),
               Padding(
                 padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
                 child: TextFormField(
+                  autofillHints: [AutofillHints.email],
                   decoration: InputDecoration(
                     hintText: 'email',
                     hintStyle: TextStyle(
@@ -125,6 +127,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   keyboardType: TextInputType.text,
                   controller: _passwordController1,
                   obscureText: !_password1Visible,
+                  enableSuggestions: true,
+                  autofillHints: [AutofillHints.newPassword],
                   decoration: InputDecoration(
                     hintText: "password",
                     hintStyle: TextStyle(
@@ -155,6 +159,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   onEditingComplete: () {
                     _password1FocusNode.unfocus();
                     _password2FocusNode.requestFocus();
+                    TextInput.finishAutofillContext();
                   },
                 ),
               ),
@@ -162,9 +167,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
                 child: TextFormField(
-                  keyboardType: TextInputType.text,
+                  keyboardType: TextInputType.visiblePassword,
                   controller: _passwordController2,
                   obscureText: !_password2Visible,
+                  autofillHints: [AutofillHints.newPassword],
+                  onEditingComplete: () => TextInput.finishAutofillContext(),
                   decoration: InputDecoration(
                     hintText: "confirm password",
                     hintStyle: TextStyle(
@@ -227,6 +234,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 ),
               ),
             ],
+          ),
           ),
         ),
       ],
