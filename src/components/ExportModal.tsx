@@ -12,6 +12,7 @@ import { User } from 'services/userService';
 import styled from 'styled-components';
 import { sleep } from 'utils/common';
 import { getExportRecordFileUID } from 'utils/export';
+import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 import { Label, Row, Value } from './Container';
@@ -108,32 +109,39 @@ export default function ExportModal(props: Props) {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);
             if (exportStage === ExportStage.FINISHED) {
-                const localFiles = await getLocalFiles();
-                const userPersonalFiles = localFiles.filter(
-                    (file) => file.ownerID === user?.id
-                );
-                const exportRecord = await exportService.getExportRecord();
-                const exportedFileCnt = exportRecord.exportedFiles.length;
-                const failedFilesCnt = exportRecord.failedFiles.length;
-                const syncedFilesCnt = userPersonalFiles.length;
-                if (syncedFilesCnt > exportedFileCnt + failedFilesCnt) {
-                    updateExportProgress({
-                        current: exportedFileCnt + failedFilesCnt,
-                        total: syncedFilesCnt,
-                    });
-                    const exportFileUIDs = new Set([
-                        ...exportRecord.exportedFiles,
-                        ...exportRecord.failedFiles,
-                    ]);
-                    const unExportedFiles = userPersonalFiles.filter(
-                        (file) =>
-                            !exportFileUIDs.has(getExportRecordFileUID(file))
+                try {
+                    const localFiles = await getLocalFiles();
+                    const userPersonalFiles = localFiles.filter(
+                        (file) => file.ownerID === user?.id
                     );
-                    exportService.addFilesQueuedRecord(
-                        exportFolder,
-                        unExportedFiles
-                    );
-                    updateExportStage(ExportStage.PAUSED);
+                    const exportRecord = await exportService.getExportRecord();
+                    const exportedFileCnt = exportRecord.exportedFiles.length;
+                    const failedFilesCnt = exportRecord.failedFiles.length;
+                    const syncedFilesCnt = userPersonalFiles.length;
+                    if (syncedFilesCnt > exportedFileCnt + failedFilesCnt) {
+                        updateExportProgress({
+                            current: exportedFileCnt + failedFilesCnt,
+                            total: syncedFilesCnt,
+                        });
+                        const exportFileUIDs = new Set([
+                            ...exportRecord.exportedFiles,
+                            ...exportRecord.failedFiles,
+                        ]);
+                        const unExportedFiles = userPersonalFiles.filter(
+                            (file) =>
+                                !exportFileUIDs.has(
+                                    getExportRecordFileUID(file)
+                                )
+                        );
+                        exportService.addFilesQueuedRecord(
+                            exportFolder,
+                            unExportedFiles
+                        );
+                        updateExportStage(ExportStage.PAUSED);
+                    }
+                } catch (e) {
+                    setExportStage(ExportStage.INIT);
+                    logError(e, 'error while updating exportModal on reopen');
                 }
             }
         };
