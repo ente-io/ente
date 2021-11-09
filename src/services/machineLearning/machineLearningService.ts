@@ -2,6 +2,7 @@ import { File, getLocalFiles } from 'services/fileService';
 import DownloadManager from 'services/downloadManager';
 
 import * as tf from '@tensorflow/tfjs-core';
+import TSNE from 'tsne-js';
 // import { setWasmPaths } from '@tensorflow/tfjs-backend-wasm';
 
 // import TFJSFaceDetectionService from './tfjsFaceDetectionService';
@@ -17,6 +18,7 @@ import {
     FaceWithEmbedding,
     MLSyncResult,
     NearestCluster,
+    TSNEData,
 } from 'utils/machineLearning/types';
 
 import * as jpeg from 'jpeg-js';
@@ -248,13 +250,61 @@ class MachineLearningService {
             // this.minClusterSize
         );
         const d3Tree = treeRoot && this.toD3Tree(treeRoot);
-        console.log('d3Tree', d3Tree);
+        console.log('d3Tree: ', d3Tree);
+
+        const tsne = this.toTSNE();
+        console.log('tsne: ', tsne);
+        const d3Tsne = tsne && this.toD3Tsne(tsne);
+        console.log('d3Tsne: ', d3Tsne);
 
         return {
             allFaces: this.allFaces,
             clustersWithNoise: this.clustersWithNoise,
             tree: d3Tree,
+            tsne: d3Tsne,
         };
+    }
+
+    private toD3Tsne(tsne) {
+        const data: TSNEData = {
+            width: 800,
+            height: 800,
+            dataset: [],
+        };
+        data.dataset = tsne.map((t) => {
+            return {
+                x: (data.width * (t[0] + 1.0)) / 2,
+                y: (data.height * (t[1] + 1.0)) / 2,
+            };
+        });
+
+        return data;
+    }
+
+    private toTSNE() {
+        const input = this.allFaces.map((f) => Array.from(f.face.descriptor));
+        if (!input || input.length < 1) {
+            return null;
+        }
+
+        const model = new TSNE({
+            dim: 2,
+            perplexity: 10.0,
+            learningRate: 10.0,
+            metric: 'euclidean',
+        });
+
+        model.init({
+            data: input,
+            type: 'dense',
+        });
+
+        // `error`,  `iter`: final error and iteration number
+        // note: computation-heavy action happens here
+        model.run();
+
+        // `outputScaled` is `output` scaled to a range of [-1, 1]
+        return model.getOutputScaled();
     }
 
     private toD3Tree(treeNode): RawNodeDatum {

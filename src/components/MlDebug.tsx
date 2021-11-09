@@ -10,6 +10,32 @@ import { MLSyncResult } from 'utils/machineLearning/types';
 import TFJSImage from './TFJSImage';
 import Tree from 'react-d3-tree';
 
+interface TSNEProps {
+    mlResult: MLSyncResult;
+}
+
+function TSNEPlot(props: TSNEProps) {
+    return (
+        <svg
+            width={props.mlResult.tsne.width + 40}
+            height={props.mlResult.tsne.height + 40}>
+            {props.mlResult.tsne.dataset.map((data, i) => (
+                <foreignObject
+                    key={i}
+                    x={data.x - 20}
+                    y={data.y - 20}
+                    width={40}
+                    height={40}>
+                    <TFJSImage
+                        faceImage={props.mlResult.allFaces[i]?.faceImage}
+                        width={40}
+                        height={40}></TFJSImage>
+                </foreignObject>
+            ))}
+        </svg>
+    );
+}
+
 const renderForeignObjectNode = ({
     nodeDatum,
     foreignObjectProps,
@@ -52,6 +78,7 @@ export default function MLDebug() {
             noise: [],
         },
         tree: null,
+        tsne: null,
     });
     const router = useRouter();
     const appContext = useContext(AppContext);
@@ -211,6 +238,16 @@ export default function MLDebug() {
                         }
                     />
                 )}
+            </div>
+            <p></p>
+            <div
+                id="tsneWrapper"
+                style={{
+                    width: '840px',
+                    height: '840px',
+                    backgroundColor: 'white',
+                }}>
+                {mlResult.tsne && <TSNEPlot mlResult={mlResult} />}
             </div>
         </div>
     );

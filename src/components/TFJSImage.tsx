@@ -4,6 +4,8 @@ import { FaceImage } from 'utils/machineLearning/types';
 
 interface FaceImageProps {
     faceImage: FaceImage;
+    width?: number;
+    height?: number;
 }
 
 export default function TFJSImage(props: FaceImageProps) {
@@ -14,12 +16,17 @@ export default function TFJSImage(props: FaceImageProps) {
             return;
         }
         const canvas = canvasRef.current;
-        canvas.setAttribute('width', props.faceImage?.length);
-        canvas.setAttribute('height', props.faceImage[0]?.length);
         const faceTensor = tf.tensor3d(props.faceImage);
-        const normFaceImage = tf.div(tf.add(faceTensor, 1.0), 2);
+        const resized =
+            props.width && props.height
+                ? tf.image.resizeBilinear(faceTensor, [
+                      props.width,
+                      props.height,
+                  ])
+                : faceTensor;
+        const normFaceImage = tf.div(tf.add(resized, 1.0), 2);
         tf.browser.toPixels(normFaceImage as tf.Tensor3D, canvas);
-    }, [props.faceImage]);
+    }, [props]);
 
     return (
         <canvas

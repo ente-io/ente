@@ -6,12 +6,13 @@ import {
     WithFaceLandmarks,
 } from 'face-api.js';
 
-import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
+import { Point, RawNodeDatum } from 'react-d3-tree/lib/types/common';
 
 export interface MLSyncResult {
     allFaces: FaceWithEmbedding[];
     clustersWithNoise: ClustersWithNoise;
     tree: RawNodeDatum;
+    tsne: TSNEData;
 }
 
 export interface AlignedFace extends NormalizedFace {
@@ -61,4 +62,10 @@ export interface FaceWithEmbedding {
     // face: AlignedFace;
     // embedding: FaceEmbedding;
     faceImage: FaceImage;
+}
+
+export interface TSNEData {
+    width: number;
+    height: number;
+    dataset: Point[];
 }
