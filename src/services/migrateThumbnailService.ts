@@ -57,7 +57,7 @@ export async function replaceThumbnail(
         }
         setProgressTracker({ current: 0, total: largeThumbnailFiles.length });
         const uploadURLs: UploadURL[] = [];
-        uploadHttpClient.fetchUploadURLs(
+        await uploadHttpClient.fetchUploadURLs(
             largeThumbnailFiles.length,
             uploadURLs
         );
