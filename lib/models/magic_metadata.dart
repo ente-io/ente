@@ -6,6 +6,7 @@ const kVisibilityArchive = 1;
 const kMagicKeyVisibility = 'visibility';
 
 const kPubMagicKeyEditedTime = 'editedTime';
+const kPubMagicKeyEditedName = 'editedName';
 
 class MagicMetadata {
   // 0 -> visible
@@ -36,8 +37,9 @@ class MagicMetadata {
 
 class PubMagicMetadata {
   int editedTime;
+  String editedName;
 
-  PubMagicMetadata({this.editedTime});
+  PubMagicMetadata({this.editedTime, this.editedName});
 
   factory PubMagicMetadata.fromEncodedJson(String encodedJson) =>
       PubMagicMetadata.fromJson(jsonDecode(encodedJson));
@@ -48,6 +50,7 @@ class PubMagicMetadata {
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map[kPubMagicKeyEditedTime] = editedTime;
+    map[kPubMagicKeyEditedName] = editedName;
     return map;
   }
 
@@ -55,6 +58,7 @@ class PubMagicMetadata {
     if (map == null) return null;
     return PubMagicMetadata(
       editedTime: map[kPubMagicKeyEditedTime],
+      editedName: map[kPubMagicKeyEditedName],
     );
   }
 }

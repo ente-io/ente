@@ -8,6 +8,7 @@ import 'package:photos/ui/exif_info_dialog.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class FileInfoWidget extends StatefulWidget {
@@ -137,7 +138,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     if (_isImage && _exif != null) {
       items.add(_getExifWidgets(_exif));
     }
-    if (widget.file.uploadedFileID != null && widget.file.updationTime != null) {
+    if (widget.file.uploadedFileID != null &&
+        widget.file.updationTime != null) {
       items.addAll(
         [
           Row(
@@ -170,7 +172,13 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       ),
     );
     return AlertDialog(
-      title: Text(widget.file.title),
+      title: InkWell(
+        child: Text(widget.file.getDisplayName()),
+        onTap: () async {
+          await editFilename(context, widget.file);
+          setState(() {});
+        },
+      ),
       content: SingleChildScrollView(
         child: ListBody(
           children: items,
