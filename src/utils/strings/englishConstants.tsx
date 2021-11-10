@@ -561,8 +561,8 @@ const englishConstants = {
     RESTORE_TO_COLLECTION: 'restore to album',
     AUTOMATIC_BIN_DELETE_MESSAGE: (relativeTime: string) =>
         `permanently deleted ${relativeTime}`,
-    EMPTY_TRASH: 'empty trash?',
-    CONFIRM_EMPTY_TRASH: 'confirm empty trash',
+    EMPTY_TRASH: 'empty trash',
+    CONFIRM_EMPTY_TRASH: 'empty trash?',
     EMPTY_TRASH_MESSAGE:
         'all files will be permanently removed from your ente account',
 
@@ -613,6 +613,7 @@ const englishConstants = {
         <>updating creation time failed for some files ,try again</>
     ),
     FIX_CREATION_TIME_LATER: 'update later',
+    FILE_NAME_CHARACTER_LIMIT: '100 characters max',
 };
 
 export default englishConstants;
