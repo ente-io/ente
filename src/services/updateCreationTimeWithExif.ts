@@ -1,6 +1,7 @@
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
 import {
     changeFileCreationTime,
+    getFileFromURL,
     updateExistingFilePubMetadata,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -8,7 +9,7 @@ import localForage from 'utils/storage/localForage';
 import downloadManager from './downloadManager';
 import { getLocalFiles, File, updatePublicMagicMetadata } from './fileService';
 import { getLocalTrash, getTrashedFiles } from './trashService';
-import { getExifDataFromURL } from './upload/exifService';
+import { getExifData } from './upload/exifService';
 
 const CREATION_TIME_UPDATED_FILES_TABLE = 'creation-time-updated-file-table';
 
@@ -52,7 +53,8 @@ export async function updateCreationTimeWithExif(
         for (const [index, file] of filesToBeUpdated.entries()) {
             try {
                 const fileURL = await downloadManager.getFile(file);
-                const exifData = await getExifDataFromURL(fileURL);
+                const fileObject = await getFileFromURL(fileURL);
+                const exifData = await getExifData(fileObject);
                 if (
                     exifData?.creationTime &&
                     exifData?.creationTime !== file.metadata.creationTime
