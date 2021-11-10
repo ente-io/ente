@@ -45,7 +45,8 @@ class PushService {
     final fcmToken = await FirebaseMessaging.instance.getToken();
     if (_prefs.getString(kFCMPushTokenKey) != fcmToken) {
       final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-      _setPushTokenOnServer(fcmToken, apnsToken);
+      await _setPushTokenOnServer(fcmToken, apnsToken);
+      await _prefs.setString(kFCMPushTokenKey, fcmToken);
     }
   }
 
