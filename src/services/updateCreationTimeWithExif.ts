@@ -53,7 +53,10 @@ export async function updateCreationTimeWithExif(
             try {
                 const fileURL = await downloadManager.getFile(file);
                 const exifData = await getExifDataFromURL(fileURL);
-                if (exifData?.creationTime) {
+                if (
+                    exifData?.creationTime &&
+                    exifData?.creationTime !== file.metadata.creationTime
+                ) {
                     let updatedFile = await changeFileCreationTime(
                         file,
                         exifData.creationTime
