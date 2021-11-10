@@ -159,8 +159,9 @@ Future<void> _init(bool isBackground) async {
   await SyncService.instance.init();
   await MemoriesService.instance.init();
   await LocalSettings.instance.init();
-  await PushService.instance.init();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  PushService.instance.init().then((_) {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  });
   FeatureFlagService.instance.init();
   _logger.info("Initialization done");
   _initializationStatus.complete();
@@ -319,8 +320,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       await _sync(isAppInBackground: true);
     }, prefix: "[bg]");
   } else {
-    _logger
-        .info("Background push received when app is alive");
+    _logger.info("Background push received when app is alive");
     await _sync(isAppInBackground: true);
   }
 }
