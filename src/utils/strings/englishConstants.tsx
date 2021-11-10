@@ -596,6 +596,7 @@ const englishConstants = {
     REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR: () => (
         <>could not compress some of your thumbnails, please retry</>
     ),
+    FILE_NAME_CHARACTER_LIMIT: '100 characters max',
 };
 
 export default englishConstants;
