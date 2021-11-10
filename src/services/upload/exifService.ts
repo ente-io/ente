@@ -1,5 +1,5 @@
 import exifr from 'exifr';
-
+import piexif from 'piexifjs';
 import { NULL_LOCATION, Location } from './metadataService';
 
 const EXIF_TAGS_NEEDED = [
@@ -28,6 +28,57 @@ export async function getExifData(
         creationTime: getUNIXTime(exifData),
     };
     return parsedEXIFData;
+}
+
+export async function updateFileModifyDateInEXIF(
+    fileBlob: Blob,
+    updatedDate: Date
+) {
+    const fileURL = URL.createObjectURL(fileBlob);
+    const imageDataURL = await convertImageToDataURL(fileURL);
+    const exifObj = piexif.load(imageDataURL);
+    if (!exifObj['0th']) {
+        exifObj['0th'] = {};
+    }
+    exifObj['0th'][piexif.ImageIFD.DateTime] = updatedDate;
+    console.log(exifObj);
+    const exifBytes = piexif.dump(exifObj);
+    const exifInsertedFile = piexif.insert(exifBytes, imageDataURL);
+    return dataURIToBlob(exifInsertedFile);
+}
+
+export async function convertImageToDataURL(url: string) {
+    const blob = await fetch(url).then((r) => r.blob());
+    const dataUrl = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+    });
+    return dataUrl;
+}
+
+function dataURIToBlob(dataURI) {
+    // convert base64 to raw binary data held in a string
+    // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+    const byteString = atob(dataURI.split(',')[1]);
+
+    // separate out the mime component
+    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+    // write the bytes of the string to an ArrayBuffer
+    const ab = new ArrayBuffer(byteString.length);
+
+    // create a view into the buffer
+    const ia = new Uint8Array(ab);
+
+    // set the bytes of the buffer to the correct values
+    for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+
+    // write the ArrayBuffer to a blob, and you're done
+    const blob = new Blob([ab], { type: mimeString });
+    return blob;
 }
 
 function getUNIXTime(exifData: any) {
