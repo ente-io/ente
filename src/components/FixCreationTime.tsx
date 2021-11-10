@@ -75,6 +75,28 @@ export default function FixCreationTime(props: Props) {
         init();
     }, []);
 
+    const main = async () => {
+        const filesToBeUpdated = await getFilesPendingCreationTimeUpdate();
+        if (fixState === FIX_STATE.NOT_STARTED && filesToBeUpdated.length > 0) {
+            props.show();
+        }
+        if (
+            (fixState === FIX_STATE.COMPLETED || fixState === FIX_STATE.NOOP) &&
+            filesToBeUpdated.length > 0
+        ) {
+            updateFixState(FIX_STATE.NOT_STARTED);
+        }
+        if (filesToBeUpdated.length === 0 && fixState !== FIX_STATE.NOOP) {
+            updateFixState(FIX_STATE.NOOP);
+        }
+    };
+
+    useEffect(() => {
+        if (props.isOpen && fixState !== FIX_STATE.RUNNING) {
+            main();
+        }
+    }, [props.isOpen]);
+
     const startFix = async () => {
         updateFixState(FIX_STATE.RUNNING);
         const filesToBeUpdated = await getFilesPendingCreationTimeUpdate();
