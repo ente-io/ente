@@ -1,6 +1,6 @@
 import constants from 'utils/strings/constants';
 import MessageDialog from './MessageDialog';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { ProgressBar, Button } from 'react-bootstrap';
 import { ComfySpan } from './ExportInProgress';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
@@ -8,6 +8,7 @@ import {
     getFilesPendingCreationTimeUpdate,
     updateCreationTimeWithExif,
 } from 'services/updateCreationTimeWithExif';
+import { GalleryContext } from 'pages/gallery';
 
 interface Props {
     isOpen: boolean;
@@ -51,6 +52,7 @@ export default function FixCreationTime(props: Props) {
         current: 0,
         total: 0,
     });
+    const galleryContext = useContext(GalleryContext);
 
     const updateFixState = (fixState: FIX_STATE) => {
         setFixState(fixState);
@@ -109,6 +111,7 @@ export default function FixCreationTime(props: Props) {
         } else {
             updateFixState(FIX_STATE.COMPLETED_WITH_ERRORS);
         }
+        await galleryContext.syncWithRemote();
     };
 
     return (
