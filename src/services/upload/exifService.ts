@@ -30,23 +30,6 @@ export async function getExifData(
     return parsedEXIFData;
 }
 
-export async function getExifDataFromURL(url: string): Promise<ParsedEXIFData> {
-    try {
-        const exifData = await exifr.parse(url, EXIF_TAGS_NEEDED);
-        if (!exifData) {
-            return { location: NULL_LOCATION, creationTime: null };
-        }
-        const parsedEXIFData = {
-            location: getEXIFLocation(exifData),
-            creationTime: getUNIXTime(exifData),
-        };
-        return parsedEXIFData;
-    } catch (e) {
-        logError(e, 'error reading exif data');
-        // ignore exif parsing errors
-    }
-}
-
 function getUNIXTime(exifData: any) {
     const dateTime: Date =
         exifData.DateTimeOriginal ?? exifData.CreateDate ?? exifData.ModifyDate;
