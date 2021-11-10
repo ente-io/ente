@@ -196,7 +196,7 @@ export default function FixCreationTime(props: Props) {
                             <Button
                                 block
                                 variant={'outline-success'}
-                                onClick={() => startFix()}>
+                                onClick={startFix}>
                                 {constants.FIX_CREATION_TIME}
                             </Button>
                         </>
