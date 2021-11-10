@@ -250,6 +250,10 @@ export function splitFilenameAndExtension(filename): [string, string] {
         ];
 }
 
+export function getFileExtension(filename) {
+    return splitFilenameAndExtension(filename)[1];
+}
+
 export function generateStreamFromArrayBuffer(data: Uint8Array) {
     return new ReadableStream({
         async start(controller: ReadableStreamDefaultController) {
@@ -266,7 +270,7 @@ export async function convertForPreview(file: File, fileBlob: Blob) {
         fileBlob = new Blob([motionPhoto.image]);
     }
 
-    const typeFromExtension = file.metadata.title.split('.')[-1];
+    const typeFromExtension = getFileExtension(file.metadata.title);
     const worker = await new CryptoWorker();
 
     const mimeType =
