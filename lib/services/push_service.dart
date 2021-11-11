@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/events/signed_in_event.dart';
@@ -10,7 +11,9 @@ import 'package:photos/services/sync_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PushService {
-  static const kFCMPushTokenKey = "fcm_push_token";
+  static const kFCMPushToken = "fcm_push_token";
+  static const kLastFCMTokenUpdationTime = "fcm_push_token_updation_time";
+  static const kFCMTokenUpdationIntervalInDays = 30;
 
   static final PushService instance = PushService._privateConstructor();
   static final _logger = Logger("PushService");
@@ -22,6 +25,7 @@ class PushService {
   PushService._privateConstructor();
 
   Future<void> init() async {
+    _prefs = await SharedPreferences.getInstance();
     await Firebase.initializeApp();
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     await messaging.requestPermission(
@@ -48,32 +52,34 @@ class PushService {
 
   Future<void> _configurePushToken() async {
     final fcmToken = await FirebaseMessaging.instance.getToken();
-    if (_prefs.getString(kFCMPushTokenKey) != fcmToken) {
+    final hasServerTokenExpired = DateTime.now().microsecondsSinceEpoch -
+            (_prefs.getInt(kLastFCMTokenUpdationTime) ?? 0) <
+        (kMicroSecondsInDay * kFCMTokenUpdationIntervalInDays);
+    if (_prefs.getString(kFCMPushToken) != fcmToken || hasServerTokenExpired) {
       final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-      await _setPushTokenOnServer(fcmToken, apnsToken);
-      await _prefs.setString(kFCMPushTokenKey, fcmToken);
-      _logger.info("Push token updated on server");
+      try {
+        await _setPushTokenOnServer(fcmToken, apnsToken);
+        await _prefs.setString(kFCMPushToken, fcmToken);
+        await _prefs.setInt(
+            kLastFCMTokenUpdationTime, DateTime.now().microsecondsSinceEpoch);
+        _logger.info("Push token updated on server");
+      } catch (e) {
+        _logger.severe("Could not set push token", e, StackTrace.current);
+      }
     }
   }
 
   Future<void> _setPushTokenOnServer(String fcmToken, String apnsToken) async {
-    try {
-      await _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/push/token",
-        data: {
-          "fcmToken": fcmToken,
-          "apnsToken": apnsToken,
-        },
-        options: Options(
-          headers: {
-            "X-Auth-Token": Configuration.instance.getToken(),
-          },
-        ),
-      );
-    } catch (e, s) {
-      _logger.severe(e, s);
-      rethrow;
-    }
+    await _dio.post(
+      Configuration.instance.getHttpEndpoint() + "/push/token",
+      data: {
+        "fcmToken": fcmToken,
+        "apnsToken": apnsToken,
+      },
+      options: Options(
+        headers: {"X-Auth-Token": Configuration.instance.getToken()},
+      ),
+    );
   }
 
   void _handlePushMessage(RemoteMessage message) {
