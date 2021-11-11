@@ -1,5 +1,6 @@
 import exifr from 'exifr';
 import piexif from 'piexifjs';
+import { logError } from 'utils/sentry';
 import { NULL_LOCATION, Location } from './metadataService';
 
 const EXIF_TAGS_NEEDED = [
@@ -34,21 +35,26 @@ export async function updateFileModifyDateInEXIF(
     fileBlob: Blob,
     updatedDate: Date
 ) {
-    const fileURL = URL.createObjectURL(fileBlob);
-    let imageDataURL = await convertImageToDataURL(fileURL);
-    imageDataURL =
-        'data:image/jpeg;base64' +
-        imageDataURL.slice(imageDataURL.indexOf(','));
-    const exifObj = piexif.load(imageDataURL);
-    if (!exifObj['0th']) {
-        exifObj['0th'] = {};
-    }
-    exifObj['0th'][piexif.ImageIFD.DateTime] =
-        convertToExifDateFormat(updatedDate);
+    try {
+        const fileURL = URL.createObjectURL(fileBlob);
+        let imageDataURL = await convertImageToDataURL(fileURL);
+        imageDataURL =
+            'data:image/jpeg;base64' +
+            imageDataURL.slice(imageDataURL.indexOf(','));
+        const exifObj = piexif.load(imageDataURL);
+        if (!exifObj['0th']) {
+            exifObj['0th'] = {};
+        }
+        exifObj['0th'][piexif.ImageIFD.DateTime] =
+            convertToExifDateFormat(updatedDate);
 
-    const exifBytes = piexif.dump(exifObj);
-    const exifInsertedFile = piexif.insert(exifBytes, imageDataURL);
-    return dataURIToBlob(exifInsertedFile);
+        const exifBytes = piexif.dump(exifObj);
+        const exifInsertedFile = piexif.insert(exifBytes, imageDataURL);
+        return dataURIToBlob(exifInsertedFile);
+    } catch (e) {
+        logError(e, 'updateFileModifyDateInEXIF failed');
+        return fileBlob;
+    }
 }
 
 export async function convertImageToDataURL(url: string) {
