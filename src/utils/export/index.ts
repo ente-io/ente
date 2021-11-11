@@ -97,10 +97,6 @@ export const getUniqueCollectionFolderPath = (
     return collectionFolderPath;
 };
 
-export const sanitizeName = (name: string) => {
-    return name.replaceAll('/', '_').replaceAll(' ', '_');
-};
-
 export const getUniqueFileSaveName = (
     filename: string,
     usedFileNamesInCollection: Set<string>
@@ -114,4 +110,8 @@ export const getUniqueFileSaveName = (
         fileSaveName = filename + `(${count})`;
     }
     return fileSaveName;
+};
+
+export const sanitizeName = (name: string) => {
+    return name.replaceAll('/', '_').replaceAll(' ', '_');
 };
