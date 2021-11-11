@@ -108,7 +108,7 @@ class ExportService {
                 this.ElectronAPIs.sendNotification(
                     ExportNotification.IN_PROGRESS
                 );
-                return this.exportInProgress;
+                return await this.exportInProgress;
             }
             this.ElectronAPIs.showOnTray('starting export');
             const exportDir = getData(LS_KEYS.EXPORT)?.folder;
