@@ -43,8 +43,9 @@ export async function updateFileModifyDateInEXIF(
     if (!exifObj['0th']) {
         exifObj['0th'] = {};
     }
-    exifObj['0th'][piexif.ImageIFD.DateTime] = updatedDate;
-    console.log(exifObj);
+    exifObj['0th'][piexif.ImageIFD.DateTime] =
+        convertToExifDateFormat(updatedDate);
+
     const exifBytes = piexif.dump(exifObj);
     const exifInsertedFile = piexif.insert(exifBytes, imageDataURL);
     return dataURIToBlob(exifInsertedFile);
@@ -104,4 +105,10 @@ function getEXIFLocation(exifData): Location {
         return NULL_LOCATION;
     }
     return { latitude: exifData.latitude, longitude: exifData.longitude };
+}
+
+function convertToExifDateFormat(date: Date) {
+    return `${date.getFullYear()}:${
+        date.getMonth() + 1
+    }:${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 }
