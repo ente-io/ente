@@ -19,6 +19,8 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 export const TYPE_HEIC = 'heic';
 export const TYPE_HEIF = 'heif';
+export const TYPE_JPEG = 'jpeg';
+export const TYPE_JPG = 'jpg';
 const UNSUPPORTED_FORMATS = ['flv', 'mkv', '3gp', 'avi', 'wmv'];
 
 export function downloadAsFile(filename: string, content: string) {

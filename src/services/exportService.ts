@@ -23,9 +23,13 @@ import { decodeMotionPhoto } from './motionPhotoService';
 import {
     fileNameWithoutExtension,
     generateStreamFromArrayBuffer,
+    getFileExtension,
     mergeMetadata,
+    TYPE_JPEG,
+    TYPE_JPG,
 } from 'utils/file';
 import { User } from './userService';
+import { updateFileModifyDateInEXIF } from './upload/exifService';
 
 export interface ExportProgress {
     current: number;
@@ -344,9 +348,21 @@ class ExportService {
             file.metadata.title,
             usedFileNamesInCollection
         );
-        const fileStream = await retryAsyncFunction(() =>
+        let fileStream = await retryAsyncFunction(() =>
             downloadManager.downloadFile(file)
         );
+        const fileType = getFileExtension(file.metadata.title);
+        if (
+            file.pubMagicMetadata?.data.editedTime &&
+            (fileType === TYPE_JPEG || fileType === TYPE_JPG)
+        ) {
+            const fileBlob = await new Response(fileStream).blob();
+            const updatedFileBlob = await updateFileModifyDateInEXIF(
+                fileBlob,
+                new Date(file.pubMagicMetadata.data.editedTime / 1000)
+            );
+            fileStream = updatedFileBlob.stream();
+        }
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             this.exportMotionPhoto(fileStream, file, collectionPath);
         } else {
