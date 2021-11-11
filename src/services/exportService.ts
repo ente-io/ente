@@ -391,12 +391,12 @@ class ExportService {
         this.saveMetadataFile(collectionPath, imageSaveName, file.metadata);
 
         const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
-        const videoUID = getUniqueFileSaveName(
+        const videoSaveName = getUniqueFileSaveName(
             motionPhoto.videoNameTitle,
             usedFileNamesInCollection
         );
-        this.saveMediaFile(collectionPath, videoUID, videoStream);
-        this.saveMetadataFile(collectionPath, videoUID, file.metadata);
+        this.saveMediaFile(collectionPath, videoSaveName, videoStream);
+        this.saveMetadataFile(collectionPath, videoSaveName, file.metadata);
     }
 
     private saveMediaFile(collectionPath, uid, fileStream) {
