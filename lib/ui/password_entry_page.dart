@@ -92,6 +92,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     if (_password != null) {
       return Container();
     }
+    final String email = Configuration.instance.getEmail() ?? '';
     return Column(
       children: [
         FlutterPasswordStrength(
@@ -105,118 +106,137 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         SingleChildScrollView(
           child: Container(
             padding: EdgeInsets.fromLTRB(16, 36, 16, 16),
-            child: Column(
-              children: [
-                Padding(padding: EdgeInsets.all(12)),
-                Text(
-                  "enter a" +
-                      (widget.mode != PasswordEntryMode.set ? " new " : " ") +
-                      "password we can use to encrypt your data",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    height: 1.3,
+            child: AutofillGroup(
+              child: Column(
+                children: [
+                  Padding(padding: EdgeInsets.all(12)),
+                  Text(
+                    "enter a" +
+                        (widget.mode != PasswordEntryMode.set ? " new " : " ") +
+                        "password we can use to encrypt your data",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      height: 1.3,
+                    ),
                   ),
-                ),
-                Padding(padding: EdgeInsets.all(8)),
-                Text("we don't store this password, so if you forget, "),
-                Text.rich(
-                  TextSpan(
-                      text: "we cannot decrypt your data",
-                      style: TextStyle(
-                        decoration: TextDecoration.underline,
-                        fontWeight: FontWeight.bold,
-                      )),
-                  style: TextStyle(
-                    height: 1.3,
+                  Padding(padding: EdgeInsets.all(8)),
+                  Text("we don't store this password, so if you forget, "),
+                  Text.rich(
+                    TextSpan(
+                        text: "we cannot decrypt your data",
+                        style: TextStyle(
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold,
+                        )),
+                    style: TextStyle(
+                      height: 1.3,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                Padding(padding: EdgeInsets.all(12)),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      hintText: "password",
-                      contentPadding: EdgeInsets.all(20),
-                      suffixIcon: _password1InFocus
-                          ? IconButton(
-                              icon: Icon(
-                                _password1Visible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: Colors.white.withOpacity(0.5),
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _password1Visible = !_password1Visible;
-                                });
-                              },
-                            )
+                  Padding(padding: EdgeInsets.all(12)),
+                  // hidden textForm for suggesting auto-fill service for saving
+                  // password
+                  SizedBox(
+                    width: 0,
+                    height: 0,
+                    child: TextFormField(
+                      autofillHints: [
+                        AutofillHints.email,
+                      ],
+                      autocorrect: false,
+                      keyboardType: TextInputType.emailAddress,
+                      initialValue: email,
+                      textInputAction: TextInputAction.next,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                    child: TextFormField(
+                      autofillHints: [AutofillHints.newPassword],
+                      decoration: InputDecoration(
+                        hintText: "password",
+                        contentPadding: EdgeInsets.all(20),
+                        suffixIcon: _password1InFocus
+                            ? IconButton(
+                                icon: Icon(
+                                  _password1Visible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: Colors.white.withOpacity(0.5),
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _password1Visible = !_password1Visible;
+                                  });
+                                },
+                              )
+                            : null,
+                      ),
+                      obscureText: !_password1Visible,
+                      controller: _passwordController1,
+                      autofocus: false,
+                      autocorrect: false,
+                      keyboardType: TextInputType.visiblePassword,
+                      onChanged: (_) {
+                        setState(() {});
+                      },
+                      textInputAction: TextInputAction.next,
+                      focusNode: _password1FocusNode,
+                    ),
+                  ),
+                  Padding(padding: EdgeInsets.all(8)),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                    child: TextFormField(
+                      autofillHints: [AutofillHints.newPassword],
+                      decoration: InputDecoration(
+                        hintText: "password again",
+                        contentPadding: EdgeInsets.all(20),
+                        suffixIcon: _password2InFocus
+                            ? IconButton(
+                                icon: Icon(
+                                  _password2Visible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: Colors.white.withOpacity(0.5),
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _password2Visible = !_password2Visible;
+                                  });
+                                },
+                              )
+                            : null,
+                      ),
+                      obscureText: !_password2Visible,
+                      controller: _passwordController2,
+                      autofocus: false,
+                      autocorrect: false,
+                      keyboardType: TextInputType.visiblePassword,
+                      onChanged: (_) {
+                        setState(() {});
+                      },
+                      focusNode: _password2FocusNode,
+                    ),
+                  ),
+                  Padding(padding: EdgeInsets.all(20)),
+                  Container(
+                    width: double.infinity,
+                    height: 64,
+                    padding: EdgeInsets.fromLTRB(40, 0, 40, 0),
+                    child: button(
+                      buttonText,
+                      fontSize: 18,
+                      onPressed: _passwordController1.text.isNotEmpty &&
+                              _passwordController2.text.isNotEmpty
+                          ? _onButtonPress
                           : null,
                     ),
-                    obscureText: !_password1Visible,
-                    controller: _passwordController1,
-                    autofocus: false,
-                    autocorrect: false,
-                    keyboardType: TextInputType.visiblePassword,
-                    onChanged: (_) {
-                      setState(() {});
-                    },
-                    textInputAction: TextInputAction.next,
-                    focusNode: _password1FocusNode,
                   ),
-                ),
-                Padding(padding: EdgeInsets.all(8)),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      hintText: "password again",
-                      contentPadding: EdgeInsets.all(20),
-                      suffixIcon: _password2InFocus
-                          ? IconButton(
-                              icon: Icon(
-                                _password2Visible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: Colors.white.withOpacity(0.5),
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _password2Visible = !_password2Visible;
-                                });
-                              },
-                            )
-                          : null,
-                    ),
-                    obscureText: !_password2Visible,
-                    controller: _passwordController2,
-                    autofocus: false,
-                    autocorrect: false,
-                    keyboardType: TextInputType.visiblePassword,
-                    onChanged: (_) {
-                      setState(() {});
-                    },
-                    focusNode: _password2FocusNode,
-                  ),
-                ),
-                Padding(padding: EdgeInsets.all(20)),
-                Container(
-                  width: double.infinity,
-                  height: 64,
-                  padding: EdgeInsets.fromLTRB(40, 0, 40, 0),
-                  child: button(
-                    buttonText,
-                    fontSize: 18,
-                    onPressed: _passwordController1.text.isNotEmpty &&
-                            _passwordController2.text.isNotEmpty
-                        ? _onButtonPress
-                        : null,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -227,7 +247,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
-                  return WebPage("how it works", "https://ente.io/architecture");
+                  return WebPage(
+                      "how it works", "https://ente.io/architecture");
                 },
               ),
             );
