@@ -35,7 +35,10 @@ export async function updateFileModifyDateInEXIF(
     updatedDate: Date
 ) {
     const fileURL = URL.createObjectURL(fileBlob);
-    const imageDataURL = await convertImageToDataURL(fileURL);
+    let imageDataURL = await convertImageToDataURL(fileURL);
+    imageDataURL =
+        'data:image/jpeg;base64' +
+        imageDataURL.slice(imageDataURL.indexOf(','));
     const exifObj = piexif.load(imageDataURL);
     if (!exifObj['0th']) {
         exifObj['0th'] = {};
@@ -49,9 +52,9 @@ export async function updateFileModifyDateInEXIF(
 
 export async function convertImageToDataURL(url: string) {
     const blob = await fetch(url).then((r) => r.blob());
-    const dataUrl = await new Promise((resolve) => {
+    const dataUrl = await new Promise<string>((resolve) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
+        reader.onload = () => resolve(reader.result as string);
         reader.readAsDataURL(blob);
     });
     return dataUrl;
