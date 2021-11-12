@@ -21,6 +21,8 @@ export const MIN_EDITED_CREATION_TIME = new Date(1800, 0, 1);
 export const MAX_EDITED_CREATION_TIME = new Date();
 export const ALL_TIME = new Date(1800, 0, 1, 23, 59, 59);
 
+export const MAX_EDITED_FILE_NAME_LENGTH = 100;
+
 export interface fileAttribute {
     encryptedData?: DataStream | Uint8Array;
     objectKey?: string;
@@ -72,6 +74,7 @@ export interface MagicMetadata extends Omit<MagicMetadataCore, 'data'> {
 
 export interface PublicMagicMetadataProps {
     editedTime?: number;
+    editedName?: string;
 }
 
 export interface PublicMagicMetadata extends Omit<MagicMetadataCore, 'data'> {
@@ -147,7 +150,7 @@ export const syncFiles = async (
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     if (files.length !== localFiles.length) {
         await setLocalFiles(files);
-        setFiles(sortFiles(mergeMetadata(files)));
+        setFiles([...sortFiles(mergeMetadata(files))]);
     }
     for (const collection of collections) {
         if (!getToken()) {
@@ -183,9 +186,9 @@ export const syncFiles = async (
             `${collection.id}-time`,
             collection.updationTime
         );
-        setFiles(sortFiles(mergeMetadata(files)));
+        setFiles([...sortFiles(mergeMetadata(files))]);
     }
-    return mergeMetadata(files);
+    return sortFiles(mergeMetadata(files));
 };
 
 export const getFiles = async (

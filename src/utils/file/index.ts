@@ -240,6 +240,16 @@ export function fileExtensionWithDot(filename) {
     else return filename.substr(lastDotPosition);
 }
 
+export function splitFilenameAndExtension(filename): [string, string] {
+    const lastDotPosition = filename.lastIndexOf('.');
+    if (lastDotPosition === -1) return [filename, null];
+    else
+        return [
+            filename.substr(0, lastDotPosition),
+            filename.substr(lastDotPosition + 1),
+        ];
+}
+
 export function generateStreamFromArrayBuffer(data: Uint8Array) {
     return new ReadableStream({
         async start(controller: ReadableStreamDefaultController) {
@@ -381,6 +391,17 @@ export async function changeFileCreationTime(file: File, editedTime: number) {
     );
 }
 
+export async function changeFileName(file: File, editedName: string) {
+    const updatedPublicMagicMetadataProps: PublicMagicMetadataProps = {
+        editedName,
+    };
+
+    return await updatePublicMagicMetadataProps(
+        file,
+        updatedPublicMagicMetadataProps
+    );
+}
+
 export function isSharedFile(file: File) {
     const user: User = getData(LS_KEYS.USER);
 
@@ -399,6 +420,9 @@ export function mergeMetadata(files: File[]): File[] {
                 ? {
                       ...(file.pubMagicMetadata?.data.editedTime && {
                           creationTime: file.pubMagicMetadata.data.editedTime,
+                      }),
+                      ...(file.pubMagicMetadata?.data.editedName && {
+                          title: file.pubMagicMetadata.data.editedName,
                       }),
                   }
                 : {}),

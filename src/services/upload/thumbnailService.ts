@@ -56,7 +56,7 @@ export async function generateThumbnail(
             }
         } catch (e) {
             logError(e, 'uploading static thumbnail', {
-                type: fileTypeInfo.exactType,
+                fileFormat: fileTypeInfo.exactType,
             });
             thumbnail = Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) =>
                 c.charCodeAt(0)
