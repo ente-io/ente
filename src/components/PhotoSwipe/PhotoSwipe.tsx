@@ -111,7 +111,7 @@ function RenderCreationTime({
         try {
             if (isInEditMode && file) {
                 const unixTimeInMicroSec = pickedTime.getTime() * 1000;
-                if (unixTimeInMicroSec === file.metadata.creationTime) {
+                if (unixTimeInMicroSec === file?.metadata.creationTime) {
                     closeEditMode();
                     return;
                 }
