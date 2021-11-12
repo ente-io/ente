@@ -171,14 +171,33 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         children: _getActions(),
       ),
     );
-    return AlertDialog(
-      title: InkWell(
-        child: Text(widget.file.getDisplayName()),
+
+    Widget titleContent;
+    if (widget.file.uploadedFileID == null) {
+      titleContent = Text(widget.file.getDisplayName());
+    } else {
+      titleContent = InkWell(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              widget.file.getDisplayName(),
+            ),
+            Icon(
+              Icons.edit,
+              color: Colors.white.withOpacity(0.85),
+            ),
+          ],
+        ),
         onTap: () async {
           await editFilename(context, widget.file);
           setState(() {});
         },
-      ),
+      );
+    }
+
+    return AlertDialog(
+      title: titleContent,
       content: SingleChildScrollView(
         child: ListBody(
           children: items,
