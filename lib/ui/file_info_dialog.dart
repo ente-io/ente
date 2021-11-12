@@ -44,6 +44,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final file = widget.file;
     var items = <Widget>[
       Row(
         children: [
@@ -54,7 +55,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           Padding(padding: EdgeInsets.all(4)),
           Text(
             getFormattedTime(
-              DateTime.fromMicrosecondsSinceEpoch(widget.file.creationTime),
+              DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
             ),
             style: TextStyle(
               color: Colors.white.withOpacity(0.85),
@@ -71,9 +72,9 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ),
           Padding(padding: EdgeInsets.all(4)),
           Text(
-            widget.file.deviceFolder ??
+            file.deviceFolder ??
                 CollectionsService.instance
-                    .getCollectionByID(widget.file.collectionID)
+                    .getCollectionByID(file.collectionID)
                     .name,
             style: TextStyle(
               color: Colors.white.withOpacity(0.85),
@@ -98,7 +99,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         Padding(padding: EdgeInsets.all(6)),
       ],
     );
-    if (widget.file.localID != null && !_isImage) {
+    if (file.localID != null && !_isImage) {
       items.addAll(
         [
           Row(
@@ -109,7 +110,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
               Padding(padding: EdgeInsets.all(4)),
               FutureBuilder(
-                future: widget.file.getAsset(),
+                future: file.getAsset(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return Text(
@@ -139,8 +140,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     if (_isImage && _exif != null) {
       items.add(_getExifWidgets(_exif));
     }
-    if (widget.file.uploadedFileID != null &&
-        widget.file.updationTime != null) {
+    if (file.uploadedFileID != null && file.updationTime != null) {
       items.addAll(
         [
           Row(
@@ -151,8 +151,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
               Padding(padding: EdgeInsets.all(4)),
               Text(
-                getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(
-                    widget.file.updationTime)),
+                getFormattedTime(
+                    DateTime.fromMicrosecondsSinceEpoch(file.updationTime)),
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.85),
                 ),
@@ -174,16 +174,16 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     );
 
     Widget titleContent;
-    if (widget.file.uploadedFileID == null ||
-        widget.file.ownerID != Configuration.instance.getUserID()) {
-      titleContent = Text(widget.file.getDisplayName());
+    if (file.uploadedFileID == null ||
+        file.ownerID != Configuration.instance.getUserID()) {
+      titleContent = Text(file.getDisplayName());
     } else {
       titleContent = InkWell(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              widget.file.getDisplayName(),
+              file.getDisplayName(),
             ),
             Icon(
               Icons.edit,
@@ -192,7 +192,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ],
         ),
         onTap: () async {
-          await editFilename(context, widget.file);
+          await editFilename(context, file);
           setState(() {});
         },
       );
