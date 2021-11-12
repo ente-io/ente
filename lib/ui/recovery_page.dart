@@ -86,8 +86,13 @@ class _RecoveryPageState extends State<RecoveryPage> {
                         );
                       } catch (e) {
                         await dialog.hide();
-                        showErrorDialog(context, "incorrect recovery key",
-                            "the recovery key you entered is incorrect");
+                        String errMessage =
+                            'the recovery key you entered is incorrect';
+                        if (e is AssertionError) {
+                          errMessage = '$errMessage : ${e.message}';
+                        }
+                        showErrorDialog(
+                            context, "incorrect recovery key", errMessage);
                       }
                     }
                   : null,

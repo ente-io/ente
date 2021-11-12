@@ -1,10 +1,12 @@
 import 'dart:io' as io;
 import 'dart:ui';
 
+import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -34,12 +36,21 @@ class RecoveryKeyDialog extends StatefulWidget {
 
 class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
   bool _hasTriedToSave = false;
+  bool _showMnenomicCode = true;
   final _recoveryKeyFile = io.File(
       Configuration.instance.getTempDirectory() + "ente-recovery-key.txt");
 
   @override
   Widget build(BuildContext context) {
-    final recoveryKey = widget.recoveryKey;
+    String recoveryKey = widget.recoveryKey;
+    if (_showMnenomicCode) {
+      recoveryKey = bip39.entropyToMnemonic(recoveryKey);
+      if (recoveryKey.split(' ').length != kMnemonicKeyWordCount) {
+        throw AssertionError(
+            'recovery code should have $kMnemonicKeyWordCount words');
+      }
+    }
+
     List<Widget> actions = [];
     if (!_hasTriedToSave) {
       actions.add(TextButton(
@@ -128,6 +139,17 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
               Text(
                 "please save this in a safe place",
               ),
+              Padding(padding: EdgeInsets.all(8)),
+              CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.trailing,
+                  title: Text('show human readable key'),
+                  value: _showMnenomicCode,
+                  onChanged: (value) {
+                    setState(() {
+                      _showMnenomicCode = value;
+                    });
+                  }),
             ],
           ),
         ),
@@ -136,6 +158,7 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
     );
   }
 
+  // author civil bicycle drop gown ship file shallow chicken hub isolate among report piece cram crumble leopard guard spike segment update fall defy achieve
   Future _shareRecoveryKey(String recoveryKey) async {
     if (_recoveryKeyFile.existsSync()) {
       await _recoveryKeyFile.delete();

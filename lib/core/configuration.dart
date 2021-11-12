@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
+import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
@@ -27,6 +28,8 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:super_logging/super_logging.dart';
 import 'package:uuid/uuid.dart';
+
+import 'constants.dart';
 
 class Configuration {
   Configuration._privateConstructor();
@@ -265,6 +268,14 @@ class Configuration {
   }
 
   Future<void> recover(String recoveryKey) async {
+    // check if user has entered mnemonic code
+    if (recoveryKey.contains(' ')) {
+      if (recoveryKey.split(' ').length != kMnemonicKeyWordCount) {
+        throw AssertionError(
+            'recovery code should have $kMnemonicKeyWordCount words');
+      }
+      recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
+    }
     final attributes = getKeyAttributes();
     Uint8List masterKey;
     try {
