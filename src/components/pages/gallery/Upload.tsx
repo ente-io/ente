@@ -155,7 +155,6 @@ export default function Upload(props: Props) {
                 );
             }
         }
-        console.log(firstFileFolder, lastFileFolder, paths);
         return {
             suggestedCollectionName: commonPathPrefix,
             multipleFolders: firstFileFolder !== lastFileFolder,
