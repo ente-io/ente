@@ -1,6 +1,7 @@
 import 'package:exif/exif.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
@@ -173,7 +174,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     );
 
     Widget titleContent;
-    if (widget.file.uploadedFileID == null) {
+    if (widget.file.uploadedFileID == null ||
+        widget.file.ownerID != Configuration.instance.getUserID()) {
       titleContent = Text(widget.file.getDisplayName());
     } else {
       titleContent = InkWell(
