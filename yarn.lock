@@ -4080,6 +4080,13 @@ hash.js@^1.0.0, hash.js@^1.0.3:
     inherits "^2.0.3"
     minimalistic-assert "^1.0.1"
 
+hdbscan@^0.0.1-alpha.1:
+  version "0.0.1-alpha.1"
+  resolved "https://registry.yarnpkg.com/hdbscan/-/hdbscan-0.0.1-alpha.1.tgz#227dac1a29b640b811bb7d05f78dd40f9128213d"
+  integrity sha512-AQrSTFIO8Sxr18K2iZBOnXw68SMUw7dDyZ65PWBMZ7emPiSaMcnGl838LPwA2HWFPK0VoDJv9dfNabqsAfFjmQ==
+  dependencies:
+    kd-tree-javascript "^1.0.3"
+
 hdbscanjs@^1.0.12:
   version "1.0.12"
   resolved "https://registry.yarnpkg.com/hdbscanjs/-/hdbscanjs-1.0.12.tgz#8ccde4993954bdc6751d894c10371c57ac446ec1"
@@ -4664,6 +4671,11 @@ jszip@3.7.1:
     pako "~1.0.2"
     readable-stream "~2.3.6"
     set-immediate-shim "~1.0.1"
+
+kd-tree-javascript@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/kd-tree-javascript/-/kd-tree-javascript-1.0.3.tgz#ab5239ed44e347e10065590fd479e947bedff96c"
+  integrity sha512-7oSugmaxTCJFqey11rlTSEQD3hGDnRgROMj9MEREvDGV8SlIFwN7x3jJRyFoi+mjO0+4wuSuaDLS1reNQHP7uA==
 
 kind-of@^3.0.2:
   version "3.2.2"

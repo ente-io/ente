@@ -40,6 +40,7 @@
     "face-api.js": "^0.22.2",
     "file-type": "^16.5.3",
     "formik": "^2.1.5",
+    "hdbscan": "^0.0.1-alpha.1",
     "hdbscanjs": "^1.0.12",
     "heic-convert": "^1.2.4",
     "http-proxy-middleware": "^1.0.5",

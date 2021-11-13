@@ -1,6 +1,7 @@
 import { DBSCAN, OPTICS, KMEANS } from 'density-clustering';
 import { ClusteringResults } from 'utils/machineLearning/types';
 import Clustering from 'hdbscanjs';
+import { Hdbscan } from 'hdbscan';
 
 class ClusteringService {
     private dbscan: DBSCAN;
@@ -41,7 +42,7 @@ class ClusteringService {
         return { clusters, noise: [] };
     }
 
-    public clusterUsingHDBSCAN(
+    public getMST(
         dataset: Array<Array<number>>
         // epsilon: number = 1.0,
         // minPts: number = 2
@@ -59,6 +60,17 @@ class ClusteringService {
         // const allNodes = treeNode.filter(()=>true, null);
         console.log(treeNode);
         return treeNode;
+    }
+
+    public clusterUsingHdbscan(dataset: Array<Array<number>>) {
+        if (dataset.length < 10) {
+            throw Error('too few samples to run Hdbscan');
+        }
+
+        const hdbscan = new Hdbscan(dataset, 5);
+        const clusters = hdbscan.getClusters();
+        const noise = hdbscan.getNoise();
+        return { clusters, noise };
     }
 }
 

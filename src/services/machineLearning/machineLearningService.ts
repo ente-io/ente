@@ -214,6 +214,7 @@ class MachineLearningService {
             }
         }
         console.log('allFaces: ', this.allFaces);
+        // console.log('allDescriptors: ', this.allFaces.map(f => Array.from(f.face.descriptor)));
 
         faceapi.nets.ssdMobilenetv1.dispose();
         // console.log('11 TF Memory stats: ', tf.memory());
@@ -226,10 +227,14 @@ class MachineLearningService {
         // this.allFaces[0].alignedRect.box,
         // this.allFaces[0].alignedRect.imageDims
 
-        this.clusteringResults = this.clusteringService.clusterUsingDBSCAN(
-            this.allFaces.map((f) => Array.from(f.face.descriptor)),
-            this.clusterFaceDistance,
-            this.minClusterSize
+        // this.clusteringResults = this.clusteringService.clusterUsingDBSCAN(
+        //     this.allFaces.map((f) => Array.from(f.face.descriptor)),
+        //     this.clusterFaceDistance,
+        //     this.minClusterSize
+        // );
+
+        this.clusteringResults = this.clusteringService.clusterUsingHdbscan(
+            this.allFaces.map((f) => Array.from(f.face.descriptor))
         );
 
         // const clusterResults = this.clusteringService.clusterUsingKMEANS(
@@ -242,9 +247,10 @@ class MachineLearningService {
         );
 
         this.updateClusterSummaries();
-        this.assignNoiseWithinLimit();
+        this.clustersWithNoise.noise = this.clusteringResults.noise;
+        // this.assignNoiseWithinLimit();
 
-        const treeRoot = this.clusteringService.clusterUsingHDBSCAN(
+        const treeRoot = this.clusteringService.getMST(
             this.allFaces.map((f) => Array.from(f.face.descriptor))
             // this.clusterFaceDistance,
             // this.minClusterSize
