@@ -10,12 +10,12 @@ import TSNE from 'tsne-js';
 import {
     Cluster,
     ClusterFaces,
-    ClusteringResults,
     ClustersWithNoise,
     FaceApiResult,
     FaceDescriptor,
     FaceImage,
     FaceWithEmbedding,
+    HdbscanResults,
     MLSyncResult,
     NearestCluster,
     TSNEData,
@@ -29,6 +29,7 @@ import * as faceapi from 'face-api.js';
 import { euclideanDistance, SsdMobilenetv1Options } from 'face-api.js';
 import { f32Average } from 'utils/machineLearning';
 import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
+import { TreeNode } from 'hdbscan';
 
 class MachineLearningService {
     // private faceDetectionService: TFJSFaceDetectionService;
@@ -37,12 +38,12 @@ class MachineLearningService {
 
     private clusterFaceDistance = 0.4;
     private maxFaceDistance = 0.5;
-    private minClusterSize = 4;
+    private minClusterSize = 5;
     private minFaceSize = 24;
-    private batchSize = 50;
+    private batchSize = 200;
 
     private allFaces: FaceWithEmbedding[];
-    private clusteringResults: ClusteringResults;
+    private clusteringResults: HdbscanResults;
     private clustersWithNoise: ClustersWithNoise;
     private allFaceImages: FaceImage[];
 
@@ -233,9 +234,11 @@ class MachineLearningService {
         //     this.minClusterSize
         // );
 
-        this.clusteringResults = this.clusteringService.clusterUsingHdbscan(
-            this.allFaces.map((f) => Array.from(f.face.descriptor))
-        );
+        this.clusteringResults = this.clusteringService.clusterUsingHdbscan({
+            input: this.allFaces.map((f) => Array.from(f.face.descriptor)),
+            minClusterSize: this.minClusterSize,
+            debug: true,
+        });
 
         // const clusterResults = this.clusteringService.clusterUsingKMEANS(
         //     this.allFaces.map((f) => f.embedding),
@@ -250,11 +253,7 @@ class MachineLearningService {
         this.clustersWithNoise.noise = this.clusteringResults.noise;
         // this.assignNoiseWithinLimit();
 
-        const treeRoot = this.clusteringService.getMST(
-            this.allFaces.map((f) => Array.from(f.face.descriptor))
-            // this.clusterFaceDistance,
-            // this.minClusterSize
-        );
+        const treeRoot = this.clusteringResults.debugInfo?.mstBinaryTree;
         const d3Tree = treeRoot && this.toD3Tree(treeRoot);
         console.log('d3Tree: ', d3Tree);
 
@@ -313,12 +312,12 @@ class MachineLearningService {
         return model.getOutputScaled();
     }
 
-    private toD3Tree(treeNode): RawNodeDatum {
+    private toD3Tree(treeNode: TreeNode<number>): RawNodeDatum {
         if (!treeNode.left && !treeNode.right) {
             return {
-                name: treeNode.opt[0],
+                name: treeNode.data.toString(),
                 attributes: {
-                    face: treeNode.opt[0],
+                    face: treeNode.data,
                 },
             };
         }
@@ -327,7 +326,7 @@ class MachineLearningService {
         treeNode.right && children.push(this.toD3Tree(treeNode.right));
 
         return {
-            name: treeNode.dist,
+            name: treeNode.data.toString(),
             children: children,
         };
     }

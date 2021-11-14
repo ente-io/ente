@@ -4080,10 +4080,10 @@ hash.js@^1.0.0, hash.js@^1.0.3:
     inherits "^2.0.3"
     minimalistic-assert "^1.0.1"
 
-hdbscan@^0.0.1-alpha.1:
-  version "0.0.1-alpha.1"
-  resolved "https://registry.yarnpkg.com/hdbscan/-/hdbscan-0.0.1-alpha.1.tgz#227dac1a29b640b811bb7d05f78dd40f9128213d"
-  integrity sha512-AQrSTFIO8Sxr18K2iZBOnXw68SMUw7dDyZ65PWBMZ7emPiSaMcnGl838LPwA2HWFPK0VoDJv9dfNabqsAfFjmQ==
+hdbscan@^0.0.1-alpha.2:
+  version "0.0.1-alpha.2"
+  resolved "https://registry.yarnpkg.com/hdbscan/-/hdbscan-0.0.1-alpha.2.tgz#7493f31a85cfea72afef9d726390b2a530585bc6"
+  integrity sha512-1tDOq3YVK4bVmB8nHHbenOeNvd46MMfEe9/PwsiwOGpcwFnA5Xt37fJvxu7+QUJ8QeW7+igN7dVQjYS7tCyLgQ==
   dependencies:
     kd-tree-javascript "^1.0.3"
 

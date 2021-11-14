@@ -5,6 +5,7 @@ import {
     WithFaceDescriptor,
     WithFaceLandmarks,
 } from 'face-api.js';
+import { DebugInfo } from 'hdbscan';
 
 import { Point, RawNodeDatum } from 'react-d3-tree/lib/types/common';
 
@@ -49,6 +50,10 @@ export interface ClustersWithNoise {
 export interface ClusteringResults {
     clusters: Array<ClusterFaces>;
     noise: ClusterFaces;
+}
+
+export interface HdbscanResults extends ClusteringResults {
+    debugInfo?: DebugInfo;
 }
 
 export interface NearestCluster {
