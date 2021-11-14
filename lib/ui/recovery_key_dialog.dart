@@ -36,21 +36,16 @@ class RecoveryKeyDialog extends StatefulWidget {
 
 class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
   bool _hasTriedToSave = false;
-  bool _showMnenomicCode = true;
   final _recoveryKeyFile = io.File(
       Configuration.instance.getTempDirectory() + "ente-recovery-key.txt");
 
   @override
   Widget build(BuildContext context) {
-    String recoveryKey = widget.recoveryKey;
-    if (_showMnenomicCode) {
-      recoveryKey = bip39.entropyToMnemonic(recoveryKey);
-      if (recoveryKey.split(' ').length != kMnemonicKeyWordCount) {
-        throw AssertionError(
-            'recovery code should have $kMnemonicKeyWordCount words');
-      }
+    final String recoveryKey = bip39.entropyToMnemonic(widget.recoveryKey);
+    if (recoveryKey.split(' ').length != kMnemonicKeyWordCount) {
+      throw AssertionError(
+          'recovery code should have $kMnemonicKeyWordCount words');
     }
-
     List<Widget> actions = [];
     if (!_hasTriedToSave) {
       actions.add(TextButton(
@@ -139,17 +134,6 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
               Text(
                 "please save this in a safe place",
               ),
-              Padding(padding: EdgeInsets.all(8)),
-              CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  controlAffinity: ListTileControlAffinity.trailing,
-                  title: Text('show human readable key'),
-                  value: _showMnenomicCode,
-                  onChanged: (value) {
-                    setState(() {
-                      _showMnenomicCode = value;
-                    });
-                  }),
             ],
           ),
         ),
