@@ -142,7 +142,6 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
     );
   }
 
-  // author civil bicycle drop gown ship file shallow chicken hub isolate among report piece cram crumble leopard guard spike segment update fall defy achieve
   Future _shareRecoveryKey(String recoveryKey) async {
     if (_recoveryKeyFile.existsSync()) {
       await _recoveryKeyFile.delete();
