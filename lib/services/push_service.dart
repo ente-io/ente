@@ -13,7 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PushService {
   static const kFCMPushToken = "fcm_push_token";
   static const kLastFCMTokenUpdationTime = "fcm_push_token_updation_time";
-  static const kFCMTokenUpdationIntervalInDays = 30;
+  static const kFCMTokenUpdationIntervalInMicroSeconds =
+      30 * kMicroSecondsInDay;
 
   static final PushService instance = PushService._privateConstructor();
   static final _logger = Logger("PushService");
@@ -52,12 +53,15 @@ class PushService {
 
   Future<void> _configurePushToken() async {
     final fcmToken = await FirebaseMessaging.instance.getToken();
-    final hasServerTokenExpired = DateTime.now().microsecondsSinceEpoch -
-            (_prefs.getInt(kLastFCMTokenUpdationTime) ?? 0) <
-        (kMicroSecondsInDay * kFCMTokenUpdationIntervalInDays);
-    if (_prefs.getString(kFCMPushToken) != fcmToken || hasServerTokenExpired) {
+    final shouldForceRefreshServerToken =
+        DateTime.now().microsecondsSinceEpoch -
+                (_prefs.getInt(kLastFCMTokenUpdationTime) ?? 0) >
+            kFCMTokenUpdationIntervalInMicroSeconds;
+    if (_prefs.getString(fcmToken) != fcmToken ||
+        shouldForceRefreshServerToken) {
       final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
       try {
+        _logger.info("Updating token on server");
         await _setPushTokenOnServer(fcmToken, apnsToken);
         await _prefs.setString(kFCMPushToken, fcmToken);
         await _prefs.setInt(
@@ -66,6 +70,8 @@ class PushService {
       } catch (e) {
         _logger.severe("Could not set push token", e, StackTrace.current);
       }
+    } else {
+      _logger.info("Skipping token update");
     }
   }
 
