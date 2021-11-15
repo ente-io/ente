@@ -253,6 +253,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    AppLifecycleService.instance.onAppInForeground();
     _configureBackgroundFetch();
   }
 
