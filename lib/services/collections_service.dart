@@ -19,6 +19,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
@@ -67,14 +68,14 @@ class CollectionsService {
     });
   }
 
-  Future<List<Collection>> sync({bool isBackground = false}) async {
+  Future<List<Collection>> sync() async {
     _logger.info("Syncing collections");
     final lastCollectionUpdationTime =
         _prefs.getInt(_collectionsSyncTimeKey) ?? 0;
 
     // Might not have synced the collection fully
     final fetchedCollections =
-        await _fetchCollections(lastCollectionUpdationTime ?? 0, isBackground);
+        await _fetchCollections(lastCollectionUpdationTime ?? 0);
     final updatedCollections = <Collection>[];
     int maxUpdationTime = lastCollectionUpdationTime;
     final ownerID = _config.getUserID();
@@ -272,14 +273,13 @@ class CollectionsService {
     }
   }
 
-  Future<List<Collection>> _fetchCollections(
-      int sinceTime, bool isBackground) async {
+  Future<List<Collection>> _fetchCollections(int sinceTime) async {
     try {
       final response = await _dio.get(
         Configuration.instance.getHttpEndpoint() + "/collections",
         queryParameters: {
           "sinceTime": sinceTime,
-          "source": isBackground ? "bg" : "fg",
+          "source": AppLifecycleService.instance.isForeground ? "fg" : "bg",
         },
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),

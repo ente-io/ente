@@ -31,7 +31,6 @@ class RemoteSyncService {
   final _diffFetcher = DiffFetcher();
   int _completedUploads = 0;
   SharedPreferences _prefs;
-  bool _isBackground;
   Completer<void> _existingSync;
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
@@ -48,9 +47,8 @@ class RemoteSyncService {
 
   RemoteSyncService._privateConstructor();
 
-  Future<void> init(bool isBackground) async {
+  Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
-    _isBackground = isBackground;
   }
 
   Future<void> sync({bool silently = false}) async {
@@ -65,7 +63,7 @@ class RemoteSyncService {
     _existingSync = Completer<void>();
 
     bool isFirstSync = !_collectionsService.hasSyncedCollections();
-    await _collectionsService.sync(isBackground: _isBackground);
+    await _collectionsService.sync();
 
     if (isFirstSync || _hasReSynced()) {
       await _syncUpdatedCollections(silently);

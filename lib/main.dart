@@ -126,7 +126,7 @@ void _backgroundTask(String taskId) async {
   }
   await _init(true);
   UpdateService.instance.showUpdateNotification();
-  await _sync(isAppInBackground: true);
+  await _sync();
   BackgroundFetch.finish(taskId);
 }
 
@@ -143,8 +143,13 @@ Future<void> _init(bool isBackground) async {
     return _initializationStatus.future;
   }
   _initializationStatus = Completer<void>();
-  _scheduleHeartBeat(isBackground);
   _logger.info("Initializing...");
+  _scheduleHeartBeat(isBackground);
+  if (isBackground) {
+    AppLifecycleService.instance.onAppInBackground();
+  } else {
+    AppLifecycleService.instance.onAppInForeground();
+  }
   InAppPurchaseConnection.enablePendingPurchases();
   CryptoUtil.init();
   await NotificationService.instance.init();
@@ -154,9 +159,9 @@ Future<void> _init(bool isBackground) async {
   await BillingService.instance.init();
   await CollectionsService.instance.init();
   await FileUploader.instance.init(isBackground);
-  await LocalSyncService.instance.init(isBackground);
+  await LocalSyncService.instance.init();
   await TrashSyncService.instance.init();
-  await RemoteSyncService.instance.init(isBackground);
+  await RemoteSyncService.instance.init();
   await SyncService.instance.init();
   await MemoriesService.instance.init();
   await LocalSettings.instance.init();
@@ -168,12 +173,12 @@ Future<void> _init(bool isBackground) async {
   _initializationStatus.complete();
 }
 
-Future<void> _sync({bool isAppInBackground = false}) async {
+Future<void> _sync() async {
   if (SyncService.instance.isSyncInProgress()) {
     _logger.info("Sync is already in progress, skipping");
     return;
   }
-  if (isAppInBackground) {
+  if (!AppLifecycleService.instance.isForeground) {
     _logger.info("Syncing in background");
   }
   try {
@@ -322,13 +327,13 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       }
       await _init(true);
       if (PushService.shouldSync(message)) {
-        await _sync(isAppInBackground: true);
+        await _sync();
       }
     }, prefix: "[bg]");
   } else {
     _logger.info("Background push received when app is alive");
     if (PushService.shouldSync(message)) {
-      await _sync(isAppInBackground: true);
+      await _sync();
     }
   }
 }
