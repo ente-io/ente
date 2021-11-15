@@ -1,6 +1,9 @@
+import { CustomError } from 'utils/common/errorUtil';
+
 interface RequestQueueItem {
     request: (canceller?: RequestCanceller) => Promise<any>;
-    callback: (response) => void;
+    successCallback: (response: any) => void;
+    failureCallback: (error: Error) => void;
     isCanceled: { status: boolean };
     canceller: { exec: () => void };
 }
@@ -26,10 +29,11 @@ export default class QueueProcessor<T> {
             },
         };
 
-        const promise = new Promise<T>((resolve) => {
+        const promise = new Promise<T>((resolve, reject) => {
             this.requestQueue.push({
                 request,
-                callback: resolve,
+                successCallback: resolve,
+                failureCallback: reject,
                 isCanceled,
                 canceller,
             });
@@ -53,15 +57,15 @@ export default class QueueProcessor<T> {
             let response = null;
 
             if (queueItem.isCanceled.status) {
-                response = null;
+                queueItem.failureCallback(Error(CustomError.REQUEST_CANCELLED));
             } else {
                 try {
                     response = await queueItem.request(queueItem.canceller);
+                    queueItem.successCallback(response);
                 } catch (e) {
-                    response = null;
+                    queueItem.failureCallback(e);
                 }
             }
-            queueItem.callback(response);
         }
     }
 }
