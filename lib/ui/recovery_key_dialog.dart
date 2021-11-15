@@ -1,10 +1,12 @@
 import 'dart:io' as io;
 import 'dart:ui';
 
+import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -39,7 +41,11 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final recoveryKey = widget.recoveryKey;
+    final String recoveryKey = bip39.entropyToMnemonic(widget.recoveryKey);
+    if (recoveryKey.split(' ').length != kMnemonicKeyWordCount) {
+      throw AssertionError(
+          'recovery code should have $kMnemonicKeyWordCount words');
+    }
     List<Widget> actions = [];
     if (!_hasTriedToSave) {
       actions.add(TextButton(

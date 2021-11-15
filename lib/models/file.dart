@@ -208,6 +208,13 @@ class File {
     }
   }
 
+  String getDisplayName() {
+    if (pubMagicMetadata != null && pubMagicMetadata.editedName != null) {
+      return pubMagicMetadata.editedName;
+    }
+    return title;
+  }
+
   // returns true if the file isn't available in the user's gallery
   bool isRemoteFile() {
     return localID == null && uploadedFileID != null;

@@ -2,24 +2,25 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/utils/dialog_util.dart';
 
-class ChangeCollectionNameDialog extends StatefulWidget {
+class RenameDialog extends StatefulWidget {
   final String name;
+  final String type;
+  final int maxLength;
 
-  const ChangeCollectionNameDialog({Key key, this.name}) : super(key: key);
+  const RenameDialog(this.name, this.type, {Key key, this.maxLength = 100})
+      : super(key: key);
 
   @override
-  _ChangeCollectionNameDialogState createState() =>
-      _ChangeCollectionNameDialogState();
+  _RenameDialogState createState() => _RenameDialogState();
 }
 
-class _ChangeCollectionNameDialogState
-    extends State<ChangeCollectionNameDialog> {
-  String _newCollectionName;
+class _RenameDialogState extends State<RenameDialog> {
+  String _newName;
 
   @override
   void initState() {
     super.initState();
-    _newCollectionName = widget.name;
+    _newName = widget.name;
   }
 
   @override
@@ -33,7 +34,7 @@ class _ChangeCollectionNameDialogState
           children: [
             TextFormField(
               decoration: InputDecoration(
-                hintText: 'album name',
+                hintText: '${widget.type} name',
                 hintStyle: TextStyle(
                   color: Colors.white30,
                 ),
@@ -41,12 +42,12 @@ class _ChangeCollectionNameDialogState
               ),
               onChanged: (value) {
                 setState(() {
-                  _newCollectionName = value;
+                  _newName = value;
                 });
               },
               autocorrect: false,
               keyboardType: TextInputType.text,
-              initialValue: _newCollectionName,
+              initialValue: _newName,
               autofocus: true,
             ),
           ],
@@ -72,21 +73,17 @@ class _ChangeCollectionNameDialogState
             ),
           ),
           onPressed: () {
-            if (_newCollectionName.trim().isEmpty) {
+            if (_newName.trim().isEmpty) {
               showErrorDialog(
-                  context, "empty name", "album name cannot be empty");
+                  context, "empty name", "${widget.type} name cannot be empty");
               return;
             }
-            if (_newCollectionName.trim().length > 100) {
+            if (_newName.trim().length > widget.maxLength) {
               showErrorDialog(context, "name too large",
-                  "album name should be less than 100 characters");
+                  "${widget.type} name should be less than ${widget.maxLength} characters");
               return;
             }
-            if (_newCollectionName.trim() == widget.name.trim()) {
-              Navigator.of(context).pop(null);
-              return;
-            }
-            Navigator.of(context).pop(_newCollectionName.trim());
+            Navigator.of(context).pop(_newName.trim());
           },
         ),
       ],

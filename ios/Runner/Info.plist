@@ -49,7 +49,7 @@
 	<key>NSFaceIDUsageDescription</key>
 	<string>Please allow ente to lock itself with FaceID or TouchID</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Please allow access to your photos so that ente can encrypt and backup them up.</string>
+	<string>Please allow access to your photos so that ente can encrypt and back them up.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

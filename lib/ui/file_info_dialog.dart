@@ -1,6 +1,7 @@
 import 'package:exif/exif.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
@@ -8,6 +9,7 @@ import 'package:photos/ui/exif_info_dialog.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class FileInfoWidget extends StatefulWidget {
@@ -42,6 +44,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final file = widget.file;
     var items = <Widget>[
       Row(
         children: [
@@ -52,7 +55,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           Padding(padding: EdgeInsets.all(4)),
           Text(
             getFormattedTime(
-              DateTime.fromMicrosecondsSinceEpoch(widget.file.creationTime),
+              DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
             ),
             style: TextStyle(
               color: Colors.white.withOpacity(0.85),
@@ -69,9 +72,9 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ),
           Padding(padding: EdgeInsets.all(4)),
           Text(
-            widget.file.deviceFolder ??
+            file.deviceFolder ??
                 CollectionsService.instance
-                    .getCollectionByID(widget.file.collectionID)
+                    .getCollectionByID(file.collectionID)
                     .name,
             style: TextStyle(
               color: Colors.white.withOpacity(0.85),
@@ -96,7 +99,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         Padding(padding: EdgeInsets.all(6)),
       ],
     );
-    if (widget.file.localID != null && !_isImage) {
+    if (file.localID != null && !_isImage) {
       items.addAll(
         [
           Row(
@@ -107,7 +110,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
               Padding(padding: EdgeInsets.all(4)),
               FutureBuilder(
-                future: widget.file.getAsset(),
+                future: file.getAsset(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return Text(
@@ -137,7 +140,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     if (_isImage && _exif != null) {
       items.add(_getExifWidgets(_exif));
     }
-    if (widget.file.uploadedFileID != null && widget.file.updationTime != null) {
+    if (file.uploadedFileID != null && file.updationTime != null) {
       items.addAll(
         [
           Row(
@@ -148,8 +151,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
               Padding(padding: EdgeInsets.all(4)),
               Text(
-                getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(
-                    widget.file.updationTime)),
+                getFormattedTime(
+                    DateTime.fromMicrosecondsSinceEpoch(file.updationTime)),
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.85),
                 ),
@@ -169,8 +172,34 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         children: _getActions(),
       ),
     );
+
+    Widget titleContent;
+    if (file.uploadedFileID == null ||
+        file.ownerID != Configuration.instance.getUserID()) {
+      titleContent = Text(file.getDisplayName());
+    } else {
+      titleContent = InkWell(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              file.getDisplayName(),
+            ),
+            Icon(
+              Icons.edit,
+              color: Colors.white.withOpacity(0.85),
+            ),
+          ],
+        ),
+        onTap: () async {
+          await editFilename(context, file);
+          setState(() {});
+        },
+      );
+    }
+
     return AlertDialog(
-      title: Text(widget.file.title),
+      title: titleContent,
       content: SingleChildScrollView(
         child: ListBody(
           children: items,

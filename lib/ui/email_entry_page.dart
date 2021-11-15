@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_password_strength/flutter_password_strength.dart';
@@ -94,139 +95,147 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           strengthColors: passwordStrengthColors,
         ),
         Expanded(
-          child: ListView(
-            children: [
-              Padding(padding: EdgeInsets.all(40)),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: 'email',
-                    hintStyle: TextStyle(
-                      color: Colors.white30,
+          child: AutofillGroup(
+            child: ListView(
+              children: [
+                Padding(padding: EdgeInsets.all(40)),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                  child: TextFormField(
+                    autofillHints: [AutofillHints.email],
+                    decoration: InputDecoration(
+                      hintText: 'email',
+                      hintStyle: TextStyle(
+                        color: Colors.white30,
+                      ),
+                      contentPadding: EdgeInsets.all(12),
                     ),
-                    contentPadding: EdgeInsets.all(12),
+                    onChanged: (value) {
+                      setState(() {
+                        _email = value.trim();
+                      });
+                    },
+                    autocorrect: false,
+                    keyboardType: TextInputType.emailAddress,
+                    initialValue: _email,
+                    textInputAction: TextInputAction.next,
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _email = value.trim();
-                    });
-                  },
-                  autocorrect: false,
-                  keyboardType: TextInputType.emailAddress,
-                  initialValue: _email,
-                  textInputAction: TextInputAction.next,
                 ),
-              ),
-              Padding(padding: EdgeInsets.all(8)),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-                child: TextFormField(
-                  keyboardType: TextInputType.text,
-                  controller: _passwordController1,
-                  obscureText: !_password1Visible,
-                  decoration: InputDecoration(
-                    hintText: "password",
-                    hintStyle: TextStyle(
-                      color: Colors.white30,
+                Padding(padding: EdgeInsets.all(8)),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                  child: TextFormField(
+                    keyboardType: TextInputType.text,
+                    controller: _passwordController1,
+                    obscureText: !_password1Visible,
+                    enableSuggestions: true,
+                    autofillHints: [AutofillHints.newPassword],
+                    decoration: InputDecoration(
+                      hintText: "password",
+                      hintStyle: TextStyle(
+                        color: Colors.white30,
+                      ),
+                      contentPadding: EdgeInsets.all(12),
+                      suffixIcon: _password1InFocus
+                          ? IconButton(
+                              icon: Icon(
+                                _password1Visible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.white.withOpacity(0.5),
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _password1Visible = !_password1Visible;
+                                });
+                              },
+                            )
+                          : null,
                     ),
-                    contentPadding: EdgeInsets.all(12),
-                    suffixIcon: _password1InFocus
-                        ? IconButton(
-                            icon: Icon(
-                              _password1Visible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Colors.white.withOpacity(0.5),
-                              size: 20,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _password1Visible = !_password1Visible;
-                              });
-                            },
-                          )
-                        : null,
+                    focusNode: _password1FocusNode,
+                    onChanged: (_) {
+                      setState(() {});
+                    },
+                    onEditingComplete: () {
+                      _password1FocusNode.unfocus();
+                      _password2FocusNode.requestFocus();
+                      TextInput.finishAutofillContext();
+                    },
                   ),
-                  focusNode: _password1FocusNode,
-                  onChanged: (_) {
-                    setState(() {});
-                  },
-                  onEditingComplete: () {
-                    _password1FocusNode.unfocus();
-                    _password2FocusNode.requestFocus();
-                  },
                 ),
-              ),
-              Padding(padding: EdgeInsets.all(8)),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-                child: TextFormField(
-                  keyboardType: TextInputType.text,
-                  controller: _passwordController2,
-                  obscureText: !_password2Visible,
-                  decoration: InputDecoration(
-                    hintText: "confirm password",
-                    hintStyle: TextStyle(
-                      color: Colors.white30,
+                Padding(padding: EdgeInsets.all(8)),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                  child: TextFormField(
+                    keyboardType: TextInputType.visiblePassword,
+                    controller: _passwordController2,
+                    obscureText: !_password2Visible,
+                    autofillHints: [AutofillHints.newPassword],
+                    onEditingComplete: () => TextInput.finishAutofillContext(),
+                    decoration: InputDecoration(
+                      hintText: "confirm password",
+                      hintStyle: TextStyle(
+                        color: Colors.white30,
+                      ),
+                      contentPadding: EdgeInsets.all(12),
+                      suffixIcon: _password2InFocus
+                          ? IconButton(
+                              icon: Icon(
+                                _password2Visible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.white.withOpacity(0.5),
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _password2Visible = !_password2Visible;
+                                });
+                              },
+                            )
+                          : null,
                     ),
-                    contentPadding: EdgeInsets.all(12),
-                    suffixIcon: _password2InFocus
-                        ? IconButton(
-                            icon: Icon(
-                              _password2Visible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Colors.white.withOpacity(0.5),
-                              size: 20,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _password2Visible = !_password2Visible;
-                              });
-                            },
-                          )
-                        : null,
+                    focusNode: _password2FocusNode,
                   ),
-                  focusNode: _password2FocusNode,
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(20),
-              ),
-              _getAgreement(),
-              Padding(padding: EdgeInsets.all(20)),
-              Container(
-                width: double.infinity,
-                height: 64,
-                padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-                child: button(
-                  AppLocalizations.of(context).sign_up,
-                  onPressed: _isFormValid()
-                      ? () {
-                          if (!isValidEmail(_email)) {
-                            showErrorDialog(context, "invalid email",
-                                "please enter a valid email address.");
-                          } else if (_passwordController1.text !=
-                              _passwordController2.text) {
-                            showErrorDialog(context, "uhm...",
-                                "the passwords you entered don't match");
-                          } else if (_passwordStrength <
-                              kPasswordStrengthThreshold) {
-                            showErrorDialog(context, "weak password",
-                                "the password you have chosen is too simple, please choose another one");
-                          } else {
-                            _config
-                                .setVolatilePassword(_passwordController1.text);
-                            _config.setEmail(_email);
-                            UserService.instance.getOtt(context, _email);
+                Padding(
+                  padding: EdgeInsets.all(20),
+                ),
+                _getAgreement(),
+                Padding(padding: EdgeInsets.all(20)),
+                Container(
+                  width: double.infinity,
+                  height: 64,
+                  padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
+                  child: button(
+                    AppLocalizations.of(context).sign_up,
+                    onPressed: _isFormValid()
+                        ? () {
+                            if (!isValidEmail(_email)) {
+                              showErrorDialog(context, "invalid email",
+                                  "please enter a valid email address.");
+                            } else if (_passwordController1.text !=
+                                _passwordController2.text) {
+                              showErrorDialog(context, "uhm...",
+                                  "the passwords you entered don't match");
+                            } else if (_passwordStrength <
+                                kPasswordStrengthThreshold) {
+                              showErrorDialog(context, "weak password",
+                                  "the password you have chosen is too simple, please choose another one");
+                            } else {
+                              _config.setVolatilePassword(
+                                  _passwordController1.text);
+                              _config.setEmail(_email);
+                              UserService.instance.getOtt(context, _email);
+                            }
                           }
-                        }
-                      : null,
-                  fontSize: 18,
+                        : null,
+                    fontSize: 18,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

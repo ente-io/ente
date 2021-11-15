@@ -20,3 +20,7 @@ const String kLivePhotoToastCounterKey = "show_live_photo_toast";
 
 const kThumbnailDiskLoadDeferDuration = Duration(milliseconds: 40);
 const kThumbnailServerLoadDeferDuration = Duration(milliseconds: 80);
+
+// 256 bit key maps to 24 words
+// https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#Generating_the_mnemonic
+const kMnemonicKeyWordCount = 24;
