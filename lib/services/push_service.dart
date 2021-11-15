@@ -39,7 +39,7 @@ class PushService {
       sound: true,
     );
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      _logger.info('Got a message whilst in the foreground!');
+      _logger.info("Got a message whilst in the foreground!");
       _handlePushMessage(message);
     });
     if (Configuration.instance.hasConfiguredAccount()) {
@@ -89,10 +89,10 @@ class PushService {
   }
 
   void _handlePushMessage(RemoteMessage message) {
-    _logger.info('Message data: ${message.data}');
+    _logger.info("Message data: ${message.data}");
     if (message.notification != null) {
       _logger.info(
-          'Message also contained a notification: ${message.notification}');
+          "Message also contained a notification: ${message.notification}");
     }
     SyncService.instance.sync();
   }
