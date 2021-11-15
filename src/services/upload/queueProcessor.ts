@@ -53,7 +53,7 @@ export default class QueueProcessor<T> {
 
     public async processQueue() {
         while (this.requestQueue.length > 0) {
-            const queueItem = this.requestQueue.pop();
+            const queueItem = this.requestQueue.shift();
             let response = null;
 
             if (queueItem.isCanceled.status) {
