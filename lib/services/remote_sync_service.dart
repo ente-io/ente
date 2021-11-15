@@ -14,6 +14,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
@@ -157,7 +158,8 @@ class RemoteSyncService {
       filesToBeUploaded =
           await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
     }
-    if (!Configuration.instance.shouldBackupVideos()) {
+    if (!Configuration.instance.shouldBackupVideos() ||
+        _shouldPerformLightWeightSync()) {
       filesToBeUploaded
           .removeWhere((element) => element.fileType == FileType.video);
     }
@@ -371,5 +373,9 @@ class RemoteSyncService {
       return kArchiveFeatureReleaseTime;
     }
     return kEditTimeFeatureReleaseTime;
+  }
+
+  bool _shouldPerformLightWeightSync() {
+    return Platform.isIOS && !AppLifecycleService.instance.isForeground;
   }
 }
