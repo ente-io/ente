@@ -17,6 +17,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/l10n/l10n.dart';
+import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/feature_flag_service.dart';
@@ -277,8 +278,10 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _logger.info("App resumed");
+      AppLifecycleService.instance.onAppInForeground();
       _sync();
+    } else {
+      AppLifecycleService.instance.onAppInBackground();
     }
   }
 
