@@ -15,6 +15,8 @@ class PushService {
   static const kLastFCMTokenUpdationTime = "fcm_push_token_updation_time";
   static const kFCMTokenUpdationIntervalInMicroSeconds =
       30 * kMicroSecondsInDay;
+  static const kPushAction = "action";
+  static const kSync = "sync";
 
   static final PushService instance = PushService._privateConstructor();
   static final _logger = Logger("PushService");
@@ -94,6 +96,13 @@ class PushService {
       _logger.info(
           "Message also contained a notification: ${message.notification}");
     }
-    SyncService.instance.sync();
+    if (shouldSync(message)) {
+      SyncService.instance.sync();
+    }
+  }
+
+  static bool shouldSync(RemoteMessage message) {
+    return message.data.containsKey(kPushAction) &&
+      message.data[kPushAction] == kSync;
   }
 }

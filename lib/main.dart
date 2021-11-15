@@ -317,11 +317,15 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         _scheduleSuicide(kBGPushTimeout); // To prevent OS from punishing us
       }
       await _init(true);
-      await _sync(isAppInBackground: true);
+      if (PushService.shouldSync(message)) {
+        await _sync(isAppInBackground: true);
+      }
     }, prefix: "[bg]");
   } else {
     _logger.info("Background push received when app is alive");
-    await _sync(isAppInBackground: true);
+    if (PushService.shouldSync(message)) {
+      await _sync(isAppInBackground: true);
+    }
   }
 }
 
