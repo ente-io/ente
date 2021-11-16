@@ -17,6 +17,7 @@ import { OverlayTrigger } from 'react-bootstrap';
 import { Collection } from 'services/collectionService';
 import RemoveIcon from 'components/icons/RemoveIcon';
 import RestoreIcon from 'components/icons/RestoreIcon';
+import ClockIcon from 'components/icons/ClockIcon';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
@@ -212,9 +213,11 @@ const SelectedFileOptions = ({
                             <DeleteIcon />
                         </IconButton>
                     </IconWithMessage>
-                    <IconButton onClick={fixTimeHelper}>
-                        {constants.FIX_CREATION_TIME}
-                    </IconButton>
+                    <IconWithMessage message={constants.FIX_CREATION_TIME}>
+                        <IconButton onClick={fixTimeHelper}>
+                            <ClockIcon />
+                        </IconButton>
+                    </IconWithMessage>
                 </>
             )}
         </SelectionBar>
