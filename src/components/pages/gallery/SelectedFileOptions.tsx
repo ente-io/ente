@@ -27,6 +27,7 @@ interface Props {
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     deleteFileHelper: (permanent?: boolean) => void;
     removeFromCollectionHelper: () => void;
+    fixTimeHelper: () => void;
     count: number;
     clearSelection: () => void;
     archiveFilesHelper: () => void;
@@ -68,6 +69,7 @@ const SelectedFileOptions = ({
     restoreToCollectionHelper,
     showCreateCollectionModal,
     removeFromCollectionHelper,
+    fixTimeHelper,
     setDialogMessage,
     setCollectionSelectorAttributes,
     deleteFileHelper,
@@ -210,6 +212,9 @@ const SelectedFileOptions = ({
                             <DeleteIcon />
                         </IconButton>
                     </IconWithMessage>
+                    <IconButton onClick={fixTimeHelper}>
+                        {constants.FIX_CREATION_TIME}
+                    </IconButton>
                 </>
             )}
         </SelectionBar>

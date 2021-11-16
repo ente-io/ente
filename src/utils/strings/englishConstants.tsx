@@ -603,9 +603,7 @@ const englishConstants = {
         <>update file time with values from EXIF</>
     ),
     UPDATE_CREATION_TIME_COMPLETED: () => <>successfully updated all files</>,
-    UPDATE_CREATION_TIME_NOOP: () => (
-        <>you have no files that whose time is out of sync with exif</>
-    ),
+
     UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR: () => (
         <>file time updation failed for some files, please retry</>
     ),

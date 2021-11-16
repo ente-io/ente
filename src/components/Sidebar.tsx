@@ -37,7 +37,6 @@ import {
     TRASH_SECTION,
 } from 'components/pages/gallery/Collections';
 import FixLargeThumbnails from './FixLargeThumbnail';
-import FixCreationTime from './FixCreationTime';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -56,7 +55,6 @@ export default function Sidebar(props: Props) {
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
     const [exportModalView, setExportModalView] = useState(false);
     const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
-    const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const galleryContext = useContext(GalleryContext);
     useEffect(() => {
         const main = async () => {
@@ -292,18 +290,6 @@ export default function Sidebar(props: Props) {
                         style={{ marginTop: '30px' }}
                         onClick={() => setFixLargeThumbsView(true)}>
                         {constants.FIX_LARGE_THUMBNAILS}
-                    </LinkButton>
-                </>
-                <>
-                    <FixCreationTime
-                        isOpen={fixCreationTimeView}
-                        hide={() => setFixCreationTimeView(false)}
-                        show={() => setFixCreationTimeView(true)}
-                    />
-                    <LinkButton
-                        style={{ marginTop: '30px' }}
-                        onClick={() => setFixCreationTimeView(true)}>
-                        {constants.FIX_CREATION_TIME}
                     </LinkButton>
                 </>
                 <LinkButton
