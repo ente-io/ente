@@ -4,7 +4,6 @@ import * as electron from 'electron';
 
 const { ipcRenderer } = electron;
 
-
 const responseToReadable = (fileStream: any) => {
     const reader = fileStream.getReader();
     const rs = new Readable();
@@ -23,6 +22,12 @@ const responseToReadable = (fileStream: any) => {
 const checkExistsAndCreateCollectionDir = async (dirPath: string) => {
     if (!fs.existsSync(dirPath)) {
         await fs.mkdir(dirPath);
+    }
+};
+
+const checkExistsAndRename = async (oldDirPath: string, newDirPath: string) => {
+    if (fs.existsSync(oldDirPath)) {
+        await fs.rename(oldDirPath, newDirPath);
     }
 };
 
@@ -45,8 +50,6 @@ const selectRootDirectory = async () => {
     }
 };
 
-
-
 const sendNotification = (content: string) => {
     ipcRenderer.send('send-notification', content);
 };
@@ -55,21 +58,21 @@ const showOnTray = (content: string) => {
 };
 
 const registerResumeExportListener = (resumeExport: () => void) => {
-    ipcRenderer.removeAllListeners("resume-export");
+    ipcRenderer.removeAllListeners('resume-export');
     ipcRenderer.on('resume-export', () => resumeExport());
 };
 const registerStopExportListener = (abortExport: () => void) => {
-    ipcRenderer.removeAllListeners("stop-export");
+    ipcRenderer.removeAllListeners('stop-export');
     ipcRenderer.on('stop-export', () => abortExport());
 };
 
 const registerPauseExportListener = (pauseExport: () => void) => {
-    ipcRenderer.removeAllListeners("pause-export");
+    ipcRenderer.removeAllListeners('pause-export');
     ipcRenderer.on('pause-export', () => pauseExport());
 };
 
 const registerRetryFailedExportListener = (retryFailedExport: () => void) => {
-    ipcRenderer.removeAllListeners("retry-export");
+    ipcRenderer.removeAllListeners('retry-export');
     ipcRenderer.on('retry-export', () => retryFailedExport());
 };
 
@@ -89,7 +92,6 @@ const getExportRecord = async (filePath: string) => {
 };
 
 const setExportRecord = async (filePath: string, data: string) => {
-    
     const filepath = `${filePath}`;
     await fs.writeFile(filepath, data);
 };
@@ -97,6 +99,7 @@ const setExportRecord = async (filePath: string, data: string) => {
 const windowObject: any = window;
 windowObject['ElectronAPIs'] = {
     checkExistsAndCreateCollectionDir,
+    checkExistsAndRename,
     saveStreamToDisk,
     saveFileToDisk,
     selectRootDirectory,
@@ -108,5 +111,5 @@ windowObject['ElectronAPIs'] = {
     registerPauseExportListener,
     registerRetryFailedExportListener,
     getExportRecord,
-    setExportRecord
+    setExportRecord,
 };
