@@ -3,7 +3,6 @@ import MessageDialog from './MessageDialog';
 import React, { useContext, useEffect, useState } from 'react';
 import { ProgressBar, Button } from 'react-bootstrap';
 import { ComfySpan } from './ExportInProgress';
-import { LS_KEYS, setData } from 'utils/storage/localStorage';
 import { updateCreationTimeWithExif } from 'services/updateCreationTimeWithExif';
 import { GalleryContext } from 'pages/gallery';
 import { File } from 'services/fileService';
@@ -46,14 +45,9 @@ export default function FixCreationTime(props: Props) {
     });
     const galleryContext = useContext(GalleryContext);
 
-    const updateFixState = (fixState: FIX_STATE) => {
-        setFixState(fixState);
-        setData(LS_KEYS.CREATION_TIME_FIX_STATE, { state: fixState });
-    };
-
     useEffect(() => {
         if (
-            !props.attributes &&
+            props.attributes &&
             props.isOpen &&
             fixState !== FIX_STATE.RUNNING
         ) {
@@ -62,15 +56,15 @@ export default function FixCreationTime(props: Props) {
     }, [props.isOpen]);
 
     const startFix = async () => {
-        updateFixState(FIX_STATE.RUNNING);
+        setFixState(FIX_STATE.RUNNING);
         const completedWithoutError = await updateCreationTimeWithExif(
             props.attributes.files,
             setProgressTracker
         );
         if (!completedWithoutError) {
-            updateFixState(FIX_STATE.COMPLETED);
+            setFixState(FIX_STATE.COMPLETED);
         } else {
-            updateFixState(FIX_STATE.COMPLETED_WITH_ERRORS);
+            setFixState(FIX_STATE.COMPLETED_WITH_ERRORS);
         }
         await galleryContext.syncWithRemote();
     };
