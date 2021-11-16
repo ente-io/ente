@@ -1,4 +1,5 @@
-import { ExportRecord } from 'services/exportService';
+import { Collection } from 'services/collectionService';
+import { ExportRecord, METADATA_FOLDER_NAME } from 'services/exportService';
 import { File } from 'services/fileService';
 import { MetadataObject } from 'services/upload/uploadService';
 import { formatDate } from 'utils/file';
@@ -6,7 +7,7 @@ import { formatDate } from 'utils/file';
 export const getExportRecordFileUID = (file: File) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
 
-export const getExportPendingFiles = async (
+export const getExportPendingFiles = (
     allFiles: File[],
     exportRecord: ExportRecord
 ) => {
@@ -19,7 +20,7 @@ export const getExportPendingFiles = async (
     return unExportedFiles;
 };
 
-export const getFilesUploadedAfterLastExport = async (
+export const getFilesUploadedAfterLastExport = (
     allFiles: File[],
     exportRecord: ExportRecord
 ) => {
@@ -32,7 +33,20 @@ export const getFilesUploadedAfterLastExport = async (
     return unExportedFiles;
 };
 
-export const getExportFailedFiles = async (
+export const getExportedFiles = (
+    allFiles: File[],
+    exportRecord: ExportRecord
+) => {
+    const exportedFileIds = new Set(exportRecord?.exportedFiles);
+    const exportedFiles = allFiles.filter((file) => {
+        if (exportedFileIds.has(getExportRecordFileUID(file))) {
+            return file;
+        }
+    });
+    return exportedFiles;
+};
+
+export const getExportFailedFiles = (
     allFiles: File[],
     exportRecord: ExportRecord
 ) => {
@@ -52,14 +66,14 @@ export const dedupe = (files: any[]) => {
 };
 
 export const getGoogleLikeMetadataFile = (
-    uid: string,
+    fileSaveName: string,
     metadata: MetadataObject
 ) => {
     const creationTime = Math.floor(metadata.creationTime / 1000000);
     const modificationTime = Math.floor(metadata.modificationTime / 1000000);
     return JSON.stringify(
         {
-            title: uid,
+            title: fileSaveName,
             creationTime: {
                 timestamp: creationTime,
                 formatted: formatDate(creationTime * 1000),
@@ -101,17 +115,42 @@ export const getUniqueFileSaveName = (
     filename: string,
     usedFileNamesInCollection: Set<string>
 ) => {
-    let fileSaveName = filename;
+    let fileSaveName = sanitizeName(filename);
     const count = 1;
     while (
         usedFileNamesInCollection &&
         usedFileNamesInCollection.has(fileSaveName)
     ) {
-        fileSaveName = filename + `(${count})`;
+        fileSaveName = sanitizeName(filename) + `(${count})`;
     }
     return fileSaveName;
 };
 
-export const sanitizeName = (name: string) => {
-    return name.replaceAll('/', '_').replaceAll(' ', '_');
-};
+export const getFileMetadataSavePath = (
+    collectionFolderPath: string,
+    fileSaveName: string
+) => `${collectionFolderPath}/${METADATA_FOLDER_NAME}/${fileSaveName}.json`;
+
+export const getFileSavePath = (
+    collectionFolderPath: string,
+    fileSaveName: string
+) => `${collectionFolderPath}/${fileSaveName}`;
+
+export const sanitizeName = (name: string) =>
+    name.replaceAll('/', '_').replaceAll(' ', '_');
+
+export const getOldCollectionFolderPath = (
+    dir: string,
+    collection: Collection
+) => `${dir}/${collection.id}_${sanitizeName(collection.name)}`;
+
+export const getOldFileSavePath = (collectionFolderPath: string, file: File) =>
+    `${collectionFolderPath}/${file.id}_${sanitizeName(file.metadata.title)}`;
+
+export const getOldFileMetadataSavePath = (
+    collectionFolderPath: string,
+    file: File
+) =>
+    `${collectionFolderPath}/${METADATA_FOLDER_NAME}/${file.id}_${sanitizeName(
+        file.metadata.title
+    )}.json`;
