@@ -42,10 +42,10 @@ export async function updateFileModifyDateInEXIF(
             'data:image/jpeg;base64' +
             imageDataURL.slice(imageDataURL.indexOf(','));
         const exifObj = piexif.load(imageDataURL);
-        if (!exifObj['0th']) {
-            exifObj['0th'] = {};
+        if (!exifObj['Exif']) {
+            exifObj['Exif'] = {};
         }
-        exifObj['0th'][piexif.ImageIFD.DateTime] =
+        exifObj['Exif'][piexif.ExifIFD.DateTimeOriginal] =
             convertToExifDateFormat(updatedDate);
 
         const exifBytes = piexif.dump(exifObj);
