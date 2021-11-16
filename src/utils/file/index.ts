@@ -16,6 +16,7 @@ import { logError } from 'utils/sentry';
 import { User } from 'services/userService';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { updateFileModifyDateInEXIF } from 'services/upload/exifService';
 
 export const TYPE_HEIC = 'heic';
 export const TYPE_HEIF = 'heif';
@@ -42,7 +43,13 @@ export function downloadAsFile(filename: string, content: string) {
 export async function downloadFile(file) {
     const a = document.createElement('a');
     a.style.display = 'none';
-    a.href = await DownloadManger.getFile(file);
+    const fileURL = await DownloadManger.getFile(file);
+    const fileBlob = await (await fetch(fileURL)).blob();
+    const updatedFileBlob = await updateFileModifyDateInEXIF(
+        fileBlob,
+        new Date(file.pubMagicMetadata.data.editedTime / 1000)
+    );
+    a.href = URL.createObjectURL(updatedFileBlob);
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         a.download = fileNameWithoutExtension(file.metadata.title) + '.zip';
     } else {
