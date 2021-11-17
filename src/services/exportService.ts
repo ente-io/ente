@@ -485,10 +485,6 @@ class ExportService {
                 oldCollectionFolderPath,
                 newCollectionFolderPath
             );
-            await this.ElectronAPIs.checkExistsAndRename(
-                `${oldCollectionFolderPath}/${METADATA_FOLDER_NAME}/`,
-                `${newCollectionFolderPath}/${METADATA_FOLDER_NAME}`
-            );
         }
     }
 
