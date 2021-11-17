@@ -531,6 +531,7 @@ export default function Gallery() {
     const fixTimeHelper = async () => {
         const selectedFiles = getSelectedFiles(selected, files);
         setFixCreationTimeAttributes({ files: selectedFiles });
+        clearSelection();
     };
 
     return (
