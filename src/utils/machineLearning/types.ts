@@ -8,6 +8,7 @@ import {
 import { DebugInfo } from 'hdbscan';
 
 import { Point, RawNodeDatum } from 'react-d3-tree/lib/types/common';
+import { Box } from 'face-api.js/build/es6/classes';
 
 export interface MLSyncResult {
     allFaces: FaceWithEmbedding[];
@@ -17,7 +18,7 @@ export interface MLSyncResult {
 }
 
 export interface AlignedFace extends NormalizedFace {
-    alignedBox: [number, number, number, number];
+    alignedBox: Box;
 }
 
 export declare type FaceEmbedding = Array<number>;
@@ -39,7 +40,7 @@ export declare type ClusterFaces = Array<number>;
 
 export interface Cluster {
     faces: ClusterFaces;
-    summary: FaceDescriptor;
+    summary?: FaceDescriptor;
 }
 
 export interface ClustersWithNoise {
@@ -63,9 +64,9 @@ export interface NearestCluster {
 
 export interface FaceWithEmbedding {
     fileId: string;
-    face: FaceApiResult;
-    // face: AlignedFace;
-    // embedding: FaceEmbedding;
+    // face: FaceApiResult;
+    face: AlignedFace;
+    embedding: FaceEmbedding;
     faceImage: FaceImage;
 }
 

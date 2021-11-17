@@ -3,16 +3,16 @@ import DownloadManager from 'services/downloadManager';
 
 import * as tf from '@tensorflow/tfjs-core';
 import TSNE from 'tsne-js';
-// import { setWasmPaths } from '@tensorflow/tfjs-backend-wasm';
+import '@tensorflow/tfjs-backend-webgl';
+import '@tensorflow/tfjs-backend-wasm';
+import { setWasmPaths } from '@tensorflow/tfjs-backend-wasm';
+import '@tensorflow/tfjs-backend-cpu';
 
-// import TFJSFaceDetectionService from './tfjsFaceDetectionService';
+import TFJSFaceDetectionService from './tfjsFaceDetectionService';
 // import TFJSFaceEmbeddingService from './tfjsFaceEmbeddingService';
 import {
     Cluster,
-    ClusterFaces,
     ClustersWithNoise,
-    FaceApiResult,
-    FaceDescriptor,
     FaceImage,
     FaceWithEmbedding,
     HdbscanResults,
@@ -25,22 +25,28 @@ import * as jpeg from 'jpeg-js';
 import ClusteringService from './clusteringService';
 
 import './faceEnvPatch';
-import * as faceapi from 'face-api.js';
-import { euclideanDistance, SsdMobilenetv1Options } from 'face-api.js';
-import { f32Average } from 'utils/machineLearning';
+import FAPIFaceEmbeddingService from './fapiFaceEmbeddingService';
+import FAPIFaceLandmarksService from './fapiFaceLandmarksService';
+// import * as faceapi from 'face-api.js';
+import { euclideanDistance } from 'face-api.js';
 import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
 import { TreeNode } from 'hdbscan';
+import { Box } from 'face-api.js/build/es6/classes';
+import { extractFaces } from 'utils/machineLearning';
 
 class MachineLearningService {
-    // private faceDetectionService: TFJSFaceDetectionService;
+    private faceDetectionService: TFJSFaceDetectionService;
+    private faceLandmarkService: FAPIFaceLandmarksService;
     // private faceEmbeddingService: TFJSFaceEmbeddingService;
+    private faceEmbeddingService: FAPIFaceEmbeddingService;
     private clusteringService: ClusteringService;
 
     private clusterFaceDistance = 0.4;
     private maxFaceDistance = 0.5;
     private minClusterSize = 5;
-    private minFaceSize = 24;
+    private minFaceSize = 32;
     private batchSize = 200;
+    private mlFaceSize = 112;
 
     private allFaces: FaceWithEmbedding[];
     private clusteringResults: HdbscanResults;
@@ -48,8 +54,16 @@ class MachineLearningService {
     private allFaceImages: FaceImage[];
 
     public constructor() {
-        // this.faceDetectionService = new TFJSFaceDetectionService();
+        this.faceDetectionService = new TFJSFaceDetectionService(
+            this.mlFaceSize
+        );
+        this.faceLandmarkService = new FAPIFaceLandmarksService(
+            this.mlFaceSize
+        );
         // this.faceEmbeddingService = new TFJSFaceEmbeddingService();
+        this.faceEmbeddingService = new FAPIFaceEmbeddingService(
+            this.mlFaceSize
+        );
         this.clusteringService = new ClusteringService();
 
         this.allFaces = [];
@@ -77,33 +91,34 @@ class MachineLearningService {
         this.batchSize = batchSize;
         this.maxFaceDistance = maxFaceDistance;
 
-        // setWasmPath('/js/tfjs/');
+        setWasmPaths('/js/tfjs/');
         await tf.ready();
 
-        // await this.faceDetectionService.init();
-        // await this.faceEmbeddingService.init();
         console.log('01 TF Memory stats: ', tf.memory());
-        await faceapi.nets.ssdMobilenetv1.loadFromUri('/models/face-api/');
-        // console.log('02 TF Memory stats: ', tf.memory());
-        await faceapi.nets.faceLandmark68Net.loadFromUri('/models/face-api/');
-        // console.log('03 TF Memory stats: ', tf.memory());
-        await faceapi.nets.faceRecognitionNet.loadFromUri('/models/face-api/');
+        await this.faceDetectionService.init();
+        // await faceapi.nets.ssdMobilenetv1.loadFromUri('/models/face-api/');
+        // // console.log('02 TF Memory stats: ', tf.memory());
+        await this.faceLandmarkService.init();
+        // await faceapi.nets.faceLandmark68Net.loadFromUri('/models/face-api/');
+        // // console.log('03 TF Memory stats: ', tf.memory());
+        await this.faceEmbeddingService.init();
+        // await faceapi.nets.faceRecognitionNet.loadFromUri('/models/face-api/');
         console.log('04 TF Memory stats: ', tf.memory());
     }
 
-    private getClusterSummary(cluster: ClusterFaces): FaceDescriptor {
-        // const faceScore = (f) => f.detection.score; // f.alignedRect.box.width *
+    // private getClusterSummary(cluster: ClusterFaces): FaceDescriptor {
+    //     // const faceScore = (f) => f.detection.score; // f.alignedRect.box.width *
 
-        // return cluster
-        //     .map((f) => this.allFaces[f].face)
-        //     .sort((f1, f2) => faceScore(f2) - faceScore(f1))[0].descriptor;
+    //     // return cluster
+    //     //     .map((f) => this.allFaces[f].face)
+    //     //     .sort((f1, f2) => faceScore(f2) - faceScore(f1))[0].descriptor;
 
-        const descriptors = cluster.map(
-            (f) => this.allFaces[f].face.descriptor
-        );
+    //     const descriptors = cluster.map(
+    //         (f) => this.allFaces[f].embedding
+    //     );
 
-        return f32Average(descriptors);
-    }
+    //     return f32Average(descriptors);
+    // }
 
     private updateClusterSummaries() {
         if (
@@ -119,7 +134,7 @@ class MachineLearningService {
         resultClusters.forEach((resultCluster) => {
             this.clustersWithNoise.clusters.push({
                 faces: resultCluster,
-                summary: this.getClusterSummary(resultCluster),
+                // summary: this.getClusterSummary(resultCluster),
             });
         });
     }
@@ -128,7 +143,7 @@ class MachineLearningService {
         let nearest: Cluster = null;
         let nearestDist = 100000;
         this.clustersWithNoise.clusters.forEach((c) => {
-            const dist = euclideanDistance(noise.face.descriptor, c.summary);
+            const dist = euclideanDistance(noise.embedding, c.summary);
             if (dist < nearestDist) {
                 nearestDist = dist;
                 nearest = c;
@@ -217,11 +232,12 @@ class MachineLearningService {
         console.log('allFaces: ', this.allFaces);
         // console.log('allDescriptors: ', this.allFaces.map(f => Array.from(f.face.descriptor)));
 
-        faceapi.nets.ssdMobilenetv1.dispose();
-        // console.log('11 TF Memory stats: ', tf.memory());
-        await faceapi.nets.faceLandmark68Net.dispose();
-        // console.log('12 TF Memory stats: ', tf.memory());
-        await faceapi.nets.faceRecognitionNet.dispose();
+        await this.faceDetectionService.dispose();
+        // faceapi.nets.ssdMobilenetv1.dispose();
+        // // console.log('11 TF Memory stats: ', tf.memory());
+        await this.faceLandmarkService.dispose();
+        // // console.log('12 TF Memory stats: ', tf.memory());
+        await this.faceEmbeddingService.dispose();
         console.log('13 TF Memory stats: ', tf.memory());
 
         // [0].alignedRect,
@@ -235,7 +251,7 @@ class MachineLearningService {
         // );
 
         this.clusteringResults = this.clusteringService.clusterUsingHdbscan({
-            input: this.allFaces.map((f) => Array.from(f.face.descriptor)),
+            input: this.allFaces.map((f) => Array.from(f.embedding)),
             minClusterSize: this.minClusterSize,
             debug: true,
         });
@@ -287,7 +303,7 @@ class MachineLearningService {
     }
 
     private toTSNE() {
-        const input = this.allFaces.map((f) => Array.from(f.face.descriptor));
+        const input = this.allFaces.map((f) => Array.from(f.embedding));
         if (!input || input.length < 1) {
             return null;
         }
@@ -347,66 +363,90 @@ class MachineLearningService {
         // console.log('1 TF Memory stats: ', tf.memory());
         const tfImage = tf.browser.fromPixels(decodedImg);
         // console.log('2 TF Memory stats: ', tf.memory());
-        // const faces = await this.faceDetectionService.estimateFaces(tfImage);
-
-        // const embeddingResults = await this.faceEmbeddingService.getEmbeddings(
-        //     tfImage,
-        //     filtertedFaces
-        // );
+        const faces = await this.faceDetectionService.estimateFaces(tfImage);
 
         // console.log('3 TF Memory stats: ', tf.memory());
         // const faceApiInput = tfImage.expandDims(0) as tf.Tensor4D;
         // tf.dispose(tfImage);
         // console.log('4 TF Memory stats: ', tf.memory());
-        const faces = (await faceapi
-            .detectAllFaces(
-                tfImage as any,
-                new SsdMobilenetv1Options({
-                    minConfidence: 0.75,
-                    // maxResults: 10
-                })
-            )
-            .withFaceLandmarks()
-            .withFaceDescriptors()) as FaceApiResult[];
+        // const faces = (await faceapi
+        //     .detectAllFaces(
+        //         tfImage as any,
+        //         new SsdMobilenetv1Options({
+        //             minConfidence: 0.75,
+        //             // maxResults: 10
+        //         })
+        //     )
+        //     .withFaceLandmarks()
+        //     .withFaceDescriptors()) as FaceApiResult[];
 
         // console.log('5 TF Memory stats: ', tf.memory());
 
-        const filtertedFaces = faces.filter((face) => {
+        let filtertedFaces = faces.filter((face) => {
             return (
-                face.alignedRect.box.width > this.minFaceSize // &&
-                // face.alignedBox[3] - face.alignedBox[1] > this.minFacePixels
+                // face.alignedRect.box.width > this.minFaceSize // &&
+                // face.alignedBox[3] - face.alignedBox[1] > this.minFaceSize
+                face.alignedBox.width > this.minFaceSize
             );
         });
         console.log('filtertedFaces: ', filtertedFaces);
 
-        // const embeddings = results.map(f=>f.descriptor);
-        // console.log('embeddings', embeddings);
+        const landmarks = await this.faceLandmarkService.detectLandmarks(
+            tfImage,
+            filtertedFaces
+        );
+        // console.log('5 TF Memory stats: ', tf.memory());
+
+        const alignedBoxes = landmarks
+            .map((l) => l.align())
+            .map((a) => a.rescale(1 / this.mlFaceSize));
+
+        filtertedFaces.forEach((face, i) => {
+            const f = face.alignedBox;
+            const alignedBox = alignedBoxes[i];
+            face.alignedBox = new Box({
+                left: f.left + alignedBox.left * f.width,
+                top: f.top + alignedBox.top * f.height,
+                right: f.right - (1 - alignedBox.right) * f.width,
+                bottom: f.bottom - (1 - alignedBox.bottom) * f.height,
+            });
+        });
+
+        filtertedFaces = filtertedFaces.filter(
+            (f) => f.alignedBox.width > this.minFaceSize
+        );
+
+        console.log(
+            'landmarks: ',
+            landmarks,
+            'filtertedFaces: ',
+            filtertedFaces
+        );
+
+        const embeddingResults = await this.faceEmbeddingService.getEmbeddings(
+            tfImage,
+            filtertedFaces
+        );
+        // console.log('6 TF Memory stats: ', tf.memory());
+        const embeddings = embeddingResults.embeddings;
+        console.log('embeddings', embeddings);
+
         let faceImages = [];
         if (filtertedFaces && filtertedFaces.length > 0) {
-            const faceBoxes = filtertedFaces
-                .map((f) => f.alignedRect.relativeBox)
-                .map((b) => [b.top, b.left, b.bottom, b.right]);
             const faceImagesTensor = tf.tidy(() => {
-                // const tfImage = tf.browser.fromPixels(decodedImg);
-                const faceApiInput = tfImage.expandDims(0) as tf.Tensor4D;
                 const normalizedImage = tf.sub(
-                    tf.div(faceApiInput, 127.5),
+                    tf.div(tfImage, 127.5),
                     1.0
-                ) as tf.Tensor4D;
-                // console.log('6 TF Memory stats: ', tf.memory());
-                return tf.image.cropAndResize(
+                ) as tf.Tensor3D;
+                return extractFaces(
                     normalizedImage,
-                    faceBoxes,
-                    tf.fill([faceBoxes.length], 0, 'int32'),
-                    [112, 112]
+                    filtertedFaces.map((f) => f.alignedBox),
+                    112
                 );
             });
-            // console.log('7 TF Memory stats: ', tf.memory());
             faceImages = await faceImagesTensor.array();
-            // console.log(JSON.stringify(results));
-            // tf.dispose(normalizedImage);
             tf.dispose(faceImagesTensor);
-            // tf.dispose(faceApiInput);
+            // console.log('7 TF Memory stats: ', tf.memory());
         }
 
         tf.dispose(tfImage);
@@ -416,6 +456,7 @@ class MachineLearningService {
             return {
                 fileId: file.id.toString(),
                 face: ff,
+                embedding: embeddings[index],
                 faceImage: faceImages[index],
             } as FaceWithEmbedding;
         });

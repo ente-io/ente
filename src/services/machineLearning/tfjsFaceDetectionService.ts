@@ -3,19 +3,22 @@ import {
     BlazeFaceModel,
     NormalizedFace,
 } from '@tensorflow-models/blazeface';
-import * as tf from '@tensorflow/tfjs';
+import * as tf from '@tensorflow/tfjs-core';
+import { GraphModel } from '@tensorflow/tfjs';
 import { AlignedFace } from 'utils/machineLearning/types';
+import { Box } from 'face-api.js/build/es6/classes';
 
 class TFJSFaceDetectionService {
     private blazeFaceModel: BlazeFaceModel;
-    private blazeFaceBackModel: tf.GraphModel;
+    private blazeFaceBackModel: GraphModel;
 
-    private desiredLeftEye = [0.3, 0.4];
-    private desiredFaceWidth = 112;
-    private desiredFaceHeight = 112;
-    private minFacePixels = 50;
+    private desiredLeftEye = [0.36, 0.45];
+    private desiredFaceSize;
+    // private desiredFaceHeight = 112;
 
-    public constructor() {}
+    public constructor(desiredFaceSize: number = 112) {
+        this.desiredFaceSize = desiredFaceSize;
+    }
 
     public async init() {
         this.blazeFaceModel = await blazeFaceLoad({
@@ -57,14 +60,19 @@ class TFJSFaceDetectionService {
             (leftEyeCenter[1] + rightEyeCenter[1] + mountCenter[1]) / 3,
         ];
 
-        const sx = center[0] - relX * size;
-        const sy = center[1] - relY * size;
-        const ex = center[0] + relX * size;
-        const ey = center[1] + relY * size;
+        const left = center[0] - relX * size;
+        const top = center[1] - relY * size;
+        const right = center[0] + relX * size;
+        const bottom = center[1] + relY * size;
 
         return {
             ...normFace,
-            alignedBox: [sx, sy, ex, ey],
+            alignedBox: new Box({
+                left: left,
+                top: top,
+                right: right,
+                bottom: bottom,
+            }),
         };
     }
 
@@ -82,7 +90,7 @@ class TFJSFaceDetectionService {
         // const yaw = Math.abs(noseTip[0] - eyesCenterX)
         const dist = Math.sqrt(dx * dx + dy * dy);
         let desiredDist = desiredRightEyeX - this.desiredLeftEye[0];
-        desiredDist *= this.desiredFaceWidth;
+        desiredDist *= this.desiredFaceSize;
         const scale = desiredDist / dist;
         // console.log("scale: ", scale);
 
@@ -91,8 +99,8 @@ class TFJSFaceDetectionService {
         eyesCenter[1] = Math.floor((leftEye[1] + rightEye[1]) / 2);
         // console.log("eyesCenter: ", eyesCenter);
 
-        const faceWidth = this.desiredFaceWidth / scale;
-        const faceHeight = this.desiredFaceHeight / scale;
+        const faceWidth = this.desiredFaceSize / scale;
+        const faceHeight = this.desiredFaceSize / scale;
         // console.log("faceWidth: ", faceWidth, "faceHeight: ", faceHeight)
 
         const tx = eyesCenter[0] - faceWidth * 0.5;
@@ -101,7 +109,12 @@ class TFJSFaceDetectionService {
 
         return {
             ...normFace,
-            alignedBox: [tx, ty, tx + faceWidth, ty + faceHeight],
+            alignedBox: new Box({
+                left: tx,
+                top: ty,
+                right: tx + faceWidth,
+                bottom: ty + faceHeight,
+            }),
         };
     }
 
@@ -120,19 +133,16 @@ class TFJSFaceDetectionService {
     }
 
     public async estimateFaces(image: tf.Tensor3D) {
-        const normalizedFaces = await this.blazeFaceModel.estimateFaces(
-            image as any
-        );
+        const normalizedFaces = await this.blazeFaceModel.estimateFaces(image);
         const alignedFaces = normalizedFaces.map((normFace) =>
-            this.getDlibAlignedFace(normFace)
+            this.getAlignedFace(normFace)
         );
-        const filtertedFaces = alignedFaces.filter((face) => {
-            return (
-                face.alignedBox[2] - face.alignedBox[0] > this.minFacePixels &&
-                face.alignedBox[3] - face.alignedBox[1] > this.minFacePixels
-            );
-        });
-        return filtertedFaces;
+
+        return alignedFaces;
+    }
+
+    public async dispose() {
+        this.blazeFaceModel.dispose();
     }
 }
 
