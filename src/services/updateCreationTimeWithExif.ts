@@ -23,13 +23,13 @@ export async function updateCreationTimeWithExif(
         setProgressTracker({ current: 0, total: filesToBeUpdated.length });
         for (const [index, file] of filesToBeUpdated.entries()) {
             try {
+                if (file.metadata.fileType !== FILE_TYPE.IMAGE) {
+                    continue;
+                }
                 const fileURL = await downloadManager.getFile(file);
                 const fileObject = await getFileFromURL(fileURL);
                 const worker = await new CryptoWorker();
                 const fileTypeInfo = await getFileType(worker, fileObject);
-                if (file.metadata.fileType !== FILE_TYPE.IMAGE) {
-                    continue;
-                }
                 const exifData = await getExifData(fileObject, fileTypeInfo);
                 if (
                     exifData?.creationTime &&
