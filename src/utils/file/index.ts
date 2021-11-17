@@ -438,3 +438,9 @@ export function updateExistingFilePubMetadata(
     existingFile.pubMagicMetadata = updatedFile.pubMagicMetadata;
     existingFile.metadata = mergeMetadata([existingFile])[0].metadata;
 }
+
+export async function getFileFromURL(fileURL: string) {
+    const fileBlob = await (await fetch(fileURL)).blob();
+    const fileFile = new globalThis.File([fileBlob], 'temp');
+    return fileFile;
+}

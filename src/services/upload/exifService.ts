@@ -1,6 +1,8 @@
 import exifr from 'exifr';
+import { logError } from 'utils/sentry';
 
 import { NULL_LOCATION, Location } from './metadataService';
+import { FileTypeInfo } from './readFileService';
 
 const EXIF_TAGS_NEEDED = [
     'DateTimeOriginal',
@@ -17,9 +19,18 @@ interface ParsedEXIFData {
 }
 
 export async function getExifData(
-    receivedFile: globalThis.File
+    receivedFile: globalThis.File,
+    fileTypeInfo: FileTypeInfo
 ): Promise<ParsedEXIFData> {
-    const exifData = await exifr.parse(receivedFile, EXIF_TAGS_NEEDED);
+    let exifData;
+    try {
+        exifData = await exifr.parse(receivedFile, EXIF_TAGS_NEEDED);
+    } catch (e) {
+        logError(e, 'file missing exif data ', {
+            fileType: fileTypeInfo.exactType,
+        });
+        // ignore exif parsing errors
+    }
     if (!exifData) {
         return { location: NULL_LOCATION, creationTime: null };
     }

@@ -28,6 +28,8 @@ const ENDPOINT = getEndpoint();
 
 const HAS_SET_KEYS = 'hasSetKeys';
 
+export const FIX_CREATION_TIME_USER_ID = 341;
+
 export interface User {
     id: number;
     name: string;

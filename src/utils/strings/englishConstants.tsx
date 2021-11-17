@@ -579,8 +579,8 @@ const englishConstants = {
     SORT_BY_COLLECTION_NAME: 'album name',
     FIX_LARGE_THUMBNAILS: 'compress thumbnails',
     THUMBNAIL_REPLACED: 'thumbnails compressed',
-    FIX: 'compress',
-    FIX_LATER: 'compress later',
+    FIX_THUMBNAIL: 'compress',
+    FIX_THUMBNAIL_LATER: 'compress later',
     REPLACE_THUMBNAIL_NOT_STARTED: () => (
         <>
             some of your videos thumbnails can be compressed to save space.
@@ -595,6 +595,18 @@ const englishConstants = {
     ),
     REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR: () => (
         <>could not compress some of your thumbnails, please retry</>
+    ),
+    FIX_CREATION_TIME: 'fix time',
+    FIX_CREATION_TIME_IN_PROGRESS: 'fixing time',
+    CREATION_TIME_UPDATED: `file time updated`,
+
+    UPDATE_CREATION_TIME_NOT_STARTED: () => (
+        <>do you want to fix time with the values found in EXIF</>
+    ),
+    UPDATE_CREATION_TIME_COMPLETED: () => <>successfully updated all files</>,
+
+    UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR: () => (
+        <>file time updation failed for some files, please retry</>
     ),
     FILE_NAME_CHARACTER_LIMIT: '100 characters max',
 };
