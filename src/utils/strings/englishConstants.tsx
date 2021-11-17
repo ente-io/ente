@@ -597,17 +597,17 @@ const englishConstants = {
         <>could not compress some of your thumbnails, please retry</>
     ),
     FIX_CREATION_TIME: 'fix time',
+    FIX_CREATION_TIME_IN_PROGRESS: 'fixing time',
     CREATION_TIME_UPDATED: `file time updated`,
 
     UPDATE_CREATION_TIME_NOT_STARTED: () => (
-        <>update file time with values from EXIF</>
+        <>do you want to fix time with the values found in EXIF</>
     ),
     UPDATE_CREATION_TIME_COMPLETED: () => <>successfully updated all files</>,
 
     UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR: () => (
         <>file time updation failed for some files, please retry</>
     ),
-    FIX_CREATION_TIME_LATER: 'update later',
     FILE_NAME_CHARACTER_LIMIT: '100 characters max',
 };
 
