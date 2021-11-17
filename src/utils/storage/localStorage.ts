@@ -13,7 +13,6 @@ export enum LS_KEYS {
     EXPORT = 'export',
     AnonymizeUserID = 'anonymizedUserID',
     THUMBNAIL_FIX_STATE = 'thumbnailFixState',
-    CREATION_TIME_FIX_STATE = 'creationTimeFixState',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {
