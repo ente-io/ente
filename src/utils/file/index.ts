@@ -16,7 +16,7 @@ import { logError } from 'utils/sentry';
 import { User } from 'services/userService';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { updateFileModifyDateInEXIF } from 'services/upload/exifService';
+import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
 
 export const TYPE_HEIC = 'heic';
 export const TYPE_HEIF = 'heif';
@@ -45,7 +45,7 @@ export async function downloadFile(file) {
     a.style.display = 'none';
     const fileURL = await DownloadManger.getFile(file);
     const fileBlob = await (await fetch(fileURL)).blob();
-    const updatedFileBlob = await updateFileModifyDateInEXIF(
+    const updatedFileBlob = await updateFileCreationDateInEXIF(
         fileBlob,
         new Date(file.pubMagicMetadata.data.editedTime / 1000)
     );
