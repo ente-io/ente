@@ -1,5 +1,6 @@
 import { createBrowserEnv } from './createBrowserEnv';
 import { createFileSystem } from './createFileSystem';
+import { createWorkerEnv } from './createWorkerEnv';
 import { isBrowser } from './isBrowser';
 import { isNodejs } from './isNodejs';
 import { Environment } from './types';
@@ -17,10 +18,16 @@ function setEnv(env: Environment) {
   environment = env
 }
 
+function isWorker() {
+  return typeof importScripts === 'function'
+}
+
 function initialize() {
   // check for isBrowser() first to prevent electron renderer process
   // to be initialized with wrong environment due to isNodejs() returning true
-  if (isBrowser()) {
+  if (isWorker()) {
+    setEnv(createWorkerEnv())
+  } else if (isBrowser()) {
     setEnv(createBrowserEnv())
   }
 }

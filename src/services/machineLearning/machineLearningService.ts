@@ -24,7 +24,7 @@ import {
 import * as jpeg from 'jpeg-js';
 import ClusteringService from './clusteringService';
 
-import './faceEnvPatch';
+// import './faceEnvPatch';
 import FAPIFaceEmbeddingService from './fapiFaceEmbeddingService';
 import FAPIFaceLandmarksService from './fapiFaceLandmarksService';
 // import * as faceapi from 'face-api.js';
