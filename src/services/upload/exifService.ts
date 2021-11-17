@@ -31,7 +31,7 @@ export async function getExifData(
     return parsedEXIFData;
 }
 
-export async function updateFileModifyDateInEXIF(
+export async function updateFileCreationDateInEXIF(
     fileBlob: Blob,
     updatedDate: Date
 ) {

@@ -35,7 +35,7 @@ import {
     TYPE_JPG,
 } from 'utils/file';
 import { User } from './userService';
-import { updateFileModifyDateInEXIF } from './upload/exifService';
+import { updateFileCreationDateInEXIF } from './upload/exifService';
 import { MetadataObject } from './upload/uploadService';
 
 export interface ExportProgress {
@@ -374,7 +374,7 @@ class ExportService {
             (fileType === TYPE_JPEG || fileType === TYPE_JPG)
         ) {
             const fileBlob = await new Response(fileStream).blob();
-            const updatedFileBlob = await updateFileModifyDateInEXIF(
+            const updatedFileBlob = await updateFileCreationDateInEXIF(
                 fileBlob,
                 new Date(file.pubMagicMetadata.data.editedTime / 1000)
             );
