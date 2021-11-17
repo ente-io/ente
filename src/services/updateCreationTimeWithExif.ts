@@ -6,20 +6,10 @@ import {
     updateExistingFilePubMetadata,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
-import localForage from 'utils/storage/localForage';
 import downloadManager from './downloadManager';
 import { File, FILE_TYPE, updatePublicMagicMetadata } from './fileService';
 import { getExifData } from './upload/exifService';
 import { getFileType } from './upload/readFileService';
-
-const CREATION_TIME_UPDATED_FILES_TABLE = 'creation-time-updated-file-table';
-
-export async function setCreationTimeUpdatedFiles(creationTimeUpdatedFiles) {
-    return await localForage.setItem<number[]>(
-        CREATION_TIME_UPDATED_FILES_TABLE,
-        creationTimeUpdatedFiles
-    );
-}
 
 export async function updateCreationTimeWithExif(
     filesToBeUpdated: File[],
