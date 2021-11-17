@@ -171,6 +171,16 @@ const SelectedFileOptions = ({
                 </>
             ) : (
                 <>
+                    <IconWithMessage message={constants.FIX_CREATION_TIME}>
+                        <IconButton onClick={fixTimeHelper}>
+                            <ClockIcon />
+                        </IconButton>
+                    </IconWithMessage>
+                    <IconWithMessage message={constants.ADD}>
+                        <IconButton onClick={addToCollection}>
+                            <AddIcon />
+                        </IconButton>
+                    </IconWithMessage>
                     {activeCollection === ARCHIVE_SECTION && (
                         <IconWithMessage message={constants.UNARCHIVE}>
                             <IconButton onClick={unArchiveFilesHelper}>
@@ -185,11 +195,7 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </IconWithMessage>
                     )}
-                    <IconWithMessage message={constants.ADD}>
-                        <IconButton onClick={addToCollection}>
-                            <AddIcon />
-                        </IconButton>
-                    </IconWithMessage>
+
                     {activeCollection !== ALL_SECTION &&
                         activeCollection !== ARCHIVE_SECTION &&
                         !isFavoriteCollection && (
@@ -211,11 +217,6 @@ const SelectedFileOptions = ({
                     <IconWithMessage message={constants.DELETE}>
                         <IconButton onClick={trashHandler}>
                             <DeleteIcon />
-                        </IconButton>
-                    </IconWithMessage>
-                    <IconWithMessage message={constants.FIX_CREATION_TIME}>
-                        <IconButton onClick={fixTimeHelper}>
-                            <ClockIcon />
                         </IconButton>
                     </IconWithMessage>
                 </>
