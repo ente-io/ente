@@ -1,5 +1,5 @@
 import { SetDialogMessage } from 'components/MessageDialog';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
 import styled from 'styled-components';
 import Navbar from 'components/Navbar';
@@ -18,6 +18,8 @@ import { Collection } from 'services/collectionService';
 import RemoveIcon from 'components/icons/RemoveIcon';
 import RestoreIcon from 'components/icons/RestoreIcon';
 import ClockIcon from 'components/icons/ClockIcon';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { FIX_CREATION_TIME_USER_ID, User } from 'services/userService';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
@@ -81,6 +83,12 @@ const SelectedFileOptions = ({
     activeCollection,
     isFavoriteCollection,
 }: Props) => {
+    const [showFixCreationTime, setShowFixCreationTime] = useState(false);
+    useEffect(() => {
+        const user: User = getData(LS_KEYS.USER);
+        const showFixCreationTime = user?.id === FIX_CREATION_TIME_USER_ID;
+        setShowFixCreationTime(showFixCreationTime);
+    }, []);
     const addToCollection = () =>
         setCollectionSelectorAttributes({
             callback: addToCollectionHelper,
@@ -171,11 +179,13 @@ const SelectedFileOptions = ({
                 </>
             ) : (
                 <>
-                    <IconWithMessage message={constants.FIX_CREATION_TIME}>
-                        <IconButton onClick={fixTimeHelper}>
-                            <ClockIcon />
-                        </IconButton>
-                    </IconWithMessage>
+                    {showFixCreationTime && (
+                        <IconWithMessage message={constants.FIX_CREATION_TIME}>
+                            <IconButton onClick={fixTimeHelper}>
+                                <ClockIcon />
+                            </IconButton>
+                        </IconWithMessage>
+                    )}
                     <IconWithMessage message={constants.ADD}>
                         <IconButton onClick={addToCollection}>
                             <AddIcon />
