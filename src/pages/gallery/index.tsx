@@ -249,12 +249,18 @@ export default function Gallery() {
     useEffect(() => setDialogView(true), [dialogMessage]);
 
     useEffect(
-        () => setCollectionSelectorView(true),
+        () => collectionSelectorAttributes && setCollectionSelectorView(true),
         [collectionSelectorAttributes]
     );
 
-    useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
-    useEffect(() => setFixCreationTimeView(true), [fixCreationTimeAttributes]);
+    useEffect(
+        () => collectionNamerAttributes && setCollectionNamerView(true),
+        [collectionNamerAttributes]
+    );
+    useEffect(
+        () => fixCreationTimeAttributes && setFixCreationTimeView(true),
+        [fixCreationTimeAttributes]
+    );
 
     useEffect(() => {
         if (typeof activeCollection === 'undefined') {
