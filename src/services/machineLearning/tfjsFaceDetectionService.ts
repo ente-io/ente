@@ -6,7 +6,7 @@ import {
 import * as tf from '@tensorflow/tfjs-core';
 import { GraphModel } from '@tensorflow/tfjs';
 import { AlignedFace } from 'utils/machineLearning/types';
-import { Box } from 'face-api.js/build/es6/classes';
+import { Box } from '../../../thirdparty/face-api/classes';
 
 class TFJSFaceDetectionService {
     private blazeFaceModel: BlazeFaceModel;

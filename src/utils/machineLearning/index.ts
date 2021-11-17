@@ -1,5 +1,5 @@
 import * as tf from '@tensorflow/tfjs-core';
-import { Box } from 'face-api.js/build/es6';
+import { Box } from '../../../thirdparty/face-api/classes';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {

@@ -28,11 +28,11 @@ import './faceEnvPatch';
 import FAPIFaceEmbeddingService from './fapiFaceEmbeddingService';
 import FAPIFaceLandmarksService from './fapiFaceLandmarksService';
 // import * as faceapi from 'face-api.js';
-import { euclideanDistance } from 'face-api.js';
 import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
 import { TreeNode } from 'hdbscan';
-import { Box } from 'face-api.js/build/es6/classes';
 import { extractFaces } from 'utils/machineLearning';
+import { Box } from '../../../thirdparty/face-api/classes';
+import { euclideanDistance } from '../../../thirdparty/face-api/euclideanDistance';
 
 class MachineLearningService {
     private faceDetectionService: TFJSFaceDetectionService;

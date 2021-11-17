@@ -2,8 +2,8 @@ import * as tf from '@tensorflow/tfjs-core';
 import { gather } from '@tensorflow/tfjs';
 import { extractFaces } from 'utils/machineLearning';
 import { AlignedFace } from 'utils/machineLearning/types';
-import { FaceLandmarks68 } from 'face-api.js/build/es6/classes';
-import { FaceLandmark68Net } from 'face-api.js/build/es6/faceLandmarkNet';
+import { FaceLandmarks68 } from '../../../thirdparty/face-api/classes';
+import { FaceLandmark68Net } from '../../../thirdparty/face-api/faceLandmarkNet';
 
 class FAPIFaceLandmarksService {
     private faceLandmarkNet: FaceLandmark68Net;

@@ -2,7 +2,7 @@ import * as tf from '@tensorflow/tfjs-core';
 import { gather } from '@tensorflow/tfjs';
 import { extractFaces } from 'utils/machineLearning';
 import { AlignedFace, FaceEmbedding } from 'utils/machineLearning/types';
-import { FaceRecognitionNet } from 'face-api.js/build/es6/faceRecognitionNet';
+import { FaceRecognitionNet } from '../../../thirdparty/face-api/faceRecognitionNet';
 
 class FAPIFaceEmbeddingService {
     private faceRecognitionNet: FaceRecognitionNet;
