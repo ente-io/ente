@@ -14,6 +14,7 @@ import {
     getFileSavePath,
     getOldFileMetadataSavePath,
     getExportedFiles,
+    getMetadataFolderPath,
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
@@ -221,7 +222,7 @@ class ExportService {
                     collectionFolderPath
                 );
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
-                    `${collectionFolderPath}/${METADATA_FOLDER_NAME}`
+                    getMetadataFolderPath(collectionFolderPath)
                 );
             }
             for (const [index, file] of files.entries()) {
