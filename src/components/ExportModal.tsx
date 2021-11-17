@@ -167,7 +167,7 @@ export default function ExportModal(props: Props) {
 
     const updateExportTime = (newTime: number) => {
         setLastExportTime(newTime);
-        exportService.updateExportRecord({ time: newTime });
+        exportService.updateExportRecord({ lastAttemptTimestamp: newTime });
     };
 
     const updateExportProgress = (newProgress: ExportProgress) => {
