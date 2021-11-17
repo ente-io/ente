@@ -8,7 +8,7 @@ import {
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
 import downloadManager from './downloadManager';
-import { File, updatePublicMagicMetadata } from './fileService';
+import { File, FILE_TYPE, updatePublicMagicMetadata } from './fileService';
 import { getExifData } from './upload/exifService';
 import { getFileType } from './upload/readFileService';
 
@@ -37,6 +37,9 @@ export async function updateCreationTimeWithExif(
                 const fileObject = await getFileFromURL(fileURL);
                 const worker = await new CryptoWorker();
                 const fileTypeInfo = await getFileType(worker, fileObject);
+                if (file.metadata.fileType !== FILE_TYPE.IMAGE) {
+                    continue;
+                }
                 const exifData = await getExifData(fileObject, fileTypeInfo);
                 if (
                     exifData?.creationTime &&
