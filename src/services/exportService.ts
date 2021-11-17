@@ -96,7 +96,7 @@ class ExportService {
     private recordUpdateInProgress = Promise.resolve();
     private stopExport: boolean = false;
     private pauseExport: boolean = false;
-    private usedFilenames = new Map<number, Set<string>>();
+    private usedFileNames = new Map<number, Set<string>>();
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
@@ -216,7 +216,6 @@ class ExportService {
                     collection.name,
                     usedCollectionPaths
                 );
-                usedCollectionPaths.add(collectionFolderPath);
                 collectionIDPathMap.set(collection.id, collectionFolderPath);
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
                     collectionFolderPath
@@ -358,7 +357,10 @@ class ExportService {
     }
 
     async downloadAndSave(file: File, collectionPath: string) {
-        const usedFileNamesInCollection = this.usedFilenames.get(
+        if (!this.usedFileNames.has(file.collectionID)) {
+            this.usedFileNames.set(file.collectionID, new Set<string>());
+        }
+        const usedFileNamesInCollection = this.usedFileNames.get(
             file.collectionID
         );
         file.metadata = mergeMetadata([file])[0].metadata;
@@ -382,7 +384,12 @@ class ExportService {
             fileStream = updatedFileBlob.stream();
         }
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            this.exportMotionPhoto(fileStream, file, collectionPath);
+            this.exportMotionPhoto(
+                fileStream,
+                file,
+                collectionPath,
+                usedFileNamesInCollection
+            );
         } else {
             this.saveMediaFile(collectionPath, fileSaveName, fileStream);
             this.saveMetadataFile(collectionPath, fileSaveName, file.metadata);
@@ -392,14 +399,12 @@ class ExportService {
     private async exportMotionPhoto(
         fileStream: ReadableStream<any>,
         file: File,
-        collectionPath: string
+        collectionPath: string,
+        usedFileNamesInCollection: Set<string>
     ) {
         const fileBlob = await new Response(fileStream).blob();
         const originalName = fileNameWithoutExtension(file.metadata.title);
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
-        const usedFileNamesInCollection = this.usedFilenames.get(
-            file.collectionID
-        );
         const imageStream = generateStreamFromArrayBuffer(motionPhoto.image);
         const imageSaveName = getUniqueFileSaveName(
             motionPhoto.imageNameTitle,

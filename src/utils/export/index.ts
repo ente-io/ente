@@ -2,7 +2,7 @@ import { Collection } from 'services/collectionService';
 import { ExportRecord, METADATA_FOLDER_NAME } from 'services/exportService';
 import { File } from 'services/fileService';
 import { MetadataObject } from 'services/upload/uploadService';
-import { formatDate } from 'utils/file';
+import { formatDate, splitFilenameAndExtension } from 'utils/file';
 
 export const getExportRecordFileUID = (file: File) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
@@ -102,15 +102,13 @@ export const getUniqueCollectionFolderPath = (
 ): string => {
     let collectionFolderPath = `${dir}/${sanitizeName(collectionName)}`;
     let count = 1;
-    while (
-        usedCollectionPaths &&
-        usedCollectionPaths.has(collectionFolderPath)
-    ) {
+    while (usedCollectionPaths.has(collectionFolderPath)) {
         collectionFolderPath = `${dir}/${sanitizeName(
             collectionName
         )}(${count})`;
         count++;
     }
+    usedCollectionPaths.add(collectionFolderPath);
     return collectionFolderPath;
 };
 
@@ -119,16 +117,19 @@ export const getMetadataFolderPath = (collectionFolderPath: string) =>
 
 export const getUniqueFileSaveName = (
     filename: string,
-    usedFileNamesInCollection: Set<string>
+    usedFilenamesInCollection: Set<string>
 ) => {
     let fileSaveName = sanitizeName(filename);
     const count = 1;
-    while (
-        usedFileNamesInCollection &&
-        usedFileNamesInCollection.has(fileSaveName)
-    ) {
-        fileSaveName = sanitizeName(filename) + `(${count})`;
+    while (usedFilenamesInCollection.has(fileSaveName)) {
+        const filenameParts = splitFilenameAndExtension(fileSaveName);
+        if (filenameParts[1]) {
+            fileSaveName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
+        } else {
+            fileSaveName = `${filenameParts[0]}(${count})`;
+        }
     }
+    usedFilenamesInCollection.add(fileSaveName);
     return fileSaveName;
 };
 
