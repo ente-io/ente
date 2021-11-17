@@ -54,13 +54,14 @@ export async function updateCreationTimeWithExif(
                     )[0];
                     updateExistingFilePubMetadata(file, updatedFile);
                 }
+            } catch (e) {
+                logError(e, 'failed to updated a CreationTime With Exif');
+                completedWithError = true;
+            } finally {
                 setProgressTracker({
                     current: index + 1,
                     total: filesToBeUpdated.length,
                 });
-            } catch (e) {
-                logError(e, 'failed to updated a CreationTime With Exif');
-                completedWithError = true;
             }
         }
     } catch (e) {
