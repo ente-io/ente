@@ -40,7 +40,7 @@ const Option = ({
 export default function FixCreationTimeOptions({ handleChange, values }) {
     return (
         <Form noValidate>
-            <Value width="40%">
+            <Value width="50%">
                 <Option
                     value={FIX_OPTIONS.DATE_TIME_ORIGINAL}
                     onChange={handleChange('option')}

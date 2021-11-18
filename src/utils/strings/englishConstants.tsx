@@ -610,7 +610,7 @@ const englishConstants = {
     ),
     FILE_NAME_CHARACTER_LIMIT: '100 characters max',
 
-    CREATION_DATE_TIME: 'creation date time ',
+    CREATION_DATE_TIME: 'creation date original ',
     DATE_TIME_DIGITIZED: 'date time digitized',
     CUSTOM_TIME: 'custom time',
 };
