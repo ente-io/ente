@@ -40,10 +40,10 @@ export async function updateCreationTimeWithExif(
                     const exifData = await getRawExif(fileObject, fileTypeInfo);
                     if (fixOption === FIX_OPTIONS.DATE_TIME_ORIGINAL) {
                         correctCreationTime = getUNIXTime(
-                            exifData.DateTimeOriginal
+                            exifData?.DateTimeOriginal
                         );
                     } else {
-                        correctCreationTime = getUNIXTime(exifData.CreateDate);
+                        correctCreationTime = getUNIXTime(exifData?.CreateDate);
                     }
                 }
                 if (
