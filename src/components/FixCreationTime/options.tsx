@@ -68,7 +68,7 @@ export default function FixCreationTimeOptions({ handleChange, values }) {
                     />
                 </Value>
                 {Number(values.option) === FIX_OPTIONS.CUSTOM_TIME && (
-                    <Value width="40%%">
+                    <Value width="40%">
                         <EnteDateTimePicker
                             isInEditMode
                             pickedTime={new Date(values.customTime)}
