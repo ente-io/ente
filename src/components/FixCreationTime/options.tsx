@@ -44,7 +44,7 @@ export default function FixCreationTimeOptions({ handleChange, values }) {
                 <Option
                     value={FIX_OPTIONS.DATE_TIME_ORIGINAL}
                     onChange={handleChange('option')}
-                    label={constants.CREATION_DATE_TIME}
+                    label={constants.DATE_TIME_ORIGINAL}
                     selected={Number(values.option)}
                 />
             </Value>
