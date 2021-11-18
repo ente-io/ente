@@ -601,7 +601,7 @@ const englishConstants = {
     CREATION_TIME_UPDATED: `file time updated`,
 
     UPDATE_CREATION_TIME_NOT_STARTED: () => (
-        <>select the option you want to use to fix creation time</>
+        <>select the option you want to use</>
     ),
     UPDATE_CREATION_TIME_COMPLETED: () => <>successfully updated all files</>,
 
