@@ -8,11 +8,8 @@ import {
     removeFromFavorites,
 } from 'services/collectionService';
 import {
-    ALL_TIME,
     File,
     MAX_EDITED_FILE_NAME_LENGTH,
-    MAX_EDITED_CREATION_TIME,
-    MIN_EDITED_CREATION_TIME,
     updatePublicMagicMetadata,
 } from 'services/fileService';
 import constants from 'utils/strings/constants';
@@ -41,14 +38,13 @@ import {
 } from 'components/Container';
 import { logError } from 'utils/sentry';
 
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import CloseIcon from 'components/icons/CloseIcon';
 import TickIcon from 'components/icons/TickIcon';
 import { FreeFlowText } from 'components/RecoveryKeyModal';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
+import EnteDateTimePicker from 'components/EnteDateTimePicker';
 
 interface Iprops {
     isOpen: boolean;
@@ -86,11 +82,6 @@ const renderInfoItem = (label: string, value: string | JSX.Element) => (
         <Value width="70%">{value}</Value>
     </Row>
 );
-
-const isSameDay = (first, second) =>
-    first.getFullYear() === second.getFullYear() &&
-    first.getMonth() === second.getMonth() &&
-    first.getDate() === second.getDate();
 
 function RenderCreationTime({
     file,
@@ -145,24 +136,11 @@ function RenderCreationTime({
                 <Label width="30%">{constants.CREATION_TIME}</Label>
                 <Value width={isInEditMode ? '50%' : '60%'}>
                     {isInEditMode ? (
-                        <DatePicker
-                            open={isInEditMode}
-                            selected={pickedTime}
-                            onChange={handleChange}
-                            timeInputLabel="Time:"
-                            dateFormat="dd/MM/yyyy h:mm aa"
-                            showTimeSelect
-                            autoFocus
-                            minDate={MIN_EDITED_CREATION_TIME}
-                            maxDate={MAX_EDITED_CREATION_TIME}
-                            maxTime={
-                                isSameDay(pickedTime, new Date())
-                                    ? MAX_EDITED_CREATION_TIME
-                                    : ALL_TIME
-                            }
-                            minTime={MIN_EDITED_CREATION_TIME}
-                            fixedHeight
-                            withPortal></DatePicker>
+                        <EnteDateTimePicker
+                            isInEditMode={isInEditMode}
+                            pickedTime={pickedTime}
+                            handleChange={handleChange}
+                        />
                     ) : (
                         formatDateTime(pickedTime)
                     )}
