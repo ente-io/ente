@@ -23,6 +23,7 @@ const Option = ({
             color: value !== Number(selected) ? '#aaa' : '#fff',
         }}>
         <Form.Check.Input
+            style={{ marginTop: '6px' }}
             id={value.toString()}
             type="radio"
             value={value}
@@ -40,19 +41,22 @@ const Option = ({
 export default function FixCreationTimeOptions({ handleChange, values }) {
     return (
         <Form noValidate>
-            <Option
-                value={FIX_OPTIONS.DATE_TIME_ORIGINAL}
-                onChange={handleChange('option')}
-                label={constants.DATE_TIME_ORIGINAL}
-                selected={Number(values.option)}
-            />
-
-            <Option
-                value={FIX_OPTIONS.DATE_TIME_DIGITIZED}
-                onChange={handleChange('option')}
-                label={constants.DATE_TIME_DIGITIZED}
-                selected={Number(values.option)}
-            />
+            <Row style={{ margin: '0' }}>
+                <Option
+                    value={FIX_OPTIONS.DATE_TIME_ORIGINAL}
+                    onChange={handleChange('option')}
+                    label={constants.DATE_TIME_ORIGINAL}
+                    selected={Number(values.option)}
+                />
+            </Row>
+            <Row style={{ margin: '0' }}>
+                <Option
+                    value={FIX_OPTIONS.DATE_TIME_DIGITIZED}
+                    onChange={handleChange('option')}
+                    label={constants.DATE_TIME_DIGITIZED}
+                    selected={Number(values.option)}
+                />
+            </Row>
             <Row style={{ margin: '0' }}>
                 <Value width="50%">
                     <Option
