@@ -40,26 +40,21 @@ const Option = ({
 export default function FixCreationTimeOptions({ handleChange, values }) {
     return (
         <Form noValidate>
-            <Value width="50%">
-                <Option
-                    value={FIX_OPTIONS.DATE_TIME_ORIGINAL}
-                    onChange={handleChange('option')}
-                    label={constants.DATE_TIME_ORIGINAL}
-                    selected={Number(values.option)}
-                />
-            </Value>
+            <Option
+                value={FIX_OPTIONS.DATE_TIME_ORIGINAL}
+                onChange={handleChange('option')}
+                label={constants.DATE_TIME_ORIGINAL}
+                selected={Number(values.option)}
+            />
 
-            <Value width="40%">
-                <Option
-                    value={FIX_OPTIONS.DATE_TIME_DIGITIZED}
-                    onChange={handleChange('option')}
-                    label={constants.DATE_TIME_DIGITIZED}
-                    selected={Number(values.option)}
-                />
-            </Value>
-
+            <Option
+                value={FIX_OPTIONS.DATE_TIME_DIGITIZED}
+                onChange={handleChange('option')}
+                label={constants.DATE_TIME_DIGITIZED}
+                selected={Number(values.option)}
+            />
             <Row style={{ margin: '0' }}>
-                <Value width="40%">
+                <Value width="50%">
                     <Option
                         value={FIX_OPTIONS.CUSTOM_TIME}
                         onChange={handleChange('option')}
