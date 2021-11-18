@@ -13,6 +13,15 @@ const EXIF_TAGS_NEEDED = [
     'GPSLatitudeRef',
     'GPSLongitudeRef',
 ];
+interface Exif {
+    DateTimeOriginal?: Date;
+    CreateDate?: Date;
+    ModifyDate?: Date;
+    GPSLatitude?: number;
+    GPSLongitude?: number;
+    GPSLatitudeRef?: number;
+    GPSLongitudeRef?: number;
+}
 interface ParsedEXIFData {
     location: Location;
     creationTime: number;
@@ -22,7 +31,26 @@ export async function getExifData(
     receivedFile: globalThis.File,
     fileTypeInfo: FileTypeInfo
 ): Promise<ParsedEXIFData> {
-    let exifData;
+    const exifData = await getRawExif(receivedFile, fileTypeInfo);
+    if (!exifData) {
+        return { location: NULL_LOCATION, creationTime: null };
+    }
+    const parsedEXIFData = {
+        location: getEXIFLocation(exifData),
+        creationTime: getUNIXTime(
+            exifData.DateTimeOriginal ??
+                exifData.CreateDate ??
+                exifData.ModifyDate
+        ),
+    };
+    return parsedEXIFData;
+}
+
+export async function getRawExif(
+    receivedFile: File,
+    fileTypeInfo: FileTypeInfo
+) {
+    let exifData: Exif;
     try {
         exifData = await exifr.parse(receivedFile, EXIF_TAGS_NEEDED);
     } catch (e) {
@@ -31,20 +59,10 @@ export async function getExifData(
         });
         // ignore exif parsing errors
     }
-    if (!exifData) {
-        return { location: NULL_LOCATION, creationTime: null };
-    }
-    const parsedEXIFData = {
-        location: getEXIFLocation(exifData),
-        creationTime: getUNIXTime(exifData),
-    };
-    return parsedEXIFData;
+    return exifData;
 }
 
-function getUNIXTime(exifData: any) {
-    const dateTime: Date =
-        exifData.DateTimeOriginal ?? exifData.CreateDate ?? exifData.ModifyDate;
-
+export function getUNIXTime(dateTime: Date) {
     if (!dateTime) {
         return null;
     }

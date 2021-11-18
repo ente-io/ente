@@ -1,3 +1,4 @@
+import { FIX_OPTIONS } from 'components/FixCreationTime';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
 import CryptoWorker from 'utils/crypto';
 import {
@@ -8,11 +9,13 @@ import {
 import { logError } from 'utils/sentry';
 import downloadManager from './downloadManager';
 import { File, FILE_TYPE, updatePublicMagicMetadata } from './fileService';
-import { getExifData } from './upload/exifService';
+import { getRawExif, getUNIXTime } from './upload/exifService';
 import { getFileType } from './upload/readFileService';
 
 export async function updateCreationTimeWithExif(
     filesToBeUpdated: File[],
+    fixOption: FIX_OPTIONS,
+    customTime: Date,
     setProgressTracker: SetProgressTracker
 ) {
     let completedWithError = false;
@@ -26,18 +29,30 @@ export async function updateCreationTimeWithExif(
                 if (file.metadata.fileType !== FILE_TYPE.IMAGE) {
                     continue;
                 }
-                const fileURL = await downloadManager.getFile(file);
-                const fileObject = await getFileFromURL(fileURL);
-                const worker = await new CryptoWorker();
-                const fileTypeInfo = await getFileType(worker, fileObject);
-                const exifData = await getExifData(fileObject, fileTypeInfo);
+                let correctCreationTime: number;
+                if (fixOption === FIX_OPTIONS.CUSTOM_TIME) {
+                    correctCreationTime = getUNIXTime(customTime);
+                } else {
+                    const fileURL = await downloadManager.getFile(file);
+                    const fileObject = await getFileFromURL(fileURL);
+                    const worker = await new CryptoWorker();
+                    const fileTypeInfo = await getFileType(worker, fileObject);
+                    const exifData = await getRawExif(fileObject, fileTypeInfo);
+                    if (fixOption === FIX_OPTIONS.DATE_TIME_ORIGINAL) {
+                        correctCreationTime = getUNIXTime(
+                            exifData.DateTimeOriginal
+                        );
+                    } else {
+                        correctCreationTime = getUNIXTime(exifData.CreateDate);
+                    }
+                }
                 if (
-                    exifData?.creationTime &&
-                    exifData?.creationTime !== file.metadata.creationTime
+                    correctCreationTime &&
+                    correctCreationTime !== file.metadata.creationTime
                 ) {
                     let updatedFile = await changeFileCreationTime(
                         file,
-                        exifData.creationTime
+                        correctCreationTime
                     );
                     updatedFile = (
                         await updatePublicMagicMetadata([updatedFile])

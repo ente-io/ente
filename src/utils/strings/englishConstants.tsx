@@ -601,7 +601,7 @@ const englishConstants = {
     CREATION_TIME_UPDATED: `file time updated`,
 
     UPDATE_CREATION_TIME_NOT_STARTED: () => (
-        <>do you want to fix time with the values found in EXIF</>
+        <>select the option you want to use to fix creation time</>
     ),
     UPDATE_CREATION_TIME_COMPLETED: () => <>successfully updated all files</>,
 
@@ -609,6 +609,10 @@ const englishConstants = {
         <>file time updation failed for some files, please retry</>
     ),
     FILE_NAME_CHARACTER_LIMIT: '100 characters max',
+
+    CREATION_DATE_TIME: 'creation date time ',
+    DATE_TIME_DIGITIZED: 'date time digitized',
+    CUSTOM_TIME: 'custom time',
 };
 
 export default englishConstants;
