@@ -93,6 +93,9 @@ import {
     Trash,
 } from 'services/trashService';
 import DeleteBtn from 'components/DeleteBtn';
+import FixCreationTime, {
+    FixCreationTimeAttributes,
+} from 'components/FixCreationTime';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -204,7 +207,9 @@ export default function Gallery() {
         useState<Map<number, number>>();
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
     const [trash, setTrash] = useState<Trash>([]);
-
+    const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
+    const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
+        useState<FixCreationTimeAttributes>(null);
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
@@ -243,13 +248,19 @@ export default function Gallery() {
 
     useEffect(() => setDialogView(true), [dialogMessage]);
 
-    useEffect(() => {
-        if (collectionSelectorAttributes) {
-            setCollectionSelectorView(true);
-        }
-    }, [collectionSelectorAttributes]);
+    useEffect(
+        () => collectionSelectorAttributes && setCollectionSelectorView(true),
+        [collectionSelectorAttributes]
+    );
 
-    useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
+    useEffect(
+        () => collectionNamerAttributes && setCollectionNamerView(true),
+        [collectionNamerAttributes]
+    );
+    useEffect(
+        () => fixCreationTimeAttributes && setFixCreationTimeView(true),
+        [fixCreationTimeAttributes]
+    );
 
     useEffect(() => {
         if (typeof activeCollection === 'undefined') {
@@ -523,6 +534,12 @@ export default function Gallery() {
         }
     };
 
+    const fixTimeHelper = async () => {
+        const selectedFiles = getSelectedFiles(selected, files);
+        setFixCreationTimeAttributes({ files: selectedFiles });
+        clearSelection();
+    };
+
     return (
         <GalleryContext.Provider
             value={{
@@ -593,6 +610,12 @@ export default function Gallery() {
                         collectionsAndTheirLatestFile
                     }
                     attributes={collectionSelectorAttributes}
+                />
+                <FixCreationTime
+                    isOpen={fixCreationTimeView}
+                    hide={() => setFixCreationTimeView(false)}
+                    show={() => setFixCreationTimeView(true)}
+                    attributes={fixCreationTimeAttributes}
                 />
                 <Upload
                     syncWithRemote={syncWithRemote}
@@ -685,6 +708,7 @@ export default function Gallery() {
                                     )
                                 )
                             }
+                            fixTimeHelper={fixTimeHelper}
                             count={selected.count}
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}

@@ -446,6 +446,9 @@ const GlobalStyles = createGlobalStyle`
     .react-datepicker__day--disabled:hover {
         background-color: #202020;
     }
+    .ente-form-group{
+        margin:0;
+    }
 `;
 
 export const LogoImage = styled.img`
