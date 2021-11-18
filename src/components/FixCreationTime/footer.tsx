@@ -3,7 +3,11 @@ import { Button } from 'react-bootstrap';
 import { FIX_STATE } from '.';
 import constants from 'utils/strings/constants';
 
-export function FixCreationTimeFooter({ fixState, startFix, ...props }) {
+export default function FixCreationTimeFooter({
+    fixState,
+    startFix,
+    ...props
+}) {
     return (
         fixState !== FIX_STATE.RUNNING && (
             <div

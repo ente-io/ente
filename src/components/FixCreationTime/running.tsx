@@ -3,7 +3,7 @@ import { ComfySpan } from 'components/ExportInProgress';
 import React from 'react';
 import { ProgressBar } from 'react-bootstrap';
 
-export function FixCreationTimeRunning({ progressTracker }) {
+export default function FixCreationTimeRunning({ progressTracker }) {
     return (
         <>
             <div style={{ marginBottom: '10px' }}>

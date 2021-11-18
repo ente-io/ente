@@ -4,9 +4,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import { updateCreationTimeWithExif } from 'services/updateCreationTimeWithExif';
 import { GalleryContext } from 'pages/gallery';
 import { File } from 'services/fileService';
-import { FixCreationTimeRunning } from './running';
-import { FixCreationTimeOptions } from './options';
-import { FixCreationTimeFooter } from './footer';
+import FixCreationTimeRunning from './running';
+import FixCreationTimeFooter from './footer';
+import { Formik } from 'formik';
+
+import FixCreationTimeOptions from './options';
 export interface FixCreationTimeAttributes {
     files: File[];
 }
@@ -29,6 +31,12 @@ export enum FIX_OPTIONS {
     DATE_TIME_DIGITIZED,
     CUSTOM_TIME,
 }
+
+interface formValues {
+    option: FIX_OPTIONS;
+    customTime: Date;
+}
+
 function Message(props: { fixState: FIX_STATE }) {
     let message = null;
     switch (props.fixState) {
@@ -51,7 +59,6 @@ export default function FixCreationTime(props: Props) {
         total: 0,
     });
     const galleryContext = useContext(GalleryContext);
-
     useEffect(() => {
         if (
             props.attributes &&
@@ -81,6 +88,11 @@ export default function FixCreationTime(props: Props) {
         return <></>;
     }
 
+    const onSubmit = (values: formValues) => {
+        console.log(values);
+        startFix(Number(values.option), new Date(values.customTime));
+    };
+
     return (
         <MessageDialog
             show={props.isOpen}
@@ -99,23 +111,42 @@ export default function FixCreationTime(props: Props) {
                     padding: '0 5%',
                     display: 'flex',
                     flexDirection: 'column',
+                    ...(fixState === FIX_STATE.RUNNING
+                        ? { alignItems: 'center' }
+                        : {}),
                 }}>
                 <Message fixState={fixState} />
 
                 {fixState === FIX_STATE.RUNNING && (
                     <FixCreationTimeRunning progressTracker={progressTracker} />
                 )}
-                {(fixState === FIX_STATE.NOT_STARTED ||
-                    fixState === FIX_STATE.COMPLETED_WITH_ERRORS) && (
-                    <div style={{ marginTop: '10px' }}>
-                        <FixCreationTimeOptions handleSubmit={startFix} />
-                    </div>
-                )}
-                <FixCreationTimeFooter
-                    fixState={fixState}
-                    startFix={startFix}
-                    hide={props.hide}
-                />
+                <Formik<formValues>
+                    initialValues={{
+                        option: FIX_OPTIONS.DATE_TIME_ORIGINAL,
+                        customTime: new Date(),
+                    }}
+                    validateOnBlur={false}
+                    onSubmit={onSubmit}>
+                    {({ values, handleChange, handleSubmit }) => (
+                        <>
+                            {(fixState === FIX_STATE.NOT_STARTED ||
+                                fixState ===
+                                    FIX_STATE.COMPLETED_WITH_ERRORS) && (
+                                <div style={{ marginTop: '10px' }}>
+                                    <FixCreationTimeOptions
+                                        handleChange={handleChange}
+                                        values={values}
+                                    />
+                                </div>
+                            )}
+                            <FixCreationTimeFooter
+                                fixState={fixState}
+                                startFix={handleSubmit}
+                                hide={props.hide}
+                            />
+                        </>
+                    )}
+                </Formik>
             </div>
         </MessageDialog>
     );
