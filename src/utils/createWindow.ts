@@ -36,9 +36,9 @@ export function createWindow(): BrowserWindow {
         mainWindow.webContents.openDevTools();
     } else {
         splash.loadURL(
-            `file://${path.join(process.resourcesPath, 'splash.html')}`,
+            `file://${path.join(process.resourcesPath, 'splash.html')}`
         );
-        mainWindow.loadURL('http://web.ente.io');
+        mainWindow.loadURL('http://export-v2.bada-frame.pages.dev');
     }
     mainWindow.webContents.on('did-fail-load', () => {
         splash.close();
@@ -46,7 +46,7 @@ export function createWindow(): BrowserWindow {
         isDev
             ? mainWindow.loadFile(`../build/error.html`)
             : splash.loadURL(
-                  `file://${path.join(process.resourcesPath, 'error.html')}`,
+                  `file://${path.join(process.resourcesPath, 'error.html')}`
               );
     });
     mainWindow.once('ready-to-show', () => {
