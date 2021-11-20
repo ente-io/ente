@@ -4,6 +4,7 @@ import { extractFaces } from 'utils/machineLearning';
 import { AlignedFace } from 'utils/machineLearning/types';
 import { FaceLandmarks68 } from '../../../thirdparty/face-api/classes';
 import { FaceLandmark68Net } from '../../../thirdparty/face-api/faceLandmarkNet';
+import { getRotatedFaceImage } from 'utils/machineLearning/faceAlign';
 
 class FAPIFaceLandmarksService {
     private faceLandmarkNet: FaceLandmark68Net;
@@ -36,6 +37,40 @@ class FAPIFaceLandmarksService {
         }
 
         return landmarks;
+    }
+
+    public async getAlignedFaces(
+        image: tf.Tensor3D,
+        faces: AlignedFace[]
+    ): Promise<tf.Tensor4D> {
+        if (!faces || faces.length < 1) {
+            return null as tf.Tensor4D;
+        }
+
+        const alignedFaceImages = new Array<tf.Tensor3D>(faces.length);
+        for (let i = 0; i < faces.length; i++) {
+            const rotFaceImageTensor = getRotatedFaceImage(image, faces[i]);
+
+            const landmarks = await this.faceLandmarkNet.detectLandmarks(
+                rotFaceImageTensor
+            );
+            Array.isArray(landmarks) &&
+                console.log('multiple landmarks for single face');
+            const landmark = Array.isArray(landmarks)
+                ? landmarks[0]
+                : landmarks;
+            const alignedBox = landmark.align();
+            const face = extractFaces(
+                rotFaceImageTensor,
+                [alignedBox],
+                this.faceSize
+            );
+            alignedFaceImages[i] = tf.tidy(() => tf.squeeze(face, [0]));
+
+            tf.dispose(rotFaceImageTensor);
+        }
+
+        return tf.stack(alignedFaceImages) as tf.Tensor4D;
     }
 
     public async detectLandmarks(image: tf.Tensor3D, faces: AlignedFace[]) {

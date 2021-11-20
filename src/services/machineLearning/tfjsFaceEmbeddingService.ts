@@ -25,18 +25,27 @@ class TFJSFaceEmbeddingService {
         );
     }
 
-    private async getEmbeddingsBatch(faceImagesTensor) {
+    public getEmbedding(face: tf.Tensor4D) {
+        return tf.tidy(() => {
+            const normalizedFace = tf.sub(tf.div(face, 127.5), 1.0);
+            return this.mobileFaceNetModel.predict(normalizedFace);
+        });
+    }
+
+    public async getEmbeddingsBatch(
+        faceImagesTensor
+    ): Promise<Array<FaceEmbedding>> {
         const embeddings = [];
         for (let i = 0; i < faceImagesTensor.shape[0]; i++) {
             const embedding = tf.tidy(() => {
                 const face = gather(faceImagesTensor, i).expandDims();
-                const embedding = this.mobileFaceNetModel.predict(face);
+                const embedding = this.getEmbedding(face);
                 return gather(embedding as any, 0);
             });
             embeddings[i] = embedding;
         }
 
-        return tf.stack(embeddings);
+        return tf.stack(embeddings).array() as Promise<Array<FaceEmbedding>>;
     }
 
     public async getEmbeddings(image: tf.Tensor3D, faces: AlignedFace[]) {
@@ -48,26 +57,20 @@ class TFJSFaceEmbeddingService {
         }
 
         const faceImagesTensor = tf.tidy(() => {
-            const normalizedImage = tf.sub(
-                tf.div(image, 127.5),
-                1.0
-            ) as tf.Tensor3D;
             return extractFaces(
-                normalizedImage,
+                image,
                 faces.map((f) => f.alignedBox),
                 this.faceSize
             );
         });
-        const embeddingsTensor = await this.getEmbeddingsBatch(
-            faceImagesTensor
-        );
-        const embeddings = await embeddingsTensor.array();
+        const embeddings = await this.getEmbeddingsBatch(faceImagesTensor);
+        // const embeddings = await embeddingsTensor.array();
         // const faceImages = await faceImagesTensor.array();
         tf.dispose(faceImagesTensor);
-        tf.dispose(embeddingsTensor);
+        // tf.dispose(embeddingsTensor);
         // console.log('embeddings: ', embeddings[0]);
         return {
-            embeddings: embeddings as FaceEmbedding[],
+            embeddings: embeddings,
             // faceImages: faceImages as FaceImage[],
         };
     }

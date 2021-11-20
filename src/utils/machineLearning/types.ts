@@ -19,6 +19,7 @@ export interface MLSyncResult {
 
 export interface AlignedFace extends NormalizedFace {
     alignedBox: Box;
+    box: Box;
 }
 
 export declare type FaceEmbedding = Array<number>;
@@ -75,3 +76,5 @@ export interface TSNEData {
     height: number;
     dataset: Point[];
 }
+
+export declare type FaceAlignmentMode = 'arcface' | 'fapi';

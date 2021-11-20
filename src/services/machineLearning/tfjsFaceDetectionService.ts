@@ -36,7 +36,7 @@ class TFJSFaceDetectionService {
         );
     }
 
-    private getDlibAlignedFace(normFace: NormalizedFace): AlignedFace {
+    private getDlibAlignedFace(normFace: NormalizedFace): Box {
         const relX = 0.5;
         const relY = 0.43;
         const relScale = 0.45;
@@ -65,18 +65,15 @@ class TFJSFaceDetectionService {
         const right = center[0] + relX * size;
         const bottom = center[1] + relY * size;
 
-        return {
-            ...normFace,
-            alignedBox: new Box({
-                left: left,
-                top: top,
-                right: right,
-                bottom: bottom,
-            }),
-        };
+        return new Box({
+            left: left,
+            top: top,
+            right: right,
+            bottom: bottom,
+        });
     }
 
-    private getAlignedFace(normFace: NormalizedFace): AlignedFace {
+    private getAlignedFace(normFace: NormalizedFace): Box {
         const leftEye = normFace.landmarks[0];
         const rightEye = normFace.landmarks[1];
         // const noseTip = normFace.landmarks[2];
@@ -107,15 +104,12 @@ class TFJSFaceDetectionService {
         const ty = eyesCenter[1] - faceHeight * this.desiredLeftEye[1];
         // console.log("tx: ", tx, "ty: ", ty);
 
-        return {
-            ...normFace,
-            alignedBox: new Box({
-                left: tx,
-                top: ty,
-                right: tx + faceWidth,
-                bottom: ty + faceHeight,
-            }),
-        };
+        return new Box({
+            left: tx,
+            top: ty,
+            right: tx + faceWidth,
+            bottom: ty + faceHeight,
+        });
     }
 
     public async detectFaces(image: tf.Tensor3D) {
@@ -132,11 +126,22 @@ class TFJSFaceDetectionService {
         return results;
     }
 
-    public async estimateFaces(image: tf.Tensor3D) {
+    public async estimateFaces(
+        image: tf.Tensor3D
+    ): Promise<Array<AlignedFace>> {
         const normalizedFaces = await this.blazeFaceModel.estimateFaces(image);
-        const alignedFaces = normalizedFaces.map((normFace) =>
-            this.getAlignedFace(normFace)
-        );
+        const alignedFaces = normalizedFaces.map((normFace) => {
+            return {
+                ...normFace,
+                box: new Box({
+                    left: normFace.topLeft[0],
+                    top: normFace.topLeft[1],
+                    right: normFace.bottomRight[0],
+                    bottom: normFace.bottomRight[1],
+                }),
+                alignedBox: this.getAlignedFace(normFace),
+            };
+        });
 
         return alignedFaces;
     }

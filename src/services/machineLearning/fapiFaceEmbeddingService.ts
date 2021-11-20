@@ -23,7 +23,7 @@ class FAPIFaceEmbeddingService {
         );
     }
 
-    private async getEmbeddingsBatch(faceImagesTensor) {
+    public async getEmbeddingsBatch(faceImagesTensor) {
         const embeddings = [];
         for (let i = 0; i < faceImagesTensor.shape[0]; i++) {
             const face = tf.tidy(() =>
