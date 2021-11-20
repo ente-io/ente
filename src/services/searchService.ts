@@ -5,6 +5,7 @@ import { DateValue, Suggestion, SuggestionType } from 'components/SearchBar';
 import HTTPService from './HTTPService';
 import { Collection } from './collectionService';
 import { File } from './fileService';
+import { logError } from 'utils/sentry';
 import { User } from './userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
@@ -45,17 +46,22 @@ export function parseHumanDate(humanDate: string): DateValue[] {
 export async function searchLocation(
     searchPhrase: string
 ): Promise<LocationSearchResponse[]> {
-    const resp = await HTTPService.get(
-        `${ENDPOINT}/search/location`,
-        {
-            query: searchPhrase,
-            limit: 4,
-        },
-        {
-            'X-Auth-Token': getToken(),
-        }
-    );
-    return resp.data.results;
+    try {
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/search/location`,
+            {
+                query: searchPhrase,
+                limit: 4,
+            },
+            {
+                'X-Auth-Token': getToken(),
+            }
+        );
+        return resp.data.results ?? [];
+    } catch (e) {
+        logError(e, 'location search failed');
+    }
+    return [];
 }
 
 export function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
@@ -99,7 +105,7 @@ export function getYearSuggestion(searchPhrase: string): Suggestion[] {
                 ];
             }
         } catch (e) {
-            // ignore
+            logError(e, 'getYearSuggestion failed');
         }
     }
     return [];
