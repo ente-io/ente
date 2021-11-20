@@ -50,6 +50,7 @@ import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
 import {
     changeFilesVisibility,
+    getNonTrashedUniqueUserFiles,
     getSelectedFiles,
     mergeMetadata,
     sortFiles,
@@ -581,7 +582,7 @@ export default function Gallery() {
                     loadingBar={loadingBar}
                     isFirstFetch={isFirstFetch}
                     collections={collections}
-                    files={files}
+                    files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}
                     setSearch={updateSearch}
                     searchStats={searchStats}
