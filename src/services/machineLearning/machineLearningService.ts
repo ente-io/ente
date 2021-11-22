@@ -307,7 +307,9 @@ class MachineLearningService {
     }
 
     private toTSNE() {
-        const input = this.allFaces.map((f) => Array.from(f.embedding));
+        const input = this.allFaces
+            .slice(0, 200)
+            .map((f) => Array.from(f.embedding));
         if (!input || input.length < 1) {
             return null;
         }
