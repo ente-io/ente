@@ -235,11 +235,6 @@ export default function Gallery() {
             setCollections(collections);
             setTrash(trash);
             await setDerivativeState(collections, files);
-            await checkSubscriptionPurchase(
-                setDialogMessage,
-                router,
-                setLoading
-            );
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -266,7 +261,7 @@ export default function Gallery() {
     );
 
     useEffect(() => {
-        if (typeof activeCollection === 'undefined') {
+        if (typeof activeCollection === 'undefined' || !router.isReady) {
             return;
         }
         let collectionQuery = '';
@@ -290,6 +285,12 @@ export default function Gallery() {
             },
         });
     }, [activeCollection]);
+
+    useEffect(() => {
+        if (router.isReady) {
+            checkSubscriptionPurchase(setDialogMessage, router, setLoading);
+        }
+    }, [router.isReady]);
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
