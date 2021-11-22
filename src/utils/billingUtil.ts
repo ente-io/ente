@@ -192,7 +192,12 @@ export async function checkSubscriptionPurchase(
     router: NextRouter,
     setLoading: SetLoading
 ) {
-    const { sessionId, status, reason, ...rest } = router.query ?? {};
+    const {
+        session_id: sessionId,
+        status,
+        reason,
+        ...rest
+    } = router.query ?? {};
     try {
         if (status === RESPONSE_STATUS.fail) {
             handleFailureReason(reason as string, setDialogMessage, setLoading);

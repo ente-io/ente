@@ -285,8 +285,8 @@ export default function Gallery() {
         router.replace({
             pathname: PAGES.GALLERY,
             query: {
-                ...rest,
                 ...(collectionQuery ? { collection: collectionQuery } : {}),
+                ...rest,
             },
         });
     }, [activeCollection]);
