@@ -269,19 +269,26 @@ export default function Gallery() {
         if (typeof activeCollection === 'undefined') {
             return;
         }
-        let collectionURL = '';
+        let collectionQuery = '';
         if (activeCollection !== ALL_SECTION) {
-            collectionURL += '?collection=';
             if (activeCollection === ARCHIVE_SECTION) {
-                collectionURL += constants.ARCHIVE;
+                collectionQuery += constants.ARCHIVE;
             } else if (activeCollection === TRASH_SECTION) {
-                collectionURL += constants.TRASH;
+                collectionQuery += constants.TRASH;
             } else {
-                collectionURL += activeCollection;
+                collectionQuery += activeCollection;
             }
         }
-        const href = `/gallery${collectionURL}`;
-        router.push(href, undefined, { shallow: true });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { collection, ...rest } = router.query ?? {};
+
+        router.replace({
+            pathname: PAGES.GALLERY,
+            query: {
+                ...rest,
+                ...(collectionQuery ? { collection: collectionQuery } : {}),
+            },
+        });
     }, [activeCollection]);
 
     const syncWithRemote = async (force = false, silent = false) => {
