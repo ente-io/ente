@@ -66,11 +66,11 @@ const renderForeignObjectNode = ({
 
 export default function MLDebug() {
     const [token, setToken] = useState<string>();
-    const [clusterFaceDistance, setClusterFaceDistance] = useState<number>(0.4);
+    const [clusterFaceDistance] = useState<number>(0.4);
     const [minClusterSize, setMinClusterSize] = useState<number>(5);
     const [minFaceSize, setMinFaceSize] = useState<number>(32);
     const [batchSize, setBatchSize] = useState<number>(200);
-    const [maxFaceDistance, setMaxFaceDistance] = useState<number>(0.5);
+    const [maxFaceDistance] = useState<number>(0.5);
     const [mlResult, setMlResult] = useState<MLSyncResult>({
         allFaces: [],
         clustersWithNoise: {
@@ -142,7 +142,7 @@ export default function MLDebug() {
 
     return (
         <div>
-            <div>ClusterFaceDistance: {clusterFaceDistance}</div>
+            {/* <div>ClusterFaceDistance: {clusterFaceDistance}</div>
             <button onClick={() => setClusterFaceDistance(0.35)}>0.35</button>
             <button onClick={() => setClusterFaceDistance(0.4)}>0.4</button>
             <button onClick={() => setClusterFaceDistance(0.45)}>0.45</button>
@@ -150,7 +150,7 @@ export default function MLDebug() {
             <button onClick={() => setClusterFaceDistance(0.55)}>0.55</button>
             <button onClick={() => setClusterFaceDistance(0.6)}>0.6</button>
 
-            <p></p>
+            <p></p> */}
             <div>MinFaceSize: {minFaceSize}</div>
             <button onClick={() => setMinFaceSize(16)}>16</button>
             <button onClick={() => setMinFaceSize(24)}>24</button>
@@ -174,12 +174,12 @@ export default function MLDebug() {
             <button onClick={() => setBatchSize(200)}>200</button>
             <button onClick={() => setBatchSize(500)}>500</button>
 
-            <p></p>
+            {/* <p></p>
             <div>MaxFaceDistance: {maxFaceDistance}</div>
             <button onClick={() => setMaxFaceDistance(0.45)}>0.45</button>
             <button onClick={() => setMaxFaceDistance(0.5)}>0.5</button>
             <button onClick={() => setMaxFaceDistance(0.55)}>0.55</button>
-            <button onClick={() => setMaxFaceDistance(0.6)}>0.6</button>
+            <button onClick={() => setMaxFaceDistance(0.6)}>0.6</button> */}
 
             <p></p>
             <button onClick={onSync}>Run ML Sync</button>
