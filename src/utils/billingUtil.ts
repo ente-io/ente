@@ -224,9 +224,7 @@ export async function checkSubscriptionPurchase(
     } catch (e) {
         // ignore
     } finally {
-        router.replace({ pathname: PAGES.GALLERY, query: rest }, undefined, {
-            shallow: true,
-        });
+        router.replace({ pathname: PAGES.GALLERY, query: rest });
     }
 }
 
