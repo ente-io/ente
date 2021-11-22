@@ -97,6 +97,7 @@ import DeleteBtn from 'components/DeleteBtn';
 import FixCreationTime, {
     FixCreationTimeAttributes,
 } from 'components/FixCreationTime';
+import { LS_KEYS, setData } from 'utils/storage/localStorage';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -214,6 +215,7 @@ export default function Gallery() {
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
+            setData(LS_KEYS.REDIRECT, { url: router.asPath });
             router.push(PAGES.ROOT);
             return;
         }
