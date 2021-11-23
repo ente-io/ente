@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/models/sessions.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -64,7 +65,7 @@ class _SessionsPageState extends State<SessionsPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(_getPrettyUA(session)),
+                    _getUAWidget(session),
                     Padding(padding: EdgeInsets.all(4)),
                     Text(
                       session.ip,
@@ -95,18 +96,42 @@ class _SessionsPageState extends State<SessionsPage> {
 
   Future<void> _fetchActiveSessions() async {
     _sessions = await UserService.instance.getActiveSessions();
-    for (final session in _sessions.sessions) {
-      Logger("Test").info(session.token);
-    }
+    _sessions.sessions.sort((first, second) {
+      return second.lastUsedTime.compareTo(first.lastUsedTime);
+    });
     setState(() {});
   }
 
   void _showSessionTerminationDialog(Session session) {
+    final isLoggingOutFromThisDevice =
+        session.token == Configuration.instance.getToken();
+    Widget text;
+    if (isLoggingOutFromThisDevice) {
+      text = Text(
+        "this will log you out of this device!",
+      );
+    } else {
+      text = SingleChildScrollView(
+        child: Column(
+          children: [
+            Text(
+              "this will log you out of the following device:",
+            ),
+            Padding(padding: EdgeInsets.all(8)),
+            Text(
+              session.userAgent,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     AlertDialog alert = AlertDialog(
       title: Text("terminate session?"),
-      content: Text(
-        "this will log you out of the selected device",
-      ),
+      content: text,
       actions: [
         TextButton(
           child: Text(
@@ -117,14 +142,20 @@ class _SessionsPageState extends State<SessionsPage> {
           ),
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop('dialog');
-            _terminateSession(session);
+            if (isLoggingOutFromThisDevice) {
+              await UserService.instance.logout(context);
+            } else {
+              _terminateSession(session);
+            }
           },
         ),
         TextButton(
           child: Text(
             "cancel",
             style: TextStyle(
-              color: Colors.white,
+              color: isLoggingOutFromThisDevice
+                  ? Theme.of(context).buttonColor
+                  : Colors.white,
             ),
           ),
           onPressed: () {
@@ -142,10 +173,19 @@ class _SessionsPageState extends State<SessionsPage> {
     );
   }
 
-  String _getPrettyUA(Session session) {
+  Widget _getUAWidget(Session session) {
+    if (session.token == Configuration.instance.getToken()) {
+      return Text(
+        "this device",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).buttonColor,
+        ),
+      );
+    }
     final parsedUA = _userAgentParser.parseResult(session.userAgent);
-    return parsedUA.browser == null
+    return Text(parsedUA.browser == null
         ? "Mobile"
-        : "Browser (" + parsedUA.browser.name + ")";
+        : "Browser (" + parsedUA.browser.name + ")");
   }
 }
