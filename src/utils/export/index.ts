@@ -70,7 +70,9 @@ export const getGoogleLikeMetadataFile = (
     metadata: MetadataObject
 ) => {
     const creationTime = Math.floor(metadata.creationTime / 1000000);
-    const modificationTime = Math.floor(metadata.modificationTime / 1000000);
+    const modificationTime = Math.floor(
+        (metadata.modificationTime ?? metadata.creationTime) / 1000000
+    );
     return JSON.stringify(
         {
             title: fileSaveName,
