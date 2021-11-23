@@ -50,15 +50,14 @@ class _SessionsPageState extends State<SessionsPage> {
   Widget _getSessionWidget(Session session) {
     final lastUsedTime =
         DateTime.fromMicrosecondsSinceEpoch(session.lastUsedTime);
-    return InkWell(
-      onTap: () async {
-        _showSessionTerminationDialog(session);
-      },
-      child: Column(
-        children: [
-          Padding(padding: EdgeInsets.all(8)),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+    return Column(
+      children: [
+        InkWell(
+          onTap: () async {
+            _showSessionTerminationDialog(session);
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -79,10 +78,9 @@ class _SessionsPageState extends State<SessionsPage> {
               ],
             ),
           ),
-          Padding(padding: EdgeInsets.all(8)),
-          Divider(),
-        ],
-      ),
+        ),
+        Divider(),
+      ],
     );
   }
 
