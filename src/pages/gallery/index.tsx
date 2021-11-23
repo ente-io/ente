@@ -265,23 +265,19 @@ export default function Gallery() {
         if (typeof activeCollection === 'undefined') {
             return;
         }
-        let collectionQuery = '';
+        let collectionURL = '';
         if (activeCollection !== ALL_SECTION) {
+            collectionURL += '?collection=';
             if (activeCollection === ARCHIVE_SECTION) {
-                collectionQuery += constants.ARCHIVE;
+                collectionURL += constants.ARCHIVE;
             } else if (activeCollection === TRASH_SECTION) {
-                collectionQuery += constants.TRASH;
+                collectionURL += constants.TRASH;
             } else {
-                collectionQuery += activeCollection;
+                collectionURL += activeCollection;
             }
         }
-
-        router.replace({
-            pathname: PAGES.GALLERY,
-            query: {
-                ...(collectionQuery ? { collection: collectionQuery } : {}),
-            },
-        });
+        const href = `/gallery${collectionURL}`;
+        router.push(href, undefined, { shallow: true });
     }, [activeCollection]);
 
     useEffect(() => {
