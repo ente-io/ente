@@ -1,12 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 import constants from 'utils/strings/constants';
-import {
-    clearData,
-    getData,
-    LS_KEYS,
-    setData,
-} from 'utils/storage/localStorage';
+import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { KeyAttributes, PAGES } from 'types';
 import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
@@ -80,9 +75,9 @@ export default function Credentials() {
                 }
                 await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
                 await decryptAndStoreToken(key);
-                const redirectURL = getData(LS_KEYS.REDIRECT)?.url;
-                setData(LS_KEYS.REDIRECT, null);
-                router.push(redirectURL ? redirectURL : PAGES.GALLERY);
+                const redirectUrl = appContext.redirectUrl;
+                appContext.setRedirectUrl(null);
+                router.push(redirectUrl ?? PAGES.GALLERY);
             } catch (e) {
                 logError(e, 'user entered a wrong password');
                 setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
