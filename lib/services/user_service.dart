@@ -15,6 +15,7 @@ import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/public_key.dart';
+import 'package:photos/models/sessions.dart';
 import 'package:photos/models/set_keys_request.dart';
 import 'package:photos/models/set_recovery_key_request.dart';
 import 'package:photos/models/user_details.dart';
@@ -115,6 +116,23 @@ class UserService {
         ),
       );
       return UserDetails.fromMap(response.data["details"]);
+    } on DioError catch (e) {
+      _logger.info(e);
+      rethrow;
+    }
+  }
+
+  Future<Sessions> getActiveSessions() async {
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/users/sessions",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      return Sessions.fromMap(response.data);
     } on DioError catch (e) {
       _logger.info(e);
       rethrow;
