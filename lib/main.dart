@@ -37,6 +37,7 @@ import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:super_logging/super_logging.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 final _logger = Logger("main");
 
@@ -258,26 +259,37 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    AppLifecycleService.instance.onAppInForeground();
     _configureBackgroundFetch();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "ente",
-      theme: themeData,
-      home: EnteApp._homeWidget,
-      debugShowCheckedModeBanner: false,
-      navigatorKey: Network.instance.getAlice().getNavigatorKey(),
-      builder: EasyLoading.init(),
-      supportedLocales: L10n.all,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
+    return VisibilityDetector(
+      key: GlobalKey(),
+      onVisibilityChanged: (visibility) {
+        if (visibility.visibleFraction == 1) {
+          Logger("EnteApp").info("App is in foreground");
+          AppLifecycleService.instance.onAppInForeground();
+        } else {
+          Logger("EnteApp").info("App is in background");
+          AppLifecycleService.instance.onAppInBackground();
+        }
+      },
+      child: MaterialApp(
+        title: "ente",
+        theme: themeData,
+        home: EnteApp._homeWidget,
+        debugShowCheckedModeBanner: false,
+        navigatorKey: Network.instance.getAlice().getNavigatorKey(),
+        builder: EasyLoading.init(),
+        supportedLocales: L10n.all,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+      ),
     );
   }
 
