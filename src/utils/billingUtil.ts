@@ -10,7 +10,6 @@ import { SetLoading } from 'pages/gallery';
 import { getData, LS_KEYS } from './storage/localStorage';
 import { CustomError } from './common/errorUtil';
 import { logError } from './sentry';
-import { PAGES } from 'types';
 
 const STRIPE = 'stripe';
 
@@ -192,12 +191,7 @@ export async function checkSubscriptionPurchase(
     router: NextRouter,
     setLoading: SetLoading
 ) {
-    const {
-        session_id: sessionId,
-        status,
-        reason,
-        ...rest
-    } = router.query ?? {};
+    const { session_id: sessionId, status, reason } = router.query ?? {};
     try {
         if (status === RESPONSE_STATUS.fail) {
             handleFailureReason(reason as string, setDialogMessage, setLoading);
@@ -223,8 +217,6 @@ export async function checkSubscriptionPurchase(
         }
     } catch (e) {
         // ignore
-    } finally {
-        router.replace({ pathname: PAGES.GALLERY, query: rest });
     }
 }
 

@@ -212,6 +212,7 @@ export default function Gallery() {
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
+
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
@@ -261,7 +262,7 @@ export default function Gallery() {
     );
 
     useEffect(() => {
-        if (typeof activeCollection === 'undefined' || !router.isReady) {
+        if (typeof activeCollection === 'undefined') {
             return;
         }
         let collectionQuery = '';
@@ -274,14 +275,11 @@ export default function Gallery() {
                 collectionQuery += activeCollection;
             }
         }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { collection, ...rest } = router.query ?? {};
 
         router.replace({
             pathname: PAGES.GALLERY,
             query: {
                 ...(collectionQuery ? { collection: collectionQuery } : {}),
-                ...rest,
             },
         });
     }, [activeCollection]);
