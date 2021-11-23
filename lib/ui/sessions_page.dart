@@ -182,8 +182,18 @@ class _SessionsPageState extends State<SessionsPage> {
       );
     }
     final parsedUA = _userAgentParser.parseResult(session.userAgent);
-    return Text(parsedUA.browser == null
-        ? "Mobile"
-        : "Browser (" + parsedUA.browser.name + ")");
+    if (session.userAgent.contains("ente")) {
+      return Text("Desktop");
+    } else if (parsedUA.browser == null) {
+      if (session.userAgent.contains("Android")) {
+        return Text("Android");
+      }
+      if (session.userAgent.contains("iPhone")) {
+        return Text("iPhone");
+      }
+      return Text("Mobile");
+    } else {
+      return Text("Browser (" + parsedUA.browser.name + ")");
+    }
   }
 }
