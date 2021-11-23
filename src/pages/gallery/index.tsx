@@ -285,7 +285,8 @@ export default function Gallery() {
     }, [activeCollection]);
 
     useEffect(() => {
-        if (router.isReady) {
+        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        if (router.isReady && key) {
             checkSubscriptionPurchase(setDialogMessage, router, setLoading);
         }
     }, [router.isReady]);
