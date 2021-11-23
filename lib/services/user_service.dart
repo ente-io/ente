@@ -139,6 +139,23 @@ class UserService {
     }
   }
 
+  Future<void> terminateSession(String token) async {
+    try {
+      await _dio.delete(_config.getHttpEndpoint() + "/users/session",
+          options: Options(
+            headers: {
+              "X-Auth-Token": _config.getToken(),
+            },
+          ),
+          queryParameters: {
+            "token": token,
+          });
+    } on DioError catch (e) {
+      _logger.info(e);
+      rethrow;
+    }
+  }
+
   Future<void> logout(BuildContext context) async {
     final dialog = createProgressDialog(context, "logging out...");
     await dialog.show();
