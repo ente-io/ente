@@ -187,7 +187,8 @@ class SuperLogging {
     $.info("setting sentry user ID to: $userID");
   }
 
-  static Future<void> _sendErrorToSentry(Object? error, StackTrace? stack) async {
+  static Future<void> _sendErrorToSentry(
+      Object? error, StackTrace? stack) async {
     try {
       await Sentry.captureException(
         error,
@@ -315,11 +316,14 @@ class SuperLogging {
       // sort files based on ascending order of date (older first)
       files.sort((a, b) => dates[a]!.compareTo(dates[b]!));
 
-      var extra = files.length - config.maxLogFiles;
-      var toDelete = files.sublist(0, extra);
+      final extra = files.length - config.maxLogFiles;
+      final toDelete = files.sublist(0, extra);
 
-      for (var file in toDelete) {
+      for (final file in toDelete) {
         try {
+          $.fine(
+            "deleting log file ${file.path}",
+          );
           await file.delete();
         } catch (ignore) {}
       }
