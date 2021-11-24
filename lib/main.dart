@@ -6,17 +6,14 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/app.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
-import 'package:photos/l10n/l10n.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
@@ -30,7 +27,6 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/app_lock.dart';
-import 'package:photos/ui/home_widget.dart';
 import 'package:photos/ui/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -49,37 +45,6 @@ const kBGTaskTimeout = Duration(seconds: 25);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 
-final themeData = ThemeData(
-  fontFamily: 'Ubuntu',
-  brightness: Brightness.dark,
-  hintColor: Colors.grey,
-  accentColor: Color.fromRGBO(45, 194, 98, 0.2),
-  buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
-  buttonTheme: ButtonThemeData().copyWith(
-    buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
-  ),
-  toggleableActiveColor: Colors.green[400],
-  scaffoldBackgroundColor: Colors.black,
-  backgroundColor: Colors.black,
-  appBarTheme: AppBarTheme().copyWith(
-    color: Color.fromRGBO(10, 20, 20, 1.0),
-  ),
-  cardColor: Color.fromRGBO(10, 15, 15, 1.0),
-  dialogTheme: DialogTheme().copyWith(
-    backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
-  ),
-  textSelectionTheme: TextSelectionThemeData().copyWith(
-    cursorColor: Colors.white.withOpacity(0.5),
-  ),
-  inputDecorationTheme: InputDecorationTheme().copyWith(
-    focusedBorder: UnderlineInputBorder(
-      borderSide: BorderSide(
-        color: Color.fromRGBO(45, 194, 98, 1.0),
-      ),
-    ),
-  ),
-);
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _runInForeground();
@@ -91,6 +56,7 @@ Future<void> _runInForeground() async {
     _logger.info("Starting app in foreground");
     await _init(false);
     _scheduleFGSync();
+    _configureBackgroundFetch();
     runApp(AppLock(
       builder: (args) => EnteApp(),
       lockScreen: LockScreen(),
@@ -246,76 +212,6 @@ Future<void> _killBGTask([String taskId]) async {
   Isolate.current.kill(priority: Isolate.immediate);
 }
 
-class EnteApp extends StatefulWidget {
-  static const _homeWidget = HomeWidget();
-
-  @override
-  _EnteAppState createState() => _EnteAppState();
-}
-
-class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _configureBackgroundFetch();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "ente",
-      theme: themeData,
-      home: EnteApp._homeWidget,
-      debugShowCheckedModeBanner: false,
-      navigatorKey: Network.instance.getAlice().getNavigatorKey(),
-      builder: EasyLoading.init(),
-      supportedLocales: L10n.all,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-    );
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      AppLifecycleService.instance.onAppInForeground();
-      _sync();
-    } else {
-      AppLifecycleService.instance.onAppInBackground();
-    }
-  }
-
-  void _configureBackgroundFetch() {
-    BackgroundFetch.configure(
-        BackgroundFetchConfig(
-          minimumFetchInterval: 15,
-          forceAlarmManager: false,
-          stopOnTerminate: false,
-          startOnBoot: true,
-          enableHeadless: true,
-          requiresBatteryNotLow: false,
-          requiresCharging: false,
-          requiresStorageNotLow: false,
-          requiresDeviceIdle: false,
-          requiredNetworkType: NetworkType.NONE,
-        ), (String taskId) async {
-      await _runInBackground(taskId);
-    }, (taskId) {
-      _logger.info("BG task timeout");
-      _killBGTask(taskId);
-    }).then((int status) {
-      _logger.info('[BackgroundFetch] configure success: $status');
-    }).catchError((e) {
-      _logger.info('[BackgroundFetch] configure ERROR: $e');
-    });
-  }
-}
-
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (_initializationStatus == null) {
     // App is dead
@@ -341,5 +237,30 @@ void _scheduleSuicide(Duration duration, [String taskID]) {
   Future.delayed(duration, () {
     _logger.warning("TLE");
     _killBGTask(taskID);
+  });
+}
+
+void _configureBackgroundFetch() {
+  BackgroundFetch.configure(
+      BackgroundFetchConfig(
+        minimumFetchInterval: 15,
+        forceAlarmManager: false,
+        stopOnTerminate: false,
+        startOnBoot: true,
+        enableHeadless: true,
+        requiresBatteryNotLow: false,
+        requiresCharging: false,
+        requiresStorageNotLow: false,
+        requiresDeviceIdle: false,
+        requiredNetworkType: NetworkType.NONE,
+      ), (String taskId) async {
+    await _runInBackground(taskId);
+  }, (taskId) {
+    _logger.info("BG task timeout");
+    _killBGTask(taskId);
+  }).then((int status) {
+    _logger.info('[BackgroundFetch] configure success: $status');
+  }).catchError((e) {
+    _logger.info('[BackgroundFetch] configure ERROR: $e');
   });
 }
