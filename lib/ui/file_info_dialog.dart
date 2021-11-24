@@ -182,9 +182,12 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              file.getDisplayName(),
+            Flexible(
+              child: Text(
+                file.getDisplayName(),
+              ),
             ),
+            Padding(padding: EdgeInsets.all(8)),
             Icon(
               Icons.edit,
               color: Colors.white.withOpacity(0.85),
