@@ -67,18 +67,23 @@ class _SessionsPageState extends State<SessionsPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      session.ip,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
-                        fontSize: 14,
+                    Flexible(
+                      child: Text(
+                        session.ip,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 14,
+                        ),
                       ),
                     ),
-                    Text(
-                      getFormattedTime(lastUsedTime),
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
-                        fontSize: 12,
+                    Padding(padding: EdgeInsets.all(8)),
+                    Flexible(
+                      child: Text(
+                        getFormattedTime(lastUsedTime),
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ],
