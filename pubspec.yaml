@@ -97,7 +97,6 @@ dependencies:
   syncfusion_flutter_sliders: ^19.2.49
   uni_links: ^0.5.1
   url_launcher: ^6.0.3
-  user_agent_parser: ^0.0.1+2
   uuid: ^3.0.4
   video_player:
     path: thirdparty/plugins/packages/video_player/video_player

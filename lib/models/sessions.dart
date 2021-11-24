@@ -52,24 +52,33 @@ class Session {
   final String token;
   final int creationTime;
   final String ip;
-  final String userAgent;
+  final String ua;
+  final String prettyUA;
   final int lastUsedTime;
 
-  Session(this.token, this.creationTime, this.ip, this.userAgent,
-      this.lastUsedTime);
+  Session(
+    this.token,
+    this.creationTime,
+    this.ip,
+    this.ua,
+    this.prettyUA,
+    this.lastUsedTime,
+  );
 
   Session copyWith({
     String token,
     int creationTime,
     String ip,
-    String userAgent,
+    String ua,
+    String prettyUA,
     int lastUsedTime,
   }) {
     return Session(
       token ?? this.token,
       creationTime ?? this.creationTime,
       ip ?? this.ip,
-      userAgent ?? this.userAgent,
+      ua ?? this.ua,
+      prettyUA ?? this.prettyUA,
       lastUsedTime ?? this.lastUsedTime,
     );
   }
@@ -79,7 +88,8 @@ class Session {
       'token': token,
       'creationTime': creationTime,
       'ip': ip,
-      'userAgent': userAgent,
+      'ua': ua,
+      'prettyUA': prettyUA,
       'lastUsedTime': lastUsedTime,
     };
   }
@@ -89,7 +99,8 @@ class Session {
       map['token'],
       map['creationTime'],
       map['ip'],
-      map['userAgent'],
+      map['ua'],
+      map['prettyUA'],
       map['lastUsedTime'],
     );
   }
@@ -101,7 +112,7 @@ class Session {
 
   @override
   String toString() {
-    return 'Session(token: $token, creationTime: $creationTime, ip: $ip, userAgent: $userAgent, lastUsedTime: $lastUsedTime)';
+    return 'Session(token: $token, creationTime: $creationTime, ip: $ip, ua: $ua, prettyUA: $prettyUA, lastUsedTime: $lastUsedTime)';
   }
 
   @override
@@ -112,7 +123,8 @@ class Session {
         other.token == token &&
         other.creationTime == creationTime &&
         other.ip == ip &&
-        other.userAgent == userAgent &&
+        other.ua == ua &&
+        other.prettyUA == prettyUA &&
         other.lastUsedTime == lastUsedTime;
   }
 
@@ -121,7 +133,8 @@ class Session {
     return token.hashCode ^
         creationTime.hashCode ^
         ip.hashCode ^
-        userAgent.hashCode ^
+        ua.hashCode ^
+        prettyUA.hashCode ^
         lastUsedTime.hashCode;
   }
 }

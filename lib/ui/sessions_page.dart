@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/sessions.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:user_agent_parser/user_agent_parser.dart';
 
 class SessionsPage extends StatefulWidget {
   SessionsPage({Key key}) : super(key: key);
@@ -17,7 +15,6 @@ class SessionsPage extends StatefulWidget {
 }
 
 class _SessionsPageState extends State<SessionsPage> {
-  final _userAgentParser = UserAgentParser();
   Sessions _sessions;
 
   @override
@@ -44,7 +41,11 @@ class _SessionsPageState extends State<SessionsPage> {
     for (final session in _sessions.sessions) {
       rows.add(_getSessionWidget(session));
     }
-    return Column(children: rows);
+    return SingleChildScrollView(
+      child: Column(
+        children: rows,
+      ),
+    );
   }
 
   Widget _getSessionWidget(Session session) {
@@ -58,23 +59,30 @@ class _SessionsPageState extends State<SessionsPage> {
           },
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                _getUAWidget(session),
+                Padding(padding: EdgeInsets.all(4)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _getUAWidget(session),
-                    Padding(padding: EdgeInsets.all(4)),
                     Text(
                       session.ip,
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.8),
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      getFormattedTime(lastUsedTime),
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 12,
                       ),
                     ),
                   ],
                 ),
-                Text(getFormattedTime(lastUsedTime)),
               ],
             ),
           ),
@@ -117,7 +125,7 @@ class _SessionsPageState extends State<SessionsPage> {
             ),
             Padding(padding: EdgeInsets.all(8)),
             Text(
-              session.userAgent,
+              session.ua,
               style: TextStyle(
                 color: Colors.white.withOpacity(0.7),
                 fontSize: 14,
@@ -181,20 +189,6 @@ class _SessionsPageState extends State<SessionsPage> {
         ),
       );
     }
-    if (session.userAgent.contains("ente")) {
-      return Text("Desktop");
-    }
-    final parsedUA = _userAgentParser.parseResult(session.userAgent);
-    if (parsedUA.browser == null) {
-      if (session.userAgent.contains("Android")) {
-        return Text("Android");
-      }
-      if (session.userAgent.contains("iPhone")) {
-        return Text("iPhone");
-      }
-      return Text("Mobile");
-    } else {
-      return Text("Browser (" + parsedUA.browser.name + ")");
-    }
+    return Text(session.prettyUA);
   }
 }

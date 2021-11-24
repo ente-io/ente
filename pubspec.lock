@@ -1189,13 +1189,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
-  user_agent_parser:
-    dependency: "direct main"
-    description:
-      name: user_agent_parser
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.1+2"
   uuid:
     dependency: "direct main"
     description:
