@@ -75,8 +75,9 @@ export default function Credentials() {
                 }
                 await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
                 await decryptAndStoreToken(key);
-
-                router.push(PAGES.GALLERY);
+                const redirectUrl = appContext.redirectUrl;
+                appContext.setRedirectUrl(null);
+                router.push(redirectUrl ?? PAGES.GALLERY);
             } catch (e) {
                 logError(e, 'user entered a wrong password');
                 setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
