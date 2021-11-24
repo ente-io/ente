@@ -123,7 +123,7 @@ class Configuration {
     if (SyncService.instance.isSyncInProgress()) {
       SyncService.instance.stopSync();
       try {
-        await SyncService.instance.existingSync();
+        await SyncService.instance.existingSync().timeout(Duration(seconds: 5));
       } catch (e) {
         // ignore
       }
