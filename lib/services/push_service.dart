@@ -49,7 +49,7 @@ class PushService {
         DateTime.now().microsecondsSinceEpoch -
                 (_prefs.getInt(kLastFCMTokenUpdationTime) ?? 0) >
             kFCMTokenUpdationIntervalInMicroSeconds;
-    if (_prefs.getString(fcmToken) != fcmToken ||
+    if (_prefs.getString(kFCMPushToken) != fcmToken ||
         shouldForceRefreshServerToken) {
       final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
       try {
