@@ -152,6 +152,8 @@ const PhotoFrame = ({
             .map((item, index) => ({
                 ...item,
                 dataIndex: index,
+                w: window.innerWidth,
+                h: window.innerHeight,
                 ...(item.deleteBy && {
                     title: constants.AUTOMATIC_BIN_DELETE_MESSAGE(
                         formatDateRelative(item.deleteBy / 1000)
