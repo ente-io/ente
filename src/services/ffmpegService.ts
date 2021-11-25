@@ -19,6 +19,8 @@ class FFmpegService {
             this.isLoading = null;
         } catch (e) {
             logError(e, 'ffmpeg load failed');
+            this.ffmpeg = null;
+            this.isLoading = null;
             throw e;
         }
     }
