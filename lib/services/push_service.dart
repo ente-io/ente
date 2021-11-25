@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -28,9 +30,28 @@ class PushService {
   PushService._privateConstructor();
 
   Future<void> init() async {
+    if (!Platform.isIOS) {
+      return;
+    }
     _prefs = await SharedPreferences.getInstance();
     await Firebase.initializeApp();
     FirebaseMessaging messaging = FirebaseMessaging.instance;
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      _logger.info("Got a message whilst in the foreground!");
+      _handleForegroundPushMessage(message);
+    });
+    if (Configuration.instance.hasConfiguredAccount()) {
+      await _requestPermission(messaging);
+      await _configurePushToken();
+    } else {
+      Bus.instance.on<SignedInEvent>().listen((_) async {
+        await _requestPermission(messaging);
+        _configurePushToken();
+      });
+    }
+  }
+
+  Future<void> _requestPermission(FirebaseMessaging messaging) async {
     await messaging.requestPermission(
       alert: true,
       announcement: false,
@@ -40,17 +61,6 @@ class PushService {
       provisional: false,
       sound: true,
     );
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      _logger.info("Got a message whilst in the foreground!");
-      _handlePushMessage(message);
-    });
-    if (Configuration.instance.hasConfiguredAccount()) {
-      await _configurePushToken();
-    } else {
-      Bus.instance.on<SignedInEvent>().listen((_) {
-        _configurePushToken();
-      });
-    }
   }
 
   Future<void> _configurePushToken() async {
@@ -90,7 +100,7 @@ class PushService {
     );
   }
 
-  void _handlePushMessage(RemoteMessage message) {
+  void _handleForegroundPushMessage(RemoteMessage message) {
     _logger.info("Message data: ${message.data}");
     if (message.notification != null) {
       _logger.info(
@@ -103,6 +113,6 @@ class PushService {
 
   static bool shouldSync(RemoteMessage message) {
     return message.data.containsKey(kPushAction) &&
-      message.data[kPushAction] == kSync;
+        message.data[kPushAction] == kSync;
   }
 }
