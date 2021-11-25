@@ -30,9 +30,6 @@ class PushService {
   PushService._privateConstructor();
 
   Future<void> init() async {
-    if (!Platform.isIOS) {
-      return;
-    }
     _prefs = await SharedPreferences.getInstance();
     await Firebase.initializeApp();
     FirebaseMessaging messaging = FirebaseMessaging.instance;

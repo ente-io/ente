@@ -130,9 +130,12 @@ Future<void> _init(bool isBackground) async {
   await SyncService.instance.init();
   await MemoriesService.instance.init();
   await LocalSettings.instance.init();
-  PushService.instance.init().then((_) {
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  });
+  if (Platform.isIOS) {
+    PushService.instance.init().then((_) {
+      FirebaseMessaging.onBackgroundMessage(
+          _firebaseMessagingBackgroundHandler);
+    });
+  }
   FeatureFlagService.instance.init();
   _logger.info("Initialization done");
   _initializationStatus.complete();
