@@ -211,9 +211,11 @@ export default function Gallery() {
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
+
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
+            appContext.setRedirectUrl(router.asPath);
             router.push(PAGES.ROOT);
             return;
         }
@@ -233,11 +235,6 @@ export default function Gallery() {
             setCollections(collections);
             setTrash(trash);
             await setDerivativeState(collections, files);
-            await checkSubscriptionPurchase(
-                setDialogMessage,
-                router,
-                setLoading
-            );
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -281,6 +278,13 @@ export default function Gallery() {
         const href = `/gallery${collectionURL}`;
         router.push(href, undefined, { shallow: true });
     }, [activeCollection]);
+
+    useEffect(() => {
+        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        if (router.isReady && key) {
+            checkSubscriptionPurchase(setDialogMessage, router, setLoading);
+        }
+    }, [router.isReady]);
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
