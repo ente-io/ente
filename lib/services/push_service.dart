@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -32,32 +30,17 @@ class PushService {
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     await Firebase.initializeApp();
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       _logger.info("Got a message whilst in the foreground!");
       _handleForegroundPushMessage(message);
     });
     if (Configuration.instance.hasConfiguredAccount()) {
-      await _requestPermission(messaging);
       await _configurePushToken();
     } else {
       Bus.instance.on<SignedInEvent>().listen((_) async {
-        await _requestPermission(messaging);
         _configurePushToken();
       });
     }
-  }
-
-  Future<void> _requestPermission(FirebaseMessaging messaging) async {
-    await messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
   }
 
   Future<void> _configurePushToken() async {
