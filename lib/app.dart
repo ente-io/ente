@@ -1,7 +1,9 @@
+import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/l10n/l10n.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -42,17 +44,27 @@ final themeData = ThemeData(
 class EnteApp extends StatefulWidget {
   static const _homeWidget = HomeWidget();
 
-  EnteApp({Key key}) : super(key: key);
+  final Future<void> Function(String) runBackgroundTask;
+  final Future<void> Function(String) killBackgroundTask;
+
+  EnteApp(
+    this.runBackgroundTask,
+    this.killBackgroundTask, {
+    Key key,
+  }) : super(key: key);
 
   @override
   _EnteAppState createState() => _EnteAppState();
 }
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
+  final _logger = Logger("EnteApp");
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _configureBackgroundFetch();
   }
 
   @override
@@ -82,5 +94,30 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     } else {
       AppLifecycleService.instance.onAppInBackground();
     }
+  }
+
+  void _configureBackgroundFetch() {
+    BackgroundFetch.configure(
+        BackgroundFetchConfig(
+          minimumFetchInterval: 15,
+          forceAlarmManager: false,
+          stopOnTerminate: false,
+          startOnBoot: true,
+          enableHeadless: true,
+          requiresBatteryNotLow: false,
+          requiresCharging: false,
+          requiresStorageNotLow: false,
+          requiresDeviceIdle: false,
+          requiredNetworkType: NetworkType.NONE,
+        ), (String taskId) async {
+      await widget.runBackgroundTask(taskId);
+    }, (taskId) {
+      _logger.info("BG task timeout");
+      widget.killBackgroundTask(taskId);
+    }).then((int status) {
+      _logger.info('[BackgroundFetch] configure success: $status');
+    }).catchError((e) {
+      _logger.info('[BackgroundFetch] configure ERROR: $e');
+    });
   }
 }

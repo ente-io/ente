@@ -56,9 +56,8 @@ Future<void> _runInForeground() async {
     _logger.info("Starting app in foreground");
     await _init(false);
     _scheduleFGSync();
-    _configureBackgroundFetch();
     runApp(AppLock(
-      builder: (args) => EnteApp(),
+      builder: (args) => EnteApp(_runBackgroundTask, _killBGTask),
       lockScreen: LockScreen(),
       enabled: Configuration.instance.shouldShowLockScreen(),
       themeData: themeData,
@@ -69,14 +68,14 @@ Future<void> _runInForeground() async {
 Future _runInBackground(String taskId) async {
   if (_initializationStatus == null) {
     _runWithLogs(() async {
-      _backgroundTask(taskId);
+      _runBackgroundTask(taskId);
     }, prefix: "[bg]");
   } else {
-    _backgroundTask(taskId);
+    _runBackgroundTask(taskId);
   }
 }
 
-void _backgroundTask(String taskId) async {
+Future<void> _runBackgroundTask(String taskId) async {
   await Future.delayed(Duration(seconds: 3));
   if (await _isRunningInForeground()) {
     _logger.info("FG task running, skipping BG task");
@@ -237,30 +236,5 @@ void _scheduleSuicide(Duration duration, [String taskID]) {
   Future.delayed(duration, () {
     _logger.warning("TLE");
     _killBGTask(taskID);
-  });
-}
-
-void _configureBackgroundFetch() {
-  BackgroundFetch.configure(
-      BackgroundFetchConfig(
-        minimumFetchInterval: 15,
-        forceAlarmManager: false,
-        stopOnTerminate: false,
-        startOnBoot: true,
-        enableHeadless: true,
-        requiresBatteryNotLow: false,
-        requiresCharging: false,
-        requiresStorageNotLow: false,
-        requiresDeviceIdle: false,
-        requiredNetworkType: NetworkType.NONE,
-      ), (String taskId) async {
-    await _runInBackground(taskId);
-  }, (taskId) {
-    _logger.info("BG task timeout");
-    _killBGTask(taskId);
-  }).then((int status) {
-    _logger.info('[BackgroundFetch] configure success: $status');
-  }).catchError((e) {
-    _logger.info('[BackgroundFetch] configure ERROR: $e');
   });
 }
