@@ -44,7 +44,7 @@ export async function generateThumbnail(
                     );
                 } catch (e) {
                     logError(e, 'failed to generate thumbnail using ffmpeg', {
-                        type: fileTypeInfo.exactType,
+                        fileFormat: fileTypeInfo.exactType,
                     });
                     canvas = await generateVideoThumbnail(file);
                 }
