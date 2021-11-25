@@ -14,6 +14,10 @@ export function runningInBrowser() {
     return typeof window !== 'undefined';
 }
 
+export function runningInWorker() {
+    return typeof importScripts === 'function';
+}
+
 export async function sleep(time: number) {
     await new Promise((resolve) => {
         setTimeout(() => resolve(null), time);

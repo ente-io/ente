@@ -5,12 +5,21 @@ import {
 } from '@tensorflow-models/blazeface';
 import * as tf from '@tensorflow/tfjs-core';
 import { GraphModel } from '@tensorflow/tfjs';
-import { AlignedFace } from 'utils/machineLearning/types';
-import { Box } from '../../../thirdparty/face-api/classes';
+import {
+    DetectedFace,
+    FaceDetectionMethod,
+    FaceDetectionService,
+    Versioned,
+} from 'utils/machineLearning/types';
+import { Box, Point } from '../../../thirdparty/face-api/classes';
 
-class TFJSFaceDetectionService {
+class TFJSFaceDetectionService implements FaceDetectionService {
     private blazeFaceModel: BlazeFaceModel;
     private blazeFaceBackModel: GraphModel;
+    private detectionMethod: Versioned<FaceDetectionMethod> = {
+        value: 'BlazeFace',
+        version: 1,
+    };
 
     private desiredLeftEye = [0.36, 0.45];
     private desiredFaceSize;
@@ -112,7 +121,7 @@ class TFJSFaceDetectionService {
         });
     }
 
-    public async detectFaces(image: tf.Tensor3D) {
+    public async detectFacesUsingModel(image: tf.Tensor3D) {
         const resizedImage = tf.image.resizeBilinear(image, [256, 256]);
         const reshapedImage = resizedImage.reshape([
             1,
@@ -126,24 +135,28 @@ class TFJSFaceDetectionService {
         return results;
     }
 
-    public async estimateFaces(
-        image: tf.Tensor3D
-    ): Promise<Array<AlignedFace>> {
+    public async detectFaces(image: tf.Tensor3D): Promise<Array<DetectedFace>> {
         const normalizedFaces = await this.blazeFaceModel.estimateFaces(image);
-        const alignedFaces = normalizedFaces.map((normFace) => {
-            return {
-                ...normFace,
-                box: new Box({
-                    left: normFace.topLeft[0],
-                    top: normFace.topLeft[1],
-                    right: normFace.bottomRight[0],
-                    bottom: normFace.bottomRight[1],
-                }),
-                alignedBox: this.getAlignedFace(normFace),
-            };
-        });
+        const detectedFaces: Array<DetectedFace> = normalizedFaces.map(
+            (normalizedFace) => {
+                const landmarks = normalizedFace.landmarks as number[][];
+                return {
+                    box: new Box({
+                        left: normalizedFace.topLeft[0],
+                        top: normalizedFace.topLeft[1],
+                        right: normalizedFace.bottomRight[0],
+                        bottom: normalizedFace.bottomRight[1],
+                    }),
+                    landmarks:
+                        landmarks &&
+                        landmarks.map((l) => new Point(l[0], l[1])),
+                    probability: normalizedFace.probability as number,
+                    detectionMethod: this.detectionMethod,
+                } as DetectedFace;
+            }
+        );
 
-        return alignedFaces;
+        return detectedFaces;
     }
 
     public async dispose() {

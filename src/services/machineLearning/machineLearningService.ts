@@ -2,7 +2,6 @@ import { File, getLocalFiles } from 'services/fileService';
 import DownloadManager from 'services/downloadManager';
 
 import * as tf from '@tensorflow/tfjs-core';
-import TSNE from 'tsne-js';
 import '@tensorflow/tfjs-backend-webgl';
 import '@tensorflow/tfjs-backend-wasm';
 import { setWasmPaths } from '@tensorflow/tfjs-backend-wasm';
@@ -11,181 +10,70 @@ import '@tensorflow/tfjs-backend-cpu';
 import TFJSFaceDetectionService from './tfjsFaceDetectionService';
 import TFJSFaceEmbeddingService from './tfjsFaceEmbeddingService';
 import {
-    AlignedFace,
-    Cluster,
-    ClustersWithNoise,
-    FaceAlignmentMode,
-    FaceImage,
-    FaceWithEmbedding,
-    HdbscanResults,
+    Face,
+    FaceAlignmentService,
+    MlFileData,
+    MLSyncConfig,
+    MLSyncContext,
     MLSyncResult,
-    NearestCluster,
-    TSNEData,
 } from 'utils/machineLearning/types';
 
 import * as jpeg from 'jpeg-js';
 import ClusteringService from './clusteringService';
 
-// import './faceEnvPatch';
-// import FAPIFaceEmbeddingService from './fapiFaceEmbeddingService';
-import FAPIFaceLandmarksService from './fapiFaceLandmarksService';
-// import * as faceapi from 'face-api.js';
-import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
-import { TreeNode } from 'hdbscan';
-import { extractFaces } from 'utils/machineLearning';
-import { Box } from '../../../thirdparty/face-api/classes';
-import { euclideanDistance } from '../../../thirdparty/face-api/euclideanDistance';
-import { extractArcfaceAlignedFaceImages } from 'utils/machineLearning/faceAlign';
+import { toTSNE } from 'utils/machineLearning/visualization';
+import { mlFacesStore } from 'utils/storage/localForage';
+import ArcfaceAlignmentService from './arcfaceAlignmentService';
 
 class MachineLearningService {
     private faceDetectionService: TFJSFaceDetectionService;
-    private faceLandmarkService: FAPIFaceLandmarksService;
+    // private faceLandmarkService: FAPIFaceLandmarksService;
+    private faceAlignmentService: FaceAlignmentService;
     private faceEmbeddingService: TFJSFaceEmbeddingService;
     // private faceEmbeddingService: FAPIFaceEmbeddingService;
     private clusteringService: ClusteringService;
 
-    private clusterFaceDistance = 0.4;
-    private maxFaceDistance = 0.5;
-    private minClusterSize = 5;
-    private minFaceSize = 32;
-    private batchSize = 200;
-    private mlFaceSize = 112;
-    private faceAlignmentMode: FaceAlignmentMode = 'arcface';
-
-    private allFaces: FaceWithEmbedding[];
-    private clusteringResults: HdbscanResults;
-    private clustersWithNoise: ClustersWithNoise;
-    private allFaceImages: FaceImage[];
-
     public constructor() {
-        this.faceDetectionService = new TFJSFaceDetectionService(
-            this.mlFaceSize
-        );
-        this.faceLandmarkService = new FAPIFaceLandmarksService(
-            this.mlFaceSize
-        );
-        this.faceEmbeddingService = new TFJSFaceEmbeddingService();
-        // this.faceEmbeddingService = new FAPIFaceEmbeddingService(
-        //     this.mlFaceSize
-        // );
-        this.clusteringService = new ClusteringService();
-
-        this.allFaces = [];
-        this.allFaceImages = [];
-        this.clusteringResults = {
-            clusters: [],
-            noise: [],
-        };
-        this.clustersWithNoise = {
-            clusters: [],
-            noise: [],
-        };
-    }
-
-    public async init(
-        clusterFaceDistance: number,
-        minClusterSize: number,
-        minFaceSize: number,
-        batchSize: number,
-        maxFaceDistance: number
-    ) {
-        this.clusterFaceDistance = clusterFaceDistance;
-        this.minClusterSize = minClusterSize;
-        this.minFaceSize = minFaceSize;
-        this.batchSize = batchSize;
-        this.maxFaceDistance = maxFaceDistance;
-
         setWasmPaths('/js/tfjs/');
-        await tf.ready();
 
-        console.log('01 TF Memory stats: ', tf.memory());
-        await this.faceDetectionService.init();
-        // await faceapi.nets.ssdMobilenetv1.loadFromUri('/models/face-api/');
-        // // console.log('02 TF Memory stats: ', tf.memory());
-        await this.faceLandmarkService.init();
-        // await faceapi.nets.faceLandmark68Net.loadFromUri('/models/face-api/');
-        // // console.log('03 TF Memory stats: ', tf.memory());
-        await this.faceEmbeddingService.init();
-        // await faceapi.nets.faceRecognitionNet.loadFromUri('/models/face-api/');
-        console.log('04 TF Memory stats: ', tf.memory());
+        this.faceDetectionService = new TFJSFaceDetectionService();
+        // this.faceLandmarkService = new FAPIFaceLandmarksService();
+        this.faceAlignmentService = new ArcfaceAlignmentService();
+        this.faceEmbeddingService = new TFJSFaceEmbeddingService();
+        // this.faceEmbeddingService = new FAPIFaceEmbeddingService();
+        this.clusteringService = new ClusteringService();
     }
 
-    // private getClusterSummary(cluster: ClusterFaces): FaceDescriptor {
-    //     // const faceScore = (f) => f.detection.score; // f.alignedRect.box.width *
-
-    //     // return cluster
-    //     //     .map((f) => this.allFaces[f].face)
-    //     //     .sort((f1, f2) => faceScore(f2) - faceScore(f1))[0].descriptor;
-
-    //     const descriptors = cluster.map(
-    //         (f) => this.allFaces[f].embedding
-    //     );
-
-    //     return f32Average(descriptors);
-    // }
-
-    private updateClusterSummaries() {
-        if (
-            !this.clusteringResults ||
-            !this.clusteringResults.clusters ||
-            this.clusteringResults.clusters.length < 1
-        ) {
-            return;
+    public async sync(
+        token: string,
+        config: MLSyncConfig
+    ): Promise<MLSyncResult> {
+        if (!token) {
+            throw Error('Token needed by ml service to sync file');
         }
 
-        const resultClusters = this.clusteringResults.clusters;
+        const syncContext = new MLSyncContext(token, config);
 
-        resultClusters.forEach((resultCluster) => {
-            this.clustersWithNoise.clusters.push({
-                faces: resultCluster,
-                // summary: this.getClusterSummary(resultCluster),
-            });
-        });
-    }
+        await this.getNewFiles(syncContext);
 
-    private getNearestCluster(noise: FaceWithEmbedding): NearestCluster {
-        let nearest: Cluster = null;
-        let nearestDist = 100000;
-        this.clustersWithNoise.clusters.forEach((c) => {
-            const dist = euclideanDistance(noise.embedding, c.summary);
-            if (dist < nearestDist) {
-                nearestDist = dist;
-                nearest = c;
-            }
-        });
-
-        console.log('nearestDist: ', nearestDist);
-        return { cluster: nearest, distance: nearestDist };
-    }
-
-    private assignNoiseWithinLimit() {
-        if (
-            !this.clusteringResults ||
-            !this.clusteringResults.noise ||
-            this.clusteringResults.noise.length < 1
-        ) {
-            return;
+        if (syncContext.files.length > 0) {
+            await this.runMLModels(syncContext);
+        } else {
+            await this.runClustering(syncContext);
         }
 
-        const noise = this.clusteringResults.noise;
+        console.log('Final TF Memory stats: ', tf.memory());
 
-        noise.forEach((n) => {
-            const noiseFace = this.allFaces[n];
-            const nearest = this.getNearestCluster(noiseFace);
+        if (syncContext.config.tsne) {
+            this.runTSNE(syncContext);
+        }
 
-            if (nearest.cluster && nearest.distance < this.maxFaceDistance) {
-                console.log('Adding noise to cluser: ', n, nearest.distance);
-                nearest.cluster.faces.push(n);
-            } else {
-                console.log(
-                    'No cluster for noise: ',
-                    n,
-                    'within distance: ',
-                    this.maxFaceDistance
-                );
-                this.clustersWithNoise.noise.push(n);
-            }
-        });
+        return {
+            nFiles: syncContext.files.length,
+            nFaces: syncContext.faces.length,
+            nClusters: syncContext.clustersWithNoise?.clusters.length,
+            nNoise: syncContext.clustersWithNoise?.noise.length,
+        };
     }
 
     private getUniqueFiles(files: File[], limit: number) {
@@ -196,31 +84,34 @@ class MachineLearningService {
             }
         }
 
-        return uniqueFiles;
+        return [...uniqueFiles.values()];
     }
 
-    public async sync(token: string): Promise<MLSyncResult> {
-        if (!token) {
-            throw Error('Token needed by ml service to sync file');
-        }
-
+    private async getNewFiles(syncContext: MLSyncContext) {
         const existingFiles = await getLocalFiles();
         existingFiles.sort(
             (a, b) => b.metadata.creationTime - a.metadata.creationTime
         );
-        const files = this.getUniqueFiles(existingFiles, this.batchSize);
+        syncContext.files = this.getUniqueFiles(
+            existingFiles,
+            syncContext.config.batchSize
+        );
         console.log(
             'Got unique files: ',
-            files.size,
+            syncContext.files.length,
             'for batchSize: ',
-            this.batchSize
+            syncContext.config.batchSize
         );
+    }
 
-        this.allFaces = [];
-        for (const file of files.values()) {
+    private async runMLModels(syncContext: MLSyncContext) {
+        await this.initMLModels();
+
+        syncContext.faces = [];
+        for (const file of syncContext.files) {
             try {
-                const result = await this.syncFile(file, token);
-                this.allFaces = this.allFaces.concat(result);
+                const result = await this.syncFile(syncContext, file);
+                syncContext.faces = syncContext.faces.concat(result);
                 // this.allFaceImages = this.allFaceImages.concat(
                 //     result.faceImages
                 // );
@@ -233,132 +124,16 @@ class MachineLearningService {
                 );
             }
         }
-        console.log('allFaces: ', this.allFaces);
+        console.log('allFaces: ', syncContext.faces);
         // console.log('allDescriptors: ', this.allFaces.map(f => Array.from(f.face.descriptor)));
+        await this.disposeMLModels();
+    }
 
-        await this.faceDetectionService.dispose();
-        // faceapi.nets.ssdMobilenetv1.dispose();
-        // // console.log('11 TF Memory stats: ', tf.memory());
-        await this.faceLandmarkService.dispose();
-        // // console.log('12 TF Memory stats: ', tf.memory());
-        await this.faceEmbeddingService.dispose();
-        console.log('13 TF Memory stats: ', tf.memory());
-
-        // [0].alignedRect,
-        // this.allFaces[0].alignedRect.box,
-        // this.allFaces[0].alignedRect.imageDims
-
-        // this.clusteringResults = this.clusteringService.clusterUsingDBSCAN(
-        //     this.allFaces.map((f) => Array.from(f.face.descriptor)),
-        //     this.clusterFaceDistance,
-        //     this.minClusterSize
-        // );
-
-        this.clusteringResults = this.clusteringService.clusterUsingHdbscan({
-            input: this.allFaces.map((f) => Array.from(f.embedding)),
-            minClusterSize: this.minClusterSize,
-            debug: true,
-        });
-
-        // const clusterResults = this.clusteringService.clusterUsingKMEANS(
-        //     this.allFaces.map((f) => f.embedding),
-        //     10);
-
-        console.log(
-            '[MLService] Got cluster results: ',
-            this.clusteringResults
+    private async syncFile(syncContext: MLSyncContext, file: File) {
+        const fileUrl = await DownloadManager.getPreview(
+            file,
+            syncContext.token
         );
-
-        this.updateClusterSummaries();
-        this.clustersWithNoise.noise = this.clusteringResults.noise;
-        // this.assignNoiseWithinLimit();
-
-        const treeRoot = this.clusteringResults.debugInfo?.mstBinaryTree;
-        const d3Tree = treeRoot && this.toD3Tree(treeRoot);
-        console.log('d3Tree: ', d3Tree);
-
-        const tsne = this.toTSNE();
-        console.log('tsne: ', tsne);
-        const d3Tsne = tsne && this.toD3Tsne(tsne);
-        console.log('d3Tsne: ', d3Tsne);
-
-        return {
-            allFaces: this.allFaces,
-            clustersWithNoise: this.clustersWithNoise,
-            tree: d3Tree,
-            tsne: d3Tsne,
-        };
-    }
-
-    private toD3Tsne(tsne) {
-        const data: TSNEData = {
-            width: 800,
-            height: 800,
-            dataset: [],
-        };
-        data.dataset = tsne.map((t) => {
-            return {
-                x: (data.width * (t[0] + 1.0)) / 2,
-                y: (data.height * (t[1] + 1.0)) / 2,
-            };
-        });
-
-        return data;
-    }
-
-    private toTSNE() {
-        const input = this.allFaces
-            .slice(0, 200)
-            .map((f) => Array.from(f.embedding));
-        if (!input || input.length < 1) {
-            return null;
-        }
-
-        const model = new TSNE({
-            dim: 2,
-            perplexity: 10.0,
-            learningRate: 10.0,
-            metric: 'euclidean',
-        });
-
-        model.init({
-            data: input,
-            type: 'dense',
-        });
-
-        // `error`,  `iter`: final error and iteration number
-        // note: computation-heavy action happens here
-        model.run();
-
-        // `outputScaled` is `output` scaled to a range of [-1, 1]
-        return model.getOutputScaled();
-    }
-
-    private toD3Tree(treeNode: TreeNode<number>): RawNodeDatum {
-        if (!treeNode.left && !treeNode.right) {
-            return {
-                name: treeNode.data.toString(),
-                attributes: {
-                    face: treeNode.data,
-                },
-            };
-        }
-        const children = [];
-        treeNode.left && children.push(this.toD3Tree(treeNode.left));
-        treeNode.right && children.push(this.toD3Tree(treeNode.right));
-
-        return {
-            name: treeNode.data.toString(),
-            children: children,
-        };
-    }
-
-    private async syncFile(file: File, token: string) {
-        if (!token) {
-            throw Error('Token needed by ml service to sync file');
-        }
-
-        const fileUrl = await DownloadManager.getPreview(file, token);
         console.log('[MLService] Got thumbnail: ', file.id.toString(), fileUrl);
 
         const thumbFile = await fetch(fileUrl);
@@ -369,146 +144,125 @@ class MachineLearningService {
         // console.log('1 TF Memory stats: ', tf.memory());
         const tfImage = tf.browser.fromPixels(decodedImg);
         // console.log('2 TF Memory stats: ', tf.memory());
-        const faces = await this.faceDetectionService.estimateFaces(tfImage);
+        const detectedFaces = await this.faceDetectionService.detectFaces(
+            tfImage
+        );
 
-        const filtertedFaces = faces.filter(
-            (f) => f.box.width > this.minFaceSize
+        const filtertedFaces = detectedFaces.filter(
+            (f) => f.box.width > syncContext.config.faceDetection.minFaceSize
         );
         console.log('[MLService] filtertedFaces: ', filtertedFaces);
         if (filtertedFaces.length < 1) {
-            return [] as Array<FaceWithEmbedding>;
+            return [] as Array<Face>;
         }
 
-        let alignedFaceImages;
-        if (this.faceAlignmentMode === 'arcface') {
-            alignedFaceImages = extractArcfaceAlignedFaceImages(
-                tfImage,
-                filtertedFaces,
-                this.mlFaceSize
-            );
-        } else if (this.faceAlignmentMode === 'fapi') {
-            alignedFaceImages = await this.faceLandmarkService.getAlignedFaces(
-                tfImage,
-                filtertedFaces
-            );
-        }
-        console.log('[MLService] alignedFaceImages: ', alignedFaceImages.shape);
+        const alignedFaces =
+            this.faceAlignmentService.getAlignedFaces(filtertedFaces);
+        console.log('[MLService] alignedFaces: ', alignedFaces);
         // console.log('3 TF Memory stats: ', tf.memory());
 
-        const embeddings = await this.faceEmbeddingService.getEmbeddingsBatch(
-            alignedFaceImages
-        );
-        console.log('[MLService] embeddings: ', embeddings);
+        const facesWithEmbeddings =
+            await this.faceEmbeddingService.getFaceEmbeddings(
+                tfImage,
+                alignedFaces
+            );
+        console.log('[MLService] facesWithEmbeddings: ', facesWithEmbeddings);
         // console.log('4 TF Memory stats: ', tf.memory());
 
-        const faceImagesTensor = tf.tidy(() => {
-            return tf.sub(tf.div(alignedFaceImages, 127.5), 1.0) as tf.Tensor4D;
-        });
-        const faceImages = await faceImagesTensor.array();
-        // console.log("[MLService] faceImages: ", faceImages);
-        // console.log('5 TF Memory stats: ', tf.memory());
-
-        tf.dispose(alignedFaceImages);
         tf.dispose(tfImage);
         // console.log('8 TF Memory stats: ', tf.memory());
 
-        return filtertedFaces.map((face, index) => {
-            return {
-                fileId: file.id.toString(),
-                face: face,
-                embedding: embeddings[index],
-                faceImage: faceImages[index],
-            } as FaceWithEmbedding;
+        const faces = facesWithEmbeddings.map(
+            (faceWithEmbeddings) =>
+                ({
+                    fileId: file.id,
+
+                    ...faceWithEmbeddings,
+                } as Face)
+        );
+
+        this.persistMLFileData(syncContext, {
+            fileId: file.id,
+            faces,
+            mlVersion: syncContext.config.mlVersion,
         });
+
+        return faces;
     }
 
-    // private async processImageUsingFapi(tfImage) {
-    //     return faceapi
-    //         .detectAllFaces(
-    //             tfImage as any,
-    //             new SsdMobilenetv1Options({
-    //                 minConfidence: 0.75,
-    //                 // maxResults: 10
-    //             })
-    //         )
-    //         .withFaceLandmarks()
-    //         .withFaceDescriptors() as FaceApiResult[];
-    // }
+    private async initMLModels() {
+        await tf.ready();
 
-    private async processImageWithoutRotation(
-        file: File,
-        tfImage: tf.Tensor3D,
-        filtertedFaces: Array<AlignedFace>
+        console.log('01 TF Memory stats: ', tf.memory());
+        await this.faceDetectionService.init();
+        // // console.log('02 TF Memory stats: ', tf.memory());
+        // await this.faceLandmarkService.init();
+        // await faceapi.nets.faceLandmark68Net.loadFromUri('/models/face-api/');
+        // // console.log('03 TF Memory stats: ', tf.memory());
+        await this.faceEmbeddingService.init();
+        // await faceapi.nets.faceRecognitionNet.loadFromUri('/models/face-api/');
+        console.log('04 TF Memory stats: ', tf.memory());
+    }
+
+    private async disposeMLModels() {
+        await this.faceDetectionService.dispose();
+        // console.log('11 TF Memory stats: ', tf.memory());
+        // await this.faceLandmarkService.dispose();
+        // console.log('12 TF Memory stats: ', tf.memory());
+        await this.faceEmbeddingService.dispose();
+        // console.log('13 TF Memory stats: ', tf.memory());
+    }
+
+    private persistMLFileData(
+        syncContext: MLSyncContext,
+        mlFileData: MlFileData
     ) {
-        const landmarks = await this.faceLandmarkService.detectLandmarks(
-            tfImage,
-            filtertedFaces
-        );
-        // console.log('5 TF Memory stats: ', tf.memory());
+        mlFacesStore.setItem(mlFileData.fileId.toString(), mlFileData);
+    }
 
-        const alignedBoxes = landmarks
-            .map((l) => l.align())
-            .map((a) => a.rescale(1 / this.mlFaceSize));
-
-        filtertedFaces.forEach((face, i) => {
-            const f = face.alignedBox;
-            const alignedBox = alignedBoxes[i];
-            face.alignedBox = new Box({
-                left: f.left + alignedBox.left * f.width,
-                top: f.top + alignedBox.top * f.height,
-                right: f.right - (1 - alignedBox.right) * f.width,
-                bottom: f.bottom - (1 - alignedBox.bottom) * f.height,
-            });
-        });
-
-        filtertedFaces = filtertedFaces.filter(
-            (f) => f.alignedBox.width > this.minFaceSize
-        );
-
-        console.log(
-            'landmarks: ',
-            landmarks,
-            'filtertedFaces: ',
-            filtertedFaces
-        );
-
-        const embeddingResults = await this.faceEmbeddingService.getEmbeddings(
-            tfImage,
-            filtertedFaces
-        );
-        // console.log('6 TF Memory stats: ', tf.memory());
-        const embeddings = embeddingResults.embeddings;
-        console.log('embeddings', embeddings);
-
-        let faceImages = [];
-        if (filtertedFaces && filtertedFaces.length > 0) {
-            const faceImagesTensor = tf.tidy(() => {
-                const normalizedImage = tf.sub(
-                    tf.div(tfImage, 127.5),
-                    1.0
-                ) as tf.Tensor3D;
-                return extractFaces(
-                    normalizedImage,
-                    filtertedFaces.map((f) => f.alignedBox),
-                    112
+    public runClustering(syncContext: MLSyncContext) {
+        if (syncContext.config.faceClustering.method.value === 'Hdbscan') {
+            syncContext.clusteringResults =
+                this.clusteringService.clusterUsingHdbscan({
+                    input: syncContext.faces.map((f) =>
+                        Array.from(f.embedding)
+                    ),
+                    minClusterSize:
+                        syncContext.config.faceClustering.minClusterSize,
+                    debug: syncContext.config.faceClustering.generateDebugInfo,
+                });
+        } else if (
+            syncContext.config.faceClustering.method.value === 'Dbscan'
+        ) {
+            syncContext.clusteringResults =
+                this.clusteringService.clusterUsingDBSCAN(
+                    syncContext.faces.map((f) => Array.from(f.embedding)),
+                    syncContext.config.faceClustering.clusterFaceDistance,
+                    syncContext.config.faceClustering.minClusterSize
                 );
-            });
-            faceImages = await faceImagesTensor.array();
-            tf.dispose(faceImagesTensor);
-            // console.log('7 TF Memory stats: ', tf.memory());
+        } else {
+            throw Error('Unknown clustering method configured');
         }
 
-        tf.dispose(tfImage);
-        // console.log('8 TF Memory stats: ', tf.memory());
+        console.log(
+            '[MLService] Got cluster results: ',
+            syncContext.clusteringResults
+        );
 
-        return filtertedFaces.map((ff, index) => {
-            return {
-                fileId: file.id.toString(),
-                face: ff,
-                embedding: embeddings[index],
-                faceImage: faceImages[index],
-            } as FaceWithEmbedding;
-        });
+        syncContext.clustersWithNoise = {
+            clusters: syncContext.clusteringResults.clusters.map((faces) => ({
+                faces,
+            })),
+            noise: syncContext.clusteringResults.noise,
+        };
+    }
+
+    private async runTSNE(syncContext: MLSyncContext) {
+        const input = syncContext.faces
+            .slice(syncContext.config.tsne.samples)
+            .map((f) => f.embedding);
+        const tsne = toTSNE(input, syncContext.config.tsne);
+        console.log('tsne: ', tsne);
     }
 }
 

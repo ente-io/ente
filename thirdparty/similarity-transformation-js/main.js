@@ -102,8 +102,7 @@ export function getSimilarityTransformation(fromPoints,
     //     mlMatrix.Matrix.mul(rotation.mmul(fromPoints), scale),
     //     translation.repeat({ columns: numPoints }));
 
-    const rotScale = mlMatrix.Matrix.mul(rotation, scale);
-    return { rotScale, translation };
+    return { rotation, scale, translation };
 }
 
 /**

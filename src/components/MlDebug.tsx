@@ -6,12 +6,13 @@ import { AppContext } from 'pages/_app';
 import { PAGES } from 'types';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
-import { MLSyncResult } from 'utils/machineLearning/types';
+// import { MLSyncResult } from 'utils/machineLearning/types';
 import TFJSImage from './TFJSImage';
+import { MLDebugResult } from 'utils/machineLearning/types';
 import Tree from 'react-d3-tree';
 
 interface TSNEProps {
-    mlResult: MLSyncResult;
+    mlResult: MLDebugResult;
 }
 
 function TSNEPlot(props: TSNEProps) {
@@ -71,7 +72,7 @@ export default function MLDebug() {
     const [minFaceSize, setMinFaceSize] = useState<number>(32);
     const [batchSize, setBatchSize] = useState<number>(200);
     const [maxFaceDistance] = useState<number>(0.5);
-    const [mlResult, setMlResult] = useState<MLSyncResult>({
+    const [mlResult, setMlResult] = useState<MLDebugResult>({
         allFaces: [],
         clustersWithNoise: {
             clusters: [],
@@ -137,6 +138,15 @@ export default function MLDebug() {
         }
     };
 
+    const onSchedule = async () => {
+        if (!MLWorker) {
+            MLWorker = getDedicatedMLWorker();
+            console.log('initiated MLWorker');
+        }
+        const mlWorker = await new MLWorker.comlink();
+        mlWorker.scheduleNextMLSync(token);
+    };
+
     const nodeSize = { x: 180, y: 180 };
     const foreignObjectProps = { width: 112, height: 150, x: -56 };
 
@@ -182,7 +192,10 @@ export default function MLDebug() {
             <button onClick={() => setMaxFaceDistance(0.6)}>0.6</button> */}
 
             <p></p>
-            <button onClick={onSync}>Run ML Sync</button>
+            <button onClick={onSync} disabled>
+                Run ML Sync
+            </button>
+            <button onClick={onSchedule}>Schedule ML Sync</button>
 
             <p>{JSON.stringify(mlResult.clustersWithNoise)}</p>
             <div>

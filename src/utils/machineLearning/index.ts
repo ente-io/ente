@@ -1,6 +1,7 @@
 import * as tf from '@tensorflow/tfjs-core';
 import { DataType } from '@tensorflow/tfjs-core';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
+import { MLSyncConfig } from './types';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -128,3 +129,46 @@ export function computeRotation(point1: Point, point2: Point) {
         Math.PI / 2 - Math.atan2(-(point2.y - point1.y), point2.x - point1.x);
     return normalizeRadians(radians);
 }
+
+export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
+    syncIntervalSec: 5, // 300
+    batchSize: 200,
+    faceDetection: {
+        method: {
+            value: 'BlazeFace',
+            version: 1,
+        },
+        minFaceSize: 32,
+    },
+    faceAlignment: {
+        method: {
+            value: 'ArcFace',
+            version: 1,
+        },
+    },
+    faceEmbedding: {
+        method: {
+            value: 'MobileFaceNet',
+            version: 1,
+        },
+        faceSize: 112,
+        generateTsne: true,
+    },
+    faceClustering: {
+        method: {
+            value: 'Hdbscan',
+            version: 1,
+        },
+        minClusterSize: 5,
+        // clusterFaceDistance: 0.4
+        generateDebugInfo: true,
+    },
+    tsne: {
+        samples: 200,
+        dim: 2,
+        perplexity: 10.0,
+        learningRate: 10.0,
+        metric: 'euclidean',
+    },
+    mlVersion: 1,
+};

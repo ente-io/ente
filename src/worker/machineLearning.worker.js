@@ -1,35 +1,63 @@
-import * as Comlink from 'comlink';
+import { expose } from 'comlink';
 import MachineLearningService from 'services/machineLearning/machineLearningService';
+import { runningInWorker } from 'utils/common';
+import { DEFAULT_ML_SYNC_CONFIG } from 'utils/machineLearning';
 
-export class MachineLearningWorker {
-    async sync(
-        token,
-        clusterFaceDistance,
-        minClusterSize,
-        minFaceSize,
-        batchSize,
-        maxFaceDistance
-    ) {
-        if (!(typeof navigator !== 'undefined')) {
-            console.log(
+class MachineLearningWorker {
+    mlService;
+    nextMLSyncTimeoutId;
+
+    getMLSyncConfig() {
+        return DEFAULT_ML_SYNC_CONFIG;
+    }
+
+    // updateMLSyncConfig(config) {
+
+    // }
+
+    scheduleNextMLSync(token) {
+        if (!this.mlService) {
+            this.mlService = new MachineLearningService();
+        }
+
+        if (this.nextMLSyncTimeoutId) {
+            this.cancelNextMLSync();
+        }
+
+        const mlSyncConfig = this.getMLSyncConfig();
+        this.nextMLSyncTimeoutId = setTimeout(
+            this.sync.bind(this, token),
+            mlSyncConfig.syncIntervalSec * 1000
+        );
+    }
+
+    cancelNextMLSync() {
+        clearTimeout(this.nextMLSyncTimeoutId);
+        this.nextMLSyncTimeoutId = undefined;
+    }
+
+    async sync(token) {
+        if (!runningInWorker()) {
+            console.error(
                 'MachineLearning worker will only run in web worker env.'
             );
             return;
         }
 
-        console.log('Running machine learning sync from worker');
-        const mlService = new MachineLearningService();
-        await mlService.init(
-            clusterFaceDistance,
-            minClusterSize,
-            minFaceSize,
-            batchSize,
-            maxFaceDistance
+        const mlSyncConfig = this.getMLSyncConfig();
+        console.log(
+            'Running machine learning sync from worker with config: ',
+            mlSyncConfig
         );
-        const results = await mlService.sync(token);
-        console.log('Ran machine learning sync from worker', results);
-        return results;
+        try {
+            const results = await this.mlService.sync(token, mlSyncConfig);
+            console.log('Ran machine learning sync from worker', results);
+        } catch (e) {
+            console.error('Error while running MLSync: ', e);
+        } finally {
+            // this.scheduleNextMLSync(token);
+        }
     }
 }
 
-Comlink.expose(MachineLearningWorker);
+expose(MachineLearningWorker, self);

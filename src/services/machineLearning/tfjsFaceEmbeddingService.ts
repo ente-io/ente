@@ -1,10 +1,15 @@
 import * as tf from '@tensorflow/tfjs-core';
 import { gather } from '@tensorflow/tfjs';
 import * as tflite from '@tensorflow/tfjs-tflite';
-import { AlignedFace, FaceEmbedding } from 'utils/machineLearning/types';
-import { extractFaces } from 'utils/machineLearning';
+import {
+    AlignedFace,
+    FaceEmbedding,
+    FaceEmbeddingService,
+    FaceWithEmbedding,
+} from 'utils/machineLearning/types';
+import { extractFaceImages } from 'utils/machineLearning/faceAlign';
 
-class TFJSFaceEmbeddingService {
+class TFJSFaceEmbeddingService implements FaceEmbeddingService {
     private mobileFaceNetModel: tflite.TFLiteModel;
     private faceSize: number;
 
@@ -45,34 +50,37 @@ class TFJSFaceEmbeddingService {
             embeddings[i] = embedding;
         }
 
+        // TODO: return Float32Array instead of number[]
         return tf.stack(embeddings).array() as Promise<Array<FaceEmbedding>>;
     }
 
-    public async getEmbeddings(image: tf.Tensor3D, faces: AlignedFace[]) {
+    public async getFaceEmbeddings(
+        image: tf.Tensor3D,
+        faces: Array<AlignedFace>
+    ) {
         if (!faces || faces.length < 1) {
-            return {
-                embeddings: [],
-                faceImages: [],
-            };
+            return [];
         }
 
-        const faceImagesTensor = tf.tidy(() => {
-            return extractFaces(
-                image,
-                faces.map((f) => f.alignedBox),
-                this.faceSize
-            );
-        });
+        const faceImagesTensor = extractFaceImages(image, faces, this.faceSize);
         const embeddings = await this.getEmbeddingsBatch(faceImagesTensor);
-        // const embeddings = await embeddingsTensor.array();
-        // const faceImages = await faceImagesTensor.array();
         tf.dispose(faceImagesTensor);
-        // tf.dispose(embeddingsTensor);
         // console.log('embeddings: ', embeddings[0]);
-        return {
-            embeddings: embeddings,
-            // faceImages: faceImages as FaceImage[],
-        };
+
+        const facesWithEmbeddings = new Array<FaceWithEmbedding>(faces.length);
+        faces.forEach((face, index) => {
+            facesWithEmbeddings[index] = {
+                ...face,
+
+                embedding: embeddings[index],
+                embeddingMethod: {
+                    value: 'MobileFaceNet',
+                    version: 1,
+                },
+            };
+        });
+
+        return facesWithEmbeddings;
     }
 
     public dispose() {}
