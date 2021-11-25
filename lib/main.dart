@@ -234,7 +234,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void _scheduleSuicide(Duration duration, [String taskID]) {
   Future.delayed(duration, () {
-    _logger.warning("TLE");
+    _logger.warning("TLE, committing seppuku");
     _killBGTask(taskID);
   });
 }
