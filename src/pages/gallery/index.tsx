@@ -50,6 +50,7 @@ import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
 import {
     changeFilesVisibility,
+    getNonTrashedUniqueUserFiles,
     getSelectedFiles,
     mergeMetadata,
     sortFiles,
@@ -93,6 +94,9 @@ import {
     Trash,
 } from 'services/trashService';
 import DeleteBtn from 'components/DeleteBtn';
+import FixCreationTime, {
+    FixCreationTimeAttributes,
+} from 'components/FixCreationTime';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -204,10 +208,14 @@ export default function Gallery() {
         useState<Map<number, number>>();
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
     const [trash, setTrash] = useState<Trash>([]);
+    const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
+    const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
+        useState<FixCreationTimeAttributes>(null);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
+            appContext.setRedirectUrl(router.asPath);
             router.push(PAGES.ROOT);
             return;
         }
@@ -227,11 +235,6 @@ export default function Gallery() {
             setCollections(collections);
             setTrash(trash);
             await setDerivativeState(collections, files);
-            await checkSubscriptionPurchase(
-                setDialogMessage,
-                router,
-                setLoading
-            );
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -243,13 +246,19 @@ export default function Gallery() {
 
     useEffect(() => setDialogView(true), [dialogMessage]);
 
-    useEffect(() => {
-        if (collectionSelectorAttributes) {
-            setCollectionSelectorView(true);
-        }
-    }, [collectionSelectorAttributes]);
+    useEffect(
+        () => collectionSelectorAttributes && setCollectionSelectorView(true),
+        [collectionSelectorAttributes]
+    );
 
-    useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
+    useEffect(
+        () => collectionNamerAttributes && setCollectionNamerView(true),
+        [collectionNamerAttributes]
+    );
+    useEffect(
+        () => fixCreationTimeAttributes && setFixCreationTimeView(true),
+        [fixCreationTimeAttributes]
+    );
 
     useEffect(() => {
         if (typeof activeCollection === 'undefined') {
@@ -269,6 +278,13 @@ export default function Gallery() {
         const href = `/gallery${collectionURL}`;
         router.push(href, undefined, { shallow: true });
     }, [activeCollection]);
+
+    useEffect(() => {
+        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        if (router.isReady && key) {
+            checkSubscriptionPurchase(setDialogMessage, router, setLoading);
+        }
+    }, [router.isReady]);
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
@@ -523,6 +539,12 @@ export default function Gallery() {
         }
     };
 
+    const fixTimeHelper = async () => {
+        const selectedFiles = getSelectedFiles(selected, files);
+        setFixCreationTimeAttributes({ files: selectedFiles });
+        clearSelection();
+    };
+
     return (
         <GalleryContext.Provider
             value={{
@@ -564,7 +586,7 @@ export default function Gallery() {
                     loadingBar={loadingBar}
                     isFirstFetch={isFirstFetch}
                     collections={collections}
-                    files={files}
+                    files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}
                     setSearch={updateSearch}
                     searchStats={searchStats}
@@ -593,6 +615,12 @@ export default function Gallery() {
                         collectionsAndTheirLatestFile
                     }
                     attributes={collectionSelectorAttributes}
+                />
+                <FixCreationTime
+                    isOpen={fixCreationTimeView}
+                    hide={() => setFixCreationTimeView(false)}
+                    show={() => setFixCreationTimeView(true)}
+                    attributes={fixCreationTimeAttributes}
                 />
                 <Upload
                     syncWithRemote={syncWithRemote}
@@ -685,6 +713,7 @@ export default function Gallery() {
                                     )
                                 )
                             }
+                            fixTimeHelper={fixTimeHelper}
                             count={selected.count}
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}

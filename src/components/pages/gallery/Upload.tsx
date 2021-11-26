@@ -134,7 +134,8 @@ export default function Upload(props: Props) {
             return null;
         }
         const paths: string[] = props.acceptedFiles.map((file) => file['path']);
-        paths.sort();
+        const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
+        paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
         const firstPath = paths[0];
         const lastPath = paths[paths.length - 1];
         const L = firstPath.length;

@@ -1,5 +1,5 @@
 import { SetDialogMessage } from 'components/MessageDialog';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
 import styled from 'styled-components';
 import Navbar from 'components/Navbar';
@@ -17,6 +17,12 @@ import { OverlayTrigger } from 'react-bootstrap';
 import { Collection } from 'services/collectionService';
 import RemoveIcon from 'components/icons/RemoveIcon';
 import RestoreIcon from 'components/icons/RestoreIcon';
+import ClockIcon from 'components/icons/ClockIcon';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import {
+    FIX_CREATION_TIME_VISIBLE_TO_USER_IDS,
+    User,
+} from 'services/userService';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
@@ -27,6 +33,7 @@ interface Props {
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     deleteFileHelper: (permanent?: boolean) => void;
     removeFromCollectionHelper: () => void;
+    fixTimeHelper: () => void;
     count: number;
     clearSelection: () => void;
     archiveFilesHelper: () => void;
@@ -68,6 +75,7 @@ const SelectedFileOptions = ({
     restoreToCollectionHelper,
     showCreateCollectionModal,
     removeFromCollectionHelper,
+    fixTimeHelper,
     setDialogMessage,
     setCollectionSelectorAttributes,
     deleteFileHelper,
@@ -78,6 +86,13 @@ const SelectedFileOptions = ({
     activeCollection,
     isFavoriteCollection,
 }: Props) => {
+    const [showFixCreationTime, setShowFixCreationTime] = useState(false);
+    useEffect(() => {
+        const user: User = getData(LS_KEYS.USER);
+        const showFixCreationTime =
+            FIX_CREATION_TIME_VISIBLE_TO_USER_IDS.includes(user?.id);
+        setShowFixCreationTime(showFixCreationTime);
+    }, []);
     const addToCollection = () =>
         setCollectionSelectorAttributes({
             callback: addToCollectionHelper,
@@ -168,6 +183,18 @@ const SelectedFileOptions = ({
                 </>
             ) : (
                 <>
+                    {showFixCreationTime && (
+                        <IconWithMessage message={constants.FIX_CREATION_TIME}>
+                            <IconButton onClick={fixTimeHelper}>
+                                <ClockIcon />
+                            </IconButton>
+                        </IconWithMessage>
+                    )}
+                    <IconWithMessage message={constants.ADD}>
+                        <IconButton onClick={addToCollection}>
+                            <AddIcon />
+                        </IconButton>
+                    </IconWithMessage>
                     {activeCollection === ARCHIVE_SECTION && (
                         <IconWithMessage message={constants.UNARCHIVE}>
                             <IconButton onClick={unArchiveFilesHelper}>
@@ -182,11 +209,7 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </IconWithMessage>
                     )}
-                    <IconWithMessage message={constants.ADD}>
-                        <IconButton onClick={addToCollection}>
-                            <AddIcon />
-                        </IconButton>
-                    </IconWithMessage>
+
                     {activeCollection !== ALL_SECTION &&
                         activeCollection !== ARCHIVE_SECTION &&
                         !isFavoriteCollection && (

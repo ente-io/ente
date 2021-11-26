@@ -451,3 +451,31 @@ export function updateExistingFilePubMetadata(
     existingFile.pubMagicMetadata = updatedFile.pubMagicMetadata;
     existingFile.metadata = mergeMetadata([existingFile])[0].metadata;
 }
+
+export async function getFileFromURL(fileURL: string) {
+    const fileBlob = await (await fetch(fileURL)).blob();
+    const fileFile = new globalThis.File([fileBlob], 'temp');
+    return fileFile;
+}
+
+export function getUniqueFiles(files: File[]) {
+    const idSet = new Set<number>();
+    return files.filter((file) => {
+        if (!idSet.has(file.id)) {
+            idSet.add(file.id);
+            return true;
+        } else {
+            return false;
+        }
+    });
+}
+export function getNonTrashedUniqueUserFiles(files: File[]) {
+    const user: User = getData(LS_KEYS.USER) ?? {};
+    return getUniqueFiles(
+        files.filter(
+            (file) =>
+                (typeof file.isTrashed === 'undefined' || !file.isTrashed) &&
+                (!user.id || file.ownerID === user.id)
+        )
+    );
+}

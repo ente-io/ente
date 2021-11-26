@@ -20,6 +20,7 @@
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
     "axios": "^0.21.3",
+    "bip39": "^3.0.4",
     "bootstrap": "^4.5.2",
     "chrono-node": "^2.2.6",
     "comlink": "^4.3.0",

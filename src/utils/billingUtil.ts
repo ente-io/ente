@@ -191,17 +191,14 @@ export async function checkSubscriptionPurchase(
     router: NextRouter,
     setLoading: SetLoading
 ) {
+    const { session_id: sessionId, status, reason } = router.query ?? {};
     try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const sessionId = urlParams.get('session_id');
-        const status = urlParams.get('status');
-        const reason = urlParams.get('reason');
         if (status === RESPONSE_STATUS.fail) {
-            handleFailureReason(reason, setDialogMessage, setLoading);
+            handleFailureReason(reason as string, setDialogMessage, setLoading);
         } else if (status === RESPONSE_STATUS.success) {
             try {
                 const subscription = await billingService.verifySubscription(
-                    sessionId
+                    sessionId as string
                 );
                 setDialogMessage({
                     title: constants.SUBSCRIPTION_PURCHASE_SUCCESS_TITLE,
@@ -220,8 +217,6 @@ export async function checkSubscriptionPurchase(
         }
     } catch (e) {
         // ignore
-    } finally {
-        router.push('gallery', undefined, { shallow: true });
     }
 }
 
