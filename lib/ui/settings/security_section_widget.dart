@@ -23,6 +23,9 @@ class SecuritySectionWidget extends StatefulWidget {
 }
 
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
+  static const kAuthToViewSessions =
+      "please authenticate to view your active sessions";
+
   final _config = Configuration.instance;
 
   StreamSubscription<TwoFactorStatusChangeEvent> _twoFactorStatusChangeEvent;
@@ -210,34 +213,36 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               ],
             ),
           ),
-          Padding(padding: EdgeInsets.all(4)),
-          Divider(height: 4),
-          Padding(padding: EdgeInsets.all(2)),
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () async {
-              AppLock.of(context).setEnabled(false);
-              final result = await requestAuthentication();
-              AppLock.of(context)
-                  .setEnabled(Configuration.instance.shouldShowLockScreen());
-              if (!result) {
-                showToast("please authenticate to view your active sessions");
-                return;
-              }
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return SessionsPage();
-                  },
-                ),
-              );
-            },
-            child: SettingsTextItem(
-                text: "active sessions", icon: Icons.navigate_next),
-          ),
         ],
       );
     }
+    children.addAll([
+      Padding(padding: EdgeInsets.all(4)),
+      Divider(height: 4),
+      Padding(padding: EdgeInsets.all(2)),
+      GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () async {
+          AppLock.of(context).setEnabled(false);
+          final result = await requestAuthentication(kAuthToViewSessions);
+          AppLock.of(context)
+              .setEnabled(Configuration.instance.shouldShowLockScreen());
+          if (!result) {
+            showToast(kAuthToViewSessions);
+            return;
+          }
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return SessionsPage();
+              },
+            ),
+          );
+        },
+        child: SettingsTextItem(
+            text: "active sessions", icon: Icons.navigate_next),
+      ),
+    ]);
     return Column(
       children: children,
     );
