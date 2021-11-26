@@ -132,7 +132,7 @@ export function computeRotation(point1: Point, point2: Point) {
 
 export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     syncIntervalSec: 5, // 300
-    batchSize: 200,
+    batchSize: 5, // 200
     faceDetection: {
         method: {
             value: 'BlazeFace',
@@ -162,6 +162,7 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
         minClusterSize: 5,
         // clusterFaceDistance: 0.4
         generateDebugInfo: true,
+        minFacesForClustering: 50, // 200
     },
     tsne: {
         samples: 200,

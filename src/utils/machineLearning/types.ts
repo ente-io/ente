@@ -152,6 +152,7 @@ export interface FaceClusteringConfig {
     minClusterSize: number;
     clusterFaceDistance?: number;
     generateDebugInfo?: boolean;
+    minFacesForClustering?: number;
 }
 
 export declare type TSNEMetric = 'euclidean' | 'manhattan';

@@ -59,6 +59,7 @@ class MachineLearningService {
         if (syncContext.files.length > 0) {
             await this.runMLModels(syncContext);
         } else {
+            await this.getAllFaces(syncContext);
             await this.runClustering(syncContext);
         }
 
@@ -69,8 +70,8 @@ class MachineLearningService {
         }
 
         return {
-            nFiles: syncContext.files.length,
-            nFaces: syncContext.faces.length,
+            nFiles: syncContext.files?.length,
+            nFaces: syncContext.faces?.length,
             nClusters: syncContext.clustersWithNoise?.clusters.length,
             nNoise: syncContext.clustersWithNoise?.noise.length,
         };
@@ -228,13 +229,32 @@ class MachineLearningService {
         return mlFilesStore.setItem(mlFileData.fileId.toString(), mlFileData);
     }
 
-    public runClustering(syncContext: MLSyncContext) {
+    private async getAllFaces(syncContext: MLSyncContext) {
+        const allFaces: Array<Face> = [];
+        await mlFilesStore.iterate((mlFileData: MlFileData) => {
+            mlFileData.faces && allFaces.push(...mlFileData.faces);
+        });
+        syncContext.faces = allFaces;
+    }
+
+    public async runClustering(syncContext: MLSyncContext) {
+        if (
+            !syncContext.faces ||
+            syncContext.faces.length <
+                syncContext.config.faceClustering.minFacesForClustering
+        ) {
+            console.log(
+                'Too few faces to cluster, not running clustering: ',
+                syncContext.faces.length
+            );
+            return;
+        }
+        const allFaces = syncContext.faces;
+        console.log('Running clustering allFaces: ', allFaces.length);
         if (syncContext.config.faceClustering.method.value === 'Hdbscan') {
             syncContext.clusteringResults =
                 this.clusteringService.clusterUsingHdbscan({
-                    input: syncContext.faces.map((f) =>
-                        Array.from(f.embedding)
-                    ),
+                    input: allFaces.map((f) => Array.from(f.embedding)),
                     minClusterSize:
                         syncContext.config.faceClustering.minClusterSize,
                     debug: syncContext.config.faceClustering.generateDebugInfo,
@@ -244,7 +264,7 @@ class MachineLearningService {
         ) {
             syncContext.clusteringResults =
                 this.clusteringService.clusterUsingDBSCAN(
-                    syncContext.faces.map((f) => Array.from(f.embedding)),
+                    allFaces.map((f) => Array.from(f.embedding)),
                     syncContext.config.faceClustering.clusterFaceDistance,
                     syncContext.config.faceClustering.minClusterSize
                 );
