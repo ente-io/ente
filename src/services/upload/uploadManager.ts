@@ -13,7 +13,7 @@ import {
     ParsedMetaDataJSON,
     parseMetadataJSON,
 } from './metadataService';
-import { segregateFiles } from 'utils/upload';
+import { addKeysToFilesToBeUploaded, segregateFiles } from 'utils/upload';
 import { ProgressUpdater } from 'components/pages/gallery/Upload';
 import uploader from './uploader';
 import UIService from './uiService';
@@ -33,9 +33,12 @@ export enum FileUploadResults {
 }
 
 export interface FileWithCollection {
-    file: globalThis.File;
-    collectionID?: number;
+    key?: string;
+    isLivePhoto?: boolean;
+    file?: globalThis.File;
+    livePhotoAsset?: [globalThis.File, globalThis.File];
     collection?: Collection;
+    collectionID?: number;
 }
 
 export enum UPLOAD_STAGES {
@@ -93,9 +96,15 @@ class UploadManager {
                 );
                 await this.seedMetadataMap(metadataFiles);
             }
-            if (mediaFiles.length) {
+            if (
+                mediaFiles?.normalFiles.length +
+                mediaFiles?.livePhotoFiles.length
+            ) {
                 UIService.setUploadStage(UPLOAD_STAGES.START);
-                await this.uploadMediaFiles(mediaFiles);
+                await this.uploadMediaFiles([
+                    ...mediaFiles.normalFiles,
+                    ...mediaFiles.livePhotoFiles,
+                ]);
             }
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
             UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
@@ -137,7 +146,7 @@ class UploadManager {
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
-        this.filesToBeUploaded.push(...mediaFiles);
+        this.filesToBeUploaded.push(...addKeysToFilesToBeUploaded(mediaFiles));
         UIService.reset(mediaFiles.length);
 
         await UploadService.init(mediaFiles.length, this.metadataMap);
@@ -202,7 +211,7 @@ class UploadManager {
                 this.failedFiles.push(fileWithCollection);
             }
 
-            UIService.moveFileToResultList(fileWithCollection.file.name);
+            UIService.moveFileToResultList(fileWithCollection.key);
         }
     }
 
