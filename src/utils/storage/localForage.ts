@@ -11,11 +11,11 @@ if (runningInBrowser()) {
     });
 }
 
-export const mlFacesStore = localForage.createInstance({
+export const mlFilesStore = localForage.createInstance({
     driver: localForage.INDEXEDDB,
     name: 'ml-data',
     version: 1.0,
-    storeName: 'faces',
+    storeName: 'files',
 });
 
 export const mlPeopleStore = localForage.createInstance({

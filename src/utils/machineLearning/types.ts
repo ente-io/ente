@@ -128,7 +128,7 @@ export interface Face extends FaceWithEmbedding {
 
 export interface MlFileData {
     fileId: number;
-    faces: Face[];
+    faces?: Face[];
     mlVersion: number;
 }
 

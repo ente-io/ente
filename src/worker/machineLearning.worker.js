@@ -7,6 +7,15 @@ class MachineLearningWorker {
     mlService;
     nextMLSyncTimeoutId;
 
+    async getMLService() {
+        if (!this.mlService) {
+            this.mlService = new MachineLearningService();
+            await this.mlService.init();
+        }
+
+        return this.mlService;
+    }
+
     getMLSyncConfig() {
         return DEFAULT_ML_SYNC_CONFIG;
     }
@@ -16,10 +25,6 @@ class MachineLearningWorker {
     // }
 
     scheduleNextMLSync(token) {
-        if (!this.mlService) {
-            this.mlService = new MachineLearningService();
-        }
-
         if (this.nextMLSyncTimeoutId) {
             this.cancelNextMLSync();
         }
@@ -31,7 +36,7 @@ class MachineLearningWorker {
         );
     }
 
-    cancelNextMLSync() {
+    async cancelNextMLSync() {
         clearTimeout(this.nextMLSyncTimeoutId);
         this.nextMLSyncTimeoutId = undefined;
     }
@@ -44,18 +49,19 @@ class MachineLearningWorker {
             return;
         }
 
+        const mlService = await this.getMLService();
         const mlSyncConfig = this.getMLSyncConfig();
         console.log(
             'Running machine learning sync from worker with config: ',
             mlSyncConfig
         );
         try {
-            const results = await this.mlService.sync(token, mlSyncConfig);
+            const results = await mlService.sync(token, mlSyncConfig);
             console.log('Ran machine learning sync from worker', results);
         } catch (e) {
             console.error('Error while running MLSync: ', e);
         } finally {
-            // this.scheduleNextMLSync(token);
+            this.scheduleNextMLSync(token);
         }
     }
 }
