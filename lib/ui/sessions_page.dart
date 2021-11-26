@@ -38,6 +38,7 @@ class _SessionsPageState extends State<SessionsPage> {
       return Center(child: loadWidget);
     }
     List<Widget> rows = [];
+    rows.add(Padding(padding: const EdgeInsets.all(4)));
     for (final session in _sessions.sessions) {
       rows.add(_getSessionWidget(session));
     }
