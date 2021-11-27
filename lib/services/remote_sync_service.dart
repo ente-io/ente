@@ -14,6 +14,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
@@ -41,6 +42,8 @@ class RemoteSyncService {
 
   // 29 October, 2021 3:56:40 AM IST
   static const kEditTimeFeatureReleaseTime = 1635460000000000;
+
+  static const kMaximumPermissibleUploadsInThrottledMode = 4;
 
   static final RemoteSyncService instance =
       RemoteSyncService._privateConstructor();
@@ -84,7 +87,9 @@ class RemoteSyncService {
     bool hasUploadedFiles = await _uploadDiff();
     _existingSync.complete();
     _existingSync = null;
-    if (hasUploadedFiles) {
+    if (hasUploadedFiles && !_shouldThrottleSync()) {
+      // Skipping a resync to ensure that files that were ignored in this 
+      // session are not processed now
       sync(silently: true);
     }
   }
@@ -157,7 +162,7 @@ class RemoteSyncService {
       filesToBeUploaded =
           await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
     }
-    if (!Configuration.instance.shouldBackupVideos()) {
+    if (!Configuration.instance.shouldBackupVideos() || _shouldThrottleSync()) {
       filesToBeUploaded
           .removeWhere((element) => element.fileType == FileType.video);
     }
@@ -189,6 +194,12 @@ class RemoteSyncService {
     }
     final List<Future> futures = [];
     for (final uploadedFileID in updatedFileIDs) {
+      if (_shouldThrottleSync() &&
+          futures.length == kMaximumPermissibleUploadsInThrottledMode) {
+        _logger
+            .info("Skipping some updated files as we are throttling uploads");
+        break;
+      }
       final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
       final future = _uploader
           .upload(file, file.collectionID)
@@ -197,6 +208,11 @@ class RemoteSyncService {
     }
 
     for (final file in filesToBeUploaded) {
+      if (_shouldThrottleSync() &&
+          futures.length == kMaximumPermissibleUploadsInThrottledMode) {
+        _logger.info("Skipping some new files as we are throttling uploads");
+        break;
+      }
       final collectionID = (await CollectionsService.instance
               .getOrCreateForPath(file.deviceFolder))
           .id;
@@ -207,6 +223,11 @@ class RemoteSyncService {
     }
 
     for (final file in editedFiles) {
+      if (_shouldThrottleSync() &&
+          futures.length == kMaximumPermissibleUploadsInThrottledMode) {
+        _logger.info("Skipping some edited files as we are throttling uploads");
+        break;
+      }
       final future = _uploader
           .upload(file, file.collectionID)
           .then((uploadedFile) => _onFileUploaded(uploadedFile));
@@ -371,5 +392,9 @@ class RemoteSyncService {
       return kArchiveFeatureReleaseTime;
     }
     return kEditTimeFeatureReleaseTime;
+  }
+
+  bool _shouldThrottleSync() {
+    return Platform.isIOS && !AppLifecycleService.instance.isForeground;
   }
 }

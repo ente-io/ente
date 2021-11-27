@@ -39,6 +39,8 @@ dependencies:
   exif: ^3.0.0
   expansion_tile_card: ^2.0.0
   extended_image: ^5.1.2
+  firebase_core: ^1.10.0
+  firebase_messaging: ^11.1.0
   flutter:
     sdk: flutter
   flutter_localizations:

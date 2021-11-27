@@ -23,6 +23,9 @@ class SecuritySectionWidget extends StatefulWidget {
 }
 
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
+  static const kAuthToViewSessions =
+      "please authenticate to view your active sessions";
+
   final _config = Configuration.instance;
 
   StreamSubscription<TwoFactorStatusChangeEvent> _twoFactorStatusChangeEvent;
@@ -222,13 +225,12 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () async {
-          String reason = "please authenticate to view your active sessions";
           AppLock.of(context).setEnabled(false);
-          final result = await requestAuthentication(reason);
+          final result = await requestAuthentication(kAuthToViewSessions);
           AppLock.of(context)
               .setEnabled(Configuration.instance.shouldShowLockScreen());
           if (!result) {
-            showToast(reason);
+            showToast(kAuthToViewSessions);
             return;
           }
           Navigator.of(context).push(
