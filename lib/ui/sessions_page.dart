@@ -6,6 +6,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class SessionsPage extends StatefulWidget {
   SessionsPage({Key key}) : super(key: key);
@@ -106,7 +107,12 @@ class _SessionsPageState extends State<SessionsPage> {
   }
 
   Future<void> _fetchActiveSessions() async {
-    _sessions = await UserService.instance.getActiveSessions();
+    _sessions = await UserService.instance
+        .getActiveSessions()
+        .onError((error, stackTrace) {
+      showToast("failed to fetch active sessions");
+      throw error;
+    });
     _sessions.sessions.sort((first, second) {
       return second.lastUsedTime.compareTo(first.lastUsedTime);
     });
