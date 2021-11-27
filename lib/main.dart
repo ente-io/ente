@@ -65,7 +65,7 @@ Future<void> _runInForeground() async {
   });
 }
 
-Future _runBackgroundTask(String taskId) async {
+Future<void> _runBackgroundTask(String taskId) async {
   _runWithLogs(() async {
     _runInBackground(taskId);
   }, prefix: "[bg]");
