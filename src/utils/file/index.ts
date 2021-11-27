@@ -11,7 +11,7 @@ import {
 } from 'services/fileService';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
-import DownloadManger from 'services/downloadManager';
+import DownloadManager from 'services/downloadManager';
 import { logError } from 'utils/sentry';
 import { User } from 'services/userService';
 import CryptoWorker from 'utils/crypto';
@@ -37,10 +37,12 @@ export function downloadAsFile(filename: string, content: string) {
     a.remove();
 }
 
-export async function downloadFile(file) {
+export async function downloadFile(file: File) {
     const a = document.createElement('a');
     a.style.display = 'none';
-    a.href = await DownloadManger.getFile(file);
+    a.href = URL.createObjectURL(
+        await new Response(await DownloadManager.downloadFile(file)).blob()
+    );
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         a.download = fileNameWithoutExtension(file.metadata.title) + '.zip';
     } else {
@@ -469,6 +471,10 @@ export function getNonTrashedUniqueUserFiles(files: File[]) {
 
 export async function downloadFiles(files: File[]) {
     for (const file of files) {
-        await downloadFile(file);
+        try {
+            await downloadFile(file);
+        } catch (e) {
+            logError(e, 'download fail for file');
+        }
     }
 }

@@ -548,8 +548,10 @@ export default function Gallery() {
 
     const downloadHelper = async () => {
         const selectedFiles = getSelectedFiles(selected, files);
-        downloadFiles(selectedFiles);
         clearSelection();
+        loadingBar.current?.continuousStart();
+        await downloadFiles(selectedFiles);
+        loadingBar.current.complete();
     };
 
     return (
