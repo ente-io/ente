@@ -68,12 +68,14 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                         value: snapshot.data,
                         onChanged: (value) async {
                           AppLock.of(context).setEnabled(false);
-                          final result = await requestAuthentication();
+                          String reason =
+                              "please authenticate to configure two-factor authentication";
+                          final result =
+                              await requestAuthentication(reason: reason);
                           AppLock.of(context).setEnabled(
                               Configuration.instance.shouldShowLockScreen());
                           if (!result) {
-                            showToast(
-                                "please authenticate to configure two-factor authentication");
+                            showToast(reason);
                             return;
                           }
                           if (value) {
@@ -114,7 +116,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               value: _config.shouldShowLockScreen(),
               onChanged: (value) async {
                 AppLock.of(context).disable();
-                final result = await requestAuthentication();
+                final result = await requestAuthentication(
+                    reason: "please authenticate to change lockscreen setting");
                 if (result) {
                   AppLock.of(context).setEnabled(value);
                   _config.setShouldShowLockScreen(value);

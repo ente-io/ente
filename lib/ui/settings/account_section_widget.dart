@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/app_lock.dart';
@@ -57,12 +56,12 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             AppLock.of(context).setEnabled(false);
-            final result = await requestAuthentication();
+            String reason = "please authenticate to view your recovery key";
+            final result = await requestAuthentication(reason: reason);
             AppLock.of(context)
                 .setEnabled(Configuration.instance.shouldShowLockScreen());
             if (!result) {
-              Logger("harami").info("Showing toast");
-              showToast("please authenticate to view your recovery key");
+              showToast(reason);
               return;
             }
 
@@ -96,11 +95,12 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             AppLock.of(context).setEnabled(false);
-            final result = await requestAuthentication();
+            String reason = "please authenticate to change your email";
+            final result = await requestAuthentication(reason: reason);
             AppLock.of(context)
                 .setEnabled(Configuration.instance.shouldShowLockScreen());
             if (!result) {
-              showToast("please authenticate to change your email");
+              showToast(reason);
               return;
             }
             showDialog(
@@ -124,11 +124,12 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             AppLock.of(context).setEnabled(false);
-            final result = await requestAuthentication();
+            String reason = "please authenticate to change your password";
+            final result = await requestAuthentication(reason: reason);
             AppLock.of(context)
                 .setEnabled(Configuration.instance.shouldShowLockScreen());
             if (!result) {
-              showToast("please authenticate to change your password");
+              showToast(reason);
               return;
             }
             Navigator.of(context).push(
