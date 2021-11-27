@@ -35,7 +35,6 @@ class FileUploader {
   static const kMaximumThumbnailCompressionAttempts = 2;
   static const kMaximumUploadAttempts = 4;
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
-  static const kFileUploadTimeout = Duration(minutes: 50);
 
   final _logger = Logger("FileUploader");
   final _dio = Network.instance.getDio();
@@ -327,15 +326,7 @@ class FileUploader {
           await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
 
       final fileUploadURL = await _getUploadURL();
-      String fileObjectKey = await _putFile(fileUploadURL, encryptedFile)
-          .timeout(kFileUploadTimeout, onTimeout: () async {
-        final message = "Upload timed out for file " +
-            file.toString() +
-            " of size " +
-            (await encryptedFile.length()).toString();
-        _logger.severe(message);
-        throw TimeoutException(message);
-      });
+      String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
 
       final metadata =
           await file.getMetadataForUpload(mediaUploadData.sourceFile);
@@ -637,6 +628,10 @@ class FileUploader {
     int attempt = 1,
   }) async {
     final fileSize = contentLength ?? await file.length();
+    _logger.info("Putting object for " +
+        file.toString() +
+        " of size: " +
+        fileSize.toString());
     final startTime = DateTime.now().millisecondsSinceEpoch;
     try {
       await _dio.put(

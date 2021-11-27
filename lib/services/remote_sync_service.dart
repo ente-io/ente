@@ -45,6 +45,8 @@ class RemoteSyncService {
 
   static const kMaximumPermissibleUploadsInThrottledMode = 4;
 
+  static const kFileUploadTimeout = Duration(minutes: 50);
+
   static final RemoteSyncService instance =
       RemoteSyncService._privateConstructor();
 
@@ -88,7 +90,7 @@ class RemoteSyncService {
     _existingSync.complete();
     _existingSync = null;
     if (hasUploadedFiles && !_shouldThrottleSync()) {
-      // Skipping a resync to ensure that files that were ignored in this 
+      // Skipping a resync to ensure that files that were ignored in this
       // session are not processed now
       sync(silently: true);
     }
@@ -201,10 +203,7 @@ class RemoteSyncService {
         break;
       }
       final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
-      final future = _uploader
-          .upload(file, file.collectionID)
-          .then((uploadedFile) => _onFileUploaded(uploadedFile));
-      futures.add(future);
+      _uploadFile(file, file.collectionID, futures);
     }
 
     for (final file in filesToBeUploaded) {
@@ -216,10 +215,7 @@ class RemoteSyncService {
       final collectionID = (await CollectionsService.instance
               .getOrCreateForPath(file.deviceFolder))
           .id;
-      final future = _uploader
-          .upload(file, collectionID)
-          .then((uploadedFile) => _onFileUploaded(uploadedFile));
-      futures.add(future);
+      _uploadFile(file, collectionID, futures);
     }
 
     for (final file in editedFiles) {
@@ -228,10 +224,7 @@ class RemoteSyncService {
         _logger.info("Skipping some edited files as we are throttling uploads");
         break;
       }
-      final future = _uploader
-          .upload(file, file.collectionID)
-          .then((uploadedFile) => _onFileUploaded(uploadedFile));
-      futures.add(future);
+      _uploadFile(file, file.collectionID, futures);
     }
 
     try {
@@ -252,6 +245,17 @@ class RemoteSyncService {
       rethrow;
     }
     return _completedUploads > 0;
+  }
+
+  void _uploadFile(File file, int collectionID, List<Future> futures) {
+    final future = _uploader
+        .upload(file, collectionID)
+        .timeout(kFileUploadTimeout, onTimeout: () async {
+      final message = "Upload timed out for file " + file.toString();
+      _logger.severe(message);
+      throw TimeoutException(message);
+    }).then((uploadedFile) => _onFileUploaded(uploadedFile));
+    futures.add(future);
   }
 
   Future<void> _onFileUploaded(File file) async {
