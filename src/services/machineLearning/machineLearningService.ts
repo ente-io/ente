@@ -323,14 +323,14 @@ class MachineLearningService {
                 .map((f) => allFaces[f])
                 .filter((f) => f);
             const person: Person = {
-                personId: index,
+                id: index,
                 files: faces.map((f) => f.fileId),
             };
 
-            await mlPeopleStore.setItem(person.personId.toString(), person);
+            await mlPeopleStore.setItem(person.id.toString(), person);
 
             faces.forEach((face) => {
-                face.personId = person.personId;
+                face.personId = person.id;
             });
             // console.log("Creating person: ", person, faces);
         }

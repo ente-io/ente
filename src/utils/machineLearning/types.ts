@@ -129,7 +129,7 @@ export interface Face extends FaceWithEmbedding {
 }
 
 export interface Person {
-    personId: number;
+    id: number;
     name?: string;
     files: Array<number>;
 }
