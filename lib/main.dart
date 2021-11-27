@@ -36,7 +36,7 @@ import 'package:super_logging/super_logging.dart';
 
 final _logger = Logger("main");
 
-Completer<void> _initializationStatus;
+bool _isProcessRunning = false;
 const kLastBGTaskHeartBeatTime = "bg_task_hb_time";
 const kLastFGTaskHeartBeatTime = "fg_task_hb_time";
 const kHeartBeatFrequency = Duration(seconds: 1);
@@ -100,10 +100,7 @@ void _headlessTaskHandler(HeadlessTask task) {
 }
 
 Future<void> _init(bool isBackground) async {
-  if (_initializationStatus != null) {
-    return _initializationStatus.future;
-  }
-  _initializationStatus = Completer<void>();
+  _isProcessRunning = true;
   _logger.info("Initializing...");
   _scheduleHeartBeat(isBackground);
   if (isBackground) {
@@ -134,7 +131,6 @@ Future<void> _init(bool isBackground) async {
   }
   FeatureFlagService.instance.init();
   _logger.info("Initialization done");
-  _initializationStatus.complete();
 }
 
 Future<void> _sync() async {
@@ -207,7 +203,12 @@ Future<void> _killBGTask([String taskId]) async {
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  if (_initializationStatus == null) {
+  if (_isProcessRunning) {
+    _logger.info("Background push received when app is alive");
+    if (PushService.shouldSync(message)) {
+      await _sync();
+    }
+  } else {
     // App is dead
     _runWithLogs(() async {
       _logger.info("Background push received");
@@ -219,11 +220,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         await _sync();
       }
     }, prefix: "[bg]");
-  } else {
-    _logger.info("Background push received when app is alive");
-    if (PushService.shouldSync(message)) {
-      await _sync();
-    }
   }
 }
 
