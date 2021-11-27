@@ -47,6 +47,7 @@ class MachineLearningWorker {
     }
 
     async sync(token) {
+        this.nextMLSyncTimeoutId = undefined;
         if (!runningInWorker()) {
             console.error(
                 'MachineLearning worker will only run in web worker env.'

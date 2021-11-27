@@ -128,6 +128,12 @@ export interface Face extends FaceWithEmbedding {
     personId?: number;
 }
 
+export interface Person {
+    personId: number;
+    name?: string;
+    files: Array<number>;
+}
+
 export interface MlFileData {
     fileId: number;
     faces?: Face[];
@@ -184,7 +190,7 @@ export class MLSyncContext {
     outOfSyncFiles: File[];
     syncedFiles: File[];
     syncedFaces: Face[];
-    allSyncedFaces?: Face[];
+    allSyncedFacesMap?: Map<number, Array<Face>>;
     faceClusteringResults?: ClusteringResults;
     faceClustersWithNoise?: ClustersWithNoise;
     tsne?: any;

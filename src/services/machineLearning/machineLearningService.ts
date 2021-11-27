@@ -18,14 +18,16 @@ import {
     MLSyncConfig,
     MLSyncContext,
     MLSyncResult,
+    Person,
 } from 'utils/machineLearning/types';
 
 import * as jpeg from 'jpeg-js';
 import ClusteringService from './clusteringService';
 
 import { toTSNE } from 'utils/machineLearning/visualization';
-import { mlFilesStore } from 'utils/storage/localForage';
+import { mlFilesStore, mlPeopleStore } from 'utils/storage/localForage';
 import ArcfaceAlignmentService from './arcfaceAlignmentService';
+import { getAllFacesFromMap } from 'utils/machineLearning';
 
 class MachineLearningService {
     private faceDetectionService: FaceDetectionService;
@@ -140,7 +142,7 @@ class MachineLearningService {
             } catch (e) {
                 console.error(
                     'Error while syncing file: ',
-                    outOfSyncfile.id.toString(),
+                    outOfSyncfile.id,
                     e
                 );
             }
@@ -243,27 +245,38 @@ class MachineLearningService {
     }
 
     public async syncIndex(syncContext: MLSyncContext) {
-        await this.runFaceClustering(syncContext);
+        await this.syncPeopleIndex(syncContext);
     }
 
-    private async getAllFaces(syncContext: MLSyncContext) {
-        if (syncContext.allSyncedFaces) {
-            return syncContext.allSyncedFaces;
+    private async syncPeopleIndex(syncContext: MLSyncContext) {
+        const allFacesMap = await this.getAllSyncedFacesMap(syncContext);
+        const allFaces = getAllFacesFromMap(allFacesMap);
+
+        await this.runFaceClustering(syncContext, allFaces);
+        await this.syncPeopleFromClusters(syncContext, allFacesMap, allFaces);
+    }
+
+    private async getAllSyncedFacesMap(syncContext: MLSyncContext) {
+        if (syncContext.allSyncedFacesMap) {
+            return syncContext.allSyncedFacesMap;
         }
 
-        const allFaces: Array<Face> = [];
+        const allSyncedFacesMap = new Map<number, Array<Face>>();
         await mlFilesStore.iterate((mlFileData: MlFileData) => {
-            mlFileData.faces && allFaces.push(...mlFileData.faces);
+            mlFileData.faces &&
+                allSyncedFacesMap.set(mlFileData.fileId, mlFileData.faces);
         });
 
-        syncContext.allSyncedFaces = allFaces;
-        return allFaces;
+        syncContext.allSyncedFacesMap = allSyncedFacesMap;
+        return allSyncedFacesMap;
     }
 
-    public async runFaceClustering(syncContext: MLSyncContext) {
+    public async runFaceClustering(
+        syncContext: MLSyncContext,
+        allFaces: Array<Face>
+    ) {
         const clusteringConfig =
             syncContext.config.faceClustering.clusteringConfig;
-        const allFaces = await this.getAllFaces(syncContext);
 
         if (!allFaces || allFaces.length < clusteringConfig.minInputSize) {
             console.log(
@@ -294,10 +307,45 @@ class MachineLearningService {
         };
     }
 
+    private async syncPeopleFromClusters(
+        syncContext: MLSyncContext,
+        allFacesMap: Map<number, Array<Face>>,
+        allFaces: Array<Face>
+    ) {
+        const clusters = syncContext.faceClustersWithNoise?.clusters;
+        if (!clusters || clusters.length < 1) {
+            return;
+        }
+
+        await mlPeopleStore.clear();
+        for (const [index, cluster] of clusters.entries()) {
+            const faces = cluster.faces
+                .map((f) => allFaces[f])
+                .filter((f) => f);
+            const person: Person = {
+                personId: index,
+                files: faces.map((f) => f.fileId),
+            };
+
+            await mlPeopleStore.setItem(person.personId.toString(), person);
+
+            faces.forEach((face) => {
+                face.personId = person.personId;
+            });
+            // console.log("Creating person: ", person, faces);
+        }
+
+        await mlFilesStore.iterate((mlFileData: MlFileData, key) => {
+            mlFileData.faces = allFacesMap.get(mlFileData.fileId);
+            mlFilesStore.setItem(key, mlFileData);
+        });
+    }
+
     private async runTSNE(syncContext: MLSyncContext) {
         let faces = syncContext.syncedFaces;
         if (!faces || faces.length < 1) {
-            faces = await this.getAllFaces(syncContext);
+            const allFacesMap = await this.getAllSyncedFacesMap(syncContext);
+            faces = getAllFacesFromMap(allFacesMap);
         }
 
         const input = faces
