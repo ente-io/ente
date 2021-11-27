@@ -44,7 +44,8 @@ class _LockScreenState extends State<LockScreen> {
   Future<void> _showLockScreen() async {
     _logger.info("Showing lockscreen");
     try {
-      final result = await requestAuthentication();
+      final result = await requestAuthentication(
+          "please authenticate to view your memories");
       if (result) {
         AppLock.of(context).didUnlock();
       }

@@ -57,7 +57,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           onTap: () async {
             AppLock.of(context).setEnabled(false);
             String reason = "please authenticate to view your recovery key";
-            final result = await requestAuthentication(reason: reason);
+            final result = await requestAuthentication(reason);
             AppLock.of(context)
                 .setEnabled(Configuration.instance.shouldShowLockScreen());
             if (!result) {
@@ -96,7 +96,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           onTap: () async {
             AppLock.of(context).setEnabled(false);
             String reason = "please authenticate to change your email";
-            final result = await requestAuthentication(reason: reason);
+            final result = await requestAuthentication(reason);
             AppLock.of(context)
                 .setEnabled(Configuration.instance.shouldShowLockScreen());
             if (!result) {
@@ -125,7 +125,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           onTap: () async {
             AppLock.of(context).setEnabled(false);
             String reason = "please authenticate to change your password";
-            final result = await requestAuthentication(reason: reason);
+            final result = await requestAuthentication(reason);
             AppLock.of(context)
                 .setEnabled(Configuration.instance.shouldShowLockScreen());
             if (!result) {
