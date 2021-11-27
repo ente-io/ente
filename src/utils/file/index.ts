@@ -466,3 +466,9 @@ export function getNonTrashedUniqueUserFiles(files: File[]) {
         )
     );
 }
+
+export async function downloadFiles(files: File[]) {
+    for (const file of files) {
+        await downloadFile(file);
+    }
+}
