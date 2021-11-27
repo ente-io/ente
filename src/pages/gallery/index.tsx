@@ -549,9 +549,9 @@ export default function Gallery() {
     const downloadHelper = async () => {
         const selectedFiles = getSelectedFiles(selected, files);
         clearSelection();
-        loadingBar.current?.continuousStart();
+        !syncInProgress.current && loadingBar.current?.continuousStart();
         await downloadFiles(selectedFiles);
-        loadingBar.current.complete();
+        !syncInProgress.current && loadingBar.current.complete();
     };
 
     return (
