@@ -12,6 +12,8 @@ import TFJSFaceEmbeddingService from './tfjsFaceEmbeddingService';
 import {
     Face,
     FaceAlignmentService,
+    FaceDetectionService,
+    FaceEmbeddingService,
     MlFileData,
     MLSyncConfig,
     MLSyncContext,
@@ -26,10 +28,10 @@ import { mlFilesStore } from 'utils/storage/localForage';
 import ArcfaceAlignmentService from './arcfaceAlignmentService';
 
 class MachineLearningService {
-    private faceDetectionService: TFJSFaceDetectionService;
+    private faceDetectionService: FaceDetectionService;
     // private faceLandmarkService: FAPIFaceLandmarksService;
     private faceAlignmentService: FaceAlignmentService;
-    private faceEmbeddingService: TFJSFaceEmbeddingService;
+    private faceEmbeddingService: FaceEmbeddingService;
     // private faceEmbeddingService: FAPIFaceEmbeddingService;
     private clusteringService: ClusteringService;
 
@@ -59,22 +61,25 @@ class MachineLearningService {
         if (syncContext.files.length > 0) {
             await this.runMLModels(syncContext);
         } else {
-            await this.getAllFaces(syncContext);
-            await this.runClustering(syncContext);
+            await this.runFaceClustering(syncContext);
         }
 
         console.log('Final TF Memory stats: ', tf.memory());
 
         if (syncContext.config.tsne) {
-            this.runTSNE(syncContext);
+            await this.runTSNE(syncContext);
         }
 
-        return {
+        const mlSyncResult = {
             nFiles: syncContext.files?.length,
             nFaces: syncContext.faces?.length,
-            nClusters: syncContext.clustersWithNoise?.clusters.length,
-            nNoise: syncContext.clustersWithNoise?.noise.length,
+            nClusters: syncContext.faceClustersWithNoise?.clusters.length,
+            nNoise: syncContext.faceClustersWithNoise?.noise.length,
+            tsne: syncContext.tsne,
         };
+        console.log('[MLService] sync results: ', mlSyncResult);
+
+        return mlSyncResult;
     }
 
     private async getMLFileVersion(file: File) {
@@ -230,67 +235,64 @@ class MachineLearningService {
     }
 
     private async getAllFaces(syncContext: MLSyncContext) {
+        if (syncContext.allFaces) {
+            return syncContext.allFaces;
+        }
+
         const allFaces: Array<Face> = [];
         await mlFilesStore.iterate((mlFileData: MlFileData) => {
             mlFileData.faces && allFaces.push(...mlFileData.faces);
         });
-        syncContext.faces = allFaces;
+
+        syncContext.allFaces = allFaces;
+        return allFaces;
     }
 
-    public async runClustering(syncContext: MLSyncContext) {
-        if (
-            !syncContext.faces ||
-            syncContext.faces.length <
-                syncContext.config.faceClustering.minFacesForClustering
-        ) {
+    public async runFaceClustering(syncContext: MLSyncContext) {
+        const clusteringConfig =
+            syncContext.config.faceClustering.clusteringConfig;
+        const allFaces = await this.getAllFaces(syncContext);
+
+        if (!allFaces || allFaces.length < clusteringConfig.minInputSize) {
             console.log(
                 'Too few faces to cluster, not running clustering: ',
-                syncContext.faces.length
+                allFaces.length
             );
             return;
         }
-        const allFaces = syncContext.faces;
-        console.log('Running clustering allFaces: ', allFaces.length);
-        if (syncContext.config.faceClustering.method.value === 'Hdbscan') {
-            syncContext.clusteringResults =
-                this.clusteringService.clusterUsingHdbscan({
-                    input: allFaces.map((f) => Array.from(f.embedding)),
-                    minClusterSize:
-                        syncContext.config.faceClustering.minClusterSize,
-                    debug: syncContext.config.faceClustering.generateDebugInfo,
-                });
-        } else if (
-            syncContext.config.faceClustering.method.value === 'Dbscan'
-        ) {
-            syncContext.clusteringResults =
-                this.clusteringService.clusterUsingDBSCAN(
-                    allFaces.map((f) => Array.from(f.embedding)),
-                    syncContext.config.faceClustering.clusterFaceDistance,
-                    syncContext.config.faceClustering.minClusterSize
-                );
-        } else {
-            throw Error('Unknown clustering method configured');
-        }
 
+        console.log('Running clustering allFaces: ', allFaces.length);
+        syncContext.faceClusteringResults = this.clusteringService.cluster(
+            syncContext.config.faceClustering.method,
+            allFaces.map((f) => Array.from(f.embedding)),
+            syncContext.config.faceClustering.clusteringConfig
+        );
         console.log(
-            '[MLService] Got cluster results: ',
-            syncContext.clusteringResults
+            '[MLService] Got face clustering results: ',
+            syncContext.faceClusteringResults
         );
 
-        syncContext.clustersWithNoise = {
-            clusters: syncContext.clusteringResults.clusters.map((faces) => ({
-                faces,
-            })),
-            noise: syncContext.clusteringResults.noise,
+        syncContext.faceClustersWithNoise = {
+            clusters: syncContext.faceClusteringResults.clusters.map(
+                (faces) => ({
+                    faces,
+                })
+            ),
+            noise: syncContext.faceClusteringResults.noise,
         };
     }
 
     private async runTSNE(syncContext: MLSyncContext) {
-        const input = syncContext.faces
-            .slice(syncContext.config.tsne.samples)
+        let faces = syncContext.faces;
+        if (!faces || faces.length < 1) {
+            faces = await this.getAllFaces(syncContext);
+        }
+
+        const input = faces
+            .slice(0, syncContext.config.tsne.samples)
             .map((f) => f.embedding);
-        const tsne = toTSNE(input, syncContext.config.tsne);
-        console.log('tsne: ', tsne);
+        syncContext.tsne = toTSNE(input, syncContext.config.tsne);
+        console.log('tsne: ', syncContext.tsne);
     }
 }
 

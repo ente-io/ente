@@ -159,10 +159,12 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
             value: 'Hdbscan',
             version: 1,
         },
-        minClusterSize: 5,
-        // clusterFaceDistance: 0.4
-        generateDebugInfo: true,
-        minFacesForClustering: 50, // 200
+        clusteringConfig: {
+            minClusterSize: 5,
+            minInputSize: 50,
+            // maxDistanceInsideCluster: 0.4,
+            generateDebugInfo: true,
+        },
     },
     tsne: {
         samples: 200,

@@ -83,7 +83,7 @@ class TFJSFaceEmbeddingService implements FaceEmbeddingService {
         return facesWithEmbeddings;
     }
 
-    public dispose() {}
+    public async dispose() {}
 }
 
 export default TFJSFaceEmbeddingService;

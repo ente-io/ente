@@ -1,5 +1,12 @@
 import { DBSCAN, OPTICS, KMEANS } from 'density-clustering';
-import { ClusteringResults, HdbscanResults } from 'utils/machineLearning/types';
+import {
+    ClusteringConfig,
+    ClusteringInput,
+    ClusteringMethod,
+    ClusteringResults,
+    HdbscanResults,
+    Versioned,
+} from 'utils/machineLearning/types';
 import Clustering from 'hdbscanjs';
 import { Hdbscan } from 'hdbscan';
 import { HdbscanInput } from 'hdbscan/dist/types';
@@ -74,6 +81,28 @@ class ClusteringService {
         const debugInfo = hdbscan.getDebugInfo();
 
         return { clusters, noise, debugInfo };
+    }
+
+    public cluster(
+        method: Versioned<ClusteringMethod>,
+        input: ClusteringInput,
+        config: ClusteringConfig
+    ) {
+        if (method.value === 'Hdbscan') {
+            return this.clusterUsingHdbscan({
+                input,
+                minClusterSize: config.minClusterSize,
+                debug: config.generateDebugInfo,
+            });
+        } else if (method.value === 'Dbscan') {
+            return this.clusterUsingDBSCAN(
+                input,
+                config.maxDistanceInsideCluster,
+                config.minClusterSize
+            );
+        } else {
+            throw Error('Unknown clustering method: ' + method.value);
+        }
     }
 }
 

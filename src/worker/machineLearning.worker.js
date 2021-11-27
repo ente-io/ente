@@ -34,11 +34,16 @@ class MachineLearningWorker {
             this.sync.bind(this, token),
             mlSyncConfig.syncIntervalSec * 1000
         );
+        console.log(
+            'Scheduled next ML Sync after: ',
+            mlSyncConfig.syncIntervalSec
+        );
     }
 
     async cancelNextMLSync() {
         clearTimeout(this.nextMLSyncTimeoutId);
         this.nextMLSyncTimeoutId = undefined;
+        console.log('Cancelled next scheduled ML Sync');
     }
 
     async sync(token) {

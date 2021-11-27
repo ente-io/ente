@@ -138,13 +138,22 @@ export default function MLDebug() {
         }
     };
 
-    const onSchedule = async () => {
+    let mlWorker;
+    const onStartMLSync = async () => {
         if (!MLWorker) {
             MLWorker = getDedicatedMLWorker();
             console.log('initiated MLWorker');
         }
-        const mlWorker = await new MLWorker.comlink();
+        if (!mlWorker) {
+            mlWorker = await new MLWorker.comlink();
+        }
         mlWorker.scheduleNextMLSync(token);
+    };
+
+    const onStopMLSync = async () => {
+        if (mlWorker) {
+            mlWorker.cancelNextMLSync();
+        }
     };
 
     const nodeSize = { x: 180, y: 180 };
@@ -195,7 +204,8 @@ export default function MLDebug() {
             <button onClick={onSync} disabled>
                 Run ML Sync
             </button>
-            <button onClick={onSchedule}>Schedule ML Sync</button>
+            <button onClick={onStartMLSync}>Start ML Sync</button>
+            <button onClick={onStopMLSync}>Stop ML Sync</button>
 
             <p>{JSON.stringify(mlResult.clustersWithNoise)}</p>
             <div>

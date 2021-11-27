@@ -17,6 +17,7 @@ export interface MLSyncResult {
     nFaces: number;
     nClusters: number;
     nNoise: number;
+    tsne?: any;
 }
 
 export interface DebugFace {
@@ -92,7 +93,7 @@ export declare type FaceAlignmentMethod =
 
 export declare type FaceEmbeddingMethod = 'MobileFaceNet' | 'FaceApiDlib';
 
-export declare type FaceClusteringMethod = 'Hdbscan' | 'Dbscan';
+export declare type ClusteringMethod = 'Hdbscan' | 'Dbscan';
 
 export class AlignedBox {
     box: Box;
@@ -148,11 +149,8 @@ export interface FaceEmbeddingConfig {
 }
 
 export interface FaceClusteringConfig {
-    method: Versioned<FaceClusteringMethod>;
-    minClusterSize: number;
-    clusterFaceDistance?: number;
-    generateDebugInfo?: boolean;
-    minFacesForClustering?: number;
+    method: Versioned<ClusteringMethod>;
+    clusteringConfig: ClusteringConfig;
 }
 
 export declare type TSNEMetric = 'euclidean' | 'manhattan';
@@ -184,8 +182,9 @@ export class MLSyncContext {
 
     files?: File[];
     faces?: Face[];
-    clusteringResults?: HdbscanResults;
-    clustersWithNoise?: ClustersWithNoise;
+    allFaces?: Face[];
+    faceClusteringResults?: ClusteringResults;
+    faceClustersWithNoise?: ClustersWithNoise;
     tsne?: any;
 
     constructor(token, config) {
@@ -195,7 +194,9 @@ export class MLSyncContext {
 }
 
 export interface FaceDetectionService {
+    init(): Promise<void>;
     detectFaces(image: tf.Tensor3D): Promise<Array<DetectedFace>>;
+    dispose(): Promise<void>;
 }
 
 export interface FaceAlignmentService {
@@ -203,8 +204,19 @@ export interface FaceAlignmentService {
 }
 
 export interface FaceEmbeddingService {
+    init(): Promise<void>;
     getFaceEmbeddings(
         image: tf.Tensor3D,
         faces: Array<AlignedFace>
     ): Promise<Array<FaceWithEmbedding>>;
+    dispose(): Promise<void>;
 }
+
+export interface ClusteringConfig {
+    minClusterSize: number;
+    maxDistanceInsideCluster?: number;
+    minInputSize?: number;
+    generateDebugInfo?: boolean;
+}
+
+export declare type ClusteringInput = Array<Array<number>>;
