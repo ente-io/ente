@@ -329,7 +329,9 @@ class FileUploader {
       final fileUploadURL = await _getUploadURL();
       String fileObjectKey = await _putFile(fileUploadURL, encryptedFile)
           .timeout(kFileUploadTimeout, onTimeout: () async {
-        final message = "Upload timed out for file of size " +
+        final message = "Upload timed out for file " +
+            file.toString() +
+            " of size " +
             (await encryptedFile.length()).toString();
         _logger.severe(message);
         throw TimeoutException(message);
