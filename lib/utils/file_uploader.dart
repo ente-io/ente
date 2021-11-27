@@ -35,6 +35,7 @@ class FileUploader {
   static const kMaximumThumbnailCompressionAttempts = 2;
   static const kMaximumUploadAttempts = 4;
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
+  static const kFileUploadTimeout = Duration(minutes: 50);
 
   final _logger = Logger("FileUploader");
   final _dio = Network.instance.getDio();
@@ -220,7 +221,12 @@ class FileUploader {
     _currentlyUploading++;
     final localID = file.localID;
     try {
-      final uploadedFile = await _tryToUpload(file, collectionID, forcedUpload);
+      final uploadedFile = await _tryToUpload(file, collectionID, forcedUpload)
+          .timeout(kFileUploadTimeout, onTimeout: () {
+        final message = "Upload timed out for file " + file.toString();
+        _logger.severe(message);
+        throw TimeoutException(message);
+      });
       _queue.remove(localID).completer.complete(uploadedFile);
       return uploadedFile;
     } catch (e) {

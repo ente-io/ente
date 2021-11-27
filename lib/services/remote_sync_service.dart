@@ -45,8 +45,6 @@ class RemoteSyncService {
 
   static const kMaximumPermissibleUploadsInThrottledMode = 4;
 
-  static const kFileUploadTimeout = Duration(minutes: 50);
-
   static final RemoteSyncService instance =
       RemoteSyncService._privateConstructor();
 
@@ -250,11 +248,7 @@ class RemoteSyncService {
   void _uploadFile(File file, int collectionID, List<Future> futures) {
     final future = _uploader
         .upload(file, collectionID)
-        .timeout(kFileUploadTimeout, onTimeout: () async {
-      final message = "Upload timed out for file " + file.toString();
-      _logger.severe(message);
-      throw TimeoutException(message);
-    }).then((uploadedFile) => _onFileUploaded(uploadedFile));
+        .then((uploadedFile) => _onFileUploaded(uploadedFile));
     futures.add(future);
   }
 
