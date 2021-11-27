@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/sessions.dart';
 import 'package:photos/services/user_service.dart';
@@ -17,6 +18,7 @@ class SessionsPage extends StatefulWidget {
 
 class _SessionsPageState extends State<SessionsPage> {
   Sessions _sessions;
+  final Logger _logger = Logger("SessionsPageState");
 
   @override
   void initState() {
@@ -101,9 +103,16 @@ class _SessionsPageState extends State<SessionsPage> {
   Future<void> _terminateSession(Session session) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
-    await UserService.instance.terminateSession(session.token);
-    await _fetchActiveSessions();
-    await dialog.hide();
+    try {
+      await UserService.instance.terminateSession(session.token);
+      await _fetchActiveSessions();
+      await dialog.hide();
+    } catch (e, s) {
+      await dialog.hide();
+      _logger.severe('failed to terminate', e, s);
+      showErrorDialog(
+          context, 'oops', "something went wrong, please try again");
+    }
   }
 
   Future<void> _fetchActiveSessions() async {
