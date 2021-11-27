@@ -65,17 +65,17 @@ Future<void> _runInForeground() async {
   });
 }
 
-Future _runInBackground(String taskId) async {
+Future _runBackgroundTask(String taskId) async {
   if (_initializationStatus == null) {
     _runWithLogs(() async {
-      _runBackgroundTask(taskId);
+      _runInBackground(taskId);
     }, prefix: "[bg]");
   } else {
-    _runBackgroundTask(taskId);
+    _runInBackground(taskId);
   }
 }
 
-Future<void> _runBackgroundTask(String taskId) async {
+Future<void> _runInBackground(String taskId) async {
   await Future.delayed(Duration(seconds: 3));
   if (await _isRunningInForeground()) {
     _logger.info("FG task running, skipping BG task");
