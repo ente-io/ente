@@ -142,10 +142,6 @@ Future<void> _init(bool isBackground) async {
 }
 
 Future<void> _sync() async {
-  if (SyncService.instance.isSyncInProgress()) {
-    _logger.info("Sync is already in progress, skipping");
-    return;
-  }
   if (!AppLifecycleService.instance.isForeground) {
     _logger.info("Syncing in background");
   }
