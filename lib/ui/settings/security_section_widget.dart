@@ -220,12 +220,13 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () async {
+          String reason = "please authenticate to view your active sessions";
           AppLock.of(context).setEnabled(false);
-          final result = await requestAuthentication();
+          final result = await requestAuthentication(reason: reason);
           AppLock.of(context)
               .setEnabled(Configuration.instance.shouldShowLockScreen());
           if (!result) {
-            showToast("please authenticate to view your active sessions");
+            showToast(reason);
             return;
           }
           Navigator.of(context).push(
