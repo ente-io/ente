@@ -166,12 +166,12 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
             generateDebugInfo: true,
         },
     },
-    tsne: {
-        samples: 200,
-        dim: 2,
-        perplexity: 10.0,
-        learningRate: 10.0,
-        metric: 'euclidean',
-    },
+    // tsne: {
+    //     samples: 200,
+    //     dim: 2,
+    //     perplexity: 10.0,
+    //     learningRate: 10.0,
+    //     metric: 'euclidean',
+    // },
     mlVersion: 1,
 };

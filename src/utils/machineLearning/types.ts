@@ -13,10 +13,11 @@ import { File } from 'services/fileService';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
 
 export interface MLSyncResult {
-    nFiles: number;
-    nFaces: number;
-    nClusters: number;
-    nNoise: number;
+    nOutOfSyncFiles: number;
+    nSyncedFiles: number;
+    nSyncedFaces: number;
+    nFaceClusters: number;
+    nFaceNoise: number;
     tsne?: any;
 }
 
@@ -180,9 +181,10 @@ export class MLSyncContext {
     token: string;
     config: MLSyncConfig;
 
-    files?: File[];
-    faces?: Face[];
-    allFaces?: Face[];
+    outOfSyncFiles: File[];
+    syncedFiles: File[];
+    syncedFaces: Face[];
+    allSyncedFaces?: Face[];
     faceClusteringResults?: ClusteringResults;
     faceClustersWithNoise?: ClustersWithNoise;
     tsne?: any;
@@ -190,6 +192,10 @@ export class MLSyncContext {
     constructor(token, config) {
         this.token = token;
         this.config = config;
+
+        this.outOfSyncFiles = [];
+        this.syncedFiles = [];
+        this.syncedFaces = [];
     }
 }
 

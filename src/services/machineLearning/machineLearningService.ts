@@ -56,12 +56,12 @@ class MachineLearningService {
 
         const syncContext = new MLSyncContext(token, config);
 
-        await this.getNewFiles(syncContext);
+        await this.getOutOfSyncFiles(syncContext);
 
-        if (syncContext.files.length > 0) {
-            await this.runMLModels(syncContext);
+        if (syncContext.outOfSyncFiles.length > 0) {
+            await this.syncFiles(syncContext);
         } else {
-            await this.runFaceClustering(syncContext);
+            await this.syncIndex(syncContext);
         }
 
         console.log('Final TF Memory stats: ', tf.memory());
@@ -70,11 +70,12 @@ class MachineLearningService {
             await this.runTSNE(syncContext);
         }
 
-        const mlSyncResult = {
-            nFiles: syncContext.files?.length,
-            nFaces: syncContext.faces?.length,
-            nClusters: syncContext.faceClustersWithNoise?.clusters.length,
-            nNoise: syncContext.faceClustersWithNoise?.noise.length,
+        const mlSyncResult: MLSyncResult = {
+            nOutOfSyncFiles: syncContext.outOfSyncFiles.length,
+            nSyncedFiles: syncContext.syncedFiles.length,
+            nSyncedFaces: syncContext.syncedFaces.length,
+            nFaceClusters: syncContext.faceClustersWithNoise?.clusters.length,
+            nFaceNoise: syncContext.faceClustersWithNoise?.noise.length,
             tsne: syncContext.tsne,
         };
         console.log('[MLService] sync results: ', mlSyncResult);
@@ -89,7 +90,10 @@ class MachineLearningService {
         return mlFileData && mlFileData.mlVersion;
     }
 
-    private async getUniqueNewFiles(syncContext: MLSyncContext, files: File[]) {
+    private async getUniqueOutOfSyncFiles(
+        syncContext: MLSyncContext,
+        files: File[]
+    ) {
         const limit = syncContext.config.batchSize;
         const mlVersion = syncContext.config.mlVersion;
         const uniqueFiles: Map<number, File> = new Map<number, File>();
@@ -103,41 +107,45 @@ class MachineLearningService {
         return [...uniqueFiles.values()];
     }
 
-    private async getNewFiles(syncContext: MLSyncContext) {
+    private async getOutOfSyncFiles(syncContext: MLSyncContext) {
         const existingFiles = await getLocalFiles();
         existingFiles.sort(
             (a, b) => b.metadata.creationTime - a.metadata.creationTime
         );
-        syncContext.files = await this.getUniqueNewFiles(
+        syncContext.outOfSyncFiles = await this.getUniqueOutOfSyncFiles(
             syncContext,
             existingFiles
         );
         console.log(
-            'Got unique files: ',
-            syncContext.files.length,
+            'Got unique outOfSyncFiles: ',
+            syncContext.outOfSyncFiles.length,
             'for batchSize: ',
             syncContext.config.batchSize
         );
     }
 
-    private async runMLModels(syncContext: MLSyncContext) {
+    private async syncFiles(syncContext: MLSyncContext) {
         // await this.initMLModels();
 
-        syncContext.faces = [];
-        for (const file of syncContext.files) {
+        for (const outOfSyncfile of syncContext.outOfSyncFiles) {
             try {
-                const mlFileData = await this.syncFile(syncContext, file);
-                syncContext.faces = syncContext.faces.concat(mlFileData.faces);
+                const mlFileData = await this.syncFile(
+                    syncContext,
+                    outOfSyncfile
+                );
+                mlFileData.faces &&
+                    syncContext.syncedFaces.push(...mlFileData.faces);
+                syncContext.syncedFiles.push(outOfSyncfile);
                 console.log('TF Memory stats: ', tf.memory());
             } catch (e) {
                 console.error(
                     'Error while syncing file: ',
-                    file.id.toString(),
+                    outOfSyncfile.id.toString(),
                     e
                 );
             }
         }
-        console.log('allFaces: ', syncContext.faces);
+        console.log('allFaces: ', syncContext.syncedFaces);
         // await this.disposeMLModels();
     }
 
@@ -234,9 +242,13 @@ class MachineLearningService {
         return mlFilesStore.setItem(mlFileData.fileId.toString(), mlFileData);
     }
 
+    public async syncIndex(syncContext: MLSyncContext) {
+        await this.runFaceClustering(syncContext);
+    }
+
     private async getAllFaces(syncContext: MLSyncContext) {
-        if (syncContext.allFaces) {
-            return syncContext.allFaces;
+        if (syncContext.allSyncedFaces) {
+            return syncContext.allSyncedFaces;
         }
 
         const allFaces: Array<Face> = [];
@@ -244,7 +256,7 @@ class MachineLearningService {
             mlFileData.faces && allFaces.push(...mlFileData.faces);
         });
 
-        syncContext.allFaces = allFaces;
+        syncContext.allSyncedFaces = allFaces;
         return allFaces;
     }
 
@@ -283,7 +295,7 @@ class MachineLearningService {
     }
 
     private async runTSNE(syncContext: MLSyncContext) {
-        let faces = syncContext.faces;
+        let faces = syncContext.syncedFaces;
         if (!faces || faces.length < 1) {
             faces = await this.getAllFaces(syncContext);
         }

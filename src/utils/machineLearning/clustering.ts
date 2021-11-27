@@ -25,17 +25,17 @@ export function getClusterSummary(cluster: ClusterFaces): FaceDescriptor {
 
 export function updateClusterSummaries(syncContext: MLSyncContext) {
     if (
-        !syncContext.clusteringResults ||
-        !syncContext.clusteringResults.clusters ||
-        syncContext.clusteringResults.clusters.length < 1
+        !syncContext.faceClusteringResults ||
+        !syncContext.faceClusteringResults.clusters ||
+        syncContext.faceClusteringResults.clusters.length < 1
     ) {
         return;
     }
 
-    const resultClusters = syncContext.clusteringResults.clusters;
+    const resultClusters = syncContext.faceClusteringResults.clusters;
 
     resultClusters.forEach((resultCluster) => {
-        syncContext.clustersWithNoise.clusters.push({
+        syncContext.faceClustersWithNoise.clusters.push({
             faces: resultCluster,
             // summary: this.getClusterSummary(resultCluster),
         });
@@ -48,7 +48,7 @@ export function getNearestCluster(
 ): NearestCluster {
     let nearest: Cluster = null;
     let nearestDist = 100000;
-    syncContext.clustersWithNoise.clusters.forEach((c) => {
+    syncContext.faceClustersWithNoise.clusters.forEach((c) => {
         const dist = euclideanDistance(noise.embedding, c.summary);
         if (dist < nearestDist) {
             nearestDist = dist;
@@ -62,17 +62,17 @@ export function getNearestCluster(
 
 export function assignNoiseWithinLimit(syncContext: MLSyncContext) {
     if (
-        !syncContext.clusteringResults ||
-        !syncContext.clusteringResults.noise ||
-        syncContext.clusteringResults.noise.length < 1
+        !syncContext.faceClusteringResults ||
+        !syncContext.faceClusteringResults.noise ||
+        syncContext.faceClusteringResults.noise.length < 1
     ) {
         return;
     }
 
-    const noise = syncContext.clusteringResults.noise;
+    const noise = syncContext.faceClusteringResults.noise;
 
     noise.forEach((n) => {
-        const noiseFace = syncContext.faces[n];
+        const noiseFace = syncContext.syncedFaces[n];
         const nearest = this.getNearestCluster(syncContext, noiseFace);
 
         if (nearest.cluster && nearest.distance < this.maxFaceDistance) {
