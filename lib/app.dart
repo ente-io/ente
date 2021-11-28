@@ -58,7 +58,7 @@ class EnteApp extends StatefulWidget {
 }
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
-  final _logger = Logger("EnteApp");
+  final _logger = Logger("EnteAppState");
 
   @override
   void initState() {
