@@ -200,6 +200,15 @@ export async function getPeopleList(file: File): Promise<Array<Person>> {
     return peopleList;
 }
 
+export async function getAllPeople() {
+    const people: Array<Person> = [];
+    await mlPeopleStore.iterate<Person, void>((person) => {
+        people.push(person);
+    });
+
+    return people.sort((p1, p2) => p2.files.length - p1.files.length);
+}
+
 export function findFirstIfSorted<T>(
     elements: Array<T>,
     comparator: (a: T, b: T) => number

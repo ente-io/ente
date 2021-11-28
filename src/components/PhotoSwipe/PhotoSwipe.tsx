@@ -36,9 +36,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import CloseIcon from 'components/icons/CloseIcon';
 import TickIcon from 'components/icons/TickIcon';
-import TFJSImage from 'components/TFJSImage';
-import { Person } from 'utils/machineLearning/types';
-import { getPeopleList } from 'utils/machineLearning';
+import { PhotoPeopleList } from 'components/PeopleList';
 
 interface Iprops {
     isOpen: boolean;
@@ -68,24 +66,6 @@ const Legend = styled.span`
 const Pre = styled.pre`
     color: #aaa;
     padding: 7px 15px;
-`;
-
-const FaceChipContainer = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
-    margin-bottom: 10px;
-`;
-
-const FaceChip = styled.div`
-    width: 112px;
-    height: 112px;
-    margin-right: 10px;
-    border-radius: 50%;
-    overflow: hidden;
-    position: relative;
 `;
 
 const renderInfoItem = (label: string, value: string | JSX.Element) => (
@@ -249,35 +229,6 @@ function ExifData(props: { exif: any }) {
     );
 }
 
-function PeopleList(props: { file }) {
-    const [peopleList, setPeopleList] = useState<Array<Person>>([]);
-
-    const updateFaceImages = async () => {
-        const peopleList = await getPeopleList(props.file);
-        setPeopleList(peopleList);
-    };
-
-    useEffect(() => {
-        // TODO: handle multiple async updates
-        updateFaceImages();
-    }, [props.file]);
-
-    return (
-        <>
-            <div>
-                <Legend>{constants.PEOPLE}</Legend>
-            </div>
-            <FaceChipContainer>
-                {peopleList.map((person, index) => (
-                    <FaceChip key={index}>
-                        <TFJSImage faceImage={person.faceImage}></TFJSImage>
-                    </FaceChip>
-                ))}
-            </FaceChipContainer>
-        </>
-    );
-}
-
 function InfoModal({
     showInfo,
     handleCloseInfo,
@@ -324,7 +275,10 @@ function InfoModal({
                             {constants.SHOW_MAP}
                         </a>
                     )}
-                <PeopleList file={items[photoSwipe?.getCurrentIndex()]} />
+                <div>
+                    <Legend>{constants.PEOPLE}</Legend>
+                </div>
+                <PhotoPeopleList file={items[photoSwipe?.getCurrentIndex()]} />
                 {exif && (
                     <>
                         <ExifData exif={exif} />

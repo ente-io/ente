@@ -93,6 +93,7 @@ import {
     Trash,
 } from 'services/trashService';
 import DeleteBtn from 'components/DeleteBtn';
+import { Person } from 'utils/machineLearning/types';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -123,6 +124,7 @@ export type Search = {
     date?: DateValue;
     location?: Bbox;
     fileIndex?: number;
+    person?: Person;
 };
 export interface SearchStats {
     resultCount: number;

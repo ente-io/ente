@@ -1,11 +1,12 @@
 import { Search, SearchStats } from 'pages/gallery';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
 import { components } from 'react-select';
 import debounce from 'debounce-promise';
 import {
     Bbox,
+    getAllPeopleSuggestion,
     getHolidaySuggestion,
     getYearSuggestion,
     parseHumanDate,
@@ -25,6 +26,8 @@ import { File, FILE_TYPE } from 'services/fileService';
 import ImageIcon from './icons/ImageIcon';
 import VideoIcon from './icons/VideoIcon';
 import { IconButton } from './Container';
+import { Person } from 'utils/machineLearning/types';
+import { PeopleList } from './PeopleList';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -75,12 +78,20 @@ const SearchInput = styled.div`
     margin: auto;
 `;
 
+const Legend = styled.span`
+    font-size: 20px;
+    color: #ddd;
+    display: inline;
+    padding: 20px 10px;
+`;
+
 export enum SuggestionType {
     DATE,
     LOCATION,
     COLLECTION,
     IMAGE,
     VIDEO,
+    PERSON,
 }
 export interface DateValue {
     date?: number;
@@ -90,7 +101,8 @@ export interface DateValue {
 export interface Suggestion {
     type: SuggestionType;
     label: string;
-    value: Bbox | DateValue | number;
+    value: Bbox | DateValue | number | Person;
+    hide?: boolean;
 }
 interface Props {
     isOpen: boolean;
@@ -104,6 +116,7 @@ interface Props {
     files: File[];
 }
 export default function SearchBar(props: Props) {
+    const selectRef = useRef(null);
     const [value, setValue] = useState<Suggestion>(null);
 
     const handleChange = (value) => {
@@ -116,14 +129,14 @@ export default function SearchBar(props: Props) {
     // Functionality
     // = =========================
     const getAutoCompleteSuggestions = async (searchPhrase: string) => {
+        const options = await getAllPeopleSuggestion();
+        // const options = [];
         searchPhrase = searchPhrase.trim().toLowerCase();
         if (!searchPhrase?.length) {
             return [];
         }
-        const options = [
-            ...getHolidaySuggestion(searchPhrase),
-            ...getYearSuggestion(searchPhrase),
-        ];
+        options.push(...getHolidaySuggestion(searchPhrase));
+        options.push(...getYearSuggestion(searchPhrase));
 
         const searchedDates = parseHumanDate(searchPhrase);
 
@@ -178,6 +191,7 @@ export default function SearchBar(props: Props) {
     const getOptions = debounce(getAutoCompleteSuggestions, 250);
 
     const search = (selectedOption: Suggestion) => {
+        // console.log('search...');
         if (!selectedOption) {
             return;
         }
@@ -202,6 +216,10 @@ export default function SearchBar(props: Props) {
             case SuggestionType.VIDEO:
                 props.setSearch({ fileIndex: selectedOption.value as number });
                 setValue(null);
+                break;
+            case SuggestionType.PERSON:
+                props.setSearch({ person: selectedOption.value as Person });
+                props.setOpen(true);
                 break;
         }
     };
@@ -246,13 +264,17 @@ export default function SearchBar(props: Props) {
             <span>{props.label}</span>
         </div>
     );
-    const { Option, Control } = components;
+    const { Option, Control, Menu } = components;
 
-    const OptionWithIcon = (props) => (
-        <Option {...props}>
-            <LabelWithIcon type={props.data.type} label={props.data.label} />
-        </Option>
-    );
+    const OptionWithIcon = (props) =>
+        !props.data.hide && (
+            <Option {...props}>
+                <LabelWithIcon
+                    type={props.data.type}
+                    label={props.data.label}
+                />
+            </Option>
+        );
     const ControlWithIcon = (props) => (
         <Control {...props}>
             <span
@@ -266,6 +288,30 @@ export default function SearchBar(props: Props) {
             {props.children}
         </Control>
     );
+
+    const CustomMenu = (props) => {
+        // console.log("props.selectProps.options: ", selectRef);
+        const peopleSuggestions = props.selectProps.options.filter(
+            (o) => o.type === SuggestionType.PERSON
+        );
+        const people = peopleSuggestions.map((o) => o.value);
+        return (
+            <Menu {...props}>
+                {people && people.length > 0 && (
+                    <>
+                        <Legend>{constants.PEOPLE}</Legend>
+                        <PeopleList
+                            people={people}
+                            onSelect={(person, index) => {
+                                selectRef.current.blur();
+                                setValue(peopleSuggestions[index]);
+                            }}></PeopleList>
+                    </>
+                )}
+                {props.children}
+            </Menu>
+        );
+    };
 
     const customStyles = {
         control: (style, { isFocused }) => ({
@@ -333,8 +379,10 @@ export default function SearchBar(props: Props) {
                             margin: '10px',
                         }}>
                         <AsyncSelect
+                            ref={selectRef}
                             value={value}
                             components={{
+                                Menu: CustomMenu,
                                 Option: OptionWithIcon,
                                 Control: ControlWithIcon,
                             }}

@@ -7,6 +7,7 @@ import { Collection } from './collectionService';
 import { File } from './fileService';
 import { User } from './userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getAllPeople } from 'utils/machineLearning';
 
 const ENDPOINT = getEndpoint();
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
@@ -103,6 +104,16 @@ export function getYearSuggestion(searchPhrase: string): Suggestion[] {
         }
     }
     return [];
+}
+
+export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
+    const people = await getAllPeople();
+    return people.slice(0, 6).map((person) => ({
+        label: person.name,
+        type: SuggestionType.PERSON,
+        value: person,
+        hide: true,
+    }));
 }
 
 export function searchCollection(
