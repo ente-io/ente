@@ -66,31 +66,38 @@ class RemoteSyncService {
     _existingSync = Completer<void>();
 
     bool isFirstSync = !_collectionsService.hasSyncedCollections();
-    await _collectionsService.sync();
 
-    if (isFirstSync || _hasReSynced()) {
-      await _syncUpdatedCollections(silently);
-    } else {
-      final syncSinceTime = _getSinceTimeForReSync();
-      await _resyncAllCollectionsSinceTime(syncSinceTime);
-    }
-    if (!_hasReSynced()) {
-      await _markReSyncAsDone();
-    }
-    // sync trash but consume error during initial launch.
-    // this is to ensure that we don't pause upload due to any error during
-    // the trash sync. Impact: We may end up re-uploading a file which was
-    // recently trashed.
-    await TrashSyncService.instance
-        .syncTrash()
-        .onError((e, s) => _logger.severe('trash sync failed', e, s));
-    bool hasUploadedFiles = await _uploadDiff();
-    _existingSync.complete();
-    _existingSync = null;
-    if (hasUploadedFiles && !_shouldThrottleSync()) {
-      // Skipping a resync to ensure that files that were ignored in this
-      // session are not processed now
-      sync(silently: true);
+    try {
+      await _collectionsService.sync();
+
+      if (isFirstSync || _hasReSynced()) {
+        await _syncUpdatedCollections(silently);
+      } else {
+        final syncSinceTime = _getSinceTimeForReSync();
+        await _resyncAllCollectionsSinceTime(syncSinceTime);
+      }
+      if (!_hasReSynced()) {
+        await _markReSyncAsDone();
+      }
+      // sync trash but consume error during initial launch.
+      // this is to ensure that we don't pause upload due to any error during
+      // the trash sync. Impact: We may end up re-uploading a file which was
+      // recently trashed.
+      await TrashSyncService.instance
+          .syncTrash()
+          .onError((e, s) => _logger.severe('trash sync failed', e, s));
+      bool hasUploadedFiles = await _uploadDiff();
+      _existingSync.complete();
+      _existingSync = null;
+      if (hasUploadedFiles && !_shouldThrottleSync()) {
+        // Skipping a resync to ensure that files that were ignored in this
+        // session are not processed now
+        sync(silently: true);
+      }
+    } catch (e, s) {
+      _logger.severe("Error executing remote sync ", e, s);
+      _existingSync.complete();
+      _existingSync = null;
     }
   }
 
