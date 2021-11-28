@@ -66,9 +66,15 @@ Future<void> _runInForeground() async {
 }
 
 Future<void> _runBackgroundTask(String taskId) async {
-  _runWithLogs(() async {
-    _runInBackground(taskId);
-  }, prefix: "[bg]");
+  if (Platform.isIOS && _isProcessRunning) {
+    _logger.info("Background task triggered when process was already running");
+    await _sync();
+    BackgroundFetch.finish(taskId);
+  } else {
+    _runWithLogs(() async {
+      _runInBackground(taskId);
+    }, prefix: "[bg]");
+  }
 }
 
 Future<void> _runInBackground(String taskId) async {
