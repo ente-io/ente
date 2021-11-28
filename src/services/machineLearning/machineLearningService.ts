@@ -26,6 +26,7 @@ import { toTSNE } from 'utils/machineLearning/visualization';
 import { mlFilesStore, mlPeopleStore } from 'utils/storage/localForage';
 import ArcfaceAlignmentService from './arcfaceAlignmentService';
 import {
+    findFirstIfSorted,
     getAllFacesFromMap,
     getFaceImage,
     getThumbnailTFImage,
@@ -315,8 +316,14 @@ class MachineLearningService {
                 .map((f) => allFaces[f])
                 .filter((f) => f);
 
+            // TODO: face box to be normalized to 0..1 scale
+            const personFace = findFirstIfSorted(
+                faces,
+                (a, b) =>
+                    a.probability * a.box.width - b.probability * b.box.width
+            );
             const faceImageTensor = await getFaceImage(
-                faces[0],
+                personFace,
                 syncContext.token
             );
             const faceImage = await faceImageTensor.array();

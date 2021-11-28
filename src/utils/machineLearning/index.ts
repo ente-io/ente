@@ -180,7 +180,7 @@ export async function getPeopleList(file: File): Promise<Array<Person>> {
     const mlFileData: MlFileData = await mlFilesStore.getItem(
         file.id.toString()
     );
-    if (!mlFileData.faces || mlFileData.faces.length < 1) {
+    if (!mlFileData || !mlFileData.faces || mlFileData.faces.length < 1) {
         return [];
     }
 
@@ -198,6 +198,25 @@ export async function getPeopleList(file: File): Promise<Array<Person>> {
     // console.log("peopleList: ", peopleList);
 
     return peopleList;
+}
+
+export function findFirstIfSorted<T>(
+    elements: Array<T>,
+    comparator: (a: T, b: T) => number
+) {
+    if (!elements || elements.length < 1) {
+        return;
+    }
+    let first = elements[0];
+
+    for (let i = 1; i < elements.length; i++) {
+        const comp = comparator(elements[i], first);
+        if (comp > 0) {
+            first = elements[i];
+        }
+    }
+
+    return first;
 }
 
 export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
