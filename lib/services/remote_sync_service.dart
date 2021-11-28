@@ -202,7 +202,7 @@ class RemoteSyncService {
     final List<Future> futures = [];
     for (final uploadedFileID in updatedFileIDs) {
       if (_shouldThrottleSync() &&
-          futures.length == kMaximumPermissibleUploadsInThrottledMode) {
+          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
         _logger
             .info("Skipping some updated files as we are throttling uploads");
         break;
@@ -213,7 +213,7 @@ class RemoteSyncService {
 
     for (final file in filesToBeUploaded) {
       if (_shouldThrottleSync() &&
-          futures.length == kMaximumPermissibleUploadsInThrottledMode) {
+          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
         _logger.info("Skipping some new files as we are throttling uploads");
         break;
       }
@@ -225,7 +225,7 @@ class RemoteSyncService {
 
     for (final file in editedFiles) {
       if (_shouldThrottleSync() &&
-          futures.length == kMaximumPermissibleUploadsInThrottledMode) {
+          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
         _logger.info("Skipping some edited files as we are throttling uploads");
         break;
       }
