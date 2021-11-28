@@ -132,6 +132,7 @@ export interface Person {
     id: number;
     name?: string;
     files: Array<number>;
+    faceImage: FaceImage;
 }
 
 export interface MlFileData {

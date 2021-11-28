@@ -1,7 +1,12 @@
 import * as tf from '@tensorflow/tfjs-core';
 import { DataType } from '@tensorflow/tfjs-core';
+import DownloadManager from 'services/downloadManager';
+import * as jpeg from 'jpeg-js';
+import { File, getLocalFiles } from 'services/fileService';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
-import { Face, MLSyncConfig } from './types';
+import { Face, MlFileData, MLSyncConfig, Person } from './types';
+import { extractFaceImage } from './faceAlign';
+import { mlFilesStore, mlPeopleStore } from 'utils/storage/localForage';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -134,6 +139,65 @@ export function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
     const allFaces = [...allFacesMap.values()].flat();
 
     return allFaces;
+}
+
+export async function getFaceImage(
+    face: Face,
+    token: string,
+    file?: File,
+    faceSize?: number
+): Promise<tf.Tensor3D> {
+    if (!file) {
+        const localFiles = await getLocalFiles();
+        file = localFiles.find((f) => f.id === face.fileId);
+    }
+
+    const tfImage = await getThumbnailTFImage(file, token);
+
+    return tf.tidy(() => {
+        const tf4DF32Image = toTensor4D(tfImage, 'float32');
+        const faceImage = extractFaceImage(tf4DF32Image, face, faceSize || 112);
+        const normalizedImage = tf.sub(tf.div(faceImage, 127.5), 1.0);
+        tf.dispose(tfImage);
+
+        return normalizedImage.squeeze([0]) as tf.Tensor3D;
+    });
+}
+
+export async function getThumbnailTFImage(file: File, token: string) {
+    const fileUrl = await DownloadManager.getPreview(file, token);
+    console.log('[MLService] Got thumbnail: ', file.id.toString(), fileUrl);
+
+    const thumbFile = await fetch(fileUrl);
+    const arrayBuffer = await thumbFile.arrayBuffer();
+    const decodedImg = await jpeg.decode(arrayBuffer);
+    // console.log('[MLService] decodedImg: ', decodedImg);
+
+    return tf.browser.fromPixels(decodedImg);
+}
+
+export async function getPeopleList(file: File): Promise<Array<Person>> {
+    const mlFileData: MlFileData = await mlFilesStore.getItem(
+        file.id.toString()
+    );
+    if (!mlFileData.faces || mlFileData.faces.length < 1) {
+        return [];
+    }
+
+    const peopleIds = mlFileData.faces
+        .map((f) => f.personId)
+        .filter((pid) => pid >= 0);
+    if (!peopleIds || peopleIds.length < 1) {
+        return [];
+    }
+    // console.log("peopleIds: ", peopleIds);
+    const peoplePromises = peopleIds.map(
+        (p) => mlPeopleStore.getItem(p.toString()) as Promise<Person>
+    );
+    const peopleList = await Promise.all(peoplePromises);
+    // console.log("peopleList: ", peopleList);
+
+    return peopleList;
 }
 
 export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {

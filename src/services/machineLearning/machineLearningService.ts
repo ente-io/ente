@@ -1,5 +1,4 @@
 import { File, getLocalFiles } from 'services/fileService';
-import DownloadManager from 'services/downloadManager';
 
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
@@ -21,13 +20,16 @@ import {
     Person,
 } from 'utils/machineLearning/types';
 
-import * as jpeg from 'jpeg-js';
 import ClusteringService from './clusteringService';
 
 import { toTSNE } from 'utils/machineLearning/visualization';
 import { mlFilesStore, mlPeopleStore } from 'utils/storage/localForage';
 import ArcfaceAlignmentService from './arcfaceAlignmentService';
-import { getAllFacesFromMap } from 'utils/machineLearning';
+import {
+    getAllFacesFromMap,
+    getFaceImage,
+    getThumbnailTFImage,
+} from 'utils/machineLearning';
 
 class MachineLearningService {
     private faceDetectionService: FaceDetectionService;
@@ -156,19 +158,9 @@ class MachineLearningService {
             fileId: file.id,
             mlVersion: syncContext.config.mlVersion,
         };
-        const fileUrl = await DownloadManager.getPreview(
-            file,
-            syncContext.token
-        );
-        console.log('[MLService] Got thumbnail: ', file.id.toString(), fileUrl);
-
-        const thumbFile = await fetch(fileUrl);
-        const arrayBuffer = await thumbFile.arrayBuffer();
-        const decodedImg = await jpeg.decode(arrayBuffer);
-        console.log('[MLService] decodedImg: ', decodedImg);
 
         // console.log('1 TF Memory stats: ', tf.memory());
-        const tfImage = tf.browser.fromPixels(decodedImg);
+        const tfImage = await getThumbnailTFImage(file, syncContext.token);
         // console.log('2 TF Memory stats: ', tf.memory());
         const detectedFaces = await this.faceDetectionService.detectFaces(
             tfImage
@@ -322,9 +314,18 @@ class MachineLearningService {
             const faces = cluster.faces
                 .map((f) => allFaces[f])
                 .filter((f) => f);
+
+            const faceImageTensor = await getFaceImage(
+                faces[0],
+                syncContext.token
+            );
+            const faceImage = await faceImageTensor.array();
+            tf.dispose(faceImageTensor);
+
             const person: Person = {
                 id: index,
                 files: faces.map((f) => f.fileId),
+                faceImage: faceImage,
             };
 
             await mlPeopleStore.setItem(person.id.toString(), person);
