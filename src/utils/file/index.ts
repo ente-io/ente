@@ -40,7 +40,7 @@ export function downloadAsFile(filename: string, content: string) {
 export async function downloadFile(file: File) {
     const a = document.createElement('a');
     a.style.display = 'none';
-    const cachedFileUrl = await DownloadManager.getCachedFile(file);
+    const cachedFileUrl = await DownloadManager.getCachedOriginalFile(file);
     const fileURL =
         cachedFileUrl ??
         URL.createObjectURL(

@@ -97,7 +97,7 @@ class DownloadManager {
         }
     };
 
-    public async getCachedFile(file: File) {
+    public async getCachedOriginalFile(file: File) {
         return await this.fileObjectUrlPromise.get(file.id.toString());
     }
 
