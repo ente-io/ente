@@ -67,7 +67,7 @@ export async function replaceThumbnail(
                     current: idx,
                     total: largeThumbnailFiles.length,
                 });
-                const originalThumbnail = await downloadManager.getThumbnail(
+                const originalThumbnail = await downloadManager.downloadThumb(
                     token,
                     file
                 );

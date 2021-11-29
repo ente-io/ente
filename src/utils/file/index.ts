@@ -40,7 +40,7 @@ export function downloadAsFile(filename: string, content: string) {
 export async function downloadFile(file: File) {
     const a = document.createElement('a');
     a.style.display = 'none';
-    const cachedFileUrl = await DownloadManager.getCachedFile(file);
+    const cachedFileUrl = await DownloadManager.getCachedOriginalFile(file);
     const fileURL =
         cachedFileUrl ??
         URL.createObjectURL(
@@ -57,10 +57,11 @@ export async function downloadFile(file: File) {
     a.remove();
 }
 
-export function fileIsHEIC(mimeType: string) {
+export function isFileHEIC(mimeType: string) {
     return (
-        mimeType.toLowerCase().endsWith(TYPE_HEIC) ||
-        mimeType.toLowerCase().endsWith(TYPE_HEIF)
+        mimeType &&
+        (mimeType.toLowerCase().endsWith(TYPE_HEIC) ||
+            mimeType.toLowerCase().endsWith(TYPE_HEIF))
     );
 }
 
@@ -277,7 +278,7 @@ export async function convertForPreview(file: File, fileBlob: Blob) {
 
     const mimeType =
         (await getMimeTypeFromBlob(worker, fileBlob)) ?? typeFromExtension;
-    if (fileIsHEIC(mimeType)) {
+    if (isFileHEIC(mimeType)) {
         fileBlob = await worker.convertHEIC2JPEG(fileBlob);
     }
     return fileBlob;
@@ -480,5 +481,18 @@ export async function downloadFiles(files: File[]) {
         } catch (e) {
             logError(e, 'download fail for file');
         }
+    }
+}
+
+export function needsConversionForPreview(file: File) {
+    const fileExtension = splitFilenameAndExtension(file.metadata.title)[1];
+    if (
+        file.metadata.fileType === FILE_TYPE.LIVE_PHOTO ||
+        (file.metadata.fileType === FILE_TYPE.IMAGE &&
+            isFileHEIC(fileExtension))
+    ) {
+        return true;
+    } else {
+        return false;
     }
 }
