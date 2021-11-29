@@ -1,7 +1,11 @@
 import { getToken } from 'utils/common/key';
 import { getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
 import CryptoWorker from 'utils/crypto';
-import { generateStreamFromArrayBuffer, convertForPreview } from 'utils/file';
+import {
+    generateStreamFromArrayBuffer,
+    convertForPreview,
+    needsConversionForPreview,
+} from 'utils/file';
 import HTTPService from './HTTPService';
 import { File, FILE_TYPE } from './fileService';
 import { logError } from 'utils/sentry';
@@ -73,36 +77,36 @@ class DownloadManager {
     };
 
     getFile = async (file: File, forPreview = false) => {
-        let fileUID: string;
-        if (file.metadata.fileType === FILE_TYPE.VIDEO) {
-            fileUID = file.id.toString();
-        } else {
-            fileUID = `${file.id}_forPreview=${forPreview}`;
-        }
+        const shouldBeConverted = forPreview && needsConversionForPreview(file);
+        const fileKey = shouldBeConverted
+            ? `${file.id}_converted`
+            : `${file.id}`;
         try {
-            const getFilePromise = async () => {
+            const getFilePromise = async (convert: boolean) => {
                 const fileStream = await this.downloadFile(file);
                 let fileBlob = await new Response(fileStream).blob();
-                if (forPreview) {
+                if (convert) {
                     fileBlob = await convertForPreview(file, fileBlob);
                 }
                 return URL.createObjectURL(fileBlob);
             };
-            if (!this.fileObjectUrlPromise.get(fileUID)) {
-                this.fileObjectUrlPromise.set(fileUID, getFilePromise());
+            if (!this.fileObjectUrlPromise.get(fileKey)) {
+                this.fileObjectUrlPromise.set(
+                    fileKey,
+                    getFilePromise(shouldBeConverted)
+                );
             }
-            return await this.fileObjectUrlPromise.get(fileUID);
+            const fileURL = await this.fileObjectUrlPromise.get(fileKey);
+            return fileURL;
         } catch (e) {
-            this.fileObjectUrlPromise.delete(fileUID);
+            this.fileObjectUrlPromise.delete(fileKey);
             logError(e, 'Failed to get File');
             throw e;
         }
     };
 
     public async getCachedFile(file: File) {
-        return await this.fileObjectUrlPromise.get(
-            `${file.id}_forPreview=false`
-        );
+        return await this.fileObjectUrlPromise.get(file.id.toString());
     }
 
     async downloadFile(file: File) {
