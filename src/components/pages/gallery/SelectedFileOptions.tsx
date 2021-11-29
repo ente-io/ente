@@ -23,6 +23,7 @@ import {
     FIX_CREATION_TIME_VISIBLE_TO_USER_IDS,
     User,
 } from 'services/userService';
+import DownloadIcon from 'components/icons/DownloadIcon';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
@@ -34,6 +35,7 @@ interface Props {
     deleteFileHelper: (permanent?: boolean) => void;
     removeFromCollectionHelper: () => void;
     fixTimeHelper: () => void;
+    downloadHelper: () => void;
     count: number;
     clearSelection: () => void;
     archiveFilesHelper: () => void;
@@ -79,6 +81,7 @@ const SelectedFileOptions = ({
     setDialogMessage,
     setCollectionSelectorAttributes,
     deleteFileHelper,
+    downloadHelper,
     count,
     clearSelection,
     archiveFilesHelper,
@@ -190,6 +193,11 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </IconWithMessage>
                     )}
+                    <IconWithMessage message={constants.DOWNLOAD}>
+                        <IconButton onClick={downloadHelper}>
+                            <DownloadIcon />
+                        </IconButton>
+                    </IconWithMessage>
                     <IconWithMessage message={constants.ADD}>
                         <IconButton onClick={addToCollection}>
                             <AddIcon />

@@ -50,6 +50,7 @@ import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
 import {
     changeFilesVisibility,
+    downloadFiles,
     getNonTrashedUniqueUserFiles,
     getSelectedFiles,
     mergeMetadata,
@@ -545,6 +546,14 @@ export default function Gallery() {
         clearSelection();
     };
 
+    const downloadHelper = async () => {
+        const selectedFiles = getSelectedFiles(selected, files);
+        clearSelection();
+        !syncInProgress.current && loadingBar.current?.continuousStart();
+        await downloadFiles(selectedFiles);
+        !syncInProgress.current && loadingBar.current.complete();
+    };
+
     return (
         <GalleryContext.Provider
             value={{
@@ -714,6 +723,7 @@ export default function Gallery() {
                                 )
                             }
                             fixTimeHelper={fixTimeHelper}
+                            downloadHelper={downloadHelper}
                             count={selected.count}
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}
