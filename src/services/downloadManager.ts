@@ -99,6 +99,12 @@ class DownloadManager {
         }
     };
 
+    public async getCachedFile(file: File) {
+        return await this.fileObjectUrlPromise.get(
+            `${file.id}_forPreview=false`
+        );
+    }
+
     async downloadFile(file: File) {
         const worker = await new CryptoWorker();
         const token = getToken();

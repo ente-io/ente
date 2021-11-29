@@ -40,9 +40,13 @@ export function downloadAsFile(filename: string, content: string) {
 export async function downloadFile(file: File) {
     const a = document.createElement('a');
     a.style.display = 'none';
-    a.href = URL.createObjectURL(
-        await new Response(await DownloadManager.downloadFile(file)).blob()
-    );
+    const cachedFileUrl = await DownloadManager.getCachedFile(file);
+    const fileURL =
+        cachedFileUrl ??
+        URL.createObjectURL(
+            await new Response(await DownloadManager.downloadFile(file)).blob()
+        );
+    a.href = fileURL;
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         a.download = fileNameWithoutExtension(file.metadata.title) + '.zip';
     } else {
