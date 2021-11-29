@@ -14,7 +14,7 @@ class DownloadManager {
     private fileObjectUrlPromise = new Map<string, Promise<string>>();
     private thumbnailObjectUrlPromise = new Map<number, Promise<string>>();
 
-    public async getPreview(file: File) {
+    public async getThumbnail(file: File) {
         try {
             const token = getToken();
             if (!token) {
