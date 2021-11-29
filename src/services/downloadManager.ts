@@ -20,21 +20,24 @@ class DownloadManager {
             if (!token) {
                 return null;
             }
-            const thumbnailCache = await caches.open('thumbs');
-            const cacheResp: Response = await thumbnailCache.match(
-                file.id.toString()
-            );
-            if (cacheResp) {
-                return URL.createObjectURL(await cacheResp.blob());
-            }
             if (!this.thumbnailObjectUrlPromise.get(file.id)) {
-                const downloadPromise = this.downloadThumb(
-                    token,
-                    thumbnailCache,
-                    file
-                );
-                this.thumbnailObjectUrlPromise.set(file.id, downloadPromise);
+                const downloadPromise = async () => {
+                    const thumbnailCache = await caches.open('thumbs');
+                    const cacheResp: Response = await thumbnailCache.match(
+                        file.id.toString()
+                    );
+                    if (cacheResp) {
+                        return URL.createObjectURL(await cacheResp.blob());
+                    }
+                    return await this.downloadThumb(
+                        token,
+                        thumbnailCache,
+                        file
+                    );
+                };
+                this.thumbnailObjectUrlPromise.set(file.id, downloadPromise());
             }
+
             return await this.thumbnailObjectUrlPromise.get(file.id);
         } catch (e) {
             this.thumbnailObjectUrlPromise.delete(file.id);
