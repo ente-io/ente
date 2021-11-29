@@ -29,11 +29,17 @@ class DownloadManager {
                     if (cacheResp) {
                         return URL.createObjectURL(await cacheResp.blob());
                     }
-                    return await this.downloadThumb(
-                        token,
-                        thumbnailCache,
-                        file
-                    );
+                    const thumb = await this.downloadThumb(token, file);
+                    const thumbBlob = new Blob([thumb]);
+                    try {
+                        await thumbnailCache.put(
+                            file.id.toString(),
+                            new Response(thumbBlob)
+                        );
+                    } catch (e) {
+                        // TODO: handle storage full exception.
+                    }
+                    return URL.createObjectURL(thumbBlob);
                 };
                 this.thumbnailObjectUrlPromise.set(file.id, downloadPromise());
             }
@@ -46,24 +52,7 @@ class DownloadManager {
         }
     }
 
-    private downloadThumb = async (
-        token: string,
-        thumbnailCache: Cache,
-        file: File
-    ) => {
-        const thumb = await this.getThumbnail(token, file);
-        try {
-            await thumbnailCache.put(
-                file.id.toString(),
-                new Response(new Blob([thumb]))
-            );
-        } catch (e) {
-            // TODO: handle storage full exception.
-        }
-        return URL.createObjectURL(new Blob([thumb]));
-    };
-
-    getThumbnail = async (token: string, file: File) => {
+    downloadThumb = async (token: string, file: File) => {
         const resp = await HTTPService.get(
             getThumbnailUrl(file.id),
             null,
