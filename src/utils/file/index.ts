@@ -44,12 +44,14 @@ export async function downloadFile(file) {
     const a = document.createElement('a');
     a.style.display = 'none';
     const fileURL = await DownloadManger.getFile(file);
-    const fileBlob = await (await fetch(fileURL)).blob();
-    const updatedFileBlob = await updateFileCreationDateInEXIF(
-        fileBlob,
-        new Date(file.pubMagicMetadata.data.editedTime / 1000)
-    );
-    a.href = URL.createObjectURL(updatedFileBlob);
+    let fileBlob = await (await fetch(fileURL)).blob();
+    if (file.pubMagicMetadata?.data.editedTime) {
+        fileBlob = await updateFileCreationDateInEXIF(
+            fileBlob,
+            new Date(file.pubMagicMetadata.data.editedTime / 1000)
+        );
+    }
+    a.href = URL.createObjectURL(fileBlob);
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         a.download = fileNameWithoutExtension(file.metadata.title) + '.zip';
     } else {
