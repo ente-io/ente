@@ -229,8 +229,8 @@ export function findFirstIfSorted<T>(
 }
 
 export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
-    syncIntervalSec: 5, // 300
-    batchSize: 5, // 200
+    syncIntervalSec: 5, // 20
+    batchSize: 200,
     faceDetection: {
         method: {
             value: 'BlazeFace',

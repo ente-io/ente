@@ -55,14 +55,19 @@ export interface PhotoPeopleListProps extends PeopleListPropsBase {
 export function PhotoPeopleList(props: PhotoPeopleListProps) {
     const [people, setPeople] = useState<Array<Person>>([]);
 
-    const updateFaceImages = async () => {
-        const people = await getPeopleList(props.file);
-        setPeople(people);
-    };
-
     useEffect(() => {
-        // TODO: handle multiple async updates
+        let didCancel = false;
+
+        async function updateFaceImages() {
+            const people = await getPeopleList(props.file);
+            !didCancel && setPeople(people);
+        }
+
         updateFaceImages();
+
+        return () => {
+            didCancel = true;
+        };
     }, [props.file]);
 
     return <PeopleList people={people} onSelect={props.onSelect}></PeopleList>;
@@ -76,20 +81,22 @@ export function AllPeopleList(props: AllPeopleListProps) {
     const [people, setPeople] = useState<Array<Person>>([]);
 
     useEffect(() => {
-        // TODO: handle multiple async updates
+        let didCancel = false;
+
         async function updateFaceImages() {
             let people = await getAllPeople();
             if (props.limit) {
                 people = people.slice(0, props.limit);
             }
-            setPeople(people);
+            !didCancel && setPeople(people);
         }
 
         updateFaceImages();
+
         return () => {
-            setPeople([]);
+            didCancel = true;
         };
-    }, [props]);
+    }, [props.limit]);
 
     return <PeopleList people={people} onSelect={props.onSelect}></PeopleList>;
 }
