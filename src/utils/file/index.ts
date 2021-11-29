@@ -11,7 +11,7 @@ import {
 } from 'services/fileService';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
-import DownloadManger from 'services/downloadManager';
+import DownloadManager from 'services/downloadManager';
 import { logError } from 'utils/sentry';
 import { User } from 'services/userService';
 import CryptoWorker from 'utils/crypto';
@@ -40,18 +40,35 @@ export function downloadAsFile(filename: string, content: string) {
     a.remove();
 }
 
-export async function downloadFile(file) {
+export async function downloadFile(file: File) {
     const a = document.createElement('a');
     a.style.display = 'none';
-    const fileURL = await DownloadManger.getFile(file);
-    let fileBlob = await (await fetch(fileURL)).blob();
-    if (file.pubMagicMetadata?.data.editedTime) {
+    let fileURL = await DownloadManager.getCachedOriginalFile(file);
+    let tempURL;
+    if (!fileURL) {
+        tempURL = URL.createObjectURL(
+            await new Response(await DownloadManager.downloadFile(file)).blob()
+        );
+        fileURL = tempURL;
+    }
+    const fileType = getFileExtension(file.metadata.title);
+    let tempEditedFileURL;
+    if (
+        file.pubMagicMetadata?.data.editedTime &&
+        (fileType === TYPE_JPEG || fileType === TYPE_JPG)
+    ) {
+        let fileBlob = await (await fetch(fileURL)).blob();
+
         fileBlob = await updateFileCreationDateInEXIF(
             fileBlob,
             new Date(file.pubMagicMetadata.data.editedTime / 1000)
         );
+        tempEditedFileURL = URL.createObjectURL(fileBlob);
+        fileURL = tempEditedFileURL;
     }
-    a.href = URL.createObjectURL(fileBlob);
+
+    a.href = fileURL;
+
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         a.download = fileNameWithoutExtension(file.metadata.title) + '.zip';
     } else {
@@ -60,12 +77,15 @@ export async function downloadFile(file) {
     document.body.appendChild(a);
     a.click();
     a.remove();
+    tempURL && URL.revokeObjectURL(tempURL);
+    tempEditedFileURL && URL.revokeObjectURL(tempEditedFileURL);
 }
 
-export function fileIsHEIC(mimeType: string) {
+export function isFileHEIC(mimeType: string) {
     return (
-        mimeType.toLowerCase().endsWith(TYPE_HEIC) ||
-        mimeType.toLowerCase().endsWith(TYPE_HEIF)
+        mimeType &&
+        (mimeType.toLowerCase().endsWith(TYPE_HEIC) ||
+            mimeType.toLowerCase().endsWith(TYPE_HEIF))
     );
 }
 
@@ -286,7 +306,7 @@ export async function convertForPreview(file: File, fileBlob: Blob) {
 
     const mimeType =
         (await getMimeTypeFromBlob(worker, fileBlob)) ?? typeFromExtension;
-    if (fileIsHEIC(mimeType)) {
+    if (isFileHEIC(mimeType)) {
         fileBlob = await worker.convertHEIC2JPEG(fileBlob);
     }
     return fileBlob;
@@ -480,4 +500,27 @@ export function getNonTrashedUniqueUserFiles(files: File[]) {
                 (!user.id || file.ownerID === user.id)
         )
     );
+}
+
+export async function downloadFiles(files: File[]) {
+    for (const file of files) {
+        try {
+            await downloadFile(file);
+        } catch (e) {
+            logError(e, 'download fail for file');
+        }
+    }
+}
+
+export function needsConversionForPreview(file: File) {
+    const fileExtension = splitFilenameAndExtension(file.metadata.title)[1];
+    if (
+        file.metadata.fileType === FILE_TYPE.LIVE_PHOTO ||
+        (file.metadata.fileType === FILE_TYPE.IMAGE &&
+            isFileHEIC(fileExtension))
+    ) {
+        return true;
+    } else {
+        return false;
+    }
 }
