@@ -95,7 +95,7 @@ export const getGoogleLikeMetadataFile = (
 };
 
 export const sanitizeName = (name: string) =>
-    name.replaceAll('/', '_').replaceAll(' ', '_');
+    name.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
 
 export const getUniqueCollectionFolderPath = (
     dir: string,
