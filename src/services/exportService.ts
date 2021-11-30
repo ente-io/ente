@@ -144,18 +144,7 @@ class ExportService {
                         collectionA.id - collectionB.id
                 );
             const exportRecord = await this.getExportRecord(exportDir);
-            if (
-                !exportRecord.version ||
-                exportRecord.version < LATEST_EXPORT_VERSION
-            ) {
-                const exportedFiles = getExportedFiles(allFiles, exportRecord);
-                await this.migrateExport(
-                    exportDir,
-                    exportRecord.version ?? 0,
-                    collections,
-                    exportedFiles
-                );
-            }
+            await this.migrateExport(exportDir, collections, allFiles);
 
             if (exportType === ExportType.NEW) {
                 filesToExport = getFilesUploadedAfterLastExport(
@@ -453,10 +442,11 @@ class ExportService {
 
     private async migrateExport(
         exportDir: string,
-        currentVersion: number,
         collections: Collection[],
-        files: File[]
+        allFiles: File[]
     ) {
+        const exportRecord = await this.getExportRecord(exportDir);
+        const currentVersion = exportRecord?.version ?? 0;
         if (currentVersion === 0) {
             const collectionIDPathMap = new Map<number, string>();
 
@@ -465,7 +455,10 @@ class ExportService {
                 exportDir,
                 collectionIDPathMap
             );
-            await this.migrateFiles(files, collectionIDPathMap);
+            await this.migrateFiles(
+                getExportedFiles(allFiles, exportRecord),
+                collectionIDPathMap
+            );
 
             await this.updateExportRecord({
                 version: LATEST_EXPORT_VERSION,
@@ -473,6 +466,10 @@ class ExportService {
         }
     }
 
+    /*
+    This updates the folder name of already exported folders from the earlier format of 
+    `collectionID_collectionName` to newer `collectionName(numbered)` format
+    */
     private async migrateCollectionFolders(
         collections: Collection[],
         dir: string,
@@ -498,6 +495,10 @@ class ExportService {
         }
     }
 
+    /*
+    This updates the file name of already exported files from the earlier format of 
+    `fileID_fileName` to newer `fileName(numbered)` format
+    */
     private async migrateFiles(
         files: File[],
         collectionIDPathMap: Map<number, string>
