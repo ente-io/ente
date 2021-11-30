@@ -11,8 +11,9 @@ const gitSha = cp.execSync('git rev-parse --short HEAD', {
     encoding: 'utf8',
 });
 
-// eslint-disable-next-line camelcase
-const COOP_COEP_Headers = [
+const { createSecureHeaders } = require('next-secure-headers');
+
+const COOP_COEP_HEADERS = [
     {
         key: 'Cross-Origin-Opener-Policy',
         value: 'same-origin',
@@ -40,7 +41,20 @@ module.exports = withSentryConfig(
                     {
                         // Apply these headers to all routes in your application....
                         source: '/(.*)',
-                        headers: COOP_COEP_Headers,
+                        headers: [
+                            ...COOP_COEP_HEADERS,
+                            ...createSecureHeaders({
+                                contentSecurityPolicy: {
+                                    directives: {
+                                        defaultSrc: 'self',
+                                        frameAncestors: 'self',
+                                        objectSrc: 'self',
+                                        baseURI: 'self',
+                                        formAction: 'self',
+                                    },
+                                },
+                            }),
+                        ],
                     },
                 ];
             },
