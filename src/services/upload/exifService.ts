@@ -31,19 +31,28 @@ export async function getExifData(
     receivedFile: globalThis.File,
     fileTypeInfo: FileTypeInfo
 ): Promise<ParsedEXIFData> {
-    const exifData = await getRawExif(receivedFile, fileTypeInfo);
-    if (!exifData) {
-        return { location: NULL_LOCATION, creationTime: null };
-    }
-    const parsedEXIFData = {
-        location: getEXIFLocation(exifData),
-        creationTime: getUNIXTime(
-            exifData.DateTimeOriginal ??
-                exifData.CreateDate ??
-                exifData.ModifyDate
-        ),
+    const nullExifData: ParsedEXIFData = {
+        location: NULL_LOCATION,
+        creationTime: null,
     };
-    return parsedEXIFData;
+    try {
+        const exifData = await getRawExif(receivedFile, fileTypeInfo);
+        if (!exifData) {
+            return nullExifData;
+        }
+        const parsedEXIFData = {
+            location: getEXIFLocation(exifData),
+            creationTime: getUNIXTime(
+                exifData.DateTimeOriginal ??
+                    exifData.CreateDate ??
+                    exifData.ModifyDate
+            ),
+        };
+        return parsedEXIFData;
+    } catch (e) {
+        logError(e, 'getExifData failed');
+        return nullExifData;
+    }
 }
 
 export async function getRawExif(
