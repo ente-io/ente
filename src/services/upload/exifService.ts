@@ -31,19 +31,28 @@ export async function getExifData(
     receivedFile: globalThis.File,
     fileTypeInfo: FileTypeInfo
 ): Promise<ParsedEXIFData> {
-    const exifData = await getRawExif(receivedFile, fileTypeInfo);
-    if (!exifData) {
-        return { location: NULL_LOCATION, creationTime: null };
-    }
-    const parsedEXIFData = {
-        location: getEXIFLocation(exifData),
-        creationTime: getUNIXTime(
-            exifData.DateTimeOriginal ??
-                exifData.CreateDate ??
-                exifData.ModifyDate
-        ),
+    const nullExifData: ParsedEXIFData = {
+        location: NULL_LOCATION,
+        creationTime: null,
     };
-    return parsedEXIFData;
+    try {
+        const exifData = await getRawExif(receivedFile, fileTypeInfo);
+        if (!exifData) {
+            return nullExifData;
+        }
+        const parsedEXIFData = {
+            location: getEXIFLocation(exifData),
+            creationTime: getUNIXTime(
+                exifData.DateTimeOriginal ??
+                    exifData.CreateDate ??
+                    exifData.ModifyDate
+            ),
+        };
+        return parsedEXIFData;
+    } catch (e) {
+        logError(e, 'getExifData failed');
+        return nullExifData;
+    }
 }
 
 export async function getRawExif(
@@ -63,14 +72,18 @@ export async function getRawExif(
 }
 
 export function getUNIXTime(dateTime: Date) {
-    if (!dateTime) {
-        return null;
-    }
-    const unixTime = dateTime.getTime() * 1000;
-    if (unixTime <= 0) {
-        return null;
-    } else {
-        return unixTime;
+    try {
+        if (!dateTime) {
+            return null;
+        }
+        const unixTime = dateTime.getTime() * 1000;
+        if (unixTime <= 0) {
+            return null;
+        } else {
+            return unixTime;
+        }
+    } catch (e) {
+        logError(e, 'getUNIXTime failed', { dateTime });
     }
 }
 
