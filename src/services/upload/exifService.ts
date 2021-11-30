@@ -72,14 +72,18 @@ export async function getRawExif(
 }
 
 export function getUNIXTime(dateTime: Date) {
-    if (!dateTime) {
-        return null;
-    }
-    const unixTime = dateTime.getTime() * 1000;
-    if (unixTime <= 0) {
-        return null;
-    } else {
-        return unixTime;
+    try {
+        if (!dateTime) {
+            return null;
+        }
+        const unixTime = dateTime.getTime() * 1000;
+        if (unixTime <= 0) {
+            return null;
+        } else {
+            return unixTime;
+        }
+    } catch (e) {
+        logError(e, 'getUNIXTime failed', { dateTime });
     }
 }
 
