@@ -440,6 +440,13 @@ class ExportService {
         return this.exportInProgress !== null;
     };
 
+    /*
+    this function migrates the exportRecord file to apply any schema changes.
+    currently we apply only a single migration to update file and collection name to newer format
+    so there is just a if condition check, 
+    later this will be converted to a loop which applies the migration one by one 
+    till the files reaches the latest version 
+    */
     private async migrateExport(
         exportDir: string,
         collections: Collection[],
