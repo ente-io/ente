@@ -1,6 +1,6 @@
 import { runningInBrowser } from 'utils/common';
 import {
-    getExportPendingFiles,
+    getExportQueuedFiles,
     getExportFailedFiles,
     getFilesUploadedAfterLastExport,
     dedupe,
@@ -154,7 +154,7 @@ class ExportService {
             } else if (exportType === ExportType.RETRY_FAILED) {
                 filesToExport = getExportFailedFiles(allFiles, exportRecord);
             } else {
-                filesToExport = getExportPendingFiles(allFiles, exportRecord);
+                filesToExport = getExportQueuedFiles(allFiles, exportRecord);
             }
             this.exportInProgress = this.fileExporter(
                 filesToExport,

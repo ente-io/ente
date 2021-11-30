@@ -7,7 +7,7 @@ import { formatDate, splitFilenameAndExtension } from 'utils/file';
 export const getExportRecordFileUID = (file: File) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
 
-export const getExportPendingFiles = (
+export const getExportQueuedFiles = (
     allFiles: File[],
     exportRecord: ExportRecord
 ) => {
