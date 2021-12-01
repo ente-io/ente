@@ -1,6 +1,6 @@
 /*
     Cache-Control: no-store, must-revalidate
-    Content-Security-Policy: default-src self; object-src self; base-uri self; form-action self; frame-ancestors self
+    Content-Security-Policy-Report-Only: default-src self; object-src self; base-uri self; form-action self; frame-ancestors self; report-uri https://csp-reporter.ente.workers.dev; report-to https://csp-reporter.ente.workers.dev; 
     Cross-Origin-Embedder-Policy:  require-corp
     Cross-Origin-Opener-Policy:  same-origin
     Strict-Transport-Security:  max-age=63072000
