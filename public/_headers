@@ -1,0 +1,10 @@
+/*
+    Cache-Control: no-store, must-revalidate
+    Content-Security-Policy: default-src self; object-src self; base-uri self; form-action self; frame-ancestors self
+    Cross-Origin-Embedder-Policy:  require-corp
+    Cross-Origin-Opener-Policy:  same-origin
+    Strict-Transport-Security:  max-age=63072000
+    X-Content-Type-Options: nosniff
+    X-Download-Options: noopen
+    X-Frame-Options: deny
+    X-Xss-Protection: 1
