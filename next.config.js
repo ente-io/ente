@@ -45,12 +45,17 @@ module.exports = withSentryConfig(
                             ...COOP_COEP_HEADERS,
                             ...createSecureHeaders({
                                 contentSecurityPolicy: {
+                                    reportOnly: true,
                                     directives: {
-                                        defaultSrc: 'self',
-                                        frameAncestors: 'self',
-                                        objectSrc: 'self',
-                                        baseURI: 'self',
-                                        formAction: 'self',
+                                        defaultSrc: `'self'`,
+                                        frameAncestors: `'self'`,
+                                        objectSrc: `'none'`,
+                                        baseURI: `'self'`,
+                                        formAction: `'self'`,
+                                        reportURI:
+                                            'https://csp-reporter.ente.workers.dev',
+                                        reportTo:
+                                            'https://csp-reporter.ente.workers.dev',
                                     },
                                 },
                             }),
