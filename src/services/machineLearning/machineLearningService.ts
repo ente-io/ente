@@ -59,6 +59,8 @@ class MachineLearningService {
             throw Error('Token needed by ml service to sync file');
         }
 
+        tf.engine().startScope();
+
         const syncContext = new MLSyncContext(token, config);
 
         await this.getOutOfSyncFiles(syncContext);
@@ -69,6 +71,7 @@ class MachineLearningService {
             await this.syncIndex(syncContext);
         }
 
+        tf.engine().endScope();
         console.log('Final TF Memory stats: ', tf.memory());
 
         if (syncContext.config.tsne) {
@@ -166,6 +169,7 @@ class MachineLearningService {
         const detectedFaces = await this.faceDetectionService.detectFaces(
             tfImage
         );
+        // console.log('3 TF Memory stats: ', tf.memory());
 
         const filtertedFaces = detectedFaces.filter(
             (f) => f.box.width > syncContext.config.faceDetection.minFaceSize
@@ -179,7 +183,7 @@ class MachineLearningService {
         const alignedFaces =
             this.faceAlignmentService.getAlignedFaces(filtertedFaces);
         console.log('[MLService] alignedFaces: ', alignedFaces);
-        // console.log('3 TF Memory stats: ', tf.memory());
+        // console.log('4 TF Memory stats: ', tf.memory());
 
         const facesWithEmbeddings =
             await this.faceEmbeddingService.getFaceEmbeddings(
@@ -187,7 +191,7 @@ class MachineLearningService {
                 alignedFaces
             );
         console.log('[MLService] facesWithEmbeddings: ', facesWithEmbeddings);
-        // console.log('4 TF Memory stats: ', tf.memory());
+        // console.log('5 TF Memory stats: ', tf.memory());
 
         tf.dispose(tfImage);
         // console.log('8 TF Memory stats: ', tf.memory());
