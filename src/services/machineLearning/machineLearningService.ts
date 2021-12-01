@@ -23,7 +23,13 @@ import {
 import ClusteringService from './clusteringService';
 
 import { toTSNE } from 'utils/machineLearning/visualization';
-import { mlFilesStore, mlPeopleStore } from 'utils/storage/localForage';
+import {
+    getIndexVersion,
+    incrementIndexVersion,
+    mlFilesStore,
+    mlPeopleStore,
+    setIndexVersion,
+} from 'utils/storage/mlStorage';
 import ArcfaceAlignmentService from './arcfaceAlignmentService';
 import {
     findFirstIfSorted,
@@ -154,6 +160,8 @@ class MachineLearningService {
             }
         }
         console.log('allFaces: ', syncContext.syncedFaces);
+
+        await incrementIndexVersion('files');
         // await this.disposeMLModels();
     }
 
@@ -246,11 +254,21 @@ class MachineLearningService {
     }
 
     private async syncPeopleIndex(syncContext: MLSyncContext) {
+        const filesVersion = await getIndexVersion('files');
+        if (filesVersion <= (await getIndexVersion('people'))) {
+            console.log(
+                '[MLService] Skipping people index as already synced to latest version'
+            );
+            return;
+        }
+
         const allFacesMap = await this.getAllSyncedFacesMap(syncContext);
         const allFaces = getAllFacesFromMap(allFacesMap);
 
         await this.runFaceClustering(syncContext, allFaces);
         await this.syncPeopleFromClusters(syncContext, allFacesMap, allFaces);
+
+        await setIndexVersion('people', filesVersion);
     }
 
     private async getAllSyncedFacesMap(syncContext: MLSyncContext) {
@@ -277,7 +295,7 @@ class MachineLearningService {
 
         if (!allFaces || allFaces.length < clusteringConfig.minInputSize) {
             console.log(
-                'Too few faces to cluster, not running clustering: ',
+                '[MLService] Too few faces to cluster, not running clustering: ',
                 allFaces.length
             );
             return;

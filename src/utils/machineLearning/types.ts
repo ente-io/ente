@@ -206,6 +206,8 @@ export class MLSyncContext {
     }
 }
 
+export declare type MLIndex = 'files' | 'people';
+
 export interface FaceDetectionService {
     init(): Promise<void>;
     detectFaces(image: tf.Tensor3D): Promise<Array<DetectedFace>>;

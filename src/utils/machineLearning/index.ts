@@ -6,7 +6,7 @@ import { File, getLocalFiles } from 'services/fileService';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
 import { Face, MlFileData, MLSyncConfig, Person } from './types';
 import { extractFaceImage } from './faceAlign';
-import { mlFilesStore, mlPeopleStore } from 'utils/storage/localForage';
+import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -229,7 +229,7 @@ export function findFirstIfSorted<T>(
 }
 
 export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
-    syncIntervalSec: 5, // 20
+    syncIntervalSec: 30,
     batchSize: 200,
     faceDetection: {
         method: {
