@@ -1,6 +1,13 @@
 import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import { ServerStyleSheet } from 'styled-components';
+import crypto from 'crypto';
+
+const cspHashOf = (text) => {
+    const hash = crypto.createHash('sha256');
+    hash.update(text);
+    return `'sha256-${hash.digest('base64')}'`;
+};
 
 export default class MyDocument extends Document {
     static async getInitialProps(ctx) {
@@ -30,12 +37,24 @@ export default class MyDocument extends Document {
     }
 
     render() {
+        let csp = `default-src 'self'; object-src 'none'; report-uri https://csp-reporter.ente.workers.dev; report-to https://csp-reporter.ente.workers.dev; script-src 'self' ${cspHashOf(
+            NextScript.getInlineScriptSource(this.props)
+        )}`;
+        if (process.env.NODE_ENV !== 'production') {
+            csp = `style-src 'self' 'unsafe-inline'; font-src 'self' data:; default-src 'self'; script-src 'unsafe-eval' 'self' ${cspHashOf(
+                NextScript.getInlineScriptSource(this.props)
+            )}`;
+        }
         return (
             <Html lang="en">
                 <Head>
                     <meta
                         name="description"
                         content="ente is a privacy focussed photo storage service that offers end-to-end encryption."
+                    />
+                    <meta
+                        httpEquiv="Content-Security-Policy-Report-Only"
+                        content={csp}
                     />
                     <link
                         rel="icon"
