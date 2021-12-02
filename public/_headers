@@ -6,5 +6,5 @@
     X-Content-Type-Options: nosniff
     X-Download-Options: noopen
     X-Frame-Options: deny
-    X-Xss-Protection: 1
+    X-XSS-Protection: 1; mode=block
     Referrer-Policy: same-origin
