@@ -1,13 +1,6 @@
 import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import { ServerStyleSheet } from 'styled-components';
-import crypto from 'crypto';
-
-const cspHashOf = (text) => {
-    const hash = crypto.createHash('sha256');
-    hash.update(text);
-    return `'sha256-${hash.digest('base64')}'`;
-};
 
 export default class MyDocument extends Document {
     static async getInitialProps(ctx) {
@@ -37,17 +30,9 @@ export default class MyDocument extends Document {
     }
 
     render() {
-        const scriptDirectiveWithHash = `script-src 'unsafe-inline' 'self' ${cspHashOf(
-            NextScript.getInlineScriptSource(this.props)
-        )};`;
-
         return (
             <Html lang="en">
                 <Head>
-                    <meta
-                        httpEquiv="Content-Security-Policy-Report-Only"
-                        content={scriptDirectiveWithHash}
-                    />
                     <meta
                         name="description"
                         content="ente is a privacy focussed photo storage service that offers end-to-end encryption."
