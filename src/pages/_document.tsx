@@ -9,6 +9,30 @@ const cspHashOf = (text) => {
     return `'sha256-${hash.digest('base64')}'`;
 };
 
+const convertToCSPString = (csp) => {
+    let cspStr = '';
+    for (const k in csp) {
+        if (Object.prototype.hasOwnProperty.call(csp, k)) {
+            cspStr += `${k} ${csp[k]}; `;
+        }
+    }
+    return cspStr;
+};
+
+const BASE_CSP_DIRECTIVES = {
+    'default-src': "'none'",
+    'report-uri': 'https://csp-reporter.ente.workers.dev',
+    'report-to': 'https://csp-reporter.ente.workers.dev',
+    'style-src': "'self'",
+    'font-src': "'self'",
+};
+
+const DEV_CSP_DIRECTIVES = {
+    'default-src': "'self'",
+    'style-src': "'self' 'unsafe-inline'",
+    'font-src': "'self' data:",
+};
+
 export default class MyDocument extends Document {
     static async getInitialProps(ctx) {
         const sheet = new ServerStyleSheet();
@@ -37,24 +61,31 @@ export default class MyDocument extends Document {
     }
 
     render() {
-        let csp = `default-src 'self'; object-src 'none'; report-uri https://csp-reporter.ente.workers.dev; report-to https://csp-reporter.ente.workers.dev; script-src 'self' ${cspHashOf(
-            NextScript.getInlineScriptSource(this.props)
-        )}`;
-        if (process.env.NODE_ENV !== 'production') {
-            csp = `style-src 'self' 'unsafe-inline'; font-src 'self' data:; default-src 'self'; script-src 'unsafe-eval' 'self' ${cspHashOf(
+        let csp = {
+            ...BASE_CSP_DIRECTIVES,
+            'script-src': `'self' ${cspHashOf(
                 NextScript.getInlineScriptSource(this.props)
-            )}`;
+            )}`,
+        };
+        if (process.env.NODE_ENV !== 'production') {
+            csp = {
+                ...BASE_CSP_DIRECTIVES,
+                ...DEV_CSP_DIRECTIVES,
+                'script-src': `'unsafe-eval' 'self'  ${cspHashOf(
+                    NextScript.getInlineScriptSource(this.props)
+                )}`,
+            };
         }
         return (
             <Html lang="en">
                 <Head>
                     <meta
-                        name="description"
-                        content="ente is a privacy focussed photo storage service that offers end-to-end encryption."
+                        httpEquiv="Content-Security-Policy-Report-Only"
+                        content={convertToCSPString(csp)}
                     />
                     <meta
-                        httpEquiv="Content-Security-Policy-Report-Only"
-                        content={csp}
+                        name="description"
+                        content="ente is a privacy focussed photo storage service that offers end-to-end encryption."
                     />
                     <link
                         rel="icon"
