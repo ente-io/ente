@@ -602,9 +602,7 @@ class FileUploader {
             .map((e) => UploadURL.fromMap(e))
             .toList();
         _uploadURLs.addAll(urls);
-        _uploadURLFetchInProgress = null;
-      } on DioError catch (e) {
-        _uploadURLFetchInProgress = null;
+      } on DioError catch (e, s) {
         if (e.response != null) {
           if (e.response.statusCode == 402) {
             final error = NoActiveSubscriptionError();
@@ -614,9 +612,13 @@ class FileUploader {
             final error = StorageLimitExceededError();
             clearQueue(error);
             throw error;
+          } else {
+            _logger.severe("Could not fetch upload URLs", e, s);
           }
         }
         rethrow;
+      } finally {
+        _uploadURLFetchInProgress = null;
       }
     });
     return _uploadURLFetchInProgress;
