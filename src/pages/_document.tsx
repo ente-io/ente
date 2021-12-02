@@ -9,30 +9,6 @@ const cspHashOf = (text) => {
     return `'sha256-${hash.digest('base64')}'`;
 };
 
-const convertToCSPString = (csp) => {
-    let cspStr = '';
-    for (const k in csp) {
-        if (Object.prototype.hasOwnProperty.call(csp, k)) {
-            cspStr += `${k} ${csp[k]}; `;
-        }
-    }
-    return cspStr;
-};
-
-const BASE_CSP_DIRECTIVES = {
-    'default-src': "'none'",
-    'report-uri': 'https://csp-reporter.ente.workers.dev',
-    'report-to': 'https://csp-reporter.ente.workers.dev',
-    'style-src': "'self'",
-    'font-src': "'self'",
-};
-
-const DEV_CSP_DIRECTIVES = {
-    'default-src': "'self'",
-    'style-src': "'self' 'unsafe-inline'",
-    'font-src': "'self' data:",
-};
-
 export default class MyDocument extends Document {
     static async getInitialProps(ctx) {
         const sheet = new ServerStyleSheet();
@@ -61,27 +37,16 @@ export default class MyDocument extends Document {
     }
 
     render() {
-        const scriptDirective = {
-            'script-src': `'unsafe-inline' 'self' ${cspHashOf(
-                NextScript.getInlineScriptSource(this.props)
-            )}`,
-        };
-        let csp = {
-            ...BASE_CSP_DIRECTIVES,
-            ...scriptDirective,
-        };
-        if (process.env.NODE_ENV !== 'production') {
-            csp = {
-                ...csp,
-                ...DEV_CSP_DIRECTIVES,
-            };
-        }
+        const scriptDirectiveWithHash = `script-src 'unsafe-inline' 'self' ${cspHashOf(
+            NextScript.getInlineScriptSource(this.props)
+        )};`;
+
         return (
             <Html lang="en">
                 <Head>
                     <meta
-                        httpEquiv="Content-Security-Policy"
-                        content={convertToCSPString(csp)}
+                        httpEquiv="Content-Security-Policy-Report-Only"
+                        content={scriptDirectiveWithHash}
                     />
                     <meta
                         name="description"
