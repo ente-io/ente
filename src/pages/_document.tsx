@@ -80,7 +80,7 @@ export default class MyDocument extends Document {
             <Html lang="en">
                 <Head>
                     <meta
-                        httpEquiv="Content-Security-Policy-Report-Only"
+                        httpEquiv="Content-Security-Policy"
                         content={convertToCSPString(csp)}
                     />
                     <meta
