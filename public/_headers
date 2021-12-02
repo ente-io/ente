@@ -8,5 +8,5 @@
     X-Frame-Options: deny
     X-XSS-Protection: 1; mode=block
     Referrer-Policy: same-origin
-    Content-Security-Policy-Report-Only: default-src 'none'; img-src 'self' blob:; style-src 'self'; font-src 'self'; script-src 'self';connect-src 'self' api.ente.io; require-trusted-types-for 'script'; reportURI https://csp-reporter.ente.workers.dev; report-to https://csp-reporter.ente.workers.dev;
+    Content-Security-Policy-Report-Only: default-src 'none'; img-src 'self' blob:; style-src 'self'; font-src 'self'; script-src 'self';connect-src 'self' api.ente.io; require-trusted-types-for 'script'; report-uri https://csp-reporter.ente.workers.dev; report-to https://csp-reporter.ente.workers.dev;
                                         
