@@ -61,19 +61,19 @@ export default class MyDocument extends Document {
     }
 
     render() {
-        let csp = {
-            ...BASE_CSP_DIRECTIVES,
-            'script-src': `'self' ${cspHashOf(
+        const scriptDirective = {
+            'script-src': `'unsafe-inline' 'self' ${cspHashOf(
                 NextScript.getInlineScriptSource(this.props)
             )}`,
         };
+        let csp = {
+            ...BASE_CSP_DIRECTIVES,
+            ...scriptDirective,
+        };
         if (process.env.NODE_ENV !== 'production') {
             csp = {
-                ...BASE_CSP_DIRECTIVES,
+                ...csp,
                 ...DEV_CSP_DIRECTIVES,
-                'script-src': `'unsafe-eval' 'self'  ${cspHashOf(
-                    NextScript.getInlineScriptSource(this.props)
-                )}`,
             };
         }
         return (
