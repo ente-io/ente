@@ -183,6 +183,7 @@ class RemoteSyncService {
             " files were ignored for upload");
       }
     }
+    _moveVideosToEnd(filesToBeUploaded);
     _logger.info(
         filesToBeUploaded.length.toString() + " new files to be uploaded.");
 
@@ -401,5 +402,18 @@ class RemoteSyncService {
 
   bool _shouldThrottleSync() {
     return Platform.isIOS && !AppLifecycleService.instance.isForeground;
+  }
+
+  void _moveVideosToEnd(List<File> file) {
+    file.sort((first, second) {
+      if (first.fileType == FileType.video &&
+          second.fileType == FileType.video) {
+        return 0;
+      } else if (first.fileType == FileType.video) {
+        return 1;
+      } else {
+        return -1;
+      }
+    });
   }
 }
