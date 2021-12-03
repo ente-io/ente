@@ -6482,6 +6482,11 @@ type-is@~1.6.17, type-is@~1.6.18:
     media-typer "0.3.0"
     mime-types "~2.1.24"
 
+typed-assert@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/typed-assert/-/typed-assert-1.0.8.tgz#4bf9f1ce7f3f974d09c3afd7c68d12e1391a233c"
+  integrity sha512-5NkbXZUlmCE73Fs7gvkp1XXJWHYetPkg60QnQ2NXQmBYNFxbBr2zA8GCtaH4K2s2WhOmSlgiSTmrjrcm5tnM5g==
+
 typescript@^4.1.3:
   version "4.4.2"
   resolved "https://registry.npmjs.org/typescript/-/typescript-4.4.2.tgz"
@@ -6679,6 +6684,13 @@ webpack-sources@^1.3.0:
   dependencies:
     source-list-map "^2.0.0"
     source-map "~0.6.1"
+
+webpack-subresource-integrity@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/webpack-subresource-integrity/-/webpack-subresource-integrity-5.0.0.tgz#8268b9cc1a229a8f8129ca9eeb59cde52185b6b1"
+  integrity sha512-x9514FpLRydO+UAQ8DY4aLtCjxmdLkuQVcDFN1kGzuusREYJ1B0rzk/iIlWiL6dnvrhEGFj2+UsdxDkP8Z4UKg==
+  dependencies:
+    typed-assert "^1.0.8"
 
 whatwg-url@^7.0.0:
   version "7.1.0"
