@@ -13,6 +13,7 @@ const gitSha = cp.execSync('git rev-parse --short HEAD', {
 
 const { createSecureHeaders } = require('next-secure-headers');
 const { SubresourceIntegrityPlugin } = require('webpack-subresource-integrity');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = withSentryConfig(
     withWorkbox(
@@ -60,6 +61,7 @@ module.exports = withSentryConfig(
                 }
                 config.output.crossOriginLoading = 'anonymous';
                 config.plugins = config.plugins || [];
+                config.plugins.push(new HtmlWebpackPlugin());
                 config.plugins.push(new SubresourceIntegrityPlugin());
                 return config;
             },
