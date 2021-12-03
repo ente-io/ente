@@ -18,6 +18,7 @@ class TrashSyncService {
   final _diffFetcher = TrashDiffFetcher();
   final _trashDB = TrashDB.instance;
   static const kLastTrashSyncTime = "last_trash_sync_time";
+  static const kTrashBatchSize = 999;
   SharedPreferences _prefs;
 
   TrashSyncService._privateConstructor();
@@ -88,23 +89,41 @@ class TrashSyncService {
   }
 
   Future<void> trashFilesOnServer(List<TrashRequest> trashRequestItems) async {
-    final params = <String, dynamic>{};
     final includedFileIDs = <int>{};
-    params["items"] = [];
+    final uniqueItems = <TrashRequest>[];
     for (final item in trashRequestItems) {
       if (!includedFileIDs.contains(item.fileID)) {
-        params["items"].add(item.toJson());
+        uniqueItems.add(item);
         includedFileIDs.add(item.fileID);
       }
     }
-    return await _dio.post(
+    int currentBatchSize = 0;
+    final requestData = <String, dynamic>{};
+    requestData["items"] = [];
+    for (final item in uniqueItems) {
+      currentBatchSize++;
+      requestData["items"].add(item.toJson());
+      if (currentBatchSize >= kTrashBatchSize) {
+        await _trashFiles(requestData);
+        requestData["items"] = [];
+        currentBatchSize = 0;
+      }
+    }
+    if (currentBatchSize > 0) {
+      return await _trashFiles(requestData);
+    }
+  }
+
+  Future<Response<dynamic>> _trashFiles(
+      Map<String, dynamic> requestData) async {
+    return _dio.post(
       Configuration.instance.getHttpEndpoint() + "/files/trash",
       options: Options(
         headers: {
           "X-Auth-Token": Configuration.instance.getToken(),
         },
       ),
-      data: params,
+      data: requestData,
     );
   }
 
