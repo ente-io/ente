@@ -327,6 +327,7 @@ class RemoteSyncService {
             // File was updated since the app was uninstalled
             _logger.info("Updated since last installation: " +
                 file.uploadedFileID.toString());
+            file.modificationTime = existingFiles[0].modificationTime;
             file.updationTime = null;
             updated++;
           } else {
