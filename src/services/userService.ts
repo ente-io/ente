@@ -28,7 +28,7 @@ const ENDPOINT = getEndpoint();
 
 const HAS_SET_KEYS = 'hasSetKeys';
 
-export const FIX_CREATION_TIME_VISIBLE_TO_USER_IDS = [1, 125, 341];
+export const FIX_CREATION_TIME_VISIBLE_TO_USER_IDS = [1, 125, 243, 341];
 
 export interface User {
     id: number;
