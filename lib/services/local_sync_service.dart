@@ -10,6 +10,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/utils/file_sync_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,7 +18,6 @@ class LocalSyncService {
   final _logger = Logger("LocalSyncService");
   final _db = FilesDB.instance;
   final Computer _computer = Computer();
-  bool _isBackground = false;
   SharedPreferences _prefs;
 
   static const kDbUpdationTimeKey = "db_updation_time";
@@ -35,10 +35,9 @@ class LocalSyncService {
   static final LocalSyncService instance =
       LocalSyncService._privateConstructor();
 
-  Future<void> init(bool isBackground) async {
-    _isBackground = isBackground;
+  Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
-    if (_isBackground) {
+    if (!AppLifecycleService.instance.isForeground) {
       await PhotoManager.setIgnorePermissionCheck(true);
     }
     await _computer.turnOn(workersCount: 1);
@@ -57,7 +56,7 @@ class LocalSyncService {
       _logger.info("Skipping local sync since permission has not been granted");
       return;
     }
-    if (Platform.isAndroid && !_isBackground) {
+    if (Platform.isAndroid && AppLifecycleService.instance.isForeground) {
       final permissionState = await PhotoManager.requestPermissionExtend();
       if (permissionState != PermissionState.authorized) {
         _logger.severe("sync requested with invalid permission",

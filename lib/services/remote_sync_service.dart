@@ -14,6 +14,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
@@ -42,6 +43,8 @@ class RemoteSyncService {
   // 29 October, 2021 3:56:40 AM IST
   static const kEditTimeFeatureReleaseTime = 1635460000000000;
 
+  static const kMaximumPermissibleUploadsInThrottledMode = 4;
+
   static final RemoteSyncService instance =
       RemoteSyncService._privateConstructor();
 
@@ -63,29 +66,38 @@ class RemoteSyncService {
     _existingSync = Completer<void>();
 
     bool isFirstSync = !_collectionsService.hasSyncedCollections();
-    await _collectionsService.sync();
 
-    if (isFirstSync || _hasReSynced()) {
-      await _syncUpdatedCollections(silently);
-    } else {
-      final syncSinceTime = _getSinceTimeForReSync();
-      await _resyncAllCollectionsSinceTime(syncSinceTime);
-    }
-    if (!_hasReSynced()) {
-      await _markReSyncAsDone();
-    }
-    // sync trash but consume error during initial launch.
-    // this is to ensure that we don't pause upload due to any error during
-    // the trash sync. Impact: We may end up re-uploading a file which was
-    // recently trashed.
-    await TrashSyncService.instance
-        .syncTrash()
-        .onError((e, s) => _logger.severe('trash sync failed', e, s));
-    bool hasUploadedFiles = await _uploadDiff();
-    _existingSync.complete();
-    _existingSync = null;
-    if (hasUploadedFiles) {
-      sync(silently: true);
+    try {
+      await _collectionsService.sync();
+
+      if (isFirstSync || _hasReSynced()) {
+        await _syncUpdatedCollections(silently);
+      } else {
+        final syncSinceTime = _getSinceTimeForReSync();
+        await _resyncAllCollectionsSinceTime(syncSinceTime);
+      }
+      if (!_hasReSynced()) {
+        await _markReSyncAsDone();
+      }
+      // sync trash but consume error during initial launch.
+      // this is to ensure that we don't pause upload due to any error during
+      // the trash sync. Impact: We may end up re-uploading a file which was
+      // recently trashed.
+      await TrashSyncService.instance
+          .syncTrash()
+          .onError((e, s) => _logger.severe('trash sync failed', e, s));
+      bool hasUploadedFiles = await _uploadDiff();
+      _existingSync.complete();
+      _existingSync = null;
+      if (hasUploadedFiles && !_shouldThrottleSync()) {
+        // Skipping a resync to ensure that files that were ignored in this
+        // session are not processed now
+        sync(silently: true);
+      }
+    } catch (e, s) {
+      _logger.severe("Error executing remote sync ", e, s);
+      _existingSync.complete();
+      _existingSync = null;
     }
   }
 
@@ -157,7 +169,7 @@ class RemoteSyncService {
       filesToBeUploaded =
           await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
     }
-    if (!Configuration.instance.shouldBackupVideos()) {
+    if (!Configuration.instance.shouldBackupVideos() || _shouldThrottleSync()) {
       filesToBeUploaded
           .removeWhere((element) => element.fileType == FileType.video);
     }
@@ -171,6 +183,7 @@ class RemoteSyncService {
             " files were ignored for upload");
       }
     }
+    _moveVideosToEnd(filesToBeUploaded);
     _logger.info(
         filesToBeUploaded.length.toString() + " new files to be uploaded.");
 
@@ -189,28 +202,35 @@ class RemoteSyncService {
     }
     final List<Future> futures = [];
     for (final uploadedFileID in updatedFileIDs) {
+      if (_shouldThrottleSync() &&
+          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
+        _logger
+            .info("Skipping some updated files as we are throttling uploads");
+        break;
+      }
       final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
-      final future = _uploader
-          .upload(file, file.collectionID)
-          .then((uploadedFile) => _onFileUploaded(uploadedFile));
-      futures.add(future);
+      _uploadFile(file, file.collectionID, futures);
     }
 
     for (final file in filesToBeUploaded) {
+      if (_shouldThrottleSync() &&
+          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
+        _logger.info("Skipping some new files as we are throttling uploads");
+        break;
+      }
       final collectionID = (await CollectionsService.instance
               .getOrCreateForPath(file.deviceFolder))
           .id;
-      final future = _uploader
-          .upload(file, collectionID)
-          .then((uploadedFile) => _onFileUploaded(uploadedFile));
-      futures.add(future);
+      _uploadFile(file, collectionID, futures);
     }
 
     for (final file in editedFiles) {
-      final future = _uploader
-          .upload(file, file.collectionID)
-          .then((uploadedFile) => _onFileUploaded(uploadedFile));
-      futures.add(future);
+      if (_shouldThrottleSync() &&
+          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
+        _logger.info("Skipping some edited files as we are throttling uploads");
+        break;
+      }
+      _uploadFile(file, file.collectionID, futures);
     }
 
     try {
@@ -231,6 +251,13 @@ class RemoteSyncService {
       rethrow;
     }
     return _completedUploads > 0;
+  }
+
+  void _uploadFile(File file, int collectionID, List<Future> futures) {
+    final future = _uploader
+        .upload(file, collectionID)
+        .then((uploadedFile) => _onFileUploaded(uploadedFile));
+    futures.add(future);
   }
 
   Future<void> _onFileUploaded(File file) async {
@@ -371,5 +398,22 @@ class RemoteSyncService {
       return kArchiveFeatureReleaseTime;
     }
     return kEditTimeFeatureReleaseTime;
+  }
+
+  bool _shouldThrottleSync() {
+    return Platform.isIOS && !AppLifecycleService.instance.isForeground;
+  }
+
+  void _moveVideosToEnd(List<File> file) {
+    file.sort((first, second) {
+      if (first.fileType == FileType.video &&
+          second.fileType == FileType.video) {
+        return 0;
+      } else if (first.fileType == FileType.video) {
+        return 1;
+      } else {
+        return -1;
+      }
+    });
   }
 }

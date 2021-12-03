@@ -117,10 +117,11 @@ class SyncService {
             e.type == DioErrorType.other) {
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.paused,
               reason: "waiting for network..."));
+          _logger.severe("unable to connect", e, StackTrace.current);
           return false;
         }
       }
-      _logger.severe("backup failed", e, s);
+      _logger.severe("backup failed", e, StackTrace.current);
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
       rethrow;
     } finally {

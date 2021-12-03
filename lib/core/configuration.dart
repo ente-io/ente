@@ -15,6 +15,7 @@ import 'package:photos/db/memories_db.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
+import 'package:photos/events/signed_in_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
@@ -313,6 +314,7 @@ class Configuration {
   Future<void> setToken(String token) async {
     _cachedToken = token;
     await _preferences.setString(tokenKey, token);
+    Bus.instance.fire(SignedInEvent());
   }
 
   Future<void> setEncryptedToken(String encryptedToken) async {

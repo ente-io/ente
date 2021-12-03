@@ -2,11 +2,11 @@ import 'package:local_auth/auth_strings.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:logging/logging.dart';
 
-Future<bool> requestAuthentication() async {
+Future<bool> requestAuthentication(String reason) async {
   Logger("AuthUtil").info("Requesting authentication");
   await LocalAuthentication().stopAuthentication();
   return await LocalAuthentication().authenticate(
-    localizedReason: "please authenticate to view your memories",
+    localizedReason: reason,
     androidAuthStrings: AndroidAuthMessages(
       biometricHint: "verify identity",
       biometricNotRecognized: "not recognized, try again",

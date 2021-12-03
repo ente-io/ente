@@ -19,6 +19,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
@@ -278,6 +279,7 @@ class CollectionsService {
         Configuration.instance.getHttpEndpoint() + "/collections",
         queryParameters: {
           "sinceTime": sinceTime,
+          "source": AppLifecycleService.instance.isForeground ? "fg" : "bg",
         },
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
