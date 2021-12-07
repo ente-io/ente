@@ -128,13 +128,15 @@ class ExportService {
                 return;
             }
             let filesToExport: File[];
-            const allFiles = (await getLocalFiles()).sort(
-                (fileA, fileB) => fileA.id - fileB.id
-            );
+            const localFiles = await getLocalFiles();
+            const userPersonalFiles = localFiles
+                .filter((file) => file.ownerID === user?.id)
+                .sort((fileA, fileB) => fileA.id - fileB.id);
+
             const collections = await getLocalCollections();
             const nonEmptyCollections = getNonEmptyCollections(
                 collections,
-                allFiles
+                userPersonalFiles
             );
             const user: User = getData(LS_KEYS.USER);
             const userCollections = nonEmptyCollections
@@ -144,17 +146,23 @@ class ExportService {
                         collectionA.id - collectionB.id
                 );
             const exportRecord = await this.getExportRecord(exportDir);
-            await this.migrateExport(exportDir, collections, allFiles);
+            await this.migrateExport(exportDir, collections, userPersonalFiles);
 
             if (exportType === ExportType.NEW) {
                 filesToExport = getFilesUploadedAfterLastExport(
-                    allFiles,
+                    userPersonalFiles,
                     exportRecord
                 );
             } else if (exportType === ExportType.RETRY_FAILED) {
-                filesToExport = getExportFailedFiles(allFiles, exportRecord);
+                filesToExport = getExportFailedFiles(
+                    userPersonalFiles,
+                    exportRecord
+                );
             } else {
-                filesToExport = getExportQueuedFiles(allFiles, exportRecord);
+                filesToExport = getExportQueuedFiles(
+                    userPersonalFiles,
+                    exportRecord
+                );
             }
             this.exportInProgress = this.fileExporter(
                 filesToExport,
