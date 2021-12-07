@@ -16,6 +16,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/main.dart';
@@ -81,6 +82,19 @@ class FileUploader {
       }
       _pollBackgroundUploadStatus();
     }
+    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      if (event.type == EventType.deletedFromDevice ||
+          event.type == EventType.deletedFromEverywhere) {
+        removeFromQueueWhere((file) {
+          for (final updatedFile in event.updatedFiles) {
+            if (file.generatedID == updatedFile.generatedID) {
+              return true;
+            }
+          }
+          return false;
+        }, InvalidFileError("File already deleted"));
+      }
+    });
   }
 
   Future<File> upload(File file, int collectionID) {

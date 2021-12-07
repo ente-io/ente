@@ -7,6 +7,7 @@ import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -150,7 +151,8 @@ class _ZoomableImageState extends State<ZoomableImage>
             _loadNetworkImage();
           } else {
             FilesDB.instance.deleteLocalFile(_photo);
-            Bus.instance.fire(LocalPhotosUpdatedEvent([_photo]));
+            Bus.instance.fire(LocalPhotosUpdatedEvent([_photo],
+                type: EventType.deletedFromDevice));
           }
         }
       });

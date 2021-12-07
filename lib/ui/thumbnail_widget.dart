@@ -7,6 +7,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/trash_db.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
@@ -228,7 +229,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           if (await doesLocalFileExist(widget.file) == false) {
             _logger.info("Deleting file " + widget.file.tag());
             FilesDB.instance.deleteLocalFile(widget.file);
-            Bus.instance.fire(LocalPhotosUpdatedEvent([widget.file]));
+            Bus.instance.fire(LocalPhotosUpdatedEvent([widget.file],
+                type: EventType.deletedFromDevice));
           }
         }
         return;
