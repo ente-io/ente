@@ -19,6 +19,10 @@ const responseToReadable = (fileStream: any) => {
     return rs;
 };
 
+const exists = (path: string) => {
+    return fs.existsSync(path);
+};
+
 const checkExistsAndCreateCollectionDir = async (dirPath: string) => {
     if (!fs.existsSync(dirPath)) {
         await fs.mkdir(dirPath);
@@ -98,6 +102,7 @@ const setExportRecord = async (filePath: string, data: string) => {
 
 const windowObject: any = window;
 windowObject['ElectronAPIs'] = {
+    exists,
     checkExistsAndCreateCollectionDir,
     checkExistsAndRename,
     saveStreamToDisk,
