@@ -48,9 +48,8 @@ export interface ExportProgress {
     current: number;
     total: number;
 }
-export interface ExportedCollection {
-    collectionID: number;
-    folderPath: string;
+export interface ExportedCollectionPaths {
+    [collectionID: number]: string;
 }
 export interface ExportStats {
     failed: number;
@@ -67,7 +66,7 @@ export interface ExportRecord {
     queuedFiles?: string[];
     exportedFiles?: string[];
     failedFiles?: string[];
-    exportedCollections?: ExportedCollection[];
+    exportedCollectionPaths?: ExportedCollectionPaths;
 }
 export enum ExportStage {
     INIT,
@@ -211,15 +210,15 @@ class ExportService {
         exportDir: string
     ): Promise<{ paused: boolean }> {
         try {
-            if (!newCollections?.length) {
+            if (newCollections?.length) {
                 await this.createNewCollectionFolders(
                     newCollections,
                     exportDir,
                     collectionIDPathMap
                 );
             }
-            if (!renamedCollections?.length) {
-                await this.renamedFolderForRenamedCollections(
+            if (renamedCollections?.length) {
+                await this.renameCollectionFolders(
                     renamedCollections,
                     exportDir,
                     collectionIDPathMap
@@ -349,16 +348,14 @@ class ExportService {
         collectionFolderPath: string
     ) {
         const exportRecord = await this.getExportRecord(folder);
-        if (!exportRecord?.exportedCollections) {
-            exportRecord.exportedCollections = [];
+        if (!exportRecord?.exportedCollectionPaths) {
+            exportRecord.exportedCollectionPaths = {};
         }
-        exportRecord.exportedCollections.push({
-            collectionID: collection.id,
-            folderPath: collectionFolderPath,
-        });
-        exportRecord.exportedCollections = dedupe(
-            exportRecord.exportedCollections
-        );
+        exportRecord.exportedCollectionPaths = {
+            ...exportRecord.exportedCollectionPaths,
+            [collection.id]: collectionFolderPath,
+        };
+
         await this.updateExportRecord(exportRecord, folder);
     }
 
@@ -366,7 +363,7 @@ class ExportService {
         const response = this.exportRecordUpdater.queueUpRequest(() =>
             this.updateExportRecordHelper(folder, newData)
         );
-        response.promise;
+        await response.promise;
     }
     async updateExportRecordHelper(folder: string, newData: ExportRecord) {
         try {
@@ -426,7 +423,7 @@ class ExportService {
             collectionIDPathMap.set(collection.id, collectionFolderPath);
         }
     }
-    async renamedFolderForRenamedCollections(
+    async renameCollectionFolders(
         renamedCollections: Collection[],
         exportFolder: string,
         collectionIDPathMap: CollectionIDPathMap

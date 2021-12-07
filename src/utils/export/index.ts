@@ -18,8 +18,9 @@ export const getExportQueuedFiles = (
     const queuedFiles = new Set(exportRecord?.queuedFiles);
     const unExportedFiles = allFiles.filter((file) => {
         if (queuedFiles.has(getExportRecordFileUID(file))) {
-            return file;
+            return true;
         }
+        return false;
     });
     return unExportedFiles;
 };
@@ -29,12 +30,13 @@ export const getCollectionsCreatedAfterLastExport = (
     exportRecord: ExportRecord
 ) => {
     const exportedCollections = new Set(
-        (exportRecord?.exportedCollections ?? []).map((c) => c.collectionID)
+        Object.keys(exportRecord?.exportedCollectionPaths).map((x) => Number(x))
     );
     const unExportedCollections = collections.filter((collection) => {
         if (!exportedCollections.has(collection.id)) {
-            return collection;
+            return true;
         }
+        return false;
     });
     return unExportedCollections;
 };
@@ -42,10 +44,11 @@ export const getCollectionIDPathMapFromExportRecord = (
     exportRecord: ExportRecord
 ): CollectionIDPathMap => {
     return new Map<number, string>(
-        (exportRecord.exportedCollections ?? []).map((c) => [
-            c.collectionID,
-            c.folderPath,
-        ])
+        (Object.entries(exportRecord.exportedCollectionPaths) ?? []).map(
+            (e) => {
+                return [Number(e[0]), String(e[1])];
+            }
+        )
     );
 };
 
@@ -56,12 +59,20 @@ export const getCollectionsRenamedAfterLastExport = (
     const collectionIDPathMap =
         getCollectionIDPathMapFromExportRecord(exportRecord);
     const renamedCollections = collections.filter((collection) => {
-        if (
-            collectionIDPathMap.has(collection.id) &&
-            collectionIDPathMap.get(collection.id) !== collection.name
-        ) {
-            return collection;
+        if (collectionIDPathMap.has(collection.id)) {
+            const currentFolderName = collectionIDPathMap.get(collection.id);
+            const startIndex = currentFolderName.lastIndexOf('/');
+            const lastIndex = currentFolderName.lastIndexOf('(');
+            const nameRoot = currentFolderName.slice(
+                startIndex + 1,
+                lastIndex !== -1 ? lastIndex : currentFolderName.length
+            );
+
+            if (nameRoot !== sanitizeName(collection.name)) {
+                return true;
+            }
         }
+        return false;
     });
     return renamedCollections;
 };
@@ -73,8 +84,9 @@ export const getFilesUploadedAfterLastExport = (
     const exportedFiles = new Set(exportRecord?.exportedFiles);
     const unExportedFiles = allFiles.filter((file) => {
         if (!exportedFiles.has(getExportRecordFileUID(file))) {
-            return file;
+            return true;
         }
+        return false;
     });
     return unExportedFiles;
 };
@@ -86,8 +98,9 @@ export const getExportedFiles = (
     const exportedFileIds = new Set(exportRecord?.exportedFiles);
     const exportedFiles = allFiles.filter((file) => {
         if (exportedFileIds.has(getExportRecordFileUID(file))) {
-            return file;
+            return true;
         }
+        return false;
     });
     return exportedFiles;
 };
@@ -99,8 +112,9 @@ export const getExportFailedFiles = (
     const failedFiles = new Set(exportRecord?.failedFiles);
     const filesToExport = allFiles.filter((file) => {
         if (failedFiles.has(getExportRecordFileUID(file))) {
-            return file;
+            return true;
         }
+        return false;
     });
     return filesToExport;
 };
@@ -170,7 +184,7 @@ export const getUniqueFileSaveName = (
     while (
         exportService.exists(getFileSavePath(collectionPath, fileSaveName))
     ) {
-        const filenameParts = splitFilenameAndExtension(filename);
+        const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
         if (filenameParts[1]) {
             fileSaveName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
         } else {
