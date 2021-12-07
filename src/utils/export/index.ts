@@ -1,5 +1,6 @@
 import { Collection } from 'services/collectionService';
 import exportService, {
+    CollectionIDPathMap,
     ExportRecord,
     METADATA_FOLDER_NAME,
 } from 'services/exportService';
@@ -36,6 +37,33 @@ export const getCollectionsCreatedAfterLastExport = (
         }
     });
     return unExportedCollections;
+};
+export const getCollectionIDPathMapFromExportRecord = (
+    exportRecord: ExportRecord
+): CollectionIDPathMap => {
+    return new Map<number, string>(
+        (exportRecord.exportedCollections ?? []).map((c) => [
+            c.collectionID,
+            c.folderPath,
+        ])
+    );
+};
+
+export const getCollectionsRenamedAfterLastExport = (
+    collections: Collection[],
+    exportRecord: ExportRecord
+) => {
+    const collectionIDPathMap =
+        getCollectionIDPathMapFromExportRecord(exportRecord);
+    const renamedCollections = collections.filter((collection) => {
+        if (
+            collectionIDPathMap.has(collection.id) &&
+            collectionIDPathMap.get(collection.id) !== collection.name
+        ) {
+            return collection;
+        }
+    });
+    return renamedCollections;
 };
 
 export const getFilesUploadedAfterLastExport = (
