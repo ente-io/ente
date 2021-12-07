@@ -134,6 +134,10 @@ class billingService {
         sessionID: string = null
     ): Promise<Subscription> {
         try {
+            const token = getToken();
+            if (!token) {
+                return;
+            }
             const response = await HTTPService.post(
                 `${ENDPOINT}/billing/verify-subscription`,
                 {
@@ -143,7 +147,7 @@ class billingService {
                 },
                 null,
                 {
-                    'X-Auth-Token': getToken(),
+                    'X-Auth-Token': token,
                 }
             );
             const { subscription } = response.data;

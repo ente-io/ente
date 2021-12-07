@@ -177,7 +177,7 @@ export default function PreviewCard(props: IProps) {
         if (file && !file.msrc) {
             const main = async () => {
                 try {
-                    const url = await DownloadManager.getPreview(file);
+                    const url = await DownloadManager.getThumbnail(file);
                     if (isMounted.current) {
                         setImgSrc(url);
                         thumbs.set(file.id, url);

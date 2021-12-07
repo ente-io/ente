@@ -152,6 +152,8 @@ const PhotoFrame = ({
             .map((item, index) => ({
                 ...item,
                 dataIndex: index,
+                w: window.innerWidth,
+                h: window.innerHeight,
                 ...(item.deleteBy && {
                     title: constants.AUTOMATIC_BIN_DELETE_MESSAGE(
                         formatDateRelative(item.deleteBy / 1000)
@@ -352,7 +354,7 @@ const PhotoFrame = ({
                 if (galleryContext.thumbs.has(item.id)) {
                     url = galleryContext.thumbs.get(item.id);
                 } else {
-                    url = await DownloadManager.getPreview(item);
+                    url = await DownloadManager.getThumbnail(item);
                     galleryContext.thumbs.set(item.id, url);
                 }
                 updateUrl(item.dataIndex)(url);
