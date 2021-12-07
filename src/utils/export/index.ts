@@ -154,6 +154,9 @@ export const getGoogleLikeMetadataFile = (
     );
 };
 
+export const oldSanitizeName = (name: string) =>
+    name.replaceAll('/', '_').replaceAll(' ', '_');
+
 export const sanitizeName = (name: string) =>
     name.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
 
@@ -208,15 +211,17 @@ export const getFileSavePath = (
 export const getOldCollectionFolderPath = (
     dir: string,
     collection: Collection
-) => `${dir}/${collection.id}_${sanitizeName(collection.name)}`;
+) => `${dir}/${collection.id}_${oldSanitizeName(collection.name)}`;
 
 export const getOldFileSavePath = (collectionFolderPath: string, file: File) =>
-    `${collectionFolderPath}/${file.id}_${sanitizeName(file.metadata.title)}`;
+    `${collectionFolderPath}/${file.id}_${oldSanitizeName(
+        file.metadata.title
+    )}`;
 
 export const getOldFileMetadataSavePath = (
     collectionFolderPath: string,
     file: File
 ) =>
-    `${collectionFolderPath}/${METADATA_FOLDER_NAME}/${file.id}_${sanitizeName(
-        file.metadata.title
-    )}.json`;
+    `${collectionFolderPath}/${METADATA_FOLDER_NAME}/${
+        file.id
+    }_${oldSanitizeName(file.metadata.title)}.json`;
