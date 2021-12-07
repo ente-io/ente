@@ -221,6 +221,11 @@ class ExportService {
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
                     getMetadataFolderPath(collectionFolderPath)
                 );
+                await this.addCollectionExportedRecord(
+                    dir,
+                    collection,
+                    collectionFolderPath
+                );
             }
             if (!files?.length) {
                 this.ElectronAPIs.sendNotification(
@@ -522,7 +527,7 @@ class ExportService {
     private async migrateCollectionFolders(
         collections: Collection[],
         dir: string,
-        collectionIDPathMap: Map<number, string>
+        collectionIDPathMap: CollectionIDPathMap
     ) {
         for (const collection of collections) {
             const oldCollectionFolderPath = getOldCollectionFolderPath(
@@ -534,15 +539,17 @@ class ExportService {
                 collection.name
             );
             collectionIDPathMap.set(collection.id, newCollectionFolderPath);
-            await this.ElectronAPIs.checkExistsAndRename(
-                oldCollectionFolderPath,
-                newCollectionFolderPath
-            );
-            await this.addCollectionExportedRecord(
-                dir,
-                collection,
-                newCollectionFolderPath
-            );
+            if (this.ElectronAPIs.exists(oldCollectionFolderPath)) {
+                await this.ElectronAPIs.checkExistsAndRename(
+                    oldCollectionFolderPath,
+                    newCollectionFolderPath
+                );
+                await this.addCollectionExportedRecord(
+                    dir,
+                    collection,
+                    newCollectionFolderPath
+                );
+            }
         }
     }
 
