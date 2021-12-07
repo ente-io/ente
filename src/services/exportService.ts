@@ -473,10 +473,14 @@ class ExportService {
             fileStream = updatedFileBlob.stream();
         }
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            this.exportMotionPhoto(fileStream, file, collectionPath);
+            await this.exportMotionPhoto(fileStream, file, collectionPath);
         } else {
             this.saveMediaFile(collectionPath, fileSaveName, fileStream);
-            this.saveMetadataFile(collectionPath, fileSaveName, file.metadata);
+            await this.saveMetadataFile(
+                collectionPath,
+                fileSaveName,
+                file.metadata
+            );
         }
     }
 
@@ -494,7 +498,11 @@ class ExportService {
             motionPhoto.imageNameTitle
         );
         this.saveMediaFile(collectionPath, imageSaveName, imageStream);
-        this.saveMetadataFile(collectionPath, imageSaveName, file.metadata);
+        await this.saveMetadataFile(
+            collectionPath,
+            imageSaveName,
+            file.metadata
+        );
 
         const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
         const videoSaveName = getUniqueFileSaveName(
@@ -502,7 +510,11 @@ class ExportService {
             motionPhoto.videoNameTitle
         );
         this.saveMediaFile(collectionPath, videoSaveName, videoStream);
-        this.saveMetadataFile(collectionPath, videoSaveName, file.metadata);
+        await this.saveMetadataFile(
+            collectionPath,
+            videoSaveName,
+            file.metadata
+        );
     }
 
     private saveMediaFile(
