@@ -401,12 +401,12 @@ class ExportService {
             fileStream
         );
     }
-    private saveMetadataFile(
+    private async saveMetadataFile(
         collectionFolderPath: string,
         fileSaveName: string,
         metadata: MetadataObject
     ) {
-        this.ElectronAPIs.saveFileToDisk(
+        await this.ElectronAPIs.saveFileToDisk(
             getFileMetadataSavePath(collectionFolderPath, fileSaveName),
             getGoogleLikeMetadataFile(fileSaveName, metadata)
         );
