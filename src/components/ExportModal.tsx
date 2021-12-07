@@ -115,8 +115,8 @@ export default function ExportModal(props: Props) {
                         (file) => file.ownerID === user?.id
                     );
                     const exportRecord = await exportService.getExportRecord();
-                    const exportedFileCnt = exportRecord.exportedFiles.length;
-                    const failedFilesCnt = exportRecord.failedFiles.length;
+                    const exportedFileCnt = exportRecord.exportedFiles?.length;
+                    const failedFilesCnt = exportRecord.failedFiles?.length;
                     const syncedFilesCnt = userPersonalFiles.length;
                     if (syncedFilesCnt > exportedFileCnt + failedFilesCnt) {
                         updateExportProgress({
@@ -191,8 +191,8 @@ export default function ExportModal(props: Props) {
         updateExportStage(ExportStage.INPROGRESS);
         await sleep(100);
     };
-    const postExportRun = async (paused: Boolean) => {
-        if (!paused) {
+    const postExportRun = async (exportResult?: { paused?: boolean }) => {
+        if (!exportResult?.paused) {
             updateExportStage(ExportStage.FINISHED);
             await sleep(100);
             updateExportTime(Date.now());
@@ -202,22 +202,22 @@ export default function ExportModal(props: Props) {
     const startExport = async () => {
         await preExportRun();
         updateExportProgress({ current: 0, total: 0 });
-        const { paused } = await exportService.exportFiles(
+        const exportResult = await exportService.exportFiles(
             updateExportProgress,
             ExportType.NEW
         );
-        await postExportRun(paused);
+        await postExportRun(exportResult);
     };
 
     const stopExport = async () => {
         exportService.stopRunningExport();
-        postExportRun(false);
+        postExportRun();
     };
 
     const pauseExport = () => {
         updateExportStage(ExportStage.PAUSED);
         exportService.pauseRunningExport();
-        postExportRun(true);
+        postExportRun({ paused: true });
     };
 
     const resumeExport = async () => {
@@ -232,23 +232,23 @@ export default function ExportModal(props: Props) {
                 current: pausedStageProgress.current + progress.current,
                 total: pausedStageProgress.current + progress.total,
             });
-        const { paused } = await exportService.exportFiles(
+        const exportResult = await exportService.exportFiles(
             updateExportStatsWithOffset,
             ExportType.PENDING
         );
 
-        await postExportRun(paused);
+        await postExportRun(exportResult);
     };
 
     const retryFailedExport = async () => {
         await preExportRun();
         updateExportProgress({ current: 0, total: exportStats.failed });
 
-        const { paused } = await exportService.exportFiles(
+        const exportResult = await exportService.exportFiles(
             updateExportProgress,
             ExportType.RETRY_FAILED
         );
-        await postExportRun(paused);
+        await postExportRun(exportResult);
     };
 
     const syncExportStatsWithReport = async () => {
