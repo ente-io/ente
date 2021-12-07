@@ -351,7 +351,10 @@ class ExportService {
 
     async downloadAndSave(file: File, collectionPath: string) {
         file.metadata = mergeMetadata([file])[0].metadata;
-        const fileSaveName = getUniqueFileSaveName(file.metadata.title);
+        const fileSaveName = getUniqueFileSaveName(
+            collectionPath,
+            file.metadata.title
+        );
         let fileStream = await retryAsyncFunction(() =>
             downloadManager.downloadFile(file)
         );
@@ -384,12 +387,18 @@ class ExportService {
         const originalName = fileNameWithoutExtension(file.metadata.title);
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
         const imageStream = generateStreamFromArrayBuffer(motionPhoto.image);
-        const imageSaveName = getUniqueFileSaveName(motionPhoto.imageNameTitle);
+        const imageSaveName = getUniqueFileSaveName(
+            collectionPath,
+            motionPhoto.imageNameTitle
+        );
         this.saveMediaFile(collectionPath, imageSaveName, imageStream);
         this.saveMetadataFile(collectionPath, imageSaveName, file.metadata);
 
         const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
-        const videoSaveName = getUniqueFileSaveName(motionPhoto.videoNameTitle);
+        const videoSaveName = getUniqueFileSaveName(
+            collectionPath,
+            motionPhoto.videoNameTitle
+        );
         this.saveMediaFile(collectionPath, videoSaveName, videoStream);
         this.saveMetadataFile(collectionPath, videoSaveName, file.metadata);
     }
@@ -500,7 +509,10 @@ class ExportService {
                 file
             );
             file = mergeMetadata([file])[0];
-            const newFileSaveName = getUniqueFileSaveName(file.metadata.title);
+            const newFileSaveName = getUniqueFileSaveName(
+                collectionIDPathMap.get(file.collectionID),
+                file.metadata.title
+            );
 
             const newFileSavePath = getFileSavePath(
                 collectionIDPathMap.get(file.collectionID),

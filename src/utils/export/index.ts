@@ -118,16 +118,22 @@ export const getUniqueCollectionFolderPath = (
 export const getMetadataFolderPath = (collectionFolderPath: string) =>
     `${collectionFolderPath}/${METADATA_FOLDER_NAME}`;
 
-export const getUniqueFileSaveName = (filename: string) => {
+export const getUniqueFileSaveName = (
+    collectionPath: string,
+    filename: string
+) => {
     let fileSaveName = sanitizeName(filename);
-    const count = 1;
-    while (exportService.exists(fileSaveName)) {
-        const filenameParts = splitFilenameAndExtension(fileSaveName);
+    let count = 1;
+    while (
+        exportService.exists(getFileSavePath(collectionPath, fileSaveName))
+    ) {
+        const filenameParts = splitFilenameAndExtension(filename);
         if (filenameParts[1]) {
             fileSaveName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
         } else {
             fileSaveName = `${filenameParts[0]}(${count})`;
         }
+        count++;
     }
     return fileSaveName;
 };
