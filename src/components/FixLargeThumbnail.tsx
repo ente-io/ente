@@ -189,7 +189,8 @@ export default function FixLargeThumbnails(props: Props) {
                         display: 'flex',
                         justifyContent: 'space-around',
                     }}>
-                    {fixState === FIX_STATE.NOT_STARTED ? (
+                    {fixState === FIX_STATE.NOT_STARTED ||
+                    fixState === FIX_STATE.FIX_LATER ? (
                         <Button
                             block
                             variant={'outline-secondary'}
@@ -197,7 +198,7 @@ export default function FixLargeThumbnails(props: Props) {
                                 updateFixState(FIX_STATE.FIX_LATER);
                                 props.hide();
                             }}>
-                            {constants.FIX_LATER}
+                            {constants.FIX_THUMBNAIL_LATER}
                         </Button>
                     ) : (
                         <Button
@@ -217,7 +218,7 @@ export default function FixLargeThumbnails(props: Props) {
                                 block
                                 variant={'outline-success'}
                                 onClick={() => startFix()}>
-                                {constants.FIX}
+                                {constants.FIX_THUMBNAIL}
                             </Button>
                         </>
                     )}

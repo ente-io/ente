@@ -446,6 +446,9 @@ const GlobalStyles = createGlobalStyle`
     .react-datepicker__day--disabled:hover {
         background-color: #202020;
     }
+    .ente-form-group{
+        margin:0;
+    }
 `;
 
 export const LogoImage = styled.img`
@@ -476,6 +479,8 @@ type AppContextType = {
     sharedFiles: File[];
     resetSharedFiles: () => void;
     setDisappearingFlashMessage: (message: FlashMessage) => void;
+    redirectUrl: string;
+    setRedirectUrl: (url: string) => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -505,6 +510,7 @@ export default function App({ Component, err }) {
     const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const [redirectName, setRedirectName] = useState<string>(null);
     const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
+    const [redirectUrl, setRedirectUrl] = useState(null);
     useEffect(() => {
         if (
             !('serviceWorker' in navigator) ||
@@ -638,6 +644,8 @@ export default function App({ Component, err }) {
                     sharedFiles,
                     resetSharedFiles,
                     setDisappearingFlashMessage,
+                    redirectUrl,
+                    setRedirectUrl,
                 }}>
                 {loading ? (
                     <Container>

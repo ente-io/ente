@@ -165,7 +165,7 @@ export async function getFaceImage(
 }
 
 export async function getThumbnailTFImage(file: File, token: string) {
-    const fileUrl = await DownloadManager.getPreview(file, token);
+    const fileUrl = await DownloadManager.getThumbnail(file, token);
     console.log('[MLService] Got thumbnail: ', file.id.toString(), fileUrl);
 
     const thumbFile = await fetch(fileUrl);

@@ -5,9 +5,8 @@ import { DateValue, Suggestion, SuggestionType } from 'components/SearchBar';
 import HTTPService from './HTTPService';
 import { Collection } from './collectionService';
 import { File } from './fileService';
-import { User } from './userService';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getAllPeople } from 'utils/machineLearning';
+import { logError } from 'utils/sentry';
 
 const ENDPOINT = getEndpoint();
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
@@ -46,17 +45,22 @@ export function parseHumanDate(humanDate: string): DateValue[] {
 export async function searchLocation(
     searchPhrase: string
 ): Promise<LocationSearchResponse[]> {
-    const resp = await HTTPService.get(
-        `${ENDPOINT}/search/location`,
-        {
-            query: searchPhrase,
-            limit: 4,
-        },
-        {
-            'X-Auth-Token': getToken(),
-        }
-    );
-    return resp.data.results;
+    try {
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/search/location`,
+            {
+                query: searchPhrase,
+                limit: 4,
+            },
+            {
+                'X-Auth-Token': getToken(),
+            }
+        );
+        return resp.data.results ?? [];
+    } catch (e) {
+        logError(e, 'location search failed');
+    }
+    return [];
 }
 
 export function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
@@ -100,7 +104,7 @@ export function getYearSuggestion(searchPhrase: string): Suggestion[] {
                 ];
             }
         } catch (e) {
-            // ignore
+            logError(e, 'getYearSuggestion failed');
         }
     }
     return [];
@@ -126,8 +130,6 @@ export function searchCollection(
 }
 
 export function searchFiles(searchPhrase: string, files: File[]) {
-    const user: User = getData(LS_KEYS.USER) ?? {};
-    const idSet = new Set();
     return files
         .map((file, idx) => ({
             title: file.metadata.title,
@@ -136,13 +138,6 @@ export function searchFiles(searchPhrase: string, files: File[]) {
             ownerID: file.ownerID,
             id: file.id,
         }))
-        .filter((file) => {
-            if (file.ownerID === user.id && !idSet.has(file.id)) {
-                idSet.add(file.id);
-                return true;
-            }
-            return false;
-        })
         .filter(({ title }) => title.toLowerCase().includes(searchPhrase))
         .slice(0, 4);
 }

@@ -8,10 +8,8 @@ import {
     removeFromFavorites,
 } from 'services/collectionService';
 import {
-    ALL_TIME,
     File,
-    MAX_EDITED_CREATION_TIME,
-    MIN_EDITED_CREATION_TIME,
+    MAX_EDITED_FILE_NAME_LENGTH,
     updatePublicMagicMetadata,
 } from 'services/fileService';
 import constants from 'utils/strings/constants';
@@ -22,21 +20,32 @@ import styled from 'styled-components';
 import events from './events';
 import {
     changeFileCreationTime,
+    changeFileName,
     downloadFile,
     formatDateTime,
+    splitFilenameAndExtension,
     updateExistingFilePubMetadata,
 } from 'utils/file';
-import { FormCheck } from 'react-bootstrap';
+import { Col, Form, FormCheck, FormControl } from 'react-bootstrap';
 import { prettyPrintExif } from 'utils/exif';
 import EditIcon from 'components/icons/EditIcon';
-import { IconButton, Label, Row, Value } from 'components/Container';
+import {
+    FlexWrapper,
+    IconButton,
+    Label,
+    Row,
+    Value,
+} from 'components/Container';
 import { logError } from 'utils/sentry';
 
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import CloseIcon from 'components/icons/CloseIcon';
 import TickIcon from 'components/icons/TickIcon';
 import { PhotoPeopleList } from 'components/PeopleList';
+import { FreeFlowText } from 'components/RecoveryKeyModal';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import EnteSpinner from 'components/EnteSpinner';
+import EnteDateTimePicker from 'components/EnteDateTimePicker';
 
 interface Iprops {
     isOpen: boolean;
@@ -75,11 +84,6 @@ const renderInfoItem = (label: string, value: string | JSX.Element) => (
     </Row>
 );
 
-const isSameDay = (first, second) =>
-    first.getFullYear() === second.getFullYear() &&
-    first.getMonth() === second.getMonth() &&
-    first.getDate() === second.getDate();
-
 function RenderCreationTime({
     file,
     scheduleUpdate,
@@ -87,7 +91,7 @@ function RenderCreationTime({
     file: File;
     scheduleUpdate: () => void;
 }) {
-    const originalCreationTime = new Date(file.metadata.creationTime / 1000);
+    const originalCreationTime = new Date(file?.metadata.creationTime / 1000);
     const [isInEditMode, setIsInEditMode] = useState(false);
 
     const [pickedTime, setPickedTime] = useState(originalCreationTime);
@@ -99,7 +103,8 @@ function RenderCreationTime({
         try {
             if (isInEditMode && file) {
                 const unixTimeInMicroSec = pickedTime.getTime() * 1000;
-                if (unixTimeInMicroSec === file.metadata.creationTime) {
+                if (unixTimeInMicroSec === file?.metadata.creationTime) {
+                    closeEditMode();
                     return;
                 }
                 let updatedFile = await changeFileCreationTime(
@@ -132,24 +137,11 @@ function RenderCreationTime({
                 <Label width="30%">{constants.CREATION_TIME}</Label>
                 <Value width={isInEditMode ? '50%' : '60%'}>
                     {isInEditMode ? (
-                        <DatePicker
-                            open={isInEditMode}
-                            selected={pickedTime}
-                            onChange={handleChange}
-                            timeInputLabel="Time:"
-                            dateFormat="dd/MM/yyyy h:mm aa"
-                            showTimeSelect
-                            autoFocus
-                            minDate={MIN_EDITED_CREATION_TIME}
-                            maxDate={MAX_EDITED_CREATION_TIME}
-                            maxTime={
-                                isSameDay(pickedTime, new Date())
-                                    ? MAX_EDITED_CREATION_TIME
-                                    : ALL_TIME
-                            }
-                            minTime={MIN_EDITED_CREATION_TIME}
-                            fixedHeight
-                            withPortal></DatePicker>
+                        <EnteDateTimePicker
+                            isInEditMode={isInEditMode}
+                            pickedTime={pickedTime}
+                            handleChange={handleChange}
+                        />
                     ) : (
                         formatDateTime(pickedTime)
                     )}
@@ -172,6 +164,170 @@ function RenderCreationTime({
                         </>
                     )}
                 </Value>
+            </Row>
+        </>
+    );
+}
+const getFileTitle = (filename, extension) => {
+    if (extension) {
+        return filename + '.' + extension;
+    } else {
+        return filename;
+    }
+};
+interface formValues {
+    filename: string;
+}
+
+const FileNameEditForm = ({ filename, saveEdits, discardEdits, extension }) => {
+    const [loading, setLoading] = useState(false);
+
+    const onSubmit = async (values: formValues) => {
+        try {
+            setLoading(true);
+            await saveEdits(values.filename);
+        } finally {
+            setLoading(false);
+        }
+    };
+    return (
+        <Formik<formValues>
+            initialValues={{ filename }}
+            validationSchema={Yup.object().shape({
+                filename: Yup.string()
+                    .required(constants.REQUIRED)
+                    .max(
+                        MAX_EDITED_FILE_NAME_LENGTH,
+                        constants.FILE_NAME_CHARACTER_LIMIT
+                    ),
+            })}
+            validateOnBlur={false}
+            onSubmit={onSubmit}>
+            {({ values, errors, handleChange, handleSubmit }) => (
+                <Form noValidate onSubmit={handleSubmit}>
+                    <Form.Row>
+                        <Form.Group
+                            bsPrefix="ente-form-group"
+                            as={Col}
+                            xs={extension ? 7 : 8}>
+                            <Form.Control
+                                as="textarea"
+                                placeholder={constants.FILE_NAME}
+                                value={values.filename}
+                                onChange={handleChange('filename')}
+                                isInvalid={Boolean(errors.filename)}
+                                autoFocus
+                                disabled={loading}
+                            />
+                            <FormControl.Feedback
+                                type="invalid"
+                                style={{ textAlign: 'center' }}>
+                                {errors.filename}
+                            </FormControl.Feedback>
+                        </Form.Group>
+                        {extension && (
+                            <Form.Group
+                                bsPrefix="ente-form-group"
+                                as={Col}
+                                xs={1}
+                                controlId="formHorizontalFileName">
+                                <FlexWrapper style={{ padding: '5px' }}>
+                                    {`.${extension}`}
+                                </FlexWrapper>
+                            </Form.Group>
+                        )}
+                        <Form.Group bsPrefix="ente-form-group" as={Col} xs={2}>
+                            <Value width={'16.67%'}>
+                                <IconButton type="submit" disabled={loading}>
+                                    {loading ? (
+                                        <EnteSpinner
+                                            style={{
+                                                width: '20px',
+                                                height: '20px',
+                                            }}
+                                        />
+                                    ) : (
+                                        <TickIcon />
+                                    )}
+                                </IconButton>
+                                <IconButton
+                                    onClick={discardEdits}
+                                    disabled={loading}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </Value>
+                        </Form.Group>
+                    </Form.Row>
+                </Form>
+            )}
+        </Formik>
+    );
+};
+
+function RenderFileName({
+    file,
+    scheduleUpdate,
+}: {
+    file: File;
+    scheduleUpdate: () => void;
+}) {
+    const originalTitle = file?.metadata.title;
+    const [isInEditMode, setIsInEditMode] = useState(false);
+    const [originalFileName, extension] =
+        splitFilenameAndExtension(originalTitle);
+    const [filename, setFilename] = useState(originalFileName);
+    const openEditMode = () => setIsInEditMode(true);
+    const closeEditMode = () => setIsInEditMode(false);
+
+    const saveEdits = async (newFilename: string) => {
+        try {
+            if (file) {
+                if (filename === newFilename) {
+                    closeEditMode();
+                    return;
+                }
+                setFilename(newFilename);
+                const newTitle = getFileTitle(newFilename, extension);
+                let updatedFile = await changeFileName(file, newTitle);
+                updatedFile = (
+                    await updatePublicMagicMetadata([updatedFile])
+                )[0];
+                updateExistingFilePubMetadata(file, updatedFile);
+                scheduleUpdate();
+            }
+        } catch (e) {
+            logError(e, 'failed to update file name');
+        } finally {
+            closeEditMode();
+        }
+    };
+    return (
+        <>
+            <Row>
+                <Label width="30%">{constants.FILE_NAME}</Label>
+                {!isInEditMode ? (
+                    <>
+                        <Value width="60%">
+                            <FreeFlowText>
+                                {getFileTitle(filename, extension)}
+                            </FreeFlowText>
+                        </Value>
+                        <Value
+                            width="10%"
+                            style={{ cursor: 'pointer', marginLeft: '10px' }}>
+                            <IconButton onClick={openEditMode}>
+                                <EditIcon />
+                            </IconButton>
+                        </Value>
+                    </>
+                ) : (
+                    <FileNameEditForm
+                        extension={extension}
+                        filename={filename}
+                        saveEdits={saveEdits}
+                        discardEdits={closeEditMode}
+                    />
+                )}
             </Row>
         </>
     );
@@ -251,8 +407,12 @@ function InfoModal({
                     constants.FILE_ID,
                     items[photoSwipe?.getCurrentIndex()]?.id
                 )}
-                {metadata?.title &&
-                    renderInfoItem(constants.FILE_NAME, metadata.title)}
+                {metadata?.title && (
+                    <RenderFileName
+                        file={items[photoSwipe?.getCurrentIndex()]}
+                        scheduleUpdate={scheduleUpdate}
+                    />
+                )}
                 {metadata?.creationTime && (
                     <RenderCreationTime
                         file={items[photoSwipe?.getCurrentIndex()]}

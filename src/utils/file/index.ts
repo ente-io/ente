@@ -11,7 +11,7 @@ import {
 } from 'services/fileService';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
-import DownloadManger from 'services/downloadManager';
+import DownloadManager from 'services/downloadManager';
 import { logError } from 'utils/sentry';
 import { User } from 'services/userService';
 import CryptoWorker from 'utils/crypto';
@@ -37,10 +37,16 @@ export function downloadAsFile(filename: string, content: string) {
     a.remove();
 }
 
-export async function downloadFile(file) {
+export async function downloadFile(file: File) {
     const a = document.createElement('a');
     a.style.display = 'none';
-    a.href = await DownloadManger.getFile(file);
+    const cachedFileUrl = await DownloadManager.getCachedOriginalFile(file);
+    const fileURL =
+        cachedFileUrl ??
+        URL.createObjectURL(
+            await new Response(await DownloadManager.downloadFile(file)).blob()
+        );
+    a.href = fileURL;
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         a.download = fileNameWithoutExtension(file.metadata.title) + '.zip';
     } else {
@@ -51,10 +57,11 @@ export async function downloadFile(file) {
     a.remove();
 }
 
-export function fileIsHEIC(mimeType: string) {
+export function isFileHEIC(mimeType: string) {
     return (
-        mimeType.toLowerCase().endsWith(TYPE_HEIC) ||
-        mimeType.toLowerCase().endsWith(TYPE_HEIF)
+        mimeType &&
+        (mimeType.toLowerCase().endsWith(TYPE_HEIC) ||
+            mimeType.toLowerCase().endsWith(TYPE_HEIF))
     );
 }
 
@@ -240,6 +247,16 @@ export function fileExtensionWithDot(filename) {
     else return filename.substr(lastDotPosition);
 }
 
+export function splitFilenameAndExtension(filename): [string, string] {
+    const lastDotPosition = filename.lastIndexOf('.');
+    if (lastDotPosition === -1) return [filename, null];
+    else
+        return [
+            filename.substr(0, lastDotPosition),
+            filename.substr(lastDotPosition + 1),
+        ];
+}
+
 export function generateStreamFromArrayBuffer(data: Uint8Array) {
     return new ReadableStream({
         async start(controller: ReadableStreamDefaultController) {
@@ -261,7 +278,7 @@ export async function convertForPreview(file: File, fileBlob: Blob) {
 
     const mimeType =
         (await getMimeTypeFromBlob(worker, fileBlob)) ?? typeFromExtension;
-    if (fileIsHEIC(mimeType)) {
+    if (isFileHEIC(mimeType)) {
         fileBlob = await worker.convertHEIC2JPEG(fileBlob);
     }
     return fileBlob;
@@ -381,6 +398,17 @@ export async function changeFileCreationTime(file: File, editedTime: number) {
     );
 }
 
+export async function changeFileName(file: File, editedName: string) {
+    const updatedPublicMagicMetadataProps: PublicMagicMetadataProps = {
+        editedName,
+    };
+
+    return await updatePublicMagicMetadataProps(
+        file,
+        updatedPublicMagicMetadataProps
+    );
+}
+
 export function isSharedFile(file: File) {
     const user: User = getData(LS_KEYS.USER);
 
@@ -400,18 +428,14 @@ export function mergeMetadata(files: File[]): File[] {
                       ...(file.pubMagicMetadata?.data.editedTime && {
                           creationTime: file.pubMagicMetadata.data.editedTime,
                       }),
+                      ...(file.pubMagicMetadata?.data.editedName && {
+                          title: file.pubMagicMetadata.data.editedName,
+                      }),
                   }
                 : {}),
             ...(file.magicMetadata?.data ? file.magicMetadata.data : {}),
         },
     }));
-}
-export function appendPhotoSwipeProps(files: File[]) {
-    return files.map((file) => ({
-        ...file,
-        w: window.innerWidth,
-        h: window.innerHeight,
-    })) as File[];
 }
 
 export function updateExistingFilePubMetadata(
@@ -420,4 +444,55 @@ export function updateExistingFilePubMetadata(
 ) {
     existingFile.pubMagicMetadata = updatedFile.pubMagicMetadata;
     existingFile.metadata = mergeMetadata([existingFile])[0].metadata;
+}
+
+export async function getFileFromURL(fileURL: string) {
+    const fileBlob = await (await fetch(fileURL)).blob();
+    const fileFile = new globalThis.File([fileBlob], 'temp');
+    return fileFile;
+}
+
+export function getUniqueFiles(files: File[]) {
+    const idSet = new Set<number>();
+    return files.filter((file) => {
+        if (!idSet.has(file.id)) {
+            idSet.add(file.id);
+            return true;
+        } else {
+            return false;
+        }
+    });
+}
+export function getNonTrashedUniqueUserFiles(files: File[]) {
+    const user: User = getData(LS_KEYS.USER) ?? {};
+    return getUniqueFiles(
+        files.filter(
+            (file) =>
+                (typeof file.isTrashed === 'undefined' || !file.isTrashed) &&
+                (!user.id || file.ownerID === user.id)
+        )
+    );
+}
+
+export async function downloadFiles(files: File[]) {
+    for (const file of files) {
+        try {
+            await downloadFile(file);
+        } catch (e) {
+            logError(e, 'download fail for file');
+        }
+    }
+}
+
+export function needsConversionForPreview(file: File) {
+    const fileExtension = splitFilenameAndExtension(file.metadata.title)[1];
+    if (
+        file.metadata.fileType === FILE_TYPE.LIVE_PHOTO ||
+        (file.metadata.fileType === FILE_TYPE.IMAGE &&
+            isFileHEIC(fileExtension))
+    ) {
+        return true;
+    } else {
+        return false;
+    }
 }

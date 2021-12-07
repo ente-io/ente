@@ -5,7 +5,9 @@ import constants from 'utils/strings/constants';
 import MessageDialog from './MessageDialog';
 import EnteSpinner from './EnteSpinner';
 import styled from 'styled-components';
-
+const bip39 = require('bip39');
+// mobile client library only supports english.
+bip39.setDefaultWordlist('english');
 export const CodeBlock = styled.div<{ height: number }>`
     display: flex;
     align-items: center;
@@ -23,6 +25,7 @@ export const FreeFlowText = styled.div`
     word-wrap: break-word;
     overflow-wrap: break-word;
     min-width: 30%;
+    text-align: left;
 `;
 interface Props {
     show: boolean;
@@ -41,7 +44,7 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
                 somethingWentWrong();
                 props.onHide();
             }
-            setRecoveryKey(recoveryKey);
+            setRecoveryKey(bip39.entropyToMnemonic(recoveryKey));
         };
         main();
     }, [props.show]);
