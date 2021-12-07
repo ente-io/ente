@@ -23,6 +23,21 @@ export const getExportQueuedFiles = (
     return unExportedFiles;
 };
 
+export const getCollectionsCreatedAfterLastExport = (
+    collections: Collection[],
+    exportRecord: ExportRecord
+) => {
+    const exportedCollections = new Set(
+        (exportRecord?.exportedCollections ?? []).map((c) => c.collectionID)
+    );
+    const unExportedCollections = collections.filter((collection) => {
+        if (!exportedCollections.has(collection.id)) {
+            return collection;
+        }
+    });
+    return unExportedCollections;
+};
+
 export const getFilesUploadedAfterLastExport = (
     allFiles: File[],
     exportRecord: ExportRecord

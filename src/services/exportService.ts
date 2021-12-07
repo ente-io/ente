@@ -15,6 +15,7 @@ import {
     getOldFileMetadataSavePath,
     getExportedFiles,
     getMetadataFolderPath,
+    getCollectionsCreatedAfterLastExport,
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
@@ -40,9 +41,14 @@ import { updateFileCreationDateInEXIF } from './upload/exifService';
 import { MetadataObject } from './upload/uploadService';
 import QueueProcessor from './upload/queueProcessor';
 
+type CollectionIDPathMap = Map<number, string>;
 export interface ExportProgress {
     current: number;
     total: number;
+}
+export interface ExportedCollection {
+    collectionID: number;
+    folderPath: string;
 }
 export interface ExportStats {
     failed: number;
@@ -59,6 +65,7 @@ export interface ExportRecord {
     queuedFiles?: string[];
     exportedFiles?: string[];
     failedFiles?: string[];
+    exportedCollections?: ExportedCollection[];
 }
 export enum ExportStage {
     INIT,
@@ -127,6 +134,8 @@ class ExportService {
                 // no-export folder set
                 return;
             }
+            const user: User = getData(LS_KEYS.USER);
+
             let filesToExport: File[];
             const localFiles = await getLocalFiles();
             const userPersonalFiles = localFiles
@@ -138,15 +147,14 @@ class ExportService {
                 collections,
                 userPersonalFiles
             );
-            const user: User = getData(LS_KEYS.USER);
             const userCollections = nonEmptyCollections
                 .filter((collection) => collection.owner.id === user?.id)
                 .sort(
                     (collectionA, collectionB) =>
                         collectionA.id - collectionB.id
                 );
-            const exportRecord = await this.getExportRecord(exportDir);
             await this.migrateExport(exportDir, collections, userPersonalFiles);
+            const exportRecord = await this.getExportRecord(exportDir);
 
             if (exportType === ExportType.NEW) {
                 filesToExport = getFilesUploadedAfterLastExport(
@@ -164,9 +172,23 @@ class ExportService {
                     exportRecord
                 );
             }
+            const collectionIDPathMap: CollectionIDPathMap = new Map<
+                number,
+                string
+            >(
+                (exportRecord.exportedCollections ?? []).map((c) => [
+                    c.collectionID,
+                    c.folderPath,
+                ])
+            );
+            const newCollections = getCollectionsCreatedAfterLastExport(
+                userCollections,
+                exportRecord
+            );
             this.exportInProgress = this.fileExporter(
                 filesToExport,
-                userCollections,
+                newCollections,
+                collectionIDPathMap,
                 updateProgress,
                 exportDir
             );
@@ -182,10 +204,24 @@ class ExportService {
     async fileExporter(
         files: File[],
         collections: Collection[],
+        collectionIDPathMap: CollectionIDPathMap,
         updateProgress: (progress: ExportProgress) => void,
         dir: string
     ): Promise<{ paused: boolean }> {
         try {
+            for (const collection of collections) {
+                const collectionFolderPath = getUniqueCollectionFolderPath(
+                    dir,
+                    collection.name
+                );
+                collectionIDPathMap.set(collection.id, collectionFolderPath);
+                await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
+                    collectionFolderPath
+                );
+                await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
+                    getMetadataFolderPath(collectionFolderPath)
+                );
+            }
             if (!files?.length) {
                 this.ElectronAPIs.sendNotification(
                     ExportNotification.UP_TO_DATE
@@ -205,20 +241,7 @@ class ExportService {
                 total: files.length,
             });
             this.ElectronAPIs.sendNotification(ExportNotification.START);
-            const collectionIDPathMap = new Map<number, string>();
-            for (const collection of collections) {
-                const collectionFolderPath = getUniqueCollectionFolderPath(
-                    dir,
-                    collection.name
-                );
-                collectionIDPathMap.set(collection.id, collectionFolderPath);
-                await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
-                    collectionFolderPath
-                );
-                await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
-                    getMetadataFolderPath(collectionFolderPath)
-                );
-            }
+
             for (const [index, file] of files.entries()) {
                 if (this.stopExport || this.pauseExport) {
                     if (this.pauseExport) {
@@ -314,6 +337,25 @@ class ExportService {
         exportRecord.exportedFiles = dedupe(exportRecord.exportedFiles);
         exportRecord.queuedFiles = dedupe(exportRecord.queuedFiles);
         exportRecord.failedFiles = dedupe(exportRecord.failedFiles);
+        await this.updateExportRecord(exportRecord, folder);
+    }
+
+    async addCollectionExportedRecord(
+        folder: string,
+        collection: Collection,
+        collectionFolderPath: string
+    ) {
+        const exportRecord = await this.getExportRecord(folder);
+        if (!exportRecord?.exportedCollections) {
+            exportRecord.exportedCollections = [];
+        }
+        exportRecord.exportedCollections.push({
+            collectionID: collection.id,
+            folderPath: collectionFolderPath,
+        });
+        exportRecord.exportedCollections = dedupe(
+            exportRecord.exportedCollections
+        );
         await this.updateExportRecord(exportRecord, folder);
     }
 
@@ -494,6 +536,11 @@ class ExportService {
             collectionIDPathMap.set(collection.id, newCollectionFolderPath);
             await this.ElectronAPIs.checkExistsAndRename(
                 oldCollectionFolderPath,
+                newCollectionFolderPath
+            );
+            await this.addCollectionExportedRecord(
+                dir,
+                collection,
                 newCollectionFolderPath
             );
         }
