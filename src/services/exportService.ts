@@ -38,6 +38,7 @@ import {
 import { User } from './userService';
 import { updateFileCreationDateInEXIF } from './upload/exifService';
 import { MetadataObject } from './upload/uploadService';
+import QueueProcessor from './upload/queueProcessor';
 
 export interface ExportProgress {
     current: number;
@@ -93,7 +94,7 @@ class ExportService {
     ElectronAPIs: any;
 
     private exportInProgress: Promise<{ paused: boolean }> = null;
-    private recordUpdateInProgress = Promise.resolve();
+    private exportRecordUpdater = new QueueProcessor<void>(1);
     private stopExport: boolean = false;
     private pauseExport: boolean = false;
 
@@ -309,27 +310,29 @@ class ExportService {
     }
 
     async updateExportRecord(newData: ExportRecord, folder?: string) {
-        await this.recordUpdateInProgress;
-        this.recordUpdateInProgress = (async () => {
-            try {
-                if (!folder) {
-                    folder = getData(LS_KEYS.EXPORT)?.folder;
-                }
-                const exportRecord = await this.getExportRecord(folder);
-                const newRecord = { ...exportRecord, ...newData };
-                await this.ElectronAPIs.setExportRecord(
-                    `${folder}/${EXPORT_RECORD_FILE_NAME}`,
-                    JSON.stringify(newRecord, null, 2)
-                );
-            } catch (e) {
-                logError(e, 'error updating Export Record');
+        const response = this.exportRecordUpdater.queueUpRequest(() =>
+            this.updateExportRecordHelper(folder, newData)
+        );
+        response.promise;
+    }
+    async updateExportRecordHelper(folder: string, newData: ExportRecord) {
+        try {
+            if (!folder) {
+                folder = getData(LS_KEYS.EXPORT)?.folder;
             }
-        })();
+            const exportRecord = await this.getExportRecord(folder);
+            const newRecord = { ...exportRecord, ...newData };
+            await this.ElectronAPIs.setExportRecord(
+                `${folder}/${EXPORT_RECORD_FILE_NAME}`,
+                JSON.stringify(newRecord, null, 2)
+            );
+        } catch (e) {
+            logError(e, 'error updating Export Record');
+        }
     }
 
     async getExportRecord(folder?: string): Promise<ExportRecord> {
         try {
-            await this.recordUpdateInProgress;
             if (!folder) {
                 folder = getData(LS_KEYS.EXPORT)?.folder;
             }
