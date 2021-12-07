@@ -30,7 +30,9 @@ export const getCollectionsCreatedAfterLastExport = (
     exportRecord: ExportRecord
 ) => {
     const exportedCollections = new Set(
-        Object.keys(exportRecord?.exportedCollectionPaths).map((x) => Number(x))
+        Object.keys(exportRecord?.exportedCollectionPaths ?? {}).map((x) =>
+            Number(x)
+        )
     );
     const unExportedCollections = collections.filter((collection) => {
         if (!exportedCollections.has(collection.id)) {
@@ -44,11 +46,9 @@ export const getCollectionIDPathMapFromExportRecord = (
     exportRecord: ExportRecord
 ): CollectionIDPathMap => {
     return new Map<number, string>(
-        (Object.entries(exportRecord.exportedCollectionPaths) ?? []).map(
-            (e) => {
-                return [Number(e[0]), String(e[1])];
-            }
-        )
+        Object.entries(exportRecord.exportedCollectionPaths ?? {}).map((e) => {
+            return [Number(e[0]), String(e[1])];
+        })
     );
 };
 
