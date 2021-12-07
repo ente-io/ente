@@ -225,13 +225,13 @@ class ExportService {
                 );
                 try {
                     await this.downloadAndSave(file, collectionPath);
-                    await this.addFileExportRecord(
+                    await this.addFileExportedRecord(
                         dir,
                         file,
                         RecordType.SUCCESS
                     );
                 } catch (e) {
-                    await this.addFileExportRecord(
+                    await this.addFileExportedRecord(
                         dir,
                         file,
                         RecordType.FAILED
@@ -279,7 +279,7 @@ class ExportService {
         await this.updateExportRecord(exportRecord, folder);
     }
 
-    async addFileExportRecord(folder: string, file: File, type: RecordType) {
+    async addFileExportedRecord(folder: string, file: File, type: RecordType) {
         const fileUID = getExportRecordFileUID(file);
         const exportRecord = await this.getExportRecord(folder);
         exportRecord.queuedFiles = exportRecord.queuedFiles.filter(
