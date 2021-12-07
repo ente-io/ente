@@ -96,7 +96,6 @@ class ExportService {
     private recordUpdateInProgress = Promise.resolve();
     private stopExport: boolean = false;
     private pauseExport: boolean = false;
-    private usedFileNames = new Map<number, Set<string>>();
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
@@ -198,12 +197,10 @@ class ExportService {
             });
             this.ElectronAPIs.sendNotification(ExportNotification.START);
             const collectionIDPathMap = new Map<number, string>();
-            const usedCollectionPaths = new Set<string>();
             for (const collection of collections) {
                 const collectionFolderPath = getUniqueCollectionFolderPath(
                     dir,
-                    collection.name,
-                    usedCollectionPaths
+                    collection.name
                 );
                 collectionIDPathMap.set(collection.id, collectionFolderPath);
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
@@ -350,17 +347,8 @@ class ExportService {
     }
 
     async downloadAndSave(file: File, collectionPath: string) {
-        if (!this.usedFileNames.has(file.collectionID)) {
-            this.usedFileNames.set(file.collectionID, new Set<string>());
-        }
-        const usedFileNamesInCollection = this.usedFileNames.get(
-            file.collectionID
-        );
         file.metadata = mergeMetadata([file])[0].metadata;
-        const fileSaveName = getUniqueFileSaveName(
-            file.metadata.title,
-            usedFileNamesInCollection
-        );
+        const fileSaveName = getUniqueFileSaveName(file.metadata.title);
         let fileStream = await retryAsyncFunction(() =>
             downloadManager.downloadFile(file)
         );
@@ -377,12 +365,7 @@ class ExportService {
             fileStream = updatedFileBlob.stream();
         }
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            this.exportMotionPhoto(
-                fileStream,
-                file,
-                collectionPath,
-                usedFileNamesInCollection
-            );
+            this.exportMotionPhoto(fileStream, file, collectionPath);
         } else {
             this.saveMediaFile(collectionPath, fileSaveName, fileStream);
             this.saveMetadataFile(collectionPath, fileSaveName, file.metadata);
@@ -392,25 +375,18 @@ class ExportService {
     private async exportMotionPhoto(
         fileStream: ReadableStream<any>,
         file: File,
-        collectionPath: string,
-        usedFileNamesInCollection: Set<string>
+        collectionPath: string
     ) {
         const fileBlob = await new Response(fileStream).blob();
         const originalName = fileNameWithoutExtension(file.metadata.title);
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
         const imageStream = generateStreamFromArrayBuffer(motionPhoto.image);
-        const imageSaveName = getUniqueFileSaveName(
-            motionPhoto.imageNameTitle,
-            usedFileNamesInCollection
-        );
+        const imageSaveName = getUniqueFileSaveName(motionPhoto.imageNameTitle);
         this.saveMediaFile(collectionPath, imageSaveName, imageStream);
         this.saveMetadataFile(collectionPath, imageSaveName, file.metadata);
 
         const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
-        const videoSaveName = getUniqueFileSaveName(
-            motionPhoto.videoNameTitle,
-            usedFileNamesInCollection
-        );
+        const videoSaveName = getUniqueFileSaveName(motionPhoto.videoNameTitle);
         this.saveMediaFile(collectionPath, videoSaveName, videoStream);
         this.saveMetadataFile(collectionPath, videoSaveName, file.metadata);
     }
@@ -438,6 +414,10 @@ class ExportService {
 
     isExportInProgress = () => {
         return this.exportInProgress !== null;
+    };
+
+    exists = (path: string) => {
+        return this.ElectronAPIs.exists(path);
     };
 
     /*
@@ -482,7 +462,6 @@ class ExportService {
         dir: string,
         collectionIDPathMap: Map<number, string>
     ) {
-        const tempUsedCollectionPaths = new Set<string>();
         for (const collection of collections) {
             const oldCollectionFolderPath = getOldCollectionFolderPath(
                 dir,
@@ -490,10 +469,8 @@ class ExportService {
             );
             const newCollectionFolderPath = getUniqueCollectionFolderPath(
                 dir,
-                collection.name,
-                tempUsedCollectionPaths
+                collection.name
             );
-            tempUsedCollectionPaths.add(newCollectionFolderPath);
             collectionIDPathMap.set(collection.id, newCollectionFolderPath);
             await this.ElectronAPIs.checkExistsAndRename(
                 oldCollectionFolderPath,
@@ -510,7 +487,6 @@ class ExportService {
         files: File[],
         collectionIDPathMap: Map<number, string>
     ) {
-        const tempUsedFileSaveNames = new Set<string>();
         for (let file of files) {
             const oldFileSavePath = getOldFileSavePath(
                 collectionIDPathMap.get(file.collectionID),
@@ -521,11 +497,7 @@ class ExportService {
                 file
             );
             file = mergeMetadata([file])[0];
-            const newFileSaveName = getUniqueFileSaveName(
-                file.metadata.title,
-                tempUsedFileSaveNames
-            );
-            tempUsedFileSaveNames.add(newFileSaveName);
+            const newFileSaveName = getUniqueFileSaveName(file.metadata.title);
 
             const newFileSavePath = getFileSavePath(
                 collectionIDPathMap.get(file.collectionID),
