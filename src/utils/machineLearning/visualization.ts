@@ -1,5 +1,5 @@
 import TSNE from 'tsne-js';
-import { TSNEConfig, TSNEData } from './types';
+import { TSNEConfig, TSNEData } from 'types/machineLearning';
 
 export function toD3Tsne(tsne) {
     const data: TSNEData = {

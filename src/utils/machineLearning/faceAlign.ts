@@ -3,7 +3,7 @@ import {
     DetectedFace,
     FaceAlignmentMethod,
     Versioned,
-} from './types';
+} from 'types/machineLearning';
 import { Matrix, inverse } from 'ml-matrix';
 import * as tf from '@tensorflow/tfjs-core';
 import { getSimilarityTransformation } from '../../../thirdparty/similarity-transformation-js/main';

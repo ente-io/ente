@@ -6,7 +6,7 @@ import {
     ClusteringResults,
     HdbscanResults,
     Versioned,
-} from 'utils/machineLearning/types';
+} from 'types/machineLearning';
 import Clustering from 'hdbscanjs';
 import { Hdbscan } from 'hdbscan';
 import { HdbscanInput } from 'hdbscan/dist/types';

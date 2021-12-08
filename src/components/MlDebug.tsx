@@ -8,7 +8,7 @@ import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
 // import { MLSyncResult } from 'utils/machineLearning/types';
 import TFJSImage from './TFJSImage';
-import { MLDebugResult } from 'utils/machineLearning/types';
+import { MLDebugResult } from 'types/machineLearning';
 import Tree from 'react-d3-tree';
 
 interface TSNEProps {

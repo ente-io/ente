@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import TFJSImage from 'components/TFJSImage';
-import { Person } from 'utils/machineLearning/types';
+import { Person } from 'types/machineLearning';
 import { getAllPeople, getPeopleList } from 'utils/machineLearning';
 import styled from 'styled-components';
 import { File } from 'services/fileService';

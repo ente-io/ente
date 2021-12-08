@@ -18,7 +18,7 @@ import {
     MLSyncContext,
     MLSyncResult,
     Person,
-} from 'utils/machineLearning/types';
+} from 'types/machineLearning';
 
 import ClusteringService from './clusteringService';
 

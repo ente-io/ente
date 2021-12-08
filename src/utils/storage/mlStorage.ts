@@ -1,4 +1,4 @@
-import { MLIndex } from 'utils/machineLearning/types';
+import { MLIndex } from 'types/machineLearning';
 import localForage from './localForage';
 
 export const mlFilesStore = localForage.createInstance({

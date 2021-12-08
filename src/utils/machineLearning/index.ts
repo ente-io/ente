@@ -4,7 +4,7 @@ import DownloadManager from 'services/downloadManager';
 import * as jpeg from 'jpeg-js';
 import { File, getLocalFiles } from 'services/fileService';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
-import { Face, MlFileData, MLSyncConfig, Person } from './types';
+import { Face, MlFileData, MLSyncConfig, Person } from 'types/machineLearning';
 import { extractFaceImage } from './faceAlign';
 import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
 

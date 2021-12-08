@@ -6,7 +6,7 @@ import {
     AlignedFace,
     DetectedFace,
     FaceAlignmentService,
-} from 'utils/machineLearning/types';
+} from 'types/machineLearning';
 
 export default class ArcfaceAlignmentService implements FaceAlignmentService {
     public getAlignedFaces(faces: Array<DetectedFace>): Array<AlignedFace> {

@@ -6,7 +6,7 @@ import {
     FaceEmbedding,
     FaceEmbeddingService,
     FaceWithEmbedding,
-} from 'utils/machineLearning/types';
+} from 'types/machineLearning';
 import { extractFaceImages } from 'utils/machineLearning/faceAlign';
 
 class TFJSFaceEmbeddingService implements FaceEmbeddingService {

@@ -26,7 +26,7 @@ import { File, FILE_TYPE } from 'services/fileService';
 import ImageIcon from './icons/ImageIcon';
 import VideoIcon from './icons/VideoIcon';
 import { IconButton } from './Container';
-import { Person } from 'utils/machineLearning/types';
+import { Person } from 'types/machineLearning';
 import { PeopleList } from './PeopleList';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`

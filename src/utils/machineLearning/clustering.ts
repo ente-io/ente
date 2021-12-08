@@ -9,7 +9,7 @@ import {
     FaceWithEmbedding,
     MLSyncContext,
     NearestCluster,
-} from './types';
+} from 'types/machineLearning';
 
 export function getClusterSummary(cluster: ClusterFaces): FaceDescriptor {
     // const faceScore = (f) => f.detection.score; // f.alignedRect.box.width *

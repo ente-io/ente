@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as tf from '@tensorflow/tfjs';
-import { FaceImage } from 'utils/machineLearning/types';
+import { FaceImage } from 'types/machineLearning';
 
 interface FaceImageProps {
     faceImage: FaceImage;

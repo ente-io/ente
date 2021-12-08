@@ -10,7 +10,7 @@ import {
     FaceDetectionMethod,
     FaceDetectionService,
     Versioned,
-} from 'utils/machineLearning/types';
+} from 'types/machineLearning';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
 
 class TFJSFaceDetectionService implements FaceDetectionService {

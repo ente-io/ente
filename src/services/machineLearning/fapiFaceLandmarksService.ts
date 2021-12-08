@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs-core';
 import { gather } from '@tensorflow/tfjs';
 import { extractFaces } from 'utils/machineLearning';
-import { DetectedFace } from 'utils/machineLearning/types';
+import { DetectedFace } from 'types/machineLearning';
 import { FaceLandmarks68 } from '../../../thirdparty/face-api/classes';
 import { FaceLandmark68Net } from '../../../thirdparty/face-api/faceLandmarkNet';
 import { getRotatedFaceImage } from 'utils/machineLearning/faceAlign';

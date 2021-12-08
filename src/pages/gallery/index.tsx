@@ -95,7 +95,7 @@ import {
     Trash,
 } from 'services/trashService';
 import DeleteBtn from 'components/DeleteBtn';
-import { Person } from 'utils/machineLearning/types';
+import { Person } from 'types/machineLearning';
 import FixCreationTime, {
     FixCreationTimeAttributes,
 } from 'components/FixCreationTime';
