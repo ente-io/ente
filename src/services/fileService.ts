@@ -2,11 +2,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
 
 import { getToken } from 'utils/common/key';
-import {
-    DataStream,
-    EncryptionResult,
-    MetadataObject,
-} from './upload/uploadService';
+import { DataStream, EncryptionResult, MetadataObject } from 'types/upload';
 import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';

@@ -1,6 +1,6 @@
 import { ExportRecord } from 'services/exportService';
 import { File } from 'services/fileService';
-import { MetadataObject } from 'services/upload/uploadService';
+import { MetadataObject } from 'types/upload';
 import { formatDate } from 'utils/file';
 
 export const getExportRecordFileUID = (file: File) =>

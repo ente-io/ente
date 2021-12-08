@@ -2,7 +2,7 @@ import { FILE_TYPE } from 'services/fileService';
 import { logError } from 'utils/sentry';
 import { getExifData } from './exifService';
 import { FileTypeInfo } from './readFileService';
-import { MetadataObject } from './uploadService';
+import { MetadataObject } from 'types/upload';
 
 export interface Location {
     latitude: number;

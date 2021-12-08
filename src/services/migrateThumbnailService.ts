@@ -7,10 +7,11 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from 'services/HTTPService';
 import CryptoWorker from 'utils/crypto';
 import uploadHttpClient from 'services/upload/uploadHttpClient';
-import { EncryptionResult, UploadURL } from 'services/upload/uploadService';
+import { UploadURL } from 'services/upload/uploadService';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
 import { getFileType } from './upload/readFileService';
 import { getLocalTrash, getTrashedFiles } from './trashService';
+import { EncryptionResult } from 'types/upload';
 
 const ENDPOINT = getEndpoint();
 const REPLACE_THUMBNAIL_THRESHOLD = 500 * 1024; // 500KB

@@ -12,11 +12,11 @@ import UploadService, {
     EncryptedFile,
     FileInMemory,
     FileWithMetadata,
-    MetadataObject,
     UploadFile,
 } from './uploadService';
 import uploadService from './uploadService';
 import { FileTypeInfo, getFileType } from './readFileService';
+import { MetadataObject } from 'types/upload';
 
 const TwoSecondInMillSeconds = 2000;
 const FIVE_GB_IN_BYTES = 5 * 1024 * 1024 * 1024;
