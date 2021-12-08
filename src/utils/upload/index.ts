@@ -1,5 +1,5 @@
 import { FileWithCollection } from 'services/upload/uploadManager';
-import { MetadataObject } from 'services/upload/uploadService';
+import { MetadataObject } from 'types/upload';
 import { File } from 'services/fileService';
 const TYPE_JSON = 'json';
 

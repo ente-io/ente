@@ -3,7 +3,7 @@ import {
     FORMAT_MISSED_BY_FILE_TYPE_LIB,
 } from 'services/fileService';
 import { logError } from 'utils/sentry';
-import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from './uploadService';
+import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from 'types/upload';
 import FileType from 'file-type/browser';
 import { CustomError } from 'utils/common/errorUtil';
 

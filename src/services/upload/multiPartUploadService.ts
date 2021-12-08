@@ -1,11 +1,9 @@
-import {
-    FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
-    DataStream,
-} from './uploadService';
+import { FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART } from './uploadService';
 import UploadHttpClient from './uploadHttpClient';
 import * as convert from 'xml-js';
 import UIService, { RANDOM_PERCENTAGE_PROGRESS_FOR_PUT } from './uiService';
 import { CustomError } from 'utils/common/errorUtil';
+import { DataStream } from 'types/upload';
 
 interface PartEtag {
     PartNumber: number;

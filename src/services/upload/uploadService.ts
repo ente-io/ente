@@ -1,4 +1,4 @@
-import { fileAttribute, FILE_TYPE } from '../fileService';
+import { fileAttribute } from '../fileService';
 import { Collection } from '../collectionService';
 import { logError } from 'utils/sentry';
 import UploadHttpClient from './uploadHttpClient';
@@ -14,16 +14,17 @@ import {
     FileTypeInfo,
 } from './readFileService';
 import { encryptFiledata } from './encryptionService';
-import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
 import { handleUploadError } from 'utils/common/errorUtil';
 import { MetadataMap } from './uploadManager';
-
-// this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
-export const MULTIPART_PART_SIZE = 20 * 1024 * 1024;
-
-export const FILE_READER_CHUNK_SIZE = ENCRYPTION_CHUNK_SIZE;
+import {
+    DataStream,
+    EncryptionResult,
+    FILE_READER_CHUNK_SIZE,
+    MetadataObject,
+    MULTIPART_PART_SIZE,
+} from 'types/upload';
 
 export const FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART = Math.floor(
     MULTIPART_PART_SIZE / FILE_READER_CHUNK_SIZE
@@ -34,32 +35,13 @@ export interface UploadURL {
     objectKey: string;
 }
 
-export interface DataStream {
-    stream: ReadableStream<Uint8Array>;
-    chunkCount: number;
-}
-
 export function isDataStream(object: any): object is DataStream {
     return 'stream' in object;
-}
-export interface EncryptionResult {
-    file: fileAttribute;
-    key: string;
 }
 export interface B64EncryptionResult {
     encryptedData: string;
     key: string;
     nonce: string;
-}
-
-export interface MetadataObject {
-    title: string;
-    creationTime: number;
-    modificationTime: number;
-    latitude: number;
-    longitude: number;
-    fileType: FILE_TYPE;
-    hasStaticThumbnail?: boolean;
 }
 
 export interface FileInMemory {
