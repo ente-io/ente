@@ -22,6 +22,12 @@ export const mlVersionStore = localForage.createInstance({
     storeName: 'versions',
 });
 
+export async function clearMLStorage() {
+    await mlFilesStore.clear();
+    await mlPeopleStore.clear();
+    await mlVersionStore.clear();
+}
+
 export async function getIndexVersion(index: MLIndex): Promise<number> {
     return ((await mlVersionStore.getItem(`${index}`)) as number) || 0;
 }

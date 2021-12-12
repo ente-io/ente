@@ -160,7 +160,8 @@ class TFJSFaceDetectionService implements FaceDetectionService {
     }
 
     public async dispose() {
-        this.blazeFaceModel.dispose();
+        await this.blazeFaceModel.dispose();
+        this.blazeFaceModel = undefined;
     }
 }
 

@@ -19,6 +19,7 @@ import uploader from './uploader';
 import UIService from './uiService';
 import UploadService from './uploadService';
 import { CustomError } from 'utils/common/errorUtil';
+import { eventBus, Events } from 'services/events';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -194,6 +195,15 @@ class UploadManager {
                 this.existingFilesCollectionWise
                     .get(file.collectionID)
                     .push(file);
+
+                try {
+                    eventBus.emit(Events.FILE_UPLOADED, {
+                        enteFile: file,
+                        localFile: fileWithCollection.file,
+                    });
+                } catch (e) {
+                    logError(e, 'Error in fileUploaded handlers');
+                }
             }
             if (
                 fileUploadResult === FileUploadResults.BLOCKED ||

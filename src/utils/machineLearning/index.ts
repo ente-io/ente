@@ -1,7 +1,5 @@
 import * as tf from '@tensorflow/tfjs-core';
-import { DataType } from '@tensorflow/tfjs-core';
 import DownloadManager from 'services/downloadManager';
-import * as jpeg from 'jpeg-js';
 import { File, getLocalFiles } from 'services/fileService';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
 import { Face, MlFileData, MLSyncConfig, Person } from 'types/machineLearning';
@@ -51,7 +49,10 @@ export function isTensor4D(tensor: any): tensor is tf.Tensor4D {
     return isTensor(tensor, 4);
 }
 
-export function toTensor4D(image: tf.Tensor3D | tf.Tensor4D, dtype?: DataType) {
+export function toTensor4D(
+    image: tf.Tensor3D | tf.Tensor4D,
+    dtype?: tf.DataType
+) {
     return tf.tidy(() => {
         let reshapedImage: tf.Tensor4D;
         if (isTensor3D(image)) {
@@ -169,11 +170,15 @@ export async function getThumbnailTFImage(file: File, token: string) {
     console.log('[MLService] Got thumbnail: ', file.id.toString(), fileUrl);
 
     const thumbFile = await fetch(fileUrl);
-    const arrayBuffer = await thumbFile.arrayBuffer();
-    const decodedImg = await jpeg.decode(arrayBuffer);
-    // console.log('[MLService] decodedImg: ', decodedImg);
+    const decodedImg = await createImageBitmap(await thumbFile.blob());
 
     return tf.browser.fromPixels(decodedImg);
+}
+
+export async function getLocalFileTFImage(localFile: globalThis.File) {
+    const imageBitmap = await createImageBitmap(localFile);
+
+    return tf.browser.fromPixels(imageBitmap);
 }
 
 export async function getPeopleList(file: File): Promise<Array<Person>> {
@@ -228,7 +233,11 @@ export function findFirstIfSorted<T>(
     return first;
 }
 
-export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
+export async function getMLSyncConfig() {
+    return DEFAULT_ML_SYNC_CONFIG;
+}
+
+const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     syncIntervalSec: 30,
     batchSize: 200,
     faceDetection: {

@@ -83,7 +83,9 @@ class TFJSFaceEmbeddingService implements FaceEmbeddingService {
         return facesWithEmbeddings;
     }
 
-    public async dispose() {}
+    public async dispose() {
+        this.mobileFaceNetModel = undefined;
+    }
 }
 
 export default TFJSFaceEmbeddingService;

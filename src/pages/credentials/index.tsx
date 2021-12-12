@@ -18,6 +18,7 @@ import { Button, Card } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
+import { eventBus, Events } from 'services/events';
 
 export default function Credentials() {
     const router = useRouter();
@@ -78,6 +79,12 @@ export default function Credentials() {
                 const redirectUrl = appContext.redirectUrl;
                 appContext.setRedirectUrl(null);
                 router.push(redirectUrl ?? PAGES.GALLERY);
+
+                try {
+                    eventBus.emit(Events.LOGIN);
+                } catch (e) {
+                    logError(e, 'Error in login handlers');
+                }
             } catch (e) {
                 logError(e, 'user entered a wrong password');
                 setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);

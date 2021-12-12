@@ -187,6 +187,7 @@ export interface MLSyncConfig {
 export class MLSyncContext {
     token: string;
     config: MLSyncConfig;
+    shouldUpdateMLVersion: boolean;
 
     outOfSyncFiles: File[];
     syncedFiles: File[];
@@ -196,9 +197,14 @@ export class MLSyncContext {
     faceClustersWithNoise?: ClustersWithNoise;
     tsne?: any;
 
-    constructor(token, config) {
+    constructor(
+        token: string,
+        config: MLSyncConfig,
+        shouldUpdateMLVersion?: boolean
+    ) {
         this.token = token;
         this.config = config;
+        this.shouldUpdateMLVersion = shouldUpdateMLVersion;
 
         this.outOfSyncFiles = [];
         this.syncedFiles = [];
@@ -235,3 +241,14 @@ export interface ClusteringConfig {
 }
 
 export declare type ClusteringInput = Array<Array<number>>;
+
+export interface MachineLearningWorker {
+    syncLocalFile(
+        token: string,
+        enteFile: File,
+        localFile: globalThis.File,
+        config?: MLSyncConfig
+    ): Promise<MlFileData>;
+
+    sync(token: string): Promise<MLSyncResult>;
+}

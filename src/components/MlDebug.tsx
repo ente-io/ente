@@ -91,7 +91,7 @@ export default function MLDebug() {
         if (runningInBrowser()) {
             console.log('initiating worker');
             const worker = new Worker(
-                new URL('worker/machineLearning.worker.js', import.meta.url),
+                new URL('worker/machineLearning.worker', import.meta.url),
                 { name: 'ml-worker' }
             );
             console.log('initiated worker');

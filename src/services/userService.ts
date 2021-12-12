@@ -9,6 +9,7 @@ import HTTPService from './HTTPService';
 import { B64EncryptionResult } from 'utils/crypto';
 import { logError } from 'utils/sentry';
 import { Subscription } from './billingService';
+import { eventBus, Events } from './events';
 
 export interface UpdatedKey {
     kekSalt: string;
@@ -129,6 +130,12 @@ export const logoutUser = async () => {
     await caches.delete('thumbs');
     await clearFiles();
     router.push(PAGES.ROOT);
+
+    try {
+        eventBus.emit(Events.LOGOUT);
+    } catch (e) {
+        logError(e, 'Error in logout handlers');
+    }
 };
 
 export const clearFiles = async () => {

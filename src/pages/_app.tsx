@@ -14,6 +14,8 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
 import Head from 'next/head';
+import { eventBus, Events } from 'services/events';
+import mlWorkManager from 'services/machineLearning/mlWorkManager';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -545,6 +547,15 @@ export default function App({ Component, err }) {
                 return Promise.reject(error);
             }
         );
+    }, []);
+
+    useEffect(() => {
+        try {
+            mlWorkManager;
+            eventBus.emit(Events.APP_START);
+        } catch (e) {
+            logError(e, 'Error in appStart handlers');
+        }
     }, []);
 
     const setUserOnline = () => setOffline(false);

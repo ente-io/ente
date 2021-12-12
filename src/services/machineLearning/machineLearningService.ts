@@ -1,4 +1,4 @@
-import { File, getLocalFiles } from 'services/fileService';
+import { File, FILE_TYPE, getLocalFiles } from 'services/fileService';
 
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
@@ -35,10 +35,13 @@ import {
     findFirstIfSorted,
     getAllFacesFromMap,
     getFaceImage,
+    getLocalFileTFImage,
+    getMLSyncConfig,
     getThumbnailTFImage,
 } from 'utils/machineLearning';
 
 class MachineLearningService {
+    private initialized = false;
     private faceDetectionService: FaceDetectionService;
     // private faceLandmarkService: FAPIFaceLandmarksService;
     private faceAlignmentService: FaceAlignmentService;
@@ -57,17 +60,17 @@ class MachineLearningService {
         this.clusteringService = new ClusteringService();
     }
 
-    public async sync(
-        token: string,
-        config: MLSyncConfig
-    ): Promise<MLSyncResult> {
+    public async sync(token: string): Promise<MLSyncResult> {
         if (!token) {
             throw Error('Token needed by ml service to sync file');
         }
 
+        await this.init();
+
         tf.engine().startScope();
 
-        const syncContext = new MLSyncContext(token, config);
+        const mlSyncConfig = await getMLSyncConfig();
+        const syncContext = new MLSyncContext(token, mlSyncConfig, true);
 
         await this.getOutOfSyncFiles(syncContext);
 
@@ -78,6 +81,7 @@ class MachineLearningService {
         }
 
         tf.engine().endScope();
+
         console.log('Final TF Memory stats: ', tf.memory());
 
         if (syncContext.config.tsne) {
@@ -139,8 +143,6 @@ class MachineLearningService {
     }
 
     private async syncFiles(syncContext: MLSyncContext) {
-        // await this.initMLModels();
-
         for (const outOfSyncfile of syncContext.outOfSyncFiles) {
             try {
                 const mlFileData = await this.syncFile(
@@ -165,14 +167,41 @@ class MachineLearningService {
         // await this.disposeMLModels();
     }
 
-    private async syncFile(syncContext: MLSyncContext, file: File) {
+    public async syncLocalFile(
+        token: string,
+        enteFile: File,
+        localFile: globalThis.File,
+        config?: MLSyncConfig
+    ) {
+        const mlSyncConfig = config || (await getMLSyncConfig());
+        const syncContext = new MLSyncContext(token, mlSyncConfig, false);
+        await this.init();
+
+        return this.syncFile(syncContext, enteFile, localFile);
+    }
+
+    private async syncFile(
+        syncContext: MLSyncContext,
+        enteFile: File,
+        localFile?: globalThis.File
+    ) {
         const mlFileData: MlFileData = {
-            fileId: file.id,
+            fileId: enteFile.id,
             mlVersion: syncContext.config.mlVersion,
         };
 
+        if (!syncContext.shouldUpdateMLVersion) {
+            mlFileData.mlVersion = 0;
+        }
+
+        let tfImage;
+        enteFile.metadata.fileType === FILE_TYPE.IMAGE;
         // console.log('1 TF Memory stats: ', tf.memory());
-        const tfImage = await getThumbnailTFImage(file, syncContext.token);
+        if (localFile) {
+            tfImage = await getLocalFileTFImage(localFile);
+        } else {
+            tfImage = await getThumbnailTFImage(enteFile, syncContext.token);
+        }
         // console.log('2 TF Memory stats: ', tf.memory());
         const detectedFaces = await this.faceDetectionService.detectFaces(
             tfImage
@@ -207,7 +236,7 @@ class MachineLearningService {
         const faces = facesWithEmbeddings.map(
             (faceWithEmbeddings) =>
                 ({
-                    fileId: file.id,
+                    fileId: enteFile.id,
 
                     ...faceWithEmbeddings,
                 } as Face)
@@ -220,6 +249,10 @@ class MachineLearningService {
     }
 
     public async init() {
+        if (this.initialized) {
+            return;
+        }
+
         await tf.ready();
 
         console.log('01 TF Memory stats: ', tf.memory());
@@ -231,9 +264,12 @@ class MachineLearningService {
         await this.faceEmbeddingService.init();
         // await faceapi.nets.faceRecognitionNet.loadFromUri('/models/face-api/');
         console.log('04 TF Memory stats: ', tf.memory());
+
+        this.initialized = true;
     }
 
     public async dispose() {
+        this.initialized = false;
         await this.faceDetectionService.dispose();
         // console.log('11 TF Memory stats: ', tf.memory());
         // await this.faceLandmarkService.dispose();
@@ -250,6 +286,7 @@ class MachineLearningService {
     }
 
     public async syncIndex(syncContext: MLSyncContext) {
+        await this.init();
         await this.syncPeopleIndex(syncContext);
     }
 
@@ -290,6 +327,8 @@ class MachineLearningService {
         syncContext: MLSyncContext,
         allFaces: Array<Face>
     ) {
+        await this.init();
+
         const clusteringConfig =
             syncContext.config.faceClustering.clusteringConfig;
 
@@ -386,4 +425,4 @@ class MachineLearningService {
     }
 }
 
-export default MachineLearningService;
+export default new MachineLearningService();
