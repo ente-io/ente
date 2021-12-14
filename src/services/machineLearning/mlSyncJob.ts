@@ -39,6 +39,10 @@ class MLSyncJob {
     }
 
     public async stop() {
+        if (!this.nextTimeoutId) {
+            return;
+        }
+
         clearTimeout(this.nextTimeoutId);
         this.nextTimeoutId = undefined;
         console.log('Cancelled next scheduled ML Sync');

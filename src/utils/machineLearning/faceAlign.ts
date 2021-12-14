@@ -1,9 +1,4 @@
-import {
-    AlignedFace,
-    DetectedFace,
-    FaceAlignmentMethod,
-    Versioned,
-} from 'types/machineLearning';
+import { AlignedFace, DetectedFace } from 'types/machineLearning';
 import { Matrix, inverse } from 'ml-matrix';
 import * as tf from '@tensorflow/tfjs-core';
 import { getSimilarityTransformation } from '../../../thirdparty/similarity-transformation-js/main';
@@ -25,8 +20,8 @@ export const ARCFACE_LANDMARKS = [
 
 export function getAlignedFaceUsingSimilarityTransform(
     face: DetectedFace,
-    alignedLandmarks: Array<[number, number]>,
-    alignmentMethod: Versioned<FaceAlignmentMethod>
+    alignedLandmarks: Array<[number, number]>
+    // alignmentMethod: Versioned<FaceAlignmentMethod>
 ): AlignedFace {
     const landmarksMat = new Matrix(
         face.landmarks.map((p) => [p.x, p.y]).slice(0, alignedLandmarks.length)
@@ -51,7 +46,7 @@ export function getAlignedFaceUsingSimilarityTransform(
         ...face,
 
         affineMatrix,
-        alignmentMethod,
+        // alignmentMethod,
     };
 }
 
@@ -116,11 +111,7 @@ export function extractArcfaceAlignedFaceImage(
 ): tf.Tensor4D {
     const alignedFace = getAlignedFaceUsingSimilarityTransform(
         face,
-        ARCFACE_LANDMARKS,
-        {
-            value: 'ArcFace',
-            version: 1,
-        }
+        ARCFACE_LANDMARKS
     );
 
     return extractFaceImage(image, alignedFace, faceSize);

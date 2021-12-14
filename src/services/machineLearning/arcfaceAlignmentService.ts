@@ -5,21 +5,34 @@ import {
 import {
     AlignedFace,
     DetectedFace,
+    FaceAlignmentMethod,
     FaceAlignmentService,
+    Versioned,
 } from 'types/machineLearning';
 
-export default class ArcfaceAlignmentService implements FaceAlignmentService {
+class ArcfaceAlignmentService implements FaceAlignmentService {
+    public method: Versioned<FaceAlignmentMethod>;
+
+    constructor() {
+        this.method = {
+            value: 'ArcFace',
+            version: 1,
+        };
+    }
+
     public getAlignedFaces(faces: Array<DetectedFace>): Array<AlignedFace> {
         const alignedFaces = new Array<AlignedFace>(faces.length);
 
         faces.forEach((face, index) => {
             alignedFaces[index] = getAlignedFaceUsingSimilarityTransform(
                 face,
-                ARCFACE_LANDMARKS,
-                { value: 'ArcFace', version: 1 }
+                ARCFACE_LANDMARKS
+                // this.method
             );
         });
 
         return alignedFaces;
     }
 }
+
+export default new ArcfaceAlignmentService();

@@ -2,7 +2,13 @@ import * as tf from '@tensorflow/tfjs-core';
 import DownloadManager from 'services/downloadManager';
 import { File, getLocalFiles } from 'services/fileService';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
-import { Face, MlFileData, MLSyncConfig, Person } from 'types/machineLearning';
+import {
+    Face,
+    MlFileData,
+    MLSyncConfig,
+    Person,
+    Versioned,
+} from 'types/machineLearning';
 import { extractFaceImage } from './faceAlign';
 import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
 
@@ -176,6 +182,7 @@ export async function getThumbnailTFImage(file: File, token: string) {
 }
 
 export async function getLocalFileTFImage(localFile: globalThis.File) {
+    // TODO: handle formats not supported by createImageBitmap, like heic
     const imageBitmap = await createImageBitmap(localFile);
 
     return tf.browser.fromPixels(imageBitmap);
@@ -233,6 +240,17 @@ export function findFirstIfSorted<T>(
     return first;
 }
 
+export function isDifferentOrOld(
+    method: Versioned<string>,
+    thanMethod: Versioned<string>
+) {
+    return (
+        !method ||
+        method.value !== thanMethod.value ||
+        method.version < thanMethod.version
+    );
+}
+
 export async function getMLSyncConfig() {
     return DEFAULT_ML_SYNC_CONFIG;
 }
@@ -241,23 +259,14 @@ const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     syncIntervalSec: 30,
     batchSize: 200,
     faceDetection: {
-        method: {
-            value: 'BlazeFace',
-            version: 1,
-        },
+        method: 'BlazeFace',
         minFaceSize: 32,
     },
     faceAlignment: {
-        method: {
-            value: 'ArcFace',
-            version: 1,
-        },
+        method: 'ArcFace',
     },
     faceEmbedding: {
-        method: {
-            value: 'MobileFaceNet',
-            version: 1,
-        },
+        method: 'MobileFaceNet',
         faceSize: 112,
         generateTsne: true,
     },

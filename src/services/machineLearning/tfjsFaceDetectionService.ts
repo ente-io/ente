@@ -14,23 +14,24 @@ import {
 import { Box, Point } from '../../../thirdparty/face-api/classes';
 
 class TFJSFaceDetectionService implements FaceDetectionService {
-    private blazeFaceModel: BlazeFaceModel;
+    private blazeFaceModel: Promise<BlazeFaceModel>;
     private blazeFaceBackModel: GraphModel;
-    private detectionMethod: Versioned<FaceDetectionMethod> = {
-        value: 'BlazeFace',
-        version: 1,
-    };
+    public method: Versioned<FaceDetectionMethod>;
 
     private desiredLeftEye = [0.36, 0.45];
     private desiredFaceSize;
     // private desiredFaceHeight = 112;
 
     public constructor(desiredFaceSize: number = 112) {
+        this.method = {
+            value: 'BlazeFace',
+            version: 1,
+        };
         this.desiredFaceSize = desiredFaceSize;
     }
 
-    public async init() {
-        this.blazeFaceModel = await blazeFaceLoad({
+    private async init() {
+        this.blazeFaceModel = blazeFaceLoad({
             maxFaces: 10,
             scoreThreshold: 0.5,
             iouThreshold: 0.3,
@@ -40,7 +41,7 @@ class TFJSFaceDetectionService implements FaceDetectionService {
         });
         console.log(
             'loaded blazeFaceModel: ',
-            this.blazeFaceModel,
+            await this.blazeFaceModel,
             await tf.getBackend()
         );
     }
@@ -135,8 +136,17 @@ class TFJSFaceDetectionService implements FaceDetectionService {
         return results;
     }
 
+    private async getBlazefaceModel() {
+        if (!this.blazeFaceModel) {
+            await this.init();
+        }
+
+        return this.blazeFaceModel;
+    }
+
     public async detectFaces(image: tf.Tensor3D): Promise<Array<DetectedFace>> {
-        const normalizedFaces = await this.blazeFaceModel.estimateFaces(image);
+        const blazeFaceModel = await this.getBlazefaceModel();
+        const normalizedFaces = await blazeFaceModel.estimateFaces(image);
         const detectedFaces: Array<DetectedFace> = normalizedFaces.map(
             (normalizedFace) => {
                 const landmarks = normalizedFace.landmarks as number[][];
@@ -151,7 +161,7 @@ class TFJSFaceDetectionService implements FaceDetectionService {
                         landmarks &&
                         landmarks.map((l) => new Point(l[0], l[1])),
                     probability: normalizedFace.probability as number,
-                    detectionMethod: this.detectionMethod,
+                    // detectionMethod: this.method,
                 } as DetectedFace;
             }
         );
@@ -160,9 +170,10 @@ class TFJSFaceDetectionService implements FaceDetectionService {
     }
 
     public async dispose() {
-        await this.blazeFaceModel.dispose();
+        const blazeFaceModel = await this.getBlazefaceModel();
+        blazeFaceModel?.dispose();
         this.blazeFaceModel = undefined;
     }
 }
 
-export default TFJSFaceDetectionService;
+export default new TFJSFaceDetectionService();

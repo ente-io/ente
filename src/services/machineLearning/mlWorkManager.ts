@@ -59,6 +59,7 @@ class MLWorkManager {
         try {
             await this.syncLocalFile(arg.enteFile, arg.localFile);
         } catch (e) {
+            // console.error(e);
             logError(e, 'Failed in ML fileUploaded Handler');
         }
     }
@@ -87,7 +88,7 @@ class MLWorkManager {
     public async startSyncJob() {
         try {
             console.log('MLWorkManager.startSyncJob');
-            const token = (await getData(LS_KEYS.USER))?.token;
+            const token = await getToken();
             const mlWorker = await this.getMLWorker();
             return this.mlSyncJob.start(token, mlWorker);
         } catch (e) {

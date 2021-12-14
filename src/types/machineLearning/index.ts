@@ -110,17 +110,17 @@ export interface DetectedFace {
     box: Box;
     landmarks: Array<Landmark>;
     probability?: number;
-    detectionMethod: Versioned<FaceDetectionMethod>;
+    // detectionMethod: Versioned<FaceDetectionMethod>;
 }
 
 export interface AlignedFace extends DetectedFace {
     affineMatrix: Array<Array<number>>;
-    alignmentMethod: Versioned<FaceAlignmentMethod>;
+    // alignmentMethod: Versioned<FaceAlignmentMethod>;
 }
 
 export interface FaceWithEmbedding extends AlignedFace {
     embedding: FaceEmbedding;
-    embeddingMethod: Versioned<FaceEmbeddingMethod>;
+    // embeddingMethod: Versioned<FaceEmbeddingMethod>;
 }
 
 export interface Face extends FaceWithEmbedding {
@@ -138,20 +138,23 @@ export interface Person {
 export interface MlFileData {
     fileId: number;
     faces?: Face[];
+    detectionMethod: Versioned<FaceDetectionMethod>;
+    alignmentMethod: Versioned<FaceAlignmentMethod>;
+    embeddingMethod: Versioned<FaceEmbeddingMethod>;
     mlVersion: number;
 }
 
 export interface FaceDetectionConfig {
-    method: Versioned<FaceDetectionMethod>;
+    method: FaceDetectionMethod;
     minFaceSize: number;
 }
 
 export interface FaceAlignmentConfig {
-    method: Versioned<FaceAlignmentMethod>;
+    method: FaceAlignmentMethod;
 }
 
 export interface FaceEmbeddingConfig {
-    method: Versioned<FaceEmbeddingMethod>;
+    method: FaceEmbeddingMethod;
     faceSize: number;
     generateTsne?: boolean;
 }
@@ -184,10 +187,14 @@ export interface MLSyncConfig {
     mlVersion: number;
 }
 
-export class MLSyncContext {
+export interface MLSyncContext {
     token: string;
     config: MLSyncConfig;
     shouldUpdateMLVersion: boolean;
+
+    faceDetectionService: FaceDetectionService;
+    faceAlignmentService: FaceAlignmentService;
+    faceEmbeddingService: FaceEmbeddingService;
 
     outOfSyncFiles: File[];
     syncedFiles: File[];
@@ -196,36 +203,43 @@ export class MLSyncContext {
     faceClusteringResults?: ClusteringResults;
     faceClustersWithNoise?: ClustersWithNoise;
     tsne?: any;
+}
 
-    constructor(
-        token: string,
-        config: MLSyncConfig,
-        shouldUpdateMLVersion?: boolean
-    ) {
-        this.token = token;
-        this.config = config;
-        this.shouldUpdateMLVersion = shouldUpdateMLVersion;
+export interface MLSyncFileContext {
+    enteFile: File;
+    localFile?: globalThis.File;
 
-        this.outOfSyncFiles = [];
-        this.syncedFiles = [];
-        this.syncedFaces = [];
-    }
+    oldMLFileData?: MlFileData;
+    newMLFileData?: MlFileData;
+
+    tfImage?: tf.Tensor3D;
+
+    newDetection?: boolean;
+    filtertedFaces?: Array<DetectedFace>;
+
+    newAlignment?: boolean;
+    alignedFaces?: Array<AlignedFace>;
+
+    facesWithEmbeddings?: Array<FaceWithEmbedding>;
 }
 
 export declare type MLIndex = 'files' | 'people';
 
 export interface FaceDetectionService {
-    init(): Promise<void>;
+    method: Versioned<FaceDetectionMethod>;
+    // init(): Promise<void>;
     detectFaces(image: tf.Tensor3D): Promise<Array<DetectedFace>>;
     dispose(): Promise<void>;
 }
 
 export interface FaceAlignmentService {
+    method: Versioned<FaceAlignmentMethod>;
     getAlignedFaces(faces: Array<DetectedFace>): Array<AlignedFace>;
 }
 
 export interface FaceEmbeddingService {
-    init(): Promise<void>;
+    method: Versioned<FaceEmbeddingMethod>;
+    // init(): Promise<void>;
     getFaceEmbeddings(
         image: tf.Tensor3D,
         faces: Array<AlignedFace>

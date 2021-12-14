@@ -4,47 +4,66 @@ import * as tflite from '@tensorflow/tfjs-tflite';
 import {
     AlignedFace,
     FaceEmbedding,
+    FaceEmbeddingMethod,
     FaceEmbeddingService,
     FaceWithEmbedding,
+    Versioned,
 } from 'types/machineLearning';
 import { extractFaceImages } from 'utils/machineLearning/faceAlign';
 
 class TFJSFaceEmbeddingService implements FaceEmbeddingService {
-    private mobileFaceNetModel: tflite.TFLiteModel;
+    private mobileFaceNetModel: Promise<tflite.TFLiteModel>;
     private faceSize: number;
+    public method: Versioned<FaceEmbeddingMethod>;
 
     public constructor(faceSize: number = 112) {
+        tflite.setWasmPath('/js/tflite/');
+        this.method = {
+            value: 'MobileFaceNet',
+            version: 1,
+        };
         this.faceSize = faceSize;
     }
 
-    public async init() {
-        tflite.setWasmPath('/js/tflite/');
-        this.mobileFaceNetModel = await tflite.loadTFLiteModel(
+    private async init() {
+        this.mobileFaceNetModel = tflite.loadTFLiteModel(
             '/models/mobilefacenet/mobilefacenet.tflite'
         );
 
         console.log(
             'loaded mobileFaceNetModel: ',
-            this.mobileFaceNetModel,
+            await this.mobileFaceNetModel,
             await tf.getBackend()
         );
     }
 
-    public getEmbedding(face: tf.Tensor4D) {
+    private async getMobileFaceNetModel() {
+        if (!this.mobileFaceNetModel) {
+            await this.init();
+        }
+
+        return this.mobileFaceNetModel;
+    }
+
+    public getEmbedding(
+        face: tf.Tensor4D,
+        mobileFaceNetModel: tflite.TFLiteModel
+    ) {
         return tf.tidy(() => {
             const normalizedFace = tf.sub(tf.div(face, 127.5), 1.0);
-            return this.mobileFaceNetModel.predict(normalizedFace);
+            return mobileFaceNetModel.predict(normalizedFace);
         });
     }
 
     public async getEmbeddingsBatch(
         faceImagesTensor
     ): Promise<Array<FaceEmbedding>> {
+        const mobileFaceNetModel = await this.getMobileFaceNetModel();
         const embeddings = [];
         for (let i = 0; i < faceImagesTensor.shape[0]; i++) {
             const embedding = tf.tidy(() => {
                 const face = gather(faceImagesTensor, i).expandDims();
-                const embedding = this.getEmbedding(face);
+                const embedding = this.getEmbedding(face, mobileFaceNetModel);
                 return gather(embedding as any, 0);
             });
             embeddings[i] = embedding;
@@ -73,10 +92,7 @@ class TFJSFaceEmbeddingService implements FaceEmbeddingService {
                 ...face,
 
                 embedding: embeddings[index],
-                embeddingMethod: {
-                    value: 'MobileFaceNet',
-                    version: 1,
-                },
+                // embeddingMethod: this.method,
             };
         });
 
@@ -88,4 +104,4 @@ class TFJSFaceEmbeddingService implements FaceEmbeddingService {
     }
 }
 
-export default TFJSFaceEmbeddingService;
+export default new TFJSFaceEmbeddingService();
