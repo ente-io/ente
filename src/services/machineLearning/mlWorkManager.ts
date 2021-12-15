@@ -67,7 +67,7 @@ class MLWorkManager {
     private async getMLWorker() {
         if (!this.mlWorker) {
             const MLWorker = getDedicatedMLWorker();
-            this.mlWorker = new MLWorker();
+            this.mlWorker = new MLWorker.comlink();
         }
 
         return this.mlWorker;

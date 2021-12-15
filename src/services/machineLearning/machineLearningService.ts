@@ -67,6 +67,8 @@ class MachineLearningService {
 
         await this.init();
 
+        // Used to debug tf memory leak, all tf memory
+        // needs to be cleaned using tf.dispose or tf.tidy
         // tf.engine().startScope();
 
         const mlSyncConfig = await getMLSyncConfig();
@@ -221,33 +223,26 @@ class MachineLearningService {
         await this.syncFileFaceDetection(syncContext, fileContext);
 
         if (
-            !fileContext.filtertedFaces ||
-            fileContext.filtertedFaces.length < 1
+            fileContext.filtertedFaces &&
+            fileContext.filtertedFaces.length > 0
         ) {
-            await this.persistMLFileData(
-                syncContext,
-                fileContext.newMLFileData
-            );
-            return fileContext.newMLFileData;
+            await this.syncFileFaceAlignment(syncContext, fileContext);
+
+            await this.syncFileFaceEmbeddings(syncContext, fileContext);
+
+            fileContext.newMLFileData.faces =
+                fileContext.facesWithEmbeddings?.map(
+                    (faceWithEmbeddings) =>
+                        ({
+                            fileId: enteFile.id,
+
+                            ...faceWithEmbeddings,
+                        } as Face)
+                );
         }
 
-        await this.syncFileFaceAlignment(syncContext, fileContext);
-
-        await this.syncFileFaceEmbeddings(syncContext, fileContext);
-
-        tf.dispose(fileContext.tfImage);
+        fileContext.tfImage && tf.dispose(fileContext.tfImage);
         // console.log('8 TF Memory stats: ', tf.memory());
-
-        const faces = fileContext.facesWithEmbeddings?.map(
-            (faceWithEmbeddings) =>
-                ({
-                    fileId: enteFile.id,
-
-                    ...faceWithEmbeddings,
-                } as Face)
-        );
-
-        fileContext.newMLFileData.faces = faces;
         await this.persistMLFileData(syncContext, fileContext.newMLFileData);
 
         return fileContext.newMLFileData;
@@ -259,9 +254,14 @@ class MachineLearningService {
     ) {
         // console.log('1 TF Memory stats: ', tf.memory());
         if (fileContext.localFile) {
-            return getLocalFileTFImage(fileContext.localFile);
+            fileContext.tfImage = await getLocalFileTFImage(
+                fileContext.localFile
+            );
         } else {
-            return getThumbnailTFImage(fileContext.enteFile, syncContext.token);
+            fileContext.tfImage = await getThumbnailTFImage(
+                fileContext.enteFile,
+                syncContext.token
+            );
         }
         // console.log('2 TF Memory stats: ', tf.memory());
     }
@@ -277,10 +277,7 @@ class MachineLearningService {
             )
         ) {
             fileContext.newDetection = true;
-            fileContext.tfImage = await this.getTFImage(
-                syncContext,
-                fileContext
-            );
+            await this.getTFImage(syncContext, fileContext);
             const detectedFaces =
                 await syncContext.faceDetectionService.detectFaces(
                     fileContext.tfImage
@@ -333,8 +330,7 @@ class MachineLearningService {
                 syncContext.faceEmbeddingService.method
             )
         ) {
-            fileContext.tfImage =
-                fileContext.tfImage ||
+            fileContext.tfImage ||
                 (await this.getTFImage(syncContext, fileContext));
             fileContext.facesWithEmbeddings =
                 await syncContext.faceEmbeddingService.getFaceEmbeddings(
@@ -359,14 +355,14 @@ class MachineLearningService {
         await tf.ready();
 
         console.log('01 TF Memory stats: ', tf.memory());
-        // await this.faceDetectionService.init();
+        // await tfjsFaceDetectionService.init();
         // // console.log('02 TF Memory stats: ', tf.memory());
         // await this.faceLandmarkService.init();
         // await faceapi.nets.faceLandmark68Net.loadFromUri('/models/face-api/');
         // // console.log('03 TF Memory stats: ', tf.memory());
-        // await this.faceEmbeddingService.init();
+        // await tfjsFaceEmbeddingService.init();
         // await faceapi.nets.faceRecognitionNet.loadFromUri('/models/face-api/');
-        console.log('04 TF Memory stats: ', tf.memory());
+        // console.log('04 TF Memory stats: ', tf.memory());
 
         this.initialized = true;
     }

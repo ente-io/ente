@@ -1,8 +1,9 @@
 import { runningInBrowser } from 'utils/common';
 import { wrap } from 'comlink';
 import { DedicatedMLWorker } from 'worker/machineLearning.worker';
+import { ComlinkWorker } from 'utils/crypto';
 
-export function getDedicatedMLWorker() {
+export function getDedicatedMLWorker(): ComlinkWorker {
     if (runningInBrowser()) {
         console.log('initiating worker');
         const worker = new Worker(
@@ -10,6 +11,7 @@ export function getDedicatedMLWorker() {
             { name: 'ml-worker' }
         );
         console.log('initiated ml-worker', worker);
-        return wrap<typeof DedicatedMLWorker>(worker);
+        const comlink = wrap<typeof DedicatedMLWorker>(worker);
+        return { comlink, worker };
     }
 }

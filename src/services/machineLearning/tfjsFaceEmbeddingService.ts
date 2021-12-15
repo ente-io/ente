@@ -59,18 +59,22 @@ class TFJSFaceEmbeddingService implements FaceEmbeddingService {
         faceImagesTensor
     ): Promise<Array<FaceEmbedding>> {
         const mobileFaceNetModel = await this.getMobileFaceNetModel();
-        const embeddings = [];
-        for (let i = 0; i < faceImagesTensor.shape[0]; i++) {
-            const embedding = tf.tidy(() => {
+
+        const embeddingsTensor = tf.tidy(() => {
+            const embeddings = [];
+            for (let i = 0; i < faceImagesTensor.shape[0]; i++) {
                 const face = gather(faceImagesTensor, i).expandDims();
                 const embedding = this.getEmbedding(face, mobileFaceNetModel);
-                return gather(embedding as any, 0);
-            });
-            embeddings[i] = embedding;
-        }
+                embeddings[i] = gather(embedding as any, 0);
+            }
+            return tf.stack(embeddings);
+        });
 
         // TODO: return Float32Array instead of number[]
-        return tf.stack(embeddings).array() as Promise<Array<FaceEmbedding>>;
+        const faceEmbeddings =
+            (await embeddingsTensor.array()) as Array<FaceEmbedding>;
+        tf.dispose(embeddingsTensor);
+        return faceEmbeddings;
     }
 
     public async getFaceEmbeddings(
