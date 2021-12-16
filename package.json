@@ -38,7 +38,7 @@
     "jszip": "3.7.1",
     "libsodium-wrappers": "^0.7.8",
     "localforage": "^1.9.0",
-    "next": "^11.1.2",
+    "next": "^11.1.3",
     "node-forge": "^0.10.0",
     "photoswipe": "file:./thirdparty/photoswipe",
     "react": "^17.0.2",
