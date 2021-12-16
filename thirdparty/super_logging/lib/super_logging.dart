@@ -261,7 +261,7 @@ class SuperLogging {
   static late bool sentryIsEnabled;
 
   static Future<void> setupSentry() async {
-    await for (final error in sentryQueueControl.stream) {
+    await for (final error in sentryQueueControl.stream.asBroadcastStream()) {
       try {
         Sentry.captureException(
           error,
