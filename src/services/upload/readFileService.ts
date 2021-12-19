@@ -6,6 +6,7 @@ import { logError } from 'utils/sentry';
 import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from './uploadService';
 import FileType from 'file-type/browser';
 import { CustomError } from 'utils/common/errorUtil';
+import { getFileExtension } from 'utils/file';
 
 const TYPE_VIDEO = 'video';
 const TYPE_IMAGE = 'image';
@@ -48,7 +49,7 @@ export async function getFileType(
         }
         return { fileType, exactType: typeParts[1] };
     } catch (e) {
-        const fileFormat = receivedFile.name.split('.').pop();
+        const fileFormat = getFileExtension(receivedFile.name);
         const formatMissedByTypeDetection = FORMAT_MISSED_BY_FILE_TYPE_LIB.find(
             (a) => a.exactType === fileFormat
         );

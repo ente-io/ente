@@ -9,7 +9,7 @@ export const logError = (
 ) => {
     const err = errorWithContext(error, msg);
     if (!process.env.NEXT_PUBLIC_SENTRY_ENV) {
-        console.log({ error, msg, info });
+        console.log(error, { msg, info });
     }
     Sentry.captureException(err, {
         level: Sentry.Severity.Info,

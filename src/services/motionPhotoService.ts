@@ -4,8 +4,8 @@ import { fileExtensionWithDot } from 'utils/file';
 class MotionPhoto {
     image: Uint8Array;
     video: Uint8Array;
-    imageNameTitle: String;
-    videoNameTitle: String;
+    imageNameTitle: string;
+    videoNameTitle: string;
 }
 
 export const decodeMotionPhoto = async (

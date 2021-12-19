@@ -16,9 +16,12 @@ import { logError } from 'utils/sentry';
 import { User } from 'services/userService';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
 
 export const TYPE_HEIC = 'heic';
 export const TYPE_HEIF = 'heif';
+export const TYPE_JPEG = 'jpeg';
+export const TYPE_JPG = 'jpg';
 const UNSUPPORTED_FORMATS = ['flv', 'mkv', '3gp', 'avi', 'wmv'];
 
 export function downloadAsFile(filename: string, content: string) {
@@ -40,13 +43,32 @@ export function downloadAsFile(filename: string, content: string) {
 export async function downloadFile(file: File) {
     const a = document.createElement('a');
     a.style.display = 'none';
-    const cachedFileUrl = await DownloadManager.getCachedOriginalFile(file);
-    const fileURL =
-        cachedFileUrl ??
-        URL.createObjectURL(
+    let fileURL = await DownloadManager.getCachedOriginalFile(file);
+    let tempURL;
+    if (!fileURL) {
+        tempURL = URL.createObjectURL(
             await new Response(await DownloadManager.downloadFile(file)).blob()
         );
+        fileURL = tempURL;
+    }
+    const fileType = getFileExtension(file.metadata.title);
+    let tempEditedFileURL;
+    if (
+        file.pubMagicMetadata?.data.editedTime &&
+        (fileType === TYPE_JPEG || fileType === TYPE_JPG)
+    ) {
+        let fileBlob = await (await fetch(fileURL)).blob();
+
+        fileBlob = await updateFileCreationDateInEXIF(
+            fileBlob,
+            new Date(file.pubMagicMetadata.data.editedTime / 1000)
+        );
+        tempEditedFileURL = URL.createObjectURL(fileBlob);
+        fileURL = tempEditedFileURL;
+    }
+
     a.href = fileURL;
+
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         a.download = fileNameWithoutExtension(file.metadata.title) + '.zip';
     } else {
@@ -55,6 +77,8 @@ export async function downloadFile(file: File) {
     document.body.appendChild(a);
     a.click();
     a.remove();
+    tempURL && URL.revokeObjectURL(tempURL);
+    tempEditedFileURL && URL.revokeObjectURL(tempEditedFileURL);
 }
 
 export function isFileHEIC(mimeType: string) {
@@ -257,6 +281,10 @@ export function splitFilenameAndExtension(filename): [string, string] {
         ];
 }
 
+export function getFileExtension(filename) {
+    return splitFilenameAndExtension(filename)[1];
+}
+
 export function generateStreamFromArrayBuffer(data: Uint8Array) {
     return new ReadableStream({
         async start(controller: ReadableStreamDefaultController) {
@@ -273,7 +301,7 @@ export async function convertForPreview(file: File, fileBlob: Blob) {
         fileBlob = new Blob([motionPhoto.image]);
     }
 
-    const typeFromExtension = file.metadata.title.split('.')[-1];
+    const typeFromExtension = getFileExtension(file.metadata.title);
     const worker = await new CryptoWorker();
 
     const mimeType =
