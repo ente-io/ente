@@ -105,9 +105,11 @@ class ExportService {
     private exportRecordUpdater = new QueueProcessor<void>(1);
     private stopExport: boolean = false;
     private pauseExport: boolean = false;
+    private oldClient: boolean = false;
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
+        this.oldClient = !this.ElectronAPIs.exists;
     }
     async selectExportDirectory() {
         return await this.ElectronAPIs.selectRootDirectory();
@@ -154,7 +156,13 @@ class ExportService {
                     (collectionA, collectionB) =>
                         collectionA.id - collectionB.id
                 );
-            await this.migrateExport(exportDir, collections, userPersonalFiles);
+            if (!this.isOldClient()) {
+                await this.migrateExport(
+                    exportDir,
+                    collections,
+                    userPersonalFiles
+                );
+            }
             const exportRecord = await this.getExportRecord(exportDir);
 
             if (exportType === ExportType.NEW) {
@@ -407,7 +415,7 @@ class ExportService {
         for (const collection of newCollections) {
             const collectionFolderPath = getUniqueCollectionFolderPath(
                 exportFolder,
-                collection.name
+                collection
             );
             await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
                 collectionFolderPath
@@ -435,7 +443,7 @@ class ExportService {
 
             const newCollectionFolderPath = getUniqueCollectionFolderPath(
                 exportFolder,
-                collection.name
+                collection
             );
             await this.ElectronAPIs.checkExistsAndRename(
                 oldCollectionFolderPath,
@@ -455,7 +463,8 @@ class ExportService {
         file.metadata = mergeMetadata([file])[0].metadata;
         const fileSaveName = getUniqueFileSaveName(
             collectionPath,
-            file.metadata.title
+            file.metadata.title,
+            file.id
         );
         let fileStream = await retryAsyncFunction(() =>
             downloadManager.downloadFile(file)
@@ -495,7 +504,8 @@ class ExportService {
         const imageStream = generateStreamFromArrayBuffer(motionPhoto.image);
         const imageSaveName = getUniqueFileSaveName(
             collectionPath,
-            motionPhoto.imageNameTitle
+            motionPhoto.imageNameTitle,
+            file.id
         );
         this.saveMediaFile(collectionPath, imageSaveName, imageStream);
         await this.saveMetadataFile(
@@ -507,7 +517,8 @@ class ExportService {
         const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
         const videoSaveName = getUniqueFileSaveName(
             collectionPath,
-            motionPhoto.videoNameTitle
+            motionPhoto.videoNameTitle,
+            file.id
         );
         this.saveMediaFile(collectionPath, videoSaveName, videoStream);
         await this.saveMetadataFile(
@@ -545,6 +556,7 @@ class ExportService {
     exists = (path: string) => {
         return this.ElectronAPIs.exists(path);
     };
+    isOldClient = () => this.oldClient;
 
     /*
     this function migrates the exportRecord file to apply any schema changes.
@@ -595,7 +607,7 @@ class ExportService {
             );
             const newCollectionFolderPath = getUniqueCollectionFolderPath(
                 exportDir,
-                collection.name
+                collection
             );
             collectionIDPathMap.set(collection.id, newCollectionFolderPath);
             if (this.ElectronAPIs.exists(oldCollectionFolderPath)) {
@@ -632,7 +644,8 @@ class ExportService {
             file = mergeMetadata([file])[0];
             const newFileSaveName = getUniqueFileSaveName(
                 collectionIDPathMap.get(file.collectionID),
-                file.metadata.title
+                file.metadata.title,
+                file.id
             );
 
             const newFileSavePath = getFileSavePath(

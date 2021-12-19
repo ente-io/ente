@@ -162,13 +162,16 @@ export const sanitizeName = (name: string) =>
 
 export const getUniqueCollectionFolderPath = (
     dir: string,
-    collectionName: string
+    collection: Collection
 ): string => {
-    let collectionFolderPath = `${dir}/${sanitizeName(collectionName)}`;
+    if (exportService.isOldClient()) {
+        return getOldCollectionFolderPath(dir, collection);
+    }
+    let collectionFolderPath = `${dir}/${sanitizeName(collection.name)}`;
     let count = 1;
     while (exportService.exists(collectionFolderPath)) {
         collectionFolderPath = `${dir}/${sanitizeName(
-            collectionName
+            collection.name
         )}(${count})`;
         count++;
     }
@@ -180,8 +183,12 @@ export const getMetadataFolderPath = (collectionFolderPath: string) =>
 
 export const getUniqueFileSaveName = (
     collectionPath: string,
-    filename: string
+    filename: string,
+    fileID: number
 ) => {
+    if (exportService.isOldClient()) {
+        return getOldFileSaveName(filename, fileID);
+    }
     let fileSaveName = sanitizeName(filename);
     let count = 1;
     while (
@@ -197,6 +204,9 @@ export const getUniqueFileSaveName = (
     }
     return fileSaveName;
 };
+
+export const getOldFileSaveName = (filename: string, fileID: number) =>
+    `${fileID}_${oldSanitizeName(filename)}`;
 
 export const getFileMetadataSavePath = (
     collectionFolderPath: string,
