@@ -164,7 +164,7 @@ export const getUniqueCollectionFolderPath = (
     dir: string,
     collection: Collection
 ): string => {
-    if (exportService.isOldClient()) {
+    if (exportService.checkAllElectronAPIsExists()) {
         return getOldCollectionFolderPath(dir, collection);
     }
     let collectionFolderPath = `${dir}/${sanitizeName(collection.name)}`;
@@ -186,7 +186,7 @@ export const getUniqueFileSaveName = (
     filename: string,
     fileID: number
 ) => {
-    if (exportService.isOldClient()) {
+    if (exportService.checkAllElectronAPIsExists()) {
         return getOldFileSaveName(filename, fileID);
     }
     let fileSaveName = sanitizeName(filename);

@@ -105,11 +105,11 @@ class ExportService {
     private exportRecordUpdater = new QueueProcessor<void>(1);
     private stopExport: boolean = false;
     private pauseExport: boolean = false;
-    private oldClient: boolean = false;
+    private allElectronAPIsExist: boolean = false;
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.oldClient = !this.ElectronAPIs.exists;
+        this.allElectronAPIsExist = this.ElectronAPIs.exists;
     }
     async selectExportDirectory() {
         return await this.ElectronAPIs.selectRootDirectory();
@@ -156,7 +156,7 @@ class ExportService {
                     (collectionA, collectionB) =>
                         collectionA.id - collectionB.id
                 );
-            if (!this.isOldClient()) {
+            if (!this.checkAllElectronAPIsExists()) {
                 await this.migrateExport(
                     exportDir,
                     collections,
@@ -556,7 +556,8 @@ class ExportService {
     exists = (path: string) => {
         return this.ElectronAPIs.exists(path);
     };
-    isOldClient = () => this.oldClient;
+
+    checkAllElectronAPIsExists = () => this.allElectronAPIsExist;
 
     /*
     this function migrates the exportRecord file to apply any schema changes.
