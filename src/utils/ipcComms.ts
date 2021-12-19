@@ -12,7 +12,6 @@ export default function setupIpcComs(
             height: 600,
             webPreferences: {
                 nodeIntegration: false,
-                enableRemoteModule: false,
                 contextIsolation: true,
                 sandbox: true,
             },
