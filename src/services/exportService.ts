@@ -109,7 +109,7 @@ class ExportService {
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.allElectronAPIsExist = !!this.ElectronAPIs.exists;
+        this.allElectronAPIsExist = !!this.ElectronAPIs?.exists;
     }
     async selectExportDirectory() {
         return await this.ElectronAPIs.selectRootDirectory();
