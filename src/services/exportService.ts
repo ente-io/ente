@@ -109,7 +109,7 @@ class ExportService {
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.allElectronAPIsExist = this.ElectronAPIs.exists;
+        this.allElectronAPIsExist = !!this.ElectronAPIs.exists;
     }
     async selectExportDirectory() {
         return await this.ElectronAPIs.selectRootDirectory();
@@ -156,7 +156,7 @@ class ExportService {
                     (collectionA, collectionB) =>
                         collectionA.id - collectionB.id
                 );
-            if (!this.checkAllElectronAPIsExists()) {
+            if (this.checkAllElectronAPIsExists()) {
                 await this.migrateExport(
                     exportDir,
                     collections,
@@ -225,7 +225,10 @@ class ExportService {
                     collectionIDPathMap
                 );
             }
-            if (renamedCollections?.length) {
+            if (
+                renamedCollections?.length &&
+                this.checkAllElectronAPIsExists()
+            ) {
                 await this.renameCollectionFolders(
                     renamedCollections,
                     exportDir,
