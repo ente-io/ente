@@ -52,6 +52,7 @@
     "electron-builder-notarize": "^1.2.0",
     "electron-download": "^4.1.1",
     "eslint": "^7.23.0",
+    "prettier": "2.5.1",
     "typescript": "^4.2.3"
   },
   "dependencies": {

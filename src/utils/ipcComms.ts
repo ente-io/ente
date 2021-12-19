@@ -1,8 +1,11 @@
-import { BrowserWindow, dialog, ipcMain, Tray, Notification } from "electron";
-import { createWindow } from "./createWindow";
-import { buildContextMenu } from "./menuUtil";
+import { BrowserWindow, dialog, ipcMain, Tray, Notification } from 'electron';
+import { createWindow } from './createWindow';
+import { buildContextMenu } from './menuUtil';
 
-export default function setupIpcComs(tray: Tray, mainWindow: BrowserWindow): void {
+export default function setupIpcComs(
+    tray: Tray,
+    mainWindow: BrowserWindow
+): void {
     ipcMain.on('select-dir', async (event) => {
         const dialogWindow = new BrowserWindow({
             width: 800,
@@ -18,7 +21,9 @@ export default function setupIpcComs(tray: Tray, mainWindow: BrowserWindow): voi
             properties: ['openDirectory'],
         });
         const dir =
-            result.filePaths && result.filePaths.length > 0 && result.filePaths[0];
+            result.filePaths &&
+            result.filePaths.length > 0 &&
+            result.filePaths[0];
         dialogWindow.close();
         event.returnValue = dir;
     });
