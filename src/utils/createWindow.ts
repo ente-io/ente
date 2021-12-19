@@ -45,8 +45,8 @@ export function createWindow(): BrowserWindow {
         isDev
             ? mainWindow.loadFile(`../build/error.html`)
             : splash.loadURL(
-                `file://${path.join(process.resourcesPath, 'error.html')}`
-            );
+                  `file://${path.join(process.resourcesPath, 'error.html')}`
+              );
     });
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
@@ -56,12 +56,10 @@ export function createWindow(): BrowserWindow {
         if (!isAppQuitting()) {
             event.preventDefault();
             mainWindow.hide();
-            const isMac = process.platform === 'darwin'
+            const isMac = process.platform === 'darwin';
             isMac && app.dock.hide();
         }
         return false;
     });
     return mainWindow;
 }
-
-
