@@ -386,7 +386,7 @@ const englishConstants = {
     DOWNLOAD_COLLECTION_MESSAGE: () => (
         <>
             <p>are you sure you want to download the complete album?</p>
-            <p>all files will be queued for download sententially</p>
+            <p>all files will be queued for download sequentially</p>
         </>
     ),
     DOWNLOAD_COLLECTION_FAILED: 'album downloading failed, please try again',
