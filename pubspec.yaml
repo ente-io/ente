@@ -28,8 +28,6 @@ dependencies:
   computer: ^2.0.0
   confetti: ^0.6.0
   connectivity: ^3.0.3
-  crisp:
-    git: "https://github.com/kcrebound/flutter-crisp.git"
   cupertino_icons: ^1.0.0
   device_info: ^2.0.2
   dio: ^4.0.0
