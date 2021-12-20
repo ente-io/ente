@@ -362,12 +362,17 @@ export default function Gallery() {
         setSelected({ count: 0, collectionID: 0 });
     };
 
+    const startLoading = () =>
+        !syncInProgress.current && loadingBar.current?.continuousStart();
+    const finishLoading = () =>
+        !syncInProgress.current && loadingBar.current.complete();
+
     if (!files) {
         return <div />;
     }
     const collectionOpsHelper =
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
-            loadingBar.current?.continuousStart();
+            startLoading();
             try {
                 await handleCollectionOps(
                     ops,
@@ -388,14 +393,14 @@ export default function Gallery() {
                 });
             } finally {
                 await syncWithRemote(false, true);
-                loadingBar.current.complete();
+                finishLoading();
             }
         };
 
     const changeFilesVisibilityHelper = async (
         visibility: VISIBILITY_STATE
     ) => {
-        loadingBar.current?.continuousStart();
+        startLoading();
         try {
             const updatedFiles = await changeFilesVisibility(
                 files,
@@ -424,7 +429,7 @@ export default function Gallery() {
             });
         } finally {
             await syncWithRemote(false, true);
-            loadingBar.current.complete();
+            finishLoading();
         }
     };
 
@@ -458,7 +463,7 @@ export default function Gallery() {
     };
 
     const deleteFileHelper = async (permanent?: boolean) => {
-        loadingBar.current?.continuousStart();
+        startLoading();
         try {
             const selectedFiles = getSelectedFiles(selected, files);
             if (permanent) {
@@ -489,7 +494,7 @@ export default function Gallery() {
             });
         } finally {
             await syncWithRemote(false, true);
-            loadingBar.current.complete();
+            finishLoading();
         }
     };
 
@@ -519,7 +524,7 @@ export default function Gallery() {
             close: { text: constants.CANCEL },
         });
     const emptyTrashHelper = async () => {
-        loadingBar.current?.continuousStart();
+        startLoading();
         try {
             await emptyTrash();
             if (selected.collectionID === TRASH_SECTION) {
@@ -536,7 +541,7 @@ export default function Gallery() {
             });
         } finally {
             await syncWithRemote(false, true);
-            loadingBar.current.complete();
+            finishLoading();
         }
     };
 
@@ -549,9 +554,9 @@ export default function Gallery() {
     const downloadHelper = async () => {
         const selectedFiles = getSelectedFiles(selected, files);
         clearSelection();
-        !syncInProgress.current && loadingBar.current?.continuousStart();
+        startLoading();
         await downloadFiles(selectedFiles);
-        !syncInProgress.current && loadingBar.current.complete();
+        finishLoading();
     };
 
     return (
@@ -609,7 +614,8 @@ export default function Gallery() {
                     syncWithRemote={syncWithRemote}
                     setDialogMessage={setDialogMessage}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    startLoadingBar={loadingBar.current?.continuousStart}
+                    startLoading={startLoading}
+                    finishLoading={finishLoading}
                     collectionFilesCount={collectionFilesCount}
                 />
                 <CollectionNamer

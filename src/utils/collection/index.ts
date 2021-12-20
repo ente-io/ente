@@ -6,12 +6,15 @@ import {
     removeFromCollection,
     restoreToCollection,
 } from 'services/collectionService';
-import { getSelectedFiles } from 'utils/file';
-import { File } from 'services/fileService';
+import { downloadFiles, getSelectedFiles } from 'utils/file';
+import { File, getLocalFiles } from 'services/fileService';
 import { CustomError } from 'utils/common/errorUtil';
 import { SelectedState } from 'pages/gallery';
 import { User } from 'services/userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { SetDialogMessage } from 'components/MessageDialog';
+import { logError } from 'utils/sentry';
+import constants from 'utils/strings/constants';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -81,5 +84,25 @@ export function isFavoriteCollection(
         return false;
     } else {
         return collection.type === CollectionType.favorites;
+    }
+}
+
+export async function downloadCollection(
+    collectionID: number,
+    setDialogMessage: SetDialogMessage
+) {
+    try {
+        const allFiles = await getLocalFiles();
+        const collectionFiles = allFiles.filter(
+            (file) => file.collectionID === collectionID
+        );
+        await downloadFiles(collectionFiles);
+    } catch (e) {
+        logError(e, 'download collection failed ');
+        setDialogMessage({
+            title: constants.ERROR,
+            content: constants.DELETE_COLLECTION_FAILED,
+            close: { variant: 'danger' },
+        });
     }
 }
