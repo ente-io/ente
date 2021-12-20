@@ -9,7 +9,7 @@ import {
     FaceWithEmbedding,
     Versioned,
 } from 'types/machineLearning';
-import { extractFaceImages } from 'utils/machineLearning/faceAlign';
+import { ibExtractFaceImages } from 'utils/machineLearning/faceAlign';
 
 class TFJSFaceEmbeddingService implements FaceEmbeddingService {
     private mobileFaceNetModel: Promise<tflite.TFLiteModel>;
@@ -78,14 +78,18 @@ class TFJSFaceEmbeddingService implements FaceEmbeddingService {
     }
 
     public async getFaceEmbeddings(
-        image: tf.Tensor3D,
+        image: ImageBitmap,
         faces: Array<AlignedFace>
     ) {
         if (!faces || faces.length < 1) {
             return [];
         }
 
-        const faceImagesTensor = extractFaceImages(image, faces, this.faceSize);
+        const faceImagesTensor = ibExtractFaceImages(
+            image as ImageBitmap,
+            faces,
+            this.faceSize
+        );
         const embeddings = await this.getEmbeddingsBatch(faceImagesTensor);
         tf.dispose(faceImagesTensor);
         // console.log('embeddings: ', embeddings[0]);

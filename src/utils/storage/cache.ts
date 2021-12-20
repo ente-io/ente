@@ -1,0 +1,24 @@
+export async function cached(
+    cacheName: string,
+    id: string,
+    get: () => Promise<Blob>
+): Promise<Blob> {
+    const cache = await caches.open(cacheName);
+    const cacheResponse = await cache.match(id);
+
+    let result: Blob;
+    if (cacheResponse) {
+        result = await cacheResponse.blob();
+    } else {
+        result = await get();
+
+        try {
+            await cache.put(id, new Response(result));
+        } catch (e) {
+            // TODO: handle storage full exception.
+            console.error('Error while storing file to cache: ', id);
+        }
+    }
+
+    return result;
+}

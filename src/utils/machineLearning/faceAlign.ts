@@ -10,6 +10,7 @@ import {
     getBoxCenterPt,
     toTensor4D,
 } from '.';
+import { transform } from 'utils/image';
 
 export const ARCFACE_LANDMARKS = [
     [38.2946, 51.6963],
@@ -98,6 +99,34 @@ export function extractFaceImages(
                 faces[i],
                 faceSize
             ).squeeze([0]);
+        }
+
+        return tf.stack(faceImages) as tf.Tensor4D;
+    });
+}
+
+export function ibExtractFaceImage(
+    image: ImageBitmap,
+    alignedFace: AlignedFace,
+    faceSize: number
+): tf.Tensor3D {
+    const affineMat = alignedFace.affineMatrix;
+    const faceImageBitmap = transform(image, affineMat, faceSize, faceSize);
+    const tfFaceImage = tf.browser.fromPixels(faceImageBitmap);
+    faceImageBitmap.close();
+
+    return tfFaceImage;
+}
+
+export function ibExtractFaceImages(
+    image: ImageBitmap,
+    faces: AlignedFace[],
+    faceSize: number
+): tf.Tensor4D {
+    return tf.tidy(() => {
+        const faceImages = new Array<tf.Tensor3D>(faces.length);
+        for (let i = 0; i < faces.length; i++) {
+            faceImages[i] = ibExtractFaceImage(image, faces[i], faceSize);
         }
 
         return tf.stack(faceImages) as tf.Tensor4D;

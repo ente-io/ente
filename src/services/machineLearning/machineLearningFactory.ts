@@ -96,4 +96,9 @@ export class LocalMLSyncContext implements MLSyncContext {
         this.syncedFiles = [];
         this.syncedFaces = [];
     }
+
+    public async dispose() {
+        await this.faceDetectionService.dispose();
+        await this.faceEmbeddingService.dispose();
+    }
 }

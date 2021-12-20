@@ -18,6 +18,10 @@ export class DedicatedMLWorker implements MachineLearningWorker {
     public async sync(token: string) {
         return mlService.sync(token);
     }
+
+    public close() {
+        self.close();
+    }
 }
 
 expose(DedicatedMLWorker, self);

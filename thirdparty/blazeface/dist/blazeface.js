@@ -273,12 +273,11 @@
                     switch (_b.label) {
                         case 0:
                             _a = tf.tidy(function () {
-                                // const resizedImage = tf.image.resizeBilinear(inputImage,
-                                //   [this.width, this.height]);
-                                var resized = _this.resizeAspectRatio(inputImage, _this.width, _this.height);
-                                var transform = tf.tensor2d([[1, 0, 0, 0, 1, 0, 0, 0]]);
-                                var paddedImage = tf.image.transform(resized.image, transform, 'nearest', 'constant', 0, [_this.width, _this.height]);
-                                var normalizedImage = tf.mul(tf.sub(tf.div(paddedImage, 255), 0.5), 2);
+                                var resizedImage = tf.image.resizeBilinear(inputImage, [_this.width, _this.height]);
+                                // const resized = this.resizeAspectRatio(inputImage, this.width, this.height);
+                                // const transform = tf.tensor2d([[1,0,0,0,1,0,0,0]]);
+                                // const paddedImage = tf.image.transform(resized.image, transform, 'nearest', 'constant', 0, [this.width, this.height]);
+                                var normalizedImage = tf.mul(tf.sub(tf.div(resizedImage, 255), 0.5), 2);
                                 // [1, 897, 17] 1 = batch, 897 = number of anchors
                                 var batchedPrediction = _this.blazeFaceModel.predict(normalizedImage);
                                 // console.log(batchedPrediction);
@@ -297,7 +296,7 @@
                                 var decodedBounds = decodeBounds(prediction, _this.anchors, _this.inputSize);
                                 var logits = tf.slice(prediction, [0, 0], [-1, 1]);
                                 var scores = tf.squeeze(tf.sigmoid(logits));
-                                return [prediction, decodedBounds, scores, resized.ratio];
+                                return [prediction, decodedBounds, scores, 1.0];
                             }), detectedOutputs = _a[0], boxes = _a[1], scores = _a[2], ratio = _a[3];
                             savedConsoleWarnFn = console.warn;
                             console.warn = function () { };

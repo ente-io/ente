@@ -85,6 +85,8 @@ export interface TSNEData {
 
 export declare type Landmark = Point;
 
+export declare type ImageType = 'Original' | 'Preview';
+
 export declare type FaceDetectionMethod = 'BlazeFace' | 'FaceApiSSD';
 
 export declare type FaceAlignmentMethod =
@@ -138,6 +140,7 @@ export interface Person {
 export interface MlFileData {
     fileId: number;
     faces?: Face[];
+    imageSource: ImageType;
     detectionMethod: Versioned<FaceDetectionMethod>;
     alignmentMethod: Versioned<FaceAlignmentMethod>;
     embeddingMethod: Versioned<FaceEmbeddingMethod>;
@@ -179,6 +182,7 @@ export interface TSNEConfig {
 export interface MLSyncConfig {
     syncIntervalSec: number;
     batchSize: number;
+    imageSource: ImageType;
     faceDetection: FaceDetectionConfig;
     faceAlignment: FaceAlignmentConfig;
     faceEmbedding: FaceEmbeddingConfig;
@@ -213,6 +217,7 @@ export interface MLSyncFileContext {
     newMLFileData?: MlFileData;
 
     tfImage?: tf.Tensor3D;
+    imageBitmap?: ImageBitmap;
 
     newDetection?: boolean;
     filtertedFaces?: Array<DetectedFace>;
@@ -225,10 +230,16 @@ export interface MLSyncFileContext {
 
 export declare type MLIndex = 'files' | 'people';
 
+export const BLAZEFACE_MAX_FACES = 20;
+export const BLAZEFACE_INPUT_SIZE = 256;
+export const BLAZEFACE_IOU_THRESHOLD = 0.3;
+export const BLAZEFACE_SCORE_THRESHOLD = 0.65;
+export const BLAZEFACE_FACE_SIZE = 112;
+
 export interface FaceDetectionService {
     method: Versioned<FaceDetectionMethod>;
     // init(): Promise<void>;
-    detectFaces(image: tf.Tensor3D): Promise<Array<DetectedFace>>;
+    detectFaces(image: ImageBitmap): Promise<Array<DetectedFace>>;
     dispose(): Promise<void>;
 }
 
@@ -241,7 +252,7 @@ export interface FaceEmbeddingService {
     method: Versioned<FaceEmbeddingMethod>;
     // init(): Promise<void>;
     getFaceEmbeddings(
-        image: tf.Tensor3D,
+        image: ImageBitmap,
         faces: Array<AlignedFace>
     ): Promise<Array<FaceWithEmbedding>>;
     dispose(): Promise<void>;
@@ -265,4 +276,21 @@ export interface MachineLearningWorker {
     ): Promise<MlFileData>;
 
     sync(token: string): Promise<MLSyncResult>;
+
+    close(): void;
 }
+
+// export class TFImageBitmap {
+//     imageBitmap: ImageBitmap;
+//     tfImage: tf.Tensor3D;
+
+//     constructor(imageBitmap: ImageBitmap, tfImage: tf.Tensor3D) {
+//         this.imageBitmap = imageBitmap;
+//         this.tfImage = tfImage;
+//     }
+
+//     async dispose() {
+//         this.tfImage && (await tf.dispose(this.tfImage));
+//         this.imageBitmap && this.imageBitmap.close();
+//     }
+// }

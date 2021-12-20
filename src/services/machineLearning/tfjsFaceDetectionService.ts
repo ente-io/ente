@@ -6,12 +6,18 @@ import {
 import * as tf from '@tensorflow/tfjs-core';
 import { GraphModel } from '@tensorflow/tfjs';
 import {
+    BLAZEFACE_FACE_SIZE,
+    BLAZEFACE_INPUT_SIZE,
+    BLAZEFACE_IOU_THRESHOLD,
+    BLAZEFACE_MAX_FACES,
+    BLAZEFACE_SCORE_THRESHOLD,
     DetectedFace,
     FaceDetectionMethod,
     FaceDetectionService,
     Versioned,
 } from 'types/machineLearning';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
+import { resizeToSquare } from 'utils/image';
 
 class TFJSFaceDetectionService implements FaceDetectionService {
     private blazeFaceModel: Promise<BlazeFaceModel>;
@@ -20,9 +26,8 @@ class TFJSFaceDetectionService implements FaceDetectionService {
 
     private desiredLeftEye = [0.36, 0.45];
     private desiredFaceSize;
-    // private desiredFaceHeight = 112;
 
-    public constructor(desiredFaceSize: number = 112) {
+    public constructor(desiredFaceSize: number = BLAZEFACE_FACE_SIZE) {
         this.method = {
             value: 'BlazeFace',
             version: 1,
@@ -32,12 +37,12 @@ class TFJSFaceDetectionService implements FaceDetectionService {
 
     private async init() {
         this.blazeFaceModel = blazeFaceLoad({
-            maxFaces: 10,
-            scoreThreshold: 0.5,
-            iouThreshold: 0.3,
+            maxFaces: BLAZEFACE_MAX_FACES,
+            scoreThreshold: BLAZEFACE_SCORE_THRESHOLD,
+            iouThreshold: BLAZEFACE_IOU_THRESHOLD,
             modelUrl: '/models/blazeface/back/model.json',
-            inputHeight: 256,
-            inputWidth: 256,
+            inputHeight: BLAZEFACE_INPUT_SIZE,
+            inputWidth: BLAZEFACE_INPUT_SIZE,
         });
         console.log(
             'loaded blazeFaceModel: ',
@@ -144,22 +149,33 @@ class TFJSFaceDetectionService implements FaceDetectionService {
         return this.blazeFaceModel;
     }
 
-    public async detectFaces(image: tf.Tensor3D): Promise<Array<DetectedFace>> {
+    public async detectFaces(
+        imageBitmap: ImageBitmap
+    ): Promise<Array<DetectedFace>> {
+        const resized = resizeToSquare(imageBitmap, BLAZEFACE_INPUT_SIZE);
+        const widthRatio = imageBitmap.width / resized.width;
+        const heightRatio = imageBitmap.height / resized.height;
+        const tfImage = tf.browser.fromPixels(resized.image);
         const blazeFaceModel = await this.getBlazefaceModel();
-        const normalizedFaces = await blazeFaceModel.estimateFaces(image);
-        const detectedFaces: Array<DetectedFace> = normalizedFaces.map(
+        const faces = await blazeFaceModel.estimateFaces(tfImage);
+        tf.dispose(tfImage);
+
+        const detectedFaces: Array<DetectedFace> = faces.map(
             (normalizedFace) => {
                 const landmarks = normalizedFace.landmarks as number[][];
                 return {
                     box: new Box({
-                        left: normalizedFace.topLeft[0],
-                        top: normalizedFace.topLeft[1],
-                        right: normalizedFace.bottomRight[0],
-                        bottom: normalizedFace.bottomRight[1],
+                        left: normalizedFace.topLeft[0] * widthRatio,
+                        top: normalizedFace.topLeft[1] * heightRatio,
+                        right: normalizedFace.bottomRight[0] * widthRatio,
+                        bottom: normalizedFace.bottomRight[1] * heightRatio,
                     }),
                     landmarks:
                         landmarks &&
-                        landmarks.map((l) => new Point(l[0], l[1])),
+                        landmarks.map(
+                            (l) =>
+                                new Point(l[0] * widthRatio, l[1] * heightRatio)
+                        ),
                     probability: normalizedFace.probability as number,
                     // detectionMethod: this.method,
                 } as DetectedFace;

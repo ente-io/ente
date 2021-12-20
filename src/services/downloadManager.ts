@@ -68,14 +68,18 @@ class DownloadManager {
         return decrypted;
     };
 
-    getFile = async (file: File, forPreview = false) => {
+    getFile = async (
+        file: File,
+        forPreview = false,
+        tokenOverride?: string
+    ) => {
         const shouldBeConverted = forPreview && needsConversionForPreview(file);
         const fileKey = shouldBeConverted
             ? `${file.id}_converted`
             : `${file.id}`;
         try {
             const getFilePromise = async (convert: boolean) => {
-                const fileStream = await this.downloadFile(file);
+                const fileStream = await this.downloadFile(file, tokenOverride);
                 let fileBlob = await new Response(fileStream).blob();
                 if (convert) {
                     fileBlob = await convertForPreview(file, fileBlob);
@@ -101,9 +105,9 @@ class DownloadManager {
         return await this.fileObjectUrlPromise.get(file.id.toString());
     }
 
-    async downloadFile(file: File) {
+    async downloadFile(file: File, tokenOverride?: string) {
         const worker = await new CryptoWorker();
-        const token = getToken();
+        const token = tokenOverride || getToken();
         if (!token) {
             return null;
         }

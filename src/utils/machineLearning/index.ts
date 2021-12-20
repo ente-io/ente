@@ -3,14 +3,17 @@ import DownloadManager from 'services/downloadManager';
 import { File, getLocalFiles } from 'services/fileService';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
 import {
+    BLAZEFACE_FACE_SIZE,
     Face,
     MlFileData,
     MLSyncConfig,
     Person,
     Versioned,
 } from 'types/machineLearning';
-import { extractFaceImage } from './faceAlign';
+import { ibExtractFaceImage } from './faceAlign';
 import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
+import { convertForPreview, needsConversionForPreview } from 'utils/file';
+import { cached } from 'utils/storage/cache';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -151,41 +154,87 @@ export function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
 export async function getFaceImage(
     face: Face,
     token: string,
-    file?: File,
-    faceSize?: number
+    faceSize: number = BLAZEFACE_FACE_SIZE,
+    file?: File
 ): Promise<tf.Tensor3D> {
     if (!file) {
         const localFiles = await getLocalFiles();
         file = localFiles.find((f) => f.id === face.fileId);
     }
 
-    const tfImage = await getThumbnailTFImage(file, token);
+    const imageBitmap = await getOriginalImageBitmap(file, token);
 
-    return tf.tidy(() => {
-        const tf4DF32Image = toTensor4D(tfImage, 'float32');
-        const faceImage = extractFaceImage(tf4DF32Image, face, faceSize || 112);
+    const faceImage = tf.tidy(() => {
+        const faceImage = ibExtractFaceImage(imageBitmap, face, faceSize);
         const normalizedImage = tf.sub(tf.div(faceImage, 127.5), 1.0);
-        tf.dispose(tfImage);
 
-        return normalizedImage.squeeze([0]) as tf.Tensor3D;
+        return normalizedImage as tf.Tensor3D;
     });
+
+    imageBitmap.close();
+
+    return faceImage;
 }
 
-export async function getThumbnailTFImage(file: File, token: string) {
+export async function getTFImage(blob): Promise<tf.Tensor3D> {
+    const imageBitmap = await createImageBitmap(blob);
+    const tfImage = tf.browser.fromPixels(imageBitmap);
+    imageBitmap.close();
+
+    return tfImage;
+}
+
+export async function getImageBitmap(blob: Blob): Promise<ImageBitmap> {
+    return await createImageBitmap(blob);
+}
+
+// export async function getTFImageUsingJpegJS(blob: Blob): Promise<TFImageBitmap> {
+//     const imageData = jpegjs.decode(await blob.arrayBuffer());
+//     const tfImage = tf.browser.fromPixels(imageData);
+
+//     return new TFImageBitmap(undefined, tfImage);
+// }
+
+async function getOriginalImageFile(file: File, token: string) {
+    const fileStream = await DownloadManager.downloadFile(file, token);
+    return new Response(fileStream).blob();
+}
+
+export async function getOriginalImageBitmap(
+    file: File,
+    token: string,
+    useCache: boolean = false
+) {
+    let fileBlob;
+
+    if (useCache) {
+        fileBlob = await cached('files', '/' + file.id.toString(), () => {
+            return getOriginalImageFile(file, token);
+        });
+    } else {
+        fileBlob = await getOriginalImageFile(file, token);
+    }
+    console.log('[MLService] Got file: ', file.id.toString());
+
+    if (needsConversionForPreview(file)) {
+        fileBlob = await convertForPreview(file, fileBlob);
+    }
+
+    return getImageBitmap(fileBlob);
+}
+
+export async function getThumbnailImageBitmap(file: File, token: string) {
     const fileUrl = await DownloadManager.getThumbnail(file, token);
     console.log('[MLService] Got thumbnail: ', file.id.toString(), fileUrl);
 
     const thumbFile = await fetch(fileUrl);
-    const decodedImg = await createImageBitmap(await thumbFile.blob());
 
-    return tf.browser.fromPixels(decodedImg);
+    return getImageBitmap(await thumbFile.blob());
 }
 
-export async function getLocalFileTFImage(localFile: globalThis.File) {
+export async function getLocalFileImageBitmap(localFile: globalThis.File) {
     // TODO: handle formats not supported by createImageBitmap, like heic
-    const imageBitmap = await createImageBitmap(localFile);
-
-    return tf.browser.fromPixels(imageBitmap);
+    return getImageBitmap(localFile);
 }
 
 export async function getPeopleList(file: File): Promise<Array<Person>> {
@@ -258,6 +307,7 @@ export async function getMLSyncConfig() {
 const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     syncIntervalSec: 30,
     batchSize: 200,
+    imageSource: 'Original',
     faceDetection: {
         method: 'BlazeFace',
         minFaceSize: 32,
