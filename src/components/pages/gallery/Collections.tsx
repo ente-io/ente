@@ -35,7 +35,8 @@ interface CollectionProps {
     setDialogMessage: SetDialogMessage;
     syncWithRemote: () => Promise<void>;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
-    startLoadingBar: () => void;
+    startLoading: () => void;
+    finishLoading: () => void;
     isInSearchMode: boolean;
     collectionFilesCount: Map<number, number>;
 }
@@ -169,7 +170,8 @@ export default function Collections(props: CollectionProps) {
         collections: props.collections,
         selectedCollectionID,
         setDialogMessage: props.setDialogMessage,
-        startLoadingBar: props.startLoadingBar,
+        startLoading: props.startLoading,
+        finishLoading: props.finishLoading,
         showCollectionShareModal: setCollectionShareModalView.bind(null, true),
         redirectToAll: setActiveCollection.bind(null, ALL_SECTION),
     });
