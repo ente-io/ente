@@ -167,6 +167,8 @@ export interface MlFileData {
     alignmentMethod: Versioned<FaceAlignmentMethod>;
     embeddingMethod: Versioned<FaceEmbeddingMethod>;
     mlVersion: number;
+    errorCount?: number;
+    lastErrorMessage?: string;
 }
 
 export interface FaceDetectionConfig {

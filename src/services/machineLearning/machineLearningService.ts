@@ -1,4 +1,4 @@
-import { File, getLocalFiles } from 'services/fileService';
+import { File, FILE_TYPE, getLocalFiles } from 'services/fileService';
 
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
@@ -24,6 +24,7 @@ import {
     incrementIndexVersion,
     mlFilesStore,
     mlPeopleStore,
+    newMlData,
     setIndexVersion,
 } from 'utils/storage/mlStorage';
 import {
@@ -127,6 +128,7 @@ class MachineLearningService {
             const mlFileVersion = mlFileData?.mlVersion || 0;
             if (
                 !uniqueFiles.has(files[i].id) &&
+                (!mlFileData?.errorCount || mlFileData.errorCount < 2) &&
                 (mlFileVersion < mlVersion ||
                     syncContext.config.imageSource !== mlFileData.imageSource)
             ) {
@@ -171,6 +173,12 @@ class MachineLearningService {
                     outOfSyncfile.id,
                     e
                 );
+
+                await this.persistMLFileSyncError(
+                    syncContext,
+                    outOfSyncfile,
+                    e
+                );
             }
         }
         console.log('allFaces: ', syncContext.syncedFaces);
@@ -193,7 +201,12 @@ class MachineLearningService {
         );
         // await this.init();
 
-        return this.syncFile(syncContext, enteFile, localFile);
+        try {
+            return await this.syncFile(syncContext, enteFile, localFile);
+        } catch (e) {
+            console.error('Error while syncing local file: ', enteFile.id, e);
+            await this.persistMLFileSyncError(syncContext, enteFile, e);
+        }
     }
 
     private async syncFile(
@@ -206,14 +219,7 @@ class MachineLearningService {
             enteFile.id.toString()
         );
         if (!fileContext.oldMLFileData) {
-            fileContext.newMLFileData = {
-                fileId: enteFile.id,
-                imageSource: syncContext.config.imageSource,
-                detectionMethod: syncContext.faceDetectionService.method,
-                alignmentMethod: syncContext.faceAlignmentService.method,
-                embeddingMethod: syncContext.faceEmbeddingService.method,
-                mlVersion: 0,
-            };
+            fileContext.newMLFileData = newMlData(syncContext, enteFile);
         } else if (
             fileContext.oldMLFileData?.mlVersion ===
                 syncContext.config.mlVersion &&
@@ -273,16 +279,24 @@ class MachineLearningService {
             fileContext.imageBitmap = await getLocalFileImageBitmap(
                 fileContext.localFile
             );
-        } else if (syncContext.config.imageSource === 'Original') {
+            fileContext.newMLFileData.imageSource = 'Original';
+        } else if (
+            syncContext.config.imageSource === 'Original' &&
+            [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(
+                fileContext.enteFile.metadata.fileType
+            )
+        ) {
             fileContext.imageBitmap = await getOriginalImageBitmap(
                 fileContext.enteFile,
                 syncContext.token
             );
+            fileContext.newMLFileData.imageSource = 'Original';
         } else {
             fileContext.imageBitmap = await getThumbnailImageBitmap(
                 fileContext.enteFile,
                 syncContext.token
             );
+            fileContext.newMLFileData.imageSource = 'Preview';
         }
 
         if (!fileContext.newMLFileData.imageDimentions) {
@@ -440,6 +454,31 @@ class MachineLearningService {
         mlFileData: MlFileData
     ) {
         return mlFilesStore.setItem(mlFileData.fileId.toString(), mlFileData);
+    }
+
+    private async persistMLFileSyncError(
+        syncContext: MLSyncContext,
+        enteFile: File,
+        e: Error
+    ) {
+        try {
+            const oldMlFileData = await this.getMLFileData(
+                enteFile.id.toString()
+            );
+            let mlFileData = oldMlFileData;
+            if (!mlFileData) {
+                mlFileData = newMlData(syncContext, enteFile);
+            }
+            mlFileData.errorCount = (mlFileData.errorCount || 0) + 1;
+            mlFileData.lastErrorMessage = e.message;
+            return mlFilesStore.setItem(
+                mlFileData.fileId.toString(),
+                mlFileData
+            );
+        } catch (e) {
+            // TODO: logError or stop sync job after most of the requests are failed
+            console.error('Error while storing ml sync error', e);
+        }
     }
 
     public async syncIndex(syncContext: MLSyncContext) {
