@@ -279,7 +279,7 @@ class MachineLearningService {
             fileContext.imageBitmap = await getLocalFileImageBitmap(
                 fileContext.localFile
             );
-            fileContext.newMLFileData.imageSource = 'Original';
+            // fileContext.newMLFileData.imageSource = 'Original';
         } else if (
             syncContext.config.imageSource === 'Original' &&
             [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(
@@ -290,13 +290,13 @@ class MachineLearningService {
                 fileContext.enteFile,
                 syncContext.token
             );
-            fileContext.newMLFileData.imageSource = 'Original';
+            // fileContext.newMLFileData.imageSource = 'Original';
         } else {
             fileContext.imageBitmap = await getThumbnailImageBitmap(
                 fileContext.enteFile,
                 syncContext.token
             );
-            fileContext.newMLFileData.imageSource = 'Preview';
+            // fileContext.newMLFileData.imageSource = 'Preview';
         }
 
         if (!fileContext.newMLFileData.imageDimentions) {
