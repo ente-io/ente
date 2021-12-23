@@ -407,8 +407,7 @@ class RemoteSyncService {
 
   void _moveVideosToEnd(List<File> file) {
     file.sort((first, second) {
-      if (first.fileType == FileType.video &&
-          second.fileType == FileType.video) {
+      if (first.fileType == second.fileType) {
         return 0;
       } else if (first.fileType == FileType.video) {
         return 1;
