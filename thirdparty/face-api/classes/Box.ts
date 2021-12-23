@@ -20,10 +20,10 @@ export class Box<BoxType = any> implements IBoundingBox, IRect {
     }
   }
 
-  private _x: number
-  private _y: number
-  private _width: number
-  private _height: number
+  public x: number
+  public y: number
+  public width: number
+  public height: number
 
   constructor(_box: IBoundingBox | IRect, allowNegativeDimensions: boolean = true) {
     const box = (_box || {}) as any
@@ -41,16 +41,16 @@ export class Box<BoxType = any> implements IBoundingBox, IRect {
 
     Box.assertIsValidBox({ x, y, width, height }, 'Box.constructor', allowNegativeDimensions)
 
-    this._x = x
-    this._y = y
-    this._width = width
-    this._height = height
+    this.x = x
+    this.y = y
+    this.width = width
+    this.height = height
   }
 
-  public get x(): number { return this._x }
-  public get y(): number { return this._y }
-  public get width(): number { return this._width }
-  public get height(): number { return this._height }
+  // public get x(): number { return this._x }
+  // public get y(): number { return this._y }
+  // public get width(): number { return this._width }
+  // public get height(): number { return this._height }
   public get left(): number { return this.x }
   public get top(): number { return this.y }
   public get right(): number { return this.x + this.width }

@@ -10,14 +10,22 @@ import {
     getBoxCenterPt,
     toTensor4D,
 } from '.';
-import { transform } from 'utils/image';
+import { cropWithRotation, transform } from 'utils/image';
+import {
+    ARCFACE_LANDMARKS,
+    ARCFACE_LANDMARKS_FACE_SIZE,
+} from 'types/machineLearning/archface';
+import { Box, Point } from '../../../thirdparty/face-api/classes';
+import { Dimensions } from 'types/image';
 
-export const ARCFACE_LANDMARKS = [
-    [38.2946, 51.6963],
-    [73.5318, 51.5014],
-    [56.0252, 71.7366],
-    [56.1396, 92.2848],
-] as Array<[number, number]>;
+export function normalizeLandmarks(
+    landmarks: Array<[number, number]>,
+    faceSize: number
+) {
+    return landmarks.map((landmark) =>
+        landmark.map((p) => p / faceSize)
+    ) as Array<[number, number]>;
+}
 
 export function getAlignedFaceUsingSimilarityTransform(
     face: DetectedFace,
@@ -43,12 +51,32 @@ export function getAlignedFaceUsingSimilarityTransform(
         [0, 0, 1],
     ];
 
+    const size = 1 / simTransform.scale;
+    const meanTranslation = simTransform.toMean.sub(0.5).mul(size);
+    const centerMat = simTransform.fromMean.sub(meanTranslation);
+    const center = new Point(centerMat.get(0, 0), centerMat.get(1, 0));
+    const rotation = -Math.atan2(
+        simTransform.rotation.get(0, 1),
+        simTransform.rotation.get(0, 0)
+    );
+    // console.log({ affineMatrix, meanTranslation, centerMat, center, toMean: simTransform.toMean, fromMean: simTransform.fromMean, size });
+
     return {
         ...face,
 
         affineMatrix,
+        center,
+        size,
+        rotation,
         // alignmentMethod,
     };
+}
+
+export function getArcfaceAlignedFace(face: DetectedFace): AlignedFace {
+    return getAlignedFaceUsingSimilarityTransform(
+        face,
+        normalizeLandmarks(ARCFACE_LANDMARKS, ARCFACE_LANDMARKS_FACE_SIZE)
+    );
 }
 
 export function extractFaceImage(
@@ -105,17 +133,44 @@ export function extractFaceImages(
     });
 }
 
+export function getAlignedFaceBox(alignedFace: AlignedFace) {
+    return new Box({
+        x: alignedFace.center.x - alignedFace.size / 2,
+        y: alignedFace.center.y - alignedFace.size / 2,
+        width: alignedFace.size,
+        height: alignedFace.size,
+    }).round();
+}
+
 export function ibExtractFaceImage(
     image: ImageBitmap,
     alignedFace: AlignedFace,
     faceSize: number
-): tf.Tensor3D {
-    const affineMat = alignedFace.affineMatrix;
-    const faceImageBitmap = transform(image, affineMat, faceSize, faceSize);
-    const tfFaceImage = tf.browser.fromPixels(faceImageBitmap);
-    faceImageBitmap.close();
+): ImageBitmap {
+    const box = getAlignedFaceBox(alignedFace);
+    const faceSizeDimentions: Dimensions = {
+        width: faceSize,
+        height: faceSize,
+    };
+    return cropWithRotation(
+        image,
+        box,
+        alignedFace.rotation,
+        faceSizeDimentions,
+        faceSizeDimentions
+    );
+}
 
-    return tfFaceImage;
+export function ibExtractFaceImageUsingTransform(
+    image: ImageBitmap,
+    alignedFace: AlignedFace,
+    faceSize: number
+): ImageBitmap {
+    const scaledMatrix = new Matrix(alignedFace.affineMatrix)
+        .mul(faceSize)
+        .to2DArray();
+    // console.log("scaledMatrix: ", scaledMatrix);
+    return transform(image, scaledMatrix, faceSize, faceSize);
 }
 
 export function ibExtractFaceImages(
@@ -126,7 +181,13 @@ export function ibExtractFaceImages(
     return tf.tidy(() => {
         const faceImages = new Array<tf.Tensor3D>(faces.length);
         for (let i = 0; i < faces.length; i++) {
-            faceImages[i] = ibExtractFaceImage(image, faces[i], faceSize);
+            const faceImageBitmap = ibExtractFaceImage(
+                image,
+                faces[i],
+                faceSize
+            );
+            faceImages[i] = tf.browser.fromPixels(faceImageBitmap);
+            faceImageBitmap.close();
         }
 
         return tf.stack(faceImages) as tf.Tensor4D;
@@ -192,7 +253,7 @@ export function getRotatedFaceImage(
             foreheadCenter
         ); // landmarkPoints[BLAZEFACE_NOSE_INDEX]
         // angle = computeRotation(leftEye, rightEye);
-        console.log('angle: ', angle);
+        // console.log('angle: ', angle);
 
         const faceCenter = getBoxCenter(face.box);
         // console.log('faceCenter: ', faceCenter);

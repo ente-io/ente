@@ -5,6 +5,8 @@ import {
     Face,
     FaceAlignmentMethod,
     FaceAlignmentService,
+    FaceCropMethod,
+    FaceCropService,
     FaceDetectionMethod,
     FaceDetectionService,
     FaceEmbeddingMethod,
@@ -13,6 +15,7 @@ import {
     MLSyncContext,
 } from 'types/machineLearning';
 import arcfaceAlignmentService from './arcfaceAlignmentService';
+import arcfaceCropService from './arcfaceCropService';
 import blazeFaceDetectionService from './tfjsFaceDetectionService';
 import mobileFaceNetEmbeddingService from './tfjsFaceEmbeddingService';
 
@@ -25,6 +28,14 @@ export class MLFactory {
         }
 
         throw Error('Unknon face detection method: ' + method);
+    }
+
+    public static getFaceCropService(method: FaceCropMethod) {
+        if (method === 'ArcFace') {
+            return arcfaceCropService;
+        }
+
+        throw Error('Unknon face crop method: ' + method);
     }
 
     public static getFaceAlignmentService(
@@ -62,6 +73,7 @@ export class LocalMLSyncContext implements MLSyncContext {
     public shouldUpdateMLVersion: boolean;
 
     public faceDetectionService: FaceDetectionService;
+    public faceCropService: FaceCropService;
     public faceAlignmentService: FaceAlignmentService;
     public faceEmbeddingService: FaceEmbeddingService;
 
@@ -84,6 +96,9 @@ export class LocalMLSyncContext implements MLSyncContext {
 
         this.faceDetectionService = MLFactory.getFaceDetectionService(
             this.config.faceDetection.method
+        );
+        this.faceCropService = MLFactory.getFaceCropService(
+            this.config.faceCrop.method
         );
         this.faceAlignmentService = MLFactory.getFaceAlignmentService(
             this.config.faceAlignment.method

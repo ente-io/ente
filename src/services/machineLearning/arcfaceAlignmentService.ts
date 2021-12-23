@@ -1,7 +1,4 @@
-import {
-    ARCFACE_LANDMARKS,
-    getAlignedFaceUsingSimilarityTransform,
-} from 'utils/machineLearning/faceAlign';
+import { getArcfaceAlignedFace } from 'utils/machineLearning/faceAlign';
 import {
     AlignedFace,
     DetectedFace,
@@ -24,11 +21,7 @@ class ArcfaceAlignmentService implements FaceAlignmentService {
         const alignedFaces = new Array<AlignedFace>(faces.length);
 
         faces.forEach((face, index) => {
-            alignedFaces[index] = getAlignedFaceUsingSimilarityTransform(
-                face,
-                ARCFACE_LANDMARKS
-                // this.method
-            );
+            alignedFaces[index] = getArcfaceAlignedFace(face);
         });
 
         return alignedFaces;

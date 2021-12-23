@@ -10,6 +10,7 @@ import { DebugInfo } from 'hdbscan';
 
 import { Point as D3Point, RawNodeDatum } from 'react-d3-tree/lib/types/common';
 import { File } from 'services/fileService';
+import { Dimensions } from 'types/image';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
 
 export interface MLSyncResult {
@@ -89,6 +90,8 @@ export declare type ImageType = 'Original' | 'Preview';
 
 export declare type FaceDetectionMethod = 'BlazeFace' | 'FaceApiSSD';
 
+export declare type FaceCropMethod = 'ArcFace';
+
 export declare type FaceAlignmentMethod =
     | 'ArcFace'
     | 'FaceApiDlib'
@@ -109,14 +112,32 @@ export interface Versioned<T> {
 }
 
 export interface DetectedFace {
+    // box and landmarks is relative to image dimentions stored at mlFileData
     box: Box;
     landmarks: Array<Landmark>;
     probability?: number;
+    faceCrop?: StoredFaceCrop;
     // detectionMethod: Versioned<FaceDetectionMethod>;
 }
 
+export interface FaceCrop {
+    image: ImageBitmap;
+    // imageBox is relative to image dimentions stored at mlFileData
+    imageBox: Box;
+}
+
+export interface StoredFaceCrop {
+    image: Blob;
+    imageBox: Box;
+}
+
 export interface AlignedFace extends DetectedFace {
+    // TODO: remove affine matrix as only works for fixed face size
     affineMatrix: Array<Array<number>>;
+    rotation: number;
+    // size and center is relative to image dimentions stored at mlFileData
+    size: number;
+    center: Point;
     // alignmentMethod: Versioned<FaceAlignmentMethod>;
 }
 
@@ -141,6 +162,7 @@ export interface MlFileData {
     fileId: number;
     faces?: Face[];
     imageSource: ImageType;
+    imageDimentions?: Dimensions;
     detectionMethod: Versioned<FaceDetectionMethod>;
     alignmentMethod: Versioned<FaceAlignmentMethod>;
     embeddingMethod: Versioned<FaceEmbeddingMethod>;
@@ -150,6 +172,17 @@ export interface MlFileData {
 export interface FaceDetectionConfig {
     method: FaceDetectionMethod;
     minFaceSize: number;
+}
+
+export interface FaceCropConfig {
+    enabled: boolean;
+    method: FaceCropMethod;
+    padding: number;
+    maxSize: number;
+    blobOptions: {
+        type: string;
+        quality: number;
+    };
 }
 
 export interface FaceAlignmentConfig {
@@ -184,6 +217,7 @@ export interface MLSyncConfig {
     batchSize: number;
     imageSource: ImageType;
     faceDetection: FaceDetectionConfig;
+    faceCrop: FaceCropConfig;
     faceAlignment: FaceAlignmentConfig;
     faceEmbedding: FaceEmbeddingConfig;
     faceClustering: FaceClusteringConfig;
@@ -197,6 +231,7 @@ export interface MLSyncContext {
     shouldUpdateMLVersion: boolean;
 
     faceDetectionService: FaceDetectionService;
+    faceCropService: FaceCropService;
     faceAlignmentService: FaceAlignmentService;
     faceEmbeddingService: FaceEmbeddingService;
 
@@ -241,6 +276,16 @@ export interface FaceDetectionService {
     // init(): Promise<void>;
     detectFaces(image: ImageBitmap): Promise<Array<DetectedFace>>;
     dispose(): Promise<void>;
+}
+
+export interface FaceCropService {
+    method: Versioned<FaceCropMethod>;
+
+    getFaceCrop(
+        imageBitmap: ImageBitmap,
+        face: DetectedFace,
+        config: FaceCropConfig
+    ): Promise<StoredFaceCrop>;
 }
 
 export interface FaceAlignmentService {

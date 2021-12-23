@@ -86,7 +86,7 @@ class TFJSFaceEmbeddingService implements FaceEmbeddingService {
         }
 
         const faceImagesTensor = ibExtractFaceImages(
-            image as ImageBitmap,
+            image,
             faces,
             this.faceSize
         );

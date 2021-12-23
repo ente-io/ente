@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, ChangeEvent } from 'react';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { ComlinkWorker } from 'utils/crypto';
@@ -6,10 +6,19 @@ import { AppContext } from 'pages/_app';
 import { PAGES } from 'types';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
-// import { MLSyncResult } from 'utils/machineLearning/types';
 import TFJSImage from './TFJSImage';
-import { MLDebugResult } from 'types/machineLearning';
+import { DetectedFace, MLDebugResult } from 'types/machineLearning';
 import Tree from 'react-d3-tree';
+import MLFileDebugView from './MLFileDebugView';
+import tfjsFaceDetectionService from 'services/machineLearning/tfjsFaceDetectionService';
+import arcfaceAlignmentService from 'services/machineLearning/arcfaceAlignmentService';
+import arcfaceCropService from 'services/machineLearning/arcfaceCropService';
+import { ibExtractFaceImageFromCrop } from 'utils/machineLearning/faceCrop';
+import { getMLSyncConfig } from 'utils/machineLearning';
+import {
+    ibExtractFaceImage,
+    ibExtractFaceImageUsingTransform,
+} from 'utils/machineLearning/faceAlign';
 
 interface TSNEProps {
     mlResult: MLDebugResult;
@@ -81,6 +90,10 @@ export default function MLDebug() {
         tree: null,
         tsne: null,
     });
+
+    const [faces, setFaces] = useState<DetectedFace[]>();
+    const [images, setImages] = useState<ImageBitmap[]>();
+
     const router = useRouter();
     const appContext = useContext(AppContext);
 
@@ -109,6 +122,14 @@ export default function MLDebug() {
             setToken(user.token);
         }
         appContext.showNavBar(true);
+
+        // async function loadMlFileData() {
+        //     const mlFileData = await mlFilesStore.getItem<MlFileData>('10000007');
+        //     setMlFileData(mlFileData);
+        //     console.log('loaded mlFileData: ', mlFileData);
+        // }
+
+        // loadMlFileData();
     }, []);
 
     const onSync = async () => {
@@ -154,6 +175,45 @@ export default function MLDebug() {
         if (mlWorker) {
             mlWorker.cancelNextMLSync();
         }
+    };
+
+    const onDebugFile = async (event: ChangeEvent<HTMLInputElement>) => {
+        // TODO: go through worker for these apis, to not include ml code in main bundle
+        const imageBitmap = await createImageBitmap(event.target.files[0]);
+        const detectedFaces = await tfjsFaceDetectionService.detectFaces(
+            imageBitmap
+        );
+        const mlSyncConfig = await getMLSyncConfig();
+        const facePromises = detectedFaces.map(async (face) => {
+            face.faceCrop = await arcfaceCropService.getFaceCrop(
+                imageBitmap,
+                face,
+                mlSyncConfig.faceCrop
+            );
+        });
+
+        await Promise.all(facePromises);
+        setFaces(detectedFaces);
+        console.log('detectedFaces: ', detectedFaces.length);
+
+        const alignedFaces =
+            arcfaceAlignmentService.getAlignedFaces(detectedFaces);
+        console.log('alignedFaces: ', alignedFaces);
+        const faceCropPromises = alignedFaces.map((face) => {
+            return ibExtractFaceImageFromCrop(face, 112);
+        });
+        const faceImagePromises = alignedFaces.map((face) => {
+            return ibExtractFaceImage(imageBitmap, face, 112);
+        });
+        const faceImageTransformPromises = alignedFaces.map((face) => {
+            return ibExtractFaceImageUsingTransform(imageBitmap, face, 112);
+        });
+        const faceImages = await Promise.all([
+            ...faceCropPromises,
+            ...faceImagePromises,
+            ...faceImageTransformPromises,
+        ]);
+        setImages(faceImages);
     };
 
     const nodeSize = { x: 180, y: 180 };
@@ -206,6 +266,9 @@ export default function MLDebug() {
             </button>
             <button onClick={onStartMLSync}>Start ML Sync</button>
             <button onClick={onStopMLSync}>Stop ML Sync</button>
+            <input id="debugFile" type="file" onChange={onDebugFile} />
+
+            <MLFileDebugView faces={faces} images={images} />
 
             <p>{JSON.stringify(mlResult.clustersWithNoise)}</p>
             <div>

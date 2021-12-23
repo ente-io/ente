@@ -165,8 +165,10 @@ export async function getFaceImage(
     const imageBitmap = await getOriginalImageBitmap(file, token);
 
     const faceImage = tf.tidy(() => {
-        const faceImage = ibExtractFaceImage(imageBitmap, face, faceSize);
-        const normalizedImage = tf.sub(tf.div(faceImage, 127.5), 1.0);
+        const faceImageBitmap = ibExtractFaceImage(imageBitmap, face, faceSize);
+        const tfFaceImage = tf.browser.fromPixels(faceImageBitmap);
+        faceImageBitmap.close();
+        const normalizedImage = tf.sub(tf.div(tfFaceImage, 127.5), 1.0);
 
         return normalizedImage as tf.Tensor3D;
     });
@@ -311,6 +313,16 @@ const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     faceDetection: {
         method: 'BlazeFace',
         minFaceSize: 32,
+    },
+    faceCrop: {
+        enabled: true,
+        method: 'ArcFace',
+        padding: 0.25,
+        maxSize: 256,
+        blobOptions: {
+            type: 'image/jpeg',
+            quality: 0.8,
+        },
     },
     faceAlignment: {
         method: 'ArcFace',

@@ -100,7 +100,7 @@ class MachineLearningService {
             nFaceNoise: syncContext.faceClustersWithNoise?.noise.length,
             tsne: syncContext.tsne,
         };
-        console.log('[MLService] sync results: ', mlSyncResult);
+        // console.log('[MLService] sync results: ', mlSyncResult);
 
         // await syncContext.dispose();
         console.log('Final TF Memory stats: ', tf.memory());
@@ -231,13 +231,15 @@ class MachineLearningService {
             fileContext.newMLFileData.mlVersion = syncContext.config.mlVersion;
         }
 
-        await this.syncFileFaceDetection(syncContext, fileContext);
+        await this.syncFileFaceDetections(syncContext, fileContext);
 
         if (
             fileContext.filtertedFaces &&
             fileContext.filtertedFaces.length > 0
         ) {
-            await this.syncFileFaceAlignment(syncContext, fileContext);
+            await this.syncFileFaceCrops(syncContext, fileContext);
+
+            await this.syncFileFaceAlignments(syncContext, fileContext);
 
             await this.syncFileFaceEmbeddings(syncContext, fileContext);
 
@@ -250,6 +252,8 @@ class MachineLearningService {
                             ...faceWithEmbeddings,
                         } as Face)
                 );
+        } else {
+            fileContext.newMLFileData.faces = undefined;
         }
 
         fileContext.tfImage && fileContext.tfImage.dispose();
@@ -280,10 +284,15 @@ class MachineLearningService {
                 syncContext.token
             );
         }
+
+        if (!fileContext.newMLFileData.imageDimentions) {
+            const { width, height } = fileContext.imageBitmap;
+            fileContext.newMLFileData.imageDimentions = { width, height };
+        }
         // console.log('2 TF Memory stats: ', tf.memory());
     }
 
-    private async syncFileFaceDetection(
+    private async syncFileFaceDetections(
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext
     ) {
@@ -302,21 +311,43 @@ class MachineLearningService {
                     fileContext.imageBitmap
                 );
             // console.log('3 TF Memory stats: ', tf.memory());
+            // TODO: reenable faces filtering based on width
             fileContext.filtertedFaces = detectedFaces;
-            // .filter(
-            //     (f) =>
-            //         f.box.width > syncContext.config.faceDetection.minFaceSize
+            // ?.filter((f) =>
+            //     f.box.width > syncContext.config.faceDetection.minFaceSize
             // );
             console.log(
                 '[MLService] filtertedFaces: ',
-                fileContext.filtertedFaces.length
+                fileContext.filtertedFaces?.length
             );
         } else {
             fileContext.filtertedFaces = fileContext.oldMLFileData.faces;
         }
     }
 
-    private async syncFileFaceAlignment(
+    private async syncFileFaceCrops(
+        syncContext: MLSyncContext,
+        fileContext: MLSyncFileContext
+    ) {
+        const imageBitmap = fileContext.imageBitmap;
+        if (
+            !fileContext.newDetection ||
+            !syncContext.config.faceCrop.enabled ||
+            !imageBitmap
+        ) {
+            return;
+        }
+
+        for (const face of fileContext.filtertedFaces) {
+            face.faceCrop = await syncContext.faceCropService.getFaceCrop(
+                imageBitmap,
+                face,
+                syncContext.config.faceCrop
+            );
+        }
+    }
+
+    private async syncFileFaceAlignments(
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext
     ) {
@@ -332,7 +363,10 @@ class MachineLearningService {
                 syncContext.faceAlignmentService.getAlignedFaces(
                     fileContext.filtertedFaces
                 );
-            console.log('[MLService] alignedFaces: ', fileContext.alignedFaces);
+            console.log(
+                '[MLService] alignedFaces: ',
+                fileContext.alignedFaces?.length
+            );
             // console.log('4 TF Memory stats: ', tf.memory());
         } else {
             fileContext.alignedFaces = fileContext.oldMLFileData.faces;
@@ -500,11 +534,9 @@ class MachineLearningService {
                 .map((f) => allFaces[f])
                 .filter((f) => f);
 
-            // TODO: face box to be normalized to 0..1 scale
             const personFace = findFirstIfSorted(
                 faces,
-                (a, b) =>
-                    a.probability * a.box.width - b.probability * b.box.width
+                (a, b) => a.probability * a.size - b.probability * b.size
             );
             const faceImageTensor = await getFaceImage(
                 personFace,

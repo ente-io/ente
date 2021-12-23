@@ -46,7 +46,7 @@ class TFJSFaceDetectionService implements FaceDetectionService {
         });
         console.log(
             'loaded blazeFaceModel: ',
-            await this.blazeFaceModel,
+            // await this.blazeFaceModel,
             await tf.getBackend()
         );
     }
@@ -160,7 +160,7 @@ class TFJSFaceDetectionService implements FaceDetectionService {
         const faces = await blazeFaceModel.estimateFaces(tfImage);
         tf.dispose(tfImage);
 
-        const detectedFaces: Array<DetectedFace> = faces.map(
+        const detectedFaces: Array<DetectedFace> = faces?.map(
             (normalizedFace) => {
                 const landmarks = normalizedFace.landmarks as number[][];
                 return {
