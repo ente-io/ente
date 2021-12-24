@@ -132,7 +132,8 @@ export interface StoredFaceCrop {
 }
 
 export interface AlignedFace extends DetectedFace {
-    // TODO: remove affine matrix as only works for fixed face size
+    // TODO: remove affine matrix as rotation, size and center
+    // are simple to store and use, affine matrix adds complexity while getting crop
     affineMatrix: Array<Array<number>>;
     rotation: number;
     // size and center is relative to image dimentions stored at mlFileData
@@ -299,7 +300,7 @@ export interface FaceEmbeddingService {
     method: Versioned<FaceEmbeddingMethod>;
     // init(): Promise<void>;
     getFaceEmbeddings(
-        image: ImageBitmap,
+        // image: ImageBitmap,
         faces: Array<AlignedFace>
     ): Promise<Array<FaceWithEmbedding>>;
     dispose(): Promise<void>;

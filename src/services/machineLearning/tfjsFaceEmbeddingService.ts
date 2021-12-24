@@ -9,7 +9,8 @@ import {
     FaceWithEmbedding,
     Versioned,
 } from 'types/machineLearning';
-import { ibExtractFaceImages } from 'utils/machineLearning/faceAlign';
+import { ibExtractFaceImagesFromCrops } from 'utils/machineLearning/faceCrop';
+import { imageBitmapsToTensor4D } from 'utils/machineLearning';
 
 class TFJSFaceEmbeddingService implements FaceEmbeddingService {
     private mobileFaceNetModel: Promise<tflite.TFLiteModel>;
@@ -20,7 +21,7 @@ class TFJSFaceEmbeddingService implements FaceEmbeddingService {
         tflite.setWasmPath('/js/tflite/');
         this.method = {
             value: 'MobileFaceNet',
-            version: 1,
+            version: 2,
         };
         this.faceSize = faceSize;
     }
@@ -78,18 +79,19 @@ class TFJSFaceEmbeddingService implements FaceEmbeddingService {
     }
 
     public async getFaceEmbeddings(
-        image: ImageBitmap,
+        // image: ImageBitmap,
         faces: Array<AlignedFace>
     ) {
         if (!faces || faces.length < 1) {
             return [];
         }
 
-        const faceImagesTensor = ibExtractFaceImages(
-            image,
+        const faceImages = await ibExtractFaceImagesFromCrops(
             faces,
             this.faceSize
         );
+        const faceImagesTensor = imageBitmapsToTensor4D(faceImages);
+        faceImages.forEach((f) => f.close());
         const embeddings = await this.getEmbeddingsBatch(faceImagesTensor);
         tf.dispose(faceImagesTensor);
         // console.log('embeddings: ', embeddings[0]);

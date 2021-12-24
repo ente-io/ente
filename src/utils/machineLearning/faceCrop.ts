@@ -7,6 +7,7 @@ import {
 } from 'types/machineLearning';
 import { cropWithRotation, imageBitmapToBlob } from 'utils/image';
 import { enlargeBox } from '.';
+import { Box } from '../../../thirdparty/face-api/classes';
 import { getAlignedFaceBox } from './faceAlign';
 
 export function getFaceCrop(
@@ -44,7 +45,7 @@ export async function ibExtractFaceImageFromCrop(
     faceSize: number
 ): Promise<ImageBitmap> {
     const image = alignedFace.faceCrop?.image;
-    const imageBox = alignedFace.faceCrop?.imageBox;
+    let imageBox = alignedFace.faceCrop?.imageBox;
     if (!image || !imageBox) {
         throw Error('Face crop not present');
     }
@@ -52,8 +53,10 @@ export async function ibExtractFaceImageFromCrop(
     const box = getAlignedFaceBox(alignedFace);
     const faceCropImage = await createImageBitmap(alignedFace.faceCrop.image);
 
+    // TODO: Have better serialization to avoid creating new object manually when calling class methods
+    imageBox = new Box(imageBox);
     const scale = faceCropImage.width / imageBox.width;
-    const scaledImageBox = alignedFace.faceCrop.imageBox.rescale(scale).round();
+    const scaledImageBox = imageBox.rescale(scale).round();
     const scaledBox = box.rescale(scale).round();
     const shiftedBox = scaledBox.shift(-scaledImageBox.x, -scaledImageBox.y);
     // console.log({ box, imageBox, faceCropImage, scale, scaledBox, scaledImageBox, shiftedBox });
@@ -71,4 +74,14 @@ export async function ibExtractFaceImageFromCrop(
     );
 
     return faceImage;
+}
+
+export async function ibExtractFaceImagesFromCrops(
+    faces: AlignedFace[],
+    faceSize: number
+): Promise<Array<ImageBitmap>> {
+    const faceImagePromises = faces.map((f) =>
+        ibExtractFaceImageFromCrop(f, faceSize)
+    );
+    return Promise.all(faceImagePromises);
 }

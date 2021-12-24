@@ -398,11 +398,11 @@ class MachineLearningService {
                 syncContext.faceEmbeddingService.method
             )
         ) {
-            fileContext.imageBitmap ||
-                (await this.getImageBitmap(syncContext, fileContext));
+            // fileContext.imageBitmap ||
+            //     (await this.getImageBitmap(syncContext, fileContext));
             fileContext.facesWithEmbeddings =
                 await syncContext.faceEmbeddingService.getFaceEmbeddings(
-                    fileContext.imageBitmap,
+                    // fileContext.imageBitmap,
                     fileContext.alignedFaces
                 );
             console.log(

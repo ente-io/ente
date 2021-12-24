@@ -79,6 +79,13 @@ export function toTensor4D(
     });
 }
 
+export function imageBitmapsToTensor4D(imageBitmaps: Array<ImageBitmap>) {
+    return tf.tidy(() => {
+        const tfImages = imageBitmaps.map((ib) => tf.browser.fromPixels(ib));
+        return tf.stack(tfImages) as tf.Tensor4D;
+    });
+}
+
 export function extractFaces(
     image: tf.Tensor3D | tf.Tensor4D,
     facebBoxes: Array<Box>,
@@ -351,5 +358,5 @@ const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     //     learningRate: 10.0,
     //     metric: 'euclidean',
     // },
-    mlVersion: 1,
+    mlVersion: 2,
 };
