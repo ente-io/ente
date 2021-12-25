@@ -40,7 +40,7 @@ import { logError } from 'utils/sentry';
 
 import CloseIcon from 'components/icons/CloseIcon';
 import TickIcon from 'components/icons/TickIcon';
-import { PhotoPeopleList } from 'components/PeopleList';
+import { PhotoPeopleList, UnidentifiedFaces } from 'components/PeopleList';
 import { FreeFlowText } from 'components/RecoveryKeyModal';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -439,6 +439,12 @@ function InfoModal({
                     <Legend>{constants.PEOPLE}</Legend>
                 </div>
                 <PhotoPeopleList file={items[photoSwipe?.getCurrentIndex()]} />
+                <div>
+                    <Legend>{constants.UNIDENTIFIED_FACES}</Legend>
+                </div>
+                <UnidentifiedFaces
+                    file={items[photoSwipe?.getCurrentIndex()]}
+                />
                 {exif && (
                     <>
                         <ExifData exif={exif} />

@@ -5,6 +5,7 @@ import { Box, Point } from '../../../thirdparty/face-api/classes';
 import {
     BLAZEFACE_FACE_SIZE,
     Face,
+    FaceImageBlob,
     MlFileData,
     MLSyncConfig,
     Person,
@@ -14,6 +15,7 @@ import { ibExtractFaceImage } from './faceAlign';
 import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
 import { convertForPreview, needsConversionForPreview } from 'utils/file';
 import { cached } from 'utils/storage/cache';
+import { imageBitmapToBlob } from 'utils/image';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -163,23 +165,16 @@ export async function getFaceImage(
     token: string,
     faceSize: number = BLAZEFACE_FACE_SIZE,
     file?: File
-): Promise<tf.Tensor3D> {
+): Promise<FaceImageBlob> {
     if (!file) {
         const localFiles = await getLocalFiles();
         file = localFiles.find((f) => f.id === face.fileId);
     }
 
     const imageBitmap = await getOriginalImageBitmap(file, token);
-
-    const faceImage = tf.tidy(() => {
-        const faceImageBitmap = ibExtractFaceImage(imageBitmap, face, faceSize);
-        const tfFaceImage = tf.browser.fromPixels(faceImageBitmap);
-        faceImageBitmap.close();
-        const normalizedImage = tf.sub(tf.div(tfFaceImage, 127.5), 1.0);
-
-        return normalizedImage as tf.Tensor3D;
-    });
-
+    const faceImageBitmap = ibExtractFaceImage(imageBitmap, face, faceSize);
+    const faceImage = imageBitmapToBlob(faceImageBitmap);
+    faceImageBitmap.close();
     imageBitmap.close();
 
     return faceImage;
@@ -250,13 +245,13 @@ export async function getPeopleList(file: File): Promise<Array<Person>> {
     const mlFileData: MlFileData = await mlFilesStore.getItem(
         file.id.toString()
     );
-    if (!mlFileData || !mlFileData.faces || mlFileData.faces.length < 1) {
+    if (!mlFileData?.faces || mlFileData.faces.length < 1) {
         return [];
     }
 
     const peopleIds = mlFileData.faces
-        .map((f) => f.personId)
-        .filter((pid) => pid >= 0);
+        .filter((f) => f.personId !== null && f.personId !== undefined)
+        .map((f) => f.personId);
     if (!peopleIds || peopleIds.length < 1) {
         return [];
     }
@@ -268,6 +263,21 @@ export async function getPeopleList(file: File): Promise<Array<Person>> {
     // console.log("peopleList: ", peopleList);
 
     return peopleList;
+}
+
+export async function getUnidentifiedFaces(
+    file: File
+): Promise<Array<FaceImageBlob>> {
+    const mlFileData: MlFileData = await mlFilesStore.getItem(
+        file.id.toString()
+    );
+
+    const faceImages = mlFileData?.faces
+        .filter((f) => f.personId === null || f.personId === undefined)
+        .map((f) => f.faceCrop?.image)
+        .filter((image) => image !== null && image !== undefined);
+
+    return faceImages;
 }
 
 export async function getAllPeople() {

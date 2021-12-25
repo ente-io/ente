@@ -40,6 +40,7 @@ export interface MLDebugResult {
 export declare type FaceEmbedding = Array<number>;
 
 export declare type FaceImage = Array<Array<Array<number>>>;
+export declare type FaceImageBlob = Blob;
 
 // export declare type FaceApiResult = WithFaceDescriptor<
 //     WithFaceLandmarks<
@@ -156,7 +157,7 @@ export interface Person {
     id: number;
     name?: string;
     files: Array<number>;
-    faceImage: FaceImage;
+    faceImage: FaceImageBlob;
 }
 
 export interface MlFileData {
@@ -165,6 +166,7 @@ export interface MlFileData {
     imageSource: ImageType;
     imageDimentions?: Dimensions;
     detectionMethod: Versioned<FaceDetectionMethod>;
+    faceCropMethod: Versioned<FaceCropMethod>;
     alignmentMethod: Versioned<FaceAlignmentMethod>;
     embeddingMethod: Versioned<FaceEmbeddingMethod>;
     mlVersion: number;
@@ -300,7 +302,7 @@ export interface FaceEmbeddingService {
     method: Versioned<FaceEmbeddingMethod>;
     // init(): Promise<void>;
     getFaceEmbeddings(
-        // image: ImageBitmap,
+        image: ImageBitmap,
         faces: Array<AlignedFace>
     ): Promise<Array<FaceWithEmbedding>>;
     dispose(): Promise<void>;

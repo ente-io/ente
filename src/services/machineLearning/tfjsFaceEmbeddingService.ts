@@ -11,6 +11,7 @@ import {
 } from 'types/machineLearning';
 import { ibExtractFaceImagesFromCrops } from 'utils/machineLearning/faceCrop';
 import { imageBitmapsToTensor4D } from 'utils/machineLearning';
+import { ibExtractFaceImages } from 'utils/machineLearning/faceAlign';
 
 class TFJSFaceEmbeddingService implements FaceEmbeddingService {
     private mobileFaceNetModel: Promise<tflite.TFLiteModel>;
@@ -79,17 +80,23 @@ class TFJSFaceEmbeddingService implements FaceEmbeddingService {
     }
 
     public async getFaceEmbeddings(
-        // image: ImageBitmap,
+        image: ImageBitmap,
         faces: Array<AlignedFace>
     ) {
         if (!faces || faces.length < 1) {
             return [];
         }
 
-        const faceImages = await ibExtractFaceImagesFromCrops(
-            faces,
-            this.faceSize
-        );
+        let faceImages: Array<ImageBitmap>;
+        if (faces.length === faces.filter((f) => f.faceCrop).length) {
+            faceImages = await ibExtractFaceImagesFromCrops(
+                faces,
+                this.faceSize
+            );
+        } else {
+            faceImages = await ibExtractFaceImages(image, faces, this.faceSize);
+        }
+
         const faceImagesTensor = imageBitmapsToTensor4D(faceImages);
         faceImages.forEach((f) => f.close());
         const embeddings = await this.getEmbeddingsBatch(faceImagesTensor);

@@ -398,11 +398,12 @@ class MachineLearningService {
                 syncContext.faceEmbeddingService.method
             )
         ) {
+            // TODO: when not storing face crops image will be needed to extract faces
             // fileContext.imageBitmap ||
             //     (await this.getImageBitmap(syncContext, fileContext));
             fileContext.facesWithEmbeddings =
                 await syncContext.faceEmbeddingService.getFaceEmbeddings(
-                    // fileContext.imageBitmap,
+                    fileContext.imageBitmap,
                     fileContext.alignedFaces
                 );
             console.log(
@@ -577,17 +578,16 @@ class MachineLearningService {
                 faces,
                 (a, b) => a.probability * a.size - b.probability * b.size
             );
-            const faceImageTensor = await getFaceImage(
-                personFace,
-                syncContext.token
-            );
-            const faceImage = await faceImageTensor.array();
-            tf.dispose(faceImageTensor);
+
+            let faceImage = personFace.faceCrop?.image;
+            if (!faceImage) {
+                faceImage = await getFaceImage(personFace, syncContext.token);
+            }
 
             const person: Person = {
                 id: index,
                 files: faces.map((f) => f.fileId),
-                faceImage: faceImage,
+                faceImage,
             };
 
             await mlPeopleStore.setItem(person.id.toString(), person);

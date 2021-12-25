@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import TFJSImage from 'components/TFJSImage';
-import { Person } from 'types/machineLearning';
-import { getAllPeople, getPeopleList } from 'utils/machineLearning';
+import { FaceImageBlob, Person } from 'types/machineLearning';
+import {
+    getAllPeople,
+    getPeopleList,
+    getUnidentifiedFaces,
+} from 'utils/machineLearning';
 import styled from 'styled-components';
 import { File } from 'services/fileService';
+import { ImageBlobView } from './ImageViews';
 
 const FaceChipContainer = styled.div`
     display: flex;
@@ -41,7 +45,7 @@ export function PeopleList(props: PeopleListProps) {
                     onClick={() =>
                         props.onSelect && props.onSelect(person, index)
                     }>
-                    <TFJSImage faceImage={person.faceImage}></TFJSImage>
+                    <ImageBlobView blob={person.faceImage}></ImageBlobView>
                 </FaceChip>
             ))}
         </FaceChipContainer>
@@ -99,4 +103,33 @@ export function AllPeopleList(props: AllPeopleListProps) {
     }, [props.limit]);
 
     return <PeopleList people={people} onSelect={props.onSelect}></PeopleList>;
+}
+
+export function UnidentifiedFaces(props: { file: File }) {
+    const [faceImages, setFaceImages] = useState<Array<FaceImageBlob>>([]);
+
+    useEffect(() => {
+        let didCancel = false;
+
+        async function updateFaceImages() {
+            const faceImages = await getUnidentifiedFaces(props.file);
+            !didCancel && setFaceImages(faceImages);
+        }
+
+        updateFaceImages();
+
+        return () => {
+            didCancel = true;
+        };
+    }, [props.file]);
+
+    return (
+        <FaceChipContainer>
+            {faceImages.map((faceImage, index) => (
+                <FaceChip key={index}>
+                    <ImageBlobView blob={faceImage}></ImageBlobView>
+                </FaceChip>
+            ))}
+        </FaceChipContainer>
+    );
 }

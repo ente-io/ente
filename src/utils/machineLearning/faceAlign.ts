@@ -177,21 +177,8 @@ export function ibExtractFaceImages(
     image: ImageBitmap,
     faces: AlignedFace[],
     faceSize: number
-): tf.Tensor4D {
-    return tf.tidy(() => {
-        const faceImages = new Array<tf.Tensor3D>(faces.length);
-        for (let i = 0; i < faces.length; i++) {
-            const faceImageBitmap = ibExtractFaceImage(
-                image,
-                faces[i],
-                faceSize
-            );
-            faceImages[i] = tf.browser.fromPixels(faceImageBitmap);
-            faceImageBitmap.close();
-        }
-
-        return tf.stack(faceImages) as tf.Tensor4D;
-    });
+): Array<ImageBitmap> {
+    return faces.map((f) => ibExtractFaceImage(image, f, faceSize));
 }
 
 export function extractArcfaceAlignedFaceImage(

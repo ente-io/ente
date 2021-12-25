@@ -7,18 +7,10 @@ import { PAGES } from 'types';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
 import TFJSImage from './TFJSImage';
-import { DetectedFace, MLDebugResult } from 'types/machineLearning';
+import { MLDebugResult } from 'types/machineLearning';
 import Tree from 'react-d3-tree';
 import MLFileDebugView from './MLFileDebugView';
-import tfjsFaceDetectionService from 'services/machineLearning/tfjsFaceDetectionService';
-import arcfaceAlignmentService from 'services/machineLearning/arcfaceAlignmentService';
-import arcfaceCropService from 'services/machineLearning/arcfaceCropService';
-import { ibExtractFaceImageFromCrop } from 'utils/machineLearning/faceCrop';
-import { getMLSyncConfig } from 'utils/machineLearning';
-import {
-    ibExtractFaceImage,
-    ibExtractFaceImageUsingTransform,
-} from 'utils/machineLearning/faceAlign';
+import mlWorkManager from 'services/machineLearning/mlWorkManager';
 
 interface TSNEProps {
     mlResult: MLDebugResult;
@@ -91,8 +83,7 @@ export default function MLDebug() {
         tsne: null,
     });
 
-    const [faces, setFaces] = useState<DetectedFace[]>();
-    const [images, setImages] = useState<ImageBitmap[]>();
+    const [debugFile, setDebugFile] = useState<File>();
 
     const router = useRouter();
     const appContext = useContext(AppContext);
@@ -172,48 +163,14 @@ export default function MLDebug() {
     };
 
     const onStopMLSync = async () => {
-        if (mlWorker) {
-            mlWorker.cancelNextMLSync();
-        }
+        // if (mlWorker) {
+        //     mlWorker.cancelNextMLSync();
+        // }
+        await mlWorkManager.stopSyncJob();
     };
 
     const onDebugFile = async (event: ChangeEvent<HTMLInputElement>) => {
-        // TODO: go through worker for these apis, to not include ml code in main bundle
-        const imageBitmap = await createImageBitmap(event.target.files[0]);
-        const detectedFaces = await tfjsFaceDetectionService.detectFaces(
-            imageBitmap
-        );
-        const mlSyncConfig = await getMLSyncConfig();
-        const facePromises = detectedFaces.map(async (face) => {
-            face.faceCrop = await arcfaceCropService.getFaceCrop(
-                imageBitmap,
-                face,
-                mlSyncConfig.faceCrop
-            );
-        });
-
-        await Promise.all(facePromises);
-        setFaces(detectedFaces);
-        console.log('detectedFaces: ', detectedFaces.length);
-
-        const alignedFaces =
-            arcfaceAlignmentService.getAlignedFaces(detectedFaces);
-        console.log('alignedFaces: ', alignedFaces);
-        const faceCropPromises = alignedFaces.map((face) => {
-            return ibExtractFaceImageFromCrop(face, 112);
-        });
-        const faceImagePromises = alignedFaces.map((face) => {
-            return ibExtractFaceImage(imageBitmap, face, 112);
-        });
-        const faceImageTransformPromises = alignedFaces.map((face) => {
-            return ibExtractFaceImageUsingTransform(imageBitmap, face, 112);
-        });
-        const faceImages = await Promise.all([
-            ...faceCropPromises,
-            ...faceImagePromises,
-            ...faceImageTransformPromises,
-        ]);
-        setImages(faceImages);
+        setDebugFile(event.target.files[0]);
     };
 
     const nodeSize = { x: 180, y: 180 };
@@ -266,9 +223,10 @@ export default function MLDebug() {
             </button>
             <button onClick={onStartMLSync}>Start ML Sync</button>
             <button onClick={onStopMLSync}>Stop ML Sync</button>
-            <input id="debugFile" type="file" onChange={onDebugFile} />
 
-            <MLFileDebugView faces={faces} images={images} />
+            <p></p>
+            <input id="debugFile" type="file" onChange={onDebugFile} />
+            <MLFileDebugView file={debugFile} />
 
             <p>{JSON.stringify(mlResult.clustersWithNoise)}</p>
             <div>

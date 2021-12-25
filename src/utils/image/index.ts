@@ -9,7 +9,9 @@ export function resizeToSquare(img: ImageBitmap, size: number) {
     const width = scale * img.width;
     const height = scale * img.height;
     const offscreen = new OffscreenCanvas(size, size);
-    offscreen.getContext('2d').drawImage(img, 0, 0, width, height);
+    const ctx = offscreen.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, width, height);
 
     return { image: offscreen.transferToImageBitmap(), width, height };
 }
@@ -22,6 +24,7 @@ export function transform(
 ) {
     const offscreen = new OffscreenCanvas(outputWidth, outputHeight);
     const context = offscreen.getContext('2d');
+    context.imageSmoothingQuality = 'high';
 
     context.transform(
         affineMat[0][0],

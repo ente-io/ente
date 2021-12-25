@@ -428,6 +428,7 @@ const englishConstants = {
     METADATA: 'metadata',
     INFO: 'information',
     PEOPLE: 'people',
+    UNIDENTIFIED_FACES: 'unidentified faces',
     FILE_ID: 'file id',
     FILE_NAME: 'file name',
     CREATION_TIME: 'creation time',

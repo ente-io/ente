@@ -1,5 +1,5 @@
 import { File } from 'services/fileService';
-import { MLIndex, MLSyncContext } from 'types/machineLearning';
+import { MlFileData, MLIndex, MLSyncContext } from 'types/machineLearning';
 import localForage from './localForage';
 
 export const mlFilesStore = localForage.createInstance({
@@ -57,11 +57,15 @@ export async function isVersionOutdated(index: MLIndex, thanIndex: MLIndex) {
     return indexVersion < thanIndexVersion;
 }
 
-export function newMlData(syncContext: MLSyncContext, enteFile: File) {
+export function newMlData(
+    syncContext: MLSyncContext,
+    enteFile: File
+): MlFileData {
     return {
         fileId: enteFile.id,
         imageSource: syncContext.config.imageSource,
         detectionMethod: syncContext.faceDetectionService.method,
+        faceCropMethod: syncContext.faceCropService.method,
         alignmentMethod: syncContext.faceAlignmentService.method,
         embeddingMethod: syncContext.faceEmbeddingService.method,
         mlVersion: 0,
