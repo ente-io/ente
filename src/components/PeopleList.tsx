@@ -125,11 +125,12 @@ export function UnidentifiedFaces(props: { file: File }) {
 
     return (
         <FaceChipContainer>
-            {faceImages.map((faceImage, index) => (
-                <FaceChip key={index}>
-                    <ImageBlobView blob={faceImage}></ImageBlobView>
-                </FaceChip>
-            ))}
+            {faceImages &&
+                faceImages.map((faceImage, index) => (
+                    <FaceChip key={index}>
+                        <ImageBlobView blob={faceImage}></ImageBlobView>
+                    </FaceChip>
+                ))}
         </FaceChipContainer>
     );
 }

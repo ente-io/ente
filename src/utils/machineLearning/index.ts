@@ -273,7 +273,7 @@ export async function getUnidentifiedFaces(
     );
 
     const faceImages = mlFileData?.faces
-        .filter((f) => f.personId === null || f.personId === undefined)
+        ?.filter((f) => f.personId === null || f.personId === undefined)
         .map((f) => f.faceCrop?.image)
         .filter((image) => image !== null && image !== undefined);
 
