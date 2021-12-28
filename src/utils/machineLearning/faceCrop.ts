@@ -40,25 +40,25 @@ export async function getStoredFaceCrop(
     };
 }
 
-export async function ibExtractFaceImageFromCrop(
-    alignedFace: AlignedFace,
+export function extractFaceImageFromCrop(
+    faceCrop: FaceCrop,
+    box: Box,
+    rotation: number,
     faceSize: number
-): Promise<ImageBitmap> {
-    const image = alignedFace.faceCrop?.image;
-    let imageBox = alignedFace.faceCrop?.imageBox;
-    if (!image || !imageBox) {
+): ImageBitmap {
+    const faceCropImage = faceCrop?.image;
+    let imageBox = faceCrop?.imageBox;
+    if (!faceCropImage || !imageBox) {
         throw Error('Face crop not present');
     }
-
-    const box = getAlignedFaceBox(alignedFace);
-    const faceCropImage = await createImageBitmap(alignedFace.faceCrop.image);
 
     // TODO: Have better serialization to avoid creating new object manually when calling class methods
     imageBox = new Box(imageBox);
     const scale = faceCropImage.width / imageBox.width;
-    const scaledImageBox = imageBox.rescale(scale).round();
-    const scaledBox = box.rescale(scale).round();
-    const shiftedBox = scaledBox.shift(-scaledImageBox.x, -scaledImageBox.y);
+    const transformedBox = box
+        .shift(-imageBox.x, -imageBox.y)
+        .rescale(scale)
+        .round();
     // console.log({ box, imageBox, faceCropImage, scale, scaledBox, scaledImageBox, shiftedBox });
 
     const faceSizeDimentions: Dimensions = {
@@ -67,13 +67,28 @@ export async function ibExtractFaceImageFromCrop(
     };
     const faceImage = cropWithRotation(
         faceCropImage,
-        shiftedBox,
-        alignedFace.rotation,
+        transformedBox,
+        rotation,
         faceSizeDimentions,
         faceSizeDimentions
     );
 
     return faceImage;
+}
+
+export async function ibExtractFaceImageFromCrop(
+    alignedFace: AlignedFace,
+    faceSize: number
+): Promise<ImageBitmap> {
+    const box = getAlignedFaceBox(alignedFace);
+    const faceCropImage = await createImageBitmap(alignedFace.faceCrop.image);
+
+    return extractFaceImageFromCrop(
+        { image: faceCropImage, imageBox: alignedFace.faceCrop?.imageBox },
+        box,
+        alignedFace.rotation,
+        faceSize
+    );
 }
 
 export async function ibExtractFaceImagesFromCrops(

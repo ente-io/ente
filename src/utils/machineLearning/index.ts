@@ -16,6 +16,7 @@ import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
 import { convertForPreview, needsConversionForPreview } from 'utils/file';
 import { cached } from 'utils/storage/cache';
 import { imageBitmapToBlob } from 'utils/image';
+import { NormalizedFace } from '@tensorflow-models/blazeface';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -123,6 +124,28 @@ export function extractFaces(
     });
 }
 
+export function newBox(x: number, y: number, width: number, height: number) {
+    return new Box({ x, y, width, height });
+}
+
+export function newBoxFromPoints(
+    left: number,
+    top: number,
+    right: number,
+    bottom: number
+) {
+    return new Box({ left, top, right, bottom });
+}
+
+export function normFaceBox(face: NormalizedFace) {
+    return newBoxFromPoints(
+        face.topLeft[0],
+        face.topLeft[1],
+        face.bottomRight[0],
+        face.bottomRight[1]
+    );
+}
+
 export function getBoxCenterPt(topLeft: Point, bottomRight: Point): Point {
     return topLeft.add(bottomRight.sub(topLeft).div(new Point(2, 2)));
 }
@@ -204,6 +227,15 @@ async function getOriginalImageFile(file: File, token: string) {
     return new Response(fileStream).blob();
 }
 
+async function getOriginalFile(file: File, token: string) {
+    let fileBlob = await getOriginalImageFile(file, token);
+    if (needsConversionForPreview(file)) {
+        fileBlob = await convertForPreview(file, fileBlob);
+    }
+
+    return fileBlob;
+}
+
 export async function getOriginalImageBitmap(
     file: File,
     token: string,
@@ -213,16 +245,12 @@ export async function getOriginalImageBitmap(
 
     if (useCache) {
         fileBlob = await cached('files', '/' + file.id.toString(), () => {
-            return getOriginalImageFile(file, token);
+            return getOriginalFile(file, token);
         });
     } else {
-        fileBlob = await getOriginalImageFile(file, token);
+        fileBlob = await getOriginalFile(file, token);
     }
     console.log('[MLService] Got file: ', file.id.toString());
-
-    if (needsConversionForPreview(file)) {
-        fileBlob = await convertForPreview(file, fileBlob);
-    }
 
     return getImageBitmap(fileBlob);
 }

@@ -273,7 +273,8 @@ export declare type MLIndex = 'files' | 'people';
 export const BLAZEFACE_MAX_FACES = 20;
 export const BLAZEFACE_INPUT_SIZE = 256;
 export const BLAZEFACE_IOU_THRESHOLD = 0.3;
-export const BLAZEFACE_SCORE_THRESHOLD = 0.65;
+export const BLAZEFACE_SCORE_THRESHOLD = 0.7;
+export const BLAZEFACE_PASS1_SCORE_THRESHOLD = 0.4;
 export const BLAZEFACE_FACE_SIZE = 112;
 
 export interface FaceDetectionService {

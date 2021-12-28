@@ -39,6 +39,15 @@ export function transform(
     return offscreen.transferToImageBitmap();
 }
 
+export function crop(imageBitmap: ImageBitmap, cropBox: Box, size: number) {
+    const dimensions: Dimensions = {
+        width: size,
+        height: size,
+    };
+
+    return cropWithRotation(imageBitmap, cropBox, 0, dimensions, dimensions);
+}
+
 export function cropWithRotation(
     imageBitmap: ImageBitmap,
     cropBox: Box,
@@ -100,6 +109,24 @@ export function cropWithRotation(
         enlargedOutputBox.y,
         enlargedOutputBox.width,
         enlargedOutputBox.height
+    );
+
+    return offscreen.transferToImageBitmap();
+}
+
+export function addPadding(image: ImageBitmap, padding: number) {
+    const scale = 1 + padding * 2;
+    const width = scale * image.width;
+    const height = scale * image.height;
+    const offscreen = new OffscreenCanvas(width, height);
+    const ctx = offscreen.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(
+        image,
+        width / 2 - image.width / 2,
+        height / 2 - image.height / 2,
+        image.width,
+        image.height
     );
 
     return offscreen.transferToImageBitmap();

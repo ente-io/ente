@@ -14,14 +14,14 @@ const FaceChipContainer = styled.div`
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 `;
 
 const FaceChip = styled.div`
     width: 112px;
     height: 112px;
-    margin-right: 10px;
+    margin: 5px;
     border-radius: 50%;
     overflow: hidden;
     position: relative;

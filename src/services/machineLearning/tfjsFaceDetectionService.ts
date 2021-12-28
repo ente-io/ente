@@ -10,6 +10,7 @@ import {
     BLAZEFACE_INPUT_SIZE,
     BLAZEFACE_IOU_THRESHOLD,
     BLAZEFACE_MAX_FACES,
+    BLAZEFACE_PASS1_SCORE_THRESHOLD,
     BLAZEFACE_SCORE_THRESHOLD,
     DetectedFace,
     FaceDetectionMethod,
@@ -17,7 +18,13 @@ import {
     Versioned,
 } from 'types/machineLearning';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
-import { resizeToSquare } from 'utils/image';
+import { addPadding, crop, resizeToSquare } from 'utils/image';
+import {
+    computeTransformToBox,
+    transformBox,
+    transformPoints,
+} from 'utils/machineLearning/transform';
+import { enlargeBox, newBox, normFaceBox } from 'utils/machineLearning';
 
 class TFJSFaceDetectionService implements FaceDetectionService {
     private blazeFaceModel: Promise<BlazeFaceModel>;
@@ -38,7 +45,7 @@ class TFJSFaceDetectionService implements FaceDetectionService {
     private async init() {
         this.blazeFaceModel = blazeFaceLoad({
             maxFaces: BLAZEFACE_MAX_FACES,
-            scoreThreshold: BLAZEFACE_SCORE_THRESHOLD,
+            scoreThreshold: BLAZEFACE_PASS1_SCORE_THRESHOLD,
             iouThreshold: BLAZEFACE_IOU_THRESHOLD,
             modelUrl: '/models/blazeface/back/model.json',
             inputHeight: BLAZEFACE_INPUT_SIZE,
@@ -149,40 +156,77 @@ class TFJSFaceDetectionService implements FaceDetectionService {
         return this.blazeFaceModel;
     }
 
-    public async detectFaces(
+    private async estimateFaces(
         imageBitmap: ImageBitmap
     ): Promise<Array<DetectedFace>> {
         const resized = resizeToSquare(imageBitmap, BLAZEFACE_INPUT_SIZE);
-        const widthRatio = imageBitmap.width / resized.width;
-        const heightRatio = imageBitmap.height / resized.height;
         const tfImage = tf.browser.fromPixels(resized.image);
         const blazeFaceModel = await this.getBlazefaceModel();
         const faces = await blazeFaceModel.estimateFaces(tfImage);
         tf.dispose(tfImage);
 
-        const detectedFaces: Array<DetectedFace> = faces?.map(
-            (normalizedFace) => {
-                const landmarks = normalizedFace.landmarks as number[][];
-                return {
-                    box: new Box({
-                        left: normalizedFace.topLeft[0] * widthRatio,
-                        top: normalizedFace.topLeft[1] * heightRatio,
-                        right: normalizedFace.bottomRight[0] * widthRatio,
-                        bottom: normalizedFace.bottomRight[1] * heightRatio,
-                    }),
-                    landmarks:
-                        landmarks &&
-                        landmarks.map(
-                            (l) =>
-                                new Point(l[0] * widthRatio, l[1] * heightRatio)
-                        ),
-                    probability: normalizedFace.probability as number,
-                    // detectionMethod: this.method,
-                } as DetectedFace;
-            }
-        );
+        const inBox = newBox(0, 0, resized.width, resized.height);
+        const toBox = newBox(0, 0, imageBitmap.width, imageBitmap.height);
+        const transform = computeTransformToBox(inBox, toBox);
+        // console.log("1st pass: ", { transform });
+
+        const detectedFaces: Array<DetectedFace> = faces?.map((f) => {
+            const box = transformBox(normFaceBox(f), transform);
+            const normLandmarks = (f.landmarks as number[][])?.map(
+                (l) => new Point(l[0], l[1])
+            );
+            const landmarks = transformPoints(normLandmarks, transform);
+            return {
+                box,
+                landmarks,
+                probability: f.probability as number,
+                // detectionMethod: this.method,
+            } as DetectedFace;
+        });
 
         return detectedFaces;
+    }
+
+    public async detectFaces(
+        imageBitmap: ImageBitmap
+    ): Promise<Array<DetectedFace>> {
+        const pass1Detections = await this.estimateFaces(imageBitmap);
+
+        // run 2nd pass for accuracy
+        const detections = [];
+        for (const face of pass1Detections) {
+            const imageBox = enlargeBox(face.box, 2);
+            const faceImage = crop(
+                imageBitmap,
+                imageBox,
+                BLAZEFACE_INPUT_SIZE / 2
+            );
+            const paddedImage = addPadding(faceImage, 0.5);
+            const paddedBox = enlargeBox(imageBox, 2);
+            const pass2Detections = await this.estimateFaces(paddedImage);
+            // TODO: select based on nearest under certain threshold
+            // this will matter based on our IOU threshold and faces near each other
+            const selected = pass2Detections[0];
+            // console.log("pass2: ", face.probability, selected.probability);
+
+            // TODO: we might miss 1st pass face actually having score within threshold
+            if (selected && selected.probability >= BLAZEFACE_SCORE_THRESHOLD) {
+                const inBox = newBox(0, 0, faceImage.width, faceImage.height);
+                imageBox.x = paddedBox.x;
+                imageBox.y = paddedBox.y;
+                const transform = computeTransformToBox(inBox, imageBox);
+
+                selected.box = transformBox(selected.box, transform);
+                selected.landmarks = transformPoints(
+                    selected.landmarks,
+                    transform
+                );
+                // console.log("pass2: ", { imageBox, paddedBox, transform, selected });
+                detections.push(selected);
+            }
+        }
+
+        return detections;
     }
 
     public async dispose() {
