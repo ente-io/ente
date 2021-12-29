@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import arcfaceAlignmentService from 'services/machineLearning/arcfaceAlignmentService';
 import arcfaceCropService from 'services/machineLearning/arcfaceCropService';
 import tfjsFaceDetectionService from 'services/machineLearning/tfjsFaceDetectionService';
+import styled from 'styled-components';
 import { AlignedFace, DetectedFace } from 'types/machineLearning';
 import { getMLSyncConfig } from 'utils/machineLearning';
 import {
@@ -15,6 +16,10 @@ import { ImageBitmapView, ImageBlobView } from './ImageViews';
 interface MLFileDebugViewProps {
     file: File;
 }
+
+const FaceCropsRow = styled.div``;
+
+const FaceImagesRow = styled.div``;
 
 function drawFaceDetection(face: AlignedFace, ctx: CanvasRenderingContext2D) {
     const pointSize = Math.ceil(
@@ -52,7 +57,10 @@ function drawFaceDetection(face: AlignedFace, ctx: CanvasRenderingContext2D) {
 export default function MLFileDebugView(props: MLFileDebugViewProps) {
     // const [imageBitmap, setImageBitmap] = useState<ImageBitmap>();
     const [faces, setFaces] = useState<DetectedFace[]>();
-    const [faceImages, setImages] = useState<ImageBitmap[]>();
+    const [facesUsingCrops, setFacesUsingCrops] = useState<ImageBitmap[]>();
+    const [facesUsingImage, setFacesUsingImage] = useState<ImageBitmap[]>();
+    const [facesUsingTransform, setFacesUsingTransform] =
+        useState<ImageBitmap[]>();
 
     const canvasRef = useRef(null);
 
@@ -90,22 +98,30 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             ctx.drawImage(imageBitmap, 0, 0);
             alignedFaces.forEach((face) => drawFaceDetection(face, ctx));
 
-            const faceCropPromises = alignedFaces.map((face) => {
-                return ibExtractFaceImageFromCrop(face, 112);
-            });
-            const faceImagePromises = alignedFaces.map((face) => {
-                return ibExtractFaceImage(imageBitmap, face, 112);
-            });
-            const faceImageTransformPromises = alignedFaces.map((face) => {
-                return ibExtractFaceImageUsingTransform(imageBitmap, face, 112);
-            });
-            const faceImages = await Promise.all([
-                ...faceCropPromises,
-                ...faceImagePromises,
-                ...faceImageTransformPromises,
-            ]);
+            const facesUsingCrops = await Promise.all(
+                alignedFaces.map((face) => {
+                    return ibExtractFaceImageFromCrop(face, 112);
+                })
+            );
+            const facesUsingImage = await Promise.all(
+                alignedFaces.map((face) => {
+                    return ibExtractFaceImage(imageBitmap, face, 112);
+                })
+            );
+            const facesUsingTransform = await Promise.all(
+                alignedFaces.map((face) => {
+                    return ibExtractFaceImageUsingTransform(
+                        imageBitmap,
+                        face,
+                        112
+                    );
+                })
+            );
+
             if (didCancel) return;
-            setImages(faceImages);
+            setFacesUsingCrops(facesUsingCrops);
+            setFacesUsingImage(facesUsingImage);
+            setFacesUsingTransform(facesUsingTransform);
         };
 
         props.file && loadFile();
@@ -124,20 +140,36 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             />
             <p></p>
             <div>Face Crops:</div>
-            {faces?.map((face, i) => (
-                <ImageBlobView
-                    key={i}
-                    blob={face.faceCrop?.image}></ImageBlobView>
-            ))}
+            <FaceCropsRow>
+                {faces?.map((face, i) => (
+                    <ImageBlobView
+                        key={i}
+                        blob={face.faceCrop?.image}></ImageBlobView>
+                ))}
+            </FaceCropsRow>
 
             <p></p>
-            <div>
-                Face Images using face crops, original image and using
-                transform:
-            </div>
-            {faceImages?.map((image, i) => (
-                <ImageBitmapView key={i} image={image}></ImageBitmapView>
-            ))}
+
+            <div>Face Images using face crops:</div>
+            <FaceImagesRow>
+                {facesUsingCrops?.map((image, i) => (
+                    <ImageBitmapView key={i} image={image}></ImageBitmapView>
+                ))}
+            </FaceImagesRow>
+
+            <div>Face Images using original image:</div>
+            <FaceImagesRow>
+                {facesUsingImage?.map((image, i) => (
+                    <ImageBitmapView key={i} image={image}></ImageBitmapView>
+                ))}
+            </FaceImagesRow>
+
+            <div>Face Images using transfrom:</div>
+            <FaceImagesRow>
+                {facesUsingTransform?.map((image, i) => (
+                    <ImageBitmapView key={i} image={image}></ImageBitmapView>
+                ))}
+            </FaceImagesRow>
         </div>
     );
 }

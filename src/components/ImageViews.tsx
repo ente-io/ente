@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { imageBitmapToBlob } from 'utils/image';
 
-const Image = styled.img`
-    max-width: 100%;
-    max-height: 100%;
-`;
+const Image = styled.img``;
 
 export function ImageBitmapView(props: { image: ImageBitmap }) {
     const [imageBlob, setImageBlob] = useState<Blob>();

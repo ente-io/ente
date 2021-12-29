@@ -26,6 +26,11 @@ const FaceChip = styled.div`
     overflow: hidden;
     position: relative;
     cursor: pointer;
+
+    & > img {
+        width: 100%;
+        height: 100%;
+    }
 `;
 
 interface PeopleListPropsBase {
