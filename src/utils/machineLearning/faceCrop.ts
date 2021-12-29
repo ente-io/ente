@@ -1,14 +1,17 @@
+import { compose, Matrix, scale, translate } from 'transformation-matrix';
 import { BlobOptions, Dimensions } from 'types/image';
 import {
     AlignedFace,
     FaceCropConfig,
     FaceCrop,
     StoredFaceCrop,
+    DetectedFace,
 } from 'types/machineLearning';
 import { cropWithRotation, imageBitmapToBlob } from 'utils/image';
 import { enlargeBox } from '.';
 import { Box } from '../../../thirdparty/face-api/classes';
 import { getAlignedFaceBox } from './faceAlign';
+import { transformBox, transformPoints } from './transform';
 
 export function getFaceCrop(
     imageBitmap: ImageBitmap,
@@ -99,4 +102,41 @@ export async function ibExtractFaceImagesFromCrops(
         ibExtractFaceImageFromCrop(f, faceSize)
     );
     return Promise.all(faceImagePromises);
+}
+
+export function transformFace(face: DetectedFace, transform: Matrix) {
+    return {
+        ...face,
+
+        box: transformBox(face.box, transform),
+        landmarks: transformPoints(face.landmarks, transform),
+    };
+}
+
+export function transformToFaceCropDims(
+    faceCrop: FaceCrop,
+    detectedFace: DetectedFace
+) {
+    const imageBox = new Box(faceCrop.imageBox);
+
+    const transform = compose(
+        scale(faceCrop.image.width / imageBox.width),
+        translate(-imageBox.x, -imageBox.y)
+    );
+
+    return transformFace(detectedFace, transform);
+}
+
+export function transformToImageDims(
+    faceCrop: FaceCrop,
+    detectedFace: DetectedFace
+) {
+    const imageBox = new Box(faceCrop.imageBox);
+
+    const transform = compose(
+        translate(imageBox.x, imageBox.y),
+        scale(imageBox.width / faceCrop.image.width)
+    );
+
+    return transformFace(detectedFace, transform);
 }

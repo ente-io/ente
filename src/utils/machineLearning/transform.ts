@@ -22,7 +22,7 @@ export function transformPoint(point: Point, transform: Matrix) {
 }
 
 export function transformPoints(points: Point[], transform: Matrix) {
-    return points.map((p) => transformPoint(p, transform));
+    return points?.map((p) => transformPoint(p, transform));
 }
 
 export function transformBox(box: Box, transform: Matrix) {
