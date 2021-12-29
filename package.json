@@ -71,6 +71,7 @@
     "react-window-infinite-loader": "^1.0.5",
     "scrypt-js": "^3.0.1",
     "styled-components": "^5.2.0",
+    "transformation-matrix": "^2.10.0",
     "tsne-js": "^1.0.3",
     "workbox-precaching": "^6.1.5",
     "workbox-recipes": "^6.1.5",
