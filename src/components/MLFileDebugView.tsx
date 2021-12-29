@@ -17,15 +17,19 @@ interface MLFileDebugViewProps {
 }
 
 function drawFaceDetection(face: AlignedFace, ctx: CanvasRenderingContext2D) {
+    const pointSize = Math.ceil(
+        Math.max(ctx.canvas.width / 512, face.box.width / 32)
+    );
+
     ctx.save();
     ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
-    ctx.lineWidth = 6;
+    ctx.lineWidth = pointSize;
     ctx.strokeRect(face.box.x, face.box.y, face.box.width, face.box.height);
     ctx.restore();
 
     ctx.save();
     ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)';
-    ctx.lineWidth = 10;
+    ctx.lineWidth = Math.round(pointSize * 1.5);
     const alignedBox = getAlignedFaceBox(face);
     ctx.strokeRect(
         alignedBox.x,
@@ -39,7 +43,7 @@ function drawFaceDetection(face: AlignedFace, ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = 'rgba(0, 0, 255, 0.8)';
     face.landmarks.forEach((l) => {
         ctx.beginPath();
-        ctx.arc(l.x, l.y, 10, 0, Math.PI * 2, true);
+        ctx.arc(l.x, l.y, pointSize, 0, Math.PI * 2, true);
         ctx.fill();
     });
     ctx.restore();
