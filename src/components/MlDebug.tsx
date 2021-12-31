@@ -7,10 +7,13 @@ import { PAGES } from 'types';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
 import TFJSImage from './TFJSImage';
-import { MLDebugResult } from 'types/machineLearning';
+import { Face, MLDebugResult, MLLibraryData } from 'types/machineLearning';
 import Tree from 'react-d3-tree';
 import MLFileDebugView from './MLFileDebugView';
 import mlWorkManager from 'services/machineLearning/mlWorkManager';
+import { getAllFacesMap, mlLibraryStore } from 'utils/storage/mlStorage';
+import { getAllFacesFromMap } from 'utils/machineLearning';
+import { FaceImagesRow, ImageBlobView } from './ImageViews';
 
 interface TSNEProps {
     mlResult: MLDebugResult;
@@ -83,6 +86,7 @@ export default function MLDebug() {
         tsne: null,
     });
 
+    const [noiseFaces, setNoiseFaces] = useState<Array<Face>>([]);
     const [debugFile, setDebugFile] = useState<File>();
 
     const router = useRouter();
@@ -113,14 +117,6 @@ export default function MLDebug() {
             setToken(user.token);
         }
         appContext.showNavBar(true);
-
-        // async function loadMlFileData() {
-        //     const mlFileData = await mlFilesStore.getItem<MlFileData>('10000007');
-        //     setMlFileData(mlFileData);
-        //     console.log('loaded mlFileData: ', mlFileData);
-        // }
-
-        // loadMlFileData();
     }, []);
 
     const onSync = async () => {
@@ -173,6 +169,20 @@ export default function MLDebug() {
         setDebugFile(event.target.files[0]);
     };
 
+    const onLoadNoiseFaces = async () => {
+        const mlLibraryData = await mlLibraryStore.getItem<MLLibraryData>(
+            'data'
+        );
+        const allFacesMap = await getAllFacesMap();
+        const allFaces = getAllFacesFromMap(allFacesMap);
+
+        const noiseFaces = mlLibraryData?.faceClusteringResults?.noise
+            ?.slice(0, 100)
+            .map((n) => allFaces[n])
+            .filter((f) => f);
+        setNoiseFaces(noiseFaces);
+    };
+
     const nodeSize = { x: 180, y: 180 };
     const foreignObjectProps = { width: 112, height: 150, x: -56 };
 
@@ -223,6 +233,17 @@ export default function MLDebug() {
             </button>
             <button onClick={onStartMLSync}>Start ML Sync</button>
             <button onClick={onStopMLSync}>Stop ML Sync</button>
+
+            <p></p>
+            <button onClick={onLoadNoiseFaces}>Load Noise Faces</button>
+            <div>Noise Faces:</div>
+            <FaceImagesRow>
+                {noiseFaces?.map((face, i) => (
+                    <ImageBlobView
+                        key={i}
+                        blob={face.faceCrop?.image}></ImageBlobView>
+                ))}
+            </FaceImagesRow>
 
             <p></p>
             <input id="debugFile" type="file" onChange={onDebugFile} />

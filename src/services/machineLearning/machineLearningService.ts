@@ -9,6 +9,7 @@ import '@tensorflow/tfjs-backend-cpu';
 import {
     Face,
     MlFileData,
+    MLLibraryData,
     MLSyncConfig,
     MLSyncContext,
     MLSyncFileContext,
@@ -16,16 +17,16 @@ import {
     Person,
 } from 'types/machineLearning';
 
-import ClusteringService from './clusteringService';
-
 import { toTSNE } from 'utils/machineLearning/visualization';
 import {
     getIndexVersion,
     incrementIndexVersion,
     mlFilesStore,
     mlPeopleStore,
+    mlLibraryStore,
     newMlData,
     setIndexVersion,
+    getAllFacesMap,
 } from 'utils/storage/mlStorage';
 import {
     findFirstIfSorted,
@@ -48,7 +49,7 @@ class MachineLearningService {
     // private faceAlignmentService: FaceAlignmentService;
     // private faceEmbeddingService: FaceEmbeddingService;
     // private faceEmbeddingService: FAPIFaceEmbeddingService;
-    private clusteringService: ClusteringService;
+    // private clusteringService: ClusteringService;
 
     public constructor() {
         setWasmPaths('/js/tfjs/');
@@ -58,7 +59,7 @@ class MachineLearningService {
         // this.faceAlignmentService = new ArcfaceAlignmentService();
         // this.faceEmbeddingService = new TFJSFaceEmbeddingService();
         // this.faceEmbeddingService = new FAPIFaceEmbeddingService();
-        this.clusteringService = new ClusteringService();
+        // this.clusteringService = new ClusteringService();
     }
 
     public async sync(token: string): Promise<MLSyncResult> {
@@ -97,8 +98,11 @@ class MachineLearningService {
             nOutOfSyncFiles: syncContext.outOfSyncFiles.length,
             nSyncedFiles: syncContext.syncedFiles.length,
             nSyncedFaces: syncContext.syncedFaces.length,
-            nFaceClusters: syncContext.faceClustersWithNoise?.clusters.length,
-            nFaceNoise: syncContext.faceClustersWithNoise?.noise.length,
+            nFaceClusters:
+                syncContext.mlLibraryData?.faceClusteringResults?.clusters
+                    .length,
+            nFaceNoise:
+                syncContext.mlLibraryData?.faceClusteringResults?.noise.length,
             tsne: syncContext.tsne,
         };
         // console.log('[MLService] sync results: ', mlSyncResult);
@@ -482,20 +486,46 @@ class MachineLearningService {
         }
     }
 
+    private async getMLLibraryData(syncContext: MLSyncContext) {
+        syncContext.mlLibraryData = await mlLibraryStore.getItem<MLLibraryData>(
+            'data'
+        );
+        if (!syncContext.mlLibraryData) {
+            syncContext.mlLibraryData = {};
+        }
+    }
+
+    private async persistMLLibraryData(syncContext: MLSyncContext) {
+        return mlLibraryStore.setItem('data', syncContext.mlLibraryData);
+    }
+
     public async syncIndex(syncContext: MLSyncContext) {
+        await this.getMLLibraryData(syncContext);
+
         // await this.init();
         await this.syncPeopleIndex(syncContext);
+
+        await this.persistMLLibraryData(syncContext);
     }
 
     private async syncPeopleIndex(syncContext: MLSyncContext) {
         const filesVersion = await getIndexVersion('files');
-        if (filesVersion <= (await getIndexVersion('people'))) {
+        if (
+            filesVersion <= (await getIndexVersion('people')) &&
+            !isDifferentOrOld(
+                syncContext.mlLibraryData?.faceClusteringMethod,
+                syncContext.faceClusteringService.method
+            )
+        ) {
             console.log(
                 '[MLService] Skipping people index as already synced to latest version'
             );
             return;
         }
 
+        // TODO: have faces addresable through fileId + faceId
+        // to avoid index based addressing, which is prone to wrong results
+        // one way could be to match nearest face within threshold in the file
         const allFacesMap = await this.getAllSyncedFacesMap(syncContext);
         const allFaces = getAllFacesFromMap(allFacesMap);
 
@@ -510,14 +540,8 @@ class MachineLearningService {
             return syncContext.allSyncedFacesMap;
         }
 
-        const allSyncedFacesMap = new Map<number, Array<Face>>();
-        await mlFilesStore.iterate((mlFileData: MlFileData) => {
-            mlFileData.faces &&
-                allSyncedFacesMap.set(mlFileData.fileId, mlFileData.faces);
-        });
-
-        syncContext.allSyncedFacesMap = allSyncedFacesMap;
-        return allSyncedFacesMap;
+        syncContext.allSyncedFacesMap = await getAllFacesMap();
+        return syncContext.allSyncedFacesMap;
     }
 
     public async runFaceClustering(
@@ -526,8 +550,7 @@ class MachineLearningService {
     ) {
         // await this.init();
 
-        const clusteringConfig =
-            syncContext.config.faceClustering.clusteringConfig;
+        const clusteringConfig = syncContext.config.faceClustering;
 
         if (!allFaces || allFaces.length < clusteringConfig.minInputSize) {
             console.log(
@@ -538,24 +561,26 @@ class MachineLearningService {
         }
 
         console.log('Running clustering allFaces: ', allFaces.length);
-        syncContext.faceClusteringResults = this.clusteringService.cluster(
-            syncContext.config.faceClustering.method,
-            allFaces.map((f) => Array.from(f.embedding)),
-            syncContext.config.faceClustering.clusteringConfig
-        );
+        syncContext.mlLibraryData.faceClusteringResults =
+            await syncContext.faceClusteringService.cluster(
+                allFaces.map((f) => Array.from(f.embedding)),
+                syncContext.config.faceClustering
+            );
+        syncContext.mlLibraryData.faceClusteringMethod =
+            syncContext.faceClusteringService.method;
         console.log(
             '[MLService] Got face clustering results: ',
-            syncContext.faceClusteringResults
+            syncContext.mlLibraryData.faceClusteringResults
         );
 
-        syncContext.faceClustersWithNoise = {
-            clusters: syncContext.faceClusteringResults.clusters.map(
-                (faces) => ({
-                    faces,
-                })
-            ),
-            noise: syncContext.faceClusteringResults.noise,
-        };
+        // syncContext.faceClustersWithNoise = {
+        //     clusters: syncContext.faceClusteringResults.clusters.map(
+        //         (faces) => ({
+        //             faces,
+        //         })
+        //     ),
+        //     noise: syncContext.faceClusteringResults.noise,
+        // };
     }
 
     private async syncPeopleFromClusters(
@@ -563,16 +588,15 @@ class MachineLearningService {
         allFacesMap: Map<number, Array<Face>>,
         allFaces: Array<Face>
     ) {
-        const clusters = syncContext.faceClustersWithNoise?.clusters;
+        const clusters =
+            syncContext.mlLibraryData.faceClusteringResults?.clusters;
         if (!clusters || clusters.length < 1) {
             return;
         }
 
         await mlPeopleStore.clear();
         for (const [index, cluster] of clusters.entries()) {
-            const faces = cluster.faces
-                .map((f) => allFaces[f])
-                .filter((f) => f);
+            const faces = cluster.map((f) => allFaces[f]).filter((f) => f);
 
             const personFace = findFirstIfSorted(
                 faces,

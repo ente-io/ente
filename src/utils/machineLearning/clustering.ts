@@ -3,15 +3,15 @@ import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
 import { f32Average } from '.';
 import { euclideanDistance } from '../../../thirdparty/face-api/euclideanDistance';
 import {
+    FacesCluster,
     Cluster,
-    ClusterFaces,
     FaceDescriptor,
     FaceWithEmbedding,
     MLSyncContext,
     NearestCluster,
 } from 'types/machineLearning';
 
-export function getClusterSummary(cluster: ClusterFaces): FaceDescriptor {
+export function getClusterSummary(cluster: Cluster): FaceDescriptor {
     // const faceScore = (f) => f.detection.score; // f.alignedRect.box.width *
 
     // return cluster
@@ -25,17 +25,17 @@ export function getClusterSummary(cluster: ClusterFaces): FaceDescriptor {
 
 export function updateClusterSummaries(syncContext: MLSyncContext) {
     if (
-        !syncContext.faceClusteringResults ||
-        !syncContext.faceClusteringResults.clusters ||
-        syncContext.faceClusteringResults.clusters.length < 1
+        !syncContext.mlLibraryData?.faceClusteringResults?.clusters ||
+        syncContext.mlLibraryData?.faceClusteringResults?.clusters.length < 1
     ) {
         return;
     }
 
-    const resultClusters = syncContext.faceClusteringResults.clusters;
+    const resultClusters =
+        syncContext.mlLibraryData.faceClusteringResults.clusters;
 
     resultClusters.forEach((resultCluster) => {
-        syncContext.faceClustersWithNoise.clusters.push({
+        syncContext.mlLibraryData.faceClustersWithNoise.clusters.push({
             faces: resultCluster,
             // summary: this.getClusterSummary(resultCluster),
         });
@@ -46,9 +46,9 @@ export function getNearestCluster(
     syncContext: MLSyncContext,
     noise: FaceWithEmbedding
 ): NearestCluster {
-    let nearest: Cluster = null;
+    let nearest: FacesCluster = null;
     let nearestDist = 100000;
-    syncContext.faceClustersWithNoise.clusters.forEach((c) => {
+    syncContext.mlLibraryData.faceClustersWithNoise.clusters.forEach((c) => {
         const dist = euclideanDistance(noise.embedding, c.summary);
         if (dist < nearestDist) {
             nearestDist = dist;
@@ -62,14 +62,13 @@ export function getNearestCluster(
 
 export function assignNoiseWithinLimit(syncContext: MLSyncContext) {
     if (
-        !syncContext.faceClusteringResults ||
-        !syncContext.faceClusteringResults.noise ||
-        syncContext.faceClusteringResults.noise.length < 1
+        !syncContext.mlLibraryData?.faceClusteringResults?.noise ||
+        syncContext.mlLibraryData?.faceClusteringResults.noise.length < 1
     ) {
         return;
     }
 
-    const noise = syncContext.faceClusteringResults.noise;
+    const noise = syncContext.mlLibraryData.faceClusteringResults.noise;
 
     noise.forEach((n) => {
         const noiseFace = syncContext.syncedFaces[n];

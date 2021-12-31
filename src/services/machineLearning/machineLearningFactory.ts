@@ -1,7 +1,5 @@
 import { File } from 'services/fileService';
 import {
-    ClusteringResults,
-    ClustersWithNoise,
     Face,
     FaceAlignmentMethod,
     FaceAlignmentService,
@@ -13,9 +11,13 @@ import {
     FaceEmbeddingService,
     MLSyncConfig,
     MLSyncContext,
+    ClusteringMethod,
+    ClusteringService,
+    MLLibraryData,
 } from 'types/machineLearning';
 import arcfaceAlignmentService from './arcfaceAlignmentService';
 import arcfaceCropService from './arcfaceCropService';
+import hdbscanClusteringService from './hdbscanClusteringService';
 import blazeFaceDetectionService from './tfjsFaceDetectionService';
 import mobileFaceNetEmbeddingService from './tfjsFaceEmbeddingService';
 
@@ -58,6 +60,16 @@ export class MLFactory {
         throw Error('Unknon face embedding method: ' + method);
     }
 
+    public static getClusteringService(
+        method: ClusteringMethod
+    ): ClusteringService {
+        if (method === 'Hdbscan') {
+            return hdbscanClusteringService;
+        }
+
+        throw Error('Unknon clustering method: ' + method);
+    }
+
     public static getMLSyncContext(
         token: string,
         config: MLSyncConfig,
@@ -76,14 +88,15 @@ export class LocalMLSyncContext implements MLSyncContext {
     public faceCropService: FaceCropService;
     public faceAlignmentService: FaceAlignmentService;
     public faceEmbeddingService: FaceEmbeddingService;
+    public faceClusteringService: ClusteringService;
 
     public outOfSyncFiles: File[];
     public syncedFiles: File[];
     public syncedFaces: Face[];
     public allSyncedFacesMap?: Map<number, Array<Face>>;
-    public faceClusteringResults?: ClusteringResults;
-    public faceClustersWithNoise?: ClustersWithNoise;
     public tsne?: any;
+
+    public mlLibraryData: MLLibraryData;
 
     constructor(
         token: string,
@@ -105,6 +118,9 @@ export class LocalMLSyncContext implements MLSyncContext {
         );
         this.faceEmbeddingService = MLFactory.getFaceEmbeddingService(
             this.config.faceEmbedding.method
+        );
+        this.faceClusteringService = MLFactory.getClusteringService(
+            this.config.faceClustering.method
         );
 
         this.outOfSyncFiles = [];

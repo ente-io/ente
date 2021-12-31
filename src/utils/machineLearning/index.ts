@@ -378,16 +378,11 @@ const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
         generateTsne: true,
     },
     faceClustering: {
-        method: {
-            value: 'Hdbscan',
-            version: 1,
-        },
-        clusteringConfig: {
-            minClusterSize: 5,
-            minInputSize: 50,
-            // maxDistanceInsideCluster: 0.4,
-            generateDebugInfo: true,
-        },
+        method: 'Hdbscan',
+        minClusterSize: 5,
+        minInputSize: 50,
+        // maxDistanceInsideCluster: 0.4,
+        generateDebugInfo: true,
     },
     // tsne: {
     //     samples: 200,

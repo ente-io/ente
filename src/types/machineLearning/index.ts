@@ -32,7 +32,7 @@ export interface DebugFace {
 
 export interface MLDebugResult {
     allFaces: DebugFace[];
-    clustersWithNoise: ClustersWithNoise;
+    clustersWithNoise: FacesClustersWithNoise;
     tree: RawNodeDatum;
     tsne: TSNEData;
 }
@@ -53,29 +53,29 @@ export declare type FaceImageBlob = Blob;
 
 export declare type FaceDescriptor = Float32Array;
 
-export declare type ClusterFaces = Array<number>;
-
-export interface Cluster {
-    faces: ClusterFaces;
-    summary?: FaceDescriptor;
-}
-
-export interface ClustersWithNoise {
-    clusters: Array<Cluster>;
-    noise: ClusterFaces;
-}
+export declare type Cluster = Array<number>;
 
 export interface ClusteringResults {
-    clusters: Array<ClusterFaces>;
-    noise: ClusterFaces;
+    clusters: Array<Cluster>;
+    noise: Cluster;
 }
 
 export interface HdbscanResults extends ClusteringResults {
     debugInfo?: DebugInfo;
 }
 
+export interface FacesCluster {
+    faces: Cluster;
+    summary?: FaceDescriptor;
+}
+
+export interface FacesClustersWithNoise {
+    clusters: Array<FacesCluster>;
+    noise: Cluster;
+}
+
 export interface NearestCluster {
-    cluster: Cluster;
+    cluster: FacesCluster;
     distance: number;
 }
 
@@ -200,10 +200,7 @@ export interface FaceEmbeddingConfig {
     generateTsne?: boolean;
 }
 
-export interface FaceClusteringConfig {
-    method: Versioned<ClusteringMethod>;
-    clusteringConfig: ClusteringConfig;
-}
+export interface FaceClusteringConfig extends ClusteringConfig {}
 
 export declare type TSNEMetric = 'euclidean' | 'manhattan';
 
@@ -239,14 +236,16 @@ export interface MLSyncContext {
     faceCropService: FaceCropService;
     faceAlignmentService: FaceAlignmentService;
     faceEmbeddingService: FaceEmbeddingService;
+    faceClusteringService: ClusteringService;
 
     outOfSyncFiles: File[];
     syncedFiles: File[];
     syncedFaces: Face[];
     allSyncedFacesMap?: Map<number, Array<Face>>;
-    faceClusteringResults?: ClusteringResults;
-    faceClustersWithNoise?: ClustersWithNoise;
     tsne?: any;
+
+    // oldMLLibraryData: MLLibraryData;
+    mlLibraryData: MLLibraryData;
 }
 
 export interface MLSyncFileContext {
@@ -266,6 +265,12 @@ export interface MLSyncFileContext {
     alignedFaces?: Array<AlignedFace>;
 
     facesWithEmbeddings?: Array<FaceWithEmbedding>;
+}
+
+export interface MLLibraryData {
+    faceClusteringMethod?: Versioned<ClusteringMethod>;
+    faceClusteringResults?: ClusteringResults;
+    faceClustersWithNoise?: FacesClustersWithNoise;
 }
 
 export declare type MLIndex = 'files' | 'people';
@@ -309,7 +314,17 @@ export interface FaceEmbeddingService {
     dispose(): Promise<void>;
 }
 
+export interface ClusteringService {
+    method: Versioned<ClusteringMethod>;
+
+    cluster(
+        input: ClusteringInput,
+        config: ClusteringConfig
+    ): Promise<ClusteringResults>;
+}
+
 export interface ClusteringConfig {
+    method: ClusteringMethod;
     minClusterSize: number;
     maxDistanceInsideCluster?: number;
     minInputSize?: number;

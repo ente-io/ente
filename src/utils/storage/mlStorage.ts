@@ -1,5 +1,10 @@
 import { File } from 'services/fileService';
-import { MlFileData, MLIndex, MLSyncContext } from 'types/machineLearning';
+import {
+    Face,
+    MlFileData,
+    MLIndex,
+    MLSyncContext,
+} from 'types/machineLearning';
 import localForage from './localForage';
 
 export const mlFilesStore = localForage.createInstance({
@@ -14,6 +19,13 @@ export const mlPeopleStore = localForage.createInstance({
     name: 'ml-data',
     version: 1.0,
     storeName: 'people',
+});
+
+export const mlLibraryStore = localForage.createInstance({
+    driver: localForage.INDEXEDDB,
+    name: 'ml-data',
+    version: 1.0,
+    storeName: 'library',
 });
 
 export const mlVersionStore = localForage.createInstance({
@@ -70,4 +82,14 @@ export function newMlData(
         embeddingMethod: syncContext.faceEmbeddingService.method,
         mlVersion: 0,
     };
+}
+
+export async function getAllFacesMap() {
+    const allSyncedFacesMap = new Map<number, Array<Face>>();
+    await mlFilesStore.iterate((mlFileData: MlFileData) => {
+        mlFileData.faces &&
+            allSyncedFacesMap.set(mlFileData.fileId, mlFileData.faces);
+    });
+
+    return allSyncedFacesMap;
 }

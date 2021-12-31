@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import arcfaceAlignmentService from 'services/machineLearning/arcfaceAlignmentService';
 import arcfaceCropService from 'services/machineLearning/arcfaceCropService';
 import tfjsFaceDetectionService from 'services/machineLearning/tfjsFaceDetectionService';
-import styled from 'styled-components';
 import { AlignedFace, DetectedFace } from 'types/machineLearning';
 import { getMLSyncConfig } from 'utils/machineLearning';
 import {
@@ -11,15 +10,16 @@ import {
     ibExtractFaceImageUsingTransform,
 } from 'utils/machineLearning/faceAlign';
 import { ibExtractFaceImageFromCrop } from 'utils/machineLearning/faceCrop';
-import { ImageBitmapView, ImageBlobView } from './ImageViews';
+import {
+    FaceCropsRow,
+    FaceImagesRow,
+    ImageBitmapView,
+    ImageBlobView,
+} from './ImageViews';
 
 interface MLFileDebugViewProps {
     file: File;
 }
-
-const FaceCropsRow = styled.div``;
-
-const FaceImagesRow = styled.div``;
 
 function drawFaceDetection(face: AlignedFace, ctx: CanvasRenderingContext2D) {
     const pointSize = Math.ceil(

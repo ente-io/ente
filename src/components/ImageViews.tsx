@@ -2,7 +2,21 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { imageBitmapToBlob } from 'utils/image';
 
-const Image = styled.img``;
+export const Image = styled.img``;
+
+export const FaceCropsRow = styled.div`
+    & > img {
+        width: 256px;
+        height: 256px;
+    }
+`;
+
+export const FaceImagesRow = styled.div`
+    & > img {
+        width: 112px;
+        height: 112px;
+    }
+`;
 
 export function ImageBitmapView(props: { image: ImageBitmap }) {
     const [imageBlob, setImageBlob] = useState<Blob>();
