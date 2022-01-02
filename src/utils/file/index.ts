@@ -266,7 +266,11 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
-export async function convertForPreview(file: File, fileBlob: Blob) {
+export async function convertForPreview(
+    file: File,
+    fileBlob: Blob,
+    usingWorker?: any
+) {
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         const originalName = fileNameWithoutExtension(file.metadata.title);
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
@@ -274,7 +278,7 @@ export async function convertForPreview(file: File, fileBlob: Blob) {
     }
 
     const typeFromExtension = file.metadata.title.split('.')[-1];
-    const worker = await new CryptoWorker();
+    const worker = usingWorker || (await new CryptoWorker());
 
     const mimeType =
         (await getMimeTypeFromBlob(worker, fileBlob)) ?? typeFromExtension;

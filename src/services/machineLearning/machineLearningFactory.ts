@@ -1,3 +1,4 @@
+import PQueue from 'p-queue';
 import { File } from 'services/fileService';
 import {
     Face,
@@ -15,6 +16,9 @@ import {
     ClusteringService,
     MLLibraryData,
 } from 'types/machineLearning';
+import { CONCURRENCY } from 'utils/common/concurrency';
+import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
+import { logQueueStats } from 'utils/machineLearning';
 import arcfaceAlignmentService from './arcfaceAlignmentService';
 import arcfaceCropService from './arcfaceCropService';
 import hdbscanClusteringService from './hdbscanClusteringService';
@@ -98,10 +102,19 @@ export class LocalMLSyncContext implements MLSyncContext {
 
     public mlLibraryData: MLLibraryData;
 
+    public syncQueue: PQueue;
+    // TODO: wheather to limit concurrent downloads
+    // private downloadQueue: PQueue;
+
+    private concurrancy: number;
+    private enteComlinkWorkers: Array<ComlinkWorker>;
+    private enteWorkers: Array<any>;
+
     constructor(
         token: string,
         config: MLSyncConfig,
-        shouldUpdateMLVersion: boolean = true
+        shouldUpdateMLVersion: boolean = true,
+        concurrancy?: number
     ) {
         this.token = token;
         this.config = config;
@@ -126,10 +139,37 @@ export class LocalMLSyncContext implements MLSyncContext {
         this.outOfSyncFiles = [];
         this.syncedFiles = [];
         this.syncedFaces = [];
+
+        this.concurrancy = concurrancy || CONCURRENCY;
+
+        console.log('Using concurrency: ', this.concurrancy);
+        this.syncQueue = new PQueue({ concurrency: this.concurrancy });
+        logQueueStats(this.syncQueue, 'sync');
+        // this.downloadQueue = new PQueue({ concurrency: 1 });
+        // logQueueStats(this.downloadQueue, 'download');
+
+        this.enteComlinkWorkers = new Array(this.concurrancy);
+        this.enteWorkers = new Array(this.concurrancy);
+    }
+
+    public async getEnteWorker(id: number): Promise<any> {
+        const wid = id % this.enteWorkers.length;
+        if (!this.enteWorkers[wid]) {
+            this.enteComlinkWorkers[wid] = getDedicatedCryptoWorker();
+            this.enteWorkers[wid] = new this.enteComlinkWorkers[wid].comlink();
+        }
+
+        return this.enteWorkers[wid];
     }
 
     public async dispose() {
-        await this.faceDetectionService.dispose();
-        await this.faceEmbeddingService.dispose();
+        // await this.faceDetectionService.dispose();
+        // await this.faceEmbeddingService.dispose();
+
+        await this.syncQueue.onIdle();
+        this.syncQueue.removeAllListeners();
+        for (const enteComlinkWorker of this.enteComlinkWorkers) {
+            enteComlinkWorker?.worker.terminate();
+        }
     }
 }

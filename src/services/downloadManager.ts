@@ -105,8 +105,8 @@ class DownloadManager {
         return await this.fileObjectUrlPromise.get(file.id.toString());
     }
 
-    async downloadFile(file: File, tokenOverride?: string) {
-        const worker = await new CryptoWorker();
+    async downloadFile(file: File, tokenOverride?: string, usingWorker?: any) {
+        const worker = usingWorker || (await new CryptoWorker());
         const token = tokenOverride || getToken();
         if (!token) {
             return null;

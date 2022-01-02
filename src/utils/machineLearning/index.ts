@@ -17,6 +17,7 @@ import { convertForPreview, needsConversionForPreview } from 'utils/file';
 import { cached } from 'utils/storage/cache';
 import { imageBitmapToBlob } from 'utils/image';
 import { NormalizedFace } from '@tensorflow-models/blazeface';
+import PQueue from 'p-queue';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -222,15 +223,36 @@ export async function getImageBitmap(blob: Blob): Promise<ImageBitmap> {
 //     return new TFImageBitmap(undefined, tfImage);
 // }
 
-async function getOriginalImageFile(file: File, token: string) {
-    const fileStream = await DownloadManager.downloadFile(file, token);
+async function getOriginalImageFile(
+    file: File,
+    token: string,
+    enteWorker?: any,
+    queue?: PQueue
+) {
+    let fileStream;
+    if (queue) {
+        fileStream = await queue.add(() =>
+            DownloadManager.downloadFile(file, token, enteWorker)
+        );
+    } else {
+        fileStream = await DownloadManager.downloadFile(
+            file,
+            token,
+            enteWorker
+        );
+    }
     return new Response(fileStream).blob();
 }
 
-async function getOriginalFile(file: File, token: string) {
-    let fileBlob = await getOriginalImageFile(file, token);
+async function getOriginalConvertedFile(
+    file: File,
+    token: string,
+    enteWorker?: any,
+    queue?: PQueue
+) {
+    let fileBlob = await getOriginalImageFile(file, token, enteWorker, queue);
     if (needsConversionForPreview(file)) {
-        fileBlob = await convertForPreview(file, fileBlob);
+        fileBlob = await convertForPreview(file, fileBlob, enteWorker);
     }
 
     return fileBlob;
@@ -239,16 +261,23 @@ async function getOriginalFile(file: File, token: string) {
 export async function getOriginalImageBitmap(
     file: File,
     token: string,
+    enteWorker?: any,
+    queue?: PQueue,
     useCache: boolean = false
 ) {
     let fileBlob;
 
     if (useCache) {
         fileBlob = await cached('files', '/' + file.id.toString(), () => {
-            return getOriginalFile(file, token);
+            return getOriginalConvertedFile(file, token, enteWorker, queue);
         });
     } else {
-        fileBlob = await getOriginalFile(file, token);
+        fileBlob = await getOriginalConvertedFile(
+            file,
+            token,
+            enteWorker,
+            queue
+        );
     }
     console.log('[MLService] Got file: ', file.id.toString());
 
@@ -345,6 +374,14 @@ export function isDifferentOrOld(
         method.value !== thanMethod.value ||
         method.version < thanMethod.version
     );
+}
+
+export function logQueueStats(queue: PQueue, name: string) {
+    queue.on('active', () => {
+        console.log(
+            `queuestats: ${name}: Working on next item.  Size: ${queue.size}  Pending: ${queue.pending}`
+        );
+    });
 }
 
 export async function getMLSyncConfig() {

@@ -39,11 +39,9 @@ import {
     isDifferentOrOld,
 } from 'utils/machineLearning';
 import { MLFactory } from './machineLearningFactory';
-// import PQueue from 'p-queue';
 
 class MachineLearningService {
     private initialized = false;
-    // private syncQueue: PQueue;
     // private faceDetectionService: FaceDetectionService;
     // private faceLandmarkService: FAPIFaceLandmarksService;
     // private faceAlignmentService: FaceAlignmentService;
@@ -53,7 +51,6 @@ class MachineLearningService {
 
     public constructor() {
         setWasmPaths('/js/tfjs/');
-        // this.syncQueue = new PQueue({ concurrency: 4 });
         // this.faceDetectionService = new TFJSFaceDetectionService();
         // this.faceLandmarkService = new FAPIFaceLandmarksService();
         // this.faceAlignmentService = new ArcfaceAlignmentService();
@@ -107,7 +104,7 @@ class MachineLearningService {
         };
         // console.log('[MLService] sync results: ', mlSyncResult);
 
-        // await syncContext.dispose();
+        await syncContext.dispose();
         console.log('Final TF Memory stats: ', tf.memory());
 
         return mlSyncResult;
@@ -162,29 +159,33 @@ class MachineLearningService {
 
     private async syncFiles(syncContext: MLSyncContext) {
         for (const outOfSyncfile of syncContext.outOfSyncFiles) {
-            try {
-                const mlFileData = await this.syncFile(
-                    syncContext,
-                    outOfSyncfile
-                );
-                mlFileData.faces &&
-                    syncContext.syncedFaces.push(...mlFileData.faces);
-                syncContext.syncedFiles.push(outOfSyncfile);
-                console.log('TF Memory stats: ', tf.memory());
-            } catch (e) {
-                console.error(
-                    'Error while syncing file: ',
-                    outOfSyncfile.id,
-                    e
-                );
+            syncContext.syncQueue.add(async () => {
+                try {
+                    const mlFileData = await this.syncFile(
+                        syncContext,
+                        outOfSyncfile
+                    );
+                    mlFileData.faces &&
+                        syncContext.syncedFaces.push(...mlFileData.faces);
+                    syncContext.syncedFiles.push(outOfSyncfile);
+                    console.log('TF Memory stats: ', tf.memory());
+                } catch (e) {
+                    console.error(
+                        'Error while syncing file: ',
+                        outOfSyncfile.id,
+                        e
+                    );
 
-                await this.persistMLFileSyncError(
-                    syncContext,
-                    outOfSyncfile,
-                    e
-                );
-            }
+                    await this.persistMLFileSyncError(
+                        syncContext,
+                        outOfSyncfile,
+                        e
+                    );
+                }
+            });
         }
+        // TODO: can use addAll instead
+        await syncContext.syncQueue.onIdle();
         console.log('allFaces: ', syncContext.syncedFaces);
 
         await incrementIndexVersion('files');
@@ -292,7 +293,8 @@ class MachineLearningService {
         ) {
             fileContext.imageBitmap = await getOriginalImageBitmap(
                 fileContext.enteFile,
-                syncContext.token
+                syncContext.token,
+                await syncContext.getEnteWorker(fileContext.enteFile.id)
             );
             // fileContext.newMLFileData.imageSource = 'Original';
         } else {

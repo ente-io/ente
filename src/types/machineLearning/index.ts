@@ -7,6 +7,7 @@ import * as tf from '@tensorflow/tfjs-core';
 //     WithFaceLandmarks,
 // } from 'face-api.js';
 import { DebugInfo } from 'hdbscan';
+import PQueue from 'p-queue';
 
 import { Point as D3Point, RawNodeDatum } from 'react-d3-tree/lib/types/common';
 import { File } from 'services/fileService';
@@ -246,6 +247,10 @@ export interface MLSyncContext {
 
     // oldMLLibraryData: MLLibraryData;
     mlLibraryData: MLLibraryData;
+
+    syncQueue: PQueue;
+
+    getEnteWorker(id: number): Promise<any>;
 }
 
 export interface MLSyncFileContext {
