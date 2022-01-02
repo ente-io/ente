@@ -106,7 +106,7 @@ export class LocalMLSyncContext implements MLSyncContext {
     // TODO: wheather to limit concurrent downloads
     // private downloadQueue: PQueue;
 
-    private concurrancy: number;
+    private concurrency: number;
     private enteComlinkWorkers: Array<ComlinkWorker>;
     private enteWorkers: Array<any>;
 
@@ -114,7 +114,7 @@ export class LocalMLSyncContext implements MLSyncContext {
         token: string,
         config: MLSyncConfig,
         shouldUpdateMLVersion: boolean = true,
-        concurrancy?: number
+        concurrency?: number
     ) {
         this.token = token;
         this.config = config;
@@ -140,16 +140,16 @@ export class LocalMLSyncContext implements MLSyncContext {
         this.syncedFiles = [];
         this.syncedFaces = [];
 
-        this.concurrancy = concurrancy || CONCURRENCY;
+        this.concurrency = concurrency || CONCURRENCY;
 
-        console.log('Using concurrency: ', this.concurrancy);
-        this.syncQueue = new PQueue({ concurrency: this.concurrancy });
+        console.log('Using concurrency: ', this.concurrency);
+        this.syncQueue = new PQueue({ concurrency: this.concurrency });
         logQueueStats(this.syncQueue, 'sync');
         // this.downloadQueue = new PQueue({ concurrency: 1 });
         // logQueueStats(this.downloadQueue, 'download');
 
-        this.enteComlinkWorkers = new Array(this.concurrancy);
-        this.enteWorkers = new Array(this.concurrancy);
+        this.enteComlinkWorkers = new Array(this.concurrency);
+        this.enteWorkers = new Array(this.concurrency);
     }
 
     public async getEnteWorker(id: number): Promise<any> {
