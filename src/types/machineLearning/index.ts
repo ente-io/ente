@@ -240,6 +240,7 @@ export interface MLSyncContext {
     faceEmbeddingService: FaceEmbeddingService;
     faceClusteringService: ClusteringService;
 
+    localFiles: Promise<File[]>;
     outOfSyncFiles: File[];
     syncedFiles: File[];
     syncedFaces: Face[];

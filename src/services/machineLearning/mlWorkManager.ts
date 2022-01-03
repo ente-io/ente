@@ -30,6 +30,8 @@ class MLWorkManager {
         eventBus.on(Events.LOGOUT, this.logoutHandler, this);
 
         eventBus.on(Events.FILE_UPLOADED, this.fileUploadedHandler, this);
+
+        eventBus.on(Events.LOCAL_FILES_UPDATED, this.startSyncJob, this);
     }
 
     private async appStartHandler() {

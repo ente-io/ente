@@ -8,6 +8,7 @@ import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
 import CryptoWorker from 'utils/crypto';
+import { eventBus, Events } from './events';
 
 const ENDPOINT = getEndpoint();
 
@@ -133,6 +134,12 @@ export const getLocalFiles = async () => {
 
 export const setLocalFiles = async (files: File[]) => {
     await localForage.setItem(FILES_TABLE, files);
+
+    try {
+        eventBus.emit(Events.LOCAL_FILES_UPDATED);
+    } catch (e) {
+        logError(e, 'Error in localFileUpdated handlers');
+    }
 };
 
 const getCollectionLastSyncTime = async (collection: Collection) =>

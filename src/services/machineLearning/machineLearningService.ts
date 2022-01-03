@@ -77,6 +77,8 @@ class MachineLearningService {
             true
         );
 
+        await this.syncRemovedFiles(syncContext);
+
         await this.getOutOfSyncFiles(syncContext);
 
         if (syncContext.outOfSyncFiles.length > 0) {
@@ -117,6 +119,39 @@ class MachineLearningService {
         return mlFileData && mlFileData.mlVersion;
     }
 
+    private async getLocalFiles(syncContext: MLSyncContext) {
+        if (!syncContext.localFiles) {
+            syncContext.localFiles = getLocalFiles();
+        }
+
+        return syncContext.localFiles;
+    }
+
+    // TODO: not required if ml data is stored as field inside ente file object
+    // it removes ml data for files in trash, they will be resynced if restored
+    private async syncRemovedFiles(syncContext: MLSyncContext) {
+        const localFiles = await this.getLocalFiles(syncContext);
+        const localFileIdMap = new Map<number, boolean>();
+        localFiles.forEach((f) => localFileIdMap.set(f.id, true));
+
+        const removedFileIds: Array<string> = [];
+        await mlFilesStore.iterate((file, idStr) => {
+            if (!localFileIdMap.has(parseInt(idStr))) {
+                removedFileIds.push(idStr);
+            }
+        });
+
+        if (removedFileIds.length < 1) {
+            return;
+        }
+
+        removedFileIds.forEach((fileId) => mlFilesStore.removeItem(fileId));
+        console.log('Removed local file ids: ', removedFileIds);
+
+        await incrementIndexVersion('files');
+    }
+
+    // TODO: optimize
     private async getUniqueOutOfSyncFiles(
         syncContext: MLSyncContext,
         files: File[]
@@ -141,7 +176,7 @@ class MachineLearningService {
     }
 
     private async getOutOfSyncFiles(syncContext: MLSyncContext) {
-        const existingFiles = await getLocalFiles();
+        const existingFiles = await this.getLocalFiles(syncContext);
         existingFiles.sort(
             (a, b) => b.metadata.creationTime - a.metadata.creationTime
         );
