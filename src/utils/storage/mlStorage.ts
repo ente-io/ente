@@ -38,6 +38,7 @@ export const mlVersionStore = localForage.createInstance({
 export async function clearMLStorage() {
     await mlFilesStore.clear();
     await mlPeopleStore.clear();
+    await mlLibraryStore.clear();
     await mlVersionStore.clear();
 }
 

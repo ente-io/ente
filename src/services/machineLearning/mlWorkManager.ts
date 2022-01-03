@@ -88,6 +88,7 @@ class MLWorkManager {
     public async startSyncJob() {
         try {
             console.log('MLWorkManager.startSyncJob');
+            await this.mlSyncJob.resetInterval();
             const token = await getToken();
             const mlWorker = await this.getMLWorker();
             return this.mlSyncJob.start(token, mlWorker);

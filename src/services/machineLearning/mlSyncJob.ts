@@ -1,13 +1,19 @@
-import { MachineLearningWorker } from 'types/machineLearning';
+import { MachineLearningWorker, MLSyncConfig } from 'types/machineLearning';
 import { getMLSyncConfig } from 'utils/machineLearning';
 
 class MLSyncJob {
+    private mlSyncConfig: Promise<MLSyncConfig>;
+    private intervalSec: number;
     private nextTimeoutId: ReturnType<typeof setTimeout>;
 
-    constructor() {}
+    constructor() {
+        this.mlSyncConfig = getMLSyncConfig();
+    }
 
     public async start(token: string, mlWorker: MachineLearningWorker) {
-        const mlSyncConfig = await getMLSyncConfig();
+        if (!this.intervalSec) {
+            await this.resetInterval();
+        }
 
         if (this.nextTimeoutId) {
             this.stop();
@@ -15,21 +21,24 @@ class MLSyncJob {
 
         this.nextTimeoutId = setTimeout(
             () => this.sync(token, mlWorker),
-            mlSyncConfig.syncIntervalSec * 1000
+            this.intervalSec * 1000
         );
-        console.log(
-            'Scheduled next ML Sync after: ',
-            mlSyncConfig.syncIntervalSec
-        );
+        console.log('Scheduled next ML Sync after: ', this.intervalSec);
     }
 
     private async sync(token: string, mlWorker: MachineLearningWorker) {
         this.nextTimeoutId = undefined;
 
-        // const mlSyncConfig = await mlService.getMLSyncConfig();
         console.log('Running ML Sync');
         try {
             const results = await mlWorker.sync(token);
+            if (results.nOutOfSyncFiles < 1) {
+                const mlSyncConfig = await this.mlSyncConfig;
+                this.intervalSec = Math.min(
+                    mlSyncConfig.maxSyncIntervalSec,
+                    this.intervalSec * 2
+                );
+            }
             console.log('Ran machine learning sync from worker', results);
         } catch (e) {
             console.error('Error while running MLSync: ', e);
@@ -46,6 +55,11 @@ class MLSyncJob {
         clearTimeout(this.nextTimeoutId);
         this.nextTimeoutId = undefined;
         console.log('Cancelled next scheduled ML Sync');
+    }
+
+    public async resetInterval() {
+        const mlSyncConfig = await this.mlSyncConfig;
+        this.intervalSec = mlSyncConfig.syncIntervalSec;
     }
 }
 

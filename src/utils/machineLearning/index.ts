@@ -390,6 +390,7 @@ export async function getMLSyncConfig() {
 
 const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     syncIntervalSec: 30,
+    maxSyncIntervalSec: 32768,
     batchSize: 200,
     imageSource: 'Original',
     faceDetection: {
