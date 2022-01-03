@@ -88,8 +88,7 @@ class RemoteSyncService {
       _existingSync = null;
       if (hasUploadedFiles) {
         await _pullDiff(true);
-        final pending = await _getFilesToBeUploaded();
-        final hasMoreFilesToBackup = pending.isNotEmpty;
+        final hasMoreFilesToBackup = (await _getFilesToBeUploaded()).isNotEmpty;
         if (hasMoreFilesToBackup && !_shouldThrottleSync()) {
           // Skipping a resync to ensure that files that were ignored in this
           // session are not processed now
