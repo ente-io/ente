@@ -299,9 +299,11 @@ export async function getLocalFileImageBitmap(localFile: globalThis.File) {
 }
 
 export async function getPeopleList(file: File): Promise<Array<Person>> {
+    console.time('getPeopleList:mlFilesStore:getItem');
     const mlFileData: MlFileData = await mlFilesStore.getItem(
         file.id.toString()
     );
+    console.timeEnd('getPeopleList:mlFilesStore:getItem');
     if (!mlFileData?.faces || mlFileData.faces.length < 1) {
         return [];
     }
@@ -313,10 +315,12 @@ export async function getPeopleList(file: File): Promise<Array<Person>> {
         return [];
     }
     // console.log("peopleIds: ", peopleIds);
+    console.time('getPeopleList:mlPeopleStore:getItems');
     const peoplePromises = peopleIds.map(
         (p) => mlPeopleStore.getItem(p.toString()) as Promise<Person>
     );
     const peopleList = await Promise.all(peoplePromises);
+    console.timeEnd('getPeopleList:mlPeopleStore:getItems');
     // console.log("peopleList: ", peopleList);
 
     return peopleList;

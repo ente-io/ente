@@ -68,7 +68,11 @@ export function PhotoPeopleList(props: PhotoPeopleListProps) {
         let didCancel = false;
 
         async function updateFaceImages() {
+            console.log('calling getPeopleList');
+            console.time('getPeopleList');
             const people = await getPeopleList(props.file);
+            console.timeEnd('getPeopleList');
+            console.log('getPeopleList done, didCancel: ', didCancel);
             !didCancel && setPeople(people);
         }
 

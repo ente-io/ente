@@ -151,7 +151,7 @@ class MachineLearningService {
         await incrementIndexVersion('files');
     }
 
-    // TODO: optimize
+    // TODO: optimize, use indexdb indexes, move facecrops to cache to reduce io
     private async getUniqueOutOfSyncFiles(
         syncContext: MLSyncContext,
         files: File[]
@@ -177,13 +177,15 @@ class MachineLearningService {
 
     private async getOutOfSyncFiles(syncContext: MLSyncContext) {
         const existingFiles = await this.getLocalFiles(syncContext);
-        existingFiles.sort(
-            (a, b) => b.metadata.creationTime - a.metadata.creationTime
-        );
+        // existingFiles.sort(
+        //     (a, b) => b.metadata.creationTime - a.metadata.creationTime
+        // );
+        console.time('getUniqueOutOfSyncFiles');
         syncContext.outOfSyncFiles = await this.getUniqueOutOfSyncFiles(
             syncContext,
             existingFiles
         );
+        console.timeEnd('getUniqueOutOfSyncFiles');
         console.log(
             'Got unique outOfSyncFiles: ',
             syncContext.outOfSyncFiles.length,
