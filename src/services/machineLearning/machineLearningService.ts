@@ -207,7 +207,13 @@ class MachineLearningService {
         // await this.init();
 
         try {
-            return await this.syncFile(syncContext, enteFile, localFile);
+            const mlFileData = await this.syncFile(
+                syncContext,
+                enteFile,
+                localFile
+            );
+            await syncContext.dispose();
+            return mlFileData;
         } catch (e) {
             console.error('Error while syncing local file: ', enteFile.id, e);
             await this.persistMLFileSyncError(syncContext, enteFile, e);
