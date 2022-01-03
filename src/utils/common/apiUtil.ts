@@ -25,7 +25,7 @@ export const getThumbnailUrl = (id: number) => {
 };
 
 export const getSentryTunnelUrl = () => {
-    return `https://sentry.functions.ente.io`;
+    return `https://sentry-reporter.ente.io`;
 };
 
 export const getPaymentsUrl = () => {
