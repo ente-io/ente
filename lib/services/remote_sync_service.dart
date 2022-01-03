@@ -106,7 +106,7 @@ class RemoteSyncService {
   }
 
   Future<void> _pullDiff(bool silently) async {
-    bool isFirstSync = !_collectionsService.hasSyncedCollections();
+    final isFirstSync = !_collectionsService.hasSyncedCollections();
     await _collectionsService.sync();
 
     if (isFirstSync || _hasReSynced()) {
