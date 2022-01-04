@@ -7,7 +7,7 @@ import {
     setData,
 } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import { KeyAttributes, PAGES } from 'types';
+import { PAGES } from 'types';
 import CryptoWorker, {
     decryptAndStoreToken,
     SaveKeyInSessionStore,
@@ -20,7 +20,7 @@ import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { User } from 'services/userService';
+import { KeyAttributes, User } from 'types/user';
 const bip39 = require('bip39');
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');

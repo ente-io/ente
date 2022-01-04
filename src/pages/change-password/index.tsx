@@ -8,11 +8,12 @@ import CryptoWorker, {
     B64EncryptionResult,
 } from 'utils/crypto';
 import { getActualKey } from 'utils/common/key';
-import { setKeys, UpdatedKey } from 'services/userService';
+import { setKeys } from 'services/userService';
 import SetPasswordForm from 'components/SetPasswordForm';
 import { AppContext } from 'pages/_app';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'types';
+import { UpdatedKey } from 'types/user';
 
 export interface KEK {
     key: string;

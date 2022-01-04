@@ -6,7 +6,7 @@ import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import { Button, Col, Table } from 'react-bootstrap';
 import { DeadCenter } from 'pages/gallery';
-import { User } from 'services/userService';
+import { User } from 'types/user';
 import { shareCollection, unshareCollection } from 'services/collectionService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SubmitButton from './SubmitButton';

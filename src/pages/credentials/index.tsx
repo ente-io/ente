@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import { KeyAttributes, PAGES } from 'types';
+import { PAGES } from 'types';
 import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker, {
     decryptAndStoreToken,
@@ -18,6 +18,7 @@ import { Button, Card } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
+import { KeyAttributes } from 'types/user';
 
 export default function Credentials() {
     const router = useRouter();

@@ -1,4 +1,4 @@
-import { User } from 'services/userService';
+import { User } from 'types/user';
 import { EnteFile } from 'types/file';
 
 export enum CollectionType {

@@ -9,7 +9,7 @@ import { getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { CustomError } from 'utils/common/errorUtil';
 import { SelectedState } from 'pages/gallery';
-import { User } from 'services/userService';
+import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { SetDialogMessage } from 'components/MessageDialog';
 import { logError } from 'utils/sentry';

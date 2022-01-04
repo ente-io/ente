@@ -5,7 +5,7 @@ import {} from 'services/collectionService';
 import AddCollectionButton from './AddCollectionButton';
 import PreviewCard from './PreviewCard';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { User } from 'services/userService';
+import { User } from 'types/user';
 import {
     Collection,
     CollectionAndItsLatestFile,

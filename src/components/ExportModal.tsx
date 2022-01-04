@@ -9,7 +9,7 @@ import {
     ExportType,
 } from 'types/export';
 import { getLocalFiles } from 'services/fileService';
-import { User } from 'services/userService';
+import { User } from 'types/user';
 import styled from 'styled-components';
 import { sleep } from 'utils/common';
 import { getExportRecordFileUID } from 'utils/export';

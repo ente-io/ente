@@ -13,7 +13,7 @@ import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
 import DownloadManager from 'services/downloadManager';
 import { logError } from 'utils/sentry';
-import { User } from 'services/userService';
+import { User } from 'types/user';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { updateFileCreationDateInEXIF } from 'services/upload/exifService';

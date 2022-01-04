@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import constants from 'utils/strings/constants';
-import { logoutUser, putAttributes, User } from 'services/userService';
+import { logoutUser, putAttributes } from 'services/userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
@@ -12,11 +12,12 @@ import {
 import SetPasswordForm from 'components/SetPasswordForm';
 import { justSignedUp, setJustSignedUp } from 'utils/storage';
 import RecoveryKeyModal from 'components/RecoveryKeyModal';
-import { KeyAttributes, PAGES } from 'types';
+import { PAGES } from 'types';
 import Container from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
+import { KeyAttributes, User } from 'types/user';
 
 export interface KEK {
     key: string;

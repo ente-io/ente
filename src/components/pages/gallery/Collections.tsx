@@ -6,7 +6,7 @@ import NavigationButton, {
 import React, { useEffect, useRef, useState } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { sortCollections } from 'services/collectionService';
-import { User } from 'services/userService';
+import { User } from 'types/user';
 import styled from 'styled-components';
 import { IMAGE_CONTAINER_MAX_WIDTH } from 'types';
 import {

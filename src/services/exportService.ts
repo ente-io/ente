@@ -39,7 +39,7 @@ import {
     TYPE_JPEG,
     TYPE_JPG,
 } from 'utils/file';
-import { User } from './userService';
+
 import { updateFileCreationDateInEXIF } from './upload/exifService';
 import { MetadataObject } from 'types/upload';
 import QueueProcessor from './upload/queueProcessor';
@@ -52,6 +52,7 @@ import {
     RecordType,
     ExportRecord,
 } from 'types/export';
+import { User } from 'types/user';
 
 const LATEST_EXPORT_VERSION = 1;
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';

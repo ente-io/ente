@@ -19,11 +19,9 @@ import RemoveIcon from 'components/icons/RemoveIcon';
 import RestoreIcon from 'components/icons/RestoreIcon';
 import ClockIcon from 'components/icons/ClockIcon';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import {
-    FIX_CREATION_TIME_VISIBLE_TO_USER_IDS,
-    User,
-} from 'services/userService';
+import { FIX_CREATION_TIME_VISIBLE_TO_USER_IDS } from 'services/userService';
 import DownloadIcon from 'components/icons/DownloadIcon';
+import { User } from 'types/user';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
