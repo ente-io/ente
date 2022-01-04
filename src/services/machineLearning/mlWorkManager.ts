@@ -4,7 +4,6 @@ import { eventBus, Events } from 'services/events';
 import { File } from 'services/fileService';
 import { MachineLearningWorker, MLSyncConfig } from 'types/machineLearning';
 import { getToken } from 'utils/common/key';
-import { migrateExistingFiles } from 'utils/machineLearning';
 import { getDedicatedMLWorker } from 'utils/machineLearning/worker';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -40,12 +39,6 @@ class MLWorkManager {
             const user = getData(LS_KEYS.USER);
             if (user?.token) {
                 this.startSyncJob();
-                const filesVersion = await mlIDbStorage.getIndexVersion(
-                    'files'
-                );
-                if (!filesVersion) {
-                    await migrateExistingFiles();
-                }
             }
         } catch (e) {
             logError(e, 'Failed in ML appStart Handler');
