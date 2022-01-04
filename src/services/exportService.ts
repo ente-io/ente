@@ -40,7 +40,7 @@ import {
 } from 'utils/file';
 import { User } from './userService';
 import { updateFileCreationDateInEXIF } from './upload/exifService';
-import { MetadataObject } from './upload/uploadService';
+import { MetadataObject } from 'types/upload';
 import QueueProcessor from './upload/queueProcessor';
 
 export type CollectionIDPathMap = Map<number, string>;

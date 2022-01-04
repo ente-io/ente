@@ -8,7 +8,7 @@ import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
 import { B64EncryptionResult } from 'utils/crypto';
 import { logError } from 'utils/sentry';
-import { Subscription } from './billingService';
+import { Subscription } from 'types/billing';
 
 export interface UpdatedKey {
     kekSalt: string;

@@ -13,7 +13,7 @@ import {
     isSubscriptionCancelled,
     isSubscribed,
     convertToHumanReadable,
-} from 'utils/billingUtil';
+} from 'utils/billing';
 
 import isElectron from 'is-electron';
 import { Collection } from 'services/collectionService';
@@ -30,7 +30,7 @@ import ExportModal from './ExportModal';
 import { GalleryContext, SetLoading } from 'pages/gallery';
 import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
-import { Subscription } from 'services/billingService';
+import { Subscription } from 'types/billing';
 import { PAGES } from 'types';
 import {
     ARCHIVE_SECTION,

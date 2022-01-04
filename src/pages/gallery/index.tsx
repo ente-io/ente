@@ -31,7 +31,7 @@ import {
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import billingService from 'services/billingService';
-import { checkSubscriptionPurchase } from 'utils/billingUtil';
+import { checkSubscriptionPurchase } from 'utils/billing';
 
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';

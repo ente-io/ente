@@ -1,15 +1,12 @@
 import constants from 'utils/strings/constants';
-import billingService, {
-    FREE_PLAN,
-    Plan,
-    Subscription,
-} from 'services/billingService';
+import billingService from 'services/billingService';
+import { FREE_PLAN, Plan, Subscription } from 'types/billing';
 import { NextRouter } from 'next/router';
 import { SetDialogMessage } from 'components/MessageDialog';
 import { SetLoading } from 'pages/gallery';
-import { getData, LS_KEYS } from './storage/localStorage';
-import { CustomError } from './common/errorUtil';
-import { logError } from './sentry';
+import { getData, LS_KEYS } from '../storage/localStorage';
+import { CustomError } from '../common/errorUtil';
+import { logError } from '../sentry';
 
 const STRIPE = 'stripe';
 

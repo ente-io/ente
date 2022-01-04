@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Form, Modal, Button } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
-import billingService, { Plan, Subscription } from 'services/billingService';
+import { Plan, Subscription } from 'types/billing';
 import {
     convertBytesToGBs,
     getUserSubscription,
@@ -16,12 +16,13 @@ import {
     hasPaidSubscription,
     isOnFreePlan,
     planForSubscription,
-} from 'utils/billingUtil';
+} from 'utils/billing';
 import { reverseString } from 'utils/common';
 import { SetDialogMessage } from 'components/MessageDialog';
 import ArrowEast from 'components/icons/ArrowEast';
 import LinkButton from './LinkButton';
 import { DeadCenter, SetLoading } from 'pages/gallery';
+import billingService from 'services/billingService';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     border-radius: 20px;
