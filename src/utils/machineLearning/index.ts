@@ -19,6 +19,7 @@ import { imageBitmapToBlob } from 'utils/image';
 import { NormalizedFace } from '@tensorflow-models/blazeface';
 import PQueue from 'p-queue';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
+import { mlFilesStore } from 'utils/storage/mlStorage';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -383,6 +384,28 @@ export function logQueueStats(queue: PQueue, name: string) {
             `queuestats: ${name}: Working on next item.  Size: ${queue.size}  Pending: ${queue.pending}`
         );
     });
+}
+
+// TODO: for migrating existing data, to be removed
+export async function migrateExistingFiles() {
+    const existingFiles: Array<MlFileData> = [];
+    await mlFilesStore.iterate((mlFileData: MlFileData) => {
+        if (!mlFileData.errorCount) {
+            mlFileData.errorCount = 0;
+            existingFiles.push(mlFileData);
+        }
+    });
+    console.log('existing files: ', existingFiles.length);
+
+    try {
+        for (const file of existingFiles) {
+            await mlIDbStorage.putFile(file);
+        }
+        await mlIDbStorage.setIndexVersion('files', 1);
+        console.log('migrateExistingFiles done');
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function getMLSyncConfig() {

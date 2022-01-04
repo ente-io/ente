@@ -8,7 +8,6 @@ import {
 } from 'idb';
 import { Face, MlFileData, MLLibraryData, Person } from 'types/machineLearning';
 import { runningInBrowser } from 'utils/common';
-import { mlFilesStore } from './mlStorage';
 
 interface MLDb extends DBSchema {
     files: {
@@ -37,6 +36,7 @@ class MLIDbStorage {
         if (!runningInBrowser()) {
             return;
         }
+
         this.db = openDB<MLDb>('mldata', 1, {
             upgrade(db) {
                 const filesStore = db.createObjectStore('files', {
@@ -54,13 +54,6 @@ class MLIDbStorage {
                 db.createObjectStore('versions');
 
                 db.createObjectStore('library');
-
-                // TODO: for migrating existing data, to be removed
-                mlFilesStore.iterate((mlFileData: MlFileData) => {
-                    mlFileData.errorCount = mlFileData.errorCount || 0;
-                    db.put('files', mlFileData);
-                });
-                db.put('versions', 1, 'files');
             },
         });
     }
