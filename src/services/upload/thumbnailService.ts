@@ -9,7 +9,7 @@ import { FileTypeInfo } from './readFileService';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
-export const MAX_THUMBNAIL_SIZE = 100 * 1024;
+const MAX_THUMBNAIL_SIZE = 100 * 1024;
 const MIN_QUALITY = 0.5;
 const MAX_QUALITY = 0.7;
 

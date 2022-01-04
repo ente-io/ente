@@ -1,7 +1,5 @@
 import { DataStream, MetadataObject } from 'types/upload';
 
-export const FILES_TABLE = 'files';
-
 export const MIN_EDITED_CREATION_TIME = new Date(1800, 0, 1);
 export const MAX_EDITED_CREATION_TIME = new Date();
 export const ALL_TIME = new Date(1800, 0, 1, 23, 59, 59);

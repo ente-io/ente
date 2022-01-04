@@ -8,14 +8,10 @@ import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
 import CryptoWorker from 'utils/crypto';
-import {
-    EnteFile,
-    FILES_TABLE,
-    TrashRequest,
-    UpdateMagicMetadataRequest,
-} from 'types/file';
+import { EnteFile, TrashRequest, UpdateMagicMetadataRequest } from 'types/file';
 
 const ENDPOINT = getEndpoint();
+const FILES_TABLE = 'files';
 
 export const getLocalFiles = async () => {
     const files: Array<EnteFile> =
