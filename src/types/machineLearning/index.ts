@@ -164,14 +164,14 @@ export interface Person {
 export interface MlFileData {
     fileId: number;
     faces?: Face[];
-    imageSource: ImageType;
+    imageSource?: ImageType;
     imageDimentions?: Dimensions;
-    detectionMethod: Versioned<FaceDetectionMethod>;
-    faceCropMethod: Versioned<FaceCropMethod>;
-    alignmentMethod: Versioned<FaceAlignmentMethod>;
-    embeddingMethod: Versioned<FaceEmbeddingMethod>;
+    detectionMethod?: Versioned<FaceDetectionMethod>;
+    faceCropMethod?: Versioned<FaceCropMethod>;
+    alignmentMethod?: Versioned<FaceAlignmentMethod>;
+    embeddingMethod?: Versioned<FaceEmbeddingMethod>;
     mlVersion: number;
-    errorCount?: number;
+    errorCount: number;
     lastErrorMessage?: string;
 }
 
@@ -240,7 +240,7 @@ export interface MLSyncContext {
     faceEmbeddingService: FaceEmbeddingService;
     faceClusteringService: ClusteringService;
 
-    localFiles: Promise<File[]>;
+    localFilesMap: Map<number, File>;
     outOfSyncFiles: File[];
     syncedFiles: File[];
     syncedFaces: Face[];

@@ -7,13 +7,14 @@ import { PAGES } from 'types';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
 import TFJSImage from './TFJSImage';
-import { Face, MLDebugResult, MLLibraryData } from 'types/machineLearning';
+import { Face, MLDebugResult } from 'types/machineLearning';
 import Tree from 'react-d3-tree';
 import MLFileDebugView from './MLFileDebugView';
 import mlWorkManager from 'services/machineLearning/mlWorkManager';
-import { getAllFacesMap, mlLibraryStore } from 'utils/storage/mlStorage';
+// import { getAllFacesMap, mlLibraryStore } from 'utils/storage/mlStorage';
 import { getAllFacesFromMap } from 'utils/machineLearning';
 import { FaceImagesRow, ImageBlobView } from './ImageViews';
+import mlIDbStorage from 'utils/storage/mlIDbStorage';
 
 interface TSNEProps {
     mlResult: MLDebugResult;
@@ -170,10 +171,12 @@ export default function MLDebug() {
     };
 
     const onLoadNoiseFaces = async () => {
-        const mlLibraryData = await mlLibraryStore.getItem<MLLibraryData>(
-            'data'
-        );
-        const allFacesMap = await getAllFacesMap();
+        // const mlLibraryData = await mlLibraryStore.getItem<MLLibraryData>(
+        //     'data'
+        // );
+        const mlLibraryData = await mlIDbStorage.getLibraryData();
+
+        const allFacesMap = await mlIDbStorage.getAllFacesMap();
         const allFaces = getAllFacesFromMap(allFacesMap);
 
         const noiseFaces = mlLibraryData?.faceClusteringResults?.noise

@@ -45,6 +45,7 @@
     "hdbscanjs": "^1.0.12",
     "heic-convert": "^1.2.4",
     "http-proxy-middleware": "^1.0.5",
+    "idb": "^7.0.0",
     "is-electron": "^2.2.0",
     "jpeg-js": "^0.4.3",
     "jszip": "3.7.1",

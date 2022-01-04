@@ -32,12 +32,14 @@ class MLSyncJob {
         console.log('Running ML Sync');
         try {
             const results = await mlWorker.sync(token);
+            const mlSyncConfig = await this.mlSyncConfig;
             if (results.nOutOfSyncFiles < 1) {
-                const mlSyncConfig = await this.mlSyncConfig;
                 this.intervalSec = Math.min(
                     mlSyncConfig.maxSyncIntervalSec,
                     this.intervalSec * 2
                 );
+            } else {
+                this.intervalSec = mlSyncConfig.syncIntervalSec;
             }
             console.log('Ran machine learning sync from worker', results);
         } catch (e) {

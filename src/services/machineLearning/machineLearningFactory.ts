@@ -94,7 +94,7 @@ export class LocalMLSyncContext implements MLSyncContext {
     public faceEmbeddingService: FaceEmbeddingService;
     public faceClusteringService: ClusteringService;
 
-    public localFiles: Promise<File[]>;
+    public localFilesMap: Map<number, File>;
     public outOfSyncFiles: File[];
     public syncedFiles: File[];
     public syncedFaces: Face[];
@@ -167,7 +167,7 @@ export class LocalMLSyncContext implements MLSyncContext {
         // await this.faceDetectionService.dispose();
         // await this.faceEmbeddingService.dispose();
 
-        this.localFiles = undefined;
+        this.localFilesMap = undefined;
         await this.syncQueue.onIdle();
         this.syncQueue.removeAllListeners();
         for (const enteComlinkWorker of this.enteComlinkWorkers) {

@@ -7,7 +7,7 @@ import { getToken } from 'utils/common/key';
 import { getDedicatedMLWorker } from 'utils/machineLearning/worker';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { clearMLStorage } from 'utils/storage/mlStorage';
+import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import MLSyncJob from './mlSyncJob';
 
 class MLWorkManager {
@@ -48,7 +48,7 @@ class MLWorkManager {
     private async logoutHandler() {
         try {
             await this.stopSyncJob();
-            await clearMLStorage();
+            await mlIDbStorage.clearMLDB();
         } catch (e) {
             logError(e, 'Failed in ML logout Handler');
         }

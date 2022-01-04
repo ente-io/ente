@@ -12,12 +12,13 @@ import {
     Versioned,
 } from 'types/machineLearning';
 import { ibExtractFaceImage } from './faceAlign';
-import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
+// import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
 import { convertForPreview, needsConversionForPreview } from 'utils/file';
 import { cached } from 'utils/storage/cache';
 import { imageBitmapToBlob } from 'utils/image';
 import { NormalizedFace } from '@tensorflow-models/blazeface';
 import PQueue from 'p-queue';
+import mlIDbStorage from 'utils/storage/mlIDbStorage';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -300,9 +301,7 @@ export async function getLocalFileImageBitmap(localFile: globalThis.File) {
 
 export async function getPeopleList(file: File): Promise<Array<Person>> {
     console.time('getPeopleList:mlFilesStore:getItem');
-    const mlFileData: MlFileData = await mlFilesStore.getItem(
-        file.id.toString()
-    );
+    const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
     console.timeEnd('getPeopleList:mlFilesStore:getItem');
     if (!mlFileData?.faces || mlFileData.faces.length < 1) {
         return [];
@@ -317,7 +316,7 @@ export async function getPeopleList(file: File): Promise<Array<Person>> {
     // console.log("peopleIds: ", peopleIds);
     console.time('getPeopleList:mlPeopleStore:getItems');
     const peoplePromises = peopleIds.map(
-        (p) => mlPeopleStore.getItem(p.toString()) as Promise<Person>
+        (p) => mlIDbStorage.getPerson(p) as Promise<Person>
     );
     const peopleList = await Promise.all(peoplePromises);
     console.timeEnd('getPeopleList:mlPeopleStore:getItems');
@@ -329,9 +328,7 @@ export async function getPeopleList(file: File): Promise<Array<Person>> {
 export async function getUnidentifiedFaces(
     file: File
 ): Promise<Array<FaceImageBlob>> {
-    const mlFileData: MlFileData = await mlFilesStore.getItem(
-        file.id.toString()
-    );
+    const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
 
     const faceImages = mlFileData?.faces
         ?.filter((f) => f.personId === null || f.personId === undefined)
@@ -342,10 +339,10 @@ export async function getUnidentifiedFaces(
 }
 
 export async function getAllPeople() {
-    const people: Array<Person> = [];
-    await mlPeopleStore.iterate<Person, void>((person) => {
-        people.push(person);
-    });
+    const people: Array<Person> = await mlIDbStorage.getAllPeople();
+    // await mlPeopleStore.iterate<Person, void>((person) => {
+    //     people.push(person);
+    // });
 
     return people.sort((p1, p2) => p2.files.length - p1.files.length);
 }

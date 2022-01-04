@@ -81,6 +81,7 @@ export function newMlData(
         faceCropMethod: syncContext.faceCropService.method,
         alignmentMethod: syncContext.faceAlignmentService.method,
         embeddingMethod: syncContext.faceEmbeddingService.method,
+        errorCount: 0,
         mlVersion: 0,
     };
 }
