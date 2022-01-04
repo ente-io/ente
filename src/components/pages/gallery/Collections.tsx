@@ -22,10 +22,11 @@ import { SetCollectionNamerAttributes } from './CollectionNamer';
 import CollectionOptions from './CollectionOptions';
 import CollectionSort from './CollectionSort';
 import OptionIcon, { OptionIconWrapper } from './OptionIcon';
-
-export const ARCHIVE_SECTION = -1;
-export const TRASH_SECTION = -2;
-export const ALL_SECTION = 0;
+import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    TRASH_SECTION,
+} from 'constants/collection';
 
 interface CollectionProps {
     collections: Collection[];

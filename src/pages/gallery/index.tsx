@@ -64,11 +64,11 @@ import AlertBanner from 'components/pages/gallery/AlertBanner';
 import UploadButton from 'components/pages/gallery/UploadButton';
 import PlanSelector from 'components/pages/gallery/PlanSelector';
 import Upload from 'components/pages/gallery/Upload';
-import Collections, {
+import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     TRASH_SECTION,
-} from 'components/pages/gallery/Collections';
+} from 'constants/collection';
 import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
 import { PAGES } from 'constants/pages';
@@ -100,6 +100,7 @@ import {
 } from 'types/collection';
 import { EnteFile, VISIBILITY_STATE } from 'types/file';
 import { GalleryContextType, SelectedState, Search } from 'types/gallery';
+import Collections from 'components/pages/gallery/Collections';
 
 export const DeadCenter = styled.div`
     flex: 1;

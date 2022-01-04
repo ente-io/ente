@@ -11,7 +11,11 @@ import constants from 'utils/strings/constants';
 import Archive from 'components/icons/Archive';
 import MoveIcon from 'components/icons/MoveIcon';
 import { COLLECTION_OPS_TYPE } from 'utils/collection';
-import { ALL_SECTION, ARCHIVE_SECTION, TRASH_SECTION } from './Collections';
+import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    TRASH_SECTION,
+} from 'constants/collection';
 import UnArchive from 'components/icons/UnArchive';
 import { OverlayTrigger } from 'react-bootstrap';
 import { Collection } from 'types/collection';

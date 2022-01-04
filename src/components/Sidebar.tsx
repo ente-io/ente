@@ -32,10 +32,7 @@ import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
 import { Subscription } from 'types/billing';
 import { PAGES } from 'constants/pages';
-import {
-    ARCHIVE_SECTION,
-    TRASH_SECTION,
-} from 'components/pages/gallery/Collections';
+import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 import FixLargeThumbnails from './FixLargeThumbnail';
 import { SetLoading } from 'types/gallery';
 interface Props {

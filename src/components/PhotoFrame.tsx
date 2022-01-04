@@ -15,7 +15,7 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     TRASH_SECTION,
-} from './pages/gallery/Collections';
+} from 'constants/collection';
 import { isSharedFile } from 'utils/file';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
