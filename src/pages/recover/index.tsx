@@ -7,7 +7,7 @@ import {
     setData,
 } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import { PAGES } from 'utils/constants';
+import { PAGES } from 'constants/pages';
 import CryptoWorker, {
     decryptAndStoreToken,
     SaveKeyInSessionStore,

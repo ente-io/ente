@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import { PAGES } from 'utils/constants';
+import { PAGES } from 'constants/pages';
 import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker, {
     decryptAndStoreToken,

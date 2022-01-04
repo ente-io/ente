@@ -71,7 +71,7 @@ import Collections, {
 } from 'components/pages/gallery/Collections';
 import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
-import { PAGES } from 'utils/constants';
+import { PAGES } from 'constants/pages';
 import {
     COLLECTION_OPS_TYPE,
     isSharedCollection,

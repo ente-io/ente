@@ -14,7 +14,7 @@ import { B64EncryptionResult } from 'utils/crypto';
 import { encryptWithRecoveryKey } from 'utils/crypto';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
-import { PAGES } from 'utils/constants';
+import { PAGES } from 'constants/pages';
 import { TwoFactorSecret } from 'types/user';
 
 enum SetupMode {

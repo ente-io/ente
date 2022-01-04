@@ -12,7 +12,7 @@ import {
 import SetPasswordForm from 'components/SetPasswordForm';
 import { justSignedUp, setJustSignedUp } from 'utils/storage';
 import RecoveryKeyModal from 'components/RecoveryKeyModal';
-import { PAGES } from 'utils/constants';
+import { PAGES } from 'constants/pages';
 import Container from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { AppContext } from 'pages/_app';

@@ -5,7 +5,7 @@ import PlayCircleOutline from 'components/icons/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
 import { GalleryContext } from 'pages/gallery';
-import { GAP_BTW_TILES } from 'utils/constants';
+import { GAP_BTW_TILES } from 'constants/gallery';
 
 interface IProps {
     file: EnteFile;

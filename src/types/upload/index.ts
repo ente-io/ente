@@ -1,5 +1,5 @@
 import { fileAttribute, FILE_TYPE } from 'types/file';
-import { ENCRYPTION_CHUNK_SIZE } from 'utils/constants';
+import { ENCRYPTION_CHUNK_SIZE } from 'constants/crypto';
 
 // list of format that were missed by type-detection for some files.
 export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [

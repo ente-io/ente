@@ -6,7 +6,7 @@ import Login from 'components/Login';
 import Container from 'components/Container';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import Card from 'react-bootstrap/Card';
-import { PAGES } from 'utils/constants';
+import { PAGES } from 'constants/pages';
 
 export default function Home() {
     const router = useRouter();

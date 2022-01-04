@@ -5,7 +5,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { disableTwoFactor, getTwoFactorStatus } from 'services/userService';
 import { SetLoading } from 'types/gallery';
-import { PAGES } from 'utils/constants';
+import { PAGES } from 'constants/pages';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 import { Label, Value, Row } from './Container';
