@@ -18,17 +18,7 @@ import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
 import { handleUploadError } from 'utils/common/errorUtil';
 import { MetadataMap } from './uploadManager';
-import {
-    DataStream,
-    EncryptionResult,
-    FILE_READER_CHUNK_SIZE,
-    MetadataObject,
-    MULTIPART_PART_SIZE,
-} from 'types/upload';
-
-export const FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART = Math.floor(
-    MULTIPART_PART_SIZE / FILE_READER_CHUNK_SIZE
-);
+import { DataStream, EncryptionResult, MetadataObject } from 'types/upload';
 
 export interface UploadURL {
     url: string;

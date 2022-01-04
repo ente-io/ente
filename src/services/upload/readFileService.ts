@@ -4,7 +4,7 @@ import {
     FILE_READER_CHUNK_SIZE,
     FORMAT_MISSED_BY_FILE_TYPE_LIB,
     MULTIPART_PART_SIZE,
-} from 'types/upload';
+} from 'constants/upload';
 import FileType from 'file-type/browser';
 import { CustomError } from 'utils/common/errorUtil';
 import { getFileExtension } from 'utils/file';
