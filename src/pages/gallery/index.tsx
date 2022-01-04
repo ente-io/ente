@@ -52,8 +52,8 @@ import {
     sortFiles,
     sortFilesIntoCollections,
 } from 'utils/file';
-import SearchBar, { DateValue } from 'components/SearchBar';
-import { Bbox } from 'services/searchService';
+import { DateValue, Bbox } from 'types/search';
+import SearchBar from 'components/SearchBar';
 import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
 import CollectionSelector, {
     CollectionSelectorAttributes,

@@ -5,7 +5,6 @@ import AsyncSelect from 'react-select/async';
 import { components } from 'react-select';
 import debounce from 'debounce-promise';
 import {
-    Bbox,
     getHolidaySuggestion,
     getYearSuggestion,
     parseHumanDate,
@@ -26,6 +25,7 @@ import ImageIcon from './icons/ImageIcon';
 import VideoIcon from './icons/VideoIcon';
 import { IconButton } from './Container';
 import { EnteFile, FILE_TYPE } from 'types/file';
+import { Suggestion, SuggestionType, DateValue, Bbox } from 'types/search';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -76,23 +76,6 @@ const SearchInput = styled.div`
     margin: auto;
 `;
 
-export enum SuggestionType {
-    DATE,
-    LOCATION,
-    COLLECTION,
-    IMAGE,
-    VIDEO,
-}
-export interface DateValue {
-    date?: number;
-    month?: number;
-    year?: number;
-}
-export interface Suggestion {
-    type: SuggestionType;
-    label: string;
-    value: Bbox | DateValue | number;
-}
 interface Props {
     isOpen: boolean;
     isFirstFetch: boolean;
