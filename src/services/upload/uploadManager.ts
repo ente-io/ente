@@ -125,7 +125,7 @@ class UploadManager {
                             fileWithCollection.collectionID,
                             title
                         ),
-                        parsedMetaDataJSON
+                        { ...parsedMetaDataJSON }
                     );
                     UIService.increaseFileUploaded();
                 }
