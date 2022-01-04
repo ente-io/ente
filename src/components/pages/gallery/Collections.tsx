@@ -5,16 +5,16 @@ import NavigationButton, {
 } from 'components/NavigationButton';
 import React, { useEffect, useRef, useState } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
-import {
-    Collection,
-    CollectionAndItsLatestFile,
-    CollectionType,
-    COLLECTION_SORT_BY,
-    sortCollections,
-} from 'services/collectionService';
+import { sortCollections } from 'services/collectionService';
 import { User } from 'services/userService';
 import styled from 'styled-components';
 import { IMAGE_CONTAINER_MAX_WIDTH } from 'types';
+import {
+    Collection,
+    CollectionAndItsLatestFile,
+    COLLECTION_SORT_BY,
+    CollectionType,
+} from 'types/collection';
 import { getSelectedCollection } from 'utils/collection';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';

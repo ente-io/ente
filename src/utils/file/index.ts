@@ -1,5 +1,5 @@
 import { SelectedState } from 'pages/gallery';
-import { Collection } from 'services/collectionService';
+import { Collection } from 'types/collection';
 import {
     File,
     fileAttribute,

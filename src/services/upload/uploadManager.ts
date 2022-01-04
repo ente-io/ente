@@ -1,5 +1,5 @@
 import { File, getLocalFiles, setLocalFiles } from '../fileService';
-import { Collection, getLocalCollections } from '../collectionService';
+import { getLocalCollections } from '../collectionService';
 import { SetFiles } from 'pages/gallery';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
 import {
@@ -19,6 +19,7 @@ import uploader from './uploader';
 import UIService from './uiService';
 import UploadService from './uploadService';
 import { CustomError } from 'utils/common/errorUtil';
+import { Collection } from 'types/collection';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;

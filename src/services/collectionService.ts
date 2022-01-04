@@ -6,79 +6,27 @@ import { getActualKey, getToken } from 'utils/common/key';
 import CryptoWorker from 'utils/crypto';
 import { SetDialogMessage } from 'components/MessageDialog';
 import constants from 'utils/strings/constants';
-import { getPublicKey, User } from './userService';
+import { getPublicKey } from './userService';
 import { B64EncryptionResult } from 'utils/crypto';
 import HTTPService from './HTTPService';
 import { File } from './fileService';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/common/errorUtil';
 import { sortFiles } from 'utils/file';
+import {
+    Collection,
+    COLLECTION_UPDATION_TIME,
+    COLLECTION_SORT_BY,
+    CollectionAndItsLatestFile,
+    CollectionType,
+    AddToCollectionRequest,
+    MoveToCollectionRequest,
+    EncryptedFileKey,
+    RemoveFromCollectionRequest,
+    COLLECTION_TABLE,
+} from 'types/collection';
 
 const ENDPOINT = getEndpoint();
-
-export enum CollectionType {
-    folder = 'folder',
-    favorites = 'favorites',
-    album = 'album',
-}
-
-const COLLECTION_UPDATION_TIME = 'collection-updation-time';
-const COLLECTIONS = 'collections';
-
-export interface Collection {
-    id: number;
-    owner: User;
-    key?: string;
-    name?: string;
-    encryptedName?: string;
-    nameDecryptionNonce?: string;
-    type: CollectionType;
-    attributes: collectionAttributes;
-    sharees: User[];
-    updationTime: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    isDeleted: boolean;
-    isSharedCollection?: boolean;
-}
-
-interface EncryptedFileKey {
-    id: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-}
-
-interface AddToCollectionRequest {
-    collectionID: number;
-    files: EncryptedFileKey[];
-}
-
-interface MoveToCollectionRequest {
-    fromCollectionID: number;
-    toCollectionID: number;
-    files: EncryptedFileKey[];
-}
-
-interface collectionAttributes {
-    encryptedPath?: string;
-    pathDecryptionNonce?: string;
-}
-
-export interface CollectionAndItsLatestFile {
-    collection: Collection;
-    file: File;
-}
-
-export enum COLLECTION_SORT_BY {
-    LATEST_FILE,
-    MODIFICATION_TIME,
-    NAME,
-}
-
-interface RemoveFromCollectionRequest {
-    collectionID: number;
-    fileIDs: number[];
-}
 
 const getCollectionWithSecrets = async (
     collection: Collection,
@@ -164,7 +112,7 @@ const getCollections = async (
 
 export const getLocalCollections = async (): Promise<Collection[]> => {
     const collections: Collection[] =
-        (await localForage.getItem(COLLECTIONS)) ?? [];
+        (await localForage.getItem(COLLECTION_TABLE)) ?? [];
     return collections;
 };
 
@@ -212,7 +160,7 @@ export const syncCollections = async () => {
         [],
         COLLECTION_SORT_BY.MODIFICATION_TIME
     );
-    await localForage.setItem(COLLECTIONS, collections);
+    await localForage.setItem(COLLECTION_TABLE, collections);
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
     return collections;
 };
@@ -365,7 +313,7 @@ export const addToFavorites = async (file: File) => {
                 CollectionType.favorites
             );
             const localCollections = await getLocalCollections();
-            await localForage.setItem(COLLECTIONS, [
+            await localForage.setItem(COLLECTION_TABLE, [
                 ...localCollections,
                 favCollection,
             ]);

@@ -19,15 +19,12 @@ import {
 import styled from 'styled-components';
 import LoadingBar from 'react-top-loading-bar';
 import {
-    Collection,
     syncCollections,
-    CollectionAndItsLatestFile,
     getCollectionsAndTheirLatestFile,
     getFavItemIds,
     getLocalCollections,
     getNonEmptyCollections,
     createCollection,
-    CollectionType,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import billingService from 'services/billingService';
@@ -98,6 +95,11 @@ import DeleteBtn from 'components/DeleteBtn';
 import FixCreationTime, {
     FixCreationTimeAttributes,
 } from 'components/FixCreationTime';
+import {
+    Collection,
+    CollectionAndItsLatestFile,
+    CollectionType,
+} from 'types/collection';
 
 export const DeadCenter = styled.div`
     flex: 1;

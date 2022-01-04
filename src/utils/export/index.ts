@@ -1,4 +1,4 @@
-import { Collection } from 'services/collectionService';
+import { Collection } from 'types/collection';
 import exportService, {
     CollectionIDPathMap,
     ExportRecord,

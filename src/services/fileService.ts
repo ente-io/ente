@@ -3,7 +3,7 @@ import localForage from 'utils/storage/localForage';
 
 import { getToken } from 'utils/common/key';
 import { DataStream, EncryptionResult, MetadataObject } from 'types/upload';
-import { Collection } from './collectionService';
+import { Collection } from 'types/collection';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';

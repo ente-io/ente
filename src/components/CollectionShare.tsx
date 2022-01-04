@@ -7,14 +7,11 @@ import FormControl from 'react-bootstrap/FormControl';
 import { Button, Col, Table } from 'react-bootstrap';
 import { DeadCenter } from 'pages/gallery';
 import { User } from 'services/userService';
-import {
-    Collection,
-    shareCollection,
-    unshareCollection,
-} from 'services/collectionService';
+import { shareCollection, unshareCollection } from 'services/collectionService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SubmitButton from './SubmitButton';
 import MessageDialog from './MessageDialog';
+import { Collection } from 'types/collection';
 
 interface Props {
     show: boolean;

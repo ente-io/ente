@@ -23,7 +23,6 @@ import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import {
-    Collection,
     getLocalCollections,
     getNonEmptyCollections,
 } from './collectionService';
@@ -42,6 +41,7 @@ import { User } from './userService';
 import { updateFileCreationDateInEXIF } from './upload/exifService';
 import { MetadataObject } from 'types/upload';
 import QueueProcessor from './upload/queueProcessor';
+import { Collection } from 'types/collection';
 
 export type CollectionIDPathMap = Map<number, string>;
 export interface ExportProgress {

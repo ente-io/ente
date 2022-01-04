@@ -1,10 +1,11 @@
 import { SetFiles } from 'pages/gallery';
+import { Collection } from 'types/collection';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
-import { Collection, getCollection } from './collectionService';
+import { getCollection } from './collectionService';
 import { File } from './fileService';
 import HTTPService from './HTTPService';
 

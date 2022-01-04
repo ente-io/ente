@@ -19,7 +19,7 @@ import LocationIcon from './icons/LocationIcon';
 import DateIcon from './icons/DateIcon';
 import SearchIcon from './icons/SearchIcon';
 import CloseIcon from './icons/CloseIcon';
-import { Collection } from 'services/collectionService';
+import { Collection } from 'types/collection';
 import CollectionIcon from './icons/CollectionIcon';
 import { File, FILE_TYPE } from 'services/fileService';
 import ImageIcon from './icons/ImageIcon';

@@ -1,5 +1,5 @@
 import { fileAttribute } from '../fileService';
-import { Collection } from '../collectionService';
+import { Collection } from 'types/collection';
 import { logError } from 'utils/sentry';
 import UploadHttpClient from './uploadHttpClient';
 import {

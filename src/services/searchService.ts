@@ -3,7 +3,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { DateValue, Suggestion, SuggestionType } from 'components/SearchBar';
 import HTTPService from './HTTPService';
-import { Collection } from './collectionService';
+import { Collection } from 'types/collection';
 import { File } from './fileService';
 import { logError } from 'utils/sentry';
 

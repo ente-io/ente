@@ -14,7 +14,7 @@ import { COLLECTION_OPS_TYPE } from 'utils/collection';
 import { ALL_SECTION, ARCHIVE_SECTION, TRASH_SECTION } from './Collections';
 import UnArchive from 'components/icons/UnArchive';
 import { OverlayTrigger } from 'react-bootstrap';
-import { Collection } from 'services/collectionService';
+import { Collection } from 'types/collection';
 import RemoveIcon from 'components/icons/RemoveIcon';
 import RestoreIcon from 'components/icons/RestoreIcon';
 import ClockIcon from 'components/icons/ClockIcon';

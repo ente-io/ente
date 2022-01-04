@@ -2,7 +2,7 @@ import { IconButton } from 'components/Container';
 import SortIcon from 'components/icons/SortIcon';
 import React from 'react';
 import { OverlayTrigger } from 'react-bootstrap';
-import { COLLECTION_SORT_BY } from 'services/collectionService';
+import { COLLECTION_SORT_BY } from 'types/collection';
 import constants from 'utils/strings/constants';
 import CollectionSortOptions from './CollectionSortOptions';
 import { IconWithMessage } from './SelectedFileOptions';

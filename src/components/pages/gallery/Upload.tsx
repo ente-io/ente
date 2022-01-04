@@ -1,10 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import {
-    Collection,
-    syncCollections,
-    createAlbum,
-} from 'services/collectionService';
+import { syncCollections, createAlbum } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import { SetDialogMessage } from 'components/MessageDialog';
 import UploadProgress from './UploadProgress';
@@ -23,6 +19,7 @@ import UploadManager, {
 import uploadManager from 'services/upload/uploadManager';
 import { METADATA_FOLDER_NAME } from 'services/exportService';
 import { getUserFacingErrorMessage } from 'utils/common/errorUtil';
+import { Collection } from 'types/collection';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 

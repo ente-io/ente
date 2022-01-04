@@ -16,7 +16,7 @@ import {
 } from 'utils/billing';
 
 import isElectron from 'is-electron';
-import { Collection } from 'services/collectionService';
+import { Collection } from 'types/collection';
 import { useRouter } from 'next/router';
 import LinkButton from './pages/gallery/LinkButton';
 import { downloadApp } from 'utils/common';

@@ -2,7 +2,7 @@ import { Value } from 'components/Container';
 import TickIcon from 'components/icons/TickIcon';
 import React from 'react';
 import { ListGroup, Popover, Row } from 'react-bootstrap';
-import { COLLECTION_SORT_BY } from 'services/collectionService';
+import { COLLECTION_SORT_BY } from 'types/collection';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 import { MenuItem, MenuLink } from './CollectionOptions';
