@@ -9,7 +9,7 @@ import {
     DATE_CONTAINER_HEIGHT,
     GAP_BTW_TILES,
     SPACE_BTW_DATES,
-} from 'types';
+} from 'utils/constants';
 import constants from 'utils/strings/constants';
 
 const A_DAY = 24 * 60 * 60 * 1000;

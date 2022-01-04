@@ -72,7 +72,7 @@ import Collections, {
 } from 'components/pages/gallery/Collections';
 import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
-import { PAGES } from 'types';
+import { PAGES } from 'utils/constants';
 import {
     COLLECTION_OPS_TYPE,
     isSharedCollection,

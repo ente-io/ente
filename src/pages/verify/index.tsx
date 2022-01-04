@@ -19,7 +19,7 @@ import SubmitButton from 'components/SubmitButton';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
-import { PAGES } from 'types';
+import { PAGES } from 'utils/constants';
 import { User } from '@sentry/nextjs';
 import { KeyAttributes, EmailVerificationResponse } from 'types/user';
 

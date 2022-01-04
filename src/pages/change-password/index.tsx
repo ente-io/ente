@@ -12,7 +12,7 @@ import { setKeys } from 'services/userService';
 import SetPasswordForm from 'components/SetPasswordForm';
 import { AppContext } from 'pages/_app';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { PAGES } from 'types';
+import { PAGES } from 'utils/constants';
 import { UpdatedKey } from 'types/user';
 
 export interface KEK {

@@ -12,7 +12,7 @@ import constants from 'utils/strings/constants';
 import localForage from 'utils/storage/localForage';
 import IncognitoWarning from 'components/IncognitoWarning';
 import { logError } from 'utils/sentry';
-import { PAGES } from 'types';
+import { PAGES } from 'utils/constants';
 
 const Container = styled.div`
     display: flex;

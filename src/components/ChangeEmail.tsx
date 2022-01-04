@@ -9,7 +9,7 @@ import { changeEmail, getOTTForEmailChange } from 'services/userService';
 import styled from 'styled-components';
 import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import { PAGES } from 'types';
+import { PAGES } from 'utils/constants';
 
 interface formValues {
     email: string;

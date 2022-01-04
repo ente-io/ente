@@ -6,7 +6,7 @@ import Container from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SignUp from 'components/SignUp';
-import { PAGES } from 'types';
+import { PAGES } from 'utils/constants';
 
 export default function SignUpPage() {
     const router = useRouter();

@@ -31,7 +31,7 @@ import { GalleryContext, SetLoading } from 'pages/gallery';
 import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
 import { Subscription } from 'types/billing';
-import { PAGES } from 'types';
+import { PAGES } from 'utils/constants';
 import {
     ARCHIVE_SECTION,
     TRASH_SECTION,

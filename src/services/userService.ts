@@ -1,4 +1,4 @@
-import { PAGES } from 'types';
+import { PAGES } from 'utils/constants';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import router from 'next/router';

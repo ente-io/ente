@@ -8,7 +8,7 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { sortCollections } from 'services/collectionService';
 import { User } from 'types/user';
 import styled from 'styled-components';
-import { IMAGE_CONTAINER_MAX_WIDTH } from 'types';
+import { IMAGE_CONTAINER_MAX_WIDTH } from 'utils/constants';
 import {
     Collection,
     CollectionAndItsLatestFile,

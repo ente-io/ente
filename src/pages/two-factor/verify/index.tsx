@@ -5,7 +5,7 @@ import router from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
 import { logoutUser, verifyTwoFactor } from 'services/userService';
-import { PAGES } from 'types';
+import { PAGES } from 'utils/constants';
 import { User } from 'types/user';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';

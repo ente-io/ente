@@ -11,7 +11,7 @@ import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import SubmitButton from 'components/SubmitButton';
 import Button from 'react-bootstrap/Button';
 import LogoImg from './LogoImg';
-import { PAGES } from 'types';
+import { PAGES } from 'utils/constants';
 
 interface formValues {
     email: string;
