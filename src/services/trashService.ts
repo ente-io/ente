@@ -9,22 +9,13 @@ import { getCollection } from './collectionService';
 import { EnteFile } from 'types/file';
 
 import HTTPService from './HTTPService';
+import { Trash, TrashItem } from 'types/trash';
 
 const TRASH = 'file-trash';
 const TRASH_TIME = 'trash-time';
 const DELETED_COLLECTION = 'deleted-collection';
 
 const ENDPOINT = getEndpoint();
-
-export interface TrashItem {
-    file: EnteFile;
-    isDeleted: boolean;
-    isRestored: boolean;
-    deleteBy: number;
-    createdAt: number;
-    updatedAt: number;
-}
-export type Trash = TrashItem[];
 
 export async function getLocalTrash() {
     const trash = (await localForage.getItem<Trash>(TRASH)) || [];

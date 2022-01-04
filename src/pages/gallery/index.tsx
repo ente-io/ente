@@ -87,8 +87,9 @@ import {
     getLocalTrash,
     getTrashedFiles,
     syncTrash,
-    Trash,
 } from 'services/trashService';
+import { Trash } from 'types/trash';
+
 import DeleteBtn from 'components/DeleteBtn';
 import FixCreationTime, {
     FixCreationTimeAttributes,
