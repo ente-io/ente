@@ -158,8 +158,10 @@ class MLIDbStorage {
         const db = await this.db;
         const allFiles = await db.getAll('files');
         const allFacesMap = new Map<number, Array<Face>>();
-        allFiles.forEach((mlFileData) =>
-            allFacesMap.set(mlFileData.fileId, mlFileData.faces)
+        allFiles.forEach(
+            (mlFileData) =>
+                mlFileData.faces &&
+                allFacesMap.set(mlFileData.fileId, mlFileData.faces)
         );
         console.timeEnd('getAllFacesMap');
 
