@@ -1,4 +1,3 @@
-import { Search, SearchStats } from 'pages/gallery';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
@@ -26,6 +25,7 @@ import VideoIcon from './icons/VideoIcon';
 import { IconButton } from './Container';
 import { EnteFile, FILE_TYPE } from 'types/file';
 import { Suggestion, SuggestionType, DateValue, Bbox } from 'types/search';
+import { Search, SearchStats } from 'types/gallery';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;

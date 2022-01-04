@@ -8,7 +8,7 @@ import UploadProgress from './UploadProgress';
 import ChoiceModal from './ChoiceModal';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
-import { GalleryContext, SetFiles, SetLoading } from 'pages/gallery';
+import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { FileRejection } from 'react-dropzone';
@@ -20,6 +20,7 @@ import uploadManager from 'services/upload/uploadManager';
 import { METADATA_FOLDER_NAME } from 'types/export';
 import { getUserFacingErrorMessage } from 'utils/common/errorUtil';
 import { Collection } from 'types/collection';
+import { SetLoading, SetFiles } from 'types/gallery';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 

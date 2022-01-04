@@ -27,7 +27,7 @@ import EnteSpinner from './EnteSpinner';
 import RecoveryKeyModal from './RecoveryKeyModal';
 import TwoFactorModal from './TwoFactorModal';
 import ExportModal from './ExportModal';
-import { GalleryContext, SetLoading } from 'pages/gallery';
+import { GalleryContext } from 'pages/gallery';
 import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
 import { Subscription } from 'types/billing';
@@ -37,6 +37,7 @@ import {
     TRASH_SECTION,
 } from 'components/pages/gallery/Collections';
 import FixLargeThumbnails from './FixLargeThumbnail';
+import { SetLoading } from 'types/gallery';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;

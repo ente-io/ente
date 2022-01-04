@@ -1,6 +1,6 @@
 import { getLocalFiles, setLocalFiles } from '../fileService';
 import { getLocalCollections } from '../collectionService';
-import { SetFiles } from 'pages/gallery';
+import { SetFiles } from 'types/gallery';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
 import {
     sortFilesIntoCollections,

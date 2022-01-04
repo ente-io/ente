@@ -1,10 +1,4 @@
-import {
-    GalleryContext,
-    Search,
-    SelectedState,
-    SetFiles,
-    setSearchStats,
-} from 'pages/gallery';
+import { GalleryContext } from 'pages/gallery';
 import PreviewCard from './pages/gallery/PreviewCard';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
@@ -25,6 +19,7 @@ import {
 import { isSharedFile } from 'utils/file';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
+import { SetFiles, SelectedState, Search, setSearchStats } from 'types/gallery';
 
 const Container = styled.div`
     display: block;

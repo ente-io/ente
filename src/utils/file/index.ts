@@ -1,4 +1,4 @@
-import { SelectedState } from 'pages/gallery';
+import { SelectedState } from 'types/gallery';
 import { Collection } from 'types/collection';
 import {
     EnteFile,

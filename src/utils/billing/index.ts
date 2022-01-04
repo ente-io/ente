@@ -3,7 +3,7 @@ import billingService from 'services/billingService';
 import { Plan, Subscription } from 'types/billing';
 import { NextRouter } from 'next/router';
 import { SetDialogMessage } from 'components/MessageDialog';
-import { SetLoading } from 'pages/gallery';
+import { SetLoading } from 'types/gallery';
 import { getData, LS_KEYS } from '../storage/localStorage';
 import { CustomError } from '../common/errorUtil';
 import { logError } from '../sentry';

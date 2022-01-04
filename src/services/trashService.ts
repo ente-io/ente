@@ -1,4 +1,4 @@
-import { SetFiles } from 'pages/gallery';
+import { SetFiles } from 'types/gallery';
 import { Collection } from 'types/collection';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
