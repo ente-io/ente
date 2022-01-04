@@ -1,14 +1,12 @@
 import { Collection } from 'types/collection';
 import exportService from 'services/exportService';
-import {
-    CollectionIDPathMap,
-    ExportRecord,
-    METADATA_FOLDER_NAME,
-} from 'types/export';
+import { CollectionIDPathMap, ExportRecord } from 'types/export';
+
 import { EnteFile } from 'types/file';
 
 import { MetadataObject } from 'types/upload';
 import { formatDate, splitFilenameAndExtension } from 'utils/file';
+import { METADATA_FOLDER_NAME } from 'constants/export';
 
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;

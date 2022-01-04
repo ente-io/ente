@@ -1,5 +1,3 @@
-export const METADATA_FOLDER_NAME = 'metadata';
-
 export enum ExportNotification {
     START = 'export started',
     IN_PROGRESS = 'export already in progress',
