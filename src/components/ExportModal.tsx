@@ -1,12 +1,13 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
-import exportService, {
+import exportService from 'services/exportService';
+import {
     ExportProgress,
     ExportStage,
     ExportStats,
     ExportType,
-} from 'services/exportService';
+} from 'types/export';
 import { getLocalFiles } from 'services/fileService';
 import { User } from 'services/userService';
 import styled from 'styled-components';

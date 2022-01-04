@@ -17,7 +17,7 @@ import UploadManager, {
     UPLOAD_STAGES,
 } from 'services/upload/uploadManager';
 import uploadManager from 'services/upload/uploadManager';
-import { METADATA_FOLDER_NAME } from 'services/exportService';
+import { METADATA_FOLDER_NAME } from 'types/export';
 import { getUserFacingErrorMessage } from 'utils/common/errorUtil';
 import { Collection } from 'types/collection';
 

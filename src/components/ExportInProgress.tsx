@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, ProgressBar } from 'react-bootstrap';
-import { ExportProgress, ExportStage } from 'services/exportService';
+import { ExportProgress, ExportStage } from 'types/export';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 

@@ -1,9 +1,10 @@
 import { Collection } from 'types/collection';
-import exportService, {
+import exportService from 'services/exportService';
+import {
     CollectionIDPathMap,
     ExportRecord,
     METADATA_FOLDER_NAME,
-} from 'services/exportService';
+} from 'types/export';
 import { File } from 'services/fileService';
 import { MetadataObject } from 'types/upload';
 import { formatDate, splitFilenameAndExtension } from 'utils/file';
