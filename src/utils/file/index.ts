@@ -17,12 +17,7 @@ import { User } from 'types/user';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
-
-export const TYPE_HEIC = 'heic';
-export const TYPE_HEIF = 'heif';
-export const TYPE_JPEG = 'jpeg';
-export const TYPE_JPG = 'jpg';
-const UNSUPPORTED_FORMATS = ['flv', 'mkv', '3gp', 'avi', 'wmv'];
+import { TYPE_JPEG, TYPE_JPG, TYPE_HEIC, TYPE_HEIF } from 'constants/file';
 
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
@@ -123,14 +118,6 @@ export function getSelectedFiles(
         }
     }
     return selectedFiles;
-}
-
-export function checkFileFormatSupport(name: string) {
-    for (const format of UNSUPPORTED_FORMATS) {
-        if (name.toLowerCase().endsWith(format)) {
-            throw Error('unsupported format');
-        }
-    }
 }
 
 export function formatDate(date: number | Date) {

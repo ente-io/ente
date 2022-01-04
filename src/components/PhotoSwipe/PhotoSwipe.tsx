@@ -8,7 +8,7 @@ import {
     removeFromFavorites,
 } from 'services/collectionService';
 import { updatePublicMagicMetadata } from 'services/fileService';
-import { EnteFile, MAX_EDITED_FILE_NAME_LENGTH } from 'types/file';
+import { EnteFile } from 'types/file';
 import constants from 'utils/strings/constants';
 import exifr from 'exifr';
 import Modal from 'react-bootstrap/Modal';
@@ -42,6 +42,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
+import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
 
 interface Iprops {
     isOpen: boolean;

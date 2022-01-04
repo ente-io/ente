@@ -6,7 +6,7 @@ import {
     MIN_EDITED_CREATION_TIME,
     MAX_EDITED_CREATION_TIME,
     ALL_TIME,
-} from 'types/file';
+} from 'constants/file';
 
 const isSameDay = (first, second) =>
     first.getFullYear() === second.getFullYear() &&

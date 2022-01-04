@@ -36,8 +36,6 @@ import {
     generateStreamFromArrayBuffer,
     getFileExtension,
     mergeMetadata,
-    TYPE_JPEG,
-    TYPE_JPG,
 } from 'utils/file';
 
 import { updateFileCreationDateInEXIF } from './upload/exifService';
@@ -53,6 +51,7 @@ import {
     ExportRecord,
 } from 'types/export';
 import { User } from 'types/user';
+import { TYPE_JPEG, TYPE_JPG } from 'constants/file';
 
 const LATEST_EXPORT_VERSION = 1;
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';

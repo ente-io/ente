@@ -4,7 +4,6 @@ export interface LocationSearchResponse {
     place: string;
     bbox: Bbox;
 }
-export const getMapboxToken = () => process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 export enum SuggestionType {
     DATE,
