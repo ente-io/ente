@@ -51,9 +51,10 @@ import {
     CollectionIDPathMap,
     RecordType,
     ExportRecord,
-    EXPORT_RECORD_FILE_NAME,
-    LATEST_EXPORT_VERSION,
 } from 'types/export';
+
+const LATEST_EXPORT_VERSION = 1;
+const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
 class ExportService {
     ElectronAPIs: any;

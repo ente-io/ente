@@ -1,4 +1,3 @@
-export const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 export const METADATA_FOLDER_NAME = 'metadata';
 
 export enum ExportNotification {
@@ -15,7 +14,6 @@ export enum RecordType {
     SUCCESS = 'success',
     FAILED = 'failed',
 }
-export const LATEST_EXPORT_VERSION = 1;
 
 export type CollectionIDPathMap = Map<number, string>;
 export interface ExportProgress {

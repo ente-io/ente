@@ -1,9 +1,3 @@
-export enum PaymentActionType {
-    Buy = 'buy',
-    Update = 'update',
-}
-export const FREE_PLAN = 'free';
-
 export interface Subscription {
     id: number;
     userID: number;

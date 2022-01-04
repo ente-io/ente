@@ -5,9 +5,14 @@ import { convertToHumanReadable } from 'utils/billing';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { getPaymentToken } from './userService';
-import { Plan, PaymentActionType, Subscription } from 'types/billing';
+import { Plan, Subscription } from 'types/billing';
 
 const ENDPOINT = getEndpoint();
+
+enum PaymentActionType {
+    Buy = 'buy',
+    Update = 'update',
+}
 
 class billingService {
     public async getPlans(): Promise<Plan[]> {

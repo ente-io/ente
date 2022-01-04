@@ -15,7 +15,6 @@ import { CustomError } from 'utils/common/errorUtil';
 import { sortFiles } from 'utils/file';
 import {
     Collection,
-    COLLECTION_UPDATION_TIME,
     COLLECTION_SORT_BY,
     CollectionAndItsLatestFile,
     CollectionType,
@@ -23,10 +22,11 @@ import {
     MoveToCollectionRequest,
     EncryptedFileKey,
     RemoveFromCollectionRequest,
-    COLLECTION_TABLE,
 } from 'types/collection';
 
 const ENDPOINT = getEndpoint();
+const COLLECTION_TABLE = 'collections';
+const COLLECTION_UPDATION_TIME = 'collection-updation-time';
 
 const getCollectionWithSecrets = async (
     collection: Collection,

@@ -1,9 +1,6 @@
 import { User } from 'services/userService';
 import { EnteFile } from 'types/file';
 
-export const COLLECTION_UPDATION_TIME = 'collection-updation-time';
-export const COLLECTION_TABLE = 'collections';
-
 export enum CollectionType {
     folder = 'folder',
     favorites = 'favorites',
