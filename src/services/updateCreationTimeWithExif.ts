@@ -8,12 +8,14 @@ import {
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import downloadManager from './downloadManager';
-import { File, FILE_TYPE, updatePublicMagicMetadata } from './fileService';
+import { updatePublicMagicMetadata } from './fileService';
+import { EnteFile, FILE_TYPE } from 'types/file';
+
 import { getRawExif, getUNIXTime } from './upload/exifService';
 import { getFileType } from './upload/readFileService';
 
 export async function updateCreationTimeWithExif(
-    filesToBeUpdated: File[],
+    filesToBeUpdated: EnteFile[],
     fixOption: FIX_OPTIONS,
     customTime: Date,
     setProgressTracker: SetProgressTracker

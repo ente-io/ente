@@ -1,4 +1,4 @@
-import { File, FILE_TYPE } from 'services/fileService';
+import { EnteFile, FILE_TYPE } from 'types/file';
 import { sleep } from 'utils/common';
 import { handleUploadError, CustomError } from 'utils/common/errorUtil';
 import { decryptFile } from 'utils/file';
@@ -22,11 +22,11 @@ const TwoSecondInMillSeconds = 2000;
 const FIVE_GB_IN_BYTES = 5 * 1024 * 1024 * 1024;
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
-    file?: File;
+    file?: EnteFile;
 }
 export default async function uploader(
     worker: any,
-    existingFilesInCollection: File[],
+    existingFilesInCollection: EnteFile[],
     fileWithCollection: FileWithCollection
 ): Promise<UploadResponse> {
     const { file: rawFile, collection } = fileWithCollection;

@@ -26,7 +26,7 @@ const FIRST_ALBUM_NAME = 'My First Album';
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setBannerMessage: (message: string | JSX.Element) => void;
-    acceptedFiles: globalThis.File[];
+    acceptedFiles: File[];
     closeCollectionSelector: () => void;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -158,7 +158,7 @@ export default function Upload(props: Props) {
         };
     }
     function getCollectionWiseFiles() {
-        const collectionWiseFiles = new Map<string, globalThis.File[]>();
+        const collectionWiseFiles = new Map<string, File[]>();
         for (const file of props.acceptedFiles) {
             const filePath = file['path'] as string;
 
@@ -200,7 +200,7 @@ export default function Upload(props: Props) {
 
             const filesWithCollectionToUpload: FileWithCollection[] = [];
             const collections: Collection[] = [];
-            let collectionWiseFiles = new Map<string, globalThis.File[]>();
+            let collectionWiseFiles = new Map<string, File[]>();
             if (strategy === UPLOAD_STRATEGY.SINGLE_COLLECTION) {
                 collectionWiseFiles.set(collectionName, props.acceptedFiles);
             } else {

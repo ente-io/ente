@@ -4,7 +4,8 @@ import { getToken } from 'utils/common/key';
 import { DateValue, Suggestion, SuggestionType } from 'components/SearchBar';
 import HTTPService from './HTTPService';
 import { Collection } from 'types/collection';
-import { File } from './fileService';
+import { EnteFile } from 'types/file';
+
 import { logError } from 'utils/sentry';
 
 const ENDPOINT = getEndpoint();
@@ -118,7 +119,7 @@ export function searchCollection(
     );
 }
 
-export function searchFiles(searchPhrase: string, files: File[]) {
+export function searchFiles(searchPhrase: string, files: EnteFile[]) {
     return files
         .map((file, idx) => ({
             title: file.metadata.title,

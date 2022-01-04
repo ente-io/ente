@@ -7,14 +7,15 @@ import {
     needsConversionForPreview,
 } from 'utils/file';
 import HTTPService from './HTTPService';
-import { File, FILE_TYPE } from './fileService';
+import { EnteFile, FILE_TYPE } from 'types/file';
+
 import { logError } from 'utils/sentry';
 
 class DownloadManager {
     private fileObjectUrlPromise = new Map<string, Promise<string>>();
     private thumbnailObjectUrlPromise = new Map<number, Promise<string>>();
 
-    public async getThumbnail(file: File) {
+    public async getThumbnail(file: EnteFile) {
         try {
             const token = getToken();
             if (!token) {
@@ -52,7 +53,7 @@ class DownloadManager {
         }
     }
 
-    downloadThumb = async (token: string, file: File) => {
+    downloadThumb = async (token: string, file: EnteFile) => {
         const resp = await HTTPService.get(
             getThumbnailUrl(file.id),
             null,
@@ -68,7 +69,7 @@ class DownloadManager {
         return decrypted;
     };
 
-    getFile = async (file: File, forPreview = false) => {
+    getFile = async (file: EnteFile, forPreview = false) => {
         const shouldBeConverted = forPreview && needsConversionForPreview(file);
         const fileKey = shouldBeConverted
             ? `${file.id}_converted`
@@ -97,11 +98,11 @@ class DownloadManager {
         }
     };
 
-    public async getCachedOriginalFile(file: File) {
+    public async getCachedOriginalFile(file: EnteFile) {
         return await this.fileObjectUrlPromise.get(file.id.toString());
     }
 
-    async downloadFile(file: File) {
+    async downloadFile(file: EnteFile) {
         const worker = await new CryptoWorker();
         const token = getToken();
         if (!token) {

@@ -1,5 +1,5 @@
 import { User } from 'services/userService';
-import { File } from 'services/fileService';
+import { EnteFile } from 'types/file';
 
 export const COLLECTION_UPDATION_TIME = 'collection-updation-time';
 export const COLLECTION_TABLE = 'collections';
@@ -51,7 +51,7 @@ export interface collectionAttributes {
 
 export interface CollectionAndItsLatestFile {
     collection: Collection;
-    file: File;
+    file: EnteFile;
 }
 
 export enum COLLECTION_SORT_BY {

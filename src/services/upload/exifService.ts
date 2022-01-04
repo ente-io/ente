@@ -28,7 +28,7 @@ interface ParsedEXIFData {
 }
 
 export async function getExifData(
-    receivedFile: globalThis.File,
+    receivedFile: File,
     fileTypeInfo: FileTypeInfo
 ): Promise<ParsedEXIFData> {
     const nullExifData: ParsedEXIFData = {

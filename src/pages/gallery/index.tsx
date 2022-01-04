@@ -8,11 +8,9 @@ import React, {
 import { useRouter } from 'next/router';
 import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
-    File,
     getLocalFiles,
     syncFiles,
     updateMagicMetadata,
-    VISIBILITY_STATE,
     trashFiles,
     deleteFromTrash,
 } from 'services/fileService';
@@ -100,6 +98,7 @@ import {
     CollectionAndItsLatestFile,
     CollectionType,
 } from 'types/collection';
+import { EnteFile, VISIBILITY_STATE } from 'types/file';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -121,7 +120,7 @@ export type SelectedState = {
     count: number;
     collectionID: number;
 };
-export type SetFiles = React.Dispatch<React.SetStateAction<File[]>>;
+export type SetFiles = React.Dispatch<React.SetStateAction<EnteFile[]>>;
 export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
 export type setSearchStats = React.Dispatch<React.SetStateAction<SearchStats>>;
@@ -161,7 +160,7 @@ export default function Gallery() {
     const [collections, setCollections] = useState<Collection[]>([]);
     const [collectionsAndTheirLatestFile, setCollectionsAndTheirLatestFile] =
         useState<CollectionAndItsLatestFile[]>([]);
-    const [files, setFiles] = useState<File[]>(null);
+    const [files, setFiles] = useState<EnteFile[]>(null);
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
     const [bannerMessage, setBannerMessage] = useState<JSX.Element | string>(
         null
@@ -341,7 +340,7 @@ export default function Gallery() {
 
     const setDerivativeState = async (
         collections: Collection[],
-        files: File[]
+        files: EnteFile[]
     ) => {
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);

@@ -1,4 +1,4 @@
-import { File, getLocalFiles, setLocalFiles } from '../fileService';
+import { getLocalFiles, setLocalFiles } from '../fileService';
 import { getLocalCollections } from '../collectionService';
 import { SetFiles } from 'pages/gallery';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
@@ -20,6 +20,7 @@ import UIService from './uiService';
 import UploadService from './uploadService';
 import { CustomError } from 'utils/common/errorUtil';
 import { Collection } from 'types/collection';
+import { EnteFile } from 'types/file';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -34,7 +35,7 @@ export enum FileUploadResults {
 }
 
 export interface FileWithCollection {
-    file: globalThis.File;
+    file: File;
     collectionID?: number;
     collection?: Collection;
 }
@@ -53,8 +54,8 @@ class UploadManager {
     private metadataMap: MetadataMap;
     private filesToBeUploaded: FileWithCollection[];
     private failedFiles: FileWithCollection[];
-    private existingFilesCollectionWise: Map<number, File[]>;
-    private existingFiles: File[];
+    private existingFilesCollectionWise: Map<number, EnteFile[]>;
+    private existingFiles: EnteFile[];
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
     public initUploader(progressUpdater: ProgressUpdater, setFiles: SetFiles) {

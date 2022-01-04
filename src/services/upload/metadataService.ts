@@ -1,4 +1,4 @@
-import { FILE_TYPE } from 'services/fileService';
+import { FILE_TYPE } from 'types/file';
 import { logError } from 'utils/sentry';
 import { getExifData } from './exifService';
 import { FileTypeInfo } from './readFileService';
@@ -29,7 +29,7 @@ const NULL_PARSED_METADATA_JSON: ParsedMetaDataJSON = {
 };
 
 export async function extractMetadata(
-    receivedFile: globalThis.File,
+    receivedFile: File,
     fileTypeInfo: FileTypeInfo
 ) {
     let exifData = null;
@@ -52,7 +52,7 @@ export async function extractMetadata(
 export const getMetadataMapKey = (collectionID: number, title: string) =>
     `${collectionID}_${title}`;
 
-export async function parseMetadataJSON(receivedFile: globalThis.File) {
+export async function parseMetadataJSON(receivedFile: File) {
     try {
         const metadataJSON: object = await new Promise((resolve, reject) => {
             const reader = new FileReader();

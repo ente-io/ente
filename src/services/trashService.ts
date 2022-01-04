@@ -6,7 +6,8 @@ import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
 import { getCollection } from './collectionService';
-import { File } from './fileService';
+import { EnteFile } from 'types/file';
+
 import HTTPService from './HTTPService';
 
 const TRASH = 'file-trash';
@@ -16,7 +17,7 @@ const DELETED_COLLECTION = 'deleted-collection';
 const ENDPOINT = getEndpoint();
 
 export interface TrashItem {
-    file: File;
+    file: EnteFile;
     isDeleted: boolean;
     isRestored: boolean;
     deleteBy: number;
@@ -53,7 +54,7 @@ async function getLastSyncTime() {
 export async function syncTrash(
     collections: Collection[],
     setFiles: SetFiles,
-    files: File[]
+    files: EnteFile[]
 ): Promise<Trash> {
     const trash = await getLocalTrash();
     collections = [...collections, ...(await getLocalDeletedCollections())];
@@ -80,7 +81,7 @@ export const updateTrash = async (
     collections: Map<number, Collection>,
     sinceTime: number,
     setFiles: SetFiles,
-    files: File[],
+    files: EnteFile[],
     currentTrash: Trash
 ): Promise<Trash> => {
     try {

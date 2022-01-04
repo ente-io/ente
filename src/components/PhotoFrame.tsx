@@ -8,7 +8,7 @@ import {
 import PreviewCard from './pages/gallery/PreviewCard';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
-import { File, FILE_TYPE } from 'services/fileService';
+import { EnteFile, FILE_TYPE } from 'types/file';
 import styled from 'styled-components';
 import DownloadManager from 'services/downloadManager';
 import constants from 'utils/strings/constants';
@@ -53,7 +53,7 @@ const EmptyScreen = styled.div`
 `;
 
 interface Props {
-    files: File[];
+    files: EnteFile[];
     setFiles: SetFiles;
     syncWithRemote: () => Promise<void>;
     favItemIds: Set<number>;
@@ -320,7 +320,7 @@ const PhotoFrame = ({
             }
         }
     };
-    const getThumbnail = (file: File[], index: number) => (
+    const getThumbnail = (file: EnteFile[], index: number) => (
         <PreviewCard
             key={`tile-${file[index].id}-selected-${
                 selected[file[index].id] ?? false
@@ -347,7 +347,11 @@ const PhotoFrame = ({
         />
     );
 
-    const getSlideData = async (instance: any, index: number, item: File) => {
+    const getSlideData = async (
+        instance: any,
+        index: number,
+        item: EnteFile
+    ) => {
         if (!item.msrc) {
             try {
                 let url: string;

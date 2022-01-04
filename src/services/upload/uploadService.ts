@@ -1,4 +1,4 @@
-import { fileAttribute } from '../fileService';
+import { fileAttribute } from 'types/file';
 import { Collection } from 'types/collection';
 import { logError } from 'utils/sentry';
 import UploadHttpClient from './uploadHttpClient';
@@ -86,7 +86,7 @@ class UploadService {
 
     async readFile(
         worker: any,
-        rawFile: globalThis.File,
+        rawFile: File,
         fileTypeInfo: FileTypeInfo
     ): Promise<FileInMemory> {
         const { thumbnail, hasStaticThumbnail } = await generateThumbnail(

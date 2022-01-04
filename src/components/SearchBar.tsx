@@ -21,10 +21,11 @@ import SearchIcon from './icons/SearchIcon';
 import CloseIcon from './icons/CloseIcon';
 import { Collection } from 'types/collection';
 import CollectionIcon from './icons/CollectionIcon';
-import { File, FILE_TYPE } from 'services/fileService';
+
 import ImageIcon from './icons/ImageIcon';
 import VideoIcon from './icons/VideoIcon';
 import { IconButton } from './Container';
+import { EnteFile, FILE_TYPE } from 'types/file';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -101,7 +102,7 @@ interface Props {
     searchStats: SearchStats;
     collections: Collection[];
     setActiveCollection: (id: number) => void;
-    files: File[];
+    files: EnteFile[];
 }
 export default function SearchBar(props: Props) {
     const [value, setValue] = useState<Suggestion>(null);

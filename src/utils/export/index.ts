@@ -5,15 +5,16 @@ import {
     ExportRecord,
     METADATA_FOLDER_NAME,
 } from 'types/export';
-import { File } from 'services/fileService';
+import { EnteFile } from 'types/file';
+
 import { MetadataObject } from 'types/upload';
 import { formatDate, splitFilenameAndExtension } from 'utils/file';
 
-export const getExportRecordFileUID = (file: File) =>
+export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
 
 export const getExportQueuedFiles = (
-    allFiles: File[],
+    allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
     const queuedFiles = new Set(exportRecord?.queuedFiles);
@@ -79,7 +80,7 @@ export const getCollectionsRenamedAfterLastExport = (
 };
 
 export const getFilesUploadedAfterLastExport = (
-    allFiles: File[],
+    allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
     const exportedFiles = new Set(exportRecord?.exportedFiles);
@@ -93,7 +94,7 @@ export const getFilesUploadedAfterLastExport = (
 };
 
 export const getExportedFiles = (
-    allFiles: File[],
+    allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
     const exportedFileIds = new Set(exportRecord?.exportedFiles);
@@ -107,7 +108,7 @@ export const getExportedFiles = (
 };
 
 export const getExportFailedFiles = (
-    allFiles: File[],
+    allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
     const failedFiles = new Set(exportRecord?.failedFiles);
@@ -224,14 +225,17 @@ export const getOldCollectionFolderPath = (
     collection: Collection
 ) => `${dir}/${collection.id}_${oldSanitizeName(collection.name)}`;
 
-export const getOldFileSavePath = (collectionFolderPath: string, file: File) =>
+export const getOldFileSavePath = (
+    collectionFolderPath: string,
+    file: EnteFile
+) =>
     `${collectionFolderPath}/${file.id}_${oldSanitizeName(
         file.metadata.title
     )}`;
 
 export const getOldFileMetadataSavePath = (
     collectionFolderPath: string,
-    file: File
+    file: EnteFile
 ) =>
     `${collectionFolderPath}/${METADATA_FOLDER_NAME}/${
         file.id

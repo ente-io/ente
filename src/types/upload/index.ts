@@ -1,5 +1,12 @@
-import { fileAttribute, FILE_TYPE } from 'services/fileService';
+import { fileAttribute, FILE_TYPE } from 'types/file';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
+
+// list of format that were missed by type-detection for some files.
+export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
+    { fileType: FILE_TYPE.IMAGE, exactType: 'jpeg' },
+    { fileType: FILE_TYPE.IMAGE, exactType: 'jpg' },
+    { fileType: FILE_TYPE.VIDEO, exactType: 'webm' },
+];
 
 // this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
 export const MULTIPART_PART_SIZE = 20 * 1024 * 1024;

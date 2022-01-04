@@ -27,7 +27,9 @@ import {
     getNonEmptyCollections,
 } from './collectionService';
 import downloadManager from './downloadManager';
-import { File, FILE_TYPE, getLocalFiles } from './fileService';
+import { getLocalFiles } from './fileService';
+import { EnteFile, FILE_TYPE } from 'types/file';
+
 import { decodeMotionPhoto } from './motionPhotoService';
 import {
     fileNameWithoutExtension,
@@ -94,7 +96,7 @@ class ExportService {
             }
             const user: User = getData(LS_KEYS.USER);
 
-            let filesToExport: File[];
+            let filesToExport: EnteFile[];
             const localFiles = await getLocalFiles();
             const userPersonalFiles = localFiles
                 .filter((file) => file.ownerID === user?.id)
@@ -165,7 +167,7 @@ class ExportService {
     }
 
     async fileExporter(
-        files: File[],
+        files: EnteFile[],
         newCollections: Collection[],
         renamedCollections: Collection[],
         collectionIDPathMap: CollectionIDPathMap,
@@ -273,13 +275,17 @@ class ExportService {
             throw e;
         }
     }
-    async addFilesQueuedRecord(folder: string, files: File[]) {
+    async addFilesQueuedRecord(folder: string, files: EnteFile[]) {
         const exportRecord = await this.getExportRecord(folder);
         exportRecord.queuedFiles = files.map(getExportRecordFileUID);
         await this.updateExportRecord(exportRecord, folder);
     }
 
-    async addFileExportedRecord(folder: string, file: File, type: RecordType) {
+    async addFileExportedRecord(
+        folder: string,
+        file: EnteFile,
+        type: RecordType
+    ) {
         const fileUID = getExportRecordFileUID(file);
         const exportRecord = await this.getExportRecord(folder);
         exportRecord.queuedFiles = exportRecord.queuedFiles.filter(
@@ -417,7 +423,7 @@ class ExportService {
         }
     }
 
-    async downloadAndSave(file: File, collectionPath: string) {
+    async downloadAndSave(file: EnteFile, collectionPath: string) {
         file.metadata = mergeMetadata([file])[0].metadata;
         const fileSaveName = getUniqueFileSaveName(
             collectionPath,
@@ -453,7 +459,7 @@ class ExportService {
 
     private async exportMotionPhoto(
         fileStream: ReadableStream<any>,
-        file: File,
+        file: EnteFile,
         collectionPath: string
     ) {
         const fileBlob = await new Response(fileStream).blob();
@@ -527,7 +533,7 @@ class ExportService {
     private async migrateExport(
         exportDir: string,
         collections: Collection[],
-        allFiles: File[]
+        allFiles: EnteFile[]
     ) {
         const exportRecord = await this.getExportRecord(exportDir);
         const currentVersion = exportRecord?.version ?? 0;
@@ -588,7 +594,7 @@ class ExportService {
     `fileID_fileName` to newer `fileName(numbered)` format
     */
     private async migrateFiles(
-        files: File[],
+        files: EnteFile[],
         collectionIDPathMap: Map<number, string>
     ) {
         for (let file of files) {

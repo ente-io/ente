@@ -1,5 +1,5 @@
 import downloadManager from 'services/downloadManager';
-import { fileAttribute, getLocalFiles } from 'services/fileService';
+import { getLocalFiles } from 'services/fileService';
 import { generateThumbnail } from 'services/upload/thumbnailService';
 import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
@@ -12,6 +12,7 @@ import { SetProgressTracker } from 'components/FixLargeThumbnail';
 import { getFileType } from './upload/readFileService';
 import { getLocalTrash, getTrashedFiles } from './trashService';
 import { EncryptionResult } from 'types/upload';
+import { fileAttribute } from 'types/file';
 
 const ENDPOINT = getEndpoint();
 const REPLACE_THUMBNAIL_THRESHOLD = 500 * 1024; // 500KB
@@ -72,7 +73,7 @@ export async function replaceThumbnail(
                     token,
                     file
                 );
-                const dummyImageFile = new globalThis.File(
+                const dummyImageFile = new File(
                     [originalThumbnail],
                     file.metadata.title
                 );

@@ -1,4 +1,4 @@
-import { FILE_TYPE } from 'services/fileService';
+import { FILE_TYPE } from 'types/file';
 import { CustomError, errorWithContext } from 'utils/common/errorUtil';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
@@ -22,7 +22,7 @@ interface Dimension {
 
 export async function generateThumbnail(
     worker,
-    file: globalThis.File,
+    file: File,
     fileTypeInfo: FileTypeInfo
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
@@ -72,7 +72,7 @@ export async function generateThumbnail(
 
 export async function generateImageThumbnail(
     worker,
-    file: globalThis.File,
+    file: File,
     isHEIC: boolean
 ) {
     const canvas = document.createElement('canvas');
@@ -82,11 +82,7 @@ export async function generateImageThumbnail(
     let timeout = null;
 
     if (isHEIC) {
-        file = new globalThis.File(
-            [await worker.convertHEIC2JPEG(file)],
-            null,
-            null
-        );
+        file = new File([await worker.convertHEIC2JPEG(file)], null, null);
     }
     let image = new Image();
     imageURL = URL.createObjectURL(file);
@@ -130,7 +126,7 @@ export async function generateImageThumbnail(
     return canvas;
 }
 
-export async function generateVideoThumbnail(file: globalThis.File) {
+export async function generateVideoThumbnail(file: File) {
     const canvas = document.createElement('canvas');
     const canvasCTX = canvas.getContext('2d');
 

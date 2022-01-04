@@ -1,5 +1,5 @@
 import { DateValue } from 'components/SearchBar';
-import { File } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import { Bbox } from 'services/searchService';
 
 export function isInsideBox(
@@ -36,7 +36,7 @@ export const isSameDay = (baseDate: DateValue) => (compareDate: Date) => {
 };
 
 export function getFilesWithCreationDay(
-    files: File[],
+    files: EnteFile[],
     searchedDate: DateValue
 ) {
     const isSearchedDate = isSameDay(searchedDate);

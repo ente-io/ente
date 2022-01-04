@@ -7,11 +7,8 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from 'services/collectionService';
-import {
-    File,
-    MAX_EDITED_FILE_NAME_LENGTH,
-    updatePublicMagicMetadata,
-} from 'services/fileService';
+import { updatePublicMagicMetadata } from 'services/fileService';
+import { EnteFile, MAX_EDITED_FILE_NAME_LENGTH } from 'types/file';
 import constants from 'utils/strings/constants';
 import exifr from 'exifr';
 import Modal from 'react-bootstrap/Modal';
@@ -51,7 +48,7 @@ interface Iprops {
     items: any[];
     currentIndex?: number;
     onClose?: (needUpdate: boolean) => void;
-    gettingData: (instance: any, index: number, item: File) => void;
+    gettingData: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
     className?: string;
     favItemIds: Set<number>;
@@ -87,7 +84,7 @@ function RenderCreationTime({
     file,
     scheduleUpdate,
 }: {
-    file: File;
+    file: EnteFile;
     scheduleUpdate: () => void;
 }) {
     const originalCreationTime = new Date(file?.metadata.creationTime / 1000);
@@ -267,7 +264,7 @@ function RenderFileName({
     file,
     scheduleUpdate,
 }: {
-    file: File;
+    file: EnteFile;
     scheduleUpdate: () => void;
 }) {
     const originalTitle = file?.metadata.title;
@@ -456,7 +453,7 @@ function PhotoSwipe(props: Iprops) {
     const { isOpen, items } = props;
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
-    const [metadata, setMetaData] = useState<File['metadata']>(null);
+    const [metadata, setMetaData] = useState<EnteFile['metadata']>(null);
     const [exif, setExif] = useState<any>(null);
     const needUpdate = useRef(false);
 
@@ -624,7 +621,7 @@ function PhotoSwipe(props: Iprops) {
     };
 
     function updateInfo() {
-        const file: File = this?.currItem;
+        const file: EnteFile = this?.currItem;
         if (file?.metadata) {
             setMetaData(file.metadata);
             setExif(null);

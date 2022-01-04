@@ -5,7 +5,8 @@ import {
     restoreToCollection,
 } from 'services/collectionService';
 import { downloadFiles, getSelectedFiles } from 'utils/file';
-import { File, getLocalFiles } from 'services/fileService';
+import { getLocalFiles } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import { CustomError } from 'utils/common/errorUtil';
 import { SelectedState } from 'pages/gallery';
 import { User } from 'services/userService';
@@ -25,7 +26,7 @@ export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
     setCollectionSelectorView: (value: boolean) => void,
     selected: SelectedState,
-    files: File[],
+    files: EnteFile[],
     setActiveCollection: (id: number) => void,
     collection: Collection
 ) {

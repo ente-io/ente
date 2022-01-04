@@ -9,7 +9,7 @@ import constants from 'utils/strings/constants';
 import { getPublicKey } from './userService';
 import { B64EncryptionResult } from 'utils/crypto';
 import HTTPService from './HTTPService';
-import { File } from './fileService';
+import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/common/errorUtil';
 import { sortFiles } from 'utils/file';
@@ -191,9 +191,9 @@ export const getCollection = async (
 
 export const getCollectionsAndTheirLatestFile = (
     collections: Collection[],
-    files: File[]
+    files: EnteFile[]
 ): CollectionAndItsLatestFile[] => {
-    const latestFile = new Map<number, File>();
+    const latestFile = new Map<number, EnteFile>();
 
     files.forEach((file) => {
         if (!latestFile.has(file.collectionID)) {
@@ -211,7 +211,9 @@ export const getCollectionsAndTheirLatestFile = (
     return collectionsAndTheirLatestFile;
 };
 
-export const getFavItemIds = async (files: File[]): Promise<Set<number>> => {
+export const getFavItemIds = async (
+    files: EnteFile[]
+): Promise<Set<number>> => {
     const favCollection = await getFavCollection();
     if (!favCollection) return new Set();
 
@@ -304,7 +306,7 @@ const postCollection = async (
     }
 };
 
-export const addToFavorites = async (file: File) => {
+export const addToFavorites = async (file: EnteFile) => {
     try {
         let favCollection = await getFavCollection();
         if (!favCollection) {
@@ -324,7 +326,7 @@ export const addToFavorites = async (file: File) => {
     }
 };
 
-export const removeFromFavorites = async (file: File) => {
+export const removeFromFavorites = async (file: EnteFile) => {
     try {
         const favCollection = await getFavCollection();
         if (!favCollection) {
@@ -338,7 +340,7 @@ export const removeFromFavorites = async (file: File) => {
 
 export const addToCollection = async (
     collection: Collection,
-    files: File[]
+    files: EnteFile[]
 ) => {
     try {
         const token = getToken();
@@ -365,7 +367,7 @@ export const addToCollection = async (
 
 export const restoreToCollection = async (
     collection: Collection,
-    files: File[]
+    files: EnteFile[]
 ) => {
     try {
         const token = getToken();
@@ -392,7 +394,7 @@ export const restoreToCollection = async (
 export const moveToCollection = async (
     fromCollectionID: number,
     toCollection: Collection,
-    files: File[]
+    files: EnteFile[]
 ) => {
     try {
         const token = getToken();
@@ -420,7 +422,7 @@ export const moveToCollection = async (
 
 const encryptWithNewCollectionKey = async (
     newCollection: Collection,
-    files: File[]
+    files: EnteFile[]
 ): Promise<EncryptedFileKey[]> => {
     const fileKeysEncryptedWithNewCollection: EncryptedFileKey[] = [];
     const worker = await new CryptoWorker();
@@ -442,7 +444,7 @@ const encryptWithNewCollectionKey = async (
 };
 export const removeFromCollection = async (
     collection: Collection,
-    files: File[]
+    files: EnteFile[]
 ) => {
     try {
         const token = getToken();
@@ -585,7 +587,7 @@ export const getFavCollection = async () => {
 
 export const getNonEmptyCollections = (
     collections: Collection[],
-    files: File[]
+    files: EnteFile[]
 ) => {
     const nonEmptyCollectionsIds = new Set<number>();
     for (const file of files) {
