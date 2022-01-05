@@ -44,14 +44,12 @@ import QueueProcessor from './upload/queueProcessor';
 import { Collection } from 'types/collection';
 import {
     ExportProgress,
-    ExportType,
-    ExportNotification,
     CollectionIDPathMap,
-    RecordType,
     ExportRecord,
 } from 'types/export';
 import { User } from 'types/user';
 import { TYPE_JPEG, TYPE_JPG } from 'constants/file';
+import { ExportType, ExportNotification, RecordType } from 'constants/export';
 
 const LATEST_EXPORT_VERSION = 1;
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
