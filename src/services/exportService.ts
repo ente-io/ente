@@ -40,7 +40,7 @@ import {
 
 import { updateFileCreationDateInEXIF } from './upload/exifService';
 import { MetadataObject } from 'types/upload';
-import QueueProcessor from './upload/queueProcessor';
+import QueueProcessor from './queueProcessor';
 import { Collection } from 'types/collection';
 import {
     ExportProgress,
