@@ -18,16 +18,18 @@ import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
 import { handleUploadError } from 'utils/error';
 import { MetadataMap } from './uploadManager';
-import { DataStream, EncryptionResult, MetadataObject } from 'types/upload';
+import {
+    DataStream,
+    EncryptionResult,
+    isDataStream,
+    MetadataObject,
+} from 'types/upload';
 
 export interface UploadURL {
     url: string;
     objectKey: string;
 }
 
-export function isDataStream(object: any): object is DataStream {
-    return 'stream' in object;
-}
 export interface B64EncryptionResult {
     encryptedData: string;
     key: string;

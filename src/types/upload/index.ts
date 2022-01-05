@@ -6,6 +6,10 @@ export interface DataStream {
     chunkCount: number;
 }
 
+export function isDataStream(object: any): object is DataStream {
+    return 'stream' in object;
+}
+
 export interface EncryptionResult {
     file: fileAttribute;
     key: string;
