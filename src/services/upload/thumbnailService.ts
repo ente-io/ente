@@ -1,4 +1,4 @@
-import { FILE_TYPE } from 'types/file';
+import { FILE_TYPE } from 'constants/file';
 import { CustomError, errorWithContext } from 'utils/common/errorUtil';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';

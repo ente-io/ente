@@ -95,9 +95,10 @@ import FixCreationTime, {
     FixCreationTimeAttributes,
 } from 'components/FixCreationTime';
 import { Collection, CollectionAndItsLatestFile } from 'types/collection';
-import { EnteFile, VISIBILITY_STATE } from 'types/file';
+import { EnteFile } from 'types/file';
 import { GalleryContextType, SelectedState, Search } from 'types/gallery';
 import Collections from 'components/pages/gallery/Collections';
+import { VISIBILITY_STATE } from 'constants/file';
 
 export const DeadCenter = styled.div`
     flex: 1;

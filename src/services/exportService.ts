@@ -28,7 +28,7 @@ import {
 } from './collectionService';
 import downloadManager from './downloadManager';
 import { getLocalFiles } from './fileService';
-import { EnteFile, FILE_TYPE } from 'types/file';
+import { EnteFile } from 'types/file';
 
 import { decodeMotionPhoto } from './motionPhotoService';
 import {
@@ -48,7 +48,7 @@ import {
     ExportRecord,
 } from 'types/export';
 import { User } from 'types/user';
-import { TYPE_JPEG, TYPE_JPG } from 'constants/file';
+import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
 import { ExportType, ExportNotification, RecordType } from 'constants/export';
 
 const LATEST_EXPORT_VERSION = 1;

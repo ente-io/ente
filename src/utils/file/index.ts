@@ -3,11 +3,9 @@ import { Collection } from 'types/collection';
 import {
     EnteFile,
     fileAttribute,
-    FILE_TYPE,
     MagicMetadataProps,
     NEW_MAGIC_METADATA,
     PublicMagicMetadataProps,
-    VISIBILITY_STATE,
 } from 'types/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
@@ -17,7 +15,14 @@ import { User } from 'types/user';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
-import { TYPE_JPEG, TYPE_JPG, TYPE_HEIC, TYPE_HEIF } from 'constants/file';
+import {
+    TYPE_JPEG,
+    TYPE_JPG,
+    TYPE_HEIC,
+    TYPE_HEIF,
+    FILE_TYPE,
+    VISIBILITY_STATE,
+} from 'constants/file';
 
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {

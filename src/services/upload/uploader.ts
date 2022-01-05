@@ -1,4 +1,4 @@
-import { EnteFile, FILE_TYPE } from 'types/file';
+import { EnteFile } from 'types/file';
 import { sleep } from 'utils/common';
 import { handleUploadError, CustomError } from 'utils/common/errorUtil';
 import { decryptFile } from 'utils/file';
@@ -17,6 +17,7 @@ import UploadService, {
 import uploadService from './uploadService';
 import { FileTypeInfo, getFileType } from './readFileService';
 import { MetadataObject } from 'types/upload';
+import { FILE_TYPE } from 'constants/file';
 
 const TwoSecondInMillSeconds = 2000;
 const FIVE_GB_IN_BYTES = 5 * 1024 * 1024 * 1024;

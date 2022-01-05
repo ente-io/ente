@@ -23,9 +23,10 @@ import CollectionIcon from './icons/CollectionIcon';
 import ImageIcon from './icons/ImageIcon';
 import VideoIcon from './icons/VideoIcon';
 import { IconButton } from './Container';
-import { EnteFile, FILE_TYPE } from 'types/file';
+import { EnteFile } from 'types/file';
 import { Suggestion, SuggestionType, DateValue, Bbox } from 'types/search';
 import { Search, SearchStats } from 'types/gallery';
+import { FILE_TYPE } from 'constants/file';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;

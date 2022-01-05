@@ -1,4 +1,5 @@
-import { fileAttribute, FILE_TYPE } from 'types/file';
+import { FILE_TYPE } from 'constants/file';
+import { fileAttribute } from 'types/file';
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;

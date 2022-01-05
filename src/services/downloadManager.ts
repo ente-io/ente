@@ -7,9 +7,10 @@ import {
     needsConversionForPreview,
 } from 'utils/file';
 import HTTPService from './HTTPService';
-import { EnteFile, FILE_TYPE } from 'types/file';
+import { EnteFile } from 'types/file';
 
 import { logError } from 'utils/sentry';
+import { FILE_TYPE } from 'constants/file';
 
 class DownloadManager {
     private fileObjectUrlPromise = new Map<string, Promise<string>>();

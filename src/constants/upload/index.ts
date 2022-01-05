@@ -1,5 +1,5 @@
 import { ENCRYPTION_CHUNK_SIZE } from 'constants/crypto';
-import { FILE_TYPE } from 'types/file';
+import { FILE_TYPE } from 'constants/file';
 import { Location } from 'services/upload/metadataService';
 
 // list of format that were missed by type-detection for some files.

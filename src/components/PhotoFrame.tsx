@@ -2,7 +2,7 @@ import { GalleryContext } from 'pages/gallery';
 import PreviewCard from './pages/gallery/PreviewCard';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
-import { EnteFile, FILE_TYPE } from 'types/file';
+import { EnteFile } from 'types/file';
 import styled from 'styled-components';
 import DownloadManager from 'services/downloadManager';
 import constants from 'utils/strings/constants';
@@ -20,6 +20,7 @@ import { isSharedFile } from 'utils/file';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
 import { SetFiles, SelectedState, Search, setSearchStats } from 'types/gallery';
+import { FILE_TYPE } from 'constants/file';
 
 const Container = styled.div`
     display: block;

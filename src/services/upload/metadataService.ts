@@ -1,4 +1,4 @@
-import { FILE_TYPE } from 'types/file';
+import { FILE_TYPE } from 'constants/file';
 import { logError } from 'utils/sentry';
 import { getExifData } from './exifService';
 import { FileTypeInfo } from './readFileService';

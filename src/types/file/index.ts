@@ -1,21 +1,10 @@
+import { VISIBILITY_STATE } from 'constants/file';
 import { DataStream, MetadataObject } from 'types/upload';
 
 export interface fileAttribute {
     encryptedData?: DataStream | Uint8Array;
     objectKey?: string;
     decryptionHeader: string;
-}
-
-export enum FILE_TYPE {
-    IMAGE,
-    VIDEO,
-    LIVE_PHOTO,
-    OTHERS,
-}
-
-export enum VISIBILITY_STATE {
-    VISIBLE,
-    ARCHIVED,
 }
 
 export interface MagicMetadataCore {
