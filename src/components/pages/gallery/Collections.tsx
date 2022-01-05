@@ -9,12 +9,7 @@ import { sortCollections } from 'services/collectionService';
 import { User } from 'types/user';
 import styled from 'styled-components';
 import { IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
-import {
-    Collection,
-    CollectionAndItsLatestFile,
-    COLLECTION_SORT_BY,
-    CollectionType,
-} from 'types/collection';
+import { Collection, CollectionAndItsLatestFile } from 'types/collection';
 import { getSelectedCollection } from 'utils/collection';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
@@ -25,6 +20,8 @@ import OptionIcon, { OptionIconWrapper } from './OptionIcon';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
+    CollectionType,
+    COLLECTION_SORT_BY,
     TRASH_SECTION,
 } from 'constants/collection';
 

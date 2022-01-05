@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Modal } from 'react-bootstrap';
 import styled from 'styled-components';
-import {} from 'services/collectionService';
 import AddCollectionButton from './AddCollectionButton';
 import PreviewCard from './PreviewCard';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { User } from 'types/user';
-import {
-    Collection,
-    CollectionAndItsLatestFile,
-    CollectionType,
-} from 'types/collection';
+import { Collection, CollectionAndItsLatestFile } from 'types/collection';
+import { CollectionType } from 'constants/collection';
 
 export const CollectionIcon = styled.div`
     width: 200px;

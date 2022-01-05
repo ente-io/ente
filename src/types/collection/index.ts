@@ -1,11 +1,6 @@
 import { User } from 'types/user';
 import { EnteFile } from 'types/file';
-
-export enum CollectionType {
-    folder = 'folder',
-    favorites = 'favorites',
-    album = 'album',
-}
+import { CollectionType } from 'constants/collection';
 
 export interface Collection {
     id: number;
@@ -49,12 +44,6 @@ export interface collectionAttributes {
 export interface CollectionAndItsLatestFile {
     collection: Collection;
     file: EnteFile;
-}
-
-export enum COLLECTION_SORT_BY {
-    LATEST_FILE,
-    MODIFICATION_TIME,
-    NAME,
 }
 
 export interface RemoveFromCollectionRequest {

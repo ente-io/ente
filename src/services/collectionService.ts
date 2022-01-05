@@ -15,14 +15,13 @@ import { CustomError } from 'utils/common/errorUtil';
 import { sortFiles } from 'utils/file';
 import {
     Collection,
-    COLLECTION_SORT_BY,
     CollectionAndItsLatestFile,
-    CollectionType,
     AddToCollectionRequest,
     MoveToCollectionRequest,
     EncryptedFileKey,
     RemoveFromCollectionRequest,
 } from 'types/collection';
+import { COLLECTION_SORT_BY, CollectionType } from 'constants/collection';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';

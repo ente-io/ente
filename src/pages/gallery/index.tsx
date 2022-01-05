@@ -67,6 +67,7 @@ import Upload from 'components/pages/gallery/Upload';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
+    CollectionType,
     TRASH_SECTION,
 } from 'constants/collection';
 import { AppContext } from 'pages/_app';
@@ -93,11 +94,7 @@ import DeleteBtn from 'components/DeleteBtn';
 import FixCreationTime, {
     FixCreationTimeAttributes,
 } from 'components/FixCreationTime';
-import {
-    Collection,
-    CollectionAndItsLatestFile,
-    CollectionType,
-} from 'types/collection';
+import { Collection, CollectionAndItsLatestFile } from 'types/collection';
 import { EnteFile, VISIBILITY_STATE } from 'types/file';
 import { GalleryContextType, SelectedState, Search } from 'types/gallery';
 import Collections from 'components/pages/gallery/Collections';

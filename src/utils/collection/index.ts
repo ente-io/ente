@@ -14,7 +14,8 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { SetDialogMessage } from 'components/MessageDialog';
 import { logError } from 'utils/sentry';
 import constants from 'utils/strings/constants';
-import { Collection, CollectionType } from 'types/collection';
+import { Collection } from 'types/collection';
+import { CollectionType } from 'constants/collection';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
