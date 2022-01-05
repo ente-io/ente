@@ -34,20 +34,28 @@ export function getFaceCrop(
     };
 }
 
-export async function getStoredFaceCrop(
+export async function getStoredFaceCropForBlob(
     faceId: string,
-    faceCrop: FaceCrop,
-    blobOptions: BlobOptions
-): Promise<StoredFaceCrop> {
-    const faceCropBlob = await imageBitmapToBlob(faceCrop.image, blobOptions);
+    imageBox: Box,
+    faceCropBlob: Blob
+) {
     const faceCropUrl = `/${faceId}`;
     const faceCropResponse = new Response(faceCropBlob);
     const faceCropCache = await caches.open(FACE_CROPS_CACHE_NAME);
     await faceCropCache.put(faceCropUrl, faceCropResponse);
     return {
         imageUrl: faceCropUrl,
-        imageBox: faceCrop.imageBox,
+        imageBox: imageBox,
     };
+}
+
+export async function getStoredFaceCrop(
+    faceId: string,
+    faceCrop: FaceCrop,
+    blobOptions: BlobOptions
+): Promise<StoredFaceCrop> {
+    const faceCropBlob = await imageBitmapToBlob(faceCrop.image, blobOptions);
+    return getStoredFaceCropForBlob(faceId, faceCrop.imageBox, faceCropBlob);
 }
 
 export async function getFaceImageBlobFromStorage(

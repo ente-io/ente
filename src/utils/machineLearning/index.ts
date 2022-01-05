@@ -20,7 +20,6 @@ import { imageBitmapToBlob } from 'utils/image';
 import { NormalizedFace } from '@tensorflow-models/blazeface';
 import PQueue from 'p-queue';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import { mlFilesStore } from 'utils/storage/mlStorage';
 import { getFaceImageBlobFromStorage } from './faceCrop';
 import { Dimensions } from 'types/image';
 
@@ -225,6 +224,8 @@ export function leftFillNum(num: number, length: number, padding: number) {
 // also comparing based on distance gives flexibility of variabale threshold
 // e.g. based on relative face size in an image
 // will anyways finalize grid size as half of our threshold
+// can also explore spatial index similar to Geohash for indexing, again overkill
+// also check if this needs to be globally unique or unique for a user
 export function getFaceId(
     fileId: number,
     face: DetectedFace,
@@ -423,28 +424,6 @@ export function logQueueStats(queue: PQueue, name: string) {
             `queuestats: ${name}: Working on next item.  Size: ${queue.size}  Pending: ${queue.pending}`
         );
     });
-}
-
-// TODO: for migrating existing data, to be removed
-export async function migrateExistingFiles() {
-    const existingFiles: Array<MlFileData> = [];
-    await mlFilesStore.iterate((mlFileData: MlFileData) => {
-        if (!mlFileData.errorCount) {
-            mlFileData.errorCount = 0;
-            existingFiles.push(mlFileData);
-        }
-    });
-    console.log('existing files: ', existingFiles.length);
-
-    try {
-        for (const file of existingFiles) {
-            await mlIDbStorage.putFile(file);
-        }
-        await mlIDbStorage.setIndexVersion('files', 1);
-        console.log('migrateExistingFiles done');
-    } catch (e) {
-        console.error(e);
-    }
 }
 
 export async function getMLSyncConfig() {

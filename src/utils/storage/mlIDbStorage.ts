@@ -134,6 +134,11 @@ class MLIDbStorage {
         return db.get('files', fileId);
     }
 
+    public async getAllFiles() {
+        const db = await this.db;
+        return db.getAll('files');
+    }
+
     public async putFile(mlFile: MlFileData) {
         const db = await this.db;
         return db.put('files', mlFile);
@@ -174,9 +179,11 @@ class MLIDbStorage {
         const tx = db.transaction('files', 'readwrite');
         let cursor = await tx.store.openCursor();
         while (cursor) {
-            const mlFileData = { ...cursor.value };
-            mlFileData.faces = allFacesMap.get(cursor.key);
-            cursor.update(mlFileData);
+            if (allFacesMap.has(cursor.key)) {
+                const mlFileData = { ...cursor.value };
+                mlFileData.faces = allFacesMap.get(cursor.key);
+                cursor.update(mlFileData);
+            }
             cursor = await cursor.continue();
         }
         await tx.done;
