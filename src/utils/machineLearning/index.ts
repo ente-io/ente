@@ -374,8 +374,11 @@ export async function getUnidentifiedFaces(
         .map((f) => f.faceCrop)
         .filter((faceCrop) => faceCrop !== null && faceCrop !== undefined);
 
-    return Promise.all(
-        faceCrops.map((faceCrop) => getFaceImageBlobFromStorage(faceCrop))
+    return (
+        faceCrops &&
+        Promise.all(
+            faceCrops.map((faceCrop) => getFaceImageBlobFromStorage(faceCrop))
+        )
     );
 }
 
