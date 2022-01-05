@@ -19,12 +19,6 @@ import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes, User } from 'types/user';
 
-export interface KEK {
-    key: string;
-    opsLimit: number;
-    memLimit: number;
-}
-
 export default function Generate() {
     const [token, setToken] = useState<string>();
     const router = useRouter();

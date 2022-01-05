@@ -14,6 +14,12 @@ export interface KeyAttributes {
     recoveryKeyEncryptedWithMasterKey: string;
     recoveryKeyDecryptionNonce: string;
 }
+export interface KEK {
+    key: string;
+    opsLimit: number;
+    memLimit: number;
+}
+
 export interface UpdatedKey {
     kekSalt: string;
     encryptedKey: string;

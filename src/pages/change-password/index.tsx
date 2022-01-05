@@ -13,13 +13,7 @@ import SetPasswordForm from 'components/SetPasswordForm';
 import { AppContext } from 'pages/_app';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
-import { UpdatedKey } from 'types/user';
-
-export interface KEK {
-    key: string;
-    opsLimit: number;
-    memLimit: number;
-}
+import { KEK, UpdatedKey } from 'types/user';
 
 export default function Generate() {
     const [token, setToken] = useState<string>();
