@@ -8,7 +8,6 @@ import {
     MLSyncConfig,
 } from 'types/machineLearning';
 import { getToken } from 'utils/common/key';
-import { migrateFaceCropsToCache } from 'utils/machineLearning/migrations';
 import { getDedicatedMLWorker } from 'utils/machineLearning/worker';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -43,7 +42,6 @@ class MLWorkManager {
         try {
             const user = getData(LS_KEYS.USER);
             if (user?.token) {
-                await migrateFaceCropsToCache();
                 this.startSyncJob();
             }
         } catch (e) {
