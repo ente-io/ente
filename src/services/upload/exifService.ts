@@ -1,8 +1,7 @@
 import exifr from 'exifr';
 import piexif from 'piexifjs';
 import { logError } from 'utils/sentry';
-import { NULL_LOCATION } from 'constants/upload';
-import { Location } from 'services/upload/metadataService';
+import { Location, NULL_LOCATION } from 'services/upload/metadataService';
 import { FileTypeInfo } from './readFileService';
 
 const EXIF_TAGS_NEEDED = [

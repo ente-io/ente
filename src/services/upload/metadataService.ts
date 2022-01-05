@@ -3,7 +3,6 @@ import { logError } from 'utils/sentry';
 import { getExifData } from './exifService';
 import { FileTypeInfo } from './readFileService';
 import { MetadataObject } from 'types/upload';
-import { NULL_LOCATION } from 'constants/upload';
 
 export interface Location {
     latitude: number;
@@ -20,6 +19,8 @@ interface ParsedMetaDataJSONWithTitle {
     title: string;
     parsedMetaDataJSON: ParsedMetaDataJSON;
 }
+
+export const NULL_LOCATION: Location = { latitude: null, longitude: null };
 
 const NULL_PARSED_METADATA_JSON: ParsedMetaDataJSON = {
     creationTime: null,
