@@ -6,6 +6,8 @@ import {
     FaceCrop,
     StoredFaceCrop,
     DetectedFace,
+    FACE_CROPS_CACHE_NAME,
+    MlFileData,
 } from 'types/machineLearning';
 import { cropWithRotation, imageBitmapToBlob } from 'utils/image';
 import { enlargeBox } from '.';
@@ -33,14 +35,73 @@ export function getFaceCrop(
 }
 
 export async function getStoredFaceCrop(
+    faceId: string,
     faceCrop: FaceCrop,
     blobOptions: BlobOptions
 ): Promise<StoredFaceCrop> {
     const faceCropBlob = await imageBitmapToBlob(faceCrop.image, blobOptions);
+    const faceCropUrl = `/${faceId}`;
+    const faceCropResponse = new Response(faceCropBlob);
+    const faceCropCache = await caches.open(FACE_CROPS_CACHE_NAME);
+    await faceCropCache.put(faceCropUrl, faceCropResponse);
     return {
-        image: faceCropBlob,
+        imageUrl: faceCropUrl,
         imageBox: faceCrop.imageBox,
     };
+}
+
+export async function getFaceImageBlobFromStorage(
+    storedFaceCrop: StoredFaceCrop
+): Promise<Blob> {
+    const faceCropCache = await caches.open(FACE_CROPS_CACHE_NAME);
+    const faceCropResponse = await faceCropCache.match(storedFaceCrop.imageUrl);
+
+    return faceCropResponse.blob();
+}
+
+export async function getFaceCropFromStorage(
+    storedFaceCrop: StoredFaceCrop
+): Promise<FaceCrop> {
+    const faceCropBlob = await getFaceImageBlobFromStorage(storedFaceCrop);
+    const faceCropImage = await createImageBitmap(faceCropBlob);
+
+    return {
+        image: faceCropImage,
+        imageBox: storedFaceCrop.imageBox,
+    };
+}
+
+export async function removeOldFaceCrops(
+    oldMLFileData: MlFileData,
+    newMLFileData: MlFileData
+) {
+    const newFaceCropUrls =
+        newMLFileData?.faces
+            ?.map((f) => f.faceCrop?.imageUrl)
+            ?.filter((fc) => fc !== null && fc !== undefined) || [];
+
+    const oldFaceCropUrls =
+        oldMLFileData?.faces
+            ?.map((f) => f.faceCrop?.imageUrl)
+            ?.filter((fc) => fc !== null && fc !== undefined) || [];
+
+    const unusedFaceCropUrls = oldFaceCropUrls.filter(
+        (oldUrl) => !newFaceCropUrls.includes(oldUrl)
+    );
+    if (!unusedFaceCropUrls || unusedFaceCropUrls.length < 1) {
+        return;
+    }
+
+    return removeFaceCropUrls(unusedFaceCropUrls);
+}
+
+export async function removeFaceCropUrls(faceCropUrls: Array<string>) {
+    console.log('Removing face crop urls: ', faceCropUrls);
+    const faceCropCache = await caches.open(FACE_CROPS_CACHE_NAME);
+    const urlRemovalPromises = faceCropUrls?.map((url) =>
+        faceCropCache.delete(url)
+    );
+    return urlRemovalPromises && Promise.all(urlRemovalPromises);
 }
 
 export function extractFaceImageFromCrop(
@@ -81,13 +142,15 @@ export function extractFaceImageFromCrop(
 
 export async function ibExtractFaceImageFromCrop(
     alignedFace: AlignedFace,
-    faceSize: number
+    faceSize: number,
+    usingFaceCrop?: FaceCrop
 ): Promise<ImageBitmap> {
     const box = getAlignedFaceBox(alignedFace);
-    const faceCropImage = await createImageBitmap(alignedFace.faceCrop.image);
+    const faceCrop =
+        usingFaceCrop || (await getFaceCropFromStorage(alignedFace.faceCrop));
 
     return extractFaceImageFromCrop(
-        { image: faceCropImage, imageBox: alignedFace.faceCrop?.imageBox },
+        { image: faceCrop.image, imageBox: faceCrop.imageBox },
         box,
         alignedFace.rotation,
         faceSize

@@ -1,13 +1,13 @@
 import {
     DetectedFace,
+    FaceCrop,
     FaceCropConfig,
     FaceCropMethod,
     FaceCropService,
-    StoredFaceCrop,
     Versioned,
 } from 'types/machineLearning';
 import { getArcfaceAlignedFace } from 'utils/machineLearning/faceAlign';
-import { getFaceCrop, getStoredFaceCrop } from 'utils/machineLearning/faceCrop';
+import { getFaceCrop } from 'utils/machineLearning/faceCrop';
 
 class ArcFaceCropService implements FaceCropService {
     public method: Versioned<FaceCropMethod>;
@@ -23,13 +23,11 @@ class ArcFaceCropService implements FaceCropService {
         imageBitmap: ImageBitmap,
         face: DetectedFace,
         config: FaceCropConfig
-    ): Promise<StoredFaceCrop> {
+    ): Promise<FaceCrop> {
         const alignedFace = getArcfaceAlignedFace(face);
         const faceCrop = getFaceCrop(imageBitmap, alignedFace, config);
-        const storedFaceCrop = getStoredFaceCrop(faceCrop, config.blobOptions);
-        faceCrop.image.close();
 
-        return storedFaceCrop;
+        return faceCrop;
     }
 }
 

@@ -24,6 +24,7 @@ import { toTSNE } from 'utils/machineLearning/visualization';
 import {
     findFirstIfSorted,
     getAllFacesFromMap,
+    getFaceId,
     getFaceImage,
     getLocalFileImageBitmap,
     getMLSyncConfig,
@@ -33,6 +34,10 @@ import {
 } from 'utils/machineLearning';
 import { MLFactory } from './machineLearningFactory';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
+import {
+    getFaceImageBlobFromStorage,
+    getStoredFaceCrop,
+} from 'utils/machineLearning/faceCrop';
 
 class MachineLearningService {
     private initialized = false;
@@ -366,6 +371,12 @@ class MachineLearningService {
         // console.log('8 TF Memory stats: ', tf.memory());
         await this.persistMLFileData(syncContext, fileContext.newMLFileData);
 
+        // TODO: enable once faceId changes go in
+        // await removeOldFaceCrops(
+        //     fileContext.oldMLFileData,
+        //     fileContext.newMLFileData
+        // );
+
         return fileContext.newMLFileData;
     }
 
@@ -459,11 +470,22 @@ class MachineLearningService {
             syncContext.faceCropService.method;
 
         for (const face of fileContext.filtertedFaces) {
-            face.faceCrop = await syncContext.faceCropService.getFaceCrop(
+            const faceCrop = await syncContext.faceCropService.getFaceCrop(
                 imageBitmap,
                 face,
                 syncContext.config.faceCrop
             );
+            const { width, height } = imageBitmap;
+            const faceId = getFaceId(fileContext.enteFile.id, face, {
+                width,
+                height,
+            });
+            face.faceCrop = await getStoredFaceCrop(
+                faceId,
+                faceCrop,
+                syncContext.config.faceCrop.blobOptions
+            );
+            faceCrop.image.close();
         }
     }
 
@@ -705,7 +727,9 @@ class MachineLearningService {
                 (a, b) => a.probability * a.size - b.probability * b.size
             );
 
-            let faceImage = personFace.faceCrop?.image;
+            let faceImage = await getFaceImageBlobFromStorage(
+                personFace.faceCrop
+            );
             if (!faceImage) {
                 faceImage = await getFaceImage(personFace, syncContext.token);
             }

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import arcfaceAlignmentService from 'services/machineLearning/arcfaceAlignmentService';
 import arcfaceCropService from 'services/machineLearning/arcfaceCropService';
 import tfjsFaceDetectionService from 'services/machineLearning/tfjsFaceDetectionService';
-import { AlignedFace, DetectedFace } from 'types/machineLearning';
+import { AlignedFace, FaceCrop } from 'types/machineLearning';
 import { getMLSyncConfig } from 'utils/machineLearning';
 import {
     getAlignedFaceBox,
@@ -10,12 +10,7 @@ import {
     ibExtractFaceImageUsingTransform,
 } from 'utils/machineLearning/faceAlign';
 import { ibExtractFaceImageFromCrop } from 'utils/machineLearning/faceCrop';
-import {
-    FaceCropsRow,
-    FaceImagesRow,
-    ImageBitmapView,
-    ImageBlobView,
-} from './ImageViews';
+import { FaceCropsRow, FaceImagesRow, ImageBitmapView } from './ImageViews';
 
 interface MLFileDebugViewProps {
     file: File;
@@ -56,7 +51,7 @@ function drawFaceDetection(face: AlignedFace, ctx: CanvasRenderingContext2D) {
 
 export default function MLFileDebugView(props: MLFileDebugViewProps) {
     // const [imageBitmap, setImageBitmap] = useState<ImageBitmap>();
-    const [faces, setFaces] = useState<DetectedFace[]>();
+    const [faceCrops, setFaceCrops] = useState<FaceCrop[]>();
     const [facesUsingCrops, setFacesUsingCrops] = useState<ImageBitmap[]>();
     const [facesUsingImage, setFacesUsingImage] = useState<ImageBitmap[]>();
     const [facesUsingTransform, setFacesUsingTransform] =
@@ -72,19 +67,20 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             const detectedFaces = await tfjsFaceDetectionService.detectFaces(
                 imageBitmap
             );
+            console.log('detectedFaces: ', detectedFaces.length);
+
             const mlSyncConfig = await getMLSyncConfig();
-            const facePromises = detectedFaces.map(async (face) => {
-                face.faceCrop = await arcfaceCropService.getFaceCrop(
+            const faceCropPromises = detectedFaces.map(async (face) =>
+                arcfaceCropService.getFaceCrop(
                     imageBitmap,
                     face,
                     mlSyncConfig.faceCrop
-                );
-            });
+                )
+            );
 
-            await Promise.all(facePromises);
+            const faceCrops = await Promise.all(faceCropPromises);
             if (didCancel) return;
-            setFaces(detectedFaces);
-            console.log('detectedFaces: ', detectedFaces.length);
+            setFaceCrops(faceCrops);
 
             const alignedFaces =
                 arcfaceAlignmentService.getAlignedFaces(detectedFaces);
@@ -99,8 +95,8 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             alignedFaces.forEach((face) => drawFaceDetection(face, ctx));
 
             const facesUsingCrops = await Promise.all(
-                alignedFaces.map((face) => {
-                    return ibExtractFaceImageFromCrop(face, 112);
+                alignedFaces.map((face, i) => {
+                    return ibExtractFaceImageFromCrop(face, 112, faceCrops[i]);
                 })
             );
             const facesUsingImage = await Promise.all(
@@ -141,10 +137,10 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             <p></p>
             <div>Face Crops:</div>
             <FaceCropsRow>
-                {faces?.map((face, i) => (
-                    <ImageBlobView
+                {faceCrops?.map((faceCrop, i) => (
+                    <ImageBitmapView
                         key={i}
-                        blob={face.faceCrop?.image}></ImageBlobView>
+                        image={faceCrop.image}></ImageBitmapView>
                 ))}
             </FaceCropsRow>
 

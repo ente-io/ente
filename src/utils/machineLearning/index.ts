@@ -4,6 +4,7 @@ import { File, getLocalFiles } from 'services/fileService';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
 import {
     BLAZEFACE_FACE_SIZE,
+    DetectedFace,
     Face,
     FaceImageBlob,
     MlFileData,
@@ -11,7 +12,7 @@ import {
     Person,
     Versioned,
 } from 'types/machineLearning';
-import { ibExtractFaceImage } from './faceAlign';
+import { getArcfaceAlignedFace, ibExtractFaceImage } from './faceAlign';
 // import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
 import { convertForPreview, needsConversionForPreview } from 'utils/file';
 import { cached } from 'utils/storage/cache';
@@ -20,6 +21,8 @@ import { NormalizedFace } from '@tensorflow-models/blazeface';
 import PQueue from 'p-queue';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { mlFilesStore } from 'utils/storage/mlStorage';
+import { getFaceImageBlobFromStorage } from './faceCrop';
+import { Dimensions } from 'types/image';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -206,6 +209,40 @@ export async function getFaceImage(
     return faceImage;
 }
 
+export function leftFillNum(num: number, length: number, padding: number) {
+    return num.toString().padStart(length, padding.toString());
+}
+
+// TODO: same face can not be only based on this id,
+// this gives same id to faces whose arcface center lies in same box of 1% image grid
+// will give same id in most of the cases, except for face centers lying near grid edges
+// faces with same id should be treated as same face, and diffrent id should be tested further
+// further test can rely on nearest face within certain threshold in same image
+// we can even have grid of half threshold and then treat even nearby faces
+// in neighbouring 8 grid boxes as same face
+// e.g. with 1% grid size, we can easily get faces within 2% threshold
+// but looks overkill for mostly single digit faces in an image
+// also comparing based on distance gives flexibility of variabale threshold
+// e.g. based on relative face size in an image
+// will anyways finalize grid size as half of our threshold
+export function getFaceId(
+    fileId: number,
+    face: DetectedFace,
+    imageDims: Dimensions
+) {
+    const arcFaceAlignedFace = getArcfaceAlignedFace(face);
+    const imgDimPoint = new Point(imageDims.width, imageDims.height);
+    const gridPt = arcFaceAlignedFace.center
+        .mul(new Point(100, 100))
+        .div(imgDimPoint)
+        .floor()
+        .bound(0, 99);
+    const gridPaddedX = leftFillNum(gridPt.x, 2, 0);
+    const gridPaddedY = leftFillNum(gridPt.y, 2, 0);
+
+    return `${fileId}-${gridPaddedX}-${gridPaddedY}`;
+}
+
 export async function getTFImage(blob): Promise<tf.Tensor3D> {
     const imageBitmap = await createImageBitmap(blob);
     const tfImage = tf.browser.fromPixels(imageBitmap);
@@ -331,12 +368,14 @@ export async function getUnidentifiedFaces(
 ): Promise<Array<FaceImageBlob>> {
     const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
 
-    const faceImages = mlFileData?.faces
+    const faceCrops = mlFileData?.faces
         ?.filter((f) => f.personId === null || f.personId === undefined)
-        .map((f) => f.faceCrop?.image)
-        .filter((image) => image !== null && image !== undefined);
+        .map((f) => f.faceCrop)
+        .filter((faceCrop) => faceCrop !== null && faceCrop !== undefined);
 
-    return faceImages;
+    return Promise.all(
+        faceCrops.map((faceCrop) => getFaceImageBlobFromStorage(faceCrop))
+    );
 }
 
 export async function getAllPeople() {

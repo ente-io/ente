@@ -2,7 +2,11 @@ import { Remote } from 'comlink';
 import PQueue from 'p-queue';
 import { eventBus, Events } from 'services/events';
 import { File } from 'services/fileService';
-import { MachineLearningWorker, MLSyncConfig } from 'types/machineLearning';
+import {
+    FACE_CROPS_CACHE_NAME,
+    MachineLearningWorker,
+    MLSyncConfig,
+} from 'types/machineLearning';
 import { getToken } from 'utils/common/key';
 import { getDedicatedMLWorker } from 'utils/machineLearning/worker';
 import { logError } from 'utils/sentry';
@@ -49,6 +53,7 @@ class MLWorkManager {
         try {
             await this.stopSyncJob();
             await mlIDbStorage.clearMLDB();
+            await caches.delete(FACE_CROPS_CACHE_NAME);
         } catch (e) {
             logError(e, 'Failed in ML logout Handler');
         }

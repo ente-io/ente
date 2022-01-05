@@ -128,8 +128,10 @@ export interface FaceCrop {
     imageBox: Box;
 }
 
+export const FACE_CROPS_CACHE_NAME = 'face-crops';
+
 export interface StoredFaceCrop {
-    image: Blob;
+    imageUrl: string;
     imageBox: Box;
 }
 
@@ -303,7 +305,7 @@ export interface FaceCropService {
         imageBitmap: ImageBitmap,
         face: DetectedFace,
         config: FaceCropConfig
-    ): Promise<StoredFaceCrop>;
+    ): Promise<FaceCrop>;
 }
 
 export interface FaceAlignmentService {

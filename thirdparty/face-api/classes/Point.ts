@@ -42,4 +42,14 @@ export class Point implements IPoint {
   public floor(): Point {
     return new Point(Math.floor(this.x), Math.floor(this.y))
   }
+
+  public round(): Point {
+    return new Point(Math.round(this.x), Math.round(this.y))
+  }
+
+  public bound(lower: number, higher: number): Point {
+    const x = Math.max(lower, Math.min(higher, this.x));
+    const y = Math.max(lower, Math.min(higher, this.y));
+    return new Point(x, y);
+  }
 }

@@ -7,7 +7,7 @@ import { PAGES } from 'types';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
 import TFJSImage from './TFJSImage';
-import { Face, MLDebugResult } from 'types/machineLearning';
+import { MLDebugResult } from 'types/machineLearning';
 import Tree from 'react-d3-tree';
 import MLFileDebugView from './MLFileDebugView';
 import mlWorkManager from 'services/machineLearning/mlWorkManager';
@@ -15,6 +15,7 @@ import mlWorkManager from 'services/machineLearning/mlWorkManager';
 import { getAllFacesFromMap } from 'utils/machineLearning';
 import { FaceImagesRow, ImageBlobView } from './ImageViews';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
+import { getFaceImageBlobFromStorage } from 'utils/machineLearning/faceCrop';
 
 interface TSNEProps {
     mlResult: MLDebugResult;
@@ -87,7 +88,7 @@ export default function MLDebug() {
         tsne: null,
     });
 
-    const [noiseFaces, setNoiseFaces] = useState<Array<Face>>([]);
+    const [noiseFaces, setNoiseFaces] = useState<Array<Blob>>([]);
     const [debugFile, setDebugFile] = useState<File>();
 
     const router = useRouter();
@@ -179,11 +180,12 @@ export default function MLDebug() {
         const allFacesMap = await mlIDbStorage.getAllFacesMap();
         const allFaces = getAllFacesFromMap(allFacesMap);
 
-        const noiseFaces = mlLibraryData?.faceClusteringResults?.noise
+        const noiseFacePromises = mlLibraryData?.faceClusteringResults?.noise
             ?.slice(0, 100)
             .map((n) => allFaces[n])
-            .filter((f) => f);
-        setNoiseFaces(noiseFaces);
+            .filter((f) => f?.faceCrop)
+            .map((f) => getFaceImageBlobFromStorage(f.faceCrop));
+        setNoiseFaces(await Promise.all(noiseFacePromises));
     };
 
     const nodeSize = { x: 180, y: 180 };
@@ -242,9 +244,7 @@ export default function MLDebug() {
             <div>Noise Faces:</div>
             <FaceImagesRow>
                 {noiseFaces?.map((face, i) => (
-                    <ImageBlobView
-                        key={i}
-                        blob={face.faceCrop?.image}></ImageBlobView>
+                    <ImageBlobView key={i} blob={face}></ImageBlobView>
                 ))}
             </FaceImagesRow>
 
