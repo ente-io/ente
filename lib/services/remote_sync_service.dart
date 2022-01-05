@@ -84,10 +84,10 @@ class RemoteSyncService {
           .onError((e, s) => _logger.severe('trash sync failed', e, s));
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
-      _existingSync.complete();
-      _existingSync = null;
       if (hasUploadedFiles) {
         await _pullDiff(true);
+        _existingSync.complete();
+        _existingSync = null;
         final hasMoreFilesToBackup = (await _getFilesToBeUploaded()).isNotEmpty;
         if (hasMoreFilesToBackup && !_shouldThrottleSync()) {
           // Skipping a resync to ensure that files that were ignored in this
@@ -96,6 +96,9 @@ class RemoteSyncService {
         } else {
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed_backup));
         }
+      } else {
+        _existingSync.complete();
+        _existingSync = null;
       }
     } catch (e, s) {
       _logger.severe("Error executing remote sync ", e, s);
