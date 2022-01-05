@@ -34,6 +34,7 @@ class DeduplicationService {
   List<DuplicateFiles> _filterDuplicatesByCreationTime(
       DuplicateFilesResponse dupes, Map<int, File> fileMap) {
     final result = <DuplicateFiles>[];
+    final missingFileIDs = <int>[];
     for (final dupe in dupes.duplicates) {
       final files = <File>[];
       final Map<int, int> creationTimeCounter = {};
@@ -55,10 +56,7 @@ class DeduplicationService {
           }
           files.add(file);
         } else {
-          _logger.severe(
-              "Missing file",
-              InvalidStateError(
-                  "Could not find file in local DB " + id.toString()));
+          missingFileIDs.add(id);
         }
       }
       // Ignores those files that were not created within the most common creationTime
@@ -82,6 +80,14 @@ class DeduplicationService {
       if (files.length > 1) {
         result.add(DuplicateFiles(files, dupe.size));
       }
+    }
+    if (missingFileIDs.isNotEmpty) {
+      _logger.severe(
+          "Missing files",
+          InvalidStateError("Could not find " +
+              missingFileIDs.length.toString() +
+              " files in local DB: " +
+              missingFileIDs.toString()));
     }
     return result;
   }
