@@ -18,7 +18,7 @@ import UploadManager, {
 } from 'services/upload/uploadManager';
 import uploadManager from 'services/upload/uploadManager';
 import { METADATA_FOLDER_NAME } from 'constants/export';
-import { getUserFacingErrorMessage } from 'utils/common/errorUtil';
+import { getUserFacingErrorMessage } from 'utils/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
 

@@ -1,5 +1,5 @@
 import { createFFmpeg, FFmpeg } from '@ffmpeg/ffmpeg';
-import { CustomError } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import QueueProcessor from './upload/queueProcessor';
 import { getUint8ArrayView } from './upload/readFileService';

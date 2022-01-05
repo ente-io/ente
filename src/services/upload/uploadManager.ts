@@ -18,7 +18,7 @@ import { ProgressUpdater } from 'components/pages/gallery/Upload';
 import uploader from './uploader';
 import UIService from './uiService';
 import UploadService from './uploadService';
-import { CustomError } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 

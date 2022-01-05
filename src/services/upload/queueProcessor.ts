@@ -1,4 +1,4 @@
-import { CustomError } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/error';
 
 interface RequestQueueItem {
     request: (canceller?: RequestCanceller) => Promise<any>;

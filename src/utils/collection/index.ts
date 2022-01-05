@@ -7,7 +7,7 @@ import {
 import { downloadFiles, getSelectedFiles } from 'utils/file';
 import { getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
-import { CustomError } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/error';
 import { SelectedState } from 'types/gallery';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';

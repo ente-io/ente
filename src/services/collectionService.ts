@@ -11,7 +11,7 @@ import { B64EncryptionResult } from 'utils/crypto';
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
-import { CustomError } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/error';
 import { sortFiles } from 'utils/file';
 import {
     Collection,

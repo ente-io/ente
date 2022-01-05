@@ -71,7 +71,7 @@ import {
     TRASH_SECTION,
 } from 'constants/collection';
 import { AppContext } from 'pages/_app';
-import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
+import { CustomError, ServerErrorCodes } from 'utils/error';
 import { PAGES } from 'constants/pages';
 import {
     COLLECTION_OPS_TYPE,

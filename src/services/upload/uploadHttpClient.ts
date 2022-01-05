@@ -4,7 +4,7 @@ import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
 import { UploadFile, UploadURL } from './uploadService';
 import { EnteFile } from 'types/file';
-import { CustomError, handleUploadError } from 'utils/common/errorUtil';
+import { CustomError, handleUploadError } from 'utils/error';
 import { retryAsyncFunction } from 'utils/network';
 import { MultipartUploadURLs } from './multiPartUploadService';
 

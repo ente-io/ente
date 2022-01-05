@@ -16,7 +16,7 @@ import {
 import { encryptFiledata } from './encryptionService';
 import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
-import { handleUploadError } from 'utils/common/errorUtil';
+import { handleUploadError } from 'utils/error';
 import { MetadataMap } from './uploadManager';
 import { DataStream, EncryptionResult, MetadataObject } from 'types/upload';
 

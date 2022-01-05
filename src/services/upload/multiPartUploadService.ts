@@ -5,7 +5,7 @@ import {
 import UIService from './uiService';
 import UploadHttpClient from './uploadHttpClient';
 import * as convert from 'xml-js';
-import { CustomError } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/error';
 import { DataStream } from 'types/upload';
 
 interface PartEtag {

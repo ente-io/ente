@@ -5,7 +5,7 @@ import { NextRouter } from 'next/router';
 import { SetDialogMessage } from 'components/MessageDialog';
 import { SetLoading } from 'types/gallery';
 import { getData, LS_KEYS } from '../storage/localStorage';
-import { CustomError } from '../common/errorUtil';
+import { CustomError } from '../error';
 import { logError } from '../sentry';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';

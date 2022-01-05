@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
-import { errorWithContext } from 'utils/common/errorUtil';
+import { errorWithContext } from 'utils/error';
 import { getUserAnonymizedID } from 'utils/user';
 
 export const logError = (

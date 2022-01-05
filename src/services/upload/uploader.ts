@@ -1,6 +1,6 @@
 import { EnteFile } from 'types/file';
 import { sleep } from 'utils/common';
-import { handleUploadError, CustomError } from 'utils/common/errorUtil';
+import { handleUploadError, CustomError } from 'utils/error';
 import { decryptFile } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { fileAlreadyInCollection } from 'utils/upload';

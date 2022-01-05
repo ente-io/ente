@@ -6,7 +6,7 @@ import {
     MULTIPART_PART_SIZE,
 } from 'constants/upload';
 import FileType from 'file-type/browser';
-import { CustomError } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/error';
 import { getFileExtension } from 'utils/file';
 
 const TYPE_VIDEO = 'video';
