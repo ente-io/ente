@@ -20,8 +20,7 @@ import { clearKeys } from 'utils/storage/sessionStorage';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
 import { PAGES } from 'constants/pages';
-import { User } from 'types/user';
-import { KeyAttributes, EmailVerificationResponse } from 'types/user';
+import { KeyAttributes, EmailVerificationResponse, User } from 'types/user';
 
 interface formValues {
     ott: string;
