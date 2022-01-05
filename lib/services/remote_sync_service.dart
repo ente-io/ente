@@ -52,6 +52,14 @@ class RemoteSyncService {
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
+
+    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
+      if (event.type == EventType.addedOrUpdated) {
+        if (_existingSync == null) {
+          sync();
+        }
+      }
+    });
   }
 
   Future<void> sync({bool silently = false}) async {
@@ -65,20 +73,8 @@ class RemoteSyncService {
     }
     _existingSync = Completer<void>();
 
-    bool isFirstSync = !_collectionsService.hasSyncedCollections();
-
     try {
-      await _collectionsService.sync();
-
-      if (isFirstSync || _hasReSynced()) {
-        await _syncUpdatedCollections(silently);
-      } else {
-        final syncSinceTime = _getSinceTimeForReSync();
-        await _resyncAllCollectionsSinceTime(syncSinceTime);
-      }
-      if (!_hasReSynced()) {
-        await _markReSyncAsDone();
-      }
+      await _pullDiff(silently);
       // sync trash but consume error during initial launch.
       // this is to ensure that we don't pause upload due to any error during
       // the trash sync. Impact: We may end up re-uploading a file which was
@@ -86,18 +82,43 @@ class RemoteSyncService {
       await TrashSyncService.instance
           .syncTrash()
           .onError((e, s) => _logger.severe('trash sync failed', e, s));
-      bool hasUploadedFiles = await _uploadDiff();
-      _existingSync.complete();
-      _existingSync = null;
-      if (hasUploadedFiles && !_shouldThrottleSync()) {
-        // Skipping a resync to ensure that files that were ignored in this
-        // session are not processed now
-        sync(silently: true);
+      final filesToBeUploaded = await _getFilesToBeUploaded();
+      final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
+      if (hasUploadedFiles) {
+        await _pullDiff(true);
+        _existingSync.complete();
+        _existingSync = null;
+        final hasMoreFilesToBackup = (await _getFilesToBeUploaded()).isNotEmpty;
+        if (hasMoreFilesToBackup && !_shouldThrottleSync()) {
+          // Skipping a resync to ensure that files that were ignored in this
+          // session are not processed now
+          sync();
+        } else {
+          Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed_backup));
+        }
+      } else {
+        _existingSync.complete();
+        _existingSync = null;
       }
     } catch (e, s) {
       _logger.severe("Error executing remote sync ", e, s);
       _existingSync.complete();
       _existingSync = null;
+    }
+  }
+
+  Future<void> _pullDiff(bool silently) async {
+    final isFirstSync = !_collectionsService.hasSyncedCollections();
+    await _collectionsService.sync();
+
+    if (isFirstSync || _hasReSynced()) {
+      await _syncUpdatedCollections(silently);
+    } else {
+      final syncSinceTime = _getSinceTimeForReSync();
+      await _resyncAllCollectionsSinceTime(syncSinceTime);
+    }
+    if (!_hasReSynced()) {
+      await _markReSyncAsDone();
     }
   }
 
@@ -159,7 +180,7 @@ class RemoteSyncService {
     }
   }
 
-  Future<bool> _uploadDiff() async {
+  Future<List<File>> _getFilesToBeUploaded() async {
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     List<File> filesToBeUploaded;
     if (LocalSyncService.instance.hasGrantedLimitedPermissions() &&
@@ -186,7 +207,10 @@ class RemoteSyncService {
     _moveVideosToEnd(filesToBeUploaded);
     _logger.info(
         filesToBeUploaded.length.toString() + " new files to be uploaded.");
+    return filesToBeUploaded;
+  }
 
+  Future<bool> _uploadFiles(List<File> filesToBeUploaded) async {
     final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated();
     _logger.info(updatedFileIDs.length.toString() + " files updated.");
 

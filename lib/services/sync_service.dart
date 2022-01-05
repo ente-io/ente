@@ -65,9 +65,6 @@ class SyncService {
       await PhotoManager.clearFileCache();
       _logger.info("Cleared file cache");
     }
-    if (LocalSyncService.instance.hasGrantedPermissions()) {
-      LocalSyncService.instance.addChangeCallback(() => sync());
-    }
   }
 
   Future<bool> existingSync() async {
@@ -155,7 +152,6 @@ class SyncService {
     await _localSyncService.onPermissionGranted(state);
     Bus.instance.fire(PermissionGrantedEvent());
     _doSync();
-    LocalSyncService.instance.addChangeCallback(() => sync());
   }
 
   void onFoldersSet(Set<String> paths) {

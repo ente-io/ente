@@ -19,6 +19,7 @@ class LocalSyncService {
   final _db = FilesDB.instance;
   final Computer _computer = Computer();
   SharedPreferences _prefs;
+  Completer<void> _existingSync;
 
   static const kDbUpdationTimeKey = "db_updation_time";
   static const kHasCompletedFirstImportKey = "has_completed_firstImport";
@@ -41,14 +42,9 @@ class LocalSyncService {
       await PhotoManager.setIgnorePermissionCheck(true);
     }
     await _computer.turnOn(workersCount: 1);
-  }
-
-  void addChangeCallback(Function() callback) {
-    PhotoManager.addChangeCallback((value) {
-      _logger.info("Something changed on disk");
-      callback();
-    });
-    PhotoManager.startChangeNotify();
+    if (hasGrantedPermissions()) {
+      _registerChangeCallback();
+    }
   }
 
   Future<void> sync() async {
@@ -64,6 +60,11 @@ class LocalSyncService {
         return;
       }
     }
+    if (_existingSync != null) {
+      _logger.warning("Sync already in progress, skipping.");
+      return _existingSync.future;
+    }
+    _existingSync = Completer<void>();
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
     _logger.info(
         existingLocalFileIDs.length.toString() + " localIDs were discovered");
@@ -117,6 +118,8 @@ class LocalSyncService {
     final endTime = DateTime.now().microsecondsSinceEpoch;
     final duration = Duration(microseconds: endTime - startTime);
     _logger.info("Load took " + duration.inMilliseconds.toString() + "ms");
+    _existingSync.complete();
+    _existingSync = null;
   }
 
   Future<bool> syncAll() async {
@@ -201,6 +204,7 @@ class LocalSyncService {
   Future<void> onPermissionGranted(PermissionState state) async {
     await _prefs.setBool(kHasGrantedPermissionsKey, true);
     await _prefs.setString(kPermissionStateKey, state.toString());
+    _registerChangeCallback();
   }
 
   bool hasCompletedFirstImport() {
@@ -256,5 +260,16 @@ class LocalSyncService {
       pathsToBackup.addAll(newFilePaths);
       Configuration.instance.setPathsToBackUp(pathsToBackup);
     }
+  }
+
+  void _registerChangeCallback() {
+    PhotoManager.addChangeCallback((value) async {
+      _logger.info("Something changed on disk");
+      if (_existingSync != null) {
+        await _existingSync.future;
+      }
+      sync();
+    });
+    PhotoManager.startChangeNotify();
   }
 }
