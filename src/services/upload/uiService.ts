@@ -1,6 +1,18 @@
-import { ProgressUpdater } from 'components/pages/gallery/Upload';
 import { RANDOM_PERCENTAGE_PROGRESS_FOR_PUT } from 'constants/upload';
 import { UPLOAD_STAGES } from './uploadManager';
+
+export interface ProgressUpdater {
+    setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
+    setFileCounter: React.Dispatch<
+        React.SetStateAction<{
+            finished: number;
+            total: number;
+        }>
+    >;
+    setUploadStage: React.Dispatch<React.SetStateAction<UPLOAD_STAGES>>;
+    setFileProgress: React.Dispatch<React.SetStateAction<Map<string, number>>>;
+    setUploadResult: React.Dispatch<React.SetStateAction<Map<string, number>>>;
+}
 
 class UIService {
     private perFileProgress: number;

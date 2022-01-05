@@ -49,18 +49,6 @@ interface AnalysisResult {
     suggestedCollectionName: string;
     multipleFolders: boolean;
 }
-export interface ProgressUpdater {
-    setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
-    setFileCounter: React.Dispatch<
-        React.SetStateAction<{
-            finished: number;
-            total: number;
-        }>
-    >;
-    setUploadStage: React.Dispatch<React.SetStateAction<UPLOAD_STAGES>>;
-    setFileProgress: React.Dispatch<React.SetStateAction<Map<string, number>>>;
-    setUploadResult: React.Dispatch<React.SetStateAction<Map<string, number>>>;
-}
 
 export default function Upload(props: Props) {
     const [progressView, setProgressView] = useState(false);

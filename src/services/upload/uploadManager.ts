@@ -14,9 +14,8 @@ import {
     parseMetadataJSON,
 } from './metadataService';
 import { segregateFiles } from 'utils/upload';
-import { ProgressUpdater } from 'components/pages/gallery/Upload';
 import uploader from './uploader';
-import UIService from './uiService';
+import UIService, { ProgressUpdater } from './uiService';
 import UploadService from './uploadService';
 import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
