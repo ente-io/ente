@@ -146,10 +146,12 @@ class MachineLearningService {
             }
         }
 
+        let updated = false;
         if (newFileIds.length > 0) {
             console.log('newFiles: ', newFileIds.length);
             const newFiles = newFileIds.map((fileId) => this.newMlData(fileId));
             await mlIDbStorage.putAllFiles(newFiles, tx);
+            updated = true;
         }
 
         const removedFileIds: Array<number> = [];
@@ -162,9 +164,16 @@ class MachineLearningService {
         if (removedFileIds.length > 0) {
             console.log('removedFiles: ', removedFileIds.length);
             await mlIDbStorage.removeAllFiles(removedFileIds, tx);
+            updated = true;
         }
 
         await tx.done;
+
+        if (updated) {
+            // TODO: should do in same transaction
+            await mlIDbStorage.incrementIndexVersion('files');
+        }
+
         console.timeEnd('syncLocalFiles');
     }
 
