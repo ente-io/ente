@@ -7,11 +7,10 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from 'services/HTTPService';
 import CryptoWorker from 'utils/crypto';
 import uploadHttpClient from 'services/upload/uploadHttpClient';
-import { UploadURL } from 'services/upload/uploadService';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
 import { getFileType } from './upload/readFileService';
 import { getLocalTrash, getTrashedFiles } from './trashService';
-import { EncryptionResult } from 'types/upload';
+import { EncryptionResult, UploadURL } from 'types/upload';
 import { fileAttribute } from 'types/file';
 
 const ENDPOINT = getEndpoint();

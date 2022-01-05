@@ -2,11 +2,10 @@ import HTTPService from 'services/HTTPService';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
-import { UploadFile, UploadURL } from './uploadService';
 import { EnteFile } from 'types/file';
 import { CustomError, handleUploadError } from 'utils/error';
 import { retryAsyncFunction } from 'utils/network';
-import { MultipartUploadURLs } from './multiPartUploadService';
+import { UploadFile, UploadURL, MultipartUploadURLs } from 'types/upload';
 
 const ENDPOINT = getEndpoint();
 const MAX_URL_REQUESTS = 50;

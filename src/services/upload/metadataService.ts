@@ -1,26 +1,18 @@
 import { FILE_TYPE } from 'constants/file';
 import { logError } from 'utils/sentry';
 import { getExifData } from './exifService';
-import { FileTypeInfo } from './readFileService';
-import { MetadataObject } from 'types/upload';
+import {
+    MetadataObject,
+    ParsedMetaDataJSON,
+    Location,
+    FileTypeInfo,
+} from 'types/upload';
+import { NULL_LOCATION } from 'constants/upload';
 
-export interface Location {
-    latitude: number;
-    longitude: number;
-}
-
-export interface ParsedMetaDataJSON {
-    creationTime: number;
-    modificationTime: number;
-    latitude: number;
-    longitude: number;
-}
 interface ParsedMetaDataJSONWithTitle {
     title: string;
     parsedMetaDataJSON: ParsedMetaDataJSON;
 }
-
-export const NULL_LOCATION: Location = { latitude: null, longitude: null };
 
 const NULL_PARSED_METADATA_JSON: ParsedMetaDataJSON = {
     creationTime: null,

@@ -12,15 +12,14 @@ import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { FileRejection } from 'react-dropzone';
-import UploadManager, {
-    FileWithCollection,
-    UPLOAD_STAGES,
-} from 'services/upload/uploadManager';
+import UploadManager from 'services/upload/uploadManager';
 import uploadManager from 'services/upload/uploadManager';
 import { METADATA_FOLDER_NAME } from 'constants/export';
 import { getUserFacingErrorMessage } from 'utils/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
+import { UPLOAD_STAGES } from 'constants/upload';
+import { FileWithCollection } from 'types/upload';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -40,7 +39,7 @@ interface Props {
     isFirstUpload: boolean;
 }
 
-export enum UPLOAD_STRATEGY {
+enum UPLOAD_STRATEGY {
     SINGLE_COLLECTION,
     COLLECTION_PER_FOLDER,
 }

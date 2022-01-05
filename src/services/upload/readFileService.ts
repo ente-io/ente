@@ -8,6 +8,7 @@ import {
 import FileType from 'file-type/browser';
 import { CustomError } from 'utils/error';
 import { getFileExtension } from 'utils/file';
+import { FileTypeInfo } from 'types/upload';
 
 const TYPE_VIDEO = 'video';
 const TYPE_IMAGE = 'image';
@@ -20,11 +21,6 @@ export async function getFileData(worker, file: File) {
     } else {
         return await worker.getUint8ArrayView(file);
     }
-}
-
-export interface FileTypeInfo {
-    fileType: FILE_TYPE;
-    exactType: string;
 }
 
 export async function getFileType(

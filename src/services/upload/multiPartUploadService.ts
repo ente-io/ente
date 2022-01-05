@@ -6,17 +6,11 @@ import UIService from './uiService';
 import UploadHttpClient from './uploadHttpClient';
 import * as convert from 'xml-js';
 import { CustomError } from 'utils/error';
-import { DataStream } from 'types/upload';
+import { DataStream, MultipartUploadURLs } from 'types/upload';
 
 interface PartEtag {
     PartNumber: number;
     ETag: string;
-}
-
-export interface MultipartUploadURLs {
-    objectKey: string;
-    partURLs: string[];
-    completeURL: string;
 }
 
 function calculatePartCount(chunkCount: number) {

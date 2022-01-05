@@ -5,7 +5,7 @@ import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b
 import FFmpegService from 'services/ffmpegService';
 import { convertToHumanReadable } from 'utils/billing';
 import { isFileHEIC } from 'utils/file';
-import { FileTypeInfo } from './readFileService';
+import { FileTypeInfo } from 'types/upload';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;

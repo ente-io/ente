@@ -1,8 +1,9 @@
+import { NULL_LOCATION } from 'constants/upload';
+import { Location } from 'types/upload';
 import exifr from 'exifr';
 import piexif from 'piexifjs';
+import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
-import { Location, NULL_LOCATION } from 'services/upload/metadataService';
-import { FileTypeInfo } from './readFileService';
 
 const EXIF_TAGS_NEEDED = [
     'DateTimeOriginal',

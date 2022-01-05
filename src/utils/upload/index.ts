@@ -1,5 +1,4 @@
-import { FileWithCollection } from 'services/upload/uploadManager';
-import { MetadataObject } from 'types/upload';
+import { FileWithCollection, MetadataObject } from 'types/upload';
 import { EnteFile } from 'types/file';
 
 const TYPE_JSON = 'json';

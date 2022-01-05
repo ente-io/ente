@@ -6,18 +6,21 @@ import { logError } from 'utils/sentry';
 import { fileAlreadyInCollection } from 'utils/upload';
 import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
-import { FileUploadResults, FileWithCollection } from './uploadManager';
-import UploadService, {
+import UploadService from './uploadService';
+import uploadService from './uploadService';
+import { getFileType } from './readFileService';
+import {
     BackupedFile,
     EncryptedFile,
     FileInMemory,
+    FileTypeInfo,
+    FileWithCollection,
     FileWithMetadata,
+    MetadataObject,
     UploadFile,
-} from './uploadService';
-import uploadService from './uploadService';
-import { FileTypeInfo, getFileType } from './readFileService';
-import { MetadataObject } from 'types/upload';
+} from 'types/upload';
 import { FILE_TYPE } from 'constants/file';
+import { FileUploadResults } from 'constants/upload';
 
 const TwoSecondInMillSeconds = 2000;
 const FIVE_GB_IN_BYTES = 5 * 1024 * 1024 * 1024;
