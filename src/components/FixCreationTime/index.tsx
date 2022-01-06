@@ -89,7 +89,6 @@ export default function FixCreationTime(props: Props) {
     }
 
     const onSubmit = (values: formValues) => {
-        console.log(values);
         startFix(Number(values.option), new Date(values.customTime));
     };
 
