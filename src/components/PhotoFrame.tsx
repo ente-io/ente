@@ -301,7 +301,7 @@ const PhotoFrame = ({
             ...selected,
             [id]: checked,
             count:
-                typeof selected[id] !== 'undefined'
+                (typeof selected[id] === 'undefined') !== checked
                     ? selected.count
                     : checked
                     ? selected.count + 1
