@@ -64,19 +64,19 @@ class MLIDbStorage {
         return deleteDB('mldata');
     }
 
-    public async getAllFileIds1() {
+    public async getAllFileIds() {
         const db = await this.db;
         return db.getAllKeys('files');
     }
 
-    public async putAllFiles1(mlFiles: Array<MlFileData>) {
+    public async putAllFilesInTx(mlFiles: Array<MlFileData>) {
         const db = await this.db;
         const tx = db.transaction('files', 'readwrite');
         await Promise.all(mlFiles.map((mlFile) => tx.store.put(mlFile)));
         await tx.done;
     }
 
-    public async removeAllFiles1(fileIds: Array<number>) {
+    public async removeAllFilesInTx(fileIds: Array<number>) {
         const db = await this.db;
         const tx = db.transaction('files', 'readwrite');
 

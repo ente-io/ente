@@ -63,3 +63,73 @@ export async function migrateFaceCropsToCache() {
     }
     console.timeEnd('migrateFaceCropsToCache');
 }
+
+export async function migrateFaceInterfaceUpdate() {
+    console.time('migrateFaceInterfaceUpdate');
+    console.log('migrateFaceInterfaceUpdate started');
+
+    const faceSchemaVersion = await mlIDbStorage.getIndexVersion('faceSchema');
+    if (faceSchemaVersion) {
+        console.log('not running migrateFaceInterfaceUpdate');
+        return;
+    }
+
+    const allFiles = await mlIDbStorage.getAllFiles();
+
+    const updatedFiles = allFiles.map((file) => {
+        const updatedFaces = file.faces?.map((f) => {
+            const updatedFace = {
+                id: f['faceId'],
+                fileId: f.fileId,
+
+                detection: {
+                    box: f['box'],
+                    landmarks: f['landmarks'],
+                    probability: f['probability'],
+                },
+                crop: f['faceCrop'],
+                alignment: {
+                    affineMatrix: f['affineMatrix'],
+                    center: f['center'],
+                    rotation: f['rotation'],
+                    size: f['size'],
+                },
+                embedding: Float32Array.from(f.embedding),
+
+                personId: f.personId,
+            } as Face;
+            if (!updatedFace.id) {
+                updatedFace.id = getFaceId(updatedFace, file.imageDimentions);
+            }
+            return updatedFace;
+        });
+        const updated: MlFileData = {
+            fileId: file.fileId,
+
+            faceDetectionMethod: file['detectionMethod'],
+            faceCropMethod: {
+                value: 'ArcFace',
+                version: 1,
+            },
+            faceAlignmentMethod: file['alignmentMethod'],
+            faceEmbeddingMethod: file['embeddingMethod'],
+
+            faces: updatedFaces,
+
+            imageDimentions: file.imageDimentions,
+            imageSource: file.imageSource,
+            errorCount: file.errorCount,
+            lastErrorMessage: file.lastErrorMessage,
+            mlVersion: file.mlVersion,
+        };
+
+        return updated;
+    });
+
+    console.log('migrateFaceInterfaceUpdate updating: ', updatedFiles.length);
+    await mlIDbStorage.putAllFilesInTx(updatedFiles);
+
+    await mlIDbStorage.incrementIndexVersion('faceSchema');
+    console.log('migrateFaceInterfaceUpdate done');
+    console.timeEnd('migrateFaceInterfaceUpdate');
+}
