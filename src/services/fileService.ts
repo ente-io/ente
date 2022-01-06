@@ -2,140 +2,24 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
 
 import { getToken } from 'utils/common/key';
-import {
-    DataStream,
-    EncryptionResult,
-    MetadataObject,
-} from './upload/uploadService';
-import { Collection } from './collectionService';
+import { EncryptionResult } from 'types/upload';
+import { Collection } from 'types/collection';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
 import CryptoWorker from 'utils/crypto';
+import { EnteFile, TrashRequest, UpdateMagicMetadataRequest } from 'types/file';
 
 const ENDPOINT = getEndpoint();
-
 const FILES_TABLE = 'files';
 
-export const MIN_EDITED_CREATION_TIME = new Date(1800, 0, 1);
-export const MAX_EDITED_CREATION_TIME = new Date();
-export const ALL_TIME = new Date(1800, 0, 1, 23, 59, 59);
-
-export const MAX_EDITED_FILE_NAME_LENGTH = 100;
-
-export interface fileAttribute {
-    encryptedData?: DataStream | Uint8Array;
-    objectKey?: string;
-    decryptionHeader: string;
-}
-
-export enum FILE_TYPE {
-    IMAGE,
-    VIDEO,
-    LIVE_PHOTO,
-    OTHERS,
-}
-
-/*  Build error occurred
-    ReferenceError: Cannot access 'FILE_TYPE' before initialization
-    when it was placed in readFileService
-*/
-// list of format that were missed by type-detection for some files.
-export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
-    { fileType: FILE_TYPE.IMAGE, exactType: 'jpeg' },
-    { fileType: FILE_TYPE.IMAGE, exactType: 'jpg' },
-    { fileType: FILE_TYPE.VIDEO, exactType: 'webm' },
-];
-
-export enum VISIBILITY_STATE {
-    VISIBLE,
-    ARCHIVED,
-}
-
-export interface MagicMetadataCore {
-    version: number;
-    count: number;
-    header: string;
-    data: Record<string, any>;
-}
-
-export interface EncryptedMagicMetadataCore
-    extends Omit<MagicMetadataCore, 'data'> {
-    data: string;
-}
-
-export interface MagicMetadataProps {
-    visibility?: VISIBILITY_STATE;
-}
-
-export interface MagicMetadata extends Omit<MagicMetadataCore, 'data'> {
-    data: MagicMetadataProps;
-}
-
-export interface PublicMagicMetadataProps {
-    editedTime?: number;
-    editedName?: string;
-}
-
-export interface PublicMagicMetadata extends Omit<MagicMetadataCore, 'data'> {
-    data: PublicMagicMetadataProps;
-}
-
-export interface File {
-    id: number;
-    collectionID: number;
-    ownerID: number;
-    file: fileAttribute;
-    thumbnail: fileAttribute;
-    metadata: MetadataObject;
-    magicMetadata: MagicMetadata;
-    pubMagicMetadata: PublicMagicMetadata;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    key: string;
-    src: string;
-    msrc: string;
-    html: string;
-    w: number;
-    h: number;
-    isDeleted: boolean;
-    isTrashed?: boolean;
-    deleteBy?: number;
-    dataIndex: number;
-    updationTime: number;
-}
-
-interface UpdateMagicMetadataRequest {
-    metadataList: UpdateMagicMetadata[];
-}
-
-interface UpdateMagicMetadata {
-    id: number;
-    magicMetadata: EncryptedMagicMetadataCore;
-}
-
-export const NEW_MAGIC_METADATA: MagicMetadataCore = {
-    version: 0,
-    data: {},
-    header: null,
-    count: 0,
-};
-
-interface TrashRequest {
-    items: TrashRequestItems[];
-}
-
-interface TrashRequestItems {
-    fileID: number;
-    collectionID: number;
-}
 export const getLocalFiles = async () => {
-    const files: Array<File> =
-        (await localForage.getItem<File[]>(FILES_TABLE)) || [];
+    const files: Array<EnteFile> =
+        (await localForage.getItem<EnteFile[]>(FILES_TABLE)) || [];
     return files;
 };
 
-export const setLocalFiles = async (files: File[]) => {
+export const setLocalFiles = async (files: EnteFile[]) => {
     await localForage.setItem(FILES_TABLE, files);
 };
 
@@ -144,7 +28,7 @@ const getCollectionLastSyncTime = async (collection: Collection) =>
 
 export const syncFiles = async (
     collections: Collection[],
-    setFiles: (files: File[]) => void
+    setFiles: (files: EnteFile[]) => void
 ) => {
     const localFiles = await getLocalFiles();
     let files = await removeDeletedCollectionFiles(collections, localFiles);
@@ -163,7 +47,7 @@ export const syncFiles = async (
         const fetchedFiles =
             (await getFiles(collection, lastSyncTime, files, setFiles)) ?? [];
         files.push(...fetchedFiles);
-        const latestVersionFiles = new Map<string, File>();
+        const latestVersionFiles = new Map<string, EnteFile>();
         files.forEach((file) => {
             const uid = `${file.collectionID}-${file.id}`;
             if (
@@ -194,11 +78,11 @@ export const syncFiles = async (
 export const getFiles = async (
     collection: Collection,
     sinceTime: number,
-    files: File[],
-    setFiles: (files: File[]) => void
-): Promise<File[]> => {
+    files: EnteFile[],
+    setFiles: (files: EnteFile[]) => void
+): Promise<EnteFile[]> => {
     try {
-        const decryptedFiles: File[] = [];
+        const decryptedFiles: EnteFile[] = [];
         let time = sinceTime;
         let resp;
         do {
@@ -219,12 +103,12 @@ export const getFiles = async (
 
             decryptedFiles.push(
                 ...(await Promise.all(
-                    resp.data.diff.map(async (file: File) => {
+                    resp.data.diff.map(async (file: EnteFile) => {
                         if (!file.isDeleted) {
                             file = await decryptFile(file, collection);
                         }
                         return file;
-                    }) as Promise<File>[]
+                    }) as Promise<EnteFile>[]
                 ))
             );
 
@@ -249,7 +133,7 @@ export const getFiles = async (
 
 const removeDeletedCollectionFiles = async (
     collections: Collection[],
-    files: File[]
+    files: EnteFile[]
 ) => {
     const syncedCollectionIds = new Set<number>();
     for (const collection of collections) {
@@ -259,7 +143,7 @@ const removeDeletedCollectionFiles = async (
     return files;
 };
 
-export const trashFiles = async (filesToTrash: File[]) => {
+export const trashFiles = async (filesToTrash: EnteFile[]) => {
     try {
         const token = getToken();
         if (!token) {
@@ -300,7 +184,7 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
     }
 };
 
-export const updateMagicMetadata = async (files: File[]) => {
+export const updateMagicMetadata = async (files: EnteFile[]) => {
     const token = getToken();
     if (!token) {
         return;
@@ -324,7 +208,7 @@ export const updateMagicMetadata = async (files: File[]) => {
         'X-Auth-Token': token,
     });
     return files.map(
-        (file): File => ({
+        (file): EnteFile => ({
             ...file,
             magicMetadata: {
                 ...file.magicMetadata,
@@ -334,7 +218,7 @@ export const updateMagicMetadata = async (files: File[]) => {
     );
 };
 
-export const updatePublicMagicMetadata = async (files: File[]) => {
+export const updatePublicMagicMetadata = async (files: EnteFile[]) => {
     const token = getToken();
     if (!token) {
         return;
@@ -363,7 +247,7 @@ export const updatePublicMagicMetadata = async (files: File[]) => {
         }
     );
     return files.map(
-        (file): File => ({
+        (file): EnteFile => ({
             ...file,
             pubMagicMetadata: {
                 ...file.pubMagicMetadata,

@@ -1,14 +1,10 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
-import exportService, {
-    ExportProgress,
-    ExportStage,
-    ExportStats,
-    ExportType,
-} from 'services/exportService';
+import exportService from 'services/exportService';
+import { ExportProgress, ExportStats } from 'types/export';
 import { getLocalFiles } from 'services/fileService';
-import { User } from 'services/userService';
+import { User } from 'types/user';
 import styled from 'styled-components';
 import { sleep } from 'utils/common';
 import { getExportRecordFileUID } from 'utils/export';
@@ -22,6 +18,7 @@ import ExportInProgress from './ExportInProgress';
 import FolderIcon from './icons/FolderIcon';
 import InProgressIcon from './icons/InProgressIcon';
 import MessageDialog from './MessageDialog';
+import { ExportStage, ExportType } from 'constants/export';
 
 const FolderIconWrapper = styled.div`
     width: 15%;

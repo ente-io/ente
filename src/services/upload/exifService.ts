@@ -1,8 +1,9 @@
+import { NULL_LOCATION } from 'constants/upload';
+import { Location } from 'types/upload';
 import exifr from 'exifr';
 import piexif from 'piexifjs';
+import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
-import { NULL_LOCATION, Location } from './metadataService';
-import { FileTypeInfo } from './readFileService';
 
 const EXIF_TAGS_NEEDED = [
     'DateTimeOriginal',
@@ -28,7 +29,7 @@ interface ParsedEXIFData {
 }
 
 export async function getExifData(
-    receivedFile: globalThis.File,
+    receivedFile: File,
     fileTypeInfo: FileTypeInfo
 ): Promise<ParsedEXIFData> {
     const nullExifData: ParsedEXIFData = {

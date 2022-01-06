@@ -1,20 +1,21 @@
 import {
     addToCollection,
-    Collection,
-    CollectionType,
     moveToCollection,
     removeFromCollection,
     restoreToCollection,
 } from 'services/collectionService';
 import { downloadFiles, getSelectedFiles } from 'utils/file';
-import { File, getLocalFiles } from 'services/fileService';
-import { CustomError } from 'utils/common/errorUtil';
-import { SelectedState } from 'pages/gallery';
-import { User } from 'services/userService';
+import { getLocalFiles } from 'services/fileService';
+import { EnteFile } from 'types/file';
+import { CustomError } from 'utils/error';
+import { SelectedState } from 'types/gallery';
+import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { SetDialogMessage } from 'components/MessageDialog';
 import { logError } from 'utils/sentry';
 import constants from 'utils/strings/constants';
+import { Collection } from 'types/collection';
+import { CollectionType } from 'constants/collection';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -26,7 +27,7 @@ export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
     setCollectionSelectorView: (value: boolean) => void,
     selected: SelectedState,
-    files: File[],
+    files: EnteFile[],
     setActiveCollection: (id: number) => void,
     collection: Collection
 ) {

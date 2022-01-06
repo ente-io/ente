@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
-import { ExportStats } from 'services/exportService';
+import { ExportStats } from 'types/export';
 import { formatDateTime } from 'utils/file';
 import constants from 'utils/strings/constants';
 import { Label, Row, Value } from './Container';

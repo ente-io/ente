@@ -8,30 +8,25 @@ import React, {
 import { useRouter } from 'next/router';
 import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
-    File,
     getLocalFiles,
     syncFiles,
     updateMagicMetadata,
-    VISIBILITY_STATE,
     trashFiles,
     deleteFromTrash,
 } from 'services/fileService';
 import styled from 'styled-components';
 import LoadingBar from 'react-top-loading-bar';
 import {
-    Collection,
     syncCollections,
-    CollectionAndItsLatestFile,
     getCollectionsAndTheirLatestFile,
     getFavItemIds,
     getLocalCollections,
     getNonEmptyCollections,
     createCollection,
-    CollectionType,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import billingService from 'services/billingService';
-import { checkSubscriptionPurchase } from 'utils/billingUtil';
+import { checkSubscriptionPurchase } from 'utils/billing';
 
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
@@ -57,8 +52,7 @@ import {
     sortFiles,
     sortFilesIntoCollections,
 } from 'utils/file';
-import SearchBar, { DateValue } from 'components/SearchBar';
-import { Bbox } from 'services/searchService';
+import SearchBar from 'components/SearchBar';
 import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
 import CollectionSelector, {
     CollectionSelectorAttributes,
@@ -70,14 +64,15 @@ import AlertBanner from 'components/pages/gallery/AlertBanner';
 import UploadButton from 'components/pages/gallery/UploadButton';
 import PlanSelector from 'components/pages/gallery/PlanSelector';
 import Upload from 'components/pages/gallery/Upload';
-import Collections, {
+import {
     ALL_SECTION,
     ARCHIVE_SECTION,
+    CollectionType,
     TRASH_SECTION,
-} from 'components/pages/gallery/Collections';
+} from 'constants/collection';
 import { AppContext } from 'pages/_app';
-import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
-import { PAGES } from 'types';
+import { CustomError, ServerErrorCodes } from 'utils/error';
+import { PAGES } from 'constants/pages';
 import {
     COLLECTION_OPS_TYPE,
     isSharedCollection,
@@ -92,12 +87,18 @@ import {
     getLocalTrash,
     getTrashedFiles,
     syncTrash,
-    Trash,
 } from 'services/trashService';
+import { Trash } from 'types/trash';
+
 import DeleteBtn from 'components/DeleteBtn';
 import FixCreationTime, {
     FixCreationTimeAttributes,
 } from 'components/FixCreationTime';
+import { Collection, CollectionAndItsLatestFile } from 'types/collection';
+import { EnteFile } from 'types/file';
+import { GalleryContextType, SelectedState, Search } from 'types/gallery';
+import Collections from 'components/pages/gallery/Collections';
+import { VISIBILITY_STATE } from 'constants/file';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -113,34 +114,6 @@ const AlertContainer = styled.div`
     font-size: 14px;
     text-align: center;
 `;
-
-export type SelectedState = {
-    [k: number]: boolean;
-    count: number;
-    collectionID: number;
-};
-export type SetFiles = React.Dispatch<React.SetStateAction<File[]>>;
-export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
-export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
-export type setSearchStats = React.Dispatch<React.SetStateAction<SearchStats>>;
-
-export type Search = {
-    date?: DateValue;
-    location?: Bbox;
-    fileIndex?: number;
-};
-export interface SearchStats {
-    resultCount: number;
-    timeTaken: number;
-}
-
-type GalleryContextType = {
-    thumbs: Map<number, string>;
-    files: Map<number, string>;
-    showPlanSelectorModal: () => void;
-    setActiveCollection: (collection: number) => void;
-    syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
-};
 
 const defaultGalleryContext: GalleryContextType = {
     thumbs: new Map(),
@@ -159,7 +132,7 @@ export default function Gallery() {
     const [collections, setCollections] = useState<Collection[]>([]);
     const [collectionsAndTheirLatestFile, setCollectionsAndTheirLatestFile] =
         useState<CollectionAndItsLatestFile[]>([]);
-    const [files, setFiles] = useState<File[]>(null);
+    const [files, setFiles] = useState<EnteFile[]>(null);
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
     const [bannerMessage, setBannerMessage] = useState<JSX.Element | string>(
         null
@@ -339,7 +312,7 @@ export default function Gallery() {
 
     const setDerivativeState = async (
         collections: Collection[],
-        files: File[]
+        files: EnteFile[]
     ) => {
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);

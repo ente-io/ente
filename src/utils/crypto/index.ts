@@ -1,5 +1,4 @@
-import { KEK } from 'pages/generate';
-import { KeyAttributes } from 'types';
+import { KEK, KeyAttributes } from 'types/user';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
 import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';

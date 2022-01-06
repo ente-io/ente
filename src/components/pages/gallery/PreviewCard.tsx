@@ -1,14 +1,14 @@
 import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
-import { File } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import styled from 'styled-components';
 import PlayCircleOutline from 'components/icons/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
 import { GalleryContext } from 'pages/gallery';
-import { GAP_BTW_TILES } from 'types';
+import { GAP_BTW_TILES } from 'constants/gallery';
 
 interface IProps {
-    file: File;
+    file: EnteFile;
     updateUrl: (url: string) => void;
     onClick?: () => void;
     forcedEnable?: boolean;

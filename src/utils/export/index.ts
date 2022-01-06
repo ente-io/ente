@@ -1,18 +1,18 @@
-import { Collection } from 'services/collectionService';
-import exportService, {
-    CollectionIDPathMap,
-    ExportRecord,
-    METADATA_FOLDER_NAME,
-} from 'services/exportService';
-import { File } from 'services/fileService';
-import { MetadataObject } from 'services/upload/uploadService';
-import { formatDate, splitFilenameAndExtension } from 'utils/file';
+import { Collection } from 'types/collection';
+import exportService from 'services/exportService';
+import { CollectionIDPathMap, ExportRecord } from 'types/export';
 
-export const getExportRecordFileUID = (file: File) =>
+import { EnteFile } from 'types/file';
+
+import { MetadataObject } from 'types/upload';
+import { formatDate, splitFilenameAndExtension } from 'utils/file';
+import { METADATA_FOLDER_NAME } from 'constants/export';
+
+export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
 
 export const getExportQueuedFiles = (
-    allFiles: File[],
+    allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
     const queuedFiles = new Set(exportRecord?.queuedFiles);
@@ -78,7 +78,7 @@ export const getCollectionsRenamedAfterLastExport = (
 };
 
 export const getFilesUploadedAfterLastExport = (
-    allFiles: File[],
+    allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
     const exportedFiles = new Set(exportRecord?.exportedFiles);
@@ -92,7 +92,7 @@ export const getFilesUploadedAfterLastExport = (
 };
 
 export const getExportedFiles = (
-    allFiles: File[],
+    allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
     const exportedFileIds = new Set(exportRecord?.exportedFiles);
@@ -106,7 +106,7 @@ export const getExportedFiles = (
 };
 
 export const getExportFailedFiles = (
-    allFiles: File[],
+    allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
     const failedFiles = new Set(exportRecord?.failedFiles);
@@ -223,14 +223,17 @@ export const getOldCollectionFolderPath = (
     collection: Collection
 ) => `${dir}/${collection.id}_${oldSanitizeName(collection.name)}`;
 
-export const getOldFileSavePath = (collectionFolderPath: string, file: File) =>
+export const getOldFileSavePath = (
+    collectionFolderPath: string,
+    file: EnteFile
+) =>
     `${collectionFolderPath}/${file.id}_${oldSanitizeName(
         file.metadata.title
     )}`;
 
 export const getOldFileMetadataSavePath = (
     collectionFolderPath: string,
-    file: File
+    file: EnteFile
 ) =>
     `${collectionFolderPath}/${METADATA_FOLDER_NAME}/${
         file.id

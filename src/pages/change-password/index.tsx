@@ -8,17 +8,12 @@ import CryptoWorker, {
     B64EncryptionResult,
 } from 'utils/crypto';
 import { getActualKey } from 'utils/common/key';
-import { setKeys, UpdatedKey } from 'services/userService';
+import { setKeys } from 'services/userService';
 import SetPasswordForm from 'components/SetPasswordForm';
 import { AppContext } from 'pages/_app';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { PAGES } from 'types';
-
-export interface KEK {
-    key: string;
-    opsLimit: number;
-    memLimit: number;
-}
+import { PAGES } from 'constants/pages';
+import { KEK, UpdatedKey } from 'types/user';
 
 export default function Generate() {
     const [token, setToken] = useState<string>();

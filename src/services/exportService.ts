@@ -23,80 +23,36 @@ import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import {
-    Collection,
     getLocalCollections,
     getNonEmptyCollections,
 } from './collectionService';
 import downloadManager from './downloadManager';
-import { File, FILE_TYPE, getLocalFiles } from './fileService';
+import { getLocalFiles } from './fileService';
+import { EnteFile } from 'types/file';
+
 import { decodeMotionPhoto } from './motionPhotoService';
 import {
     fileNameWithoutExtension,
     generateStreamFromArrayBuffer,
     getFileExtension,
     mergeMetadata,
-    TYPE_JPEG,
-    TYPE_JPG,
 } from 'utils/file';
-import { User } from './userService';
-import { updateFileCreationDateInEXIF } from './upload/exifService';
-import { MetadataObject } from './upload/uploadService';
-import QueueProcessor from './upload/queueProcessor';
 
-export type CollectionIDPathMap = Map<number, string>;
-export interface ExportProgress {
-    current: number;
-    total: number;
-}
-export interface ExportedCollectionPaths {
-    [collectionID: number]: string;
-}
-export interface ExportStats {
-    failed: number;
-    success: number;
-}
+import { updateFileCreationDateInEXIF } from './upload/exifService';
+import { MetadataObject } from 'types/upload';
+import QueueProcessor from './queueProcessor';
+import { Collection } from 'types/collection';
+import {
+    ExportProgress,
+    CollectionIDPathMap,
+    ExportRecord,
+} from 'types/export';
+import { User } from 'types/user';
+import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
+import { ExportType, ExportNotification, RecordType } from 'constants/export';
 
 const LATEST_EXPORT_VERSION = 1;
-
-export interface ExportRecord {
-    version?: number;
-    stage?: ExportStage;
-    lastAttemptTimestamp?: number;
-    progress?: ExportProgress;
-    queuedFiles?: string[];
-    exportedFiles?: string[];
-    failedFiles?: string[];
-    exportedCollectionPaths?: ExportedCollectionPaths;
-}
-export enum ExportStage {
-    INIT,
-    INPROGRESS,
-    PAUSED,
-    FINISHED,
-}
-
-enum ExportNotification {
-    START = 'export started',
-    IN_PROGRESS = 'export already in progress',
-    FINISH = 'export finished',
-    FAILED = 'export failed',
-    ABORT = 'export aborted',
-    PAUSE = 'export paused',
-    UP_TO_DATE = `no new files to export`,
-}
-
-enum RecordType {
-    SUCCESS = 'success',
-    FAILED = 'failed',
-}
-export enum ExportType {
-    NEW,
-    PENDING,
-    RETRY_FAILED,
-}
-
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
-export const METADATA_FOLDER_NAME = 'metadata';
 
 class ExportService {
     ElectronAPIs: any;
@@ -139,7 +95,7 @@ class ExportService {
             }
             const user: User = getData(LS_KEYS.USER);
 
-            let filesToExport: File[];
+            let filesToExport: EnteFile[];
             const localFiles = await getLocalFiles();
             const userPersonalFiles = localFiles
                 .filter((file) => file.ownerID === user?.id)
@@ -210,7 +166,7 @@ class ExportService {
     }
 
     async fileExporter(
-        files: File[],
+        files: EnteFile[],
         newCollections: Collection[],
         renamedCollections: Collection[],
         collectionIDPathMap: CollectionIDPathMap,
@@ -318,13 +274,17 @@ class ExportService {
             throw e;
         }
     }
-    async addFilesQueuedRecord(folder: string, files: File[]) {
+    async addFilesQueuedRecord(folder: string, files: EnteFile[]) {
         const exportRecord = await this.getExportRecord(folder);
         exportRecord.queuedFiles = files.map(getExportRecordFileUID);
         await this.updateExportRecord(exportRecord, folder);
     }
 
-    async addFileExportedRecord(folder: string, file: File, type: RecordType) {
+    async addFileExportedRecord(
+        folder: string,
+        file: EnteFile,
+        type: RecordType
+    ) {
         const fileUID = getExportRecordFileUID(file);
         const exportRecord = await this.getExportRecord(folder);
         exportRecord.queuedFiles = exportRecord.queuedFiles.filter(
@@ -462,7 +422,7 @@ class ExportService {
         }
     }
 
-    async downloadAndSave(file: File, collectionPath: string) {
+    async downloadAndSave(file: EnteFile, collectionPath: string) {
         file.metadata = mergeMetadata([file])[0].metadata;
         const fileSaveName = getUniqueFileSaveName(
             collectionPath,
@@ -498,7 +458,7 @@ class ExportService {
 
     private async exportMotionPhoto(
         fileStream: ReadableStream<any>,
-        file: File,
+        file: EnteFile,
         collectionPath: string
     ) {
         const fileBlob = await new Response(fileStream).blob();
@@ -572,7 +532,7 @@ class ExportService {
     private async migrateExport(
         exportDir: string,
         collections: Collection[],
-        allFiles: File[]
+        allFiles: EnteFile[]
     ) {
         const exportRecord = await this.getExportRecord(exportDir);
         const currentVersion = exportRecord?.version ?? 0;
@@ -633,7 +593,7 @@ class ExportService {
     `fileID_fileName` to newer `fileName(numbered)` format
     */
     private async migrateFiles(
-        files: File[],
+        files: EnteFile[],
         collectionIDPathMap: Map<number, string>
     ) {
         for (let file of files) {

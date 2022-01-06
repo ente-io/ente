@@ -1,6 +1,6 @@
-import { File, getLocalFiles, setLocalFiles } from '../fileService';
-import { Collection, getLocalCollections } from '../collectionService';
-import { SetFiles } from 'pages/gallery';
+import { getLocalFiles, setLocalFiles } from '../fileService';
+import { getLocalCollections } from '../collectionService';
+import { SetFiles } from 'types/gallery';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
 import {
     sortFilesIntoCollections,
@@ -8,52 +8,32 @@ import {
     removeUnnecessaryFileProps,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
-import {
-    getMetadataMapKey,
-    ParsedMetaDataJSON,
-    parseMetadataJSON,
-} from './metadataService';
+import { getMetadataMapKey, parseMetadataJSON } from './metadataService';
 import { segregateFiles } from 'utils/upload';
-import { ProgressUpdater } from 'components/pages/gallery/Upload';
 import uploader from './uploader';
 import UIService from './uiService';
 import UploadService from './uploadService';
-import { CustomError } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/error';
+import { Collection } from 'types/collection';
+import { EnteFile } from 'types/file';
+import {
+    FileWithCollection,
+    MetadataMap,
+    ParsedMetaDataJSON,
+    ProgressUpdater,
+} from 'types/upload';
+import { UPLOAD_STAGES, FileUploadResults } from 'constants/upload';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
-
-export enum FileUploadResults {
-    FAILED = -1,
-    SKIPPED = -2,
-    UNSUPPORTED = -3,
-    BLOCKED = -4,
-    TOO_LARGE = -5,
-    UPLOADED = 100,
-}
-
-export interface FileWithCollection {
-    file: globalThis.File;
-    collectionID?: number;
-    collection?: Collection;
-}
-
-export enum UPLOAD_STAGES {
-    START,
-    READING_GOOGLE_METADATA_FILES,
-    UPLOADING,
-    FINISH,
-}
-
-export type MetadataMap = Map<string, ParsedMetaDataJSON>;
 
 class UploadManager {
     private cryptoWorkers = new Array<ComlinkWorker>(MAX_CONCURRENT_UPLOADS);
     private metadataMap: MetadataMap;
     private filesToBeUploaded: FileWithCollection[];
     private failedFiles: FileWithCollection[];
-    private existingFilesCollectionWise: Map<number, File[]>;
-    private existingFiles: File[];
+    private existingFilesCollectionWise: Map<number, EnteFile[]>;
+    private existingFiles: EnteFile[];
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
     public initUploader(progressUpdater: ProgressUpdater, setFiles: SetFiles) {

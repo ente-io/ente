@@ -2,11 +2,10 @@ import HTTPService from 'services/HTTPService';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
-import { UploadFile, UploadURL } from './uploadService';
-import { File } from '../fileService';
-import { CustomError, handleUploadError } from 'utils/common/errorUtil';
+import { EnteFile } from 'types/file';
+import { CustomError, handleUploadError } from 'utils/error';
 import { retryAsyncFunction } from 'utils/network';
-import { MultipartUploadURLs } from './multiPartUploadService';
+import { UploadFile, UploadURL, MultipartUploadURLs } from 'types/upload';
 
 const ENDPOINT = getEndpoint();
 const MAX_URL_REQUESTS = 50;
@@ -14,7 +13,7 @@ const MAX_URL_REQUESTS = 50;
 class UploadHttpClient {
     private uploadURLFetchInProgress = null;
 
-    async uploadFile(uploadFile: UploadFile): Promise<File> {
+    async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
         try {
             const token = getToken();
             if (!token) {

@@ -1,19 +1,21 @@
-import {
-    FILE_TYPE,
-    FORMAT_MISSED_BY_FILE_TYPE_LIB,
-} from 'services/fileService';
+import { FILE_TYPE } from 'constants/file';
 import { logError } from 'utils/sentry';
-import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from './uploadService';
+import {
+    FILE_READER_CHUNK_SIZE,
+    FORMAT_MISSED_BY_FILE_TYPE_LIB,
+    MULTIPART_PART_SIZE,
+} from 'constants/upload';
 import FileType from 'file-type/browser';
-import { CustomError } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/error';
 import { getFileExtension } from 'utils/file';
+import { FileTypeInfo } from 'types/upload';
 
 const TYPE_VIDEO = 'video';
 const TYPE_IMAGE = 'image';
 const EDITED_FILE_SUFFIX = '-edited';
 const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
 
-export async function getFileData(worker, file: globalThis.File) {
+export async function getFileData(worker, file: File) {
     if (file.size > MULTIPART_PART_SIZE) {
         return getFileStream(worker, file, FILE_READER_CHUNK_SIZE);
     } else {
@@ -21,14 +23,9 @@ export async function getFileData(worker, file: globalThis.File) {
     }
 }
 
-export interface FileTypeInfo {
-    fileType: FILE_TYPE;
-    exactType: string;
-}
-
 export async function getFileType(
     worker,
-    receivedFile: globalThis.File
+    receivedFile: File
 ): Promise<FileTypeInfo> {
     try {
         let fileType: FILE_TYPE;
@@ -67,7 +64,7 @@ export async function getFileType(
     Get the original file name for edited file to associate it to original file's metadataJSON file 
     as edited file doesn't have their own metadata file
 */
-export function getFileOriginalName(file: globalThis.File) {
+export function getFileOriginalName(file: File) {
     let originalName: string = null;
 
     const isEditedFile = file.name.endsWith(EDITED_FILE_SUFFIX);
@@ -79,7 +76,7 @@ export function getFileOriginalName(file: globalThis.File) {
     return originalName;
 }
 
-async function getMimeType(worker, file: globalThis.File) {
+async function getMimeType(worker, file: File) {
     const fileChunkBlob = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
     return getMimeTypeFromBlob(worker, fileChunkBlob);
 }
@@ -94,7 +91,7 @@ export async function getMimeTypeFromBlob(worker, fileBlob: Blob) {
     }
 }
 
-function getFileStream(worker, file: globalThis.File, chunkSize: number) {
+function getFileStream(worker, file: File, chunkSize: number) {
     const fileChunkReader = fileChunkReaderMaker(worker, file, chunkSize);
 
     const stream = new ReadableStream<Uint8Array>({
@@ -114,11 +111,7 @@ function getFileStream(worker, file: globalThis.File, chunkSize: number) {
     };
 }
 
-async function* fileChunkReaderMaker(
-    worker,
-    file: globalThis.File,
-    chunkSize: number
-) {
+async function* fileChunkReaderMaker(worker, file: File, chunkSize: number) {
     let offset = 0;
     while (offset < file.size) {
         const blob = file.slice(offset, chunkSize + offset);
