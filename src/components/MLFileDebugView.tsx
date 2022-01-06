@@ -18,19 +18,24 @@ interface MLFileDebugViewProps {
 
 function drawFaceDetection(face: AlignedFace, ctx: CanvasRenderingContext2D) {
     const pointSize = Math.ceil(
-        Math.max(ctx.canvas.width / 512, face.box.width / 32)
+        Math.max(ctx.canvas.width / 512, face.detection.box.width / 32)
     );
 
     ctx.save();
     ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
     ctx.lineWidth = pointSize;
-    ctx.strokeRect(face.box.x, face.box.y, face.box.width, face.box.height);
+    ctx.strokeRect(
+        face.detection.box.x,
+        face.detection.box.y,
+        face.detection.box.width,
+        face.detection.box.height
+    );
     ctx.restore();
 
     ctx.save();
     ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)';
     ctx.lineWidth = Math.round(pointSize * 1.5);
-    const alignedBox = getAlignedFaceBox(face);
+    const alignedBox = getAlignedFaceBox(face.alignment);
     ctx.strokeRect(
         alignedBox.x,
         alignedBox.y,
@@ -41,7 +46,7 @@ function drawFaceDetection(face: AlignedFace, ctx: CanvasRenderingContext2D) {
 
     ctx.save();
     ctx.fillStyle = 'rgba(0, 0, 255, 0.8)';
-    face.landmarks.forEach((l) => {
+    face.detection.landmarks.forEach((l) => {
         ctx.beginPath();
         ctx.arc(l.x, l.y, pointSize, 0, Math.PI * 2, true);
         ctx.fill();
@@ -64,16 +69,16 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
         const loadFile = async () => {
             // TODO: go through worker for these apis, to not include ml code in main bundle
             const imageBitmap = await createImageBitmap(props.file);
-            const detectedFaces = await tfjsFaceDetectionService.detectFaces(
+            const faceDetections = await tfjsFaceDetectionService.detectFaces(
                 imageBitmap
             );
-            console.log('detectedFaces: ', detectedFaces.length);
+            console.log('detectedFaces: ', faceDetections.length);
 
             const mlSyncConfig = await getMLSyncConfig();
-            const faceCropPromises = detectedFaces.map(async (face) =>
+            const faceCropPromises = faceDetections.map(async (faceDetection) =>
                 arcfaceCropService.getFaceCrop(
                     imageBitmap,
-                    face,
+                    faceDetection,
                     mlSyncConfig.faceCrop
                 )
             );
@@ -82,9 +87,10 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             if (didCancel) return;
             setFaceCrops(faceCrops);
 
-            const alignedFaces =
-                arcfaceAlignmentService.getAlignedFaces(detectedFaces);
-            console.log('alignedFaces: ', alignedFaces);
+            const faceAlignments = faceDetections.map((detection) =>
+                arcfaceAlignmentService.getFaceAlignment(detection)
+            );
+            console.log('alignedFaces: ', faceAlignments);
 
             const canvas: HTMLCanvasElement = canvasRef.current;
             canvas.width = imageBitmap.width;
@@ -92,23 +98,35 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             const ctx = canvas.getContext('2d');
             if (didCancel) return;
             ctx.drawImage(imageBitmap, 0, 0);
-            alignedFaces.forEach((face) => drawFaceDetection(face, ctx));
+            const alignedFaces = faceAlignments.map((alignment, i) => {
+                return {
+                    detection: faceDetections[i],
+                    alignment,
+                } as AlignedFace;
+            });
+            alignedFaces.forEach((alignedFace) =>
+                drawFaceDetection(alignedFace, ctx)
+            );
 
             const facesUsingCrops = await Promise.all(
                 alignedFaces.map((face, i) => {
-                    return ibExtractFaceImageFromCrop(face, 112, faceCrops[i]);
+                    return ibExtractFaceImageFromCrop(
+                        faceCrops[i],
+                        face.alignment,
+                        112
+                    );
                 })
             );
             const facesUsingImage = await Promise.all(
                 alignedFaces.map((face) => {
-                    return ibExtractFaceImage(imageBitmap, face, 112);
+                    return ibExtractFaceImage(imageBitmap, face.alignment, 112);
                 })
             );
             const facesUsingTransform = await Promise.all(
                 alignedFaces.map((face) => {
                     return ibExtractFaceImageUsingTransform(
                         imageBitmap,
-                        face,
+                        face.alignment,
                         112
                     );
                 })

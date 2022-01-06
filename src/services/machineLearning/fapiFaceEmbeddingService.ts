@@ -46,7 +46,7 @@ class FAPIFaceEmbeddingService {
             };
         }
 
-        const boxes = faces.map((f) => f.box);
+        const boxes = faces.map((f) => f.detection.box);
         const faceImagesTensor = extractFaces(image, boxes, this.faceSize);
         // const embeddingsTensor = await this.mobileFaceNetModel.predict(faceImagesTensor);
         const f32embeddings = await this.getEmbeddingsBatch(faceImagesTensor);

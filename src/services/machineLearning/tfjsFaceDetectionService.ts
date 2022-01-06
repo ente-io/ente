@@ -12,7 +12,7 @@ import {
     BLAZEFACE_MAX_FACES,
     BLAZEFACE_PASS1_SCORE_THRESHOLD,
     BLAZEFACE_SCORE_THRESHOLD,
-    DetectedFace,
+    FaceDetection,
     FaceDetectionMethod,
     FaceDetectionService,
     Versioned,
@@ -158,7 +158,7 @@ class TFJSFaceDetectionService implements FaceDetectionService {
 
     private async estimateFaces(
         imageBitmap: ImageBitmap
-    ): Promise<Array<DetectedFace>> {
+    ): Promise<Array<FaceDetection>> {
         const resized = resizeToSquare(imageBitmap, BLAZEFACE_INPUT_SIZE);
         const tfImage = tf.browser.fromPixels(resized.image);
         const blazeFaceModel = await this.getBlazefaceModel();
@@ -170,7 +170,7 @@ class TFJSFaceDetectionService implements FaceDetectionService {
         const transform = computeTransformToBox(inBox, toBox);
         // console.log("1st pass: ", { transform });
 
-        const detectedFaces: Array<DetectedFace> = faces?.map((f) => {
+        const faceDetections: Array<FaceDetection> = faces?.map((f) => {
             const box = transformBox(normFaceBox(f), transform);
             const normLandmarks = (f.landmarks as number[][])?.map(
                 (l) => new Point(l[0], l[1])
@@ -181,21 +181,21 @@ class TFJSFaceDetectionService implements FaceDetectionService {
                 landmarks,
                 probability: f.probability as number,
                 // detectionMethod: this.method,
-            } as DetectedFace;
+            } as FaceDetection;
         });
 
-        return detectedFaces;
+        return faceDetections;
     }
 
     public async detectFaces(
         imageBitmap: ImageBitmap
-    ): Promise<Array<DetectedFace>> {
+    ): Promise<Array<FaceDetection>> {
         const pass1Detections = await this.estimateFaces(imageBitmap);
 
         // run 2nd pass for accuracy
-        const detections = [];
-        for (const face of pass1Detections) {
-            const imageBox = enlargeBox(face.box, 2);
+        const detections: Array<FaceDetection> = [];
+        for (const pass1Detection of pass1Detections) {
+            const imageBox = enlargeBox(pass1Detection.box, 2);
             const faceImage = crop(
                 imageBitmap,
                 imageBox,

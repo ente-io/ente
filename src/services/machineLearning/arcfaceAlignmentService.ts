@@ -1,11 +1,11 @@
-import { getArcfaceAlignedFace } from 'utils/machineLearning/faceAlign';
 import {
-    AlignedFace,
-    DetectedFace,
+    FaceAlignment,
     FaceAlignmentMethod,
     FaceAlignmentService,
+    FaceDetection,
     Versioned,
 } from 'types/machineLearning';
+import { getArcfaceAlignment } from 'utils/machineLearning/faceAlign';
 
 class ArcfaceAlignmentService implements FaceAlignmentService {
     public method: Versioned<FaceAlignmentMethod>;
@@ -17,14 +17,8 @@ class ArcfaceAlignmentService implements FaceAlignmentService {
         };
     }
 
-    public getAlignedFaces(faces: Array<DetectedFace>): Array<AlignedFace> {
-        const alignedFaces = new Array<AlignedFace>(faces.length);
-
-        faces.forEach((face, index) => {
-            alignedFaces[index] = getArcfaceAlignedFace(face);
-        });
-
-        return alignedFaces;
+    public getFaceAlignment(faceDetection: FaceDetection): FaceAlignment {
+        return getArcfaceAlignment(faceDetection);
     }
 }
 

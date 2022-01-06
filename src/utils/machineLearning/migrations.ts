@@ -38,19 +38,15 @@ export async function migrateFaceCropsToCache() {
     for (const file of allFilesWithFaces) {
         let updated = false;
         for (const face of file.faces) {
-            if (!face['faceId']) {
-                const faceCropBlob = face.faceCrop['image'];
-                const faceId = getFaceId(
-                    file.fileId,
-                    face,
-                    file.imageDimentions
-                );
-                face.faceCrop = await getStoredFaceCropForBlob(
+            if (!face['id']) {
+                const faceCropBlob = face.crop['image'];
+                const faceId = getFaceId(face, file.imageDimentions);
+                face.crop = await getStoredFaceCropForBlob(
                     faceId,
-                    face.faceCrop.imageBox,
+                    face.crop.imageBox,
                     faceCropBlob
                 );
-                face['faceId'] = faceId;
+                face['id'] = faceId;
                 updated = true;
             }
         }

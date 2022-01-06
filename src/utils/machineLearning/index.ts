@@ -1,8 +1,11 @@
+import { NormalizedFace } from '@tensorflow-models/blazeface';
 import * as tf from '@tensorflow/tfjs-core';
+import PQueue from 'p-queue';
 import DownloadManager from 'services/downloadManager';
 import { File, getLocalFiles } from 'services/fileService';
-import { Box, Point } from '../../../thirdparty/face-api/classes';
+import { Dimensions } from 'types/image';
 import {
+    AlignedFace,
     BLAZEFACE_FACE_SIZE,
     DetectedFace,
     Face,
@@ -12,16 +15,14 @@ import {
     Person,
     Versioned,
 } from 'types/machineLearning';
-import { getArcfaceAlignedFace, ibExtractFaceImage } from './faceAlign';
 // import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
 import { convertForPreview, needsConversionForPreview } from 'utils/file';
-import { cached } from 'utils/storage/cache';
 import { imageBitmapToBlob } from 'utils/image';
-import { NormalizedFace } from '@tensorflow-models/blazeface';
-import PQueue from 'p-queue';
+import { cached } from 'utils/storage/cache';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
+import { Box, Point } from '../../../thirdparty/face-api/classes';
+import { getArcfaceAlignment, ibExtractFaceImage } from './faceAlign';
 import { getFaceImageBlobFromStorage } from './faceCrop';
-import { Dimensions } from 'types/image';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -189,7 +190,7 @@ export function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
 }
 
 export async function getFaceImage(
-    face: Face,
+    face: AlignedFace,
     token: string,
     faceSize: number = BLAZEFACE_FACE_SIZE,
     file?: File
@@ -200,7 +201,11 @@ export async function getFaceImage(
     }
 
     const imageBitmap = await getOriginalImageBitmap(file, token);
-    const faceImageBitmap = ibExtractFaceImage(imageBitmap, face, faceSize);
+    const faceImageBitmap = ibExtractFaceImage(
+        imageBitmap,
+        face.alignment,
+        faceSize
+    );
     const faceImage = imageBitmapToBlob(faceImageBitmap);
     faceImageBitmap.close();
     imageBitmap.close();
@@ -226,12 +231,8 @@ export function leftFillNum(num: number, length: number, padding: number) {
 // will anyways finalize grid size as half of our threshold
 // can also explore spatial index similar to Geohash for indexing, again overkill
 // also check if this needs to be globally unique or unique for a user
-export function getFaceId(
-    fileId: number,
-    face: DetectedFace,
-    imageDims: Dimensions
-) {
-    const arcFaceAlignedFace = getArcfaceAlignedFace(face);
+export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
+    const arcFaceAlignedFace = getArcfaceAlignment(detectedFace.detection);
     const imgDimPoint = new Point(imageDims.width, imageDims.height);
     const gridPt = arcFaceAlignedFace.center
         .mul(new Point(100, 100))
@@ -241,7 +242,7 @@ export function getFaceId(
     const gridPaddedX = leftFillNum(gridPt.x, 2, 0);
     const gridPaddedY = leftFillNum(gridPt.y, 2, 0);
 
-    return `${fileId}-${gridPaddedX}-${gridPaddedY}`;
+    return `${detectedFace.fileId}-${gridPaddedX}-${gridPaddedY}`;
 }
 
 export async function getTFImage(blob): Promise<tf.Tensor3D> {
@@ -371,7 +372,7 @@ export async function getUnidentifiedFaces(
 
     const faceCrops = mlFileData?.faces
         ?.filter((f) => f.personId === null || f.personId === undefined)
-        .map((f) => f.faceCrop)
+        .map((f) => f.crop)
         .filter((faceCrop) => faceCrop !== null && faceCrop !== undefined);
 
     return (

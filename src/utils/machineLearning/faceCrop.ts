@@ -5,9 +5,10 @@ import {
     FaceCropConfig,
     FaceCrop,
     StoredFaceCrop,
-    DetectedFace,
     FACE_CROPS_CACHE_NAME,
     MlFileData,
+    FaceAlignment,
+    FaceDetection,
 } from 'types/machineLearning';
 import { cropWithRotation, imageBitmapToBlob } from 'utils/image';
 import { enlargeBox } from '.';
@@ -17,10 +18,10 @@ import { transformBox, transformPoints } from './transform';
 
 export function getFaceCrop(
     imageBitmap: ImageBitmap,
-    alignedFace: AlignedFace,
+    alignment: FaceAlignment,
     config: FaceCropConfig
 ): FaceCrop {
-    const box = getAlignedFaceBox(alignedFace);
+    const box = getAlignedFaceBox(alignment);
     const scaleForPadding = 1 + config.padding * 2;
     const paddedBox = enlargeBox(box, scaleForPadding).round();
     const faceImageBitmap = cropWithRotation(imageBitmap, paddedBox, 0, {
@@ -85,12 +86,12 @@ export async function removeOldFaceCrops(
 ) {
     const newFaceCropUrls =
         newMLFileData?.faces
-            ?.map((f) => f.faceCrop?.imageUrl)
+            ?.map((f) => f.crop?.imageUrl)
             ?.filter((fc) => fc !== null && fc !== undefined) || [];
 
     const oldFaceCropUrls =
         oldMLFileData?.faces
-            ?.map((f) => f.faceCrop?.imageUrl)
+            ?.map((f) => f.crop?.imageUrl)
             ?.filter((fc) => fc !== null && fc !== undefined) || [];
 
     const unusedFaceCropUrls = oldFaceCropUrls.filter(
@@ -149,44 +150,47 @@ export function extractFaceImageFromCrop(
 }
 
 export async function ibExtractFaceImageFromCrop(
-    alignedFace: AlignedFace,
-    faceSize: number,
-    usingFaceCrop?: FaceCrop
+    faceCrop: FaceCrop,
+    alignment: FaceAlignment,
+    faceSize: number
 ): Promise<ImageBitmap> {
-    const box = getAlignedFaceBox(alignedFace);
-    const faceCrop =
-        usingFaceCrop || (await getFaceCropFromStorage(alignedFace.faceCrop));
+    const box = getAlignedFaceBox(alignment);
 
     return extractFaceImageFromCrop(
-        { image: faceCrop.image, imageBox: faceCrop.imageBox },
+        faceCrop,
         box,
-        alignedFace.rotation,
+        alignment.rotation,
         faceSize
     );
 }
 
 export async function ibExtractFaceImagesFromCrops(
-    faces: AlignedFace[],
+    faces: Array<AlignedFace>,
     faceSize: number
 ): Promise<Array<ImageBitmap>> {
-    const faceImagePromises = faces.map((f) =>
-        ibExtractFaceImageFromCrop(f, faceSize)
-    );
+    const faceImagePromises = faces.map(async (alignedFace) => {
+        const faceCrop = await getFaceCropFromStorage(alignedFace.crop);
+        return ibExtractFaceImageFromCrop(
+            faceCrop,
+            alignedFace.alignment,
+            faceSize
+        );
+    });
     return Promise.all(faceImagePromises);
 }
 
-export function transformFace(face: DetectedFace, transform: Matrix) {
+export function transformFace(faceDetection: FaceDetection, transform: Matrix) {
     return {
-        ...face,
+        ...faceDetection,
 
-        box: transformBox(face.box, transform),
-        landmarks: transformPoints(face.landmarks, transform),
+        box: transformBox(faceDetection.box, transform),
+        landmarks: transformPoints(faceDetection.landmarks, transform),
     };
 }
 
 export function transformToFaceCropDims(
     faceCrop: FaceCrop,
-    detectedFace: DetectedFace
+    faceDetection: FaceDetection
 ) {
     const imageBox = new Box(faceCrop.imageBox);
 
@@ -195,12 +199,12 @@ export function transformToFaceCropDims(
         translate(-imageBox.x, -imageBox.y)
     );
 
-    return transformFace(detectedFace, transform);
+    return transformFace(faceDetection, transform);
 }
 
 export function transformToImageDims(
     faceCrop: FaceCrop,
-    detectedFace: DetectedFace
+    faceDetection: FaceDetection
 ) {
     const imageBox = new Box(faceCrop.imageBox);
 
@@ -209,5 +213,5 @@ export function transformToImageDims(
         scale(imageBox.width / faceCrop.image.width)
     );
 
-    return transformFace(detectedFace, transform);
+    return transformFace(faceDetection, transform);
 }

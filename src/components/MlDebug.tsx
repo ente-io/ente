@@ -183,8 +183,8 @@ export default function MLDebug() {
         const noiseFacePromises = mlLibraryData?.faceClusteringResults?.noise
             ?.slice(0, 100)
             .map((n) => allFaces[n])
-            .filter((f) => f?.faceCrop)
-            .map((f) => getFaceImageBlobFromStorage(f.faceCrop));
+            .filter((f) => f?.crop)
+            .map((f) => getFaceImageBlobFromStorage(f.crop));
         setNoiseFaces(await Promise.all(noiseFacePromises));
     };
 

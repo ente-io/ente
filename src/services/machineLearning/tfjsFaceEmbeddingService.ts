@@ -1,17 +1,16 @@
-import * as tf from '@tensorflow/tfjs-core';
 import { gather } from '@tensorflow/tfjs';
+import * as tf from '@tensorflow/tfjs-core';
 import * as tflite from '@tensorflow/tfjs-tflite';
 import {
     AlignedFace,
     FaceEmbedding,
     FaceEmbeddingMethod,
     FaceEmbeddingService,
-    FaceWithEmbedding,
     Versioned,
 } from 'types/machineLearning';
-import { ibExtractFaceImagesFromCrops } from 'utils/machineLearning/faceCrop';
 import { imageBitmapsToTensor4D } from 'utils/machineLearning';
 import { ibExtractFaceImages } from 'utils/machineLearning/faceAlign';
+import { ibExtractFaceImagesFromCrops } from 'utils/machineLearning/faceCrop';
 
 class TFJSFaceEmbeddingService implements FaceEmbeddingService {
     private mobileFaceNetModel: Promise<tflite.TFLiteModel>;
@@ -88,13 +87,18 @@ class TFJSFaceEmbeddingService implements FaceEmbeddingService {
         }
 
         let faceImages: Array<ImageBitmap>;
-        if (faces.length === faces.filter((f) => f.faceCrop).length) {
+        if (faces.length === faces.filter((f) => f.crop).length) {
             faceImages = await ibExtractFaceImagesFromCrops(
                 faces,
                 this.faceSize
             );
         } else {
-            faceImages = await ibExtractFaceImages(image, faces, this.faceSize);
+            const faceAlignments = faces.map((f) => f.alignment);
+            faceImages = await ibExtractFaceImages(
+                image,
+                faceAlignments,
+                this.faceSize
+            );
         }
 
         const faceImagesTensor = imageBitmapsToTensor4D(faceImages);
@@ -103,17 +107,7 @@ class TFJSFaceEmbeddingService implements FaceEmbeddingService {
         tf.dispose(faceImagesTensor);
         // console.log('embeddings: ', embeddings[0]);
 
-        const facesWithEmbeddings = new Array<FaceWithEmbedding>(faces.length);
-        faces.forEach((face, index) => {
-            facesWithEmbeddings[index] = {
-                ...face,
-
-                embedding: embeddings[index],
-                // embeddingMethod: this.method,
-            };
-        });
-
-        return facesWithEmbeddings;
+        return embeddings;
     }
 
     public async dispose() {

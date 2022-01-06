@@ -77,10 +77,10 @@ export function newMlData(
     return {
         fileId: enteFile.id,
         imageSource: syncContext.config.imageSource,
-        detectionMethod: syncContext.faceDetectionService.method,
+        faceDetectionMethod: syncContext.faceDetectionService.method,
         faceCropMethod: syncContext.faceCropService.method,
-        alignmentMethod: syncContext.faceAlignmentService.method,
-        embeddingMethod: syncContext.faceEmbeddingService.method,
+        faceAlignmentMethod: syncContext.faceAlignmentService.method,
+        faceEmbeddingMethod: syncContext.faceEmbeddingService.method,
         errorCount: 0,
         mlVersion: 0,
     };

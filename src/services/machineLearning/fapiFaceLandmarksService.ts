@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs-core';
 import { gather } from '@tensorflow/tfjs';
 import { extractFaces } from 'utils/machineLearning';
-import { DetectedFace } from 'types/machineLearning';
+import { DetectedFace, FaceDetection } from 'types/machineLearning';
 import { FaceLandmarks68 } from '../../../thirdparty/face-api/classes';
 import { FaceLandmark68Net } from '../../../thirdparty/face-api/faceLandmarkNet';
 import { getRotatedFaceImage } from 'utils/machineLearning/faceAlign';
@@ -41,15 +41,18 @@ class FAPIFaceLandmarksService {
 
     public async getAlignedFaces(
         image: tf.Tensor3D,
-        faces: DetectedFace[]
+        faceDetections: Array<FaceDetection>
     ): Promise<tf.Tensor4D> {
-        if (!faces || faces.length < 1) {
+        if (!faceDetections || faceDetections.length < 1) {
             return null as tf.Tensor4D;
         }
 
-        const alignedFaceImages = new Array<tf.Tensor3D>(faces.length);
-        for (let i = 0; i < faces.length; i++) {
-            const rotFaceImageTensor = getRotatedFaceImage(image, faces[i]);
+        const alignedFaceImages = new Array<tf.Tensor3D>(faceDetections.length);
+        for (let i = 0; i < faceDetections.length; i++) {
+            const rotFaceImageTensor = getRotatedFaceImage(
+                image,
+                faceDetections[i]
+            );
 
             const landmarks = await this.faceLandmarkNet.detectLandmarks(
                 rotFaceImageTensor
@@ -78,7 +81,7 @@ class FAPIFaceLandmarksService {
             return [] as Array<FaceLandmarks68>;
         }
 
-        const boxes = faces.map((f) => f.box);
+        const boxes = faces.map((f) => f.detection.box);
         const faceImagesTensor = extractFaces(image, boxes, this.faceSize);
 
         const landmarks = await this.getLandmarksBatch(faceImagesTensor);

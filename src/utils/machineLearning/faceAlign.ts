@@ -1,4 +1,4 @@
-import { AlignedFace, DetectedFace } from 'types/machineLearning';
+import { FaceAlignment, FaceDetection } from 'types/machineLearning';
 import { Matrix, inverse } from 'ml-matrix';
 import * as tf from '@tensorflow/tfjs-core';
 import { getSimilarityTransformation } from '../../../thirdparty/similarity-transformation-js/main';
@@ -27,13 +27,15 @@ export function normalizeLandmarks(
     ) as Array<[number, number]>;
 }
 
-export function getAlignedFaceUsingSimilarityTransform(
-    face: DetectedFace,
+export function getFaceAlignmentUsingSimilarityTransform(
+    faceDetection: FaceDetection,
     alignedLandmarks: Array<[number, number]>
     // alignmentMethod: Versioned<FaceAlignmentMethod>
-): AlignedFace {
+): FaceAlignment {
     const landmarksMat = new Matrix(
-        face.landmarks.map((p) => [p.x, p.y]).slice(0, alignedLandmarks.length)
+        faceDetection.landmarks
+            .map((p) => [p.x, p.y])
+            .slice(0, alignedLandmarks.length)
     ).transpose();
     const alignedLandmarksMat = new Matrix(alignedLandmarks).transpose();
 
@@ -62,29 +64,28 @@ export function getAlignedFaceUsingSimilarityTransform(
     // console.log({ affineMatrix, meanTranslation, centerMat, center, toMean: simTransform.toMean, fromMean: simTransform.fromMean, size });
 
     return {
-        ...face,
-
         affineMatrix,
         center,
         size,
         rotation,
-        // alignmentMethod,
     };
 }
 
-export function getArcfaceAlignedFace(face: DetectedFace): AlignedFace {
-    return getAlignedFaceUsingSimilarityTransform(
-        face,
+export function getArcfaceAlignment(
+    faceDetection: FaceDetection
+): FaceAlignment {
+    return getFaceAlignmentUsingSimilarityTransform(
+        faceDetection,
         normalizeLandmarks(ARCFACE_LANDMARKS, ARCFACE_LANDMARKS_FACE_SIZE)
     );
 }
 
 export function extractFaceImage(
     image: tf.Tensor4D,
-    alignedFace: AlignedFace,
+    alignment: FaceAlignment,
     faceSize: number
 ) {
-    const affineMat = new Matrix(alignedFace.affineMatrix);
+    const affineMat = new Matrix(alignment.affineMatrix);
 
     const I = inverse(affineMat);
 
@@ -115,16 +116,16 @@ export function extractFaceImage(
 
 export function extractFaceImages(
     image: tf.Tensor3D | tf.Tensor4D,
-    faces: AlignedFace[],
+    alignments: Array<FaceAlignment>,
     faceSize: number
 ): tf.Tensor4D {
     return tf.tidy(() => {
         const tf4dFloat32Image = toTensor4D(image, 'float32');
-        const faceImages = new Array<tf.Tensor3D>(faces.length);
-        for (let i = 0; i < faces.length; i++) {
+        const faceImages = new Array<tf.Tensor3D>(alignments.length);
+        for (let i = 0; i < alignments.length; i++) {
             faceImages[i] = extractFaceImage(
                 tf4dFloat32Image,
-                faces[i],
+                alignments[i],
                 faceSize
             ).squeeze([0]);
         }
@@ -133,21 +134,21 @@ export function extractFaceImages(
     });
 }
 
-export function getAlignedFaceBox(alignedFace: AlignedFace) {
+export function getAlignedFaceBox(alignment: FaceAlignment) {
     return new Box({
-        x: alignedFace.center.x - alignedFace.size / 2,
-        y: alignedFace.center.y - alignedFace.size / 2,
-        width: alignedFace.size,
-        height: alignedFace.size,
+        x: alignment.center.x - alignment.size / 2,
+        y: alignment.center.y - alignment.size / 2,
+        width: alignment.size,
+        height: alignment.size,
     }).round();
 }
 
 export function ibExtractFaceImage(
     image: ImageBitmap,
-    alignedFace: AlignedFace,
+    alignment: FaceAlignment,
     faceSize: number
 ): ImageBitmap {
-    const box = getAlignedFaceBox(alignedFace);
+    const box = getAlignedFaceBox(alignment);
     const faceSizeDimentions: Dimensions = {
         width: faceSize,
         height: faceSize,
@@ -155,7 +156,7 @@ export function ibExtractFaceImage(
     return cropWithRotation(
         image,
         box,
-        alignedFace.rotation,
+        alignment.rotation,
         faceSizeDimentions,
         faceSizeDimentions
     );
@@ -163,10 +164,10 @@ export function ibExtractFaceImage(
 
 export function ibExtractFaceImageUsingTransform(
     image: ImageBitmap,
-    alignedFace: AlignedFace,
+    alignment: FaceAlignment,
     faceSize: number
 ): ImageBitmap {
-    const scaledMatrix = new Matrix(alignedFace.affineMatrix)
+    const scaledMatrix = new Matrix(alignment.affineMatrix)
         .mul(faceSize)
         .to2DArray();
     // console.log("scaledMatrix: ", scaledMatrix);
@@ -175,37 +176,39 @@ export function ibExtractFaceImageUsingTransform(
 
 export function ibExtractFaceImages(
     image: ImageBitmap,
-    faces: AlignedFace[],
+    alignments: Array<FaceAlignment>,
     faceSize: number
 ): Array<ImageBitmap> {
-    return faces.map((f) => ibExtractFaceImage(image, f, faceSize));
+    return alignments.map((alignment) =>
+        ibExtractFaceImage(image, alignment, faceSize)
+    );
 }
 
 export function extractArcfaceAlignedFaceImage(
     image: tf.Tensor4D,
-    face: DetectedFace,
+    faceDetection: FaceDetection,
     faceSize: number
 ): tf.Tensor4D {
-    const alignedFace = getAlignedFaceUsingSimilarityTransform(
-        face,
+    const alignment = getFaceAlignmentUsingSimilarityTransform(
+        faceDetection,
         ARCFACE_LANDMARKS
     );
 
-    return extractFaceImage(image, alignedFace, faceSize);
+    return extractFaceImage(image, alignment, faceSize);
 }
 
 export function extractArcfaceAlignedFaceImages(
     image: tf.Tensor3D | tf.Tensor4D,
-    faces: DetectedFace[],
+    faceDetections: Array<FaceDetection>,
     faceSize: number
 ): tf.Tensor4D {
     return tf.tidy(() => {
         const tf4dFloat32Image = toTensor4D(image, 'float32');
-        const faceImages = new Array<tf.Tensor3D>(faces.length);
-        for (let i = 0; i < faces.length; i++) {
+        const faceImages = new Array<tf.Tensor3D>(faceDetections.length);
+        for (let i = 0; i < faceDetections.length; i++) {
             faceImages[i] = extractArcfaceAlignedFaceImage(
                 tf4dFloat32Image,
-                faces[i],
+                faceDetections[i],
                 faceSize
             ).squeeze([0]);
         }
@@ -221,12 +224,12 @@ const BLAZEFACE_MOUTH_INDEX = 3;
 
 export function getRotatedFaceImage(
     image: tf.Tensor3D | tf.Tensor4D,
-    face: DetectedFace,
+    faceDetection: FaceDetection,
     padding: number = 1.5
 ): tf.Tensor4D {
-    const paddedBox = enlargeBox(face.box, padding);
+    const paddedBox = enlargeBox(faceDetection.box, padding);
     // console.log("paddedBox", paddedBox);
-    const landmarkPoints = face.landmarks;
+    const landmarkPoints = faceDetection.landmarks;
 
     return tf.tidy(() => {
         const tf4dFloat32Image = toTensor4D(image, 'float32');
@@ -242,7 +245,7 @@ export function getRotatedFaceImage(
         // angle = computeRotation(leftEye, rightEye);
         // console.log('angle: ', angle);
 
-        const faceCenter = getBoxCenter(face.box);
+        const faceCenter = getBoxCenter(faceDetection.box);
         // console.log('faceCenter: ', faceCenter);
         const faceCenterNormalized: [number, number] = [
             faceCenter.x / tf4dFloat32Image.shape[2],

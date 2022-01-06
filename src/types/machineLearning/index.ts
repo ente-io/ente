@@ -38,8 +38,6 @@ export interface MLDebugResult {
     tsne: TSNEData;
 }
 
-export declare type FaceEmbedding = Array<number>;
-
 export declare type FaceImage = Array<Array<Array<number>>>;
 export declare type FaceImageBlob = Blob;
 
@@ -113,13 +111,20 @@ export interface Versioned<T> {
     version: number;
 }
 
-export interface DetectedFace {
+export interface FaceDetection {
     // box and landmarks is relative to image dimentions stored at mlFileData
     box: Box;
-    landmarks: Array<Landmark>;
+    landmarks?: Array<Landmark>;
     probability?: number;
-    faceCrop?: StoredFaceCrop;
-    // detectionMethod: Versioned<FaceDetectionMethod>;
+}
+
+export interface DetectedFace {
+    fileId: number;
+    detection: FaceDetection;
+}
+
+export interface DetectedFaceWithId extends DetectedFace {
+    id: string;
 }
 
 export interface FaceCrop {
@@ -135,7 +140,11 @@ export interface StoredFaceCrop {
     imageBox: Box;
 }
 
-export interface AlignedFace extends DetectedFace {
+export interface CroppedFace extends DetectedFaceWithId {
+    crop?: StoredFaceCrop;
+}
+
+export interface FaceAlignment {
     // TODO: remove affine matrix as rotation, size and center
     // are simple to store and use, affine matrix adds complexity while getting crop
     affineMatrix: Array<Array<number>>;
@@ -143,16 +152,19 @@ export interface AlignedFace extends DetectedFace {
     // size and center is relative to image dimentions stored at mlFileData
     size: number;
     center: Point;
-    // alignmentMethod: Versioned<FaceAlignmentMethod>;
 }
 
+export interface AlignedFace extends CroppedFace {
+    alignment?: FaceAlignment;
+}
+
+export declare type FaceEmbedding = Array<number>;
+
 export interface FaceWithEmbedding extends AlignedFace {
-    embedding: FaceEmbedding;
-    // embeddingMethod: Versioned<FaceEmbeddingMethod>;
+    embedding?: FaceEmbedding;
 }
 
 export interface Face extends FaceWithEmbedding {
-    fileId: number;
     personId?: number;
 }
 
@@ -168,10 +180,10 @@ export interface MlFileData {
     faces?: Face[];
     imageSource?: ImageType;
     imageDimentions?: Dimensions;
-    detectionMethod?: Versioned<FaceDetectionMethod>;
+    faceDetectionMethod?: Versioned<FaceDetectionMethod>;
     faceCropMethod?: Versioned<FaceCropMethod>;
-    alignmentMethod?: Versioned<FaceAlignmentMethod>;
-    embeddingMethod?: Versioned<FaceEmbeddingMethod>;
+    faceAlignmentMethod?: Versioned<FaceAlignmentMethod>;
+    faceEmbeddingMethod?: Versioned<FaceEmbeddingMethod>;
     mlVersion: number;
     errorCount: number;
     lastErrorMessage?: string;
@@ -268,12 +280,9 @@ export interface MLSyncFileContext {
     imageBitmap?: ImageBitmap;
 
     newDetection?: boolean;
-    filtertedFaces?: Array<DetectedFace>;
-
     newAlignment?: boolean;
-    alignedFaces?: Array<AlignedFace>;
 
-    facesWithEmbeddings?: Array<FaceWithEmbedding>;
+    faces?: Array<Face>;
 }
 
 export interface MLLibraryData {
@@ -294,7 +303,7 @@ export const BLAZEFACE_FACE_SIZE = 112;
 export interface FaceDetectionService {
     method: Versioned<FaceDetectionMethod>;
     // init(): Promise<void>;
-    detectFaces(image: ImageBitmap): Promise<Array<DetectedFace>>;
+    detectFaces(image: ImageBitmap): Promise<Array<FaceDetection>>;
     dispose(): Promise<void>;
 }
 
@@ -303,14 +312,14 @@ export interface FaceCropService {
 
     getFaceCrop(
         imageBitmap: ImageBitmap,
-        face: DetectedFace,
+        face: FaceDetection,
         config: FaceCropConfig
     ): Promise<FaceCrop>;
 }
 
 export interface FaceAlignmentService {
     method: Versioned<FaceAlignmentMethod>;
-    getAlignedFaces(faces: Array<DetectedFace>): Array<AlignedFace>;
+    getFaceAlignment(faceDetection: FaceDetection): FaceAlignment;
 }
 
 export interface FaceEmbeddingService {
@@ -319,7 +328,7 @@ export interface FaceEmbeddingService {
     getFaceEmbeddings(
         image: ImageBitmap,
         faces: Array<AlignedFace>
-    ): Promise<Array<FaceWithEmbedding>>;
+    ): Promise<Array<FaceEmbedding>>;
     dispose(): Promise<void>;
 }
 

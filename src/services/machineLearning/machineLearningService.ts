@@ -7,6 +7,7 @@ import { setWasmPaths } from '@tensorflow/tfjs-backend-wasm';
 import '@tensorflow/tfjs-backend-cpu';
 
 import {
+    DetectedFace,
     Face,
     MlFileData,
     MLSyncConfig,
@@ -352,25 +353,14 @@ class MachineLearningService {
 
         await this.syncFileFaceDetections(syncContext, fileContext);
 
-        if (
-            fileContext.filtertedFaces &&
-            fileContext.filtertedFaces.length > 0
-        ) {
+        if (fileContext.faces && fileContext.faces.length > 0) {
             await this.syncFileFaceCrops(syncContext, fileContext);
 
             await this.syncFileFaceAlignments(syncContext, fileContext);
 
             await this.syncFileFaceEmbeddings(syncContext, fileContext);
 
-            fileContext.newMLFileData.faces =
-                fileContext.facesWithEmbeddings?.map(
-                    (faceWithEmbeddings) =>
-                        ({
-                            fileId: enteFile.id,
-
-                            ...faceWithEmbeddings,
-                        } as Face)
-                );
+            fileContext.newMLFileData.faces = fileContext.faces;
         } else {
             fileContext.newMLFileData.faces = undefined;
         }
@@ -432,34 +422,46 @@ class MachineLearningService {
     ) {
         if (
             isDifferentOrOld(
-                fileContext.oldMLFileData?.detectionMethod,
+                fileContext.oldMLFileData?.faceDetectionMethod,
                 syncContext.faceDetectionService.method
             ) ||
             fileContext.oldMLFileData?.imageSource !==
                 syncContext.config.imageSource
         ) {
-            fileContext.newMLFileData.detectionMethod =
+            fileContext.newMLFileData.faceDetectionMethod =
                 syncContext.faceDetectionService.method;
             fileContext.newMLFileData.imageSource =
                 syncContext.config.imageSource;
             fileContext.newDetection = true;
             await this.getImageBitmap(syncContext, fileContext);
-            const detectedFaces =
+            const faceDetections =
                 await syncContext.faceDetectionService.detectFaces(
                     fileContext.imageBitmap
                 );
             // console.log('3 TF Memory stats: ', tf.memory());
             // TODO: reenable faces filtering based on width
-            fileContext.filtertedFaces = detectedFaces;
+            const detectedFaces = faceDetections?.map((detection) => {
+                return {
+                    fileId: fileContext.enteFile.id,
+                    detection,
+                } as DetectedFace;
+            });
+            fileContext.faces = detectedFaces?.map((detectedFace) => ({
+                ...detectedFace,
+                id: getFaceId(
+                    detectedFace,
+                    fileContext.newMLFileData.imageDimentions
+                ),
+            }));
             // ?.filter((f) =>
             //     f.box.width > syncContext.config.faceDetection.minFaceSize
             // );
             console.log(
                 '[MLService] filtertedFaces: ',
-                fileContext.filtertedFaces?.length
+                fileContext.faces?.length
             );
         } else {
-            fileContext.filtertedFaces = fileContext.oldMLFileData.faces;
+            fileContext.faces = fileContext.oldMLFileData?.faces;
         }
     }
 
@@ -478,19 +480,14 @@ class MachineLearningService {
         fileContext.newMLFileData.faceCropMethod =
             syncContext.faceCropService.method;
 
-        for (const face of fileContext.filtertedFaces) {
+        for (const face of fileContext.faces) {
             const faceCrop = await syncContext.faceCropService.getFaceCrop(
                 imageBitmap,
-                face,
+                face.detection,
                 syncContext.config.faceCrop
             );
-            const { width, height } = imageBitmap;
-            const faceId = getFaceId(fileContext.enteFile.id, face, {
-                width,
-                height,
-            });
-            face.faceCrop = await getStoredFaceCrop(
-                faceId,
+            face.crop = await getStoredFaceCrop(
+                face.id,
                 faceCrop,
                 syncContext.config.faceCrop.blobOptions
             );
@@ -505,24 +502,26 @@ class MachineLearningService {
         if (
             fileContext.newDetection ||
             isDifferentOrOld(
-                fileContext.oldMLFileData?.alignmentMethod,
+                fileContext.oldMLFileData?.faceAlignmentMethod,
                 syncContext.faceAlignmentService.method
             )
         ) {
-            fileContext.newMLFileData.alignmentMethod =
+            fileContext.newMLFileData.faceAlignmentMethod =
                 syncContext.faceAlignmentService.method;
             fileContext.newAlignment = true;
-            fileContext.alignedFaces =
-                syncContext.faceAlignmentService.getAlignedFaces(
-                    fileContext.filtertedFaces
-                );
+            for (const face of fileContext.faces) {
+                face.alignment =
+                    syncContext.faceAlignmentService.getFaceAlignment(
+                        face.detection
+                    );
+            }
             console.log(
                 '[MLService] alignedFaces: ',
-                fileContext.alignedFaces?.length
+                fileContext.faces?.length
             );
             // console.log('4 TF Memory stats: ', tf.memory());
         } else {
-            fileContext.alignedFaces = fileContext.oldMLFileData.faces;
+            fileContext.faces = fileContext.oldMLFileData?.faces;
         }
     }
 
@@ -533,27 +532,27 @@ class MachineLearningService {
         if (
             fileContext.newAlignment ||
             isDifferentOrOld(
-                fileContext.oldMLFileData?.embeddingMethod,
+                fileContext.oldMLFileData?.faceEmbeddingMethod,
                 syncContext.faceEmbeddingService.method
             )
         ) {
-            fileContext.newMLFileData.embeddingMethod =
+            fileContext.newMLFileData.faceEmbeddingMethod =
                 syncContext.faceEmbeddingService.method;
             // TODO: when not storing face crops image will be needed to extract faces
             // fileContext.imageBitmap ||
             //     (await this.getImageBitmap(syncContext, fileContext));
-            fileContext.facesWithEmbeddings =
+            const embeddings =
                 await syncContext.faceEmbeddingService.getFaceEmbeddings(
                     fileContext.imageBitmap,
-                    fileContext.alignedFaces
+                    fileContext.faces
                 );
-            console.log(
-                '[MLService] facesWithEmbeddings: ',
-                fileContext.facesWithEmbeddings
-            );
+
+            fileContext.faces.forEach((f, i) => (f.embedding = embeddings[i]));
+
+            console.log('[MLService] facesWithEmbeddings: ', fileContext.faces);
             // console.log('5 TF Memory stats: ', tf.memory());
         } else {
-            fileContext.facesWithEmbeddings = fileContext.oldMLFileData?.faces;
+            fileContext.faces = fileContext.oldMLFileData?.faces;
         }
     }
 
@@ -733,12 +732,12 @@ class MachineLearningService {
 
             const personFace = findFirstIfSorted(
                 faces,
-                (a, b) => a.probability * a.size - b.probability * b.size
+                (a, b) =>
+                    a.detection.probability * a.alignment.size -
+                    b.detection.probability * b.alignment.size
             );
 
-            let faceImage = await getFaceImageBlobFromStorage(
-                personFace.faceCrop
-            );
+            let faceImage = await getFaceImageBlobFromStorage(personFace.crop);
             if (!faceImage) {
                 faceImage = await getFaceImage(personFace, syncContext.token);
             }
