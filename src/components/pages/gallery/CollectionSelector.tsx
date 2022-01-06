@@ -86,6 +86,7 @@ function CollectionSelector({
                 <PreviewCard
                     file={item.file}
                     updateUrl={() => {}}
+                    onSelect={() => {}}
                     forcedEnable
                 />
                 <Card.Text className="text-center">

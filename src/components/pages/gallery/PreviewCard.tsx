@@ -14,7 +14,7 @@ interface IProps {
     forcedEnable?: boolean;
     selectable?: boolean;
     selected?: boolean;
-    onSelect?: (checked: boolean) => void;
+    onSelect: (checked: boolean) => void;
     onHover?: () => void;
     onRangeSelect?: () => void;
     isRangeSelectActive?: boolean;
@@ -218,7 +218,7 @@ export default function PreviewCard(props: IProps) {
             if (isRangeSelectActive) {
                 onRangeSelect();
             } else {
-                onSelect?.(!selected);
+                onSelect(!selected);
             }
         } else if (file?.msrc || imgSrc) {
             onClick?.();
@@ -229,7 +229,7 @@ export default function PreviewCard(props: IProps) {
         if (isRangeSelectActive) {
             onRangeSelect?.();
         } else {
-            onSelect?.(e.target.checked);
+            onSelect(e.target.checked);
         }
     };
 
