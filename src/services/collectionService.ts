@@ -6,79 +6,26 @@ import { getActualKey, getToken } from 'utils/common/key';
 import CryptoWorker from 'utils/crypto';
 import { SetDialogMessage } from 'components/MessageDialog';
 import constants from 'utils/strings/constants';
-import { getPublicKey, User } from './userService';
+import { getPublicKey } from './userService';
 import { B64EncryptionResult } from 'utils/crypto';
 import HTTPService from './HTTPService';
-import { File } from './fileService';
+import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
-import { CustomError } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/error';
 import { sortFiles } from 'utils/file';
+import {
+    Collection,
+    CollectionAndItsLatestFile,
+    AddToCollectionRequest,
+    MoveToCollectionRequest,
+    EncryptedFileKey,
+    RemoveFromCollectionRequest,
+} from 'types/collection';
+import { COLLECTION_SORT_BY, CollectionType } from 'constants/collection';
 
 const ENDPOINT = getEndpoint();
-
-export enum CollectionType {
-    folder = 'folder',
-    favorites = 'favorites',
-    album = 'album',
-}
-
+const COLLECTION_TABLE = 'collections';
 const COLLECTION_UPDATION_TIME = 'collection-updation-time';
-const COLLECTIONS = 'collections';
-
-export interface Collection {
-    id: number;
-    owner: User;
-    key?: string;
-    name?: string;
-    encryptedName?: string;
-    nameDecryptionNonce?: string;
-    type: CollectionType;
-    attributes: collectionAttributes;
-    sharees: User[];
-    updationTime: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    isDeleted: boolean;
-    isSharedCollection?: boolean;
-}
-
-interface EncryptedFileKey {
-    id: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-}
-
-interface AddToCollectionRequest {
-    collectionID: number;
-    files: EncryptedFileKey[];
-}
-
-interface MoveToCollectionRequest {
-    fromCollectionID: number;
-    toCollectionID: number;
-    files: EncryptedFileKey[];
-}
-
-interface collectionAttributes {
-    encryptedPath?: string;
-    pathDecryptionNonce?: string;
-}
-
-export interface CollectionAndItsLatestFile {
-    collection: Collection;
-    file: File;
-}
-
-export enum COLLECTION_SORT_BY {
-    LATEST_FILE,
-    MODIFICATION_TIME,
-    NAME,
-}
-
-interface RemoveFromCollectionRequest {
-    collectionID: number;
-    fileIDs: number[];
-}
 
 const getCollectionWithSecrets = async (
     collection: Collection,
@@ -164,7 +111,7 @@ const getCollections = async (
 
 export const getLocalCollections = async (): Promise<Collection[]> => {
     const collections: Collection[] =
-        (await localForage.getItem(COLLECTIONS)) ?? [];
+        (await localForage.getItem(COLLECTION_TABLE)) ?? [];
     return collections;
 };
 
@@ -212,7 +159,7 @@ export const syncCollections = async () => {
         [],
         COLLECTION_SORT_BY.MODIFICATION_TIME
     );
-    await localForage.setItem(COLLECTIONS, collections);
+    await localForage.setItem(COLLECTION_TABLE, collections);
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
     return collections;
 };
@@ -243,9 +190,9 @@ export const getCollection = async (
 
 export const getCollectionsAndTheirLatestFile = (
     collections: Collection[],
-    files: File[]
+    files: EnteFile[]
 ): CollectionAndItsLatestFile[] => {
-    const latestFile = new Map<number, File>();
+    const latestFile = new Map<number, EnteFile>();
 
     files.forEach((file) => {
         if (!latestFile.has(file.collectionID)) {
@@ -263,7 +210,9 @@ export const getCollectionsAndTheirLatestFile = (
     return collectionsAndTheirLatestFile;
 };
 
-export const getFavItemIds = async (files: File[]): Promise<Set<number>> => {
+export const getFavItemIds = async (
+    files: EnteFile[]
+): Promise<Set<number>> => {
     const favCollection = await getFavCollection();
     if (!favCollection) return new Set();
 
@@ -356,7 +305,7 @@ const postCollection = async (
     }
 };
 
-export const addToFavorites = async (file: File) => {
+export const addToFavorites = async (file: EnteFile) => {
     try {
         let favCollection = await getFavCollection();
         if (!favCollection) {
@@ -365,7 +314,7 @@ export const addToFavorites = async (file: File) => {
                 CollectionType.favorites
             );
             const localCollections = await getLocalCollections();
-            await localForage.setItem(COLLECTIONS, [
+            await localForage.setItem(COLLECTION_TABLE, [
                 ...localCollections,
                 favCollection,
             ]);
@@ -376,7 +325,7 @@ export const addToFavorites = async (file: File) => {
     }
 };
 
-export const removeFromFavorites = async (file: File) => {
+export const removeFromFavorites = async (file: EnteFile) => {
     try {
         const favCollection = await getFavCollection();
         if (!favCollection) {
@@ -390,7 +339,7 @@ export const removeFromFavorites = async (file: File) => {
 
 export const addToCollection = async (
     collection: Collection,
-    files: File[]
+    files: EnteFile[]
 ) => {
     try {
         const token = getToken();
@@ -417,7 +366,7 @@ export const addToCollection = async (
 
 export const restoreToCollection = async (
     collection: Collection,
-    files: File[]
+    files: EnteFile[]
 ) => {
     try {
         const token = getToken();
@@ -444,7 +393,7 @@ export const restoreToCollection = async (
 export const moveToCollection = async (
     fromCollectionID: number,
     toCollection: Collection,
-    files: File[]
+    files: EnteFile[]
 ) => {
     try {
         const token = getToken();
@@ -472,7 +421,7 @@ export const moveToCollection = async (
 
 const encryptWithNewCollectionKey = async (
     newCollection: Collection,
-    files: File[]
+    files: EnteFile[]
 ): Promise<EncryptedFileKey[]> => {
     const fileKeysEncryptedWithNewCollection: EncryptedFileKey[] = [];
     const worker = await new CryptoWorker();
@@ -494,7 +443,7 @@ const encryptWithNewCollectionKey = async (
 };
 export const removeFromCollection = async (
     collection: Collection,
-    files: File[]
+    files: EnteFile[]
 ) => {
     try {
         const token = getToken();
@@ -637,7 +586,7 @@ export const getFavCollection = async () => {
 
 export const getNonEmptyCollections = (
     collections: Collection[],
-    files: File[]
+    files: EnteFile[]
 ) => {
     const nonEmptyCollectionsIds = new Set<number>();
     for (const file of files) {

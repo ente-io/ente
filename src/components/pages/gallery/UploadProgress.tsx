@@ -3,15 +3,13 @@ import ExpandMore from 'components/icons/ExpandMore';
 import React, { useState } from 'react';
 import { Button, Modal, ProgressBar } from 'react-bootstrap';
 import { FileRejection } from 'react-dropzone';
-import {
-    FileUploadResults,
-    UPLOAD_STAGES,
-} from 'services/upload/uploadManager';
+
 import styled from 'styled-components';
 import { DESKTOP_APP_DOWNLOAD_URL } from 'utils/common';
 import constants from 'utils/strings/constants';
 import { Collapse } from 'react-collapse';
 import { ButtonVariant, getVariantColor } from './LinkButton';
+import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 
 interface Props {
     fileCounter;

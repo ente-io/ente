@@ -1,26 +1,18 @@
-import { FILE_TYPE } from 'services/fileService';
+import { FILE_TYPE } from 'constants/file';
 import { logError } from 'utils/sentry';
 import { getExifData } from './exifService';
-import { FileTypeInfo } from './readFileService';
-import { MetadataObject } from './uploadService';
+import {
+    MetadataObject,
+    ParsedMetaDataJSON,
+    Location,
+    FileTypeInfo,
+} from 'types/upload';
+import { NULL_LOCATION } from 'constants/upload';
 
-export interface Location {
-    latitude: number;
-    longitude: number;
-}
-
-export interface ParsedMetaDataJSON {
-    creationTime: number;
-    modificationTime: number;
-    latitude: number;
-    longitude: number;
-}
 interface ParsedMetaDataJSONWithTitle {
     title: string;
     parsedMetaDataJSON: ParsedMetaDataJSON;
 }
-
-export const NULL_LOCATION: Location = { latitude: null, longitude: null };
 
 const NULL_PARSED_METADATA_JSON: ParsedMetaDataJSON = {
     creationTime: null,
@@ -29,7 +21,7 @@ const NULL_PARSED_METADATA_JSON: ParsedMetaDataJSON = {
 };
 
 export async function extractMetadata(
-    receivedFile: globalThis.File,
+    receivedFile: File,
     fileTypeInfo: FileTypeInfo
 ) {
     let exifData = null;
@@ -52,7 +44,7 @@ export async function extractMetadata(
 export const getMetadataMapKey = (collectionID: number, title: string) =>
     `${collectionID}_${title}`;
 
-export async function parseMetadataJSON(receivedFile: globalThis.File) {
+export async function parseMetadataJSON(receivedFile: File) {
     try {
         const metadataJSON: object = await new Promise((resolve, reject) => {
             const reader = new FileReader();

@@ -1,20 +1,33 @@
 import React from 'react';
+
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import {
     MIN_EDITED_CREATION_TIME,
     MAX_EDITED_CREATION_TIME,
     ALL_TIME,
-} from 'services/fileService';
-
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+} from 'constants/file';
 
 const isSameDay = (first, second) =>
     first.getFullYear() === second.getFullYear() &&
     first.getMonth() === second.getMonth() &&
     first.getDate() === second.getDate();
 
-const EnteDateTimePicker = ({ isInEditMode, pickedTime, handleChange }) => (
+interface Props {
+    loading?: boolean;
+    isInEditMode: boolean;
+    pickedTime: Date;
+    handleChange: (date: Date) => void;
+}
+
+const EnteDateTimePicker = ({
+    loading,
+    isInEditMode,
+    pickedTime,
+    handleChange,
+}: Props) => (
     <DatePicker
+        disabled={loading}
         open={isInEditMode}
         selected={pickedTime}
         onChange={handleChange}

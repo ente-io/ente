@@ -11,7 +11,7 @@ export const getFileUrl = (id: number) => {
             'https://api.ente.io'
         );
     }
-    return `https://files.ente.workers.dev/?fileID=${id}`;
+    return `https://files.ente.io/?fileID=${id}`;
 };
 
 export const getThumbnailUrl = (id: number) => {
@@ -21,11 +21,11 @@ export const getThumbnailUrl = (id: number) => {
             'https://api.ente.io'
         );
     }
-    return `https://thumbnails.ente.workers.dev/?fileID=${id}`;
+    return `https://thumbnails.ente.io/?fileID=${id}`;
 };
 
 export const getSentryTunnelUrl = () => {
-    return `https://sentry-reporter.ente.workers.dev`;
+    return `https://sentry-reporter.ente.io`;
 };
 
 export const getPaymentsUrl = () => {

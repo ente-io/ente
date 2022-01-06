@@ -11,7 +11,7 @@ import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
 import { recoverTwoFactor, removeTwoFactor } from 'services/userService';
 import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
-import { PAGES } from 'types';
+import { PAGES } from 'constants/pages';
 const bip39 = require('bip39');
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
