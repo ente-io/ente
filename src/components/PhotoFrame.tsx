@@ -315,9 +315,12 @@ const PhotoFrame = ({
 
     const handleRangeSelect = (index: number) => () => {
         if (rangeStart !== index) {
-            const checked = !!selected[filteredData[index].id];
             const direction =
                 (index - rangeStart) / Math.abs(index - rangeStart);
+            let checked = true;
+            for (let i = rangeStart; i !== index; i += direction) {
+                checked = checked && !!selected[filteredData[i].id];
+            }
             for (let i = rangeStart; i !== index; i += direction) {
                 handleSelect(filteredData[i].id)(!checked);
             }
