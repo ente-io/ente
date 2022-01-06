@@ -46,6 +46,14 @@ import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
 
+const SmallLoadingSpinner = () => (
+    <EnteSpinner
+        style={{
+            width: '20px',
+            height: '20px',
+        }}
+    />
+);
 interface Iprops {
     isOpen: boolean;
     items: any[];
@@ -161,12 +169,7 @@ function RenderCreationTime({
                         <>
                             <IconButton onClick={saveEdits}>
                                 {loading ? (
-                                    <EnteSpinner
-                                        style={{
-                                            width: '20px',
-                                            height: '20px',
-                                        }}
-                                    />
+                                    <SmallLoadingSpinner />
                                 ) : (
                                     <TickIcon />
                                 )}
@@ -253,12 +256,7 @@ const FileNameEditForm = ({ filename, saveEdits, discardEdits, extension }) => {
                             <Value width={'16.67%'}>
                                 <IconButton type="submit" disabled={loading}>
                                     {loading ? (
-                                        <EnteSpinner
-                                            style={{
-                                                width: '20px',
-                                                height: '20px',
-                                            }}
-                                        />
+                                        <SmallLoadingSpinner />
                                     ) : (
                                         <TickIcon />
                                     )}
