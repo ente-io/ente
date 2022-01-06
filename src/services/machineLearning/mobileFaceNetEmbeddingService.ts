@@ -1,29 +1,31 @@
-import { gather } from '@tensorflow/tfjs';
 import * as tf from '@tensorflow/tfjs-core';
 import * as tflite from '@tensorflow/tfjs-tflite';
+import PQueue from 'p-queue';
 import {
-    AlignedFace,
     FaceEmbedding,
     FaceEmbeddingMethod,
     FaceEmbeddingService,
+    MOBILEFACENET_FACE_SIZE,
     Versioned,
 } from 'types/machineLearning';
 import { imageBitmapsToTensor4D } from 'utils/machineLearning';
-import { ibExtractFaceImages } from 'utils/machineLearning/faceAlign';
-import { ibExtractFaceImagesFromCrops } from 'utils/machineLearning/faceCrop';
 
 class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
-    private mobileFaceNetModel: Promise<tflite.TFLiteModel>;
-    private faceSize: number;
     public method: Versioned<FaceEmbeddingMethod>;
+    public faceSize: number;
 
-    public constructor(faceSize: number = 112) {
+    private mobileFaceNetModel: Promise<tflite.TFLiteModel>;
+    private serialQueue: PQueue;
+
+    public constructor(faceSize: number = MOBILEFACENET_FACE_SIZE) {
         tflite.setWasmPath('/js/tflite/');
         this.method = {
             value: 'MobileFaceNet',
             version: 2,
         };
         this.faceSize = faceSize;
+        // TODO: set timeout
+        this.serialQueue = new PQueue({ concurrency: 1 });
     }
 
     private async init() {
@@ -46,68 +48,53 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
         return this.mobileFaceNetModel;
     }
 
-    public getEmbedding(
-        face: tf.Tensor4D,
+    public getFaceEmbeddingTF(
+        faceTensor: tf.Tensor4D,
         mobileFaceNetModel: tflite.TFLiteModel
-    ) {
+    ): tf.Tensor2D {
         return tf.tidy(() => {
-            const normalizedFace = tf.sub(tf.div(face, 127.5), 1.0);
-            return mobileFaceNetModel.predict(normalizedFace);
+            const normalizedFace = tf.sub(tf.div(faceTensor, 127.5), 1.0);
+            return mobileFaceNetModel.predict(normalizedFace) as tf.Tensor2D;
         });
     }
 
-    public async getEmbeddingsBatch(
-        faceImagesTensor
-    ): Promise<Array<FaceEmbedding>> {
+    // Do not use this, use getFaceEmbedding which calls this through serialqueue
+    private async getFaceEmbeddingNoQueue(
+        faceImage: ImageBitmap
+    ): Promise<FaceEmbedding> {
         const mobileFaceNetModel = await this.getMobileFaceNetModel();
 
-        const embeddingsTensor = tf.tidy(() => {
-            const embeddings = [];
-            for (let i = 0; i < faceImagesTensor.shape[0]; i++) {
-                const face = gather(faceImagesTensor, i).expandDims();
-                const embedding = this.getEmbedding(face, mobileFaceNetModel);
-                embeddings[i] = gather(embedding as any, 0);
-            }
-            return tf.stack(embeddings);
+        const embeddingTensor = tf.tidy(() => {
+            const faceTensor = imageBitmapsToTensor4D([faceImage]);
+            const embeddingsTensor = this.getFaceEmbeddingTF(
+                faceTensor,
+                mobileFaceNetModel
+            );
+            return tf.squeeze(embeddingsTensor, [0]);
         });
 
-        // TODO: return Float32Array instead of number[]
-        const faceEmbeddings =
-            (await embeddingsTensor.array()) as Array<FaceEmbedding>;
-        tf.dispose(embeddingsTensor);
-        return faceEmbeddings;
+        const embedding = new Float32Array(await embeddingTensor.data());
+        embeddingTensor.dispose();
+
+        return embedding;
+    }
+
+    // TODO: TFLiteModel seems to not work concurrenly,
+    // remove serialqueue if that is not the case
+    private async getFaceEmbedding(
+        faceImage: ImageBitmap
+    ): Promise<FaceEmbedding> {
+        return this.serialQueue.add(() =>
+            this.getFaceEmbeddingNoQueue(faceImage)
+        );
     }
 
     public async getFaceEmbeddings(
-        image: ImageBitmap,
-        faces: Array<AlignedFace>
-    ) {
-        if (!faces || faces.length < 1) {
-            return [];
-        }
-
-        let faceImages: Array<ImageBitmap>;
-        if (faces.length === faces.filter((f) => f.crop).length) {
-            faceImages = await ibExtractFaceImagesFromCrops(
-                faces,
-                this.faceSize
-            );
-        } else {
-            const faceAlignments = faces.map((f) => f.alignment);
-            faceImages = await ibExtractFaceImages(
-                image,
-                faceAlignments,
-                this.faceSize
-            );
-        }
-
-        const faceImagesTensor = imageBitmapsToTensor4D(faceImages);
-        faceImages.forEach((f) => f.close());
-        const embeddings = await this.getEmbeddingsBatch(faceImagesTensor);
-        tf.dispose(faceImagesTensor);
-        // console.log('embeddings: ', embeddings[0]);
-
-        return embeddings;
+        faceImages: Array<ImageBitmap>
+    ): Promise<Array<FaceEmbedding>> {
+        return Promise.all(
+            faceImages.map((faceImage) => this.getFaceEmbedding(faceImage))
+        );
     }
 
     public async dispose() {

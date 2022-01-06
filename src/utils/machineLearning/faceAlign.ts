@@ -114,7 +114,7 @@ export function extractFaceImage(
     });
 }
 
-export function extractFaceImages(
+export function tfExtractFaceImages(
     image: tf.Tensor3D | tf.Tensor4D,
     alignments: Array<FaceAlignment>,
     faceSize: number

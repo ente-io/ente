@@ -21,8 +21,15 @@ import { imageBitmapToBlob } from 'utils/image';
 import { cached } from 'utils/storage/cache';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
-import { getArcfaceAlignment, ibExtractFaceImage } from './faceAlign';
-import { getFaceImageBlobFromStorage } from './faceCrop';
+import {
+    getArcfaceAlignment,
+    ibExtractFaceImage,
+    ibExtractFaceImages,
+} from './faceAlign';
+import {
+    getFaceImageBlobFromStorage,
+    ibExtractFaceImagesFromCrops,
+} from './faceCrop';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -211,6 +218,23 @@ export async function getFaceImage(
     imageBitmap.close();
 
     return faceImage;
+}
+
+export async function extractFaceImages(
+    faces: Array<AlignedFace>,
+    faceSize: number,
+    image?: ImageBitmap
+) {
+    if (faces.length === faces.filter((f) => f.crop).length) {
+        return ibExtractFaceImagesFromCrops(faces, faceSize);
+    } else if (image) {
+        const faceAlignments = faces.map((f) => f.alignment);
+        return ibExtractFaceImages(image, faceAlignments, faceSize);
+    } else {
+        throw Error(
+            'Either face crops or image is required to extract face images'
+        );
+    }
 }
 
 export function leftFillNum(num: number, length: number, padding: number) {

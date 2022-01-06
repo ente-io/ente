@@ -23,6 +23,7 @@ import { toTSNE } from 'utils/machineLearning/visualization';
 //     mlFilesStore
 // } from 'utils/storage/mlStorage';
 import {
+    extractFaceImages,
     findFirstIfSorted,
     getAllFacesFromMap,
     getFaceId,
@@ -538,15 +539,19 @@ class MachineLearningService {
         ) {
             fileContext.newMLFileData.faceEmbeddingMethod =
                 syncContext.faceEmbeddingService.method;
-            // TODO: when not storing face crops image will be needed to extract faces
+            // TODO: when not storing face crops, image will be needed to extract faces
             // fileContext.imageBitmap ||
             //     (await this.getImageBitmap(syncContext, fileContext));
+            const faceImages = await extractFaceImages(
+                fileContext.faces,
+                syncContext.faceEmbeddingService.faceSize
+            );
+
             const embeddings =
                 await syncContext.faceEmbeddingService.getFaceEmbeddings(
-                    fileContext.imageBitmap,
-                    fileContext.faces
+                    faceImages
                 );
-
+            faceImages.forEach((faceImage) => faceImage.close());
             fileContext.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
             console.log('[MLService] facesWithEmbeddings: ', fileContext.faces);
@@ -768,7 +773,7 @@ class MachineLearningService {
 
         const input = faces
             .slice(0, syncContext.config.tsne.samples)
-            .map((f) => f.embedding);
+            .map((f) => Array.from(f.embedding));
         syncContext.tsne = toTSNE(input, syncContext.config.tsne);
         console.log('tsne: ', syncContext.tsne);
     }

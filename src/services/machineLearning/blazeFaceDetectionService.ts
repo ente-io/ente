@@ -162,6 +162,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
         const resized = resizeToSquare(imageBitmap, BLAZEFACE_INPUT_SIZE);
         const tfImage = tf.browser.fromPixels(resized.image);
         const blazeFaceModel = await this.getBlazefaceModel();
+        // TODO: check if this works concurrently, else use serialqueue
         const faces = await blazeFaceModel.estimateFaces(tfImage);
         tf.dispose(tfImage);
 

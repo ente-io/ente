@@ -158,7 +158,7 @@ export interface AlignedFace extends CroppedFace {
     alignment?: FaceAlignment;
 }
 
-export declare type FaceEmbedding = Array<number>;
+export declare type FaceEmbedding = Float32Array;
 
 export interface FaceWithEmbedding extends AlignedFace {
     embedding?: FaceEmbedding;
@@ -299,6 +299,7 @@ export const BLAZEFACE_IOU_THRESHOLD = 0.3;
 export const BLAZEFACE_SCORE_THRESHOLD = 0.7;
 export const BLAZEFACE_PASS1_SCORE_THRESHOLD = 0.4;
 export const BLAZEFACE_FACE_SIZE = 112;
+export const MOBILEFACENET_FACE_SIZE = 112;
 
 export interface FaceDetectionService {
     method: Versioned<FaceDetectionMethod>;
@@ -324,10 +325,10 @@ export interface FaceAlignmentService {
 
 export interface FaceEmbeddingService {
     method: Versioned<FaceEmbeddingMethod>;
+    faceSize: number;
     // init(): Promise<void>;
     getFaceEmbeddings(
-        image: ImageBitmap,
-        faces: Array<AlignedFace>
+        faceImages: Array<ImageBitmap>
     ): Promise<Array<FaceEmbedding>>;
     dispose(): Promise<void>;
 }
