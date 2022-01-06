@@ -289,8 +289,12 @@ const PhotoFrame = ({
         if (selected.collectionID !== activeCollection) {
             setSelected({ count: 0, collectionID: 0 });
         }
-        if (checked && typeof index !== 'undefined') {
-            setRangeStart(index);
+        if (typeof index !== 'undefined') {
+            if (checked) {
+                setRangeStart(index);
+            } else {
+                setRangeStart(undefined);
+            }
         }
 
         setSelected((selected) => ({
@@ -311,12 +315,13 @@ const PhotoFrame = ({
 
     const handleRangeSelect = (index: number) => () => {
         if (rangeStart !== index) {
+            const checked = !!selected[filteredData[index].id];
             const direction =
                 (index - rangeStart) / Math.abs(index - rangeStart);
-            for (let i = rangeStart + direction; i !== index; i += direction) {
-                handleSelect(filteredData[i].id)(true);
+            for (let i = rangeStart; i !== index; i += direction) {
+                handleSelect(filteredData[i].id)(!checked);
             }
-            handleSelect(filteredData[index].id, index)(true);
+            handleSelect(filteredData[index].id, index)(!checked);
         }
     };
     const getThumbnail = (file: File[], index: number) => (
