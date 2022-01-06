@@ -46,6 +46,14 @@ import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
 
+const SmallLoadingSpinner = () => (
+    <EnteSpinner
+        style={{
+            width: '20px',
+            height: '20px',
+        }}
+    />
+);
 interface Iprops {
     isOpen: boolean;
     items: any[];
@@ -90,6 +98,7 @@ function RenderCreationTime({
     file: File;
     scheduleUpdate: () => void;
 }) {
+    const [loading, setLoading] = useState(false);
     const originalCreationTime = new Date(file?.metadata.creationTime / 1000);
     const [isInEditMode, setIsInEditMode] = useState(false);
 
@@ -100,6 +109,7 @@ function RenderCreationTime({
 
     const saveEdits = async () => {
         try {
+            setLoading(true);
             if (isInEditMode && file) {
                 const unixTimeInMicroSec = pickedTime.getTime() * 1000;
                 if (unixTimeInMicroSec === file?.metadata.creationTime) {
@@ -118,14 +128,16 @@ function RenderCreationTime({
             }
         } catch (e) {
             logError(e, 'failed to update creationTime');
+        } finally {
+            closeEditMode();
+            setLoading(false);
         }
-        closeEditMode();
     };
     const discardEdits = () => {
         setPickedTime(originalCreationTime);
         closeEditMode();
     };
-    const handleChange = (newDate) => {
+    const handleChange = (newDate: Date) => {
         if (newDate instanceof Date) {
             setPickedTime(newDate);
         }
@@ -137,6 +149,7 @@ function RenderCreationTime({
                 <Value width={isInEditMode ? '50%' : '60%'}>
                     {isInEditMode ? (
                         <EnteDateTimePicker
+                            loading={loading}
                             isInEditMode={isInEditMode}
                             pickedTime={pickedTime}
                             handleChange={handleChange}
@@ -155,7 +168,11 @@ function RenderCreationTime({
                     ) : (
                         <>
                             <IconButton onClick={saveEdits}>
-                                <TickIcon />
+                                {loading ? (
+                                    <SmallLoadingSpinner />
+                                ) : (
+                                    <TickIcon />
+                                )}
                             </IconButton>
                             <IconButton onClick={discardEdits}>
                                 <CloseIcon />
@@ -239,12 +256,7 @@ const FileNameEditForm = ({ filename, saveEdits, discardEdits, extension }) => {
                             <Value width={'16.67%'}>
                                 <IconButton type="submit" disabled={loading}>
                                     {loading ? (
-                                        <EnteSpinner
-                                            style={{
-                                                width: '20px',
-                                                height: '20px',
-                                            }}
-                                        />
+                                        <SmallLoadingSpinner />
                                     ) : (
                                         <TickIcon />
                                     )}
