@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import arcfaceAlignmentService from 'services/machineLearning/arcfaceAlignmentService';
 import arcfaceCropService from 'services/machineLearning/arcfaceCropService';
-import tfjsFaceDetectionService from 'services/machineLearning/tfjsFaceDetectionService';
+import blazeFaceDetectionService from 'services/machineLearning/blazeFaceDetectionService';
 import { AlignedFace, FaceCrop } from 'types/machineLearning';
 import { getMLSyncConfig } from 'utils/machineLearning';
 import {
@@ -69,7 +69,7 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
         const loadFile = async () => {
             // TODO: go through worker for these apis, to not include ml code in main bundle
             const imageBitmap = await createImageBitmap(props.file);
-            const faceDetections = await tfjsFaceDetectionService.detectFaces(
+            const faceDetections = await blazeFaceDetectionService.detectFaces(
                 imageBitmap
             );
             console.log('detectedFaces: ', faceDetections.length);

@@ -22,8 +22,8 @@ import { logQueueStats } from 'utils/machineLearning';
 import arcfaceAlignmentService from './arcfaceAlignmentService';
 import arcfaceCropService from './arcfaceCropService';
 import hdbscanClusteringService from './hdbscanClusteringService';
-import blazeFaceDetectionService from './tfjsFaceDetectionService';
-import mobileFaceNetEmbeddingService from './tfjsFaceEmbeddingService';
+import blazeFaceDetectionService from './blazeFaceDetectionService';
+import mobileFaceNetEmbeddingService from './mobileFaceNetEmbeddingService';
 
 export class MLFactory {
     public static getFaceDetectionService(
