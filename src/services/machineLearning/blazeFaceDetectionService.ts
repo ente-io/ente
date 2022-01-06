@@ -26,7 +26,7 @@ import {
 } from 'utils/machineLearning/transform';
 import { enlargeBox, newBox, normFaceBox } from 'utils/machineLearning';
 
-class TFJSFaceDetectionService implements FaceDetectionService {
+class BlazeFaceDetectionService implements FaceDetectionService {
     private blazeFaceModel: Promise<BlazeFaceModel>;
     private blazeFaceBackModel: GraphModel;
     public method: Versioned<FaceDetectionMethod>;
@@ -236,4 +236,4 @@ class TFJSFaceDetectionService implements FaceDetectionService {
     }
 }
 
-export default new TFJSFaceDetectionService();
+export default new BlazeFaceDetectionService();

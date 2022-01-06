@@ -12,7 +12,7 @@ import { imageBitmapsToTensor4D } from 'utils/machineLearning';
 import { ibExtractFaceImages } from 'utils/machineLearning/faceAlign';
 import { ibExtractFaceImagesFromCrops } from 'utils/machineLearning/faceCrop';
 
-class TFJSFaceEmbeddingService implements FaceEmbeddingService {
+class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
     private mobileFaceNetModel: Promise<tflite.TFLiteModel>;
     private faceSize: number;
     public method: Versioned<FaceEmbeddingMethod>;
@@ -115,4 +115,4 @@ class TFJSFaceEmbeddingService implements FaceEmbeddingService {
     }
 }
 
-export default new TFJSFaceEmbeddingService();
+export default new MobileFaceNetEmbeddingService();
