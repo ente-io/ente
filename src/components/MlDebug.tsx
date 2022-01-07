@@ -7,7 +7,7 @@ import { PAGES } from 'types';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
 import TFJSImage from './TFJSImage';
-import { MLDebugResult } from 'types/machineLearning';
+import { FACE_CROPS_CACHE_NAME, MLDebugResult } from 'types/machineLearning';
 import Tree from 'react-d3-tree';
 import MLFileDebugView from './MLFileDebugView';
 import mlWorkManager from 'services/machineLearning/mlWorkManager';
@@ -70,6 +70,22 @@ const renderForeignObjectNode = ({
         </foreignObject>
     </g>
 );
+
+const readAsDataURL = (blob) =>
+    new Promise<string>((resolve, reject) => {
+        const fileReader = new FileReader();
+        fileReader.onload = () => resolve(fileReader.result as string);
+        fileReader.onerror = () => reject(fileReader.error);
+        fileReader.readAsDataURL(blob);
+    });
+
+const readAsText = (blob) =>
+    new Promise<string>((resolve, reject) => {
+        const fileReader = new FileReader();
+        fileReader.onload = () => resolve(fileReader.result as string);
+        fileReader.onerror = () => reject(fileReader.error);
+        fileReader.readAsText(blob);
+    });
 
 export default function MLDebug() {
     const [token, setToken] = useState<string>();
@@ -167,6 +183,76 @@ export default function MLDebug() {
         await mlWorkManager.stopSyncJob();
     };
 
+    // for debug purpose, not a memory efficient implementation
+    const onExportMLData = async () => {
+        const mlDbData = await mlIDbStorage.getAllMLData();
+        const faceClusteringResults =
+            mlDbData?.library?.data?.faceClusteringResults;
+        faceClusteringResults && (faceClusteringResults.debugInfo = undefined);
+        console.log(
+            'Exporting ML DB data: ',
+            Object.keys(mlDbData),
+            Object.keys(mlDbData)?.map((k) => Object.keys(mlDbData[k])?.length)
+        );
+
+        const faceCropCache = await caches.open(FACE_CROPS_CACHE_NAME);
+        const keys = await faceCropCache.keys();
+        const faceCrops = {};
+        console.log('Exporting faceCrops cache entries: ', keys.length);
+        for (let i = 0; i < keys.length; i++) {
+            const response = await faceCropCache.match(keys[i]);
+            const blob = await response.blob();
+            const data = await readAsDataURL(blob);
+            faceCrops[keys[i].url] = data;
+        }
+        const mlCacheData = {};
+        mlCacheData[FACE_CROPS_CACHE_NAME] = faceCrops;
+
+        const mlData = { mlDbData, mlCacheData };
+
+        const mlDataJson = JSON.stringify(mlData);
+        const mlDataJsonBlob = new Blob([mlDataJson], {
+            type: 'application/json',
+        });
+        const a = document.createElement('a');
+        a.download = `ente-mldata-${Date.now()}.json`;
+        a.href = window.URL.createObjectURL(mlDataJsonBlob);
+        const clickEvt = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: true,
+        });
+        a.dispatchEvent(clickEvt);
+        a.remove();
+        console.log('ML Data Exported');
+    };
+
+    const onImportMLData = async (event: ChangeEvent<HTMLInputElement>) => {
+        const mlDataJson = await readAsText(event.target.files[0]);
+        const mlData = JSON.parse(mlDataJson);
+        const { mlDbData, mlCacheData } = mlData;
+
+        const faceCrops = mlCacheData[FACE_CROPS_CACHE_NAME];
+        console.log(
+            'Importing faceCrops cache entries: ',
+            Object.keys(faceCrops).length
+        );
+        const faceCropCache = await caches.open(FACE_CROPS_CACHE_NAME);
+        for (const url of Object.keys(faceCrops)) {
+            const data = await fetch(faceCrops[url]);
+            faceCropCache.put(url, data);
+        }
+
+        console.log(
+            'Importing ML DB data: ',
+            Object.keys(mlDbData),
+            Object.keys(mlDbData)?.map((k) => Object.keys(mlDbData[k])?.length)
+        );
+        await mlIDbStorage.putAllMLData(mlDbData);
+
+        console.log('ML Data Imported');
+    };
+
     const onDebugFile = async (event: ChangeEvent<HTMLInputElement>) => {
         setDebugFile(event.target.files[0]);
     };
@@ -238,6 +324,10 @@ export default function MLDebug() {
             </button>
             <button onClick={onStartMLSync}>Start ML Sync</button>
             <button onClick={onStopMLSync}>Stop ML Sync</button>
+
+            <p></p>
+            <button onClick={onExportMLData}>Export ML Data</button>
+            <input id="importMLData" type="file" onChange={onImportMLData} />
 
             <p></p>
             <button onClick={onLoadNoiseFaces}>Load Noise Faces</button>

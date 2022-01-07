@@ -76,6 +76,7 @@ class MLWorkManager {
     private async getMLWorker() {
         if (!this.mlWorker) {
             const MLWorker = getDedicatedMLWorker();
+            // TODO: handle worker getting killed
             this.mlWorker = new MLWorker.comlink();
         }
 
@@ -100,6 +101,7 @@ class MLWorkManager {
             await this.mlSyncJob.resetInterval();
             const token = await getToken();
             const mlWorker = await this.getMLWorker();
+            // TODO: handle case where job is currently running
             return this.mlSyncJob.start(token, mlWorker);
         } catch (e) {
             logError(e, 'Failed to start MLSync Job');

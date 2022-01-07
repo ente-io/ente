@@ -9,6 +9,7 @@ import {
 import { Face, MlFileData, MLLibraryData, Person } from 'types/machineLearning';
 import { runningInBrowser } from 'utils/common';
 
+const MLDATA_DB_NAME = 'mldata';
 interface MLDb extends DBSchema {
     files: {
         key: number;
@@ -37,7 +38,7 @@ class MLIDbStorage {
             return;
         }
 
-        this.db = openDB<MLDb>('mldata', 1, {
+        this.db = openDB<MLDb>(MLDATA_DB_NAME, 1, {
             upgrade(db) {
                 const filesStore = db.createObjectStore('files', {
                     keyPath: 'fileId',
@@ -61,7 +62,7 @@ class MLIDbStorage {
     public async clearMLDB() {
         const db = await this.db;
         db.close();
-        return deleteDB('mldata');
+        return deleteDB(MLDATA_DB_NAME);
     }
 
     public async getAllFileIds() {
@@ -239,6 +240,66 @@ class MLIDbStorage {
     public async putLibraryData(data: MLLibraryData) {
         const db = await this.db;
         return db.put('library', data, 'data');
+    }
+
+    // for debug purpose
+    public async getAllMLData() {
+        const db = await this.db;
+        const tx = db.transaction(db.objectStoreNames, 'readonly');
+        const allMLData: any = {};
+        for (const store of tx.objectStoreNames) {
+            const keys = await tx.objectStore(store).getAllKeys();
+            const data = await tx.objectStore(store).getAll();
+
+            allMLData[store] = {};
+            for (let i = 0; i < keys.length; i++) {
+                allMLData[store][keys[i]] = data[i];
+            }
+        }
+        await tx.done;
+
+        const files = allMLData['files'];
+        for (const fileId of Object.keys(files)) {
+            const fileData = files[fileId];
+            fileData.faces?.forEach(
+                (f) => (f.embedding = Array.from(f.embedding))
+            );
+        }
+
+        return allMLData;
+    }
+
+    // for debug purpose, this will overwrite all data
+    public async putAllMLData(allMLData: Map<string, any>) {
+        const db = await this.db;
+        const tx = db.transaction(db.objectStoreNames, 'readwrite');
+        for (const store of tx.objectStoreNames) {
+            const records = allMLData[store];
+            if (!records) {
+                continue;
+            }
+            const txStore = tx.objectStore(store);
+
+            if (store === 'files') {
+                const files = records;
+                for (const fileId of Object.keys(files)) {
+                    const fileData = files[fileId];
+                    fileData.faces?.forEach(
+                        (f) => (f.embedding = Float32Array.from(f.embedding))
+                    );
+                }
+            }
+
+            await txStore.clear();
+            for (const key of Object.keys(records)) {
+                if (txStore.keyPath) {
+                    txStore.put(records[key]);
+                } else {
+                    txStore.put(records[key], key);
+                }
+            }
+        }
+        await tx.done;
     }
 }
 
