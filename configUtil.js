@@ -50,4 +50,16 @@ module.exports = {
             cwd: __dirname,
             encoding: 'utf8',
         }),
+
+    getSentryDSN: () =>
+        process.env.NEXT_PUBLIC_SENTRY_DSN ??
+        'https://860186db60c54c7fbacfe255124958e8@errors.ente.io/4',
+
+    getSentryENV: () => process.env.NEXT_PUBLIC_SENTRY_ENV ?? 'development',
+
+    getSentryRelease: () => process.env.SENTRY_RELEASE,
+
+    isSentryEnabled: () =>
+        process.env.SENTRY_ENABLED ??
+        (process.env.NEXT_PUBLIC_SENTRY_ENV ?? 'development') !== 'development',
 };
