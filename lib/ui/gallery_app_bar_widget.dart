@@ -218,8 +218,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (collection == null) {
         if (widget.type == GalleryAppBarType.local_folder) {
           collection =
-              CollectionsService.instance.getCollectionForPath(widget.path);
-          collection ??=
               await CollectionsService.instance.getOrCreateForPath(widget.path);
         } else {
           throw Exception(
