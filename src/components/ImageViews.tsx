@@ -46,7 +46,15 @@ export function ImageBlobView(props: { blob: Blob }) {
     const [imgUrl, setImgUrl] = useState<string>();
 
     useEffect(() => {
-        setImgUrl(props.blob && URL.createObjectURL(props.blob));
+        try {
+            setImgUrl(props.blob && URL.createObjectURL(props.blob));
+        } catch (e) {
+            console.error(
+                'ImageBlobView: can not create object url for blob: ',
+                props.blob,
+                e
+            );
+        }
     }, [props.blob]);
 
     return (
