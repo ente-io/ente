@@ -203,7 +203,8 @@ export default function MLDebug() {
             const response = await faceCropCache.match(keys[i]);
             const blob = await response.blob();
             const data = await readAsDataURL(blob);
-            faceCrops[keys[i].url] = data;
+            const path = new URL(keys[i].url).pathname;
+            faceCrops[path] = data;
         }
         const mlCacheData = {};
         mlCacheData[FACE_CROPS_CACHE_NAME] = faceCrops;
