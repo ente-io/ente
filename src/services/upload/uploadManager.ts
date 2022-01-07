@@ -92,9 +92,10 @@ class UploadManager {
     private async seedMetadataMap(metadataFiles: FileWithCollection[]) {
         try {
             UIService.reset(metadataFiles.length);
-
+            const reader = new FileReader();
             for (const fileWithCollection of metadataFiles) {
                 const parsedMetaDataJSONWithTitle = await parseMetadataJSON(
+                    reader,
                     fileWithCollection.file
                 );
                 if (parsedMetaDataJSONWithTitle) {
@@ -137,14 +138,15 @@ class UploadManager {
             this.cryptoWorkers[i] = cryptoWorker;
             uploadProcesses.push(
                 this.uploadNextFileInQueue(
-                    await new this.cryptoWorkers[i].comlink()
+                    await new this.cryptoWorkers[i].comlink(),
+                    new FileReader()
                 )
             );
         }
         await Promise.all(uploadProcesses);
     }
 
-    private async uploadNextFileInQueue(worker: any) {
+    private async uploadNextFileInQueue(worker: any, reader: FileReader) {
         while (this.filesToBeUploaded.length > 0) {
             const fileWithCollection = this.filesToBeUploaded.pop();
             const existingFilesInCollection =
@@ -157,6 +159,7 @@ class UploadManager {
             fileWithCollection.collection = collection;
             const { fileUploadResult, file } = await uploader(
                 worker,
+                reader,
                 existingFilesInCollection,
                 fileWithCollection
             );

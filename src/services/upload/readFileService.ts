@@ -15,11 +15,11 @@ const TYPE_IMAGE = 'image';
 const EDITED_FILE_SUFFIX = '-edited';
 const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
 
-export async function getFileData(worker, file: File) {
+export async function getFileData(worker, reader: FileReader, file: File) {
     if (file.size > MULTIPART_PART_SIZE) {
         return getFileStream(worker, file, FILE_READER_CHUNK_SIZE);
     } else {
-        return await worker.getUint8ArrayView(file);
+        return await getUint8ArrayView(reader, file);
     }
 }
 
@@ -81,9 +81,9 @@ async function getMimeType(worker, file: File) {
     return getMimeTypeFromBlob(worker, fileChunkBlob);
 }
 
-export async function getMimeTypeFromBlob(worker, fileBlob: Blob) {
+export async function getMimeTypeFromBlob(reader: FileReader, fileBlob: Blob) {
     try {
-        const initialFiledata = await worker.getUint8ArrayView(fileBlob);
+        const initialFiledata = await getUint8ArrayView(reader, fileBlob);
         const result = await FileType.fromBuffer(initialFiledata);
         return result.mime;
     } catch (e) {

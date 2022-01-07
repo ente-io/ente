@@ -60,6 +60,7 @@ export async function downloadFile(file: EnteFile) {
         let fileBlob = await (await fetch(fileURL)).blob();
 
         fileBlob = await updateFileCreationDateInEXIF(
+            new FileReader(),
             fileBlob,
             new Date(file.pubMagicMetadata.data.editedTime / 1000)
         );

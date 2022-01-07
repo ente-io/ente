@@ -30,6 +30,7 @@ interface UploadResponse {
 }
 export default async function uploader(
     worker: any,
+    reader: FileReader,
     existingFilesInCollection: EnteFile[],
     fileWithCollection: FileWithCollection
 ): Promise<UploadResponse> {
@@ -70,7 +71,12 @@ export default async function uploader(
             return { fileUploadResult: FileUploadResults.SKIPPED };
         }
 
-        file = await UploadService.readFile(worker, rawFile, fileTypeInfo);
+        file = await UploadService.readFile(
+            worker,
+            reader,
+            rawFile,
+            fileTypeInfo
+        );
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
         }

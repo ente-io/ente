@@ -6,6 +6,7 @@ import FFmpegService from 'services/ffmpegService';
 import { convertToHumanReadable } from 'utils/billing';
 import { isFileHEIC } from 'utils/file';
 import { FileTypeInfo } from 'types/upload';
+import { getUint8ArrayView } from './readFileService';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
@@ -22,6 +23,7 @@ interface Dimension {
 
 export async function generateThumbnail(
     worker,
+    reader: FileReader,
     file: File,
     fileTypeInfo: FileTypeInfo
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
@@ -50,7 +52,7 @@ export async function generateThumbnail(
                 }
             }
             const thumbnailBlob = await thumbnailCanvasToBlob(canvas);
-            thumbnail = await worker.getUint8ArrayView(thumbnailBlob);
+            thumbnail = await getUint8ArrayView(reader, thumbnailBlob);
             if (thumbnail.length === 0) {
                 throw Error('EMPTY THUMBNAIL');
             }
