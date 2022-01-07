@@ -39,7 +39,7 @@ import {
 } from 'utils/file';
 
 import { updateFileCreationDateInEXIF } from './upload/exifService';
-import { MetadataObject } from 'types/upload';
+import { Metadata } from 'types/upload';
 import QueueProcessor from './queueProcessor';
 import { Collection } from 'types/collection';
 import {
@@ -509,7 +509,7 @@ class ExportService {
     private async saveMetadataFile(
         collectionFolderPath: string,
         fileSaveName: string,
-        metadata: MetadataObject
+        metadata: Metadata
     ) {
         await this.ElectronAPIs.saveFileToDisk(
             getFileMetadataSavePath(collectionFolderPath, fileSaveName),

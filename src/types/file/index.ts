@@ -1,5 +1,5 @@
 import { VISIBILITY_STATE } from 'constants/file';
-import { DataStream, MetadataObject } from 'types/upload';
+import { DataStream, Metadata } from 'types/upload';
 
 export interface fileAttribute {
     encryptedData?: DataStream | Uint8Array;
@@ -42,7 +42,7 @@ export interface EnteFile {
     ownerID: number;
     file: fileAttribute;
     thumbnail: fileAttribute;
-    metadata: MetadataObject;
+    metadata: Metadata;
     magicMetadata: MagicMetadata;
     pubMagicMetadata: PublicMagicMetadata;
     encryptedKey: string;
