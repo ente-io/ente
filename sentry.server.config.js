@@ -4,7 +4,7 @@ import {
     getSentryENV,
     getSentryRelease,
     isSentryEnabled,
-} from './configUtil';
+} from 'constants/sentry';
 
 const SENTRY_DSN = getSentryDSN();
 const SENTRY_ENV = getSentryENV();
