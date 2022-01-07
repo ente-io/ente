@@ -34,12 +34,16 @@ class PushService {
       _logger.info("Got a message whilst in the foreground!");
       _handleForegroundPushMessage(message);
     });
-    if (Configuration.instance.hasConfiguredAccount()) {
-      await _configurePushToken();
-    } else {
-      Bus.instance.on<SignedInEvent>().listen((_) async {
-        _configurePushToken();
-      });
+    try {
+      if (Configuration.instance.hasConfiguredAccount()) {
+        await _configurePushToken();
+      } else {
+        Bus.instance.on<SignedInEvent>().listen((_) async {
+          _configurePushToken();
+        });
+      }
+    } catch (e, s) {
+      _logger.severe("Could not configure push token", e, s);
     }
   }
 
