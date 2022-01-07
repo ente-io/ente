@@ -172,7 +172,8 @@ export interface Person {
     id: number;
     name?: string;
     files: Array<number>;
-    faceImage: FaceImageBlob;
+    displayFaceId?: string;
+    displayImageUrl?: string;
 }
 
 export interface MlFileData {

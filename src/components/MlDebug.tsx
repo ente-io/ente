@@ -15,7 +15,7 @@ import mlWorkManager from 'services/machineLearning/mlWorkManager';
 import { getAllFacesFromMap } from 'utils/machineLearning';
 import { FaceImagesRow, ImageBlobView } from './ImageViews';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import { getFaceImageBlobFromStorage } from 'utils/machineLearning/faceCrop';
+import { getFaceCropBlobFromStorage } from 'utils/machineLearning/faceCrop';
 
 interface TSNEProps {
     mlResult: MLDebugResult;
@@ -271,7 +271,7 @@ export default function MLDebug() {
             ?.slice(0, 100)
             .map((n) => allFaces[n])
             .filter((f) => f?.crop)
-            .map((f) => getFaceImageBlobFromStorage(f.crop));
+            .map((f) => getFaceCropBlobFromStorage(f.crop));
         setNoiseFaces(await Promise.all(noiseFacePromises));
     };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaceImageBlob, Person } from 'types/machineLearning';
+import { Face, FACE_CROPS_CACHE_NAME, Person } from 'types/machineLearning';
 import {
     getAllPeople,
     getPeopleList,
@@ -7,7 +7,7 @@ import {
 } from 'utils/machineLearning';
 import styled from 'styled-components';
 import { File } from 'services/fileService';
-import { ImageBlobView } from './ImageViews';
+import { ImageCacheView } from './ImageViews';
 
 const FaceChipContainer = styled.div`
     display: flex;
@@ -50,7 +50,10 @@ export function PeopleList(props: PeopleListProps) {
                     onClick={() =>
                         props.onSelect && props.onSelect(person, index)
                     }>
-                    <ImageBlobView blob={person.faceImage}></ImageBlobView>
+                    <ImageCacheView
+                        url={person.displayImageUrl}
+                        cacheName={FACE_CROPS_CACHE_NAME}
+                    />
                 </FaceChip>
             ))}
         </FaceChipContainer>
@@ -115,14 +118,14 @@ export function AllPeopleList(props: AllPeopleListProps) {
 }
 
 export function UnidentifiedFaces(props: { file: File }) {
-    const [faceImages, setFaceImages] = useState<Array<FaceImageBlob>>([]);
+    const [faces, setFaces] = useState<Array<Face>>([]);
 
     useEffect(() => {
         let didCancel = false;
 
         async function updateFaceImages() {
-            const faceImages = await getUnidentifiedFaces(props.file);
-            !didCancel && setFaceImages(faceImages);
+            const faces = await getUnidentifiedFaces(props.file);
+            !didCancel && setFaces(faces);
         }
 
         updateFaceImages();
@@ -134,10 +137,13 @@ export function UnidentifiedFaces(props: { file: File }) {
 
     return (
         <FaceChipContainer>
-            {faceImages &&
-                faceImages.map((faceImage, index) => (
+            {faces &&
+                faces.map((face, index) => (
                     <FaceChip key={index}>
-                        <ImageBlobView blob={faceImage}></ImageBlobView>
+                        <ImageCacheView
+                            url={face.crop?.imageUrl}
+                            cacheName={FACE_CROPS_CACHE_NAME}
+                        />
                     </FaceChip>
                 ))}
         </FaceChipContainer>

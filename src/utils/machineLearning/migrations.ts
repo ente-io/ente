@@ -2,7 +2,7 @@ import { MlFileData, Face } from 'types/machineLearning';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { mlFilesStore } from 'utils/storage/mlStorage';
 import { getFaceId } from '.';
-import { getStoredFaceCropForBlob } from './faceCrop';
+import { storeFaceCropForBlob } from './faceCrop';
 
 // TODO: for migrating existing data, to be removed
 export async function migrateExistingFiles() {
@@ -41,7 +41,7 @@ export async function migrateFaceCropsToCache() {
             if (!face['id']) {
                 const faceCropBlob = face.crop['image'];
                 const faceId = getFaceId(face, file.imageDimentions);
-                face.crop = await getStoredFaceCropForBlob(
+                face.crop = await storeFaceCropForBlob(
                     faceId,
                     face.crop.imageBox,
                     faceCropBlob

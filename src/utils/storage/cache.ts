@@ -22,3 +22,13 @@ export async function cached(
 
     return result;
 }
+
+export async function getBlobFromCache(
+    cacheName: string,
+    url: string
+): Promise<Blob> {
+    const cache = await caches.open(cacheName);
+    const response = await cache.match(url);
+
+    return response.blob();
+}

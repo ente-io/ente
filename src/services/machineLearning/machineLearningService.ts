@@ -27,7 +27,7 @@ import {
     findFirstIfSorted,
     getAllFacesFromMap,
     getFaceId,
-    getFaceImage,
+    getLocalFile,
     getLocalFileImageBitmap,
     getMLSyncConfig,
     getOriginalImageBitmap,
@@ -36,10 +36,7 @@ import {
 } from 'utils/machineLearning';
 import { MLFactory } from './machineLearningFactory';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import {
-    getFaceImageBlobFromStorage,
-    getStoredFaceCrop,
-} from 'utils/machineLearning/faceCrop';
+import { storeFaceCrop } from 'utils/machineLearning/faceCrop';
 
 class MachineLearningService {
     private initialized = false;
@@ -466,6 +463,24 @@ class MachineLearningService {
         }
     }
 
+    private async saveFaceCrop(
+        imageBitmap: ImageBitmap,
+        face: Face,
+        syncContext: MLSyncContext
+    ) {
+        const faceCrop = await syncContext.faceCropService.getFaceCrop(
+            imageBitmap,
+            face.detection,
+            syncContext.config.faceCrop
+        );
+        face.crop = await storeFaceCrop(
+            face.id,
+            faceCrop,
+            syncContext.config.faceCrop.blobOptions
+        );
+        faceCrop.image.close();
+    }
+
     private async syncFileFaceCrops(
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext
@@ -482,17 +497,7 @@ class MachineLearningService {
             syncContext.faceCropService.method;
 
         for (const face of fileContext.faces) {
-            const faceCrop = await syncContext.faceCropService.getFaceCrop(
-                imageBitmap,
-                face.detection,
-                syncContext.config.faceCrop
-            );
-            face.crop = await getStoredFaceCrop(
-                face.id,
-                faceCrop,
-                syncContext.config.faceCrop.blobOptions
-            );
-            faceCrop.image.close();
+            await this.saveFaceCrop(imageBitmap, face, syncContext);
         }
     }
 
@@ -742,15 +747,20 @@ class MachineLearningService {
                     b.detection.probability * b.alignment.size
             );
 
-            let faceImage = await getFaceImageBlobFromStorage(personFace.crop);
-            if (!faceImage) {
-                faceImage = await getFaceImage(personFace, syncContext.token);
+            if (personFace && !personFace.crop?.imageUrl) {
+                const file = await getLocalFile(personFace.fileId);
+                const imageBitmap = await getOriginalImageBitmap(
+                    file,
+                    syncContext.token
+                );
+                this.saveFaceCrop(imageBitmap, personFace, syncContext);
             }
 
             const person: Person = {
                 id: index,
                 files: faces.map((f) => f.fileId),
-                faceImage,
+                displayFaceId: personFace?.id,
+                displayImageUrl: personFace?.crop?.imageUrl,
             };
 
             await mlIDbStorage.putPerson(person);

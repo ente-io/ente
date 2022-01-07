@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { imageBitmapToBlob } from 'utils/image';
+import { getBlobFromCache } from 'utils/storage/cache';
 
 export const Image = styled.img``;
 
@@ -17,6 +18,36 @@ export const FaceImagesRow = styled.div`
         height: 112px;
     }
 `;
+
+export function ImageCacheView(props: { url: string; cacheName: string }) {
+    const [imageBlob, setImageBlob] = useState<Blob>();
+
+    useEffect(() => {
+        let didCancel = false;
+
+        async function loadImage() {
+            let blob: Blob;
+            if (!props.url || !props.cacheName) {
+                blob = undefined;
+            } else {
+                blob = await getBlobFromCache(props.cacheName, props.url);
+            }
+
+            !didCancel && setImageBlob(blob);
+        }
+
+        loadImage();
+        return () => {
+            didCancel = true;
+        };
+    }, [props.url, props.cacheName]);
+
+    return (
+        <>
+            <ImageBlobView blob={imageBlob}></ImageBlobView>
+        </>
+    );
+}
 
 export function ImageBitmapView(props: { image: ImageBitmap }) {
     const [imageBlob, setImageBlob] = useState<Blob>();

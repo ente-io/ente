@@ -27,7 +27,7 @@ import {
     ibExtractFaceImages,
 } from './faceAlign';
 import {
-    getFaceImageBlobFromStorage,
+    getFaceCropBlobFromStorage,
     ibExtractFaceImagesFromCrops,
 } from './faceCrop';
 
@@ -196,6 +196,11 @@ export function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
     return allFaces;
 }
 
+export async function getLocalFile(fileId: number) {
+    const localFiles = await getLocalFiles();
+    return localFiles.find((f) => f.id === fileId);
+}
+
 export async function getFaceImage(
     face: AlignedFace,
     token: string,
@@ -203,8 +208,7 @@ export async function getFaceImage(
     file?: File
 ): Promise<FaceImageBlob> {
     if (!file) {
-        const localFiles = await getLocalFiles();
-        file = localFiles.find((f) => f.id === face.fileId);
+        file = await getLocalFile(face.fileId);
     }
 
     const imageBitmap = await getOriginalImageBitmap(file, token);
@@ -389,20 +393,25 @@ export async function getPeopleList(file: File): Promise<Array<Person>> {
     return peopleList;
 }
 
-export async function getUnidentifiedFaces(
-    file: File
-): Promise<Array<FaceImageBlob>> {
+export async function getUnidentifiedFaces(file: File): Promise<Array<Face>> {
     const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
 
-    const faceCrops = mlFileData?.faces
-        ?.filter((f) => f.personId === null || f.personId === undefined)
+    return mlFileData?.faces?.filter(
+        (f) => f.personId === null || f.personId === undefined
+    );
+}
+
+export async function getFaceCropBlobs(
+    faces: Array<Face>
+): Promise<Array<FaceImageBlob>> {
+    const faceCrops = faces
         .map((f) => f.crop)
         .filter((faceCrop) => faceCrop !== null && faceCrop !== undefined);
 
     return (
         faceCrops &&
         Promise.all(
-            faceCrops.map((faceCrop) => getFaceImageBlobFromStorage(faceCrop))
+            faceCrops.map((faceCrop) => getFaceCropBlobFromStorage(faceCrop))
         )
     );
 }
