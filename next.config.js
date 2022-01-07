@@ -5,11 +5,18 @@ const withWorkbox = require('@ente-io/next-with-workbox');
 
 const { withSentryConfig } = require('@sentry/nextjs');
 
-const cp = require('child_process');
-const gitSha = cp.execSync('git rev-parse --short HEAD', {
-    cwd: __dirname,
-    encoding: 'utf8',
-});
+const {
+    getGitSha,
+    convertToNextHeaderFormat,
+    buildCSPHeader,
+    COOP_COEP_HEADERS,
+    WEB_SECURITY_HEADERS,
+    CSP_DIRECTIVES,
+    WORKBOX_CONFIG,
+    ALL_ROUTES,
+} = require('./configUtil');
+
+const gitSha = getGitSha();
 
 module.exports = withSentryConfig(
     withWorkbox(
@@ -17,9 +24,20 @@ module.exports = withSentryConfig(
             env: {
                 SENTRY_RELEASE: gitSha,
             },
-            workbox: {
-                swSrc: 'src/serviceWorker.js',
-                exclude: [/manifest\.json$/i],
+            workbox: WORKBOX_CONFIG,
+
+            headers() {
+                return [
+                    {
+                        // Apply these headers to all routes in your application....
+                        source: ALL_ROUTES,
+                        headers: convertToNextHeaderFormat({
+                            ...COOP_COEP_HEADERS,
+                            ...WEB_SECURITY_HEADERS,
+                            ...buildCSPHeader(CSP_DIRECTIVES),
+                        }),
+                    },
+                ];
             },
             // https://dev.to/marcinwosinek/how-to-add-resolve-fallback-to-webpack-5-in-nextjs-10-i6j
             webpack: (config, { isServer }) => {
