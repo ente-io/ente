@@ -14,15 +14,18 @@ const {
     CSP_DIRECTIVES,
     WORKBOX_CONFIG,
     ALL_ROUTES,
+    isSentryEnabled,
 } = require('./configUtil');
 
-const gitSha = getGitSha();
+const GIT_SHA = getGitSha();
+
+const SENTRY_ENABLED = isSentryEnabled();
 
 module.exports = withSentryConfig(
     withWorkbox(
         withBundleAnalyzer({
             env: {
-                SENTRY_RELEASE: gitSha,
+                SENTRY_RELEASE: GIT_SHA,
             },
             workbox: WORKBOX_CONFIG,
 
@@ -48,5 +51,5 @@ module.exports = withSentryConfig(
             },
         })
     ),
-    { release: gitSha }
+    { release: GIT_SHA, dryRun: !SENTRY_ENABLED }
 );
