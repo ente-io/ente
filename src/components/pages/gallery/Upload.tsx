@@ -273,10 +273,14 @@ export default function Upload(props: Props) {
     };
 
     const uploadToSingleNewCollection = (collectionName: string) => {
-        uploadFilesToNewCollections(
-            UPLOAD_STRATEGY.SINGLE_COLLECTION,
-            collectionName
-        );
+        if (collectionName) {
+            uploadFilesToNewCollections(
+                UPLOAD_STRATEGY.SINGLE_COLLECTION,
+                collectionName
+            );
+        } else {
+            showCollectionCreateModal(analysisResult);
+        }
     };
     const showCollectionCreateModal = (analysisResult: AnalysisResult) => {
         props.setCollectionNamerAttributes({
@@ -291,25 +295,23 @@ export default function Upload(props: Props) {
         analysisResult: AnalysisResult,
         isFirstUpload: boolean
     ) => {
-        if (!analysisResult.suggestedCollectionName) {
-            if (isFirstUpload) {
-                uploadToSingleNewCollection(FIRST_ALBUM_NAME);
-            } else {
-                props.setCollectionSelectorAttributes({
-                    callback: uploadFilesToExistingCollection,
-                    showNextModal: () =>
-                        showCollectionCreateModal(analysisResult),
-                    title: constants.UPLOAD_TO_COLLECTION,
-                });
-            }
+        if (isFirstUpload) {
+            uploadToSingleNewCollection(FIRST_ALBUM_NAME);
         } else {
+            let showNextModal = () => {};
             if (analysisResult.multipleFolders) {
-                setChoiceModalView(true);
-            } else if (analysisResult.suggestedCollectionName) {
-                uploadToSingleNewCollection(
-                    analysisResult.suggestedCollectionName
-                );
+                showNextModal = () => setChoiceModalView(true);
+            } else {
+                showNextModal = () =>
+                    uploadToSingleNewCollection(
+                        analysisResult.suggestedCollectionName
+                    );
             }
+            props.setCollectionSelectorAttributes({
+                callback: uploadFilesToExistingCollection,
+                showNextModal,
+                title: constants.UPLOAD_TO_COLLECTION,
+            });
         }
     };
 
