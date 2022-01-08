@@ -43,6 +43,7 @@ import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
 import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
+import { sleep } from 'utils/common';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -615,22 +616,24 @@ function PhotoSwipe(props: Iprops) {
         }
     };
 
-    const checkExifAvailable = () => {
+    const checkExifAvailable = async () => {
         setExif(null);
-        setTimeout(() => {
+        await sleep(100);
+        try {
             const img: HTMLImageElement = document.querySelector(
                 '.pswp__img:not(.pswp__img--placeholder)'
             );
             if (img) {
-                exifr.parse(img).then(function (exifData) {
-                    if (!exifData) {
-                        return;
-                    }
-                    exifData.raw = prettyPrintExif(exifData);
-                    setExif(exifData);
-                });
+                const exifData = await exifr.parse(img);
+                if (!exifData) {
+                    return;
+                }
+                exifData.raw = prettyPrintExif(exifData);
+                setExif(exifData);
             }
-        }, 100);
+        } catch (e) {
+            logError(e, 'exifr parsing failed');
+        }
     };
 
     function updateInfo() {
