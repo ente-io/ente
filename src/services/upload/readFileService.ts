@@ -24,12 +24,12 @@ export async function getFileData(worker, reader: FileReader, file: File) {
 }
 
 export async function getFileType(
-    worker,
+    reader: FileReader,
     receivedFile: File
 ): Promise<FileTypeInfo> {
     try {
         let fileType: FILE_TYPE;
-        const mimeType = await getMimeType(worker, receivedFile);
+        const mimeType = await getMimeType(reader, receivedFile);
         const typeParts = mimeType?.split('/');
         if (typeParts?.length !== 2) {
             throw Error(CustomError.TYPE_DETECTION_FAILED);
@@ -76,9 +76,9 @@ export function getFileOriginalName(file: File) {
     return originalName;
 }
 
-async function getMimeType(worker, file: File) {
+async function getMimeType(reader: FileReader, file: File) {
     const fileChunkBlob = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
-    return getMimeTypeFromBlob(worker, fileChunkBlob);
+    return getMimeTypeFromBlob(reader, fileChunkBlob);
 }
 
 export async function getMimeTypeFromBlob(reader: FileReader, fileBlob: Blob) {
