@@ -54,7 +54,7 @@ export default async function uploader(
             await sleep(TwoSecondInMillSeconds);
             return { fileUploadResult: FileUploadResults.TOO_LARGE };
         }
-        fileTypeInfo = await getFileType(worker, rawFile);
+        fileTypeInfo = await getFileType(reader, rawFile);
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }

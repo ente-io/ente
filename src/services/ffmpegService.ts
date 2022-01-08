@@ -30,7 +30,7 @@ class FFmpegService {
         if (!this.ffmpeg) {
             await this.init();
         }
-        if (this.fileReader) {
+        if (!this.fileReader) {
             this.fileReader = new FileReader();
         }
         if (this.isLoading) {
