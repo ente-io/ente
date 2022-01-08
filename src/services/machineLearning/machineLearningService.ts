@@ -753,7 +753,7 @@ class MachineLearningService {
                     file,
                     syncContext.token
                 );
-                this.saveFaceCrop(imageBitmap, personFace, syncContext);
+                await this.saveFaceCrop(imageBitmap, personFace, syncContext);
             }
 
             const person: Person = {

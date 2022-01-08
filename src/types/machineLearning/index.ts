@@ -231,8 +231,6 @@ export interface TSNEConfig {
 }
 
 export interface MLSyncConfig {
-    syncIntervalSec: number;
-    maxSyncIntervalSec: number;
     batchSize: number;
     imageSource: ImageType;
     faceDetection: FaceDetectionConfig;

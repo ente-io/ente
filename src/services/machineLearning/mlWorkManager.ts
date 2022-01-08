@@ -1,31 +1,33 @@
-import { Remote } from 'comlink';
+import debounce from 'debounce-promise';
 import PQueue from 'p-queue';
 import { eventBus, Events } from 'services/events';
 import { File } from 'services/fileService';
-import {
-    FACE_CROPS_CACHE_NAME,
-    MachineLearningWorker,
-    MLSyncConfig,
-} from 'types/machineLearning';
+import { FACE_CROPS_CACHE_NAME, MLSyncConfig } from 'types/machineLearning';
 import { getToken } from 'utils/common/key';
-import { getDedicatedMLWorker } from 'utils/machineLearning/worker';
+import { getMLSyncJobConfig } from 'utils/machineLearning';
+import { MLWorkerWithProxy } from 'utils/machineLearning/worker';
 import { logError } from 'utils/sentry';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import MLSyncJob from './mlSyncJob';
+import { MLSyncJobResult, MLSyncJob } from './mlSyncJob';
+
+const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
+const LOCAL_FILES_UPDATED_DEBOUNCE_SEC = 30;
 
 class MLWorkManager {
-    private mlWorker: Promise<Remote<MachineLearningWorker>>;
     private mlSyncJob: MLSyncJob;
+    private syncJobWorker: MLWorkerWithProxy;
+
     private liveSyncQueue: PQueue;
+    private liveSyncWorker: MLWorkerWithProxy;
 
     constructor() {
-        this.mlSyncJob = new MLSyncJob();
         this.liveSyncQueue = new PQueue({ concurrency: 1 });
 
-        this.liveSyncQueue.on('active', this.stopSyncJob, this);
-
-        this.liveSyncQueue.on('idle', this.startSyncJob, this);
+        const debouncedLiveSyncIdle = debounce(
+            () => this.onLiveSyncIdle(),
+            LIVE_SYNC_IDLE_DEBOUNCE_SEC * 1000
+        );
+        this.liveSyncQueue.on('idle', () => debouncedLiveSyncIdle(), this);
 
         eventBus.on(Events.APP_START, this.appStartHandler, this);
 
@@ -35,23 +37,33 @@ class MLWorkManager {
 
         eventBus.on(Events.FILE_UPLOADED, this.fileUploadedHandler, this);
 
-        eventBus.on(Events.LOCAL_FILES_UPDATED, this.startSyncJob, this);
+        const debouncedFilesUpdated = debounce(
+            () => this.localFilesUpdatedHandler(),
+            LOCAL_FILES_UPDATED_DEBOUNCE_SEC * 1000
+        );
+        eventBus.on(
+            Events.LOCAL_FILES_UPDATED,
+            () => debouncedFilesUpdated(),
+            this
+        );
     }
 
+    // Handlers
     private async appStartHandler() {
+        console.log('appStartHandler');
         try {
-            const user = getData(LS_KEYS.USER);
-            if (user?.token) {
-                this.startSyncJob();
-            }
+            this.startSyncJob();
         } catch (e) {
             logError(e, 'Failed in ML appStart Handler');
         }
     }
 
     private async logoutHandler() {
+        console.log('logoutHandler');
         try {
             await this.stopSyncJob();
+            this.mlSyncJob = undefined;
+            this.terminateLiveSyncWorker();
             await mlIDbStorage.clearMLDB();
             await caches.delete(FACE_CROPS_CACHE_NAME);
         } catch (e) {
@@ -63,6 +75,7 @@ class MLWorkManager {
         enteFile: File;
         localFile: globalThis.File;
     }) {
+        console.log('fileUploadedHandler');
         try {
             await this.syncLocalFile(arg.enteFile, arg.localFile);
         } catch (e) {
@@ -71,14 +84,29 @@ class MLWorkManager {
         }
     }
 
-    private async getMLWorker() {
-        if (!this.mlWorker) {
-            const MLWorker = getDedicatedMLWorker();
-            // TODO: handle worker getting killed
-            this.mlWorker = new MLWorker.comlink();
+    private async localFilesUpdatedHandler() {
+        console.log('Local files updated');
+        this.startSyncJob();
+    }
+
+    // Live Sync
+    private async getLiveSyncWorker() {
+        if (!this.liveSyncWorker) {
+            this.liveSyncWorker = new MLWorkerWithProxy();
         }
 
-        return this.mlWorker;
+        return this.liveSyncWorker.proxy;
+    }
+
+    private terminateLiveSyncWorker() {
+        this.liveSyncWorker?.terminate();
+        this.liveSyncWorker = undefined;
+    }
+
+    private onLiveSyncIdle() {
+        console.log('Live sync idle');
+        this.terminateLiveSyncWorker();
+        this.startSyncJob();
     }
 
     public async syncLocalFile(
@@ -87,29 +115,66 @@ class MLWorkManager {
         config?: MLSyncConfig
     ) {
         return this.liveSyncQueue.add(async () => {
-            const token = await getToken();
-            const mlWorker = await this.getMLWorker();
+            this.stopSyncJob();
+            const token = getToken();
+            const mlWorker = await this.getLiveSyncWorker();
             return mlWorker.syncLocalFile(token, enteFile, localFile, config);
         });
+    }
+
+    // Sync Job
+    private async getSyncJobWorker() {
+        if (!this.syncJobWorker) {
+            this.syncJobWorker = new MLWorkerWithProxy();
+        }
+
+        return this.syncJobWorker.proxy;
+    }
+
+    private terminateSyncJobWorker() {
+        this.syncJobWorker?.terminate();
+        this.syncJobWorker = undefined;
+    }
+
+    private async runMLSyncJob() {
+        const token = getToken();
+        const jobWorkerProxy = await this.getSyncJobWorker();
+
+        const mlSyncResult = await jobWorkerProxy.sync(token);
+
+        this.terminateSyncJobWorker();
+        const jobResult: MLSyncJobResult = {
+            shouldBackoff: mlSyncResult.nOutOfSyncFiles < 1,
+            mlSyncResult,
+        };
+        console.log('ML Sync Job result: ', jobResult);
+        return jobResult;
     }
 
     public async startSyncJob() {
         try {
             console.log('MLWorkManager.startSyncJob');
-            await this.mlSyncJob.resetInterval();
-            const token = await getToken();
-            const mlWorker = await this.getMLWorker();
-            // TODO: handle case where job is currently running
-            return this.mlSyncJob.start(token, mlWorker);
+            if (!getToken()) {
+                console.log('User not logged in, not starting ml sync job');
+                return;
+            }
+            const mlSyncJobConfig = await getMLSyncJobConfig();
+            if (!this.mlSyncJob) {
+                this.mlSyncJob = new MLSyncJob(mlSyncJobConfig, () =>
+                    this.runMLSyncJob()
+                );
+            }
+            this.mlSyncJob.start();
         } catch (e) {
             logError(e, 'Failed to start MLSync Job');
         }
     }
 
-    public async stopSyncJob() {
+    public stopSyncJob(terminateWorker: boolean = true) {
         try {
             console.log('MLWorkManager.stopSyncJob');
-            return this.mlSyncJob.stop();
+            this.mlSyncJob.stop();
+            terminateWorker && this.terminateSyncJobWorker();
         } catch (e) {
             logError(e, 'Failed to stop MLSync Job');
         }

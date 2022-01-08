@@ -15,6 +15,7 @@ import {
     Person,
     Versioned,
 } from 'types/machineLearning';
+import { JobConfig } from 'utils/common/job';
 // import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
 import { convertForPreview, needsConversionForPreview } from 'utils/file';
 import { imageBitmapToBlob } from 'utils/image';
@@ -463,13 +464,21 @@ export function logQueueStats(queue: PQueue, name: string) {
     });
 }
 
+export async function getMLSyncJobConfig() {
+    return DEFAULT_ML_SYNC_JOB_CONFIG;
+}
+
+const DEFAULT_ML_SYNC_JOB_CONFIG: JobConfig = {
+    intervalSec: 30,
+    maxItervalSec: 32768,
+    backoffMultiplier: 2,
+};
+
 export async function getMLSyncConfig() {
     return DEFAULT_ML_SYNC_CONFIG;
 }
 
 const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
-    syncIntervalSec: 30,
-    maxSyncIntervalSec: 32768,
     batchSize: 200,
     imageSource: 'Original',
     faceDetection: {
@@ -496,7 +505,7 @@ const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     },
     faceClustering: {
         method: 'Hdbscan',
-        minClusterSize: 5,
+        minClusterSize: 6,
         minInputSize: 50,
         // maxDistanceInsideCluster: 0.4,
         generateDebugInfo: true,

@@ -1,17 +1,27 @@
 import { runningInBrowser } from 'utils/common';
-import { wrap } from 'comlink';
+import { Remote, wrap } from 'comlink';
 import { DedicatedMLWorker } from 'worker/machineLearning.worker';
-import { ComlinkWorker } from 'utils/crypto';
+import { MachineLearningWorker } from 'types/machineLearning';
 
-export function getDedicatedMLWorker(): ComlinkWorker {
-    if (runningInBrowser()) {
-        console.log('initiating worker');
-        const worker = new Worker(
+export class MLWorkerWithProxy {
+    public proxy: Promise<Remote<MachineLearningWorker>>;
+    private worker: Worker;
+
+    constructor() {
+        if (!runningInBrowser()) {
+            return;
+        }
+        this.worker = new Worker(
             new URL('worker/machineLearning.worker', import.meta.url),
             { name: 'ml-worker' }
         );
-        console.log('initiated ml-worker', worker);
-        const comlink = wrap<typeof DedicatedMLWorker>(worker);
-        return { comlink, worker };
+        console.log('Initiated ml-worker');
+        const comlink = wrap<typeof DedicatedMLWorker>(this.worker);
+        this.proxy = new comlink();
+    }
+
+    public terminate() {
+        this.worker.terminate();
+        console.log('Terminated ml-worker');
     }
 }
