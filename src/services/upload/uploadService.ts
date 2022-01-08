@@ -19,7 +19,7 @@ import {
     isDataStream,
     MetadataMap,
     Metadata,
-    ParsedMetaDataJSON,
+    ParsedMetadataJSON,
     ProcessedFile,
     UploadFile,
     UploadURL,
@@ -27,7 +27,7 @@ import {
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
-    private metadataMap: Map<string, ParsedMetaDataJSON>;
+    private metadataMap: Map<string, ParsedMetadataJSON>;
     private pendingUploadCount: number = 0;
 
     async init(fileCount: number, metadataMap: MetadataMap) {
