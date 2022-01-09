@@ -1,5 +1,9 @@
 import { NormalizedFace } from '@tensorflow-models/blazeface';
 import * as tf from '@tensorflow/tfjs-core';
+import {
+    DEFAULT_ML_SYNC_CONFIG,
+    DEFAULT_ML_SYNC_JOB_CONFIG,
+} from 'constants/machineLearning/config';
 import PQueue from 'p-queue';
 import DownloadManager from 'services/downloadManager';
 import { File, getLocalFiles } from 'services/fileService';
@@ -11,11 +15,9 @@ import {
     Face,
     FaceImageBlob,
     MlFileData,
-    MLSyncConfig,
     Person,
     Versioned,
 } from 'types/machineLearning';
-import { JobConfig } from 'utils/common/job';
 // import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
 import { convertForPreview, needsConversionForPreview } from 'utils/file';
 import { imageBitmapToBlob } from 'utils/image';
@@ -468,54 +470,6 @@ export async function getMLSyncJobConfig() {
     return DEFAULT_ML_SYNC_JOB_CONFIG;
 }
 
-const DEFAULT_ML_SYNC_JOB_CONFIG: JobConfig = {
-    intervalSec: 30,
-    maxItervalSec: 32768,
-    backoffMultiplier: 2,
-};
-
 export async function getMLSyncConfig() {
     return DEFAULT_ML_SYNC_CONFIG;
 }
-
-const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
-    batchSize: 200,
-    imageSource: 'Original',
-    faceDetection: {
-        method: 'BlazeFace',
-        minFaceSize: 32,
-    },
-    faceCrop: {
-        enabled: true,
-        method: 'ArcFace',
-        padding: 0.25,
-        maxSize: 256,
-        blobOptions: {
-            type: 'image/jpeg',
-            quality: 0.8,
-        },
-    },
-    faceAlignment: {
-        method: 'ArcFace',
-    },
-    faceEmbedding: {
-        method: 'MobileFaceNet',
-        faceSize: 112,
-        generateTsne: true,
-    },
-    faceClustering: {
-        method: 'Hdbscan',
-        minClusterSize: 6,
-        minInputSize: 50,
-        // maxDistanceInsideCluster: 0.4,
-        generateDebugInfo: true,
-    },
-    // tsne: {
-    //     samples: 200,
-    //     dim: 2,
-    //     perplexity: 10.0,
-    //     learningRate: 10.0,
-    //     metric: 'euclidean',
-    // },
-    mlVersion: 2,
-};
