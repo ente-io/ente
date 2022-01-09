@@ -7,7 +7,7 @@ import {
 } from 'constants/upload';
 import FileType from 'file-type/browser';
 import { CustomError } from 'utils/error';
-import { getFileExtension } from 'utils/file';
+import { getFileExtension, splitFilenameAndExtension } from 'utils/file';
 import { FileTypeInfo } from 'types/upload';
 
 const TYPE_VIDEO = 'video';
@@ -66,12 +66,21 @@ export async function getFileType(
 */
 export function getFileOriginalName(file: File) {
     let originalName: string = null;
+    const [nameWithoutExtension, extension] = splitFilenameAndExtension(
+        file.name
+    );
 
-    const isEditedFile = file.name.endsWith(EDITED_FILE_SUFFIX);
+    const isEditedFile = nameWithoutExtension.endsWith(EDITED_FILE_SUFFIX);
     if (isEditedFile) {
-        originalName = file.name.slice(0, -1 * EDITED_FILE_SUFFIX.length);
+        originalName = nameWithoutExtension.slice(
+            0,
+            -1 * EDITED_FILE_SUFFIX.length
+        );
     } else {
         originalName = file.name;
+    }
+    if (extension) {
+        originalName += '.' + extension;
     }
     return originalName;
 }
