@@ -60,6 +60,7 @@ export async function downloadFile(file: EnteFile) {
         let fileBlob = await (await fetch(fileURL)).blob();
 
         fileBlob = await updateFileCreationDateInEXIF(
+            new FileReader(),
             fileBlob,
             new Date(file.pubMagicMetadata.data.editedTime / 1000)
         );
@@ -295,9 +296,10 @@ export async function convertForPreview(file: EnteFile, fileBlob: Blob) {
 
     const typeFromExtension = getFileExtension(file.metadata.title);
     const worker = await new CryptoWorker();
+    const reader = new FileReader();
 
     const mimeType =
-        (await getMimeTypeFromBlob(worker, fileBlob)) ?? typeFromExtension;
+        (await getMimeTypeFromBlob(reader, fileBlob)) ?? typeFromExtension;
     if (isFileHEIC(mimeType)) {
         fileBlob = await worker.convertHEIC2JPEG(fileBlob);
     }

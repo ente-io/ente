@@ -62,6 +62,7 @@ class ExportService {
     private stopExport: boolean = false;
     private pauseExport: boolean = false;
     private allElectronAPIsExist: boolean = false;
+    private fileReader: FileReader = null;
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
@@ -438,7 +439,11 @@ class ExportService {
             (fileType === TYPE_JPEG || fileType === TYPE_JPG)
         ) {
             const fileBlob = await new Response(fileStream).blob();
+            if (!this.fileReader) {
+                this.fileReader = new FileReader();
+            }
             const updatedFileBlob = await updateFileCreationDateInEXIF(
+                this.fileReader,
                 fileBlob,
                 new Date(file.pubMagicMetadata.data.editedTime / 1000)
             );

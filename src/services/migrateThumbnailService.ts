@@ -44,6 +44,7 @@ export async function replaceThumbnail(
     try {
         const token = getToken();
         const worker = await new CryptoWorker();
+        const reader = new FileReader();
         const files = await getLocalFiles();
         const trash = await getLocalTrash();
         const trashFiles = getTrashedFiles(trash);
@@ -76,9 +77,10 @@ export async function replaceThumbnail(
                     [originalThumbnail],
                     file.metadata.title
                 );
-                const fileTypeInfo = await getFileType(worker, dummyImageFile);
+                const fileTypeInfo = await getFileType(reader, dummyImageFile);
                 const { thumbnail: newThumbnail } = await generateThumbnail(
                     worker,
+                    reader,
                     dummyImageFile,
                     fileTypeInfo
                 );

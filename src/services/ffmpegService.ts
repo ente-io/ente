@@ -7,6 +7,7 @@ import { getUint8ArrayView } from './upload/readFileService';
 class FFmpegService {
     private ffmpeg: FFmpeg = null;
     private isLoading = null;
+    private fileReader: FileReader = null;
 
     private generateThumbnailProcessor = new QueueProcessor<Uint8Array>(1);
     async init() {
@@ -29,11 +30,19 @@ class FFmpegService {
         if (!this.ffmpeg) {
             await this.init();
         }
+        if (!this.fileReader) {
+            this.fileReader = new FileReader();
+        }
         if (this.isLoading) {
             await this.isLoading;
         }
         const response = this.generateThumbnailProcessor.queueUpRequest(
-            generateThumbnailHelper.bind(null, this.ffmpeg, file)
+            generateThumbnailHelper.bind(
+                null,
+                this.ffmpeg,
+                this.fileReader,
+                file
+            )
         );
         try {
             return await response.promise;
@@ -49,14 +58,18 @@ class FFmpegService {
     }
 }
 
-async function generateThumbnailHelper(ffmpeg: FFmpeg, file: File) {
+async function generateThumbnailHelper(
+    ffmpeg: FFmpeg,
+    reader: FileReader,
+    file: File
+) {
     try {
         const inputFileName = `${Date.now().toString()}-${file.name}`;
         const thumbFileName = `${Date.now().toString()}-thumb.jpeg`;
         ffmpeg.FS(
             'writeFile',
             inputFileName,
-            await getUint8ArrayView(new FileReader(), file)
+            await getUint8ArrayView(reader, file)
         );
         let seekTime = 1.0;
         let thumb = null;

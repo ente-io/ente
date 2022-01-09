@@ -44,10 +44,12 @@ export async function extractMetadata(
 export const getMetadataMapKey = (collectionID: number, title: string) =>
     `${collectionID}_${title}`;
 
-export async function parseMetadataJSON(receivedFile: File) {
+export async function parseMetadataJSON(
+    reader: FileReader,
+    receivedFile: File
+) {
     try {
         const metadataJSON: object = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
             reader.onabort = () => reject(Error('file reading was aborted'));
             reader.onerror = () => reject(Error('file reading has failed'));
             reader.onload = () => {

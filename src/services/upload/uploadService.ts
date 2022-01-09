@@ -38,16 +38,18 @@ class UploadService {
 
     async readFile(
         worker: any,
+        reader: FileReader,
         rawFile: File,
         fileTypeInfo: FileTypeInfo
     ): Promise<FileInMemory> {
         const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
             worker,
+            reader,
             rawFile,
             fileTypeInfo
         );
 
-        const filedata = await getFileData(worker, rawFile);
+        const filedata = await getFileData(reader, rawFile);
 
         return {
             filedata,
