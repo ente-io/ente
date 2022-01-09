@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useContext, ChangeEvent } from 'react';
+import React, {
+    useState,
+    useEffect,
+    useContext,
+    ChangeEvent,
+    useRef,
+} from 'react';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { ComlinkWorker } from 'utils/crypto';
@@ -8,6 +14,7 @@ import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
 import TFJSImage from './TFJSImage';
 import {
+    Face,
     FACE_CROPS_CACHE_NAME,
     MLDebugResult,
     Person,
@@ -17,10 +24,14 @@ import MLFileDebugView from './MLFileDebugView';
 import mlWorkManager from 'services/machineLearning/mlWorkManager';
 // import { getAllFacesMap, mlLibraryStore } from 'utils/storage/mlStorage';
 import { getAllFacesFromMap, getAllPeople } from 'utils/machineLearning';
-import { FaceImagesRow, ImageBlobView } from './ImageViews';
+import { FaceImagesRow, ImageBlobView, ImageCacheView } from './ImageViews';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { getFaceCropBlobFromStorage } from 'utils/machineLearning/faceCrop';
 import { PeopleList } from './PeopleList';
+import styled from 'styled-components';
+import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
+import { DebugInfo } from 'hdbscan';
+import { toD3Tree } from 'utils/machineLearning/clustering';
 
 interface TSNEProps {
     mlResult: MLDebugResult;
@@ -48,11 +59,14 @@ function TSNEPlot(props: TSNEProps) {
     );
 }
 
-const renderForeignObjectNode = ({
-    nodeDatum,
-    foreignObjectProps,
-    mlResult,
-}) => (
+const D3ImageContainer = styled.div`
+    & > img {
+        width: 100%;
+        height: 100%;
+    }
+`;
+
+const renderForeignObjectNode = ({ nodeDatum, foreignObjectProps }) => (
     <g>
         <circle r={15}></circle>
         {/* `foreignObject` requires width & height to be explicitly set. */}
@@ -66,10 +80,12 @@ const renderForeignObjectNode = ({
                     {nodeDatum.name}
                 </h3>
                 {!nodeDatum.children && nodeDatum.name && (
-                    <TFJSImage
-                        faceImage={
-                            mlResult.allFaces[nodeDatum.name]?.faceImage
-                        }></TFJSImage>
+                    <D3ImageContainer>
+                        <ImageCacheView
+                            url={nodeDatum.attributes.face.crop?.imageUrl}
+                            cacheName={FACE_CROPS_CACHE_NAME}
+                        />
+                    </D3ImageContainer>
                 )}
             </div>
         </foreignObject>
@@ -92,6 +108,17 @@ const readAsText = (blob) =>
         fileReader.readAsText(blob);
     });
 
+const getFaceCrops = async (faces: Face[]) => {
+    const faceCropPromises = faces
+        .filter((f) => f?.crop)
+        .map((f) => getFaceCropBlobFromStorage(f.crop));
+    return Promise.all(faceCropPromises);
+};
+
+const ClusterFacesRow = styled(FaceImagesRow)`
+    display: flex;
+`;
+
 export default function MLDebug() {
     const [token, setToken] = useState<string>();
     const [clusterFaceDistance] = useState<number>(0.4);
@@ -110,8 +137,11 @@ export default function MLDebug() {
     });
 
     const [allPeople, setAllPeople] = useState<Array<Person>>([]);
+    const [clusters, setClusters] = useState<Array<Array<Blob>>>([]);
     const [noiseFaces, setNoiseFaces] = useState<Array<Blob>>([]);
+    const [mstD3Tree, setMstD3Tree] = useState<RawNodeDatum>(null);
     const [debugFile, setDebugFile] = useState<File>();
+    const importMLDataFileInput = useRef(null);
 
     const router = useRouter();
     const appContext = useContext(AppContext);
@@ -234,6 +264,10 @@ export default function MLDebug() {
         console.log('ML Data Exported');
     };
 
+    const onImportMLDataClick = () => {
+        importMLDataFileInput.current.click();
+    };
+
     const onImportMLData = async (event: ChangeEvent<HTMLInputElement>) => {
         const mlDataJson = await readAsText(event.target.files[0]);
         const mlData = JSON.parse(mlDataJson);
@@ -273,21 +307,31 @@ export default function MLDebug() {
         setAllPeople(allPeople);
     };
 
-    const onLoadNoiseFaces = async () => {
-        // const mlLibraryData = await mlLibraryStore.getItem<MLLibraryData>(
-        //     'data'
-        // );
+    const onLoadClusteringResults = async () => {
         const mlLibraryData = await mlIDbStorage.getLibraryData();
-
         const allFacesMap = await mlIDbStorage.getAllFacesMap();
         const allFaces = getAllFacesFromMap(allFacesMap);
 
-        const noiseFacePromises = mlLibraryData?.faceClusteringResults?.noise
-            ?.slice(0, 100)
-            .map((n) => allFaces[n])
-            .filter((f) => f?.crop)
-            .map((f) => getFaceCropBlobFromStorage(f.crop));
-        setNoiseFaces(await Promise.all(noiseFacePromises));
+        const clusterPromises = mlLibraryData?.faceClusteringResults?.clusters
+            .map((cluster) => cluster?.slice(0, 200).map((f) => allFaces[f]))
+            .map((faces) => getFaceCrops(faces));
+        setClusters(await Promise.all(clusterPromises));
+
+        const noiseFaces = mlLibraryData?.faceClusteringResults?.noise
+            ?.slice(0, 200)
+            .map((n) => allFaces[n]);
+        setNoiseFaces(await getFaceCrops(noiseFaces));
+
+        const clusteringDebugInfo: DebugInfo =
+            mlLibraryData?.faceClusteringResults['debugInfo'];
+        if (clusteringDebugInfo) {
+            const d3Tree = toD3Tree(
+                clusteringDebugInfo.mstBinaryTree,
+                allFaces
+            );
+            console.log(clusteringDebugInfo.mstBinaryTree, d3Tree);
+            setMstD3Tree(d3Tree);
+        }
     };
 
     const nodeSize = { x: 180, y: 180 };
@@ -343,9 +387,13 @@ export default function MLDebug() {
 
             <p></p>
             <button onClick={onExportMLData}>Export ML Data</button>
-            <input id="importMLData" type="file" onChange={onImportMLData} />
-
-            <p></p>
+            <button onClick={onImportMLDataClick}>Import ML Data</button>
+            <input
+                ref={importMLDataFileInput}
+                hidden
+                type="file"
+                onChange={onImportMLData}
+            />
             <button onClick={onClearPeopleIndex}>Clear People Index</button>
 
             <p></p>
@@ -356,50 +404,32 @@ export default function MLDebug() {
             <PeopleList people={allPeople}></PeopleList>
 
             <p></p>
-            <button onClick={onLoadNoiseFaces}>Load Noise Faces</button>
-            <div>Noise Faces:</div>
-            <FaceImagesRow>
+            <button onClick={onLoadClusteringResults}>
+                Load Clustering Results
+            </button>
+
+            <div>Clusters:</div>
+            {clusters.map((cluster, index) => (
+                <ClusterFacesRow key={index}>
+                    {cluster?.map((face, i) => (
+                        <ImageBlobView key={i} blob={face}></ImageBlobView>
+                    ))}
+                </ClusterFacesRow>
+            ))}
+
+            <div>Noise:</div>
+            <ClusterFacesRow>
                 {noiseFaces?.map((face, i) => (
                     <ImageBlobView key={i} blob={face}></ImageBlobView>
                 ))}
-            </FaceImagesRow>
+            </ClusterFacesRow>
 
             <p></p>
             <input id="debugFile" type="file" onChange={onDebugFile} />
             <MLFileDebugView file={debugFile} />
 
-            <p>{JSON.stringify(mlResult.clustersWithNoise)}</p>
-            <div>
-                <p>Clusters: </p>
-                {mlResult.clustersWithNoise.clusters.map((cluster, index) => (
-                    <div key={index} style={{ display: 'flex' }}>
-                        {cluster.faces.map((faceIndex, ind) => (
-                            <div key={ind}>
-                                <TFJSImage
-                                    faceImage={
-                                        mlResult.allFaces[faceIndex].faceImage
-                                    }></TFJSImage>
-                            </div>
-                        ))}
-                    </div>
-                ))}
-
-                <p style={{ marginTop: '1em' }}>Noise: </p>
-                <div style={{ display: 'flex' }}>
-                    {mlResult.clustersWithNoise.noise.map(
-                        (faceIndex, index) => (
-                            <div key={index}>
-                                <TFJSImage
-                                    faceImage={
-                                        mlResult.allFaces[faceIndex].faceImage
-                                    }></TFJSImage>
-                            </div>
-                        )
-                    )}
-                </div>
-            </div>
-
             <p></p>
+            <div>Hdbscan MST: </div>
             <div
                 id="treeWrapper"
                 style={{
@@ -407,9 +437,9 @@ export default function MLDebug() {
                     height: '50em',
                     backgroundColor: 'white',
                 }}>
-                {mlResult.tree && (
+                {mstD3Tree && (
                     <Tree
-                        data={mlResult.tree}
+                        data={mstD3Tree}
                         orientation={'vertical'}
                         nodeSize={nodeSize}
                         zoom={0.25}
@@ -417,13 +447,14 @@ export default function MLDebug() {
                             renderForeignObjectNode({
                                 ...rd3tProps,
                                 foreignObjectProps,
-                                mlResult,
                             })
                         }
                     />
                 )}
             </div>
+
             <p></p>
+            <div>TSNE of embeddings: </div>
             <div
                 id="tsneWrapper"
                 style={{

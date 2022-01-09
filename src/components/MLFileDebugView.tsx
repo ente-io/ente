@@ -150,7 +150,9 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             {/* <ImageBitmapView image={imageBitmap}></ImageBitmapView> */}
             <canvas
                 ref={canvasRef}
-                style={{ display: 'inline', width: '100%' }}
+                width={0}
+                height={0}
+                style={{ maxWidth: '100%' }}
             />
             <p></p>
             <div>Face Crops:</div>
