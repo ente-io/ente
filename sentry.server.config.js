@@ -3,17 +3,17 @@ import {
     getSentryDSN,
     getSentryENV,
     getSentryRelease,
-    isSentryEnabled,
+    getIsSentryEnabled,
 } from 'constants/sentry';
 
 const SENTRY_DSN = getSentryDSN();
 const SENTRY_ENV = getSentryENV();
 const SENTRY_RELEASE = getSentryRelease();
-const ENABLED = isSentryEnabled();
+const IS_ENABLED = getIsSentryEnabled();
 
 Sentry.init({
     dsn: SENTRY_DSN,
-    enabled: ENABLED,
+    enabled: IS_ENABLED,
     environment: SENTRY_ENV,
     release: SENTRY_RELEASE,
     autoSessionTracking: false,

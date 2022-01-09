@@ -1,5 +1,5 @@
 const cp = require('child_process');
-const { isSentryEnabled } = require('./sentryConfigUtil');
+const { getIsSentryEnabled } = require('./sentryConfigUtil');
 
 module.exports = {
     COOP_COEP_HEADERS: {
@@ -51,5 +51,5 @@ module.exports = {
             cwd: __dirname,
             encoding: 'utf8',
         }),
-    isSentryEnabled: isSentryEnabled,
+    getIsSentryEnabled: getIsSentryEnabled,
 };

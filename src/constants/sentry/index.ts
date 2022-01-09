@@ -7,4 +7,4 @@ export const getSentryENV = () =>
 
 export const getSentryRelease = () => process.env.SENTRY_RELEASE;
 
-export { isSentryEnabled } from '../../../sentryConfigUtil';
+export { getIsSentryEnabled } from '../../../sentryConfigUtil';
