@@ -736,6 +736,9 @@ class MachineLearningService {
             return;
         }
 
+        for (const face of allFaces) {
+            face.personId = undefined;
+        }
         await mlIDbStorage.clearAllPeople();
         for (const [index, cluster] of clusters.entries()) {
             const faces = cluster.map((f) => allFaces[f]).filter((f) => f);
