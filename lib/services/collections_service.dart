@@ -473,7 +473,7 @@ class CollectionsService {
   Future<void> move(
       int toCollectionID, int fromCollectionID, List<File> files) async {
     _validateMoveRequest(toCollectionID, fromCollectionID, files);
-    files.removeWhere((element) => element.uploadedFileID != null);
+    files.removeWhere((element) => element.uploadedFileID == null);
     if (files.isEmpty) {
       _logger.info("nothing to move to collection");
       return;
