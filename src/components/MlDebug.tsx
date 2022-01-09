@@ -7,16 +7,20 @@ import { PAGES } from 'types';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
 import TFJSImage from './TFJSImage';
-import { FACE_CROPS_CACHE_NAME, MLDebugResult } from 'types/machineLearning';
+import {
+    FACE_CROPS_CACHE_NAME,
+    MLDebugResult,
+    Person,
+} from 'types/machineLearning';
 import Tree from 'react-d3-tree';
 import MLFileDebugView from './MLFileDebugView';
 import mlWorkManager from 'services/machineLearning/mlWorkManager';
 // import { getAllFacesMap, mlLibraryStore } from 'utils/storage/mlStorage';
-import { getAllFacesFromMap } from 'utils/machineLearning';
+import { getAllFacesFromMap, getAllPeople } from 'utils/machineLearning';
 import { FaceImagesRow, ImageBlobView } from './ImageViews';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { getFaceCropBlobFromStorage } from 'utils/machineLearning/faceCrop';
-import { AllPeopleList } from './PeopleList';
+import { PeopleList } from './PeopleList';
 
 interface TSNEProps {
     mlResult: MLDebugResult;
@@ -105,6 +109,7 @@ export default function MLDebug() {
         tsne: null,
     });
 
+    const [allPeople, setAllPeople] = useState<Array<Person>>([]);
     const [noiseFaces, setNoiseFaces] = useState<Array<Blob>>([]);
     const [debugFile, setDebugFile] = useState<File>();
 
@@ -255,8 +260,17 @@ export default function MLDebug() {
         console.log('ML Data Imported');
     };
 
+    const onClearPeopleIndex = async () => {
+        mlIDbStorage.setIndexVersion('people', 0);
+    };
+
     const onDebugFile = async (event: ChangeEvent<HTMLInputElement>) => {
         setDebugFile(event.target.files[0]);
+    };
+
+    const onLoadAllPeople = async () => {
+        const allPeople = await getAllPeople(100);
+        setAllPeople(allPeople);
     };
 
     const onLoadNoiseFaces = async () => {
@@ -332,8 +346,14 @@ export default function MLDebug() {
             <input id="importMLData" type="file" onChange={onImportMLData} />
 
             <p></p>
+            <button onClick={onClearPeopleIndex}>Clear People Index</button>
+
+            <p></p>
+            <button onClick={onLoadAllPeople}>
+                Load All Identified People
+            </button>
             <div>All identified people:</div>
-            <AllPeopleList limit={100}></AllPeopleList>
+            <PeopleList people={allPeople}></PeopleList>
 
             <p></p>
             <button onClick={onLoadNoiseFaces}>Load Noise Faces</button>

@@ -419,13 +419,15 @@ export async function getFaceCropBlobs(
     );
 }
 
-export async function getAllPeople() {
+export async function getAllPeople(limit: number = undefined) {
     let people: Array<Person> = await mlIDbStorage.getAllPeople();
     // await mlPeopleStore.iterate<Person, void>((person) => {
     //     people.push(person);
     // });
     people = people ?? [];
-    return people.sort((p1, p2) => p2.files.length - p1.files.length);
+    return people
+        .sort((p1, p2) => p2.files.length - p1.files.length)
+        .slice(0, limit);
 }
 
 export function findFirstIfSorted<T>(

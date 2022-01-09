@@ -111,8 +111,8 @@ export function getYearSuggestion(searchPhrase: string): Suggestion[] {
 }
 
 export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
-    const people = await getAllPeople();
-    return people.slice(0, 6).map((person) => ({
+    const people = await getAllPeople(6);
+    return people.map((person) => ({
         label: person.name,
         type: SuggestionType.PERSON,
         value: person,
