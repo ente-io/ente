@@ -1,6 +1,5 @@
 import { FIX_OPTIONS } from 'components/FixCreationTime';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
-import CryptoWorker from 'utils/crypto';
 import {
     changeFileCreationTime,
     getFileFromURL,
@@ -38,8 +37,8 @@ export async function updateCreationTimeWithExif(
                 } else {
                     const fileURL = await downloadManager.getFile(file);
                     const fileObject = await getFileFromURL(fileURL);
-                    const worker = await new CryptoWorker();
-                    const fileTypeInfo = await getFileType(worker, fileObject);
+                    const reader = new FileReader();
+                    const fileTypeInfo = await getFileType(reader, fileObject);
                     const exifData = await getRawExif(fileObject, fileTypeInfo);
                     if (fixOption === FIX_OPTIONS.DATE_TIME_ORIGINAL) {
                         correctCreationTime = getUNIXTime(

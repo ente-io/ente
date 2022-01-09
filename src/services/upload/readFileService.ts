@@ -15,9 +15,9 @@ const TYPE_IMAGE = 'image';
 const EDITED_FILE_SUFFIX = '-edited';
 const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
 
-export async function getFileData(worker, reader: FileReader, file: File) {
+export async function getFileData(reader: FileReader, file: File) {
     if (file.size > MULTIPART_PART_SIZE) {
-        return getFileStream(worker, reader, file, FILE_READER_CHUNK_SIZE);
+        return getFileStream(reader, file, FILE_READER_CHUNK_SIZE);
     } else {
         return await getUint8ArrayView(reader, file);
     }
@@ -91,18 +91,8 @@ export async function getMimeTypeFromBlob(reader: FileReader, fileBlob: Blob) {
     }
 }
 
-function getFileStream(
-    worker,
-    reader: FileReader,
-    file: File,
-    chunkSize: number
-) {
-    const fileChunkReader = fileChunkReaderMaker(
-        worker,
-        reader,
-        file,
-        chunkSize
-    );
+function getFileStream(reader: FileReader, file: File, chunkSize: number) {
+    const fileChunkReader = fileChunkReaderMaker(reader, file, chunkSize);
 
     const stream = new ReadableStream<Uint8Array>({
         async pull(controller: ReadableStreamDefaultController) {
@@ -122,7 +112,6 @@ function getFileStream(
 }
 
 async function* fileChunkReaderMaker(
-    worker,
     reader: FileReader,
     file: File,
     chunkSize: number

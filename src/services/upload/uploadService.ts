@@ -49,7 +49,7 @@ class UploadService {
             fileTypeInfo
         );
 
-        const filedata = await getFileData(worker, reader, rawFile);
+        const filedata = await getFileData(reader, rawFile);
 
         return {
             filedata,
