@@ -16,7 +16,7 @@ import {
     FileTypeInfo,
     FileWithCollection,
     FileWithMetadata,
-    MetadataObject,
+    Metadata,
     UploadFile,
 } from 'types/upload';
 import { FILE_TYPE } from 'constants/file';
@@ -40,7 +40,7 @@ export default async function uploader(
 
     let file: FileInMemory = null;
     let encryptedFile: EncryptedFile = null;
-    let metadata: MetadataObject = null;
+    let metadata: Metadata = null;
     let fileTypeInfo: FileTypeInfo = null;
     let fileWithMetadata: FileWithMetadata = null;
 

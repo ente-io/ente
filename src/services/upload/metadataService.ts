@@ -2,7 +2,7 @@ import { FILE_TYPE } from 'constants/file';
 import { logError } from 'utils/sentry';
 import { getExifData } from './exifService';
 import {
-    MetadataObject,
+    Metadata,
     ParsedMetaDataJSON,
     Location,
     FileTypeInfo,
@@ -29,7 +29,7 @@ export async function extractMetadata(
         exifData = await getExifData(receivedFile, fileTypeInfo);
     }
 
-    const extractedMetadata: MetadataObject = {
+    const extractedMetadata: Metadata = {
         title: receivedFile.name,
         creationTime:
             exifData?.creationTime ?? receivedFile.lastModified * 1000,

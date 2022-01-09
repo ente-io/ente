@@ -17,7 +17,7 @@ export interface EncryptionResult {
     key: string;
 }
 
-export interface MetadataObject {
+export interface Metadata {
     title: string;
     creationTime: number;
     modificationTime: number;
@@ -90,7 +90,7 @@ export interface FileInMemory {
 
 export interface FileWithMetadata
     extends Omit<FileInMemory, 'hasStaticThumbnail'> {
-    metadata: MetadataObject;
+    metadata: Metadata;
 }
 
 export interface EncryptedFile {

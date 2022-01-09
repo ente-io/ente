@@ -18,7 +18,7 @@ import {
     FileWithMetadata,
     isDataStream,
     MetadataMap,
-    MetadataObject,
+    Metadata,
     ParsedMetaDataJSON,
     ProcessedFile,
     UploadFile,
@@ -62,13 +62,13 @@ class UploadService {
         rawFile: File,
         collection: Collection,
         fileTypeInfo: FileTypeInfo
-    ): Promise<MetadataObject> {
+    ): Promise<Metadata> {
         const originalName = getFileOriginalName(rawFile);
         const googleMetadata =
             this.metadataMap.get(
                 getMetadataMapKey(collection.id, originalName)
             ) ?? {};
-        const extractedMetadata: MetadataObject = await extractMetadata(
+        const extractedMetadata: Metadata = await extractMetadata(
             rawFile,
             fileTypeInfo
         );

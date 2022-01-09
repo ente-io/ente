@@ -4,7 +4,7 @@ import { CollectionIDPathMap, ExportRecord } from 'types/export';
 
 import { EnteFile } from 'types/file';
 
-import { MetadataObject } from 'types/upload';
+import { Metadata } from 'types/upload';
 import { formatDate, splitFilenameAndExtension } from 'utils/file';
 import { METADATA_FOLDER_NAME } from 'constants/export';
 
@@ -127,7 +127,7 @@ export const dedupe = (files: any[]) => {
 
 export const getGoogleLikeMetadataFile = (
     fileSaveName: string,
-    metadata: MetadataObject
+    metadata: Metadata
 ) => {
     const creationTime = Math.floor(metadata.creationTime / 1000000);
     const modificationTime = Math.floor(
