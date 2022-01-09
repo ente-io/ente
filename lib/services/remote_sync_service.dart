@@ -104,6 +104,9 @@ class RemoteSyncService {
       _logger.severe("Error executing remote sync ", e, s);
       _existingSync.complete();
       _existingSync = null;
+      if (e is UnauthorizedError) {
+        rethrow;
+      }
     }
   }
 
