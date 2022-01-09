@@ -36,6 +36,7 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     faceClustering: {
         method: 'Hdbscan',
         minClusterSize: 6,
+        minSamples: 6,
         minInputSize: 50,
         // maxDistanceInsideCluster: 0.4,
         generateDebugInfo: true,

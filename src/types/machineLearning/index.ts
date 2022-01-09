@@ -344,6 +344,7 @@ export interface ClusteringService {
 export interface ClusteringConfig {
     method: ClusteringMethod;
     minClusterSize: number;
+    minSamples?: number;
     maxDistanceInsideCluster?: number;
     minInputSize?: number;
     generateDebugInfo?: boolean;

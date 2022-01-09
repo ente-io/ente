@@ -26,6 +26,7 @@ class HdbscanClusteringService implements ClusteringService {
             input,
 
             minClusterSize: config.minClusterSize,
+            minSamples: config.minSamples,
             debug: config.generateDebugInfo,
         });
 
