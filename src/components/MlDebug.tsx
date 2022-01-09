@@ -16,6 +16,7 @@ import { getAllFacesFromMap } from 'utils/machineLearning';
 import { FaceImagesRow, ImageBlobView } from './ImageViews';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { getFaceCropBlobFromStorage } from 'utils/machineLearning/faceCrop';
+import { AllPeopleList } from './PeopleList';
 
 interface TSNEProps {
     mlResult: MLDebugResult;
@@ -329,6 +330,10 @@ export default function MLDebug() {
             <p></p>
             <button onClick={onExportMLData}>Export ML Data</button>
             <input id="importMLData" type="file" onChange={onImportMLData} />
+
+            <p></p>
+            <div>All identified people:</div>
+            <AllPeopleList limit={100}></AllPeopleList>
 
             <p></p>
             <button onClick={onLoadNoiseFaces}>Load Noise Faces</button>
