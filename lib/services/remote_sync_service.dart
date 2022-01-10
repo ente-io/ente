@@ -104,7 +104,12 @@ class RemoteSyncService {
       _logger.severe("Error executing remote sync ", e, s);
       _existingSync.complete();
       _existingSync = null;
-      if (e is UnauthorizedError) {
+      // rethrow whitelisted error so that UI status can be updated correctly.
+      if (e is UnauthorizedError ||
+          e is NoActiveSubscriptionError ||
+          e is WiFiUnavailableError ||
+          e is StorageLimitExceededError ||
+          e is SyncStopRequestedError) {
         rethrow;
       }
     }
