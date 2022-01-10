@@ -41,7 +41,7 @@
     "exifr": "^7.1.3",
     "file-type": "^16.5.3",
     "formik": "^2.1.5",
-    "hdbscan": "^0.0.1-alpha.2",
+    "hdbscan": "0.0.1-alpha.3",
     "hdbscanjs": "^1.0.12",
     "heic-convert": "^1.2.4",
     "http-proxy-middleware": "^1.0.5",

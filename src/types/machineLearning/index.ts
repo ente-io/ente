@@ -345,6 +345,8 @@ export interface ClusteringConfig {
     method: ClusteringMethod;
     minClusterSize: number;
     minSamples?: number;
+    clusterSelectionEpsilon?: number;
+    clusterSelectionMethod?: 'eom' | 'leaf';
     maxDistanceInsideCluster?: number;
     minInputSize?: number;
     generateDebugInfo?: boolean;

@@ -22,11 +22,14 @@ class HdbscanClusteringService implements ClusteringService {
         input: ClusteringInput,
         config: ClusteringConfig
     ): Promise<HdbscanResults> {
+        // console.log('Clustering input: ', input);
         const hdbscan = new Hdbscan({
             input,
 
             minClusterSize: config.minClusterSize,
             minSamples: config.minSamples,
+            clusterSelectionEpsilon: config.clusterSelectionEpsilon,
+            clusterSelectionMethod: config.clusterSelectionMethod,
             debug: config.generateDebugInfo,
         });
 
