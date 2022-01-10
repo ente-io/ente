@@ -1,4 +1,8 @@
 import {
+    DEFAULT_ML_SYNC_CONFIG,
+    DEFAULT_ML_SYNC_JOB_CONFIG,
+} from 'constants/machineLearning/config';
+import {
     openDB,
     deleteDB,
     DBSchema,
@@ -6,8 +10,12 @@ import {
     IDBPTransaction,
     StoreNames,
 } from 'idb';
+import { Config } from 'types/common/config';
 import { Face, MlFileData, MLLibraryData, Person } from 'types/machineLearning';
 import { runningInBrowser } from 'utils/common';
+
+export const ML_SYNC_JOB_CONFIG_NAME = 'ml-sync-job';
+export const ML_SYNC_CONFIG_NAME = 'ml-sync';
 
 const MLDATA_DB_NAME = 'mldata';
 interface MLDb extends DBSchema {
@@ -28,6 +36,10 @@ interface MLDb extends DBSchema {
         key: string;
         value: MLLibraryData;
     };
+    configs: {
+        key: string;
+        value: Config;
+    };
 }
 
 class MLIDbStorage {
@@ -38,23 +50,36 @@ class MLIDbStorage {
             return;
         }
 
-        this.db = openDB<MLDb>(MLDATA_DB_NAME, 1, {
-            upgrade(db) {
-                const filesStore = db.createObjectStore('files', {
-                    keyPath: 'fileId',
-                });
-                filesStore.createIndex('mlVersion', [
-                    'mlVersion',
-                    'errorCount',
-                ]);
+        this.db = openDB<MLDb>(MLDATA_DB_NAME, 2, {
+            upgrade(db, oldVersion, newVersion, tx) {
+                if (newVersion === 1) {
+                    const filesStore = db.createObjectStore('files', {
+                        keyPath: 'fileId',
+                    });
+                    filesStore.createIndex('mlVersion', [
+                        'mlVersion',
+                        'errorCount',
+                    ]);
 
-                db.createObjectStore('people', {
-                    keyPath: 'id',
-                });
+                    db.createObjectStore('people', {
+                        keyPath: 'id',
+                    });
 
-                db.createObjectStore('versions');
+                    db.createObjectStore('versions');
 
-                db.createObjectStore('library');
+                    db.createObjectStore('library');
+                } else if (newVersion === 2) {
+                    db.createObjectStore('configs');
+
+                    tx.objectStore('configs').add(
+                        DEFAULT_ML_SYNC_JOB_CONFIG,
+                        ML_SYNC_JOB_CONFIG_NAME
+                    );
+                    tx.objectStore('configs').add(
+                        DEFAULT_ML_SYNC_CONFIG,
+                        ML_SYNC_CONFIG_NAME
+                    );
+                }
             },
         });
     }
@@ -240,6 +265,24 @@ class MLIDbStorage {
     public async putLibraryData(data: MLLibraryData) {
         const db = await this.db;
         return db.put('library', data, 'data');
+    }
+
+    public async getConfig<T extends Config>(name: string, def: T) {
+        const db = await this.db;
+        const tx = db.transaction('configs', 'readwrite');
+        let config = (await tx.store.get(name)) as T;
+        if (!config) {
+            config = def;
+            await tx.store.put(def, name);
+        }
+        await tx.done;
+
+        return config;
+    }
+
+    public async putConfig(name: string, data: Config) {
+        const db = await this.db;
+        return db.put('configs', data, name);
     }
 
     // for debug purpose

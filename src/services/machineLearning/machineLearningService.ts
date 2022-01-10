@@ -29,7 +29,6 @@ import {
     getFaceId,
     getLocalFile,
     getLocalFileImageBitmap,
-    getMLSyncConfig,
     getOriginalImageBitmap,
     getThumbnailImageBitmap,
     isDifferentOrOld,
@@ -37,6 +36,7 @@ import {
 import { MLFactory } from './machineLearningFactory';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { storeFaceCrop } from 'utils/machineLearning/faceCrop';
+import { getMLSyncConfig } from 'utils/machineLearning/config';
 
 class MachineLearningService {
     private initialized = false;

@@ -1,9 +1,5 @@
 import { NormalizedFace } from '@tensorflow-models/blazeface';
 import * as tf from '@tensorflow/tfjs-core';
-import {
-    DEFAULT_ML_SYNC_CONFIG,
-    DEFAULT_ML_SYNC_JOB_CONFIG,
-} from 'constants/machineLearning/config';
 import PQueue from 'p-queue';
 import DownloadManager from 'services/downloadManager';
 import { File, getLocalFiles } from 'services/fileService';
@@ -466,12 +462,4 @@ export function logQueueStats(queue: PQueue, name: string) {
             `queuestats: ${name}: Working on next item.  Size: ${queue.size}  Pending: ${queue.pending}`
         );
     });
-}
-
-export async function getMLSyncJobConfig() {
-    return DEFAULT_ML_SYNC_JOB_CONFIG;
-}
-
-export async function getMLSyncConfig() {
-    return DEFAULT_ML_SYNC_CONFIG;
 }

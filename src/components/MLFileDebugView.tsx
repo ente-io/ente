@@ -3,7 +3,7 @@ import arcfaceAlignmentService from 'services/machineLearning/arcfaceAlignmentSe
 import arcfaceCropService from 'services/machineLearning/arcfaceCropService';
 import blazeFaceDetectionService from 'services/machineLearning/blazeFaceDetectionService';
 import { AlignedFace, FaceCrop } from 'types/machineLearning';
-import { getMLSyncConfig } from 'utils/machineLearning';
+import { getMLSyncConfig } from 'utils/machineLearning/config';
 import {
     getAlignedFaceBox,
     ibExtractFaceImage,

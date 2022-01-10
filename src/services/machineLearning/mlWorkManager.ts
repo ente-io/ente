@@ -4,7 +4,7 @@ import { eventBus, Events } from 'services/events';
 import { File } from 'services/fileService';
 import { FACE_CROPS_CACHE_NAME, MLSyncConfig } from 'types/machineLearning';
 import { getToken } from 'utils/common/key';
-import { getMLSyncJobConfig } from 'utils/machineLearning';
+import { getMLSyncJobConfig } from 'utils/machineLearning/config';
 import { MLWorkerWithProxy } from 'utils/machineLearning/worker';
 import { logError } from 'utils/sentry';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';

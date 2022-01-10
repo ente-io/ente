@@ -1,14 +1,4 @@
-export type JobState = 'Scheduled' | 'Running' | 'NotScheduled';
-
-export interface JobConfig {
-    intervalSec: number;
-    maxItervalSec: number;
-    backoffMultiplier: number;
-}
-
-export interface JobResult {
-    shouldBackoff: boolean;
-}
+import { JobResult, JobConfig, JobState } from 'types/common/job';
 
 export class SimpleJob<R extends JobResult> {
     private config: JobConfig;
