@@ -24,6 +24,7 @@ import arcfaceCropService from './arcfaceCropService';
 import hdbscanClusteringService from './hdbscanClusteringService';
 import blazeFaceDetectionService from './blazeFaceDetectionService';
 import mobileFaceNetEmbeddingService from './mobileFaceNetEmbeddingService';
+import dbscanClusteringService from './dbscanClusteringService';
 
 export class MLFactory {
     public static getFaceDetectionService(
@@ -69,6 +70,9 @@ export class MLFactory {
     ): ClusteringService {
         if (method === 'Hdbscan') {
             return hdbscanClusteringService;
+        }
+        if (method === 'Dbscan') {
+            return dbscanClusteringService;
         }
 
         throw Error('Unknon clustering method: ' + method);
