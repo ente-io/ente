@@ -66,6 +66,7 @@
     "react-dropzone": "^11.2.4",
     "react-otp-input": "^2.3.1",
     "react-select": "^4.3.1",
+    "react-simple-code-editor": "^0.11.0",
     "react-top-loading-bar": "^2.0.1",
     "react-virtualized-auto-sizer": "^1.0.2",
     "react-window": "^1.8.6",

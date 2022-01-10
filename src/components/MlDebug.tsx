@@ -17,6 +17,7 @@ import {
     Face,
     FACE_CROPS_CACHE_NAME,
     MLDebugResult,
+    MLSyncConfig,
     Person,
 } from 'types/machineLearning';
 import Tree from 'react-d3-tree';
@@ -32,6 +33,15 @@ import styled from 'styled-components';
 import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
 import { DebugInfo } from 'hdbscan';
 import { toD3Tree } from 'utils/machineLearning/clustering';
+import {
+    getMLSyncConfig,
+    getMLSyncJobConfig,
+    updateMLSyncConfig,
+    updateMLSyncJobConfig,
+} from 'utils/machineLearning/config';
+import { Button, Col, Row } from 'react-bootstrap';
+import Editor from 'react-simple-code-editor';
+import { JobConfig } from 'types/common/job';
 
 interface TSNEProps {
     mlResult: MLDebugResult;
@@ -121,10 +131,12 @@ const ClusterFacesRow = styled(FaceImagesRow)`
 
 export default function MLDebug() {
     const [token, setToken] = useState<string>();
+    const [mlSyncConfig, setMlSyncConfig] = useState<string>();
+    const [mlSyncJobConfig, setMlSyncJobConfig] = useState<string>();
     const [clusterFaceDistance] = useState<number>(0.4);
-    const [minClusterSize, setMinClusterSize] = useState<number>(5);
-    const [minFaceSize, setMinFaceSize] = useState<number>(32);
-    const [batchSize, setBatchSize] = useState<number>(200);
+    // const [minClusterSize, setMinClusterSize] = useState<number>(5);
+    // const [minFaceSize, setMinFaceSize] = useState<number>(32);
+    // const [batchSize, setBatchSize] = useState<number>(200);
     const [maxFaceDistance] = useState<number>(0.5);
     const [mlResult, setMlResult] = useState<MLDebugResult>({
         allFaces: [],
@@ -163,6 +175,26 @@ export default function MLDebug() {
     };
     let MLWorker: ComlinkWorker;
 
+    const loadMlSyncConfig = async () => {
+        const mlSyncConfig = await getMLSyncConfig();
+        setMlSyncConfig(JSON.stringify(mlSyncConfig, null, '\t'));
+    };
+
+    const updateMlSyncConf = async () => {
+        const mlSyncConfigObj = JSON.parse(mlSyncConfig) as MLSyncConfig;
+        updateMLSyncConfig(mlSyncConfigObj);
+    };
+
+    const loadMlSyncJobConfig = async () => {
+        const mlSyncJobConfig = await getMLSyncJobConfig();
+        setMlSyncJobConfig(JSON.stringify(mlSyncJobConfig, null, '\t'));
+    };
+
+    const updateMlSyncJobConf = async () => {
+        const mlSyncJobConfigObj = JSON.parse(mlSyncJobConfig) as JobConfig;
+        updateMLSyncJobConfig(mlSyncJobConfigObj);
+    };
+
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
         if (!user?.token) {
@@ -171,6 +203,9 @@ export default function MLDebug() {
             setToken(user.token);
         }
         appContext.showNavBar(true);
+
+        loadMlSyncConfig();
+        loadMlSyncJobConfig();
     }, []);
 
     const onSync = async () => {
@@ -183,9 +218,9 @@ export default function MLDebug() {
             const result = await mlWorker.sync(
                 token,
                 clusterFaceDistance,
-                minClusterSize,
-                minFaceSize,
-                batchSize,
+                // minClusterSize,
+                // minFaceSize,
+                // batchSize,
                 maxFaceDistance
             );
             setMlResult(result);
@@ -337,6 +372,7 @@ export default function MLDebug() {
     const nodeSize = { x: 180, y: 180 };
     const foreignObjectProps = { width: 112, height: 150, x: -56 };
 
+    // TODO: Remove debug page or config editor from prod
     return (
         <div>
             {/* <div>ClusterFaceDistance: {clusterFaceDistance}</div>
@@ -348,7 +384,67 @@ export default function MLDebug() {
             <button onClick={() => setClusterFaceDistance(0.6)}>0.6</button>
 
             <p></p> */}
-            <div>MinFaceSize: {minFaceSize}</div>
+
+            <Row>
+                <Col style={{ width: '50%' }}>
+                    <div>ML Sync Config:</div>
+                    <div style={{ height: '200px', overflow: 'auto' }}>
+                        <Editor
+                            value={mlSyncConfig}
+                            onValueChange={(mlSyncConfig) =>
+                                setMlSyncConfig(mlSyncConfig)
+                            }
+                            highlight={(code) => code}
+                            padding={10}
+                            style={{
+                                background: 'white',
+                            }}
+                        />
+                    </div>
+                    <Row style={{ marginTop: '10px' }}>
+                        <Col>
+                            <Button onClick={() => loadMlSyncConfig()}>
+                                Reload
+                            </Button>
+                        </Col>
+                        <Col>
+                            <Button onClick={() => updateMlSyncConf()}>
+                                Update
+                            </Button>
+                        </Col>
+                    </Row>
+                </Col>
+                <Col style={{ width: '50%' }}>
+                    <div>ML Sync Job Config:</div>
+                    <div style={{ height: '200px', overflow: 'auto' }}>
+                        <Editor
+                            value={mlSyncJobConfig}
+                            onValueChange={(mlSyncConfig) =>
+                                setMlSyncJobConfig(mlSyncConfig)
+                            }
+                            highlight={(code) => code}
+                            padding={10}
+                            style={{
+                                background: 'white',
+                            }}
+                        />
+                    </div>
+                    <Row style={{ marginTop: '10px' }}>
+                        <Col>
+                            <Button onClick={() => loadMlSyncJobConfig()}>
+                                Reload
+                            </Button>
+                        </Col>
+                        <Col>
+                            <Button onClick={() => updateMlSyncJobConf()}>
+                                Update
+                            </Button>
+                        </Col>
+                    </Row>
+                </Col>
+            </Row>
+
+            {/* <div>MinFaceSize: {minFaceSize}</div>
             <button onClick={() => setMinFaceSize(16)}>16</button>
             <button onClick={() => setMinFaceSize(24)}>24</button>
             <button onClick={() => setMinFaceSize(32)}>32</button>
@@ -369,7 +465,7 @@ export default function MLDebug() {
             <button onClick={() => setBatchSize(50)}>50</button>
             <button onClick={() => setBatchSize(100)}>100</button>
             <button onClick={() => setBatchSize(200)}>200</button>
-            <button onClick={() => setBatchSize(500)}>500</button>
+            <button onClick={() => setBatchSize(500)}>500</button> */}
 
             {/* <p></p>
             <div>MaxFaceDistance: {maxFaceDistance}</div>
