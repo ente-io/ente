@@ -12,7 +12,7 @@ notify us (security@ente.io). We welcome working with you to resolve the issue p
   degradation of our service. Only interact with accounts you own or with explicit permission of the
   account holder.
 - If you would like to encrypt your report, please use the PGP key with long ID
-  `437D3337404C4B07095C28E71719A1B5C1D12679` (available in the public keyserver pool).
+  `E273695C0403F34F74171932DF6DDDE98EBD2394` (available in the public keyserver pool).
 
 # In-scope
 
