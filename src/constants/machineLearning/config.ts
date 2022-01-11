@@ -35,9 +35,9 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     },
     faceClustering: {
         method: 'Hdbscan',
-        minClusterSize: 6,
-        minSamples: 6,
-        clusterSelectionEpsilon: 0.7,
+        minClusterSize: 3,
+        minSamples: 5,
+        clusterSelectionEpsilon: 0.65,
         clusterSelectionMethod: 'leaf',
         minInputSize: 50,
         // maxDistanceInsideCluster: 0.4,
