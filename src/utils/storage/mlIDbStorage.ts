@@ -52,6 +52,7 @@ class MLIDbStorage {
 
         this.db = openDB<MLDb>(MLDATA_DB_NAME, 2, {
             upgrade(db, oldVersion, newVersion, tx) {
+                // TODO: consider oldVersion
                 if (newVersion === 1) {
                     const filesStore = db.createObjectStore('files', {
                         keyPath: 'fileId',
@@ -168,6 +169,20 @@ class MLIDbStorage {
     public async putFile(mlFile: MlFileData) {
         const db = await this.db;
         return db.put('files', mlFile);
+    }
+
+    public async upsertFileInTx(
+        fileId: number,
+        upsert: (mlFile: MlFileData) => MlFileData
+    ) {
+        const db = await this.db;
+        const tx = db.transaction('files', 'readwrite');
+        const existing = await tx.store.get(fileId);
+        const updated = upsert(existing);
+        await tx.store.put(updated);
+        await tx.done;
+
+        return updated;
     }
 
     public async putAllFiles(

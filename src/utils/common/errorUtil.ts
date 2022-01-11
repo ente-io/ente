@@ -29,9 +29,10 @@ export enum CustomError {
     INVALID_COLLECTION_OPERATION = 'invalid collection operation',
     WAIT_TIME_EXCEEDED = 'thumbnail generation wait time exceeded',
     REQUEST_CANCELLED = 'request canceled',
+    NETWORK_ERROR = 'Network Error',
 }
 
-function parseUploadError(error: AxiosResponse) {
+export function parseServerError(error: AxiosResponse) {
     let parsedMessage = null;
     if (error?.status) {
         const errorCode = error.status.toString();
@@ -64,7 +65,7 @@ function parseUploadError(error: AxiosResponse) {
 export function handleUploadError(error: AxiosResponse | Error): Error {
     let parsedError: Error = null;
     if ('status' in error) {
-        parsedError = parseUploadError(error).parsedError;
+        parsedError = parseServerError(error).parsedError;
     } else {
         parsedError = error;
     }

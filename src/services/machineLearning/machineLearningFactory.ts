@@ -105,6 +105,8 @@ export class LocalMLSyncContext implements MLSyncContext {
     public allSyncedFacesMap?: Map<number, Array<Face>>;
     public tsne?: any;
 
+    public error?: Error;
+
     public mlLibraryData: MLLibraryData;
 
     public syncQueue: PQueue;

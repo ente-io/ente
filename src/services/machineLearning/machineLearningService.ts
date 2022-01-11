@@ -37,6 +37,7 @@ import { MLFactory } from './machineLearningFactory';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { storeFaceCrop } from 'utils/machineLearning/faceCrop';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
+import { CustomError, parseServerError } from 'utils/common/errorUtil';
 
 class MachineLearningService {
     private initialized = false;
@@ -101,6 +102,7 @@ class MachineLearningService {
             nFaceNoise:
                 syncContext.mlLibraryData?.faceClusteringResults?.noise.length,
             tsne: syncContext.tsne,
+            error: syncContext.error,
         };
         // console.log('[MLService] sync results: ', mlSyncResult);
 
@@ -260,36 +262,33 @@ class MachineLearningService {
     }
 
     private async syncFiles(syncContext: MLSyncContext) {
-        for (const outOfSyncfile of syncContext.outOfSyncFiles) {
-            syncContext.syncQueue.add(async () => {
-                try {
-                    const mlFileData = await this.syncFile(
-                        syncContext,
-                        outOfSyncfile
-                    );
-                    mlFileData.faces &&
-                        syncContext.syncedFaces.push(...mlFileData.faces);
-                    syncContext.syncedFiles.push(outOfSyncfile);
-                    console.log('TF Memory stats: ', tf.memory());
-                } catch (e) {
-                    console.error(
-                        'Error while syncing file: ',
-                        outOfSyncfile.id,
-                        e
-                    );
-
-                    await this.persistMLFileSyncError(
-                        syncContext,
-                        outOfSyncfile,
-                        e
-                    );
-                }
-            });
+        try {
+            // TODO: can use q.addAll and error event to clear pending tasks
+            await Promise.all(
+                syncContext.outOfSyncFiles.map((outOfSyncfile) =>
+                    syncContext.syncQueue.add(async () => {
+                        const mlFileData = await this.syncFileWithErrorHandler(
+                            syncContext,
+                            outOfSyncfile
+                        );
+                        // TODO: just store file and faces count in syncContext
+                        mlFileData?.faces &&
+                            syncContext.syncedFaces.push(...mlFileData.faces);
+                        syncContext.syncedFiles.push(outOfSyncfile);
+                    })
+                )
+            );
+        } catch (error) {
+            console.error('Error in sync job: ', error);
+            syncContext.syncQueue.clear();
+            syncContext.error = error;
         }
-        // TODO: can use addAll instead
         await syncContext.syncQueue.onIdle();
         console.log('allFaces: ', syncContext.syncedFaces);
 
+        // TODO: In case syncJob has to use multiple ml workers
+        // do in same transaction with each file update
+        // or keep in files store itself
         await mlIDbStorage.incrementIndexVersion('files');
         // await this.disposeMLModels();
     }
@@ -299,7 +298,7 @@ class MachineLearningService {
         enteFile: File,
         localFile: globalThis.File,
         config?: MLSyncConfig
-    ) {
+    ): Promise<MlFileData | Error> {
         const mlSyncConfig = config || (await getMLSyncConfig());
         const syncContext = MLFactory.getMLSyncContext(
             token,
@@ -309,7 +308,7 @@ class MachineLearningService {
         // await this.init();
 
         try {
-            const mlFileData = await this.syncFile(
+            const mlFileData = await this.syncFileWithErrorHandler(
                 syncContext,
                 enteFile,
                 localFile
@@ -318,7 +317,39 @@ class MachineLearningService {
             return mlFileData;
         } catch (e) {
             console.error('Error while syncing local file: ', enteFile.id, e);
-            await this.persistMLFileSyncError(syncContext, enteFile, e);
+            return e;
+        }
+    }
+
+    private async syncFileWithErrorHandler(
+        syncContext: MLSyncContext,
+        enteFile: File,
+        localFile?: globalThis.File
+    ): Promise<MlFileData> {
+        try {
+            const mlFileData = await this.syncFile(
+                syncContext,
+                enteFile,
+                localFile
+            );
+            return mlFileData;
+        } catch (e) {
+            let error = e;
+            if ('status' in error) {
+                error = parseServerError(error).parsedError || error;
+            }
+            // TODO: throw errors not related to specific file
+            // sync job run should stop after these errors
+            // don't persist these errors against file
+            switch (error.message) {
+                case CustomError.SESSION_EXPIRED_MESSAGE:
+                case CustomError.NETWORK_ERROR:
+                    throw error;
+            }
+
+            await this.persistMLFileSyncError(syncContext, enteFile, error);
+        } finally {
+            console.log('TF Memory stats: ', tf.memory());
         }
     }
 
@@ -615,14 +646,15 @@ class MachineLearningService {
         e: Error
     ) {
         try {
-            const oldMlFileData = await this.getMLFileData(enteFile.id);
-            let mlFileData = oldMlFileData;
-            if (!mlFileData) {
-                mlFileData = this.newMlData(enteFile.id);
-            }
-            mlFileData.errorCount = (mlFileData.errorCount || 0) + 1;
-            mlFileData.lastErrorMessage = e.message;
-            return this.persistMLFileData(syncContext, mlFileData);
+            await mlIDbStorage.upsertFileInTx(enteFile.id, (mlFileData) => {
+                if (!mlFileData) {
+                    mlFileData = this.newMlData(enteFile.id);
+                }
+                mlFileData.errorCount = (mlFileData.errorCount || 0) + 1;
+                mlFileData.lastErrorMessage = e.message;
+
+                return mlFileData;
+            });
         } catch (e) {
             // TODO: logError or stop sync job after most of the requests are failed
             console.error('Error while storing ml sync error', e);

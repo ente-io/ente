@@ -22,6 +22,7 @@ export interface MLSyncResult {
     nFaceClusters: number;
     nFaceNoise: number;
     tsne?: any;
+    error?: Error;
 }
 
 export interface DebugFace {
@@ -261,6 +262,8 @@ export interface MLSyncContext {
     allSyncedFacesMap?: Map<number, Array<Face>>;
     tsne?: any;
 
+    error?: Error;
+
     // oldMLLibraryData: MLLibraryData;
     mlLibraryData: MLLibraryData;
 
@@ -361,7 +364,7 @@ export interface MachineLearningWorker {
         enteFile: File,
         localFile: globalThis.File,
         config?: MLSyncConfig
-    ): Promise<MlFileData>;
+    ): Promise<MlFileData | Error>;
 
     sync(token: string): Promise<MLSyncResult>;
 

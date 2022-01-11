@@ -114,12 +114,18 @@ class MLWorkManager {
         localFile: globalThis.File,
         config?: MLSyncConfig
     ) {
-        return this.liveSyncQueue.add(async () => {
+        const result = await this.liveSyncQueue.add(async () => {
             this.stopSyncJob();
             const token = getToken();
             const mlWorker = await this.getLiveSyncWorker();
             return mlWorker.syncLocalFile(token, enteFile, localFile, config);
         });
+
+        if ('message' in result) {
+            // TODO: redirect/refresh to gallery in case of session_expired
+            // may not be required as uploader should anyways take care of this
+            console.error('Error while syncing local file: ', result);
+        }
     }
 
     // Sync Job
@@ -144,10 +150,14 @@ class MLWorkManager {
 
         this.terminateSyncJobWorker();
         const jobResult: MLSyncJobResult = {
-            shouldBackoff: mlSyncResult.nOutOfSyncFiles < 1,
+            shouldBackoff:
+                !!mlSyncResult.error || mlSyncResult.nOutOfSyncFiles < 1,
             mlSyncResult,
         };
         console.log('ML Sync Job result: ', jobResult);
+
+        // TODO: redirect/refresh to gallery in case of session_expired, stop ml sync job
+
         return jobResult;
     }
 
