@@ -27,7 +27,7 @@ import ImageIcon from './icons/ImageIcon';
 import VideoIcon from './icons/VideoIcon';
 import { IconButton } from './Container';
 import { Person } from 'types/machineLearning';
-import { PeopleList } from './PeopleList';
+import { PeopleList } from './MachineLearning/PeopleList';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
