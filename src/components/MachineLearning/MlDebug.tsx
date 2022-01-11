@@ -39,9 +39,13 @@ import {
     updateMLSyncConfig,
     updateMLSyncJobConfig,
 } from 'utils/machineLearning/config';
-import { Button, Col, Row } from 'react-bootstrap';
-import Editor from 'react-simple-code-editor';
+import { Col, Row } from 'react-bootstrap';
 import { JobConfig } from 'types/common/job';
+import { ConfigEditor } from './ConfigEditor';
+import {
+    DEFAULT_ML_SYNC_CONFIG,
+    DEFAULT_ML_SYNC_JOB_CONFIG,
+} from 'constants/machineLearning/config';
 
 interface TSNEProps {
     mlResult: MLDebugResult;
@@ -131,8 +135,6 @@ const ClusterFacesRow = styled(FaceImagesRow)`
 
 export default function MLDebug() {
     const [token, setToken] = useState<string>();
-    const [mlSyncConfig, setMlSyncConfig] = useState<string>();
-    const [mlSyncJobConfig, setMlSyncJobConfig] = useState<string>();
     const [clusterFaceDistance] = useState<number>(0.4);
     // const [minClusterSize, setMinClusterSize] = useState<number>(5);
     // const [minFaceSize, setMinFaceSize] = useState<number>(32);
@@ -175,26 +177,6 @@ export default function MLDebug() {
     };
     let MLWorker: ComlinkWorker;
 
-    const loadMlSyncConfig = async () => {
-        const mlSyncConfig = await getMLSyncConfig();
-        setMlSyncConfig(JSON.stringify(mlSyncConfig, null, '\t'));
-    };
-
-    const updateMlSyncConf = async () => {
-        const mlSyncConfigObj = JSON.parse(mlSyncConfig) as MLSyncConfig;
-        updateMLSyncConfig(mlSyncConfigObj);
-    };
-
-    const loadMlSyncJobConfig = async () => {
-        const mlSyncJobConfig = await getMLSyncJobConfig();
-        setMlSyncJobConfig(JSON.stringify(mlSyncJobConfig, null, '\t'));
-    };
-
-    const updateMlSyncJobConf = async () => {
-        const mlSyncJobConfigObj = JSON.parse(mlSyncJobConfig) as JobConfig;
-        updateMLSyncJobConfig(mlSyncJobConfigObj);
-    };
-
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
         if (!user?.token) {
@@ -203,9 +185,6 @@ export default function MLDebug() {
             setToken(user.token);
         }
         appContext.showNavBar(true);
-
-        loadMlSyncConfig();
-        loadMlSyncJobConfig();
     }, []);
 
     const onSync = async () => {
@@ -385,62 +364,29 @@ export default function MLDebug() {
 
             <p></p> */}
 
-            <Row>
-                <Col style={{ width: '50%' }}>
-                    <div>ML Sync Config:</div>
-                    <div style={{ height: '200px', overflow: 'auto' }}>
-                        <Editor
-                            value={mlSyncConfig}
-                            onValueChange={(mlSyncConfig) =>
-                                setMlSyncConfig(mlSyncConfig)
-                            }
-                            highlight={(code) => code}
-                            padding={10}
-                            style={{
-                                background: 'white',
-                            }}
-                        />
-                    </div>
-                    <Row style={{ marginTop: '10px' }}>
-                        <Col>
-                            <Button onClick={() => loadMlSyncConfig()}>
-                                Reload
-                            </Button>
-                        </Col>
-                        <Col>
-                            <Button onClick={() => updateMlSyncConf()}>
-                                Update
-                            </Button>
-                        </Col>
-                    </Row>
+            <Row style={{ margin: '15px' }}>
+                <Col>
+                    <ConfigEditor
+                        name="ML Sync"
+                        getConfig={() => getMLSyncConfig()}
+                        defaultConfig={() =>
+                            Promise.resolve(DEFAULT_ML_SYNC_CONFIG)
+                        }
+                        setConfig={(mlSyncConfig) =>
+                            updateMLSyncConfig(mlSyncConfig as MLSyncConfig)
+                        }></ConfigEditor>
                 </Col>
-                <Col style={{ width: '50%' }}>
-                    <div>ML Sync Job Config:</div>
-                    <div style={{ height: '200px', overflow: 'auto' }}>
-                        <Editor
-                            value={mlSyncJobConfig}
-                            onValueChange={(mlSyncConfig) =>
-                                setMlSyncJobConfig(mlSyncConfig)
-                            }
-                            highlight={(code) => code}
-                            padding={10}
-                            style={{
-                                background: 'white',
-                            }}
-                        />
-                    </div>
-                    <Row style={{ marginTop: '10px' }}>
-                        <Col>
-                            <Button onClick={() => loadMlSyncJobConfig()}>
-                                Reload
-                            </Button>
-                        </Col>
-                        <Col>
-                            <Button onClick={() => updateMlSyncJobConf()}>
-                                Update
-                            </Button>
-                        </Col>
-                    </Row>
+
+                <Col>
+                    <ConfigEditor
+                        name="ML Sync Job"
+                        getConfig={() => getMLSyncJobConfig()}
+                        defaultConfig={() =>
+                            Promise.resolve(DEFAULT_ML_SYNC_JOB_CONFIG)
+                        }
+                        setConfig={(mlSyncJobConfig) =>
+                            updateMLSyncJobConfig(mlSyncJobConfig as JobConfig)
+                        }></ConfigEditor>
                 </Col>
             </Row>
 
