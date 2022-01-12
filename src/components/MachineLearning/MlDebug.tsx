@@ -31,7 +31,7 @@ import { getFaceCropBlobFromStorage } from 'utils/machineLearning/faceCrop';
 import { PeopleList } from './PeopleList';
 import styled from 'styled-components';
 import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
-import { DebugInfo } from 'hdbscan';
+import { DebugInfo, mstToBinaryTree } from 'hdbscan';
 import { toD3Tree } from 'utils/machineLearning/clustering';
 import {
     getMLSyncConfig,
@@ -339,11 +339,9 @@ export default function MLDebug() {
         const clusteringDebugInfo: DebugInfo =
             mlLibraryData?.faceClusteringResults['debugInfo'];
         if (clusteringDebugInfo) {
-            const d3Tree = toD3Tree(
-                clusteringDebugInfo.mstBinaryTree,
-                allFaces
-            );
-            console.log(clusteringDebugInfo.mstBinaryTree, d3Tree);
+            const mstBinaryTree = mstToBinaryTree(clusteringDebugInfo.mst);
+            const d3Tree = toD3Tree(mstBinaryTree, allFaces);
+            // console.log(mstBinaryTree, d3Tree);
             setMstD3Tree(d3Tree);
         }
     };

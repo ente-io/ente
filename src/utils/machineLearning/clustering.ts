@@ -89,6 +89,7 @@ export function assignNoiseWithinLimit(syncContext: MLSyncContext) {
     });
 }
 
+// TODO: remove recursion to avoid stack size limits
 export function toD3Tree(
     treeNode: TreeNode<number>,
     allObjects: Array<any>
