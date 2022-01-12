@@ -50,7 +50,7 @@ function CollectionSelector({
         CollectionAndItsLatestFile[]
     >([]);
     useEffect(() => {
-        if (!attributes) {
+        if (!attributes || !props.show) {
             return;
         }
         const user: User = getData(LS_KEYS.USER);
