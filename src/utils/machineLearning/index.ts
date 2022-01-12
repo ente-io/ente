@@ -456,6 +456,28 @@ export function isDifferentOrOld(
     );
 }
 
+function primitiveArrayEquals(a, b) {
+    return (
+        Array.isArray(a) &&
+        Array.isArray(b) &&
+        a.length === b.length &&
+        a.every((val, index) => val === b[index])
+    );
+}
+
+export function areFaceIdsSame(ofFaces: Array<Face>, toFaces: Array<Face>) {
+    if (
+        (ofFaces === null || ofFaces === undefined) &&
+        (toFaces === null || toFaces === undefined)
+    ) {
+        return true;
+    }
+    return primitiveArrayEquals(
+        ofFaces?.map((f) => f.id),
+        toFaces?.map((f) => f.id)
+    );
+}
+
 export function logQueueStats(queue: PQueue, name: string) {
     queue.on('active', () => {
         console.log(

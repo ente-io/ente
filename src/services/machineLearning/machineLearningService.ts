@@ -23,6 +23,7 @@ import { toTSNE } from 'utils/machineLearning/visualization';
 //     mlFilesStore
 // } from 'utils/storage/mlStorage';
 import {
+    areFaceIdsSame,
     extractFaceImages,
     findFirstIfSorted,
     getAllFacesFromMap,
@@ -370,6 +371,8 @@ class MachineLearningService {
 
         if (syncContext.shouldUpdateMLVersion) {
             newMlFile.mlVersion = syncContext.config.mlVersion;
+        } else if (fileContext.oldMlFile?.mlVersion) {
+            newMlFile.mlVersion = fileContext.oldMlFile.mlVersion;
         }
 
         await this.syncFileFaceDetections(syncContext, fileContext);
@@ -513,7 +516,8 @@ class MachineLearningService {
             !isDifferentOrOld(
                 oldMlFile?.faceCropMethod,
                 syncContext.faceCropService.method
-            )
+            ) &&
+            areFaceIdsSame(newMlFile.faces, oldMlFile?.faces)
         ) {
             for (const [index, face] of newMlFile.faces.entries()) {
                 face.crop = oldMlFile.faces[index].crop;
@@ -540,7 +544,8 @@ class MachineLearningService {
             !isDifferentOrOld(
                 oldMlFile?.faceAlignmentMethod,
                 syncContext.faceAlignmentService.method
-            )
+            ) &&
+            areFaceIdsSame(newMlFile.faces, oldMlFile?.faces)
         ) {
             for (const [index, face] of newMlFile.faces.entries()) {
                 face.alignment = oldMlFile.faces[index].alignment;
@@ -570,7 +575,8 @@ class MachineLearningService {
             !isDifferentOrOld(
                 oldMlFile?.faceEmbeddingMethod,
                 syncContext.faceEmbeddingService.method
-            )
+            ) &&
+            areFaceIdsSame(newMlFile.faces, oldMlFile?.faces)
         ) {
             for (const [index, face] of newMlFile.faces.entries()) {
                 face.embedding = oldMlFile.faces[index].embedding;
