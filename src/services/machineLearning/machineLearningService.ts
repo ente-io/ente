@@ -786,11 +786,10 @@ class MachineLearningService {
         for (const [index, cluster] of clusters.entries()) {
             const faces = cluster.map((f) => allFaces[f]).filter((f) => f);
 
+            // TODO: take default display face from last leaves of hdbscan clusters
             const personFace = findFirstIfSorted(
                 faces,
-                (a, b) =>
-                    a.detection.probability * a.alignment.size -
-                    b.detection.probability * b.alignment.size
+                (a, b) => b.detection.probability - a.detection.probability
             );
 
             if (personFace && !personFace.crop?.imageUrl) {

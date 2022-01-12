@@ -437,7 +437,7 @@ export function findFirstIfSorted<T>(
 
     for (let i = 1; i < elements.length; i++) {
         const comp = comparator(elements[i], first);
-        if (comp > 0) {
+        if (comp < 0) {
             first = elements[i];
         }
     }
