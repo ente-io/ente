@@ -359,65 +359,58 @@ class MachineLearningService {
         localFile?: globalThis.File
     ) {
         const fileContext: MLSyncFileContext = { enteFile, localFile };
-        fileContext.oldMLFileData = await this.getMLFileData(enteFile.id);
-        if (!fileContext.oldMLFileData) {
-            fileContext.newMLFileData = this.newMlData(enteFile.id);
-        } else if (
-            fileContext.oldMLFileData?.mlVersion ===
-                syncContext.config.mlVersion &&
-            fileContext.oldMLFileData?.imageSource ===
-                syncContext.config.imageSource
+        fileContext.oldMlFile = await this.getMLFileData(enteFile.id);
+        if (
+            fileContext.oldMlFile?.mlVersion === syncContext.config.mlVersion
+            // TODO: reset mlversion of all files when user changes image source
         ) {
-            return fileContext.oldMLFileData;
-        } else {
-            // TODO: let rest of sync populate new file data correctly
-            fileContext.newMLFileData = { ...fileContext.oldMLFileData };
-            fileContext.newMLFileData.imageSource =
-                syncContext.config.imageSource;
+            return fileContext.oldMlFile;
         }
+        const newMlFile = (fileContext.newMlFile = this.newMlData(enteFile.id));
 
         if (syncContext.shouldUpdateMLVersion) {
-            fileContext.newMLFileData.mlVersion = syncContext.config.mlVersion;
+            newMlFile.mlVersion = syncContext.config.mlVersion;
         }
 
         await this.syncFileFaceDetections(syncContext, fileContext);
 
-        if (fileContext.faces && fileContext.faces.length > 0) {
+        if (newMlFile.faces && newMlFile.faces.length > 0) {
             await this.syncFileFaceCrops(syncContext, fileContext);
 
             await this.syncFileFaceAlignments(syncContext, fileContext);
 
             await this.syncFileFaceEmbeddings(syncContext, fileContext);
-
-            fileContext.newMLFileData.faces = fileContext.faces;
-        } else {
-            fileContext.newMLFileData.faces = undefined;
         }
 
         fileContext.tfImage && fileContext.tfImage.dispose();
         fileContext.imageBitmap && fileContext.imageBitmap.close();
         // console.log('8 TF Memory stats: ', tf.memory());
-        await this.persistMLFileData(syncContext, fileContext.newMLFileData);
+
+        newMlFile.errorCount = 0;
+        newMlFile.lastErrorMessage = undefined;
+        await this.persistMLFileData(syncContext, newMlFile);
 
         // TODO: enable once faceId changes go in
         // await removeOldFaceCrops(
-        //     fileContext.oldMLFileData,
-        //     fileContext.newMLFileData
+        //     fileContext.oldMlFile,
+        //     fileContext.newMlFile
         // );
 
-        return fileContext.newMLFileData;
+        return newMlFile;
     }
 
     private async getImageBitmap(
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext
     ) {
+        if (fileContext.imageBitmap) {
+            return fileContext.imageBitmap;
+        }
         // console.log('1 TF Memory stats: ', tf.memory());
         if (fileContext.localFile) {
             fileContext.imageBitmap = await getLocalFileImageBitmap(
                 fileContext.localFile
             );
-            // fileContext.newMLFileData.imageSource = 'Original';
         } else if (
             syncContext.config.imageSource === 'Original' &&
             [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(
@@ -429,69 +422,66 @@ class MachineLearningService {
                 syncContext.token,
                 await syncContext.getEnteWorker(fileContext.enteFile.id)
             );
-            // fileContext.newMLFileData.imageSource = 'Original';
         } else {
             fileContext.imageBitmap = await getThumbnailImageBitmap(
                 fileContext.enteFile,
                 syncContext.token
             );
-            // fileContext.newMLFileData.imageSource = 'Preview';
         }
 
-        if (!fileContext.newMLFileData.imageDimentions) {
-            const { width, height } = fileContext.imageBitmap;
-            fileContext.newMLFileData.imageDimentions = { width, height };
-        }
+        fileContext.newMlFile.imageSource = syncContext.config.imageSource;
+        const { width, height } = fileContext.imageBitmap;
+        fileContext.newMlFile.imageDimentions = { width, height };
         // console.log('2 TF Memory stats: ', tf.memory());
+
+        return fileContext.imageBitmap;
     }
 
     private async syncFileFaceDetections(
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext
     ) {
+        const { oldMlFile, newMlFile } = fileContext;
         if (
-            isDifferentOrOld(
-                fileContext.oldMLFileData?.faceDetectionMethod,
+            !isDifferentOrOld(
+                oldMlFile?.faceDetectionMethod,
                 syncContext.faceDetectionService.method
-            ) ||
-            fileContext.oldMLFileData?.imageSource !==
-                syncContext.config.imageSource
+            ) &&
+            oldMlFile?.imageSource === syncContext.config.imageSource
         ) {
-            fileContext.newMLFileData.faceDetectionMethod =
-                syncContext.faceDetectionService.method;
-            fileContext.newMLFileData.imageSource =
-                syncContext.config.imageSource;
-            fileContext.newDetection = true;
-            await this.getImageBitmap(syncContext, fileContext);
-            const faceDetections =
-                await syncContext.faceDetectionService.detectFaces(
-                    fileContext.imageBitmap
-                );
-            // console.log('3 TF Memory stats: ', tf.memory());
-            // TODO: reenable faces filtering based on width
-            const detectedFaces = faceDetections?.map((detection) => {
-                return {
-                    fileId: fileContext.enteFile.id,
-                    detection,
-                } as DetectedFace;
-            });
-            fileContext.faces = detectedFaces?.map((detectedFace) => ({
-                ...detectedFace,
-                id: getFaceId(
-                    detectedFace,
-                    fileContext.newMLFileData.imageDimentions
-                ),
+            newMlFile.faces = oldMlFile?.faces?.map((existingFace) => ({
+                id: existingFace.id,
+                fileId: existingFace.fileId,
+                detection: existingFace.detection,
             }));
-            // ?.filter((f) =>
-            //     f.box.width > syncContext.config.faceDetection.minFaceSize
-            // );
-            console.log(
-                '[MLService] filtertedFaces: ',
-                fileContext.faces?.length
-            );
-        } else {
-            fileContext.faces = fileContext.oldMLFileData?.faces;
+
+            newMlFile.imageSource = oldMlFile.imageSource;
+            newMlFile.imageDimentions = oldMlFile.imageDimentions;
+            newMlFile.faceDetectionMethod = oldMlFile.faceDetectionMethod;
+            return;
         }
+
+        newMlFile.faceDetectionMethod = syncContext.faceDetectionService.method;
+        fileContext.newDetection = true;
+        const imageBitmap = await this.getImageBitmap(syncContext, fileContext);
+        const faceDetections =
+            await syncContext.faceDetectionService.detectFaces(imageBitmap);
+        // console.log('3 TF Memory stats: ', tf.memory());
+        // TODO: reenable faces filtering based on width
+        const detectedFaces = faceDetections?.map((detection) => {
+            return {
+                fileId: fileContext.enteFile.id,
+                detection,
+            } as DetectedFace;
+        });
+        newMlFile.faces = detectedFaces?.map((detectedFace) => ({
+            ...detectedFace,
+            id: getFaceId(detectedFace, newMlFile.imageDimentions),
+        }));
+        // ?.filter((f) =>
+        //     f.box.width > syncContext.config.faceDetection.minFaceSize
+        // );
+        console.log('[MLService] Detected Faces: ', newMlFile.faces?.length);
     }
 
     private async saveFaceCrop(
@@ -516,18 +506,26 @@ class MachineLearningService {
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext
     ) {
-        const imageBitmap = fileContext.imageBitmap;
+        const { oldMlFile, newMlFile } = fileContext;
         if (
-            !fileContext.newDetection ||
-            !syncContext.config.faceCrop.enabled ||
-            !imageBitmap
+            // !syncContext.config.faceCrop.enabled ||
+            !fileContext.newDetection &&
+            !isDifferentOrOld(
+                oldMlFile?.faceCropMethod,
+                syncContext.faceCropService.method
+            )
         ) {
+            for (const [index, face] of newMlFile.faces.entries()) {
+                face.crop = oldMlFile.faces[index].crop;
+            }
+            newMlFile.faceCropMethod = oldMlFile.faceCropMethod;
             return;
         }
-        fileContext.newMLFileData.faceCropMethod =
-            syncContext.faceCropService.method;
 
-        for (const face of fileContext.faces) {
+        const imageBitmap = await this.getImageBitmap(syncContext, fileContext);
+        newMlFile.faceCropMethod = syncContext.faceCropService.method;
+
+        for (const face of newMlFile.faces) {
             await this.saveFaceCrop(imageBitmap, face, syncContext);
         }
     }
@@ -536,65 +534,72 @@ class MachineLearningService {
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext
     ) {
+        const { oldMlFile, newMlFile } = fileContext;
         if (
-            fileContext.newDetection ||
-            isDifferentOrOld(
-                fileContext.oldMLFileData?.faceAlignmentMethod,
+            !fileContext.newDetection &&
+            !isDifferentOrOld(
+                oldMlFile?.faceAlignmentMethod,
                 syncContext.faceAlignmentService.method
             )
         ) {
-            fileContext.newMLFileData.faceAlignmentMethod =
-                syncContext.faceAlignmentService.method;
-            fileContext.newAlignment = true;
-            for (const face of fileContext.faces) {
-                face.alignment =
-                    syncContext.faceAlignmentService.getFaceAlignment(
-                        face.detection
-                    );
+            for (const [index, face] of newMlFile.faces.entries()) {
+                face.alignment = oldMlFile.faces[index].alignment;
             }
-            console.log(
-                '[MLService] alignedFaces: ',
-                fileContext.faces?.length
-            );
-            // console.log('4 TF Memory stats: ', tf.memory());
-        } else {
-            fileContext.faces = fileContext.oldMLFileData?.faces;
+            newMlFile.faceAlignmentMethod = oldMlFile.faceAlignmentMethod;
+            return;
         }
+
+        newMlFile.faceAlignmentMethod = syncContext.faceAlignmentService.method;
+        fileContext.newAlignment = true;
+        for (const face of newMlFile.faces) {
+            face.alignment = syncContext.faceAlignmentService.getFaceAlignment(
+                face.detection
+            );
+        }
+        console.log('[MLService] alignedFaces: ', newMlFile.faces?.length);
+        // console.log('4 TF Memory stats: ', tf.memory());
     }
 
     private async syncFileFaceEmbeddings(
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext
     ) {
+        const { oldMlFile, newMlFile } = fileContext;
         if (
-            fileContext.newAlignment ||
-            isDifferentOrOld(
-                fileContext.oldMLFileData?.faceEmbeddingMethod,
+            !fileContext.newAlignment &&
+            !isDifferentOrOld(
+                oldMlFile?.faceEmbeddingMethod,
                 syncContext.faceEmbeddingService.method
             )
         ) {
-            fileContext.newMLFileData.faceEmbeddingMethod =
-                syncContext.faceEmbeddingService.method;
-            // TODO: when not storing face crops, image will be needed to extract faces
-            // fileContext.imageBitmap ||
-            //     (await this.getImageBitmap(syncContext, fileContext));
-            const faceImages = await extractFaceImages(
-                fileContext.faces,
-                syncContext.faceEmbeddingService.faceSize
-            );
-
-            const embeddings =
-                await syncContext.faceEmbeddingService.getFaceEmbeddings(
-                    faceImages
-                );
-            faceImages.forEach((faceImage) => faceImage.close());
-            fileContext.faces.forEach((f, i) => (f.embedding = embeddings[i]));
-
-            console.log('[MLService] facesWithEmbeddings: ', fileContext.faces);
-            // console.log('5 TF Memory stats: ', tf.memory());
-        } else {
-            fileContext.faces = fileContext.oldMLFileData?.faces;
+            for (const [index, face] of newMlFile.faces.entries()) {
+                face.embedding = oldMlFile.faces[index].embedding;
+            }
+            newMlFile.faceEmbeddingMethod = oldMlFile.faceEmbeddingMethod;
+            return;
         }
+
+        newMlFile.faceEmbeddingMethod = syncContext.faceEmbeddingService.method;
+        // TODO: when not storing face crops, image will be needed to extract faces
+        // fileContext.imageBitmap ||
+        //     (await this.getImageBitmap(syncContext, fileContext));
+        const faceImages = await extractFaceImages(
+            newMlFile.faces,
+            syncContext.faceEmbeddingService.faceSize
+        );
+
+        const embeddings =
+            await syncContext.faceEmbeddingService.getFaceEmbeddings(
+                faceImages
+            );
+        faceImages.forEach((faceImage) => faceImage.close());
+        newMlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
+
+        console.log(
+            '[MLService] facesWithEmbeddings: ',
+            newMlFile.faces.length
+        );
+        // console.log('5 TF Memory stats: ', tf.memory());
     }
 
     public async init() {

@@ -70,6 +70,7 @@ class MLIDbStorage {
 
                     db.createObjectStore('library');
                 } else if (newVersion === 2) {
+                    // TODO: update configs if version is updated in defaults
                     db.createObjectStore('configs');
 
                     tx.objectStore('configs').add(

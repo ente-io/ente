@@ -276,16 +276,14 @@ export interface MLSyncFileContext {
     enteFile: File;
     localFile?: globalThis.File;
 
-    oldMLFileData?: MlFileData;
-    newMLFileData?: MlFileData;
+    oldMlFile?: MlFileData;
+    newMlFile?: MlFileData;
 
     tfImage?: tf.Tensor3D;
     imageBitmap?: ImageBitmap;
 
     newDetection?: boolean;
     newAlignment?: boolean;
-
-    faces?: Array<Face>;
 }
 
 export interface MLLibraryData {
