@@ -17,8 +17,10 @@ module.exports = {
     },
 
     CSP_DIRECTIVES: {
-        'default-src': "'none'",
+        'default-src': "'self'",
         'img-src': "'self' blob:",
+        'media-src': "'self' blob:",
+        'manifest-src': "'self'",
         'style-src': "'self' 'unsafe-inline'",
         'font-src ': "'self'; script-src 'self' 'unsafe-eval' blob:",
         'connect-src':
