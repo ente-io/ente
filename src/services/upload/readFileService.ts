@@ -77,7 +77,7 @@ export function getFileOriginalName(file: File) {
             -1 * EDITED_FILE_SUFFIX.length
         );
     } else {
-        originalName = file.name;
+        originalName = nameWithoutExtension;
     }
     if (extension) {
         originalName += '.' + extension;
