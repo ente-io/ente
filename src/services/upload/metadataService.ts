@@ -3,18 +3,18 @@ import { logError } from 'utils/sentry';
 import { getExifData } from './exifService';
 import {
     Metadata,
-    ParsedMetaDataJSON,
+    ParsedMetadataJSON,
     Location,
     FileTypeInfo,
 } from 'types/upload';
 import { NULL_LOCATION } from 'constants/upload';
 
-interface ParsedMetaDataJSONWithTitle {
+interface ParsedMetadataJSONWithTitle {
     title: string;
-    parsedMetaDataJSON: ParsedMetaDataJSON;
+    parsedMetadataJSON: ParsedMetadataJSON;
 }
 
-const NULL_PARSED_METADATA_JSON: ParsedMetaDataJSON = {
+const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     creationTime: null,
     modificationTime: null,
     ...NULL_LOCATION,
@@ -62,7 +62,7 @@ export async function parseMetadataJSON(
             reader.readAsText(receivedFile);
         });
 
-        const parsedMetaDataJSON: ParsedMetaDataJSON =
+        const parsedMetadataJSON: ParsedMetadataJSON =
             NULL_PARSED_METADATA_JSON;
         if (!metadataJSON || !metadataJSON['title']) {
             return;
@@ -73,20 +73,20 @@ export async function parseMetadataJSON(
             metadataJSON['photoTakenTime'] &&
             metadataJSON['photoTakenTime']['timestamp']
         ) {
-            parsedMetaDataJSON.creationTime =
+            parsedMetadataJSON.creationTime =
                 metadataJSON['photoTakenTime']['timestamp'] * 1000000;
         } else if (
             metadataJSON['creationTime'] &&
             metadataJSON['creationTime']['timestamp']
         ) {
-            parsedMetaDataJSON.creationTime =
+            parsedMetadataJSON.creationTime =
                 metadataJSON['creationTime']['timestamp'] * 1000000;
         }
         if (
             metadataJSON['modificationTime'] &&
             metadataJSON['modificationTime']['timestamp']
         ) {
-            parsedMetaDataJSON.modificationTime =
+            parsedMetadataJSON.modificationTime =
                 metadataJSON['modificationTime']['timestamp'] * 1000000;
         }
         let locationData: Location = NULL_LOCATION;
@@ -104,10 +104,10 @@ export async function parseMetadataJSON(
             locationData = metadataJSON['geoDataExif'];
         }
         if (locationData !== null) {
-            parsedMetaDataJSON.latitude = locationData.latitude;
-            parsedMetaDataJSON.longitude = locationData.longitude;
+            parsedMetadataJSON.latitude = locationData.latitude;
+            parsedMetadataJSON.longitude = locationData.longitude;
         }
-        return { title, parsedMetaDataJSON } as ParsedMetaDataJSONWithTitle;
+        return { title, parsedMetadataJSON } as ParsedMetadataJSONWithTitle;
     } catch (e) {
         logError(e, 'parseMetadataJSON failed');
         // ignore

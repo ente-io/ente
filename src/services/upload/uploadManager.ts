@@ -19,7 +19,7 @@ import { EnteFile } from 'types/file';
 import {
     FileWithCollection,
     MetadataMap,
-    ParsedMetaDataJSON,
+    ParsedMetadataJSON,
     ProgressUpdater,
 } from 'types/upload';
 import { UPLOAD_STAGES, FileUploadResults } from 'constants/upload';
@@ -44,7 +44,7 @@ class UploadManager {
     private async init(newCollections?: Collection[]) {
         this.filesToBeUploaded = [];
         this.failedFiles = [];
-        this.metadataMap = new Map<string, ParsedMetaDataJSON>();
+        this.metadataMap = new Map<string, ParsedMetadataJSON>();
         this.existingFiles = await getLocalFiles();
         this.existingFilesCollectionWise = sortFilesIntoCollections(
             this.existingFiles
@@ -94,19 +94,19 @@ class UploadManager {
             UIService.reset(metadataFiles.length);
             const reader = new FileReader();
             for (const fileWithCollection of metadataFiles) {
-                const parsedMetaDataJSONWithTitle = await parseMetadataJSON(
+                const parsedMetadataJSONWithTitle = await parseMetadataJSON(
                     reader,
                     fileWithCollection.file
                 );
-                if (parsedMetaDataJSONWithTitle) {
-                    const { title, parsedMetaDataJSON } =
-                        parsedMetaDataJSONWithTitle;
+                if (parsedMetadataJSONWithTitle) {
+                    const { title, parsedMetadataJSON } =
+                        parsedMetadataJSONWithTitle;
                     this.metadataMap.set(
                         getMetadataMapKey(
                             fileWithCollection.collectionID,
                             title
                         ),
-                        { ...parsedMetaDataJSON }
+                        { ...parsedMetadataJSON }
                     );
                     UIService.increaseFileUploaded();
                 }

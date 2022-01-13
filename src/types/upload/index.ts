@@ -32,7 +32,7 @@ export interface Location {
     longitude: number;
 }
 
-export interface ParsedMetaDataJSON {
+export interface ParsedMetadataJSON {
     creationTime: number;
     modificationTime: number;
     latitude: number;
@@ -69,7 +69,7 @@ export interface FileWithCollection {
     collection?: Collection;
 }
 
-export type MetadataMap = Map<string, ParsedMetaDataJSON>;
+export type MetadataMap = Map<string, ParsedMetadataJSON>;
 
 export interface UploadURL {
     url: string;
