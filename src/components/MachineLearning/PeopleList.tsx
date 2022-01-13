@@ -16,6 +16,7 @@ const FaceChipContainer = styled.div`
     align-items: center;
     margin-top: 5px;
     margin-bottom: 5px;
+    overflow: auto;
 `;
 
 const FaceChip = styled.div`
@@ -39,11 +40,17 @@ interface PeopleListPropsBase {
 
 export interface PeopleListProps extends PeopleListPropsBase {
     people: Array<Person>;
+    maxRows?: number;
 }
 
 export function PeopleList(props: PeopleListProps) {
     return (
-        <FaceChipContainer>
+        <FaceChipContainer
+            style={
+                props.maxRows && {
+                    maxHeight: props.maxRows * 122 + 28,
+                }
+            }>
             {props.people.map((person, index) => (
                 <FaceChip
                     key={index}

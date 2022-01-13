@@ -302,6 +302,7 @@ export default function SearchBar(props: Props) {
                         <Legend>{constants.PEOPLE}</Legend>
                         <PeopleList
                             people={people}
+                            maxRows={2}
                             onSelect={(person, index) => {
                                 selectRef.current.blur();
                                 setValue(peopleSuggestions[index]);
