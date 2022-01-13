@@ -336,12 +336,14 @@ export default function MLDebug() {
             .map((n) => allFaces[n]);
         setNoiseFaces(await getFaceCrops(noiseFaces));
 
+        // TODO: disabling mst binary tree display for faces > 1000
+        // can enable once toD3Tree is non recursive
+        // and only important part of tree is retrieved
         const clusteringDebugInfo: DebugInfo =
             mlLibraryData?.faceClusteringResults['debugInfo'];
-        if (clusteringDebugInfo) {
+        if (allFaces.length <= 1000 && clusteringDebugInfo) {
             const mstBinaryTree = mstToBinaryTree(clusteringDebugInfo.mst);
             const d3Tree = toD3Tree(mstBinaryTree, allFaces);
-            // console.log(mstBinaryTree, d3Tree);
             setMstD3Tree(d3Tree);
         }
     };

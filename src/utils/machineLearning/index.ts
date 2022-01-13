@@ -246,17 +246,12 @@ export function leftFillNum(num: number, length: number, padding: number) {
 
 // TODO: same face can not be only based on this id,
 // this gives same id to faces whose arcface center lies in same box of 1% image grid
+// maximum distance for same id will be around √2%
 // will give same id in most of the cases, except for face centers lying near grid edges
 // faces with same id should be treated as same face, and diffrent id should be tested further
 // further test can rely on nearest face within certain threshold in same image
-// we can even have grid of half threshold and then treat even nearby faces
-// in neighbouring 8 grid boxes as same face
-// e.g. with 1% grid size, we can easily get faces within 2% threshold
-// but looks overkill for mostly single digit faces in an image
-// also comparing based on distance gives flexibility of variabale threshold
-// e.g. based on relative face size in an image
-// will anyways finalize grid size as half of our threshold
-// can also explore spatial index similar to Geohash for indexing, again overkill
+// can also explore spatial index similar to Geohash for indexing, but overkill
+// for mostly single digit faces in one image
 // also check if this needs to be globally unique or unique for a user
 export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
     const arcFaceAlignedFace = getArcfaceAlignment(detectedFace.detection);
