@@ -1,7 +1,8 @@
-import { ProgressUpdater } from 'components/pages/gallery/Upload';
-import { UPLOAD_STAGES } from './uploadManager';
-
-export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
+import {
+    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    UPLOAD_STAGES,
+} from 'constants/upload';
+import { ProgressUpdater } from 'types/upload';
 
 class UIService {
     private perFileProgress: number;

@@ -5,16 +5,11 @@ import NavigationButton, {
 } from 'components/NavigationButton';
 import React, { useEffect, useRef, useState } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
-import {
-    Collection,
-    CollectionAndItsLatestFile,
-    CollectionType,
-    COLLECTION_SORT_BY,
-    sortCollections,
-} from 'services/collectionService';
-import { User } from 'services/userService';
+import { sortCollections } from 'services/collectionService';
+import { User } from 'types/user';
 import styled from 'styled-components';
-import { IMAGE_CONTAINER_MAX_WIDTH } from 'types';
+import { IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
+import { Collection, CollectionAndItsLatestFile } from 'types/collection';
 import { getSelectedCollection } from 'utils/collection';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
@@ -22,10 +17,13 @@ import { SetCollectionNamerAttributes } from './CollectionNamer';
 import CollectionOptions from './CollectionOptions';
 import CollectionSort from './CollectionSort';
 import OptionIcon, { OptionIconWrapper } from './OptionIcon';
-
-export const ARCHIVE_SECTION = -1;
-export const TRASH_SECTION = -2;
-export const ALL_SECTION = 0;
+import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    CollectionType,
+    COLLECTION_SORT_BY,
+    TRASH_SECTION,
+} from 'constants/collection';
 
 interface CollectionProps {
     collections: Collection[];

@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import styled from 'styled-components';
-import { File } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
     IMAGE_CONTAINER_MAX_HEIGHT,
@@ -9,7 +9,7 @@ import {
     DATE_CONTAINER_HEIGHT,
     GAP_BTW_TILES,
     SPACE_BTW_DATES,
-} from 'types';
+} from 'constants/gallery';
 import constants from 'utils/strings/constants';
 
 const A_DAY = 24 * 60 * 60 * 1000;
@@ -23,7 +23,7 @@ enum ITEM_TYPE {
 
 interface TimeStampListItem {
     itemType: ITEM_TYPE;
-    items?: File[];
+    items?: EnteFile[];
     itemStartIndex?: number;
     date?: string;
     dates?: {
@@ -102,9 +102,9 @@ const NothingContainer = styled.div<{ span: number }>`
 interface Props {
     height: number;
     width: number;
-    filteredData: File[];
+    filteredData: EnteFile[];
     showBanner: boolean;
-    getThumbnail: (file: File[], index: number) => JSX.Element;
+    getThumbnail: (file: EnteFile[], index: number) => JSX.Element;
     activeCollection: number;
     resetFetching: () => void;
 }

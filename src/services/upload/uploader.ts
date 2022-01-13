@@ -1,32 +1,37 @@
-import { File, FILE_TYPE } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import { sleep } from 'utils/common';
-import { handleUploadError, CustomError } from 'utils/common/errorUtil';
+import { handleUploadError, CustomError } from 'utils/error';
 import { decryptFile } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { fileAlreadyInCollection } from 'utils/upload';
 import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
-import { FileUploadResults, FileWithCollection } from './uploadManager';
-import UploadService, {
+import UploadService from './uploadService';
+import uploadService from './uploadService';
+import { getFileType } from './readFileService';
+import {
     BackupedFile,
     EncryptedFile,
     FileInMemory,
+    FileTypeInfo,
+    FileWithCollection,
     FileWithMetadata,
-    MetadataObject,
+    Metadata,
     UploadFile,
-} from './uploadService';
-import uploadService from './uploadService';
-import { FileTypeInfo, getFileType } from './readFileService';
+} from 'types/upload';
+import { FILE_TYPE } from 'constants/file';
+import { FileUploadResults } from 'constants/upload';
 
 const TwoSecondInMillSeconds = 2000;
 const FIVE_GB_IN_BYTES = 5 * 1024 * 1024 * 1024;
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
-    file?: File;
+    file?: EnteFile;
 }
 export default async function uploader(
     worker: any,
-    existingFilesInCollection: File[],
+    reader: FileReader,
+    existingFilesInCollection: EnteFile[],
     fileWithCollection: FileWithCollection
 ): Promise<UploadResponse> {
     const { file: rawFile, collection } = fileWithCollection;
@@ -35,7 +40,7 @@ export default async function uploader(
 
     let file: FileInMemory = null;
     let encryptedFile: EncryptedFile = null;
-    let metadata: MetadataObject = null;
+    let metadata: Metadata = null;
     let fileTypeInfo: FileTypeInfo = null;
     let fileWithMetadata: FileWithMetadata = null;
 
@@ -49,7 +54,7 @@ export default async function uploader(
             await sleep(TwoSecondInMillSeconds);
             return { fileUploadResult: FileUploadResults.TOO_LARGE };
         }
-        fileTypeInfo = await getFileType(worker, rawFile);
+        fileTypeInfo = await getFileType(reader, rawFile);
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
@@ -66,7 +71,12 @@ export default async function uploader(
             return { fileUploadResult: FileUploadResults.SKIPPED };
         }
 
-        file = await UploadService.readFile(worker, rawFile, fileTypeInfo);
+        file = await UploadService.readFile(
+            worker,
+            reader,
+            rawFile,
+            fileTypeInfo
+        );
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
         }

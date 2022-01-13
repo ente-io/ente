@@ -11,19 +11,21 @@ import constants from 'utils/strings/constants';
 import Archive from 'components/icons/Archive';
 import MoveIcon from 'components/icons/MoveIcon';
 import { COLLECTION_OPS_TYPE } from 'utils/collection';
-import { ALL_SECTION, ARCHIVE_SECTION, TRASH_SECTION } from './Collections';
+import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    TRASH_SECTION,
+} from 'constants/collection';
 import UnArchive from 'components/icons/UnArchive';
 import { OverlayTrigger } from 'react-bootstrap';
-import { Collection } from 'services/collectionService';
+import { Collection } from 'types/collection';
 import RemoveIcon from 'components/icons/RemoveIcon';
 import RestoreIcon from 'components/icons/RestoreIcon';
 import ClockIcon from 'components/icons/ClockIcon';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import {
-    FIX_CREATION_TIME_VISIBLE_TO_USER_IDS,
-    User,
-} from 'services/userService';
+import { FIX_CREATION_TIME_VISIBLE_TO_USER_IDS } from 'constants/user';
 import DownloadIcon from 'components/icons/DownloadIcon';
+import { User } from 'types/user';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;

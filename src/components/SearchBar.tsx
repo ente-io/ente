@@ -1,11 +1,9 @@
-import { Search, SearchStats } from 'pages/gallery';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
 import { components } from 'react-select';
 import debounce from 'debounce-promise';
 import {
-    Bbox,
     getHolidaySuggestion,
     getYearSuggestion,
     parseHumanDate,
@@ -19,12 +17,16 @@ import LocationIcon from './icons/LocationIcon';
 import DateIcon from './icons/DateIcon';
 import SearchIcon from './icons/SearchIcon';
 import CloseIcon from './icons/CloseIcon';
-import { Collection } from 'services/collectionService';
+import { Collection } from 'types/collection';
 import CollectionIcon from './icons/CollectionIcon';
-import { File, FILE_TYPE } from 'services/fileService';
+
 import ImageIcon from './icons/ImageIcon';
 import VideoIcon from './icons/VideoIcon';
 import { IconButton } from './Container';
+import { EnteFile } from 'types/file';
+import { Suggestion, SuggestionType, DateValue, Bbox } from 'types/search';
+import { Search, SearchStats } from 'types/gallery';
+import { FILE_TYPE } from 'constants/file';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -75,23 +77,6 @@ const SearchInput = styled.div`
     margin: auto;
 `;
 
-export enum SuggestionType {
-    DATE,
-    LOCATION,
-    COLLECTION,
-    IMAGE,
-    VIDEO,
-}
-export interface DateValue {
-    date?: number;
-    month?: number;
-    year?: number;
-}
-export interface Suggestion {
-    type: SuggestionType;
-    label: string;
-    value: Bbox | DateValue | number;
-}
 interface Props {
     isOpen: boolean;
     isFirstFetch: boolean;
@@ -101,7 +86,7 @@ interface Props {
     searchStats: SearchStats;
     collections: Collection[];
     setActiveCollection: (id: number) => void;
-    files: File[];
+    files: EnteFile[];
 }
 export default function SearchBar(props: Props) {
     const [value, setValue] = useState<Suggestion>(null);

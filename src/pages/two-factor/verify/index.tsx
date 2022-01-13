@@ -4,8 +4,9 @@ import VerifyTwoFactor from 'components/VerifyTwoFactor';
 import router from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
-import { logoutUser, User, verifyTwoFactor } from 'services/userService';
-import { PAGES } from 'types';
+import { logoutUser, verifyTwoFactor } from 'services/userService';
+import { PAGES } from 'constants/pages';
+import { User } from 'types/user';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 

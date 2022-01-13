@@ -1,10 +1,11 @@
 import { useRouter } from 'next/router';
-import { DeadCenter, SetLoading } from 'pages/gallery';
+import { DeadCenter } from 'pages/gallery';
 import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 import React, { useContext, useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { disableTwoFactor, getTwoFactorStatus } from 'services/userService';
-import { PAGES } from 'types';
+import { SetLoading } from 'types/gallery';
+import { PAGES } from 'constants/pages';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 import { Label, Value, Row } from './Container';

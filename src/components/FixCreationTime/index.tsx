@@ -3,14 +3,14 @@ import MessageDialog from '../MessageDialog';
 import React, { useContext, useEffect, useState } from 'react';
 import { updateCreationTimeWithExif } from 'services/updateCreationTimeWithExif';
 import { GalleryContext } from 'pages/gallery';
-import { File } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import FixCreationTimeRunning from './running';
 import FixCreationTimeFooter from './footer';
 import { Formik } from 'formik';
 
 import FixCreationTimeOptions from './options';
 export interface FixCreationTimeAttributes {
-    files: File[];
+    files: EnteFile[];
 }
 
 interface Props {
@@ -89,7 +89,6 @@ export default function FixCreationTime(props: Props) {
     }
 
     const onSubmit = (values: formValues) => {
-        console.log(values);
         startFix(Number(values.option), new Date(values.customTime));
     };
 

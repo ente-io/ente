@@ -1,15 +1,16 @@
-import { FILE_TYPE } from 'services/fileService';
-import { CustomError, errorWithContext } from 'utils/common/errorUtil';
+import { FILE_TYPE } from 'constants/file';
+import { CustomError, errorWithContext } from 'utils/error';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
 import FFmpegService from 'services/ffmpegService';
-import { convertToHumanReadable } from 'utils/billingUtil';
+import { convertToHumanReadable } from 'utils/billing';
 import { isFileHEIC } from 'utils/file';
-import { FileTypeInfo } from './readFileService';
+import { FileTypeInfo } from 'types/upload';
+import { getUint8ArrayView } from './readFileService';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
-export const MAX_THUMBNAIL_SIZE = 100 * 1024;
+const MAX_THUMBNAIL_SIZE = 100 * 1024;
 const MIN_QUALITY = 0.5;
 const MAX_QUALITY = 0.7;
 
@@ -22,7 +23,8 @@ interface Dimension {
 
 export async function generateThumbnail(
     worker,
-    file: globalThis.File,
+    reader: FileReader,
+    file: File,
     fileTypeInfo: FileTypeInfo
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
@@ -50,7 +52,7 @@ export async function generateThumbnail(
                 }
             }
             const thumbnailBlob = await thumbnailCanvasToBlob(canvas);
-            thumbnail = await worker.getUint8ArrayView(thumbnailBlob);
+            thumbnail = await getUint8ArrayView(reader, thumbnailBlob);
             if (thumbnail.length === 0) {
                 throw Error('EMPTY THUMBNAIL');
             }
@@ -72,7 +74,7 @@ export async function generateThumbnail(
 
 export async function generateImageThumbnail(
     worker,
-    file: globalThis.File,
+    file: File,
     isHEIC: boolean
 ) {
     const canvas = document.createElement('canvas');
@@ -82,11 +84,7 @@ export async function generateImageThumbnail(
     let timeout = null;
 
     if (isHEIC) {
-        file = new globalThis.File(
-            [await worker.convertHEIC2JPEG(file)],
-            null,
-            null
-        );
+        file = new File([await worker.convertHEIC2JPEG(file)], null, null);
     }
     let image = new Image();
     imageURL = URL.createObjectURL(file);
@@ -130,7 +128,7 @@ export async function generateImageThumbnail(
     return canvas;
 }
 
-export async function generateVideoThumbnail(file: globalThis.File) {
+export async function generateVideoThumbnail(file: File) {
     const canvas = document.createElement('canvas');
     const canvasCTX = canvas.getContext('2d');
 

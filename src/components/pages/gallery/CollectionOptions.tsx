@@ -1,16 +1,13 @@
 import React from 'react';
 import { SetDialogMessage } from 'components/MessageDialog';
 import { ListGroup, Popover } from 'react-bootstrap';
-import {
-    Collection,
-    deleteCollection,
-    renameCollection,
-} from 'services/collectionService';
+import { deleteCollection, renameCollection } from 'services/collectionService';
 import { downloadCollection, getSelectedCollection } from 'utils/collection';
 import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import LinkButton, { ButtonVariant, LinkButtonProps } from './LinkButton';
 import { sleep } from 'utils/common';
+import { Collection } from 'types/collection';
 
 interface CollectionOptionsProps {
     syncWithRemote: () => Promise<void>;

@@ -1,8 +1,9 @@
+import { NULL_LOCATION } from 'constants/upload';
+import { Location } from 'types/upload';
 import exifr from 'exifr';
 import piexif from 'piexifjs';
+import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
-import { NULL_LOCATION, Location } from './metadataService';
-import { FileTypeInfo } from './readFileService';
 
 const EXIF_TAGS_NEEDED = [
     'DateTimeOriginal',
@@ -28,7 +29,7 @@ interface ParsedEXIFData {
 }
 
 export async function getExifData(
-    receivedFile: globalThis.File,
+    receivedFile: File,
     fileTypeInfo: FileTypeInfo
 ): Promise<ParsedEXIFData> {
     const nullExifData: ParsedEXIFData = {
@@ -56,12 +57,13 @@ export async function getExifData(
 }
 
 export async function updateFileCreationDateInEXIF(
+    reader: FileReader,
     fileBlob: Blob,
     updatedDate: Date
 ) {
     try {
         const fileURL = URL.createObjectURL(fileBlob);
-        let imageDataURL = await convertImageToDataURL(fileURL);
+        let imageDataURL = await convertImageToDataURL(reader, fileURL);
         imageDataURL =
             'data:image/jpeg;base64' +
             imageDataURL.slice(imageDataURL.indexOf(','));
@@ -81,10 +83,9 @@ export async function updateFileCreationDateInEXIF(
     }
 }
 
-export async function convertImageToDataURL(url: string) {
+export async function convertImageToDataURL(reader: FileReader, url: string) {
     const blob = await fetch(url).then((r) => r.blob());
     const dataUrl = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
         reader.readAsDataURL(blob);
     });
