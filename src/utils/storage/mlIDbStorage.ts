@@ -52,8 +52,7 @@ class MLIDbStorage {
 
         this.db = openDB<MLDb>(MLDATA_DB_NAME, 2, {
             upgrade(db, oldVersion, newVersion, tx) {
-                // TODO: consider oldVersion
-                if (newVersion === 1) {
+                if (oldVersion < 1) {
                     const filesStore = db.createObjectStore('files', {
                         keyPath: 'fileId',
                     });
@@ -69,7 +68,8 @@ class MLIDbStorage {
                     db.createObjectStore('versions');
 
                     db.createObjectStore('library');
-                } else if (newVersion === 2) {
+                }
+                if (oldVersion < 2) {
                     // TODO: update configs if version is updated in defaults
                     db.createObjectStore('configs');
 
