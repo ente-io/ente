@@ -39,7 +39,7 @@ import {
     updateMLSyncConfig,
     updateMLSyncJobConfig,
 } from 'utils/machineLearning/config';
-import { Col, Row } from 'react-bootstrap';
+import { Button, Col, Container, Form, Row } from 'react-bootstrap';
 import { JobConfig } from 'types/common/job';
 import { ConfigEditor } from './ConfigEditor';
 import {
@@ -131,6 +131,15 @@ const getFaceCrops = async (faces: Face[]) => {
 
 const ClusterFacesRow = styled(FaceImagesRow)`
     display: flex;
+    max-width: 100%;
+    overflow: auto;
+`;
+
+const RowWithGap = styled(Row)`
+    justify-content: center;
+    & > * {
+        margin: 10px;
+    }
 `;
 
 export default function MLDebug() {
@@ -153,6 +162,9 @@ export default function MLDebug() {
     const [allPeople, setAllPeople] = useState<Array<Person>>([]);
     const [clusters, setClusters] = useState<Array<Array<Blob>>>([]);
     const [noiseFaces, setNoiseFaces] = useState<Array<Blob>>([]);
+    const [minProbability, setMinProbability] = useState<number>(0);
+    const [maxProbability, setMaxProbability] = useState<number>(1);
+    const [filteredFaces, setFilteredFaces] = useState<Array<Blob>>([]);
     const [mstD3Tree, setMstD3Tree] = useState<RawNodeDatum>(null);
     const [debugFile, setDebugFile] = useState<File>();
     const importMLDataFileInput = useRef(null);
@@ -348,12 +360,26 @@ export default function MLDebug() {
         }
     };
 
+    const showFilteredFaces = async () => {
+        console.log('Filtering with: ', minProbability, maxProbability);
+        const allFacesMap = await mlIDbStorage.getAllFacesMap();
+        const allFaces = getAllFacesFromMap(allFacesMap);
+        const filteredFaces = allFaces
+            .filter(
+                (f) =>
+                    f.detection.probability >= minProbability &&
+                    f.detection.probability <= maxProbability
+            )
+            .slice(0, 200);
+        setFilteredFaces(await getFaceCrops(filteredFaces));
+    };
+
     const nodeSize = { x: 180, y: 180 };
     const foreignObjectProps = { width: 112, height: 150, x: -56 };
 
     // TODO: Remove debug page or config editor from prod
     return (
-        <div>
+        <Container>
             {/* <div>ClusterFaceDistance: {clusterFaceDistance}</div>
             <button onClick={() => setClusterFaceDistance(0.35)}>0.35</button>
             <button onClick={() => setClusterFaceDistance(0.4)}>0.4</button>
@@ -363,8 +389,8 @@ export default function MLDebug() {
             <button onClick={() => setClusterFaceDistance(0.6)}>0.6</button>
 
             <p></p> */}
-
-            <Row style={{ margin: '15px' }}>
+            <hr />
+            <Row>
                 <Col>
                     <ConfigEditor
                         name="ML Sync"
@@ -420,37 +446,45 @@ export default function MLDebug() {
             <button onClick={() => setMaxFaceDistance(0.55)}>0.55</button>
             <button onClick={() => setMaxFaceDistance(0.6)}>0.6</button> */}
 
-            <p></p>
-            <button onClick={onSync} disabled>
-                Run ML Sync
-            </button>
-            <button onClick={onStartMLSync}>Start ML Sync</button>
-            <button onClick={onStopMLSync}>Stop ML Sync</button>
+            <hr />
+            <RowWithGap>
+                <Button onClick={onSync} disabled>
+                    Run ML Sync
+                </Button>
+                <Button onClick={onStartMLSync}>Start ML Sync</Button>
+                <Button onClick={onStopMLSync}>Stop ML Sync</Button>
+            </RowWithGap>
 
-            <p></p>
-            <button onClick={onExportMLData}>Export ML Data</button>
-            <button onClick={onImportMLDataClick}>Import ML Data</button>
-            <input
-                ref={importMLDataFileInput}
-                hidden
-                type="file"
-                onChange={onImportMLData}
-            />
-            <button onClick={onClearPeopleIndex}>Clear People Index</button>
+            <hr />
+            <RowWithGap>
+                <Button onClick={onExportMLData}>Export ML Data</Button>
+                <Button onClick={onImportMLDataClick}>Import ML Data</Button>
+                <input
+                    ref={importMLDataFileInput}
+                    hidden
+                    type="file"
+                    onChange={onImportMLData}
+                />
+                <Button onClick={onClearPeopleIndex}>Clear People Index</Button>
+            </RowWithGap>
 
-            <p></p>
-            <button onClick={onLoadAllPeople}>
-                Load All Identified People
-            </button>
-            <div>All identified people:</div>
+            <hr />
+            <RowWithGap>
+                <Button onClick={onLoadAllPeople}>
+                    Load All Identified People
+                </Button>
+            </RowWithGap>
+            <Row>All identified people:</Row>
             <PeopleList people={allPeople}></PeopleList>
 
-            <p></p>
-            <button onClick={onLoadClusteringResults}>
-                Load Clustering Results
-            </button>
+            <hr />
+            <RowWithGap>
+                <Button onClick={onLoadClusteringResults}>
+                    Load Clustering Results
+                </Button>
+            </RowWithGap>
 
-            <div>Clusters:</div>
+            <Row>Clusters:</Row>
             {clusters.map((cluster, index) => (
                 <ClusterFacesRow key={index}>
                     {cluster?.map((face, i) => (
@@ -459,19 +493,61 @@ export default function MLDebug() {
                 </ClusterFacesRow>
             ))}
 
-            <div>Noise:</div>
+            <p></p>
+            <Row>Noise:</Row>
             <ClusterFacesRow>
                 {noiseFaces?.map((face, i) => (
                     <ImageBlobView key={i} blob={face}></ImageBlobView>
                 ))}
             </ClusterFacesRow>
 
+            <hr />
+            <Row>Show Faces based on detection probability:</Row>
+            <Row style={{ alignItems: 'end' }}>
+                <Col>
+                    <Form.Label htmlFor="minProbability">Min: </Form.Label>
+                    <Form.Control
+                        type="number"
+                        id="minProbability"
+                        placeholder="e.g. 70"
+                        onChange={(e) =>
+                            setMinProbability(
+                                (parseFloat(e.target.value) || 0) / 100
+                            )
+                        }
+                    />
+                </Col>
+                <Col>
+                    <Form.Label htmlFor="maxProbability">Max: </Form.Label>
+                    <Form.Control
+                        type="number"
+                        id="maxProbability"
+                        placeholder="e.g. 80"
+                        onChange={(e) =>
+                            setMaxProbability(
+                                (parseFloat(e.target.value) || 100) / 100
+                            )
+                        }
+                    />
+                </Col>
+                <Col>
+                    <Button onClick={showFilteredFaces}>Show Faces</Button>
+                </Col>
+            </Row>
             <p></p>
+            <ClusterFacesRow>
+                {filteredFaces?.map((face, i) => (
+                    <ImageBlobView key={i} blob={face}></ImageBlobView>
+                ))}
+            </ClusterFacesRow>
+
+            <hr />
+            <Row>Debug File:</Row>
             <input id="debugFile" type="file" onChange={onDebugFile} />
             <MLFileDebugView file={debugFile} />
 
-            <p></p>
-            <div>Hdbscan MST: </div>
+            <hr />
+            <Row>Hdbscan MST: </Row>
             <div
                 id="treeWrapper"
                 style={{
@@ -495,17 +571,20 @@ export default function MLDebug() {
                 )}
             </div>
 
-            <p></p>
-            <div>TSNE of embeddings: </div>
-            <div
-                id="tsneWrapper"
-                style={{
-                    width: '840px',
-                    height: '840px',
-                    backgroundColor: 'white',
-                }}>
-                {mlResult.tsne && <TSNEPlot mlResult={mlResult} />}
-            </div>
-        </div>
+            <hr />
+            <Row>TSNE of embeddings: </Row>
+            <Row>
+                <div
+                    id="tsneWrapper"
+                    style={{
+                        width: '840px',
+                        height: '840px',
+                        backgroundColor: 'white',
+                        overflow: 'auto',
+                    }}>
+                    {mlResult.tsne && <TSNEPlot mlResult={mlResult} />}
+                </div>
+            </Row>
+        </Container>
     );
 }
