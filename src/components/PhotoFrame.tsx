@@ -314,10 +314,18 @@ const PhotoFrame = ({
             const direction =
                 (index - rangeStart) / Math.abs(index - rangeStart);
             let checked = true;
-            for (let i = rangeStart; i !== index; i += direction) {
+            for (
+                let i = rangeStart;
+                (index - i) * direction >= 0;
+                i += direction
+            ) {
                 checked = checked && !!selected[filteredData[i].id];
             }
-            for (let i = rangeStart; i !== index; i += direction) {
+            for (
+                let i = rangeStart;
+                (index - i) * direction > 0;
+                i += direction
+            ) {
                 handleSelect(filteredData[i].id)(!checked);
             }
             handleSelect(filteredData[index].id, index)(!checked);
