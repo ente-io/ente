@@ -130,7 +130,7 @@ const PhotoFrame = ({
                 onThumbnailClick(filteredDataIdx)();
             }
         }
-    }, [search]);
+    }, [search, filteredData]);
 
     const resetFetching = () => {
         setFetching({});
