@@ -141,7 +141,7 @@ export default function Upload(props: Props) {
             }
         }
         return {
-            suggestedCollectionName: commonPathPrefix,
+            suggestedCollectionName: commonPathPrefix || null,
             multipleFolders: firstFileFolder !== lastFileFolder,
         };
     }
@@ -279,14 +279,14 @@ export default function Upload(props: Props) {
                 collectionName
             );
         } else {
-            showCollectionCreateModal(analysisResult);
+            showCollectionCreateModal();
         }
     };
-    const showCollectionCreateModal = (analysisResult: AnalysisResult) => {
+    const showCollectionCreateModal = () => {
         props.setCollectionNamerAttributes({
             title: constants.CREATE_COLLECTION,
             buttonText: constants.CREATE,
-            autoFilledName: analysisResult?.suggestedCollectionName,
+            autoFilledName: null,
             callback: uploadToSingleNewCollection,
         });
     };
@@ -296,7 +296,10 @@ export default function Upload(props: Props) {
         isFirstUpload: boolean
     ) => {
         if (isFirstUpload) {
-            uploadToSingleNewCollection(FIRST_ALBUM_NAME);
+            const collectionName =
+                analysisResult.suggestedCollectionName ?? FIRST_ALBUM_NAME;
+
+            uploadToSingleNewCollection(collectionName);
         } else {
             let showNextModal = () => {};
             if (analysisResult.multipleFolders) {
