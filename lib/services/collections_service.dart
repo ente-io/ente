@@ -473,11 +473,7 @@ class CollectionsService {
   Future<void> move(
       int toCollectionID, int fromCollectionID, List<File> files) async {
     _validateMoveRequest(toCollectionID, fromCollectionID, files);
-    final existingUploadedIDs =
-        await FilesDB.instance.getUploadedFileIDs(toCollectionID);
-    files.removeWhere((element) =>
-        element.uploadedFileID != null &&
-        existingUploadedIDs.contains(element.uploadedFileID));
+    files.removeWhere((element) => element.uploadedFileID == null);
     if (files.isEmpty) {
       _logger.info("nothing to move to collection");
       return;
@@ -498,23 +494,25 @@ class CollectionsService {
               file.uploadedFileID, file.encryptedKey, file.keyDecryptionNonce)
           .toMap());
     }
-    return _dio
-        .post(
+    await _dio.post(
       Configuration.instance.getHttpEndpoint() + "/collections/move-files",
       data: params,
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-    )
-        .then((value) async {
-      // insert files to new collection
-      await _filesDB.insertMultiple(files);
-      // remove files from old collection
-      await _filesDB.removeFromCollection(
-          fromCollectionID, files.map((e) => e.uploadedFileID).toList());
-      Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
-      Bus.instance.fire(CollectionUpdatedEvent(fromCollectionID, files,
-          type: EventType.deletedFromRemote));
-    });
+    );
+
+    // remove files from old collection
+    await _filesDB.removeFromCollection(
+        fromCollectionID, files.map((e) => e.uploadedFileID).toList());
+    Bus.instance.fire(CollectionUpdatedEvent(fromCollectionID, files,
+        type: EventType.deletedFromRemote));
+    // insert new files in the toCollection which are not part of the toCollection
+    final existingUploadedIDs =
+        await FilesDB.instance.getUploadedFileIDs(toCollectionID);
+    files.removeWhere(
+        (element) => existingUploadedIDs.contains(element.uploadedFileID));
+    await _filesDB.insertMultiple(files);
+    Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
   }
 
   void _validateMoveRequest(
