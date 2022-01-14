@@ -16,10 +16,22 @@ enum PaymentActionType {
 
 class billingService {
     public async getPlans(): Promise<Plan[]> {
+        const token = getToken();
         try {
-            const response = await HTTPService.get(
-                `${ENDPOINT}/billing/plans/v2`
-            );
+            let response;
+            if (!token) {
+                response = await HTTPService.get(
+                    `${ENDPOINT}/billing/plans/v2`
+                );
+            } else {
+                response = await HTTPService.get(
+                    `${ENDPOINT}/billing/user-plans/v2`,
+                    null,
+                    {
+                        'X-Auth-Token': getToken(),
+                    }
+                );
+            }
             const { plans } = response.data;
             return plans;
         } catch (e) {
