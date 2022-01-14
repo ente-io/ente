@@ -22,8 +22,4 @@ export const getActualKey = async () => {
     }
 };
 
-export const getStripePublishableKey = () =>
-    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ??
-    'pk_live_51HAhqDK59oeucIMOiTI6MDDM2UWUbCAJXJCGsvjJhiO8nYJz38rQq5T4iyQLDMKxqEDUfU5Hopuj4U5U4dff23oT00fHvZeodC';
-
 export const getToken = () => getData(LS_KEYS.USER)?.token;
