@@ -257,12 +257,15 @@ class MLIDbStorage {
         return db.get('versions', index);
     }
 
-    public async incrementIndexVersion(index: string) {
+    public async incrementIndexVersion(index: StoreNames<MLDb>) {
+        if (index === 'versions') {
+            throw new Error('versions store can not be versioned');
+        }
         const db = await this.db;
-        const tx = db.transaction('versions', 'readwrite');
-        let version = await tx.store.get(index);
+        const tx = db.transaction(['versions', index], 'readwrite');
+        let version = await tx.objectStore('versions').get(index);
         version = (version || 0) + 1;
-        tx.store.put(version, index);
+        tx.objectStore('versions').put(version, index);
         await tx.done;
 
         return version;
