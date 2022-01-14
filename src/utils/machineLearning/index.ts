@@ -1,5 +1,6 @@
 import { NormalizedFace } from '@tensorflow-models/blazeface';
 import * as tf from '@tensorflow/tfjs-core';
+import { euclidean } from 'hdbscan';
 import PQueue from 'p-queue';
 import DownloadManager from 'services/downloadManager';
 import { File, getLocalFiles } from 'services/fileService';
@@ -471,6 +472,27 @@ export function areFaceIdsSame(ofFaces: Array<Face>, toFaces: Array<Face>) {
         ofFaces?.map((f) => f.id),
         toFaces?.map((f) => f.id)
     );
+}
+
+export function getNearestPointIndex(
+    toPoint: Point,
+    fromPoints: Array<Point>,
+    maxDistance?: number
+) {
+    const dists = fromPoints.map((point, i) => ({
+        index: i,
+        point: point,
+        distance: euclidean([point.x, point.y], [toPoint.x, toPoint.y]),
+    }));
+    const nearest = findFirstIfSorted(
+        dists,
+        (a, b) => Math.abs(a.distance) - Math.abs(b.distance)
+    );
+
+    // console.log('Nearest dist: ', nearest.distance, maxDistance);
+    if (!maxDistance || nearest.distance <= maxDistance) {
+        return nearest.index;
+    }
 }
 
 export function logQueueStats(queue: PQueue, name: string) {

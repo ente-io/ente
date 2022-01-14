@@ -25,6 +25,11 @@ import {
     transformPoints,
 } from 'utils/machineLearning/transform';
 import { enlargeBox, newBox, normFaceBox } from 'utils/machineLearning';
+import {
+    getNearestDetection,
+    removeDuplicateDetections,
+    transformPaddedToImage,
+} from 'utils/machineLearning/faceDetection';
 
 class BlazeFaceDetectionService implements FaceDetectionService {
     private blazeFaceModel: Promise<BlazeFaceModel>;
@@ -191,6 +196,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
     public async detectFaces(
         imageBitmap: ImageBitmap
     ): Promise<Array<FaceDetection>> {
+        const maxFaceDistance = imageBitmap.width * 0.0141;
         const pass1Detections = await this.estimateFaces(imageBitmap);
 
         // run 2nd pass for accuracy
@@ -205,29 +211,28 @@ class BlazeFaceDetectionService implements FaceDetectionService {
             const paddedImage = addPadding(faceImage, 0.5);
             const paddedBox = enlargeBox(imageBox, 2);
             const pass2Detections = await this.estimateFaces(paddedImage);
-            // TODO: select based on nearest under certain threshold
-            // this will matter based on our IOU threshold and faces near each other
-            const selected = pass2Detections[0];
-            // console.log("pass2: ", face.probability, selected.probability);
+
+            pass2Detections?.forEach((d) =>
+                transformPaddedToImage(d, faceImage, imageBox, paddedBox)
+            );
+            let selected = pass2Detections?.[0];
+            if (pass2Detections?.length > 1) {
+                // console.log('2nd pass >1 face', pass2Detections.length);
+                selected = getNearestDetection(
+                    pass1Detection,
+                    pass2Detections
+                    // maxFaceDistance
+                );
+            }
 
             // TODO: we might miss 1st pass face actually having score within threshold
             if (selected && selected.probability >= BLAZEFACE_SCORE_THRESHOLD) {
-                const inBox = newBox(0, 0, faceImage.width, faceImage.height);
-                imageBox.x = paddedBox.x;
-                imageBox.y = paddedBox.y;
-                const transform = computeTransformToBox(inBox, imageBox);
-
-                selected.box = transformBox(selected.box, transform);
-                selected.landmarks = transformPoints(
-                    selected.landmarks,
-                    transform
-                );
                 // console.log("pass2: ", { imageBox, paddedBox, transform, selected });
                 detections.push(selected);
             }
         }
 
-        return detections;
+        return removeDuplicateDetections(detections, maxFaceDistance);
     }
 
     public async dispose() {
