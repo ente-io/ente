@@ -14,7 +14,11 @@ class DownloadManager {
     private fileObjectUrlPromise = new Map<string, Promise<string>>();
     private thumbnailObjectUrlPromise = new Map<number, Promise<string>>();
 
-    public async getThumbnail(file: File, tokenOverride?: string) {
+    public async getThumbnail(
+        file: File,
+        tokenOverride?: string,
+        timeout?: number
+    ) {
         try {
             const token = tokenOverride || getToken();
             if (!token) {
@@ -29,7 +33,11 @@ class DownloadManager {
                     if (cacheResp) {
                         return URL.createObjectURL(await cacheResp.blob());
                     }
-                    const thumb = await this.downloadThumb(token, file);
+                    const thumb = await this.downloadThumb(
+                        token,
+                        file,
+                        timeout
+                    );
                     const thumbBlob = new Blob([thumb]);
                     try {
                         await thumbnailCache.put(
@@ -52,12 +60,12 @@ class DownloadManager {
         }
     }
 
-    downloadThumb = async (token: string, file: File) => {
+    downloadThumb = async (token: string, file: File, timeout?: number) => {
         const resp = await HTTPService.get(
             getThumbnailUrl(file.id),
             null,
             { 'X-Auth-Token': token },
-            { responseType: 'arraybuffer' }
+            { responseType: 'arraybuffer', timeout }
         );
         const worker = await new CryptoWorker();
         const decrypted: Uint8Array = await worker.decryptThumbnail(
@@ -105,7 +113,12 @@ class DownloadManager {
         return await this.fileObjectUrlPromise.get(file.id.toString());
     }
 
-    async downloadFile(file: File, tokenOverride?: string, usingWorker?: any) {
+    async downloadFile(
+        file: File,
+        tokenOverride?: string,
+        usingWorker?: any,
+        timeout?: number
+    ) {
         const worker = usingWorker || (await new CryptoWorker());
         const token = tokenOverride || getToken();
         if (!token) {
@@ -119,7 +132,7 @@ class DownloadManager {
                 getFileUrl(file.id),
                 null,
                 { 'X-Auth-Token': token },
-                { responseType: 'arraybuffer' }
+                { responseType: 'arraybuffer', timeout }
             );
             const decrypted: any = await worker.decryptFile(
                 new Uint8Array(resp.data),

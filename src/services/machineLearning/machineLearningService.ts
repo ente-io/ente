@@ -264,24 +264,25 @@ class MachineLearningService {
 
     private async syncFiles(syncContext: MLSyncContext) {
         try {
-            // TODO: can use q.addAll and error event to clear pending tasks
-            await Promise.all(
-                syncContext.outOfSyncFiles.map((outOfSyncfile) =>
-                    syncContext.syncQueue.add(async () => {
-                        const mlFileData = await this.syncFileWithErrorHandler(
-                            syncContext,
-                            outOfSyncfile
-                        );
-                        // TODO: just store file and faces count in syncContext
-                        mlFileData?.faces &&
-                            syncContext.syncedFaces.push(...mlFileData.faces);
-                        syncContext.syncedFiles.push(outOfSyncfile);
-                    })
-                )
+            const functions = syncContext.outOfSyncFiles.map(
+                (outOfSyncfile) => async () => {
+                    const mlFileData = await this.syncFileWithErrorHandler(
+                        syncContext,
+                        outOfSyncfile
+                    );
+                    // TODO: just store file and faces count in syncContext
+                    mlFileData?.faces &&
+                        syncContext.syncedFaces.push(...mlFileData.faces);
+                    syncContext.syncedFiles.push(outOfSyncfile);
+                }
             );
+            syncContext.syncQueue.on('error', (error) => {
+                console.error('syncQueue: onError: ', error);
+                syncContext.syncQueue.clear();
+            });
+            await syncContext.syncQueue.addAll(functions);
         } catch (error) {
             console.error('Error in sync job: ', error);
-            syncContext.syncQueue.clear();
             syncContext.error = error;
         }
         await syncContext.syncQueue.onIdle();
@@ -336,6 +337,7 @@ class MachineLearningService {
             return mlFileData;
         } catch (e) {
             let error = e;
+            console.error('Error in ml sync, fileId: ', enteFile.id, error);
             if ('status' in error) {
                 error = parseServerError(error).parsedError || error;
             }

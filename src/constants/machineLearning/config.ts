@@ -52,3 +52,5 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     // },
     mlVersion: 2,
 };
+
+export const ML_SYNC_DOWNLOAD_TIMEOUT_MS = 300000;

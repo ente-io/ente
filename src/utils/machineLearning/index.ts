@@ -1,5 +1,6 @@
 import { NormalizedFace } from '@tensorflow-models/blazeface';
 import * as tf from '@tensorflow/tfjs-core';
+import { ML_SYNC_DOWNLOAD_TIMEOUT_MS } from 'constants/machineLearning/config';
 import { euclidean } from 'hdbscan';
 import PQueue from 'p-queue';
 import DownloadManager from 'services/downloadManager';
@@ -296,7 +297,12 @@ async function getOriginalImageFile(
     let fileStream;
     if (queue) {
         fileStream = await queue.add(() =>
-            DownloadManager.downloadFile(file, token, enteWorker)
+            DownloadManager.downloadFile(
+                file,
+                token,
+                enteWorker,
+                ML_SYNC_DOWNLOAD_TIMEOUT_MS
+            )
         );
     } else {
         fileStream = await DownloadManager.downloadFile(
@@ -349,7 +355,11 @@ export async function getOriginalImageBitmap(
 }
 
 export async function getThumbnailImageBitmap(file: File, token: string) {
-    const fileUrl = await DownloadManager.getThumbnail(file, token);
+    const fileUrl = await DownloadManager.getThumbnail(
+        file,
+        token,
+        ML_SYNC_DOWNLOAD_TIMEOUT_MS
+    );
     console.log('[MLService] Got thumbnail: ', file.id.toString(), fileUrl);
 
     const thumbFile = await fetch(fileUrl);
