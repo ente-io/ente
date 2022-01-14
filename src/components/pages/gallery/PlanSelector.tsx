@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Modal, Button } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Plan, Subscription } from 'types/billing';
 import {
     convertBytesToGBs,
@@ -25,7 +25,7 @@ import { DeadCenter } from 'pages/gallery';
 import billingService from 'services/billingService';
 import { SetLoading } from 'types/gallery';
 
-export const PlanIcon = styled.div<{ selected: boolean }>`
+export const PlanIcon = styled.div<{ currentlySubscribed: boolean }>`
     border-radius: 20px;
     width: 220px;
     border: 2px solid #333;
@@ -38,8 +38,9 @@ export const PlanIcon = styled.div<{ selected: boolean }>`
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    cursor: ${(props) => (props.selected ? 'not-allowed' : 'pointer')};
-    border-color: ${(props) => props.selected && '#56e066'};
+    cursor: ${(props) =>
+        props.currentlySubscribed ? 'not-allowed' : 'pointer'};
+    border-color: ${(props) => props.currentlySubscribed && '#56e066'};
     transition: all 0.3s ease-out;
     overflow: hidden;
     position: relative;
@@ -56,12 +57,17 @@ export const PlanIcon = styled.div<{ selected: boolean }>`
         transition: all 0.5s ease-out;
     }
 
-    &:hover {
-        transform: scale(1.1);
-        background-color: #ffffff11;
-    }
-
-    &:hover > div:first-child::before {
+    &:hover
+        ${(props) =>
+            !props.currentlySubscribed &&
+            css`
+                 {
+                    transform: scale(1.1);
+                    background-color: #ffffff11;
+                }
+            `}
+        &:hover
+        > div:first-child::before {
         transform: rotate(45deg) translateX(300px);
     }
 `;
@@ -163,8 +169,12 @@ function PlanSelector(props: Props) {
             <PlanIcon
                 key={plan.stripeID}
                 className="subscription-plan-selector"
-                selected={isUserSubscribedPlan(plan, subscription)}
-                onClick={async () => await onPlanSelect(plan)}>
+                currentlySubscribed={isUserSubscribedPlan(plan, subscription)}
+                onClick={
+                    isUserSubscribedPlan(plan, subscription)
+                        ? () => {}
+                        : async () => await onPlanSelect(plan)
+                }>
                 <div>
                     <span
                         style={{
