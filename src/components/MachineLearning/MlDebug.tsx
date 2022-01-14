@@ -226,23 +226,12 @@ export default function MLDebug() {
         }
     };
 
-    let mlWorker;
     const onStartMLSync = async () => {
-        if (!MLWorker) {
-            MLWorker = getDedicatedMLWorker();
-            console.log('initiated MLWorker');
-        }
-        if (!mlWorker) {
-            mlWorker = await new MLWorker.comlink();
-        }
-        mlWorker.scheduleNextMLSync(token);
+        mlWorkManager.startSyncJob();
     };
 
     const onStopMLSync = async () => {
-        // if (mlWorker) {
-        //     mlWorker.cancelNextMLSync();
-        // }
-        await mlWorkManager.stopSyncJob();
+        mlWorkManager.stopSyncJob();
     };
 
     // for debug purpose, not a memory efficient implementation
