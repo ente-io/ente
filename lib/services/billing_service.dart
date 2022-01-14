@@ -58,12 +58,28 @@ class BillingService {
   }
 
   Future<BillingPlans> getBillingPlans() {
-    _future ??= _dio
-        .get(_config.getHttpEndpoint() + "/billing/plans/v2")
+    _future ??= (_config.getToken() == null
+            ? _fetchPublicBillingPlans()
+            : _fetchPrivateBillingPlans())
         .then((response) {
       return BillingPlans.fromMap(response.data);
     });
     return _future;
+  }
+
+  Future<Response<dynamic>> _fetchPrivateBillingPlans() {
+    return _dio.get(
+      _config.getHttpEndpoint() + "/billing/user-plans/",
+      options: Options(
+        headers: {
+          "X-Auth-Token": _config.getToken(),
+        },
+      ),
+    );
+  }
+
+  Future<Response<dynamic>> _fetchPublicBillingPlans() {
+    return _dio.get(_config.getHttpEndpoint() + "/billing/plans/v2");
   }
 
   Future<Subscription> verifySubscription(
