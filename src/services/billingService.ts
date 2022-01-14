@@ -25,7 +25,7 @@ class billingService {
                 );
             } else {
                 response = await HTTPService.get(
-                    `${ENDPOINT}/billing/user-plans/v2`,
+                    `${ENDPOINT}/billing/user-plans`,
                     null,
                     {
                         'X-Auth-Token': getToken(),
