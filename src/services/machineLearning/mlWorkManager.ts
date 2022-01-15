@@ -1,7 +1,7 @@
 import debounce from 'debounce-promise';
 import PQueue from 'p-queue';
 import { eventBus, Events } from 'services/events';
-import { File } from 'services/fileService';
+import { File, FILE_TYPE } from 'services/fileService';
 import { FACE_CROPS_CACHE_NAME, MLSyncConfig } from 'types/machineLearning';
 import { getToken } from 'utils/common/key';
 import { getMLSyncJobConfig } from 'utils/machineLearning/config';
@@ -76,6 +76,10 @@ class MLWorkManager {
         localFile: globalThis.File;
     }) {
         console.log('fileUploadedHandler');
+        if (arg.enteFile.metadata.fileType !== FILE_TYPE.IMAGE) {
+            console.log('Skipping non image file for local file processing');
+            return;
+        }
         try {
             await this.syncLocalFile(arg.enteFile, arg.localFile);
         } catch (e) {

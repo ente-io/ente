@@ -367,9 +367,17 @@ export async function getThumbnailImageBitmap(file: File, token: string) {
     return getImageBitmap(await thumbFile.blob());
 }
 
-export async function getLocalFileImageBitmap(localFile: globalThis.File) {
-    // TODO: handle formats not supported by createImageBitmap, like heic
-    return getImageBitmap(localFile);
+export async function getLocalFileImageBitmap(
+    enteFile: File,
+    localFile: globalThis.File,
+    enteWorkerProvider?: () => Promise<any>
+) {
+    let fileBlob = localFile as Blob;
+    if (needsConversionForPreview(enteFile)) {
+        const enteWorker = await enteWorkerProvider();
+        fileBlob = await convertForPreview(enteFile, fileBlob, enteWorker);
+    }
+    return getImageBitmap(fileBlob);
 }
 
 export async function getPeopleList(file: File): Promise<Array<Person>> {

@@ -25,6 +25,8 @@ export class SimpleJob<R extends JobResult> {
         this.resetInterval();
         if (this.state !== 'Running') {
             this.scheduleNext();
+        } else {
+            console.log('Job already running, not scheduling');
         }
     }
 

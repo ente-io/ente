@@ -413,8 +413,13 @@ class MachineLearningService {
         }
         // console.log('1 TF Memory stats: ', tf.memory());
         if (fileContext.localFile) {
+            if (fileContext.enteFile.metadata.fileType !== FILE_TYPE.IMAGE) {
+                throw new Error('Local file of only image type is supported');
+            }
             fileContext.imageBitmap = await getLocalFileImageBitmap(
-                fileContext.localFile
+                fileContext.enteFile,
+                fileContext.localFile,
+                () => syncContext.getEnteWorker(fileContext.enteFile.id)
             );
         } else if (
             syncContext.config.imageSource === 'Original' &&
