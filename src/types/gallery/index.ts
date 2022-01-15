@@ -26,6 +26,7 @@ export type GalleryContextType = {
     thumbs: Map<number, string>;
     files: Map<number, string>;
     showPlanSelectorModal: () => void;
+    closeMessageDialog: () => void;
     setActiveCollection: (collection: number) => void;
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
 };

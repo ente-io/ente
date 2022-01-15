@@ -119,6 +119,7 @@ const defaultGalleryContext: GalleryContextType = {
     thumbs: new Map(),
     files: new Map(),
     showPlanSelectorModal: () => null,
+    closeMessageDialog: () => null,
     setActiveCollection: () => null,
     syncWithRemote: () => null,
 };
@@ -144,7 +145,7 @@ export default function Gallery() {
         collectionID: 0,
     });
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
-    const [dialogView, setDialogView] = useState(false);
+    const [messageDialogView, setMessageDialogView] = useState(false);
     const [planModalView, setPlanModalView] = useState(false);
     const [loading, setLoading] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
@@ -186,6 +187,9 @@ export default function Gallery() {
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
 
+    const showPlanSelectorModal = () => setPlanModalView(true);
+    const closeMessageDialog = () => setMessageDialogView(false);
+
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
@@ -218,7 +222,7 @@ export default function Gallery() {
         appContext.showNavBar(true);
     }, []);
 
-    useEffect(() => setDialogView(true), [dialogMessage]);
+    useEffect(() => setMessageDialogView(true), [dialogMessage]);
 
     useEffect(
         () => collectionSelectorAttributes && setCollectionSelectorView(true),
@@ -536,7 +540,8 @@ export default function Gallery() {
         <GalleryContext.Provider
             value={{
                 ...defaultGalleryContext,
-                showPlanSelectorModal: () => setPlanModalView(true),
+                showPlanSelectorModal,
+                closeMessageDialog,
                 setActiveCollection,
                 syncWithRemote,
             }}>
@@ -563,8 +568,8 @@ export default function Gallery() {
                 <AlertBanner bannerMessage={bannerMessage} />
                 <MessageDialog
                     size="lg"
-                    show={dialogView}
-                    onHide={() => setDialogView(false)}
+                    show={messageDialogView}
+                    onHide={closeMessageDialog}
                     attributes={dialogMessage}
                 />
                 <SearchBar
