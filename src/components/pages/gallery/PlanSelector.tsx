@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Form, Modal, Button } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import styled, { css } from 'styled-components';
@@ -21,9 +21,10 @@ import { reverseString } from 'utils/common';
 import { SetDialogMessage } from 'components/MessageDialog';
 import ArrowEast from 'components/icons/ArrowEast';
 import LinkButton from './LinkButton';
-import { DeadCenter } from 'pages/gallery';
+import { DeadCenter, GalleryContext } from 'pages/gallery';
 import billingService from 'services/billingService';
 import { SetLoading } from 'types/gallery';
+import { logError } from 'utils/sentry';
 
 export const PlanIcon = styled.div<{ currentlySubscribed: boolean }>`
     border-radius: 20px;
@@ -86,6 +87,8 @@ function PlanSelector(props: Props) {
     const subscription: Subscription = getUserSubscription();
     const [plans, setPlans] = useState<Plan[]>(null);
     const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(PLAN_PERIOD.YEAR);
+    const galleryContext = useContext(GalleryContext);
+
     const togglePeriod = () => {
         setPlanPeriod((prevPeriod) =>
             prevPeriod === PLAN_PERIOD.MONTH
@@ -93,9 +96,16 @@ function PlanSelector(props: Props) {
                 : PLAN_PERIOD.MONTH
         );
     };
+    function onReopenClick() {
+        galleryContext.closeMessageDialog();
+        galleryContext.showPlanSelectorModal();
+    }
     useEffect(() => {
-        if (props.modalView) {
-            const main = async () => {
+        if (!props.modalView) {
+            return;
+        }
+        const main = async () => {
+            try {
                 props.setLoading(true);
                 let plans = await billingService.getPlans();
 
@@ -111,10 +121,24 @@ function PlanSelector(props: Props) {
                     plans = [planForSubscription(subscription), ...plans];
                 }
                 setPlans(plans);
+            } catch (e) {
+                logError(e, 'plan selector modal open failed');
+                props.closeModal();
+                props.setDialogMessage({
+                    title: constants.OPEN_PLAN_SELECTOR_MODAL_FAILED,
+                    content: constants.UNKNOWN_ERROR,
+                    close: { text: 'close', variant: 'danger' },
+                    proceed: {
+                        text: constants.REOPEN_PLAN_SELECTOR_MODAL,
+                        variant: 'success',
+                        action: onReopenClick,
+                    },
+                });
+            } finally {
                 props.setLoading(false);
-            };
-            main();
-        }
+            }
+        };
+        main();
     }, [props.modalView]);
 
     async function onPlanSelect(plan: Plan) {

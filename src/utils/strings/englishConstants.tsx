@@ -621,6 +621,8 @@ const englishConstants = {
     DATE_TIME_ORIGINAL: 'EXIF:DateTimeOriginal',
     DATE_TIME_DIGITIZED: 'EXIF:DateTimeDigitized',
     CUSTOM_TIME: 'custom time',
+    REOPEN_PLAN_SELECTOR_MODAL: 're-open plans',
+    OPEN_PLAN_SELECTOR_MODAL_FAILED: 'failed to open plans',
 };
 
 export default englishConstants;
