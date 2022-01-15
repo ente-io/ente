@@ -129,6 +129,7 @@ export const updateTrash = async (
     } catch (e) {
         logError(e, 'Get trash files failed');
     }
+    return [];
 };
 
 function removeDuplicates(trash: Trash) {
