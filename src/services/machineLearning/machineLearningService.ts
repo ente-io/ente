@@ -180,6 +180,7 @@ class MachineLearningService {
     }
 
     // TODO: not required if ml data is stored as field inside ente file object
+    // remove, not required now
     // it removes ml data for files in trash, they will be resynced if restored
     // private async syncRemovedFiles(syncContext: MLSyncContext) {
     //     const db = await mlIDbStorage.db;
@@ -220,6 +221,7 @@ class MachineLearningService {
     }
 
     // TODO: optimize, use indexdb indexes, move facecrops to cache to reduce io
+    // remove, already done
     private async getUniqueOutOfSyncFilesNoIdx(
         syncContext: MLSyncContext,
         files: File[]
@@ -343,7 +345,8 @@ class MachineLearningService {
             }
             // TODO: throw errors not related to specific file
             // sync job run should stop after these errors
-            // don't persist these errors against file
+            // don't persist these errors against file,
+            // can include indexeddb/cache errors too
             switch (error.message) {
                 case CustomError.SESSION_EXPIRED_MESSAGE:
                 case CustomError.NETWORK_ERROR:

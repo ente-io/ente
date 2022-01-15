@@ -225,7 +225,8 @@ class BlazeFaceDetectionService implements FaceDetectionService {
                 );
             }
 
-            // TODO: we might miss 1st pass face actually having score within threshold
+            // we might miss 1st pass face actually having score within threshold
+            // it is ok as results will be consistent with 2nd pass only detections
             if (selected && selected.probability >= BLAZEFACE_SCORE_THRESHOLD) {
                 // console.log("pass2: ", { imageBox, paddedBox, transform, selected });
                 detections.push(selected);

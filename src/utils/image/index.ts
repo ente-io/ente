@@ -1,4 +1,4 @@
-// TODO: these utils only work in env where OffscreenCanvas is available
+// these utils only work in env where OffscreenCanvas is available
 
 import { BlobOptions, Dimensions } from 'types/image';
 import { enlargeBox } from 'utils/machineLearning';

@@ -129,7 +129,7 @@ export async function migrateFaceInterfaceUpdate() {
     console.log('migrateFaceInterfaceUpdate updating: ', updatedFiles.length);
     await mlIDbStorage.putAllFilesInTx(updatedFiles);
 
-    await mlIDbStorage.incrementIndexVersion('faceSchema');
+    await mlIDbStorage.setIndexVersion('faceSchema', 1);
     console.log('migrateFaceInterfaceUpdate done');
     console.timeEnd('migrateFaceInterfaceUpdate');
 }

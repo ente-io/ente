@@ -150,7 +150,7 @@ export class LocalMLSyncContext implements MLSyncContext {
         this.concurrency = concurrency || CONCURRENCY;
 
         console.log('Using concurrency: ', this.concurrency);
-        // TODO: set timeout, timeout is added on downloads
+        // timeout is added on downloads
         // timeout on queue will keep the operation open till worker is terminated
         this.syncQueue = new PQueue({ concurrency: this.concurrency });
         logQueueStats(this.syncQueue, 'sync');
