@@ -278,8 +278,7 @@ class MachineLearningService {
                     syncContext.syncedFiles.push(outOfSyncfile);
                 }
             );
-            syncContext.syncQueue.on('error', (error) => {
-                console.error('syncQueue: onError: ', error);
+            syncContext.syncQueue.on('error', () => {
                 syncContext.syncQueue.clear();
             });
             await syncContext.syncQueue.addAll(functions);

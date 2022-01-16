@@ -514,9 +514,13 @@ export function getNearestPointIndex(
 }
 
 export function logQueueStats(queue: PQueue, name: string) {
-    queue.on('active', () => {
+    queue.on('active', () =>
         console.log(
-            `queuestats: ${name}: Working on next item.  Size: ${queue.size}  Pending: ${queue.pending}`
-        );
-    });
+            `queuestats: ${name}: Active, Size: ${queue.size} Pending: ${queue.pending}`
+        )
+    );
+    queue.on('idle', () => console.log(`queuestats: ${name}: Idle`));
+    queue.on('error', (error) =>
+        console.error(`queuestats: ${name}: Error, `, error)
+    );
 }

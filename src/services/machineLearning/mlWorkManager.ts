@@ -4,6 +4,7 @@ import { eventBus, Events } from 'services/events';
 import { File, FILE_TYPE } from 'services/fileService';
 import { FACE_CROPS_CACHE_NAME, MLSyncConfig } from 'types/machineLearning';
 import { getToken } from 'utils/common/key';
+import { logQueueStats } from 'utils/machineLearning';
 import { getMLSyncJobConfig } from 'utils/machineLearning/config';
 import { MLWorkerWithProxy } from 'utils/machineLearning/worker';
 import { logError } from 'utils/sentry';
@@ -11,6 +12,7 @@ import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { MLSyncJobResult, MLSyncJob } from './mlSyncJob';
 
 const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
+const LIVE_SYNC_QUEUE_TIMEOUT_SEC = 300;
 const LOCAL_FILES_UPDATED_DEBOUNCE_SEC = 30;
 
 class MLWorkManager {
@@ -21,7 +23,13 @@ class MLWorkManager {
     private liveSyncWorker: MLWorkerWithProxy;
 
     constructor() {
-        this.liveSyncQueue = new PQueue({ concurrency: 1 });
+        this.liveSyncQueue = new PQueue({
+            concurrency: 1,
+            // TODO: temp, remove
+            timeout: LIVE_SYNC_QUEUE_TIMEOUT_SEC * 1000,
+            throwOnTimeout: true,
+        });
+        logQueueStats(this.liveSyncQueue, 'livesync');
 
         const debouncedLiveSyncIdle = debounce(
             () => this.onLiveSyncIdle(),
@@ -82,9 +90,10 @@ class MLWorkManager {
         }
         try {
             await this.syncLocalFile(arg.enteFile, arg.localFile);
-        } catch (e) {
-            // console.error(e);
-            logError(e, 'Failed in ML fileUploaded Handler');
+        } catch (error) {
+            console.error('Error in syncLocalFile', error);
+            this.liveSyncQueue.clear();
+            // logError(e, 'Failed in ML fileUploaded Handler');
         }
     }
 
