@@ -1,5 +1,5 @@
 import * as tf from '@tensorflow/tfjs-core';
-import * as tflite from '@tensorflow/tfjs-tflite';
+import { TFLiteModel } from '@tensorflow/tfjs-tflite';
 import PQueue from 'p-queue';
 import {
     FaceEmbedding,
@@ -14,11 +14,10 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
     public method: Versioned<FaceEmbeddingMethod>;
     public faceSize: number;
 
-    private mobileFaceNetModel: Promise<tflite.TFLiteModel>;
+    private mobileFaceNetModel: Promise<TFLiteModel>;
     private serialQueue: PQueue;
 
     public constructor(faceSize: number = MOBILEFACENET_FACE_SIZE) {
-        tflite.setWasmPath('/js/tflite/');
         this.method = {
             value: 'MobileFaceNet',
             version: 2,
@@ -29,6 +28,10 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
     }
 
     private async init() {
+        // TODO: can also create new instance per new syncContext
+        const tflite = await import('@tensorflow/tfjs-tflite');
+        tflite.setWasmPath('/js/tflite/');
+
         this.mobileFaceNetModel = tflite.loadTFLiteModel(
             '/models/mobilefacenet/mobilefacenet.tflite'
         );
@@ -50,7 +53,7 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
 
     public getFaceEmbeddingTF(
         faceTensor: tf.Tensor4D,
-        mobileFaceNetModel: tflite.TFLiteModel
+        mobileFaceNetModel: TFLiteModel
     ): tf.Tensor2D {
         return tf.tidy(() => {
             const normalizedFace = tf.sub(tf.div(faceTensor, 127.5), 1.0);
