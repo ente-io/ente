@@ -54,3 +54,5 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
 };
 
 export const ML_SYNC_DOWNLOAD_TIMEOUT_MS = 300000;
+
+export const MAX_FACE_DISTANCE_PERCENT = Math.sqrt(2) / 100;

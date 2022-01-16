@@ -30,6 +30,7 @@ import {
     removeDuplicateDetections,
     transformPaddedToImage,
 } from 'utils/machineLearning/faceDetection';
+import { MAX_FACE_DISTANCE_PERCENT } from 'constants/machineLearning/config';
 
 class BlazeFaceDetectionService implements FaceDetectionService {
     private blazeFaceModel: Promise<BlazeFaceModel>;
@@ -196,7 +197,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
     public async detectFaces(
         imageBitmap: ImageBitmap
     ): Promise<Array<FaceDetection>> {
-        const maxFaceDistance = imageBitmap.width * 0.0141;
+        const maxFaceDistance = imageBitmap.width * MAX_FACE_DISTANCE_PERCENT;
         const pass1Detections = await this.estimateFaces(imageBitmap);
 
         // run 2nd pass for accuracy
