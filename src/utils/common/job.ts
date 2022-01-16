@@ -66,6 +66,7 @@ export class SimpleJob<R extends JobResult> {
         }
     }
 
+    // currently client is responsible to terminate running job
     public stop() {
         this.stopped = true;
         this.clearScheduled();
@@ -74,6 +75,7 @@ export class SimpleJob<R extends JobResult> {
     private clearScheduled() {
         clearTimeout(this.nextTimeoutId);
         this.nextTimeoutId = undefined;
+        this.state = 'NotScheduled';
         console.log('Cleared next job');
     }
 }
