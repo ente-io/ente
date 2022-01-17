@@ -6,6 +6,11 @@ import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
 import { GalleryContext } from 'pages/gallery';
 import { GAP_BTW_TILES } from 'constants/gallery';
+import {
+    defaultSharedAlbumContext,
+    SharedAlbumContext,
+} from 'pages/shared-album';
+import SharedCollectionDownloadManager from 'services/sharedCollectionDownloadManager';
 
 interface IProps {
     file: EnteFile;
@@ -173,11 +178,22 @@ export default function PreviewCard(props: IProps) {
         isInsSelectRange,
     } = props;
     const isMounted = useRef(true);
+    const sharedAlbumContext =
+        useContext(SharedAlbumContext) ?? defaultSharedAlbumContext;
     useLayoutEffect(() => {
         if (file && !file.msrc) {
             const main = async () => {
                 try {
-                    const url = await DownloadManager.getThumbnail(file);
+                    let url;
+                    if (sharedAlbumContext.accessedThroughSharedURL) {
+                        url =
+                            await SharedCollectionDownloadManager.getThumbnail(
+                                file,
+                                sharedAlbumContext.token
+                            );
+                    } else {
+                        url = await DownloadManager.getThumbnail(file);
+                    }
                     if (isMounted.current) {
                         setImgSrc(url);
                         thumbs.set(file.id, url);

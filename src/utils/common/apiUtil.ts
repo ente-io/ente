@@ -14,10 +14,30 @@ export const getFileUrl = (id: number) => {
     return `https://files.ente.io/?fileID=${id}`;
 };
 
+export const getSharedAlbumFileUrl = (id: number) => {
+    if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
+        return (
+            `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/public-collection/files/download/${id}` ??
+            'https://api.ente.io'
+        );
+    }
+    return `https://files.ente.io/?fileID=${id}`;
+};
+
 export const getThumbnailUrl = (id: number) => {
     if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
         return (
             `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/files/preview/${id}` ??
+            'https://api.ente.io'
+        );
+    }
+    return `https://thumbnails.ente.io/?fileID=${id}`;
+};
+
+export const getSharedAlbumThumbnailUrl = (id: number) => {
+    if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
+        return (
+            `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/public-collection/files/preview/${id}` ??
             'https://api.ente.io'
         );
     }

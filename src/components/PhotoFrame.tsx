@@ -20,6 +20,11 @@ import { isPlaybackPossible } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
 import { SetFiles, SelectedState, Search, setSearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
+import SharedCollectionDownloadManager from 'services/sharedCollectionDownloadManager';
+import {
+    defaultSharedAlbumContext,
+    SharedAlbumContext,
+} from 'pages/shared-album';
 
 const Container = styled.div`
     display: block;
@@ -89,6 +94,8 @@ const PhotoFrame = ({
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
     const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
+    const sharedAlbumContext =
+        useContext(SharedAlbumContext) ?? defaultSharedAlbumContext;
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
@@ -365,7 +372,15 @@ const PhotoFrame = ({
                 if (galleryContext.thumbs.has(item.id)) {
                     url = galleryContext.thumbs.get(item.id);
                 } else {
-                    url = await DownloadManager.getThumbnail(item);
+                    if (sharedAlbumContext.accessedThroughSharedURL) {
+                        url =
+                            await SharedCollectionDownloadManager.getThumbnail(
+                                item,
+                                sharedAlbumContext.token
+                            );
+                    } else {
+                        url = await DownloadManager.getThumbnail(item);
+                    }
                     galleryContext.thumbs.set(item.id, url);
                 }
                 updateUrl(item.dataIndex)(url);
@@ -392,7 +407,15 @@ const PhotoFrame = ({
                 if (galleryContext.files.has(item.id)) {
                     url = galleryContext.files.get(item.id);
                 } else {
-                    url = await DownloadManager.getFile(item, true);
+                    if (sharedAlbumContext.accessedThroughSharedURL) {
+                        url = await SharedCollectionDownloadManager.getFile(
+                            item,
+                            sharedAlbumContext.token,
+                            true
+                        );
+                    } else {
+                        url = await DownloadManager.getFile(item, true);
+                    }
                     galleryContext.files.set(item.id, url);
                 }
                 await updateSrcUrl(item.dataIndex, url);
