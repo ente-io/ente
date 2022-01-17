@@ -63,7 +63,7 @@ export const savePublicCollection = async (collection: Collection) => {
 };
 
 const getPublicCollectionLastSyncTime = async (collectionUID: string) =>
-    (await localForage.getItem<number>(`${collectionUID}-time`)) ?? 0;
+    (await localForage.getItem<number>(`public-${collectionUID}-time`)) ?? 0;
 
 const setPublicCollectionLastSyncTime = async (
     collectionUID: string,
