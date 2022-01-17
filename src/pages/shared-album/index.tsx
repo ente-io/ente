@@ -40,6 +40,7 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const appContext = useContext(AppContext);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [abuseReportFormView, setAbuseReportFormView] = useState(false);
 
     const showReportForm = () => setAbuseReportFormView(true);
@@ -115,10 +116,7 @@ export default function PublicCollectionGallery() {
                 isSharedCollection
             />
             <ReportAbuse onClick={showReportForm} />
-            <AbuseReportForm
-                show={abuseReportFormView}
-                close={closeReportForm}
-            />
+            <AbuseReportForm show={false} close={closeReportForm} />
         </PublicCollectionGalleryContext.Provider>
     );
 }

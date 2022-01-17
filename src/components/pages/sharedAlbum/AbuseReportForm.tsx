@@ -35,7 +35,6 @@ export function AbuseReportForm({ show, close }: Iprops) {
             setLoading(false);
         }
     };
-    console.log(typeof REPORT_REASON);
     return (
         <MessageDialog
             show={show}
