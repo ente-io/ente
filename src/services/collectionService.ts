@@ -598,7 +598,6 @@ export const createShareableUrl = async (collection: Collection) => {
                 'X-Auth-Token': token,
             }
         );
-        console.log(resp);
         return resp.data as PublicAccessUrl;
     } catch (e) {
         logError(e, 'createShareableUrl failed ');

@@ -102,6 +102,9 @@ function CollectionShare(props: Props) {
             </td>
         </tr>
     );
+    if (!props.collection) {
+        return <></>;
+    }
     return (
         <MessageDialog
             show={props.show}
@@ -177,13 +180,13 @@ function CollectionShare(props: Props) {
                         width: '100%',
                     }}
                 />
-                {props.collection?.publicAccessUrls.length > 0 && (
+                {props.collection.publicAccessUrls?.length > 0 && (
                     <div style={{ width: '100%', wordBreak: 'break-all' }}>
                         <p>{constants.PUBLIC_URL}</p>
 
                         <Table striped bordered hover variant="dark" size="sm">
                             <tbody>
-                                {props.collection?.publicAccessUrls.map(
+                                {props.collection.publicAccessUrls?.map(
                                     (publicAccessUrl) => (
                                         <tr key={publicAccessUrl.url}>
                                             {
@@ -207,13 +210,13 @@ function CollectionShare(props: Props) {
                         </Table>
                     </div>
                 )}
-                {props.collection?.sharees.length > 0 ? (
+                {props.collection.sharees?.length > 0 ? (
                     <>
                         <p>{constants.SHAREES}</p>
 
                         <Table striped bordered hover variant="dark" size="sm">
                             <tbody>
-                                {props.collection?.sharees.map((sharee) => (
+                                {props.collection.sharees?.map((sharee) => (
                                     <ShareeRow
                                         key={sharee.email}
                                         sharee={sharee}
