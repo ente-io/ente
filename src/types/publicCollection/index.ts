@@ -1,6 +1,6 @@
 import { EnteFile } from 'types/file';
 
-export interface SharedAlbumContextType {
+export interface PublicCollectionGalleryContextType {
     token: string;
     accessedThroughSharedURL: boolean;
 }

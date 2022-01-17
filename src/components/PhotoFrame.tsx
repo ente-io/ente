@@ -20,10 +20,10 @@ import { isPlaybackPossible } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
 import { SetFiles, SelectedState, Search, setSearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
-import SharedCollectionDownloadManager from 'services/sharedCollectionDownloadManager';
+import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import {
-    defaultSharedAlbumContext,
-    SharedAlbumContext,
+    defaultPublicCollectionGalleryContext,
+    PublicCollectionGalleryContext,
 } from 'pages/shared-album';
 
 const Container = styled.div`
@@ -94,8 +94,9 @@ const PhotoFrame = ({
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
     const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
-    const sharedAlbumContext =
-        useContext(SharedAlbumContext) ?? defaultSharedAlbumContext;
+    const publicCollectionGalleryContext =
+        useContext(PublicCollectionGalleryContext) ??
+        defaultPublicCollectionGalleryContext;
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
@@ -372,11 +373,13 @@ const PhotoFrame = ({
                 if (galleryContext.thumbs.has(item.id)) {
                     url = galleryContext.thumbs.get(item.id);
                 } else {
-                    if (sharedAlbumContext.accessedThroughSharedURL) {
+                    if (
+                        publicCollectionGalleryContext.accessedThroughSharedURL
+                    ) {
                         url =
-                            await SharedCollectionDownloadManager.getThumbnail(
+                            await PublicCollectionDownloadManager.getThumbnail(
                                 item,
-                                sharedAlbumContext.token
+                                publicCollectionGalleryContext.token
                             );
                     } else {
                         url = await DownloadManager.getThumbnail(item);
@@ -407,10 +410,12 @@ const PhotoFrame = ({
                 if (galleryContext.files.has(item.id)) {
                     url = galleryContext.files.get(item.id);
                 } else {
-                    if (sharedAlbumContext.accessedThroughSharedURL) {
-                        url = await SharedCollectionDownloadManager.getFile(
+                    if (
+                        publicCollectionGalleryContext.accessedThroughSharedURL
+                    ) {
+                        url = await PublicCollectionDownloadManager.getFile(
                             item,
-                            sharedAlbumContext.token,
+                            publicCollectionGalleryContext.token,
                             true
                         );
                     } else {

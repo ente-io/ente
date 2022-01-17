@@ -7,7 +7,7 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { SharedAlbumContextType } from 'types/publicCollection';
+import { PublicCollectionGalleryContextType } from 'types/publicCollection';
 import {
     getLocalPublicCollection,
     getLocalPublicFiles,
@@ -21,14 +21,16 @@ import { AppContext } from 'pages/_app';
 import OpenInEnte from 'components/pages/sharedAlbum/OpenInEnte';
 import { CollectionInfo } from 'components/pages/sharedAlbum/CollectionInfo';
 
-export const defaultSharedAlbumContext: SharedAlbumContextType = {
-    token: null,
-    accessedThroughSharedURL: false,
-};
+export const defaultPublicCollectionGalleryContext: PublicCollectionGalleryContextType =
+    {
+        token: null,
+        accessedThroughSharedURL: false,
+    };
 
-export const SharedAlbumContext = createContext<SharedAlbumContextType>(
-    defaultSharedAlbumContext
-);
+export const PublicCollectionGalleryContext =
+    createContext<PublicCollectionGalleryContextType>(
+        defaultPublicCollectionGalleryContext
+    );
 
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
@@ -80,9 +82,9 @@ export default function PublicCollectionGallery() {
         return <div />;
     }
     return (
-        <SharedAlbumContext.Provider
+        <PublicCollectionGalleryContext.Provider
             value={{
-                ...defaultSharedAlbumContext,
+                ...defaultPublicCollectionGalleryContext,
                 token: token.current,
                 accessedThroughSharedURL: true,
             }}>
@@ -107,6 +109,6 @@ export default function PublicCollectionGallery() {
                 activeCollection={ALL_SECTION}
                 isSharedCollection
             />
-        </SharedAlbumContext.Provider>
+        </PublicCollectionGalleryContext.Provider>
     );
 }

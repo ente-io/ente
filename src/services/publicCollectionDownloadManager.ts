@@ -1,7 +1,7 @@
 import {
     getFileUrl,
-    getSharedAlbumFileUrl,
-    getSharedAlbumThumbnailUrl,
+    getPublicCollectionFileUrl,
+    getPublicCollectionThumbnailUrl,
 } from 'utils/common/apiUtil';
 import CryptoWorker from 'utils/crypto';
 import {
@@ -15,7 +15,7 @@ import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 
-class SharedCollectionDownloadManager {
+class PublicCollectionDownloadManager {
     private fileObjectUrlPromise = new Map<string, Promise<string>>();
     private thumbnailObjectUrlPromise = new Map<number, Promise<string>>();
 
@@ -58,7 +58,7 @@ class SharedCollectionDownloadManager {
 
     downloadThumb = async (token: string, file: EnteFile) => {
         const resp = await HTTPService.get(
-            getSharedAlbumThumbnailUrl(file.id),
+            getPublicCollectionThumbnailUrl(file.id),
             null,
             { 'X-Auth-Access-Token': token },
             { responseType: 'arraybuffer' }
@@ -115,7 +115,7 @@ class SharedCollectionDownloadManager {
             file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
         ) {
             const resp = await HTTPService.get(
-                getSharedAlbumFileUrl(file.id),
+                getPublicCollectionFileUrl(file.id),
                 null,
                 { 'X-Auth-Access-Token': token },
                 { responseType: 'arraybuffer' }
@@ -188,4 +188,4 @@ class SharedCollectionDownloadManager {
     }
 }
 
-export default new SharedCollectionDownloadManager();
+export default new PublicCollectionDownloadManager();
