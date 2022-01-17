@@ -661,7 +661,6 @@ export default function Gallery() {
                     search={search}
                     setSearchStats={setSearchStats}
                     deleted={deleted}
-                    setDialogMessage={setDialogMessage}
                     activeCollection={activeCollection}
                     isSharedCollection={isSharedCollection(
                         activeCollection,

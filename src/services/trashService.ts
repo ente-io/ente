@@ -107,7 +107,7 @@ export const updateTrash = async (
                 if (!trashItem.isDeleted && !trashItem.isRestored) {
                     trashItem.file = await decryptFile(
                         trashItem.file,
-                        collection
+                        collection.key
                     );
                 }
                 updatedTrash.push(trashItem);

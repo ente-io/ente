@@ -1,5 +1,4 @@
 import { SelectedState } from 'types/gallery';
-import { Collection } from 'types/collection';
 import {
     EnteFile,
     fileAttribute,
@@ -202,13 +201,13 @@ export function sortFiles(files: EnteFile[]) {
     return files;
 }
 
-export async function decryptFile(file: EnteFile, collection: Collection) {
+export async function decryptFile(file: EnteFile, collectionKey: string) {
     try {
         const worker = await new CryptoWorker();
         file.key = await worker.decryptB64(
             file.encryptedKey,
             file.keyDecryptionNonce,
-            collection.key
+            collectionKey
         );
         const encryptedMetadata = file.metadata as unknown as fileAttribute;
         file.metadata = await worker.decryptMetadata(

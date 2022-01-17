@@ -9,7 +9,6 @@ import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
-import { SetDialogMessage } from './MessageDialog';
 import { fileIsArchived, formatDateRelative } from 'utils/file';
 import {
     ALL_SECTION,
@@ -64,7 +63,6 @@ interface Props {
     search: Search;
     setSearchStats: setSearchStats;
     deleted?: number[];
-    setDialogMessage: SetDialogMessage;
     activeCollection: number;
     isSharedCollection: boolean;
 }

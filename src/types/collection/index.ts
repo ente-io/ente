@@ -17,6 +17,19 @@ export interface Collection {
     keyDecryptionNonce: string;
     isDeleted: boolean;
     isSharedCollection?: boolean;
+    publicAccessUrls?: PublicAccessUrl[];
+}
+
+export interface PublicAccessUrl {
+    url: string;
+    deviceLimit: number;
+    validTill: number;
+}
+
+export interface CreatePublicAccessTokenRequest {
+    collectionID: number;
+    validTill: number;
+    deviceLimit: number;
 }
 
 export interface EncryptedFileKey {

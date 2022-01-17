@@ -20,8 +20,15 @@ import {
     MoveToCollectionRequest,
     EncryptedFileKey,
     RemoveFromCollectionRequest,
+    CreatePublicAccessTokenRequest,
+    PublicAccessUrl,
 } from 'types/collection';
-import { COLLECTION_SORT_BY, CollectionType } from 'constants/collection';
+import {
+    COLLECTION_SORT_BY,
+    CollectionType,
+    COLLECTION_SHARE_DEFAULT_DEVICE_LIMIT,
+    COLLECTION_SHARE_DEFAULT_VALID_DURATION,
+} from 'constants/collection';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -570,6 +577,31 @@ export const unshareCollection = async (
         );
     } catch (e) {
         logError(e, 'unshare collection failed ');
+        throw e;
+    }
+};
+
+export const createShareableUrl = async (collection: Collection) => {
+    try {
+        const token = getToken();
+        const createPublicAccessTokenRequest: CreatePublicAccessTokenRequest = {
+            collectionID: collection.id,
+            validTill:
+                Date.now() * 1000 + COLLECTION_SHARE_DEFAULT_VALID_DURATION,
+            deviceLimit: COLLECTION_SHARE_DEFAULT_DEVICE_LIMIT,
+        };
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/collections/share-url`,
+            createPublicAccessTokenRequest,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        console.log(resp);
+        return resp.data as PublicAccessUrl;
+    } catch (e) {
+        logError(e, 'createShareableUrl failed ');
         throw e;
     }
 };

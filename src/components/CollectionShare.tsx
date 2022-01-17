@@ -7,11 +7,16 @@ import FormControl from 'react-bootstrap/FormControl';
 import { Button, Col, Table } from 'react-bootstrap';
 import { DeadCenter } from 'pages/gallery';
 import { User } from 'types/user';
-import { shareCollection, unshareCollection } from 'services/collectionService';
+import {
+    shareCollection,
+    unshareCollection,
+    createShareableUrl,
+} from 'services/collectionService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SubmitButton from './SubmitButton';
 import MessageDialog from './MessageDialog';
 import { Collection } from 'types/collection';
+import { transformShareURLForHost } from 'utils/collection';
 
 interface Props {
     show: boolean;
@@ -69,6 +74,11 @@ function CollectionShare(props: Props) {
     };
     const collectionUnshare = async (sharee) => {
         await unshareCollection(props.collection, sharee.email);
+        await props.syncWithRemote();
+    };
+
+    const createSharableUrlHelper = async () => {
+        await createShareableUrl(props.collection);
         await props.syncWithRemote();
     };
 
@@ -154,6 +164,11 @@ function CollectionShare(props: Props) {
                         </Form>
                     )}
                 </Formik>
+                <Button
+                    variant="outline-success"
+                    onClick={createSharableUrlHelper}>
+                    Create New Shareable URL
+                </Button>
                 <div
                     style={{
                         height: '1px',
@@ -162,6 +177,36 @@ function CollectionShare(props: Props) {
                         width: '100%',
                     }}
                 />
+                {props.collection?.publicAccessUrls.length > 0 && (
+                    <div style={{ width: '100%', wordBreak: 'break-all' }}>
+                        <p>{constants.PUBLIC_URL}</p>
+
+                        <Table striped bordered hover variant="dark" size="sm">
+                            <tbody>
+                                {props.collection?.publicAccessUrls.map(
+                                    (publicAccessUrl) => (
+                                        <tr key={publicAccessUrl.url}>
+                                            {
+                                                <a
+                                                    href={transformShareURLForHost(
+                                                        publicAccessUrl.url,
+                                                        props.collection.key
+                                                    )}
+                                                    target="_blank"
+                                                    rel="noreferrer">
+                                                    {transformShareURLForHost(
+                                                        publicAccessUrl.url,
+                                                        props.collection.key
+                                                    )}
+                                                </a>
+                                            }
+                                        </tr>
+                                    )
+                                )}
+                            </tbody>
+                        </Table>
+                    </div>
+                )}
                 {props.collection?.sharees.length > 0 ? (
                     <>
                         <p>{constants.SHAREES}</p>

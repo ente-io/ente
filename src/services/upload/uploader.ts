@@ -103,7 +103,7 @@ export default async function uploader(
         );
 
         const uploadedFile = await UploadHttpClient.uploadFile(uploadFile);
-        const decryptedFile = await decryptFile(uploadedFile, collection);
+        const decryptedFile = await decryptFile(uploadedFile, collection.key);
 
         UIService.setFileProgress(rawFile.name, FileUploadResults.UPLOADED);
         UIService.increaseFileUploaded();
