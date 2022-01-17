@@ -18,7 +18,7 @@ const Wrapper = styled.div`
 function OpenInEnte({ redirect }) {
     return (
         <Wrapper onClick={redirect}>
-            <Button variant="outline-success">Open in ente</Button>
+            <Button variant="outline-success">open in ente</Button>
         </Wrapper>
     );
 }

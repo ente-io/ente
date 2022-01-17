@@ -239,3 +239,7 @@ const decryptCollectionName = async (
             collectionKey
         )));
 };
+
+export const reportAbuse = () => {
+    return;
+};

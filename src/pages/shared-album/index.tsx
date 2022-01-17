@@ -20,6 +20,8 @@ import { mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
 import OpenInEnte from 'components/pages/sharedAlbum/OpenInEnte';
 import { CollectionInfo } from 'components/pages/sharedAlbum/CollectionInfo';
+import ReportAbuse from 'components/pages/sharedAlbum/ReportAbuse';
+import { AbuseReportForm } from 'components/pages/sharedAlbum/AbuseReportForm';
 
 export const defaultPublicCollectionGalleryContext: PublicCollectionGalleryContextType =
     {
@@ -38,7 +40,10 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const appContext = useContext(AppContext);
+    const [abuseReportFormView, setAbuseReportFormView] = useState(false);
 
+    const showReportForm = () => setAbuseReportFormView(true);
+    const closeReportForm = () => setAbuseReportFormView(false);
     useEffect(() => {
         const main = async () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -108,6 +113,11 @@ export default function PublicCollectionGallery() {
                 deleted={[]}
                 activeCollection={ALL_SECTION}
                 isSharedCollection
+            />
+            <ReportAbuse onClick={showReportForm} />
+            <AbuseReportForm
+                show={abuseReportFormView}
+                close={closeReportForm}
             />
         </PublicCollectionGalleryContext.Provider>
     );
