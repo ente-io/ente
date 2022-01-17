@@ -17,6 +17,9 @@ export default function sharedAlbum() {
     const [token, setToken] = useState<string>(null);
     const [collectionKey, setCollectionKey] = useState(null);
     const [files, setFiles] = useState([]);
+    //  todo add shared-collection info access using access token api
+    // const [collections, setCollections] = useState<Collection[]>([]);
+
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('accessToken');
