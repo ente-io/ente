@@ -110,7 +110,7 @@ export async function downloadCollection(
 
 export function transformShareURLForHost(url: string, collectionKey: string) {
     const host = window.location.host;
-    return `${url}&collectionKey=${collectionKey}`.replace(
+    return `${url}&collectionKey=${encodeURIComponent(collectionKey)}`.replace(
         'https://albums.ente.io',
         `http://${host}/shared-album`
     );

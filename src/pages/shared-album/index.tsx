@@ -10,7 +10,9 @@ export default function sharedAlbum() {
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('accessToken');
-        const collectionKey = urlParams.get('collectionKey');
+        const collectionKey = decodeURIComponent(
+            urlParams.get('collectionKey')
+        );
         setToken(token);
         setCollectionKey(collectionKey);
         syncWithRemote(token, collectionKey);
@@ -22,7 +24,6 @@ export default function sharedAlbum() {
             c ?? collectionKey,
             setFiles
         );
-        console.log(files);
         setFiles(files);
     };
 
@@ -40,7 +41,7 @@ export default function sharedAlbum() {
             isInSearchMode={false}
             search={{}}
             setSearchStats={() => null}
-            deleted={null}
+            deleted={[]}
             activeCollection={ALL_SECTION}
             isSharedCollection={true}
         />

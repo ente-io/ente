@@ -55,4 +55,5 @@ export const getSharedCollectionFiles = async (
     } catch (e) {
         logError(e, 'Get files failed');
     }
+    return [];
 };
