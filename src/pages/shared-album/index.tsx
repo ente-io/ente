@@ -3,6 +3,7 @@ import PhotoFrame from 'components/PhotoFrame';
 import React, { createContext, useEffect, useState } from 'react';
 import { getSharedCollectionFiles } from 'services/sharedCollectionService';
 import { SharedAlbumContextType } from 'types/sharedAlbum';
+import { OpenInEnte } from 'components/sharedAlbum/OpenInEnte';
 
 export const defaultSharedAlbumContext: SharedAlbumContextType = {
     token: null,
@@ -47,6 +48,7 @@ export default function sharedAlbum() {
                 token,
                 accessedThroughSharedURL: true,
             }}>
+            <OpenInEnte />
             <PhotoFrame
                 files={files}
                 setFiles={setFiles}
