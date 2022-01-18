@@ -15,7 +15,7 @@ export class MLWorkerWithProxy {
         }
         this.worker = new Worker(
             new URL('worker/machineLearning.worker', import.meta.url),
-            { name }
+            { name: 'ml-sync' }
         );
         this.worker.onerror = (errorEvent) => {
             console.error('Got error event from worker', errorEvent);

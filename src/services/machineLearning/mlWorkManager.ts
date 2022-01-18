@@ -105,7 +105,7 @@ class MLWorkManager {
     // Live Sync
     private async getLiveSyncWorker() {
         if (!this.liveSyncWorker) {
-            this.liveSyncWorker = new MLWorkerWithProxy('ml-live-sync');
+            this.liveSyncWorker = new MLWorkerWithProxy('ml-sync-live');
         }
 
         return this.liveSyncWorker.proxy;
