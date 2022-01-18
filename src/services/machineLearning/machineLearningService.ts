@@ -10,7 +10,6 @@ import {
     DetectedFace,
     Face,
     MlFileData,
-    MLSyncConfig,
     MLSyncContext,
     MLSyncFileContext,
     MLSyncResult,
@@ -48,6 +47,8 @@ class MachineLearningService {
     // private faceEmbeddingService: FaceEmbeddingService;
     // private faceEmbeddingService: FAPIFaceEmbeddingService;
     // private clusteringService: ClusteringService;
+
+    private localSyncContext: Promise<MLSyncContext>;
 
     public constructor() {
         setWasmPaths('/js/tfjs/');
@@ -95,8 +96,8 @@ class MachineLearningService {
 
         const mlSyncResult: MLSyncResult = {
             nOutOfSyncFiles: syncContext.outOfSyncFiles.length,
-            nSyncedFiles: syncContext.syncedFiles.length,
-            nSyncedFaces: syncContext.syncedFaces.length,
+            nSyncedFiles: syncContext.nSyncedFiles,
+            nSyncedFaces: syncContext.nSyncedFaces,
             nFaceClusters:
                 syncContext.mlLibraryData?.faceClusteringResults?.clusters
                     .length,
@@ -268,14 +269,11 @@ class MachineLearningService {
         try {
             const functions = syncContext.outOfSyncFiles.map(
                 (outOfSyncfile) => async () => {
-                    const mlFileData = await this.syncFileWithErrorHandler(
+                    await this.syncFileWithErrorHandler(
                         syncContext,
                         outOfSyncfile
                     );
                     // TODO: just store file and faces count in syncContext
-                    mlFileData?.faces &&
-                        syncContext.syncedFaces.push(...mlFileData.faces);
-                    syncContext.syncedFiles.push(outOfSyncfile);
                 }
             );
             syncContext.syncQueue.on('error', () => {
@@ -287,7 +285,7 @@ class MachineLearningService {
             syncContext.error = error;
         }
         await syncContext.syncQueue.onIdle();
-        console.log('allFaces: ', syncContext.syncedFaces);
+        console.log('allFaces: ', syncContext.nSyncedFaces);
 
         // TODO: In case syncJob has to use multiple ml workers
         // do in same transaction with each file update
@@ -296,19 +294,32 @@ class MachineLearningService {
         // await this.disposeMLModels();
     }
 
+    private async getLocalSyncContext(token: string) {
+        if (!this.localSyncContext) {
+            console.log('Creating localSyncContext');
+            this.localSyncContext = getMLSyncConfig().then((mlSyncConfig) =>
+                MLFactory.getMLSyncContext(token, mlSyncConfig, false)
+            );
+        }
+
+        return this.localSyncContext;
+    }
+
+    public async closeLocalSyncContext() {
+        if (this.localSyncContext) {
+            console.log('Closing localSyncContext');
+            const syncContext = await this.localSyncContext;
+            await syncContext.dispose();
+            this.localSyncContext = undefined;
+        }
+    }
+
     public async syncLocalFile(
         token: string,
         enteFile: File,
-        localFile: globalThis.File,
-        config?: MLSyncConfig
+        localFile: globalThis.File
     ): Promise<MlFileData | Error> {
-        const mlSyncConfig = config || (await getMLSyncConfig());
-        const syncContext = MLFactory.getMLSyncContext(
-            token,
-            mlSyncConfig,
-            false
-        );
-        // await this.init();
+        const syncContext = await this.getLocalSyncContext(token);
 
         try {
             const mlFileData = await this.syncFileWithErrorHandler(
@@ -316,7 +327,11 @@ class MachineLearningService {
                 enteFile,
                 localFile
             );
-            await syncContext.dispose();
+
+            if (syncContext.nSyncedFiles >= syncContext.config.batchSize) {
+                await this.closeLocalSyncContext();
+            }
+            // await syncContext.dispose();
             return mlFileData;
         } catch (e) {
             console.error('Error while syncing local file: ', enteFile.id, e);
@@ -335,6 +350,8 @@ class MachineLearningService {
                 enteFile,
                 localFile
             );
+            syncContext.nSyncedFaces += mlFileData.faces?.length || 0;
+            syncContext.nSyncedFiles += 1;
             return mlFileData;
         } catch (e) {
             let error = e;
@@ -353,6 +370,7 @@ class MachineLearningService {
             }
 
             await this.persistMLFileSyncError(syncContext, enteFile, error);
+            syncContext.nSyncedFiles += 1;
         } finally {
             console.log('TF Memory stats: ', tf.memory());
         }
@@ -829,13 +847,10 @@ class MachineLearningService {
     }
 
     private async runTSNE(syncContext: MLSyncContext) {
-        let faces = syncContext.syncedFaces;
-        if (!faces || faces.length < 1) {
-            const allFacesMap = await this.getAllSyncedFacesMap(syncContext);
-            faces = getAllFacesFromMap(allFacesMap);
-        }
+        const allFacesMap = await this.getAllSyncedFacesMap(syncContext);
+        const allFaces = getAllFacesFromMap(allFacesMap);
 
-        const input = faces
+        const input = allFaces
             .slice(0, syncContext.config.tsne.samples)
             .map((f) => Array.from(f.embedding));
         syncContext.tsne = toTSNE(input, syncContext.config.tsne);

@@ -100,8 +100,8 @@ export class LocalMLSyncContext implements MLSyncContext {
 
     public localFilesMap: Map<number, File>;
     public outOfSyncFiles: File[];
-    public syncedFiles: File[];
-    public syncedFaces: Face[];
+    public nSyncedFiles: number;
+    public nSyncedFaces: number;
     public allSyncedFacesMap?: Map<number, Array<Face>>;
     public tsne?: any;
 
@@ -144,8 +144,8 @@ export class LocalMLSyncContext implements MLSyncContext {
         );
 
         this.outOfSyncFiles = [];
-        this.syncedFiles = [];
-        this.syncedFaces = [];
+        this.nSyncedFiles = 0;
+        this.nSyncedFaces = 0;
 
         this.concurrency = concurrency || CONCURRENCY;
 

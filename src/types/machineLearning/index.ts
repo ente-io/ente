@@ -257,8 +257,8 @@ export interface MLSyncContext {
 
     localFilesMap: Map<number, File>;
     outOfSyncFiles: File[];
-    syncedFiles: File[];
-    syncedFaces: Face[];
+    nSyncedFiles: number;
+    nSyncedFaces: number;
     allSyncedFacesMap?: Map<number, Array<Face>>;
     tsne?: any;
 
@@ -270,6 +270,7 @@ export interface MLSyncContext {
     syncQueue: PQueue;
 
     getEnteWorker(id: number): Promise<any>;
+    dispose(): Promise<void>;
 }
 
 export interface MLSyncFileContext {
@@ -357,11 +358,12 @@ export interface ClusteringConfig {
 export declare type ClusteringInput = Array<Array<number>>;
 
 export interface MachineLearningWorker {
+    closeLocalSyncContext(): Promise<void>;
+
     syncLocalFile(
         token: string,
         enteFile: File,
-        localFile: globalThis.File,
-        config?: MLSyncConfig
+        localFile: globalThis.File
     ): Promise<MlFileData | Error>;
 
     sync(token: string): Promise<MLSyncResult>;

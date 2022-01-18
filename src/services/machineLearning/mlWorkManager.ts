@@ -2,7 +2,7 @@ import debounce from 'debounce-promise';
 import PQueue from 'p-queue';
 import { eventBus, Events } from 'services/events';
 import { File, FILE_TYPE } from 'services/fileService';
-import { FACE_CROPS_CACHE_NAME, MLSyncConfig } from 'types/machineLearning';
+import { FACE_CROPS_CACHE_NAME } from 'types/machineLearning';
 import { getToken } from 'utils/common/key';
 import { logQueueStats } from 'utils/machineLearning';
 import { getMLSyncJobConfig } from 'utils/machineLearning/config';
@@ -71,7 +71,7 @@ class MLWorkManager {
         try {
             await this.stopSyncJob();
             this.mlSyncJob = undefined;
-            this.terminateLiveSyncWorker();
+            await this.terminateLiveSyncWorker();
             await mlIDbStorage.clearMLDB();
             await caches.delete(FACE_CROPS_CACHE_NAME);
         } catch (e) {
@@ -83,7 +83,7 @@ class MLWorkManager {
         enteFile: File;
         localFile: globalThis.File;
     }) {
-        console.log('fileUploadedHandler');
+        console.log('fileUploadedHandler: ', arg.enteFile.id);
         if (arg.enteFile.metadata.fileType !== FILE_TYPE.IMAGE) {
             console.log('Skipping non image file for local file processing');
             return;
@@ -91,7 +91,7 @@ class MLWorkManager {
         try {
             await this.syncLocalFile(arg.enteFile, arg.localFile);
         } catch (error) {
-            console.error('Error in syncLocalFile', error);
+            console.error('Error in syncLocalFile: ', arg.enteFile.id, error);
             this.liveSyncQueue.clear();
             // logError(e, 'Failed in ML fileUploaded Handler');
         }
@@ -105,33 +105,41 @@ class MLWorkManager {
     // Live Sync
     private async getLiveSyncWorker() {
         if (!this.liveSyncWorker) {
-            this.liveSyncWorker = new MLWorkerWithProxy();
+            this.liveSyncWorker = new MLWorkerWithProxy('ml-live-sync');
         }
 
         return this.liveSyncWorker.proxy;
     }
 
-    private terminateLiveSyncWorker() {
+    private async terminateLiveSyncWorker() {
+        if (!this.liveSyncWorker) {
+            return;
+        }
+        try {
+            const liveSyncWorker = await this.liveSyncWorker.proxy;
+            await liveSyncWorker.closeLocalSyncContext();
+        } catch (error) {
+            console.error(
+                'Error while closing local sync context, terminating worker',
+                error
+            );
+        }
         this.liveSyncWorker?.terminate();
         this.liveSyncWorker = undefined;
     }
 
-    private onLiveSyncIdle() {
+    private async onLiveSyncIdle() {
         console.log('Live sync idle');
-        this.terminateLiveSyncWorker();
+        await this.terminateLiveSyncWorker();
         this.startSyncJob();
     }
 
-    public async syncLocalFile(
-        enteFile: File,
-        localFile: globalThis.File,
-        config?: MLSyncConfig
-    ) {
+    public async syncLocalFile(enteFile: File, localFile: globalThis.File) {
         const result = await this.liveSyncQueue.add(async () => {
             this.stopSyncJob();
             const token = getToken();
             const mlWorker = await this.getLiveSyncWorker();
-            return mlWorker.syncLocalFile(token, enteFile, localFile, config);
+            return mlWorker.syncLocalFile(token, enteFile, localFile);
         });
 
         if ('message' in result) {
@@ -144,7 +152,7 @@ class MLWorkManager {
     // Sync Job
     private async getSyncJobWorker() {
         if (!this.syncJobWorker) {
-            this.syncJobWorker = new MLWorkerWithProxy();
+            this.syncJobWorker = new MLWorkerWithProxy('ml-sync-job');
         }
 
         return this.syncJobWorker.proxy;

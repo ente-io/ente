@@ -1,6 +1,6 @@
 import { TreeNode } from 'hdbscan';
 import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
-import { f32Average } from '.';
+import { f32Average, getAllFacesFromMap } from '.';
 import { euclideanDistance } from '../../../thirdparty/face-api/euclideanDistance';
 import {
     FacesCluster,
@@ -10,6 +10,7 @@ import {
     MLSyncContext,
     NearestCluster,
 } from 'types/machineLearning';
+import { getAllFacesMap } from 'utils/storage/mlStorage';
 
 export function getClusterSummary(cluster: Cluster): FaceDescriptor {
     // const faceScore = (f) => f.detection.score; // f.alignedRect.box.width *
@@ -60,7 +61,7 @@ export function getNearestCluster(
     return { cluster: nearest, distance: nearestDist };
 }
 
-export function assignNoiseWithinLimit(syncContext: MLSyncContext) {
+export async function assignNoiseWithinLimit(syncContext: MLSyncContext) {
     if (
         !syncContext.mlLibraryData?.faceClusteringResults?.noise ||
         syncContext.mlLibraryData?.faceClusteringResults.noise.length < 1
@@ -69,9 +70,11 @@ export function assignNoiseWithinLimit(syncContext: MLSyncContext) {
     }
 
     const noise = syncContext.mlLibraryData.faceClusteringResults.noise;
+    const allFacesMap = await getAllFacesMap();
+    const allFaces = getAllFacesFromMap(allFacesMap);
 
     noise.forEach((n) => {
-        const noiseFace = syncContext.syncedFaces[n];
+        const noiseFace = allFaces[n];
         const nearest = this.getNearestCluster(syncContext, noiseFace);
 
         if (nearest.cluster && nearest.distance < this.maxFaceDistance) {
