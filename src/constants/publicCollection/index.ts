@@ -1,0 +1,6 @@
+export enum REPORT_REASON {
+    COPYRIGHT = 'COPYRIGHT',
+    CHILD_ABUSE = 'CHILD_ABUSE',
+    NUDITY = 'NUDITY',
+    OTHER = 'OTHER',
+}

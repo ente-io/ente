@@ -5,8 +5,12 @@ import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
 import { EnteFile } from 'types/file';
-import { LocalSavedPublicCollectionFiles } from 'types/publicCollection';
+import {
+    AbuseReportRequest,
+    LocalSavedPublicCollectionFiles,
+} from 'types/publicCollection';
 import CryptoWorker from 'utils/crypto';
+import { REPORT_REASON } from 'constants/publicCollection';
 
 const ENDPOINT = getEndpoint();
 const PUBLIC_COLLECTION_FILES_TABLE = 'public-collection-files';
@@ -240,6 +244,26 @@ const decryptCollectionName = async (
         )));
 };
 
-export const reportAbuse = () => {
-    return;
+export const reportAbuse = async (
+    token: string,
+    url: string,
+    reason: REPORT_REASON,
+    comment: string
+) => {
+    try {
+        if (!token) {
+            return;
+        }
+        const abuseReportRequest: AbuseReportRequest = { url, reason, comment };
+
+        await HTTPService.post(
+            `${ENDPOINT}/public-collection/report-abuse`,
+            abuseReportRequest,
+            null,
+            { 'X-Auth-Access-Token': token }
+        );
+    } catch (e) {
+        logError(e, 'failed to post abuse report');
+        return e;
+    }
 };

@@ -22,11 +22,13 @@ import OpenInEnte from 'components/pages/sharedAlbum/OpenInEnte';
 import { CollectionInfo } from 'components/pages/sharedAlbum/CollectionInfo';
 import ReportAbuse from 'components/pages/sharedAlbum/ReportAbuse';
 import { AbuseReportForm } from 'components/pages/sharedAlbum/AbuseReportForm';
+import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
 
 export const defaultPublicCollectionGalleryContext: PublicCollectionGalleryContextType =
     {
         token: null,
         accessedThroughSharedURL: false,
+        setDialogMessage: () => null,
     };
 
 export const PublicCollectionGalleryContext =
@@ -37,16 +39,24 @@ export const PublicCollectionGalleryContext =
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
     const collectionKey = useRef<string>(null);
+    const url = useRef<string>(null);
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const appContext = useContext(AppContext);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [abuseReportFormView, setAbuseReportFormView] = useState(false);
+    const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
+    const [messageDialogView, setMessageDialogView] = useState(false);
 
     const showReportForm = () => setAbuseReportFormView(true);
     const closeReportForm = () => setAbuseReportFormView(false);
+
+    const openMessageDialog = () => setMessageDialogView(true);
+    const closeMessageDialog = () => setMessageDialogView(false);
+
     useEffect(() => {
         const main = async () => {
+            url.current = window.location.href;
             const urlParams = new URLSearchParams(window.location.search);
             const eToken = urlParams.get('accessToken');
             const eCollectionKey = decodeURIComponent(
@@ -74,6 +84,8 @@ export default function PublicCollectionGallery() {
         main();
     }, []);
 
+    useEffect(openMessageDialog, [dialogMessage]);
+
     const syncWithRemote = async (collection?: Collection) => {
         if (!collection) {
             collection = await getPublicCollection(
@@ -93,6 +105,7 @@ export default function PublicCollectionGallery() {
                 ...defaultPublicCollectionGalleryContext,
                 token: token.current,
                 accessedThroughSharedURL: true,
+                setDialogMessage,
             }}>
             <OpenInEnte redirect={() => null} />
 
@@ -116,7 +129,17 @@ export default function PublicCollectionGallery() {
                 isSharedCollection
             />
             <ReportAbuse onClick={showReportForm} />
-            <AbuseReportForm show={false} close={closeReportForm} />
+            <AbuseReportForm
+                show={abuseReportFormView}
+                close={closeReportForm}
+                url={url.current}
+            />
+            <MessageDialog
+                size="lg"
+                show={messageDialogView}
+                onHide={closeMessageDialog}
+                attributes={dialogMessage}
+            />
         </PublicCollectionGalleryContext.Provider>
     );
 }
