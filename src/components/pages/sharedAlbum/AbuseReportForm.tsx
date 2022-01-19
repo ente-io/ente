@@ -27,7 +27,6 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
         { setFieldError }: FormikHelpers<AbuseReportRequest>
     ) => {
         try {
-            console.log({ url, reason, comment });
             setLoading(true);
             if (reason === REPORT_REASON.OTHER && !comment) {
                 setFieldError(
@@ -53,11 +52,6 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
         } finally {
             setLoading(false);
         }
-        publicCollectionGalleryContent.setDialogMessage({
-            title: constants.REPORT_SUBMIT_SUCCESS_TITLE,
-            content: constants.REPORT_SUBMIT_SUCCESS_CONTENT,
-            close: { text: constants.CLOSE },
-        });
     };
     return (
         <MessageDialog

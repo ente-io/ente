@@ -264,6 +264,6 @@ export const reportAbuse = async (
         );
     } catch (e) {
         logError(e, 'failed to post abuse report');
-        return e;
+        throw e;
     }
 };
