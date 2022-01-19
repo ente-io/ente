@@ -1,22 +1,25 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import { Button, Col, Table } from 'react-bootstrap';
-import { DeadCenter } from 'pages/gallery';
+import { DeadCenter, GalleryContext } from 'pages/gallery';
 import { User } from 'types/user';
 import {
     shareCollection,
     unshareCollection,
     createShareableUrl,
+    deleteShareableURL,
 } from 'services/collectionService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SubmitButton from './SubmitButton';
 import MessageDialog from './MessageDialog';
 import { Collection } from 'types/collection';
 import { transformShareURLForHost } from 'utils/collection';
+import { IconButton, Row, Value } from './Container';
+import CloseIcon from './icons/CloseIcon';
 
 interface Props {
     show: boolean;
@@ -34,6 +37,8 @@ interface ShareeProps {
 
 function CollectionShare(props: Props) {
     const [loading, setLoading] = useState(false);
+
+    const galleryContext = useContext(GalleryContext);
     const collectionShare = async (
         { email }: formValues,
         { resetForm, setFieldError }: FormikHelpers<formValues>
@@ -80,6 +85,24 @@ function CollectionShare(props: Props) {
     const createSharableUrlHelper = async () => {
         await createShareableUrl(props.collection);
         await props.syncWithRemote();
+    };
+
+    const deleteSharableURLHelper = async () => {
+        await deleteShareableURL(props.collection);
+        await props.syncWithRemote();
+    };
+
+    const deleteSharableLink = () => {
+        galleryContext.setDialogMessage({
+            title: 'delete sharable url',
+            content: 'are you sure you want to delete the sharable url?',
+            close: { text: constants.CANCEL },
+            proceed: {
+                text: 'delete',
+                action: deleteSharableURLHelper,
+                variant: 'danger',
+            },
+        });
     };
 
     const ShareeRow = ({ sharee, collectionUnshare }: ShareeProps) => (
@@ -167,11 +190,13 @@ function CollectionShare(props: Props) {
                         </Form>
                     )}
                 </Formik>
-                <Button
-                    variant="outline-success"
-                    onClick={createSharableUrlHelper}>
-                    Create New Shareable URL
-                </Button>
+                {props.collection.publicAccessUrls?.length === 0 && (
+                    <Button
+                        variant="outline-success"
+                        onClick={createSharableUrlHelper}>
+                        Create New Shareable URL
+                    </Button>
+                )}
                 <div
                     style={{
                         height: '1px',
@@ -184,30 +209,38 @@ function CollectionShare(props: Props) {
                     <div style={{ width: '100%', wordBreak: 'break-all' }}>
                         <p>{constants.PUBLIC_URL}</p>
 
-                        <Table striped bordered hover variant="dark" size="sm">
-                            <tbody>
-                                {props.collection.publicAccessUrls?.map(
-                                    (publicAccessUrl) => (
-                                        <tr key={publicAccessUrl.url}>
-                                            {
-                                                <a
-                                                    href={transformShareURLForHost(
-                                                        publicAccessUrl.url,
-                                                        props.collection.key
-                                                    )}
-                                                    target="_blank"
-                                                    rel="noreferrer">
-                                                    {transformShareURLForHost(
-                                                        publicAccessUrl.url,
-                                                        props.collection.key
-                                                    )}
-                                                </a>
-                                            }
-                                        </tr>
-                                    )
-                                )}
-                            </tbody>
-                        </Table>
+                        {props.collection.publicAccessUrls?.map(
+                            (publicAccessUrl) => (
+                                <Row key={publicAccessUrl.url}>
+                                    <Value width="80%">
+                                        {
+                                            <a
+                                                href={transformShareURLForHost(
+                                                    publicAccessUrl.url,
+                                                    props.collection.key
+                                                )}
+                                                target="_blank"
+                                                rel="noreferrer">
+                                                {transformShareURLForHost(
+                                                    publicAccessUrl.url,
+                                                    props.collection.key
+                                                )}
+                                            </a>
+                                        }
+                                    </Value>
+                                    <Value
+                                        width="20%"
+                                        style={{
+                                            justifyContent: 'space-around',
+                                        }}>
+                                        <IconButton
+                                            onClick={deleteSharableLink}>
+                                            <CloseIcon />
+                                        </IconButton>
+                                    </Value>
+                                </Row>
+                            )
+                        )}
                     </div>
                 )}
                 {props.collection.sharees?.length > 0 ? (

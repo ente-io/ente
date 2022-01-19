@@ -122,6 +122,7 @@ const defaultGalleryContext: GalleryContextType = {
     closeMessageDialog: () => null,
     setActiveCollection: () => null,
     syncWithRemote: () => null,
+    setDialogMessage: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -544,6 +545,7 @@ export default function Gallery() {
                 closeMessageDialog,
                 setActiveCollection,
                 syncWithRemote,
+                setDialogMessage,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}

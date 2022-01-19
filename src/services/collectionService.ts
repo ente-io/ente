@@ -584,6 +584,9 @@ export const unshareCollection = async (
 export const createShareableUrl = async (collection: Collection) => {
     try {
         const token = getToken();
+        if (!token) {
+            throw Error(CustomError.TOKEN_MISSING);
+        }
         const createPublicAccessTokenRequest: CreatePublicAccessTokenRequest = {
             collectionID: collection.id,
             validTill:
@@ -601,6 +604,26 @@ export const createShareableUrl = async (collection: Collection) => {
         return resp.data as PublicAccessUrl;
     } catch (e) {
         logError(e, 'createShareableUrl failed ');
+        throw e;
+    }
+};
+
+export const deleteShareableURL = async (collection: Collection) => {
+    try {
+        const token = getToken();
+        if (!token) {
+            throw Error(CustomError.TOKEN_MISSING);
+        }
+        await HTTPService.delete(
+            `${ENDPOINT}/collections/share-url/${collection.id}`,
+            null,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        logError(e, 'deleteShareableUrl failed ');
         throw e;
     }
 };

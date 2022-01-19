@@ -29,6 +29,7 @@ export enum CustomError {
     INVALID_COLLECTION_OPERATION = 'invalid collection operation',
     WAIT_TIME_EXCEEDED = 'thumbnail generation wait time exceeded',
     REQUEST_CANCELLED = 'request canceled',
+    TOKEN_MISSING = 'token missing ',
 }
 
 function parseUploadError(error: AxiosResponse) {
