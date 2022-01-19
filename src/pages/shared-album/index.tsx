@@ -18,11 +18,11 @@ import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
-import OpenInEnte from 'components/pages/sharedAlbum/OpenInEnte';
 import { CollectionInfo } from 'components/pages/sharedAlbum/CollectionInfo';
 import ReportAbuse from 'components/pages/sharedAlbum/ReportAbuse';
 import { AbuseReportForm } from 'components/pages/sharedAlbum/AbuseReportForm';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
+import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 
 export const defaultPublicCollectionGalleryContext: PublicCollectionGalleryContextType =
     {
@@ -43,7 +43,6 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const appContext = useContext(AppContext);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [abuseReportFormView, setAbuseReportFormView] = useState(false);
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
@@ -107,7 +106,7 @@ export default function PublicCollectionGallery() {
                 accessedThroughSharedURL: true,
                 setDialogMessage,
             }}>
-            <OpenInEnte redirect={() => null} />
+            <GoToEnte />
 
             <CollectionInfo collection={publicCollection} />
 

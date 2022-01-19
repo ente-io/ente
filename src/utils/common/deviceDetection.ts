@@ -1,3 +1,10 @@
+export enum OS {
+    WP = 'wp',
+    ANDROID = 'android',
+    IOS = 'ios',
+    UNKNOWN = 'unknown',
+}
+
 const GetDeviceOS = () => {
     let userAgent = '';
     if (
@@ -8,19 +15,19 @@ const GetDeviceOS = () => {
     }
     // Windows Phone must come first because its UA also contains "Android"
     if (/windows phone/i.test(userAgent)) {
-        return 'wp';
+        return OS.WP;
     }
 
     if (/android/i.test(userAgent)) {
-        return 'android';
+        return OS.ANDROID;
     }
 
     // iOS detection from: http://stackoverflow.com/a/9039885/177710
     if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-        return 'ios';
+        return OS.IOS;
     }
 
-    return 'unknown';
+    return OS.UNKNOWN;
 };
 
 export default GetDeviceOS;

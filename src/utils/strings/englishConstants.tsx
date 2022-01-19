@@ -632,6 +632,8 @@ const englishConstants = {
     REPORT_SUBMIT_SUCCESS_CONTENT: 'thank you, your report have been submitted',
     REPORT_SUBMIT_SUCCESS_TITLE: 'report sent',
     REPORT_SUBMIT_FAILED: 'failed to sent report, try again',
+    INSTALL: 'install',
+    SIGNUP_OR_LOGIN: 'signup / login',
 };
 
 export default englishConstants;
