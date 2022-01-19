@@ -50,6 +50,7 @@ export default function PublicCollectionGallery() {
             }
             token.current = eToken;
             collectionKey.current = eCollectionKey;
+            url.current = window.location.href;
             const localCollection = await getLocalPublicCollection(
                 eCollectionKey
             );
