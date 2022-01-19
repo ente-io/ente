@@ -5,6 +5,13 @@ export enum OS {
     UNKNOWN = 'unknown',
 }
 
+declare global {
+    interface Window {
+        opera: any;
+        MSStream: any;
+    }
+}
+
 const GetDeviceOS = () => {
     let userAgent = '';
     if (
