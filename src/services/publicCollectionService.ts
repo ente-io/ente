@@ -162,6 +162,7 @@ const getPublicFiles = async (
                     sinceTime: time,
                 },
                 {
+                    'Cache-Control': 'no-cache',
                     'X-Auth-Access-Token': token,
                 }
             );
@@ -207,7 +208,7 @@ export const getPublicCollection = async (
         const resp = await HTTPService.get(
             `${ENDPOINT}/public-collection/info`,
             null,
-            { 'X-Auth-Access-Token': token }
+            { 'Cache-Control': 'no-cache', 'X-Auth-Access-Token': token }
         );
         const fetchedCollection = resp.data?.collection;
         const collectionName = await decryptCollectionName(
