@@ -2,7 +2,7 @@ import MessageDialog from 'components/MessageDialog';
 import SubmitButton from 'components/SubmitButton';
 import { REPORT_REASON } from 'constants/publicCollection';
 import { Formik, FormikHelpers } from 'formik';
-import { PublicCollectionGalleryContext } from 'pages/shared-album';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import React, { useContext, useState } from 'react';
 import { Form, FormControl } from 'react-bootstrap';
 import { reportAbuse } from 'services/publicCollectionService';

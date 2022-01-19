@@ -1,13 +1,6 @@
 import { ALL_SECTION } from 'constants/collection';
 import PhotoFrame from 'components/PhotoFrame';
-import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from 'react';
-import { PublicCollectionGalleryContextType } from 'types/publicCollection';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
     getLocalPublicCollection,
     getLocalPublicFiles,
@@ -23,18 +16,11 @@ import ReportAbuse from 'components/pages/sharedAlbum/ReportAbuse';
 import { AbuseReportForm } from 'components/pages/sharedAlbum/AbuseReportForm';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
 import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
-
-export const defaultPublicCollectionGalleryContext: PublicCollectionGalleryContextType =
-    {
-        token: null,
-        accessedThroughSharedURL: false,
-        setDialogMessage: () => null,
-    };
-
-export const PublicCollectionGalleryContext =
-    createContext<PublicCollectionGalleryContextType>(
-        defaultPublicCollectionGalleryContext
-    );
+import {
+    defaultPublicCollectionGalleryContext,
+    PublicCollectionGalleryContext,
+} from 'utils/publicCollectionGallery';
+import { useRouter } from 'next/router';
 
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
@@ -52,15 +38,16 @@ export default function PublicCollectionGallery() {
 
     const openMessageDialog = () => setMessageDialogView(true);
     const closeMessageDialog = () => setMessageDialogView(false);
-
+    const router = useRouter();
     useEffect(() => {
         const main = async () => {
-            url.current = window.location.href;
-            const urlParams = new URLSearchParams(window.location.search);
-            const eToken = urlParams.get('accessToken');
+            const eToken = (router.query.token?.[0] ?? '') as string;
             const eCollectionKey = decodeURIComponent(
-                urlParams.get('collectionKey')
+                window.location.hash.slice(1)
             );
+            if (!eToken || !eCollectionKey) {
+                return;
+            }
             token.current = eToken;
             collectionKey.current = eCollectionKey;
             const localCollection = await getLocalPublicCollection(

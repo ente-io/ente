@@ -9,7 +9,7 @@ import { GAP_BTW_TILES } from 'constants/gallery';
 import {
     defaultPublicCollectionGalleryContext,
     PublicCollectionGalleryContext,
-} from 'pages/shared-album';
+} from 'utils/publicCollectionGallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 
 interface IProps {

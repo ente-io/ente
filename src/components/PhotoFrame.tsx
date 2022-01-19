@@ -24,7 +24,7 @@ import PublicCollectionDownloadManager from 'services/publicCollectionDownloadMa
 import {
     defaultPublicCollectionGalleryContext,
     PublicCollectionGalleryContext,
-} from 'pages/shared-album';
+} from 'utils/publicCollectionGallery';
 
 const Container = styled.div`
     display: block;
