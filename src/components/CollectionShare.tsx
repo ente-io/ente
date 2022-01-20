@@ -4,7 +4,7 @@ import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
-import { Button, Col, Table } from 'react-bootstrap';
+import { Button, Col, Row, Table } from 'react-bootstrap';
 import { DeadCenter, GalleryContext } from 'pages/gallery';
 import { User } from 'types/user';
 import {
@@ -18,8 +18,8 @@ import SubmitButton from './SubmitButton';
 import MessageDialog from './MessageDialog';
 import { Collection } from 'types/collection';
 import { transformShareURLForHost } from 'utils/collection';
-import { IconButton, Row, Value } from './Container';
-import CloseIcon from './icons/CloseIcon';
+import CopyIcon from './icons/CopyIcon';
+import { IconButton, Value } from './Container';
 
 interface Props {
     show: boolean;
@@ -83,7 +83,8 @@ function CollectionShare(props: Props) {
     };
 
     const createSharableURLHelper = async () => {
-        await createShareableURL(props.collection);
+        const publicURL = await createShareableURL(props.collection);
+        props.collection.publicURLs = [publicURL];
         await props.syncWithRemote();
     };
 
@@ -103,6 +104,14 @@ function CollectionShare(props: Props) {
                 variant: 'danger',
             },
         });
+    };
+
+    const handleCollectionPublicSharing = () => {
+        if (props.collection.publicURLs?.length > 0) {
+            deleteSharableLink();
+        } else {
+            createSharableURLHelper();
+        }
     };
 
     const ShareeRow = ({ sharee, collectionUnshare }: ShareeProps) => (
@@ -130,7 +139,7 @@ function CollectionShare(props: Props) {
     }
     return (
         <MessageDialog
-            show={props.show}
+            show={true}
             onHide={props.onHide}
             attributes={{ title: constants.SHARE_COLLECTION }}>
             <DeadCenter style={{ width: '85%', margin: 'auto' }}>
@@ -190,13 +199,18 @@ function CollectionShare(props: Props) {
                         </Form>
                     )}
                 </Formik>
-                {props.collection.publicURLs?.length === 0 && (
-                    <Button
-                        variant="outline-success"
-                        onClick={createSharableURLHelper}>
-                        Create New Shareable URL
-                    </Button>
-                )}
+                <Row style={{ padding: '10px' }}>
+                    <Value width="100%" style={{ paddingTop: '10px' }}>
+                        Public sharing
+                    </Value>
+                    <Form.Switch
+                        style={{ marginLeft: '20px' }}
+                        checked={props.collection.publicURLs?.length > 0}
+                        id="collection-public-sharing-toggler"
+                        className="custom-switch-md"
+                        onChange={handleCollectionPublicSharing}
+                    />
+                </Row>
                 <div
                     style={{
                         height: '1px',
@@ -205,13 +219,14 @@ function CollectionShare(props: Props) {
                         width: '100%',
                     }}
                 />
+
                 {props.collection.publicURLs?.length > 0 && (
                     <div style={{ width: '100%', wordBreak: 'break-all' }}>
                         <p>{constants.PUBLIC_URL}</p>
 
                         {props.collection.publicURLs?.map((publicURL) => (
                             <Row key={publicURL.url}>
-                                <Value width="80%">
+                                <Value width="85%">
                                     {
                                         <a
                                             href={transformShareURLForHost(
@@ -228,19 +243,17 @@ function CollectionShare(props: Props) {
                                     }
                                 </Value>
                                 <Value
-                                    width="20%"
-                                    style={{
-                                        justifyContent: 'space-around',
-                                    }}>
-                                    <IconButton onClick={deleteSharableLink}>
-                                        <CloseIcon />
+                                    width="15%"
+                                    style={{ justifyContent: 'space-around' }}>
+                                    <IconButton>
+                                        <CopyIcon />
                                     </IconButton>
                                 </Value>
                             </Row>
                         ))}
                     </div>
                 )}
-                {props.collection.sharees?.length > 0 ? (
+                {props.collection.sharees?.length > 0 && (
                     <>
                         <p>{constants.SHAREES}</p>
 
@@ -256,11 +269,13 @@ function CollectionShare(props: Props) {
                             </tbody>
                         </Table>
                     </>
-                ) : (
-                    <div style={{ marginTop: '12px' }}>
-                        {constants.ZERO_SHAREES()}
-                    </div>
                 )}
+                {props.collection.sharees?.length > 0 &&
+                    props.collection.publicURLs?.length > 0 && (
+                        <div style={{ marginTop: '12px' }}>
+                            {constants.ZERO_SHAREES()}
+                        </div>
+                    )}
             </DeadCenter>
         </MessageDialog>
     );
