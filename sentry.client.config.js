@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
-import { getSentryTunnelUrl } from 'utils/common/apiUtil';
+import { getSentryTunnelURL } from 'utils/common/apiUtil';
 import { getUserAnonymizedID } from 'utils/user';
 import {
     getSentryDSN,
@@ -21,7 +21,7 @@ Sentry.init({
     release: SENTRY_RELEASE,
     attachStacktrace: true,
     autoSessionTracking: false,
-    tunnel: getSentryTunnelUrl(),
+    tunnel: getSentryTunnelURL(),
     // ...
     // Note: if you want to override the automatic release value, do not set a
     // `release` value here - use the environment variable `SENTRY_RELEASE`, so

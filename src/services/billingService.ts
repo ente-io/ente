@@ -1,4 +1,4 @@
-import { getEndpoint, getPaymentsUrl } from 'utils/common/apiUtil';
+import { getEndpoint, getPaymentsURL } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { setData, LS_KEYS } from 'utils/storage/localStorage';
 import { convertToHumanReadable } from 'utils/billing';
@@ -154,7 +154,7 @@ class billingService {
         action: string
     ) {
         try {
-            window.location.href = `${getPaymentsUrl()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${
+            window.location.href = `${getPaymentsURL()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${
                 window.location.origin
             }/gallery`;
         } catch (e) {

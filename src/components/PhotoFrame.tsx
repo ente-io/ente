@@ -215,7 +215,7 @@ const PhotoFrame = ({
             });
     }, [files, deleted, search, activeCollection]);
 
-    const updateUrl = (index: number) => (url: string) => {
+    const updateURL = (index: number) => (url: string) => {
         files[index] = {
             ...files[index],
             msrc: url,
@@ -246,7 +246,7 @@ const PhotoFrame = ({
         setFiles(files);
     };
 
-    const updateSrcUrl = async (index: number, url: string) => {
+    const updateSrcURL = async (index: number, url: string) => {
         files[index] = {
             ...files[index],
             w: window.innerWidth,
@@ -343,7 +343,7 @@ const PhotoFrame = ({
                 selected[file[index].id] ?? false
             }`}
             file={file[index]}
-            updateUrl={updateUrl(file[index].dataIndex)}
+            updateURL={updateURL(file[index].dataIndex)}
             onClick={onThumbnailClick(index)}
             selectable={!isSharedCollection}
             onSelect={handleSelect(file[index].id, index)}
@@ -386,7 +386,7 @@ const PhotoFrame = ({
                     }
                     galleryContext.thumbs.set(item.id, url);
                 }
-                updateUrl(item.dataIndex)(url);
+                updateURL(item.dataIndex)(url);
                 item.msrc = url;
                 if (!item.src) {
                     item.src = url;
@@ -423,7 +423,7 @@ const PhotoFrame = ({
                     }
                     galleryContext.files.set(item.id, url);
                 }
-                await updateSrcUrl(item.dataIndex, url);
+                await updateSrcURL(item.dataIndex, url);
                 item.html = files[item.dataIndex].html;
                 item.src = files[item.dataIndex].src;
                 item.w = files[item.dataIndex].w;
