@@ -190,7 +190,7 @@ function CollectionShare(props: Props) {
                         </Form>
                     )}
                 </Formik>
-                {props.collection.publicAccessURLs?.length === 0 && (
+                {props.collection.publicURLs?.length === 0 && (
                     <Button
                         variant="outline-success"
                         onClick={createSharableURLHelper}>
@@ -205,42 +205,39 @@ function CollectionShare(props: Props) {
                         width: '100%',
                     }}
                 />
-                {props.collection.publicAccessURLs?.length > 0 && (
+                {props.collection.publicURLs?.length > 0 && (
                     <div style={{ width: '100%', wordBreak: 'break-all' }}>
                         <p>{constants.PUBLIC_URL}</p>
 
-                        {props.collection.publicAccessURLs?.map(
-                            (publicAccessURL) => (
-                                <Row key={publicAccessURL.url}>
-                                    <Value width="80%">
-                                        {
-                                            <a
-                                                href={transformShareURLForHost(
-                                                    publicAccessURL.url,
-                                                    props.collection.key
-                                                )}
-                                                target="_blank"
-                                                rel="noreferrer">
-                                                {transformShareURLForHost(
-                                                    publicAccessURL.url,
-                                                    props.collection.key
-                                                )}
-                                            </a>
-                                        }
-                                    </Value>
-                                    <Value
-                                        width="20%"
-                                        style={{
-                                            justifyContent: 'space-around',
-                                        }}>
-                                        <IconButton
-                                            onClick={deleteSharableLink}>
-                                            <CloseIcon />
-                                        </IconButton>
-                                    </Value>
-                                </Row>
-                            )
-                        )}
+                        {props.collection.publicURLs?.map((publicURL) => (
+                            <Row key={publicURL.url}>
+                                <Value width="80%">
+                                    {
+                                        <a
+                                            href={transformShareURLForHost(
+                                                publicURL.url,
+                                                props.collection.key
+                                            )}
+                                            target="_blank"
+                                            rel="noreferrer">
+                                            {transformShareURLForHost(
+                                                publicURL.url,
+                                                props.collection.key
+                                            )}
+                                        </a>
+                                    }
+                                </Value>
+                                <Value
+                                    width="20%"
+                                    style={{
+                                        justifyContent: 'space-around',
+                                    }}>
+                                    <IconButton onClick={deleteSharableLink}>
+                                        <CloseIcon />
+                                    </IconButton>
+                                </Value>
+                            </Row>
+                        ))}
                     </div>
                 )}
                 {props.collection.sharees?.length > 0 ? (

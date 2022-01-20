@@ -17,7 +17,7 @@ export interface Collection {
     keyDecryptionNonce: string;
     isDeleted: boolean;
     isSharedCollection?: boolean;
-    publicAccessURLs?: PublicAccessURL[];
+    publicURLs?: PublicAccessURL[];
 }
 
 export interface PublicAccessURL {
