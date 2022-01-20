@@ -4,7 +4,7 @@ export const getEndpoint = () => {
     return endPoint;
 };
 
-export const getFileUrl = (id: number) => {
+export const getFileURL = (id: number) => {
     if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
         return (
             `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/files/download/${id}` ??
@@ -14,7 +14,7 @@ export const getFileUrl = (id: number) => {
     return `https://files.ente.io/?fileID=${id}`;
 };
 
-export const getThumbnailUrl = (id: number) => {
+export const getThumbnailURL = (id: number) => {
     if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
         return (
             `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/files/preview/${id}` ??
@@ -24,11 +24,11 @@ export const getThumbnailUrl = (id: number) => {
     return `https://thumbnails.ente.io/?fileID=${id}`;
 };
 
-export const getSentryTunnelUrl = () => {
+export const getSentryTunnelURL = () => {
     return `https://sentry-reporter.ente.io`;
 };
 
-export const getPaymentsUrl = () => {
+export const getPaymentsURL = () => {
     if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
         return process.env.NEXT_PUBLIC_ENTE_PAYMENT_ENDPOINT;
     }
