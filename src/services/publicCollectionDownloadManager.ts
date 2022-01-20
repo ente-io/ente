@@ -1,5 +1,4 @@
 import {
-    getFileURL,
     getPublicCollectionFileURL,
     getPublicCollectionThumbnailURL,
 } from 'utils/common/apiUtil';
@@ -127,7 +126,7 @@ class PublicCollectionDownloadManager {
             );
             return generateStreamFromArrayBuffer(decrypted);
         }
-        const resp = await fetch(getFileURL(file.id), {
+        const resp = await fetch(getPublicCollectionFileURL(file.id), {
             headers: {
                 'X-Auth-Token': token,
             },
