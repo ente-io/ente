@@ -86,7 +86,7 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
                     }): JSX.Element => (
                         <Form noValidate onSubmit={handleSubmit}>
                             <Form.Group controlId="reportForm.url">
-                                <Form.Label>Album Url</Form.Label>
+                                <Form.Label>{constants.ALBUM_URL}</Form.Label>
                                 <Form.Control
                                     type="text"
                                     disabled

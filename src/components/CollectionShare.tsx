@@ -10,7 +10,7 @@ import { User } from 'types/user';
 import {
     shareCollection,
     unshareCollection,
-    createShareableUrl,
+    createShareableURL,
     deleteShareableURL,
 } from 'services/collectionService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -82,8 +82,8 @@ function CollectionShare(props: Props) {
         await props.syncWithRemote();
     };
 
-    const createSharableUrlHelper = async () => {
-        await createShareableUrl(props.collection);
+    const createSharableURLHelper = async () => {
+        await createShareableURL(props.collection);
         await props.syncWithRemote();
     };
 
@@ -190,10 +190,10 @@ function CollectionShare(props: Props) {
                         </Form>
                     )}
                 </Formik>
-                {props.collection.publicAccessUrls?.length === 0 && (
+                {props.collection.publicAccessURLs?.length === 0 && (
                     <Button
                         variant="outline-success"
-                        onClick={createSharableUrlHelper}>
+                        onClick={createSharableURLHelper}>
                         Create New Shareable URL
                     </Button>
                 )}
@@ -205,24 +205,24 @@ function CollectionShare(props: Props) {
                         width: '100%',
                     }}
                 />
-                {props.collection.publicAccessUrls?.length > 0 && (
+                {props.collection.publicAccessURLs?.length > 0 && (
                     <div style={{ width: '100%', wordBreak: 'break-all' }}>
                         <p>{constants.PUBLIC_URL}</p>
 
-                        {props.collection.publicAccessUrls?.map(
-                            (publicAccessUrl) => (
-                                <Row key={publicAccessUrl.url}>
+                        {props.collection.publicAccessURLs?.map(
+                            (publicAccessURL) => (
+                                <Row key={publicAccessURL.url}>
                                     <Value width="80%">
                                         {
                                             <a
                                                 href={transformShareURLForHost(
-                                                    publicAccessUrl.url,
+                                                    publicAccessURL.url,
                                                     props.collection.key
                                                 )}
                                                 target="_blank"
                                                 rel="noreferrer">
                                                 {transformShareURLForHost(
-                                                    publicAccessUrl.url,
+                                                    publicAccessURL.url,
                                                     props.collection.key
                                                 )}
                                             </a>

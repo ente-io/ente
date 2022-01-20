@@ -21,7 +21,7 @@ import {
     EncryptedFileKey,
     RemoveFromCollectionRequest,
     CreatePublicAccessTokenRequest,
-    PublicAccessUrl,
+    PublicAccessURL,
 } from 'types/collection';
 import {
     COLLECTION_SORT_BY,
@@ -581,7 +581,7 @@ export const unshareCollection = async (
     }
 };
 
-export const createShareableUrl = async (collection: Collection) => {
+export const createShareableURL = async (collection: Collection) => {
     try {
         const token = getToken();
         if (!token) {
@@ -601,9 +601,9 @@ export const createShareableUrl = async (collection: Collection) => {
                 'X-Auth-Token': token,
             }
         );
-        return resp.data as PublicAccessUrl;
+        return resp.data as PublicAccessURL;
     } catch (e) {
-        logError(e, 'createShareableUrl failed ');
+        logError(e, 'createShareableURL failed ');
         throw e;
     }
 };
@@ -623,7 +623,7 @@ export const deleteShareableURL = async (collection: Collection) => {
             }
         );
     } catch (e) {
-        logError(e, 'deleteShareableUrl failed ');
+        logError(e, 'deleteShareableURL failed ');
         throw e;
     }
 };

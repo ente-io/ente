@@ -14,7 +14,7 @@ export const getFileUrl = (id: number) => {
     return `https://files.ente.io/?fileID=${id}`;
 };
 
-export const getPublicCollectionFileUrl = (id: number) => {
+export const getPublicCollectionFileURL = (id: number) => {
     if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
         return (
             `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/public-collection/files/download/${id}` ??
@@ -34,7 +34,7 @@ export const getThumbnailUrl = (id: number) => {
     return `https://thumbnails.ente.io/?fileID=${id}`;
 };
 
-export const getPublicCollectionThumbnailUrl = (id: number) => {
+export const getPublicCollectionThumbnailURL = (id: number) => {
     if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
         return (
             `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/public-collection/files/preview/${id}` ??

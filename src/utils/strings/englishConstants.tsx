@@ -634,6 +634,7 @@ const englishConstants = {
     REPORT_SUBMIT_FAILED: 'failed to sent report, try again',
     INSTALL: 'install',
     SIGNUP_OR_LOGIN: 'signup / login',
+    ALBUM_URL: 'album url',
 };
 
 export default englishConstants;
