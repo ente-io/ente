@@ -20,7 +20,6 @@ import {
     defaultPublicCollectionGalleryContext,
     PublicCollectionGalleryContext,
 } from 'utils/publicCollectionGallery';
-import { useRouter } from 'next/router';
 
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
@@ -38,12 +37,14 @@ export default function PublicCollectionGallery() {
 
     const openMessageDialog = () => setMessageDialogView(true);
     const closeMessageDialog = () => setMessageDialogView(false);
-    const router = useRouter();
+
     useEffect(() => {
         const main = async () => {
-            const eToken = (router.query.token?.[0] ?? '') as string;
+            url.current = window.location.href;
+            const urlParams = new URLSearchParams(window.location.search);
+            const eToken = urlParams.get('accessToken');
             const eCollectionKey = decodeURIComponent(
-                window.location.hash.slice(1)
+                urlParams.get('collectionKey')
             );
             if (!eToken || !eCollectionKey) {
                 return;
