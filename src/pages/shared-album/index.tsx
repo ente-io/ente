@@ -80,6 +80,7 @@ export default function PublicCollectionGallery() {
                 token.current,
                 collectionKey.current
             );
+            setPublicCollection(collection);
         }
         await syncPublicFiles(token.current, collection, setPublicFiles);
     };
