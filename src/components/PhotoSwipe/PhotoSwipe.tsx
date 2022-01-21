@@ -91,9 +91,11 @@ const renderInfoItem = (label: string, value: string | JSX.Element) => (
 );
 
 function RenderCreationTime({
+    disableEdits,
     file,
     scheduleUpdate,
 }: {
+    disableEdits: boolean;
     file: EnteFile;
     scheduleUpdate: () => void;
 }) {
@@ -160,24 +162,25 @@ function RenderCreationTime({
                 <Value
                     width={isInEditMode ? '20%' : '10%'}
                     style={{ cursor: 'pointer', marginLeft: '10px' }}>
-                    {!isInEditMode ? (
-                        <IconButton onClick={openEditMode}>
-                            <EditIcon />
-                        </IconButton>
-                    ) : (
-                        <>
-                            <IconButton onClick={saveEdits}>
-                                {loading ? (
-                                    <SmallLoadingSpinner />
-                                ) : (
-                                    <TickIcon />
-                                )}
+                    {!disableEdits &&
+                        (!isInEditMode ? (
+                            <IconButton onClick={openEditMode}>
+                                <EditIcon />
                             </IconButton>
-                            <IconButton onClick={discardEdits}>
-                                <CloseIcon />
-                            </IconButton>
-                        </>
-                    )}
+                        ) : (
+                            <>
+                                <IconButton onClick={saveEdits}>
+                                    {loading ? (
+                                        <SmallLoadingSpinner />
+                                    ) : (
+                                        <TickIcon />
+                                    )}
+                                </IconButton>
+                                <IconButton onClick={discardEdits}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </>
+                        ))}
                 </Value>
             </Row>
         </>
@@ -275,9 +278,11 @@ const FileNameEditForm = ({ filename, saveEdits, discardEdits, extension }) => {
 };
 
 function RenderFileName({
+    disableEdits,
     file,
     scheduleUpdate,
 }: {
+    disableEdits: boolean;
     file: EnteFile;
     scheduleUpdate: () => void;
 }) {
@@ -322,13 +327,18 @@ function RenderFileName({
                                 {getFileTitle(filename, extension)}
                             </FreeFlowText>
                         </Value>
-                        <Value
-                            width="10%"
-                            style={{ cursor: 'pointer', marginLeft: '10px' }}>
-                            <IconButton onClick={openEditMode}>
-                                <EditIcon />
-                            </IconButton>
-                        </Value>
+                        {!disableEdits && (
+                            <Value
+                                width="10%"
+                                style={{
+                                    cursor: 'pointer',
+                                    marginLeft: '10px',
+                                }}>
+                                <IconButton onClick={openEditMode}>
+                                    <EditIcon />
+                                </IconButton>
+                            </Value>
+                        )}
                     </>
                 ) : (
                     <FileNameEditForm
@@ -396,6 +406,7 @@ function ExifData(props: { exif: any }) {
 }
 
 function InfoModal({
+    disableEdits,
     showInfo,
     handleCloseInfo,
     items,
@@ -419,12 +430,14 @@ function InfoModal({
                 )}
                 {metadata?.title && (
                     <RenderFileName
+                        disableEdits={disableEdits}
                         file={items[photoSwipe?.getCurrentIndex()]}
                         scheduleUpdate={scheduleUpdate}
                     />
                 )}
                 {metadata?.creationTime && (
                     <RenderCreationTime
+                        disableEdits={disableEdits}
                         file={items[photoSwipe?.getCurrentIndex()]}
                         scheduleUpdate={scheduleUpdate}
                     />
@@ -744,6 +757,7 @@ function PhotoSwipe(props: Iprops) {
                 </div>
             </div>
             <InfoModal
+                disableEdits={props.isSharedCollection}
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
                 items={items}
