@@ -24,6 +24,7 @@ import {
 import { CustomError } from 'utils/error';
 import Container from 'components/Container';
 import constants from 'utils/strings/constants';
+import EnteSpinner from 'components/EnteSpinner';
 
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
@@ -35,7 +36,7 @@ export default function PublicCollectionGallery() {
     const [abuseReportFormView, setAbuseReportFormView] = useState(false);
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
-
+    const [loading, setLoading] = useState(true);
     const showReportForm = () => setAbuseReportFormView(true);
     const closeReportForm = () => setAbuseReportFormView(false);
 
@@ -67,6 +68,7 @@ export default function PublicCollectionGallery() {
                     )
                 );
                 setPublicFiles(localPublicFiles);
+                setLoading(false);
             }
             syncWithRemote();
             appContext.showNavBar(true);
@@ -93,9 +95,19 @@ export default function PublicCollectionGallery() {
                 setPublicCollection(null);
                 setPublicFiles(null);
             }
+        } finally {
+            setLoading(false);
         }
     };
-
+    if (loading) {
+        return (
+            <Container>
+                <EnteSpinner>
+                    <span className="sr-only">Loading...</span>
+                </EnteSpinner>
+            </Container>
+        );
+    }
     if (!publicFiles) {
         return <Container>{constants.NOT_FOUND}</Container>;
     }

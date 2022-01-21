@@ -58,7 +58,9 @@ function CollectionShare(props: Props) {
             if (email === user.email) {
                 setFieldError('email', constants.SHARE_WITH_SELF);
             } else if (
-                props.collection.sharees.find((value) => value.email === email)
+                props.collection?.sharees?.find(
+                    (value) => value.email === email
+                )
             ) {
                 setFieldError('email', constants.ALREADY_SHARED(email));
             } else {
@@ -246,10 +248,10 @@ function CollectionShare(props: Props) {
                     <div style={{ width: '100%', wordBreak: 'break-all' }}>
                         <>{constants.PUBLIC_URL}</>
                         <CodeBlock
-                            key={props.collection.publicURLs?.[0].url}
+                            key={publicShareUrl}
                             height={'160px'}
                             code={transformShareURLForHost(
-                                props.collection.publicURLs?.[0].url,
+                                publicShareUrl,
                                 props.collection.key
                             )}
                         />
