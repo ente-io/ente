@@ -623,6 +623,7 @@ const englishConstants = {
     CUSTOM_TIME: 'custom time',
     REOPEN_PLAN_SELECTOR_MODAL: 're-open plans',
     OPEN_PLAN_SELECTOR_MODAL_FAILED: 'failed to open plans',
+    NOT_FOUND: '404 not found',
 };
 
 export default englishConstants;
