@@ -6,42 +6,30 @@ export const getEndpoint = () => {
 
 export const getFileUrl = (id: number) => {
     if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
-        return (
-            `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/files/download/${id}` ??
-            'https://api.ente.io'
-        );
+        return `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/files/download/${id}`;
     }
     return `https://files.ente.io/?fileID=${id}`;
 };
 
 export const getPublicCollectionFileURL = (id: number) => {
     if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
-        return (
-            `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/public-collection/files/download/${id}` ??
-            'https://api.ente.io'
-        );
+        return `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/public-collection/files/download/${id}`;
     }
-    return `https://files.ente.io/?fileID=${id}`;
+    return `https://public-albums.ente.io/download/?fileID=${id}`;
 };
 
 export const getThumbnailUrl = (id: number) => {
     if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
-        return (
-            `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/files/preview/${id}` ??
-            'https://api.ente.io'
-        );
+        return `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/files/preview/${id}`;
     }
     return `https://thumbnails.ente.io/?fileID=${id}`;
 };
 
 export const getPublicCollectionThumbnailURL = (id: number) => {
     if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
-        return (
-            `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/public-collection/files/preview/${id}` ??
-            'https://api.ente.io'
-        );
+        return `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/public-collection/files/preview/${id}`;
     }
-    return `https://thumbnails.ente.io/?fileID=${id}`;
+    return `https://public-albums.ente.io/preview/?fileID=${id}`;
 };
 
 export const getSentryTunnelUrl = () => {
