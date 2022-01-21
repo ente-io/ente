@@ -4,8 +4,8 @@ import styled from 'styled-components';
 
 const Container = styled.div`
     position: fixed;
-    bottom: 40px;
-    right: 40px;
+    bottom: 7%;
+    right: 2%;
     align-self: flex-end;
 `;
 
