@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/services/deduplication_service.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/data_util.dart';
@@ -23,7 +24,7 @@ class DeduplicatePage extends StatefulWidget {
 }
 
 class _DeduplicatePageState extends State<DeduplicatePage> {
-  static final kHeaderRowCount = 2;
+  static final kHeaderRowCount = 3;
   static final kDeleteIconOverlay = Container(
     decoration: BoxDecoration(
       gradient: LinearGradient(
@@ -51,13 +52,23 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   final Set<File> _selectedFiles = <File>{};
   final Map<int, int> _fileSizeMap = {};
+  List<DuplicateFiles> _duplicates;
+  bool _shouldClubByCaptureTime = true;
 
   SortKey sortKey = SortKey.size;
 
   @override
   void initState() {
     super.initState();
-    for (final duplicate in widget.duplicates) {
+    _duplicates =
+        DeduplicationService.instance.clubDuplicatesByTime(widget.duplicates);
+    _selectAllFilesButFirst();
+    showToast("long-press on an item to view in full-screen");
+  }
+
+  void _selectAllFilesButFirst() {
+    _selectedFiles.clear();
+    for (final duplicate in _duplicates) {
       for (int index = 0; index < duplicate.files.length; index++) {
         // Select all items but the first
         if (index != 0) {
@@ -67,7 +78,6 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         _fileSizeMap[duplicate.files[index].uploadedFileID] = duplicate.size;
       }
     }
-    showToast("long-press on an item to view in full-screen");
   }
 
   @override
@@ -93,7 +103,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   }
 
   void _sortDuplicates() {
-    widget.duplicates.sort((first, second) {
+    _duplicates.sort((first, second) {
       if (sortKey == SortKey.size) {
         final aSize = first.files.length * first.size;
         final bSize = second.files.length * second.size;
@@ -117,15 +127,24 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               if (index == 0) {
                 return _getHeader();
               } else if (index == 1) {
-                return _getSortMenu();
+                return _getClubbingConfig();
+              } else if (index == 2) {
+                if (_duplicates.isNotEmpty) {
+                  return _getSortMenu();
+                } else {
+                  return Padding(
+                    padding: EdgeInsets.only(top: 32),
+                    child: nothingToSeeHere,
+                  );
+                }
               }
               return Padding(
                 padding: const EdgeInsets.only(top: 10, bottom: 10),
-                child: _getGridView(widget.duplicates[index - kHeaderRowCount],
+                child: _getGridView(_duplicates[index - kHeaderRowCount],
                     index - kHeaderRowCount),
               );
             },
-            itemCount: widget.duplicates.length + kHeaderRowCount,
+            itemCount: _duplicates.length + kHeaderRowCount,
             shrinkWrap: true,
           ),
         ),
@@ -140,7 +159,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       child: Column(
         children: [
           Text(
-            "the following files were clubbed based on their sizes and capture times",
+            "the following files were clubbed based on their sizes" +
+                (_shouldClubByCaptureTime ? " and capture times" : ""),
             style: TextStyle(
               color: Colors.white.withOpacity(0.6),
               height: 1.2,
@@ -156,9 +176,40 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               height: 1.2,
             ),
           ),
+          Padding(
+            padding: EdgeInsets.all(12),
+          ),
+          Divider(
+            height: 0,
+          ),
         ],
       ),
     );
+  }
+
+  Widget _getClubbingConfig() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 4),
+      child: CheckboxListTile(
+        value: _shouldClubByCaptureTime,
+        onChanged: (value) {
+          _shouldClubByCaptureTime = value;
+          _resetEntriesAndSelection();
+          setState(() {});
+        },
+        title: Text("club by capture time"),
+      ),
+    );
+  }
+
+  void _resetEntriesAndSelection() {
+    if (_shouldClubByCaptureTime) {
+      _duplicates =
+          DeduplicationService.instance.clubDuplicatesByTime(_duplicates);
+    } else {
+      _duplicates = widget.duplicates;
+    }
+    _selectAllFilesButFirst();
   }
 
   Widget _getSortMenu() {
@@ -324,7 +375,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       },
       onLongPress: () {
         HapticFeedback.lightImpact();
-        final files = widget.duplicates[index].files;
+        final files = _duplicates[index].files;
         routeToPage(
           context,
           DetailPage(
