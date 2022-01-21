@@ -4,14 +4,7 @@ import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
-import {
-    Button,
-    Col,
-    OverlayTrigger,
-    Row,
-    Table,
-    Tooltip,
-} from 'react-bootstrap';
+import { Button, Col, Table } from 'react-bootstrap';
 import { DeadCenter, GalleryContext } from 'pages/gallery';
 import { User } from 'types/user';
 import {
@@ -25,9 +18,8 @@ import SubmitButton from './SubmitButton';
 import MessageDialog from './MessageDialog';
 import { Collection } from 'types/collection';
 import { transformShareURLForHost } from 'utils/collection';
-import CopyIcon from './icons/CopyIcon';
-import { IconButton, Value } from './Container';
-import TickIcon from './icons/TickIcon';
+import { Row, Value } from './Container';
+import { CodeBlock } from './CodeBlock';
 
 interface Props {
     show: boolean;
@@ -46,7 +38,6 @@ interface ShareeProps {
 function CollectionShare(props: Props) {
     const [loading, setLoading] = useState(false);
     const galleryContext = useContext(GalleryContext);
-    const [copied, setCopied] = useState<boolean>(false);
 
     const collectionShare = async (
         { email }: formValues,
@@ -123,12 +114,6 @@ function CollectionShare(props: Props) {
         }
     };
 
-    const copyToClipboardHelper = () => {
-        navigator.clipboard.writeText(props.collection.publicURLs[0].url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1000);
-    };
-
     const ShareeRow = ({ sharee, collectionUnshare }: ShareeProps) => (
         <tr>
             <td>{sharee.email}</td>
@@ -149,18 +134,6 @@ function CollectionShare(props: Props) {
             </td>
         </tr>
     );
-
-    const RenderCopiedMessage = (props) => {
-        const { style, ...rest } = props;
-        return (
-            <Tooltip
-                {...rest}
-                style={{ ...style, zIndex: 2001 }}
-                id="button-tooltip">
-                copied
-            </Tooltip>
-        );
-    };
 
     if (!props.collection) {
         return <></>;
@@ -227,9 +200,9 @@ function CollectionShare(props: Props) {
                         </Form>
                     )}
                 </Formik>
-                <Row style={{ padding: '10px' }}>
-                    <Value width="100%" style={{ paddingTop: '10px' }}>
-                        Public sharing
+                <Row style={{ margin: '10px' }}>
+                    <Value width="auto" style={{ paddingTop: '5px' }}>
+                        {constants.PUBLIC_SHARING}
                     </Value>
                     <Form.Switch
                         style={{ marginLeft: '20px' }}
@@ -250,53 +223,15 @@ function CollectionShare(props: Props) {
 
                 {props.collection.publicURLs?.length > 0 && (
                     <div style={{ width: '100%', wordBreak: 'break-all' }}>
-                        <p>{constants.PUBLIC_URL}</p>
-
-                        {props.collection.publicURLs?.map((publicURL) => (
-                            <Row key={publicURL.url}>
-                                <Value width="85%">
-                                    {
-                                        <a
-                                            href={transformShareURLForHost(
-                                                publicURL.url,
-                                                props.collection.key
-                                            )}
-                                            target="_blank"
-                                            rel="noreferrer">
-                                            {transformShareURLForHost(
-                                                publicURL.url,
-                                                props.collection.key
-                                            )}
-                                        </a>
-                                    }
-                                </Value>
-                                <Value
-                                    width="15%"
-                                    style={{ justifyContent: 'space-around' }}>
-                                    <OverlayTrigger
-                                        show={copied}
-                                        placement="bottom"
-                                        trigger={'click'}
-                                        overlay={RenderCopiedMessage}
-                                        delay={{ show: 200, hide: 800 }}>
-                                        <IconButton
-                                            onClick={copyToClipboardHelper}
-                                            style={{
-                                                background: 'none',
-                                                ...(copied
-                                                    ? { color: '#51cd7c' }
-                                                    : {}),
-                                            }}>
-                                            {copied ? (
-                                                <TickIcon />
-                                            ) : (
-                                                <CopyIcon />
-                                            )}
-                                        </IconButton>
-                                    </OverlayTrigger>
-                                </Value>
-                            </Row>
-                        ))}
+                        <>{constants.PUBLIC_URL}</>
+                        <CodeBlock
+                            key={props.collection.publicURLs?.[0].url}
+                            height={'160px'}
+                            code={transformShareURLForHost(
+                                props.collection.publicURLs?.[0].url,
+                                props.collection.key
+                            )}
+                        />
                     </div>
                 )}
                 {props.collection.sharees?.length > 0 && (
@@ -316,8 +251,8 @@ function CollectionShare(props: Props) {
                         </Table>
                     </>
                 )}
-                {props.collection.sharees?.length > 0 &&
-                    props.collection.publicURLs?.length > 0 && (
+                {props.collection.sharees?.length === 0 &&
+                    props.collection.publicURLs?.length === 0 && (
                         <div style={{ marginTop: '12px' }}>
                             {constants.ZERO_SHAREES()}
                         </div>

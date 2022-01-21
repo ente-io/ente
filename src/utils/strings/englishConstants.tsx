@@ -635,6 +635,7 @@ const englishConstants = {
     INSTALL: 'install',
     SIGNUP_OR_LOGIN: 'signup / login',
     ALBUM_URL: 'album url',
+    PUBLIC_SHARING: 'public sharing',
 };
 
 export default englishConstants;
