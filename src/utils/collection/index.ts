@@ -109,6 +109,9 @@ export async function downloadCollection(
 }
 
 export function transformShareURLForHost(url: string, collectionKey: string) {
+    if (!url) {
+        return null;
+    }
     const host = window.location.host;
     const sharableURL = new URL(url);
     sharableURL.host = host;
