@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { IconButton } from './Container';
+import { FreeFlowText, IconButton } from './Container';
 import CopyIcon from './icons/CopyIcon';
 import React, { useState } from 'react';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
@@ -27,13 +27,6 @@ export const CodeWrapper = styled.div<{ height?: string }>`
     color: white;
     margin: 20px 0;
     width: 100%;
-`;
-
-const FreeFlowText = styled.div`
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    min-width: 30%;
-    text-align: left;
 `;
 
 type Iprops = React.PropsWithChildren<{
