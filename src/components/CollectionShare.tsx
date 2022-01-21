@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
@@ -20,6 +20,8 @@ import { Collection } from 'types/collection';
 import { transformShareURLForHost } from 'utils/collection';
 import { Row, Value } from './Container';
 import { CodeBlock } from './CodeBlock';
+import { ButtonVariant, getVariantColor } from './pages/gallery/LinkButton';
+import { handleSharingErrors } from 'utils/error';
 
 interface Props {
     show: boolean;
@@ -38,6 +40,13 @@ interface ShareeProps {
 function CollectionShare(props: Props) {
     const [loading, setLoading] = useState(false);
     const galleryContext = useContext(GalleryContext);
+    const [sharableLinkError, setSharableLinkError] = useState(null);
+    const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
+
+    useEffect(
+        () => setPublicShareUrl(props.collection?.publicURLs?.[0]?.url || null),
+        [props.collection]
+    );
 
     const collectionShare = async (
         { email }: formValues,
@@ -58,20 +67,7 @@ function CollectionShare(props: Props) {
                 resetForm();
             }
         } catch (e) {
-            let errorMessage = null;
-            switch (e?.status) {
-                case 400:
-                    errorMessage = constants.SHARING_BAD_REQUEST_ERROR;
-                    break;
-                case 402:
-                    errorMessage = constants.SHARING_DISABLED_FOR_FREE_ACCOUNTS;
-                    break;
-                case 404:
-                    errorMessage = constants.USER_DOES_NOT_EXIST;
-                    break;
-                default:
-                    errorMessage = `${constants.UNKNOWN_ERROR} ${e.message}`;
-            }
+            const errorMessage = handleSharingErrors(e);
             setFieldError('email', errorMessage);
         } finally {
             setLoading(false);
@@ -83,14 +79,31 @@ function CollectionShare(props: Props) {
     };
 
     const createSharableURLHelper = async () => {
-        const publicURL = await createShareableURL(props.collection);
-        props.collection.publicURLs = [publicURL];
-        await props.syncWithRemote();
+        try {
+            galleryContext.startLoading();
+            const publicURL = await createShareableURL(props.collection);
+            galleryContext.finishLoading();
+            setPublicShareUrl(publicURL.url);
+            await galleryContext.syncWithRemote(false, true);
+        } catch (e) {
+            const errorMessage = handleSharingErrors(e);
+            setSharableLinkError(errorMessage);
+        } finally {
+            galleryContext.finishLoading();
+        }
     };
 
     const deleteSharableURLHelper = async () => {
-        await deleteShareableURL(props.collection);
-        await props.syncWithRemote();
+        try {
+            await deleteShareableURL(props.collection);
+            setPublicShareUrl(null);
+            await galleryContext.syncWithRemote(false, true);
+        } catch (e) {
+            const errorMessage = handleSharingErrors(e);
+            setSharableLinkError(errorMessage);
+        } finally {
+            galleryContext.finishLoading();
+        }
     };
 
     const deleteSharableLink = () => {
@@ -107,7 +120,8 @@ function CollectionShare(props: Props) {
     };
 
     const handleCollectionPublicSharing = () => {
-        if (props.collection.publicURLs?.length > 0) {
+        setSharableLinkError(null);
+        if (publicShareUrl) {
             deleteSharableLink();
         } else {
             createSharableURLHelper();
@@ -206,11 +220,18 @@ function CollectionShare(props: Props) {
                     </Value>
                     <Form.Switch
                         style={{ marginLeft: '20px' }}
-                        checked={props.collection.publicURLs?.length > 0}
+                        checked={!!publicShareUrl}
                         id="collection-public-sharing-toggler"
                         className="custom-switch-md"
                         onChange={handleCollectionPublicSharing}
                     />
+                </Row>
+                <Row
+                    style={{
+                        margin: '10px',
+                        color: getVariantColor(ButtonVariant.danger),
+                    }}>
+                    {sharableLinkError}
                 </Row>
                 <div
                     style={{
@@ -221,7 +242,7 @@ function CollectionShare(props: Props) {
                     }}
                 />
 
-                {props.collection.publicURLs?.length > 0 && (
+                {publicShareUrl && (
                     <div style={{ width: '100%', wordBreak: 'break-all' }}>
                         <>{constants.PUBLIC_URL}</>
                         <CodeBlock

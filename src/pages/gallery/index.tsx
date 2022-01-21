@@ -123,6 +123,8 @@ const defaultGalleryContext: GalleryContextType = {
     setActiveCollection: () => null,
     syncWithRemote: () => null,
     setDialogMessage: () => null,
+    startLoading: () => null,
+    finishLoading: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -546,6 +548,8 @@ export default function Gallery() {
                 setActiveCollection,
                 syncWithRemote,
                 setDialogMessage,
+                startLoading,
+                finishLoading,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}

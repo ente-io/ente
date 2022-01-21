@@ -51,17 +51,13 @@ function parseUploadError(error: AxiosResponse) {
             case ServerErrorCodes.FILE_TOO_LARGE:
                 parsedMessage = CustomError.FILE_TOO_LARGE;
                 break;
+            default:
+                parsedMessage = `${constants.UNKNOWN_ERROR} statusCode:${errorCode}`;
         }
     }
-    if (parsedMessage) {
-        return {
-            parsedError: new Error(parsedMessage),
-        };
-    } else {
-        return {
-            parsedError: new Error(CustomError.UNKNOWN_ERROR),
-        };
-    }
+    return {
+        parsedError: new Error(parsedMessage),
+    };
 }
 
 export function handleUploadError(error: AxiosResponse | Error): Error {
@@ -105,3 +101,25 @@ export function errorWithContext(originalError: Error, context: string) {
         originalError.stack;
     return errorWithContext;
 }
+
+export const handleSharingErrors = (e) => {
+    let errorMessage = null;
+    if ('status' in e) {
+        switch (e?.status) {
+            case 400:
+                errorMessage = constants.SHARING_BAD_REQUEST_ERROR;
+                break;
+            case 402:
+                errorMessage = constants.SHARING_DISABLED_FOR_FREE_ACCOUNTS;
+                break;
+            case 404:
+                errorMessage = constants.USER_DOES_NOT_EXIST;
+                break;
+            default:
+                errorMessage = `${constants.UNKNOWN_ERROR} statusCode:${e.status}`;
+        }
+    } else {
+        errorMessage = e.message;
+    }
+    return errorMessage;
+};

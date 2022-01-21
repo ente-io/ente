@@ -577,7 +577,6 @@ export const unshareCollection = async (
         );
     } catch (e) {
         logError(e, 'unshare collection failed ');
-        throw e;
     }
 };
 
