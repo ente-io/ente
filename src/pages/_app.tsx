@@ -361,6 +361,19 @@ const GlobalStyles = createGlobalStyle`
     #button-tooltip > .arrow::before{
         border-bottom-color:#282828 !important;
     }
+    #button-tooltip > .arrow::after{
+        border-bottom-color:#282828 !important;
+        border-top-color:#282828 !important;
+
+    }
+    .arrow::before{
+        border-bottom-color:#282828 !important;
+        border-top-color:#282828 !important;
+    }
+    .arrow::after{
+        border-bottom-color:#282828 !important;
+        border-top-color:#282828 !important;
+    }
     .carousel-inner {
         padding-bottom: 50px !important;
     }
