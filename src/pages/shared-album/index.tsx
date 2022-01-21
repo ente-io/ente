@@ -5,6 +5,7 @@ import {
     getLocalPublicCollection,
     getLocalPublicFiles,
     getPublicCollection,
+    removePublicCollectionWithFiles,
     syncPublicFiles,
 } from 'services/publicCollectionService';
 import { Collection } from 'types/collection';
@@ -20,6 +21,9 @@ import {
     defaultPublicCollectionGalleryContext,
     PublicCollectionGalleryContext,
 } from 'utils/publicCollectionGallery';
+import { CustomError } from 'utils/error';
+import Container from 'components/Container';
+import constants from 'utils/strings/constants';
 
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
@@ -63,10 +67,8 @@ export default function PublicCollectionGallery() {
                     )
                 );
                 setPublicFiles(localPublicFiles);
-                syncWithRemote(localCollection);
-            } else {
-                syncWithRemote();
             }
+            syncWithRemote();
             appContext.showNavBar(true);
         };
         main();
@@ -74,19 +76,28 @@ export default function PublicCollectionGallery() {
 
     useEffect(openMessageDialog, [dialogMessage]);
 
-    const syncWithRemote = async (collection?: Collection) => {
-        if (!collection) {
-            collection = await getPublicCollection(
+    const syncWithRemote = async () => {
+        try {
+            const collection = await getPublicCollection(
                 token.current,
                 collectionKey.current
             );
             setPublicCollection(collection);
+
+            await syncPublicFiles(token.current, collection, setPublicFiles);
+        } catch (e) {
+            if (e.message === CustomError.TOKEN_EXPIRED) {
+                // share has been disabled
+                // local cache should be cleared
+                removePublicCollectionWithFiles(collectionKey.current);
+                setPublicCollection(null);
+                setPublicFiles(null);
+            }
         }
-        await syncPublicFiles(token.current, collection, setPublicFiles);
     };
 
     if (!publicFiles) {
-        return <div />;
+        return <Container>{constants.NOT_FOUND}</Container>;
     }
     return (
         <PublicCollectionGalleryContext.Provider

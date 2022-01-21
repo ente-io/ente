@@ -7,6 +7,7 @@ export const ServerErrorCodes = {
     FORBIDDEN: '403',
     STORAGE_LIMIT_EXCEEDED: '426',
     FILE_TOO_LARGE: '413',
+    TOKEN_EXPIRED: '410',
 };
 
 export enum CustomError {
@@ -30,6 +31,7 @@ export enum CustomError {
     WAIT_TIME_EXCEEDED = 'thumbnail generation wait time exceeded',
     REQUEST_CANCELLED = 'request canceled',
     TOKEN_MISSING = 'token missing ',
+    TOKEN_EXPIRED = 'token expired',
 }
 
 function parseUploadError(error: AxiosResponse) {

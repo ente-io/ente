@@ -11,6 +11,7 @@ import {
 } from 'types/publicCollection';
 import CryptoWorker from 'utils/crypto';
 import { REPORT_REASON } from 'constants/publicCollection';
+import { CustomError, ServerErrorCodes } from 'utils/error';
 
 const ENDPOINT = getEndpoint();
 const PUBLIC_COLLECTION_FILES_TABLE = 'public-collection-files';
@@ -222,11 +223,20 @@ export const getPublicCollection = async (
         };
         await savePublicCollection(collection);
         return collection;
-    } catch (e) {
-        logError(e, 'failed to get public collection', {
+    } catch (error) {
+        logError(error, 'failed to get public collection', {
             collectionKey,
             token,
         });
+        if ('status' in error) {
+            const errorCode = error.status.toString();
+            if (
+                errorCode === ServerErrorCodes.SESSION_EXPIRED ||
+                errorCode === ServerErrorCodes.TOKEN_EXPIRED
+            ) {
+                throw Error(CustomError.TOKEN_EXPIRED);
+            }
+        }
     }
 };
 
@@ -267,4 +277,34 @@ export const reportAbuse = async (
         logError(e, 'failed to post abuse report');
         throw e;
     }
+};
+
+export const removePublicCollectionWithFiles = async (
+    collectionKey: string
+) => {
+    const publicCollections =
+        (await localForage.getItem<Collection[]>(PUBLIC_COLLECTIONS_TABLE)) ??
+        [];
+    const collectionToRemove = publicCollections.find(
+        (collection) => (collection.key = collectionKey)
+    );
+    await localForage.setItem(
+        PUBLIC_COLLECTIONS_TABLE,
+        publicCollections.filter(
+            (collection) => collection.id !== collectionToRemove.id
+        )
+    );
+
+    const publicCollectionFiles =
+        (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
+            PUBLIC_COLLECTION_FILES_TABLE
+        )) ?? [];
+    await localForage.setItem(
+        PUBLIC_COLLECTION_FILES_TABLE,
+        publicCollectionFiles.filter(
+            (collectionFiles) =>
+                collectionFiles.collectionUID ===
+                getCollectionUID(collectionToRemove)
+        )
+    );
 };

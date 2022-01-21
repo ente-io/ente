@@ -636,7 +636,7 @@ const englishConstants = {
     SIGNUP_OR_LOGIN: 'signup / login',
     ALBUM_URL: 'album url',
     PUBLIC_SHARING: 'public sharing',
-    NOT_FOUND: '404 not found',
+    NOT_FOUND: '404 - not found',
 };
 
 export default englishConstants;
