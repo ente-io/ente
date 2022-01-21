@@ -4,7 +4,14 @@ import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
-import { Button, Col, Row, Table } from 'react-bootstrap';
+import {
+    Button,
+    Col,
+    OverlayTrigger,
+    Row,
+    Table,
+    Tooltip,
+} from 'react-bootstrap';
 import { DeadCenter, GalleryContext } from 'pages/gallery';
 import { User } from 'types/user';
 import {
@@ -20,6 +27,7 @@ import { Collection } from 'types/collection';
 import { transformShareURLForHost } from 'utils/collection';
 import CopyIcon from './icons/CopyIcon';
 import { IconButton, Value } from './Container';
+import TickIcon from './icons/TickIcon';
 
 interface Props {
     show: boolean;
@@ -37,8 +45,9 @@ interface ShareeProps {
 
 function CollectionShare(props: Props) {
     const [loading, setLoading] = useState(false);
-
     const galleryContext = useContext(GalleryContext);
+    const [copied, setCopied] = useState<boolean>(false);
+
     const collectionShare = async (
         { email }: formValues,
         { resetForm, setFieldError }: FormikHelpers<formValues>
@@ -114,6 +123,12 @@ function CollectionShare(props: Props) {
         }
     };
 
+    const copyToClipboardHelper = () => {
+        navigator.clipboard.writeText(props.collection.publicURLs[0].url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1000);
+    };
+
     const ShareeRow = ({ sharee, collectionUnshare }: ShareeProps) => (
         <tr>
             <td>{sharee.email}</td>
@@ -134,12 +149,25 @@ function CollectionShare(props: Props) {
             </td>
         </tr>
     );
+
+    const RenderCopiedMessage = (props) => {
+        const { style, ...rest } = props;
+        return (
+            <Tooltip
+                {...rest}
+                style={{ ...style, zIndex: 2001 }}
+                id="button-tooltip">
+                copied
+            </Tooltip>
+        );
+    };
+
     if (!props.collection) {
         return <></>;
     }
     return (
         <MessageDialog
-            show={true}
+            show={props.show}
             onHide={props.onHide}
             attributes={{ title: constants.SHARE_COLLECTION }}>
             <DeadCenter style={{ width: '85%', margin: 'auto' }}>
@@ -245,9 +273,27 @@ function CollectionShare(props: Props) {
                                 <Value
                                     width="15%"
                                     style={{ justifyContent: 'space-around' }}>
-                                    <IconButton>
-                                        <CopyIcon />
-                                    </IconButton>
+                                    <OverlayTrigger
+                                        show={copied}
+                                        placement="bottom"
+                                        trigger={'click'}
+                                        overlay={RenderCopiedMessage}
+                                        delay={{ show: 200, hide: 800 }}>
+                                        <IconButton
+                                            onClick={copyToClipboardHelper}
+                                            style={{
+                                                background: 'none',
+                                                ...(copied
+                                                    ? { color: '#51cd7c' }
+                                                    : {}),
+                                            }}>
+                                            {copied ? (
+                                                <TickIcon />
+                                            ) : (
+                                                <CopyIcon />
+                                            )}
+                                        </IconButton>
+                                    </OverlayTrigger>
                                 </Value>
                             </Row>
                         ))}
