@@ -547,7 +547,7 @@ const englishConstants = {
     INPROGRESS_UPLOADS: 'uploads in progress',
     TOO_LARGE_UPLOADS: 'large files',
     TOO_LARGE_INFO:
-        'these files were not uploaded as they exceed the maximum size limit for your storage plan',
+        'these files were not uploaded as they exceed our maximum file size limit',
     UPLOAD_TO_COLLECTION: 'upload to album',
     ARCHIVE: 'archive',
     ALL: 'all',
