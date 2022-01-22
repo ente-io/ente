@@ -546,8 +546,7 @@ const englishConstants = {
     BLOCKED_UPLOADS: 'blocked uploads',
     INPROGRESS_UPLOADS: 'uploads in progress',
     TOO_LARGE_UPLOADS: 'large files',
-    LARGER_THAN_AVAILABLE_STORAGE_UPLOADS:
-        'larger than available storage files',
+    LARGER_THAN_AVAILABLE_STORAGE_UPLOADS: 'insufficient storage',
     LARGER_THAN_AVAILABLE_STORAGE_INFO:
         'these files were not uploaded as they exceed the maximum size limit for your storage plan',
     TOO_LARGE_INFO:
