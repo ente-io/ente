@@ -133,9 +133,12 @@ export default async function uploader(
             case CustomError.FILE_TOO_LARGE:
                 UIService.setFileProgress(
                     rawFile.name,
-                    FileUploadResults.TOO_LARGE
+                    FileUploadResults.LARGER_THAN_AVAILABLE_STORAGE
                 );
-                return { fileUploadResult: FileUploadResults.TOO_LARGE };
+                return {
+                    fileUploadResult:
+                        FileUploadResults.LARGER_THAN_AVAILABLE_STORAGE,
+                };
             default:
                 UIService.setFileProgress(
                     rawFile.name,
