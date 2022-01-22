@@ -196,7 +196,7 @@ export default function Gallery() {
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
-            appContext.setRedirectUrl(router.asPath);
+            appContext.setRedirectURL(router.asPath);
             router.push(PAGES.ROOT);
             return;
         }

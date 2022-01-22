@@ -496,8 +496,8 @@ type AppContextType = {
     sharedFiles: File[];
     resetSharedFiles: () => void;
     setDisappearingFlashMessage: (message: FlashMessage) => void;
-    redirectUrl: string;
-    setRedirectUrl: (url: string) => void;
+    redirectURL: string;
+    setRedirectURL: (url: string) => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -527,7 +527,7 @@ export default function App({ Component, err }) {
     const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const [redirectName, setRedirectName] = useState<string>(null);
     const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
-    const [redirectUrl, setRedirectUrl] = useState(null);
+    const [redirectURL, setRedirectURL] = useState(null);
     useEffect(() => {
         if (
             !('serviceWorker' in navigator) ||
@@ -661,8 +661,8 @@ export default function App({ Component, err }) {
                     sharedFiles,
                     resetSharedFiles,
                     setDisappearingFlashMessage,
-                    redirectUrl,
-                    setRedirectUrl,
+                    redirectURL,
+                    setRedirectURL,
                 }}>
                 {loading ? (
                     <Container>
