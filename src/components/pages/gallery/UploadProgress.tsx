@@ -241,6 +241,16 @@ export default function UploadProgress(props: Props) {
                 />
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
+                    fileUploadResult={
+                        FileUploadResults.LARGER_THAN_AVAILABLE_STORAGE
+                    }
+                    sectionTitle={
+                        constants.LARGER_THAN_AVAILABLE_STORAGE_UPLOADS
+                    }
+                    sectionInfo={constants.LARGER_THAN_AVAILABLE_STORAGE_INFO}
+                />
+                <ResultSection
+                    fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.UNSUPPORTED}
                     sectionTitle={constants.UNSUPPORTED_FILES}
                     sectionInfo={constants.UNSUPPORTED_INFO}
