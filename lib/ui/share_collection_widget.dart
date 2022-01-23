@@ -1,5 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -80,6 +85,46 @@ class _SharingDialogState extends State<SharingDialog> {
       );
     }
 
+    bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
+
+    children.addAll([
+      Padding(padding: EdgeInsets.all(2)),
+      Divider(height: 12),
+      Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
+      SizedBox(
+        height: 36,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("enable public url"),
+            Switch(
+              value: hasUrl,
+              onChanged: (enable) async {
+                final dialog = createProgressDialog(
+                    context, enable ? "generating url..." : "disabling url");
+                try {
+                  await dialog.show();
+                  enable
+                      ? await CollectionsService.instance
+                          .createShareUrl(widget.collection)
+                      : await CollectionsService.instance
+                          .disableShareUrl(widget.collection);
+                } catch (e) {
+                  _logger.severe('failed to $enable url', e);
+                } finally {
+                  dialog.hide();
+                  setState(() {});
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    ]);
+    if (widget.collection.publicURLs?.isNotEmpty ?? false) {
+      children.add(_getShareableUrlWidget());
+    }
+
     return AlertDialog(
       title: Text("sharing"),
       content: SingleChildScrollView(
@@ -145,6 +190,41 @@ class _SharingDialogState extends State<SharingDialog> {
           },
         ),
       ],
+    );
+  }
+
+  Widget _getShareableUrlWidget() {
+    String base64urlEncode = base64UrlEncode(
+        CollectionsService.instance.getCollectionKey(widget.collection.id));
+    String url =
+        "${widget.collection.publicURLs.first.url}#collectionKey=$base64urlEncode";
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () async {
+              await Clipboard.setData(ClipboardData(text: url));
+              showToast("URL is copied to clipboard");
+            },
+            child: Container(
+              padding: EdgeInsets.all(16),
+              child: Center(
+                child: Text(
+                  url,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                ),
+              ),
+              color: Colors.white.withOpacity(0.1),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
