@@ -25,6 +25,7 @@ import { CustomError } from 'utils/error';
 import Container from 'components/Container';
 import constants from 'utils/strings/constants';
 import EnteSpinner from 'components/EnteSpinner';
+import LoadingBar from 'react-top-loading-bar';
 
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
@@ -39,9 +40,13 @@ export default function PublicCollectionGallery() {
     const [loading, setLoading] = useState(true);
     const showReportForm = () => setAbuseReportFormView(true);
     const closeReportForm = () => setAbuseReportFormView(false);
+    const loadingBar = useRef(null);
 
     const openMessageDialog = () => setMessageDialogView(true);
     const closeMessageDialog = () => setMessageDialogView(false);
+
+    const startLoading = () => loadingBar.current?.continuousStart();
+    const finishLoading = () => loadingBar.current.complete();
 
     useEffect(() => {
         const main = async () => {
@@ -52,6 +57,7 @@ export default function PublicCollectionGallery() {
                 urlParams.get('collectionKey')
             );
             if (!eToken || !eCollectionKey) {
+                setLoading(false);
                 return;
             }
             token.current = eToken;
@@ -80,6 +86,7 @@ export default function PublicCollectionGallery() {
 
     const syncWithRemote = async () => {
         try {
+            startLoading();
             const collection = await getPublicCollection(
                 token.current,
                 collectionKey.current
@@ -97,6 +104,7 @@ export default function PublicCollectionGallery() {
             }
         } finally {
             setLoading(false);
+            finishLoading();
         }
     };
     if (loading) {
@@ -120,7 +128,7 @@ export default function PublicCollectionGallery() {
                 setDialogMessage,
             }}>
             <GoToEnte />
-
+            <LoadingBar color="#51cd7c" ref={loadingBar} />
             <CollectionInfo collection={publicCollection} />
 
             <PhotoFrame
