@@ -58,6 +58,12 @@ export default function Sidebar(props: Props) {
     const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
     const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);
+    const enableMlSearch = async () => {
+        await appContext.updateMlSearchEnabled(true);
+    };
+    const disableMlSearch = async () => {
+        await appContext.updateMlSearchEnabled(false);
+    };
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -302,9 +308,21 @@ export default function Sidebar(props: Props) {
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={() => {
-                        appContext.updateMlSearchEnabled(
-                            !appContext.mlSearchEnabled
-                        );
+                        if (!appContext.mlSearchEnabled) {
+                            props.setDialogMessage({
+                                title: `${constants.CONFIRM} ${constants.ENABLE_ML_SEARCH}`,
+                                content: constants.ENABLE_ML_SEARCH_MESSAGE,
+                                staticBackdrop: true,
+                                proceed: {
+                                    text: constants.ENABLE_ML_SEARCH,
+                                    action: enableMlSearch,
+                                    variant: 'success',
+                                },
+                                close: { text: constants.CANCEL },
+                            });
+                        } else {
+                            disableMlSearch();
+                        }
                     }}>
                     {appContext.mlSearchEnabled
                         ? constants.DISABLE_ML_SEARCH

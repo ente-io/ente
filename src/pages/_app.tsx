@@ -501,6 +501,7 @@ export interface FlashMessage {
     message: string;
     type: FLASH_MESSAGE_TYPE;
 }
+// TODO: AppContext is not cleared after logout
 export const AppContext = createContext<AppContextType>(null);
 
 const redirectMap = {
