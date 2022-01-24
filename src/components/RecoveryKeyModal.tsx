@@ -39,12 +39,14 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
             return;
         }
         const main = async () => {
-            const recoveryKey = await getRecoveryKey();
-            if (!recoveryKey) {
+            try {
+                const recoveryKey = await getRecoveryKey();
+                setRecoveryKey(bip39.entropyToMnemonic(recoveryKey));
+            } catch (e) {
                 somethingWentWrong();
+            } finally {
                 props.onHide();
             }
-            setRecoveryKey(bip39.entropyToMnemonic(recoveryKey));
         };
         main();
     }, [props.show]);
