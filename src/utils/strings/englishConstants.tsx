@@ -640,6 +640,9 @@ const englishConstants = {
     ALBUM_URL: 'album url',
     PUBLIC_SHARING: 'public sharing',
     NOT_FOUND: '404 - not found',
+    DISABLE_PUBLIC_SHARING: "'disable public sharing",
+    DISABLE_PUBLIC_SHARING_MESSAGE:
+        'are you sure you want to disable public sharing?',
 };
 
 export default englishConstants;

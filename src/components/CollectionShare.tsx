@@ -96,9 +96,8 @@ function CollectionShare(props: Props) {
                 publicURL.url,
                 props.collection.key
             );
-            galleryContext.finishLoading();
             setPublicShareUrl(sharableURL);
-            await galleryContext.syncWithRemote(false, true);
+            galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
             setSharableLinkError(errorMessage);
@@ -109,9 +108,10 @@ function CollectionShare(props: Props) {
 
     const deleteSharableURLHelper = async () => {
         try {
+            galleryContext.startLoading();
             await deleteShareableURL(props.collection);
             setPublicShareUrl(null);
-            await galleryContext.syncWithRemote(false, true);
+            galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
             setSharableLinkError(errorMessage);
@@ -122,13 +122,13 @@ function CollectionShare(props: Props) {
 
     const deleteSharableLink = () => {
         galleryContext.setDialogMessage({
-            title: 'delete sharable url',
-            content: 'are you sure you want to delete the sharable url?',
+            title: constants.DISABLE_PUBLIC_SHARING,
+            content: constants.DISABLE_PUBLIC_SHARING_MESSAGE,
             close: { text: constants.CANCEL },
             proceed: {
-                text: 'delete',
+                text: constants.DELETE,
                 action: deleteSharableURLHelper,
-                variant: 'danger',
+                variant: ButtonVariant.danger,
             },
         });
     };
