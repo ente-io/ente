@@ -21,10 +21,7 @@ import { PhotoList } from './PhotoList';
 import { SetFiles, SelectedState, Search, setSearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
-import {
-    defaultPublicCollectionGalleryContext,
-    PublicCollectionGalleryContext,
-} from 'utils/publicCollectionGallery';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 
 const Container = styled.div`
     display: block;
@@ -94,9 +91,9 @@ const PhotoFrame = ({
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
     const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
-    const publicCollectionGalleryContext =
-        useContext(PublicCollectionGalleryContext) ??
-        defaultPublicCollectionGalleryContext;
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
