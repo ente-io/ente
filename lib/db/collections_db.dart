@@ -224,8 +224,10 @@ class CollectionsDB {
       ),
       List<User>.from((json.decode(row[columnSharees]) as List)
           .map((x) => User.fromMap(x))),
-      List<PublicURL>.from((json.decode(row[columnPublicURLs]) as List)
-          .map((x) => PublicURL.fromMap(x))),
+      row[columnPublicURLs] == null
+          ? []
+          : List<PublicURL>.from((json.decode(row[columnPublicURLs]) as List)
+              .map((x) => PublicURL.fromMap(x))),
       int.parse(row[columnUpdationTime]),
       // default to False is columnIsDeleted is not set
       isDeleted: (row[columnIsDeleted] ?? _sqlBoolFalse) == _sqlBoolTrue,
