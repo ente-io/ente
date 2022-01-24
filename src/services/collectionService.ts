@@ -584,7 +584,7 @@ export const createShareableURL = async (collection: Collection) => {
     try {
         const token = getToken();
         if (!token) {
-            throw Error(CustomError.TOKEN_MISSING);
+            return null;
         }
         const createPublicAccessTokenRequest: CreatePublicAccessTokenRequest = {
             collectionID: collection.id,
@@ -611,7 +611,7 @@ export const deleteShareableURL = async (collection: Collection) => {
     try {
         const token = getToken();
         if (!token) {
-            throw Error(CustomError.TOKEN_MISSING);
+            return null;
         }
         await HTTPService.delete(
             `${ENDPOINT}/collections/share-url/${collection.id}`,
