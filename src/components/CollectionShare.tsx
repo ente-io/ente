@@ -22,6 +22,7 @@ import { Row, Value } from './Container';
 import { CodeBlock } from './CodeBlock';
 import { ButtonVariant, getVariantColor } from './pages/gallery/LinkButton';
 import { handleSharingErrors } from 'utils/error';
+import { sleep } from 'utils/common';
 
 interface Props {
     show: boolean;
@@ -62,6 +63,7 @@ function CollectionShare(props: Props) {
     ) => {
         try {
             setLoading(true);
+            galleryContext.startLoading();
             const user: User = getData(LS_KEYS.USER);
             if (email === user.email) {
                 setFieldError('email', constants.SHARE_WITH_SELF);
@@ -73,7 +75,8 @@ function CollectionShare(props: Props) {
                 setFieldError('email', constants.ALREADY_SHARED(email));
             } else {
                 await shareCollection(props.collection, email);
-                await props.syncWithRemote();
+                await sleep(2000);
+                await galleryContext.syncWithRemote(false, true);
                 resetForm();
             }
         } catch (e) {
@@ -81,11 +84,18 @@ function CollectionShare(props: Props) {
             setFieldError('email', errorMessage);
         } finally {
             setLoading(false);
+            galleryContext.finishLoading();
         }
     };
     const collectionUnshare = async (sharee) => {
-        await unshareCollection(props.collection, sharee.email);
-        await props.syncWithRemote();
+        try {
+            galleryContext.startLoading();
+            await unshareCollection(props.collection, sharee.email);
+            await sleep(2000);
+            await galleryContext.syncWithRemote(false, true);
+        } finally {
+            galleryContext.finishLoading();
+        }
     };
 
     const createSharableURLHelper = async () => {
