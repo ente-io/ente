@@ -21,7 +21,7 @@ import {
     EncryptedFileKey,
     RemoveFromCollectionRequest,
     CreatePublicAccessTokenRequest,
-    PublicAccessURL,
+    PublicURL,
 } from 'types/collection';
 import {
     COLLECTION_SORT_BY,
@@ -600,7 +600,7 @@ export const createShareableURL = async (collection: Collection) => {
                 'X-Auth-Token': token,
             }
         );
-        return resp.data as PublicAccessURL;
+        return resp.data.result as PublicURL;
     } catch (e) {
         logError(e, 'createShareableURL failed ');
         throw e;

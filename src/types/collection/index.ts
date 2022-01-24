@@ -17,10 +17,10 @@ export interface Collection {
     keyDecryptionNonce: string;
     isDeleted: boolean;
     isSharedCollection?: boolean;
-    publicURLs?: PublicAccessURL[];
+    publicURLs?: PublicURL[];
 }
 
-export interface PublicAccessURL {
+export interface PublicURL {
     url: string;
     deviceLimit: number;
     validTill: number;
