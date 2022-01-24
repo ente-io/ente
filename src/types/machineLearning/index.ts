@@ -244,6 +244,10 @@ export interface MLSyncConfig extends Config {
     mlVersion: number;
 }
 
+export interface MLSearchConfig extends Config {
+    enabled: boolean;
+}
+
 export interface MLSyncContext {
     token: string;
     config: MLSyncConfig;

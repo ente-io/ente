@@ -1,4 +1,5 @@
 import {
+    DEFAULT_ML_SEARCH_CONFIG,
     DEFAULT_ML_SYNC_CONFIG,
     DEFAULT_ML_SYNC_JOB_CONFIG,
 } from 'constants/machineLearning/config';
@@ -16,6 +17,7 @@ import { runningInBrowser } from 'utils/common';
 
 export const ML_SYNC_JOB_CONFIG_NAME = 'ml-sync-job';
 export const ML_SYNC_CONFIG_NAME = 'ml-sync';
+export const ML_SEARCH_CONFIG_NAME = 'ml-search';
 
 const MLDATA_DB_NAME = 'mldata';
 interface MLDb extends DBSchema {
@@ -50,7 +52,7 @@ class MLIDbStorage {
             return;
         }
 
-        this.db = openDB<MLDb>(MLDATA_DB_NAME, 2, {
+        this.db = openDB<MLDb>(MLDATA_DB_NAME, 3, {
             upgrade(db, oldVersion, newVersion, tx) {
                 if (oldVersion < 1) {
                     const filesStore = db.createObjectStore('files', {
@@ -80,6 +82,12 @@ class MLIDbStorage {
                     tx.objectStore('configs').add(
                         DEFAULT_ML_SYNC_CONFIG,
                         ML_SYNC_CONFIG_NAME
+                    );
+                }
+                if (oldVersion < 3) {
+                    tx.objectStore('configs').add(
+                        DEFAULT_ML_SEARCH_CONFIG,
+                        ML_SEARCH_CONFIG_NAME
                     );
                 }
             },

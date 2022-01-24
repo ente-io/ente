@@ -16,6 +16,10 @@ import FlashMessageBar from 'components/FlashMessageBar';
 import Head from 'next/head';
 import { eventBus, Events } from 'services/events';
 import mlWorkManager from 'services/machineLearning/mlWorkManager';
+import {
+    getMLSearchConfig,
+    updateMLSearchConfig,
+} from 'utils/machineLearning/config';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -483,6 +487,8 @@ type AppContextType = {
     setDisappearingFlashMessage: (message: FlashMessage) => void;
     redirectUrl: string;
     setRedirectUrl: (url: string) => void;
+    mlSearchEnabled: boolean;
+    updateMlSearchEnabled: (enabled: boolean) => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -513,6 +519,7 @@ export default function App({ Component, err }) {
     const [redirectName, setRedirectName] = useState<string>(null);
     const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
     const [redirectUrl, setRedirectUrl] = useState(null);
+    const [mlSearchEnabled, setMlSearchEnabled] = useState(false);
     useEffect(() => {
         if (
             !('serviceWorker' in navigator) ||
@@ -550,12 +557,18 @@ export default function App({ Component, err }) {
     }, []);
 
     useEffect(() => {
-        try {
-            mlWorkManager;
-            eventBus.emit(Events.APP_START);
-        } catch (e) {
-            logError(e, 'Error in appStart handlers');
-        }
+        const loadMlSearchState = async () => {
+            try {
+                const mlSearchConfig = await getMLSearchConfig();
+                setMlSearchEnabled(mlSearchConfig.enabled);
+                mlWorkManager.setMlSearchEnabled(mlSearchConfig.enabled);
+                eventBus.emit(Events.APP_START);
+            } catch (e) {
+                logError(e, 'Error in appStart handlers');
+            }
+        };
+
+        loadMlSearchState();
     }, []);
 
     const setUserOnline = () => setOffline(false);
@@ -612,6 +625,13 @@ export default function App({ Component, err }) {
         setFlashMessage(flashMessages);
         setTimeout(() => setFlashMessage(null), 5000);
     };
+    const updateMlSearchEnabled = async (enabled: boolean) => {
+        const mlSearchConfig = await getMLSearchConfig();
+        mlSearchConfig.enabled = enabled;
+        await updateMLSearchConfig(mlSearchConfig);
+        setMlSearchEnabled(enabled);
+        mlWorkManager.setMlSearchEnabled(enabled);
+    };
     //  ho ja yaar
     return (
         <>
@@ -657,6 +677,8 @@ export default function App({ Component, err }) {
                     setDisappearingFlashMessage,
                     redirectUrl,
                     setRedirectUrl,
+                    mlSearchEnabled,
+                    updateMlSearchEnabled,
                 }}>
                 {loading ? (
                     <Container>

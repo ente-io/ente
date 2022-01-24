@@ -204,6 +204,8 @@ const englishConstants = {
     ),
     CONTACT_SUPPORT: 'contact support',
     REQUEST_FEATURE: 'request feature',
+    ENABLE_ML_SEARCH: 'enable ML Search beta',
+    DISABLE_ML_SEARCH: 'disable ML Search beta',
     ML_DEBUG: 'ML Debug',
     SUPPORT: 'support',
     CONFIRM: 'confirm',

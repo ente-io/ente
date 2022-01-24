@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import Photoswipe from 'photoswipe';
 import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
 import classnames from 'classnames';
@@ -49,6 +49,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
+import { AppContext } from 'pages/_app';
 
 interface Iprops {
     isOpen: boolean;
@@ -397,6 +398,7 @@ function InfoModal({
     exif,
     scheduleUpdate,
 }) {
+    const appContext = useContext(AppContext);
     return (
         <Modal show={showInfo} onHide={handleCloseInfo}>
             <Modal.Header closeButton>
@@ -438,16 +440,22 @@ function InfoModal({
                             {constants.SHOW_MAP}
                         </a>
                     )}
-                <div>
-                    <Legend>{constants.PEOPLE}</Legend>
-                </div>
-                <PhotoPeopleList file={items[photoSwipe?.getCurrentIndex()]} />
-                <div>
-                    <Legend>{constants.UNIDENTIFIED_FACES}</Legend>
-                </div>
-                <UnidentifiedFaces
-                    file={items[photoSwipe?.getCurrentIndex()]}
-                />
+                {appContext.mlSearchEnabled && (
+                    <>
+                        <div>
+                            <Legend>{constants.PEOPLE}</Legend>
+                        </div>
+                        <PhotoPeopleList
+                            file={items[photoSwipe?.getCurrentIndex()]}
+                        />
+                        <div>
+                            <Legend>{constants.UNIDENTIFIED_FACES}</Legend>
+                        </div>
+                        <UnidentifiedFaces
+                            file={items[photoSwipe?.getCurrentIndex()]}
+                        />
+                    </>
+                )}
                 {exif && (
                     <>
                         <ExifData exif={exif} />

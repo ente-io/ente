@@ -1,5 +1,5 @@
 import { Search, SearchStats } from 'pages/gallery';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
 import { components } from 'react-select';
@@ -28,6 +28,7 @@ import VideoIcon from './icons/VideoIcon';
 import { IconButton } from './Container';
 import { Person } from 'types/machineLearning';
 import { PeopleList } from './MachineLearning/PeopleList';
+import { AppContext } from 'pages/_app';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -118,6 +119,7 @@ interface Props {
 export default function SearchBar(props: Props) {
     const selectRef = useRef(null);
     const [value, setValue] = useState<Suggestion>(null);
+    const appContext = useContext(AppContext);
 
     const handleChange = (value) => {
         setValue(value);
@@ -129,11 +131,13 @@ export default function SearchBar(props: Props) {
     // Functionality
     // = =========================
     const getAutoCompleteSuggestions = async (searchPhrase: string) => {
-        const options = await getAllPeopleSuggestion();
-        // const options = [];
+        const options = [];
         searchPhrase = searchPhrase.trim().toLowerCase();
         if (!searchPhrase?.length) {
             return [];
+        }
+        if (appContext.mlSearchEnabled) {
+            options.push(...(await getAllPeopleSuggestion()));
         }
         options.push(...getHolidaySuggestion(searchPhrase));
         options.push(...getYearSuggestion(searchPhrase));

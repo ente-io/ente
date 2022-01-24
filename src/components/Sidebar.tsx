@@ -37,6 +37,7 @@ import {
     TRASH_SECTION,
 } from 'components/pages/gallery/Collections';
 import FixLargeThumbnails from './FixLargeThumbnail';
+import { AppContext } from 'pages/_app';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -56,6 +57,7 @@ export default function Sidebar(props: Props) {
     const [exportModalView, setExportModalView] = useState(false);
     const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
     const galleryContext = useContext(GalleryContext);
+    const appContext = useContext(AppContext);
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -296,6 +298,17 @@ export default function Sidebar(props: Props) {
                     style={{ marginTop: '30px' }}
                     onClick={openFeedbackURL}>
                     {constants.REQUEST_FEATURE}
+                </LinkButton>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => {
+                        appContext.updateMlSearchEnabled(
+                            !appContext.mlSearchEnabled
+                        );
+                    }}>
+                    {appContext.mlSearchEnabled
+                        ? constants.DISABLE_ML_SEARCH
+                        : constants.ENABLE_ML_SEARCH}
                 </LinkButton>
                 <LinkButton
                     style={{ marginTop: '30px' }}

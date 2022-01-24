@@ -1,5 +1,5 @@
 import { JobConfig } from 'types/common/job';
-import { MLSyncConfig } from 'types/machineLearning';
+import { MLSearchConfig, MLSyncConfig } from 'types/machineLearning';
 
 export const DEFAULT_ML_SYNC_JOB_CONFIG: JobConfig = {
     intervalSec: 30,
@@ -51,6 +51,10 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     //     metric: 'euclidean',
     // },
     mlVersion: 2,
+};
+
+export const DEFAULT_ML_SEARCH_CONFIG: MLSearchConfig = {
+    enabled: false,
 };
 
 export const ML_SYNC_DOWNLOAD_TIMEOUT_MS = 300000;

@@ -19,8 +19,12 @@ class MLWorkManager {
     private mlSyncJob: MLSyncJob;
     private syncJobWorker: MLWorkerWithProxy;
 
+    private debouncedLiveSyncIdle: () => void;
+    private debouncedFilesUpdated: () => void;
+
     private liveSyncQueue: PQueue;
     private liveSyncWorker: MLWorkerWithProxy;
+    private mlSearchEnabled: boolean;
 
     constructor() {
         this.liveSyncQueue = new PQueue({
@@ -29,31 +33,58 @@ class MLWorkManager {
             timeout: LIVE_SYNC_QUEUE_TIMEOUT_SEC * 1000,
             throwOnTimeout: true,
         });
-        logQueueStats(this.liveSyncQueue, 'livesync');
+        this.mlSearchEnabled = false;
 
-        const debouncedLiveSyncIdle = debounce(
+        eventBus.on(Events.LOGOUT, this.logoutHandler, this);
+        this.debouncedLiveSyncIdle = debounce(
             () => this.onLiveSyncIdle(),
             LIVE_SYNC_IDLE_DEBOUNCE_SEC * 1000
         );
-        this.liveSyncQueue.on('idle', () => debouncedLiveSyncIdle(), this);
-
-        eventBus.on(Events.APP_START, this.appStartHandler, this);
-
-        eventBus.on(Events.LOGIN, this.startSyncJob, this);
-
-        eventBus.on(Events.LOGOUT, this.logoutHandler, this);
-
-        eventBus.on(Events.FILE_UPLOADED, this.fileUploadedHandler, this);
-
-        const debouncedFilesUpdated = debounce(
-            () => this.localFilesUpdatedHandler(),
+        this.debouncedFilesUpdated = debounce(
+            () => this.mlSearchEnabled && this.localFilesUpdatedHandler(),
             LOCAL_FILES_UPDATED_DEBOUNCE_SEC * 1000
         );
-        eventBus.on(
-            Events.LOCAL_FILES_UPDATED,
-            () => debouncedFilesUpdated(),
-            this
-        );
+    }
+
+    public async setMlSearchEnabled(enabled: boolean) {
+        if (!this.mlSearchEnabled && enabled) {
+            console.log('Enabling MLWorkManager');
+            this.mlSearchEnabled = true;
+
+            logQueueStats(this.liveSyncQueue, 'livesync');
+            this.liveSyncQueue.on('idle', this.debouncedLiveSyncIdle, this);
+
+            // eventBus.on(Events.APP_START, this.appStartHandler, this);
+            // eventBus.on(Events.LOGIN, this.startSyncJob, this);
+            eventBus.on(Events.FILE_UPLOADED, this.fileUploadedHandler, this);
+            eventBus.on(
+                Events.LOCAL_FILES_UPDATED,
+                this.debouncedFilesUpdated,
+                this
+            );
+
+            await this.startSyncJob();
+        } else if (this.mlSearchEnabled && !enabled) {
+            console.log('Disabling MLWorkManager');
+            this.mlSearchEnabled = false;
+
+            this.liveSyncQueue.removeAllListeners();
+
+            // eventBus.removeListener(Events.APP_START, this.appStartHandler, this);
+            // eventBus.removeListener(Events.LOGIN, this.startSyncJob, this);
+            eventBus.removeListener(
+                Events.FILE_UPLOADED,
+                this.fileUploadedHandler,
+                this
+            );
+            eventBus.removeListener(
+                Events.LOCAL_FILES_UPDATED,
+                this.debouncedFilesUpdated,
+                this
+            );
+
+            await this.stopSyncJob();
+        }
     }
 
     // Handlers
@@ -83,6 +114,9 @@ class MLWorkManager {
         enteFile: File;
         localFile: globalThis.File;
     }) {
+        if (!this.mlSearchEnabled) {
+            return;
+        }
         console.log('fileUploadedHandler: ', arg.enteFile.id);
         if (arg.enteFile.metadata.fileType !== FILE_TYPE.IMAGE) {
             console.log('Skipping non image file for local file processing');
@@ -131,7 +165,7 @@ class MLWorkManager {
     private async onLiveSyncIdle() {
         console.log('Live sync idle');
         await this.terminateLiveSyncWorker();
-        this.startSyncJob();
+        this.mlSearchEnabled && this.startSyncJob();
     }
 
     public async syncLocalFile(enteFile: File, localFile: globalThis.File) {
@@ -185,6 +219,10 @@ class MLWorkManager {
     public async startSyncJob() {
         try {
             console.log('MLWorkManager.startSyncJob');
+            if (!this.mlSearchEnabled) {
+                console.log('ML Search disabled, not starting ml sync job');
+                return;
+            }
             if (!getToken()) {
                 console.log('User not logged in, not starting ml sync job');
                 return;
