@@ -14,6 +14,7 @@ import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -85,49 +86,50 @@ class _SharingDialogState extends State<SharingDialog> {
       );
     }
 
-    bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
-
-    children.addAll([
-      Padding(padding: EdgeInsets.all(2)),
-      Divider(height: 12),
-      Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
-      SizedBox(
-        height: 36,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text("enable public url"),
-            Switch(
-              value: hasUrl,
-              onChanged: (enable) async {
-                final dialog = createProgressDialog(
-                    context, enable ? "generating url..." : "disabling url");
-                try {
-                  await dialog.show();
-                  enable
-                      ? await CollectionsService.instance
-                          .createShareUrl(widget.collection)
-                      : await CollectionsService.instance
-                          .disableShareUrl(widget.collection);
-                } catch (e) {
-                  dialog.hide();
-                  if (e is SharingNotPermittedForFreeAccountsError) {
-                    _showUnSupportedAlert();
-                  } else {
-                    _logger.severe("failed to share collection", e);
-                    showGenericErrorDialog(context);
+    if (!FeatureFlagService.instance.disableUrlSharing()) {
+      bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
+      children.addAll([
+        Padding(padding: EdgeInsets.all(2)),
+        Divider(height: 12),
+        Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
+        SizedBox(
+          height: 36,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("enable public url"),
+              Switch(
+                value: hasUrl,
+                onChanged: (enable) async {
+                  final dialog = createProgressDialog(
+                      context, enable ? "generating url..." : "disabling url");
+                  try {
+                    await dialog.show();
+                    enable
+                        ? await CollectionsService.instance
+                            .createShareUrl(widget.collection)
+                        : await CollectionsService.instance
+                            .disableShareUrl(widget.collection);
+                    dialog.hide();
+                    setState(() {});
+                  } catch (e) {
+                    dialog.hide();
+                    if (e is SharingNotPermittedForFreeAccountsError) {
+                      _showUnSupportedAlert();
+                    } else {
+                      _logger.severe("failed to share collection", e);
+                      showGenericErrorDialog(context);
+                    }
                   }
-                }
-
-                setState(() {});
-              },
-            ),
-          ],
+                },
+              ),
+            ],
+          ),
         ),
-      ),
-    ]);
-    if (widget.collection.publicURLs?.isNotEmpty ?? false) {
-      children.add(_getShareableUrlWidget());
+      ]);
+      if (widget.collection.publicURLs?.isNotEmpty ?? false) {
+        children.add(_getShareableUrlWidget());
+      }
     }
 
     return AlertDialog(

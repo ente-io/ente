@@ -32,6 +32,17 @@ class FeatureFlagService {
     }
   }
 
+  bool disableUrlSharing() {
+    try {
+      _featureFlags ??=
+          FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey));
+      return _featureFlags != null ? _featureFlags.disableUrlSharing : false;
+    } catch (e) {
+      _logger.severe(e);
+      return false;
+    }
+  }
+
   bool enableStripe() {
     if (Platform.isIOS) {
       return false;
@@ -64,10 +75,12 @@ class FeatureFlagService {
 
 class FeatureFlags {
   bool disableCFWorker = false; // default to false
+  bool disableUrlSharing = false; // default to false
   bool enableStripe = true; // default to true
 
   FeatureFlags(
     this.disableCFWorker,
+    this.disableUrlSharing,
     this.enableStripe,
   );
 
@@ -75,6 +88,7 @@ class FeatureFlags {
   Map<String, dynamic> toMap() {
     return {
       "disableCFWorker": disableCFWorker,
+      "disableUrlSharing": disableUrlSharing,
       "enableStripe": enableStripe,
     };
   }
@@ -87,6 +101,7 @@ class FeatureFlags {
   factory FeatureFlags.fromMap(Map<String, dynamic> json) {
     return FeatureFlags(
       json["disableCFWorker"] ?? false,
+      json["disableUrlSharing"] ?? false,
       json["enableStripe"] ?? true,
     );
   }
