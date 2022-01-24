@@ -51,7 +51,7 @@ function GoToEnte() {
 
     const getHookLink = (os: OS) => {
         if (os === OS.ANDROID || os === OS.IOS) {
-            return 'ente.io/app';
+            return 'https://ente.io/app';
         } else {
             return 'https://web.ente.io';
         }
