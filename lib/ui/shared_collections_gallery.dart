@@ -329,18 +329,20 @@ class OutgoingCollectionItem extends StatelessWidget {
                     fontSize: 16,
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
-                  child: Text(
-                    "shared with " + sharees.join(", "),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context).primaryColorLight,
-                    ),
-                    textAlign: TextAlign.left,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
+                sharees.isEmpty
+                    ? Container()
+                    : Padding(
+                        padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                        child: Text(
+                          "shared with " + sharees.join(", "),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Theme.of(context).primaryColorLight,
+                          ),
+                          textAlign: TextAlign.left,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
               ],
             ),
           ],
