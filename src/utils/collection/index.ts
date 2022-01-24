@@ -109,7 +109,7 @@ export async function downloadCollection(
     }
 }
 
-export async function transformShareURLForHost(
+export async function appendCollectionKeyToShareURL(
     url: string,
     collectionKey: string
 ) {
@@ -117,10 +117,12 @@ export async function transformShareURLForHost(
     if (!url) {
         return null;
     }
-    const host = window.location.host;
     const sharableURL = new URL(url);
-    sharableURL.host = host;
-    sharableURL.pathname = '/shared-album';
+    if (process.env.NODE_ENV === 'development') {
+        const host = window.location.host;
+        sharableURL.host = host;
+        sharableURL.pathname = '/shared-album';
+    }
     sharableURL.hash = await worker.toHex(collectionKey);
     sharableURL.protocol = 'http';
     return sharableURL.href;

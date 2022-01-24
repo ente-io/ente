@@ -17,7 +17,7 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SubmitButton from './SubmitButton';
 import MessageDialog from './MessageDialog';
 import { Collection } from 'types/collection';
-import { transformShareURLForHost } from 'utils/collection';
+import { appendCollectionKeyToShareURL } from 'utils/collection';
 import { Row, Value } from './Container';
 import { CodeBlock } from './CodeBlock';
 import { ButtonVariant, getVariantColor } from './pages/gallery/LinkButton';
@@ -46,7 +46,7 @@ function CollectionShare(props: Props) {
     useEffect(() => {
         const main = async () => {
             if (props.collection?.publicURLs?.[0]?.url) {
-                const t = await transformShareURLForHost(
+                const t = await appendCollectionKeyToShareURL(
                     props.collection?.publicURLs?.[0]?.url,
                     props.collection.key
                 );
@@ -92,8 +92,12 @@ function CollectionShare(props: Props) {
         try {
             galleryContext.startLoading();
             const publicURL = await createShareableURL(props.collection);
+            const sharableURL = await appendCollectionKeyToShareURL(
+                publicURL.url,
+                props.collection.key
+            );
             galleryContext.finishLoading();
-            setPublicShareUrl(publicURL.url);
+            setPublicShareUrl(sharableURL);
             await galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
@@ -275,12 +279,11 @@ function CollectionShare(props: Props) {
                         </Table>
                     </>
                 )}
-                {props.collection.sharees?.length === 0 &&
-                    props.collection.publicURLs?.length === 0 && (
-                        <div style={{ marginTop: '12px' }}>
-                            {constants.ZERO_SHAREES()}
-                        </div>
-                    )}
+                {props.collection.sharees?.length === 0 && !publicShareUrl && (
+                    <div style={{ marginTop: '12px' }}>
+                        {constants.ZERO_SHAREES()}
+                    </div>
+                )}
             </DeadCenter>
         </MessageDialog>
     );
