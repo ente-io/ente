@@ -121,10 +121,7 @@ export default function SetupTwoFactor() {
                                         constants.TWO_FACTOR_MANUAL_CODE_INSTRUCTION
                                     }
                                 </p>
-                                <CodeBlock
-                                    height={'100px'}
-                                    code={twoFactorSecret.secretCode}
-                                />
+                                <CodeBlock code={twoFactorSecret.secretCode} />
                                 <Button
                                     block
                                     variant="link"

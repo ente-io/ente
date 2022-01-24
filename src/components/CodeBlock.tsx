@@ -18,12 +18,11 @@ const CopyButtonWrapper = styled(IconButton)`
     margin: 10px;
 `;
 
-export const CodeWrapper = styled.div<{ height?: string }>`
+export const CodeWrapper = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
     background: #1a1919;
-    height: ${(props) => props.height};
     padding: 37px 40px 20px 20px;
     color: white;
     width: 100%;
@@ -31,7 +30,6 @@ export const CodeWrapper = styled.div<{ height?: string }>`
 
 type Iprops = React.PropsWithChildren<{
     code: string;
-    height?: string;
 }>;
 export const CodeBlock = (props: Iprops) => {
     const [copied, setCopied] = useState<boolean>(false);
@@ -56,7 +54,7 @@ export const CodeBlock = (props: Iprops) => {
 
     return (
         <Wrapper>
-            <CodeWrapper {...(props.height ? { height: props?.height } : {})}>
+            <CodeWrapper>
                 {props.code ? (
                     <FreeFlowText>{props.code}</FreeFlowText>
                 ) : (

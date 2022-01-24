@@ -255,11 +255,7 @@ function CollectionShare(props: Props) {
                 {publicShareUrl && (
                     <div style={{ width: '100%', wordBreak: 'break-all' }}>
                         <>{constants.PUBLIC_URL}</>
-                        <CodeBlock
-                            key={publicShareUrl}
-                            height={'160px'}
-                            code={publicShareUrl}
-                        />
+                        <CodeBlock key={publicShareUrl} code={publicShareUrl} />
                     </div>
                 )}
                 {props.collection.sharees?.length > 0 && (

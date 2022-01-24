@@ -57,7 +57,7 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
                 },
             }}>
             <p>{constants.RECOVERY_KEY_DESCRIPTION}</p>
-            <CodeBlock height={'150px'} code={recoveryKey} />
+            <CodeBlock code={recoveryKey} />
             <p>{constants.KEY_NOT_STORED_DISCLAIMER}</p>
         </MessageDialog>
     );
