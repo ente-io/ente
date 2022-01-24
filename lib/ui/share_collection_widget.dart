@@ -90,22 +90,24 @@ class _SharingDialogState extends State<SharingDialog> {
     if (!FeatureFlagService.instance.disableUrlSharing()) {
       bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
       children.addAll([
-        Padding(padding: EdgeInsets.all(2)),
-        Divider(height: 12),
-        Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
+        Padding(padding: EdgeInsets.all(12)),
+        Divider(height: 1),
+        Padding(padding: EdgeInsets.all(8)),
         SizedBox(
           height: 36,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("enable public url"),
+              Text("public link"),
               Switch(
                 value: hasUrl,
                 onChanged: (enable) async {
                   // confirm if user wants to disable the url
                   if (!enable) {
-                    var choice = await showChoiceDialog(context, 'disable url',
-                        'are you sure you want to disable?',
+                    final choice = await showChoiceDialog(
+                        context,
+                        'disable link',
+                        'are you sure that you want to disable the album link?',
                         firstAction: 'yes, disable',
                         secondAction: 'no',
                         actionType: ActionType.critical);
@@ -113,8 +115,8 @@ class _SharingDialogState extends State<SharingDialog> {
                       return;
                     }
                   }
-                  final dialog = createProgressDialog(
-                      context, enable ? "generating url..." : "disabling url");
+                  final dialog = createProgressDialog(context,
+                      enable ? "creating link..." : "disabling link...");
                   try {
                     await dialog.show();
                     enable
@@ -167,7 +169,6 @@ class _SharingDialogState extends State<SharingDialog> {
           child: TypeAheadField(
             textFieldConfiguration: TextFieldConfiguration(
               keyboardType: TextInputType.emailAddress,
-              autofocus: true,
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: "email@your-friend.com",
@@ -214,18 +215,19 @@ class _SharingDialogState extends State<SharingDialog> {
 
   Widget _getShareableUrlWidget() {
     var hexEncoder = HexEncoder(upperCase: false);
-    String base64urlEncode = hexEncoder.convert(
+    String collectionKey = hexEncoder.convert(
         CollectionsService.instance.getCollectionKey(widget.collection.id));
-    String url = "${widget.collection.publicURLs.first.url}#$base64urlEncode";
+    String url = "${widget.collection.publicURLs.first.url}#$collectionKey";
     return SingleChildScrollView(
       child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(padding: EdgeInsets.all(4)),
             GestureDetector(
               onTap: () async {
                 await Clipboard.setData(ClipboardData(text: url));
-                showToast("URL is copied to clipboard");
+                showToast("link copied to clipboard");
               },
               child: Container(
                 padding: EdgeInsets.all(16),
@@ -239,16 +241,28 @@ class _SharingDialogState extends State<SharingDialog> {
                     ),
                   ),
                 ),
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withOpacity(0.02),
               ),
             ),
             Padding(padding: EdgeInsets.all(2)),
             TextButton(
-              child: Text(
-                "share url",
-                style: TextStyle(
-                  color: Theme.of(context).buttonColor,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.adaptive.share,
+                    color: Theme.of(context).buttonColor,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(4),
+                  ),
+                  Text(
+                    "share link",
+                    style: TextStyle(
+                      color: Theme.of(context).buttonColor,
+                    ),
+                  ),
+                ],
               ),
               onPressed: () {
                 shareText(url);
