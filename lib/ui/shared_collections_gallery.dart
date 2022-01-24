@@ -282,13 +282,15 @@ class OutgoingCollectionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final sharees = <String>[];
     for (int index = 0; index < c.collection.sharees.length; index++) {
+      final sharee = c.collection.sharees[index];
+      final name = sharee.name ?? sharee.email;
       if (index < 2) {
-        sharees.add(c.collection.sharees[index].name);
+        sharees.add(name);
       } else {
         final remaining = c.collection.sharees.length - index;
         if (remaining == 1) {
           // If it's the last sharee
-          sharees.add(c.collection.sharees[index].name);
+          sharees.add(name);
         } else {
           sharees.add("and " +
               remaining.toString() +
@@ -306,7 +308,7 @@ class OutgoingCollectionItem extends StatelessWidget {
           children: <Widget>[
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
-              child: Container(
+              child: SizedBox(
                 child: Hero(
                     tag: "outgoing_collection" + c.thumbnail.tag(),
                     child: ThumbnailWidget(
@@ -330,7 +332,7 @@ class OutgoingCollectionItem extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
                   child: Text(
-                    "Shared with " + sharees.join(", "),
+                    "shared with " + sharees.join(", "),
                     style: TextStyle(
                       fontSize: 14,
                       color: Theme.of(context).primaryColorLight,
