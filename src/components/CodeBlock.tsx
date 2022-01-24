@@ -8,6 +8,7 @@ import EnteSpinner from './EnteSpinner';
 
 const Wrapper = styled.div`
     position: relative;
+    margin: 20px 0;
 `;
 const CopyButtonWrapper = styled(IconButton)`
     position: absolute;
@@ -25,7 +26,6 @@ export const CodeWrapper = styled.div<{ height?: string }>`
     height: ${(props) => props.height};
     padding: 37px 40px 20px 20px;
     color: white;
-    margin: 20px 0;
     width: 100%;
 `;
 
@@ -41,6 +41,7 @@ export const CodeBlock = (props: Iprops) => {
         setCopied(true);
         setTimeout(() => setCopied(false), 1000);
     };
+
     const RenderCopiedMessage = (props) => {
         const { style, ...rest } = props;
         return (
@@ -52,9 +53,10 @@ export const CodeBlock = (props: Iprops) => {
             </Tooltip>
         );
     };
+
     return (
         <Wrapper>
-            <CodeWrapper height={props?.height || 'auto'}>
+            <CodeWrapper {...(props.height ? { height: props?.height } : {})}>
                 {props.code ? (
                     <FreeFlowText>{props.code}</FreeFlowText>
                 ) : (
