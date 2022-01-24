@@ -106,7 +106,7 @@ function CollectionShare(props: Props) {
         }
     };
 
-    const deleteSharableURLHelper = async () => {
+    const disablePublicSharingHelper = async () => {
         try {
             galleryContext.startLoading();
             await deleteShareableURL(props.collection);
@@ -120,14 +120,14 @@ function CollectionShare(props: Props) {
         }
     };
 
-    const deleteSharableLink = () => {
+    const disablePublicSharing = () => {
         galleryContext.setDialogMessage({
             title: constants.DISABLE_PUBLIC_SHARING,
             content: constants.DISABLE_PUBLIC_SHARING_MESSAGE,
             close: { text: constants.CANCEL },
             proceed: {
                 text: constants.DELETE,
-                action: deleteSharableURLHelper,
+                action: disablePublicSharingHelper,
                 variant: ButtonVariant.danger,
             },
         });
@@ -136,7 +136,7 @@ function CollectionShare(props: Props) {
     const handleCollectionPublicSharing = () => {
         setSharableLinkError(null);
         if (publicShareUrl) {
-            deleteSharableLink();
+            disablePublicSharing();
         } else {
             createSharableURLHelper();
         }
