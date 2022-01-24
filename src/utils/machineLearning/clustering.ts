@@ -1,7 +1,6 @@
-import { TreeNode } from 'hdbscan';
+import { euclidean, TreeNode } from 'hdbscan';
 import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
 import { f32Average, getAllFacesFromMap } from '.';
-import { euclideanDistance } from '../../../thirdparty/face-api/euclideanDistance';
 import {
     FacesCluster,
     Cluster,
@@ -50,7 +49,10 @@ export function getNearestCluster(
     let nearest: FacesCluster = null;
     let nearestDist = 100000;
     syncContext.mlLibraryData.faceClustersWithNoise.clusters.forEach((c) => {
-        const dist = euclideanDistance(noise.embedding, c.summary);
+        const dist = euclidean(
+            Array.from(noise.embedding),
+            Array.from(c.summary)
+        );
         if (dist < nearestDist) {
             nearestDist = dist;
             nearest = c;
