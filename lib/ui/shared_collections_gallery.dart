@@ -323,11 +323,19 @@ class OutgoingCollectionItem extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  c.collection.name,
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      c.collection.name,
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                    Padding(padding: EdgeInsets.all(2)),
+                    c.collection.publicURLs.isEmpty
+                        ? Container()
+                        : Icon(Icons.link),
+                  ],
                 ),
                 sharees.isEmpty
                     ? Container()
