@@ -9,7 +9,7 @@ import { GAP_BTW_TILES } from 'constants/gallery';
 
 interface IProps {
     file: EnteFile;
-    updateUrl: (url: string) => void;
+    updateURL: (url: string) => void;
     onClick?: () => void;
     forcedEnable?: boolean;
     selectable?: boolean;
@@ -161,7 +161,7 @@ export default function PreviewCard(props: IProps) {
     const {
         file,
         onClick,
-        updateUrl,
+        updateURL,
         forcedEnable,
         selectable,
         selected,
@@ -185,7 +185,7 @@ export default function PreviewCard(props: IProps) {
                         if (!file.src) {
                             file.src = url;
                         }
-                        updateUrl(url);
+                        updateURL(url);
                     }
                 } catch (e) {
                     // no-op
