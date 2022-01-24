@@ -43,10 +43,18 @@ function CollectionShare(props: Props) {
     const [sharableLinkError, setSharableLinkError] = useState(null);
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
 
-    useEffect(
-        () => setPublicShareUrl(props.collection?.publicURLs?.[0]?.url || null),
-        [props.collection]
-    );
+    useEffect(() => {
+        const main = async () => {
+            if (props.collection?.publicURLs?.[0]?.url) {
+                const t = await transformShareURLForHost(
+                    props.collection?.publicURLs?.[0]?.url,
+                    props.collection.key
+                );
+                setPublicShareUrl(t);
+            }
+        };
+        main();
+    }, [props.collection]);
 
     const collectionShare = async (
         { email }: formValues,
@@ -250,10 +258,7 @@ function CollectionShare(props: Props) {
                         <CodeBlock
                             key={publicShareUrl}
                             height={'160px'}
-                            code={transformShareURLForHost(
-                                publicShareUrl,
-                                props.collection.key
-                            )}
+                            code={publicShareUrl}
                         />
                     </div>
                 )}

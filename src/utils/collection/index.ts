@@ -16,6 +16,7 @@ import { logError } from 'utils/sentry';
 import constants from 'utils/strings/constants';
 import { Collection } from 'types/collection';
 import { CollectionType } from 'constants/collection';
+import CryptoWorker from 'utils/crypto';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -108,19 +109,19 @@ export async function downloadCollection(
     }
 }
 
-export function transformShareURLForHost(url: string, collectionKey: string) {
+export async function transformShareURLForHost(
+    url: string,
+    collectionKey: string
+) {
+    const worker = await new CryptoWorker();
     if (!url) {
         return null;
     }
     const host = window.location.host;
     const sharableURL = new URL(url);
     sharableURL.host = host;
-    const accessToken = sharableURL.pathname.slice(
-        -sharableURL.pathname.lastIndexOf('/') + 1
-    );
-    sharableURL.pathname = '/shared-album/';
-    sharableURL.searchParams.append('accessToken', accessToken);
-    sharableURL.searchParams.append('collectionKey', collectionKey);
+    sharableURL.pathname = '/shared-album';
+    sharableURL.hash = await worker.toHex(collectionKey);
     sharableURL.protocol = 'http';
     return sharableURL.href;
 }

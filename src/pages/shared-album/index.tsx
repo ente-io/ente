@@ -26,6 +26,7 @@ import Container from 'components/Container';
 import constants from 'utils/strings/constants';
 import EnteSpinner from 'components/EnteSpinner';
 import LoadingBar from 'react-top-loading-bar';
+import CryptoWorker from 'utils/crypto';
 
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
@@ -46,22 +47,22 @@ export default function PublicCollectionGallery() {
     const closeMessageDialog = () => setMessageDialogView(false);
 
     const startLoading = () => loadingBar.current?.continuousStart();
-    const finishLoading = () => loadingBar.current.complete();
+    const finishLoading = () => loadingBar.current?.complete();
 
     useEffect(() => {
         const main = async () => {
+            const worker = await new CryptoWorker();
             url.current = window.location.href;
-            const urlParams = new URLSearchParams(window.location.search);
-            const eToken = urlParams.get('accessToken');
-            const eCollectionKey = decodeURIComponent(
-                urlParams.get('collectionKey')
-            );
-            if (!eToken || !eCollectionKey) {
+            const urlS = new URL(url.current);
+            const eToken = urlS.searchParams.get('t');
+            const eCollectionKey = urlS.hash.slice(1);
+            const decodedCollectionKey = await worker.fromHex(eCollectionKey);
+            if (!eToken || !decodedCollectionKey) {
                 setLoading(false);
                 return;
             }
             token.current = eToken;
-            collectionKey.current = eCollectionKey;
+            collectionKey.current = decodedCollectionKey;
             url.current = window.location.href;
             const localCollection = await getLocalPublicCollection(
                 eCollectionKey
