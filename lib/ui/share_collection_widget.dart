@@ -16,6 +16,7 @@ import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
@@ -101,6 +102,17 @@ class _SharingDialogState extends State<SharingDialog> {
               Switch(
                 value: hasUrl,
                 onChanged: (enable) async {
+                  // confirm if user wants to disable the url
+                  if (!enable) {
+                    var choice = await showChoiceDialog(context, 'disable url',
+                        'are you sure you want to disable?',
+                        firstAction: 'yes, disable',
+                        secondAction: 'no',
+                        actionType: ActionType.critical);
+                    if (choice != DialogUserChoice.firstChoice) {
+                      return;
+                    }
+                  }
                   final dialog = createProgressDialog(
                       context, enable ? "generating url..." : "disabling url");
                   try {
