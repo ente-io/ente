@@ -2,7 +2,7 @@ import {
     load as blazeFaceLoad,
     BlazeFaceModel,
     NormalizedFace,
-} from '@tensorflow-models/blazeface';
+} from 'blazeface-back';
 import * as tf from '@tensorflow/tfjs-core';
 import { GraphModel } from '@tensorflow/tfjs';
 import {

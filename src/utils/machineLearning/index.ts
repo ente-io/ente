@@ -1,4 +1,4 @@
-import { NormalizedFace } from '@tensorflow-models/blazeface';
+import { NormalizedFace } from 'blazeface-back';
 import * as tf from '@tensorflow/tfjs-core';
 import { ML_SYNC_DOWNLOAD_TIMEOUT_MS } from 'constants/machineLearning/config';
 import { euclidean } from 'hdbscan';

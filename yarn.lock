@@ -1399,9 +1399,6 @@
     ejs "^2.6.1"
     magic-string "^0.25.0"
 
-"@tensorflow-models/blazeface@./thirdparty/blazeface":
-  version "0.0.7-ente"
-
 "@tensorflow/tfjs-backend-cpu@3.11.0":
   version "3.11.0"
   resolved "https://registry.yarnpkg.com/@tensorflow/tfjs-backend-cpu/-/tfjs-backend-cpu-3.11.0.tgz#01d5d68b91faf12bee4854adae56bc956b794f1a"
@@ -2259,6 +2256,11 @@ bip39@^3.0.4:
     create-hash "^1.1.0"
     pbkdf2 "^3.0.9"
     randombytes "^2.0.1"
+
+blazeface-back@^0.0.8:
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/blazeface-back/-/blazeface-back-0.0.8.tgz#d997a9cfcd5b7ad03367d65d7c0b365c5a835b83"
+  integrity sha512-7eYoSPJ9JvV2cHp+qwW+YNvrdTDFzMGnSGCGR24Lx6OluwPa+qX4NqNrBv31ukw2Ne/FkvFHhZuUDpxpowr+Bg==
 
 bluebird@^3.5.5:
   version "3.7.2"
