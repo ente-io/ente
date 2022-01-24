@@ -1,7 +1,7 @@
 import { FaceAlignment, FaceDetection } from 'types/machineLearning';
 import { Matrix, inverse } from 'ml-matrix';
 import * as tf from '@tensorflow/tfjs-core';
-import { getSimilarityTransformation } from '../../../thirdparty/similarity-transformation-js/main';
+import { getSimilarityTransformation } from 'similarity-transformation';
 import {
     computeRotation,
     enlargeBox,

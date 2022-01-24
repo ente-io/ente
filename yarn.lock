@@ -6584,6 +6584,11 @@ signal-exit@^3.0.0, signal-exit@^3.0.2, signal-exit@^3.0.3:
   resolved "https://registry.npmjs.org/signal-exit/-/signal-exit-3.0.3.tgz"
   integrity sha512-VUJ49FC8U1OxwZLxIbTTrDvLnf/6TDgxZcK8wxR8zs13xpx7xbG60ndBlhNrFi2EMuFRoeDoJO7wthSLq42EjA==
 
+similarity-transformation@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/similarity-transformation/-/similarity-transformation-0.0.1.tgz#7b40266150be1ac593827b08a06a458df4fc9238"
+  integrity sha512-RiotBF9Xpqzv0d7Xymcqukr9iReximKtU3EaK58g7pdYZGB0+bTkPdHX0Za+H7/NyP9zWfFmpZ0AAepg+uNLYw==
+
 slash@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/slash/-/slash-3.0.0.tgz"
