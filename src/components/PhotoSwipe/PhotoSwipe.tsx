@@ -667,9 +667,9 @@ function PhotoSwipe(props: Iprops) {
 
     const downloadFileHelper = async (file) => {
         const { loadingBar } = props;
-        loadingBar.current.continuousStart();
+        loadingBar.current?.continuousStart();
         await downloadFile(file);
-        loadingBar.current.complete();
+        loadingBar.current?.complete();
     };
     const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;

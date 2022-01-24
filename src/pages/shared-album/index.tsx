@@ -141,7 +141,7 @@ export default function PublicCollectionGallery() {
                 selected={{ count: 0, collectionID: null }}
                 isFirstLoad={false}
                 openFileUploader={() => null}
-                loadingBar={null}
+                loadingBar={loadingBar}
                 isInSearchMode={false}
                 search={{}}
                 setSearchStats={() => null}
