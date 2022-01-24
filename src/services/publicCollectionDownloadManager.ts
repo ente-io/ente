@@ -55,7 +55,7 @@ class PublicCollectionDownloadManager {
         }
     }
 
-    downloadThumb = async (token: string, file: EnteFile) => {
+    private downloadThumb = async (token: string, file: EnteFile) => {
         const resp = await HTTPService.get(
             getPublicCollectionThumbnailURL(file.id),
             null,
@@ -100,11 +100,7 @@ class PublicCollectionDownloadManager {
         }
     };
 
-    public async getCachedOriginalFile(file: EnteFile) {
-        return await this.fileObjectURLPromise.get(file.id.toString());
-    }
-
-    async downloadFile(token: string, file: EnteFile) {
+    private async downloadFile(token: string, file: EnteFile) {
         const worker = await new CryptoWorker();
         if (!token) {
             return null;
