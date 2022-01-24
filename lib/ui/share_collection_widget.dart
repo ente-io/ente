@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
@@ -21,6 +20,7 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
+import 'package:photos/utils/hex.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -194,37 +194,49 @@ class _SharingDialogState extends State<SharingDialog> {
   }
 
   Widget _getShareableUrlWidget() {
-    String base64urlEncode = base64UrlEncode(
+    var hexEncoder = HexEncoder(upperCase: false);
+    String base64urlEncode = hexEncoder.convert(
         CollectionsService.instance.getCollectionKey(widget.collection.id));
-    String url =
-        "${widget.collection.publicURLs.first.url}#collectionKey=$base64urlEncode";
+    String url = "${widget.collection.publicURLs.first.url}#$base64urlEncode";
     return SingleChildScrollView(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GestureDetector(
-            onTap: () async {
-              await Clipboard.setData(ClipboardData(text: url));
-              showToast("URL is copied to clipboard");
-            },
-            child: Container(
-              padding: EdgeInsets.all(16),
-              child: Center(
-                child: Text(
-                  url,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                    color: Colors.white.withOpacity(0.7),
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: () async {
+                await Clipboard.setData(ClipboardData(text: url));
+                showToast("URL is copied to clipboard");
+              },
+              child: Container(
+                padding: EdgeInsets.all(16),
+                child: Center(
+                  child: Text(
+                    url,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                      color: Colors.white.withOpacity(0.7),
+                    ),
                   ),
                 ),
+                color: Colors.white.withOpacity(0.1),
               ),
-              color: Colors.white.withOpacity(0.1),
             ),
-          ),
-        ],
-      ),
+            Padding(padding: EdgeInsets.all(2)),
+            TextButton(
+              child: Text(
+                "share url",
+                style: TextStyle(
+                  color: Theme.of(context).buttonColor,
+                ),
+              ),
+              onPressed: () {
+                shareText(url);
+                // _shareRecoveryKey(recoveryKey);
+              },
+            ),
+          ]),
     );
   }
 
