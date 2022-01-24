@@ -643,6 +643,7 @@ const englishConstants = {
     DISABLE_PUBLIC_SHARING: "'disable public sharing",
     DISABLE_PUBLIC_SHARING_MESSAGE:
         'are you sure you want to disable public sharing?',
+    ABUSE_REPORT: "'abuse report'",
 };
 
 export default englishConstants;

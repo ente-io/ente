@@ -58,7 +58,7 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
             show={show}
             onHide={close}
             attributes={{
-                title: 'abuse report',
+                title: constants.ABUSE_REPORT,
                 staticBackdrop: true,
             }}>
             <div style={{ padding: '5px 20px' }}>
