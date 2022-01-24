@@ -110,11 +110,16 @@ class _SharingDialogState extends State<SharingDialog> {
                       : await CollectionsService.instance
                           .disableShareUrl(widget.collection);
                 } catch (e) {
-                  _logger.severe('failed to $enable url', e);
-                } finally {
                   dialog.hide();
-                  setState(() {});
+                  if (e is SharingNotPermittedForFreeAccountsError) {
+                    _showUnSupportedAlert();
+                  } else {
+                    _logger.severe("failed to share collection", e);
+                    showGenericErrorDialog(context);
+                  }
                 }
+
+                setState(() {});
               },
             ),
           ],
@@ -320,44 +325,48 @@ class _SharingDialogState extends State<SharingDialog> {
       } catch (e) {
         await dialog.hide();
         if (e is SharingNotPermittedForFreeAccountsError) {
-          AlertDialog alert = AlertDialog(
-            title: Text("sorry"),
-            content: Text(
-                "sharing is not permitted for free accounts, please subscribe"),
-            actions: [
-              TextButton(
-                child: Text("subscribe"),
-                onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (BuildContext context) {
-                        return getSubscriptionPage();
-                      },
-                    ),
-                  );
-                },
-              ),
-              TextButton(
-                child: Text("ok"),
-                onPressed: () {
-                  Navigator.of(context, rootNavigator: true).pop();
-                },
-              ),
-            ],
-          );
-
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return alert;
-            },
-          );
+          _showUnSupportedAlert();
         } else {
           _logger.severe("failed to share collection", e);
           showGenericErrorDialog(context);
         }
       }
     }
+  }
+
+  void _showUnSupportedAlert() {
+    AlertDialog alert = AlertDialog(
+      title: Text("sorry"),
+      content:
+          Text("sharing is not permitted for free accounts, please subscribe"),
+      actions: [
+        TextButton(
+          child: Text("subscribe"),
+          onPressed: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return getSubscriptionPage();
+                },
+              ),
+            );
+          },
+        ),
+        TextButton(
+          child: Text("ok"),
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+        ),
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 }
 

@@ -286,6 +286,11 @@ class CollectionsService {
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
       _cacheCollectionAttributes(collection);
+    } on DioError catch (e) {
+      if (e.response.statusCode == 402) {
+        throw SharingNotPermittedForFreeAccountsError();
+      }
+      rethrow;
     } catch (e, s) {
       _logger.severe("failed to rename collection", e, s);
       rethrow;
