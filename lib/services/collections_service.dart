@@ -286,6 +286,7 @@ class CollectionsService {
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
       _cacheCollectionAttributes(collection);
+      Bus.instance.fire(CollectionUpdatedEvent(collection.id, <File>[]));
     } on DioError catch (e) {
       if (e.response.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
@@ -312,6 +313,7 @@ class CollectionsService {
       collection.publicURLs.clear();
       await _db.insert(List.from([collection]));
       _cacheCollectionAttributes(collection);
+      Bus.instance.fire(CollectionUpdatedEvent(collection.id, <File>[]));
     } on DioError catch (e) {
       _logger.info(e);
       rethrow;
