@@ -119,11 +119,9 @@ export async function appendCollectionKeyToShareURL(
     }
     const sharableURL = new URL(url);
     if (process.env.NODE_ENV === 'development') {
-        const host = window.location.host;
-        sharableURL.host = host;
-        sharableURL.pathname = '/shared-album';
+        sharableURL.host = 'localhost:3001';
+        sharableURL.protocol = 'http';
     }
     sharableURL.hash = await worker.toHex(collectionKey);
-    sharableURL.protocol = 'http';
     return sharableURL.href;
 }

@@ -12,7 +12,7 @@ import constants from 'utils/strings/constants';
 import localForage from 'utils/storage/localForage';
 import IncognitoWarning from 'components/IncognitoWarning';
 import { logError } from 'utils/sentry';
-import { PAGES } from 'constants/pages';
+import { ALBUM_SITE_HOST, PAGES } from 'constants/pages';
 
 const Container = styled.div`
     display: flex;
@@ -104,22 +104,42 @@ export default function LandingPage() {
     const [showLogin, setShowLogin] = useState(true);
     const [blockUsage, setBlockUsage] = useState(false);
     useEffect(() => {
-        const main = async () => {
-            const user = getData(LS_KEYS.USER);
-            if (user?.email) {
-                await router.push(PAGES.VERIFY);
-            }
-            try {
-                await localForage.ready();
-            } catch (e) {
-                logError(e, 'usage in incognito mode tried');
-                setBlockUsage(true);
-            }
-            setLoading(false);
-        };
-        main();
         appContext.showNavBar(false);
+        const currentURL = new URL(window.location.href);
+        currentURL.pathname = router.pathname;
+        if (
+            currentURL.host === ALBUM_SITE_HOST &&
+            currentURL.pathname !== PAGES.SHARED_ALBUMS
+        ) {
+            handleAlbumsRedirect(currentURL);
+        } else {
+            handleNormalRedirect();
+        }
     }, []);
+
+    const handleAlbumsRedirect = (currentURL: URL) => {
+        router.push({
+            pathname: PAGES.SHARED_ALBUMS,
+            search: currentURL.search,
+            hash: currentURL.hash,
+        });
+        setLoading(false);
+    };
+
+    const handleNormalRedirect = async () => {
+        const user = getData(LS_KEYS.USER);
+        if (user?.email) {
+            await router.push(PAGES.VERIFY);
+        }
+        try {
+            await localForage.ready();
+        } catch (e) {
+            logError(e, 'usage in incognito mode tried');
+            setBlockUsage(true);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const signUp = () => setShowLogin(false);
     const login = () => setShowLogin(true);
