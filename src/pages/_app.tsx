@@ -569,12 +569,16 @@ export default function App({ Component, err }) {
     const resetSharedFiles = () => setSharedFiles(null);
 
     useEffect(() => {
-        console.log(
-            `%c${constants.CONSOLE_WARNING_STOP}`,
-            'color: red; font-size: 52px;'
-        );
-        console.log(`%c${constants.CONSOLE_WARNING_DESC}`, 'font-size: 20px;');
-
+        if (process.env.NODE_ENV === 'production') {
+            console.log(
+                `%c${constants.CONSOLE_WARNING_STOP}`,
+                'color: red; font-size: 52px;'
+            );
+            console.log(
+                `%c${constants.CONSOLE_WARNING_DESC}`,
+                'font-size: 20px;'
+            );
+        }
         const query = new URLSearchParams(window.location.search);
         const redirect = query.get('redirect');
         if (redirect && redirectMap[redirect]) {
@@ -613,12 +617,13 @@ export default function App({ Component, err }) {
             window.removeEventListener('offline', setUserOffline);
         };
     }, [redirectName]);
+
     const showNavBar = (show: boolean) => setShowNavBar(show);
     const setDisappearingFlashMessage = (flashMessages: FlashMessage) => {
         setFlashMessage(flashMessages);
         setTimeout(() => setFlashMessage(null), 5000);
     };
-    //  ho ja yaar
+
     return (
         <>
             <Head>
