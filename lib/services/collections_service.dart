@@ -29,10 +29,6 @@ class CollectionsService {
   static final _collectionSyncTimeKeyPrefix = "collection_sync_time_";
   static final _collectionsSyncTimeKey = "collections_sync_time";
 
-  static final _collectionsPublicUrlReSync = "c_public_url";
-  //  January 26, 2022 11:38:29 AM
-  static const kPublicUrlFeatureReleaseTime = 1643177309000000;
-
   static const int kMaximumWriteAttempts = 5;
 
   final _logger = Logger("CollectionsService");
@@ -72,20 +68,10 @@ class CollectionsService {
     });
   }
 
-  int _getLastCollectionsSyncTime() {
-    if (!_prefs.containsKey(_collectionsSyncTimeKey)) {
-      _prefs.setBool(_collectionsPublicUrlReSync, true);
-      return 0;
-    } else if (!_prefs.containsKey(_collectionsPublicUrlReSync)) {
-      _prefs.setBool(_collectionsPublicUrlReSync, true);
-      return kPublicUrlFeatureReleaseTime;
-    }
-    return _prefs.containsKey(_collectionsSyncTimeKey) ?? 0;
-  }
-
   Future<List<Collection>> sync() async {
     _logger.info("Syncing collections");
-    final lastCollectionUpdationTime = _getLastCollectionsSyncTime();
+    final lastCollectionUpdationTime =
+        _prefs.getInt(_collectionsSyncTimeKey) ?? 0;
 
     // Might not have synced the collection fully
     final fetchedCollections =
