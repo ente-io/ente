@@ -471,7 +471,7 @@ const PhotoFrame = ({
                                 getThumbnail={getThumbnail}
                                 filteredData={filteredData}
                                 activeCollection={activeCollection}
-                                showBanner={
+                                showAppDownloadBanner={
                                     files.length < 30 && !isInSearchMode
                                 }
                                 resetFetching={resetFetching}
