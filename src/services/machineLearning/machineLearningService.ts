@@ -84,7 +84,15 @@ class MachineLearningService {
 
         if (syncContext.outOfSyncFiles.length > 0) {
             await this.syncFiles(syncContext);
-        } else {
+        }
+
+        // TODO: running index before all files are on latest ml version
+        // may be need to just take synced files on latest ml version for indexing
+        if (
+            syncContext.outOfSyncFiles.length <= 0 ||
+            (syncContext.nSyncedFiles === syncContext.config.batchSize &&
+                Math.random() < 0.2)
+        ) {
             await this.syncIndex(syncContext);
         }
 
