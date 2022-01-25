@@ -16,7 +16,6 @@ import { CollectionInfo } from 'components/pages/sharedAlbum/CollectionInfo';
 import ReportAbuse from 'components/pages/sharedAlbum/ReportAbuse';
 import { AbuseReportForm } from 'components/pages/sharedAlbum/AbuseReportForm';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
-import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 import {
     defaultPublicCollectionGalleryContext,
     PublicCollectionGalleryContext,
@@ -128,7 +127,6 @@ export default function PublicCollectionGallery() {
                 accessedThroughSharedURL: true,
                 setDialogMessage,
             }}>
-            <GoToEnte />
             <LoadingBar color="#51cd7c" ref={loadingBar} />
             <CollectionInfo collection={publicCollection} />
 

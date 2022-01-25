@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 
 const Navbar = styled.div`
+    padding: 0 20px;
     font-size: 20px;
     line-height: 2rem;
     background-color: #111;
