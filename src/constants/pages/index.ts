@@ -14,5 +14,5 @@ export enum PAGES {
     ROOT = '/',
     SHARED_ALBUMS = '/shared-albums',
 }
-
-export const ALBUM_SITE_HOST = 'albums.ente.io';
+export const getAlbumSiteHost = () =>
+    process.env.NODE_ENV === 'production' ? 'albums.ente.io' : 'localhost:3002';

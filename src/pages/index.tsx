@@ -12,7 +12,9 @@ import constants from 'utils/strings/constants';
 import localForage from 'utils/storage/localForage';
 import IncognitoWarning from 'components/IncognitoWarning';
 import { logError } from 'utils/sentry';
-import { ALBUM_SITE_HOST, PAGES } from 'constants/pages';
+import { getAlbumSiteHost, PAGES } from 'constants/pages';
+
+const ALBUM_SITE_HOST = getAlbumSiteHost();
 
 const Container = styled.div`
     display: flex;
@@ -117,12 +119,24 @@ export default function LandingPage() {
         }
     }, []);
 
-    const handleAlbumsRedirect = (currentURL: URL) => {
-        router.push({
+    const handleAlbumsRedirect = async (currentURL: URL) => {
+        await router.push({
             pathname: PAGES.SHARED_ALBUMS,
             search: currentURL.search,
             hash: currentURL.hash,
         });
+        await router.push(
+            {
+                pathname: PAGES.SHARED_ALBUMS,
+                search: currentURL.search,
+                hash: currentURL.hash,
+            },
+            {
+                pathname: PAGES.ROOT,
+                search: currentURL.search,
+                hash: currentURL.hash,
+            }
+        );
         setLoading(false);
     };
 
