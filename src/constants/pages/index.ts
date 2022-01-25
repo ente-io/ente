@@ -12,4 +12,7 @@ export enum PAGES {
     TWO_FACTOR_RECOVER = '/two-factor/recover',
     VERIFY = '/verify',
     ROOT = '/',
+    SHARED_ALBUMS = '/shared-albums',
 }
+
+export const ALBUM_SITE_HOST = 'albums.ente.io';
