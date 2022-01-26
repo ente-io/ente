@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
 import { components } from 'react-select';
@@ -27,6 +27,7 @@ import { EnteFile } from 'types/file';
 import { Suggestion, SuggestionType, DateValue, Bbox } from 'types/search';
 import { Search, SearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
+import { GalleryContext } from 'pages/gallery';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -81,7 +82,6 @@ interface Props {
     isOpen: boolean;
     isFirstFetch: boolean;
     setOpen: (value: boolean) => void;
-    loadingBar: any;
     setSearch: (search: Search) => void;
     searchStats: SearchStats;
     collections: Collection[];
@@ -90,7 +90,7 @@ interface Props {
 }
 export default function SearchBar(props: Props) {
     const [value, setValue] = useState<Suggestion>(null);
-
+    const galleryContext = useContext(GalleryContext);
     const handleChange = (value) => {
         setValue(value);
     };
@@ -192,10 +192,10 @@ export default function SearchBar(props: Props) {
     };
     const resetSearch = () => {
         if (props.isOpen) {
-            props.loadingBar.current?.continuousStart();
+            galleryContext.startLoading();
             props.setSearch({});
             setTimeout(() => {
-                props.loadingBar.current?.complete();
+                galleryContext.finishLoading();
             }, 10);
             props.setOpen(false);
             setValue(null);

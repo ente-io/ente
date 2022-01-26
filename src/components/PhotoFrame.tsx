@@ -60,7 +60,6 @@ interface Props {
     selected: SelectedState;
     isFirstLoad;
     openFileUploader;
-    loadingBar;
     isInSearchMode: boolean;
     search: Search;
     setSearchStats: setSearchStats;
@@ -78,7 +77,6 @@ const PhotoFrame = ({
     selected,
     isFirstLoad,
     openFileUploader,
-    loadingBar,
     isInSearchMode,
     search,
     setSearchStats,
@@ -488,7 +486,6 @@ const PhotoFrame = ({
                         onClose={handleClose}
                         gettingData={getSlideData}
                         favItemIds={favItemIds}
-                        loadingBar={loadingBar}
                         isSharedCollection={isSharedCollection}
                         isTrashCollection={activeCollection === TRASH_SECTION}
                     />

@@ -45,6 +45,7 @@ import EnteDateTimePicker from 'components/EnteDateTimePicker';
 import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
 import { sleep } from 'utils/common';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
+import { GalleryContext } from 'pages/gallery';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -63,7 +64,6 @@ interface Iprops {
     id?: string;
     className?: string;
     favItemIds: Set<number>;
-    loadingBar: any;
     isSharedCollection: boolean;
     isTrashCollection: boolean;
 }
@@ -487,6 +487,7 @@ function PhotoSwipe(props: Iprops) {
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
+    const galleryContext = useContext(GalleryContext);
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -670,15 +671,14 @@ function PhotoSwipe(props: Iprops) {
     };
 
     const downloadFileHelper = async (file) => {
-        const { loadingBar } = props;
-        loadingBar.current?.continuousStart();
+        galleryContext.startLoading();
         await downloadFile(
             file,
             publicCollectionGalleryContext.accessedThroughSharedURL,
             publicCollectionGalleryContext.token
         );
 
-        loadingBar.current?.complete();
+        galleryContext.finishLoading();
     };
     const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;
