@@ -334,19 +334,19 @@ const PhotoFrame = ({
             handleSelect(filteredData[index].id, index)(!checked);
         }
     };
-    const getThumbnail = (file: EnteFile[], index: number) => (
+    const getThumbnail = (files: EnteFile[], index: number) => (
         <PreviewCard
-            key={`tile-${file[index].id}-selected-${
-                selected[file[index].id] ?? false
+            key={`tile-${files[index].id}-selected-${
+                selected[files[index].id] ?? false
             }`}
-            file={file[index]}
-            updateURL={updateURL(file[index].dataIndex)}
+            file={files[index]}
+            updateURL={updateURL(files[index].dataIndex)}
             onClick={onThumbnailClick(index)}
             selectable={!isSharedCollection}
-            onSelect={handleSelect(file[index].id, index)}
+            onSelect={handleSelect(files[index].id, index)}
             selected={
                 selected.collectionID === activeCollection &&
-                selected[file[index].id]
+                selected[files[index].id]
             }
             selectOnClick={selected.count > 0}
             onHover={onHoverOver(index)}

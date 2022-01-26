@@ -120,7 +120,7 @@ interface Props {
     width: number;
     filteredData: EnteFile[];
     showAppDownloadBanner: boolean;
-    getThumbnail: (file: EnteFile[], index: number) => JSX.Element;
+    getThumbnail: (files: EnteFile[], index: number) => JSX.Element;
     activeCollection: number;
     resetFetching: () => void;
 }
@@ -439,6 +439,9 @@ export function PhotoList({
             }
         }
     };
+    if (!timeStampList) {
+        return <></>;
+    }
 
     return (
         <List
