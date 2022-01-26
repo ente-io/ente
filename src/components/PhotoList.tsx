@@ -439,7 +439,7 @@ export function PhotoList({
             }
         }
     };
-    if (!timeStampList) {
+    if (!timeStampList?.length) {
         return <></>;
     }
 
