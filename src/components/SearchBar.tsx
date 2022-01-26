@@ -125,19 +125,32 @@ export default function SearchBar(props: Props) {
         setValue(value);
     };
 
+    // TODO: HACK as AsyncSelect does not support default options reloading on focus/click
+    // unwanted side effect: placeholder is not shown on focus/click
+    // https://github.com/JedWatson/react-select/issues/1879
+    // for correct fix AsyncSelect can be extended to support default options reloading on focus/click
+    const handleOnFocus = () => {
+        if (appContext.mlSearchEnabled) {
+            const emptySearch = ' ';
+            selectRef.current.state.inputValue = emptySearch;
+            selectRef.current.select.state.inputValue = emptySearch;
+            selectRef.current.handleInputChange(emptySearch);
+        }
+    };
+
     useEffect(() => search(value), [value]);
 
     // = =========================
     // Functionality
     // = =========================
     const getAutoCompleteSuggestions = async (searchPhrase: string) => {
-        const options = [];
+        const options: Array<Suggestion> = [];
         searchPhrase = searchPhrase.trim().toLowerCase();
-        if (!searchPhrase?.length) {
-            return [];
-        }
         if (appContext.mlSearchEnabled) {
             options.push(...(await getAllPeopleSuggestion()));
+        }
+        if (!searchPhrase?.length) {
+            return options;
         }
         options.push(...getHolidaySuggestion(searchPhrase));
         options.push(...getYearSuggestion(searchPhrase));
@@ -394,6 +407,7 @@ export default function SearchBar(props: Props) {
                             placeholder={constants.SEARCH_HINT()}
                             loadOptions={getOptions}
                             onChange={handleChange}
+                            onFocus={handleOnFocus}
                             isClearable
                             escapeClearsValue
                             styles={customStyles}
