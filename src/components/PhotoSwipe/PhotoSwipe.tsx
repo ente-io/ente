@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import Photoswipe from 'photoswipe';
 import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
 import classnames from 'classnames';
@@ -44,6 +44,7 @@ import EnteSpinner from 'components/EnteSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
 import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
 import { sleep } from 'utils/common';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -483,6 +484,9 @@ function PhotoSwipe(props: Iprops) {
     const [metadata, setMetaData] = useState<EnteFile['metadata']>(null);
     const [exif, setExif] = useState<any>(null);
     const needUpdate = useRef(false);
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -668,7 +672,12 @@ function PhotoSwipe(props: Iprops) {
     const downloadFileHelper = async (file) => {
         const { loadingBar } = props;
         loadingBar.current?.continuousStart();
-        await downloadFile(file);
+        await downloadFile(
+            file,
+            publicCollectionGalleryContext.accessedThroughSharedURL,
+            publicCollectionGalleryContext.token
+        );
+
         loadingBar.current?.complete();
     };
     const scheduleUpdate = () => (needUpdate.current = true);
