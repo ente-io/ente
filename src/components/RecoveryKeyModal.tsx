@@ -25,7 +25,6 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
                 setRecoveryKey(bip39.entropyToMnemonic(recoveryKey));
             } catch (e) {
                 somethingWentWrong();
-            } finally {
                 props.onHide();
             }
         };
