@@ -6,6 +6,7 @@ import { logError } from 'utils/sentry';
 import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
 import { EnteFile } from 'types/file';
 import {
+    AbuseReportDetails,
     AbuseReportRequest,
     LocalSavedPublicCollectionFiles,
 } from 'types/publicCollection';
@@ -259,13 +260,13 @@ export const reportAbuse = async (
     token: string,
     url: string,
     reason: REPORT_REASON,
-    comment: string
+    details: AbuseReportDetails
 ) => {
     try {
         if (!token) {
             return;
         }
-        const abuseReportRequest: AbuseReportRequest = { url, reason, comment };
+        const abuseReportRequest: AbuseReportRequest = { url, reason, details };
 
         await HTTPService.post(
             `${ENDPOINT}/public-collection/report-abuse`,

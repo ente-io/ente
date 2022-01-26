@@ -169,6 +169,9 @@ const GlobalStyles = createGlobalStyle`
     .modal-xl{
         max-width:90% !important;
     }
+    .modal-lg {
+        max-width: 720px !important;
+      }
     .plan-selector-modal-content {
         width:auto;
         margin:auto;
@@ -467,6 +470,9 @@ const GlobalStyles = createGlobalStyle`
     }
     .ente-form-group{
         margin:0;
+    }
+    .form-check-input:hover, .form-check-label :hover{
+        cursor:pointer;
     }
 `;
 

@@ -17,5 +17,24 @@ export interface LocalSavedPublicCollectionFiles {
 export interface AbuseReportRequest {
     url: string;
     reason: REPORT_REASON;
+    details: AbuseReportDetails;
+}
+
+export interface AbuseReportDetails {
+    fullName: string;
+    email: string;
     comment: string;
+    signature: string;
+    onBehalfOf: string;
+    jobTitle: string;
+    address: Address;
+}
+
+export interface Address {
+    street: string;
+    city: string;
+    state: string;
+    country: string;
+    postalCode: string;
+    phone: string;
 }
