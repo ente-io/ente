@@ -25,6 +25,8 @@ import constants from 'utils/strings/constants';
 import EnteSpinner from 'components/EnteSpinner';
 import LoadingBar from 'react-top-loading-bar';
 import CryptoWorker from 'utils/crypto';
+import { PAGES } from 'constants/pages';
+import router from 'next/router';
 
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
@@ -48,6 +50,21 @@ export default function PublicCollectionGallery() {
     const finishLoading = () => loadingBar.current?.complete();
 
     useEffect(() => {
+        const currentURL = new URL(window.location.href);
+        if (currentURL.pathname !== PAGES.ROOT) {
+            router.push(
+                {
+                    pathname: PAGES.SHARED_ALBUMS,
+                    search: currentURL.search,
+                    hash: currentURL.hash,
+                },
+                {
+                    pathname: PAGES.ROOT,
+                    search: currentURL.search,
+                    hash: currentURL.hash,
+                }
+            );
+        }
         const main = async () => {
             const worker = await new CryptoWorker();
             url.current = window.location.href;
