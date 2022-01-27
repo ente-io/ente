@@ -636,7 +636,6 @@ const englishConstants = {
     REPORT_SUBMIT_SUCCESS_TITLE: 'report sent',
     REPORT_SUBMIT_FAILED: 'failed to sent report, try again',
     INSTALL: 'install',
-    SIGNUP_OR_LOGIN: 'signup / login',
     ALBUM_URL: 'album url',
     PUBLIC_SHARING: 'public sharing',
     NOT_FOUND: '404 - not found',
