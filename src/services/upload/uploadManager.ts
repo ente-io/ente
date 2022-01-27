@@ -189,6 +189,7 @@ class UploadManager {
                 fileWithCollection.file.name,
                 fileUploadResult
             );
+            UploadService.reducePendingUploadCount();
         }
     }
 

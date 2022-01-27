@@ -36,6 +36,10 @@ class UploadService {
         await this.preFetchUploadURLs();
     }
 
+    reducePendingUploadCount() {
+        this.pendingUploadCount--;
+    }
+
     async readFile(
         worker: any,
         reader: FileReader,
