@@ -28,8 +28,8 @@ class DownloadManager {
                         try {
                             return await caches.open('thumbs');
                         } catch (e) {
-                            logError(e, 'cache open failed');
                             return null;
+                            // ignore
                         }
                     })();
 

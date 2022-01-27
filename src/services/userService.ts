@@ -80,7 +80,6 @@ export const logoutUser = async () => {
         try {
             await caches.delete('thumbs');
         } catch (e) {
-            logError(e, 'cache delete failed');
             // ignore
         }
         await clearFiles();
