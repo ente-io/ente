@@ -238,7 +238,9 @@ export default function Sidebar(props: Props) {
                         onHide={() => setRecoveryModalView(false)}
                         somethingWentWrong={() =>
                             props.setDialogMessage({
-                                title: constants.RECOVER_KEY_GENERATION_FAILED,
+                                title: constants.ERROR,
+                                content:
+                                    constants.RECOVER_KEY_GENERATION_FAILED,
                                 close: { variant: 'danger' },
                             })
                         }
