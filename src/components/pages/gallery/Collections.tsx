@@ -180,23 +180,8 @@ export default function Collections(props: CollectionProps) {
     const renderTooltip = (collectionID: number) => {
         const fileCount = props.collectionFilesCount?.get(collectionID) ?? 0;
         return (
-            <Tooltip
-                style={{
-                    padding: '0',
-                    paddingBottom: '5px',
-                }}
-                id="button-tooltip">
-                <div
-                    style={{
-                        backgroundColor: '#282828',
-                        padding: '2px 10px',
-                        margin: 0,
-                        color: '#ddd',
-                        borderRadius: 3,
-                        fontSize: '12px',
-                    }}>
-                    {fileCount} {fileCount > 1 ? 'items' : 'item'}
-                </div>
+            <Tooltip id="button-tooltip">
+                {fileCount} {fileCount > 1 ? 'items' : 'item'}
             </Tooltip>
         );
     };

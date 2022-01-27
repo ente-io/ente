@@ -9,7 +9,6 @@ import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
-import { SetDialogMessage } from './MessageDialog';
 import { fileIsArchived, formatDateRelative } from 'utils/file';
 import {
     ALL_SECTION,
@@ -21,6 +20,8 @@ import { isPlaybackPossible } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
 import { SetFiles, SelectedState, Search, setSearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
+import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 
 const Container = styled.div`
     display: block;
@@ -64,7 +65,6 @@ interface Props {
     search: Search;
     setSearchStats: setSearchStats;
     deleted?: number[];
-    setDialogMessage: SetDialogMessage;
     activeCollection: number;
     isSharedCollection: boolean;
 }
@@ -91,6 +91,9 @@ const PhotoFrame = ({
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
     const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
@@ -367,7 +370,17 @@ const PhotoFrame = ({
                 if (galleryContext.thumbs.has(item.id)) {
                     url = galleryContext.thumbs.get(item.id);
                 } else {
-                    url = await DownloadManager.getThumbnail(item);
+                    if (
+                        publicCollectionGalleryContext.accessedThroughSharedURL
+                    ) {
+                        url =
+                            await PublicCollectionDownloadManager.getThumbnail(
+                                item,
+                                publicCollectionGalleryContext.token
+                            );
+                    } else {
+                        url = await DownloadManager.getThumbnail(item);
+                    }
                     galleryContext.thumbs.set(item.id, url);
                 }
                 updateURL(item.dataIndex)(url);
@@ -394,7 +407,17 @@ const PhotoFrame = ({
                 if (galleryContext.files.has(item.id)) {
                     url = galleryContext.files.get(item.id);
                 } else {
-                    url = await DownloadManager.getFile(item, true);
+                    if (
+                        publicCollectionGalleryContext.accessedThroughSharedURL
+                    ) {
+                        url = await PublicCollectionDownloadManager.getFile(
+                            item,
+                            publicCollectionGalleryContext.token,
+                            true
+                        );
+                    } else {
+                        url = await DownloadManager.getFile(item, true);
+                    }
                     galleryContext.files.set(item.id, url);
                 }
                 await updateSrcURL(item.dataIndex, url);

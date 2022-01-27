@@ -358,10 +358,20 @@ const GlobalStyles = createGlobalStyle`
     .list-group-item:active , list-group-item:focus{
         background-color:#000 !important;
     }
-    .arrow::after{
+    #button-tooltip > .arrow::before{
         border-bottom-color:#282828 !important;
     }
+    #button-tooltip > .arrow::after{
+        border-bottom-color:#282828 !important;
+        border-top-color:#282828 !important;
+
+    }
     .arrow::before{
+        border-bottom-color:#282828 !important;
+        border-top-color:#282828 !important;
+    }
+    .arrow::after{
+        border-bottom-color:#282828 !important;
         border-top-color:#282828 !important;
     }
     .carousel-inner {
@@ -407,8 +417,15 @@ const GlobalStyles = createGlobalStyle`
             -webkit-transform: rotate(359deg);
         }
     }
+    #button-tooltip{
+        color: #ddd;
+        border-radius: 5px;
+        font-size: 12px;
+        padding:0px
+    }
     .tooltip-inner{
-        padding:0px;
+        background-color: #282828;
+        margin:6px 0;
     }
     .react-datepicker__input-container > input {
         width:100%;

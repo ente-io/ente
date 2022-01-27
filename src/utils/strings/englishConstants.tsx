@@ -357,6 +357,7 @@ const englishConstants = {
             </div>
         </>
     ),
+    PUBLIC_URL: 'publicly sharable url',
     SHARE_WITH_SELF: 'oops, you cannot share with yourself',
     ALREADY_SHARED: (email) =>
         `oops, you're already sharing this with ${email}`,
@@ -606,7 +607,23 @@ const englishConstants = {
     CUSTOM_TIME: 'custom time',
     REOPEN_PLAN_SELECTOR_MODAL: 're-open plans',
     OPEN_PLAN_SELECTOR_MODAL_FAILED: 'failed to open plans',
-    NOT_FOUND: '404 not found',
+    COMMENT: 'comment',
+    ABUSE_REPORT_DESCRIPTION:
+        'fill out the following form to submit the abuse report. Refer the dmca section for more detail for privacy policy of submitting a report ',
+    OTHER_REASON_REQUIRES_COMMENTS:
+        'reason = other, require  a mandatory comment ',
+    REPORT_SUBMIT_SUCCESS_CONTENT: 'thank you, your report have been submitted',
+    REPORT_SUBMIT_SUCCESS_TITLE: 'report sent',
+    REPORT_SUBMIT_FAILED: 'failed to sent report, try again',
+    INSTALL: 'install',
+    SIGNUP_OR_LOGIN: 'signup / login',
+    ALBUM_URL: 'album url',
+    PUBLIC_SHARING: 'public sharing',
+    NOT_FOUND: '404 - not found',
+    DISABLE_PUBLIC_SHARING: "'disable public sharing",
+    DISABLE_PUBLIC_SHARING_MESSAGE:
+        'are you sure you want to disable public sharing?',
+    ABUSE_REPORT: "'abuse report'",
 };
 
 export default englishConstants;

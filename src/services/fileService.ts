@@ -105,7 +105,7 @@ export const getFiles = async (
                 ...(await Promise.all(
                     resp.data.diff.map(async (file: EnteFile) => {
                         if (!file.isDeleted) {
-                            file = await decryptFile(file, collection);
+                            file = await decryptFile(file, collection.key);
                         }
                         return file;
                     }) as Promise<EnteFile>[]

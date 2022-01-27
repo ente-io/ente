@@ -28,6 +28,7 @@ import { prettyPrintExif } from 'utils/exif';
 import EditIcon from 'components/icons/EditIcon';
 import {
     FlexWrapper,
+    FreeFlowText,
     IconButton,
     Label,
     Row,
@@ -37,7 +38,6 @@ import { logError } from 'utils/sentry';
 
 import CloseIcon from 'components/icons/CloseIcon';
 import TickIcon from 'components/icons/TickIcon';
-import { FreeFlowText } from 'components/RecoveryKeyModal';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
@@ -667,9 +667,9 @@ function PhotoSwipe(props: Iprops) {
 
     const downloadFileHelper = async (file) => {
         const { loadingBar } = props;
-        loadingBar.current.continuousStart();
+        loadingBar.current?.continuousStart();
         await downloadFile(file);
-        loadingBar.current.complete();
+        loadingBar.current?.complete();
     };
     const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;
