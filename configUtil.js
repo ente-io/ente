@@ -26,8 +26,6 @@ module.exports = {
         'base-uri ': "'self'",
         'frame-ancestors': " 'none'",
         'form-action': "'none'",
-        'report-uri': 'https://csp-reporter.ente.io',
-        'report-to': 'https://csp-reporter.ente.io',
     },
 
     WORKBOX_CONFIG: {

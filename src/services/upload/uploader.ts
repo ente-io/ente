@@ -1,5 +1,4 @@
 import { EnteFile } from 'types/file';
-import { sleep } from 'utils/common';
 import { handleUploadError, CustomError } from 'utils/error';
 import { decryptFile } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -22,7 +21,6 @@ import {
 import { FILE_TYPE } from 'constants/file';
 import { FileUploadResults } from 'constants/upload';
 
-const TwoSecondInMillSeconds = 2000;
 const FIVE_GB_IN_BYTES = 5 * 1024 * 1024 * 1024;
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
@@ -46,12 +44,6 @@ export default async function uploader(
 
     try {
         if (rawFile.size >= FIVE_GB_IN_BYTES) {
-            UIService.setFileProgress(
-                rawFile.name,
-                FileUploadResults.TOO_LARGE
-            );
-            // wait two second before removing the file from the progress in file section
-            await sleep(TwoSecondInMillSeconds);
             return { fileUploadResult: FileUploadResults.TOO_LARGE };
         }
         fileTypeInfo = await getFileType(reader, rawFile);
@@ -65,10 +57,7 @@ export default async function uploader(
         );
 
         if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
-            UIService.setFileProgress(rawFile.name, FileUploadResults.SKIPPED);
-            // wait two second before removing the file from the progress in file section
-            await sleep(TwoSecondInMillSeconds);
-            return { fileUploadResult: FileUploadResults.SKIPPED };
+            return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
         }
 
         file = await UploadService.readFile(
@@ -105,7 +94,6 @@ export default async function uploader(
         const uploadedFile = await UploadHttpClient.uploadFile(uploadFile);
         const decryptedFile = await decryptFile(uploadedFile, collection);
 
-        UIService.setFileProgress(rawFile.name, FileUploadResults.UPLOADED);
         UIService.increaseFileUploaded();
         return {
             fileUploadResult: FileUploadResults.UPLOADED,
@@ -118,29 +106,15 @@ export default async function uploader(
         const error = handleUploadError(e);
         switch (error.message) {
             case CustomError.ETAG_MISSING:
-                UIService.setFileProgress(
-                    rawFile.name,
-                    FileUploadResults.BLOCKED
-                );
                 return { fileUploadResult: FileUploadResults.BLOCKED };
             case CustomError.UNSUPPORTED_FILE_FORMAT:
-                UIService.setFileProgress(
-                    rawFile.name,
-                    FileUploadResults.UNSUPPORTED
-                );
                 return { fileUploadResult: FileUploadResults.UNSUPPORTED };
-
             case CustomError.FILE_TOO_LARGE:
-                UIService.setFileProgress(
-                    rawFile.name,
-                    FileUploadResults.TOO_LARGE
-                );
-                return { fileUploadResult: FileUploadResults.TOO_LARGE };
+                return {
+                    fileUploadResult:
+                        FileUploadResults.LARGER_THAN_AVAILABLE_STORAGE,
+                };
             default:
-                UIService.setFileProgress(
-                    rawFile.name,
-                    FileUploadResults.FAILED
-                );
                 return { fileUploadResult: FileUploadResults.FAILED };
         }
     } finally {

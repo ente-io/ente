@@ -129,10 +129,7 @@ const InProgressSection = (props: InProgressProps) => {
                     <FileList>
                         {fileList.map(({ fileName, progress }) => (
                             <li key={fileName}>
-                                {constants.FILE_UPLOAD_PROGRESS(
-                                    fileName,
-                                    progress
-                                )}
+                                {`${fileName} - ${progress}%`}
                             </li>
                         ))}
                     </FileList>
@@ -235,9 +232,19 @@ export default function UploadProgress(props: Props) {
                 />
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
-                    fileUploadResult={FileUploadResults.SKIPPED}
+                    fileUploadResult={FileUploadResults.ALREADY_UPLOADED}
                     sectionTitle={constants.SKIPPED_FILES}
                     sectionInfo={constants.SKIPPED_INFO}
+                />
+                <ResultSection
+                    fileUploadResultMap={fileUploadResultMap}
+                    fileUploadResult={
+                        FileUploadResults.LARGER_THAN_AVAILABLE_STORAGE
+                    }
+                    sectionTitle={
+                        constants.LARGER_THAN_AVAILABLE_STORAGE_UPLOADS
+                    }
+                    sectionInfo={constants.LARGER_THAN_AVAILABLE_STORAGE_INFO}
                 />
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}

@@ -109,26 +109,6 @@ const englishConstants = {
     },
     UPLOADING_FILES: 'file upload',
     FILE_NOT_UPLOADED_LIST: 'the following files were not uploaded',
-    FILE_UPLOAD_PROGRESS: (name: string, progress: number) => (
-        <div id={name}>
-            {name}
-            {' - '}
-            <span style={{ color: '#eee' }}>
-                {(() => {
-                    switch (progress) {
-                        case -1:
-                            return 'failed';
-                        case -2:
-                            return 'already uploaded, skipping...';
-                        case -3:
-                            return 'unsupported file format, skipping....';
-                        default:
-                            return `${progress}%`;
-                    }
-                })()}
-            </span>
-        </div>
-    ),
     SUBSCRIPTION_EXPIRED: (action) => (
         <>
             your subscription has expired, please a{' '}
@@ -546,8 +526,11 @@ const englishConstants = {
     BLOCKED_UPLOADS: 'blocked uploads',
     INPROGRESS_UPLOADS: 'uploads in progress',
     TOO_LARGE_UPLOADS: 'large files',
-    TOO_LARGE_INFO:
+    LARGER_THAN_AVAILABLE_STORAGE_UPLOADS: 'insufficient storage',
+    LARGER_THAN_AVAILABLE_STORAGE_INFO:
         'these files were not uploaded as they exceed the maximum size limit for your storage plan',
+    TOO_LARGE_INFO:
+        'these files were not uploaded as they exceed our maximum file size limit',
     UPLOAD_TO_COLLECTION: 'upload to album',
     ARCHIVE: 'archive',
     ALL: 'all',
@@ -621,6 +604,9 @@ const englishConstants = {
     DATE_TIME_ORIGINAL: 'EXIF:DateTimeOriginal',
     DATE_TIME_DIGITIZED: 'EXIF:DateTimeDigitized',
     CUSTOM_TIME: 'custom time',
+    REOPEN_PLAN_SELECTOR_MODAL: 're-open plans',
+    OPEN_PLAN_SELECTOR_MODAL_FAILED: 'failed to open plans',
+    NOT_FOUND: '404 not found',
 };
 
 export default englishConstants;
