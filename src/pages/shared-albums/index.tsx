@@ -85,9 +85,7 @@ export default function PublicCollectionGallery() {
             if (localCollection) {
                 setPublicCollection(localCollection);
                 const localPublicFiles = sortFiles(
-                    mergeMetadata(
-                        await getLocalPublicFiles(`${localCollection.id}`)
-                    )
+                    mergeMetadata(await getLocalPublicFiles(localCollection))
                 );
                 setPublicFiles(localPublicFiles);
                 setLoading(false);
@@ -154,7 +152,7 @@ export default function PublicCollectionGallery() {
                 favItemIds={null}
                 setSelected={() => null}
                 selected={{ count: 0, collectionID: null }}
-                isFirstLoad={false}
+                isFirstLoad={true}
                 openFileUploader={() => null}
                 isInSearchMode={false}
                 search={{}}
