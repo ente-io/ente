@@ -18,7 +18,7 @@ const ENDPOINT = getEndpoint();
 const PUBLIC_COLLECTION_FILES_TABLE = 'public-collection-files';
 const PUBLIC_COLLECTIONS_TABLE = 'public-collections';
 
-const getCollectionUID = (collection: Collection) => `${collection.id}`;
+const getCollectionUID = (collection: Collection) => `${collection.key}`;
 
 export const getLocalPublicFiles = async (collectionUID: string) => {
     const localSavedPublicCollectionFiles = (
@@ -39,19 +39,21 @@ export const savePublicCollectionFiles = async (
         (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
             PUBLIC_COLLECTION_FILES_TABLE
         )) ?? [];
-    await localForage.setItem(PUBLIC_COLLECTION_FILES_TABLE, [
-        ...publicCollectionFiles,
-        { collectionUID, files },
-    ]);
+    await localForage.setItem(
+        PUBLIC_COLLECTION_FILES_TABLE,
+        dedupeCollectionFiles([
+            ...publicCollectionFiles,
+            { collectionUID, files },
+        ])
+    );
 };
 
 export const getLocalPublicCollection = async (collectionKey: string) => {
+    const localCollections =
+        (await localForage.getItem<Collection[]>(PUBLIC_COLLECTIONS_TABLE)) ??
+        [];
     const publicCollection =
-        (
-            (await localForage.getItem<Collection[]>(
-                PUBLIC_COLLECTIONS_TABLE
-            )) ?? []
-        ).find(
+        localCollections.find(
             (localSavedPublicCollection) =>
                 localSavedPublicCollection.key === collectionKey
         ) || null;
@@ -62,10 +64,36 @@ export const savePublicCollection = async (collection: Collection) => {
     const publicCollections =
         (await localForage.getItem<Collection[]>(PUBLIC_COLLECTIONS_TABLE)) ??
         [];
-    await localForage.setItem(PUBLIC_COLLECTIONS_TABLE, [
-        ...publicCollections,
-        collection,
-    ]);
+    await localForage.setItem(
+        PUBLIC_COLLECTIONS_TABLE,
+        dedupeCollections([...publicCollections, collection])
+    );
+};
+
+const dedupeCollections = (collections: Collection[]) => {
+    const keySet = new Set([]);
+    return collections.filter((collection) => {
+        if (!keySet.has(collection.key)) {
+            keySet.add(collection.key);
+            return true;
+        } else {
+            return false;
+        }
+    });
+};
+
+const dedupeCollectionFiles = (
+    collectionFiles: LocalSavedPublicCollectionFiles[]
+) => {
+    const keySet = new Set([]);
+    return collectionFiles.filter(({ collectionUID }) => {
+        if (!keySet.has(collectionUID)) {
+            keySet.add(collectionUID);
+            return true;
+        } else {
+            return false;
+        }
+    });
 };
 
 const getPublicCollectionLastSyncTime = async (collectionUID: string) =>
