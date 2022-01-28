@@ -288,6 +288,9 @@ export const removePublicCollectionWithFiles = async (
     const collectionToRemove = publicCollections.find(
         (collection) => (collection.key = collectionKey)
     );
+    if (!collectionToRemove) {
+        return;
+    }
     await localForage.setItem(
         PUBLIC_COLLECTIONS_TABLE,
         publicCollections.filter(

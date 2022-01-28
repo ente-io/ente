@@ -60,7 +60,6 @@ interface Props {
     selected: SelectedState;
     isFirstLoad;
     openFileUploader;
-    loadingBar;
     isInSearchMode: boolean;
     search: Search;
     setSearchStats: setSearchStats;
@@ -78,7 +77,6 @@ const PhotoFrame = ({
     selected,
     isFirstLoad,
     openFileUploader,
-    loadingBar,
     isInSearchMode,
     search,
     setSearchStats,
@@ -334,30 +332,33 @@ const PhotoFrame = ({
             handleSelect(filteredData[index].id, index)(!checked);
         }
     };
-    const getThumbnail = (file: EnteFile[], index: number) => (
-        <PreviewCard
-            key={`tile-${file[index].id}-selected-${
-                selected[file[index].id] ?? false
-            }`}
-            file={file[index]}
-            updateURL={updateURL(file[index].dataIndex)}
-            onClick={onThumbnailClick(index)}
-            selectable={!isSharedCollection}
-            onSelect={handleSelect(file[index].id, index)}
-            selected={
-                selected.collectionID === activeCollection &&
-                selected[file[index].id]
-            }
-            selectOnClick={selected.count > 0}
-            onHover={onHoverOver(index)}
-            onRangeSelect={handleRangeSelect(index)}
-            isRangeSelectActive={isShiftKeyPressed && selected.count > 0}
-            isInsSelectRange={
-                (index >= rangeStart && index <= currentHover) ||
-                (index >= currentHover && index <= rangeStart)
-            }
-        />
-    );
+    const getThumbnail = (files: EnteFile[], index: number) =>
+        files[index] ? (
+            <PreviewCard
+                key={`tile-${files[index].id}-selected-${
+                    selected[files[index].id] ?? false
+                }`}
+                file={files[index]}
+                updateURL={updateURL(files[index].dataIndex)}
+                onClick={onThumbnailClick(index)}
+                selectable={!isSharedCollection}
+                onSelect={handleSelect(files[index].id, index)}
+                selected={
+                    selected.collectionID === activeCollection &&
+                    selected[files[index].id]
+                }
+                selectOnClick={selected.count > 0}
+                onHover={onHoverOver(index)}
+                onRangeSelect={handleRangeSelect(index)}
+                isRangeSelectActive={isShiftKeyPressed && selected.count > 0}
+                isInsSelectRange={
+                    (index >= rangeStart && index <= currentHover) ||
+                    (index >= currentHover && index <= rangeStart)
+                }
+            />
+        ) : (
+            <></>
+        );
 
     const getSlideData = async (
         instance: any,
@@ -485,7 +486,6 @@ const PhotoFrame = ({
                         onClose={handleClose}
                         gettingData={getSlideData}
                         favItemIds={favItemIds}
-                        loadingBar={loadingBar}
                         isSharedCollection={isSharedCollection}
                         isTrashCollection={activeCollection === TRASH_SECTION}
                     />

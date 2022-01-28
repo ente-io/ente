@@ -100,7 +100,11 @@ class PublicCollectionDownloadManager {
         }
     };
 
-    private async downloadFile(token: string, file: EnteFile) {
+    public async getCachedOriginalFile(file: EnteFile) {
+        return await this.fileObjectURLPromise.get(file.id.toString());
+    }
+
+    async downloadFile(token: string, file: EnteFile) {
         const worker = await new CryptoWorker();
         if (!token) {
             return null;

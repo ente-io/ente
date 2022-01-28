@@ -178,6 +178,7 @@ export default function Gallery() {
     const loadingBar = useRef(null);
     const [isInSearchMode, setIsInSearchMode] = useState(false);
     const [searchStats, setSearchStats] = useState(null);
+    const isLoadingBarRunning = useRef(true);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
     const [deleted, setDeleted] = useState<number[]>([]);
@@ -278,7 +279,7 @@ export default function Gallery() {
             if (!(await isTokenValid())) {
                 throw new Error(ServerErrorCodes.SESSION_EXPIRED);
             }
-            !silent && loadingBar.current?.continuousStart();
+            !silent && startLoading();
             await billingService.syncSubscription();
             const collections = await syncCollections();
             setCollections(collections);
@@ -308,7 +309,7 @@ export default function Gallery() {
                     break;
             }
         } finally {
-            !silent && loadingBar.current?.complete();
+            !silent && finishLoading();
         }
         syncInProgress.current = false;
         if (resync.current) {
@@ -342,10 +343,14 @@ export default function Gallery() {
         setSelected({ count: 0, collectionID: 0 });
     };
 
-    const startLoading = () =>
-        !syncInProgress.current && loadingBar.current?.continuousStart();
-    const finishLoading = () =>
-        !syncInProgress.current && loadingBar.current.complete();
+    const startLoading = () => {
+        !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
+        isLoadingBarRunning.current = true;
+    };
+    const finishLoading = () => {
+        loadingBar.current?.complete();
+        isLoadingBarRunning.current = false;
+    };
 
     if (!files) {
         return <div />;
@@ -581,7 +586,6 @@ export default function Gallery() {
                 <SearchBar
                     isOpen={isInSearchMode}
                     setOpen={setIsInSearchMode}
-                    loadingBar={loadingBar}
                     isFirstFetch={isFirstFetch}
                     collections={collections}
                     files={getNonTrashedUniqueUserFiles(files)}
@@ -662,7 +666,6 @@ export default function Gallery() {
                     selected={selected}
                     isFirstLoad={isFirstLoad}
                     openFileUploader={openFileUploader}
-                    loadingBar={loadingBar}
                     isInSearchMode={isInSearchMode}
                     search={search}
                     setSearchStats={setSearchStats}
