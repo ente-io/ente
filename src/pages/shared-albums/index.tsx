@@ -68,19 +68,19 @@ export default function PublicCollectionGallery() {
         const main = async () => {
             const worker = await new CryptoWorker();
             url.current = window.location.href;
-            const urlS = new URL(url.current);
-            const eToken = urlS.searchParams.get('t');
-            const eCollectionKey = urlS.hash.slice(1);
-            const decodedCollectionKey = await worker.fromHex(eCollectionKey);
-            if (!eToken || !decodedCollectionKey) {
+            const currentURL = new URL(url.current);
+            const t = currentURL.searchParams.get('t');
+            const ck = currentURL.hash.slice(1);
+            const dck = await worker.fromHex(ck);
+            if (!t || !dck) {
                 setLoading(false);
                 return;
             }
-            token.current = eToken;
-            collectionKey.current = decodedCollectionKey;
+            token.current = t;
+            collectionKey.current = dck;
             url.current = window.location.href;
             const localCollection = await getLocalPublicCollection(
-                eCollectionKey
+                collectionKey.current
             );
             if (localCollection) {
                 setPublicCollection(localCollection);
