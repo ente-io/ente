@@ -72,13 +72,21 @@ export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) =>
     });
 
 export const logoutUser = async () => {
-    // ignore server logout result as logoutUser can be triggered before sign up or on token expiry
-    await _logout();
-    clearKeys();
-    clearData();
-    await caches.delete('thumbs');
-    await clearFiles();
-    router.push(PAGES.ROOT);
+    try {
+        // ignore server logout result as logoutUser can be triggered before sign up or on token expiry
+        await _logout();
+        clearKeys();
+        clearData();
+        try {
+            await caches.delete('thumbs');
+        } catch (e) {
+            // ignore
+        }
+        await clearFiles();
+        router.push(PAGES.ROOT);
+    } catch (e) {
+        logError(e, 'logoutUser failed');
+    }
 };
 
 export const clearFiles = async () => {

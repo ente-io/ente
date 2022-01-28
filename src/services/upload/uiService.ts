@@ -1,4 +1,5 @@
 import {
+    FileUploadResults,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_STAGES,
 } from 'constants/upload';
@@ -9,7 +10,7 @@ class UIService {
     private filesUploaded: number;
     private totalFileCount: number;
     private fileProgress: Map<string, number>;
-    private uploadResult: Map<string, number>;
+    private uploadResult: Map<string, FileUploadResults>;
     private progressUpdater: ProgressUpdater;
 
     init(progressUpdater: ProgressUpdater) {
@@ -47,8 +48,8 @@ class UIService {
         this.updateProgressBarUI();
     }
 
-    moveFileToResultList(filename: string) {
-        this.uploadResult.set(filename, this.fileProgress.get(filename));
+    moveFileToResultList(filename: string, uploadResult: FileUploadResults) {
+        this.uploadResult.set(filename, uploadResult);
         this.fileProgress.delete(filename);
         this.updateProgressBarUI();
     }
