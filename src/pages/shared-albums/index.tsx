@@ -13,10 +13,8 @@ import { EnteFile } from 'types/file';
 import { mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
 import { CollectionInfo } from 'components/pages/sharedAlbum/CollectionInfo';
-import ReportAbuse from 'components/pages/sharedAlbum/ReportAbuse';
 import { AbuseReportForm } from 'components/pages/sharedAlbum/AbuseReportForm';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
-import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 import {
     defaultPublicCollectionGalleryContext,
     PublicCollectionGalleryContext,
@@ -39,7 +37,7 @@ export default function PublicCollectionGallery() {
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [loading, setLoading] = useState(true);
-    const showReportForm = () => setAbuseReportFormView(true);
+    const openReportForm = () => setAbuseReportFormView(true);
     const closeReportForm = () => setAbuseReportFormView(false);
     const loadingBar = useRef(null);
 
@@ -127,8 +125,8 @@ export default function PublicCollectionGallery() {
                 token: token.current,
                 accessedThroughSharedURL: true,
                 setDialogMessage,
+                openReportForm,
             }}>
-            <GoToEnte />
             <LoadingBar color="#51cd7c" ref={loadingBar} />
             <CollectionInfo collection={publicCollection} />
 
@@ -149,7 +147,6 @@ export default function PublicCollectionGallery() {
                 activeCollection={ALL_SECTION}
                 isSharedCollection
             />
-            <ReportAbuse onClick={showReportForm} />
             <AbuseReportForm
                 show={abuseReportFormView}
                 close={closeReportForm}

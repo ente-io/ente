@@ -6,6 +6,7 @@ export const defaultPublicCollectionGalleryContext: PublicCollectionGalleryConte
         token: null,
         accessedThroughSharedURL: false,
         setDialogMessage: () => null,
+        openReportForm: () => null,
     };
 
 export const PublicCollectionGalleryContext =

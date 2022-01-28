@@ -6,6 +6,7 @@ export interface PublicCollectionGalleryContextType {
     token: string;
     accessedThroughSharedURL: boolean;
     setDialogMessage: SetDialogMessage;
+    openReportForm: () => void;
 }
 
 export interface LocalSavedPublicCollectionFiles {

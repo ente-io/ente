@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useContext } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import styled from 'styled-components';
 import { EnteFile } from 'types/file';
@@ -11,6 +11,8 @@ import {
     SPACE_BTW_DATES,
 } from 'constants/gallery';
 import constants from 'utils/strings/constants';
+import LinkButton, { ButtonVariant } from './pages/gallery/LinkButton';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const NO_OF_PAGES = 2;
@@ -18,7 +20,7 @@ const NO_OF_PAGES = 2;
 enum ITEM_TYPE {
     TIME = 'TIME',
     TILE = 'TILE',
-    BANNER = 'BANNER',
+    OTHER = 'OTHER',
 }
 
 interface TimeStampListItem {
@@ -31,7 +33,7 @@ interface TimeStampListItem {
         span: number;
     }[];
     groups?: number[];
-    banner?: any;
+    item?: any;
     id?: string;
     height?: number;
 }
@@ -88,6 +90,20 @@ const BannerContainer = styled.div<{ span: number }>`
     display: flex;
     justify-content: center;
     align-items: flex-end;
+    & > p {
+        margin: 0;
+    }
+    margin: 1rem 0;
+`;
+
+const ReportAbuseItem = styled.div<{ span: number }>`
+    flex: 1;
+    text-align: right;
+    grid-column: span ${(props) => props.span};
+    & > p {
+        margin: 0;
+    }
+    margin: 2rem 0 1rem 0;
 `;
 
 const NothingContainer = styled.div<{ span: number }>`
@@ -103,7 +119,7 @@ interface Props {
     height: number;
     width: number;
     filteredData: EnteFile[];
-    showBanner: boolean;
+    showAppDownloadBanner: boolean;
     getThumbnail: (file: EnteFile[], index: number) => JSX.Element;
     activeCollection: number;
     resetFetching: () => void;
@@ -113,7 +129,7 @@ export function PhotoList({
     height,
     width,
     filteredData,
-    showBanner,
+    showAppDownloadBanner,
     getThumbnail,
     activeCollection,
     resetFetching,
@@ -123,7 +139,9 @@ export function PhotoList({
     const filteredDataCopyRef = useRef([]);
     const filteredDataCopy = filteredDataCopyRef.current ?? [];
     const listRef = useRef(null);
-
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
     let columns = Math.floor(width / IMAGE_CONTAINER_MAX_WIDTH);
     let listItemHeight = IMAGE_CONTAINER_MAX_HEIGHT;
 
@@ -195,14 +213,28 @@ export function PhotoList({
         if (timeStampList.length === 0) {
             timeStampList.push(getEmptyListItem());
         }
-        if (showBanner) {
-            timeStampList.push(getBannerItem(timeStampList));
+        if (
+            showAppDownloadBanner ||
+            publicCollectionGalleryContext.accessedThroughSharedURL
+        ) {
+            timeStampList.push(getVacuumItem(timeStampList));
+            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+                timeStampList.push(getReportAbuseItem());
+            } else {
+                timeStampList.push(getAppDownloadBannerItem());
+            }
         }
 
         timeStampListRef.current = timeStampList;
         filteredDataCopyRef.current = filteredData;
         refreshList();
-    }, [width, height, filteredData, showBanner]);
+    }, [
+        width,
+        height,
+        filteredData,
+        showAppDownloadBanner,
+        publicCollectionGalleryContext.accessedThroughSharedURL,
+    ]);
 
     const isSameDay = (first, second) =>
         first.getFullYear() === second.getFullYear() &&
@@ -211,8 +243,8 @@ export function PhotoList({
 
     const getEmptyListItem = () => {
         return {
-            itemType: ITEM_TYPE.BANNER,
-            banner: (
+            itemType: ITEM_TYPE.OTHER,
+            item: (
                 <NothingContainer span={columns}>
                     <div>{constants.NOTHING_HERE}</div>
                 </NothingContainer>
@@ -221,25 +253,48 @@ export function PhotoList({
             height: height - 48,
         };
     };
-
-    const getBannerItem = (timeStampList) => {
+    const getVacuumItem = (timeStampList) => {
         const photoFrameHeight = (() => {
             let sum = 0;
             const getCurrentItemSize = getItemSize(timeStampList);
             for (let i = 0; i < timeStampList.length; i++) {
                 sum += getCurrentItemSize(i);
+                if (height - sum <= 70) {
+                    break;
+                }
             }
             return sum;
         })();
         return {
-            itemType: ITEM_TYPE.BANNER,
-            banner: (
+            itemType: ITEM_TYPE.OTHER,
+            item: <></>,
+            height: Math.max(height - photoFrameHeight - 70, 0),
+        };
+    };
+    const getAppDownloadBannerItem = () => {
+        return {
+            itemType: ITEM_TYPE.OTHER,
+            item: (
                 <BannerContainer span={columns}>
                     <p>{constants.INSTALL_MOBILE_APP()}</p>
                 </BannerContainer>
             ),
-            id: 'install-banner',
-            height: Math.max(48, height - photoFrameHeight),
+        };
+    };
+
+    const getReportAbuseItem = () => {
+        return {
+            itemType: ITEM_TYPE.OTHER,
+            item: (
+                <ReportAbuseItem span={columns}>
+                    <LinkButton
+                        style={{ fontSize: '16px' }}
+                        variant={ButtonVariant.danger}
+                        onClick={publicCollectionGalleryContext.openReportForm}>
+                        {constants.ABUSE_REPORT_BUTTON_TEXT}
+                    </LinkButton>
+                </ReportAbuseItem>
+            ),
         };
     };
     /**
@@ -363,8 +418,8 @@ export function PhotoList({
                         {listItem.date}
                     </DateContainer>
                 );
-            case ITEM_TYPE.BANNER:
-                return listItem.banner;
+            case ITEM_TYPE.OTHER:
+                return listItem.item;
             default: {
                 const ret = listItem.items.map((item, idx) =>
                     getThumbnail(

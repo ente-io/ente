@@ -14,6 +14,8 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
 import Head from 'next/head';
+import { getAlbumSiteHost } from 'constants/pages';
+import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -473,9 +475,12 @@ export const LogoImage = styled.img`
     margin-right: 5px;
 `;
 
-const FlexContainer = styled.div`
+const FlexContainer = styled.div<{ shouldJustifyLeft?: boolean }>`
     flex: 1;
     text-align: center;
+    @media (max-width: 760px) {
+        text-align: ${(props) => (props.shouldJustifyLeft ? 'left' : 'center')};
+    }
 `;
 
 export const MessageContainer = styled.div`
@@ -528,6 +533,8 @@ export default function App({ Component, err }) {
     const [redirectName, setRedirectName] = useState<string>(null);
     const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
     const [redirectURL, setRedirectURL] = useState(null);
+    const [isAlbumsDomain, setIsAlbumsDomain] = useState(false);
+
     useEffect(() => {
         if (
             !('serviceWorker' in navigator) ||
@@ -618,6 +625,13 @@ export default function App({ Component, err }) {
         };
     }, [redirectName]);
 
+    useEffect(() => {
+        const currentURL = new URL(window.location.href);
+        if (currentURL.host === getAlbumSiteHost()) {
+            setIsAlbumsDomain(true);
+        }
+    }, []);
+
     const showNavBar = (show: boolean) => setShowNavBar(show);
     const setDisappearingFlashMessage = (flashMessages: FlashMessage) => {
         setFlashMessage(flashMessages);
@@ -632,13 +646,14 @@ export default function App({ Component, err }) {
             <GlobalStyles />
             {showNavbar && (
                 <Navbar>
-                    <FlexContainer>
+                    <FlexContainer shouldJustifyLeft={isAlbumsDomain}>
                         <LogoImage
                             style={{ height: '24px', padding: '3px' }}
                             alt="logo"
                             src="/icon.svg"
                         />
                     </FlexContainer>
+                    {isAlbumsDomain && <GoToEnte />}
                 </Navbar>
             )}
             <MessageContainer>

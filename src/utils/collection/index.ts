@@ -17,6 +17,7 @@ import constants from 'utils/strings/constants';
 import { Collection } from 'types/collection';
 import { CollectionType } from 'constants/collection';
 import CryptoWorker from 'utils/crypto';
+import { getAlbumSiteHost } from 'constants/pages';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -119,7 +120,7 @@ export async function appendCollectionKeyToShareURL(
     }
     const sharableURL = new URL(url);
     if (process.env.NODE_ENV === 'development') {
-        sharableURL.host = 'localhost:3001';
+        sharableURL.host = getAlbumSiteHost();
         sharableURL.protocol = 'http';
     }
     sharableURL.hash = await worker.toHex(collectionKey);

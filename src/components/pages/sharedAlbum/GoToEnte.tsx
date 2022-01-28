@@ -6,15 +6,7 @@ import constants from 'utils/strings/constants';
 
 const Wrapper = styled.div`
     position: fixed;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    top: 0;
-    z-index: 100;
-    min-height: 64px;
-    right: 32px;
-    transition: opacity 1s ease;
-    cursor: pointer;
+    right: 20px;
 `;
 
 const NoStyleAnchor = styled.a`
@@ -45,7 +37,7 @@ function GoToEnte() {
         if (os === OS.ANDROID || os === OS.IOS) {
             return constants.INSTALL;
         } else {
-            return constants.SIGNUP_OR_LOGIN;
+            return constants.SIGN_UP;
         }
     };
 

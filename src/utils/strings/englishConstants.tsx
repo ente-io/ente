@@ -616,14 +616,14 @@ const englishConstants = {
     REPORT_SUBMIT_SUCCESS_TITLE: 'report sent',
     REPORT_SUBMIT_FAILED: 'failed to sent report, try again',
     INSTALL: 'install',
-    SIGNUP_OR_LOGIN: 'signup / login',
     ALBUM_URL: 'album url',
     PUBLIC_SHARING: 'public sharing',
     NOT_FOUND: '404 - not found',
     DISABLE_PUBLIC_SHARING: "'disable public sharing",
     DISABLE_PUBLIC_SHARING_MESSAGE:
         'are you sure you want to disable public sharing?',
-    ABUSE_REPORT: "'abuse report'",
+    ABUSE_REPORT: 'abuse report',
+    ABUSE_REPORT_BUTTON_TEXT: 'abuse report?',
 };
 
 export default englishConstants;
