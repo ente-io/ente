@@ -185,7 +185,11 @@ class UploadManager {
                 this.failedFiles.push(fileWithCollection);
             }
 
-            UIService.moveFileToResultList(fileWithCollection.file.name);
+            UIService.moveFileToResultList(
+                fileWithCollection.file.name,
+                fileUploadResult
+            );
+            UploadService.reducePendingUploadCount();
         }
     }
 

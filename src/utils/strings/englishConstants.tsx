@@ -109,26 +109,6 @@ const englishConstants = {
     },
     UPLOADING_FILES: 'file upload',
     FILE_NOT_UPLOADED_LIST: 'the following files were not uploaded',
-    FILE_UPLOAD_PROGRESS: (name: string, progress: number) => (
-        <div id={name}>
-            {name}
-            {' - '}
-            <span style={{ color: '#eee' }}>
-                {(() => {
-                    switch (progress) {
-                        case -1:
-                            return 'failed';
-                        case -2:
-                            return 'already uploaded, skipping...';
-                        case -3:
-                            return 'unsupported file format, skipping....';
-                        default:
-                            return `${progress}%`;
-                    }
-                })()}
-            </span>
-        </div>
-    ),
     SUBSCRIPTION_EXPIRED: (action) => (
         <>
             your subscription has expired, please a{' '}
@@ -636,7 +616,6 @@ const englishConstants = {
     REPORT_SUBMIT_SUCCESS_TITLE: 'report sent',
     REPORT_SUBMIT_FAILED: 'failed to sent report, try again',
     INSTALL: 'install',
-    SIGNUP_OR_LOGIN: 'signup / login',
     ALBUM_URL: 'album url',
     PUBLIC_SHARING: 'public sharing',
     NOT_FOUND: '404 - not found',

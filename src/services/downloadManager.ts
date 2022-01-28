@@ -24,8 +24,16 @@ class DownloadManager {
             }
             if (!this.thumbnailObjectURLPromise.get(file.id)) {
                 const downloadPromise = async () => {
-                    const thumbnailCache = await caches.open('thumbs');
-                    const cacheResp: Response = await thumbnailCache.match(
+                    const thumbnailCache = await (async () => {
+                        try {
+                            return await caches.open('thumbs');
+                        } catch (e) {
+                            return null;
+                            // ignore
+                        }
+                    })();
+
+                    const cacheResp: Response = await thumbnailCache?.match(
                         file.id.toString()
                     );
                     if (cacheResp) {
@@ -34,7 +42,7 @@ class DownloadManager {
                     const thumb = await this.downloadThumb(token, file);
                     const thumbBlob = new Blob([thumb]);
                     try {
-                        await thumbnailCache.put(
+                        await thumbnailCache?.put(
                             file.id.toString(),
                             new Response(thumbBlob)
                         );

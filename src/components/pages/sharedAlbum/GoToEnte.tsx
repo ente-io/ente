@@ -37,7 +37,7 @@ function GoToEnte() {
         if (os === OS.ANDROID || os === OS.IOS) {
             return constants.INSTALL;
         } else {
-            return constants.SIGNUP_OR_LOGIN;
+            return constants.SIGN_UP;
         }
     };
 

@@ -30,11 +30,11 @@ export enum UPLOAD_STAGES {
 }
 
 export enum FileUploadResults {
-    FAILED = -1,
-    SKIPPED = -2,
-    UNSUPPORTED = -3,
-    BLOCKED = -4,
-    TOO_LARGE = -5,
-    LARGER_THAN_AVAILABLE_STORAGE = -6,
-    UPLOADED = 100,
+    FAILED,
+    ALREADY_UPLOADED,
+    UNSUPPORTED,
+    BLOCKED,
+    TOO_LARGE,
+    LARGER_THAN_AVAILABLE_STORAGE,
+    UPLOADED,
 }
