@@ -357,7 +357,7 @@ const englishConstants = {
             </div>
         </>
     ),
-    PUBLIC_URL: 'publicly sharable url',
+    PUBLIC_URL: 'public link',
     SHARE_WITH_SELF: 'oops, you cannot share with yourself',
     ALREADY_SHARED: (email) =>
         `oops, you're already sharing this with ${email}`,

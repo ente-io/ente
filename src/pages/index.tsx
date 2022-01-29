@@ -146,6 +146,7 @@ export default function LandingPage() {
             await router.push(PAGES.VERIFY);
         }
         await initLocalForage();
+        setLoading(false);
     };
 
     const initLocalForage = async () => {
