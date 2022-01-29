@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
@@ -214,7 +213,12 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       ),
       actions: [
         TextButton(
-          child: Text("ok"),
+          child: Text(
+            "ok",
+            style: TextStyle(
+              color: Theme.of(context).buttonColor,
+            ),
+          ),
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             final collection = await _createAlbum(_albumName);
