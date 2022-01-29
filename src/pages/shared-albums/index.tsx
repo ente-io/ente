@@ -121,7 +121,7 @@ export default function PublicCollectionGallery() {
                 // local cache should be cleared
                 removePublicCollectionWithFiles(collectionKey.current);
                 setPublicCollection(null);
-                setPublicFiles(null);
+                setPublicFiles([]);
             }
         } finally {
             finishLoading();
