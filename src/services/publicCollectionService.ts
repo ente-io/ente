@@ -21,15 +21,20 @@ const PUBLIC_COLLECTIONS_TABLE = 'public-collections';
 const getCollectionUID = (collection: Collection) => `${collection.key}`;
 
 export const getLocalPublicFiles = async (collection: Collection) => {
-    const localSavedPublicCollectionFiles = (
-        (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
-            PUBLIC_COLLECTION_FILES_TABLE
-        )) ?? []
-    ).find(
-        (localSavedPublicCollectionFiles) =>
-            localSavedPublicCollectionFiles.collectionUID ===
-            getCollectionUID(collection)
-    ) || { collectionKey: null, files: [] as EnteFile[] };
+    const localSavedPublicCollectionFiles =
+        (
+            (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
+                PUBLIC_COLLECTION_FILES_TABLE
+            )) || []
+        ).find(
+            (localSavedPublicCollectionFiles) =>
+                localSavedPublicCollectionFiles.collectionUID ===
+                getCollectionUID(collection)
+        ) ||
+        ({
+            collectionUID: null,
+            files: [] as EnteFile[],
+        } as LocalSavedPublicCollectionFiles);
     return localSavedPublicCollectionFiles.files;
 };
 export const savePublicCollectionFiles = async (
@@ -39,7 +44,7 @@ export const savePublicCollectionFiles = async (
     const publicCollectionFiles =
         (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
             PUBLIC_COLLECTION_FILES_TABLE
-        )) ?? [];
+        )) || [];
     await localForage.setItem(
         PUBLIC_COLLECTION_FILES_TABLE,
         dedupeCollectionFiles([
@@ -51,7 +56,7 @@ export const savePublicCollectionFiles = async (
 
 export const getLocalPublicCollection = async (collectionKey: string) => {
     const localCollections =
-        (await localForage.getItem<Collection[]>(PUBLIC_COLLECTIONS_TABLE)) ??
+        (await localForage.getItem<Collection[]>(PUBLIC_COLLECTIONS_TABLE)) ||
         [];
     const publicCollection =
         localCollections.find(
