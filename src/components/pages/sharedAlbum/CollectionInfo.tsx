@@ -7,9 +7,7 @@ interface Iprops {
 }
 
 const Info = styled.h5`
-    padding: 5px 24px;
     margin: 20px;
-    border-bottom: 2px solid #5a5858;
 `;
 
 export function CollectionInfo(props: Iprops) {

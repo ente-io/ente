@@ -226,7 +226,9 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
                                     <Form.Group controlId="reportForm.email">
                                         <Form.Control
                                             type="text"
-                                            placeholder={constants.ENTER_EMAIL}
+                                            placeholder={
+                                                constants.ENTER_EMAIL_ADDRESS
+                                            }
                                             value={values.email}
                                             onChange={handleChange('email')}
                                             isInvalid={Boolean(

@@ -52,6 +52,8 @@ function CollectionShare(props: Props) {
                     props.collection.key
                 );
                 setPublicShareUrl(t);
+            } else {
+                setPublicShareUrl(null);
             }
         };
         main();

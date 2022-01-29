@@ -137,7 +137,7 @@ export default function LandingPage() {
                 hash: currentURL.hash,
             }
         );
-        setLoading(false);
+        await initLocalForage();
     };
 
     const handleNormalRedirect = async () => {
@@ -145,6 +145,10 @@ export default function LandingPage() {
         if (user?.email) {
             await router.push(PAGES.VERIFY);
         }
+        await initLocalForage();
+    };
+
+    const initLocalForage = async () => {
         try {
             await localForage.ready();
         } catch (e) {

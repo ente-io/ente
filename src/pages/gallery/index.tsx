@@ -178,7 +178,7 @@ export default function Gallery() {
     const loadingBar = useRef(null);
     const [isInSearchMode, setIsInSearchMode] = useState(false);
     const [searchStats, setSearchStats] = useState(null);
-    const isLoadingBarRunning = useRef(true);
+    const isLoadingBarRunning = useRef(false);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
     const [deleted, setDeleted] = useState<number[]>([]);

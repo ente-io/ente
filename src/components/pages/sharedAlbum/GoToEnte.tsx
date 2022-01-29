@@ -10,6 +10,7 @@ const Wrapper = styled.div`
 `;
 
 const NoStyleAnchor = styled.a`
+    color: inherit;
     text-decoration: none !important;
     &:hover {
         color: #fff !important;
@@ -20,7 +21,7 @@ export const ButtonWithLink = ({
     href,
     children,
 }: React.PropsWithChildren<{ href: string }>) => (
-    <Button variant="outline-success">
+    <Button id="go-to-ente">
         <NoStyleAnchor href={href}>{children}</NoStyleAnchor>
     </Button>
 );
