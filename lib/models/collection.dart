@@ -13,6 +13,7 @@ class Collection {
   final CollectionType type;
   final CollectionAttributes attributes;
   final List<User> sharees;
+  final List<PublicURL> publicURLs;
   final int updationTime;
   final bool isDeleted;
 
@@ -27,6 +28,7 @@ class Collection {
     this.type,
     this.attributes,
     this.sharees,
+    this.publicURLs,
     this.updationTime, {
     this.isDeleted = false,
   });
@@ -63,6 +65,7 @@ class Collection {
     CollectionType type,
     CollectionAttributes attributes,
     List<User> sharees,
+    List<PublicURL> publicURLs,
     int updationTime,
     bool isDeleted,
   }) {
@@ -77,6 +80,7 @@ class Collection {
       type ?? this.type,
       attributes ?? this.attributes,
       sharees ?? this.sharees,
+      publicURLs ?? this.publicURLs,
       updationTime ?? this.updationTime,
       isDeleted: isDeleted ?? this.isDeleted,
     );
@@ -94,6 +98,7 @@ class Collection {
       'type': typeToString(type),
       'attributes': attributes?.toMap(),
       'sharees': sharees?.map((x) => x?.toMap())?.toList(),
+      'publicURLs': publicURLs?.map((x) => x?.toMap())?.toList(),
       'updationTime': updationTime,
       'isDeleted': isDeleted,
     };
@@ -104,6 +109,11 @@ class Collection {
     final sharees = (map['sharees'] == null || map['sharees'].length == 0)
         ? <User>[]
         : List<User>.from(map['sharees'].map((x) => User.fromMap(x)));
+    final publicURLs =
+        (map['publicURLs'] == null || map['publicURLs'].length == 0)
+            ? <PublicURL>[]
+            : List<PublicURL>.from(
+                map['publicURLs'].map((x) => PublicURL.fromMap(x)));
     return Collection(
       map['id'],
       User.fromMap(map['owner']),
@@ -115,6 +125,7 @@ class Collection {
       typeFromString(map['type']),
       CollectionAttributes.fromMap(map['attributes']),
       sharees,
+      publicURLs,
       map['updationTime'],
       isDeleted: map['isDeleted'] ?? false,
     );
@@ -127,7 +138,7 @@ class Collection {
 
   @override
   String toString() {
-    return 'Collection(id: $id, owner: $owner, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, encryptedName: $encryptedName, nameDecryptionNonce: $nameDecryptionNonce, type: $type, attributes: $attributes, sharees: $sharees, updationTime: $updationTime, isDeleted: $isDeleted)';
+    return 'Collection(id: $id, owner: $owner, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, encryptedName: $encryptedName, nameDecryptionNonce: $nameDecryptionNonce, type: $type, attributes: $attributes, sharees: $sharees, publicURLs: $publicURLs, updationTime: $updationTime, isDeleted: $isDeleted)';
   }
 
   @override
@@ -145,6 +156,7 @@ class Collection {
         o.type == type &&
         o.attributes == attributes &&
         listEquals(o.sharees, sharees) &&
+        listEquals(o.publicURLs, publicURLs) &&
         o.updationTime == updationTime &&
         o.isDeleted == isDeleted;
   }
@@ -161,6 +173,7 @@ class Collection {
         type.hashCode ^
         attributes.hashCode ^
         sharees.hashCode ^
+        publicURLs.hashCode ^
         updationTime.hashCode ^
         isDeleted.hashCode;
   }
@@ -298,4 +311,56 @@ class User {
 
   @override
   int get hashCode => id.hashCode ^ email.hashCode ^ name.hashCode;
+}
+
+class PublicURL {
+  String url;
+  int deviceLimit;
+  int validTill;
+
+  PublicURL({
+    this.url,
+    this.deviceLimit,
+    this.validTill,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'url': url,
+      'deviceLimit': deviceLimit,
+      'validTill': validTill,
+    };
+  }
+
+  factory PublicURL.fromMap(Map<String, dynamic> map) {
+    if (map == null) return null;
+
+    return PublicURL(
+      url: map['url'],
+      deviceLimit: map['deviceLimit'],
+      validTill: map['validTill'],
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory PublicURL.fromJson(String source) =>
+      PublicURL.fromMap(json.decode(source));
+
+  @override
+  String toString() =>
+      'PublicUrl( url: $url, deviceLimit: $deviceLimit, validTill: $validTill)';
+
+  @override
+  bool operator ==(Object o) {
+    if (identical(this, o)) return true;
+
+    return o is PublicURL &&
+        o.deviceLimit == deviceLimit &&
+        o.url == url &&
+        o.validTill == validTill;
+  }
+
+  @override
+  int get hashCode => deviceLimit.hashCode ^ url.hashCode ^ validTill.hashCode;
 }

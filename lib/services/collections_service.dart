@@ -273,6 +273,53 @@ class CollectionsService {
     }
   }
 
+  Future<void> createShareUrl(Collection collection) async {
+    try {
+      final response = await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/collections/share-url",
+        data: {
+          "collectionID": collection.id,
+        },
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
+      collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
+      await _db.insert(List.from([collection]));
+      _cacheCollectionAttributes(collection);
+      Bus.instance.fire(CollectionUpdatedEvent(collection.id, <File>[]));
+    } on DioError catch (e) {
+      if (e.response.statusCode == 402) {
+        throw SharingNotPermittedForFreeAccountsError();
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to rename collection", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> disableShareUrl(Collection collection) async {
+    try {
+      await _dio.delete(
+        _config.getHttpEndpoint() +
+            "/collections/share-url/" +
+            collection.id.toString(),
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      collection.publicURLs.clear();
+      await _db.insert(List.from([collection]));
+      _cacheCollectionAttributes(collection);
+      Bus.instance.fire(CollectionUpdatedEvent(collection.id, <File>[]));
+    } on DioError catch (e) {
+      _logger.info(e);
+      rethrow;
+    }
+  }
+
   Future<List<Collection>> _fetchCollections(int sinceTime) async {
     try {
       final response = await _dio.get(
@@ -318,6 +365,7 @@ class CollectionsService {
       Sodium.bin2base64(encryptedName.nonce),
       CollectionType.album,
       CollectionAttributes(),
+      null,
       null,
       null,
     ));
@@ -368,6 +416,7 @@ class CollectionsService {
         pathDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce),
         version: 1,
       ),
+      null,
       null,
       null,
     ));

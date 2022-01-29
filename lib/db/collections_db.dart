@@ -26,6 +26,7 @@ class CollectionsDB {
   static final columnPathDecryptionNonce = 'path_decryption_nonce';
   static final columnVersion = 'version';
   static final columnSharees = 'sharees';
+  static final columnPublicURLs = 'public_urls';
   static final columnUpdationTime = 'updation_time';
   static final columnIsDeleted = 'is_deleted';
 
@@ -35,6 +36,7 @@ class CollectionsDB {
     ...addEncryptedName(),
     ...addVersion(),
     ...addIsDeleted(),
+    ...addPublicURLs(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -127,6 +129,15 @@ class CollectionsDB {
     ];
   }
 
+  static List<String> addPublicURLs() {
+    return [
+      '''
+        ALTER TABLE $table 
+        ADD COLUMN $columnPublicURLs TEXT;
+      '''
+    ];
+  }
+
   Future<List<dynamic>> insert(List<Collection> collections) async {
     final db = await instance.database;
     var batch = db.batch();
@@ -185,6 +196,8 @@ class CollectionsDB {
     row[columnVersion] = collection.attributes.version;
     row[columnSharees] =
         json.encode(collection.sharees?.map((x) => x?.toMap())?.toList());
+    row[columnPublicURLs] =
+        json.encode(collection.publicURLs?.map((x) => x?.toMap())?.toList());
     row[columnUpdationTime] = collection.updationTime;
     if (collection.isDeleted ?? false) {
       row[columnIsDeleted] = _sqlBoolTrue;
@@ -211,6 +224,10 @@ class CollectionsDB {
       ),
       List<User>.from((json.decode(row[columnSharees]) as List)
           .map((x) => User.fromMap(x))),
+      row[columnPublicURLs] == null
+          ? []
+          : List<PublicURL>.from((json.decode(row[columnPublicURLs]) as List)
+              .map((x) => PublicURL.fromMap(x))),
       int.parse(row[columnUpdationTime]),
       // default to False is columnIsDeleted is not set
       isDeleted: (row[columnIsDeleted] ?? _sqlBoolFalse) == _sqlBoolTrue,
