@@ -97,8 +97,9 @@ const BannerContainer = styled.div<{ span: number }>`
 `;
 
 const ReportAbuseItem = styled.div<{ span: number }>`
-    flex: 1;
-    text-align: right;
+    display: flex;
+    justify-content: center;
+    font-size: 14px;
     grid-column: span ${(props) => props.span};
     & > p {
         margin: 0;
