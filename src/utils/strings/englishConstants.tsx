@@ -617,7 +617,7 @@ const englishConstants = {
     REPORT_SUBMIT_FAILED: 'failed to sent report, try again',
     INSTALL: 'install',
     ALBUM_URL: 'album url',
-    PUBLIC_SHARING: 'public sharing',
+    PUBLIC_SHARING: 'link sharing',
     NOT_FOUND: '404 - not found',
     DISABLE_PUBLIC_SHARING: "'disable public sharing",
     DISABLE_PUBLIC_SHARING_MESSAGE:

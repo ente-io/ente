@@ -266,9 +266,10 @@ function CollectionShare(props: Props) {
                         width: '100%',
                     }}
                 />
-                <div style={{ marginBottom: '1rem' }}>
+                <div>
                     <FlexWrapper>
-                        <FlexWrapper style={{ paddingTop: '5px' }}>
+                        <FlexWrapper
+                            style={{ paddingTop: '5px', color: '#fff' }}>
                             {constants.PUBLIC_SHARING}
                         </FlexWrapper>
                         <Form.Switch
@@ -289,11 +290,12 @@ function CollectionShare(props: Props) {
                         </FlexWrapper>
                     )}
                 </div>
-                {publicShareUrl && (
+                {publicShareUrl ? (
                     <div style={{ width: '100%', wordBreak: 'break-all' }}>
-                        <>{constants.PUBLIC_URL}</>
                         <CodeBlock key={publicShareUrl} code={publicShareUrl} />
                     </div>
+                ) : (
+                    <div style={{ height: '30px' }} />
                 )}
             </DeadCenter>
         </MessageDialog>
