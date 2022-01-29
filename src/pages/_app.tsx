@@ -232,6 +232,17 @@ const GlobalStyles = createGlobalStyle`
     .btn-outline-danger, .btn-outline-secondary, .btn-outline-primary{
         border-width: 2px;
     }
+
+    #go-to-ente{
+        background:none;
+        border-color: #3dbb69;
+        color:#51cd7c;
+    }
+    #go-to-ente:hover, #go-to-ente:focus, #go-to-ente:active {
+        color:#fff;
+        background-color: #44774d;
+    }
+    
     a {
         color: #fff;
     }
