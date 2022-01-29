@@ -50,8 +50,8 @@ export const savePublicCollectionFiles = async (
     await localForage.setItem(
         PUBLIC_COLLECTION_FILES_TABLE,
         dedupeCollectionFiles([
-            ...publicCollectionFiles,
             { collectionUID, files },
+            ...publicCollectionFiles,
         ])
     );
 };
@@ -74,7 +74,7 @@ export const savePublicCollection = async (collection: Collection) => {
         [];
     await localForage.setItem(
         PUBLIC_COLLECTIONS_TABLE,
-        dedupeCollections([...publicCollections, collection])
+        dedupeCollections([collection, ...publicCollections])
     );
 };
 
