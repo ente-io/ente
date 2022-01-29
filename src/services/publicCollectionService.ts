@@ -19,6 +19,8 @@ const PUBLIC_COLLECTION_FILES_TABLE = 'public-collection-files';
 const PUBLIC_COLLECTIONS_TABLE = 'public-collections';
 
 const getCollectionUID = (collection: Collection) => `${collection.key}`;
+const getCollectionSyncTimeUID = (collectionUID: string) =>
+    `public-${collectionUID}-time`;
 
 export const getLocalPublicFiles = async (collection: Collection) => {
     const localSavedPublicCollectionFiles =
@@ -103,12 +105,14 @@ const dedupeCollectionFiles = (
 };
 
 const getPublicCollectionLastSyncTime = async (collectionUID: string) =>
-    (await localForage.getItem<number>(`public-${collectionUID}-time`)) ?? 0;
+    (await localForage.getItem<number>(
+        getCollectionSyncTimeUID(collectionUID)
+    )) ?? 0;
 
 const setPublicCollectionLastSyncTime = async (
     collectionUID: string,
     time: number
-) => await localForage.setItem(collectionUID, time);
+) => await localForage.setItem(getCollectionSyncTimeUID(collectionUID), time);
 
 export const syncPublicFiles = async (
     token: string,
