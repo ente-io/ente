@@ -240,7 +240,7 @@ function CollectionShare(props: Props) {
                         </Form>
                     )}
                 </Formik>
-                {props.collection.sharees?.length > 0 ? (
+                {props.collection.sharees?.length > 0 && (
                     <>
                         <p>{constants.SHAREES}</p>
 
@@ -256,15 +256,12 @@ function CollectionShare(props: Props) {
                             </tbody>
                         </Table>
                     </>
-                ) : (
-                    <div style={{ marginTop: '12px' }}>
-                        {constants.ZERO_SHAREES()}
-                    </div>
                 )}
                 <div
                     style={{
                         height: '1px',
-                        margin: '10px 0px',
+                        marginTop: '10px',
+                        marginBottom: '18px',
                         background: '#444',
                         width: '100%',
                     }}
