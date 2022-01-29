@@ -99,7 +99,6 @@ const BannerContainer = styled.div<{ span: number }>`
 const ReportAbuseItem = styled.div<{ span: number }>`
     display: flex;
     justify-content: center;
-    font-size: 14px;
     grid-column: span ${(props) => props.span};
     & > p {
         margin: 0;
@@ -289,7 +288,7 @@ export function PhotoList({
             item: (
                 <ReportAbuseItem span={columns}>
                     <LinkButton
-                        style={{ fontSize: '16px' }}
+                        style={{ fontSize: '14px' }}
                         variant={ButtonVariant.danger}
                         onClick={publicCollectionGalleryContext.openReportForm}>
                         {constants.ABUSE_REPORT_BUTTON_TEXT}
