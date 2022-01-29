@@ -32,7 +32,7 @@ export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
-    const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
+    const [publicFiles, setPublicFiles] = useState<EnteFile[]>([]);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const appContext = useContext(AppContext);
     const [abuseReportFormView, setAbuseReportFormView] = useState(false);
@@ -42,14 +42,23 @@ export default function PublicCollectionGallery() {
     const openReportForm = () => setAbuseReportFormView(true);
     const closeReportForm = () => setAbuseReportFormView(false);
     const loadingBar = useRef(null);
+    const [isLoadingBarRunning, setIsLoadingBarRunning] = useState(false);
 
     const openMessageDialog = () => setMessageDialogView(true);
     const closeMessageDialog = () => setMessageDialogView(false);
 
-    const startLoading = () => loadingBar.current?.continuousStart();
-    const finishLoading = () => loadingBar.current?.complete();
+    const startLoading = () => {
+        !isLoadingBarRunning && loadingBar.current?.continuousStart();
+        setIsLoadingBarRunning(true);
+    };
+    const finishLoading = () => {
+        loadingBar.current?.complete();
+        setIsLoadingBarRunning(false);
+    };
 
     useEffect(() => {
+        appContext.showNavBar(true);
+        setLoading(false);
         const currentURL = new URL(window.location.href);
         if (currentURL.pathname !== PAGES.ROOT) {
             router.push(
@@ -88,10 +97,8 @@ export default function PublicCollectionGallery() {
                     mergeMetadata(await getLocalPublicFiles(localCollection))
                 );
                 setPublicFiles(localPublicFiles);
-                setLoading(false);
             }
             syncWithRemote();
-            appContext.showNavBar(true);
         };
         main();
     }, []);
@@ -117,7 +124,6 @@ export default function PublicCollectionGallery() {
                 setPublicFiles(null);
             }
         } finally {
-            setLoading(false);
             finishLoading();
         }
     };
@@ -130,7 +136,7 @@ export default function PublicCollectionGallery() {
             </Container>
         );
     }
-    if (!publicFiles) {
+    if (!isLoadingBarRunning && !publicFiles) {
         return <Container>{constants.NOT_FOUND}</Container>;
     }
     return (
