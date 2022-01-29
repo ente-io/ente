@@ -627,19 +627,20 @@ const englishConstants = {
     MALICIOUS_CONTENT: 'contains malicious content',
     COPYRIGHT:
         'infringes on the copyright of someone I am authorized to represent',
-    SELECT_REASON: 'select a reason',
-    ENTER_FULL_NAME: 'full name',
+    ENTER_EMAIL_ADDRESS: 'email*',
+    SELECT_REASON: 'select a reason*',
+    ENTER_FULL_NAME: 'full name*',
     ENTER_DIGITAL_SIGNATURE:
-        'typing your full name in this box will act as your digital signature',
-    ENTER_ON_BEHALF_OF: 'I am reporting on behalf of',
-    ENTER_ADDRESS: 'address',
-    ENTER_JOB_TITLE: 'job title',
-    ENTER_CITY: 'city',
-    ENTER_PHONE: 'phone number',
+        'typing your full name in this box will act as your digital signature*',
+    ENTER_ON_BEHALF_OF: 'I am reporting on behalf of*',
+    ENTER_ADDRESS: 'address*',
+    ENTER_JOB_TITLE: 'job title*',
+    ENTER_CITY: 'city*',
+    ENTER_PHONE: 'phone number*',
 
-    ENTER_STATE: 'state',
-    ENTER_POSTAL_CODE: 'zip/postal code',
-    ENTER_COUNTRY: 'country',
+    ENTER_STATE: 'state*',
+    ENTER_POSTAL_CODE: 'zip/postal code*',
+    ENTER_COUNTRY: 'country*',
     JUDICIAL_DESCRIPTION: () => (
         <>
             By checking the following boxes, I state{' '}
