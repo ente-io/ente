@@ -623,7 +623,7 @@ const englishConstants = {
     DISABLE_PUBLIC_SHARING_MESSAGE:
         'are you sure you want to disable public sharing?',
     ABUSE_REPORT: 'abuse report',
-    ABUSE_REPORT_BUTTON_TEXT: 'abuse report?',
+    ABUSE_REPORT_BUTTON_TEXT: 'report abuse?',
     MALICIOUS_CONTENT: 'contains malicious content',
     COPYRIGHT:
         'infringes on the copyright of someone I am authorized to represent',
