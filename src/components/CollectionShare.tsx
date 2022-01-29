@@ -18,7 +18,7 @@ import SubmitButton from './SubmitButton';
 import MessageDialog from './MessageDialog';
 import { Collection } from 'types/collection';
 import { appendCollectionKeyToShareURL } from 'utils/collection';
-import { Row, Value } from './Container';
+import { FlexWrapper } from './Container';
 import { CodeBlock } from './CodeBlock';
 import { ButtonVariant, getVariantColor } from './pages/gallery/LinkButton';
 import { handleSharingErrors } from 'utils/error';
@@ -138,7 +138,7 @@ function CollectionShare(props: Props) {
             content: constants.DISABLE_PUBLIC_SHARING_MESSAGE,
             close: { text: constants.CANCEL },
             proceed: {
-                text: constants.DELETE,
+                text: constants.DISABLE,
                 action: disablePublicSharingHelper,
                 variant: ButtonVariant.danger,
             },
@@ -240,40 +240,6 @@ function CollectionShare(props: Props) {
                         </Form>
                     )}
                 </Formik>
-                <Row style={{ margin: '10px' }}>
-                    <Value width="auto" style={{ paddingTop: '5px' }}>
-                        {constants.PUBLIC_SHARING}
-                    </Value>
-                    <Form.Switch
-                        style={{ marginLeft: '20px' }}
-                        checked={!!publicShareUrl}
-                        id="collection-public-sharing-toggler"
-                        className="custom-switch-md"
-                        onChange={handleCollectionPublicSharing}
-                    />
-                </Row>
-                <Row
-                    style={{
-                        margin: '10px',
-                        color: getVariantColor(ButtonVariant.danger),
-                    }}>
-                    {sharableLinkError}
-                </Row>
-                <div
-                    style={{
-                        height: '1px',
-                        margin: '10px 0px',
-                        background: '#444',
-                        width: '100%',
-                    }}
-                />
-
-                {publicShareUrl && (
-                    <div style={{ width: '100%', wordBreak: 'break-all' }}>
-                        <>{constants.PUBLIC_URL}</>
-                        <CodeBlock key={publicShareUrl} code={publicShareUrl} />
-                    </div>
-                )}
                 {props.collection.sharees?.length > 0 && (
                     <>
                         <p>{constants.SHAREES}</p>
@@ -291,10 +257,45 @@ function CollectionShare(props: Props) {
                         </Table>
                     </>
                 )}
-                {props.collection.sharees?.length === 0 && !publicShareUrl && (
-                    <div style={{ marginTop: '12px' }}>
-                        {constants.ZERO_SHAREES()}
+                <div
+                    style={{
+                        height: '1px',
+                        marginTop: '10px',
+                        marginBottom: '18px',
+                        background: '#444',
+                        width: '100%',
+                    }}
+                />
+                <div>
+                    <FlexWrapper>
+                        <FlexWrapper
+                            style={{ paddingTop: '5px', color: '#fff' }}>
+                            {constants.PUBLIC_SHARING}
+                        </FlexWrapper>
+                        <Form.Switch
+                            style={{ marginLeft: '20px' }}
+                            checked={!!publicShareUrl}
+                            id="collection-public-sharing-toggler"
+                            className="custom-switch-md"
+                            onChange={handleCollectionPublicSharing}
+                        />
+                    </FlexWrapper>
+                    {sharableLinkError && (
+                        <FlexWrapper
+                            style={{
+                                marginTop: '10px',
+                                color: getVariantColor(ButtonVariant.danger),
+                            }}>
+                            {sharableLinkError}
+                        </FlexWrapper>
+                    )}
+                </div>
+                {publicShareUrl ? (
+                    <div style={{ width: '100%', wordBreak: 'break-all' }}>
+                        <CodeBlock key={publicShareUrl} code={publicShareUrl} />
                     </div>
+                ) : (
+                    <div style={{ height: '30px' }} />
                 )}
             </DeadCenter>
         </MessageDialog>

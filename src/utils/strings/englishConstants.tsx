@@ -357,7 +357,7 @@ const englishConstants = {
             </div>
         </>
     ),
-    PUBLIC_URL: 'publicly sharable url',
+    PUBLIC_URL: 'public link',
     SHARE_WITH_SELF: 'oops, you cannot share with yourself',
     ALREADY_SHARED: (email) =>
         `oops, you're already sharing this with ${email}`,
@@ -617,13 +617,13 @@ const englishConstants = {
     REPORT_SUBMIT_FAILED: 'failed to sent report, try again',
     INSTALL: 'install',
     ALBUM_URL: 'album url',
-    PUBLIC_SHARING: 'public sharing',
+    PUBLIC_SHARING: 'link sharing',
     NOT_FOUND: '404 - not found',
     DISABLE_PUBLIC_SHARING: "'disable public sharing",
     DISABLE_PUBLIC_SHARING_MESSAGE:
         'are you sure you want to disable public sharing?',
     ABUSE_REPORT: 'abuse report',
-    ABUSE_REPORT_BUTTON_TEXT: 'abuse report?',
+    ABUSE_REPORT_BUTTON_TEXT: 'report abuse?',
     MALICIOUS_CONTENT: 'contains malicious content',
     COPYRIGHT:
         'infringes on the copyright of someone I am authorized to represent',
