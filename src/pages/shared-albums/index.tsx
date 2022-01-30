@@ -19,7 +19,7 @@ import {
     defaultPublicCollectionGalleryContext,
     PublicCollectionGalleryContext,
 } from 'utils/publicCollectionGallery';
-import { CustomError } from 'utils/error';
+import { CustomError, parseSharingErrorCodes } from 'utils/error';
 import Container from 'components/Container';
 import constants from 'utils/strings/constants';
 import EnteSpinner from 'components/EnteSpinner';
@@ -116,7 +116,8 @@ export default function PublicCollectionGallery() {
 
             await syncPublicFiles(token.current, collection, setPublicFiles);
         } catch (e) {
-            if (e.message === CustomError.TOKEN_EXPIRED) {
+            const parsedError = parseSharingErrorCodes(e);
+            if (parsedError.message === CustomError.TOKEN_EXPIRED) {
                 // share has been disabled
                 // local cache should be cleared
                 removePublicCollectionWithFiles(collectionKey.current);

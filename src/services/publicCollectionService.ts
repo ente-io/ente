@@ -12,7 +12,6 @@ import {
 } from 'types/publicCollection';
 import CryptoWorker from 'utils/crypto';
 import { REPORT_REASON } from 'constants/publicCollection';
-import { CustomError, ServerErrorCodes } from 'utils/error';
 
 const ENDPOINT = getEndpoint();
 const PUBLIC_COLLECTION_FILES_TABLE = 'public-collection-files';
@@ -175,7 +174,7 @@ export const syncPublicFiles = async (
         return [...sortFiles(mergeMetadata(files))];
     } catch (e) {
         logError(e, 'failed to get local  or sync shared collection files');
-        return [];
+        throw e;
     }
 };
 
@@ -260,21 +259,12 @@ export const getPublicCollection = async (
         };
         await savePublicCollection(collection);
         return collection;
-    } catch (error) {
-        logError(error, 'failed to get public collection', {
+    } catch (e) {
+        logError(e, 'failed to get public collection', {
             collectionKey,
             token,
         });
-        if ('status' in error) {
-            const errorCode = error.status.toString();
-            if (
-                errorCode === ServerErrorCodes.SESSION_EXPIRED ||
-                errorCode === ServerErrorCodes.TOKEN_EXPIRED ||
-                errorCode === ServerErrorCodes.TOO_MANY_REQUEST
-            ) {
-                throw Error(CustomError.TOKEN_EXPIRED);
-            }
-        }
+        throw e;
     }
 };
 
