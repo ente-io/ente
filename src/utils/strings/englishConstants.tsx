@@ -213,6 +213,9 @@ const englishConstants = {
         'enabling this feature, it will download all original images on local ' +
         'device to analyze them. So please only enable this if you are ok with ' +
         'bandwidth and local processing of all images in your photo library.',
+    ML_SEARCH_NOT_COMPATIBLE:
+        'Can not enable on-device machine learning and people search. ' +
+        'We only support latest chrome desktop and ente desktop for this Beta release.',
     ML_DEBUG: 'ML Debug',
     SUPPORT: 'support',
     CONFIRM: 'confirm',

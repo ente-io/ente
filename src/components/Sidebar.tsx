@@ -38,6 +38,7 @@ import {
 } from 'components/pages/gallery/Collections';
 import FixLargeThumbnails from './FixLargeThumbnail';
 import { AppContext } from 'pages/_app';
+import { canEnableMlSearch } from 'utils/machineLearning/compatibility';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -309,6 +310,14 @@ export default function Sidebar(props: Props) {
                     style={{ marginTop: '30px' }}
                     onClick={() => {
                         if (!appContext.mlSearchEnabled) {
+                            if (!canEnableMlSearch()) {
+                                props.setDialogMessage({
+                                    title: constants.ENABLE_ML_SEARCH,
+                                    content: constants.ML_SEARCH_NOT_COMPATIBLE,
+                                    close: { text: constants.OK },
+                                });
+                                return;
+                            }
                             props.setDialogMessage({
                                 title: `${constants.CONFIRM} ${constants.ENABLE_ML_SEARCH}`,
                                 content: constants.ENABLE_ML_SEARCH_MESSAGE,
