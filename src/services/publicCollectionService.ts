@@ -269,7 +269,8 @@ export const getPublicCollection = async (
             const errorCode = error.status.toString();
             if (
                 errorCode === ServerErrorCodes.SESSION_EXPIRED ||
-                errorCode === ServerErrorCodes.TOKEN_EXPIRED
+                errorCode === ServerErrorCodes.TOKEN_EXPIRED ||
+                errorCode === ServerErrorCodes.TOO_MANY_REQUEST
             ) {
                 throw Error(CustomError.TOKEN_EXPIRED);
             }

@@ -8,6 +8,7 @@ export const ServerErrorCodes = {
     STORAGE_LIMIT_EXCEEDED: '426',
     FILE_TOO_LARGE: '413',
     TOKEN_EXPIRED: '410',
+    TOO_MANY_REQUEST: '429',
 };
 
 export enum CustomError {
