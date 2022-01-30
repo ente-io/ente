@@ -58,7 +58,6 @@ export default function PublicCollectionGallery() {
 
     useEffect(() => {
         appContext.showNavBar(true);
-        setLoading(false);
         const currentURL = new URL(window.location.href);
         if (currentURL.pathname !== PAGES.ROOT) {
             router.push(
@@ -99,6 +98,7 @@ export default function PublicCollectionGallery() {
                 setPublicFiles(localPublicFiles);
             }
             syncWithRemote();
+            setLoading(false);
         };
         main();
     }, []);
