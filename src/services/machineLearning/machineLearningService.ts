@@ -2,9 +2,9 @@ import { File, FILE_TYPE, getLocalFiles } from 'services/fileService';
 
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
-import '@tensorflow/tfjs-backend-wasm';
-import { setWasmPaths } from '@tensorflow/tfjs-backend-wasm';
-import '@tensorflow/tfjs-backend-cpu';
+// import '@tensorflow/tfjs-backend-wasm';
+// import { setWasmPaths } from '@tensorflow/tfjs-backend-wasm';
+// import '@tensorflow/tfjs-backend-cpu';
 
 import {
     DetectedFace,
@@ -51,7 +51,7 @@ class MachineLearningService {
     private localSyncContext: Promise<MLSyncContext>;
 
     public constructor() {
-        setWasmPaths('/js/tfjs/');
+        // setWasmPaths('/js/tfjs/');
         // this.faceDetectionService = new TFJSFaceDetectionService();
         // this.faceLandmarkService = new FAPIFaceLandmarksService();
         // this.faceAlignmentService = new ArcfaceAlignmentService();
