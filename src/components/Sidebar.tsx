@@ -337,13 +337,15 @@ export default function Sidebar(props: Props) {
                         ? constants.DISABLE_ML_SEARCH
                         : constants.ENABLE_ML_SEARCH}
                 </LinkButton>
-                <LinkButton
-                    style={{ marginTop: '30px' }}
-                    onClick={() => {
-                        router.push(PAGES.ML_DEBUG);
-                    }}>
-                    {constants.ML_DEBUG}
-                </LinkButton>
+                {appContext.mlSearchEnabled && (
+                    <LinkButton
+                        style={{ marginTop: '30px' }}
+                        onClick={() => {
+                            router.push(PAGES.ML_DEBUG);
+                        }}>
+                        {constants.ML_DEBUG}
+                    </LinkButton>
+                )}
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={() => initiateEmail('contact@ente.io')}>
