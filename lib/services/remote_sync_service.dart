@@ -338,9 +338,17 @@ class RemoteSyncService {
         // File exists in ente db with same title & device folder
         // Note: The file.generatedID might be already set inside
         // [DiffFetcher.getEncryptedFilesDiff]
-
-        final fileWithLocalID = existingFiles
-            .firstWhere((e) => e.localID != null, orElse: () => null);
+        // Try to find existing file with same localID as remote file with a fallback
+        // to finding any existing file with localID. This is needed to handle
+        // case when localID for a file changes and the file is uploaded again in
+        // the same collection
+        final fileWithLocalID = existingFiles.firstWhere(
+            (e) =>
+                file.localID != null &&
+                e.localID != null &&
+                e.localID == file.localID,
+            orElse: () => existingFiles.firstWhere((e) => e.localID != null,
+                orElse: () => null));
         if (fileWithLocalID != null) {
           // File should ideally have the same localID
           if (file.localID != null && file.localID != fileWithLocalID.localID) {
