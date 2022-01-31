@@ -5,6 +5,7 @@ import {
     getLocalPublicCollection,
     getLocalPublicFiles,
     getPublicCollection,
+    getPublicCollectionUID,
     removePublicCollectionWithFiles,
     syncPublicFiles,
 } from 'services/publicCollectionService';
@@ -100,10 +101,13 @@ export default function PublicCollectionGallery() {
                 );
                 if (localCollection) {
                     setPublicCollection(localCollection);
+                    const collectionUID = getPublicCollectionUID(
+                        collectionKey.current,
+                        token.current
+                    );
+                    const localFiles = await getLocalPublicFiles(collectionUID);
                     const localPublicFiles = sortFiles(
-                        mergeMetadata(
-                            await getLocalPublicFiles(localCollection)
-                        )
+                        mergeMetadata(localFiles)
                     );
                     setPublicFiles(localPublicFiles);
                 }
@@ -132,7 +136,10 @@ export default function PublicCollectionGallery() {
             if (parsedError.message === CustomError.TOKEN_EXPIRED) {
                 // share has been disabled
                 // local cache should be cleared
-                removePublicCollectionWithFiles(collectionKey.current);
+                removePublicCollectionWithFiles(
+                    token.current,
+                    collectionKey.current
+                );
                 setPublicCollection(null);
                 setPublicFiles([]);
             }

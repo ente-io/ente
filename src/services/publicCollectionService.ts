@@ -17,11 +17,13 @@ const ENDPOINT = getEndpoint();
 const PUBLIC_COLLECTION_FILES_TABLE = 'public-collection-files';
 const PUBLIC_COLLECTIONS_TABLE = 'public-collections';
 
-const getCollectionUID = (collection: Collection) => `${collection.key}`;
-const getCollectionSyncTimeUID = (collectionUID: string) =>
+export const getPublicCollectionUID = (collectionKey: string, token: string) =>
+    `${collectionKey.slice(0, 8)}-${token.slice(0, 8)}`;
+
+const getPublicCollectionSyncTimeUID = (collectionUID: string) =>
     `public-${collectionUID}-time`;
 
-export const getLocalPublicFiles = async (collection: Collection) => {
+export const getLocalPublicFiles = async (collectionUID: string) => {
     const localSavedPublicCollectionFiles =
         (
             (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
@@ -29,8 +31,7 @@ export const getLocalPublicFiles = async (collection: Collection) => {
             )) || []
         ).find(
             (localSavedPublicCollectionFiles) =>
-                localSavedPublicCollectionFiles.collectionUID ===
-                getCollectionUID(collection)
+                localSavedPublicCollectionFiles.collectionUID === collectionUID
         ) ||
         ({
             collectionUID: null,
@@ -105,13 +106,17 @@ const dedupeCollectionFiles = (
 
 const getPublicCollectionLastSyncTime = async (collectionUID: string) =>
     (await localForage.getItem<number>(
-        getCollectionSyncTimeUID(collectionUID)
+        getPublicCollectionSyncTimeUID(collectionUID)
     )) ?? 0;
 
 const setPublicCollectionLastSyncTime = async (
     collectionUID: string,
     time: number
-) => await localForage.setItem(getCollectionSyncTimeUID(collectionUID), time);
+) =>
+    await localForage.setItem(
+        getPublicCollectionSyncTimeUID(collectionUID),
+        time
+    );
 
 export const syncPublicFiles = async (
     token: string,
@@ -120,14 +125,15 @@ export const syncPublicFiles = async (
 ) => {
     try {
         let files: EnteFile[] = [];
-        const localFiles = await getLocalPublicFiles(collection);
+        const collectionUID = getPublicCollectionUID(collection.key, token);
+        const localFiles = await getLocalPublicFiles(collectionUID);
         files.push(...localFiles);
         try {
             if (!token) {
                 return files;
             }
             const lastSyncTime = await getPublicCollectionLastSyncTime(
-                getCollectionUID(collection)
+                collectionUID
             );
             if (collection.updationTime === lastSyncTime) {
                 return files;
@@ -159,12 +165,9 @@ export const syncPublicFiles = async (
                 }
                 files.push(file);
             }
-            await savePublicCollectionFiles(
-                getCollectionUID(collection),
-                files
-            );
+            await savePublicCollectionFiles(collectionUID, files);
             await setPublicCollectionLastSyncTime(
-                getCollectionUID(collection),
+                collectionUID,
                 collection.updationTime
             );
             setPublicFiles([...sortFiles(mergeMetadata(files))]);
@@ -308,21 +311,17 @@ export const reportAbuse = async (
 };
 
 export const removePublicCollectionWithFiles = async (
+    token: string,
     collectionKey: string
 ) => {
+    const collectionUID = getPublicCollectionUID(collectionKey, token);
     const publicCollections =
-        (await localForage.getItem<Collection[]>(PUBLIC_COLLECTIONS_TABLE)) ??
+        (await localForage.getItem<Collection[]>(PUBLIC_COLLECTIONS_TABLE)) ||
         [];
-    const collectionToRemove = publicCollections.find(
-        (collection) => (collection.key = collectionKey)
-    );
-    if (!collectionToRemove) {
-        return;
-    }
     await localForage.setItem(
         PUBLIC_COLLECTIONS_TABLE,
         publicCollections.filter(
-            (collection) => collection.id !== collectionToRemove.id
+            (collection) => collection.key !== collectionKey
         )
     );
 
@@ -333,9 +332,7 @@ export const removePublicCollectionWithFiles = async (
     await localForage.setItem(
         PUBLIC_COLLECTION_FILES_TABLE,
         publicCollectionFiles.filter(
-            (collectionFiles) =>
-                collectionFiles.collectionUID ===
-                getCollectionUID(collectionToRemove)
+            (collectionFiles) => collectionFiles.collectionUID !== collectionUID
         )
     );
 };
