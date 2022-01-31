@@ -47,15 +47,25 @@ interface MLDb extends DBSchema {
 }
 
 class MLIDbStorage {
-    public db: Promise<IDBPDatabase<MLDb>>;
+    public _db: Promise<IDBPDatabase<MLDb>>;
 
     constructor() {
         if (!runningInBrowser()) {
             return;
         }
 
-        this.db = openDB<MLDb>(MLDATA_DB_NAME, 3, {
-            upgrade(db, oldVersion, newVersion, tx) {
+        this.db;
+    }
+
+    private openDB(): Promise<IDBPDatabase<MLDb>> {
+        const mlIDbStorage = this;
+        return openDB<MLDb>(MLDATA_DB_NAME, 3, {
+            async terminated() {
+                console.log('Indexed DB terminated');
+                mlIDbStorage._db = undefined;
+                await mlIDbStorage.db;
+            },
+            async upgrade(db, oldVersion, newVersion, tx) {
                 if (oldVersion < 1) {
                     const filesStore = db.createObjectStore('files', {
                         keyPath: 'fileId',
@@ -77,29 +87,39 @@ class MLIDbStorage {
                     // TODO: update configs if version is updated in defaults
                     db.createObjectStore('configs');
 
-                    tx.objectStore('configs').add(
-                        DEFAULT_ML_SYNC_JOB_CONFIG,
-                        ML_SYNC_JOB_CONFIG_NAME
-                    );
-                    tx.objectStore('configs').add(
-                        DEFAULT_ML_SYNC_CONFIG,
-                        ML_SYNC_CONFIG_NAME
-                    );
+                    await tx
+                        .objectStore('configs')
+                        .add(
+                            DEFAULT_ML_SYNC_JOB_CONFIG,
+                            ML_SYNC_JOB_CONFIG_NAME
+                        );
+                    await tx
+                        .objectStore('configs')
+                        .add(DEFAULT_ML_SYNC_CONFIG, ML_SYNC_CONFIG_NAME);
                 }
                 if (oldVersion < 3) {
-                    tx.objectStore('configs').add(
-                        DEFAULT_ML_SEARCH_CONFIG,
-                        ML_SEARCH_CONFIG_NAME
-                    );
+                    await tx
+                        .objectStore('configs')
+                        .add(DEFAULT_ML_SEARCH_CONFIG, ML_SEARCH_CONFIG_NAME);
                 }
             },
         });
     }
 
+    public get db(): Promise<IDBPDatabase<MLDb>> {
+        if (!this._db) {
+            this._db = this.openDB();
+        }
+
+        return this._db;
+    }
+
     public async clearMLDB() {
         const db = await this.db;
         db.close();
-        return deleteDB(MLDATA_DB_NAME);
+        await deleteDB(MLDATA_DB_NAME);
+        this._db = undefined;
+        await this.db;
     }
 
     public async getAllFileIds() {
