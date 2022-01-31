@@ -38,6 +38,7 @@ import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { storeFaceCrop } from 'utils/machineLearning/faceCrop';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
 import { CustomError, parseServerError } from 'utils/common/errorUtil';
+import { MAX_ML_SYNC_ERROR_COUNT } from 'constants/machineLearning/config';
 
 class MachineLearningService {
     private initialized = false;
@@ -217,7 +218,7 @@ class MachineLearningService {
         const fileIds = await mlIDbStorage.getFileIds(
             syncContext.config.batchSize,
             syncContext.config.mlVersion,
-            2
+            MAX_ML_SYNC_ERROR_COUNT
         );
 
         console.log('fileIds: ', fileIds);

@@ -440,6 +440,12 @@ const englishConstants = {
     METADATA: 'metadata',
     INFO: 'information',
     PEOPLE: 'people',
+    INDEXING_SCHEDULED: 'indexing is scheduled...',
+    ANALYZING_PHOTOS: (nSyncedFiles, nTotalFiles) =>
+        `analyzing new photos (${nSyncedFiles} of ${nTotalFiles} done)...`,
+    INDEXING_PEOPLE: (nSyncedFiles) =>
+        `indexing people in ${nSyncedFiles} photos...`,
+    INDEXING_DONE: (nSyncedFiles) => `indexed ${nSyncedFiles} photos`,
     UNIDENTIFIED_FACES: 'unidentified faces',
     FILE_ID: 'file id',
     FILE_NAME: 'file name',

@@ -7,6 +7,9 @@ import { Collection } from './collectionService';
 import { File } from './fileService';
 import { getAllPeople } from 'utils/machineLearning';
 import { logError } from 'utils/sentry';
+import constants from 'utils/strings/constants';
+import mlIDbStorage from 'utils/storage/mlIDbStorage';
+import { getMLSyncConfig } from 'utils/machineLearning/config';
 
 const ENDPOINT = getEndpoint();
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
@@ -118,6 +121,32 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
         value: person,
         hide: true,
     }));
+}
+
+export async function getIndexStatusSuggestion(): Promise<Suggestion> {
+    const config = await getMLSyncConfig();
+    const indexStatus = await mlIDbStorage.getIndexStatus(config.mlVersion);
+
+    let label;
+    if (!indexStatus.localFilesSynced) {
+        label = constants.INDEXING_SCHEDULED;
+    } else if (indexStatus.outOfSyncFilesExists) {
+        label = constants.ANALYZING_PHOTOS(
+            indexStatus.nSyncedFiles,
+            indexStatus.nTotalFiles
+        );
+    } else if (!indexStatus.peopleIndexSynced) {
+        label = constants.INDEXING_PEOPLE(indexStatus.nSyncedFiles);
+    } else {
+        label = constants.INDEXING_DONE(indexStatus.nSyncedFiles);
+    }
+
+    return {
+        label,
+        type: SuggestionType.INDEX_STATUS,
+        value: indexStatus,
+        hide: true,
+    };
 }
 
 export function searchCollection(

@@ -8,6 +8,7 @@ import {
     Bbox,
     getAllPeopleSuggestion,
     getHolidaySuggestion,
+    getIndexStatusSuggestion,
     getYearSuggestion,
     parseHumanDate,
     searchCollection,
@@ -29,6 +30,8 @@ import { IconButton } from './Container';
 import { Person } from 'types/machineLearning';
 import { PeopleList } from './MachineLearning/PeopleList';
 import { AppContext } from 'pages/_app';
+import { IndexStatus } from 'types/machineLearning/ui';
+import { Col, Row } from 'react-bootstrap';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -83,7 +86,18 @@ const Legend = styled.span`
     font-size: 20px;
     color: #ddd;
     display: inline;
-    padding: 20px 10px;
+    padding: 8px 12px;
+`;
+
+const Caption = styled.span`
+    font-size: 12px;
+    display: inline;
+    padding: 8px 12px;
+`;
+
+const LegendRow = styled(Row)`
+    align-items: center;
+    justify-content: space-between;
 `;
 
 export enum SuggestionType {
@@ -93,6 +107,7 @@ export enum SuggestionType {
     IMAGE,
     VIDEO,
     PERSON,
+    INDEX_STATUS,
 }
 export interface DateValue {
     date?: number;
@@ -102,7 +117,7 @@ export interface DateValue {
 export interface Suggestion {
     type: SuggestionType;
     label: string;
-    value: Bbox | DateValue | number | Person;
+    value: Bbox | DateValue | number | Person | IndexStatus;
     hide?: boolean;
 }
 interface Props {
@@ -147,6 +162,7 @@ export default function SearchBar(props: Props) {
         const options: Array<Suggestion> = [];
         searchPhrase = searchPhrase.trim().toLowerCase();
         if (appContext.mlSearchEnabled) {
+            options.push(await getIndexStatusSuggestion());
             options.push(...(await getAllPeopleSuggestion()));
         }
         if (!searchPhrase?.length) {
@@ -312,19 +328,35 @@ export default function SearchBar(props: Props) {
             (o) => o.type === SuggestionType.PERSON
         );
         const people = peopleSuggestions.map((o) => o.value);
+
+        const indexStatusSuggestion = props.selectProps.options.filter(
+            (o) => o.type === SuggestionType.INDEX_STATUS
+        )[0] as Suggestion;
+
+        const indexStatus = indexStatusSuggestion?.value as IndexStatus;
+
         return (
             <Menu {...props}>
-                {people && people.length > 0 && (
-                    <>
-                        <Legend>{constants.PEOPLE}</Legend>
-                        <PeopleList
-                            people={people}
-                            maxRows={2}
-                            onSelect={(person, index) => {
-                                selectRef.current.blur();
-                                setValue(peopleSuggestions[index]);
-                            }}></PeopleList>
-                    </>
+                {appContext.mlSearchEnabled && (
+                    <Col>
+                        <LegendRow>
+                            <Legend>{constants.PEOPLE}</Legend>
+                            {indexStatus && (
+                                <Caption>{indexStatusSuggestion.label}</Caption>
+                            )}
+                        </LegendRow>
+                        {people && people.length > 0 && (
+                            <Row>
+                                <PeopleList
+                                    people={people}
+                                    maxRows={2}
+                                    onSelect={(person, index) => {
+                                        selectRef.current.blur();
+                                        setValue(peopleSuggestions[index]);
+                                    }}></PeopleList>
+                            </Row>
+                        )}
+                    </Col>
                 )}
                 {props.children}
             </Menu>

@@ -2,6 +2,7 @@ import {
     DEFAULT_ML_SEARCH_CONFIG,
     DEFAULT_ML_SYNC_CONFIG,
     DEFAULT_ML_SYNC_JOB_CONFIG,
+    MAX_ML_SYNC_ERROR_COUNT,
 } from 'constants/machineLearning/config';
 import {
     openDB,
@@ -13,6 +14,7 @@ import {
 } from 'idb';
 import { Config } from 'types/common/config';
 import { Face, MlFileData, MLLibraryData, Person } from 'types/machineLearning';
+import { IndexStatus } from 'types/machineLearning/ui';
 import { runningInBrowser } from 'utils/common';
 
 export const ML_SYNC_JOB_CONFIG_NAME = 'ml-sync-job';
@@ -310,6 +312,52 @@ class MLIDbStorage {
     public async putConfig(name: string, data: Config) {
         const db = await this.db;
         return db.put('configs', data, name);
+    }
+
+    public async getIndexStatus(latestMlVersion: number): Promise<IndexStatus> {
+        const db = await this.db;
+        const tx = db.transaction(['files', 'versions'], 'readonly');
+        const mlVersionIdx = tx.objectStore('files').index('mlVersion');
+
+        let outOfSyncCursor = await mlVersionIdx.openKeyCursor(
+            IDBKeyRange.upperBound([latestMlVersion], true)
+        );
+        let outOfSyncFilesExists = false;
+        while (outOfSyncCursor && !outOfSyncFilesExists) {
+            if (
+                outOfSyncCursor.key[0] < latestMlVersion &&
+                outOfSyncCursor.key[1] <= MAX_ML_SYNC_ERROR_COUNT
+            ) {
+                outOfSyncFilesExists = true;
+            }
+            outOfSyncCursor = await outOfSyncCursor.continue();
+        }
+
+        const nSyncedFiles = await mlVersionIdx.count(
+            IDBKeyRange.lowerBound([latestMlVersion])
+        );
+        const nTotalFiles = await mlVersionIdx.count();
+
+        const filesIndexVersion = await tx.objectStore('versions').get('files');
+        const peopleIndexVersion = await tx
+            .objectStore('versions')
+            .get('people');
+        const filesIndexVersionExists =
+            filesIndexVersion !== null && filesIndexVersion !== undefined;
+        const peopleIndexVersionExists =
+            peopleIndexVersion !== null && peopleIndexVersion !== undefined;
+
+        await tx.done;
+
+        return {
+            outOfSyncFilesExists,
+            nSyncedFiles,
+            nTotalFiles,
+            localFilesSynced: filesIndexVersionExists,
+            peopleIndexSynced:
+                peopleIndexVersionExists &&
+                peopleIndexVersion === filesIndexVersion,
+        };
     }
 
     // for debug purpose
