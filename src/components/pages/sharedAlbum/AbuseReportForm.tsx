@@ -86,7 +86,7 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
             publicCollectionGalleryContent.setDialogMessage({
                 title: constants.REPORT_SUBMIT_SUCCESS_TITLE,
                 content: constants.REPORT_SUBMIT_SUCCESS_CONTENT,
-                close: { text: constants.CLOSE },
+                close: { text: constants.OK },
             });
         } catch (e) {
             setFieldError('signature', constants.REPORT_SUBMIT_FAILED);
