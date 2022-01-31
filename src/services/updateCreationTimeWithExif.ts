@@ -1,6 +1,5 @@
 import { FIX_OPTIONS } from 'components/FixCreationTime';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
-import CryptoWorker from 'utils/crypto';
 import {
     changeFileCreationTime,
     getFileFromURL,
@@ -8,12 +7,15 @@ import {
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import downloadManager from './downloadManager';
-import { File, FILE_TYPE, updatePublicMagicMetadata } from './fileService';
+import { updatePublicMagicMetadata } from './fileService';
+import { EnteFile } from 'types/file';
+
 import { getRawExif, getUNIXTime } from './upload/exifService';
 import { getFileType } from './upload/readFileService';
+import { FILE_TYPE } from 'constants/file';
 
 export async function updateCreationTimeWithExif(
-    filesToBeUpdated: File[],
+    filesToBeUpdated: EnteFile[],
     fixOption: FIX_OPTIONS,
     customTime: Date,
     setProgressTracker: SetProgressTracker
@@ -35,8 +37,8 @@ export async function updateCreationTimeWithExif(
                 } else {
                     const fileURL = await downloadManager.getFile(file);
                     const fileObject = await getFileFromURL(fileURL);
-                    const worker = await new CryptoWorker();
-                    const fileTypeInfo = await getFileType(worker, fileObject);
+                    const reader = new FileReader();
+                    const fileTypeInfo = await getFileType(reader, fileObject);
                     const exifData = await getRawExif(fileObject, fileTypeInfo);
                     if (fixOption === FIX_OPTIONS.DATE_TIME_ORIGINAL) {
                         correctCreationTime = getUNIXTime(

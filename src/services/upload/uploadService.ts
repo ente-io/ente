@@ -1,81 +1,33 @@
-import { fileAttribute } from '../fileService';
-import { Collection } from '../collectionService';
+import { Collection } from 'types/collection';
 import { logError } from 'utils/sentry';
 import UploadHttpClient from './uploadHttpClient';
-import {
-    extractMetadata,
-    getMetadataMapKey,
-    ParsedMetaDataJSON,
-} from './metadataService';
+import { extractMetadata, getMetadataMapKey } from './metadataService';
 import { generateThumbnail } from './thumbnailService';
-import {
-    getFileOriginalName,
-    getFileData,
-    FileTypeInfo,
-} from './readFileService';
+import { getFileOriginalName, getFileData } from './readFileService';
 import { encryptFiledata } from './encryptionService';
 import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
-import { handleUploadError } from 'utils/common/errorUtil';
-import { MetadataMap } from './uploadManager';
+import { handleUploadError } from 'utils/error';
 import {
-    DataStream,
+    B64EncryptionResult,
+    BackupedFile,
+    EncryptedFile,
     EncryptionResult,
-    FILE_READER_CHUNK_SIZE,
-    MetadataObject,
-    MULTIPART_PART_SIZE,
+    FileInMemory,
+    FileTypeInfo,
+    FileWithMetadata,
+    isDataStream,
+    MetadataMap,
+    Metadata,
+    ParsedMetadataJSON,
+    ProcessedFile,
+    UploadFile,
+    UploadURL,
 } from 'types/upload';
-
-export const FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART = Math.floor(
-    MULTIPART_PART_SIZE / FILE_READER_CHUNK_SIZE
-);
-
-export interface UploadURL {
-    url: string;
-    objectKey: string;
-}
-
-export function isDataStream(object: any): object is DataStream {
-    return 'stream' in object;
-}
-export interface B64EncryptionResult {
-    encryptedData: string;
-    key: string;
-    nonce: string;
-}
-
-export interface FileInMemory {
-    filedata: Uint8Array | DataStream;
-    thumbnail: Uint8Array;
-    hasStaticThumbnail: boolean;
-}
-
-export interface FileWithMetadata
-    extends Omit<FileInMemory, 'hasStaticThumbnail'> {
-    metadata: MetadataObject;
-}
-
-export interface EncryptedFile {
-    file: ProcessedFile;
-    fileKey: B64EncryptionResult;
-}
-export interface ProcessedFile {
-    file: fileAttribute;
-    thumbnail: fileAttribute;
-    metadata: fileAttribute;
-    filename: string;
-}
-export interface BackupedFile extends Omit<ProcessedFile, 'filename'> {}
-
-export interface UploadFile extends BackupedFile {
-    collectionID: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-}
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
-    private metadataMap: Map<string, ParsedMetaDataJSON>;
+    private metadataMap: Map<string, ParsedMetadataJSON>;
     private pendingUploadCount: number = 0;
 
     async init(fileCount: number, metadataMap: MetadataMap) {
@@ -84,18 +36,24 @@ class UploadService {
         await this.preFetchUploadURLs();
     }
 
+    reducePendingUploadCount() {
+        this.pendingUploadCount--;
+    }
+
     async readFile(
         worker: any,
-        rawFile: globalThis.File,
+        reader: FileReader,
+        rawFile: File,
         fileTypeInfo: FileTypeInfo
     ): Promise<FileInMemory> {
         const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
             worker,
+            reader,
             rawFile,
             fileTypeInfo
         );
 
-        const filedata = await getFileData(worker, rawFile);
+        const filedata = await getFileData(reader, rawFile);
 
         return {
             filedata,
@@ -108,13 +66,13 @@ class UploadService {
         rawFile: File,
         collection: Collection,
         fileTypeInfo: FileTypeInfo
-    ): Promise<MetadataObject> {
+    ): Promise<Metadata> {
         const originalName = getFileOriginalName(rawFile);
         const googleMetadata =
             this.metadataMap.get(
                 getMetadataMapKey(collection.id, originalName)
             ) ?? {};
-        const extractedMetadata: MetadataObject = await extractMetadata(
+        const extractedMetadata: Metadata = await extractMetadata(
             rawFile,
             fileTypeInfo
         );

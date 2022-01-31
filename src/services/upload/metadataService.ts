@@ -1,35 +1,27 @@
-import { FILE_TYPE } from 'services/fileService';
+import { FILE_TYPE } from 'constants/file';
 import { logError } from 'utils/sentry';
 import { getExifData } from './exifService';
-import { FileTypeInfo } from './readFileService';
-import { MetadataObject } from 'types/upload';
+import {
+    Metadata,
+    ParsedMetadataJSON,
+    Location,
+    FileTypeInfo,
+} from 'types/upload';
+import { NULL_LOCATION } from 'constants/upload';
 
-export interface Location {
-    latitude: number;
-    longitude: number;
-}
-
-export interface ParsedMetaDataJSON {
-    creationTime: number;
-    modificationTime: number;
-    latitude: number;
-    longitude: number;
-}
-interface ParsedMetaDataJSONWithTitle {
+interface ParsedMetadataJSONWithTitle {
     title: string;
-    parsedMetaDataJSON: ParsedMetaDataJSON;
+    parsedMetadataJSON: ParsedMetadataJSON;
 }
 
-export const NULL_LOCATION: Location = { latitude: null, longitude: null };
-
-const NULL_PARSED_METADATA_JSON: ParsedMetaDataJSON = {
+const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     creationTime: null,
     modificationTime: null,
     ...NULL_LOCATION,
 };
 
 export async function extractMetadata(
-    receivedFile: globalThis.File,
+    receivedFile: File,
     fileTypeInfo: FileTypeInfo
 ) {
     let exifData = null;
@@ -37,7 +29,7 @@ export async function extractMetadata(
         exifData = await getExifData(receivedFile, fileTypeInfo);
     }
 
-    const extractedMetadata: MetadataObject = {
+    const extractedMetadata: Metadata = {
         title: receivedFile.name,
         creationTime:
             exifData?.creationTime ?? receivedFile.lastModified * 1000,
@@ -52,10 +44,12 @@ export async function extractMetadata(
 export const getMetadataMapKey = (collectionID: number, title: string) =>
     `${collectionID}_${title}`;
 
-export async function parseMetadataJSON(receivedFile: globalThis.File) {
+export async function parseMetadataJSON(
+    reader: FileReader,
+    receivedFile: File
+) {
     try {
         const metadataJSON: object = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
             reader.onabort = () => reject(Error('file reading was aborted'));
             reader.onerror = () => reject(Error('file reading has failed'));
             reader.onload = () => {
@@ -68,7 +62,7 @@ export async function parseMetadataJSON(receivedFile: globalThis.File) {
             reader.readAsText(receivedFile);
         });
 
-        const parsedMetaDataJSON: ParsedMetaDataJSON =
+        const parsedMetadataJSON: ParsedMetadataJSON =
             NULL_PARSED_METADATA_JSON;
         if (!metadataJSON || !metadataJSON['title']) {
             return;
@@ -79,20 +73,20 @@ export async function parseMetadataJSON(receivedFile: globalThis.File) {
             metadataJSON['photoTakenTime'] &&
             metadataJSON['photoTakenTime']['timestamp']
         ) {
-            parsedMetaDataJSON.creationTime =
+            parsedMetadataJSON.creationTime =
                 metadataJSON['photoTakenTime']['timestamp'] * 1000000;
         } else if (
             metadataJSON['creationTime'] &&
             metadataJSON['creationTime']['timestamp']
         ) {
-            parsedMetaDataJSON.creationTime =
+            parsedMetadataJSON.creationTime =
                 metadataJSON['creationTime']['timestamp'] * 1000000;
         }
         if (
             metadataJSON['modificationTime'] &&
             metadataJSON['modificationTime']['timestamp']
         ) {
-            parsedMetaDataJSON.modificationTime =
+            parsedMetadataJSON.modificationTime =
                 metadataJSON['modificationTime']['timestamp'] * 1000000;
         }
         let locationData: Location = NULL_LOCATION;
@@ -110,10 +104,10 @@ export async function parseMetadataJSON(receivedFile: globalThis.File) {
             locationData = metadataJSON['geoDataExif'];
         }
         if (locationData !== null) {
-            parsedMetaDataJSON.latitude = locationData.latitude;
-            parsedMetaDataJSON.longitude = locationData.longitude;
+            parsedMetadataJSON.latitude = locationData.latitude;
+            parsedMetadataJSON.longitude = locationData.longitude;
         }
-        return { title, parsedMetaDataJSON } as ParsedMetaDataJSONWithTitle;
+        return { title, parsedMetadataJSON } as ParsedMetadataJSONWithTitle;
     } catch (e) {
         logError(e, 'parseMetadataJSON failed');
         // ignore

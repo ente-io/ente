@@ -6,7 +6,7 @@ import {
     getUnidentifiedFaces,
 } from 'utils/machineLearning';
 import styled from 'styled-components';
-import { File } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import { ImageCacheView } from './ImageViews';
 
 const FaceChipContainer = styled.div`
@@ -68,7 +68,7 @@ export function PeopleList(props: PeopleListProps) {
 }
 
 export interface PhotoPeopleListProps extends PeopleListPropsBase {
-    file: File;
+    file: EnteFile;
 }
 
 export function PhotoPeopleList(props: PhotoPeopleListProps) {
@@ -124,7 +124,7 @@ export function AllPeopleList(props: AllPeopleListProps) {
     return <PeopleList people={people} onSelect={props.onSelect}></PeopleList>;
 }
 
-export function UnidentifiedFaces(props: { file: File }) {
+export function UnidentifiedFaces(props: { file: EnteFile }) {
     const [faces, setFaces] = useState<Array<Face>>([]);
 
     useEffect(() => {

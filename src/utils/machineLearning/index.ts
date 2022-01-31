@@ -4,7 +4,8 @@ import { ML_SYNC_DOWNLOAD_TIMEOUT_MS } from 'constants/machineLearning/config';
 import { euclidean } from 'hdbscan';
 import PQueue from 'p-queue';
 import DownloadManager from 'services/downloadManager';
-import { File, getLocalFiles } from 'services/fileService';
+import { getLocalFiles } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import { Dimensions } from 'types/image';
 import {
     AlignedFace,
@@ -206,7 +207,7 @@ export async function getFaceImage(
     face: AlignedFace,
     token: string,
     faceSize: number = BLAZEFACE_FACE_SIZE,
-    file?: File
+    file?: EnteFile
 ): Promise<FaceImageBlob> {
     if (!file) {
         file = await getLocalFile(face.fileId);
@@ -289,7 +290,7 @@ export async function getImageBitmap(blob: Blob): Promise<ImageBitmap> {
 // }
 
 async function getOriginalImageFile(
-    file: File,
+    file: EnteFile,
     token: string,
     enteWorker?: any,
     queue?: PQueue
@@ -315,7 +316,7 @@ async function getOriginalImageFile(
 }
 
 async function getOriginalConvertedFile(
-    file: File,
+    file: EnteFile,
     token: string,
     enteWorker?: any,
     queue?: PQueue
@@ -329,7 +330,7 @@ async function getOriginalConvertedFile(
 }
 
 export async function getOriginalImageBitmap(
-    file: File,
+    file: EnteFile,
     token: string,
     enteWorker?: any,
     queue?: PQueue,
@@ -354,7 +355,7 @@ export async function getOriginalImageBitmap(
     return getImageBitmap(fileBlob);
 }
 
-export async function getThumbnailImageBitmap(file: File, token: string) {
+export async function getThumbnailImageBitmap(file: EnteFile, token: string) {
     const fileUrl = await DownloadManager.getThumbnail(
         file,
         token,
@@ -368,7 +369,7 @@ export async function getThumbnailImageBitmap(file: File, token: string) {
 }
 
 export async function getLocalFileImageBitmap(
-    enteFile: File,
+    enteFile: EnteFile,
     localFile: globalThis.File,
     enteWorkerProvider?: () => Promise<any>
 ) {
@@ -380,7 +381,7 @@ export async function getLocalFileImageBitmap(
     return getImageBitmap(fileBlob);
 }
 
-export async function getPeopleList(file: File): Promise<Array<Person>> {
+export async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
     console.time('getPeopleList:mlFilesStore:getItem');
     const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
     console.timeEnd('getPeopleList:mlFilesStore:getItem');
@@ -406,7 +407,9 @@ export async function getPeopleList(file: File): Promise<Array<Person>> {
     return peopleList;
 }
 
-export async function getUnidentifiedFaces(file: File): Promise<Array<Face>> {
+export async function getUnidentifiedFaces(
+    file: EnteFile
+): Promise<Array<Face>> {
     const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
 
     return mlFileData?.faces?.filter(

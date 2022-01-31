@@ -7,11 +7,8 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from 'services/collectionService';
-import {
-    File,
-    MAX_EDITED_FILE_NAME_LENGTH,
-    updatePublicMagicMetadata,
-} from 'services/fileService';
+import { updatePublicMagicMetadata } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import constants from 'utils/strings/constants';
 import exifr from 'exifr';
 import Modal from 'react-bootstrap/Modal';
@@ -31,6 +28,7 @@ import { prettyPrintExif } from 'utils/exif';
 import EditIcon from 'components/icons/EditIcon';
 import {
     FlexWrapper,
+    FreeFlowText,
     IconButton,
     Label,
     Row,
@@ -44,23 +42,34 @@ import {
     PhotoPeopleList,
     UnidentifiedFaces,
 } from 'components/MachineLearning/PeopleList';
-import { FreeFlowText } from 'components/RecoveryKeyModal';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
 import { AppContext } from 'pages/_app';
 
+import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
+import { sleep } from 'utils/common';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
+import { GalleryContext } from 'pages/gallery';
+
+const SmallLoadingSpinner = () => (
+    <EnteSpinner
+        style={{
+            width: '20px',
+            height: '20px',
+        }}
+    />
+);
 interface Iprops {
     isOpen: boolean;
     items: any[];
     currentIndex?: number;
     onClose?: (needUpdate: boolean) => void;
-    gettingData: (instance: any, index: number, item: File) => void;
+    gettingData: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
     className?: string;
     favItemIds: Set<number>;
-    loadingBar: any;
     isSharedCollection: boolean;
     isTrashCollection: boolean;
 }
@@ -89,12 +98,15 @@ const renderInfoItem = (label: string, value: string | JSX.Element) => (
 );
 
 function RenderCreationTime({
+    shouldDisableEdits,
     file,
     scheduleUpdate,
 }: {
-    file: File;
+    shouldDisableEdits: boolean;
+    file: EnteFile;
     scheduleUpdate: () => void;
 }) {
+    const [loading, setLoading] = useState(false);
     const originalCreationTime = new Date(file?.metadata.creationTime / 1000);
     const [isInEditMode, setIsInEditMode] = useState(false);
 
@@ -105,6 +117,7 @@ function RenderCreationTime({
 
     const saveEdits = async () => {
         try {
+            setLoading(true);
             if (isInEditMode && file) {
                 const unixTimeInMicroSec = pickedTime.getTime() * 1000;
                 if (unixTimeInMicroSec === file?.metadata.creationTime) {
@@ -123,14 +136,16 @@ function RenderCreationTime({
             }
         } catch (e) {
             logError(e, 'failed to update creationTime');
+        } finally {
+            closeEditMode();
+            setLoading(false);
         }
-        closeEditMode();
     };
     const discardEdits = () => {
         setPickedTime(originalCreationTime);
         closeEditMode();
     };
-    const handleChange = (newDate) => {
+    const handleChange = (newDate: Date) => {
         if (newDate instanceof Date) {
             setPickedTime(newDate);
         }
@@ -142,6 +157,7 @@ function RenderCreationTime({
                 <Value width={isInEditMode ? '50%' : '60%'}>
                     {isInEditMode ? (
                         <EnteDateTimePicker
+                            loading={loading}
                             isInEditMode={isInEditMode}
                             pickedTime={pickedTime}
                             handleChange={handleChange}
@@ -153,20 +169,25 @@ function RenderCreationTime({
                 <Value
                     width={isInEditMode ? '20%' : '10%'}
                     style={{ cursor: 'pointer', marginLeft: '10px' }}>
-                    {!isInEditMode ? (
-                        <IconButton onClick={openEditMode}>
-                            <EditIcon />
-                        </IconButton>
-                    ) : (
-                        <>
-                            <IconButton onClick={saveEdits}>
-                                <TickIcon />
+                    {!shouldDisableEdits &&
+                        (!isInEditMode ? (
+                            <IconButton onClick={openEditMode}>
+                                <EditIcon />
                             </IconButton>
-                            <IconButton onClick={discardEdits}>
-                                <CloseIcon />
-                            </IconButton>
-                        </>
-                    )}
+                        ) : (
+                            <>
+                                <IconButton onClick={saveEdits}>
+                                    {loading ? (
+                                        <SmallLoadingSpinner />
+                                    ) : (
+                                        <TickIcon />
+                                    )}
+                                </IconButton>
+                                <IconButton onClick={discardEdits}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </>
+                        ))}
                 </Value>
             </Row>
         </>
@@ -244,12 +265,7 @@ const FileNameEditForm = ({ filename, saveEdits, discardEdits, extension }) => {
                             <Value width={'16.67%'}>
                                 <IconButton type="submit" disabled={loading}>
                                     {loading ? (
-                                        <EnteSpinner
-                                            style={{
-                                                width: '20px',
-                                                height: '20px',
-                                            }}
-                                        />
+                                        <SmallLoadingSpinner />
                                     ) : (
                                         <TickIcon />
                                     )}
@@ -269,10 +285,12 @@ const FileNameEditForm = ({ filename, saveEdits, discardEdits, extension }) => {
 };
 
 function RenderFileName({
+    shouldDisableEdits,
     file,
     scheduleUpdate,
 }: {
-    file: File;
+    shouldDisableEdits: boolean;
+    file: EnteFile;
     scheduleUpdate: () => void;
 }) {
     const originalTitle = file?.metadata.title;
@@ -316,13 +334,18 @@ function RenderFileName({
                                 {getFileTitle(filename, extension)}
                             </FreeFlowText>
                         </Value>
-                        <Value
-                            width="10%"
-                            style={{ cursor: 'pointer', marginLeft: '10px' }}>
-                            <IconButton onClick={openEditMode}>
-                                <EditIcon />
-                            </IconButton>
-                        </Value>
+                        {!shouldDisableEdits && (
+                            <Value
+                                width="10%"
+                                style={{
+                                    cursor: 'pointer',
+                                    marginLeft: '10px',
+                                }}>
+                                <IconButton onClick={openEditMode}>
+                                    <EditIcon />
+                                </IconButton>
+                            </Value>
+                        )}
                     </>
                 ) : (
                     <FileNameEditForm
@@ -390,6 +413,7 @@ function ExifData(props: { exif: any }) {
 }
 
 function InfoModal({
+    shouldDisableEdits,
     showInfo,
     handleCloseInfo,
     items,
@@ -414,12 +438,14 @@ function InfoModal({
                 )}
                 {metadata?.title && (
                     <RenderFileName
+                        shouldDisableEdits={shouldDisableEdits}
                         file={items[photoSwipe?.getCurrentIndex()]}
                         scheduleUpdate={scheduleUpdate}
                     />
                 )}
                 {metadata?.creationTime && (
                     <RenderCreationTime
+                        shouldDisableEdits={shouldDisableEdits}
                         file={items[photoSwipe?.getCurrentIndex()]}
                         scheduleUpdate={scheduleUpdate}
                     />
@@ -478,9 +504,13 @@ function PhotoSwipe(props: Iprops) {
     const { isOpen, items } = props;
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
-    const [metadata, setMetaData] = useState<File['metadata']>(null);
+    const [metadata, setMetaData] = useState<EnteFile['metadata']>(null);
     const [exif, setExif] = useState<any>(null);
     const needUpdate = useRef(false);
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
+    const galleryContext = useContext(GalleryContext);
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -627,26 +657,28 @@ function PhotoSwipe(props: Iprops) {
         }
     };
 
-    const checkExifAvailable = () => {
+    const checkExifAvailable = async () => {
         setExif(null);
-        setTimeout(() => {
+        await sleep(100);
+        try {
             const img: HTMLImageElement = document.querySelector(
                 '.pswp__img:not(.pswp__img--placeholder)'
             );
             if (img) {
-                exifr.parse(img).then(function (exifData) {
-                    if (!exifData) {
-                        return;
-                    }
-                    exifData.raw = prettyPrintExif(exifData);
-                    setExif(exifData);
-                });
+                const exifData = await exifr.parse(img);
+                if (!exifData) {
+                    return;
+                }
+                exifData.raw = prettyPrintExif(exifData);
+                setExif(exifData);
             }
-        }, 100);
+        } catch (e) {
+            logError(e, 'exifr parsing failed');
+        }
     };
 
     function updateInfo() {
-        const file: File = this?.currItem;
+        const file: EnteFile = this?.currItem;
         if (file?.metadata) {
             setMetaData(file.metadata);
             setExif(null);
@@ -662,10 +694,14 @@ function PhotoSwipe(props: Iprops) {
     };
 
     const downloadFileHelper = async (file) => {
-        const { loadingBar } = props;
-        loadingBar.current.continuousStart();
-        await downloadFile(file);
-        loadingBar.current.complete();
+        galleryContext.startLoading();
+        await downloadFile(
+            file,
+            publicCollectionGalleryContext.accessedThroughSharedURL,
+            publicCollectionGalleryContext.token
+        );
+
+        galleryContext.finishLoading();
     };
     const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;
@@ -753,6 +789,7 @@ function PhotoSwipe(props: Iprops) {
                 </div>
             </div>
             <InfoModal
+                shouldDisableEdits={props.isSharedCollection}
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
                 items={items}

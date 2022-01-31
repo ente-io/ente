@@ -10,7 +10,7 @@ import { DebugInfo } from 'hdbscan';
 import PQueue from 'p-queue';
 
 import { Point as D3Point, RawNodeDatum } from 'react-d3-tree/lib/types/common';
-import { File } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import { Config } from 'types/common/config';
 import { Dimensions } from 'types/image';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
@@ -259,8 +259,8 @@ export interface MLSyncContext {
     faceEmbeddingService: FaceEmbeddingService;
     faceClusteringService: ClusteringService;
 
-    localFilesMap: Map<number, File>;
-    outOfSyncFiles: File[];
+    localFilesMap: Map<number, EnteFile>;
+    outOfSyncFiles: EnteFile[];
     nSyncedFiles: number;
     nSyncedFaces: number;
     allSyncedFacesMap?: Map<number, Array<Face>>;
@@ -278,7 +278,7 @@ export interface MLSyncContext {
 }
 
 export interface MLSyncFileContext {
-    enteFile: File;
+    enteFile: EnteFile;
     localFile?: globalThis.File;
 
     oldMlFile?: MlFileData;
@@ -366,7 +366,7 @@ export interface MachineLearningWorker {
 
     syncLocalFile(
         token: string,
-        enteFile: File,
+        enteFile: EnteFile,
         localFile: globalThis.File
     ): Promise<MlFileData | Error>;
 

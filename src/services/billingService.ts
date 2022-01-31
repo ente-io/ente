@@ -1,10 +1,11 @@
-import { getEndpoint, getPaymentsUrl } from 'utils/common/apiUtil';
+import { getEndpoint, getPaymentsURL } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { setData, LS_KEYS } from 'utils/storage/localStorage';
-import { convertToHumanReadable } from 'utils/billingUtil';
+import { convertToHumanReadable } from 'utils/billing';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { getPaymentToken } from './userService';
+import { Plan, Subscription } from 'types/billing';
 
 const ENDPOINT = getEndpoint();
 
@@ -12,37 +13,25 @@ enum PaymentActionType {
     Buy = 'buy',
     Update = 'update',
 }
-export interface Subscription {
-    id: number;
-    userID: number;
-    productID: string;
-    storage: number;
-    originalTransactionID: string;
-    expiryTime: number;
-    paymentProvider: string;
-    attributes: {
-        isCancelled: boolean;
-    };
-    price: string;
-    period: string;
-}
-export interface Plan {
-    id: string;
-    androidID: string;
-    iosID: string;
-    storage: number;
-    price: string;
-    period: string;
-    stripeID: string;
-}
 
-export const FREE_PLAN = 'free';
 class billingService {
     public async getPlans(): Promise<Plan[]> {
+        const token = getToken();
         try {
-            const response = await HTTPService.get(
-                `${ENDPOINT}/billing/plans/v2`
-            );
+            let response;
+            if (!token) {
+                response = await HTTPService.get(
+                    `${ENDPOINT}/billing/plans/v2`
+                );
+            } else {
+                response = await HTTPService.get(
+                    `${ENDPOINT}/billing/user-plans`,
+                    null,
+                    {
+                        'X-Auth-Token': getToken(),
+                    }
+                );
+            }
             const { plans } = response.data;
             return plans;
         } catch (e) {
@@ -165,7 +154,7 @@ class billingService {
         action: string
     ) {
         try {
-            window.location.href = `${getPaymentsUrl()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${
+            window.location.href = `${getPaymentsURL()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${
                 window.location.origin
             }/gallery`;
         } catch (e) {

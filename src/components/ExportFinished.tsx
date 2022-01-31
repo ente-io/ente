@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
-import { ExportStats } from 'services/exportService';
+import { ExportStats } from 'types/export';
 import { formatDateTime } from 'utils/file';
 import constants from 'utils/strings/constants';
 import { Label, Row, Value } from './Container';
@@ -29,8 +29,8 @@ export default function ExportFinished(props: Props) {
                     padding: '0 5%',
                 }}>
                 <Row>
-                    <Label width="40%">{constants.LAST_EXPORT_TIME}</Label>
-                    <Value width="60%">
+                    <Label width="35%">{constants.LAST_EXPORT_TIME}</Label>
+                    <Value width="65%">
                         {formatDateTime(props.lastExportTime)}
                     </Value>
                 </Row>
@@ -38,7 +38,7 @@ export default function ExportFinished(props: Props) {
                     <Label width="60%">
                         {constants.SUCCESSFULLY_EXPORTED_FILES}
                     </Label>
-                    <Value width="35%">
+                    <Value width="40%">
                         <ComfySpan>
                             {props.exportStats.success} / {totalFiles}
                         </ComfySpan>

@@ -1,4 +1,4 @@
-import { KeyAttributes, PAGES } from 'types';
+import { PAGES } from 'constants/pages';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import router from 'next/router';
@@ -8,70 +8,20 @@ import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
 import { B64EncryptionResult } from 'utils/crypto';
 import { logError } from 'utils/sentry';
-import { Subscription } from './billingService';
 import { eventBus, Events } from './events';
+import {
+    KeyAttributes,
+    UpdatedKey,
+    RecoveryKey,
+    TwoFactorSecret,
+    TwoFactorVerificationResponse,
+    TwoFactorRecoveryResponse,
+    UserDetails,
+} from 'types/user';
 
-export interface UpdatedKey {
-    kekSalt: string;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    memLimit: number;
-    opsLimit: number;
-}
-
-export interface RecoveryKey {
-    masterKeyEncryptedWithRecoveryKey: string;
-    masterKeyDecryptionNonce: string;
-    recoveryKeyEncryptedWithMasterKey: string;
-    recoveryKeyDecryptionNonce: string;
-}
 const ENDPOINT = getEndpoint();
 
 const HAS_SET_KEYS = 'hasSetKeys';
-
-export const FIX_CREATION_TIME_VISIBLE_TO_USER_IDS = [1, 125, 243, 341];
-
-export interface User {
-    id: number;
-    name: string;
-    email: string;
-    token: string;
-    encryptedToken: string;
-    isTwoFactorEnabled: boolean;
-    twoFactorSessionID: string;
-}
-export interface EmailVerificationResponse {
-    id: number;
-    keyAttributes?: KeyAttributes;
-    encryptedToken?: string;
-    token?: string;
-    twoFactorSessionID: string;
-}
-
-export interface TwoFactorVerificationResponse {
-    id: number;
-    keyAttributes: KeyAttributes;
-    encryptedToken?: string;
-    token?: string;
-}
-
-export interface TwoFactorSecret {
-    secretCode: string;
-    qrCode: string;
-}
-
-export interface TwoFactorRecoveryResponse {
-    encryptedSecret: string;
-    secretDecryptionNonce: string;
-}
-
-export interface UserDetails {
-    email: string;
-    usage: number;
-    fileCount: number;
-    sharedCollectionCount: number;
-    subscription: Subscription;
-}
 
 export const getOtt = (email: string) =>
     HTTPService.get(`${ENDPOINT}/users/ott`, {
@@ -123,18 +73,26 @@ export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) =>
     });
 
 export const logoutUser = async () => {
-    // ignore server logout result as logoutUser can be triggered before sign up or on token expiry
-    await _logout();
-    clearKeys();
-    clearData();
-    await caches.delete('thumbs');
-    await clearFiles();
-    router.push(PAGES.ROOT);
-
     try {
-        eventBus.emit(Events.LOGOUT);
+        // ignore server logout result as logoutUser can be triggered before sign up or on token expiry
+        await _logout();
+        clearKeys();
+        clearData();
+        try {
+            await caches.delete('thumbs');
+        } catch (e) {
+            // ignore
+        }
+        await clearFiles();
+        router.push(PAGES.ROOT);
+
+        try {
+            eventBus.emit(Events.LOGOUT);
+        } catch (e) {
+            logError(e, 'Error in logout handlers');
+        }
     } catch (e) {
-        logError(e, 'Error in logout handlers');
+        logError(e, 'logoutUser failed');
     }
 };
 

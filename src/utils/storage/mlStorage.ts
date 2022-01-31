@@ -1,4 +1,4 @@
-import { File } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import {
     Face,
     MlFileData,
@@ -72,7 +72,7 @@ export async function isVersionOutdated(index: MLIndex, thanIndex: MLIndex) {
 
 export function newMlData(
     syncContext: MLSyncContext,
-    enteFile: File
+    enteFile: EnteFile
 ): MlFileData {
     return {
         fileId: enteFile.id,

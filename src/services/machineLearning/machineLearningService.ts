@@ -1,4 +1,6 @@
-import { File, FILE_TYPE, getLocalFiles } from 'services/fileService';
+import { getLocalFiles } from 'services/fileService';
+import { EnteFile } from 'types/file';
+import { FILE_TYPE } from 'constants/file';
 
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
@@ -37,7 +39,7 @@ import { MLFactory } from './machineLearningFactory';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { storeFaceCrop } from 'utils/machineLearning/faceCrop';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
-import { CustomError, parseServerError } from 'utils/common/errorUtil';
+import { CustomError, parseServerError } from 'utils/error';
 import { MAX_ML_SYNC_ERROR_COUNT } from 'constants/machineLearning/config';
 
 class MachineLearningService {
@@ -134,7 +136,7 @@ class MachineLearningService {
     private async getLocalFilesMap(syncContext: MLSyncContext) {
         if (!syncContext.localFilesMap) {
             const localFiles = await getLocalFiles();
-            syncContext.localFilesMap = new Map<number, File>();
+            syncContext.localFilesMap = new Map<number, EnteFile>();
             localFiles.forEach((f) => syncContext.localFilesMap.set(f.id, f));
         }
 
@@ -234,11 +236,11 @@ class MachineLearningService {
     // remove, already done
     private async getUniqueOutOfSyncFilesNoIdx(
         syncContext: MLSyncContext,
-        files: File[]
+        files: EnteFile[]
     ) {
         const limit = syncContext.config.batchSize;
         const mlVersion = syncContext.config.mlVersion;
-        const uniqueFiles: Map<number, File> = new Map<number, File>();
+        const uniqueFiles: Map<number, EnteFile> = new Map<number, EnteFile>();
         for (let i = 0; uniqueFiles.size < limit && i < files.length; i++) {
             const mlFileData = await this.getMLFileData(files[i].id);
             const mlFileVersion = mlFileData?.mlVersion || 0;
@@ -325,7 +327,7 @@ class MachineLearningService {
 
     public async syncLocalFile(
         token: string,
-        enteFile: File,
+        enteFile: EnteFile,
         localFile: globalThis.File
     ): Promise<MlFileData | Error> {
         const syncContext = await this.getLocalSyncContext(token);
@@ -350,7 +352,7 @@ class MachineLearningService {
 
     private async syncFileWithErrorHandler(
         syncContext: MLSyncContext,
-        enteFile: File,
+        enteFile: EnteFile,
         localFile?: globalThis.File
     ): Promise<MlFileData> {
         try {
@@ -387,7 +389,7 @@ class MachineLearningService {
 
     private async syncFile(
         syncContext: MLSyncContext,
-        enteFile: File,
+        enteFile: EnteFile,
         localFile?: globalThis.File
     ) {
         const fileContext: MLSyncFileContext = { enteFile, localFile };
@@ -689,7 +691,7 @@ class MachineLearningService {
 
     private async persistMLFileSyncError(
         syncContext: MLSyncContext,
-        enteFile: File,
+        enteFile: EnteFile,
         e: Error
     ) {
         try {

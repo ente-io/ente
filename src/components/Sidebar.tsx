@@ -13,10 +13,10 @@ import {
     isSubscriptionCancelled,
     isSubscribed,
     convertToHumanReadable,
-} from 'utils/billingUtil';
+} from 'utils/billing';
 
 import isElectron from 'is-electron';
-import { Collection } from 'services/collectionService';
+import { Collection } from 'types/collection';
 import { useRouter } from 'next/router';
 import LinkButton from './pages/gallery/LinkButton';
 import { downloadApp } from 'utils/common';
@@ -27,18 +27,16 @@ import EnteSpinner from './EnteSpinner';
 import RecoveryKeyModal from './RecoveryKeyModal';
 import TwoFactorModal from './TwoFactorModal';
 import ExportModal from './ExportModal';
-import { GalleryContext, SetLoading } from 'pages/gallery';
+import { GalleryContext } from 'pages/gallery';
 import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
-import { Subscription } from 'services/billingService';
-import { PAGES } from 'types';
-import {
-    ARCHIVE_SECTION,
-    TRASH_SECTION,
-} from 'components/pages/gallery/Collections';
+import { Subscription } from 'types/billing';
+import { PAGES } from 'constants/pages';
+import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 import FixLargeThumbnails from './FixLargeThumbnail';
 import { AppContext } from 'pages/_app';
 import { canEnableMlSearch } from 'utils/machineLearning/compatibility';
+import { SetLoading } from 'types/gallery';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -249,7 +247,9 @@ export default function Sidebar(props: Props) {
                         onHide={() => setRecoveryModalView(false)}
                         somethingWentWrong={() =>
                             props.setDialogMessage({
-                                title: constants.RECOVER_KEY_GENERATION_FAILED,
+                                title: constants.ERROR,
+                                content:
+                                    constants.RECOVER_KEY_GENERATION_FAILED,
                                 close: { variant: 'danger' },
                             })
                         }

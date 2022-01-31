@@ -1,5 +1,5 @@
 import { getToken } from 'utils/common/key';
-import { getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
+import { getFileURL, getThumbnailURL } from 'utils/common/apiUtil';
 import CryptoWorker from 'utils/crypto';
 import {
     generateStreamFromArrayBuffer,
@@ -7,15 +7,16 @@ import {
     needsConversionForPreview,
 } from 'utils/file';
 import HTTPService from './HTTPService';
-import { File, FILE_TYPE } from './fileService';
+import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
+import { FILE_TYPE } from 'constants/file';
 
 class DownloadManager {
-    private fileObjectUrlPromise = new Map<string, Promise<string>>();
-    private thumbnailObjectUrlPromise = new Map<number, Promise<string>>();
+    private fileObjectURLPromise = new Map<string, Promise<string>>();
+    private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
 
     public async getThumbnail(
-        file: File,
+        file: EnteFile,
         tokenOverride?: string,
         timeout?: number
     ) {
@@ -24,10 +25,18 @@ class DownloadManager {
             if (!token) {
                 return null;
             }
-            if (!this.thumbnailObjectUrlPromise.get(file.id)) {
+            if (!this.thumbnailObjectURLPromise.get(file.id)) {
                 const downloadPromise = async () => {
-                    const thumbnailCache = await caches.open('thumbs');
-                    const cacheResp: Response = await thumbnailCache.match(
+                    const thumbnailCache = await (async () => {
+                        try {
+                            return await caches.open('thumbs');
+                        } catch (e) {
+                            return null;
+                            // ignore
+                        }
+                    })();
+
+                    const cacheResp: Response = await thumbnailCache?.match(
                         '/' + file.id.toString()
                     );
                     if (cacheResp) {
@@ -40,7 +49,7 @@ class DownloadManager {
                     );
                     const thumbBlob = new Blob([thumb]);
                     try {
-                        await thumbnailCache.put(
+                        await thumbnailCache?.put(
                             file.id.toString(),
                             new Response(thumbBlob)
                         );
@@ -49,20 +58,20 @@ class DownloadManager {
                     }
                     return URL.createObjectURL(thumbBlob);
                 };
-                this.thumbnailObjectUrlPromise.set(file.id, downloadPromise());
+                this.thumbnailObjectURLPromise.set(file.id, downloadPromise());
             }
 
-            return await this.thumbnailObjectUrlPromise.get(file.id);
+            return await this.thumbnailObjectURLPromise.get(file.id);
         } catch (e) {
-            this.thumbnailObjectUrlPromise.delete(file.id);
+            this.thumbnailObjectURLPromise.delete(file.id);
             logError(e, 'get preview Failed');
             throw e;
         }
     }
 
-    downloadThumb = async (token: string, file: File, timeout?: number) => {
+    downloadThumb = async (token: string, file: EnteFile, timeout?: number) => {
         const resp = await HTTPService.get(
-            getThumbnailUrl(file.id),
+            getThumbnailURL(file.id),
             null,
             { 'X-Auth-Token': token },
             { responseType: 'arraybuffer', timeout }
@@ -77,7 +86,7 @@ class DownloadManager {
     };
 
     getFile = async (
-        file: File,
+        file: EnteFile,
         forPreview = false,
         tokenOverride?: string
     ) => {
@@ -94,27 +103,27 @@ class DownloadManager {
                 }
                 return URL.createObjectURL(fileBlob);
             };
-            if (!this.fileObjectUrlPromise.get(fileKey)) {
-                this.fileObjectUrlPromise.set(
+            if (!this.fileObjectURLPromise.get(fileKey)) {
+                this.fileObjectURLPromise.set(
                     fileKey,
                     getFilePromise(shouldBeConverted)
                 );
             }
-            const fileURL = await this.fileObjectUrlPromise.get(fileKey);
+            const fileURL = await this.fileObjectURLPromise.get(fileKey);
             return fileURL;
         } catch (e) {
-            this.fileObjectUrlPromise.delete(fileKey);
+            this.fileObjectURLPromise.delete(fileKey);
             logError(e, 'Failed to get File');
             throw e;
         }
     };
 
-    public async getCachedOriginalFile(file: File) {
-        return await this.fileObjectUrlPromise.get(file.id.toString());
+    public async getCachedOriginalFile(file: EnteFile) {
+        return await this.fileObjectURLPromise.get(file.id.toString());
     }
 
     async downloadFile(
-        file: File,
+        file: EnteFile,
         tokenOverride?: string,
         usingWorker?: any,
         timeout?: number
@@ -129,7 +138,7 @@ class DownloadManager {
             file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
         ) {
             const resp = await HTTPService.get(
-                getFileUrl(file.id),
+                getFileURL(file.id),
                 null,
                 { 'X-Auth-Token': token },
                 { responseType: 'arraybuffer', timeout }
@@ -141,7 +150,7 @@ class DownloadManager {
             );
             return generateStreamFromArrayBuffer(decrypted);
         }
-        const resp = await fetch(getFileUrl(file.id), {
+        const resp = await fetch(getFileURL(file.id), {
             headers: {
                 'X-Auth-Token': token,
             },

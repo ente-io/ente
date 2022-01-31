@@ -1,5 +1,5 @@
 import PQueue from 'p-queue';
-import { File } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import {
     Face,
     FaceAlignmentMethod,
@@ -98,8 +98,8 @@ export class LocalMLSyncContext implements MLSyncContext {
     public faceEmbeddingService: FaceEmbeddingService;
     public faceClusteringService: ClusteringService;
 
-    public localFilesMap: Map<number, File>;
-    public outOfSyncFiles: File[];
+    public localFilesMap: Map<number, EnteFile>;
+    public outOfSyncFiles: EnteFile[];
     public nSyncedFiles: number;
     public nSyncedFaces: number;
     public allSyncedFacesMap?: Map<number, Array<Face>>;

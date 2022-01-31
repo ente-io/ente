@@ -1,25 +1,28 @@
-import { SelectedState } from 'pages/gallery';
-import { Collection } from 'services/collectionService';
+import { SelectedState } from 'types/gallery';
 import {
-    File,
+    EnteFile,
     fileAttribute,
-    FILE_TYPE,
     MagicMetadataProps,
     NEW_MAGIC_METADATA,
     PublicMagicMetadataProps,
-    VISIBILITY_STATE,
-} from 'services/fileService';
+} from 'types/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getMimeTypeFromBlob } from 'services/upload/readFileService';
 import DownloadManager from 'services/downloadManager';
 import { logError } from 'utils/sentry';
-import { User } from 'services/userService';
+import { User } from 'types/user';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-
-export const TYPE_HEIC = 'heic';
-export const TYPE_HEIF = 'heif';
-const UNSUPPORTED_FORMATS = ['flv', 'mkv', '3gp', 'avi', 'wmv'];
+import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
+import {
+    TYPE_JPEG,
+    TYPE_JPG,
+    TYPE_HEIC,
+    TYPE_HEIF,
+    FILE_TYPE,
+    VISIBILITY_STATE,
+} from 'constants/file';
+import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
@@ -37,16 +40,63 @@ export function downloadAsFile(filename: string, content: string) {
     a.remove();
 }
 
-export async function downloadFile(file: File) {
+export async function downloadFile(
+    file: EnteFile,
+    accessedThroughSharedURL: boolean,
+    token?: string
+) {
+    let fileURL: string;
+    let tempURL: string;
     const a = document.createElement('a');
     a.style.display = 'none';
-    const cachedFileUrl = await DownloadManager.getCachedOriginalFile(file);
-    const fileURL =
-        cachedFileUrl ??
-        URL.createObjectURL(
-            await new Response(await DownloadManager.downloadFile(file)).blob()
+    if (accessedThroughSharedURL) {
+        fileURL = await PublicCollectionDownloadManager.getCachedOriginalFile(
+            file
         );
+        tempURL;
+        if (!fileURL) {
+            tempURL = URL.createObjectURL(
+                await new Response(
+                    await PublicCollectionDownloadManager.downloadFile(
+                        token,
+                        file
+                    )
+                ).blob()
+            );
+            console.log({ tempURL });
+            fileURL = tempURL;
+        }
+    } else {
+        fileURL = await DownloadManager.getCachedOriginalFile(file);
+        if (!fileURL) {
+            tempURL = URL.createObjectURL(
+                await new Response(
+                    await DownloadManager.downloadFile(file)
+                ).blob()
+            );
+            fileURL = tempURL;
+        }
+    }
+
+    const fileType = getFileExtension(file.metadata.title);
+    let tempEditedFileURL: string;
+    if (
+        file.pubMagicMetadata?.data.editedTime &&
+        (fileType === TYPE_JPEG || fileType === TYPE_JPG)
+    ) {
+        let fileBlob = await (await fetch(fileURL)).blob();
+
+        fileBlob = await updateFileCreationDateInEXIF(
+            new FileReader(),
+            fileBlob,
+            new Date(file.pubMagicMetadata.data.editedTime / 1000)
+        );
+        tempEditedFileURL = URL.createObjectURL(fileBlob);
+        fileURL = tempEditedFileURL;
+    }
+
     a.href = fileURL;
+
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         a.download = fileNameWithoutExtension(file.metadata.title) + '.zip';
     } else {
@@ -55,6 +105,8 @@ export async function downloadFile(file: File) {
     document.body.appendChild(a);
     a.click();
     a.remove();
+    tempURL && URL.revokeObjectURL(tempURL);
+    tempEditedFileURL && URL.revokeObjectURL(tempEditedFileURL);
 }
 
 export function isFileHEIC(mimeType: string) {
@@ -65,8 +117,8 @@ export function isFileHEIC(mimeType: string) {
     );
 }
 
-export function sortFilesIntoCollections(files: File[]) {
-    const collectionWiseFiles = new Map<number, File[]>();
+export function sortFilesIntoCollections(files: EnteFile[]) {
+    const collectionWiseFiles = new Map<number, EnteFile[]>();
     for (const file of files) {
         if (!collectionWiseFiles.has(file.collectionID)) {
             collectionWiseFiles.set(file.collectionID, []);
@@ -87,10 +139,10 @@ function getSelectedFileIds(selectedFiles: SelectedState) {
 }
 export function getSelectedFiles(
     selected: SelectedState,
-    files: File[]
-): File[] {
+    files: EnteFile[]
+): EnteFile[] {
     const filesIDs = new Set(getSelectedFileIds(selected));
-    const selectedFiles: File[] = [];
+    const selectedFiles: EnteFile[] = [];
     const foundFiles = new Set<number>();
     for (const file of files) {
         if (filesIDs.has(file.id) && !foundFiles.has(file.id)) {
@@ -99,14 +151,6 @@ export function getSelectedFiles(
         }
     }
     return selectedFiles;
-}
-
-export function checkFileFormatSupport(name: string) {
-    for (const format of UNSUPPORTED_FORMATS) {
-        if (name.toLowerCase().endsWith(format)) {
-            throw Error('unsupported format');
-        }
-    }
 }
 
 export function formatDate(date: number | Date) {
@@ -157,7 +201,7 @@ export function formatDateRelative(date: number) {
             );
 }
 
-export function sortFiles(files: File[]) {
+export function sortFiles(files: EnteFile[]) {
     // sort according to modification time first
     files = files.sort((a, b) => {
         if (!b.metadata?.modificationTime) {
@@ -185,13 +229,13 @@ export function sortFiles(files: File[]) {
     return files;
 }
 
-export async function decryptFile(file: File, collection: Collection) {
+export async function decryptFile(file: EnteFile, collectionKey: string) {
     try {
         const worker = await new CryptoWorker();
         file.key = await worker.decryptB64(
             file.encryptedKey,
             file.keyDecryptionNonce,
-            collection.key
+            collectionKey
         );
         const encryptedMetadata = file.metadata as unknown as fileAttribute;
         file.metadata = await worker.decryptMetadata(
@@ -220,7 +264,7 @@ export async function decryptFile(file: File, collection: Collection) {
     }
 }
 
-export function removeUnnecessaryFileProps(files: File[]): File[] {
+export function removeUnnecessaryFileProps(files: EnteFile[]): EnteFile[] {
     const stripedFiles = files.map((file) => {
         delete file.src;
         delete file.msrc;
@@ -257,6 +301,10 @@ export function splitFilenameAndExtension(filename): [string, string] {
         ];
 }
 
+export function getFileExtension(filename) {
+    return splitFilenameAndExtension(filename)[1];
+}
+
 export function generateStreamFromArrayBuffer(data: Uint8Array) {
     return new ReadableStream({
         async start(controller: ReadableStreamDefaultController) {
@@ -267,7 +315,7 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
 }
 
 export async function convertForPreview(
-    file: File,
+    file: EnteFile,
     fileBlob: Blob,
     usingWorker?: any
 ) {
@@ -277,18 +325,19 @@ export async function convertForPreview(
         fileBlob = new Blob([motionPhoto.image]);
     }
 
-    const typeFromExtension = file.metadata.title.split('.')[-1];
+    const typeFromExtension = getFileExtension(file.metadata.title);
     const worker = usingWorker || (await new CryptoWorker());
+    const reader = new FileReader();
 
     const mimeType =
-        (await getMimeTypeFromBlob(worker, fileBlob)) ?? typeFromExtension;
+        (await getMimeTypeFromBlob(reader, fileBlob)) ?? typeFromExtension;
     if (isFileHEIC(mimeType)) {
         fileBlob = await worker.convertHEIC2JPEG(fileBlob);
     }
     return fileBlob;
 }
 
-export function fileIsArchived(file: File) {
+export function fileIsArchived(file: EnteFile) {
     if (
         !file ||
         !file.magicMetadata ||
@@ -302,7 +351,7 @@ export function fileIsArchived(file: File) {
 }
 
 export async function updateMagicMetadataProps(
-    file: File,
+    file: EnteFile,
     magicMetadataUpdates: MagicMetadataProps
 ) {
     const worker = await new CryptoWorker();
@@ -338,7 +387,7 @@ export async function updateMagicMetadataProps(
     }
 }
 export async function updatePublicMagicMetadataProps(
-    file: File,
+    file: EnteFile,
     publicMetadataUpdates: PublicMagicMetadataProps
 ) {
     const worker = await new CryptoWorker();
@@ -373,12 +422,12 @@ export async function updatePublicMagicMetadataProps(
 }
 
 export async function changeFilesVisibility(
-    files: File[],
+    files: EnteFile[],
     selected: SelectedState,
     visibility: VISIBILITY_STATE
 ) {
     const selectedFiles = getSelectedFiles(selected, files);
-    const updatedFiles: File[] = [];
+    const updatedFiles: EnteFile[] = [];
     for (const file of selectedFiles) {
         const updatedMagicMetadataProps: MagicMetadataProps = {
             visibility,
@@ -391,7 +440,10 @@ export async function changeFilesVisibility(
     return updatedFiles;
 }
 
-export async function changeFileCreationTime(file: File, editedTime: number) {
+export async function changeFileCreationTime(
+    file: EnteFile,
+    editedTime: number
+) {
     const updatedPublicMagicMetadataProps: PublicMagicMetadataProps = {
         editedTime,
     };
@@ -402,7 +454,7 @@ export async function changeFileCreationTime(file: File, editedTime: number) {
     );
 }
 
-export async function changeFileName(file: File, editedName: string) {
+export async function changeFileName(file: EnteFile, editedName: string) {
     const updatedPublicMagicMetadataProps: PublicMagicMetadataProps = {
         editedName,
     };
@@ -413,7 +465,7 @@ export async function changeFileName(file: File, editedName: string) {
     );
 }
 
-export function isSharedFile(file: File) {
+export function isSharedFile(file: EnteFile) {
     const user: User = getData(LS_KEYS.USER);
 
     if (!user?.id || !file?.ownerID) {
@@ -422,7 +474,7 @@ export function isSharedFile(file: File) {
     return file.ownerID !== user.id;
 }
 
-export function mergeMetadata(files: File[]): File[] {
+export function mergeMetadata(files: EnteFile[]): EnteFile[] {
     return files.map((file) => ({
         ...file,
         metadata: {
@@ -443,8 +495,8 @@ export function mergeMetadata(files: File[]): File[] {
 }
 
 export function updateExistingFilePubMetadata(
-    existingFile: File,
-    updatedFile: File
+    existingFile: EnteFile,
+    updatedFile: EnteFile
 ) {
     existingFile.pubMagicMetadata = updatedFile.pubMagicMetadata;
     existingFile.metadata = mergeMetadata([existingFile])[0].metadata;
@@ -452,11 +504,11 @@ export function updateExistingFilePubMetadata(
 
 export async function getFileFromURL(fileURL: string) {
     const fileBlob = await (await fetch(fileURL)).blob();
-    const fileFile = new globalThis.File([fileBlob], 'temp');
+    const fileFile = new File([fileBlob], 'temp');
     return fileFile;
 }
 
-export function getUniqueFiles(files: File[]) {
+export function getUniqueFiles(files: EnteFile[]) {
     const idSet = new Set<number>();
     return files.filter((file) => {
         if (!idSet.has(file.id)) {
@@ -467,7 +519,7 @@ export function getUniqueFiles(files: File[]) {
         }
     });
 }
-export function getNonTrashedUniqueUserFiles(files: File[]) {
+export function getNonTrashedUniqueUserFiles(files: EnteFile[]) {
     const user: User = getData(LS_KEYS.USER) ?? {};
     return getUniqueFiles(
         files.filter(
@@ -478,17 +530,17 @@ export function getNonTrashedUniqueUserFiles(files: File[]) {
     );
 }
 
-export async function downloadFiles(files: File[]) {
+export async function downloadFiles(files: EnteFile[]) {
     for (const file of files) {
         try {
-            await downloadFile(file);
+            await downloadFile(file, false);
         } catch (e) {
             logError(e, 'download fail for file');
         }
     }
 }
 
-export function needsConversionForPreview(file: File) {
+export function needsConversionForPreview(file: EnteFile) {
     const fileExtension = splitFilenameAndExtension(file.metadata.title)[1];
     if (
         file.metadata.fileType === FILE_TYPE.LIVE_PHOTO ||

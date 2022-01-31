@@ -1,7 +1,8 @@
 import debounce from 'debounce-promise';
 import PQueue from 'p-queue';
 import { eventBus, Events } from 'services/events';
-import { File, FILE_TYPE } from 'services/fileService';
+import { EnteFile } from 'types/file';
+import { FILE_TYPE } from 'constants/file';
 import { FACE_CROPS_CACHE_NAME } from 'types/machineLearning';
 import { getToken } from 'utils/common/key';
 import { logQueueStats } from 'utils/machineLearning';
@@ -111,7 +112,7 @@ class MLWorkManager {
     }
 
     private async fileUploadedHandler(arg: {
-        enteFile: File;
+        enteFile: EnteFile;
         localFile: globalThis.File;
     }) {
         if (!this.mlSearchEnabled) {
@@ -168,7 +169,7 @@ class MLWorkManager {
         this.mlSearchEnabled && this.startSyncJob();
     }
 
-    public async syncLocalFile(enteFile: File, localFile: globalThis.File) {
+    public async syncLocalFile(enteFile: EnteFile, localFile: globalThis.File) {
         const result = await this.liveSyncQueue.add(async () => {
             this.stopSyncJob();
             const token = getToken();

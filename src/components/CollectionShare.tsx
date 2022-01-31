@@ -1,20 +1,28 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import { Button, Col, Table } from 'react-bootstrap';
-import { DeadCenter } from 'pages/gallery';
-import { User } from 'services/userService';
+import { DeadCenter, GalleryContext } from 'pages/gallery';
+import { User } from 'types/user';
 import {
-    Collection,
     shareCollection,
     unshareCollection,
+    createShareableURL,
+    deleteShareableURL,
 } from 'services/collectionService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SubmitButton from './SubmitButton';
 import MessageDialog from './MessageDialog';
+import { Collection } from 'types/collection';
+import { appendCollectionKeyToShareURL } from 'utils/collection';
+import { FlexWrapper } from './Container';
+import { CodeBlock } from './CodeBlock';
+import { ButtonVariant, getVariantColor } from './pages/gallery/LinkButton';
+import { handleSharingErrors } from 'utils/error';
+import { sleep } from 'utils/common';
 
 interface Props {
     show: boolean;
@@ -32,47 +40,118 @@ interface ShareeProps {
 
 function CollectionShare(props: Props) {
     const [loading, setLoading] = useState(false);
+    const galleryContext = useContext(GalleryContext);
+    const [sharableLinkError, setSharableLinkError] = useState(null);
+    const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
+
+    useEffect(() => {
+        const main = async () => {
+            if (props.collection?.publicURLs?.[0]?.url) {
+                const t = await appendCollectionKeyToShareURL(
+                    props.collection?.publicURLs?.[0]?.url,
+                    props.collection.key
+                );
+                setPublicShareUrl(t);
+            } else {
+                setPublicShareUrl(null);
+            }
+        };
+        main();
+    }, [props.collection]);
+
     const collectionShare = async (
         { email }: formValues,
         { resetForm, setFieldError }: FormikHelpers<formValues>
     ) => {
         try {
             setLoading(true);
+            galleryContext.startLoading();
             const user: User = getData(LS_KEYS.USER);
             if (email === user.email) {
                 setFieldError('email', constants.SHARE_WITH_SELF);
             } else if (
-                props.collection.sharees.find((value) => value.email === email)
+                props.collection?.sharees?.find(
+                    (value) => value.email === email
+                )
             ) {
                 setFieldError('email', constants.ALREADY_SHARED(email));
             } else {
                 await shareCollection(props.collection, email);
-                await props.syncWithRemote();
+                await sleep(2000);
+                await galleryContext.syncWithRemote(false, true);
                 resetForm();
             }
         } catch (e) {
-            let errorMessage = null;
-            switch (e?.status) {
-                case 400:
-                    errorMessage = constants.SHARING_BAD_REQUEST_ERROR;
-                    break;
-                case 402:
-                    errorMessage = constants.SHARING_DISABLED_FOR_FREE_ACCOUNTS;
-                    break;
-                case 404:
-                    errorMessage = constants.USER_DOES_NOT_EXIST;
-                    break;
-                default:
-                    errorMessage = `${constants.UNKNOWN_ERROR} ${e.message}`;
-            }
+            const errorMessage = handleSharingErrors(e);
             setFieldError('email', errorMessage);
         } finally {
             setLoading(false);
+            galleryContext.finishLoading();
         }
     };
     const collectionUnshare = async (sharee) => {
-        await unshareCollection(props.collection, sharee.email);
-        await props.syncWithRemote();
+        try {
+            galleryContext.startLoading();
+            await unshareCollection(props.collection, sharee.email);
+            await sleep(2000);
+            await galleryContext.syncWithRemote(false, true);
+        } finally {
+            galleryContext.finishLoading();
+        }
+    };
+
+    const createSharableURLHelper = async () => {
+        try {
+            galleryContext.startLoading();
+            const publicURL = await createShareableURL(props.collection);
+            const sharableURL = await appendCollectionKeyToShareURL(
+                publicURL.url,
+                props.collection.key
+            );
+            setPublicShareUrl(sharableURL);
+            galleryContext.syncWithRemote(false, true);
+        } catch (e) {
+            const errorMessage = handleSharingErrors(e);
+            setSharableLinkError(errorMessage);
+        } finally {
+            galleryContext.finishLoading();
+        }
+    };
+
+    const disablePublicSharingHelper = async () => {
+        try {
+            galleryContext.startLoading();
+            await deleteShareableURL(props.collection);
+            setPublicShareUrl(null);
+            galleryContext.syncWithRemote(false, true);
+        } catch (e) {
+            const errorMessage = handleSharingErrors(e);
+            setSharableLinkError(errorMessage);
+        } finally {
+            galleryContext.finishLoading();
+        }
+    };
+
+    const disablePublicSharing = () => {
+        galleryContext.setDialogMessage({
+            title: constants.DISABLE_PUBLIC_SHARING,
+            content: constants.DISABLE_PUBLIC_SHARING_MESSAGE,
+            close: { text: constants.CANCEL },
+            proceed: {
+                text: constants.DISABLE,
+                action: disablePublicSharingHelper,
+                variant: ButtonVariant.danger,
+            },
+        });
+    };
+
+    const handleCollectionPublicSharing = () => {
+        setSharableLinkError(null);
+        if (publicShareUrl) {
+            disablePublicSharing();
+        } else {
+            createSharableURLHelper();
+        }
     };
 
     const ShareeRow = ({ sharee, collectionUnshare }: ShareeProps) => (
@@ -95,6 +174,10 @@ function CollectionShare(props: Props) {
             </td>
         </tr>
     );
+
+    if (!props.collection) {
+        return <></>;
+    }
     return (
         <MessageDialog
             show={props.show}
@@ -157,21 +240,13 @@ function CollectionShare(props: Props) {
                         </Form>
                     )}
                 </Formik>
-                <div
-                    style={{
-                        height: '1px',
-                        margin: '10px 0px',
-                        background: '#444',
-                        width: '100%',
-                    }}
-                />
-                {props.collection?.sharees.length > 0 ? (
+                {props.collection.sharees?.length > 0 && (
                     <>
                         <p>{constants.SHAREES}</p>
 
                         <Table striped bordered hover variant="dark" size="sm">
                             <tbody>
-                                {props.collection?.sharees.map((sharee) => (
+                                {props.collection.sharees?.map((sharee) => (
                                     <ShareeRow
                                         key={sharee.email}
                                         sharee={sharee}
@@ -181,10 +256,46 @@ function CollectionShare(props: Props) {
                             </tbody>
                         </Table>
                     </>
-                ) : (
-                    <div style={{ marginTop: '12px' }}>
-                        {constants.ZERO_SHAREES()}
+                )}
+                <div
+                    style={{
+                        height: '1px',
+                        marginTop: '10px',
+                        marginBottom: '18px',
+                        background: '#444',
+                        width: '100%',
+                    }}
+                />
+                <div>
+                    <FlexWrapper>
+                        <FlexWrapper
+                            style={{ paddingTop: '5px', color: '#fff' }}>
+                            {constants.PUBLIC_SHARING}
+                        </FlexWrapper>
+                        <Form.Switch
+                            style={{ marginLeft: '20px' }}
+                            checked={!!publicShareUrl}
+                            id="collection-public-sharing-toggler"
+                            className="custom-switch-md"
+                            onChange={handleCollectionPublicSharing}
+                        />
+                    </FlexWrapper>
+                    {sharableLinkError && (
+                        <FlexWrapper
+                            style={{
+                                marginTop: '10px',
+                                color: getVariantColor(ButtonVariant.danger),
+                            }}>
+                            {sharableLinkError}
+                        </FlexWrapper>
+                    )}
+                </div>
+                {publicShareUrl ? (
+                    <div style={{ width: '100%', wordBreak: 'break-all' }}>
+                        <CodeBlock key={publicShareUrl} code={publicShareUrl} />
                     </div>
+                ) : (
+                    <div style={{ height: '30px' }} />
                 )}
             </DeadCenter>
         </MessageDialog>

@@ -1,19 +1,16 @@
-import { FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART } from './uploadService';
+import {
+    FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
+    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+} from 'constants/upload';
+import UIService from './uiService';
 import UploadHttpClient from './uploadHttpClient';
 import * as convert from 'xml-js';
-import UIService, { RANDOM_PERCENTAGE_PROGRESS_FOR_PUT } from './uiService';
-import { CustomError } from 'utils/common/errorUtil';
-import { DataStream } from 'types/upload';
+import { CustomError } from 'utils/error';
+import { DataStream, MultipartUploadURLs } from 'types/upload';
 
 interface PartEtag {
     PartNumber: number;
     ETag: string;
-}
-
-export interface MultipartUploadURLs {
-    objectKey: string;
-    partURLs: string[];
-    completeURL: string;
 }
 
 function calculatePartCount(chunkCount: number) {

@@ -60,3 +60,10 @@ export const FlexWrapper = styled.div`
     text-align: center;
     justify-content: center;
 `;
+
+export const FreeFlowText = styled.div`
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    min-width: 30%;
+    text-align: left;
+`;

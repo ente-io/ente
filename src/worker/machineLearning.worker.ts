@@ -1,5 +1,5 @@
 import { expose } from 'comlink';
-import { File } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import mlService from 'services/machineLearning/machineLearningService';
 import { MachineLearningWorker } from 'types/machineLearning';
 
@@ -12,7 +12,7 @@ export class DedicatedMLWorker implements MachineLearningWorker {
 
     public async syncLocalFile(
         token: string,
-        enteFile: File,
+        enteFile: EnteFile,
         localFile: globalThis.File
     ) {
         return mlService.syncLocalFile(token, enteFile, localFile);
