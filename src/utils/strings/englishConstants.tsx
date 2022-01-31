@@ -612,7 +612,7 @@ const englishConstants = {
         'Note: Submitting this report will notify the album owner.',
     OTHER_REASON_REQUIRES_COMMENTS:
         'reason = other, require  a mandatory comment ',
-    REPORT_SUBMIT_SUCCESS_CONTENT: 'your report have been submitted',
+    REPORT_SUBMIT_SUCCESS_CONTENT: 'your report has been submitted',
     REPORT_SUBMIT_SUCCESS_TITLE: 'report sent',
     REPORT_SUBMIT_FAILED: 'failed to sent report, try again',
     INSTALL: 'install',
