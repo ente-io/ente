@@ -609,7 +609,7 @@ const englishConstants = {
     OPEN_PLAN_SELECTOR_MODAL_FAILED: 'failed to open plans',
     COMMENT: 'comment',
     ABUSE_REPORT_DESCRIPTION:
-        'fill out the following form to submit the abuse report. Refer the dmca section for more detail for privacy policy of submitting a report ',
+        'Note: Submitting this report will notify the album owner.',
     OTHER_REASON_REQUIRES_COMMENTS:
         'reason = other, require  a mandatory comment ',
     REPORT_SUBMIT_SUCCESS_CONTENT: 'your report have been submitted',
