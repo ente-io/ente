@@ -16,6 +16,7 @@ import { Config } from 'types/common/config';
 import { Face, MlFileData, MLLibraryData, Person } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { runningInBrowser } from 'utils/common';
+import { logError } from 'utils/sentry';
 
 export const ML_SYNC_JOB_CONFIG_NAME = 'ml-sync-job';
 export const ML_SYNC_CONFIG_NAME = 'ml-sync';
@@ -61,9 +62,21 @@ class MLIDbStorage {
         const mlIDbStorage = this;
         return openDB<MLDb>(MLDATA_DB_NAME, 3, {
             async terminated() {
-                console.log('Indexed DB terminated');
+                console.error('ML Indexed DB terminated');
+                logError(new Error(), 'ML Indexed DB terminated');
                 mlIDbStorage._db = undefined;
+                // TODO: remove if there is chance of this going into recursion in some case
                 await mlIDbStorage.db;
+            },
+            blocked() {
+                // TODO: make sure we dont allow multiple tabs of app
+                console.error('ML Indexed DB blocked');
+                logError(new Error(), 'ML Indexed DB blocked');
+            },
+            blocking() {
+                // TODO: make sure we dont allow multiple tabs of app
+                console.error('ML Indexed DB blocking');
+                logError(new Error(), 'ML Indexed DB blocking');
             },
             async upgrade(db, oldVersion, newVersion, tx) {
                 if (oldVersion < 1) {
