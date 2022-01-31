@@ -565,7 +565,7 @@ export default function App({ Component, err }) {
                 mlWorkManager.setMlSearchEnabled(mlSearchConfig.enabled);
                 eventBus.emit(Events.APP_START);
             } catch (e) {
-                logError(e, 'Error in appStart handlers');
+                logError(e, 'Error while loading mlSearchEnabled');
             }
         };
 
@@ -627,11 +627,15 @@ export default function App({ Component, err }) {
         setTimeout(() => setFlashMessage(null), 5000);
     };
     const updateMlSearchEnabled = async (enabled: boolean) => {
-        const mlSearchConfig = await getMLSearchConfig();
-        mlSearchConfig.enabled = enabled;
-        await updateMLSearchConfig(mlSearchConfig);
-        setMlSearchEnabled(enabled);
-        mlWorkManager.setMlSearchEnabled(enabled);
+        try {
+            const mlSearchConfig = await getMLSearchConfig();
+            mlSearchConfig.enabled = enabled;
+            await updateMLSearchConfig(mlSearchConfig);
+            setMlSearchEnabled(enabled);
+            mlWorkManager.setMlSearchEnabled(enabled);
+        } catch (e) {
+            logError(e, 'Error while updating mlSearchEnabled');
+        }
     };
     //  ho ja yaar
     return (

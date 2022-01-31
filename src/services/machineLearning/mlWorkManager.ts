@@ -242,7 +242,7 @@ class MLWorkManager {
     public stopSyncJob(terminateWorker: boolean = true) {
         try {
             console.log('MLWorkManager.stopSyncJob');
-            this.mlSyncJob.stop();
+            this.mlSyncJob?.stop();
             terminateWorker && this.terminateSyncJobWorker();
         } catch (e) {
             logError(e, 'Failed to stop MLSync Job');

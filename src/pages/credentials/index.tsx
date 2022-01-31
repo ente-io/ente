@@ -73,6 +73,8 @@ export default function Credentials() {
                         keyAttributes,
                         key
                     );
+                    // TODO: not required after reseting appContext on first login
+                    appContext.updateMlSearchEnabled(false);
                 }
                 await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
                 await decryptAndStoreToken(key);
