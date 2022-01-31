@@ -1,9 +1,10 @@
 {
   "name": "bada-frame",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "albums": "next dev -p 3002",
     "prebuild": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "build": "next build",
     "build-analyze": "ANALYZE=true next build",

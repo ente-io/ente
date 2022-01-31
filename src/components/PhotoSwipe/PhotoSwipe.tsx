@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import Photoswipe from 'photoswipe';
 import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
 import classnames from 'classnames';
@@ -28,6 +28,7 @@ import { prettyPrintExif } from 'utils/exif';
 import EditIcon from 'components/icons/EditIcon';
 import {
     FlexWrapper,
+    FreeFlowText,
     IconButton,
     Label,
     Row,
@@ -37,13 +38,14 @@ import { logError } from 'utils/sentry';
 
 import CloseIcon from 'components/icons/CloseIcon';
 import TickIcon from 'components/icons/TickIcon';
-import { FreeFlowText } from 'components/RecoveryKeyModal';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
 import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
 import { sleep } from 'utils/common';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
+import { GalleryContext } from 'pages/gallery';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -62,7 +64,6 @@ interface Iprops {
     id?: string;
     className?: string;
     favItemIds: Set<number>;
-    loadingBar: any;
     isSharedCollection: boolean;
     isTrashCollection: boolean;
 }
@@ -483,6 +484,10 @@ function PhotoSwipe(props: Iprops) {
     const [metadata, setMetaData] = useState<EnteFile['metadata']>(null);
     const [exif, setExif] = useState<any>(null);
     const needUpdate = useRef(false);
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
+    const galleryContext = useContext(GalleryContext);
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -666,10 +671,14 @@ function PhotoSwipe(props: Iprops) {
     };
 
     const downloadFileHelper = async (file) => {
-        const { loadingBar } = props;
-        loadingBar.current.continuousStart();
-        await downloadFile(file);
-        loadingBar.current.complete();
+        galleryContext.startLoading();
+        await downloadFile(
+            file,
+            publicCollectionGalleryContext.accessedThroughSharedURL,
+            publicCollectionGalleryContext.token
+        );
+
+        galleryContext.finishLoading();
     };
     const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;

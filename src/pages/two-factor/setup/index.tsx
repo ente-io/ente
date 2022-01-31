@@ -1,6 +1,5 @@
 import EnteSpinner from 'components/EnteSpinner';
 import LogoImg from 'components/LogoImg';
-import { CodeBlock, FreeFlowText } from 'components/RecoveryKeyModal';
 import { DeadCenter } from 'pages/gallery';
 import React, { useContext, useEffect, useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
@@ -16,6 +15,7 @@ import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import { TwoFactorSecret } from 'types/user';
+import { CodeBlock } from 'components/CodeBlock';
 
 enum SetupMode {
     QR_CODE,
@@ -121,15 +121,7 @@ export default function SetupTwoFactor() {
                                         constants.TWO_FACTOR_MANUAL_CODE_INSTRUCTION
                                     }
                                 </p>
-                                <CodeBlock height={100}>
-                                    {!twoFactorSecret ? (
-                                        <EnteSpinner />
-                                    ) : (
-                                        <FreeFlowText>
-                                            {twoFactorSecret.secretCode}
-                                        </FreeFlowText>
-                                    )}
-                                </CodeBlock>
+                                <CodeBlock code={twoFactorSecret.secretCode} />
                                 <Button
                                     block
                                     variant="link"

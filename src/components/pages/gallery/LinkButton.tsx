@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 
 export enum ButtonVariant {
     success = 'success',
@@ -26,17 +27,25 @@ export function getVariantColor(variant: string) {
             return '#d1d1d1';
     }
 }
+
+const CustomH5 = styled.h5<{ color: string }>`
+    color: ${(props) => props.color};
+    cursor: pointer;
+    margin-bottom: 0;
+    &:hover {
+        text-decoration: underline;
+    }
+`;
+
 export default function LinkButton(props: LinkButtonProps) {
     return (
-        <h5
+        <CustomH5
+            color={getVariantColor(props.variant)}
             style={{
-                color: getVariantColor(props.variant),
-                cursor: 'pointer',
-                marginBottom: 0,
                 ...props.style,
             }}
             onClick={props?.onClick ?? (() => null)}>
             {props.children}
-        </h5>
+        </CustomH5>
     );
 }

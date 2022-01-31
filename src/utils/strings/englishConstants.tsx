@@ -357,6 +357,7 @@ const englishConstants = {
             </div>
         </>
     ),
+    PUBLIC_URL: 'public link',
     SHARE_WITH_SELF: 'oops, you cannot share with yourself',
     ALREADY_SHARED: (email) =>
         `oops, you're already sharing this with ${email}`,
@@ -606,7 +607,49 @@ const englishConstants = {
     CUSTOM_TIME: 'custom time',
     REOPEN_PLAN_SELECTOR_MODAL: 're-open plans',
     OPEN_PLAN_SELECTOR_MODAL_FAILED: 'failed to open plans',
-    NOT_FOUND: '404 not found',
+    COMMENT: 'comment',
+    ABUSE_REPORT_DESCRIPTION:
+        'fill out the following form to submit the abuse report. Refer the dmca section for more detail for privacy policy of submitting a report ',
+    OTHER_REASON_REQUIRES_COMMENTS:
+        'reason = other, require  a mandatory comment ',
+    REPORT_SUBMIT_SUCCESS_CONTENT: 'thank you, your report have been submitted',
+    REPORT_SUBMIT_SUCCESS_TITLE: 'report sent',
+    REPORT_SUBMIT_FAILED: 'failed to sent report, try again',
+    INSTALL: 'install',
+    ALBUM_URL: 'album url',
+    PUBLIC_SHARING: 'link sharing',
+    NOT_FOUND: '404 - not found',
+    DISABLE_PUBLIC_SHARING: "'disable public sharing",
+    DISABLE_PUBLIC_SHARING_MESSAGE:
+        'are you sure you want to disable public sharing?',
+    ABUSE_REPORT: 'abuse report',
+    ABUSE_REPORT_BUTTON_TEXT: 'report abuse?',
+    MALICIOUS_CONTENT: 'contains malicious content',
+    COPYRIGHT:
+        'infringes on the copyright of someone I am authorized to represent',
+    ENTER_EMAIL_ADDRESS: 'email*',
+    SELECT_REASON: 'select a reason*',
+    ENTER_FULL_NAME: 'full name*',
+    ENTER_DIGITAL_SIGNATURE:
+        'typing your full name in this box will act as your digital signature*',
+    ENTER_ON_BEHALF_OF: 'I am reporting on behalf of*',
+    ENTER_ADDRESS: 'address*',
+    ENTER_JOB_TITLE: 'job title*',
+    ENTER_CITY: 'city*',
+    ENTER_PHONE: 'phone number*',
+
+    ENTER_STATE: 'state*',
+    ENTER_POSTAL_CODE: 'zip/postal code*',
+    ENTER_COUNTRY: 'country*',
+    JUDICIAL_DESCRIPTION: () => (
+        <>
+            By checking the following boxes, I state{' '}
+            <strong>UNDER PENALTY OF PERJURY </strong>of law that:
+        </>
+    ),
+    TERM_1: 'I hereby state that I have a good faith belief that the sharing of copyrighted material at the location above is not authorized by the copyright owner, its agent, or the law (e.g., as a fair use). ',
+    TERM_2: 'I hereby state that the information in this Notice is accurate and, under penalty of perjury, that I am the owner, or authorized to act on behalf of, the owner, of the copyright or of an exclusive right under the copyright that is allegedly infringed. ',
+    TERM_3: 'I acknowledge that any person who knowingly materially misrepresents that material or activity is infringing may be subject to liability for damages. ',
 };
 
 export default englishConstants;

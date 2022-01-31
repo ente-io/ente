@@ -1,5 +1,4 @@
 import { SelectedState } from 'types/gallery';
-import { Collection } from 'types/collection';
 import {
     EnteFile,
     fileAttribute,
@@ -23,6 +22,7 @@ import {
     FILE_TYPE,
     VISIBILITY_STATE,
 } from 'constants/file';
+import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
@@ -40,19 +40,46 @@ export function downloadAsFile(filename: string, content: string) {
     a.remove();
 }
 
-export async function downloadFile(file: EnteFile) {
+export async function downloadFile(
+    file: EnteFile,
+    accessedThroughSharedURL: boolean,
+    token?: string
+) {
+    let fileURL: string;
+    let tempURL: string;
     const a = document.createElement('a');
     a.style.display = 'none';
-    let fileURL = await DownloadManager.getCachedOriginalFile(file);
-    let tempURL;
-    if (!fileURL) {
-        tempURL = URL.createObjectURL(
-            await new Response(await DownloadManager.downloadFile(file)).blob()
+    if (accessedThroughSharedURL) {
+        fileURL = await PublicCollectionDownloadManager.getCachedOriginalFile(
+            file
         );
-        fileURL = tempURL;
+        tempURL;
+        if (!fileURL) {
+            tempURL = URL.createObjectURL(
+                await new Response(
+                    await PublicCollectionDownloadManager.downloadFile(
+                        token,
+                        file
+                    )
+                ).blob()
+            );
+            console.log({ tempURL });
+            fileURL = tempURL;
+        }
+    } else {
+        fileURL = await DownloadManager.getCachedOriginalFile(file);
+        if (!fileURL) {
+            tempURL = URL.createObjectURL(
+                await new Response(
+                    await DownloadManager.downloadFile(file)
+                ).blob()
+            );
+            fileURL = tempURL;
+        }
     }
+
     const fileType = getFileExtension(file.metadata.title);
-    let tempEditedFileURL;
+    let tempEditedFileURL: string;
     if (
         file.pubMagicMetadata?.data.editedTime &&
         (fileType === TYPE_JPEG || fileType === TYPE_JPG)
@@ -202,13 +229,13 @@ export function sortFiles(files: EnteFile[]) {
     return files;
 }
 
-export async function decryptFile(file: EnteFile, collection: Collection) {
+export async function decryptFile(file: EnteFile, collectionKey: string) {
     try {
         const worker = await new CryptoWorker();
         file.key = await worker.decryptB64(
             file.encryptedKey,
             file.keyDecryptionNonce,
-            collection.key
+            collectionKey
         );
         const encryptedMetadata = file.metadata as unknown as fileAttribute;
         file.metadata = await worker.decryptMetadata(
@@ -502,7 +529,7 @@ export function getNonTrashedUniqueUserFiles(files: EnteFile[]) {
 export async function downloadFiles(files: EnteFile[]) {
     for (const file of files) {
         try {
-            await downloadFile(file);
+            await downloadFile(file, false);
         } catch (e) {
             logError(e, 'download fail for file');
         }

@@ -20,6 +20,8 @@ import {
     MoveToCollectionRequest,
     EncryptedFileKey,
     RemoveFromCollectionRequest,
+    CreatePublicAccessTokenRequest,
+    PublicURL,
 } from 'types/collection';
 import { COLLECTION_SORT_BY, CollectionType } from 'constants/collection';
 
@@ -570,6 +572,49 @@ export const unshareCollection = async (
         );
     } catch (e) {
         logError(e, 'unshare collection failed ');
+    }
+};
+
+export const createShareableURL = async (collection: Collection) => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return null;
+        }
+        const createPublicAccessTokenRequest: CreatePublicAccessTokenRequest = {
+            collectionID: collection.id,
+        };
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/collections/share-url`,
+            createPublicAccessTokenRequest,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return resp.data.result as PublicURL;
+    } catch (e) {
+        logError(e, 'createShareableURL failed ');
+        throw e;
+    }
+};
+
+export const deleteShareableURL = async (collection: Collection) => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return null;
+        }
+        await HTTPService.delete(
+            `${ENDPOINT}/collections/share-url/${collection.id}`,
+            null,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        logError(e, 'deleteShareableURL failed ');
         throw e;
     }
 };
