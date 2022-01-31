@@ -40,7 +40,7 @@ export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
-    const [publicFiles, setPublicFiles] = useState<EnteFile[]>([]);
+    const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const appContext = useContext(AppContext);
     const [abuseReportFormView, setAbuseReportFormView] = useState(false);
@@ -147,12 +147,11 @@ export default function PublicCollectionGallery() {
         }
     };
 
-    if (!publicFiles?.length) {
-        if (loading) {
-            return <Loader />;
-        } else {
-            return <Container>{constants.NOT_FOUND}</Container>;
-        }
+    if (!publicFiles && loading) {
+        return <Loader />;
+    }
+    if (!publicFiles?.length && !loading) {
+        return <Container>{constants.NOT_FOUND}</Container>;
     }
 
     return (
