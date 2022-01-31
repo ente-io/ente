@@ -50,23 +50,22 @@ export default function PublicCollectionGallery() {
     const openReportForm = () => setAbuseReportFormView(true);
     const closeReportForm = () => setAbuseReportFormView(false);
     const loadingBar = useRef(null);
-    const [isLoadingBarRunning, setIsLoadingBarRunning] = useState(false);
+    const isLoadingBarRunning = useRef(false);
 
     const openMessageDialog = () => setMessageDialogView(true);
     const closeMessageDialog = () => setMessageDialogView(false);
 
-    const startLoading = () => {
-        !isLoadingBarRunning && loadingBar.current?.continuousStart();
-        setIsLoadingBarRunning(true);
+    const startLoadingBar = () => {
+        !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
+        isLoadingBarRunning.current = true;
     };
-    const finishLoading = () => {
-        loadingBar.current?.complete();
-        setIsLoadingBarRunning(false);
+    const finishLoadingBar = () => {
+        isLoadingBarRunning.current && loadingBar.current?.complete();
+        isLoadingBarRunning.current = false;
     };
 
     useEffect(() => {
         appContext.showNavBar(true);
-        startLoading();
         const currentURL = new URL(window.location.href);
         if (currentURL.pathname !== PAGES.ROOT) {
             router.push(
@@ -111,7 +110,7 @@ export default function PublicCollectionGallery() {
                     );
                     setPublicFiles(localPublicFiles);
                 }
-                syncWithRemote();
+                await syncWithRemote();
             } finally {
                 setLoading(false);
             }
@@ -123,7 +122,7 @@ export default function PublicCollectionGallery() {
 
     const syncWithRemote = async () => {
         try {
-            startLoading();
+            startLoadingBar();
             const collection = await getPublicCollection(
                 token.current,
                 collectionKey.current
@@ -144,14 +143,15 @@ export default function PublicCollectionGallery() {
                 setPublicFiles([]);
             }
         } finally {
-            finishLoading();
+            finishLoadingBar();
         }
     };
-    if (loading || !publicFiles?.length) {
-        if (!isLoadingBarRunning) {
-            return <Container>{constants.NOT_FOUND}</Container>;
-        } else {
+
+    if (!publicFiles?.length) {
+        if (loading) {
             return <Loader />;
+        } else {
+            return <Container>{constants.NOT_FOUND}</Container>;
         }
     }
 
