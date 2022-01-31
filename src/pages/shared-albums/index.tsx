@@ -28,6 +28,13 @@ import CryptoWorker from 'utils/crypto';
 import { PAGES } from 'constants/pages';
 import router from 'next/router';
 
+const Loader = () => (
+    <Container>
+        <EnteSpinner>
+            <span className="sr-only">Loading...</span>
+        </EnteSpinner>
+    </Container>
+);
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
     const collectionKey = useRef<string>(null);
@@ -58,6 +65,7 @@ export default function PublicCollectionGallery() {
 
     useEffect(() => {
         appContext.showNavBar(true);
+        startLoading();
         const currentURL = new URL(window.location.href);
         if (currentURL.pathname !== PAGES.ROOT) {
             router.push(
@@ -74,31 +82,35 @@ export default function PublicCollectionGallery() {
             );
         }
         const main = async () => {
-            const worker = await new CryptoWorker();
-            url.current = window.location.href;
-            const currentURL = new URL(url.current);
-            const t = currentURL.searchParams.get('t');
-            const ck = currentURL.hash.slice(1);
-            const dck = await worker.fromHex(ck);
-            if (!t || !dck) {
-                setLoading(false);
-                return;
-            }
-            token.current = t;
-            collectionKey.current = dck;
-            url.current = window.location.href;
-            const localCollection = await getLocalPublicCollection(
-                collectionKey.current
-            );
-            if (localCollection) {
-                setPublicCollection(localCollection);
-                const localPublicFiles = sortFiles(
-                    mergeMetadata(await getLocalPublicFiles(localCollection))
+            try {
+                const worker = await new CryptoWorker();
+                url.current = window.location.href;
+                const currentURL = new URL(url.current);
+                const t = currentURL.searchParams.get('t');
+                const ck = currentURL.hash.slice(1);
+                const dck = await worker.fromHex(ck);
+                if (!t || !dck) {
+                    return;
+                }
+                token.current = t;
+                collectionKey.current = dck;
+                url.current = window.location.href;
+                const localCollection = await getLocalPublicCollection(
+                    collectionKey.current
                 );
-                setPublicFiles(localPublicFiles);
+                if (localCollection) {
+                    setPublicCollection(localCollection);
+                    const localPublicFiles = sortFiles(
+                        mergeMetadata(
+                            await getLocalPublicFiles(localCollection)
+                        )
+                    );
+                    setPublicFiles(localPublicFiles);
+                }
+                syncWithRemote();
+            } finally {
+                setLoading(false);
             }
-            syncWithRemote();
-            setLoading(false);
         };
         main();
     }, []);
@@ -128,18 +140,14 @@ export default function PublicCollectionGallery() {
             finishLoading();
         }
     };
-    if (loading) {
-        return (
-            <Container>
-                <EnteSpinner>
-                    <span className="sr-only">Loading...</span>
-                </EnteSpinner>
-            </Container>
-        );
+    if (loading || !publicFiles?.length) {
+        if (!isLoadingBarRunning) {
+            return <Container>{constants.NOT_FOUND}</Container>;
+        } else {
+            return <Loader />;
+        }
     }
-    if (!isLoadingBarRunning && !publicFiles) {
-        return <Container>{constants.NOT_FOUND}</Container>;
-    }
+
     return (
         <PublicCollectionGalleryContext.Provider
             value={{
