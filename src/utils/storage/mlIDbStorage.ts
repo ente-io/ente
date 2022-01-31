@@ -115,6 +115,9 @@ class MLIDbStorage {
                         .objectStore('configs')
                         .add(DEFAULT_ML_SEARCH_CONFIG, ML_SEARCH_CONFIG_NAME);
                 }
+                console.log(
+                    `Ml DB upgraded to version: ${newVersion} from version: ${oldVersion}`
+                );
             },
         });
     }
@@ -122,6 +125,7 @@ class MLIDbStorage {
     public get db(): Promise<IDBPDatabase<MLDb>> {
         if (!this._db) {
             this._db = this.openDB();
+            console.log('Opening Ml DB');
         }
 
         return this._db;
@@ -131,6 +135,7 @@ class MLIDbStorage {
         const db = await this.db;
         db.close();
         await deleteDB(MLDATA_DB_NAME);
+        console.log('Cleared Ml DB');
         this._db = undefined;
         await this.db;
     }
