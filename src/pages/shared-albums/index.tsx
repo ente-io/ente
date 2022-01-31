@@ -5,6 +5,7 @@ import {
     getLocalPublicCollection,
     getLocalPublicFiles,
     getPublicCollection,
+    getPublicCollectionUID,
     removePublicCollectionWithFiles,
     syncPublicFiles,
 } from 'services/publicCollectionService';
@@ -19,7 +20,7 @@ import {
     defaultPublicCollectionGalleryContext,
     PublicCollectionGalleryContext,
 } from 'utils/publicCollectionGallery';
-import { CustomError } from 'utils/error';
+import { CustomError, parseSharingErrorCodes } from 'utils/error';
 import Container from 'components/Container';
 import constants from 'utils/strings/constants';
 import EnteSpinner from 'components/EnteSpinner';
@@ -28,11 +29,18 @@ import CryptoWorker from 'utils/crypto';
 import { PAGES } from 'constants/pages';
 import router from 'next/router';
 
+const Loader = () => (
+    <Container>
+        <EnteSpinner>
+            <span className="sr-only">Loading...</span>
+        </EnteSpinner>
+    </Container>
+);
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
-    const [publicFiles, setPublicFiles] = useState<EnteFile[]>([]);
+    const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const appContext = useContext(AppContext);
     const [abuseReportFormView, setAbuseReportFormView] = useState(false);
@@ -42,23 +50,22 @@ export default function PublicCollectionGallery() {
     const openReportForm = () => setAbuseReportFormView(true);
     const closeReportForm = () => setAbuseReportFormView(false);
     const loadingBar = useRef(null);
-    const [isLoadingBarRunning, setIsLoadingBarRunning] = useState(false);
+    const isLoadingBarRunning = useRef(false);
 
     const openMessageDialog = () => setMessageDialogView(true);
     const closeMessageDialog = () => setMessageDialogView(false);
 
-    const startLoading = () => {
-        !isLoadingBarRunning && loadingBar.current?.continuousStart();
-        setIsLoadingBarRunning(true);
+    const startLoadingBar = () => {
+        !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
+        isLoadingBarRunning.current = true;
     };
-    const finishLoading = () => {
-        loadingBar.current?.complete();
-        setIsLoadingBarRunning(false);
+    const finishLoadingBar = () => {
+        isLoadingBarRunning.current && loadingBar.current?.complete();
+        isLoadingBarRunning.current = false;
     };
 
     useEffect(() => {
         appContext.showNavBar(true);
-        setLoading(false);
         const currentURL = new URL(window.location.href);
         if (currentURL.pathname !== PAGES.ROOT) {
             router.push(
@@ -75,30 +82,38 @@ export default function PublicCollectionGallery() {
             );
         }
         const main = async () => {
-            const worker = await new CryptoWorker();
-            url.current = window.location.href;
-            const currentURL = new URL(url.current);
-            const t = currentURL.searchParams.get('t');
-            const ck = currentURL.hash.slice(1);
-            const dck = await worker.fromHex(ck);
-            if (!t || !dck) {
-                setLoading(false);
-                return;
-            }
-            token.current = t;
-            collectionKey.current = dck;
-            url.current = window.location.href;
-            const localCollection = await getLocalPublicCollection(
-                collectionKey.current
-            );
-            if (localCollection) {
-                setPublicCollection(localCollection);
-                const localPublicFiles = sortFiles(
-                    mergeMetadata(await getLocalPublicFiles(localCollection))
+            try {
+                const worker = await new CryptoWorker();
+                url.current = window.location.href;
+                const currentURL = new URL(url.current);
+                const t = currentURL.searchParams.get('t');
+                const ck = currentURL.hash.slice(1);
+                const dck = await worker.fromHex(ck);
+                if (!t || !dck) {
+                    return;
+                }
+                token.current = t;
+                collectionKey.current = dck;
+                url.current = window.location.href;
+                const localCollection = await getLocalPublicCollection(
+                    collectionKey.current
                 );
-                setPublicFiles(localPublicFiles);
+                if (localCollection) {
+                    setPublicCollection(localCollection);
+                    const collectionUID = getPublicCollectionUID(
+                        collectionKey.current,
+                        token.current
+                    );
+                    const localFiles = await getLocalPublicFiles(collectionUID);
+                    const localPublicFiles = sortFiles(
+                        mergeMetadata(localFiles)
+                    );
+                    setPublicFiles(localPublicFiles);
+                }
+                await syncWithRemote();
+            } finally {
+                setLoading(false);
             }
-            syncWithRemote();
         };
         main();
     }, []);
@@ -107,7 +122,7 @@ export default function PublicCollectionGallery() {
 
     const syncWithRemote = async () => {
         try {
-            startLoading();
+            startLoadingBar();
             const collection = await getPublicCollection(
                 token.current,
                 collectionKey.current
@@ -116,29 +131,29 @@ export default function PublicCollectionGallery() {
 
             await syncPublicFiles(token.current, collection, setPublicFiles);
         } catch (e) {
-            if (e.message === CustomError.TOKEN_EXPIRED) {
+            const parsedError = parseSharingErrorCodes(e);
+            if (parsedError.message === CustomError.TOKEN_EXPIRED) {
                 // share has been disabled
                 // local cache should be cleared
-                removePublicCollectionWithFiles(collectionKey.current);
+                removePublicCollectionWithFiles(
+                    token.current,
+                    collectionKey.current
+                );
                 setPublicCollection(null);
                 setPublicFiles([]);
             }
         } finally {
-            finishLoading();
+            finishLoadingBar();
         }
     };
-    if (loading) {
-        return (
-            <Container>
-                <EnteSpinner>
-                    <span className="sr-only">Loading...</span>
-                </EnteSpinner>
-            </Container>
-        );
+
+    if (!publicFiles && loading) {
+        return <Loader />;
     }
-    if (!isLoadingBarRunning && !publicFiles) {
+    if (!publicFiles?.length && !loading) {
         return <Container>{constants.NOT_FOUND}</Container>;
     }
+
     return (
         <PublicCollectionGalleryContext.Provider
             value={{

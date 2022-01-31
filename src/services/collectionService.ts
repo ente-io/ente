@@ -23,12 +23,7 @@ import {
     CreatePublicAccessTokenRequest,
     PublicURL,
 } from 'types/collection';
-import {
-    COLLECTION_SORT_BY,
-    CollectionType,
-    COLLECTION_SHARE_DEFAULT_DEVICE_LIMIT,
-    COLLECTION_SHARE_DEFAULT_VALID_DURATION,
-} from 'constants/collection';
+import { COLLECTION_SORT_BY, CollectionType } from 'constants/collection';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -588,9 +583,6 @@ export const createShareableURL = async (collection: Collection) => {
         }
         const createPublicAccessTokenRequest: CreatePublicAccessTokenRequest = {
             collectionID: collection.id,
-            validTill:
-                Date.now() * 1000 + COLLECTION_SHARE_DEFAULT_VALID_DURATION,
-            deviceLimit: COLLECTION_SHARE_DEFAULT_DEVICE_LIMIT,
         };
         const resp = await HTTPService.post(
             `${ENDPOINT}/collections/share-url`,
