@@ -1,7 +1,7 @@
 import { getLocalFiles, setLocalFiles } from '../fileService';
 import { getLocalCollections } from '../collectionService';
 import { SetFiles } from 'types/gallery';
-import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
+import { getDedicatedCryptoWorker } from 'utils/crypto';
 import {
     sortFilesIntoCollections,
     sortFiles,
@@ -23,6 +23,7 @@ import {
     ProgressUpdater,
 } from 'types/upload';
 import { UPLOAD_STAGES, FileUploadResults } from 'constants/upload';
+import { ComlinkWorker } from 'utils/comlink';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;

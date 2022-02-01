@@ -23,6 +23,7 @@ import {
     VISIBILITY_STATE,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
+import HEICConverter from 'services/HEICConverter';
 
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
@@ -322,13 +323,12 @@ export async function convertForPreview(file: EnteFile, fileBlob: Blob) {
     }
 
     const typeFromExtension = getFileExtension(file.metadata.title);
-    const worker = await new CryptoWorker();
     const reader = new FileReader();
 
     const mimeType =
         (await getMimeTypeFromBlob(reader, fileBlob)) ?? typeFromExtension;
     if (isFileHEIC(mimeType)) {
-        fileBlob = await worker.convertHEIC2JPEG(fileBlob);
+        fileBlob = await HEICConverter.convert(fileBlob);
     }
     return fileBlob;
 }

@@ -7,6 +7,7 @@ import { convertToHumanReadable } from 'utils/billing';
 import { isFileHEIC } from 'utils/file';
 import { FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from './readFileService';
+import HEICConverter from 'services/HEICConverter';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
@@ -84,7 +85,7 @@ export async function generateImageThumbnail(
     let timeout = null;
 
     if (isHEIC) {
-        file = new File([await worker.convertHEIC2JPEG(file)], null, null);
+        file = new File([await HEICConverter.convert(file)], null, null);
     }
     let image = new Image();
     imageURL = URL.createObjectURL(file);
