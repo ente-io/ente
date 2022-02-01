@@ -14,8 +14,6 @@ import IncognitoWarning from 'components/IncognitoWarning';
 import { logError } from 'utils/sentry';
 import { getAlbumSiteHost, PAGES } from 'constants/pages';
 
-const ALBUM_SITE_HOST = getAlbumSiteHost();
-
 const Container = styled.div`
     display: flex;
     flex: 1;
@@ -108,6 +106,7 @@ export default function LandingPage() {
     useEffect(() => {
         appContext.showNavBar(false);
         const currentURL = new URL(window.location.href);
+        const ALBUM_SITE_HOST = getAlbumSiteHost();
         currentURL.pathname = router.pathname;
         if (
             currentURL.host === ALBUM_SITE_HOST &&
