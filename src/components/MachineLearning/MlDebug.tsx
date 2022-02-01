@@ -17,6 +17,7 @@ import {
     Face,
     FACE_CROPS_CACHE_NAME,
     MLDebugResult,
+    MlFileData,
     MLSyncConfig,
     Person,
 } from 'types/machineLearning';
@@ -247,15 +248,29 @@ export default function MLDebug() {
         );
 
         const faceCropCache = await caches.open(FACE_CROPS_CACHE_NAME);
-        const keys = await faceCropCache.keys();
         const faceCrops = {};
-        console.log('Exporting faceCrops cache entries: ', keys.length);
-        for (let i = 0; i < keys.length; i++) {
-            const response = await faceCropCache.match(keys[i]);
-            const blob = await response.blob();
-            const data = await readAsDataURL(blob);
-            const path = new URL(keys[i].url).pathname;
-            faceCrops[path] = data;
+        const files =
+            mlDbData['files'] &&
+            (Object.values(mlDbData['files']) as MlFileData[]);
+        for (const fileData of files || []) {
+            for (const face of fileData.faces || []) {
+                const faceCropUrl = face.crop?.imageUrl;
+                if (!faceCropUrl) {
+                    console.error('face crop not found for faceId: ', face.id);
+                    continue;
+                }
+                const response = await faceCropCache.match(faceCropUrl);
+                if (response && response.ok) {
+                    const blob = await response.blob();
+                    const data = await readAsDataURL(blob);
+                    faceCrops[faceCropUrl] = data;
+                } else {
+                    console.error(
+                        'face crop cache entry not found for faceCropUrl: ',
+                        faceCropUrl
+                    );
+                }
+            }
         }
         const mlCacheData = {};
         mlCacheData[FACE_CROPS_CACHE_NAME] = faceCrops;
