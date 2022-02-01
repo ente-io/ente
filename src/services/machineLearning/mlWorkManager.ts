@@ -198,7 +198,19 @@ class MLWorkManager {
         this.syncJobWorker = undefined;
     }
 
-    private async runMLSyncJob() {
+    private async runMLSyncJob(): Promise<MLSyncJobResult> {
+        // TODO: skipping is not required if we are caching chunks through service worker
+        // currently worker chunk itself is not loaded when network is not there
+        if (!navigator.onLine) {
+            console.log(
+                'Skipping ml-sync job run as not connected to internet.'
+            );
+            return {
+                shouldBackoff: true,
+                mlSyncResult: undefined,
+            };
+        }
+
         const token = getToken();
         const jobWorkerProxy = await this.getSyncJobWorker();
 
