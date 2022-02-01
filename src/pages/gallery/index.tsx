@@ -348,7 +348,7 @@ export default function Gallery() {
         isLoadingBarRunning.current = true;
     };
     const finishLoading = () => {
-        loadingBar.current?.complete();
+        isLoadingBarRunning.current && loadingBar.current?.complete();
         isLoadingBarRunning.current = false;
     };
 

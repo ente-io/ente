@@ -28,8 +28,8 @@ export interface PublicURL {
 
 export interface CreatePublicAccessTokenRequest {
     collectionID: number;
-    validTill: number;
-    deviceLimit: number;
+    validTill?: number;
+    deviceLimit?: number;
 }
 
 export interface EncryptedFileKey {

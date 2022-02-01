@@ -368,7 +368,8 @@ class MachineLearningService {
             let error = e;
             console.error('Error in ml sync, fileId: ', enteFile.id, error);
             if ('status' in error) {
-                error = parseServerError(error).parsedError || error;
+                const parsedMessage = parseServerError(error);
+                error = parsedMessage ? new Error(parsedMessage) : error;
             }
             // TODO: throw errors not related to specific file
             // sync job run should stop after these errors
