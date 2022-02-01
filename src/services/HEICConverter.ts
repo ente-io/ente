@@ -4,7 +4,7 @@ import { CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 
 class HEICConverter {
-    private convertProcessor = new QueueProcessor<Blob>(2);
+    private convertProcessor = new QueueProcessor<Blob>(5);
     private worker = null;
 
     async convert(fileBlob: Blob, format = 'JPEG'): Promise<Blob> {
