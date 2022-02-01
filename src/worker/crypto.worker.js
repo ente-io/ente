@@ -1,6 +1,6 @@
 import * as Comlink from 'comlink';
 import * as libsodium from 'utils/crypto/libsodium';
-import { convertHEIC2JPEG } from 'utils/file/convertHEIC';
+import { convertHEIC } from 'utils/file/convertHEIC';
 
 export class Crypto {
     async decryptMetadata(encryptedMetadata, header, key) {
@@ -149,8 +149,8 @@ export class Crypto {
         return libsodium.fromHex(string);
     }
 
-    async convertHEIC2JPEG(file) {
-        return convertHEIC2JPEG(file);
+    async convertHEIC(format, file) {
+        return convertHEIC(format, file);
     }
 }
 
