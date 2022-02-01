@@ -69,9 +69,7 @@ class InfoSectionWidget extends StatelessWidget {
           child:
               SettingsTextItem(text: "source code", icon: Icons.navigate_next),
         ),
-        UpdateService.instance.isIndependent()
-            ? Divider(height: 4)
-            : Container(),
+        Divider(height: 4),
         UpdateService.instance.isIndependent()
             ? GestureDetector(
                 behavior: HitTestBehavior.translucent,
