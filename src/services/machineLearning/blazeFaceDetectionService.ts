@@ -4,7 +4,7 @@ import {
     NormalizedFace,
 } from 'blazeface-back';
 import * as tf from '@tensorflow/tfjs-core';
-import { GraphModel } from '@tensorflow/tfjs';
+import { GraphModel } from '@tensorflow/tfjs-converter';
 import {
     BLAZEFACE_FACE_SIZE,
     BLAZEFACE_INPUT_SIZE,
@@ -142,7 +142,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
 
     public async detectFacesUsingModel(image: tf.Tensor3D) {
         const resizedImage = tf.image.resizeBilinear(image, [256, 256]);
-        const reshapedImage = resizedImage.reshape([
+        const reshapedImage = tf.reshape(resizedImage, [
             1,
             resizedImage.shape[0],
             resizedImage.shape[1],

@@ -7,7 +7,6 @@ import {
     HdbscanResults,
     Versioned,
 } from 'types/machineLearning';
-import Clustering from 'hdbscanjs';
 import { Hdbscan } from 'hdbscan';
 import { HdbscanInput } from 'hdbscan/dist/types';
 
@@ -48,26 +47,6 @@ class ClusteringService {
     ) {
         const clusters = this.kmeans.run(dataset, numClusters);
         return { clusters, noise: [] };
-    }
-
-    public getMST(
-        dataset: Array<Array<number>>
-        // epsilon: number = 1.0,
-        // minPts: number = 2
-    ) {
-        if (dataset.length < 1) {
-            return null;
-        }
-
-        const hdataset = dataset.map((d, index) => {
-            return { data: d, opt: index };
-        });
-
-        const cluster = new Clustering(hdataset, Clustering.distFunc.euclidean);
-        const treeNode = cluster.getTree();
-        // const allNodes = treeNode.filter(()=>true, null);
-        console.log(treeNode);
-        return treeNode;
     }
 
     public clusterUsingHdbscan(hdbscanInput: HdbscanInput): HdbscanResults {

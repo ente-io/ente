@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import '@tensorflow/tfjs-backend-webgl';
 import arcfaceAlignmentService from 'services/machineLearning/arcfaceAlignmentService';
 import arcfaceCropService from 'services/machineLearning/arcfaceCropService';
 import blazeFaceDetectionService from 'services/machineLearning/blazeFaceDetectionService';

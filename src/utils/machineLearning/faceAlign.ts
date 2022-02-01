@@ -123,11 +123,10 @@ export function tfExtractFaceImages(
         const tf4dFloat32Image = toTensor4D(image, 'float32');
         const faceImages = new Array<tf.Tensor3D>(alignments.length);
         for (let i = 0; i < alignments.length; i++) {
-            faceImages[i] = extractFaceImage(
-                tf4dFloat32Image,
-                alignments[i],
-                faceSize
-            ).squeeze([0]);
+            faceImages[i] = tf.squeeze(
+                extractFaceImage(tf4dFloat32Image, alignments[i], faceSize),
+                [0]
+            );
         }
 
         return tf.stack(faceImages) as tf.Tensor4D;
@@ -206,11 +205,14 @@ export function extractArcfaceAlignedFaceImages(
         const tf4dFloat32Image = toTensor4D(image, 'float32');
         const faceImages = new Array<tf.Tensor3D>(faceDetections.length);
         for (let i = 0; i < faceDetections.length; i++) {
-            faceImages[i] = extractArcfaceAlignedFaceImage(
-                tf4dFloat32Image,
-                faceDetections[i],
-                faceSize
-            ).squeeze([0]);
+            faceImages[i] = tf.squeeze(
+                extractArcfaceAlignedFaceImage(
+                    tf4dFloat32Image,
+                    faceDetections[i],
+                    faceSize
+                ),
+                [0]
+            );
         }
 
         return tf.stack(faceImages) as tf.Tensor4D;
