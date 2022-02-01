@@ -1,27 +1,37 @@
 import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
-import { File } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import styled from 'styled-components';
 import PlayCircleOutline from 'components/icons/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
 import { GalleryContext } from 'pages/gallery';
-import { GAP_BTW_TILES } from 'types';
+import { GAP_BTW_TILES } from 'constants/gallery';
+import {
+    defaultPublicCollectionGalleryContext,
+    PublicCollectionGalleryContext,
+} from 'utils/publicCollectionGallery';
+import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 
 interface IProps {
-    file: File;
-    updateUrl: (url: string) => void;
+    file: EnteFile;
+    updateURL: (url: string) => void;
     onClick?: () => void;
     forcedEnable?: boolean;
     selectable?: boolean;
     selected?: boolean;
-    onSelect?: (checked: boolean) => void;
+    onSelect: (checked: boolean) => void;
+    onHover?: () => void;
+    onRangeSelect?: () => void;
+    isRangeSelectActive?: boolean;
     selectOnClick?: boolean;
+    isInsSelectRange?: boolean;
 }
 
-const Check = styled.input`
+const Check = styled.input<{ active: boolean }>`
     appearance: none;
     position: absolute;
-    right: 0;
+    z-index: 10;
+    left: 0;
     opacity: 0;
     outline: none;
     cursor: pointer;
@@ -34,7 +44,7 @@ const Check = styled.input`
         width: 16px;
         height: 16px;
         border: 2px solid #fff;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: #ddd;
         display: inline-block;
         border-radius: 50%;
         vertical-align: bottom;
@@ -43,18 +53,19 @@ const Check = styled.input`
         line-height: 16px;
         transition: background-color 0.3s ease;
         pointer-events: inherit;
+        color: #aaa;
     }
     &::after {
         content: '';
         width: 5px;
         height: 10px;
-        border-right: 2px solid #fff;
-        border-bottom: 2px solid #fff;
+        border-right: 2px solid #333;
+        border-bottom: 2px solid #333;
         transform: translate(-18px, 8px);
-        opacity: 0;
         transition: transform 0.3s ease;
         position: absolute;
         pointer-events: inherit;
+        transform: translate(-18px, 10px) rotate(45deg);
     }
 
     /** checked */
@@ -65,13 +76,48 @@ const Check = styled.input`
         color: #fff;
     }
     &:checked::after {
-        opacity: 1;
-        transform: translate(-18px, 10px) rotate(45deg);
+        content: '';
+        border-right: 2px solid #ddd;
+        border-bottom: 2px solid #ddd;
     }
-
+    ${(props) => props.active && 'opacity: 0.5 '};
     &:checked {
-        opacity: 1;
+        opacity: 1 !important;
     }
+`;
+
+export const HoverOverlay = styled.div<{ checked: boolean }>`
+    opacity: 0;
+    left: 0;
+    top: 0;
+    outline: none;
+    height: 40%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-weight: 900;
+    position: absolute;
+    ${(props) =>
+        !props.checked &&
+        'background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))'};
+`;
+
+export const InSelectRangeOverLay = styled.div<{ active: boolean }>`
+    opacity: ${(props) => (!props.active ? 0 : 1)});
+    left: 0;
+    top: 0;
+    outline: none;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-weight: 900;
+    position: absolute;
+    ${(props) => props.active && 'background:rgba(81, 205, 124, 0.25)'};
 `;
 
 const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
@@ -107,6 +153,9 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
     }
 
     &:hover ${Check} {
+        opacity: 0.5;
+    }
+    &:hover ${HoverOverlay} {
         opacity: 1;
     }
 `;
@@ -117,26 +166,48 @@ export default function PreviewCard(props: IProps) {
     const {
         file,
         onClick,
-        updateUrl,
+        updateURL,
         forcedEnable,
         selectable,
         selected,
         onSelect,
         selectOnClick,
+        onHover,
+        onRangeSelect,
+        isRangeSelectActive,
+        isInsSelectRange,
     } = props;
     const isMounted = useRef(true);
+    const publicCollectionGalleryContext =
+        useContext(PublicCollectionGalleryContext) ??
+        defaultPublicCollectionGalleryContext;
     useLayoutEffect(() => {
         if (file && !file.msrc) {
             const main = async () => {
-                const url = await DownloadManager.getPreview(file);
-                if (isMounted.current) {
-                    setImgSrc(url);
-                    thumbs.set(file.id, url);
-                    file.msrc = url;
-                    if (!file.src) {
-                        file.src = url;
+                try {
+                    let url;
+                    if (
+                        publicCollectionGalleryContext.accessedThroughSharedURL
+                    ) {
+                        url =
+                            await PublicCollectionDownloadManager.getThumbnail(
+                                file,
+                                publicCollectionGalleryContext.token
+                            );
+                    } else {
+                        url = await DownloadManager.getThumbnail(file);
                     }
-                    updateUrl(url);
+                    if (isMounted.current) {
+                        setImgSrc(url);
+                        thumbs.set(file.id, url);
+                        file.msrc = url;
+                        if (!file.src) {
+                            file.src = url;
+                        }
+                        updateURL(url);
+                    }
+                } catch (e) {
+                    // no-op
                 }
             };
 
@@ -163,24 +234,37 @@ export default function PreviewCard(props: IProps) {
 
     const handleClick = () => {
         if (selectOnClick) {
-            onSelect?.(!selected);
+            if (isRangeSelectActive) {
+                onRangeSelect();
+            } else {
+                onSelect(!selected);
+            }
         } else if (file?.msrc || imgSrc) {
             onClick?.();
         }
     };
 
     const handleSelect: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-        onSelect?.(e.target.checked);
+        if (isRangeSelectActive) {
+            onRangeSelect?.();
+        } else {
+            onSelect(e.target.checked);
+        }
     };
 
     const longPressCallback = () => {
         onSelect(!selected);
     };
-
+    const handleHover = () => {
+        if (isRangeSelectActive) {
+            onHover();
+        }
+    };
     return (
         <Cont
             id={`thumb-${file?.id}`}
             onClick={handleClick}
+            onMouseEnter={handleHover}
             disabled={!forcedEnable && !file?.msrc && !imgSrc}
             selected={selected}
             {...(selectable ? useLongPress(longPressCallback, 500) : {})}>
@@ -189,11 +273,16 @@ export default function PreviewCard(props: IProps) {
                     type="checkbox"
                     checked={selected}
                     onChange={handleSelect}
+                    active={isRangeSelectActive && isInsSelectRange}
                     onClick={(e) => e.stopPropagation()}
                 />
             )}
             {(file?.msrc || imgSrc) && <img src={file?.msrc || imgSrc} />}
             {file?.metadata.fileType === 1 && <PlayCircleOutline />}
+            <HoverOverlay checked={selected} />
+            <InSelectRangeOverLay
+                active={isRangeSelectActive && isInsSelectRange}
+            />
         </Cont>
     );
 }

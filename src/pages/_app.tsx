@@ -14,6 +14,8 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
 import Head from 'next/head';
+import { getAlbumSiteHost } from 'constants/pages';
+import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -79,10 +81,31 @@ const GlobalStyles = createGlobalStyle`
         height: 100%;
     }
 
-    .video-loading > div {
+    .video-loading > div.spinner-border {
         position: relative;
         top: -50vh;
         left: 50vw;
+    }
+
+    
+
+    .video-loading > div.download-message {
+        position: relative;
+        top: -60vh;
+        left: 0;
+        height: 16vh;
+        padding:2vh 0;
+        background-color: #151414;
+        color:#ddd;
+        display: flex;
+        flex-direction:column;
+        align-items: center;
+        justify-content: space-around;
+        opacity: 0.8;
+        font-size:20px;
+    }
+    .download-message > a{
+        width: 130px;
     }
 
     :root {
@@ -95,6 +118,12 @@ const GlobalStyles = createGlobalStyle`
 
     .pswp__img {
         object-fit: contain;
+    }
+    .pswp__caption{
+        font-size:20px;
+        height:10%;
+        padding-left:5%;
+        color:#eee;
     }
 
     .modal {
@@ -140,6 +169,9 @@ const GlobalStyles = createGlobalStyle`
     .modal-xl{
         max-width:90% !important;
     }
+    .modal-lg {
+        max-width: 720px !important;
+      }
     .plan-selector-modal-content {
         width:auto;
         margin:auto;
@@ -200,6 +232,17 @@ const GlobalStyles = createGlobalStyle`
     .btn-outline-danger, .btn-outline-secondary, .btn-outline-primary{
         border-width: 2px;
     }
+
+    #go-to-ente{
+        background:none;
+        border-color: #3dbb69;
+        color:#51cd7c;
+    }
+    #go-to-ente:hover, #go-to-ente:focus, #go-to-ente:active {
+        color:#fff;
+        background-color: #44774d;
+    }
+    
     a {
         color: #fff;
     }
@@ -331,10 +374,20 @@ const GlobalStyles = createGlobalStyle`
     .list-group-item:active , list-group-item:focus{
         background-color:#000 !important;
     }
-    .arrow::after{
+    #button-tooltip > .arrow::before{
         border-bottom-color:#282828 !important;
     }
+    #button-tooltip > .arrow::after{
+        border-bottom-color:#282828 !important;
+        border-top-color:#282828 !important;
+
+    }
     .arrow::before{
+        border-bottom-color:#282828 !important;
+        border-top-color:#282828 !important;
+    }
+    .arrow::after{
+        border-bottom-color:#282828 !important;
         border-top-color:#282828 !important;
     }
     .carousel-inner {
@@ -380,8 +433,57 @@ const GlobalStyles = createGlobalStyle`
             -webkit-transform: rotate(359deg);
         }
     }
+    #button-tooltip{
+        color: #ddd;
+        border-radius: 5px;
+        font-size: 12px;
+        padding:0px
+    }
     .tooltip-inner{
-        padding:0px;
+        background-color: #282828;
+        margin:6px 0;
+    }
+    .react-datepicker__input-container > input {
+        width:100%;
+    }
+    .react-datepicker__navigation{
+        top:14px;
+    }
+    .react-datepicker, .react-datepicker__header,.react-datepicker__time-container .react-datepicker__time,.react-datepicker-time__header{
+        background-color: #202020;
+        color:#fff;
+        border-color: #444;
+    }
+    .react-datepicker__current-month,.react-datepicker__day-name, .react-datepicker__day, .react-datepicker__time-name{
+         color:#fff;
+     }
+    .react-datepicker__day--disabled{
+        color:#5b5656;
+    }
+    .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item:hover{
+        background-color:#686868
+    }
+    .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--disabled :hover{
+        background-color: #202020;
+    }
+
+    .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--disabled{
+        color:#5b5656;
+    }
+    .react-datepicker{
+        padding-bottom:10px;
+    }
+    .react-datepicker__day:hover {
+        background-color:#686868
+    }
+    .react-datepicker__day--disabled:hover {
+        background-color: #202020;
+    }
+    .ente-form-group{
+        margin:0;
+    }
+    .form-check-input:hover, .form-check-label :hover{
+        cursor:pointer;
     }
 `;
 
@@ -390,9 +492,12 @@ export const LogoImage = styled.img`
     margin-right: 5px;
 `;
 
-const FlexContainer = styled.div`
+const FlexContainer = styled.div<{ shouldJustifyLeft?: boolean }>`
     flex: 1;
     text-align: center;
+    @media (max-width: 760px) {
+        text-align: ${(props) => (props.shouldJustifyLeft ? 'left' : 'center')};
+    }
 `;
 
 export const MessageContainer = styled.div`
@@ -413,6 +518,8 @@ type AppContextType = {
     sharedFiles: File[];
     resetSharedFiles: () => void;
     setDisappearingFlashMessage: (message: FlashMessage) => void;
+    redirectURL: string;
+    setRedirectURL: (url: string) => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -442,6 +549,9 @@ export default function App({ Component, err }) {
     const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const [redirectName, setRedirectName] = useState<string>(null);
     const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
+    const [redirectURL, setRedirectURL] = useState(null);
+    const [isAlbumsDomain, setIsAlbumsDomain] = useState(false);
+
     useEffect(() => {
         if (
             !('serviceWorker' in navigator) ||
@@ -483,12 +593,16 @@ export default function App({ Component, err }) {
     const resetSharedFiles = () => setSharedFiles(null);
 
     useEffect(() => {
-        console.log(
-            `%c${constants.CONSOLE_WARNING_STOP}`,
-            'color: red; font-size: 52px;'
-        );
-        console.log(`%c${constants.CONSOLE_WARNING_DESC}`, 'font-size: 20px;');
-
+        if (process.env.NODE_ENV === 'production') {
+            console.log(
+                `%c${constants.CONSOLE_WARNING_STOP}`,
+                'color: red; font-size: 52px;'
+            );
+            console.log(
+                `%c${constants.CONSOLE_WARNING_DESC}`,
+                'font-size: 20px;'
+            );
+        }
         const query = new URLSearchParams(window.location.search);
         const redirect = query.get('redirect');
         if (redirect && redirectMap[redirect]) {
@@ -527,12 +641,20 @@ export default function App({ Component, err }) {
             window.removeEventListener('offline', setUserOffline);
         };
     }, [redirectName]);
+
+    useEffect(() => {
+        const currentURL = new URL(window.location.href);
+        if (currentURL.host === getAlbumSiteHost()) {
+            setIsAlbumsDomain(true);
+        }
+    }, []);
+
     const showNavBar = (show: boolean) => setShowNavBar(show);
     const setDisappearingFlashMessage = (flashMessages: FlashMessage) => {
         setFlashMessage(flashMessages);
         setTimeout(() => setFlashMessage(null), 5000);
     };
-    //  ho ja yaar
+
     return (
         <>
             <Head>
@@ -541,13 +663,14 @@ export default function App({ Component, err }) {
             <GlobalStyles />
             {showNavbar && (
                 <Navbar>
-                    <FlexContainer>
+                    <FlexContainer shouldJustifyLeft={isAlbumsDomain}>
                         <LogoImage
                             style={{ height: '24px', padding: '3px' }}
                             alt="logo"
                             src="/icon.svg"
                         />
                     </FlexContainer>
+                    {isAlbumsDomain && <GoToEnte />}
                 </Navbar>
             )}
             <MessageContainer>
@@ -575,6 +698,8 @@ export default function App({ Component, err }) {
                     sharedFiles,
                     resetSharedFiles,
                     setDisappearingFlashMessage,
+                    redirectURL,
+                    setRedirectURL,
                 }}>
                 {loading ? (
                     <Container>

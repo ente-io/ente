@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
-import CrossIcon from './icons/CrossIcon';
+import CloseIcon from './icons/CloseIcon';
 
 const CloseButtonWrapper = styled.div`
     position: absolute;
@@ -39,7 +39,6 @@ const Overlay = styled.div`
 type Props = React.PropsWithChildren<{
     getRootProps: any;
     getInputProps: any;
-    showCollectionSelector;
 }>;
 
 export default function FullScreenDropZone(props: Props) {
@@ -58,16 +57,12 @@ export default function FullScreenDropZone(props: Props) {
         <DropDiv
             {...props.getRootProps({
                 onDragEnter,
-                onDrop: (e) => {
-                    e.preventDefault();
-                    props.showCollectionSelector();
-                },
             })}>
             <input {...props.getInputProps()} />
             {isDragActive && (
                 <Overlay onDrop={onDragLeave} onDragLeave={onDragLeave}>
                     <CloseButtonWrapper onClick={onDragLeave}>
-                        <CrossIcon />
+                        <CloseIcon />
                     </CloseButtonWrapper>
                     {constants.UPLOAD_DROPZONE_MESSAGE}
                 </Overlay>

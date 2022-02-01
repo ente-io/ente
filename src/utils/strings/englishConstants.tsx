@@ -109,26 +109,6 @@ const englishConstants = {
     },
     UPLOADING_FILES: 'file upload',
     FILE_NOT_UPLOADED_LIST: 'the following files were not uploaded',
-    FILE_UPLOAD_PROGRESS: (name: string, progress: number) => (
-        <div id={name}>
-            {name}
-            {' - '}
-            <span style={{ color: '#eee' }}>
-                {(() => {
-                    switch (progress) {
-                        case -1:
-                            return 'failed';
-                        case -2:
-                            return 'already uploaded, skipping...';
-                        case -3:
-                            return 'unsupported file format, skipping....';
-                        default:
-                            return `${progress}%`;
-                    }
-                })()}
-            </span>
-        </div>
-    ),
     SUBSCRIPTION_EXPIRED: (action) => (
         <>
             your subscription has expired, please a{' '}
@@ -159,8 +139,8 @@ const englishConstants = {
     UPLOAD_FIRST_PHOTO_DESCRIPTION: 'preserve your first memory with ente',
     UPLOAD_FIRST_PHOTO: 'preserve',
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
-    CONFIRM_DELETE_FILE: 'confirm file deletion',
-    DELETE_FILE_MESSAGE: 'sure you want to delete selected files?',
+    CONFIRM_DELETE: 'confirm deletion',
+    DELETE_MESSAGE: `the selected files will be permanently deleted and can't be restored `,
     DELETE_FILE: 'delete files',
     DELETE: 'delete',
     MULTI_FOLDER_UPLOAD: 'multiple folders detected',
@@ -210,7 +190,7 @@ const englishConstants = {
     CANCEL: 'cancel',
     LOGOUT: 'logout',
     DELETE_ACCOUNT: 'delete account',
-    DELETE_MESSAGE: () => (
+    DELETE_ACCOUNT_MESSAGE: () => (
         <>
             <p>
                 please send an email to{' '}
@@ -359,8 +339,7 @@ const englishConstants = {
         <>
             <p>are you sure you want to delete this album?</p>
             <p>
-                all files that are unique to this album will be permanently
-                deleted
+                all files that are unique to this album will be moved to trash
             </p>
         </>
     ),
@@ -378,11 +357,20 @@ const englishConstants = {
             </div>
         </>
     ),
+    PUBLIC_URL: 'public link',
     SHARE_WITH_SELF: 'oops, you cannot share with yourself',
     ALREADY_SHARED: (email) =>
         `oops, you're already sharing this with ${email}`,
     SHARING_BAD_REQUEST_ERROR: 'sharing album not allowed',
     SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing is disabled for free accounts',
+    CONFIRM_DOWNLOAD_COLLECTION: 'download album',
+    DOWNLOAD_COLLECTION_MESSAGE: () => (
+        <>
+            <p>are you sure you want to download the complete album?</p>
+            <p>all files will be queued for download sequentially</p>
+        </>
+    ),
+    DOWNLOAD_COLLECTION_FAILED: 'album downloading failed, please try again',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
     SEARCH_HINT: () => (
         <span>try searching for New York, April 14, Christmas...</span>
@@ -420,7 +408,7 @@ const englishConstants = {
         </span>
     ),
     NOT_FILE_OWNER: 'you cannot delete files in a shared album',
-    ADD_TO_COLLECTION: 'add to collection',
+    ADD_TO_COLLECTION: 'add to album',
     SELECTED: 'selected',
     VIDEO_PLAYBACK_FAILED: 'video format not supported',
     VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD:
@@ -539,9 +527,129 @@ const englishConstants = {
     BLOCKED_UPLOADS: 'blocked uploads',
     INPROGRESS_UPLOADS: 'uploads in progress',
     TOO_LARGE_UPLOADS: 'large files',
-    TOO_LARGE_INFO:
+    LARGER_THAN_AVAILABLE_STORAGE_UPLOADS: 'insufficient storage',
+    LARGER_THAN_AVAILABLE_STORAGE_INFO:
         'these files were not uploaded as they exceed the maximum size limit for your storage plan',
+    TOO_LARGE_INFO:
+        'these files were not uploaded as they exceed our maximum file size limit',
     UPLOAD_TO_COLLECTION: 'upload to album',
+    ARCHIVE: 'archive',
+    ALL: 'all',
+    MOVE_TO_COLLECTION: 'move to album',
+    UNARCHIVE: 'un-archive',
+    MOVE: 'move',
+    ADD: 'add',
+    SORT: 'sort',
+    REMOVE: 'remove',
+    CONFIRM_REMOVE: 'confirm removal',
+    TRASH: 'trash',
+    MOVE_TO_TRASH: 'move to trash',
+    TRASH_MESSAGE:
+        'the selected files will be removed from all albums and moved to trash ',
+    DELETE_PERMANENTLY: 'delete permanently',
+    RESTORE: 'restore',
+    CONFIRM_RESTORE: 'confirm restoration',
+    RESTORE_MESSAGE: 'restore selected files ?',
+    RESTORE_TO_COLLECTION: 'restore to album',
+    AUTOMATIC_BIN_DELETE_MESSAGE: (relativeTime: string) =>
+        `permanently deleted ${relativeTime}`,
+    EMPTY_TRASH: 'empty trash',
+    CONFIRM_EMPTY_TRASH: 'empty trash?',
+    EMPTY_TRASH_MESSAGE:
+        'all files will be permanently removed from your ente account',
+
+    CONFIRM_REMOVE_MESSAGE: () => (
+        <>
+            <p>are you sure you want to remove these files from the album?</p>
+            <p>
+                all files that are unique to this album will be moved to trash
+            </p>
+        </>
+    ),
+    SORT_BY_LATEST_PHOTO: 'recent photo',
+    SORT_BY_MODIFICATION_TIME: 'last updated',
+    SORT_BY_COLLECTION_NAME: 'album name',
+    FIX_LARGE_THUMBNAILS: 'compress thumbnails',
+    THUMBNAIL_REPLACED: 'thumbnails compressed',
+    FIX_THUMBNAIL: 'compress',
+    FIX_THUMBNAIL_LATER: 'compress later',
+    REPLACE_THUMBNAIL_NOT_STARTED: () => (
+        <>
+            some of your videos thumbnails can be compressed to save space.
+            would you like ente to compress them?
+        </>
+    ),
+    REPLACE_THUMBNAIL_COMPLETED: () => (
+        <>successfully compressed all thumbnails</>
+    ),
+    REPLACE_THUMBNAIL_NOOP: () => (
+        <>you have no thumbnails that can be compressed further</>
+    ),
+    REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR: () => (
+        <>could not compress some of your thumbnails, please retry</>
+    ),
+    FIX_CREATION_TIME: 'fix time',
+    FIX_CREATION_TIME_IN_PROGRESS: 'fixing time',
+    CREATION_TIME_UPDATED: `file time updated`,
+
+    UPDATE_CREATION_TIME_NOT_STARTED: () => (
+        <>select the option you want to use</>
+    ),
+    UPDATE_CREATION_TIME_COMPLETED: () => <>successfully updated all files</>,
+
+    UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR: () => (
+        <>file time updation failed for some files, please retry</>
+    ),
+    FILE_NAME_CHARACTER_LIMIT: '100 characters max',
+
+    DATE_TIME_ORIGINAL: 'EXIF:DateTimeOriginal',
+    DATE_TIME_DIGITIZED: 'EXIF:DateTimeDigitized',
+    CUSTOM_TIME: 'custom time',
+    REOPEN_PLAN_SELECTOR_MODAL: 're-open plans',
+    OPEN_PLAN_SELECTOR_MODAL_FAILED: 'failed to open plans',
+    COMMENT: 'comment',
+    ABUSE_REPORT_DESCRIPTION:
+        'Note: Submitting this report will notify the album owner.',
+    OTHER_REASON_REQUIRES_COMMENTS:
+        'reason = other, require  a mandatory comment ',
+    REPORT_SUBMIT_SUCCESS_CONTENT: 'your report has been submitted',
+    REPORT_SUBMIT_SUCCESS_TITLE: 'report sent',
+    REPORT_SUBMIT_FAILED: 'failed to sent report, try again',
+    INSTALL: 'install',
+    ALBUM_URL: 'album url',
+    PUBLIC_SHARING: 'link sharing',
+    NOT_FOUND: '404 - not found',
+    DISABLE_PUBLIC_SHARING: "'disable public sharing",
+    DISABLE_PUBLIC_SHARING_MESSAGE:
+        'are you sure you want to disable public sharing?',
+    ABUSE_REPORT: 'abuse report',
+    ABUSE_REPORT_BUTTON_TEXT: 'report abuse?',
+    MALICIOUS_CONTENT: 'contains malicious content',
+    COPYRIGHT:
+        'infringes on the copyright of someone I am authorized to represent',
+    ENTER_EMAIL_ADDRESS: 'email*',
+    SELECT_REASON: 'select a reason*',
+    ENTER_FULL_NAME: 'full name*',
+    ENTER_DIGITAL_SIGNATURE:
+        'typing your full name in this box will act as your digital signature*',
+    ENTER_ON_BEHALF_OF: 'I am reporting on behalf of*',
+    ENTER_ADDRESS: 'address*',
+    ENTER_JOB_TITLE: 'job title*',
+    ENTER_CITY: 'city*',
+    ENTER_PHONE: 'phone number*',
+
+    ENTER_STATE: 'state*',
+    ENTER_POSTAL_CODE: 'zip/postal code*',
+    ENTER_COUNTRY: 'country*',
+    JUDICIAL_DESCRIPTION: () => (
+        <>
+            By checking the following boxes, I state{' '}
+            <strong>UNDER PENALTY OF PERJURY </strong>of law that:
+        </>
+    ),
+    TERM_1: 'I hereby state that I have a good faith belief that the sharing of copyrighted material at the location above is not authorized by the copyright owner, its agent, or the law (e.g., as a fair use). ',
+    TERM_2: 'I hereby state that the information in this Notice is accurate and, under penalty of perjury, that I am the owner, or authorized to act on behalf of, the owner, of the copyright or of an exclusive right under the copyright that is allegedly infringed. ',
+    TERM_3: 'I acknowledge that any person who knowingly materially misrepresents that material or activity is infringing may be subject to liability for damages. ',
 };
 
 export default englishConstants;

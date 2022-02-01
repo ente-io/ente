@@ -1,9 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Modal } from 'react-bootstrap';
 import styled from 'styled-components';
-import { CollectionAndItsLatestFile } from 'services/collectionService';
 import AddCollectionButton from './AddCollectionButton';
 import PreviewCard from './PreviewCard';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { User } from 'types/user';
+import { Collection, CollectionAndItsLatestFile } from 'types/collection';
+import { CollectionType } from 'constants/collection';
 
 export const CollectionIcon = styled.div`
     width: 200px;
@@ -17,9 +20,10 @@ export const CollectionIcon = styled.div`
 `;
 
 export interface CollectionSelectorAttributes {
-    callback: (collection) => void;
-    showNextModal: (firstAlbum?: boolean) => void;
+    callback: (collection: Collection) => void;
+    showNextModal: () => void;
     title: string;
+    fromCollection?: number;
 }
 export type SetCollectionSelectorAttributes = React.Dispatch<
     React.SetStateAction<CollectionSelectorAttributes>
@@ -34,47 +38,60 @@ const CollectionCard = styled(Card)`
 interface Props {
     show: boolean;
     onHide: (closeBtnClick?: boolean) => void;
-    directlyShowNextModal: boolean;
     collectionsAndTheirLatestFile: CollectionAndItsLatestFile[];
     attributes: CollectionSelectorAttributes;
 }
 function CollectionSelector({
     attributes,
-    directlyShowNextModal,
     collectionsAndTheirLatestFile,
     ...props
 }: Props) {
+    const [collectionToShow, setCollectionToShow] = useState<
+        CollectionAndItsLatestFile[]
+    >([]);
     useEffect(() => {
-        if (directlyShowNextModal && attributes) {
-            props.onHide();
-            attributes.showNextModal(true);
+        if (!attributes || !props.show) {
+            return;
         }
-    }, [attributes]);
+        const user: User = getData(LS_KEYS.USER);
+        const personalCollectionsOtherThanFrom =
+            collectionsAndTheirLatestFile?.filter(
+                (item) =>
+                    item.collection.id !== attributes.fromCollection &&
+                    item.collection.owner.id === user?.id &&
+                    item.collection.type !== CollectionType.favorites
+            );
+        if (personalCollectionsOtherThanFrom.length === 0) {
+            props.onHide();
+            attributes.showNextModal();
+        } else {
+            setCollectionToShow(personalCollectionsOtherThanFrom);
+        }
+    }, [props.show]);
 
     if (!attributes) {
         return <Modal />;
     }
-    const CollectionIcons: JSX.Element[] = collectionsAndTheirLatestFile?.map(
-        (item) => (
-            <CollectionIcon
-                key={item.collection.id}
-                onClick={() => {
-                    attributes.callback(item.collection);
-                    props.onHide();
-                }}>
-                <CollectionCard>
-                    <PreviewCard
-                        file={item.file}
-                        updateUrl={() => {}}
-                        forcedEnable
-                    />
-                    <Card.Text className="text-center">
-                        {item.collection.name}
-                    </Card.Text>
-                </CollectionCard>
-            </CollectionIcon>
-        )
-    );
+    const CollectionIcons: JSX.Element[] = collectionToShow?.map((item) => (
+        <CollectionIcon
+            key={item.collection.id}
+            onClick={() => {
+                attributes.callback(item.collection);
+                props.onHide();
+            }}>
+            <CollectionCard>
+                <PreviewCard
+                    file={item.file}
+                    updateURL={() => {}}
+                    onSelect={() => {}}
+                    forcedEnable
+                />
+                <Card.Text className="text-center">
+                    {item.collection.name}
+                </Card.Text>
+            </CollectionCard>
+        </CollectionIcon>
+    ));
 
     return (
         <Modal
@@ -88,7 +105,6 @@ function CollectionSelector({
             <Modal.Body
                 style={{
                     display: 'flex',
-                    justifyContent: 'space-around',
                     flexWrap: 'wrap',
                 }}>
                 <AddCollectionButton showNextModal={attributes.showNextModal} />

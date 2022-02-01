@@ -1,11 +1,14 @@
+import { CustomError } from 'utils/error';
+
 interface RequestQueueItem {
     request: (canceller?: RequestCanceller) => Promise<any>;
-    callback: (response) => void;
+    successCallback: (response: any) => void;
+    failureCallback: (error: Error) => void;
     isCanceled: { status: boolean };
     canceller: { exec: () => void };
 }
 
-interface RequestCanceller {
+export interface RequestCanceller {
     exec: () => void;
 }
 
@@ -16,7 +19,9 @@ export default class QueueProcessor<T> {
 
     constructor(private maxParallelProcesses: number) {}
 
-    public queueUpRequest(request: () => Promise<T>) {
+    public queueUpRequest(
+        request: (canceller?: RequestCanceller) => Promise<T>
+    ) {
         const isCanceled = { status: false };
         const canceller: RequestCanceller = {
             exec: () => {
@@ -24,10 +29,11 @@ export default class QueueProcessor<T> {
             },
         };
 
-        const promise = new Promise<T>((resolve) => {
+        const promise = new Promise<T>((resolve, reject) => {
             this.requestQueue.push({
                 request,
-                callback: resolve,
+                successCallback: resolve,
+                failureCallback: reject,
                 isCanceled,
                 canceller,
             });
@@ -37,7 +43,7 @@ export default class QueueProcessor<T> {
         return { promise, canceller };
     }
 
-    async pollQueue() {
+    private async pollQueue() {
         if (this.requestInProcessing < this.maxParallelProcesses) {
             this.requestInProcessing++;
             await this.processQueue();
@@ -45,22 +51,21 @@ export default class QueueProcessor<T> {
         }
     }
 
-    public async processQueue() {
+    private async processQueue() {
         while (this.requestQueue.length > 0) {
-            const queueItem = this.requestQueue.pop();
-            let response: string;
+            const queueItem = this.requestQueue.shift();
+            let response = null;
 
             if (queueItem.isCanceled.status) {
-                response = null;
+                queueItem.failureCallback(Error(CustomError.REQUEST_CANCELLED));
             } else {
                 try {
                     response = await queueItem.request(queueItem.canceller);
+                    queueItem.successCallback(response);
                 } catch (e) {
-                    response = null;
+                    queueItem.failureCallback(e);
                 }
             }
-            queueItem.callback(response);
-            await this.processQueue();
         }
     }
 }

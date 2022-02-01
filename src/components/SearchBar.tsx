@@ -1,15 +1,14 @@
-import { Search, SearchStats, SetCollections } from 'pages/gallery';
-import React, { useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
 import { components } from 'react-select';
 import debounce from 'debounce-promise';
-import { File } from 'services/fileService';
 import {
-    Bbox,
     getHolidaySuggestion,
     getYearSuggestion,
     parseHumanDate,
+    searchCollection,
+    searchFiles,
     searchLocation,
 } from 'services/searchService';
 import { getFormattedDate } from 'utils/search';
@@ -17,7 +16,18 @@ import constants from 'utils/strings/constants';
 import LocationIcon from './icons/LocationIcon';
 import DateIcon from './icons/DateIcon';
 import SearchIcon from './icons/SearchIcon';
-import CrossIcon from './icons/CrossIcon';
+import CloseIcon from './icons/CloseIcon';
+import { Collection } from 'types/collection';
+import CollectionIcon from './icons/CollectionIcon';
+
+import ImageIcon from './icons/ImageIcon';
+import VideoIcon from './icons/VideoIcon';
+import { IconButton } from './Container';
+import { EnteFile } from 'types/file';
+import { Suggestion, SuggestionType, DateValue, Bbox } from 'types/search';
+import { Search, SearchStats } from 'types/gallery';
+import { FILE_TYPE } from 'constants/file';
+import { GalleryContext } from 'pages/gallery';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -68,56 +78,41 @@ const SearchInput = styled.div`
     margin: auto;
 `;
 
-export enum SuggestionType {
-    DATE,
-    LOCATION,
-}
-export interface DateValue {
-    date?: number;
-    month?: number;
-    year?: number;
-}
-export interface Suggestion {
-    type: SuggestionType;
-    label: string;
-    value: Bbox | DateValue;
-}
 interface Props {
     isOpen: boolean;
     isFirstFetch: boolean;
-    setOpen: (value) => void;
-    loadingBar: any;
-    setCollections: SetCollections;
+    setOpen: (value: boolean) => void;
     setSearch: (search: Search) => void;
-    files: File[];
     searchStats: SearchStats;
+    collections: Collection[];
+    setActiveCollection: (id: number) => void;
+    files: EnteFile[];
 }
 export default function SearchBar(props: Props) {
-    const selectRef = useRef(null);
-    useEffect(() => {
-        if (props.isOpen) {
-            setTimeout(() => {
-                selectRef.current?.focus();
-            }, 250);
-        }
-    }, [props.isOpen]);
+    const [value, setValue] = useState<Suggestion>(null);
+    const galleryContext = useContext(GalleryContext);
+    const handleChange = (value) => {
+        setValue(value);
+    };
+
+    useEffect(() => search(value), [value]);
 
     // = =========================
     // Functionality
     // = =========================
     const getAutoCompleteSuggestions = async (searchPhrase: string) => {
-        searchPhrase = searchPhrase.trim();
+        searchPhrase = searchPhrase.trim().toLowerCase();
         if (!searchPhrase?.length) {
             return [];
         }
-        const option = [
+        const options = [
             ...getHolidaySuggestion(searchPhrase),
             ...getYearSuggestion(searchPhrase),
         ];
 
         const searchedDates = parseHumanDate(searchPhrase);
 
-        option.push(
+        options.push(
             ...searchedDates.map((searchedDate) => ({
                 type: SuggestionType.DATE,
                 value: searchedDate,
@@ -125,9 +120,35 @@ export default function SearchBar(props: Props) {
             }))
         );
 
-        const searchResults = await searchLocation(searchPhrase);
-        option.push(
-            ...searchResults.map(
+        const collectionResults = searchCollection(
+            searchPhrase,
+            props.collections
+        );
+        options.push(
+            ...collectionResults.map(
+                (searchResult) =>
+                    ({
+                        type: SuggestionType.COLLECTION,
+                        value: searchResult.id,
+                        label: searchResult.name,
+                    } as Suggestion)
+            )
+        );
+        const fileResults = searchFiles(searchPhrase, props.files);
+        options.push(
+            ...fileResults.map((file) => ({
+                type:
+                    file.type === FILE_TYPE.IMAGE
+                        ? SuggestionType.IMAGE
+                        : SuggestionType.VIDEO,
+                value: file.index,
+                label: file.title,
+            }))
+        );
+
+        const locationResults = await searchLocation(searchPhrase);
+        options.push(
+            ...locationResults.map(
                 (searchResult) =>
                     ({
                         type: SuggestionType.LOCATION,
@@ -136,41 +157,48 @@ export default function SearchBar(props: Props) {
                     } as Suggestion)
             )
         );
-        return option;
+        return options;
     };
 
     const getOptions = debounce(getAutoCompleteSuggestions, 250);
 
-    const filterFiles = (selectedOption: Suggestion) => {
+    const search = (selectedOption: Suggestion) => {
         if (!selectedOption) {
             return;
         }
-        // const startTime = Date.now();
-        props.setOpen(true);
-
         switch (selectedOption.type) {
             case SuggestionType.DATE:
                 props.setSearch({
                     date: selectedOption.value as DateValue,
                 });
+                props.setOpen(true);
                 break;
             case SuggestionType.LOCATION:
                 props.setSearch({
                     location: selectedOption.value as Bbox,
                 });
+                props.setOpen(true);
+                break;
+            case SuggestionType.COLLECTION:
+                props.setActiveCollection(selectedOption.value as number);
+                setValue(null);
+                break;
+            case SuggestionType.IMAGE:
+            case SuggestionType.VIDEO:
+                props.setSearch({ fileIndex: selectedOption.value as number });
+                setValue(null);
                 break;
         }
     };
     const resetSearch = () => {
         if (props.isOpen) {
-            selectRef.current.select.state.value = null;
-            props.loadingBar.current?.continuousStart();
-            // props.setFiles(allFiles);
+            galleryContext.startLoading();
             props.setSearch({});
             setTimeout(() => {
-                props.loadingBar.current?.complete();
+                galleryContext.finishLoading();
             }, 10);
             props.setOpen(false);
+            setValue(null);
         }
     };
 
@@ -178,8 +206,22 @@ export default function SearchBar(props: Props) {
     // UI
     // = =========================
 
-    const getIconByType = (type: SuggestionType) =>
-        type === SuggestionType.DATE ? <DateIcon /> : <LocationIcon />;
+    const getIconByType = (type: SuggestionType) => {
+        switch (type) {
+            case SuggestionType.DATE:
+                return <DateIcon />;
+            case SuggestionType.LOCATION:
+                return <LocationIcon />;
+            case SuggestionType.COLLECTION:
+                return <CollectionIcon />;
+            case SuggestionType.IMAGE:
+                return <ImageIcon />;
+            case SuggestionType.VIDEO:
+                return <VideoIcon />;
+            default:
+                return <SearchIcon />;
+        }
+    };
 
     const LabelWithIcon = (props: { type: SuggestionType; label: string }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -204,13 +246,7 @@ export default function SearchBar(props: Props) {
                     paddingLeft: '10px',
                     paddingBottom: '4px',
                 }}>
-                {props.getValue().length === 0 || props.menuIsOpen ? (
-                    <SearchIcon />
-                ) : props.getValue()[0].type === SuggestionType.DATE ? (
-                    <DateIcon />
-                ) : (
-                    <LocationIcon />
-                )}
+                {getIconByType(props.getValue()[0]?.type)}
             </span>
             {props.children}
         </Control>
@@ -282,29 +318,25 @@ export default function SearchBar(props: Props) {
                             margin: '10px',
                         }}>
                         <AsyncSelect
+                            value={value}
                             components={{
                                 Option: OptionWithIcon,
                                 Control: ControlWithIcon,
                             }}
-                            ref={selectRef}
                             placeholder={constants.SEARCH_HINT()}
                             loadOptions={getOptions}
-                            onChange={filterFiles}
+                            onChange={handleChange}
                             isClearable
                             escapeClearsValue
                             styles={customStyles}
                             noOptionsMessage={() => null}
                         />
                     </div>
-                    <div style={{ width: '24px' }}>
-                        {props.isOpen && (
-                            <div
-                                style={{ cursor: 'pointer' }}
-                                onClick={resetSearch}>
-                                <CrossIcon />
-                            </div>
-                        )}
-                    </div>
+                    {props.isOpen && (
+                        <IconButton onClick={() => resetSearch()}>
+                            <CloseIcon />
+                        </IconButton>
+                    )}
                 </SearchInput>
             </Wrapper>
             <SearchButton

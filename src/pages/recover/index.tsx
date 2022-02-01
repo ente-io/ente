@@ -7,7 +7,7 @@ import {
     setData,
 } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import { KeyAttributes, PAGES } from 'types';
+import { PAGES } from 'constants/pages';
 import CryptoWorker, {
     decryptAndStoreToken,
     SaveKeyInSessionStore,
@@ -20,7 +20,10 @@ import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { User } from 'services/userService';
+import { KeyAttributes, User } from 'types/user';
+const bip39 = require('bip39');
+// mobile client library only supports english.
+bip39.setDefaultWordlist('english');
 
 export default function Recover() {
     const router = useRouter();
@@ -51,6 +54,13 @@ export default function Recover() {
 
     const recover = async (recoveryKey: string, setFieldError) => {
         try {
+            // check if user is entering mnemonic recovery key
+            if (recoveryKey.trim().indexOf(' ') > 0) {
+                if (recoveryKey.trim().split(' ').length !== 24) {
+                    throw new Error('recovery code should have 24 words');
+                }
+                recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
+            }
             const cryptoWorker = await new CryptoWorker();
             const masterKey: string = await cryptoWorker.decryptB64(
                 keyAttributes.masterKeyEncryptedWithRecoveryKey,

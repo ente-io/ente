@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import Photoswipe from 'photoswipe';
 import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
 import classnames from 'classnames';
@@ -7,28 +7,65 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from 'services/collectionService';
-import { File, FILE_TYPE } from 'services/fileService';
+import { updatePublicMagicMetadata } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import constants from 'utils/strings/constants';
-import DownloadManger from 'services/downloadManager';
-import EXIF from 'exif-js';
+import exifr from 'exifr';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
 import styled from 'styled-components';
 import events from './events';
-import { fileNameWithoutExtension, formatDateTime } from 'utils/file';
-import { FormCheck } from 'react-bootstrap';
+import {
+    changeFileCreationTime,
+    changeFileName,
+    downloadFile,
+    formatDateTime,
+    splitFilenameAndExtension,
+    updateExistingFilePubMetadata,
+} from 'utils/file';
+import { Col, Form, FormCheck, FormControl } from 'react-bootstrap';
+import { prettyPrintExif } from 'utils/exif';
+import EditIcon from 'components/icons/EditIcon';
+import {
+    FlexWrapper,
+    FreeFlowText,
+    IconButton,
+    Label,
+    Row,
+    Value,
+} from 'components/Container';
+import { logError } from 'utils/sentry';
 
+import CloseIcon from 'components/icons/CloseIcon';
+import TickIcon from 'components/icons/TickIcon';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import EnteSpinner from 'components/EnteSpinner';
+import EnteDateTimePicker from 'components/EnteDateTimePicker';
+import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
+import { sleep } from 'utils/common';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
+import { GalleryContext } from 'pages/gallery';
+
+const SmallLoadingSpinner = () => (
+    <EnteSpinner
+        style={{
+            width: '20px',
+            height: '20px',
+        }}
+    />
+);
 interface Iprops {
     isOpen: boolean;
     items: any[];
     currentIndex?: number;
     onClose?: (needUpdate: boolean) => void;
-    gettingData: (instance: any, index: number, item: File) => void;
+    gettingData: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
     className?: string;
     favItemIds: Set<number>;
-    loadingBar: any;
+    isSharedCollection: boolean;
+    isTrashCollection: boolean;
 }
 
 const LegendContainer = styled.div`
@@ -48,16 +85,274 @@ const Pre = styled.pre`
 `;
 
 const renderInfoItem = (label: string, value: string | JSX.Element) => (
-    <>
-        <Form.Label column sm="4">
-            {label}
-        </Form.Label>
-        <Form.Label column sm="8">
-            {value}
-        </Form.Label>
-    </>
+    <Row>
+        <Label width="30%">{label}</Label>
+        <Value width="70%">{value}</Value>
+    </Row>
 );
 
+function RenderCreationTime({
+    shouldDisableEdits,
+    file,
+    scheduleUpdate,
+}: {
+    shouldDisableEdits: boolean;
+    file: EnteFile;
+    scheduleUpdate: () => void;
+}) {
+    const [loading, setLoading] = useState(false);
+    const originalCreationTime = new Date(file?.metadata.creationTime / 1000);
+    const [isInEditMode, setIsInEditMode] = useState(false);
+
+    const [pickedTime, setPickedTime] = useState(originalCreationTime);
+
+    const openEditMode = () => setIsInEditMode(true);
+    const closeEditMode = () => setIsInEditMode(false);
+
+    const saveEdits = async () => {
+        try {
+            setLoading(true);
+            if (isInEditMode && file) {
+                const unixTimeInMicroSec = pickedTime.getTime() * 1000;
+                if (unixTimeInMicroSec === file?.metadata.creationTime) {
+                    closeEditMode();
+                    return;
+                }
+                let updatedFile = await changeFileCreationTime(
+                    file,
+                    unixTimeInMicroSec
+                );
+                updatedFile = (
+                    await updatePublicMagicMetadata([updatedFile])
+                )[0];
+                updateExistingFilePubMetadata(file, updatedFile);
+                scheduleUpdate();
+            }
+        } catch (e) {
+            logError(e, 'failed to update creationTime');
+        } finally {
+            closeEditMode();
+            setLoading(false);
+        }
+    };
+    const discardEdits = () => {
+        setPickedTime(originalCreationTime);
+        closeEditMode();
+    };
+    const handleChange = (newDate: Date) => {
+        if (newDate instanceof Date) {
+            setPickedTime(newDate);
+        }
+    };
+    return (
+        <>
+            <Row>
+                <Label width="30%">{constants.CREATION_TIME}</Label>
+                <Value width={isInEditMode ? '50%' : '60%'}>
+                    {isInEditMode ? (
+                        <EnteDateTimePicker
+                            loading={loading}
+                            isInEditMode={isInEditMode}
+                            pickedTime={pickedTime}
+                            handleChange={handleChange}
+                        />
+                    ) : (
+                        formatDateTime(pickedTime)
+                    )}
+                </Value>
+                <Value
+                    width={isInEditMode ? '20%' : '10%'}
+                    style={{ cursor: 'pointer', marginLeft: '10px' }}>
+                    {!shouldDisableEdits &&
+                        (!isInEditMode ? (
+                            <IconButton onClick={openEditMode}>
+                                <EditIcon />
+                            </IconButton>
+                        ) : (
+                            <>
+                                <IconButton onClick={saveEdits}>
+                                    {loading ? (
+                                        <SmallLoadingSpinner />
+                                    ) : (
+                                        <TickIcon />
+                                    )}
+                                </IconButton>
+                                <IconButton onClick={discardEdits}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </>
+                        ))}
+                </Value>
+            </Row>
+        </>
+    );
+}
+const getFileTitle = (filename, extension) => {
+    if (extension) {
+        return filename + '.' + extension;
+    } else {
+        return filename;
+    }
+};
+interface formValues {
+    filename: string;
+}
+
+const FileNameEditForm = ({ filename, saveEdits, discardEdits, extension }) => {
+    const [loading, setLoading] = useState(false);
+
+    const onSubmit = async (values: formValues) => {
+        try {
+            setLoading(true);
+            await saveEdits(values.filename);
+        } finally {
+            setLoading(false);
+        }
+    };
+    return (
+        <Formik<formValues>
+            initialValues={{ filename }}
+            validationSchema={Yup.object().shape({
+                filename: Yup.string()
+                    .required(constants.REQUIRED)
+                    .max(
+                        MAX_EDITED_FILE_NAME_LENGTH,
+                        constants.FILE_NAME_CHARACTER_LIMIT
+                    ),
+            })}
+            validateOnBlur={false}
+            onSubmit={onSubmit}>
+            {({ values, errors, handleChange, handleSubmit }) => (
+                <Form noValidate onSubmit={handleSubmit}>
+                    <Form.Row>
+                        <Form.Group
+                            bsPrefix="ente-form-group"
+                            as={Col}
+                            xs={extension ? 7 : 8}>
+                            <Form.Control
+                                as="textarea"
+                                placeholder={constants.FILE_NAME}
+                                value={values.filename}
+                                onChange={handleChange('filename')}
+                                isInvalid={Boolean(errors.filename)}
+                                autoFocus
+                                disabled={loading}
+                            />
+                            <FormControl.Feedback
+                                type="invalid"
+                                style={{ textAlign: 'center' }}>
+                                {errors.filename}
+                            </FormControl.Feedback>
+                        </Form.Group>
+                        {extension && (
+                            <Form.Group
+                                bsPrefix="ente-form-group"
+                                as={Col}
+                                xs={1}
+                                controlId="formHorizontalFileName">
+                                <FlexWrapper style={{ padding: '5px' }}>
+                                    {`.${extension}`}
+                                </FlexWrapper>
+                            </Form.Group>
+                        )}
+                        <Form.Group bsPrefix="ente-form-group" as={Col} xs={2}>
+                            <Value width={'16.67%'}>
+                                <IconButton type="submit" disabled={loading}>
+                                    {loading ? (
+                                        <SmallLoadingSpinner />
+                                    ) : (
+                                        <TickIcon />
+                                    )}
+                                </IconButton>
+                                <IconButton
+                                    onClick={discardEdits}
+                                    disabled={loading}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </Value>
+                        </Form.Group>
+                    </Form.Row>
+                </Form>
+            )}
+        </Formik>
+    );
+};
+
+function RenderFileName({
+    shouldDisableEdits,
+    file,
+    scheduleUpdate,
+}: {
+    shouldDisableEdits: boolean;
+    file: EnteFile;
+    scheduleUpdate: () => void;
+}) {
+    const originalTitle = file?.metadata.title;
+    const [isInEditMode, setIsInEditMode] = useState(false);
+    const [originalFileName, extension] =
+        splitFilenameAndExtension(originalTitle);
+    const [filename, setFilename] = useState(originalFileName);
+    const openEditMode = () => setIsInEditMode(true);
+    const closeEditMode = () => setIsInEditMode(false);
+
+    const saveEdits = async (newFilename: string) => {
+        try {
+            if (file) {
+                if (filename === newFilename) {
+                    closeEditMode();
+                    return;
+                }
+                setFilename(newFilename);
+                const newTitle = getFileTitle(newFilename, extension);
+                let updatedFile = await changeFileName(file, newTitle);
+                updatedFile = (
+                    await updatePublicMagicMetadata([updatedFile])
+                )[0];
+                updateExistingFilePubMetadata(file, updatedFile);
+                scheduleUpdate();
+            }
+        } catch (e) {
+            logError(e, 'failed to update file name');
+        } finally {
+            closeEditMode();
+        }
+    };
+    return (
+        <>
+            <Row>
+                <Label width="30%">{constants.FILE_NAME}</Label>
+                {!isInEditMode ? (
+                    <>
+                        <Value width="60%">
+                            <FreeFlowText>
+                                {getFileTitle(filename, extension)}
+                            </FreeFlowText>
+                        </Value>
+                        {!shouldDisableEdits && (
+                            <Value
+                                width="10%"
+                                style={{
+                                    cursor: 'pointer',
+                                    marginLeft: '10px',
+                                }}>
+                                <IconButton onClick={openEditMode}>
+                                    <EditIcon />
+                                </IconButton>
+                            </Value>
+                        )}
+                    </>
+                ) : (
+                    <FileNameEditForm
+                        extension={extension}
+                        filename={filename}
+                        saveEdits={saveEdits}
+                        discardEdits={closeEditMode}
+                    />
+                )}
+            </Row>
+        </>
+    );
+}
 function ExifData(props: { exif: any }) {
     const { exif } = props;
     const [showAll, setShowAll] = useState(false);
@@ -111,6 +406,74 @@ function ExifData(props: { exif: any }) {
     );
 }
 
+function InfoModal({
+    shouldDisableEdits,
+    showInfo,
+    handleCloseInfo,
+    items,
+    photoSwipe,
+    metadata,
+    exif,
+    scheduleUpdate,
+}) {
+    return (
+        <Modal show={showInfo} onHide={handleCloseInfo}>
+            <Modal.Header closeButton>
+                <Modal.Title>{constants.INFO}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <div>
+                    <Legend>{constants.METADATA}</Legend>
+                </div>
+                {renderInfoItem(
+                    constants.FILE_ID,
+                    items[photoSwipe?.getCurrentIndex()]?.id
+                )}
+                {metadata?.title && (
+                    <RenderFileName
+                        shouldDisableEdits={shouldDisableEdits}
+                        file={items[photoSwipe?.getCurrentIndex()]}
+                        scheduleUpdate={scheduleUpdate}
+                    />
+                )}
+                {metadata?.creationTime && (
+                    <RenderCreationTime
+                        shouldDisableEdits={shouldDisableEdits}
+                        file={items[photoSwipe?.getCurrentIndex()]}
+                        scheduleUpdate={scheduleUpdate}
+                    />
+                )}
+                {metadata?.modificationTime &&
+                    renderInfoItem(
+                        constants.UPDATED_ON,
+                        formatDateTime(metadata.modificationTime / 1000)
+                    )}
+                {metadata?.longitude > 0 &&
+                    metadata?.longitude > 0 &&
+                    renderInfoItem(
+                        constants.LOCATION,
+                        <a
+                            href={`https://www.openstreetmap.org/?mlat=${metadata.latitude}&mlon=${metadata.longitude}#map=15/${metadata.latitude}/${metadata.longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer">
+                            {constants.SHOW_MAP}
+                        </a>
+                    )}
+                {exif && (
+                    <>
+                        <ExifData exif={exif} />
+                    </>
+                )}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="outline-secondary" onClick={handleCloseInfo}>
+                    {constants.CLOSE}
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
+}
+
 function PhotoSwipe(props: Iprops) {
     const pswpElement = useRef<HTMLDivElement>();
     const [photoSwipe, setPhotoSwipe] = useState<Photoswipe<any>>();
@@ -118,9 +481,13 @@ function PhotoSwipe(props: Iprops) {
     const { isOpen, items } = props;
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
-    const [metadata, setMetaData] = useState<File['metadata']>(null);
+    const [metadata, setMetaData] = useState<EnteFile['metadata']>(null);
     const [exif, setExif] = useState<any>(null);
     const needUpdate = useRef(false);
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
+    const galleryContext = useContext(GalleryContext);
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -138,6 +505,13 @@ function PhotoSwipe(props: Iprops) {
     useEffect(() => {
         updateItems(items);
     }, [items]);
+
+    useEffect(() => {
+        if (photoSwipe) {
+            photoSwipe.options.arrowKeys = !showInfo;
+            photoSwipe.options.escKey = !showInfo;
+        }
+    }, [showInfo]);
 
     function updateFavButton() {
         setIsFav(isInFav(this?.currItem));
@@ -260,27 +634,28 @@ function PhotoSwipe(props: Iprops) {
         }
     };
 
-    const checkExifAvailable = () => {
+    const checkExifAvailable = async () => {
         setExif(null);
-        setTimeout(() => {
-            const img = document.querySelector(
+        await sleep(100);
+        try {
+            const img: HTMLImageElement = document.querySelector(
                 '.pswp__img:not(.pswp__img--placeholder)'
             );
             if (img) {
-                // @ts-expect-error
-                EXIF.getData(img, function () {
-                    const exif = EXIF.getAllTags(this);
-                    exif.raw = EXIF.pretty(this);
-                    if (exif.raw) {
-                        setExif(exif);
-                    }
-                });
+                const exifData = await exifr.parse(img);
+                if (!exifData) {
+                    return;
+                }
+                exifData.raw = prettyPrintExif(exifData);
+                setExif(exifData);
             }
-        }, 100);
+        } catch (e) {
+            logError(e, 'exifr parsing failed');
+        }
     };
 
     function updateInfo() {
-        const file: File = this?.currItem;
+        const file: EnteFile = this?.currItem;
         if (file?.metadata) {
             setMetaData(file.metadata);
             setExif(null);
@@ -295,22 +670,17 @@ function PhotoSwipe(props: Iprops) {
         setShowInfo(true);
     };
 
-    const downloadFile = async (file) => {
-        const { loadingBar } = props;
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        loadingBar.current.continuousStart();
-        a.href = await DownloadManger.getFile(file);
-        loadingBar.current.complete();
-        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            a.download = fileNameWithoutExtension(file.metadata.title) + '.zip';
-        } else {
-            a.download = file.metadata.title;
-        }
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+    const downloadFileHelper = async (file) => {
+        galleryContext.startLoading();
+        await downloadFile(
+            file,
+            publicCollectionGalleryContext.accessedThroughSharedURL,
+            publicCollectionGalleryContext.token
+        );
+
+        galleryContext.finishLoading();
     };
+    const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;
     let { className } = props;
     className = classnames(['pswp', className]).trim();
@@ -343,7 +713,7 @@ function PhotoSwipe(props: Iprops) {
                                 className="pswp-custom download-btn"
                                 title={constants.DOWNLOAD}
                                 onClick={() =>
-                                    downloadFile(photoSwipe.currItem)
+                                    downloadFileHelper(photoSwipe.currItem)
                                 }
                             />
 
@@ -355,13 +725,16 @@ function PhotoSwipe(props: Iprops) {
                                 className="pswp__button pswp__button--zoom"
                                 title={constants.ZOOM_IN_OUT}
                             />
-                            <FavButton
-                                size={44}
-                                isClick={isFav}
-                                onClick={() => {
-                                    onFavClick(photoSwipe?.currItem);
-                                }}
-                            />
+                            {!props.isSharedCollection &&
+                                !props.isTrashCollection && (
+                                    <FavButton
+                                        size={44}
+                                        isClick={isFav}
+                                        onClick={() => {
+                                            onFavClick(photoSwipe?.currItem);
+                                        }}
+                                    />
+                                )}
                             <button
                                 className="pswp-custom info-btn"
                                 title={constants.INFO}
@@ -387,64 +760,21 @@ function PhotoSwipe(props: Iprops) {
                             title={constants.NEXT}
                         />
                         <div className="pswp__caption">
-                            <div className="pswp__caption__center" />
+                            <div />
                         </div>
                     </div>
                 </div>
             </div>
-            <Modal show={showInfo} onHide={handleCloseInfo}>
-                <Modal.Header closeButton>
-                    <Modal.Title>{constants.INFO}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group>
-                        <div>
-                            <Legend>{constants.METADATA}</Legend>
-                        </div>
-                        {renderInfoItem(
-                            constants.FILE_ID,
-                            items[photoSwipe?.getCurrentIndex()]?.id
-                        )}
-                        {metadata?.title &&
-                            renderInfoItem(constants.FILE_NAME, metadata.title)}
-                        {metadata?.creationTime &&
-                            renderInfoItem(
-                                constants.CREATION_TIME,
-                                formatDateTime(metadata.creationTime / 1000)
-                            )}
-                        {metadata?.modificationTime &&
-                            renderInfoItem(
-                                constants.UPDATED_ON,
-                                formatDateTime(metadata.modificationTime / 1000)
-                            )}
-                        {metadata?.longitude > 0 &&
-                            metadata?.longitude > 0 &&
-                            renderInfoItem(
-                                constants.LOCATION,
-                                <a
-                                    href={`https://www.openstreetmap.org/?mlat=${metadata.latitude}&mlon=${metadata.longitude}#map=15/${metadata.latitude}/${metadata.longitude}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer">
-                                    {constants.SHOW_MAP}
-                                </a>
-                            )}
-                        {exif && (
-                            <>
-                                <br />
-                                <br />
-                                <ExifData exif={exif} />
-                            </>
-                        )}
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button
-                        variant="outline-secondary"
-                        onClick={handleCloseInfo}>
-                        {constants.CLOSE}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            <InfoModal
+                shouldDisableEdits={props.isSharedCollection}
+                showInfo={showInfo}
+                handleCloseInfo={handleCloseInfo}
+                items={items}
+                photoSwipe={photoSwipe}
+                metadata={metadata}
+                exif={exif}
+                scheduleUpdate={scheduleUpdate}
+            />
         </>
     );
 }

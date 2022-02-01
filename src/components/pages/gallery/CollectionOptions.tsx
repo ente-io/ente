@@ -1,27 +1,48 @@
 import React from 'react';
 import { SetDialogMessage } from 'components/MessageDialog';
 import { ListGroup, Popover } from 'react-bootstrap';
-import {
-    Collection,
-    deleteCollection,
-    renameCollection,
-} from 'services/collectionService';
-import { getSelectedCollection } from 'utils/collection';
+import { deleteCollection, renameCollection } from 'services/collectionService';
+import { downloadCollection, getSelectedCollection } from 'utils/collection';
 import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
-import LinkButton from './LinkButton';
+import LinkButton, { ButtonVariant, LinkButtonProps } from './LinkButton';
+import { sleep } from 'utils/common';
+import { Collection } from 'types/collection';
 
-interface Props {
+interface CollectionOptionsProps {
     syncWithRemote: () => Promise<void>;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     collections: Collection[];
     selectedCollectionID: number;
     setDialogMessage: SetDialogMessage;
-    startLoadingBar: () => void;
+    startLoading: () => void;
+    finishLoading: () => void;
     showCollectionShareModal: () => void;
     redirectToAll: () => void;
 }
-const CollectionOptions = (props: Props) => {
+
+export const MenuLink = ({ children, ...props }: LinkButtonProps) => (
+    <LinkButton
+        style={{ fontSize: '14px', fontWeight: 700, padding: '8px 1em' }}
+        {...props}>
+        {children}
+    </LinkButton>
+);
+
+export const MenuItem = (props: { children: any }) => (
+    <ListGroup.Item
+        style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#282828',
+            padding: 0,
+        }}>
+        {props.children}
+    </ListGroup.Item>
+);
+
+const CollectionOptions = (props: CollectionOptionsProps) => {
     const collectionRename = async (
         selectedCollection: Collection,
         newName: string
@@ -40,7 +61,7 @@ const CollectionOptions = (props: Props) => {
                 props.collections
             )?.name,
             callback: (newName) => {
-                props.startLoadingBar();
+                props.startLoading();
                 collectionRename(
                     getSelectedCollection(
                         props.selectedCollectionID,
@@ -59,7 +80,7 @@ const CollectionOptions = (props: Props) => {
             proceed: {
                 text: constants.DELETE_COLLECTION,
                 action: () => {
-                    props.startLoadingBar();
+                    props.startLoading();
                     deleteCollection(
                         props.selectedCollectionID,
                         props.syncWithRemote,
@@ -75,23 +96,32 @@ const CollectionOptions = (props: Props) => {
         });
     };
 
-    const MenuLink = (props) => (
-        <LinkButton
-            style={{ fontSize: '14px', fontWeight: 700, padding: '8px 1em' }}
-            {...props}>
-            {props.children}
-        </LinkButton>
-    );
+    const confirmDownloadCollection = () => {
+        props.setDialogMessage({
+            title: constants.CONFIRM_DOWNLOAD_COLLECTION,
+            content: constants.DOWNLOAD_COLLECTION_MESSAGE(),
+            staticBackdrop: true,
+            proceed: {
+                text: constants.DOWNLOAD,
+                action: downloadCollectionHelper,
+                variant: 'success',
+            },
+            close: {
+                text: constants.CANCEL,
+            },
+        });
+    };
 
-    const MenuItem = (props) => (
-        <ListGroup.Item
-            style={{
-                background: '#282828',
-                padding: 0,
-            }}>
-            {props.children}
-        </ListGroup.Item>
-    );
+    const downloadCollectionHelper = async () => {
+        props.startLoading();
+        await downloadCollection(
+            props.selectedCollectionID,
+            props.setDialogMessage
+        );
+        await sleep(1000);
+        props.finishLoading();
+    };
+
     return (
         <Popover id="collection-options" style={{ borderRadius: '10px' }}>
             <Popover.Content style={{ padding: 0, border: 'none' }}>
@@ -107,8 +137,13 @@ const CollectionOptions = (props: Props) => {
                         </MenuLink>
                     </MenuItem>
                     <MenuItem>
+                        <MenuLink onClick={confirmDownloadCollection}>
+                            {constants.DOWNLOAD}
+                        </MenuLink>
+                    </MenuItem>
+                    <MenuItem>
                         <MenuLink
-                            variant="danger"
+                            variant={ButtonVariant.danger}
                             onClick={confirmDeleteCollection}>
                             {constants.DELETE}
                         </MenuLink>

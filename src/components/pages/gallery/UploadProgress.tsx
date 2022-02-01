@@ -3,15 +3,13 @@ import ExpandMore from 'components/icons/ExpandMore';
 import React, { useState } from 'react';
 import { Button, Modal, ProgressBar } from 'react-bootstrap';
 import { FileRejection } from 'react-dropzone';
-import {
-    FileUploadResults,
-    UPLOAD_STAGES,
-} from 'services/upload/uploadManager';
+
 import styled from 'styled-components';
 import { DESKTOP_APP_DOWNLOAD_URL } from 'utils/common';
 import constants from 'utils/strings/constants';
 import { Collapse } from 'react-collapse';
 import { ButtonVariant, getVariantColor } from './LinkButton';
+import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 
 interface Props {
     fileCounter;
@@ -131,10 +129,7 @@ const InProgressSection = (props: InProgressProps) => {
                     <FileList>
                         {fileList.map(({ fileName, progress }) => (
                             <li key={fileName}>
-                                {constants.FILE_UPLOAD_PROGRESS(
-                                    fileName,
-                                    progress
-                                )}
+                                {`${fileName} - ${progress}%`}
                             </li>
                         ))}
                     </FileList>
@@ -177,7 +172,7 @@ export default function UploadProgress(props: Props) {
             }
             aria-labelledby="contained-modal-title-vcenter"
             centered
-            backdrop={fileProgressStatuses?.length !== 0 ? 'static' : 'true'}>
+            backdrop={fileProgressStatuses?.length !== 0 ? 'static' : true}>
             <Modal.Header
                 style={{
                     display: 'flex',
@@ -237,9 +232,19 @@ export default function UploadProgress(props: Props) {
                 />
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
-                    fileUploadResult={FileUploadResults.SKIPPED}
+                    fileUploadResult={FileUploadResults.ALREADY_UPLOADED}
                     sectionTitle={constants.SKIPPED_FILES}
                     sectionInfo={constants.SKIPPED_INFO}
+                />
+                <ResultSection
+                    fileUploadResultMap={fileUploadResultMap}
+                    fileUploadResult={
+                        FileUploadResults.LARGER_THAN_AVAILABLE_STORAGE
+                    }
+                    sectionTitle={
+                        constants.LARGER_THAN_AVAILABLE_STORAGE_UPLOADS
+                    }
+                    sectionInfo={constants.LARGER_THAN_AVAILABLE_STORAGE_INFO}
                 />
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}

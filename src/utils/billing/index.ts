@@ -1,17 +1,15 @@
 import constants from 'utils/strings/constants';
-import billingService, {
-    FREE_PLAN,
-    Plan,
-    Subscription,
-} from 'services/billingService';
+import billingService from 'services/billingService';
+import { Plan, Subscription } from 'types/billing';
 import { NextRouter } from 'next/router';
 import { SetDialogMessage } from 'components/MessageDialog';
-import { SetLoading } from 'pages/gallery';
-import { getData, LS_KEYS } from './storage/localStorage';
-import { CustomError } from './common/errorUtil';
-import { logError } from './sentry';
+import { SetLoading } from 'types/gallery';
+import { getData, LS_KEYS } from '../storage/localStorage';
+import { CustomError } from '../error';
+import { logError } from '../sentry';
 
-const STRIPE = 'stripe';
+const PAYMENT_PROVIDER_STRIPE = 'stripe';
+const FREE_PLAN = 'free';
 
 enum FAILURE_REASON {
     AUTHENTICATION_FAILED = 'authentication_failed',
@@ -94,7 +92,7 @@ export function hasStripeSubscription(subscription: Subscription) {
     return (
         hasPaidSubscription(subscription) &&
         subscription.paymentProvider.length > 0 &&
-        subscription.paymentProvider === STRIPE
+        subscription.paymentProvider === PAYMENT_PROVIDER_STRIPE
     );
 }
 
@@ -191,17 +189,14 @@ export async function checkSubscriptionPurchase(
     router: NextRouter,
     setLoading: SetLoading
 ) {
+    const { session_id: sessionId, status, reason } = router.query ?? {};
     try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const sessionId = urlParams.get('session_id');
-        const status = urlParams.get('status');
-        const reason = urlParams.get('reason');
         if (status === RESPONSE_STATUS.fail) {
-            handleFailureReason(reason, setDialogMessage, setLoading);
+            handleFailureReason(reason as string, setDialogMessage, setLoading);
         } else if (status === RESPONSE_STATUS.success) {
             try {
                 const subscription = await billingService.verifySubscription(
-                    sessionId
+                    sessionId as string
                 );
                 setDialogMessage({
                     title: constants.SUBSCRIPTION_PURCHASE_SUCCESS_TITLE,
@@ -220,8 +215,6 @@ export async function checkSubscriptionPurchase(
         }
     } catch (e) {
         // ignore
-    } finally {
-        router.push('gallery', undefined, { shallow: true });
     }
 }
 

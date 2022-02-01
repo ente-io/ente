@@ -1,90 +1,161 @@
-import EXIF from 'exif-js';
-
+import { NULL_LOCATION } from 'constants/upload';
+import { Location } from 'types/upload';
+import exifr from 'exifr';
+import piexif from 'piexifjs';
+import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
-import { NULL_LOCATION, Location } from './metadataService';
 
-const SOUTH_DIRECTION = 'S';
-const WEST_DIRECTION = 'W';
-const CHUNK_SIZE_FOR_EXIF_READING = 4 * 1024 * 1024;
+const EXIF_TAGS_NEEDED = [
+    'DateTimeOriginal',
+    'CreateDate',
+    'ModifyDate',
+    'GPSLatitude',
+    'GPSLongitude',
+    'GPSLatitudeRef',
+    'GPSLongitudeRef',
+];
+interface Exif {
+    DateTimeOriginal?: Date;
+    CreateDate?: Date;
+    ModifyDate?: Date;
+    GPSLatitude?: number;
+    GPSLongitude?: number;
+    GPSLatitudeRef?: number;
+    GPSLongitudeRef?: number;
+}
 interface ParsedEXIFData {
     location: Location;
     creationTime: number;
 }
 
 export async function getExifData(
-    worker,
-    receivedFile: globalThis.File
+    receivedFile: File,
+    fileTypeInfo: FileTypeInfo
 ): Promise<ParsedEXIFData> {
+    const nullExifData: ParsedEXIFData = {
+        location: NULL_LOCATION,
+        creationTime: null,
+    };
     try {
-        const fileChunk = await worker.getUint8ArrayView(
-            receivedFile.slice(0, CHUNK_SIZE_FOR_EXIF_READING)
-        );
-        const exifData = EXIF.readFromBinaryFile(fileChunk.buffer);
+        const exifData = await getRawExif(receivedFile, fileTypeInfo);
         if (!exifData) {
-            return { location: NULL_LOCATION, creationTime: null };
+            return nullExifData;
         }
-        return {
+        const parsedEXIFData = {
             location: getEXIFLocation(exifData),
-            creationTime: getUNIXTime(exifData),
+            creationTime: getUNIXTime(
+                exifData.DateTimeOriginal ??
+                    exifData.CreateDate ??
+                    exifData.ModifyDate
+            ),
         };
+        return parsedEXIFData;
     } catch (e) {
-        logError(e, 'error reading exif data');
-        // ignore exif parsing errors
+        logError(e, 'getExifData failed');
+        return nullExifData;
     }
 }
 
-function getUNIXTime(exifData: any) {
-    const dateString: string = exifData.DateTimeOriginal || exifData.DateTime;
-    if (!dateString || dateString === '0000:00:00 00:00:00') {
-        return null;
+export async function updateFileCreationDateInEXIF(
+    reader: FileReader,
+    fileBlob: Blob,
+    updatedDate: Date
+) {
+    try {
+        const fileURL = URL.createObjectURL(fileBlob);
+        let imageDataURL = await convertImageToDataURL(reader, fileURL);
+        imageDataURL =
+            'data:image/jpeg;base64' +
+            imageDataURL.slice(imageDataURL.indexOf(','));
+        const exifObj = piexif.load(imageDataURL);
+        if (!exifObj['Exif']) {
+            exifObj['Exif'] = {};
+        }
+        exifObj['Exif'][piexif.ExifIFD.DateTimeOriginal] =
+            convertToExifDateFormat(updatedDate);
+
+        const exifBytes = piexif.dump(exifObj);
+        const exifInsertedFile = piexif.insert(exifBytes, imageDataURL);
+        return dataURIToBlob(exifInsertedFile);
+    } catch (e) {
+        logError(e, 'updateFileModifyDateInEXIF failed');
+        return fileBlob;
     }
-    const parts = dateString.split(' ')[0].split(':');
-    const date = new Date(
-        Number(parts[0]),
-        Number(parts[1]) - 1,
-        Number(parts[2])
-    );
-    return date.getTime() * 1000;
+}
+
+export async function convertImageToDataURL(reader: FileReader, url: string) {
+    const blob = await fetch(url).then((r) => r.blob());
+    const dataURL = await new Promise<string>((resolve) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+    });
+    return dataURL;
+}
+
+function dataURIToBlob(dataURI) {
+    // convert base64 to raw binary data held in a string
+    // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+    const byteString = atob(dataURI.split(',')[1]);
+
+    // separate out the mime component
+    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+    // write the bytes of the string to an ArrayBuffer
+    const ab = new ArrayBuffer(byteString.length);
+
+    // create a view into the buffer
+    const ia = new Uint8Array(ab);
+
+    // set the bytes of the buffer to the correct values
+    for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+
+    // write the ArrayBuffer to a blob, and you're done
+    const blob = new Blob([ab], { type: mimeString });
+    return blob;
+}
+export async function getRawExif(
+    receivedFile: File,
+    fileTypeInfo: FileTypeInfo
+) {
+    let exifData: Exif;
+    try {
+        exifData = await exifr.parse(receivedFile, EXIF_TAGS_NEEDED);
+    } catch (e) {
+        logError(e, 'file missing exif data ', {
+            fileType: fileTypeInfo.exactType,
+        });
+        // ignore exif parsing errors
+    }
+    return exifData;
+}
+
+export function getUNIXTime(dateTime: Date) {
+    try {
+        if (!dateTime) {
+            return null;
+        }
+        const unixTime = dateTime.getTime() * 1000;
+        if (unixTime <= 0) {
+            return null;
+        } else {
+            return unixTime;
+        }
+    } catch (e) {
+        logError(e, 'getUNIXTime failed', { dateTime });
+    }
 }
 
 function getEXIFLocation(exifData): Location {
-    if (!exifData.GPSLatitude) {
+    if (!exifData.latitude || !exifData.longitude) {
         return NULL_LOCATION;
     }
-
-    const latDegree = exifData.GPSLatitude[0];
-    const latMinute = exifData.GPSLatitude[1];
-    const latSecond = exifData.GPSLatitude[2];
-
-    const lonDegree = exifData.GPSLongitude[0];
-    const lonMinute = exifData.GPSLongitude[1];
-    const lonSecond = exifData.GPSLongitude[2];
-
-    const latDirection = exifData.GPSLatitudeRef;
-    const lonDirection = exifData.GPSLongitudeRef;
-
-    const latFinal = convertDMSToDD(
-        latDegree,
-        latMinute,
-        latSecond,
-        latDirection
-    );
-
-    const lonFinal = convertDMSToDD(
-        lonDegree,
-        lonMinute,
-        lonSecond,
-        lonDirection
-    );
-    return { latitude: latFinal * 1.0, longitude: lonFinal * 1.0 };
+    return { latitude: exifData.latitude, longitude: exifData.longitude };
 }
 
-function convertDMSToDD(degrees, minutes, seconds, direction) {
-    let dd = degrees + minutes / 60 + seconds / 3600;
-
-    if (direction === SOUTH_DIRECTION || direction === WEST_DIRECTION) {
-        dd = dd * -1;
-    }
-
-    return dd;
+function convertToExifDateFormat(date: Date) {
+    return `${date.getFullYear()}:${
+        date.getMonth() + 1
+    }:${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 }

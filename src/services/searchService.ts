@@ -1,17 +1,21 @@
 import * as chrono from 'chrono-node';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
-import { DateValue, Suggestion, SuggestionType } from 'components/SearchBar';
 import HTTPService from './HTTPService';
+import { Collection } from 'types/collection';
+import { EnteFile } from 'types/file';
+
+import { logError } from 'utils/sentry';
+import {
+    DateValue,
+    LocationSearchResponse,
+    Suggestion,
+    SuggestionType,
+} from 'types/search';
 
 const ENDPOINT = getEndpoint();
+
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
-export type Bbox = [number, number, number, number];
-export interface LocationSearchResponse {
-    place: string;
-    bbox: Bbox;
-}
-export const getMapboxToken = () => process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 export function parseHumanDate(humanDate: string): DateValue[] {
     const date = chrono.parseDate(humanDate);
@@ -41,17 +45,22 @@ export function parseHumanDate(humanDate: string): DateValue[] {
 export async function searchLocation(
     searchPhrase: string
 ): Promise<LocationSearchResponse[]> {
-    const resp = await HTTPService.get(
-        `${ENDPOINT}/search/location`,
-        {
-            query: searchPhrase,
-            limit: 4,
-        },
-        {
-            'X-Auth-Token': getToken(),
-        }
-    );
-    return resp.data.results;
+    try {
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/search/location`,
+            {
+                query: searchPhrase,
+                limit: 4,
+            },
+            {
+                'X-Auth-Token': getToken(),
+            }
+        );
+        return resp.data.results ?? [];
+    } catch (e) {
+        logError(e, 'location search failed');
+    }
+    return [];
 }
 
 export function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
@@ -77,7 +86,7 @@ export function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
             type: SuggestionType.DATE,
         },
     ].filter((suggestion) =>
-        suggestion.label.toLowerCase().includes(searchPhrase.toLowerCase())
+        suggestion.label.toLowerCase().includes(searchPhrase)
     );
 }
 
@@ -95,8 +104,30 @@ export function getYearSuggestion(searchPhrase: string): Suggestion[] {
                 ];
             }
         } catch (e) {
-            // ignore
+            logError(e, 'getYearSuggestion failed');
         }
     }
     return [];
+}
+
+export function searchCollection(
+    searchPhrase: string,
+    collections: Collection[]
+): Collection[] {
+    return collections.filter((collection) =>
+        collection.name.toLowerCase().includes(searchPhrase)
+    );
+}
+
+export function searchFiles(searchPhrase: string, files: EnteFile[]) {
+    return files
+        .map((file, idx) => ({
+            title: file.metadata.title,
+            index: idx,
+            type: file.metadata.fileType,
+            ownerID: file.ownerID,
+            id: file.id,
+        }))
+        .filter(({ title }) => title.toLowerCase().includes(searchPhrase))
+        .slice(0, 4);
 }

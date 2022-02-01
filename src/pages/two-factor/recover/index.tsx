@@ -11,7 +11,10 @@ import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
 import { recoverTwoFactor, removeTwoFactor } from 'services/userService';
 import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
-import { PAGES } from 'types';
+import { PAGES } from 'constants/pages';
+const bip39 = require('bip39');
+// mobile client library only supports english.
+bip39.setDefaultWordlist('english');
 
 export default function Recover() {
     const router = useRouter();
@@ -43,6 +46,13 @@ export default function Recover() {
 
     const recover = async (recoveryKey: string, setFieldError) => {
         try {
+            // check if user is entering mnemonic recovery key
+            if (recoveryKey.trim().indexOf(' ') > 0) {
+                if (recoveryKey.trim().split(' ').length !== 24) {
+                    throw new Error('recovery code should have 24 words');
+                }
+                recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
+            }
             const cryptoWorker = await new CryptoWorker();
             const twoFactorSecret: string = await cryptoWorker.decryptB64(
                 encryptedTwoFactorSecret.encryptedData,

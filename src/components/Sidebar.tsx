@@ -13,10 +13,10 @@ import {
     isSubscriptionCancelled,
     isSubscribed,
     convertToHumanReadable,
-} from 'utils/billingUtil';
+} from 'utils/billing';
 
 import isElectron from 'is-electron';
-import { Collection } from 'services/collectionService';
+import { Collection } from 'types/collection';
 import { useRouter } from 'next/router';
 import LinkButton from './pages/gallery/LinkButton';
 import { downloadApp } from 'utils/common';
@@ -27,17 +27,18 @@ import EnteSpinner from './EnteSpinner';
 import RecoveryKeyModal from './RecoveryKeyModal';
 import TwoFactorModal from './TwoFactorModal';
 import ExportModal from './ExportModal';
-import { GalleryContext, SetLoading } from 'pages/gallery';
+import { GalleryContext } from 'pages/gallery';
 import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
-import { Subscription } from 'services/billingService';
-import { PAGES } from 'types';
-
+import { Subscription } from 'types/billing';
+import { PAGES } from 'constants/pages';
+import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
+import FixLargeThumbnails from './FixLargeThumbnail';
+import { SetLoading } from 'types/gallery';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
     setLoading: SetLoading;
-    showPlanSelectorModal: () => void;
 }
 export default function Sidebar(props: Props) {
     const [usage, SetUsage] = useState<string>(null);
@@ -51,8 +52,8 @@ export default function Sidebar(props: Props) {
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
     const [exportModalView, setExportModalView] = useState(false);
+    const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
     const galleryContext = useContext(GalleryContext);
-    galleryContext.showPlanSelectorModal = props.showPlanSelectorModal;
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -110,8 +111,19 @@ export default function Sidebar(props: Props) {
     const router = useRouter();
     function onManageClick() {
         setIsOpen(false);
-        props.showPlanSelectorModal();
+        galleryContext.showPlanSelectorModal();
     }
+
+    const Divider = () => (
+        <div
+            style={{
+                height: '1px',
+                marginTop: '40px',
+                background: '#242424',
+                width: '100%',
+            }}
+        />
+    );
     return (
         <Menu
             isOpen={isOpen}
@@ -203,23 +215,22 @@ export default function Sidebar(props: Props) {
                         )}
                     </div>
                 </div>
-                <div
-                    style={{
-                        height: '1px',
-                        marginTop: '40px',
-                        background: '#242424',
-                        width: '100%',
-                    }}
-                />
+                <Divider />
                 <LinkButton
                     style={{ marginTop: '30px' }}
-                    onClick={openFeedbackURL}>
-                    {constants.REQUEST_FEATURE}
+                    onClick={() => {
+                        galleryContext.setActiveCollection(ARCHIVE_SECTION);
+                        setIsOpen(false);
+                    }}>
+                    {constants.ARCHIVE}
                 </LinkButton>
                 <LinkButton
                     style={{ marginTop: '30px' }}
-                    onClick={() => initiateEmail('contact@ente.io')}>
-                    {constants.SUPPORT}
+                    onClick={() => {
+                        galleryContext.setActiveCollection(TRASH_SECTION);
+                        setIsOpen(false);
+                    }}>
+                    {constants.TRASH}
                 </LinkButton>
                 <>
                     <RecoveryKeyModal
@@ -227,7 +238,9 @@ export default function Sidebar(props: Props) {
                         onHide={() => setRecoveryModalView(false)}
                         somethingWentWrong={() =>
                             props.setDialogMessage({
-                                title: constants.RECOVER_KEY_GENERATION_FAILED,
+                                title: constants.ERROR,
+                                content:
+                                    constants.RECOVER_KEY_GENERATION_FAILED,
                                 close: { variant: 'danger' },
                             })
                         }
@@ -266,6 +279,29 @@ export default function Sidebar(props: Props) {
                     }}>
                     {constants.UPDATE_EMAIL}
                 </LinkButton>
+                <Divider />
+                <>
+                    <FixLargeThumbnails
+                        isOpen={fixLargeThumbsView}
+                        hide={() => setFixLargeThumbsView(false)}
+                        show={() => setFixLargeThumbsView(true)}
+                    />
+                    <LinkButton
+                        style={{ marginTop: '30px' }}
+                        onClick={() => setFixLargeThumbsView(true)}>
+                        {constants.FIX_LARGE_THUMBNAILS}
+                    </LinkButton>
+                </>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={openFeedbackURL}>
+                    {constants.REQUEST_FEATURE}
+                </LinkButton>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => initiateEmail('contact@ente.io')}>
+                    {constants.SUPPORT}
+                </LinkButton>
                 <>
                     <ExportModal
                         show={exportModalView}
@@ -284,14 +320,7 @@ export default function Sidebar(props: Props) {
                         </div>
                     </LinkButton>
                 </>
-                <div
-                    style={{
-                        height: '1px',
-                        marginTop: '40px',
-                        background: '#242424',
-                        width: '100%',
-                    }}
-                />
+                <Divider />
                 <LinkButton
                     variant="danger"
                     style={{ marginTop: '30px' }}
@@ -316,7 +345,7 @@ export default function Sidebar(props: Props) {
                     onClick={() =>
                         props.setDialogMessage({
                             title: `${constants.DELETE_ACCOUNT}`,
-                            content: constants.DELETE_MESSAGE(),
+                            content: constants.DELETE_ACCOUNT_MESSAGE(),
                             staticBackdrop: true,
                             proceed: {
                                 text: constants.DELETE_ACCOUNT,

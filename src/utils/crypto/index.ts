@@ -1,5 +1,4 @@
-import { KEK } from 'pages/generate';
-import { KeyAttributes } from 'types';
+import { KEK, KeyAttributes } from 'types/user';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
 import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
@@ -107,7 +106,7 @@ export const SaveKeyInSessionStore = async (
 };
 
 export const getRecoveryKey = async () => {
-    let recoveryKey = null;
+    let recoveryKey: string = null;
     try {
         const cryptoWorker = await new CryptoWorker();
 
@@ -130,6 +129,7 @@ export const getRecoveryKey = async () => {
         return recoveryKey;
     } catch (e) {
         logError(e, 'getRecoveryKey failed');
+        throw e;
     }
 };
 
@@ -139,7 +139,7 @@ async function createNewRecoveryKey() {
 
     const cryptoWorker = await new CryptoWorker();
 
-    const recoveryKey = await cryptoWorker.generateEncryptionKey();
+    const recoveryKey: string = await cryptoWorker.generateEncryptionKey();
     const encryptedMasterKey: B64EncryptionResult =
         await cryptoWorker.encryptToB64(masterKey, recoveryKey);
     const encryptedRecoveryKey: B64EncryptionResult =

@@ -3,27 +3,11 @@ import { downloadAsFile } from 'utils/file';
 import { getRecoveryKey } from 'utils/crypto';
 import constants from 'utils/strings/constants';
 import MessageDialog from './MessageDialog';
-import EnteSpinner from './EnteSpinner';
-import styled from 'styled-components';
+import { CodeBlock } from './CodeBlock';
+const bip39 = require('bip39');
+// mobile client library only supports english.
+bip39.setDefaultWordlist('english');
 
-export const CodeBlock = styled.div<{ height: number }>`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #1a1919;
-    height: ${(props) => props.height}px;
-    padding-left: 30px;
-    padding-right: 20px;
-    color: white;
-    margin: 20px 0;
-    width: 100%;
-`;
-
-export const FreeFlowText = styled.div`
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    min-width: 30%;
-`;
 interface Props {
     show: boolean;
     onHide: () => void;
@@ -36,12 +20,13 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
             return;
         }
         const main = async () => {
-            const recoveryKey = await getRecoveryKey();
-            if (!recoveryKey) {
+            try {
+                const recoveryKey = await getRecoveryKey();
+                setRecoveryKey(bip39.entropyToMnemonic(recoveryKey));
+            } catch (e) {
                 somethingWentWrong();
                 props.onHide();
             }
-            setRecoveryKey(recoveryKey);
         };
         main();
     }, [props.show]);
@@ -73,13 +58,7 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
                 },
             }}>
             <p>{constants.RECOVERY_KEY_DESCRIPTION}</p>
-            <CodeBlock height={150}>
-                {recoveryKey ? (
-                    <FreeFlowText>{recoveryKey}</FreeFlowText>
-                ) : (
-                    <EnteSpinner />
-                )}
-            </CodeBlock>
+            <CodeBlock code={recoveryKey} />
             <p>{constants.KEY_NOT_STORED_DISCLAIMER}</p>
         </MessageDialog>
     );

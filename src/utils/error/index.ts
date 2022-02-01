@@ -1,4 +1,3 @@
-import { AxiosResponse } from 'axios';
 import constants from 'utils/strings/constants';
 
 export const ServerErrorCodes = {
@@ -7,6 +6,11 @@ export const ServerErrorCodes = {
     FORBIDDEN: '403',
     STORAGE_LIMIT_EXCEEDED: '426',
     FILE_TOO_LARGE: '413',
+    TOKEN_EXPIRED: '410',
+    TOO_MANY_REQUEST: '429',
+    BAD_REQUEST: '400',
+    PAYMENT_REQUIRED: '402',
+    NOT_FOUND: '404',
 };
 
 export enum CustomError {
@@ -25,9 +29,17 @@ export enum CustomError {
     SESSION_EXPIRED_MESSAGE = 'session expired',
     TYPE_DETECTION_FAILED = 'type detection failed',
     SIGNUP_FAILED = 'signup failed',
+    FAV_COLLECTION_MISSING = 'favorite collection missing',
+    INVALID_COLLECTION_OPERATION = 'invalid collection operation',
+    WAIT_TIME_EXCEEDED = 'thumbnail generation wait time exceeded',
+    REQUEST_CANCELLED = 'request canceled',
+    TOKEN_EXPIRED = 'token expired',
+    BAD_REQUEST = 'bad request',
+    SUBSCRIPTION_NEEDED = 'subscription not present',
+    NOT_FOUND = 'not found ',
 }
 
-function parseUploadError(error: AxiosResponse) {
+function parseUploadErrorCodes(error) {
     let parsedMessage = null;
     if (error?.status) {
         const errorCode = error.status.toString();
@@ -44,26 +56,18 @@ function parseUploadError(error: AxiosResponse) {
             case ServerErrorCodes.FILE_TOO_LARGE:
                 parsedMessage = CustomError.FILE_TOO_LARGE;
                 break;
+            default:
+                parsedMessage = `${constants.UNKNOWN_ERROR} statusCode:${errorCode}`;
         }
-    }
-    if (parsedMessage) {
-        return {
-            parsedError: new Error(parsedMessage),
-        };
     } else {
-        return {
-            parsedError: new Error(CustomError.UNKNOWN_ERROR),
-        };
+        parsedMessage = error.message;
     }
+    return new Error(parsedMessage);
 }
 
-export function handleUploadError(error: AxiosResponse | Error): Error {
-    let parsedError: Error = null;
-    if ('status' in error) {
-        parsedError = parseUploadError(error).parsedError;
-    } else {
-        parsedError = error;
-    }
+export function handleUploadError(error): Error {
+    const parsedError = parseUploadErrorCodes(error);
+
     // breaking errors
     switch (parsedError.message) {
         case CustomError.SUBSCRIPTION_EXPIRED:
@@ -98,3 +102,49 @@ export function errorWithContext(originalError: Error, context: string) {
         originalError.stack;
     return errorWithContext;
 }
+export const parseSharingErrorCodes = (error) => {
+    let parsedMessage = null;
+    if (error?.status) {
+        const errorCode = error.status.toString();
+        switch (errorCode) {
+            case ServerErrorCodes.BAD_REQUEST:
+                parsedMessage = CustomError.BAD_REQUEST;
+                break;
+            case ServerErrorCodes.PAYMENT_REQUIRED:
+                parsedMessage = CustomError.SUBSCRIPTION_NEEDED;
+                break;
+            case ServerErrorCodes.NOT_FOUND:
+                parsedMessage = CustomError.NOT_FOUND;
+                break;
+            case ServerErrorCodes.SESSION_EXPIRED:
+            case ServerErrorCodes.TOKEN_EXPIRED:
+            case ServerErrorCodes.TOO_MANY_REQUEST:
+                parsedMessage = CustomError.TOKEN_EXPIRED;
+                break;
+            default:
+                parsedMessage = `${constants.UNKNOWN_ERROR} statusCode:${errorCode}`;
+        }
+    } else {
+        parsedMessage = error.message;
+    }
+    return new Error(parsedMessage);
+};
+
+export const handleSharingErrors = (error) => {
+    const parsedError = parseSharingErrorCodes(error);
+    let errorMessage = '';
+    switch (parsedError.message) {
+        case CustomError.BAD_REQUEST:
+            errorMessage = constants.SHARING_BAD_REQUEST_ERROR;
+            break;
+        case CustomError.SUBSCRIPTION_NEEDED:
+            errorMessage = constants.SHARING_DISABLED_FOR_FREE_ACCOUNTS;
+            break;
+        case CustomError.NOT_FOUND:
+            errorMessage = constants.USER_DOES_NOT_EXIST;
+            break;
+        default:
+            errorMessage = parsedError.message;
+    }
+    return errorMessage;
+};

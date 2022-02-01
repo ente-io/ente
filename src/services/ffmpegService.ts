@@ -1,12 +1,13 @@
 import { createFFmpeg, FFmpeg } from '@ffmpeg/ffmpeg';
-import { CustomError } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
-import QueueProcessor from './upload/queueProcessor';
+import QueueProcessor from './queueProcessor';
 import { getUint8ArrayView } from './upload/readFileService';
 
 class FFmpegService {
     private ffmpeg: FFmpeg = null;
     private isLoading = null;
+    private fileReader: FileReader = null;
 
     private generateThumbnailProcessor = new QueueProcessor<Uint8Array>(1);
     async init() {
@@ -19,6 +20,8 @@ class FFmpegService {
             this.isLoading = null;
         } catch (e) {
             logError(e, 'ffmpeg load failed');
+            this.ffmpeg = null;
+            this.isLoading = null;
             throw e;
         }
     }
@@ -27,29 +30,46 @@ class FFmpegService {
         if (!this.ffmpeg) {
             await this.init();
         }
+        if (!this.fileReader) {
+            this.fileReader = new FileReader();
+        }
         if (this.isLoading) {
             await this.isLoading;
         }
         const response = this.generateThumbnailProcessor.queueUpRequest(
-            generateThumbnailHelper.bind(null, this.ffmpeg, file)
+            generateThumbnailHelper.bind(
+                null,
+                this.ffmpeg,
+                this.fileReader,
+                file
+            )
         );
-
-        const thumbnail = await response.promise;
-        if (!thumbnail) {
-            throw Error(CustomError.THUMBNAIL_GENERATION_FAILED);
+        try {
+            return await response.promise;
+        } catch (e) {
+            if (e.message === CustomError.REQUEST_CANCELLED) {
+                // ignore
+                return null;
+            } else {
+                logError(e, 'ffmpeg thumbnail generation failed');
+                throw e;
+            }
         }
-        return thumbnail;
     }
 }
 
-async function generateThumbnailHelper(ffmpeg: FFmpeg, file: File) {
+async function generateThumbnailHelper(
+    ffmpeg: FFmpeg,
+    reader: FileReader,
+    file: File
+) {
     try {
-        const inputFileName = `${Date.now().toString}-${file.name}`;
-        const thumbFileName = `${Date.now().toString}-thumb.png`;
+        const inputFileName = `${Date.now().toString()}-${file.name}`;
+        const thumbFileName = `${Date.now().toString()}-thumb.jpeg`;
         ffmpeg.FS(
             'writeFile',
             inputFileName,
-            await getUint8ArrayView(new FileReader(), file)
+            await getUint8ArrayView(reader, file)
         );
         let seekTime = 1.0;
         let thumb = null;
@@ -62,6 +82,8 @@ async function generateThumbnailHelper(ffmpeg: FFmpeg, file: File) {
                     `00:00:0${seekTime.toFixed(3)}`,
                     '-vframes',
                     '1',
+                    '-vf',
+                    'scale=-1:720',
                     thumbFileName
                 );
                 thumb = ffmpeg.FS('readFile', thumbFileName);
