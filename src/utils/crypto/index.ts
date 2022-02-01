@@ -6,11 +6,7 @@ import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getActualKey, getToken } from 'utils/common/key';
 import { setRecoveryKey } from 'services/userService';
 import { logError } from 'utils/sentry';
-
-export interface ComlinkWorker {
-    comlink: any;
-    worker: Worker;
-}
+import { ComlinkWorker } from 'utils/comlink';
 
 export interface B64EncryptionResult {
     encryptedData: string;
@@ -22,7 +18,7 @@ export const getDedicatedCryptoWorker = (): ComlinkWorker => {
     if (runningInBrowser()) {
         const worker = new Worker(
             new URL('worker/crypto.worker.js', import.meta.url),
-            { name: 'ente-worker' }
+            { name: 'ente-crypto-worker' }
         );
         const comlink = Comlink.wrap(worker);
         return { comlink, worker };

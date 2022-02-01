@@ -85,11 +85,7 @@ export async function generateImageThumbnail(
     let timeout = null;
 
     if (isHEIC) {
-        file = new File(
-            [await HEICConverter.convert(worker, file)],
-            null,
-            null
-        );
+        file = new File([await HEICConverter.convert(file)], null, null);
     }
     let image = new Image();
     imageURL = URL.createObjectURL(file);

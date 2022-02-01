@@ -1,8 +1,8 @@
 import * as HeicConvert from 'heic-convert';
 
 export async function convertHEIC(
-    format: string,
-    fileBlob: Blob
+    fileBlob: Blob,
+    format: string
 ): Promise<Blob> {
     const filedata = new Uint8Array(await fileBlob.arrayBuffer());
     const result = await HeicConvert({ buffer: filedata, format });
