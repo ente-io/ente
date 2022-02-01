@@ -46,8 +46,7 @@ export default class QueueProcessor<T> {
     private async pollQueue() {
         if (this.requestInProcessing < this.maxParallelProcesses) {
             this.requestInProcessing++;
-            await this.processQueue();
-            this.requestInProcessing--;
+            this.processQueue();
         }
     }
 
@@ -67,5 +66,6 @@ export default class QueueProcessor<T> {
                 }
             }
         }
+        this.requestInProcessing--;
     }
 }
