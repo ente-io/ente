@@ -1,13 +1,18 @@
 import QueueProcessor from 'services/queueProcessor';
+import { ConvertWorker } from 'utils/comlink';
 import { CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 
 class HEICConverter {
     private convertProcessor = new QueueProcessor<Blob>(5);
+    private worker = null;
 
-    async convert(worker, fileBlob: Blob, format = 'JPEG'): Promise<Blob> {
+    async convert(fileBlob: Blob, format = 'JPEG'): Promise<Blob> {
+        if (!this.worker) {
+            this.worker = await new ConvertWorker();
+        }
         const response = this.convertProcessor.queueUpRequest(
-            async () => await worker.convertHEIC(format, fileBlob)
+            async () => await this.worker.convertHEIC(fileBlob, format)
         );
         try {
             return await response.promise;

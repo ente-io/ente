@@ -1,6 +1,5 @@
 import * as Comlink from 'comlink';
 import * as libsodium from 'utils/crypto/libsodium';
-import { convertHEIC } from 'utils/file/convertHEIC';
 
 export class Crypto {
     async decryptMetadata(encryptedMetadata, header, key) {
@@ -147,10 +146,6 @@ export class Crypto {
 
     async fromHex(string) {
         return libsodium.fromHex(string);
-    }
-
-    async convertHEIC(format, file) {
-        return convertHEIC(format, file);
     }
 }
 
