@@ -609,7 +609,7 @@ const englishConstants = {
     OPEN_PLAN_SELECTOR_MODAL_FAILED: 'failed to open plans',
     COMMENT: 'comment',
     ABUSE_REPORT_DESCRIPTION:
-        'Note: Submitting this report will notify the album owner.',
+        'submitting this report will notify the album owner.',
     OTHER_REASON_REQUIRES_COMMENTS:
         'reason = other, require  a mandatory comment ',
     REPORT_SUBMIT_SUCCESS_CONTENT: 'your report has been submitted',
