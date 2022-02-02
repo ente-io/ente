@@ -106,6 +106,7 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
             }}>
             <Wrapper>
                 <h6>{constants.ABUSE_REPORT_DESCRIPTION}</h6>
+                <br />
                 <Formik<FormValues>
                     initialValues={{
                         ...defaultInitialValues,
@@ -169,7 +170,6 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
                     }): JSX.Element => (
                         <Form noValidate onSubmit={handleSubmit}>
                             <Form.Group controlId="reportForm.url">
-                                <Form.Label>{constants.ALBUM_URL}</Form.Label>
                                 <Form.Control
                                     type="text"
                                     disabled
