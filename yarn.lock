@@ -1764,6 +1764,11 @@
     anymatch "^3.0.0"
     source-map "^0.6.0"
 
+"@types/wicg-file-system-access@^2020.9.5":
+  version "2020.9.5"
+  resolved "https://registry.yarnpkg.com/@types/wicg-file-system-access/-/wicg-file-system-access-2020.9.5.tgz#4a0c8f3d1ed101525f329e86c978f7735404474f"
+  integrity sha512-UYK244awtmcUYQfs7FR8710MJcefL2WvkyHMjA8yJzxd1mo0Gfn88sRZ1Bls7hiUhA2w7ne1gpJ9T5g3G0wOyA==
+
 "@types/yup@^0.29.7":
   version "0.29.13"
   resolved "https://registry.npmjs.org/@types/yup/-/yup-0.29.13.tgz"
@@ -1837,6 +1842,11 @@
   dependencies:
     "@typescript-eslint/types" "4.31.0"
     eslint-visitor-keys "^2.0.0"
+
+"@zip.js/zip.js@^2.4.2":
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/@zip.js/zip.js/-/zip.js-2.4.2.tgz#7c2d4b381c0f73dffa1d02ef630c4168ebd5cc4a"
+  integrity sha512-D4xr9g7U625Q01lQASr9g1sQWEGhndyd+G3v3OvY/qH3pwaJDpbVDy+TO6yEq7c8teQdjjTiiBvlcQcVtT+itg==
 
 accepts@~1.3.7:
   version "1.3.7"
