@@ -1,10 +1,4 @@
-import React, {
-    useState,
-    useEffect,
-    useContext,
-    ChangeEvent,
-    useRef,
-} from 'react';
+import React, { useState, useEffect, useContext, ChangeEvent } from 'react';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { ComlinkWorker } from 'utils/crypto';
@@ -46,6 +40,7 @@ import {
     DEFAULT_ML_SYNC_CONFIG,
     DEFAULT_ML_SYNC_JOB_CONFIG,
 } from 'constants/machineLearning/config';
+import { exportMlData, importMlData } from 'utils/machineLearning/mldataExport';
 
 interface TSNEProps {
     mlResult: MLDebugResult;
@@ -106,22 +101,6 @@ const renderForeignObjectNode = ({ nodeDatum, foreignObjectProps }) => (
     </g>
 );
 
-const readAsDataURL = (blob) =>
-    new Promise<string>((resolve, reject) => {
-        const fileReader = new FileReader();
-        fileReader.onload = () => resolve(fileReader.result as string);
-        fileReader.onerror = () => reject(fileReader.error);
-        fileReader.readAsDataURL(blob);
-    });
-
-const readAsText = (blob) =>
-    new Promise<string>((resolve, reject) => {
-        const fileReader = new FileReader();
-        fileReader.onload = () => resolve(fileReader.result as string);
-        fileReader.onerror = () => reject(fileReader.error);
-        fileReader.readAsText(blob);
-    });
-
 const getFaceCrops = async (faces: Face[]) => {
     const faceCropPromises = faces
         .filter((f) => f?.crop)
@@ -167,7 +146,6 @@ export default function MLDebug() {
     const [filteredFaces, setFilteredFaces] = useState<Array<Blob>>([]);
     const [mstD3Tree, setMstD3Tree] = useState<RawNodeDatum>(null);
     const [debugFile, setDebugFile] = useState<File>();
-    const importMLDataFileInput = useRef(null);
 
     const router = useRouter();
     const appContext = useContext(AppContext);
@@ -236,77 +214,54 @@ export default function MLDebug() {
 
     // for debug purpose, not a memory efficient implementation
     const onExportMLData = async () => {
-        const mlDbData = await mlIDbStorage.getAllMLData();
-        const faceClusteringResults =
-            mlDbData?.library?.data?.faceClusteringResults;
-        faceClusteringResults && (faceClusteringResults.debugInfo = undefined);
-        console.log(
-            'Exporting ML DB data: ',
-            Object.keys(mlDbData),
-            Object.keys(mlDbData)?.map((k) => Object.keys(mlDbData[k])?.length)
-        );
-
-        const faceCropCache = await caches.open(FACE_CROPS_CACHE_NAME);
-        const keys = await faceCropCache.keys();
-        const faceCrops = {};
-        console.log('Exporting faceCrops cache entries: ', keys.length);
-        for (let i = 0; i < keys.length; i++) {
-            const response = await faceCropCache.match(keys[i]);
-            const blob = await response.blob();
-            const data = await readAsDataURL(blob);
-            const path = new URL(keys[i].url).pathname;
-            faceCrops[path] = data;
-        }
-        const mlCacheData = {};
-        mlCacheData[FACE_CROPS_CACHE_NAME] = faceCrops;
-
-        const mlData = { mlDbData, mlCacheData };
-
-        const mlDataJson = JSON.stringify(mlData);
-        const mlDataJsonBlob = new Blob([mlDataJson], {
-            type: 'application/json',
-        });
-        const a = document.createElement('a');
-        a.download = `ente-mldata-${Date.now()}.json`;
-        a.href = window.URL.createObjectURL(mlDataJsonBlob);
-        const clickEvt = new MouseEvent('click', {
-            view: window,
-            bubbles: true,
-            cancelable: true,
-        });
-        a.dispatchEvent(clickEvt);
-        a.remove();
-        console.log('ML Data Exported');
-    };
-
-    const onImportMLDataClick = () => {
-        importMLDataFileInput.current.click();
-    };
-
-    const onImportMLData = async (event: ChangeEvent<HTMLInputElement>) => {
-        const mlDataJson = await readAsText(event.target.files[0]);
-        const mlData = JSON.parse(mlDataJson);
-        const { mlDbData, mlCacheData } = mlData;
-
-        const faceCrops = mlCacheData[FACE_CROPS_CACHE_NAME];
-        console.log(
-            'Importing faceCrops cache entries: ',
-            Object.keys(faceCrops).length
-        );
-        const faceCropCache = await caches.open(FACE_CROPS_CACHE_NAME);
-        for (const url of Object.keys(faceCrops)) {
-            const data = await fetch(faceCrops[url]);
-            faceCropCache.put(url, data);
+        let mlDataZipHandle: FileSystemFileHandle;
+        try {
+            mlDataZipHandle = await showSaveFilePicker({
+                suggestedName: `ente-mldata-${Date.now()}`,
+                types: [
+                    {
+                        accept: {
+                            'application/zip': ['.zip'],
+                        },
+                    },
+                ],
+            });
+        } catch (e) {
+            console.error(e);
+            return;
         }
 
-        console.log(
-            'Importing ML DB data: ',
-            Object.keys(mlDbData),
-            Object.keys(mlDbData)?.map((k) => Object.keys(mlDbData[k])?.length)
-        );
-        await mlIDbStorage.putAllMLData(mlDbData);
+        try {
+            const mlDataZipWritable = await mlDataZipHandle.createWritable();
+            await exportMlData(mlDataZipWritable);
+        } catch (e) {
+            console.error('Error while exporting: ', e);
+        }
+    };
 
-        console.log('ML Data Imported');
+    const onImportMLData = async () => {
+        let mlDataZipHandle: FileSystemFileHandle;
+        try {
+            [mlDataZipHandle] = await showOpenFilePicker({
+                types: [
+                    {
+                        accept: {
+                            'application/zip': ['.zip'],
+                        },
+                    },
+                ],
+            });
+        } catch (e) {
+            console.error(e);
+            return;
+        }
+
+        try {
+            const mlDataZipFile = await mlDataZipHandle.getFile();
+            await importMlData(mlDataZipFile);
+        } catch (e) {
+            console.error('Error while importing: ', e);
+        }
     };
 
     const onClearPeopleIndex = async () => {
@@ -447,13 +402,7 @@ export default function MLDebug() {
             <hr />
             <RowWithGap>
                 <Button onClick={onExportMLData}>Export ML Data</Button>
-                <Button onClick={onImportMLDataClick}>Import ML Data</Button>
-                <input
-                    ref={importMLDataFileInput}
-                    hidden
-                    type="file"
-                    onChange={onImportMLData}
-                />
+                <Button onClick={onImportMLData}>Import ML Data</Button>
                 <Button onClick={onClearPeopleIndex}>Clear People Index</Button>
             </RowWithGap>
 
