@@ -140,7 +140,7 @@ export default function PublicCollectionGallery() {
                     collectionKey.current
                 );
                 setPublicCollection(null);
-                setPublicFiles([]);
+                setPublicFiles(null);
             }
         } finally {
             finishLoadingBar();
@@ -150,7 +150,7 @@ export default function PublicCollectionGallery() {
     if (!publicFiles && loading) {
         return <Loader />;
     }
-    if (!publicFiles?.length && !loading) {
+    if (!publicFiles && !loading) {
         return <Container>{constants.NOT_FOUND}</Container>;
     }
 
