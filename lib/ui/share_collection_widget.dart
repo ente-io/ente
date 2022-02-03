@@ -228,15 +228,26 @@ class _SharingDialogState extends State<SharingDialog> {
               },
               child: Container(
                 padding: EdgeInsets.all(16),
-                child: Center(
-                  child: Text(
-                    url,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                      color: Colors.white.withOpacity(0.7),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        url,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                          color: Colors.white.withOpacity(0.68),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ),
-                  ),
+                    Padding(padding: EdgeInsets.all(2)),
+                    Icon(
+                      Icons.copy,
+                      size: 18,
+                    ),
+                  ],
                 ),
                 color: Colors.white.withOpacity(0.02),
               ),
