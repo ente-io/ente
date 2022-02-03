@@ -79,6 +79,9 @@ export default function PublicCollectionGallery() {
                     pathname: PAGES.ROOT,
                     search: currentURL.search,
                     hash: currentURL.hash,
+                },
+                {
+                    shallow: true,
                 }
             );
         }

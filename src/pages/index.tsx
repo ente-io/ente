@@ -124,18 +124,6 @@ export default function LandingPage() {
             search: currentURL.search,
             hash: currentURL.hash,
         });
-        await router.replace(
-            {
-                pathname: PAGES.SHARED_ALBUMS,
-                search: currentURL.search,
-                hash: currentURL.hash,
-            },
-            {
-                pathname: PAGES.ROOT,
-                search: currentURL.search,
-                hash: currentURL.hash,
-            }
-        );
         await initLocalForage();
     };
 
