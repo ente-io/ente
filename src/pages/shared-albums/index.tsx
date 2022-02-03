@@ -27,7 +27,7 @@ import EnteSpinner from 'components/EnteSpinner';
 import LoadingBar from 'react-top-loading-bar';
 import CryptoWorker from 'utils/crypto';
 import { PAGES } from 'constants/pages';
-import router from 'next/router';
+import { useRouter } from 'next/router';
 
 const Loader = () => (
     <Container>
@@ -51,6 +51,7 @@ export default function PublicCollectionGallery() {
     const closeReportForm = () => setAbuseReportFormView(false);
     const loadingBar = useRef(null);
     const isLoadingBarRunning = useRef(false);
+    const router = useRouter();
 
     const openMessageDialog = () => setMessageDialogView(true);
     const closeMessageDialog = () => setMessageDialogView(false);
@@ -68,7 +69,7 @@ export default function PublicCollectionGallery() {
         appContext.showNavBar(true);
         const currentURL = new URL(window.location.href);
         if (currentURL.pathname !== PAGES.ROOT) {
-            router.push(
+            router.replace(
                 {
                     pathname: PAGES.SHARED_ALBUMS,
                     search: currentURL.search,
