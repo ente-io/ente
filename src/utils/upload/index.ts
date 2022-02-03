@@ -33,7 +33,7 @@ export function areFilesSame(
 export function segregateFiles(
     filesWithCollectionToUpload: FileWithCollection[]
 ) {
-    const metadataFiles: FileWithCollection[] = [];
+    const metadataJSONFiles: FileWithCollection[] = [];
     const mediaFiles: FileWithCollection[] = [];
     filesWithCollectionToUpload.forEach((fileWithCollection) => {
         const file = fileWithCollection.file;
@@ -42,10 +42,10 @@ export function segregateFiles(
             return;
         }
         if (file.name.toLowerCase().endsWith(TYPE_JSON)) {
-            metadataFiles.push(fileWithCollection);
+            metadataJSONFiles.push(fileWithCollection);
         } else {
             mediaFiles.push(fileWithCollection);
         }
     });
-    return { mediaFiles, metadataFiles };
+    return { mediaFiles, metadataJSONFiles };
 }

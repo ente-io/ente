@@ -38,3 +38,5 @@ export enum FileUploadResults {
     LARGER_THAN_AVAILABLE_STORAGE,
     UPLOADED,
 }
+
+export const FIVE_GB_IN_BYTES = 5 * 1024 * 1024 * 1024;

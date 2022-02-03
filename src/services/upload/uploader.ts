@@ -7,21 +7,11 @@ import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
 import UploadService from './uploadService';
 import uploadService from './uploadService';
-import { getFileType } from './readFileService';
-import {
-    BackupedFile,
-    EncryptedFile,
-    FileInMemory,
-    FileTypeInfo,
-    FileWithCollection,
-    FileWithMetadata,
-    Metadata,
-    UploadFile,
-} from 'types/upload';
+import { BackupedFile, FileWithCollection, UploadFile } from 'types/upload';
 import { FILE_TYPE } from 'constants/file';
-import { FileUploadResults } from 'constants/upload';
+import { FileUploadResults, FIVE_GB_IN_BYTES } from 'constants/upload';
+import { getMetadataMapKey } from './metadataService';
 
-const FIVE_GB_IN_BYTES = 5 * 1024 * 1024 * 1024;
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
     file?: EnteFile;
@@ -35,32 +25,26 @@ export default async function uploader(
     const { file: rawFile, collection } = fileWithCollection;
 
     UIService.setFileProgress(rawFile.name, 0);
-
-    let file: FileInMemory = null;
-    let encryptedFile: EncryptedFile = null;
-    let metadata: Metadata = null;
-    let fileTypeInfo: FileTypeInfo = null;
-    let fileWithMetadata: FileWithMetadata = null;
-
+    const { fileTypeInfo, metadata } =
+        uploadService.getFileMetadataAndFileTypeInfo(
+            getMetadataMapKey(collection.id, rawFile.name)
+        );
     try {
         if (rawFile.size >= FIVE_GB_IN_BYTES) {
             return { fileUploadResult: FileUploadResults.TOO_LARGE };
         }
-        fileTypeInfo = await getFileType(reader, rawFile);
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
-        metadata = await uploadService.getFileMetadata(
-            rawFile,
-            collection,
-            fileTypeInfo
-        );
+        if (!metadata) {
+            throw Error(CustomError.NO_METADATA);
+        }
 
         if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
             return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
         }
 
-        file = await UploadService.readFile(
+        const file = await UploadService.readFile(
             worker,
             reader,
             rawFile,
@@ -69,13 +53,13 @@ export default async function uploader(
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
         }
-        fileWithMetadata = {
+        const fileWithMetadata = {
             filedata: file.filedata,
             thumbnail: file.thumbnail,
             metadata,
         };
 
-        encryptedFile = await UploadService.encryptFile(
+        const encryptedFile = await UploadService.encryptFile(
             worker,
             fileWithMetadata,
             collection.key
@@ -117,9 +101,5 @@ export default async function uploader(
             default:
                 return { fileUploadResult: FileUploadResults.FAILED };
         }
-    } finally {
-        file = null;
-        fileWithMetadata = null;
-        encryptedFile = null;
     }
 }

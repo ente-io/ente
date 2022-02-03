@@ -17,23 +17,33 @@ import {
     FileTypeInfo,
     FileWithMetadata,
     isDataStream,
-    MetadataMap,
     Metadata,
-    ParsedMetadataJSON,
     ProcessedFile,
     UploadFile,
     UploadURL,
+    MetadataAndFileTypeInfoMap,
+    ParsedMetadataJSONMap,
 } from 'types/upload';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
-    private metadataMap: Map<string, ParsedMetadataJSON>;
+    private parsedMetadataJSONMap: ParsedMetadataJSONMap;
+    private metadataAndFileTypeInfoMap: MetadataAndFileTypeInfoMap;
     private pendingUploadCount: number = 0;
 
-    async init(fileCount: number, metadataMap: MetadataMap) {
+    async setFileCount(fileCount: number) {
         this.pendingUploadCount = fileCount;
-        this.metadataMap = metadataMap;
         await this.preFetchUploadURLs();
+    }
+
+    setParsedMetadataJSONMap(parsedMetadataJSONMap: ParsedMetadataJSONMap) {
+        this.parsedMetadataJSONMap = parsedMetadataJSONMap;
+    }
+
+    setMetadataAndFileTypeInfoMap(
+        metadataAndFileTypeInfoMap: MetadataAndFileTypeInfoMap
+    ) {
+        this.metadataAndFileTypeInfoMap = metadataAndFileTypeInfoMap;
     }
 
     reducePendingUploadCount() {
@@ -62,28 +72,36 @@ class UploadService {
         };
     }
 
-    async getFileMetadata(
+    async extractMetadata(
         rawFile: File,
-        collection: Collection,
+        collectionID: number,
         fileTypeInfo: FileTypeInfo
     ): Promise<Metadata> {
-        const originalName = getFileOriginalName(rawFile);
-        const googleMetadata =
-            this.metadataMap.get(
-                getMetadataMapKey(collection.id, originalName)
-            ) ?? {};
-        const extractedMetadata: Metadata = await extractMetadata(
-            rawFile,
-            fileTypeInfo
-        );
+        try {
+            const originalName = getFileOriginalName(rawFile);
+            const googleMetadata =
+                this.parsedMetadataJSONMap.get(
+                    getMetadataMapKey(collectionID, originalName)
+                ) ?? {};
+            const extractedMetadata: Metadata = await extractMetadata(
+                rawFile,
+                fileTypeInfo
+            );
 
-        for (const [key, value] of Object.entries(googleMetadata)) {
-            if (!value) {
-                continue;
+            for (const [key, value] of Object.entries(googleMetadata)) {
+                if (!value) {
+                    continue;
+                }
+                extractedMetadata[key] = value;
             }
-            extractedMetadata[key] = value;
+            return extractedMetadata;
+        } catch (e) {
+            logError(e, 'failed to extract file metadata');
         }
-        return extractedMetadata;
+    }
+
+    getFileMetadataAndFileTypeInfo(key: string) {
+        return this.getFileMetadataAndFileTypeInfo(key);
     }
 
     async encryptFile(
