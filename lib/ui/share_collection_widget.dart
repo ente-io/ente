@@ -290,12 +290,11 @@ class _SharingDialogState extends State<SharingDialog> {
           "please enter a valid email address.");
       return;
     } else if (email == Configuration.instance.getEmail()) {
-      showErrorDialog(context, AppLocalizations.of(context).oops,
-          "you cannot share with yourself");
+      showErrorDialog(context, "oops", "you cannot share with yourself");
       return;
     } else if (widget.collection.sharees.any((user) => user.email == email)) {
-      showErrorDialog(context, AppLocalizations.of(context).oops,
-          "you're already sharing this with " + email);
+      showErrorDialog(
+          context, "oops", "you're already sharing this with " + email);
       return;
     }
     if (publicKey == null) {
