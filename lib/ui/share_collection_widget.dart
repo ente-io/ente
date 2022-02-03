@@ -53,7 +53,7 @@ class _SharingDialogState extends State<SharingDialog> {
       children.add(_getEmailField());
     }
     children.add(Padding(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(8),
     ));
     if (!_showEntryField) {
       children.add(SizedBox(
@@ -87,9 +87,9 @@ class _SharingDialogState extends State<SharingDialog> {
     if (!FeatureFlagService.instance.disableUrlSharing()) {
       bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
       children.addAll([
-        Padding(padding: EdgeInsets.all(12)),
+        Padding(padding: EdgeInsets.all(16)),
         Divider(height: 1),
-        Padding(padding: EdgeInsets.all(8)),
+        Padding(padding: EdgeInsets.all(12)),
         SizedBox(
           height: 36,
           child: Row(
