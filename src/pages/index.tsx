@@ -119,10 +119,12 @@ export default function LandingPage() {
     }, []);
 
     const handleAlbumsRedirect = async (currentURL: URL) => {
+        const end = currentURL.hash.lastIndexOf('&');
+        const hash = currentURL.hash.slice(1, end !== -1 ? end : undefined);
         await router.replace({
             pathname: PAGES.SHARED_ALBUMS,
             search: currentURL.search,
-            hash: currentURL.hash,
+            hash: hash,
         });
         await initLocalForage();
     };

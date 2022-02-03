@@ -22,6 +22,7 @@ import { SetFiles, SelectedState, Search, setSearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
+import { useRouter } from 'next/router';
 
 const Container = styled.div`
     display: block;
@@ -48,6 +49,8 @@ const EmptyScreen = styled.div`
         filter: drop-shadow(3px 3px 5px rgba(45, 194, 98, 0.5));
     }
 `;
+
+const PHOTOSWIPE_HASH_SUFFIX = '&photoswipe-opened';
 
 interface Props {
     files: EnteFile[];
@@ -97,6 +100,7 @@ const PhotoFrame = ({
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     const filteredDataRef = useRef([]);
     const filteredData = filteredDataRef?.current ?? [];
+    const router = useRouter();
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Shift') {
@@ -110,6 +114,18 @@ const PhotoFrame = ({
         };
         document.addEventListener('keydown', handleKeyDown, false);
         document.addEventListener('keyup', handleKeyUp, false);
+        router.events.on('hashChangeComplete', (url: string) => {
+            const start = url.indexOf('#');
+            const hash = url.slice(start !== -1 ? start : url.length);
+            const shouldPhotoSwipeBeOpened = hash.endsWith(
+                PHOTOSWIPE_HASH_SUFFIX
+            );
+            if (shouldPhotoSwipeBeOpened) {
+                setOpen(true);
+            } else {
+                setOpen(false);
+            }
+        });
         return () => {
             document.addEventListener('keydown', handleKeyDown, false);
             document.addEventListener('keyup', handleKeyUp, false);
@@ -209,6 +225,21 @@ const PhotoFrame = ({
                 return false;
             });
     }, [files, deleted, search, activeCollection]);
+
+    useEffect(() => {
+        const currentURL = new URL(window.location.href);
+        const end = currentURL.hash.lastIndexOf('&');
+        const hash = currentURL.hash.slice(1, end !== -1 ? end : undefined);
+        if (open) {
+            router.push({
+                hash: hash + PHOTOSWIPE_HASH_SUFFIX,
+            });
+        } else {
+            router.push({
+                hash: hash,
+            });
+        }
+    }, [open]);
 
     const updateURL = (index: number) => (url: string) => {
         files[index] = {
