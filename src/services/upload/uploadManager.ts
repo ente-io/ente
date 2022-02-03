@@ -32,7 +32,6 @@ import {
 import { ComlinkWorker } from 'utils/comlink';
 import { getFileType } from './readFileService';
 import { FILE_TYPE } from 'constants/file';
-import { title } from 'process';
 import uploadService from './uploadService';
 
 const MAX_CONCURRENT_UPLOADS = 4;
@@ -95,6 +94,9 @@ class UploadManager {
             if (mediaFiles.length) {
                 UIService.setUploadStage(UPLOAD_STAGES.START);
                 await this.extractMetadataFromFiles(mediaFiles);
+                uploadService.setMetadataAndFileTypeInfoMap(
+                    this.metadataAndFileTypeInfoMap
+                );
                 await this.uploadMediaFiles(mediaFiles);
             }
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
@@ -155,10 +157,15 @@ class UploadManager {
                         )) || null;
                     return { fileTypeInfo, metadata };
                 })();
+
                 this.metadataAndFileTypeInfoMap.set(
-                    getMetadataMapKey(collectionID, title),
-                    { ...{ fileTypeInfo, metadata } }
+                    getMetadataMapKey(collectionID, file.name),
+                    {
+                        fileTypeInfo: { ...fileTypeInfo },
+                        metadata: { ...metadata },
+                    }
                 );
+                console.log(this.metadataAndFileTypeInfoMap.keys());
                 UIService.increaseFileUploaded();
             }
         } catch (e) {

@@ -23,12 +23,20 @@ import {
     UploadURL,
     MetadataAndFileTypeInfoMap,
     ParsedMetadataJSONMap,
+    ParsedMetadataJSON,
+    MetadataAndFileTypeInfo,
 } from 'types/upload';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
-    private parsedMetadataJSONMap: ParsedMetadataJSONMap;
-    private metadataAndFileTypeInfoMap: MetadataAndFileTypeInfoMap;
+    private parsedMetadataJSONMap: ParsedMetadataJSONMap = new Map<
+        string,
+        ParsedMetadataJSON
+    >();
+    private metadataAndFileTypeInfoMap: MetadataAndFileTypeInfoMap = new Map<
+        string,
+        MetadataAndFileTypeInfo
+    >();
     private pendingUploadCount: number = 0;
 
     async setFileCount(fileCount: number) {
@@ -101,7 +109,8 @@ class UploadService {
     }
 
     getFileMetadataAndFileTypeInfo(key: string) {
-        return this.getFileMetadataAndFileTypeInfo(key);
+        console.log(this.metadataAndFileTypeInfoMap, key);
+        return this.metadataAndFileTypeInfoMap.get(key);
     }
 
     async encryptFile(
