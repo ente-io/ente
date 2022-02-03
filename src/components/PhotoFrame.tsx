@@ -117,10 +117,10 @@ const PhotoFrame = ({
         router.events.on('hashChangeComplete', (url: string) => {
             const start = url.indexOf('#');
             const hash = url.slice(start !== -1 ? start : url.length);
-            const photoSwipeShouldBeOpened = hash.endsWith(
+            const shouldPhotoSwipeBeOpened = hash.endsWith(
                 PHOTOSWIPE_HASH_SUFFIX
             );
-            if (photoSwipeShouldBeOpened) {
+            if (shouldPhotoSwipeBeOpened) {
                 setOpen(true);
             } else {
                 setOpen(false);
