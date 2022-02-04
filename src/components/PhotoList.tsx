@@ -270,6 +270,7 @@ export function PhotoList({
     const getAppDownloadFooter = () => {
         return {
             itemType: ITEM_TYPE.OTHER,
+            height: FOOTER_HEIGHT,
             item: (
                 <FooterContainer span={columns}>
                     <p>{constants.INSTALL_MOBILE_APP()}</p>
@@ -281,6 +282,7 @@ export function PhotoList({
     const getAlbumsFooter = () => {
         return {
             itemType: ITEM_TYPE.OTHER,
+            height: FOOTER_HEIGHT,
             item: (
                 <FooterContainer span={columns}>
                     <p>
