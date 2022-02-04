@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -94,7 +93,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           width: double.infinity,
           height: 64,
           child: button(
-            AppLocalizations.of(context).log_in,
+            "log in",
             fontSize: 18,
             onPressed: _passwordController.text.isNotEmpty
                 ? () async {

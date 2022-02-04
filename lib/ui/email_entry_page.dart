@@ -5,7 +5,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_password_strength/flutter_password_strength.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/billing_plan.dart';
@@ -67,7 +66,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         child: Material(
           type: MaterialType.transparency,
           child: Text(
-            AppLocalizations.of(context).sign_up,
+            "sign up",
             style: TextStyle(
               fontSize: 18,
               letterSpacing: 0.6,
@@ -209,7 +208,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   height: 64,
                   padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
                   child: button(
-                    AppLocalizations.of(context).sign_up,
+                    "sign up",
                     onPressed: _isFormValid()
                         ? () {
                             if (!isValidEmail(_email)) {
