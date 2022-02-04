@@ -33,10 +33,6 @@ export default class MyDocument extends Document {
         return (
             <Html lang="en">
                 <Head>
-                    <meta
-                        name="description"
-                        content="ente is a privacy focussed photo storage service that offers end-to-end encryption."
-                    />
                     <link
                         rel="icon"
                         href="/images/favicon.png"

@@ -1,6 +1,6 @@
 export const getSentryDSN = () =>
     process.env.NEXT_PUBLIC_SENTRY_DSN ??
-    'https://860186db60c54c7fbacfe255124958e8@errors.ente.io/4';
+    'https://60abb33b597c42f6a3fb27cd82c55101@sentry.ente.io/2';
 
 export const getSentryENV = () =>
     process.env.NEXT_PUBLIC_SENTRY_ENV ?? 'development';
