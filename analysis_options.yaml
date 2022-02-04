@@ -36,7 +36,7 @@ analyzer:
     directives_ordering: error
     always_use_package_imports: error
     prefer_final_fields: error
-    unused_import: warning
+    unused_import: error
     prefer_is_empty: warning
     use_rethrow_when_possible: info
 
