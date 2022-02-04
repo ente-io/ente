@@ -22,6 +22,13 @@ Sentry.init({
     attachStacktrace: true,
     autoSessionTracking: false,
     tunnel: getSentryTunnelURL(),
+    beforeSend(event) {
+        event.request = event.request || {};
+        const currentURL = new URL(document.location.href);
+        currentURL.hash = '';
+        event.request.url = currentURL;
+        return event;
+    },
     // ...
     // Note: if you want to override the automatic release value, do not set a
     // `release` value here - use the environment variable `SENTRY_RELEASE`, so
