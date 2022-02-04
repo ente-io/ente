@@ -17,6 +17,7 @@ import { getVariantColor, ButtonVariant } from './pages/gallery/LinkButton';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const NO_OF_PAGES = 2;
+const FOOTER_HEIGHT = 90;
 
 enum ITEM_TYPE {
     TIME = 'TIME',
@@ -84,7 +85,11 @@ const DateContainer = styled.div<{ span: number }>`
     height: ${DATE_CONTAINER_HEIGHT}px;
 `;
 
-const BannerContainer = styled.div<{ span: number }>`
+const FooterContainer = styled.div<{ span: number }>`
+    font-size: 14px;
+    @media (max-width: 540px) {
+        font-size: 12px;
+    }
     color: #979797;
     text-align: center;
     grid-column: span ${(props) => props.span};
@@ -94,10 +99,6 @@ const BannerContainer = styled.div<{ span: number }>`
     & > p {
         margin: 0;
     }
-    margin: 1rem 0;
-`;
-
-const AlbumsFooterContainer = styled(BannerContainer)`
     margin: calc(2rem + 20px) 0 1rem 0;
 `;
 
@@ -254,7 +255,7 @@ export function PhotoList({
             const getCurrentItemSize = getItemSize(timeStampList);
             for (let i = 0; i < timeStampList.length; i++) {
                 sum += getCurrentItemSize(i);
-                if (height - sum <= 70) {
+                if (height - sum <= FOOTER_HEIGHT) {
                     break;
                 }
             }
@@ -263,16 +264,17 @@ export function PhotoList({
         return {
             itemType: ITEM_TYPE.OTHER,
             item: <></>,
-            height: Math.max(height - photoFrameHeight - 70, 0),
+            height: Math.max(height - photoFrameHeight - FOOTER_HEIGHT, 0),
         };
     };
     const getAppDownloadFooter = () => {
         return {
             itemType: ITEM_TYPE.OTHER,
+            height: FOOTER_HEIGHT,
             item: (
-                <BannerContainer span={columns}>
+                <FooterContainer span={columns}>
                     <p>{constants.INSTALL_MOBILE_APP()}</p>
-                </BannerContainer>
+                </FooterContainer>
             ),
         };
     };
@@ -280,8 +282,9 @@ export function PhotoList({
     const getAlbumsFooter = () => {
         return {
             itemType: ITEM_TYPE.OTHER,
+            height: FOOTER_HEIGHT,
             item: (
-                <AlbumsFooterContainer span={columns}>
+                <FooterContainer span={columns}>
                     <p>
                         {constants.PRESERVED_BY}{' '}
                         <a
@@ -294,7 +297,7 @@ export function PhotoList({
                             {constants.ENTE_IO}
                         </a>
                     </p>
-                </AlbumsFooterContainer>
+                </FooterContainer>
             ),
         };
     };
