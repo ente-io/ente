@@ -97,14 +97,8 @@ const BannerContainer = styled.div<{ span: number }>`
     margin: 1rem 0;
 `;
 
-const ReportAbuseItem = styled.div<{ span: number }>`
-    display: flex;
-    justify-content: center;
-    grid-column: span ${(props) => props.span};
-    & > p {
-        margin: 0;
-    }
-    margin: 2rem 0 1rem 0;
+const AlbumsFooterContainer = styled(BannerContainer)`
+    margin: calc(2rem + 20px) 0 1rem 0;
 `;
 
 const NothingContainer = styled.div<{ span: number }>`
@@ -287,7 +281,7 @@ export function PhotoList({
         return {
             itemType: ITEM_TYPE.OTHER,
             item: (
-                <ReportAbuseItem span={columns}>
+                <AlbumsFooterContainer span={columns}>
                     <p>
                         {constants.PRESERVED_BY}{' '}
                         <a
@@ -300,7 +294,7 @@ export function PhotoList({
                             {constants.ENTE_IO}
                         </a>
                     </p>
-                </ReportAbuseItem>
+                </AlbumsFooterContainer>
             ),
         };
     };
