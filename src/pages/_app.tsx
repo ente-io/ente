@@ -659,6 +659,15 @@ export default function App({ Component, err }) {
         <>
             <Head>
                 <title>{constants.TITLE}</title>
+                {typeof window !== 'undefined' &&
+                window.location.host === getAlbumSiteHost() ? (
+                    <meta name="description" content="album shared over ente" />
+                ) : (
+                    <meta
+                        name="description"
+                        content="ente is a privacy focussed photo storage service that offers end-to-end encryption."
+                    />
+                )}
             </Head>
             <GlobalStyles />
             {showNavbar && (
