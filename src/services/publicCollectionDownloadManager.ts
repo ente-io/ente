@@ -37,6 +37,7 @@ class PublicCollectionDownloadManager {
                     const cacheResp: Response = await thumbnailCache?.match(
                         file.id.toString()
                     );
+                    console.log(cacheResp);
                     if (cacheResp) {
                         return URL.createObjectURL(await cacheResp.blob());
                     }
