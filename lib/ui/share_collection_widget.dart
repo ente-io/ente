@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:logging/logging.dart';
@@ -53,7 +52,7 @@ class _SharingDialogState extends State<SharingDialog> {
       children.add(_getEmailField());
     }
     children.add(Padding(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(8),
     ));
     if (!_showEntryField) {
       children.add(SizedBox(
@@ -87,9 +86,9 @@ class _SharingDialogState extends State<SharingDialog> {
     if (!FeatureFlagService.instance.disableUrlSharing()) {
       bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
       children.addAll([
-        Padding(padding: EdgeInsets.all(12)),
+        Padding(padding: EdgeInsets.all(16)),
         Divider(height: 1),
-        Padding(padding: EdgeInsets.all(8)),
+        Padding(padding: EdgeInsets.all(12)),
         SizedBox(
           height: 36,
           child: Row(
@@ -228,15 +227,26 @@ class _SharingDialogState extends State<SharingDialog> {
               },
               child: Container(
                 padding: EdgeInsets.all(16),
-                child: Center(
-                  child: Text(
-                    url,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                      color: Colors.white.withOpacity(0.7),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        url,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                          color: Colors.white.withOpacity(0.68),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ),
-                  ),
+                    Padding(padding: EdgeInsets.all(2)),
+                    Icon(
+                      Icons.copy,
+                      size: 18,
+                    ),
+                  ],
                 ),
                 color: Colors.white.withOpacity(0.02),
               ),
@@ -279,12 +289,11 @@ class _SharingDialogState extends State<SharingDialog> {
           "please enter a valid email address.");
       return;
     } else if (email == Configuration.instance.getEmail()) {
-      showErrorDialog(context, AppLocalizations.of(context).oops,
-          "you cannot share with yourself");
+      showErrorDialog(context, "oops", "you cannot share with yourself");
       return;
     } else if (widget.collection.sharees.any((user) => user.email == email)) {
-      showErrorDialog(context, AppLocalizations.of(context).oops,
-          "you're already sharing this with " + email);
+      showErrorDialog(
+          context, "oops", "you're already sharing this with " + email);
       return;
     }
     if (publicKey == null) {

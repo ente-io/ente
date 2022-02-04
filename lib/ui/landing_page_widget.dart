@@ -1,7 +1,6 @@
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/login_page.dart';
@@ -110,7 +109,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                     child: Material(
                       type: MaterialType.transparency,
                       child: Text(
-                        AppLocalizations.of(context).log_in,
+                        "log in",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -153,7 +152,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
           child: Material(
             type: MaterialType.transparency,
             child: Text(
-              AppLocalizations.of(context).sign_up,
+              "sign up",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,

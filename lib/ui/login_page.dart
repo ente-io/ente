@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
@@ -36,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Material(
             type: MaterialType.transparency,
             child: Text(
-              AppLocalizations.of(context).log_in,
+              "log in",
               style: TextStyle(
                 fontSize: 16,
                 letterSpacing: 0.6,
@@ -139,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
           height: 64,
           padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
           child: button(
-            AppLocalizations.of(context).log_in,
+            "log in",
             onPressed: _email != null && _email.isNotEmpty
                 ? () {
                     if (!isValidEmail(_email)) {
