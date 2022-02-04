@@ -11,8 +11,9 @@ import {
     SPACE_BTW_DATES,
 } from 'constants/gallery';
 import constants from 'utils/strings/constants';
-import LinkButton, { ButtonVariant } from './pages/gallery/LinkButton';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
+import { ENTE_WEBSITE_LINK } from 'constants/publicCollection';
+import { getVariantColor, ButtonVariant } from './pages/gallery/LinkButton';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const NO_OF_PAGES = 2;
@@ -96,14 +97,8 @@ const BannerContainer = styled.div<{ span: number }>`
     margin: 1rem 0;
 `;
 
-const ReportAbuseItem = styled.div<{ span: number }>`
-    display: flex;
-    justify-content: center;
-    grid-column: span ${(props) => props.span};
-    & > p {
-        margin: 0;
-    }
-    margin: 2rem 0 1rem 0;
+const AlbumsFooterContainer = styled(BannerContainer)`
+    margin: calc(2rem + 20px) 0 1rem 0;
 `;
 
 const NothingContainer = styled.div<{ span: number }>`
@@ -219,9 +214,9 @@ export function PhotoList({
         ) {
             timeStampList.push(getVacuumItem(timeStampList));
             if (publicCollectionGalleryContext.accessedThroughSharedURL) {
-                timeStampList.push(getReportAbuseItem());
+                timeStampList.push(getAlbumsFooter());
             } else {
-                timeStampList.push(getAppDownloadBannerItem());
+                timeStampList.push(getAppDownloadFooter());
             }
         }
 
@@ -271,7 +266,7 @@ export function PhotoList({
             height: Math.max(height - photoFrameHeight - 70, 0),
         };
     };
-    const getAppDownloadBannerItem = () => {
+    const getAppDownloadFooter = () => {
         return {
             itemType: ITEM_TYPE.OTHER,
             item: (
@@ -282,18 +277,24 @@ export function PhotoList({
         };
     };
 
-    const getReportAbuseItem = () => {
+    const getAlbumsFooter = () => {
         return {
             itemType: ITEM_TYPE.OTHER,
             item: (
-                <ReportAbuseItem span={columns}>
-                    <LinkButton
-                        style={{ fontSize: '14px' }}
-                        variant={ButtonVariant.danger}
-                        onClick={publicCollectionGalleryContext.openReportForm}>
-                        {constants.ABUSE_REPORT_BUTTON_TEXT}
-                    </LinkButton>
-                </ReportAbuseItem>
+                <AlbumsFooterContainer span={columns}>
+                    <p>
+                        {constants.PRESERVED_BY}{' '}
+                        <a
+                            target="_blank"
+                            style={{
+                                color: getVariantColor(ButtonVariant.success),
+                            }}
+                            href={ENTE_WEBSITE_LINK}
+                            rel="noreferrer">
+                            {constants.ENTE_IO}
+                        </a>
+                    </p>
+                </AlbumsFooterContainer>
             ),
         };
     };
