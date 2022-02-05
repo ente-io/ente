@@ -263,10 +263,7 @@ export const getPublicCollection = async (
         await savePublicCollection(collection);
         return collection;
     } catch (e) {
-        logError(e, 'failed to get public collection', {
-            collectionKey,
-            token,
-        });
+        logError(e, 'failed to get public collection');
         throw e;
     }
 };
