@@ -38,14 +38,9 @@ class PublicCollectionDownloadManager {
                     const cacheResp: Response = await thumbnailCache?.match(
                         file.id.toString()
                     );
+                    console.log(cacheResp);
                     if (cacheResp) {
-                        console.log('cache hit', file.id);
-                        const cacheBlob = await cacheResp.blob();
-                        const cacheURL = URL.createObjectURL(cacheBlob);
-                        console.log(file.id, cacheBlob?.size, cacheURL);
-                        return cacheURL;
-                    } else {
-                        console.log('cache miss', file.id);
+                        return URL.createObjectURL(await cacheResp.blob());
                     }
                     const thumb = await this.downloadThumb(token, file);
                     const thumbBlob = new Blob([thumb]);
