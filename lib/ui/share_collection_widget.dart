@@ -375,7 +375,12 @@ class _SharingDialogState extends State<SharingDialog> {
           Text("sharing is not permitted for free accounts, please subscribe"),
       actions: [
         TextButton(
-          child: Text("subscribe"),
+          child: Text(
+            "subscribe",
+            style: TextStyle(
+              color: Theme.of(context).buttonColor,
+            ),
+          ),
           onPressed: () {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
@@ -387,7 +392,12 @@ class _SharingDialogState extends State<SharingDialog> {
           },
         ),
         TextButton(
-          child: Text("ok"),
+          child: Text(
+            "ok",
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop();
           },
