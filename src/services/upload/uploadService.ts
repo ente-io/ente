@@ -109,7 +109,6 @@ class UploadService {
     }
 
     getFileMetadataAndFileTypeInfo(key: string) {
-        console.log(this.metadataAndFileTypeInfoMap, key);
         return this.metadataAndFileTypeInfoMap.get(key);
     }
 

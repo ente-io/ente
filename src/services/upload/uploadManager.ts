@@ -165,7 +165,6 @@ class UploadManager {
                         metadata: { ...metadata },
                     }
                 );
-                console.log(this.metadataAndFileTypeInfoMap.keys());
                 UIService.increaseFileUploaded();
             }
         } catch (e) {
