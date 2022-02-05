@@ -13,7 +13,6 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
-import Head from 'next/head';
 import { getAlbumSiteHost } from 'constants/pages';
 import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 
@@ -657,18 +656,6 @@ export default function App({ Component, err }) {
 
     return (
         <>
-            <Head>
-                <title>{constants.TITLE}</title>
-                {typeof window !== 'undefined' &&
-                window.location.host === getAlbumSiteHost() ? (
-                    <meta name="description" content="album shared over ente" />
-                ) : (
-                    <meta
-                        name="description"
-                        content="ente is a privacy focussed photo storage service that offers end-to-end encryption."
-                    />
-                )}
-            </Head>
             <GlobalStyles />
             {showNavbar && (
                 <Navbar>
