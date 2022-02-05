@@ -71,6 +71,7 @@ class UserService {
       showGenericErrorDialog(context);
     } on DioError catch (e) {
       await dialog.hide();
+      _logger.info(e);
       if (e.response != null && e.response.statusCode == 403) {
         showErrorDialog(context, "oops", "this email is already in use");
       } else {
@@ -218,6 +219,7 @@ class UserService {
         throw Exception("unexpected response during email verification");
       }
     } on DioError catch (e) {
+      _logger.info(e);
       await dialog.hide();
       if (e.response != null && e.response.statusCode == 410) {
         await showErrorDialog(

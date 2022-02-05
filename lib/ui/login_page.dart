@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/common/report_bug_popup.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -30,20 +31,20 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Hero(
-          tag: "log_in",
-          child: Material(
-            type: MaterialType.transparency,
-            child: Text(
-              "log in",
-              style: TextStyle(
-                fontSize: 16,
-                letterSpacing: 0.6,
+          title: Hero(
+            tag: "log_in",
+            child: Material(
+              type: MaterialType.transparency,
+              child: Text(
+                "log in",
+                style: TextStyle(
+                  fontSize: 16,
+                  letterSpacing: 0.6,
+                ),
               ),
             ),
           ),
-        ),
-      ),
+          actions: <Widget>[reportBugPopupMenu(context)]),
       body: _getBody(),
     );
   }

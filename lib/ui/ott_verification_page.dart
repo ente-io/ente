@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/common/report_bug_popup.dart';
 import 'package:photos/ui/common_elements.dart';
 
 class OTTVerificationPage extends StatefulWidget {
@@ -24,6 +25,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("verify email"),
+        actions: <Widget>[reportBugPopupMenu(context)],
       ),
       body: _getBody(),
     );
