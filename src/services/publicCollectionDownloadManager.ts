@@ -40,9 +40,11 @@ class PublicCollectionDownloadManager {
                     if (cacheResp) {
                         console.log('cache hit', file.id);
                         const cacheBlob = await cacheResp.blob();
-                        const cacheURL = URL.createObjectURL(cacheBlob);
-                        console.log(file.id, cacheBlob?.size, cacheURL);
-                        return cacheURL;
+                        console.log(
+                            file.id,
+                            new Uint8Array(await cacheBlob.arrayBuffer())
+                        );
+                        return URL.createObjectURL(cacheBlob);
                     } else {
                         console.log('cache miss', file.id);
                     }
