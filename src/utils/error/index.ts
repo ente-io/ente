@@ -33,6 +33,7 @@ export enum CustomError {
     INVALID_COLLECTION_OPERATION = 'invalid collection operation',
     WAIT_TIME_EXCEEDED = 'thumbnail generation wait time exceeded',
     REQUEST_CANCELLED = 'request canceled',
+    REQUEST_FAILED = 'request failed',
     TOKEN_EXPIRED = 'token expired',
     BAD_REQUEST = 'bad request',
     SUBSCRIPTION_NEEDED = 'subscription not present',

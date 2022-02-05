@@ -87,9 +87,12 @@ const DateContainer = styled.div<{ span: number }>`
 
 const FooterContainer = styled.div<{ span: number }>`
     font-size: 14px;
+    margin-bottom: 0.75rem;
     @media (max-width: 540px) {
         font-size: 12px;
+        margin-bottom: 0.5rem;
     }
+
     color: #979797;
     text-align: center;
     grid-column: span ${(props) => props.span};
@@ -99,7 +102,7 @@ const FooterContainer = styled.div<{ span: number }>`
     & > p {
         margin: 0;
     }
-    margin: calc(2rem + 20px) 0 1rem 0;
+    margin-top: calc(2rem + 20px);
 `;
 
 const NothingContainer = styled.div<{ span: number }>`
