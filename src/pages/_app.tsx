@@ -13,6 +13,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
+import Head from 'next/head';
 import { getAlbumSiteHost } from 'constants/pages';
 import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 
@@ -656,6 +657,9 @@ export default function App({ Component, err }) {
 
     return (
         <>
+            <Head>
+                <title>{constants.TITLE}</title>
+            </Head>
             <GlobalStyles />
             {showNavbar && (
                 <Navbar>

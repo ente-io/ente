@@ -135,6 +135,7 @@ const englishConstants = {
     NEXT: 'next (arrow right)',
     NO_INTERNET_CONNECTION:
         'please check your internet connection and try again',
+    TITLE: 'ente.io | encrypted photo storage',
     UPLOAD_FIRST_PHOTO_DESCRIPTION: 'preserve your first memory with ente',
     UPLOAD_FIRST_PHOTO: 'preserve',
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
