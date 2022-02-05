@@ -39,4 +39,4 @@ export enum FileUploadResults {
     UPLOADED,
 }
 
-export const FIVE_GB_IN_BYTES = 5 * 1024 * 1024 * 1024;
+export const MAX_FILE_SIZE_SUPPORTED = 5 * 1024 * 1024 * 1024; // 5 GB

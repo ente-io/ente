@@ -9,7 +9,7 @@ import UploadService from './uploadService';
 import uploadService from './uploadService';
 import { BackupedFile, FileWithCollection, UploadFile } from 'types/upload';
 import { FILE_TYPE } from 'constants/file';
-import { FileUploadResults, FIVE_GB_IN_BYTES } from 'constants/upload';
+import { FileUploadResults, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
 import { getMetadataMapKey } from './metadataService';
 
 interface UploadResponse {
@@ -30,7 +30,7 @@ export default async function uploader(
             getMetadataMapKey(collection.id, rawFile.name)
         );
     try {
-        if (rawFile.size >= FIVE_GB_IN_BYTES) {
+        if (rawFile.size >= MAX_FILE_SIZE_SUPPORTED) {
             return { fileUploadResult: FileUploadResults.TOO_LARGE };
         }
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {

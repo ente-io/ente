@@ -27,7 +27,7 @@ import {
 import {
     UPLOAD_STAGES,
     FileUploadResults,
-    FIVE_GB_IN_BYTES,
+    MAX_FILE_SIZE_SUPPORTED,
 } from 'constants/upload';
 import { ComlinkWorker } from 'utils/comlink';
 import { getFileType } from './readFileService';
@@ -142,7 +142,7 @@ class UploadManager {
             const reader = new FileReader();
             for (const { file, collectionID } of mediaFiles) {
                 const { fileTypeInfo, metadata } = await (async () => {
-                    if (file.size >= FIVE_GB_IN_BYTES) {
+                    if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
                         return { fileTypeInfo: null, metadata: null };
                     }
                     const fileTypeInfo = await getFileType(reader, file);
