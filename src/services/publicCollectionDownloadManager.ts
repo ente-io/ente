@@ -13,6 +13,7 @@ import { EnteFile } from 'types/file';
 
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
+import { CustomError } from 'utils/error';
 
 class PublicCollectionDownloadManager {
     private fileObjectURLPromise = new Map<string, Promise<string>>();
@@ -78,6 +79,9 @@ class PublicCollectionDownloadManager {
             { 'X-Auth-Access-Token': token },
             { responseType: 'arraybuffer' }
         );
+        if (typeof resp.data === 'undefined') {
+            throw Error(CustomError.REQUEST_FAILED);
+        }
         const worker = await new CryptoWorker();
         const decrypted: Uint8Array = await worker.decryptThumbnail(
             new Uint8Array(resp.data),
@@ -135,6 +139,9 @@ class PublicCollectionDownloadManager {
                 { 'X-Auth-Access-Token': token },
                 { responseType: 'arraybuffer' }
             );
+            if (typeof resp.data === 'undefined') {
+                throw Error(CustomError.REQUEST_FAILED);
+            }
             const decrypted: any = await worker.decryptFile(
                 new Uint8Array(resp.data),
                 await worker.fromB64(file.file.decryptionHeader),
