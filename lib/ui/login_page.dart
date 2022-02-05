@@ -68,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             onChanged: (value) {
               setState(() {
-                _email = value;
+                _email = value.trim();
               });
             },
             autocorrect: false,
