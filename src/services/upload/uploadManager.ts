@@ -125,7 +125,7 @@ class UploadManager {
                         parsedMetadataJSONWithTitle;
                     this.parsedMetadataJSONMap.set(
                         getMetadataMapKey(collectionID, title),
-                        { ...parsedMetadataJSON }
+                        parsedMetadataJSON && { ...parsedMetadataJSON }
                     );
                     UIService.increaseFileUploaded();
                 }
@@ -161,8 +161,8 @@ class UploadManager {
                 this.metadataAndFileTypeInfoMap.set(
                     getMetadataMapKey(collectionID, file.name),
                     {
-                        fileTypeInfo: { ...fileTypeInfo },
-                        metadata: { ...metadata },
+                        fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
+                        metadata: metadata && { ...metadata },
                     }
                 );
                 UIService.increaseFileUploaded();
