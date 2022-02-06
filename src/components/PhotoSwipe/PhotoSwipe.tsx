@@ -171,24 +171,24 @@ function RenderCreationTime({
                     <Value
                         width={isInEditMode ? '20%' : '10%'}
                         style={{ cursor: 'pointer', marginLeft: '10px' }}>
-                        (!isInEditMode ? (
-                        <IconButton onClick={openEditMode}>
-                            <EditIcon />
-                        </IconButton>
+                        {!isInEditMode ? (
+                            <IconButton onClick={openEditMode}>
+                                <EditIcon />
+                            </IconButton>
                         ) : (
-                        <>
-                            <IconButton onClick={saveEdits}>
-                                {loading ? (
-                                    <SmallLoadingSpinner />
-                                ) : (
-                                    <TickIcon />
-                                )}
-                            </IconButton>
-                            <IconButton onClick={discardEdits}>
-                                <CloseIcon />
-                            </IconButton>
-                        </>
-                        ))
+                            <>
+                                <IconButton onClick={saveEdits}>
+                                    {loading ? (
+                                        <SmallLoadingSpinner />
+                                    ) : (
+                                        <TickIcon />
+                                    )}
+                                </IconButton>
+                                <IconButton onClick={discardEdits}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </>
+                        )}
                     </Value>
                 )}
             </Row>
