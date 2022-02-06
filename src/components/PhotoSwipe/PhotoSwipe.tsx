@@ -743,11 +743,13 @@ function PhotoSwipe(props: Iprops) {
                                         }}
                                     />
                                 )}
-                            <button
-                                className="pswp-custom info-btn"
-                                title={constants.INFO}
-                                onClick={handleOpenInfo}
-                            />
+                            {!props.isSharedCollection && (
+                                <button
+                                    className="pswp-custom info-btn"
+                                    title={constants.INFO}
+                                    onClick={handleOpenInfo}
+                                />
+                            )}
                             <div className="pswp__preloader">
                                 <div className="pswp__preloader__icn">
                                     <div className="pswp__preloader__cut">
@@ -773,16 +775,18 @@ function PhotoSwipe(props: Iprops) {
                     </div>
                 </div>
             </div>
-            <InfoModal
-                shouldDisableEdits={props.isSharedCollection}
-                showInfo={showInfo}
-                handleCloseInfo={handleCloseInfo}
-                items={items}
-                photoSwipe={photoSwipe}
-                metadata={metadata}
-                exif={exif}
-                scheduleUpdate={scheduleUpdate}
-            />
+            {!props.isSharedCollection && (
+                <InfoModal
+                    shouldDisableEdits={props.isSharedCollection}
+                    showInfo={showInfo}
+                    handleCloseInfo={handleCloseInfo}
+                    items={items}
+                    photoSwipe={photoSwipe}
+                    metadata={metadata}
+                    exif={exif}
+                    scheduleUpdate={scheduleUpdate}
+                />
+            )}
         </>
     );
 }
