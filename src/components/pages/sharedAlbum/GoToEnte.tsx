@@ -1,3 +1,4 @@
+import { ENTE_WEBSITE_LINK } from 'constants/urls';
 import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import styled from 'styled-components';
@@ -42,17 +43,9 @@ function GoToEnte() {
         }
     };
 
-    const getHookLink = (os: OS) => {
-        if (os === OS.ANDROID || os === OS.IOS) {
-            return 'https://ente.io/app';
-        } else {
-            return 'https://web.ente.io';
-        }
-    };
-
     return (
         <Wrapper>
-            <ButtonWithLink href={getHookLink(os)}>
+            <ButtonWithLink href={ENTE_WEBSITE_LINK}>
                 {getButtonText(os)}
             </ButtonWithLink>
         </Wrapper>
