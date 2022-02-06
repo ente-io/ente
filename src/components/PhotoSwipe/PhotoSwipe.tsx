@@ -148,7 +148,14 @@ function RenderCreationTime({
         <>
             <Row>
                 <Label width="30%">{constants.CREATION_TIME}</Label>
-                <Value width={isInEditMode ? '50%' : '60%'}>
+                <Value
+                    width={
+                        !shouldDisableEdits
+                            ? isInEditMode
+                                ? '50%'
+                                : '60%'
+                            : '70%'
+                    }>
                     {isInEditMode ? (
                         <EnteDateTimePicker
                             loading={loading}
@@ -160,11 +167,11 @@ function RenderCreationTime({
                         formatDateTime(pickedTime)
                     )}
                 </Value>
-                <Value
-                    width={isInEditMode ? '20%' : '10%'}
-                    style={{ cursor: 'pointer', marginLeft: '10px' }}>
-                    {!shouldDisableEdits &&
-                        (!isInEditMode ? (
+                {!shouldDisableEdits && (
+                    <Value
+                        width={isInEditMode ? '20%' : '10%'}
+                        style={{ cursor: 'pointer', marginLeft: '10px' }}>
+                        {!isInEditMode ? (
                             <IconButton onClick={openEditMode}>
                                 <EditIcon />
                             </IconButton>
@@ -181,8 +188,9 @@ function RenderCreationTime({
                                     <CloseIcon />
                                 </IconButton>
                             </>
-                        ))}
-                </Value>
+                        )}
+                    </Value>
+                )}
             </Row>
         </>
     );
@@ -323,7 +331,7 @@ function RenderFileName({
                 <Label width="30%">{constants.FILE_NAME}</Label>
                 {!isInEditMode ? (
                     <>
-                        <Value width="60%">
+                        <Value width={!shouldDisableEdits ? '60%' : '70%'}>
                             <FreeFlowText>
                                 {getFileTitle(filename, extension)}
                             </FreeFlowText>
@@ -735,11 +743,13 @@ function PhotoSwipe(props: Iprops) {
                                         }}
                                     />
                                 )}
-                            <button
-                                className="pswp-custom info-btn"
-                                title={constants.INFO}
-                                onClick={handleOpenInfo}
-                            />
+                            {!props.isSharedCollection && (
+                                <button
+                                    className="pswp-custom info-btn"
+                                    title={constants.INFO}
+                                    onClick={handleOpenInfo}
+                                />
+                            )}
                             <div className="pswp__preloader">
                                 <div className="pswp__preloader__icn">
                                     <div className="pswp__preloader__cut">
@@ -765,16 +775,18 @@ function PhotoSwipe(props: Iprops) {
                     </div>
                 </div>
             </div>
-            <InfoModal
-                shouldDisableEdits={props.isSharedCollection}
-                showInfo={showInfo}
-                handleCloseInfo={handleCloseInfo}
-                items={items}
-                photoSwipe={photoSwipe}
-                metadata={metadata}
-                exif={exif}
-                scheduleUpdate={scheduleUpdate}
-            />
+            {!props.isSharedCollection && (
+                <InfoModal
+                    shouldDisableEdits={props.isSharedCollection}
+                    showInfo={showInfo}
+                    handleCloseInfo={handleCloseInfo}
+                    items={items}
+                    photoSwipe={photoSwipe}
+                    metadata={metadata}
+                    exif={exif}
+                    scheduleUpdate={scheduleUpdate}
+                />
+            )}
         </>
     );
 }
