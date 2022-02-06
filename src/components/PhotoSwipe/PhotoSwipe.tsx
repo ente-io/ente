@@ -148,7 +148,14 @@ function RenderCreationTime({
         <>
             <Row>
                 <Label width="30%">{constants.CREATION_TIME}</Label>
-                <Value width={isInEditMode ? '50%' : '60%'}>
+                <Value
+                    width={
+                        !shouldDisableEdits
+                            ? isInEditMode
+                                ? '50%'
+                                : '60%'
+                            : '70%'
+                    }>
                     {isInEditMode ? (
                         <EnteDateTimePicker
                             loading={loading}
@@ -160,29 +167,30 @@ function RenderCreationTime({
                         formatDateTime(pickedTime)
                     )}
                 </Value>
-                <Value
-                    width={isInEditMode ? '20%' : '10%'}
-                    style={{ cursor: 'pointer', marginLeft: '10px' }}>
-                    {!shouldDisableEdits &&
+                {!shouldDisableEdits && (
+                    <Value
+                        width={isInEditMode ? '20%' : '10%'}
+                        style={{ cursor: 'pointer', marginLeft: '10px' }}>
                         (!isInEditMode ? (
-                            <IconButton onClick={openEditMode}>
-                                <EditIcon />
-                            </IconButton>
+                        <IconButton onClick={openEditMode}>
+                            <EditIcon />
+                        </IconButton>
                         ) : (
-                            <>
-                                <IconButton onClick={saveEdits}>
-                                    {loading ? (
-                                        <SmallLoadingSpinner />
-                                    ) : (
-                                        <TickIcon />
-                                    )}
-                                </IconButton>
-                                <IconButton onClick={discardEdits}>
-                                    <CloseIcon />
-                                </IconButton>
-                            </>
-                        ))}
-                </Value>
+                        <>
+                            <IconButton onClick={saveEdits}>
+                                {loading ? (
+                                    <SmallLoadingSpinner />
+                                ) : (
+                                    <TickIcon />
+                                )}
+                            </IconButton>
+                            <IconButton onClick={discardEdits}>
+                                <CloseIcon />
+                            </IconButton>
+                        </>
+                        ))
+                    </Value>
+                )}
             </Row>
         </>
     );
@@ -323,7 +331,7 @@ function RenderFileName({
                 <Label width="30%">{constants.FILE_NAME}</Label>
                 {!isInEditMode ? (
                     <>
-                        <Value width="60%">
+                        <Value width={!shouldDisableEdits ? '60%' : '70%'}>
                             <FreeFlowText>
                                 {getFileTitle(filename, extension)}
                             </FreeFlowText>
