@@ -283,7 +283,8 @@ class OutgoingCollectionItem extends StatelessWidget {
     final sharees = <String>[];
     for (int index = 0; index < c.collection.sharees.length; index++) {
       final sharee = c.collection.sharees[index];
-      final name = sharee.name ?? sharee.email;
+      final name =
+          (sharee.name?.isNotEmpty ?? false) ? sharee.name : sharee.email;
       if (index < 2) {
         sharees.add(name);
       } else {
