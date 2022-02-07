@@ -321,38 +321,40 @@ class OutgoingCollectionItem extends StatelessWidget {
               ),
             ),
             Padding(padding: EdgeInsets.all(8)),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      c.collection.name,
-                      style: TextStyle(
-                        fontSize: 16,
-                      ),
-                    ),
-                    Padding(padding: EdgeInsets.all(2)),
-                    c.collection.publicURLs.isEmpty
-                        ? Container()
-                        : Icon(Icons.link),
-                  ],
-                ),
-                sharees.isEmpty
-                    ? Container()
-                    : Padding(
-                        padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
-                        child: Text(
-                          "shared with " + sharees.join(", "),
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Theme.of(context).primaryColorLight,
-                          ),
-                          textAlign: TextAlign.left,
-                          overflow: TextOverflow.ellipsis,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        c.collection.name,
+                        style: TextStyle(
+                          fontSize: 16,
                         ),
                       ),
-              ],
+                      Padding(padding: EdgeInsets.all(2)),
+                      c.collection.publicURLs.isEmpty
+                          ? Container()
+                          : Icon(Icons.link),
+                    ],
+                  ),
+                  sharees.isEmpty
+                      ? Container()
+                      : Padding(
+                          padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                          child: Text(
+                            "shared with " + sharees.join(", "),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).primaryColorLight,
+                            ),
+                            textAlign: TextAlign.left,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                ],
+              ),
             ),
           ],
         ),
