@@ -76,7 +76,7 @@ class _SharingDialogState extends State<SharingDialog> {
           child: button(
             "add",
             onPressed: () {
-              _addEmailToCollection(_email.trim());
+              _addEmailToCollection(_email?.trim() ?? '');
             },
           ),
         ),
