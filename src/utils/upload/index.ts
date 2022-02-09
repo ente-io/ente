@@ -1,7 +1,8 @@
 import { FileWithCollection } from 'services/upload/uploadManager';
 import { MetadataObject } from 'services/upload/uploadService';
-import { File } from 'services/fileService';
+import { File, FILE_TYPE } from 'services/fileService';
 import { splitFilenameAndExtension } from 'utils/file';
+import { getFileTypeFromFileObject } from 'services/upload/readFileService';
 const TYPE_JSON = 'json';
 
 export function fileAlreadyInCollection(
@@ -63,15 +64,35 @@ export function segregateFiles(
             const collectionID = mediaFiles[i].collectionID;
             const file1 = mediaFile1.file;
             const file2 = mediaFile2.file;
+            const file1Type = getFileTypeFromFileObject(file1);
+            const file2Type = getFileTypeFromFileObject(file2);
             if (
-                splitFilenameAndExtension(file1.name)[0] ===
-                splitFilenameAndExtension(file2.name)[0]
+                file1Type !== FILE_TYPE.OTHERS &&
+                file2Type !== FILE_TYPE.OTHERS
             ) {
-                livePhotoFiles.push({
-                    collectionID: collectionID,
-                    isLivePhoto: true,
-                    livePhotoAsset: [file1, file2],
-                });
+                let imageFile;
+                let videoFile;
+                if (
+                    file1Type !== file2Type &&
+                    splitFilenameAndExtension(file1.name)[0] ===
+                        splitFilenameAndExtension(file2.name)[0]
+                ) {
+                    if (
+                        file1Type === FILE_TYPE.IMAGE &&
+                        file2Type === FILE_TYPE.VIDEO
+                    ) {
+                        imageFile = file1;
+                        videoFile = file2;
+                    } else {
+                        imageFile = file2;
+                        videoFile = file1;
+                    }
+                    livePhotoFiles.push({
+                        collectionID: collectionID,
+                        isLivePhoto: true,
+                        livePhotoAsset: { image: imageFile, video: videoFile },
+                    });
+                }
             }
         } else {
             normalFiles.push(mediaFile1);

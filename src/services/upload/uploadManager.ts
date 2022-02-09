@@ -36,7 +36,7 @@ export interface FileWithCollection {
     key?: string;
     isLivePhoto?: boolean;
     file?: globalThis.File;
-    livePhotoAsset?: [globalThis.File, globalThis.File];
+    livePhotoAsset?: { image: globalThis.File; video: globalThis.File };
     collection?: Collection;
     collectionID?: number;
 }

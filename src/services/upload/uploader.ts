@@ -68,21 +68,7 @@ export default async function uploader(
             };
             let imageFile: globalThis.File;
             let videoFile: globalThis.File;
-            if (
-                file1TypeInfo.fileType === FILE_TYPE.IMAGE &&
-                file2TypeInfo.fileType === FILE_TYPE.VIDEO
-            ) {
-                imageFile = livePhotoAsset[0];
-                videoFile = livePhotoAsset[1];
-            } else if (
-                file1TypeInfo.fileType === FILE_TYPE.VIDEO &&
-                file2TypeInfo.fileType === FILE_TYPE.IMAGE
-            ) {
-                imageFile = livePhotoAsset[1];
-                videoFile = livePhotoAsset[0];
-            } else {
-                throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
-            }
+
             const imageMetadata = await uploadService.getFileMetadata(
                 imageFile,
                 collection,
