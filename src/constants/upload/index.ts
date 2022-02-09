@@ -25,6 +25,7 @@ export const NULL_LOCATION: Location = { latitude: null, longitude: null };
 export enum UPLOAD_STAGES {
     START,
     READING_GOOGLE_METADATA_FILES,
+    EXTRACTING_METADATA,
     UPLOADING,
     FINISH,
 }

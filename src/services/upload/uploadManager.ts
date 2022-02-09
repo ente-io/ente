@@ -92,11 +92,12 @@ class UploadManager {
                 );
             }
             if (mediaFiles.length) {
-                UIService.setUploadStage(UPLOAD_STAGES.START);
+                UIService.setUploadStage(UPLOAD_STAGES.EXTRACTING_METADATA);
                 await this.extractMetadataFromFiles(mediaFiles);
                 uploadService.setMetadataAndFileTypeInfoMap(
                     this.metadataAndFileTypeInfoMap
                 );
+                UIService.setUploadStage(UPLOAD_STAGES.START);
                 await this.uploadMediaFiles(mediaFiles);
             }
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
