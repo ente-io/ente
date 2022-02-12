@@ -104,10 +104,7 @@ export default function PublicCollectionGallery() {
                 );
                 if (localCollection) {
                     setPublicCollection(localCollection);
-                    const collectionUID = getPublicCollectionUID(
-                        collectionKey.current,
-                        token.current
-                    );
+                    const collectionUID = getPublicCollectionUID(token.current);
                     const localFiles = await getLocalPublicFiles(collectionUID);
                     const localPublicFiles = sortFiles(
                         mergeMetadata(localFiles)
