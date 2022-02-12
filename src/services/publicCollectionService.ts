@@ -17,8 +17,7 @@ const ENDPOINT = getEndpoint();
 const PUBLIC_COLLECTION_FILES_TABLE = 'public-collection-files';
 const PUBLIC_COLLECTIONS_TABLE = 'public-collections';
 
-export const getPublicCollectionUID = (collectionKey: string, token: string) =>
-    `${collectionKey.slice(0, 8)}-${token.slice(0, 8)}`;
+export const getPublicCollectionUID = (token: string) => `${token}`;
 
 const getPublicCollectionSyncTimeUID = (collectionUID: string) =>
     `public-${collectionUID}-time`;
@@ -125,7 +124,7 @@ export const syncPublicFiles = async (
 ) => {
     try {
         let files: EnteFile[] = [];
-        const collectionUID = getPublicCollectionUID(collection.key, token);
+        const collectionUID = getPublicCollectionUID(token);
         const localFiles = await getLocalPublicFiles(collectionUID);
         files.push(...localFiles);
         try {
@@ -311,7 +310,7 @@ export const removePublicCollectionWithFiles = async (
     token: string,
     collectionKey: string
 ) => {
-    const collectionUID = getPublicCollectionUID(collectionKey, token);
+    const collectionUID = getPublicCollectionUID(token);
     const publicCollections =
         (await localForage.getItem<Collection[]>(PUBLIC_COLLECTIONS_TABLE)) ||
         [];
