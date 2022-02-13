@@ -63,11 +63,18 @@ export interface ProgressUpdater {
     setUploadResult: React.Dispatch<React.SetStateAction<Map<string, number>>>;
 }
 
-export interface FileWithCollection {
+export interface UploadAsset {
+    isLivePhoto: boolean;
+    file: File;
+    livePhotoAssets: LivePhotoAssets;
+}
+export interface LivePhotoAssets {
+    image: globalThis.File;
+    video: globalThis.File;
+}
+
+export interface FileWithCollection extends UploadAsset {
     key?: string;
-    isLivePhoto?: boolean;
-    file?: globalThis.File;
-    livePhotoAsset?: { image: globalThis.File; video: globalThis.File };
     collection?: Collection;
     collectionID?: number;
 }

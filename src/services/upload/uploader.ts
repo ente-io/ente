@@ -1,13 +1,11 @@
 import { EnteFile } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
-import { decryptFile, splitFilenameAndExtension } from 'utils/file';
+import { decryptFile } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { fileAlreadyInCollection } from 'utils/upload';
 import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
 import UploadService from './uploadService';
-import uploadService from './uploadService';
-import { getFileType } from './readFileService';
 import {
     BackupedFile,
     EncryptedFile,
@@ -15,13 +13,10 @@ import {
     FileTypeInfo,
     FileWithCollection,
     FileWithMetadata,
-    isDataStream,
     Metadata,
     UploadFile,
 } from 'types/upload';
-import { FILE_TYPE } from 'constants/file';
 import { FileUploadResults } from 'constants/upload';
-import { encodeMotionPhoto } from 'services/motionPhotoService';
 
 const FIVE_GB_IN_BYTES = 5 * 1024 * 1024 * 1024;
 interface UploadResponse {
@@ -35,11 +30,9 @@ export default async function uploader(
     fileWithCollection: FileWithCollection
 ): Promise<UploadResponse> {
     const {
-        file: rawFile,
-        isLivePhoto,
-        livePhotoAsset,
         collection,
         key: progressBarKey,
+        ...uploadAsset
     } = fileWithCollection;
 
     let file: FileInMemory = null;
@@ -49,93 +42,31 @@ export default async function uploader(
     let fileWithMetadata: FileWithMetadata = null;
 
     UIService.setFileProgress(progressBarKey, 0);
-    const fileSize = isLivePhoto
-        ? livePhotoAsset[0].size + livePhotoAsset[1].size
-        : rawFile.size;
+    const fileSize = UploadService.getAssetSize(uploadAsset);
     try {
         if (fileSize >= FIVE_GB_IN_BYTES) {
             return { fileUploadResult: FileUploadResults.TOO_LARGE };
         }
-        if (isLivePhoto) {
-            const file1TypeInfo = await getFileType(worker, livePhotoAsset[0]);
-            const file2TypeInfo = await getFileType(worker, livePhotoAsset[1]);
-            fileTypeInfo = {
-                fileType: FILE_TYPE.LIVE_PHOTO,
-                exactType: `${file1TypeInfo.exactType}+${file2TypeInfo.exactType}`,
-            };
-            let imageFile: globalThis.File;
-            let videoFile: globalThis.File;
 
-            const imageMetadata = await uploadService.getFileMetadata(
-                imageFile,
-                collection,
-                fileTypeInfo
-            );
-            const videoMetadata = await uploadService.getFileMetadata(
-                videoFile,
-                collection,
-                fileTypeInfo
-            );
-            metadata = {
-                ...videoMetadata,
-                ...imageMetadata,
-                title: splitFilenameAndExtension(livePhotoAsset[0].name)[0],
-            };
-            if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
-                return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
-            }
-            const image = await UploadService.readFile(
-                worker,
-                reader,
-                imageFile,
-                fileTypeInfo
-            );
-            const video = await UploadService.readFile(
-                worker,
-                reader,
-                videoFile,
-                fileTypeInfo
-            );
+        fileTypeInfo = await UploadService.getAssetType(worker, uploadAsset);
 
-            if (isDataStream(video.filedata) || isDataStream(image.filedata)) {
-                throw new Error('too large live photo assets');
-            }
-            file = {
-                filedata: await encodeMotionPhoto({
-                    image: image.filedata as Uint8Array,
-                    video: video.filedata as Uint8Array,
-                    imageNameTitle: imageFile.name,
-                    videoNameTitle: videoFile.name,
-                }),
-                thumbnail: video.hasStaticThumbnail
-                    ? video.thumbnail
-                    : image.thumbnail,
-                hasStaticThumbnail: !(
-                    !video.hasStaticThumbnail || !image.hasStaticThumbnail
-                ),
-            };
-        } else {
-            fileTypeInfo = await getFileType(worker, rawFile);
-            if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
-                throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
-            }
-            metadata = await uploadService.getFileMetadata(
-                rawFile,
-                collection,
-                fileTypeInfo
-            );
+        metadata = await UploadService.getAssetMetadata(
+            uploadAsset,
+            collection,
+            fileTypeInfo
+        );
 
-            if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
-                return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
-            }
-
-            file = await UploadService.readFile(
-                worker,
-                reader,
-                rawFile,
-                fileTypeInfo
-            );
+        if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
+            return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
         }
+
+        file = await UploadService.readAsset(
+            worker,
+            reader,
+            fileTypeInfo,
+            uploadAsset
+        );
+
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
         }
@@ -145,7 +76,7 @@ export default async function uploader(
             metadata,
         };
 
-        encryptedFile = await UploadService.encryptFile(
+        encryptedFile = await UploadService.encryptAsset(
             worker,
             fileWithMetadata,
             collection.key

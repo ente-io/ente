@@ -1,29 +1,35 @@
 import { Collection } from 'types/collection';
 import { logError } from 'utils/sentry';
 import UploadHttpClient from './uploadHttpClient';
-import { extractMetadata, getMetadataMapKey } from './metadataService';
-import { generateThumbnail } from './thumbnailService';
-import { getFileOriginalName, getFileData } from './readFileService';
-import { encryptFiledata } from './encryptionService';
-import { uploadStreamUsingMultipart } from './multiPartUploadService';
-import UIService from './uiService';
-import { handleUploadError } from 'utils/error';
+import { getFileMetadata } from './fileService';
+import { getFileType } from './readFileService';
+import { CustomError, handleUploadError } from 'utils/error';
 import {
-    B64EncryptionResult,
-    BackupedFile,
-    EncryptedFile,
-    EncryptionResult,
-    FileInMemory,
     FileTypeInfo,
-    FileWithMetadata,
-    isDataStream,
     MetadataMap,
     Metadata,
     ParsedMetadataJSON,
+    UploadURL,
+    UploadAsset,
+    B64EncryptionResult,
+    BackupedFile,
+    isDataStream,
     ProcessedFile,
     UploadFile,
-    UploadURL,
+    FileWithMetadata,
+    EncryptedFile,
 } from 'types/upload';
+import { FILE_TYPE } from 'constants/file';
+import { FORMAT_MISSED_BY_FILE_TYPE_LIB } from 'constants/upload';
+import {
+    getLivePhotoFileType,
+    getLivePhotoMetadata,
+    getLivePhotoSize,
+    readLivePhoto,
+} from './livePhotoService';
+import { encryptFile, getFileSize, readFile } from './fileService';
+import { uploadStreamUsingMultipart } from './multiPartUploadService';
+import UIService from './uiService';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
@@ -40,85 +46,68 @@ class UploadService {
         this.pendingUploadCount--;
     }
 
-    async readFile(
-        worker: any,
-        reader: FileReader,
-        rawFile: File,
-        fileTypeInfo: FileTypeInfo
-    ): Promise<FileInMemory> {
-        const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-            worker,
-            reader,
-            rawFile,
-            fileTypeInfo
-        );
-
-        const filedata = await getFileData(reader, rawFile);
-
-        return {
-            filedata,
-            thumbnail,
-            hasStaticThumbnail,
-        };
+    getAssetSize({ isLivePhoto, file, livePhotoAssets }: UploadAsset) {
+        return isLivePhoto
+            ? getLivePhotoSize(livePhotoAssets)
+            : getFileSize(file);
     }
 
-    async getFileMetadata(
-        rawFile: File,
+    async getAssetType(
+        worker,
+        { file, isLivePhoto, livePhotoAssets }: UploadAsset
+    ) {
+        const fileTypeInfo = isLivePhoto
+            ? await getLivePhotoFileType(worker, livePhotoAssets)
+            : await getFileType(worker, file);
+        if (fileTypeInfo.fileType !== FILE_TYPE.OTHERS) {
+            return fileTypeInfo;
+        }
+        try {
+            const formatMissedByTypeDetection =
+                FORMAT_MISSED_BY_FILE_TYPE_LIB.find(
+                    (a) => a.exactType === fileTypeInfo.exactType
+                );
+            if (formatMissedByTypeDetection) {
+                return formatMissedByTypeDetection;
+            }
+            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+        } catch (e) {
+            logError(e, CustomError.TYPE_DETECTION_FAILED, {
+                fileType: fileTypeInfo.exactType,
+            });
+        }
+    }
+    async readAsset(
+        worker: any,
+        reader: FileReader,
+        fileTypeInfo: FileTypeInfo,
+        { isLivePhoto, file, livePhotoAssets }: UploadAsset
+    ) {
+        return isLivePhoto
+            ? await readLivePhoto(worker, reader, fileTypeInfo, livePhotoAssets)
+            : await readFile(worker, reader, fileTypeInfo, file);
+    }
+
+    async getAssetMetadata(
+        { isLivePhoto, file, livePhotoAssets }: UploadAsset,
         collection: Collection,
         fileTypeInfo: FileTypeInfo
     ): Promise<Metadata> {
-        const originalName = getFileOriginalName(rawFile);
-        const googleMetadata =
-            this.metadataMap.get(
-                getMetadataMapKey(collection.id, originalName)
-            ) ?? {};
-        const extractedMetadata: Metadata = await extractMetadata(
-            rawFile,
-            fileTypeInfo
-        );
-
-        for (const [key, value] of Object.entries(googleMetadata)) {
-            if (!value) {
-                continue;
-            }
-            extractedMetadata[key] = value;
-        }
-        return extractedMetadata;
+        return isLivePhoto
+            ? await getLivePhotoMetadata(
+                  livePhotoAssets,
+                  collection,
+                  fileTypeInfo
+              )
+            : await getFileMetadata(file, collection, fileTypeInfo);
     }
 
-    async encryptFile(
+    async encryptAsset(
         worker: any,
         file: FileWithMetadata,
         encryptionKey: string
     ): Promise<EncryptedFile> {
-        try {
-            const { key: fileKey, file: encryptedFiledata } =
-                await encryptFiledata(worker, file.filedata);
-
-            const { file: encryptedThumbnail }: EncryptionResult =
-                await worker.encryptThumbnail(file.thumbnail, fileKey);
-            const { file: encryptedMetadata }: EncryptionResult =
-                await worker.encryptMetadata(file.metadata, fileKey);
-
-            const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
-                fileKey,
-                encryptionKey
-            );
-
-            const result: EncryptedFile = {
-                file: {
-                    file: encryptedFiledata,
-                    thumbnail: encryptedThumbnail,
-                    metadata: encryptedMetadata,
-                    filename: file.metadata.title,
-                },
-                fileKey: encryptedKey,
-            };
-            return result;
-        } catch (e) {
-            logError(e, 'Error encrypting files');
-            throw e;
-        }
+        return encryptFile(worker, file, encryptionKey);
     }
 
     async uploadToBucket(file: ProcessedFile): Promise<BackupedFile> {
