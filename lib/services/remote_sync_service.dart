@@ -215,7 +215,7 @@ class RemoteSyncService {
     if (filesToBeUploaded.isEmpty) {
       // look for files which user manually tried to back up but they are not
       // uploaded yet. These files should ignore video backup & ignored files filter
-      filesToBeUploaded = await _db.getFilesUserUploadedManually();
+      filesToBeUploaded = await _db.getPendingManualUploads();
     }
     _moveVideosToEnd(filesToBeUploaded);
     _logger.info(
