@@ -48,8 +48,8 @@ class FavoritesService {
       Bus.instance.fire(CollectionUpdatedEvent(collectionID, [file]));
     } else {
       await _collectionsService.addToCollection(collectionID, [file]);
-      RemoteSyncService.instance.sync(silently: true);
     }
+    RemoteSyncService.instance.sync(silently: true);
   }
 
   Future<void> removeFromFavorites(File file) async {
