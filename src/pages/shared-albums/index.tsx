@@ -36,6 +36,7 @@ const Loader = () => (
         </EnteSpinner>
     </Container>
 );
+const bs58 = require('bs58');
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
     const collectionKey = useRef<string>(null);
@@ -92,10 +93,13 @@ export default function PublicCollectionGallery() {
                 const currentURL = new URL(url.current);
                 const t = currentURL.searchParams.get('t');
                 const ck = currentURL.hash.slice(1);
-                const dck = await worker.fromHex(ck);
-                if (!t || !dck) {
+                if (!t || !ck) {
                     return;
                 }
+                const dck =
+                    ck.length < 50
+                        ? await worker.toB64(bs58.decode(ck))
+                        : await worker.fromHex(ck);
                 token.current = t;
                 collectionKey.current = dck;
                 url.current = window.location.href;
