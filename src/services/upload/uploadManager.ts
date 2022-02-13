@@ -102,11 +102,11 @@ class UploadManager {
                         : mediaFiles;
                 uiService.setFilenames(
                     new Map<number, string>(
-                        mediaFiles.map(({ localID }) => [
+                        analysedMediaFiles.map(({ localID, file }) => [
                             localID,
                             UploadService.getFileMetadataAndFileTypeInfo(
                                 localID
-                            ).metadata.title,
+                            )?.metadata?.title ?? file.name,
                         ])
                     )
                 );
