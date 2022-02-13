@@ -1,7 +1,7 @@
 import { Collection } from 'types/collection';
 import { logError } from 'utils/sentry';
 import UploadHttpClient from './uploadHttpClient';
-import { getFileMetadata } from './fileService';
+import { extractFileMetadata } from './fileService';
 import { getFileType } from './readFileService';
 import { handleUploadError } from 'utils/error';
 import {
@@ -83,12 +83,12 @@ class UploadService {
             : await readFile(worker, reader, fileTypeInfo, file);
     }
 
-    async getFileMetadata(
+    async extractFileMetadata(
         file: File,
         collectionID: number,
         fileTypeInfo: FileTypeInfo
     ): Promise<Metadata> {
-        return getFileMetadata(
+        return extractFileMetadata(
             this.parsedMetadataJSONMap,
             file,
             collectionID,

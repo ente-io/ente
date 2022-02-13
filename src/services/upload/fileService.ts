@@ -40,7 +40,7 @@ export async function readFile(
     };
 }
 
-export async function getFileMetadata(
+export async function extractFileMetadata(
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     rawFile: File,
     collectionID: number,

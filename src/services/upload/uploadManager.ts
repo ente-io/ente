@@ -166,7 +166,7 @@ class UploadManager {
                         return { fileTypeInfo, metadata: null };
                     }
                     const metadata =
-                        (await UploadService.getFileMetadata(
+                        (await UploadService.extractFileMetadata(
                             file,
                             collectionID,
                             fileTypeInfo
