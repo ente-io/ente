@@ -29,7 +29,7 @@ export function getLivePhotoMetadata(
     return {
         ...file1Metadata,
         ...file2Metadata,
-        title: splitFilenameAndExtension(file1Metadata.title)[0],
+        title: `${splitFilenameAndExtension(file1Metadata.title)[0]}.zip`,
         fileType: FILE_TYPE.LIVE_PHOTO,
     };
 }
