@@ -38,6 +38,7 @@ export enum CustomError {
     BAD_REQUEST = 'bad request',
     SUBSCRIPTION_NEEDED = 'subscription not present',
     NOT_FOUND = 'not found ',
+    NO_METADATA = 'no metadata',
 }
 
 function parseUploadErrorCodes(error) {

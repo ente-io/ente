@@ -8,8 +8,8 @@ import {
     removeUnnecessaryFileProps,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
-import { getMetadataMapKey, parseMetadataJSON } from './metadataService';
-import { addKeysToFilesToBeUploaded, segregateFiles } from 'utils/upload';
+import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
+import { segregateMetadataAndMediaFiles } from 'utils/upload';
 import uploader from './uploader';
 import UIService from './uiService';
 import UploadService from './uploadService';
@@ -18,19 +18,27 @@ import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import {
     FileWithCollection,
-    MetadataMap,
+    MetadataAndFileTypeInfo,
+    MetadataAndFileTypeInfoMap,
     ParsedMetadataJSON,
+    ParsedMetadataJSONMap,
     ProgressUpdater,
 } from 'types/upload';
-import { UPLOAD_STAGES, FileUploadResults } from 'constants/upload';
+import {
+    UPLOAD_STAGES,
+    FileUploadResults,
+    MAX_FILE_SIZE_SUPPORTED,
+} from 'constants/upload';
 import { ComlinkWorker } from 'utils/comlink';
+import { FILE_TYPE } from 'constants/file';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
 
 class UploadManager {
     private cryptoWorkers = new Array<ComlinkWorker>(MAX_CONCURRENT_UPLOADS);
-    private metadataMap: MetadataMap;
+    private parsedMetadataJSONMap: ParsedMetadataJSONMap;
+    private metadataAndFileTypeInfoMap: MetadataAndFileTypeInfoMap;
     private filesToBeUploaded: FileWithCollection[];
     private failedFiles: FileWithCollection[];
     private existingFilesCollectionWise: Map<number, EnteFile[]>;
@@ -45,7 +53,11 @@ class UploadManager {
     private async init(newCollections?: Collection[]) {
         this.filesToBeUploaded = [];
         this.failedFiles = [];
-        this.metadataMap = new Map<string, ParsedMetadataJSON>();
+        this.parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
+        this.metadataAndFileTypeInfoMap = new Map<
+            number,
+            MetadataAndFileTypeInfo
+        >();
         this.existingFiles = await getLocalFiles();
         this.existingFilesCollectionWise = sortFilesIntoCollections(
             this.existingFiles
@@ -65,24 +77,27 @@ class UploadManager {
     ) {
         try {
             await this.init(newCreatedCollections);
-            const { metadataFiles, mediaFiles } = segregateFiles(
-                fileWithCollectionToBeUploaded
-            );
-            if (metadataFiles.length) {
+            const { metadataJSONFiles, mediaFiles } =
+                segregateMetadataAndMediaFiles(fileWithCollectionToBeUploaded);
+            if (metadataJSONFiles.length) {
                 UIService.setUploadStage(
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES
                 );
-                await this.seedMetadataMap(metadataFiles);
+                await this.parseMetadataJSONFiles(metadataJSONFiles);
+                UploadService.setParsedMetadataJSONMap(
+                    this.parsedMetadataJSONMap
+                );
             }
-            if (
-                mediaFiles?.normalFiles.length +
-                mediaFiles?.livePhotoFiles.length
-            ) {
+            if (mediaFiles.length) {
+                UIService.setUploadStage(UPLOAD_STAGES.EXTRACTING_METADATA);
+                await this.extractMetadataFromFiles(mediaFiles);
+                UploadService.setMetadataAndFileTypeInfoMap(
+                    this.metadataAndFileTypeInfoMap
+                );
                 UIService.setUploadStage(UPLOAD_STAGES.START);
-                await this.uploadMediaFiles([
-                    ...mediaFiles.normalFiles,
-                    ...mediaFiles.livePhotoFiles,
-                ]);
+                const analysedMediaFiles =
+                    UploadService.clusterLivePhotoFiles(mediaFiles);
+                await this.uploadMediaFiles(analysedMediaFiles);
             }
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
             UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
@@ -96,24 +111,21 @@ class UploadManager {
         }
     }
 
-    private async seedMetadataMap(metadataFiles: FileWithCollection[]) {
+    private async parseMetadataJSONFiles(metadataFiles: FileWithCollection[]) {
         try {
             UIService.reset(metadataFiles.length);
             const reader = new FileReader();
-            for (const fileWithCollection of metadataFiles) {
+            for (const { file, collectionID } of metadataFiles) {
                 const parsedMetadataJSONWithTitle = await parseMetadataJSON(
                     reader,
-                    fileWithCollection.file
+                    file
                 );
                 if (parsedMetadataJSONWithTitle) {
                     const { title, parsedMetadataJSON } =
                         parsedMetadataJSONWithTitle;
-                    this.metadataMap.set(
-                        getMetadataMapKey(
-                            fileWithCollection.collectionID,
-                            title
-                        ),
-                        { ...parsedMetadataJSON }
+                    this.parsedMetadataJSONMap.set(
+                        getMetadataJSONMapKey(collectionID, title),
+                        parsedMetadataJSON && { ...parsedMetadataJSON }
                     );
                     UIService.increaseFileUploaded();
                 }
@@ -124,11 +136,47 @@ class UploadManager {
         }
     }
 
+    private async extractMetadataFromFiles(mediaFiles: FileWithCollection[]) {
+        try {
+            UIService.reset(mediaFiles.length);
+            const reader = new FileReader();
+            for (const { file, localID, collectionID } of mediaFiles) {
+                const { fileTypeInfo, metadata } = await (async () => {
+                    if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
+                        return { fileTypeInfo: null, metadata: null };
+                    }
+                    const fileTypeInfo = await UploadService.getFileType(
+                        reader,
+                        file
+                    );
+                    if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
+                        return { fileTypeInfo, metadata: null };
+                    }
+                    const metadata =
+                        (await UploadService.getFileMetadata(
+                            file,
+                            collectionID,
+                            fileTypeInfo
+                        )) || null;
+                    return { fileTypeInfo, metadata };
+                })();
+
+                this.metadataAndFileTypeInfoMap.set(localID, {
+                    fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
+                    metadata: metadata && { ...metadata },
+                });
+                UIService.increaseFileUploaded();
+            }
+        } catch (e) {
+            logError(e, 'error extracting metadata');
+            // silently ignore the error
+        }
+    }
+
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
-        this.filesToBeUploaded.push(...addKeysToFilesToBeUploaded(mediaFiles));
         UIService.reset(mediaFiles.length);
 
-        await UploadService.init(mediaFiles.length, this.metadataMap);
+        await UploadService.setFileCount(mediaFiles.length);
 
         UIService.setUploadStage(UPLOAD_STAGES.UPLOADING);
 
@@ -156,19 +204,15 @@ class UploadManager {
     private async uploadNextFileInQueue(worker: any, reader: FileReader) {
         while (this.filesToBeUploaded.length > 0) {
             const fileWithCollection = this.filesToBeUploaded.pop();
+            const { collectionID } = fileWithCollection;
             const existingFilesInCollection =
-                this.existingFilesCollectionWise.get(
-                    fileWithCollection.collectionID
-                ) ?? [];
-            const collection = this.collections.get(
-                fileWithCollection.collectionID
-            );
-            fileWithCollection.collection = collection;
+                this.existingFilesCollectionWise.get(collectionID) ?? [];
+            const collection = this.collections.get(collectionID);
             const { fileUploadResult, file } = await uploader(
                 worker,
                 reader,
                 existingFilesInCollection,
-                fileWithCollection
+                { ...fileWithCollection, collection }
             );
 
             if (fileUploadResult === FileUploadResults.UPLOADED) {
@@ -193,7 +237,7 @@ class UploadManager {
             }
 
             UIService.moveFileToResultList(
-                fileWithCollection.key,
+                fileWithCollection.localID,
                 fileUploadResult
             );
             UploadService.reducePendingUploadCount();

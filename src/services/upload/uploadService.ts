@@ -5,25 +5,27 @@ import { getFileMetadata } from './fileService';
 import { getFileType } from './readFileService';
 import { CustomError, handleUploadError } from 'utils/error';
 import {
-    FileTypeInfo,
-    MetadataMap,
-    Metadata,
-    ParsedMetadataJSON,
-    UploadURL,
-    UploadAsset,
     B64EncryptionResult,
     BackupedFile,
-    isDataStream,
-    ProcessedFile,
-    UploadFile,
-    FileWithMetadata,
     EncryptedFile,
+    FileTypeInfo,
+    FileWithCollection,
+    FileWithMetadata,
+    isDataStream,
+    Metadata,
+    MetadataAndFileTypeInfo,
+    MetadataAndFileTypeInfoMap,
+    ParsedMetadataJSON,
+    ParsedMetadataJSONMap,
+    ProcessedFile,
+    UploadAsset,
+    UploadFile,
+    UploadURL,
 } from 'types/upload';
 import { FILE_TYPE } from 'constants/file';
 import { FORMAT_MISSED_BY_FILE_TYPE_LIB } from 'constants/upload';
 import {
-    getLivePhotoFileType,
-    getLivePhotoMetadata,
+    clusterLivePhotoFiles,
     getLivePhotoSize,
     readLivePhoto,
 } from './livePhotoService';
@@ -33,13 +35,29 @@ import UIService from './uiService';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
-    private metadataMap: Map<string, ParsedMetadataJSON>;
+    private parsedMetadataJSONMap: ParsedMetadataJSONMap = new Map<
+        string,
+        ParsedMetadataJSON
+    >();
+    private metadataAndFileTypeInfoMap: MetadataAndFileTypeInfoMap = new Map<
+        number,
+        MetadataAndFileTypeInfo
+    >();
     private pendingUploadCount: number = 0;
 
-    async init(fileCount: number, metadataMap: MetadataMap) {
+    async setFileCount(fileCount: number) {
         this.pendingUploadCount = fileCount;
-        this.metadataMap = metadataMap;
         await this.preFetchUploadURLs();
+    }
+
+    setParsedMetadataJSONMap(parsedMetadataJSONMap: ParsedMetadataJSONMap) {
+        this.parsedMetadataJSONMap = parsedMetadataJSONMap;
+    }
+
+    setMetadataAndFileTypeInfoMap(
+        metadataAndFileTypeInfoMap: MetadataAndFileTypeInfoMap
+    ) {
+        this.metadataAndFileTypeInfoMap = metadataAndFileTypeInfoMap;
     }
 
     reducePendingUploadCount() {
@@ -52,13 +70,8 @@ class UploadService {
             : getFileSize(file);
     }
 
-    async getAssetType(
-        worker,
-        { file, isLivePhoto, livePhotoAssets }: UploadAsset
-    ) {
-        const fileTypeInfo = isLivePhoto
-            ? await getLivePhotoFileType(worker, livePhotoAssets)
-            : await getFileType(worker, file);
+    async getFileType(reader: FileReader, file: File) {
+        const fileTypeInfo = await getFileType(reader, file);
         if (fileTypeInfo.fileType !== FILE_TYPE.OTHERS) {
             return fileTypeInfo;
         }
@@ -88,18 +101,30 @@ class UploadService {
             : await readFile(worker, reader, fileTypeInfo, file);
     }
 
-    async getAssetMetadata(
-        { isLivePhoto, file, livePhotoAssets }: UploadAsset,
-        collection: Collection,
+    async getFileMetadata(
+        file: File,
+        collectionID: number,
         fileTypeInfo: FileTypeInfo
     ): Promise<Metadata> {
-        return isLivePhoto
-            ? await getLivePhotoMetadata(
-                  livePhotoAssets,
-                  collection,
-                  fileTypeInfo
-              )
-            : await getFileMetadata(file, collection, fileTypeInfo);
+        return getFileMetadata(file, collectionID, fileTypeInfo);
+    }
+
+    getFileMetadataAndFileTypeInfo(localID: number) {
+        return this.metadataAndFileTypeInfoMap.get(localID);
+    }
+
+    setFileMetadataAndFileTypeInfo(
+        localID: number,
+        metadataAndFileTypeInfo: MetadataAndFileTypeInfo
+    ) {
+        return this.metadataAndFileTypeInfoMap.set(
+            localID,
+            metadataAndFileTypeInfo
+        );
+    }
+
+    clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
+        return clusterLivePhotoFiles(mediaFiles);
     }
 
     async encryptAsset(
@@ -115,12 +140,12 @@ class UploadService {
             let fileObjectKey: string = null;
             if (isDataStream(file.file.encryptedData)) {
                 fileObjectKey = await uploadStreamUsingMultipart(
-                    file.filename,
+                    file.localID,
                     file.file.encryptedData
                 );
             } else {
                 const progressTracker = UIService.trackUploadProgress(
-                    file.filename
+                    file.localID
                 );
                 const fileUploadURL = await this.getUploadURL();
                 fileObjectKey = await UploadHttpClient.putFile(

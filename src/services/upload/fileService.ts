@@ -1,4 +1,3 @@
-import { Collection } from 'types/collection';
 import {
     FileTypeInfo,
     FileInMemory,
@@ -10,7 +9,7 @@ import {
 } from 'types/upload';
 import { logError } from 'utils/sentry';
 import { encryptFiledata } from './encryptionService';
-import { getMetadataMapKey, extractMetadata } from './metadataService';
+import { extractMetadata, getMetadataJSONMapKey } from './metadataService';
 import { getFileData, getFileOriginalName } from './readFileService';
 import { generateThumbnail } from './thumbnailService';
 
@@ -42,13 +41,14 @@ export async function readFile(
 
 export async function getFileMetadata(
     rawFile: File,
-    collection: Collection,
+    collectionID: number,
     fileTypeInfo: FileTypeInfo
 ) {
     const originalName = getFileOriginalName(rawFile);
     const googleMetadata =
-        this.metadataMap.get(getMetadataMapKey(collection.id, originalName)) ??
-        {};
+        this.metadataMap.get(
+            getMetadataJSONMapKey(collectionID, originalName)
+        ) ?? {};
     const extractedMetadata: Metadata = await extractMetadata(
         rawFile,
         fileTypeInfo
@@ -89,7 +89,7 @@ export async function encryptFile(
                 file: encryptedFiledata,
                 thumbnail: encryptedThumbnail,
                 metadata: encryptedMetadata,
-                filename: file.metadata.title,
+                localID: file.localID,
             },
             fileKey: encryptedKey,
         };

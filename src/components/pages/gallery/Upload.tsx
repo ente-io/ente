@@ -18,7 +18,7 @@ import { METADATA_FOLDER_NAME } from 'constants/export';
 import { getUserFacingErrorMessage } from 'utils/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
-import { UPLOAD_STAGES } from 'constants/upload';
+import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import { FileWithCollection } from 'types/upload';
 
 const FIRST_ALBUM_NAME = 'My First Album';
@@ -54,9 +54,12 @@ export default function Upload(props: Props) {
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
         UPLOAD_STAGES.START
     );
+    const [filenames, setFilenames] = useState(new Map<number, string>());
     const [fileCounter, setFileCounter] = useState({ finished: 0, total: 0 });
-    const [fileProgress, setFileProgress] = useState(new Map<string, number>());
-    const [uploadResult, setUploadResult] = useState(new Map<string, number>());
+    const [fileProgress, setFileProgress] = useState(new Map<number, number>());
+    const [uploadResult, setUploadResult] = useState(
+        new Map<FileUploadResults, number>()
+    );
     const [percentComplete, setPercentComplete] = useState(0);
     const [choiceModalView, setChoiceModalView] = useState(false);
     const [analysisResult, setAnalysisResult] = useState<AnalysisResult>({
@@ -107,8 +110,8 @@ export default function Upload(props: Props) {
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
         setFileCounter({ finished: 0, total: 0 });
-        setFileProgress(new Map<string, number>());
-        setUploadResult(new Map<string, number>());
+        setFileProgress(new Map<number, number>());
+        setUploadResult(new Map<number, number>());
         setPercentComplete(0);
         props.closeCollectionSelector();
         setProgressView(true);
@@ -118,6 +121,11 @@ export default function Upload(props: Props) {
         if (props.acceptedFiles.length === 0) {
             return null;
         }
+        setFilenames(
+            new Map<number, string>(
+                props.acceptedFiles.map((file, index) => [index, file.name])
+            )
+        );
         const paths: string[] = props.acceptedFiles.map((file) => file['path']);
         const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
         paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
@@ -169,8 +177,9 @@ export default function Upload(props: Props) {
         try {
             uploadInit();
             const filesWithCollectionToUpload: FileWithCollection[] =
-                props.acceptedFiles.map((file) => ({
+                props.acceptedFiles.map((file, index) => ({
                     file,
+                    localID: index,
                     collectionID: collection.id,
                 }));
             await uploadFiles(filesWithCollectionToUpload);
@@ -202,12 +211,14 @@ export default function Upload(props: Props) {
                         existingCollection
                     );
                     collections.push(collection);
-                    for (const file of files) {
-                        filesWithCollectionToUpload.push({
+
+                    filesWithCollectionToUpload.push(
+                        ...files.map((file, index) => ({
+                            localID: index,
                             collectionID: collection.id,
                             file,
-                        });
-                    }
+                        }))
+                    );
                 }
             } catch (e) {
                 setProgressView(false);
@@ -336,6 +347,7 @@ export default function Upload(props: Props) {
             />
             <UploadProgress
                 now={percentComplete}
+                filenames={filenames}
                 fileCounter={fileCounter}
                 uploadStage={uploadStage}
                 fileProgress={fileProgress}

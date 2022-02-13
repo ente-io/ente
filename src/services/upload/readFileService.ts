@@ -145,22 +145,3 @@ export async function getUint8ArrayView(
         throw e;
     }
 }
-
-export function getFileTypeFromFileObject(file: globalThis.File) {
-    const typeParts = file.type.split('/');
-    let fileType;
-    if (typeParts?.length !== 2) {
-        throw Error(CustomError.TYPE_DETECTION_FAILED);
-    }
-    switch (typeParts[0]) {
-        case TYPE_IMAGE:
-            fileType = FILE_TYPE.IMAGE;
-            break;
-        case TYPE_VIDEO:
-            fileType = FILE_TYPE.VIDEO;
-            break;
-        default:
-            fileType = FILE_TYPE.OTHERS;
-    }
-    return fileType;
-}

@@ -20,7 +20,7 @@ function calculatePartCount(chunkCount: number) {
     return partCount;
 }
 export async function uploadStreamUsingMultipart(
-    filename: string,
+    fileLocalID: number,
     dataStream: DataStream
 ) {
     const uploadPartCount = calculatePartCount(dataStream.chunkCount);
@@ -30,7 +30,7 @@ export async function uploadStreamUsingMultipart(
     const fileObjectKey = await uploadStreamInParts(
         multipartUploadURLs,
         dataStream.stream,
-        filename,
+        fileLocalID,
         uploadPartCount
     );
     return fileObjectKey;
@@ -39,7 +39,7 @@ export async function uploadStreamUsingMultipart(
 export async function uploadStreamInParts(
     multipartUploadURLs: MultipartUploadURLs,
     dataStream: ReadableStream<Uint8Array>,
-    filename: string,
+    fileLocalID: number,
     uploadPartCount: number
 ) {
     const streamReader = dataStream.getReader();
@@ -52,7 +52,7 @@ export async function uploadStreamInParts(
     ] of multipartUploadURLs.partURLs.entries()) {
         const uploadChunk = await combineChunksToFormUploadPart(streamReader);
         const progressTracker = UIService.trackUploadProgress(
-            filename,
+            fileLocalID,
             percentPerPart,
             index
         );

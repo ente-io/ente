@@ -59,8 +59,8 @@ export interface ProgressUpdater {
         }>
     >;
     setUploadStage: React.Dispatch<React.SetStateAction<UPLOAD_STAGES>>;
-    setFileProgress: React.Dispatch<React.SetStateAction<Map<string, number>>>;
-    setUploadResult: React.Dispatch<React.SetStateAction<Map<string, number>>>;
+    setFileProgress: React.Dispatch<React.SetStateAction<Map<number, number>>>;
+    setUploadResult: React.Dispatch<React.SetStateAction<Map<number, number>>>;
 }
 
 export interface UploadAsset {
@@ -74,11 +74,18 @@ export interface LivePhotoAssets {
 }
 
 export interface FileWithCollection extends UploadAsset {
-    key?: string;
+    localID: number;
     collection?: Collection;
     collectionID?: number;
 }
 export type MetadataMap = Map<string, ParsedMetadataJSON>;
+export interface MetadataAndFileTypeInfo {
+    metadata: Metadata;
+    fileTypeInfo: FileTypeInfo;
+}
+
+export type MetadataAndFileTypeInfoMap = Map<number, MetadataAndFileTypeInfo>;
+export type ParsedMetadataJSONMap = Map<string, ParsedMetadataJSON>;
 
 export interface UploadURL {
     url: string;
@@ -100,6 +107,7 @@ export interface FileInMemory {
 export interface FileWithMetadata
     extends Omit<FileInMemory, 'hasStaticThumbnail'> {
     metadata: Metadata;
+    localID: number;
 }
 
 export interface EncryptedFile {
@@ -110,9 +118,9 @@ export interface ProcessedFile {
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: fileAttribute;
-    filename: string;
+    localID: number;
 }
-export interface BackupedFile extends Omit<ProcessedFile, 'filename'> {}
+export interface BackupedFile extends Omit<ProcessedFile, 'localID'> {}
 
 export interface UploadFile extends BackupedFile {
     collectionID: number;

@@ -6,19 +6,10 @@ import { fileAlreadyInCollection } from 'utils/upload';
 import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
 import UploadService from './uploadService';
-import {
-    BackupedFile,
-    EncryptedFile,
-    FileInMemory,
-    FileTypeInfo,
-    FileWithCollection,
-    FileWithMetadata,
-    Metadata,
-    UploadFile,
-} from 'types/upload';
-import { FileUploadResults } from 'constants/upload';
+import { FILE_TYPE } from 'constants/file';
+import { FileUploadResults, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
+import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
 
-const FIVE_GB_IN_BYTES = 5 * 1024 * 1024 * 1024;
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
     file?: EnteFile;
@@ -29,38 +20,36 @@ export default async function uploader(
     existingFilesInCollection: EnteFile[],
     fileWithCollection: FileWithCollection
 ): Promise<UploadResponse> {
-    const {
-        collection,
-        key: progressBarKey,
-        ...uploadAsset
-    } = fileWithCollection;
+    const { collection, localID, ...uploadAsset } = fileWithCollection;
 
-    let file: FileInMemory = null;
-    let encryptedFile: EncryptedFile = null;
-    let metadata: Metadata = null;
-    let fileTypeInfo: FileTypeInfo = null;
-    let fileWithMetadata: FileWithMetadata = null;
-
-    UIService.setFileProgress(progressBarKey, 0);
-    const fileSize = UploadService.getAssetSize(uploadAsset);
+    UIService.setFileProgress(localID, 0);
+    const { fileTypeInfo, metadata } =
+        UploadService.getFileMetadataAndFileTypeInfo(localID);
     try {
-        if (fileSize >= FIVE_GB_IN_BYTES) {
+        const fileSize = UploadService.getAssetSize(uploadAsset);
+        if (fileSize >= MAX_FILE_SIZE_SUPPORTED) {
             return { fileUploadResult: FileUploadResults.TOO_LARGE };
         }
+        if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
+            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+        }
+        if (!metadata) {
+            throw Error(CustomError.NO_METADATA);
+        }
 
-        fileTypeInfo = await UploadService.getAssetType(worker, uploadAsset);
+        // fileTypeInfo = await UploadService.getAssetType(worker, uploadAsset);
 
-        metadata = await UploadService.getAssetMetadata(
-            uploadAsset,
-            collection,
-            fileTypeInfo
-        );
+        // metadata = await UploadService.getAssetMetadata(
+        //     uploadAsset,
+        //     collection,
+        //     fileTypeInfo
+        // );
 
         if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
             return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
         }
 
-        file = await UploadService.readAsset(
+        const file = await UploadService.readAsset(
             worker,
             reader,
             fileTypeInfo,
@@ -70,13 +59,14 @@ export default async function uploader(
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
         }
-        fileWithMetadata = {
+        const fileWithMetadata = {
+            localID,
             filedata: file.filedata,
             thumbnail: file.thumbnail,
             metadata,
         };
 
-        encryptedFile = await UploadService.encryptAsset(
+        const encryptedFile = await UploadService.encryptAsset(
             worker,
             fileWithMetadata,
             collection.key
@@ -118,9 +108,5 @@ export default async function uploader(
             default:
                 return { fileUploadResult: FileUploadResults.FAILED };
         }
-    } finally {
-        file = null;
-        fileWithMetadata = null;
-        encryptedFile = null;
     }
 }
