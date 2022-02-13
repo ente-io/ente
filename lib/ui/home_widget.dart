@@ -24,6 +24,7 @@ import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/update_service.dart';
@@ -269,7 +270,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         ExtentsPageView(
           children: [
             (Configuration.instance.getPathsToBackUp().isEmpty &&
-                    !LocalSyncService.instance.hasGrantedLimitedPermissions())
+                    !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
+                    CollectionsService.instance.getActiveCollections().isEmpty)
                 ? _getBackupFolderSelectionHook()
                 : _getMainGalleryWidget(),
             _deviceFolderGalleryWidget,
