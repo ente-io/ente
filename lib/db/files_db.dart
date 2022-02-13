@@ -590,7 +590,14 @@ class FilesDB {
       orderBy: '$columnCreationTime DESC',
       groupBy: columnLocalID,
     );
-    return _convertToFiles(results);
+    var files = _convertToFiles(results);
+    // future-safe filter just to ensure that the query doesn't end up  returning files
+    // which should not be backed up
+    files.removeWhere((e) =>
+        e.collectionID == null ||
+        e.localID == null ||
+        e.uploadedFileID != null);
+    return files;
   }
 
   Future<List<File>> getAllLocalFiles() async {
