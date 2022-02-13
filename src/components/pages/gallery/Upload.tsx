@@ -58,7 +58,7 @@ export default function Upload(props: Props) {
     const [fileCounter, setFileCounter] = useState({ finished: 0, total: 0 });
     const [fileProgress, setFileProgress] = useState(new Map<number, number>());
     const [uploadResult, setUploadResult] = useState(
-        new Map<FileUploadResults, number>()
+        new Map<number, FileUploadResults>()
     );
     const [percentComplete, setPercentComplete] = useState(0);
     const [choiceModalView, setChoiceModalView] = useState(false);
