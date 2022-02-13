@@ -255,9 +255,14 @@ class RemoteSyncService {
         _logger.info("Skipping some new files as we are throttling uploads");
         break;
       }
-      final collectionID = (await CollectionsService.instance
-              .getOrCreateForPath(file.deviceFolder))
-          .id;
+      // prefer existing collection ID for manually uploaded files.
+      // See https://github.com/ente-io/frame/pull/187
+      final collectionID =
+          (file.collectionID != null || file.collectionID != -1)
+              ? file.collectionID
+              : (await CollectionsService.instance
+                      .getOrCreateForPath(file.deviceFolder))
+                  .id;
       _uploadFile(file, collectionID, futures);
     }
 
