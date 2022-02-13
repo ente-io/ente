@@ -1,6 +1,10 @@
 import { FILE_TYPE } from 'constants/file';
 import { logError } from 'utils/sentry';
-import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from 'constants/upload';
+import {
+    FILE_READER_CHUNK_SIZE,
+    FORMAT_MISSED_BY_FILE_TYPE_LIB,
+    MULTIPART_PART_SIZE,
+} from 'constants/upload';
 import FileType from 'file-type/browser';
 import { CustomError } from 'utils/error';
 import { getFileExtension, splitFilenameAndExtension } from 'utils/file';
@@ -43,6 +47,15 @@ export async function getFileType(
         return { fileType, exactType: typeParts[1] };
     } catch (e) {
         const fileFormat = getFileExtension(receivedFile.name);
+        const formatMissedByTypeDetection = FORMAT_MISSED_BY_FILE_TYPE_LIB.find(
+            (a) => a.exactType === fileFormat
+        );
+        if (formatMissedByTypeDetection) {
+            return formatMissedByTypeDetection;
+        }
+        logError(e, CustomError.TYPE_DETECTION_FAILED, {
+            fileType: fileFormat,
+        });
         return { fileType: FILE_TYPE.OTHERS, exactType: fileFormat };
     }
 }

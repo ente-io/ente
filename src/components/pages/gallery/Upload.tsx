@@ -77,6 +77,7 @@ export default function Upload(props: Props) {
                 setFileProgress,
                 setUploadResult,
                 setUploadStage,
+                setFilenames,
             },
             props.setFiles
         );
@@ -121,11 +122,6 @@ export default function Upload(props: Props) {
         if (props.acceptedFiles.length === 0) {
             return null;
         }
-        setFilenames(
-            new Map<number, string>(
-                props.acceptedFiles.map((file, index) => [index, file.name])
-            )
-        );
         const paths: string[] = props.acceptedFiles.map((file) => file['path']);
         const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
         paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));

@@ -37,14 +37,6 @@ export default async function uploader(
             throw Error(CustomError.NO_METADATA);
         }
 
-        // fileTypeInfo = await UploadService.getAssetType(worker, uploadAsset);
-
-        // metadata = await UploadService.getAssetMetadata(
-        //     uploadAsset,
-        //     collection,
-        //     fileTypeInfo
-        // );
-
         if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
             return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
         }

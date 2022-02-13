@@ -9,23 +9,33 @@ import {
 } from 'types/upload';
 import { splitFilenameAndExtension } from 'utils/file';
 import { readFile } from './fileService';
-import { getFileType } from './readFileService';
 import uploadService from './uploadService';
 import UploadService from './uploadService';
-export async function getLivePhotoFileType(
-    worker,
-    livePhotoAssets: LivePhotoAssets
+
+export function getLivePhotoFileType(
+    file1TypeInfo: FileTypeInfo,
+    file2TypeInfo: FileTypeInfo
 ) {
-    const file1TypeInfo = await getFileType(worker, livePhotoAssets[0]);
-    const file2TypeInfo = await getFileType(worker, livePhotoAssets[1]);
     return {
         fileType: FILE_TYPE.LIVE_PHOTO,
         exactType: `${file1TypeInfo.exactType}+${file2TypeInfo.exactType}`,
     };
 }
 
+export function getLivePhotoMetadata(
+    file1Metadata: Metadata,
+    file2Metadata: Metadata
+) {
+    return {
+        ...file1Metadata,
+        ...file2Metadata,
+        title: splitFilenameAndExtension(file1Metadata.title)[0],
+        fileType: FILE_TYPE.LIVE_PHOTO,
+    };
+}
+
 export function getLivePhotoSize(livePhotoAssets: LivePhotoAssets) {
-    return livePhotoAssets[0].size + livePhotoAssets[1].size;
+    return livePhotoAssets.image.size + livePhotoAssets.video.size;
 }
 
 export async function readLivePhoto(
@@ -37,13 +47,13 @@ export async function readLivePhoto(
     const image = await readFile(
         worker,
         reader,
-        fileTypeInfo,
+        { exactType: fileTypeInfo.exactType, fileType: FILE_TYPE.IMAGE },
         livePhotoAssets.image
     );
     const video = await readFile(
         worker,
         reader,
-        fileTypeInfo,
+        { exactType: fileTypeInfo.exactType, fileType: FILE_TYPE.VIDEO },
         livePhotoAssets.video
     );
 
@@ -66,9 +76,14 @@ export async function readLivePhoto(
 
 export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
     const analysedMediaFiles: FileWithCollection[] = [];
-    for (let i = 0; i < mediaFiles.length - 1; i++) {
+    mediaFiles.sort((media1Files, media2Files) =>
+        splitFilenameAndExtension(media1Files.file.name)[0].localeCompare(
+            splitFilenameAndExtension(media2Files.file.name)[0]
+        )
+    );
+    for (let i = 0; i < mediaFiles.length - 1; i += 2) {
         const mediaFile1 = mediaFiles[i];
-        const mediaFile2 = mediaFiles[i];
+        const mediaFile2 = mediaFiles[i + 1];
         const { fileTypeInfo: file1TypeInfo, metadata: file1Metadata } =
             UploadService.getFileMetadataAndFileTypeInfo(mediaFile1.localID);
         const { fileTypeInfo: file2TypeInfo, metadata: file2Metadata } =
@@ -93,15 +108,14 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                 isLivePhoto: true,
                 livePhotoAssets: { image: imageFile, video: videoFile },
             });
-            const livePhotoFileTypeInfo: FileTypeInfo = {
-                fileType: FILE_TYPE.LIVE_PHOTO,
-                exactType: `${file1TypeInfo.exactType} - ${file2TypeInfo.exactType}`,
-            };
-            const livePhotoMetadata: Metadata = {
-                ...file1Metadata,
-                ...file2Metadata,
-                title: splitFilenameAndExtension(file1Metadata.title)[0],
-            };
+            const livePhotoFileTypeInfo: FileTypeInfo = getLivePhotoFileType(
+                file1TypeInfo,
+                file2TypeInfo
+            );
+            const livePhotoMetadata: Metadata = getLivePhotoMetadata(
+                file1Metadata,
+                file2Metadata
+            );
             uploadService.setFileMetadataAndFileTypeInfo(livePhotoLocalID, {
                 fileTypeInfo: { ...livePhotoFileTypeInfo },
                 metadata: { ...livePhotoMetadata },
@@ -121,10 +135,22 @@ function areFilesLivePhotoAssets(
     mediaFile1: FileWithCollection,
     mediaFile2: FileWithCollection
 ) {
-    const { collectionID: file1collectionID, file: file1 } = mediaFile1;
-    const { collectionID: file2collectionID, file: file2 } = mediaFile2;
-    const file1Type = FILE_TYPE.OTHERS;
-    const file2Type = FILE_TYPE.OTHERS;
+    const {
+        collectionID: file1collectionID,
+        file: file1,
+        localID: localID1,
+    } = mediaFile1;
+    const {
+        collectionID: file2collectionID,
+        file: file2,
+        localID: localID2,
+    } = mediaFile2;
+    const {
+        fileTypeInfo: { fileType: file1Type },
+    } = UploadService.getFileMetadataAndFileTypeInfo(localID1);
+    const {
+        fileTypeInfo: { fileType: file2Type },
+    } = UploadService.getFileMetadataAndFileTypeInfo(localID2);
     return (
         file1collectionID === file2collectionID &&
         file1Type !== file2Type &&

@@ -3,7 +3,7 @@ import { logError } from 'utils/sentry';
 import UploadHttpClient from './uploadHttpClient';
 import { getFileMetadata } from './fileService';
 import { getFileType } from './readFileService';
-import { CustomError, handleUploadError } from 'utils/error';
+import { handleUploadError } from 'utils/error';
 import {
     B64EncryptionResult,
     BackupedFile,
@@ -22,8 +22,6 @@ import {
     UploadFile,
     UploadURL,
 } from 'types/upload';
-import { FILE_TYPE } from 'constants/file';
-import { FORMAT_MISSED_BY_FILE_TYPE_LIB } from 'constants/upload';
 import {
     clusterLivePhotoFiles,
     getLivePhotoSize,
@@ -71,25 +69,9 @@ class UploadService {
     }
 
     async getFileType(reader: FileReader, file: File) {
-        const fileTypeInfo = await getFileType(reader, file);
-        if (fileTypeInfo.fileType !== FILE_TYPE.OTHERS) {
-            return fileTypeInfo;
-        }
-        try {
-            const formatMissedByTypeDetection =
-                FORMAT_MISSED_BY_FILE_TYPE_LIB.find(
-                    (a) => a.exactType === fileTypeInfo.exactType
-                );
-            if (formatMissedByTypeDetection) {
-                return formatMissedByTypeDetection;
-            }
-            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
-        } catch (e) {
-            logError(e, CustomError.TYPE_DETECTION_FAILED, {
-                fileType: fileTypeInfo.exactType,
-            });
-        }
+        return getFileType(reader, file);
     }
+
     async readAsset(
         worker: any,
         reader: FileReader,
@@ -106,7 +88,12 @@ class UploadService {
         collectionID: number,
         fileTypeInfo: FileTypeInfo
     ): Promise<Metadata> {
-        return getFileMetadata(file, collectionID, fileTypeInfo);
+        return getFileMetadata(
+            this.parsedMetadataJSONMap,
+            file,
+            collectionID,
+            fileTypeInfo
+        );
     }
 
     getFileMetadataAndFileTypeInfo(localID: number) {

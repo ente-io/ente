@@ -61,6 +61,7 @@ export interface ProgressUpdater {
     setUploadStage: React.Dispatch<React.SetStateAction<UPLOAD_STAGES>>;
     setFileProgress: React.Dispatch<React.SetStateAction<Map<number, number>>>;
     setUploadResult: React.Dispatch<React.SetStateAction<Map<number, number>>>;
+    setFilenames: React.Dispatch<React.SetStateAction<Map<number, string>>>;
 }
 
 export interface UploadAsset {
@@ -78,7 +79,6 @@ export interface FileWithCollection extends UploadAsset {
     collection?: Collection;
     collectionID?: number;
 }
-export type MetadataMap = Map<string, ParsedMetadataJSON>;
 export interface MetadataAndFileTypeInfo {
     metadata: Metadata;
     fileTypeInfo: FileTypeInfo;

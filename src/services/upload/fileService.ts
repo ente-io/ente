@@ -6,6 +6,7 @@ import {
     EncryptedFile,
     EncryptionResult,
     FileWithMetadata,
+    ParsedMetadataJSONMap,
 } from 'types/upload';
 import { logError } from 'utils/sentry';
 import { encryptFiledata } from './encryptionService';
@@ -40,13 +41,14 @@ export async function readFile(
 }
 
 export async function getFileMetadata(
+    parsedMetadataJSONMap: ParsedMetadataJSONMap,
     rawFile: File,
     collectionID: number,
     fileTypeInfo: FileTypeInfo
 ) {
     const originalName = getFileOriginalName(rawFile);
     const googleMetadata =
-        this.metadataMap.get(
+        parsedMetadataJSONMap.get(
             getMetadataJSONMapKey(collectionID, originalName)
         ) ?? {};
     const extractedMetadata: Metadata = await extractMetadata(

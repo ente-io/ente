@@ -31,6 +31,7 @@ import {
 } from 'constants/upload';
 import { ComlinkWorker } from 'utils/comlink';
 import { FILE_TYPE } from 'constants/file';
+import uiService from './uiService';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -96,7 +97,19 @@ class UploadManager {
                 );
                 UIService.setUploadStage(UPLOAD_STAGES.START);
                 const analysedMediaFiles =
-                    UploadService.clusterLivePhotoFiles(mediaFiles);
+                    mediaFiles.length > 1
+                        ? UploadService.clusterLivePhotoFiles(mediaFiles)
+                        : mediaFiles;
+                uiService.setFilenames(
+                    new Map<number, string>(
+                        mediaFiles.map(({ localID }) => [
+                            localID,
+                            UploadService.getFileMetadataAndFileTypeInfo(
+                                localID
+                            ).metadata.title,
+                        ])
+                    )
+                );
                 await this.uploadMediaFiles(analysedMediaFiles);
             }
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
@@ -174,6 +187,7 @@ class UploadManager {
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
+        this.filesToBeUploaded.push(...mediaFiles);
         UIService.reset(mediaFiles.length);
 
         await UploadService.setFileCount(mediaFiles.length);

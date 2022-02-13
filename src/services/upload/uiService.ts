@@ -43,6 +43,10 @@ class UIService {
         this.progressUpdater.setPercentComplete(percent);
     }
 
+    setFilenames(filenames: Map<number, string>) {
+        this.progressUpdater.setFilenames(filenames);
+    }
+
     increaseFileUploaded() {
         this.filesUploaded++;
         this.updateProgressBarUI();
@@ -97,18 +101,16 @@ class UIService {
         return {
             cancel,
             onUploadProgress: (event) => {
-                fileLocalID &&
-                    this.fileProgress.set(
-                        fileLocalID,
-                        Math.min(
-                            Math.round(
-                                percentPerPart * index +
-                                    (percentPerPart * event.loaded) /
-                                        event.total
-                            ),
-                            98
-                        )
-                    );
+                this.fileProgress.set(
+                    fileLocalID,
+                    Math.min(
+                        Math.round(
+                            percentPerPart * index +
+                                (percentPerPart * event.loaded) / event.total
+                        ),
+                        98
+                    )
+                );
                 this.updateProgressBarUI();
                 if (event.loaded === event.total) {
                     clearTimeout(timeout);
