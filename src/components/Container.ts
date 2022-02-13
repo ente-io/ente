@@ -50,7 +50,7 @@ export const Value = styled.div<{ width?: string }>`
     justify-content: flex-start;
     align-items: center;
     width: ${(props) => props.width ?? '30%'};
-    text-align: center;
+
     color: #ddd;
 `;
 

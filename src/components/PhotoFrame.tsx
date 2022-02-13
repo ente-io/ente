@@ -50,7 +50,7 @@ const EmptyScreen = styled.div`
     }
 `;
 
-const PHOTOSWIPE_HASH_SUFFIX = '&photoswipe-opened';
+const PHOTOSWIPE_HASH_SUFFIX = '&opened';
 
 interface Props {
     files: EnteFile[];
