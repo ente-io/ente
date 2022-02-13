@@ -43,7 +43,8 @@ class FavoritesService {
   Future<void> addToFavorites(File file) async {
     final collectionID = await _getOrCreateFavoriteCollectionID();
     if (file.uploadedFileID == null) {
-      await _fileUploader.forceUpload(file, collectionID);
+      file.collectionID = collectionID;
+      await _filesDB.insert(file);
       Bus.instance.fire(CollectionUpdatedEvent(collectionID, [file]));
     } else {
       await _collectionsService.addToCollection(collectionID, [file]);
