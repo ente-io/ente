@@ -54,7 +54,7 @@ export async function getFileType(
             return formatMissedByTypeDetection;
         }
         logError(e, CustomError.TYPE_DETECTION_FAILED, {
-            fileType: fileFormat,
+            fileFormat,
         });
         return { fileType: FILE_TYPE.OTHERS, exactType: fileFormat };
     }
