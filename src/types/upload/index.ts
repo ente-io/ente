@@ -64,9 +64,9 @@ export interface ProgressUpdater {
 }
 
 export interface UploadAsset {
-    isLivePhoto: boolean;
-    file: File;
-    livePhotoAssets: LivePhotoAssets;
+    isLivePhoto?: boolean;
+    file?: File;
+    livePhotoAssets?: LivePhotoAssets;
 }
 export interface LivePhotoAssets {
     image: globalThis.File;

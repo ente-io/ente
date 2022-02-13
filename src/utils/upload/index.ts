@@ -91,7 +91,7 @@ export function segregateFiles(
                     livePhotoFiles.push({
                         collectionID: collectionID,
                         isLivePhoto: true,
-                        livePhotoAsset: { image: imageFile, video: videoFile },
+                        livePhotoAssets: { image: imageFile, video: videoFile },
                     });
                 }
             }
@@ -114,7 +114,7 @@ export function addKeysToFilesToBeUploaded(files: FileWithCollection[]) {
 function getFileToBeUploadedKey(fileWithCollection: FileWithCollection) {
     const fileName = splitFilenameAndExtension(
         fileWithCollection.isLivePhoto
-            ? fileWithCollection.livePhotoAsset[0].name + '-livePhoto'
+            ? fileWithCollection.livePhotoAssets[0].name + '-livePhoto'
             : fileWithCollection.file.name
     )[0];
     return fileName;
