@@ -1,4 +1,4 @@
-import { CustomError } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/error';
 
 interface RequestQueueItem {
     request: (canceller?: RequestCanceller) => Promise<any>;
@@ -43,17 +43,16 @@ export default class QueueProcessor<T> {
         return { promise, canceller };
     }
 
-    async pollQueue() {
+    private async pollQueue() {
         if (this.requestInProcessing < this.maxParallelProcesses) {
             this.requestInProcessing++;
-            await this.processQueue();
-            this.requestInProcessing--;
+            this.processQueue();
         }
     }
 
-    public async processQueue() {
+    private async processQueue() {
         while (this.requestQueue.length > 0) {
-            const queueItem = this.requestQueue.pop();
+            const queueItem = this.requestQueue.shift();
             let response = null;
 
             if (queueItem.isCanceled.status) {
@@ -67,5 +66,6 @@ export default class QueueProcessor<T> {
                 }
             }
         }
+        this.requestInProcessing--;
     }
 }

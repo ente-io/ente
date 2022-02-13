@@ -14,6 +14,8 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
 import Head from 'next/head';
+import { getAlbumSiteHost } from 'constants/pages';
+import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -167,6 +169,9 @@ const GlobalStyles = createGlobalStyle`
     .modal-xl{
         max-width:90% !important;
     }
+    .modal-lg {
+        max-width: 720px !important;
+      }
     .plan-selector-modal-content {
         width:auto;
         margin:auto;
@@ -227,6 +232,17 @@ const GlobalStyles = createGlobalStyle`
     .btn-outline-danger, .btn-outline-secondary, .btn-outline-primary{
         border-width: 2px;
     }
+
+    #go-to-ente{
+        background:none;
+        border-color: #3dbb69;
+        color:#51cd7c;
+    }
+    #go-to-ente:hover, #go-to-ente:focus, #go-to-ente:active {
+        color:#fff;
+        background-color: #44774d;
+    }
+    
     a {
         color: #fff;
     }
@@ -358,10 +374,20 @@ const GlobalStyles = createGlobalStyle`
     .list-group-item:active , list-group-item:focus{
         background-color:#000 !important;
     }
-    .arrow::after{
+    #button-tooltip > .arrow::before{
         border-bottom-color:#282828 !important;
     }
+    #button-tooltip > .arrow::after{
+        border-bottom-color:#282828 !important;
+        border-top-color:#282828 !important;
+
+    }
     .arrow::before{
+        border-bottom-color:#282828 !important;
+        border-top-color:#282828 !important;
+    }
+    .arrow::after{
+        border-bottom-color:#282828 !important;
         border-top-color:#282828 !important;
     }
     .carousel-inner {
@@ -407,8 +433,15 @@ const GlobalStyles = createGlobalStyle`
             -webkit-transform: rotate(359deg);
         }
     }
+    #button-tooltip{
+        color: #ddd;
+        border-radius: 5px;
+        font-size: 12px;
+        padding:0px
+    }
     .tooltip-inner{
-        padding:0px;
+        background-color: #282828;
+        margin:6px 0;
     }
     .react-datepicker__input-container > input {
         width:100%;
@@ -449,6 +482,9 @@ const GlobalStyles = createGlobalStyle`
     .ente-form-group{
         margin:0;
     }
+    .form-check-input:hover, .form-check-label :hover{
+        cursor:pointer;
+    }
 `;
 
 export const LogoImage = styled.img`
@@ -456,9 +492,12 @@ export const LogoImage = styled.img`
     margin-right: 5px;
 `;
 
-const FlexContainer = styled.div`
+const FlexContainer = styled.div<{ shouldJustifyLeft?: boolean }>`
     flex: 1;
     text-align: center;
+    @media (max-width: 760px) {
+        text-align: ${(props) => (props.shouldJustifyLeft ? 'left' : 'center')};
+    }
 `;
 
 export const MessageContainer = styled.div`
@@ -479,8 +518,8 @@ type AppContextType = {
     sharedFiles: File[];
     resetSharedFiles: () => void;
     setDisappearingFlashMessage: (message: FlashMessage) => void;
-    redirectUrl: string;
-    setRedirectUrl: (url: string) => void;
+    redirectURL: string;
+    setRedirectURL: (url: string) => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -510,7 +549,9 @@ export default function App({ Component, err }) {
     const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const [redirectName, setRedirectName] = useState<string>(null);
     const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
-    const [redirectUrl, setRedirectUrl] = useState(null);
+    const [redirectURL, setRedirectURL] = useState(null);
+    const [isAlbumsDomain, setIsAlbumsDomain] = useState(false);
+
     useEffect(() => {
         if (
             !('serviceWorker' in navigator) ||
@@ -552,12 +593,16 @@ export default function App({ Component, err }) {
     const resetSharedFiles = () => setSharedFiles(null);
 
     useEffect(() => {
-        console.log(
-            `%c${constants.CONSOLE_WARNING_STOP}`,
-            'color: red; font-size: 52px;'
-        );
-        console.log(`%c${constants.CONSOLE_WARNING_DESC}`, 'font-size: 20px;');
-
+        if (process.env.NODE_ENV === 'production') {
+            console.log(
+                `%c${constants.CONSOLE_WARNING_STOP}`,
+                'color: red; font-size: 52px;'
+            );
+            console.log(
+                `%c${constants.CONSOLE_WARNING_DESC}`,
+                'font-size: 20px;'
+            );
+        }
         const query = new URLSearchParams(window.location.search);
         const redirect = query.get('redirect');
         if (redirect && redirectMap[redirect]) {
@@ -596,12 +641,20 @@ export default function App({ Component, err }) {
             window.removeEventListener('offline', setUserOffline);
         };
     }, [redirectName]);
+
+    useEffect(() => {
+        const currentURL = new URL(window.location.href);
+        if (currentURL.host === getAlbumSiteHost()) {
+            setIsAlbumsDomain(true);
+        }
+    }, []);
+
     const showNavBar = (show: boolean) => setShowNavBar(show);
     const setDisappearingFlashMessage = (flashMessages: FlashMessage) => {
         setFlashMessage(flashMessages);
         setTimeout(() => setFlashMessage(null), 5000);
     };
-    //  ho ja yaar
+
     return (
         <>
             <Head>
@@ -610,13 +663,14 @@ export default function App({ Component, err }) {
             <GlobalStyles />
             {showNavbar && (
                 <Navbar>
-                    <FlexContainer>
+                    <FlexContainer shouldJustifyLeft={isAlbumsDomain}>
                         <LogoImage
                             style={{ height: '24px', padding: '3px' }}
                             alt="logo"
                             src="/icon.svg"
                         />
                     </FlexContainer>
+                    {isAlbumsDomain && <GoToEnte />}
                 </Navbar>
             )}
             <MessageContainer>
@@ -644,8 +698,8 @@ export default function App({ Component, err }) {
                     sharedFiles,
                     resetSharedFiles,
                     setDisappearingFlashMessage,
-                    redirectUrl,
-                    setRedirectUrl,
+                    redirectURL,
+                    setRedirectURL,
                 }}>
                 {loading ? (
                     <Container>

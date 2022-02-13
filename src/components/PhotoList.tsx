@@ -1,7 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useContext } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import styled from 'styled-components';
-import { File } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
     IMAGE_CONTAINER_MAX_HEIGHT,
@@ -9,21 +9,25 @@ import {
     DATE_CONTAINER_HEIGHT,
     GAP_BTW_TILES,
     SPACE_BTW_DATES,
-} from 'types';
+} from 'constants/gallery';
 import constants from 'utils/strings/constants';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
+import { ENTE_WEBSITE_LINK } from 'constants/urls';
+import { getVariantColor, ButtonVariant } from './pages/gallery/LinkButton';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const NO_OF_PAGES = 2;
+const FOOTER_HEIGHT = 90;
 
 enum ITEM_TYPE {
     TIME = 'TIME',
     TILE = 'TILE',
-    BANNER = 'BANNER',
+    OTHER = 'OTHER',
 }
 
 interface TimeStampListItem {
     itemType: ITEM_TYPE;
-    items?: File[];
+    items?: EnteFile[];
     itemStartIndex?: number;
     date?: string;
     dates?: {
@@ -31,7 +35,7 @@ interface TimeStampListItem {
         span: number;
     }[];
     groups?: number[];
-    banner?: any;
+    item?: any;
     id?: string;
     height?: number;
 }
@@ -81,13 +85,24 @@ const DateContainer = styled.div<{ span: number }>`
     height: ${DATE_CONTAINER_HEIGHT}px;
 `;
 
-const BannerContainer = styled.div<{ span: number }>`
+const FooterContainer = styled.div<{ span: number }>`
+    font-size: 14px;
+    margin-bottom: 0.75rem;
+    @media (max-width: 540px) {
+        font-size: 12px;
+        margin-bottom: 0.5rem;
+    }
+
     color: #979797;
     text-align: center;
     grid-column: span ${(props) => props.span};
     display: flex;
     justify-content: center;
     align-items: flex-end;
+    & > p {
+        margin: 0;
+    }
+    margin-top: calc(2rem + 20px);
 `;
 
 const NothingContainer = styled.div<{ span: number }>`
@@ -102,9 +117,9 @@ const NothingContainer = styled.div<{ span: number }>`
 interface Props {
     height: number;
     width: number;
-    filteredData: File[];
-    showBanner: boolean;
-    getThumbnail: (file: File[], index: number) => JSX.Element;
+    filteredData: EnteFile[];
+    showAppDownloadBanner: boolean;
+    getThumbnail: (files: EnteFile[], index: number) => JSX.Element;
     activeCollection: number;
     resetFetching: () => void;
 }
@@ -113,7 +128,7 @@ export function PhotoList({
     height,
     width,
     filteredData,
-    showBanner,
+    showAppDownloadBanner,
     getThumbnail,
     activeCollection,
     resetFetching,
@@ -123,7 +138,9 @@ export function PhotoList({
     const filteredDataCopyRef = useRef([]);
     const filteredDataCopy = filteredDataCopyRef.current ?? [];
     const listRef = useRef(null);
-
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
     let columns = Math.floor(width / IMAGE_CONTAINER_MAX_WIDTH);
     let listItemHeight = IMAGE_CONTAINER_MAX_HEIGHT;
 
@@ -195,14 +212,28 @@ export function PhotoList({
         if (timeStampList.length === 0) {
             timeStampList.push(getEmptyListItem());
         }
-        if (showBanner) {
-            timeStampList.push(getBannerItem(timeStampList));
+        if (
+            showAppDownloadBanner ||
+            publicCollectionGalleryContext.accessedThroughSharedURL
+        ) {
+            timeStampList.push(getVacuumItem(timeStampList));
+            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+                timeStampList.push(getAlbumsFooter());
+            } else {
+                timeStampList.push(getAppDownloadFooter());
+            }
         }
 
         timeStampListRef.current = timeStampList;
         filteredDataCopyRef.current = filteredData;
         refreshList();
-    }, [width, height, filteredData, showBanner]);
+    }, [
+        width,
+        height,
+        filteredData,
+        showAppDownloadBanner,
+        publicCollectionGalleryContext.accessedThroughSharedURL,
+    ]);
 
     const isSameDay = (first, second) =>
         first.getFullYear() === second.getFullYear() &&
@@ -211,8 +242,8 @@ export function PhotoList({
 
     const getEmptyListItem = () => {
         return {
-            itemType: ITEM_TYPE.BANNER,
-            banner: (
+            itemType: ITEM_TYPE.OTHER,
+            item: (
                 <NothingContainer span={columns}>
                     <div>{constants.NOTHING_HERE}</div>
                 </NothingContainer>
@@ -221,25 +252,56 @@ export function PhotoList({
             height: height - 48,
         };
     };
-
-    const getBannerItem = (timeStampList) => {
+    const getVacuumItem = (timeStampList) => {
         const photoFrameHeight = (() => {
             let sum = 0;
             const getCurrentItemSize = getItemSize(timeStampList);
             for (let i = 0; i < timeStampList.length; i++) {
                 sum += getCurrentItemSize(i);
+                if (height - sum <= FOOTER_HEIGHT) {
+                    break;
+                }
             }
             return sum;
         })();
         return {
-            itemType: ITEM_TYPE.BANNER,
-            banner: (
-                <BannerContainer span={columns}>
+            itemType: ITEM_TYPE.OTHER,
+            item: <></>,
+            height: Math.max(height - photoFrameHeight - FOOTER_HEIGHT, 0),
+        };
+    };
+    const getAppDownloadFooter = () => {
+        return {
+            itemType: ITEM_TYPE.OTHER,
+            height: FOOTER_HEIGHT,
+            item: (
+                <FooterContainer span={columns}>
                     <p>{constants.INSTALL_MOBILE_APP()}</p>
-                </BannerContainer>
+                </FooterContainer>
             ),
-            id: 'install-banner',
-            height: Math.max(48, height - photoFrameHeight),
+        };
+    };
+
+    const getAlbumsFooter = () => {
+        return {
+            itemType: ITEM_TYPE.OTHER,
+            height: FOOTER_HEIGHT,
+            item: (
+                <FooterContainer span={columns}>
+                    <p>
+                        {constants.PRESERVED_BY}{' '}
+                        <a
+                            target="_blank"
+                            style={{
+                                color: getVariantColor(ButtonVariant.success),
+                            }}
+                            href={ENTE_WEBSITE_LINK}
+                            rel="noreferrer">
+                            {constants.ENTE_IO}
+                        </a>
+                    </p>
+                </FooterContainer>
+            ),
         };
     };
     /**
@@ -363,8 +425,8 @@ export function PhotoList({
                         {listItem.date}
                     </DateContainer>
                 );
-            case ITEM_TYPE.BANNER:
-                return listItem.banner;
+            case ITEM_TYPE.OTHER:
+                return listItem.item;
             default: {
                 const ret = listItem.items.map((item, idx) =>
                     getThumbnail(
@@ -384,6 +446,9 @@ export function PhotoList({
             }
         }
     };
+    if (!timeStampList?.length) {
+        return <></>;
+    }
 
     return (
         <List

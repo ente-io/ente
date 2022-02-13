@@ -19,7 +19,7 @@ import { setJustSignedUp } from 'utils/storage';
 import LogoImg from './LogoImg';
 import { logError } from 'utils/sentry';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { PAGES } from 'types';
+import { PAGES } from 'constants/pages';
 
 interface FormValues {
     email: string;

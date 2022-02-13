@@ -50,7 +50,7 @@ export const Value = styled.div<{ width?: string }>`
     justify-content: flex-start;
     align-items: center;
     width: ${(props) => props.width ?? '30%'};
-    text-align: center;
+
     color: #ddd;
 `;
 
@@ -59,4 +59,11 @@ export const FlexWrapper = styled.div`
     display: flex;
     text-align: center;
     justify-content: center;
+`;
+
+export const FreeFlowText = styled.div`
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    min-width: 30%;
+    text-align: left;
 `;

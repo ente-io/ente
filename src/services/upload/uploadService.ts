@@ -1,99 +1,33 @@
-import { fileAttribute, FILE_TYPE } from '../fileService';
-import { Collection } from '../collectionService';
+import { Collection } from 'types/collection';
 import { logError } from 'utils/sentry';
 import UploadHttpClient from './uploadHttpClient';
-import {
-    extractMetadata,
-    getMetadataMapKey,
-    ParsedMetaDataJSON,
-} from './metadataService';
+import { extractMetadata, getMetadataMapKey } from './metadataService';
 import { generateThumbnail } from './thumbnailService';
-import {
-    getFileOriginalName,
-    getFileData,
-    FileTypeInfo,
-} from './readFileService';
+import { getFileOriginalName, getFileData } from './readFileService';
 import { encryptFiledata } from './encryptionService';
-import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
-import { handleUploadError } from 'utils/common/errorUtil';
-import { MetadataMap } from './uploadManager';
-
-// this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
-export const MULTIPART_PART_SIZE = 20 * 1024 * 1024;
-
-export const FILE_READER_CHUNK_SIZE = ENCRYPTION_CHUNK_SIZE;
-
-export const FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART = Math.floor(
-    MULTIPART_PART_SIZE / FILE_READER_CHUNK_SIZE
-);
-
-export interface UploadURL {
-    url: string;
-    objectKey: string;
-}
-
-export interface DataStream {
-    stream: ReadableStream<Uint8Array>;
-    chunkCount: number;
-}
-
-export function isDataStream(object: any): object is DataStream {
-    return 'stream' in object;
-}
-export interface EncryptionResult {
-    file: fileAttribute;
-    key: string;
-}
-export interface B64EncryptionResult {
-    encryptedData: string;
-    key: string;
-    nonce: string;
-}
-
-export interface MetadataObject {
-    title: string;
-    creationTime: number;
-    modificationTime: number;
-    latitude: number;
-    longitude: number;
-    fileType: FILE_TYPE;
-    hasStaticThumbnail?: boolean;
-}
-
-export interface FileInMemory {
-    filedata: Uint8Array | DataStream;
-    thumbnail: Uint8Array;
-    hasStaticThumbnail: boolean;
-}
-
-export interface FileWithMetadata
-    extends Omit<FileInMemory, 'hasStaticThumbnail'> {
-    metadata: MetadataObject;
-}
-
-export interface EncryptedFile {
-    file: ProcessedFile;
-    fileKey: B64EncryptionResult;
-}
-export interface ProcessedFile {
-    file: fileAttribute;
-    thumbnail: fileAttribute;
-    metadata: fileAttribute;
-    filename: string;
-}
-export interface BackupedFile extends Omit<ProcessedFile, 'filename'> {}
-
-export interface UploadFile extends BackupedFile {
-    collectionID: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-}
+import { handleUploadError } from 'utils/error';
+import {
+    B64EncryptionResult,
+    BackupedFile,
+    EncryptedFile,
+    EncryptionResult,
+    FileInMemory,
+    FileTypeInfo,
+    FileWithMetadata,
+    isDataStream,
+    MetadataMap,
+    Metadata,
+    ParsedMetadataJSON,
+    ProcessedFile,
+    UploadFile,
+    UploadURL,
+} from 'types/upload';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
-    private metadataMap: Map<string, ParsedMetaDataJSON>;
+    private metadataMap: Map<string, ParsedMetadataJSON>;
     private pendingUploadCount: number = 0;
 
     async init(fileCount: number, metadataMap: MetadataMap) {
@@ -102,18 +36,24 @@ class UploadService {
         await this.preFetchUploadURLs();
     }
 
+    reducePendingUploadCount() {
+        this.pendingUploadCount--;
+    }
+
     async readFile(
         worker: any,
-        rawFile: globalThis.File,
+        reader: FileReader,
+        rawFile: File,
         fileTypeInfo: FileTypeInfo
     ): Promise<FileInMemory> {
         const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
             worker,
+            reader,
             rawFile,
             fileTypeInfo
         );
 
-        const filedata = await getFileData(worker, rawFile);
+        const filedata = await getFileData(reader, rawFile);
 
         return {
             filedata,
@@ -126,13 +66,13 @@ class UploadService {
         rawFile: File,
         collection: Collection,
         fileTypeInfo: FileTypeInfo
-    ): Promise<MetadataObject> {
+    ): Promise<Metadata> {
         const originalName = getFileOriginalName(rawFile);
         const googleMetadata =
             this.metadataMap.get(
                 getMetadataMapKey(collection.id, originalName)
             ) ?? {};
-        const extractedMetadata: MetadataObject = await extractMetadata(
+        const extractedMetadata: Metadata = await extractMetadata(
             rawFile,
             fileTypeInfo
         );

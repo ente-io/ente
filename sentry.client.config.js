@@ -1,21 +1,34 @@
 import * as Sentry from '@sentry/nextjs';
-import { getSentryTunnelUrl } from 'utils/common/apiUtil';
+import { getSentryTunnelURL } from 'utils/common/apiUtil';
 import { getUserAnonymizedID } from 'utils/user';
+import {
+    getSentryDSN,
+    getSentryENV,
+    getSentryRelease,
+    getIsSentryEnabled,
+} from 'constants/sentry';
 
-const SENTRY_DSN =
-    process.env.NEXT_PUBLIC_SENTRY_DSN ??
-    'https://860186db60c54c7fbacfe255124958e8@errors.ente.io/4';
-const SENTRY_ENV = process.env.NEXT_PUBLIC_SENTRY_ENV ?? 'development';
+const SENTRY_DSN = getSentryDSN();
+const SENTRY_ENV = getSentryENV();
+const SENTRY_RELEASE = getSentryRelease();
+const IS_ENABLED = getIsSentryEnabled();
 
 Sentry.setUser({ id: getUserAnonymizedID() });
 Sentry.init({
     dsn: SENTRY_DSN,
-    enabled: SENTRY_ENV !== 'development',
+    enabled: IS_ENABLED,
     environment: SENTRY_ENV,
-    release: process.env.SENTRY_RELEASE,
+    release: SENTRY_RELEASE,
     attachStacktrace: true,
     autoSessionTracking: false,
-    tunnel: getSentryTunnelUrl(),
+    tunnel: getSentryTunnelURL(),
+    beforeSend(event) {
+        event.request = event.request || {};
+        const currentURL = new URL(document.location.href);
+        currentURL.hash = '';
+        event.request.url = currentURL;
+        return event;
+    },
     // ...
     // Note: if you want to override the automatic release value, do not set a
     // `release` value here - use the environment variable `SENTRY_RELEASE`, so

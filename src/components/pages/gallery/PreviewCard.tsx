@@ -1,20 +1,25 @@
 import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
-import { File } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import styled from 'styled-components';
 import PlayCircleOutline from 'components/icons/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
 import { GalleryContext } from 'pages/gallery';
-import { GAP_BTW_TILES } from 'types';
+import { GAP_BTW_TILES } from 'constants/gallery';
+import {
+    defaultPublicCollectionGalleryContext,
+    PublicCollectionGalleryContext,
+} from 'utils/publicCollectionGallery';
+import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 
 interface IProps {
-    file: File;
-    updateUrl: (url: string) => void;
+    file: EnteFile;
+    updateURL: (url: string) => void;
     onClick?: () => void;
     forcedEnable?: boolean;
     selectable?: boolean;
     selected?: boolean;
-    onSelect?: (checked: boolean) => void;
+    onSelect: (checked: boolean) => void;
     onHover?: () => void;
     onRangeSelect?: () => void;
     isRangeSelectActive?: boolean;
@@ -161,7 +166,7 @@ export default function PreviewCard(props: IProps) {
     const {
         file,
         onClick,
-        updateUrl,
+        updateURL,
         forcedEnable,
         selectable,
         selected,
@@ -173,11 +178,25 @@ export default function PreviewCard(props: IProps) {
         isInsSelectRange,
     } = props;
     const isMounted = useRef(true);
+    const publicCollectionGalleryContext =
+        useContext(PublicCollectionGalleryContext) ??
+        defaultPublicCollectionGalleryContext;
     useLayoutEffect(() => {
         if (file && !file.msrc) {
             const main = async () => {
                 try {
-                    const url = await DownloadManager.getPreview(file);
+                    let url;
+                    if (
+                        publicCollectionGalleryContext.accessedThroughSharedURL
+                    ) {
+                        url =
+                            await PublicCollectionDownloadManager.getThumbnail(
+                                file,
+                                publicCollectionGalleryContext.token
+                            );
+                    } else {
+                        url = await DownloadManager.getThumbnail(file);
+                    }
                     if (isMounted.current) {
                         setImgSrc(url);
                         thumbs.set(file.id, url);
@@ -185,7 +204,7 @@ export default function PreviewCard(props: IProps) {
                         if (!file.src) {
                             file.src = url;
                         }
-                        updateUrl(url);
+                        updateURL(url);
                     }
                 } catch (e) {
                     // no-op
@@ -217,8 +236,9 @@ export default function PreviewCard(props: IProps) {
         if (selectOnClick) {
             if (isRangeSelectActive) {
                 onRangeSelect();
+            } else {
+                onSelect(!selected);
             }
-            onSelect?.(!selected);
         } else if (file?.msrc || imgSrc) {
             onClick?.();
         }
@@ -227,15 +247,16 @@ export default function PreviewCard(props: IProps) {
     const handleSelect: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         if (isRangeSelectActive) {
             onRangeSelect?.();
+        } else {
+            onSelect(e.target.checked);
         }
-        onSelect?.(e.target.checked);
     };
 
     const longPressCallback = () => {
         onSelect(!selected);
     };
     const handleHover = () => {
-        if (selectOnClick) {
+        if (isRangeSelectActive) {
             onHover();
         }
     };

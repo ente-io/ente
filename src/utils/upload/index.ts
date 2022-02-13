@@ -1,13 +1,14 @@
-import { FileWithCollection } from 'services/upload/uploadManager';
-import { MetadataObject } from 'services/upload/uploadService';
-import { File, FILE_TYPE } from 'services/fileService';
-import { splitFilenameAndExtension } from 'utils/file';
+import { FileWithCollection, Metadata } from 'types/upload';
+import { EnteFile } from 'types/file';
+import { FILE_TYPE } from 'constants/file';
 import { getFileTypeFromFileObject } from 'services/upload/readFileService';
+import { splitFilenameAndExtension } from 'utils/file';
+
 const TYPE_JSON = 'json';
 
 export function fileAlreadyInCollection(
-    existingFilesInCollection: File[],
-    newFileMetadata: MetadataObject
+    existingFilesInCollection: EnteFile[],
+    newFileMetadata: Metadata
 ): boolean {
     for (const existingFile of existingFilesInCollection) {
         if (areFilesSame(existingFile.metadata, newFileMetadata)) {
@@ -17,8 +18,8 @@ export function fileAlreadyInCollection(
     return false;
 }
 export function areFilesSame(
-    existingFile: MetadataObject,
-    newFile: MetadataObject
+    existingFile: Metadata,
+    newFile: Metadata
 ): boolean {
     if (
         existingFile.fileType === newFile.fileType &&

@@ -2,7 +2,7 @@ import { B64EncryptionResult } from 'utils/crypto';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { CustomError } from './errorUtil';
+import { CustomError } from '../error';
 
 export const getActualKey = async () => {
     try {
@@ -21,9 +21,5 @@ export const getActualKey = async () => {
         throw new Error(CustomError.KEY_MISSING);
     }
 };
-
-export const getStripePublishableKey = () =>
-    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ??
-    'pk_live_51HAhqDK59oeucIMOiTI6MDDM2UWUbCAJXJCGsvjJhiO8nYJz38rQq5T4iyQLDMKxqEDUfU5Hopuj4U5U4dff23oT00fHvZeodC';
 
 export const getToken = () => getData(LS_KEYS.USER)?.token;

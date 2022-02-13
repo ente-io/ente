@@ -1,4 +1,4 @@
-import { DataStream, EncryptionResult, isDataStream } from './uploadService';
+import { DataStream, EncryptionResult, isDataStream } from 'types/upload';
 
 async function encryptFileStream(worker, fileData: DataStream) {
     const { stream, chunkCount } = fileData;

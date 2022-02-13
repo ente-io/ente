@@ -1,23 +1,22 @@
 import React from 'react';
 import { SetDialogMessage } from 'components/MessageDialog';
 import { ListGroup, Popover } from 'react-bootstrap';
-import {
-    Collection,
-    deleteCollection,
-    renameCollection,
-} from 'services/collectionService';
-import { getSelectedCollection } from 'utils/collection';
+import { deleteCollection, renameCollection } from 'services/collectionService';
+import { downloadCollection, getSelectedCollection } from 'utils/collection';
 import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import LinkButton, { ButtonVariant, LinkButtonProps } from './LinkButton';
+import { sleep } from 'utils/common';
+import { Collection } from 'types/collection';
 
-interface Props {
+interface CollectionOptionsProps {
     syncWithRemote: () => Promise<void>;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     collections: Collection[];
     selectedCollectionID: number;
     setDialogMessage: SetDialogMessage;
-    startLoadingBar: () => void;
+    startLoading: () => void;
+    finishLoading: () => void;
     showCollectionShareModal: () => void;
     redirectToAll: () => void;
 }
@@ -43,7 +42,7 @@ export const MenuItem = (props: { children: any }) => (
     </ListGroup.Item>
 );
 
-const CollectionOptions = (props: Props) => {
+const CollectionOptions = (props: CollectionOptionsProps) => {
     const collectionRename = async (
         selectedCollection: Collection,
         newName: string
@@ -62,7 +61,7 @@ const CollectionOptions = (props: Props) => {
                 props.collections
             )?.name,
             callback: (newName) => {
-                props.startLoadingBar();
+                props.startLoading();
                 collectionRename(
                     getSelectedCollection(
                         props.selectedCollectionID,
@@ -81,7 +80,7 @@ const CollectionOptions = (props: Props) => {
             proceed: {
                 text: constants.DELETE_COLLECTION,
                 action: () => {
-                    props.startLoadingBar();
+                    props.startLoading();
                     deleteCollection(
                         props.selectedCollectionID,
                         props.syncWithRemote,
@@ -97,6 +96,32 @@ const CollectionOptions = (props: Props) => {
         });
     };
 
+    const confirmDownloadCollection = () => {
+        props.setDialogMessage({
+            title: constants.CONFIRM_DOWNLOAD_COLLECTION,
+            content: constants.DOWNLOAD_COLLECTION_MESSAGE(),
+            staticBackdrop: true,
+            proceed: {
+                text: constants.DOWNLOAD,
+                action: downloadCollectionHelper,
+                variant: 'success',
+            },
+            close: {
+                text: constants.CANCEL,
+            },
+        });
+    };
+
+    const downloadCollectionHelper = async () => {
+        props.startLoading();
+        await downloadCollection(
+            props.selectedCollectionID,
+            props.setDialogMessage
+        );
+        await sleep(1000);
+        props.finishLoading();
+    };
+
     return (
         <Popover id="collection-options" style={{ borderRadius: '10px' }}>
             <Popover.Content style={{ padding: 0, border: 'none' }}>
@@ -109,6 +134,11 @@ const CollectionOptions = (props: Props) => {
                     <MenuItem>
                         <MenuLink onClick={props.showCollectionShareModal}>
                             {constants.SHARE}
+                        </MenuLink>
+                    </MenuItem>
+                    <MenuItem>
+                        <MenuLink onClick={confirmDownloadCollection}>
+                            {constants.DOWNLOAD}
                         </MenuLink>
                     </MenuItem>
                     <MenuItem>

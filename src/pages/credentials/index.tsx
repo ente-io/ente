@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import { KeyAttributes, PAGES } from 'types';
+import { PAGES } from 'constants/pages';
 import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker, {
     decryptAndStoreToken,
@@ -18,6 +18,7 @@ import { Button, Card } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
+import { KeyAttributes } from 'types/user';
 
 export default function Credentials() {
     const router = useRouter();
@@ -75,9 +76,9 @@ export default function Credentials() {
                 }
                 await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
                 await decryptAndStoreToken(key);
-                const redirectUrl = appContext.redirectUrl;
-                appContext.setRedirectUrl(null);
-                router.push(redirectUrl ?? PAGES.GALLERY);
+                const redirectURL = appContext.redirectURL;
+                appContext.setRedirectURL(null);
+                router.push(redirectURL ?? PAGES.GALLERY);
             } catch (e) {
                 logError(e, 'user entered a wrong password');
                 setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);

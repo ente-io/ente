@@ -1,34 +1,37 @@
-import { File, FILE_TYPE } from 'services/fileService';
-import { sleep } from 'utils/common';
-import { handleUploadError, CustomError } from 'utils/common/errorUtil';
+import { EnteFile } from 'types/file';
+import { handleUploadError, CustomError } from 'utils/error';
 import { decryptFile, splitFilenameAndExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { fileAlreadyInCollection } from 'utils/upload';
 import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
-import { FileUploadResults, FileWithCollection } from './uploadManager';
-import UploadService, {
+import UploadService from './uploadService';
+import uploadService from './uploadService';
+import { getFileType } from './readFileService';
+import {
     BackupedFile,
     EncryptedFile,
     FileInMemory,
+    FileTypeInfo,
+    FileWithCollection,
     FileWithMetadata,
     isDataStream,
-    MetadataObject,
+    Metadata,
     UploadFile,
-} from './uploadService';
-import uploadService from './uploadService';
-import { FileTypeInfo, getFileType } from './readFileService';
+} from 'types/upload';
+import { FILE_TYPE } from 'constants/file';
+import { FileUploadResults } from 'constants/upload';
 import { encodeMotionPhoto } from 'services/motionPhotoService';
 
-const TwoSecondInMillSeconds = 2000;
 const FIVE_GB_IN_BYTES = 5 * 1024 * 1024 * 1024;
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
-    file?: File;
+    file?: EnteFile;
 }
 export default async function uploader(
     worker: any,
-    existingFilesInCollection: File[],
+    reader: FileReader,
+    existingFilesInCollection: EnteFile[],
     fileWithCollection: FileWithCollection
 ): Promise<UploadResponse> {
     const {
@@ -41,7 +44,7 @@ export default async function uploader(
 
     let file: FileInMemory = null;
     let encryptedFile: EncryptedFile = null;
-    let metadata: MetadataObject = null;
+    let metadata: Metadata = null;
     let fileTypeInfo: FileTypeInfo = null;
     let fileWithMetadata: FileWithMetadata = null;
 
@@ -51,12 +54,6 @@ export default async function uploader(
         : rawFile.size;
     try {
         if (fileSize >= FIVE_GB_IN_BYTES) {
-            UIService.setFileProgress(
-                progressBarKey,
-                FileUploadResults.TOO_LARGE
-            );
-            // wait two second before removing the file from the progress in file section
-            await sleep(TwoSecondInMillSeconds);
             return { fileUploadResult: FileUploadResults.TOO_LARGE };
         }
         if (isLivePhoto) {
@@ -85,21 +82,17 @@ export default async function uploader(
                 title: splitFilenameAndExtension(livePhotoAsset[0].name)[0],
             };
             if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
-                UIService.setFileProgress(
-                    progressBarKey,
-                    FileUploadResults.SKIPPED
-                );
-                // wait two second before removing the file from the progress in file section
-                await sleep(TwoSecondInMillSeconds);
-                return { fileUploadResult: FileUploadResults.SKIPPED };
+                return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
             }
             const image = await UploadService.readFile(
                 worker,
+                reader,
                 imageFile,
                 fileTypeInfo
             );
             const video = await UploadService.readFile(
                 worker,
+                reader,
                 videoFile,
                 fileTypeInfo
             );
@@ -133,16 +126,15 @@ export default async function uploader(
             );
 
             if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
-                UIService.setFileProgress(
-                    progressBarKey,
-                    FileUploadResults.SKIPPED
-                );
-                // wait two second before removing the file from the progress in file section
-                await sleep(TwoSecondInMillSeconds);
-                return { fileUploadResult: FileUploadResults.SKIPPED };
+                return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
             }
 
-            file = await UploadService.readFile(worker, rawFile, fileTypeInfo);
+            file = await UploadService.readFile(
+                worker,
+                reader,
+                rawFile,
+                fileTypeInfo
+            );
         }
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
@@ -170,9 +162,8 @@ export default async function uploader(
         );
 
         const uploadedFile = await UploadHttpClient.uploadFile(uploadFile);
-        const decryptedFile = await decryptFile(uploadedFile, collection);
+        const decryptedFile = await decryptFile(uploadedFile, collection.key);
 
-        UIService.setFileProgress(progressBarKey, FileUploadResults.UPLOADED);
         UIService.increaseFileUploaded();
         return {
             fileUploadResult: FileUploadResults.UPLOADED,
@@ -185,29 +176,15 @@ export default async function uploader(
         const error = handleUploadError(e);
         switch (error.message) {
             case CustomError.ETAG_MISSING:
-                UIService.setFileProgress(
-                    progressBarKey,
-                    FileUploadResults.BLOCKED
-                );
                 return { fileUploadResult: FileUploadResults.BLOCKED };
             case CustomError.UNSUPPORTED_FILE_FORMAT:
-                UIService.setFileProgress(
-                    progressBarKey,
-                    FileUploadResults.UNSUPPORTED
-                );
                 return { fileUploadResult: FileUploadResults.UNSUPPORTED };
-
             case CustomError.FILE_TOO_LARGE:
-                UIService.setFileProgress(
-                    progressBarKey,
-                    FileUploadResults.TOO_LARGE
-                );
-                return { fileUploadResult: FileUploadResults.TOO_LARGE };
+                return {
+                    fileUploadResult:
+                        FileUploadResults.LARGER_THAN_AVAILABLE_STORAGE,
+                };
             default:
-                UIService.setFileProgress(
-                    progressBarKey,
-                    FileUploadResults.FAILED
-                );
                 return { fileUploadResult: FileUploadResults.FAILED };
         }
     } finally {

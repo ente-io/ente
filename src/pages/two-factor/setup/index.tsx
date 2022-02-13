@@ -1,14 +1,9 @@
 import EnteSpinner from 'components/EnteSpinner';
 import LogoImg from 'components/LogoImg';
-import { CodeBlock, FreeFlowText } from 'components/RecoveryKeyModal';
 import { DeadCenter } from 'pages/gallery';
 import React, { useContext, useEffect, useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
-import {
-    enableTwoFactor,
-    setupTwoFactor,
-    TwoFactorSecret,
-} from 'services/userService';
+import { enableTwoFactor, setupTwoFactor } from 'services/userService';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 import Container from 'components/Container';
@@ -18,7 +13,9 @@ import { B64EncryptionResult } from 'utils/crypto';
 import { encryptWithRecoveryKey } from 'utils/crypto';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
-import { PAGES } from 'types';
+import { PAGES } from 'constants/pages';
+import { TwoFactorSecret } from 'types/user';
+import { CodeBlock } from 'components/CodeBlock';
 
 enum SetupMode {
     QR_CODE,
@@ -124,15 +121,7 @@ export default function SetupTwoFactor() {
                                         constants.TWO_FACTOR_MANUAL_CODE_INSTRUCTION
                                     }
                                 </p>
-                                <CodeBlock height={100}>
-                                    {!twoFactorSecret ? (
-                                        <EnteSpinner />
-                                    ) : (
-                                        <FreeFlowText>
-                                            {twoFactorSecret.secretCode}
-                                        </FreeFlowText>
-                                    )}
-                                </CodeBlock>
+                                <CodeBlock code={twoFactorSecret.secretCode} />
                                 <Button
                                     block
                                     variant="link"

@@ -1,5 +1,4 @@
-import { KEK } from 'pages/generate';
-import { KeyAttributes } from 'types';
+import { KEK, KeyAttributes } from 'types/user';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
 import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
@@ -7,11 +6,7 @@ import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getActualKey, getToken } from 'utils/common/key';
 import { setRecoveryKey } from 'services/userService';
 import { logError } from 'utils/sentry';
-
-export interface ComlinkWorker {
-    comlink: any;
-    worker: Worker;
-}
+import { ComlinkWorker } from 'utils/comlink';
 
 export interface B64EncryptionResult {
     encryptedData: string;
@@ -23,7 +18,7 @@ export const getDedicatedCryptoWorker = (): ComlinkWorker => {
     if (runningInBrowser()) {
         const worker = new Worker(
             new URL('worker/crypto.worker.js', import.meta.url),
-            { name: 'ente-worker' }
+            { name: 'ente-crypto-worker' }
         );
         const comlink = Comlink.wrap(worker);
         return { comlink, worker };
@@ -107,7 +102,7 @@ export const SaveKeyInSessionStore = async (
 };
 
 export const getRecoveryKey = async () => {
-    let recoveryKey = null;
+    let recoveryKey: string = null;
     try {
         const cryptoWorker = await new CryptoWorker();
 
@@ -130,6 +125,7 @@ export const getRecoveryKey = async () => {
         return recoveryKey;
     } catch (e) {
         logError(e, 'getRecoveryKey failed');
+        throw e;
     }
 };
 
@@ -139,7 +135,7 @@ async function createNewRecoveryKey() {
 
     const cryptoWorker = await new CryptoWorker();
 
-    const recoveryKey = await cryptoWorker.generateEncryptionKey();
+    const recoveryKey: string = await cryptoWorker.generateEncryptionKey();
     const encryptedMasterKey: B64EncryptionResult =
         await cryptoWorker.encryptToB64(masterKey, recoveryKey);
     const encryptedRecoveryKey: B64EncryptionResult =

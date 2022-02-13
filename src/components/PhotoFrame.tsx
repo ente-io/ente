@@ -1,30 +1,28 @@
-import {
-    GalleryContext,
-    Search,
-    SelectedState,
-    SetFiles,
-    setSearchStats,
-} from 'pages/gallery';
+import { GalleryContext } from 'pages/gallery';
 import PreviewCard from './pages/gallery/PreviewCard';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
-import { File, FILE_TYPE } from 'services/fileService';
+import { EnteFile } from 'types/file';
 import styled from 'styled-components';
 import DownloadManager from 'services/downloadManager';
 import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
-import { SetDialogMessage } from './MessageDialog';
 import { fileIsArchived, formatDateRelative } from 'utils/file';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     TRASH_SECTION,
-} from './pages/gallery/Collections';
+} from 'constants/collection';
 import { isSharedFile } from 'utils/file';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
+import { SetFiles, SelectedState, Search, setSearchStats } from 'types/gallery';
+import { FILE_TYPE } from 'constants/file';
+import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
+import { useRouter } from 'next/router';
 
 const Container = styled.div`
     display: block;
@@ -52,8 +50,10 @@ const EmptyScreen = styled.div`
     }
 `;
 
+const PHOTOSWIPE_HASH_SUFFIX = '&opened';
+
 interface Props {
-    files: File[];
+    files: EnteFile[];
     setFiles: SetFiles;
     syncWithRemote: () => Promise<void>;
     favItemIds: Set<number>;
@@ -63,12 +63,10 @@ interface Props {
     selected: SelectedState;
     isFirstLoad;
     openFileUploader;
-    loadingBar;
     isInSearchMode: boolean;
     search: Search;
     setSearchStats: setSearchStats;
     deleted?: number[];
-    setDialogMessage: SetDialogMessage;
     activeCollection: number;
     isSharedCollection: boolean;
 }
@@ -82,7 +80,6 @@ const PhotoFrame = ({
     selected,
     isFirstLoad,
     openFileUploader,
-    loadingBar,
     isInSearchMode,
     search,
     setSearchStats,
@@ -95,11 +92,15 @@ const PhotoFrame = ({
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
     const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     const filteredDataRef = useRef([]);
     const filteredData = filteredDataRef?.current ?? [];
+    const router = useRouter();
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Shift') {
@@ -113,6 +114,18 @@ const PhotoFrame = ({
         };
         document.addEventListener('keydown', handleKeyDown, false);
         document.addEventListener('keyup', handleKeyUp, false);
+        router.events.on('hashChangeComplete', (url: string) => {
+            const start = url.indexOf('#');
+            const hash = url.slice(start !== -1 ? start : url.length);
+            const shouldPhotoSwipeBeOpened = hash.endsWith(
+                PHOTOSWIPE_HASH_SUFFIX
+            );
+            if (shouldPhotoSwipeBeOpened) {
+                setOpen(true);
+            } else {
+                setOpen(false);
+            }
+        });
         return () => {
             document.addEventListener('keydown', handleKeyDown, false);
             document.addEventListener('keyup', handleKeyUp, false);
@@ -134,7 +147,7 @@ const PhotoFrame = ({
                 onThumbnailClick(filteredDataIdx)();
             }
         }
-    }, [search]);
+    }, [search, filteredData]);
 
     const resetFetching = () => {
         setFetching({});
@@ -213,7 +226,22 @@ const PhotoFrame = ({
             });
     }, [files, deleted, search, activeCollection]);
 
-    const updateUrl = (index: number) => (url: string) => {
+    useEffect(() => {
+        const currentURL = new URL(window.location.href);
+        const end = currentURL.hash.lastIndexOf('&');
+        const hash = currentURL.hash.slice(1, end !== -1 ? end : undefined);
+        if (open) {
+            router.push({
+                hash: hash + PHOTOSWIPE_HASH_SUFFIX,
+            });
+        } else {
+            router.push({
+                hash: hash,
+            });
+        }
+    }, [open]);
+
+    const updateURL = (index: number) => (url: string) => {
         files[index] = {
             ...files[index],
             msrc: url,
@@ -244,7 +272,7 @@ const PhotoFrame = ({
         setFiles(files);
     };
 
-    const updateSrcUrl = async (index: number, url: string) => {
+    const updateSrcURL = async (index: number, url: string) => {
         files[index] = {
             ...files[index],
             w: window.innerWidth,
@@ -289,14 +317,23 @@ const PhotoFrame = ({
         if (selected.collectionID !== activeCollection) {
             setSelected({ count: 0, collectionID: 0 });
         }
-        if (checked) {
-            setRangeStart(index);
+        if (typeof index !== 'undefined') {
+            if (checked) {
+                setRangeStart(index);
+            } else {
+                setRangeStart(undefined);
+            }
         }
 
         setSelected((selected) => ({
             ...selected,
             [id]: checked,
-            count: checked ? selected.count + 1 : selected.count - 1,
+            count:
+                selected[id] === checked
+                    ? selected.count
+                    : checked
+                    ? selected.count + 1
+                    : selected.count - 1,
             collectionID: activeCollection,
         }));
     };
@@ -305,59 +342,80 @@ const PhotoFrame = ({
     };
 
     const handleRangeSelect = (index: number) => () => {
-        if (rangeStart !== index) {
-            let leftEnd = -1;
-            let rightEnd = -1;
-            if (index < rangeStart) {
-                leftEnd = index + 1;
-                rightEnd = rangeStart - 1;
-            } else {
-                leftEnd = rangeStart + 1;
-                rightEnd = index - 1;
+        if (typeof rangeStart !== 'undefined' && rangeStart !== index) {
+            const direction =
+                (index - rangeStart) / Math.abs(index - rangeStart);
+            let checked = true;
+            for (
+                let i = rangeStart;
+                (index - i) * direction >= 0;
+                i += direction
+            ) {
+                checked = checked && !!selected[filteredData[i].id];
             }
-            for (let i = leftEnd; i <= rightEnd; i++) {
-                handleSelect(filteredData[i].id)(true);
+            for (
+                let i = rangeStart;
+                (index - i) * direction > 0;
+                i += direction
+            ) {
+                handleSelect(filteredData[i].id)(!checked);
             }
+            handleSelect(filteredData[index].id, index)(!checked);
         }
     };
-    const getThumbnail = (file: File[], index: number) => (
-        <PreviewCard
-            key={`tile-${file[index].id}-selected-${
-                selected[file[index].id] ?? false
-            }`}
-            file={file[index]}
-            updateUrl={updateUrl(file[index].dataIndex)}
-            onClick={onThumbnailClick(index)}
-            selectable={!isSharedCollection}
-            onSelect={handleSelect(file[index].id, index)}
-            selected={
-                selected.collectionID === activeCollection &&
-                selected[file[index].id]
-            }
-            selectOnClick={selected.count > 0}
-            onHover={onHoverOver(index)}
-            onRangeSelect={handleRangeSelect(index)}
-            isRangeSelectActive={
-                isShiftKeyPressed && (rangeStart || rangeStart === 0)
-            }
-            isInsSelectRange={
-                (index >= rangeStart && index <= currentHover) ||
-                (index >= currentHover && index <= rangeStart)
-            }
-        />
-    );
+    const getThumbnail = (files: EnteFile[], index: number) =>
+        files[index] ? (
+            <PreviewCard
+                key={`tile-${files[index].id}-selected-${
+                    selected[files[index].id] ?? false
+                }`}
+                file={files[index]}
+                updateURL={updateURL(files[index].dataIndex)}
+                onClick={onThumbnailClick(index)}
+                selectable={!isSharedCollection}
+                onSelect={handleSelect(files[index].id, index)}
+                selected={
+                    selected.collectionID === activeCollection &&
+                    selected[files[index].id]
+                }
+                selectOnClick={selected.count > 0}
+                onHover={onHoverOver(index)}
+                onRangeSelect={handleRangeSelect(index)}
+                isRangeSelectActive={isShiftKeyPressed && selected.count > 0}
+                isInsSelectRange={
+                    (index >= rangeStart && index <= currentHover) ||
+                    (index >= currentHover && index <= rangeStart)
+                }
+            />
+        ) : (
+            <></>
+        );
 
-    const getSlideData = async (instance: any, index: number, item: File) => {
+    const getSlideData = async (
+        instance: any,
+        index: number,
+        item: EnteFile
+    ) => {
         if (!item.msrc) {
             try {
                 let url: string;
                 if (galleryContext.thumbs.has(item.id)) {
                     url = galleryContext.thumbs.get(item.id);
                 } else {
-                    url = await DownloadManager.getPreview(item);
+                    if (
+                        publicCollectionGalleryContext.accessedThroughSharedURL
+                    ) {
+                        url =
+                            await PublicCollectionDownloadManager.getThumbnail(
+                                item,
+                                publicCollectionGalleryContext.token
+                            );
+                    } else {
+                        url = await DownloadManager.getThumbnail(item);
+                    }
                     galleryContext.thumbs.set(item.id, url);
                 }
-                updateUrl(item.dataIndex)(url);
+                updateURL(item.dataIndex)(url);
                 item.msrc = url;
                 if (!item.src) {
                     item.src = url;
@@ -381,10 +439,20 @@ const PhotoFrame = ({
                 if (galleryContext.files.has(item.id)) {
                     url = galleryContext.files.get(item.id);
                 } else {
-                    url = await DownloadManager.getFile(item, true);
+                    if (
+                        publicCollectionGalleryContext.accessedThroughSharedURL
+                    ) {
+                        url = await PublicCollectionDownloadManager.getFile(
+                            item,
+                            publicCollectionGalleryContext.token,
+                            true
+                        );
+                    } else {
+                        url = await DownloadManager.getFile(item, true);
+                    }
                     galleryContext.files.set(item.id, url);
                 }
-                await updateSrcUrl(item.dataIndex, url);
+                await updateSrcURL(item.dataIndex, url);
                 item.html = files[item.dataIndex].html;
                 item.src = files[item.dataIndex].src;
                 item.w = files[item.dataIndex].w;
@@ -435,7 +503,7 @@ const PhotoFrame = ({
                                 getThumbnail={getThumbnail}
                                 filteredData={filteredData}
                                 activeCollection={activeCollection}
-                                showBanner={
+                                showAppDownloadBanner={
                                     files.length < 30 && !isInSearchMode
                                 }
                                 resetFetching={resetFetching}
@@ -449,7 +517,6 @@ const PhotoFrame = ({
                         onClose={handleClose}
                         gettingData={getSlideData}
                         favItemIds={favItemIds}
-                        loadingBar={loadingBar}
                         isSharedCollection={isSharedCollection}
                         isTrashCollection={activeCollection === TRASH_SECTION}
                     />

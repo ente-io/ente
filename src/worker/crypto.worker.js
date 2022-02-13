@@ -1,6 +1,5 @@
 import * as Comlink from 'comlink';
 import * as libsodium from 'utils/crypto/libsodium';
-import { convertHEIC2JPEG } from 'utils/file/convertHEIC';
 
 export class Crypto {
     async decryptMetadata(encryptedMetadata, header, key) {
@@ -147,34 +146,6 @@ export class Crypto {
 
     async fromHex(string) {
         return libsodium.fromHex(string);
-    }
-
-    // temporary fix for  https://github.com/vercel/next.js/issues/25484
-    async getUint8ArrayView(file) {
-        try {
-            return await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onabort = () =>
-                    reject(Error('file reading was aborted'));
-                reader.onerror = () => reject(Error('file reading has failed'));
-                reader.onload = () => {
-                    // Do whatever you want with the file contents
-                    const result =
-                        typeof reader.result === 'string'
-                            ? new TextEncoder().encode(reader.result)
-                            : new Uint8Array(reader.result);
-                    resolve(result);
-                };
-                reader.readAsArrayBuffer(file);
-            });
-        } catch (e) {
-            console.log(e, 'error reading file to byte-array');
-            throw e;
-        }
-    }
-
-    async convertHEIC2JPEG(file) {
-        return convertHEIC2JPEG(file);
     }
 }
 
