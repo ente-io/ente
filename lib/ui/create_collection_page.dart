@@ -13,7 +13,6 @@ import 'package:photos/ui/collection_page.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -318,21 +317,22 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     await dialog.show();
     try {
       final List<File> files = [];
+      final List<File> filesPendingUpload = [];
       if (widget.sharedFiles != null) {
-        final localFiles = await convertIncomingSharedMediaToFile(
-            widget.sharedFiles, collectionID);
-        await FilesDB.instance.insertMultiple(localFiles);
+        filesPendingUpload.addAll(await convertIncomingSharedMediaToFile(
+            widget.sharedFiles, collectionID));
       } else {
+        final List<File> filesPendingUpload = [];
         for (final file in widget.selectedFiles.files) {
           final currentFile = await FilesDB.instance.getFile(file.generatedID);
           if (currentFile.uploadedFileID == null) {
-            final uploadedFile = (await FileUploader.instance
-                .forceUpload(currentFile, collectionID));
-            files.add(uploadedFile);
+            currentFile.collectionID = collectionID;
+            filesPendingUpload.add(currentFile);
           } else {
             files.add(currentFile);
           }
         }
+        await FilesDB.instance.insertMultiple(filesPendingUpload);
         await CollectionsService.instance.addToCollection(collectionID, files);
       }
       RemoteSyncService.instance.sync(silently: true);

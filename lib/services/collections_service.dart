@@ -434,10 +434,10 @@ class CollectionsService {
       files.removeWhere((element) =>
           element.uploadedFileID != null &&
           existingFileIDsInCollection.contains(element.uploadedFileID));
-      if (files.isEmpty) {
-        _logger.info("nothing to add to the collection");
-        return;
-      }
+    }
+    if (files.isEmpty || !containsUploadedFile) {
+      _logger.info("nothing to add to the collection");
+      return;
     }
 
     final params = <String, dynamic>{};
