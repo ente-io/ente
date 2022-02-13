@@ -16,7 +16,6 @@ import { logError } from 'utils/sentry';
 import constants from 'utils/strings/constants';
 import { Collection } from 'types/collection';
 import { CollectionType } from 'constants/collection';
-import CryptoWorker from 'utils/crypto';
 import { getAlbumSiteHost } from 'constants/pages';
 
 export enum COLLECTION_OPS_TYPE {
@@ -114,15 +113,16 @@ export async function appendCollectionKeyToShareURL(
     url: string,
     collectionKey: string
 ) {
-    const worker = await new CryptoWorker();
     if (!url) {
         return null;
     }
+    const bs58 = require('bs58');
     const sharableURL = new URL(url);
     if (process.env.NODE_ENV === 'development') {
         sharableURL.host = getAlbumSiteHost();
         sharableURL.protocol = 'http';
     }
-    sharableURL.hash = await worker.toHex(collectionKey);
+    const bytes = Buffer.from(collectionKey, 'base64');
+    sharableURL.hash = bs58.encode(bytes);
     return sharableURL.href;
 }
