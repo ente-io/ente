@@ -33,12 +33,6 @@ export function areFilesSame(
 export function segregateMetadataAndMediaFiles(
     filesWithCollectionToUpload: FileWithCollection[]
 ) {
-    filesWithCollectionToUpload = filesWithCollectionToUpload.sort(
-        (fileWithCollection1, fileWithCollection2) =>
-            fileWithCollection1.file.name.localeCompare(
-                fileWithCollection2.file.name
-            )
-    );
     const metadataJSONFiles: FileWithCollection[] = [];
     const mediaFiles: FileWithCollection[] = [];
     filesWithCollectionToUpload.forEach((fileWithCollection) => {
