@@ -77,11 +77,18 @@ export async function readLivePhoto(
 
 export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
     const analysedMediaFiles: FileWithCollection[] = [];
-    mediaFiles.sort((media1Files, media2Files) =>
-        splitFilenameAndExtension(media1Files.file.name)[0].localeCompare(
-            splitFilenameAndExtension(media2Files.file.name)[0]
+    mediaFiles
+        .sort((firstMediaFile, secondMediaFile) =>
+            splitFilenameAndExtension(
+                firstMediaFile.file.name
+            )[0].localeCompare(
+                splitFilenameAndExtension(secondMediaFile.file.name)[0]
+            )
         )
-    );
+        .sort(
+            (firstMediaFile, secondMediaFile) =>
+                firstMediaFile.collectionID - secondMediaFile.collectionID
+        );
     let index = 0;
     while (index < mediaFiles.length - 1) {
         const firstMediaFile = mediaFiles[index];
