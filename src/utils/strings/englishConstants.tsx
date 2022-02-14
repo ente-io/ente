@@ -653,6 +653,8 @@ const englishConstants = {
     TERM_3: 'I acknowledge that any person who knowingly materially misrepresents that material or activity is infringing may be subject to liability for damages. ',
     PRESERVED_BY: 'preserved by',
     ENTE_IO: 'ente.io',
+    PLAYBACK_SUPPORT_COMING: 'playback support coming soon...',
+    LIVE_PHOTO: 'this is a live photo',
 };
 
 export default englishConstants;

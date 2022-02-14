@@ -42,7 +42,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
-import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
+import { FILE_TYPE, MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
 import { sleep } from 'utils/common';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
@@ -525,6 +525,15 @@ function PhotoSwipe(props: Iprops) {
         setIsFav(isInFav(this?.currItem));
     }
 
+    function handleLivePhotoNotification() {
+        if (checkIsLivePhoto(this?.currItem)) {
+            galleryContext.setNotificationAttributes({
+                message: constants.PLAYBACK_SUPPORT_COMING,
+                title: constants.LIVE_PHOTO,
+            });
+        }
+    }
+
     const openPhotoSwipe = () => {
         const { items, currentIndex } = props;
         const options = {
@@ -587,6 +596,7 @@ function PhotoSwipe(props: Iprops) {
         photoSwipe.listen('beforeChange', function () {
             updateInfo.call(this);
             updateFavButton.call(this);
+            handleLivePhotoNotification.call(this);
         });
         photoSwipe.listen('resize', checkExifAvailable);
         photoSwipe.init();
@@ -615,6 +625,10 @@ function PhotoSwipe(props: Iprops) {
             return favItemIds.has(file.id);
         }
         return false;
+    };
+
+    const checkIsLivePhoto = (file: EnteFile) => {
+        return file.metadata.fileType === FILE_TYPE.LIVE_PHOTO;
     };
 
     const onFavClick = async (file) => {
