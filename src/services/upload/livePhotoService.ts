@@ -9,6 +9,7 @@ import {
 } from 'types/upload';
 import { splitFilenameAndExtension } from 'utils/file';
 import { readFile } from './fileService';
+import { getFileData } from './readFileService';
 import uploadService from './uploadService';
 import UploadService from './uploadService';
 
@@ -50,12 +51,8 @@ export async function readLivePhoto(
     fileTypeInfo: FileTypeInfo,
     livePhotoAssets: LivePhotoAssets
 ) {
-    const image = await readFile(
-        worker,
-        reader,
-        { exactType: fileTypeInfo.exactType, fileType: FILE_TYPE.IMAGE },
-        livePhotoAssets.image
-    );
+    const image = await getFileData(reader, livePhotoAssets.image);
+
     const video = await readFile(
         worker,
         reader,
@@ -63,20 +60,18 @@ export async function readLivePhoto(
         livePhotoAssets.video
     );
 
-    if (isDataStream(video.filedata) || isDataStream(image.filedata)) {
+    if (isDataStream(video.filedata) || isDataStream(image)) {
         throw new Error('too large live photo assets');
     }
     return {
         filedata: await encodeMotionPhoto({
-            image: image.filedata as Uint8Array,
+            image: image as Uint8Array,
             video: video.filedata as Uint8Array,
             imageNameTitle: livePhotoAssets.image.name,
             videoNameTitle: livePhotoAssets.video.name,
         }),
-        thumbnail: video.hasStaticThumbnail ? video.thumbnail : image.thumbnail,
-        hasStaticThumbnail: !(
-            !video.hasStaticThumbnail || !image.hasStaticThumbnail
-        ),
+        thumbnail: video.thumbnail,
+        hasStaticThumbnail: video.hasStaticThumbnail,
     };
 }
 
