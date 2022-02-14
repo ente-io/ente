@@ -134,10 +134,10 @@ const GlobalStyles = createGlobalStyle`
         min-height: -moz-calc(80% - 3.5rem);
         min-height: calc(80% - 3.5rem);
     }
-    .modal .modal-header, .modal .modal-footer {
+    .modal .modal-header, .modal .modal-footer , .toast-header{
         border-color: #444 !important;
     }
-    .modal .modal-header .close {
+    .modal .modal-header .close, .toast-header .close {
         color: #aaa;
         text-shadow: none;
     }
@@ -145,7 +145,11 @@ const GlobalStyles = createGlobalStyle`
         z-index:2000;
         opacity:0.8 !important;
     }
-    .modal .card , .table {
+
+    .toast-header{
+        border-radius:0px !important;
+    }
+    .modal .card , .table , .toast {
         background-color: #202020;
         border: none;
     }
@@ -154,7 +158,7 @@ const GlobalStyles = createGlobalStyle`
         overflow: hidden;
         margin: 0 0 5px 0;
     }
-    .modal-content {
+    .modal-content ,.toast-header{
         border-radius:15px;
         background-color:#202020 !important;
     }
@@ -484,6 +488,10 @@ const GlobalStyles = createGlobalStyle`
     }
     .form-check-input:hover, .form-check-label :hover{
         cursor:pointer;
+    }
+
+    .ente-toast{
+
     }
 `;
 
