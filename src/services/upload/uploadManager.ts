@@ -97,9 +97,7 @@ class UploadManager {
                 );
                 UIService.setUploadStage(UPLOAD_STAGES.START);
                 const analysedMediaFiles =
-                    mediaFiles.length > 1
-                        ? UploadService.clusterLivePhotoFiles(mediaFiles)
-                        : mediaFiles;
+                    UploadService.clusterLivePhotoFiles(mediaFiles);
                 uiService.setFilenames(
                     new Map<number, string>(
                         analysedMediaFiles.map(({ localID, file }) => [
