@@ -51,27 +51,27 @@ export async function readLivePhoto(
     fileTypeInfo: FileTypeInfo,
     livePhotoAssets: LivePhotoAssets
 ) {
-    const image = await getFileData(reader, livePhotoAssets.image);
-
-    const video = await readFile(
+    const image = await readFile(
         worker,
         reader,
-        { exactType: fileTypeInfo.exactType, fileType: FILE_TYPE.VIDEO },
-        livePhotoAssets.video
+        { exactType: fileTypeInfo.exactType, fileType: FILE_TYPE.IMAGE },
+        livePhotoAssets.image
     );
 
-    if (isDataStream(video.filedata) || isDataStream(image)) {
+    const video = await getFileData(reader, livePhotoAssets.video);
+
+    if (isDataStream(video) || isDataStream(image.filedata)) {
         throw new Error('too large live photo assets');
     }
     return {
         filedata: await encodeMotionPhoto({
-            image: image as Uint8Array,
-            video: video.filedata as Uint8Array,
+            image: image.filedata as Uint8Array,
+            video: video as Uint8Array,
             imageNameTitle: livePhotoAssets.image.name,
             videoNameTitle: livePhotoAssets.video.name,
         }),
-        thumbnail: video.thumbnail,
-        hasStaticThumbnail: video.hasStaticThumbnail,
+        thumbnail: image.thumbnail,
+        hasStaticThumbnail: image.hasStaticThumbnail,
     };
 }
 
