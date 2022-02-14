@@ -11,6 +11,7 @@ import {
     PublicCollectionGalleryContext,
 } from 'utils/publicCollectionGallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
+import LivePhotoIndicatorOverlay from 'components/icons/LivePhotoIndicatorOverlay';
 
 interface IProps {
     file: EnteFile;
@@ -283,6 +284,7 @@ export default function PreviewCard(props: IProps) {
             <InSelectRangeOverLay
                 active={isRangeSelectActive && isInsSelectRange}
             />
+            <LivePhotoIndicatorOverlay />
         </Cont>
     );
 }
