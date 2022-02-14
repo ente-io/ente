@@ -274,6 +274,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.0"
+  fast_base58:
+    dependency: "direct main"
+    description:
+      name: fast_base58
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.1"
   ffi:
     dependency: transitive
     description:

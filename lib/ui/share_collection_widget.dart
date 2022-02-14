@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -18,7 +19,6 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
-import 'package:photos/utils/hex.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -210,8 +210,7 @@ class _SharingDialogState extends State<SharingDialog> {
   }
 
   Widget _getShareableUrlWidget() {
-    var hexEncoder = HexEncoder(upperCase: false);
-    String collectionKey = hexEncoder.convert(
+    String collectionKey = Base58Encode(
         CollectionsService.instance.getCollectionKey(widget.collection.id));
     String url = "${widget.collection.publicURLs.first.url}#$collectionKey";
     return SingleChildScrollView(
