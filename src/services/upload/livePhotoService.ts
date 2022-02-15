@@ -128,12 +128,12 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                 secondFileFileInfo.fileType === FILE_TYPE.VIDEO
             ) {
                 imageFile = firstMediaFile.file;
+                imageMetadata = firstFileMetadata;
                 videoFile = secondMediaFile.file;
-                imageMetadata = secondFileMetadata;
             } else {
                 imageFile = secondMediaFile.file;
+                imageMetadata = secondFileMetadata;
                 videoFile = firstMediaFile.file;
-                imageMetadata = firstFileMetadata;
             }
             const livePhotoLocalID = index;
             analysedMediaFiles.push({
