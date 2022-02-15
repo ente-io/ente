@@ -22,6 +22,8 @@ interface LivePhotoIdentifier {
     size: number;
 }
 
+const ENTE_LIVE_PHOTO_FORMAT = 'elp';
+
 export function getLivePhotoFileType(
     file1TypeInfo: FileTypeInfo,
     file2TypeInfo: FileTypeInfo
@@ -32,14 +34,12 @@ export function getLivePhotoFileType(
     };
 }
 
-export function getLivePhotoMetadata(
-    file1Metadata: Metadata,
-    file2Metadata: Metadata
-) {
+export function getLivePhotoMetadata(imageMetadata: Metadata) {
     return {
-        ...file1Metadata,
-        ...file2Metadata,
-        title: `${splitFilenameAndExtension(file1Metadata.title)[0]}.zip`,
+        ...imageMetadata,
+        title: `${
+            splitFilenameAndExtension(imageMetadata.title)[0]
+        }.${ENTE_LIVE_PHOTO_FORMAT}`,
         fileType: FILE_TYPE.LIVE_PHOTO,
     };
 }
@@ -120,17 +120,20 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
         if (
             areFilesLivePhotoAssets(firstFileIdentifier, secondFileIdentifier)
         ) {
-            let imageFile;
-            let videoFile;
+            let imageFile: File;
+            let videoFile: File;
+            let imageMetadata: Metadata;
             if (
                 firstFileTypeInfo.fileType === FILE_TYPE.IMAGE &&
                 secondFileFileInfo.fileType === FILE_TYPE.VIDEO
             ) {
                 imageFile = firstMediaFile.file;
                 videoFile = secondMediaFile.file;
+                imageMetadata = secondFileMetadata;
             } else {
                 imageFile = secondMediaFile.file;
                 videoFile = firstMediaFile.file;
+                imageMetadata = firstFileMetadata;
             }
             const livePhotoLocalID = index;
             analysedMediaFiles.push({
@@ -143,10 +146,8 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                 firstFileTypeInfo,
                 secondFileFileInfo
             );
-            const livePhotoMetadata: Metadata = getLivePhotoMetadata(
-                firstFileMetadata,
-                secondFileMetadata
-            );
+            const livePhotoMetadata: Metadata =
+                getLivePhotoMetadata(imageMetadata);
             uploadService.setFileMetadataAndFileTypeInfo(livePhotoLocalID, {
                 fileTypeInfo: { ...livePhotoFileTypeInfo },
                 metadata: { ...livePhotoMetadata },
