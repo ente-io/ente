@@ -618,6 +618,7 @@ function PhotoSwipe(props: Iprops) {
             videoTag.pause();
         }
         handleCloseInfo();
+        galleryContext.setNotificationAttributes(null);
     };
     const isInFav = (file) => {
         const { favItemIds } = props;
