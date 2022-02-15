@@ -161,7 +161,7 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                     fileTypeInfo: secondFileFileInfo,
                 };
             }
-            const livePhotoLocalID = index;
+            const livePhotoLocalID = firstMediaFile.localID;
             analysedMediaFiles.push({
                 localID: livePhotoLocalID,
                 collectionID: firstMediaFile.collectionID,
