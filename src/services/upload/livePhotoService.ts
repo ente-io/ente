@@ -1,4 +1,5 @@
 import { FILE_TYPE } from 'constants/file';
+import { MULTIPART_PART_SIZE } from 'constants/upload';
 import { encodeMotionPhoto } from 'services/motionPhotoService';
 import {
     FileTypeInfo,
@@ -17,6 +18,7 @@ interface LivePhotoIdentifier {
     collectionID: number;
     fileType: FILE_TYPE;
     name: string;
+    size: number;
 }
 
 export function getLivePhotoFileType(
@@ -60,6 +62,10 @@ export async function readLivePhoto(
 
     const video = await getFileData(reader, livePhotoAssets.video);
 
+    /*
+    did it based on the assumption that live photo assets ideally would not be larger than MULTIPART_PART_SIZE and hence not require to be streamed
+    also, allowing that would require a small amount of code changes as the zipping library doesn't support stream as a input
+    */
     if (isDataStream(video) || isDataStream(image.filedata)) {
         throw new Error('too large live photo assets');
     }
@@ -107,11 +113,13 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
             collectionID: firstMediaFile.collectionID,
             fileType: firstFileTypeInfo.fileType,
             name: firstFileMetadata.title,
+            size: firstMediaFile.file.size,
         };
         const secondFileIdentifier: LivePhotoIdentifier = {
             collectionID: secondMediaFile.collectionID,
             fileType: secondFileFileInfo.fileType,
             name: secondFileMetadata.title,
+            size: secondMediaFile.file.size,
         };
         if (
             areFilesLivePhotoAssets(firstFileIdentifier, secondFileIdentifier)
@@ -170,6 +178,8 @@ function areFilesLivePhotoAssets(
         firstFileIdentifier.fileType !== FILE_TYPE.OTHERS &&
         secondFileIdentifier.fileType !== FILE_TYPE.OTHERS &&
         splitFilenameAndExtension(firstFileIdentifier.name)[0] ===
-            splitFilenameAndExtension(secondFileIdentifier.name)[0]
+            splitFilenameAndExtension(secondFileIdentifier.name)[0] &&
+        firstFileIdentifier.size <= MULTIPART_PART_SIZE && // so that they are small enough to be read and uploaded in single chunk
+        secondFileIdentifier.size <= MULTIPART_PART_SIZE
     );
 }
