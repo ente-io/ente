@@ -22,15 +22,21 @@ interface LivePhotoIdentifier {
     size: number;
 }
 
+interface Asset {
+    file: File;
+    metadata: Metadata;
+    fileTypeInfo: FileTypeInfo;
+}
+
 const ENTE_LIVE_PHOTO_FORMAT = 'elp';
 
 export function getLivePhotoFileType(
-    file1TypeInfo: FileTypeInfo,
-    file2TypeInfo: FileTypeInfo
+    imageFileTypeInfo: FileTypeInfo,
+    videoTypeInfo: FileTypeInfo
 ) {
     return {
         fileType: FILE_TYPE.LIVE_PHOTO,
-        exactType: `${file1TypeInfo.exactType}+${file2TypeInfo.exactType}`,
+        exactType: `${imageFileTypeInfo.exactType}+${videoTypeInfo.exactType}`,
     };
 }
 
@@ -54,11 +60,18 @@ export async function readLivePhoto(
     fileTypeInfo: FileTypeInfo,
     livePhotoAssets: LivePhotoAssets
 ) {
+    const imageType = fileTypeInfo.exactType.slice(
+        0,
+        fileTypeInfo.exactType.indexOf('+')
+    );
     const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
         worker,
         reader,
         livePhotoAssets.image,
-        { exactType: fileTypeInfo.exactType, fileType: FILE_TYPE.IMAGE }
+        {
+            exactType: imageType,
+            fileType: FILE_TYPE.IMAGE,
+        }
     );
 
     const image = await getUint8ArrayView(reader, livePhotoAssets.image);
@@ -120,34 +133,51 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
         if (
             areFilesLivePhotoAssets(firstFileIdentifier, secondFileIdentifier)
         ) {
-            let imageFile: File;
-            let videoFile: File;
-            let imageMetadata: Metadata;
+            let imageAsset: Asset;
+            let videoAsset: Asset;
             if (
                 firstFileTypeInfo.fileType === FILE_TYPE.IMAGE &&
                 secondFileFileInfo.fileType === FILE_TYPE.VIDEO
             ) {
-                imageFile = firstMediaFile.file;
-                imageMetadata = firstFileMetadata;
-                videoFile = secondMediaFile.file;
+                imageAsset = {
+                    file: firstMediaFile.file,
+                    metadata: firstFileMetadata,
+                    fileTypeInfo: firstFileTypeInfo,
+                };
+                videoAsset = {
+                    file: secondMediaFile.file,
+                    metadata: secondFileMetadata,
+                    fileTypeInfo: secondFileFileInfo,
+                };
             } else {
-                imageFile = secondMediaFile.file;
-                imageMetadata = secondFileMetadata;
-                videoFile = firstMediaFile.file;
+                videoAsset = {
+                    file: firstMediaFile.file,
+                    metadata: firstFileMetadata,
+                    fileTypeInfo: firstFileTypeInfo,
+                };
+                imageAsset = {
+                    file: secondMediaFile.file,
+                    metadata: secondFileMetadata,
+                    fileTypeInfo: secondFileFileInfo,
+                };
             }
             const livePhotoLocalID = index;
             analysedMediaFiles.push({
                 localID: livePhotoLocalID,
                 collectionID: firstMediaFile.collectionID,
                 isLivePhoto: true,
-                livePhotoAssets: { image: imageFile, video: videoFile },
+                livePhotoAssets: {
+                    image: imageAsset.file,
+                    video: videoAsset.file,
+                },
             });
             const livePhotoFileTypeInfo: FileTypeInfo = getLivePhotoFileType(
-                firstFileTypeInfo,
-                secondFileFileInfo
+                imageAsset.fileTypeInfo,
+                videoAsset.fileTypeInfo
             );
-            const livePhotoMetadata: Metadata =
-                getLivePhotoMetadata(imageMetadata);
+            const livePhotoMetadata: Metadata = getLivePhotoMetadata(
+                imageAsset.metadata
+            );
             uploadService.setFileMetadataAndFileTypeInfo(livePhotoLocalID, {
                 fileTypeInfo: { ...livePhotoFileTypeInfo },
                 metadata: { ...livePhotoMetadata },
