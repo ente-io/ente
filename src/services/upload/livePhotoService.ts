@@ -112,13 +112,13 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
         const firstFileIdentifier: LivePhotoIdentifier = {
             collectionID: firstMediaFile.collectionID,
             fileType: firstFileTypeInfo.fileType,
-            name: firstFileMetadata.title,
+            name: firstMediaFile.file.name,
             size: firstMediaFile.file.size,
         };
         const secondFileIdentifier: LivePhotoIdentifier = {
             collectionID: secondMediaFile.collectionID,
             fileType: secondFileFileInfo.fileType,
-            name: secondFileMetadata.title,
+            name: secondMediaFile.file.name,
             size: secondMediaFile.file.size,
         };
         if (
