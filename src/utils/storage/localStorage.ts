@@ -13,7 +13,7 @@ export enum LS_KEYS {
     EXPORT = 'export',
     AnonymizeUserID = 'anonymizedUserID',
     THUMBNAIL_FIX_STATE = 'thumbnailFixState',
-    IS_LIVE_PHOTO_INFO_SHOWN_COUNT = 'isLivePhotoInfoShownCount',
+    LIVE_PHOTO_INFO_SHOWN_COUNT = 'livePhotoInfoShownCount',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {
