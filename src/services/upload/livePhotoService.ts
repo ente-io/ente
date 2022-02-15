@@ -1,16 +1,17 @@
 import { FILE_TYPE } from 'constants/file';
-import { MULTIPART_PART_SIZE } from 'constants/upload';
+import { LIVE_PHOTO_ASSET_SIZE_LIMIT } from 'constants/upload';
 import { encodeMotionPhoto } from 'services/motionPhotoService';
 import {
     FileTypeInfo,
     FileWithCollection,
-    isDataStream,
     LivePhotoAssets,
     Metadata,
 } from 'types/upload';
+import { CustomError } from 'utils/error';
 import { splitFilenameAndExtension } from 'utils/file';
-import { readFile } from './fileService';
-import { getFileData } from './readFileService';
+import { logError } from 'utils/sentry';
+import { getUint8ArrayView } from './readFileService';
+import { generateThumbnail } from './thumbnailService';
 import uploadService from './uploadService';
 import UploadService from './uploadService';
 
@@ -53,31 +54,26 @@ export async function readLivePhoto(
     fileTypeInfo: FileTypeInfo,
     livePhotoAssets: LivePhotoAssets
 ) {
-    const image = await readFile(
+    const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
         worker,
         reader,
-        { exactType: fileTypeInfo.exactType, fileType: FILE_TYPE.IMAGE },
-        livePhotoAssets.image
+        livePhotoAssets.image,
+        { exactType: fileTypeInfo.exactType, fileType: FILE_TYPE.IMAGE }
     );
 
-    const video = await getFileData(reader, livePhotoAssets.video);
+    const image = await getUint8ArrayView(reader, livePhotoAssets.image);
 
-    /*
-    did it based on the assumption that live photo assets ideally would not be larger than MULTIPART_PART_SIZE and hence not require to be streamed
-    also, allowing that would require a small amount of code changes as the zipping library doesn't support stream as a input
-    */
-    if (isDataStream(video) || isDataStream(image.filedata)) {
-        throw new Error('too large live photo assets');
-    }
+    const video = await getUint8ArrayView(reader, livePhotoAssets.video);
+
     return {
         filedata: await encodeMotionPhoto({
-            image: image.filedata as Uint8Array,
-            video: video as Uint8Array,
+            image,
+            video,
             imageNameTitle: livePhotoAssets.image.name,
             videoNameTitle: livePhotoAssets.video.name,
         }),
-        thumbnail: image.thumbnail,
-        hasStaticThumbnail: image.hasStaticThumbnail,
+        thumbnail,
+        hasStaticThumbnail,
     };
 }
 
@@ -171,15 +167,35 @@ function areFilesLivePhotoAssets(
     firstFileIdentifier: LivePhotoIdentifier,
     secondFileIdentifier: LivePhotoIdentifier
 ) {
-    return (
+    if (
         firstFileIdentifier.collectionID ===
             secondFileIdentifier.collectionID &&
         firstFileIdentifier.fileType !== secondFileIdentifier.fileType &&
         firstFileIdentifier.fileType !== FILE_TYPE.OTHERS &&
         secondFileIdentifier.fileType !== FILE_TYPE.OTHERS &&
         splitFilenameAndExtension(firstFileIdentifier.name)[0] ===
-            splitFilenameAndExtension(secondFileIdentifier.name)[0] &&
-        firstFileIdentifier.size <= MULTIPART_PART_SIZE && // so that they are small enough to be read and uploaded in single chunk
-        secondFileIdentifier.size <= MULTIPART_PART_SIZE
-    );
+            splitFilenameAndExtension(secondFileIdentifier.name)[0]
+    ) {
+        // checks size of live Photo assets are less than allowed limit
+        // I did that based on the assumption that live photo assets ideally would not be larger than LIVE_PHOTO_ASSET_SIZE_LIMIT
+        // also zipping library doesn't support stream as a input
+        if (
+            firstFileIdentifier.size <= LIVE_PHOTO_ASSET_SIZE_LIMIT &&
+            secondFileIdentifier.size <= LIVE_PHOTO_ASSET_SIZE_LIMIT
+        ) {
+            return true;
+        } else {
+            logError(
+                new Error(CustomError.TOO_LARGE_LIVE_PHOTO_ASSETS),
+                CustomError.TOO_LARGE_LIVE_PHOTO_ASSETS,
+                {
+                    fileSizes: [
+                        firstFileIdentifier.size,
+                        secondFileIdentifier.size,
+                    ],
+                }
+            );
+        }
+    }
+    return false;
 }

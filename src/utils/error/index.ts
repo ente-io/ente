@@ -39,6 +39,7 @@ export enum CustomError {
     SUBSCRIPTION_NEEDED = 'subscription not present',
     NOT_FOUND = 'not found ',
     NO_METADATA = 'no metadata',
+    TOO_LARGE_LIVE_PHOTO_ASSETS = 'too large live photo assets',
 }
 
 function parseUploadErrorCodes(error) {
