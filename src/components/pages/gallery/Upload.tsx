@@ -201,6 +201,7 @@ export default function Upload(props: Props) {
             }
             try {
                 const existingCollection = await syncCollections();
+                let index = 0;
                 for (const [collectionName, files] of collectionWiseFiles) {
                     const collection = await createAlbum(
                         collectionName,
@@ -209,8 +210,8 @@ export default function Upload(props: Props) {
                     collections.push(collection);
 
                     filesWithCollectionToUpload.push(
-                        ...files.map((file, index) => ({
-                            localID: index,
+                        ...files.map((file) => ({
+                            localID: index++,
                             collectionID: collection.id,
                             file,
                         }))
