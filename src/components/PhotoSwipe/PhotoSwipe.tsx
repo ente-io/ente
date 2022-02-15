@@ -46,6 +46,7 @@ import { FILE_TYPE, MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
 import { sleep } from 'utils/common';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -527,10 +528,18 @@ function PhotoSwipe(props: Iprops) {
 
     function handleLivePhotoNotification() {
         if (checkIsLivePhoto(this?.currItem)) {
-            galleryContext.setNotificationAttributes({
-                message: constants.PLAYBACK_SUPPORT_COMING,
-                title: constants.LIVE_PHOTO,
-            });
+            const infoShownCount = Number(
+                getData(LS_KEYS.IS_LIVE_PHOTO_INFO_SHOWN_COUNT)?.value ?? 0
+            );
+            if (infoShownCount < 3) {
+                galleryContext.setNotificationAttributes({
+                    message: constants.PLAYBACK_SUPPORT_COMING,
+                    title: constants.LIVE_PHOTO,
+                });
+                setData(LS_KEYS.IS_LIVE_PHOTO_INFO_SHOWN_COUNT, {
+                    value: infoShownCount + 1,
+                });
+            }
         }
     }
 
