@@ -7,7 +7,7 @@ import {
     PublicMagicMetadataProps,
 } from 'types/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
-import { getMimeTypeFromBlob } from 'services/upload/readFileService';
+import { getFileTypeFromBlob } from 'services/upload/readFileService';
 import DownloadManager from 'services/downloadManager';
 import { logError } from 'utils/sentry';
 import { User } from 'types/user';
@@ -326,7 +326,8 @@ export async function convertForPreview(file: EnteFile, fileBlob: Blob) {
     const reader = new FileReader();
 
     const mimeType =
-        (await getMimeTypeFromBlob(reader, fileBlob)) ?? typeFromExtension;
+        (await getFileTypeFromBlob(reader, fileBlob))?.mime ??
+        typeFromExtension;
     if (isFileHEIC(mimeType)) {
         fileBlob = await HEICConverter.convert(fileBlob);
     }

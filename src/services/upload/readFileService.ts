@@ -29,12 +29,12 @@ export async function getFileType(
 ): Promise<FileTypeInfo> {
     try {
         let fileType: FILE_TYPE;
-        const mimeType = await getMimeType(reader, receivedFile);
-        const typeParts = mimeType?.split('/');
-        if (typeParts?.length !== 2) {
+        const typeResult = await extractFileType(reader, receivedFile);
+        const mimTypeParts = typeResult.mime?.split('/');
+        if (mimTypeParts?.length !== 2) {
             throw Error(CustomError.TYPE_DETECTION_FAILED);
         }
-        switch (typeParts[0]) {
+        switch (mimTypeParts[0]) {
             case TYPE_IMAGE:
                 fileType = FILE_TYPE.IMAGE;
                 break;
@@ -44,7 +44,7 @@ export async function getFileType(
             default:
                 fileType = FILE_TYPE.OTHERS;
         }
-        return { fileType, exactType: typeParts[1] };
+        return { fileType, exactType: typeResult.ext };
     } catch (e) {
         const fileFormat = getFileExtension(receivedFile.name);
         const formatMissedByTypeDetection = FORMAT_MISSED_BY_FILE_TYPE_LIB.find(
@@ -85,16 +85,15 @@ export function getFileOriginalName(file: File) {
     return originalName;
 }
 
-async function getMimeType(reader: FileReader, file: File) {
+async function extractFileType(reader: FileReader, file: File) {
     const fileChunkBlob = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
-    return getMimeTypeFromBlob(reader, fileChunkBlob);
+    return getFileTypeFromBlob(reader, fileChunkBlob);
 }
 
-export async function getMimeTypeFromBlob(reader: FileReader, fileBlob: Blob) {
+export async function getFileTypeFromBlob(reader: FileReader, fileBlob: Blob) {
     try {
         const initialFiledata = await getUint8ArrayView(reader, fileBlob);
-        const result = await FileType.fromBuffer(initialFiledata);
-        return result.mime;
+        return await FileType.fromBuffer(initialFiledata);
     } catch (e) {
         throw Error(CustomError.TYPE_DETECTION_FAILED);
     }
