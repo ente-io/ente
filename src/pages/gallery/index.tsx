@@ -104,7 +104,7 @@ import {
 } from 'types/gallery';
 import Collections from 'components/pages/gallery/Collections';
 import { VISIBILITY_STATE } from 'constants/file';
-import Notification from 'components/ToastNotification';
+import ToastNotification from 'components/ToastNotification';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -590,7 +590,7 @@ export default function Gallery() {
                     setLoading={setLoading}
                 />
                 <AlertBanner bannerMessage={bannerMessage} />
-                <Notification
+                <ToastNotification
                     attributes={notificationAttributes}
                     clearAttributes={clearNotificationAttributes}
                 />
