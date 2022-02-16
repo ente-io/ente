@@ -19,13 +19,11 @@ export function getFileSize(file: File) {
 }
 
 export async function readFile(
-    worker: any,
     reader: FileReader,
     fileTypeInfo: FileTypeInfo,
     rawFile: File
 ): Promise<FileInMemory> {
     const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-        worker,
         reader,
         rawFile,
         fileTypeInfo

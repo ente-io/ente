@@ -42,7 +42,6 @@ export default async function uploader(
         }
 
         const file = await UploadService.readAsset(
-            worker,
             reader,
             fileTypeInfo,
             uploadAsset

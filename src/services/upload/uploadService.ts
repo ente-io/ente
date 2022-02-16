@@ -73,14 +73,13 @@ class UploadService {
     }
 
     async readAsset(
-        worker: any,
         reader: FileReader,
         fileTypeInfo: FileTypeInfo,
         { isLivePhoto, file, livePhotoAssets }: UploadAsset
     ) {
         return isLivePhoto
-            ? await readLivePhoto(worker, reader, fileTypeInfo, livePhotoAssets)
-            : await readFile(worker, reader, fileTypeInfo, file);
+            ? await readLivePhoto(reader, fileTypeInfo, livePhotoAssets)
+            : await readFile(reader, fileTypeInfo, file);
     }
 
     async extractFileMetadata(

@@ -55,7 +55,6 @@ export function getLivePhotoSize(livePhotoAssets: LivePhotoAssets) {
 }
 
 export async function readLivePhoto(
-    worker,
     reader: FileReader,
     fileTypeInfo: FileTypeInfo,
     livePhotoAssets: LivePhotoAssets
@@ -65,7 +64,6 @@ export async function readLivePhoto(
         fileTypeInfo.exactType.indexOf('+')
     );
     const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-        worker,
         reader,
         livePhotoAssets.image,
         {
