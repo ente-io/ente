@@ -53,7 +53,7 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
                 title: attributes?.title,
             }}>
             <Formik<formValues>
-                initialValues={{ albumName: attributes.autoFilledName }}
+                initialValues={{ albumName: attributes.autoFilledName ?? '' }}
                 validationSchema={Yup.object().shape({
                     albumName: Yup.string().required(constants.REQUIRED),
                 })}
