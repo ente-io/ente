@@ -127,18 +127,22 @@ class UploadManager {
             UIService.reset(metadataFiles.length);
             const reader = new FileReader();
             for (const { file, collectionID } of metadataFiles) {
-                const parsedMetadataJSONWithTitle = await parseMetadataJSON(
-                    reader,
-                    file
-                );
-                if (parsedMetadataJSONWithTitle) {
-                    const { title, parsedMetadataJSON } =
-                        parsedMetadataJSONWithTitle;
-                    this.parsedMetadataJSONMap.set(
-                        getMetadataJSONMapKey(collectionID, title),
-                        parsedMetadataJSON && { ...parsedMetadataJSON }
+                try {
+                    const parsedMetadataJSONWithTitle = await parseMetadataJSON(
+                        reader,
+                        file
                     );
-                    UIService.increaseFileUploaded();
+                    if (parsedMetadataJSONWithTitle) {
+                        const { title, parsedMetadataJSON } =
+                            parsedMetadataJSONWithTitle;
+                        this.parsedMetadataJSONMap.set(
+                            getMetadataJSONMapKey(collectionID, title),
+                            parsedMetadataJSON && { ...parsedMetadataJSON }
+                        );
+                        UIService.increaseFileUploaded();
+                    }
+                } catch (e) {
+                    logError(e, 'parsing failed for a file');
                 }
             }
         } catch (e) {
@@ -152,31 +156,35 @@ class UploadManager {
             UIService.reset(mediaFiles.length);
             const reader = new FileReader();
             for (const { file, localID, collectionID } of mediaFiles) {
-                const { fileTypeInfo, metadata } = await (async () => {
-                    if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
-                        return { fileTypeInfo: null, metadata: null };
-                    }
-                    const fileTypeInfo = await UploadService.getFileType(
-                        reader,
-                        file
-                    );
-                    if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
-                        return { fileTypeInfo, metadata: null };
-                    }
-                    const metadata =
-                        (await UploadService.extractFileMetadata(
-                            file,
-                            collectionID,
-                            fileTypeInfo
-                        )) || null;
-                    return { fileTypeInfo, metadata };
-                })();
+                try {
+                    const { fileTypeInfo, metadata } = await (async () => {
+                        if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
+                            return { fileTypeInfo: null, metadata: null };
+                        }
+                        const fileTypeInfo = await UploadService.getFileType(
+                            reader,
+                            file
+                        );
+                        if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
+                            return { fileTypeInfo, metadata: null };
+                        }
+                        const metadata =
+                            (await UploadService.extractFileMetadata(
+                                file,
+                                collectionID,
+                                fileTypeInfo
+                            )) || null;
+                        return { fileTypeInfo, metadata };
+                    })();
 
-                this.metadataAndFileTypeInfoMap.set(localID, {
-                    fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
-                    metadata: metadata && { ...metadata },
-                });
-                UIService.increaseFileUploaded();
+                    this.metadataAndFileTypeInfoMap.set(localID, {
+                        fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
+                        metadata: metadata && { ...metadata },
+                    });
+                    UIService.increaseFileUploaded();
+                } catch (e) {
+                    logError(e, 'metadata extraction failed for a file');
+                }
             }
         } catch (e) {
             logError(e, 'error extracting metadata');
