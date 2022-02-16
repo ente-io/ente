@@ -226,7 +226,7 @@ function areFilesLivePhotoAssets(
 }
 
 function removeUnderscoreSuffix(filename: string) {
-    const indexOfUnderscore = filename.indexOf('_');
+    const indexOfUnderscore = filename.lastIndexOf('_');
     if (indexOfUnderscore !== -1) {
         return filename.slice(0, indexOfUnderscore);
     } else {
