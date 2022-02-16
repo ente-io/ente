@@ -278,7 +278,7 @@ export async function getTFImage(blob): Promise<tf.Tensor3D> {
     return tfImage;
 }
 
-export async function getImageBitmap(blob: Blob): Promise<ImageBitmap> {
+export async function getImageBlobBitmap(blob: Blob): Promise<ImageBitmap> {
     return await createImageBitmap(blob);
 }
 
@@ -352,7 +352,7 @@ export async function getOriginalImageBitmap(
     }
     console.log('[MLService] Got file: ', file.id.toString());
 
-    return getImageBitmap(fileBlob);
+    return getImageBlobBitmap(fileBlob);
 }
 
 export async function getThumbnailImageBitmap(file: EnteFile, token: string) {
@@ -365,7 +365,7 @@ export async function getThumbnailImageBitmap(file: EnteFile, token: string) {
 
     const thumbFile = await fetch(fileUrl);
 
-    return getImageBitmap(await thumbFile.blob());
+    return getImageBlobBitmap(await thumbFile.blob());
 }
 
 export async function getLocalFileImageBitmap(
@@ -378,7 +378,7 @@ export async function getLocalFileImageBitmap(
         const enteWorker = await enteWorkerProvider();
         fileBlob = await convertForPreview(enteFile, fileBlob, enteWorker);
     }
-    return getImageBitmap(fileBlob);
+    return getImageBlobBitmap(fileBlob);
 }
 
 export async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
