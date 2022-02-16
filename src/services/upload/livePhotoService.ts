@@ -204,8 +204,12 @@ function areFilesLivePhotoAssets(
         firstFileIdentifier.fileType !== secondFileIdentifier.fileType &&
         firstFileIdentifier.fileType !== FILE_TYPE.OTHERS &&
         secondFileIdentifier.fileType !== FILE_TYPE.OTHERS &&
-        splitFilenameAndExtension(firstFileIdentifier.name)[0] ===
-            splitFilenameAndExtension(secondFileIdentifier.name)[0]
+        removeUnderscoreSuffix(
+            splitFilenameAndExtension(firstFileIdentifier.name)[0]
+        ) ===
+            removeUnderscoreSuffix(
+                splitFilenameAndExtension(secondFileIdentifier.name)[0]
+            )
     ) {
         // checks size of live Photo assets are less than allowed limit
         // I did that based on the assumption that live photo assets ideally would not be larger than LIVE_PHOTO_ASSET_SIZE_LIMIT
@@ -229,4 +233,13 @@ function areFilesLivePhotoAssets(
         }
     }
     return false;
+}
+
+function removeUnderscoreSuffix(filename: string) {
+    const indexOfUnderscore = filename.indexOf('_');
+    if (indexOfUnderscore !== -1) {
+        return filename.slice(0, indexOfUnderscore);
+    } else {
+        return filename;
+    }
 }
