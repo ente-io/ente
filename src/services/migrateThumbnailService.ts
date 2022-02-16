@@ -79,7 +79,6 @@ export async function replaceThumbnail(
                 );
                 const fileTypeInfo = await getFileType(reader, dummyImageFile);
                 const { thumbnail: newThumbnail } = await generateThumbnail(
-                    worker,
                     reader,
                     dummyImageFile,
                     fileTypeInfo

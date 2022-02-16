@@ -25,6 +25,7 @@ export const NULL_LOCATION: Location = { latitude: null, longitude: null };
 export enum UPLOAD_STAGES {
     START,
     READING_GOOGLE_METADATA_FILES,
+    EXTRACTING_METADATA,
     UPLOADING,
     FINISH,
 }
@@ -38,3 +39,7 @@ export enum FileUploadResults {
     LARGER_THAN_AVAILABLE_STORAGE,
     UPLOADED,
 }
+
+export const MAX_FILE_SIZE_SUPPORTED = 5 * 1024 * 1024 * 1024; // 5 GB
+
+export const LIVE_PHOTO_ASSET_SIZE_LIMIT = 20 * 1024 * 1024; // 20MB

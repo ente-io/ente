@@ -99,13 +99,14 @@ const englishConstants = {
     ENTER_ALBUM_NAME: 'album name',
     CLOSE: 'close',
     NO: 'no',
-    NOTHING_HERE: 'nothing to see here eyes 👀',
+    NOTHING_HERE: 'nothing to see here yet 👀',
     UPLOAD: {
         0: 'preparing to upload',
         1: 'reading google metadata files',
-        2: (fileCounter) =>
+        2: 'reading file metadata to organize file',
+        3: (fileCounter) =>
             `${fileCounter.finished} / ${fileCounter.total} files backed up`,
-        3: 'backup complete',
+        4: 'backup complete',
     },
     UPLOADING_FILES: 'file upload',
     FILE_NOT_UPLOADED_LIST: 'the following files were not uploaded',
@@ -516,6 +517,13 @@ const englishConstants = {
         </>
     ),
 
+    LIVE_PHOTOS_DETECTED: () => (
+        <p>
+            the photo and video files from your Live Photos have been merged
+            into a single ELP file
+        </p>
+    ),
+
     RETRY_FAILED: 'retry failed uploads',
     FAILED_UPLOADS: 'failed uploads ',
     SKIPPED_FILES: 'ignored uploads',
@@ -652,6 +660,8 @@ const englishConstants = {
     TERM_3: 'I acknowledge that any person who knowingly materially misrepresents that material or activity is infringing may be subject to liability for damages. ',
     PRESERVED_BY: 'preserved by',
     ENTE_IO: 'ente.io',
+    PLAYBACK_SUPPORT_COMING: 'playback support coming soon...',
+    LIVE_PHOTO: 'this is a live photo',
 };
 
 export default englishConstants;

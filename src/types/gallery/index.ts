@@ -33,4 +33,10 @@ export type GalleryContextType = {
     setDialogMessage: SetDialogMessage;
     startLoading: () => void;
     finishLoading: () => void;
+    setNotificationAttributes: (attributes: NotificationAttributes) => void;
 };
+
+export interface NotificationAttributes {
+    message: string;
+    title: string;
+}

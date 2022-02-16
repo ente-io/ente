@@ -18,7 +18,7 @@ import { METADATA_FOLDER_NAME } from 'constants/export';
 import { getUserFacingErrorMessage } from 'utils/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
-import { UPLOAD_STAGES } from 'constants/upload';
+import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import { FileWithCollection } from 'types/upload';
 
 const FIRST_ALBUM_NAME = 'My First Album';
@@ -54,10 +54,15 @@ export default function Upload(props: Props) {
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
         UPLOAD_STAGES.START
     );
+    const [filenames, setFilenames] = useState(new Map<number, string>());
     const [fileCounter, setFileCounter] = useState({ finished: 0, total: 0 });
-    const [fileProgress, setFileProgress] = useState(new Map<string, number>());
-    const [uploadResult, setUploadResult] = useState(new Map<string, number>());
+    const [fileProgress, setFileProgress] = useState(new Map<number, number>());
+    const [uploadResult, setUploadResult] = useState(
+        new Map<number, FileUploadResults>()
+    );
     const [percentComplete, setPercentComplete] = useState(0);
+    const [hasLivePhotos, setHasLivePhotos] = useState(false);
+
     const [choiceModalView, setChoiceModalView] = useState(false);
     const [analysisResult, setAnalysisResult] = useState<AnalysisResult>({
         suggestedCollectionName: '',
@@ -74,6 +79,8 @@ export default function Upload(props: Props) {
                 setFileProgress,
                 setUploadResult,
                 setUploadStage,
+                setFilenames,
+                setHasLivePhotos,
             },
             props.setFiles
         );
@@ -107,8 +114,8 @@ export default function Upload(props: Props) {
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
         setFileCounter({ finished: 0, total: 0 });
-        setFileProgress(new Map<string, number>());
-        setUploadResult(new Map<string, number>());
+        setFileProgress(new Map<number, number>());
+        setUploadResult(new Map<number, number>());
         setPercentComplete(0);
         props.closeCollectionSelector();
         setProgressView(true);
@@ -169,8 +176,9 @@ export default function Upload(props: Props) {
         try {
             uploadInit();
             const filesWithCollectionToUpload: FileWithCollection[] =
-                props.acceptedFiles.map((file) => ({
+                props.acceptedFiles.map((file, index) => ({
                     file,
+                    localID: index,
                     collectionID: collection.id,
                 }));
             await uploadFiles(filesWithCollectionToUpload);
@@ -196,18 +204,21 @@ export default function Upload(props: Props) {
             }
             try {
                 const existingCollection = await syncCollections();
+                let index = 0;
                 for (const [collectionName, files] of collectionWiseFiles) {
                     const collection = await createAlbum(
                         collectionName,
                         existingCollection
                     );
                     collections.push(collection);
-                    for (const file of files) {
-                        filesWithCollectionToUpload.push({
+
+                    filesWithCollectionToUpload.push(
+                        ...files.map((file) => ({
+                            localID: index++,
                             collectionID: collection.id,
                             file,
-                        });
-                    }
+                        }))
+                    );
                 }
             } catch (e) {
                 setProgressView(false);
@@ -336,9 +347,11 @@ export default function Upload(props: Props) {
             />
             <UploadProgress
                 now={percentComplete}
+                filenames={filenames}
                 fileCounter={fileCounter}
                 uploadStage={uploadStage}
                 fileProgress={fileProgress}
+                hasLivePhotos={hasLivePhotos}
                 show={progressView}
                 closeModal={() => setProgressView(false)}
                 retryFailed={retryFailed}
