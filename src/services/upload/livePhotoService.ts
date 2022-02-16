@@ -126,6 +126,16 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
             name: secondMediaFile.file.name,
             size: secondMediaFile.file.size,
         };
+        const firstAsset = {
+            file: firstMediaFile.file,
+            metadata: firstFileMetadata,
+            fileTypeInfo: firstFileTypeInfo,
+        };
+        const secondAsset = {
+            file: secondMediaFile.file,
+            metadata: secondFileMetadata,
+            fileTypeInfo: secondFileFileInfo,
+        };
         if (
             areFilesLivePhotoAssets(firstFileIdentifier, secondFileIdentifier)
         ) {
@@ -135,27 +145,11 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                 firstFileTypeInfo.fileType === FILE_TYPE.IMAGE &&
                 secondFileFileInfo.fileType === FILE_TYPE.VIDEO
             ) {
-                imageAsset = {
-                    file: firstMediaFile.file,
-                    metadata: firstFileMetadata,
-                    fileTypeInfo: firstFileTypeInfo,
-                };
-                videoAsset = {
-                    file: secondMediaFile.file,
-                    metadata: secondFileMetadata,
-                    fileTypeInfo: secondFileFileInfo,
-                };
+                imageAsset = firstAsset;
+                videoAsset = secondAsset;
             } else {
-                videoAsset = {
-                    file: firstMediaFile.file,
-                    metadata: firstFileMetadata,
-                    fileTypeInfo: firstFileTypeInfo,
-                };
-                imageAsset = {
-                    file: secondMediaFile.file,
-                    metadata: secondFileMetadata,
-                    fileTypeInfo: secondFileFileInfo,
-                };
+                videoAsset = firstAsset;
+                imageAsset = secondAsset;
             }
             const livePhotoLocalID = firstMediaFile.localID;
             analysedMediaFiles.push({
