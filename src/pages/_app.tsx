@@ -490,9 +490,6 @@ const GlobalStyles = createGlobalStyle`
         cursor:pointer;
     }
 
-    .ente-toast{
-
-    }
 `;
 
 export const LogoImage = styled.img`
