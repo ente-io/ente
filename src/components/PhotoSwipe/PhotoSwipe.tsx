@@ -20,6 +20,7 @@ import {
     changeFileName,
     downloadFile,
     formatDateTime,
+    isLivePhoto,
     splitFilenameAndExtension,
     updateExistingFilePubMetadata,
 } from 'utils/file';
@@ -42,7 +43,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
-import { FILE_TYPE, MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
+import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
 import { sleep } from 'utils/common';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
@@ -530,7 +531,7 @@ function PhotoSwipe(props: Iprops) {
     }
 
     function handleLivePhotoNotification() {
-        if (checkIsLivePhoto(this?.currItem)) {
+        if (isLivePhoto(this?.currItem)) {
             const infoShownCount = getLivePhotoInfoShownCount();
             if (infoShownCount < 3) {
                 galleryContext.setNotificationAttributes({
@@ -634,10 +635,6 @@ function PhotoSwipe(props: Iprops) {
             return favItemIds.has(file.id);
         }
         return false;
-    };
-
-    const checkIsLivePhoto = (file: EnteFile) => {
-        return file.metadata.fileType === FILE_TYPE.LIVE_PHOTO;
     };
 
     const onFavClick = async (file) => {

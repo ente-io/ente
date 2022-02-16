@@ -12,7 +12,7 @@ import {
 } from 'utils/publicCollectionGallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import LivePhotoIndicatorOverlay from 'components/icons/LivePhotoIndicatorOverlay';
-import { FILE_TYPE } from 'constants/file';
+import { isLivePhoto } from 'utils/file';
 
 interface IProps {
     file: EnteFile;
@@ -285,9 +285,7 @@ export default function PreviewCard(props: IProps) {
             <InSelectRangeOverLay
                 active={isRangeSelectActive && isInsSelectRange}
             />
-            {file?.metadata.fileType === FILE_TYPE.LIVE_PHOTO && (
-                <LivePhotoIndicatorOverlay />
-            )}
+            {isLivePhoto(file) && <LivePhotoIndicatorOverlay />}
         </Cont>
     );
 }

@@ -548,3 +548,7 @@ export function needsConversionForPreview(file: EnteFile) {
         return false;
     }
 }
+
+export function isLivePhoto(file: EnteFile) {
+    return file.metadata.fileType === FILE_TYPE.LIVE_PHOTO;
+}
