@@ -33,10 +33,12 @@ const ENTE_LIVE_PHOTO_FORMAT = 'elp';
 export function getLivePhotoFileType(
     imageFileTypeInfo: FileTypeInfo,
     videoTypeInfo: FileTypeInfo
-) {
+): FileTypeInfo {
     return {
         fileType: FILE_TYPE.LIVE_PHOTO,
         exactType: `${imageFileTypeInfo.exactType}+${videoTypeInfo.exactType}`,
+        imageType: imageFileTypeInfo.exactType,
+        videoType: videoTypeInfo.exactType,
     };
 }
 
@@ -59,15 +61,11 @@ export async function readLivePhoto(
     fileTypeInfo: FileTypeInfo,
     livePhotoAssets: LivePhotoAssets
 ) {
-    const imageType = fileTypeInfo.exactType.slice(
-        0,
-        fileTypeInfo.exactType.indexOf('+')
-    );
     const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
         reader,
         livePhotoAssets.image,
         {
-            exactType: imageType,
+            exactType: fileTypeInfo.imageType,
             fileType: FILE_TYPE.IMAGE,
         }
     );

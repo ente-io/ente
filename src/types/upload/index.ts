@@ -48,6 +48,8 @@ export interface MultipartUploadURLs {
 export interface FileTypeInfo {
     fileType: FILE_TYPE;
     exactType: string;
+    imageType?: string;
+    videoType?: string;
 }
 
 export interface ProgressUpdater {
