@@ -48,8 +48,6 @@ export async function downloadFile(
 ) {
     let fileURL: string;
     let tempURL: string;
-    const a = document.createElement('a');
-    a.style.display = 'none';
     if (accessedThroughSharedURL) {
         fileURL = await PublicCollectionDownloadManager.getCachedOriginalFile(
             file
@@ -95,19 +93,35 @@ export async function downloadFile(
         tempEditedFileURL = URL.createObjectURL(fileBlob);
         fileURL = tempEditedFileURL;
     }
-
-    a.href = fileURL;
+    let tempImageURL: string;
+    let tempVideoURL: string;
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        a.download = fileNameWithoutExtension(file.metadata.title) + '.zip';
+        const fileBlob = await (await fetch(fileURL)).blob();
+        const originalName = fileNameWithoutExtension(file.metadata.title);
+        const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
+        tempImageURL = URL.createObjectURL(new Blob([motionPhoto.image]));
+        tempVideoURL = URL.createObjectURL(new Blob([motionPhoto.video]));
+        downloadUsingAnchor(motionPhoto.imageNameTitle, tempImageURL);
+        downloadUsingAnchor(motionPhoto.videoNameTitle, tempVideoURL);
     } else {
-        a.download = file.metadata.title;
+        downloadUsingAnchor(file.metadata.title, fileURL);
     }
+
+    tempURL && URL.revokeObjectURL(tempURL);
+    tempEditedFileURL && URL.revokeObjectURL(tempEditedFileURL);
+    tempImageURL && URL.revokeObjectURL(tempImageURL);
+    tempVideoURL && URL.revokeObjectURL(tempVideoURL);
+}
+
+function downloadUsingAnchor(name: string, link: string) {
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = link;
+    a.download = name;
     document.body.appendChild(a);
     a.click();
     a.remove();
-    tempURL && URL.revokeObjectURL(tempURL);
-    tempEditedFileURL && URL.revokeObjectURL(tempEditedFileURL);
 }
 
 export function isFileHEIC(mimeType: string) {
