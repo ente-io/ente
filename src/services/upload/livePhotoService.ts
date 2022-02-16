@@ -8,7 +8,7 @@ import {
     Metadata,
 } from 'types/upload';
 import { CustomError } from 'utils/error';
-import { splitFilenameAndExtension } from 'utils/file';
+import { isImageOrVideo, splitFilenameAndExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getUint8ArrayView } from './readFileService';
 import { generateThumbnail } from './thumbnailService';
@@ -192,8 +192,8 @@ function areFilesLivePhotoAssets(
         firstFileIdentifier.collectionID ===
             secondFileIdentifier.collectionID &&
         firstFileIdentifier.fileType !== secondFileIdentifier.fileType &&
-        firstFileIdentifier.fileType !== FILE_TYPE.OTHERS &&
-        secondFileIdentifier.fileType !== FILE_TYPE.OTHERS &&
+        isImageOrVideo(firstFileIdentifier.fileType) &&
+        isImageOrVideo(secondFileIdentifier.fileType) &&
         removeUnderscoreSuffix(
             splitFilenameAndExtension(firstFileIdentifier.name)[0]
         ) ===

@@ -549,6 +549,8 @@ export function needsConversionForPreview(file: EnteFile) {
     }
 }
 
-export function isLivePhoto(file: EnteFile) {
-    return file.metadata.fileType === FILE_TYPE.LIVE_PHOTO;
-}
+export const isLivePhoto = (file: EnteFile) =>
+    file.metadata.fileType === FILE_TYPE.LIVE_PHOTO;
+
+export const isImageOrVideo = (fileType: FILE_TYPE) =>
+    fileType in [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO];
