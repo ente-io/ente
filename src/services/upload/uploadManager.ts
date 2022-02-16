@@ -106,6 +106,9 @@ class UploadManager {
                         ])
                     )
                 );
+                UIService.setHasLivePhoto(
+                    mediaFiles.length !== analysedMediaFiles.length
+                );
                 await this.uploadMediaFiles(analysedMediaFiles);
             }
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);

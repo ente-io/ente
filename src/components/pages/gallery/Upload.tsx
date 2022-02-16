@@ -61,6 +61,8 @@ export default function Upload(props: Props) {
         new Map<number, FileUploadResults>()
     );
     const [percentComplete, setPercentComplete] = useState(0);
+    const [hasLivePhotos, setHasLivePhotos] = useState(false);
+
     const [choiceModalView, setChoiceModalView] = useState(false);
     const [analysisResult, setAnalysisResult] = useState<AnalysisResult>({
         suggestedCollectionName: '',
@@ -78,6 +80,7 @@ export default function Upload(props: Props) {
                 setUploadResult,
                 setUploadStage,
                 setFilenames,
+                setHasLivePhotos,
             },
             props.setFiles
         );
@@ -348,6 +351,7 @@ export default function Upload(props: Props) {
                 fileCounter={fileCounter}
                 uploadStage={uploadStage}
                 fileProgress={fileProgress}
+                hasLivePhotos={hasLivePhotos}
                 show={progressView}
                 closeModal={() => setProgressView(false)}
                 retryFailed={retryFailed}

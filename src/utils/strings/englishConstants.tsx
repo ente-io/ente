@@ -517,6 +517,13 @@ const englishConstants = {
         </>
     ),
 
+    LIVE_PHOTOS_DETECTED: () => (
+        <p>
+            the photo and video files from your Live Photos have been merged
+            into a single ELP file
+        </p>
+    ),
+
     RETRY_FAILED: 'retry failed uploads',
     FAILED_UPLOADS: 'failed uploads ',
     SKIPPED_FILES: 'ignored uploads',

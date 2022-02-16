@@ -64,6 +64,7 @@ export interface ProgressUpdater {
     setFileProgress: React.Dispatch<React.SetStateAction<Map<number, number>>>;
     setUploadResult: React.Dispatch<React.SetStateAction<Map<number, number>>>;
     setFilenames: React.Dispatch<React.SetStateAction<Map<number, string>>>;
+    setHasLivePhotos: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export interface UploadAsset {

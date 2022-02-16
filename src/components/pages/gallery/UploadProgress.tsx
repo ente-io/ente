@@ -22,6 +22,7 @@ interface Props {
     show;
     fileRejections: FileRejection[];
     uploadResult: Map<number, FileUploadResults>;
+    hasLivePhotos: boolean;
 }
 interface FileProgresses {
     fileID: number;
@@ -111,6 +112,7 @@ interface InProgressProps {
     filenames: Map<number, string>;
     sectionTitle: string;
     fileProgressStatuses: FileProgresses[];
+    sectionInfo?: any;
 }
 const InProgressSection = (props: InProgressProps) => {
     const [listView, setListView] = useState(true);
@@ -129,6 +131,9 @@ const InProgressSection = (props: InProgressProps) => {
             </SectionTitle>
             <Collapse isOpened={listView}>
                 <Content>
+                    {props.sectionInfo && (
+                        <SectionInfo>{props.sectionInfo}</SectionInfo>
+                    )}
                     <FileList>
                         {fileList.map(({ fileID, progress }) => (
                             <li key={fileID}>
@@ -148,7 +153,7 @@ export default function UploadProgress(props: Props) {
     const fileProgressStatuses = [] as FileProgresses[];
     const fileUploadResultMap = new Map<FileUploadResults, number[]>();
     let filesNotUploaded = false;
-
+    let sectionInfo = null;
     if (props.fileProgress) {
         for (const [localID, progress] of props.fileProgress) {
             fileProgressStatuses.push({
@@ -169,6 +174,9 @@ export default function UploadProgress(props: Props) {
 
             fileUploadResultMap.set(progress, [...fileList, localID]);
         }
+    }
+    if (props.hasLivePhotos) {
+        sectionInfo = constants.LIVE_PHOTOS_DETECTED();
     }
 
     return (
@@ -212,6 +220,7 @@ export default function UploadProgress(props: Props) {
                     filenames={props.filenames}
                     fileProgressStatuses={fileProgressStatuses}
                     sectionTitle={constants.INPROGRESS_UPLOADS}
+                    sectionInfo={sectionInfo}
                 />
 
                 <ResultSection

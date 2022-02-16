@@ -47,6 +47,10 @@ class UIService {
         this.progressUpdater.setFilenames(filenames);
     }
 
+    setHasLivePhoto(hasLivePhoto: boolean) {
+        this.progressUpdater.setHasLivePhotos(hasLivePhoto);
+    }
+
     increaseFileUploaded() {
         this.filesUploaded++;
         this.updateProgressBarUI();
