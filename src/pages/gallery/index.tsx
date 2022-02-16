@@ -104,7 +104,7 @@ import {
 } from 'types/gallery';
 import Collections from 'components/pages/gallery/Collections';
 import { VISIBILITY_STATE } from 'constants/file';
-import Notification from 'components/Notification';
+import Notification from 'components/ToastNotification';
 
 export const DeadCenter = styled.div`
     flex: 1;

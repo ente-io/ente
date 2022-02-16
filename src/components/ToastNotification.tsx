@@ -17,7 +17,10 @@ interface Iprops {
     clearAttributes: () => void;
 }
 
-export default function Notification({ attributes, clearAttributes }: Iprops) {
+export default function ToastNotification({
+    attributes,
+    clearAttributes,
+}: Iprops) {
     const [show, setShow] = useState(false);
     const closeToast = () => {
         setShow(false);
