@@ -8,6 +8,7 @@ import {
     FileTypeInfo,
 } from 'types/upload';
 import { NULL_LOCATION } from 'constants/upload';
+import { splitFilenameAndExtension } from 'utils/file';
 
 interface ParsedMetadataJSONWithTitle {
     title: string;
@@ -30,7 +31,9 @@ export async function extractMetadata(
     }
 
     const extractedMetadata: Metadata = {
-        title: receivedFile.name,
+        title: `${splitFilenameAndExtension(receivedFile.name)[0]}.${
+            fileTypeInfo.exactType
+        }`,
         creationTime:
             exifData?.creationTime ?? receivedFile.lastModified * 1000,
         modificationTime: receivedFile.lastModified * 1000,
