@@ -8,12 +8,10 @@ import '@tensorflow/tfjs-backend-webgl';
 // import '@tensorflow/tfjs-backend-cpu';
 
 import {
-    Face,
     MlFileData,
     MLSyncContext,
     MLSyncFileContext,
     MLSyncResult,
-    Person,
 } from 'types/machineLearning';
 
 import { toTSNE } from 'utils/machineLearning/visualization';
@@ -21,20 +19,14 @@ import { toTSNE } from 'utils/machineLearning/visualization';
 //     incrementIndexVersion,
 //     mlFilesStore
 // } from 'utils/storage/mlStorage';
-import {
-    findFirstIfSorted,
-    getAllFacesFromMap,
-    getLocalFile,
-    getOriginalImageBitmap,
-    isDifferentOrOld,
-} from 'utils/machineLearning';
+import { getAllFacesFromMap } from 'utils/machineLearning';
 import { MLFactory } from './machineLearningFactory';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
 import { CustomError, parseServerError } from 'utils/error';
 import { MAX_ML_SYNC_ERROR_COUNT } from 'constants/machineLearning/config';
-import FaceDetectionService from './faceDetectionService';
-
+import FaceService from './faceService';
+import PeopleService from './peopleService';
 class MachineLearningService {
     private initialized = false;
     // private faceDetectionService: FaceDetectionService;
@@ -402,26 +394,14 @@ class MachineLearningService {
             newMlFile.mlVersion = fileContext.oldMlFile.mlVersion;
         }
 
-        await FaceDetectionService.syncFileFaceDetections(
-            syncContext,
-            fileContext
-        );
+        await FaceService.syncFileFaceDetections(syncContext, fileContext);
 
         if (newMlFile.faces && newMlFile.faces.length > 0) {
-            await FaceDetectionService.syncFileFaceCrops(
-                syncContext,
-                fileContext
-            );
+            await FaceService.syncFileFaceCrops(syncContext, fileContext);
 
-            await FaceDetectionService.syncFileFaceAlignments(
-                syncContext,
-                fileContext
-            );
+            await FaceService.syncFileFaceAlignments(syncContext, fileContext);
 
-            await FaceDetectionService.syncFileFaceEmbeddings(
-                syncContext,
-                fileContext
-            );
+            await FaceService.syncFileFaceEmbeddings(syncContext, fileContext);
         }
 
         fileContext.tfImage && fileContext.tfImage.dispose();
@@ -521,139 +501,13 @@ class MachineLearningService {
         await this.getMLLibraryData(syncContext);
 
         // await this.init();
-        await this.syncPeopleIndex(syncContext);
+        await PeopleService.syncPeopleIndex(syncContext);
 
         await this.persistMLLibraryData(syncContext);
     }
 
-    private async syncPeopleIndex(syncContext: MLSyncContext) {
-        const filesVersion = await mlIDbStorage.getIndexVersion('files');
-        if (
-            filesVersion <= (await mlIDbStorage.getIndexVersion('people')) &&
-            !isDifferentOrOld(
-                syncContext.mlLibraryData?.faceClusteringMethod,
-                syncContext.faceClusteringService.method
-            )
-        ) {
-            console.log(
-                '[MLService] Skipping people index as already synced to latest version'
-            );
-            return;
-        }
-
-        // TODO: have faces addresable through fileId + faceId
-        // to avoid index based addressing, which is prone to wrong results
-        // one way could be to match nearest face within threshold in the file
-        const allFacesMap = await this.getAllSyncedFacesMap(syncContext);
-        const allFaces = getAllFacesFromMap(allFacesMap);
-
-        await this.runFaceClustering(syncContext, allFaces);
-        await this.syncPeopleFromClusters(syncContext, allFacesMap, allFaces);
-
-        await mlIDbStorage.setIndexVersion('people', filesVersion);
-    }
-
-    private async getAllSyncedFacesMap(syncContext: MLSyncContext) {
-        if (syncContext.allSyncedFacesMap) {
-            return syncContext.allSyncedFacesMap;
-        }
-
-        syncContext.allSyncedFacesMap = await mlIDbStorage.getAllFacesMap();
-        return syncContext.allSyncedFacesMap;
-    }
-
-    public async runFaceClustering(
-        syncContext: MLSyncContext,
-        allFaces: Array<Face>
-    ) {
-        // await this.init();
-
-        const clusteringConfig = syncContext.config.faceClustering;
-
-        if (!allFaces || allFaces.length < clusteringConfig.minInputSize) {
-            console.log(
-                '[MLService] Too few faces to cluster, not running clustering: ',
-                allFaces.length
-            );
-            return;
-        }
-
-        console.log('Running clustering allFaces: ', allFaces.length);
-        syncContext.mlLibraryData.faceClusteringResults =
-            await syncContext.faceClusteringService.cluster(
-                allFaces.map((f) => Array.from(f.embedding)),
-                syncContext.config.faceClustering
-            );
-        syncContext.mlLibraryData.faceClusteringMethod =
-            syncContext.faceClusteringService.method;
-        console.log(
-            '[MLService] Got face clustering results: ',
-            syncContext.mlLibraryData.faceClusteringResults
-        );
-
-        // syncContext.faceClustersWithNoise = {
-        //     clusters: syncContext.faceClusteringResults.clusters.map(
-        //         (faces) => ({
-        //             faces,
-        //         })
-        //     ),
-        //     noise: syncContext.faceClusteringResults.noise,
-        // };
-    }
-
-    private async syncPeopleFromClusters(
-        syncContext: MLSyncContext,
-        allFacesMap: Map<number, Array<Face>>,
-        allFaces: Array<Face>
-    ) {
-        const clusters =
-            syncContext.mlLibraryData.faceClusteringResults?.clusters;
-        if (!clusters || clusters.length < 1) {
-            return;
-        }
-
-        for (const face of allFaces) {
-            face.personId = undefined;
-        }
-        await mlIDbStorage.clearAllPeople();
-        for (const [index, cluster] of clusters.entries()) {
-            const faces = cluster.map((f) => allFaces[f]).filter((f) => f);
-
-            // TODO: take default display face from last leaves of hdbscan clusters
-            const personFace = findFirstIfSorted(
-                faces,
-                (a, b) => b.detection.probability - a.detection.probability
-            );
-
-            if (personFace && !personFace.crop?.imageUrl) {
-                const file = await getLocalFile(personFace.fileId);
-                const imageBitmap = await getOriginalImageBitmap(
-                    file,
-                    syncContext.token
-                );
-                await this.saveFaceCrop(imageBitmap, personFace, syncContext);
-            }
-
-            const person: Person = {
-                id: index,
-                files: faces.map((f) => f.fileId),
-                displayFaceId: personFace?.id,
-                displayImageUrl: personFace?.crop?.imageUrl,
-            };
-
-            await mlIDbStorage.putPerson(person);
-
-            faces.forEach((face) => {
-                face.personId = person.id;
-            });
-            // console.log("Creating person: ", person, faces);
-        }
-
-        await mlIDbStorage.updateFaces(allFacesMap);
-    }
-
     private async runTSNE(syncContext: MLSyncContext) {
-        const allFacesMap = await this.getAllSyncedFacesMap(syncContext);
+        const allFacesMap = await FaceService.getAllSyncedFacesMap(syncContext);
         const allFaces = getAllFacesFromMap(allFacesMap);
 
         const input = allFaces

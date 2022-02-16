@@ -11,9 +11,10 @@ import {
     extractFaceImages,
 } from 'utils/machineLearning';
 import { storeFaceCrop } from 'utils/machineLearning/faceCrop';
+import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import ReaderService from './readerService';
 
-class FaceDetectionService {
+class FaceService {
     async syncFileFaceDetections(
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext
@@ -187,6 +188,54 @@ class FaceDetectionService {
         );
         faceCrop.image.close();
     }
+
+    async getAllSyncedFacesMap(syncContext: MLSyncContext) {
+        if (syncContext.allSyncedFacesMap) {
+            return syncContext.allSyncedFacesMap;
+        }
+
+        syncContext.allSyncedFacesMap = await mlIDbStorage.getAllFacesMap();
+        return syncContext.allSyncedFacesMap;
+    }
+
+    public async runFaceClustering(
+        syncContext: MLSyncContext,
+        allFaces: Array<Face>
+    ) {
+        // await this.init();
+
+        const clusteringConfig = syncContext.config.faceClustering;
+
+        if (!allFaces || allFaces.length < clusteringConfig.minInputSize) {
+            console.log(
+                '[MLService] Too few faces to cluster, not running clustering: ',
+                allFaces.length
+            );
+            return;
+        }
+
+        console.log('Running clustering allFaces: ', allFaces.length);
+        syncContext.mlLibraryData.faceClusteringResults =
+            await syncContext.faceClusteringService.cluster(
+                allFaces.map((f) => Array.from(f.embedding)),
+                syncContext.config.faceClustering
+            );
+        syncContext.mlLibraryData.faceClusteringMethod =
+            syncContext.faceClusteringService.method;
+        console.log(
+            '[MLService] Got face clustering results: ',
+            syncContext.mlLibraryData.faceClusteringResults
+        );
+
+        // syncContext.faceClustersWithNoise = {
+        //     clusters: syncContext.faceClusteringResults.clusters.map(
+        //         (faces) => ({
+        //             faces,
+        //         })
+        //     ),
+        //     noise: syncContext.faceClusteringResults.noise,
+        // };
+    }
 }
 
-export default new FaceDetectionService();
+export default new FaceService();
