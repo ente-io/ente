@@ -48,6 +48,8 @@ export interface MultipartUploadURLs {
 export interface FileTypeInfo {
     fileType: FILE_TYPE;
     exactType: string;
+    imageType?: string;
+    videoType?: string;
 }
 
 export interface ProgressUpdater {
@@ -59,17 +61,34 @@ export interface ProgressUpdater {
         }>
     >;
     setUploadStage: React.Dispatch<React.SetStateAction<UPLOAD_STAGES>>;
-    setFileProgress: React.Dispatch<React.SetStateAction<Map<string, number>>>;
-    setUploadResult: React.Dispatch<React.SetStateAction<Map<string, number>>>;
+    setFileProgress: React.Dispatch<React.SetStateAction<Map<number, number>>>;
+    setUploadResult: React.Dispatch<React.SetStateAction<Map<number, number>>>;
+    setFilenames: React.Dispatch<React.SetStateAction<Map<number, string>>>;
+    setHasLivePhotos: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export interface FileWithCollection {
-    file: File;
-    collectionID?: number;
+export interface UploadAsset {
+    isLivePhoto?: boolean;
+    file?: File;
+    livePhotoAssets?: LivePhotoAssets;
+}
+export interface LivePhotoAssets {
+    image: globalThis.File;
+    video: globalThis.File;
+}
+
+export interface FileWithCollection extends UploadAsset {
+    localID: number;
     collection?: Collection;
+    collectionID?: number;
+}
+export interface MetadataAndFileTypeInfo {
+    metadata: Metadata;
+    fileTypeInfo: FileTypeInfo;
 }
 
-export type MetadataMap = Map<string, ParsedMetadataJSON>;
+export type MetadataAndFileTypeInfoMap = Map<number, MetadataAndFileTypeInfo>;
+export type ParsedMetadataJSONMap = Map<string, ParsedMetadataJSON>;
 
 export interface UploadURL {
     url: string;
@@ -91,6 +110,7 @@ export interface FileInMemory {
 export interface FileWithMetadata
     extends Omit<FileInMemory, 'hasStaticThumbnail'> {
     metadata: Metadata;
+    localID: number;
 }
 
 export interface EncryptedFile {
@@ -101,9 +121,9 @@ export interface ProcessedFile {
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: fileAttribute;
-    filename: string;
+    localID: number;
 }
-export interface BackupedFile extends Omit<ProcessedFile, 'filename'> {}
+export interface BackupedFile extends Omit<ProcessedFile, 'localID'> {}
 
 export interface UploadFile extends BackupedFile {
     collectionID: number;

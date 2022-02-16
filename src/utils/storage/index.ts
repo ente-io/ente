@@ -13,3 +13,11 @@ export const justSignedUp = () =>
 export function setJustSignedUp(status) {
     setData(LS_KEYS.JUST_SIGNED_UP, { status });
 }
+
+export function getLivePhotoInfoShownCount() {
+    return getData(LS_KEYS.LIVE_PHOTO_INFO_SHOWN_COUNT)?.count ?? 0;
+}
+
+export function setLivePhotoInfoShownCount(count) {
+    setData(LS_KEYS.LIVE_PHOTO_INFO_SHOWN_COUNT, { count });
+}

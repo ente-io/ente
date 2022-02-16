@@ -17,13 +17,15 @@ interface Props {
     now;
     closeModal;
     retryFailed;
-    fileProgress: Map<string, number>;
+    fileProgress: Map<number, number>;
+    filenames: Map<number, string>;
     show;
     fileRejections: FileRejection[];
-    uploadResult: Map<string, number>;
+    uploadResult: Map<number, FileUploadResults>;
+    hasLivePhotos: boolean;
 }
 interface FileProgresses {
-    fileName: string;
+    fileID: number;
     progress: number;
 }
 
@@ -72,7 +74,8 @@ const NotUploadSectionHeader = styled.div`
 `;
 
 interface ResultSectionProps {
-    fileUploadResultMap: Map<FileUploadResults, string[]>;
+    filenames: Map<number, string>;
+    fileUploadResultMap: Map<FileUploadResults, number[]>;
     fileUploadResult: FileUploadResults;
     sectionTitle: any;
     sectionInfo?: any;
@@ -95,8 +98,8 @@ const ResultSection = (props: ResultSectionProps) => {
                         <SectionInfo>{props.sectionInfo}</SectionInfo>
                     )}
                     <FileList>
-                        {fileList.map((fileName) => (
-                            <li key={fileName}>{fileName}</li>
+                        {fileList.map((fileID) => (
+                            <li key={fileID}>{props.filenames.get(fileID)}</li>
                         ))}
                     </FileList>
                 </Content>
@@ -106,8 +109,10 @@ const ResultSection = (props: ResultSectionProps) => {
 };
 
 interface InProgressProps {
+    filenames: Map<number, string>;
     sectionTitle: string;
     fileProgressStatuses: FileProgresses[];
+    sectionInfo?: any;
 }
 const InProgressSection = (props: InProgressProps) => {
     const [listView, setListView] = useState(true);
@@ -126,10 +131,15 @@ const InProgressSection = (props: InProgressProps) => {
             </SectionTitle>
             <Collapse isOpened={listView}>
                 <Content>
+                    {props.sectionInfo && (
+                        <SectionInfo>{props.sectionInfo}</SectionInfo>
+                    )}
                     <FileList>
-                        {fileList.map(({ fileName, progress }) => (
-                            <li key={fileName}>
-                                {`${fileName} - ${progress}%`}
+                        {fileList.map(({ fileID, progress }) => (
+                            <li key={fileID}>
+                                {`${props.filenames.get(
+                                    fileID
+                                )} - ${progress}%`}
                             </li>
                         ))}
                     </FileList>
@@ -141,25 +151,32 @@ const InProgressSection = (props: InProgressProps) => {
 
 export default function UploadProgress(props: Props) {
     const fileProgressStatuses = [] as FileProgresses[];
-    const fileUploadResultMap = new Map<FileUploadResults, string[]>();
+    const fileUploadResultMap = new Map<FileUploadResults, number[]>();
     let filesNotUploaded = false;
-
+    let sectionInfo = null;
     if (props.fileProgress) {
-        for (const [fileName, progress] of props.fileProgress) {
-            fileProgressStatuses.push({ fileName, progress });
+        for (const [localID, progress] of props.fileProgress) {
+            fileProgressStatuses.push({
+                fileID: localID,
+                progress,
+            });
         }
     }
     if (props.uploadResult) {
-        for (const [fileName, progress] of props.uploadResult) {
+        for (const [localID, progress] of props.uploadResult) {
             if (!fileUploadResultMap.has(progress)) {
                 fileUploadResultMap.set(progress, []);
             }
-            if (progress < 0) {
+            if (progress !== FileUploadResults.UPLOADED) {
                 filesNotUploaded = true;
             }
             const fileList = fileUploadResultMap.get(progress);
-            fileUploadResultMap.set(progress, [...fileList, fileName]);
+
+            fileUploadResultMap.set(progress, [...fileList, localID]);
         }
+    }
+    if (props.hasLivePhotos) {
+        sectionInfo = constants.LIVE_PHOTOS_DETECTED();
     }
 
     return (
@@ -200,11 +217,14 @@ export default function UploadProgress(props: Props) {
                     />
                 )}
                 <InProgressSection
+                    filenames={props.filenames}
                     fileProgressStatuses={fileProgressStatuses}
                     sectionTitle={constants.INPROGRESS_UPLOADS}
+                    sectionInfo={sectionInfo}
                 />
 
                 <ResultSection
+                    filenames={props.filenames}
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.UPLOADED}
                     sectionTitle={constants.SUCCESSFUL_UPLOADS}
@@ -218,6 +238,7 @@ export default function UploadProgress(props: Props) {
                     )}
 
                 <ResultSection
+                    filenames={props.filenames}
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.BLOCKED}
                     sectionTitle={constants.BLOCKED_UPLOADS}
@@ -226,17 +247,20 @@ export default function UploadProgress(props: Props) {
                     )}
                 />
                 <ResultSection
+                    filenames={props.filenames}
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.FAILED}
                     sectionTitle={constants.FAILED_UPLOADS}
                 />
                 <ResultSection
+                    filenames={props.filenames}
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.ALREADY_UPLOADED}
                     sectionTitle={constants.SKIPPED_FILES}
                     sectionInfo={constants.SKIPPED_INFO}
                 />
                 <ResultSection
+                    filenames={props.filenames}
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={
                         FileUploadResults.LARGER_THAN_AVAILABLE_STORAGE
@@ -247,12 +271,14 @@ export default function UploadProgress(props: Props) {
                     sectionInfo={constants.LARGER_THAN_AVAILABLE_STORAGE_INFO}
                 />
                 <ResultSection
+                    filenames={props.filenames}
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.UNSUPPORTED}
                     sectionTitle={constants.UNSUPPORTED_FILES}
                     sectionInfo={constants.UNSUPPORTED_INFO}
                 />
                 <ResultSection
+                    filenames={props.filenames}
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.TOO_LARGE}
                     sectionTitle={constants.TOO_LARGE_UPLOADS}

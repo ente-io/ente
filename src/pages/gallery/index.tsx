@@ -96,9 +96,15 @@ import FixCreationTime, {
 } from 'components/FixCreationTime';
 import { Collection, CollectionAndItsLatestFile } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { GalleryContextType, SelectedState, Search } from 'types/gallery';
+import {
+    GalleryContextType,
+    SelectedState,
+    Search,
+    NotificationAttributes,
+} from 'types/gallery';
 import Collections from 'components/pages/gallery/Collections';
 import { VISIBILITY_STATE } from 'constants/file';
+import ToastNotification from 'components/ToastNotification';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -125,6 +131,7 @@ const defaultGalleryContext: GalleryContextType = {
     setDialogMessage: () => null,
     startLoading: () => null,
     finishLoading: () => null,
+    setNotificationAttributes: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -191,8 +198,13 @@ export default function Gallery() {
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
 
+    const [notificationAttributes, setNotificationAttributes] =
+        useState<NotificationAttributes>(null);
+
     const showPlanSelectorModal = () => setPlanModalView(true);
     const closeMessageDialog = () => setMessageDialogView(false);
+
+    const clearNotificationAttributes = () => setNotificationAttributes(null);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -555,6 +567,7 @@ export default function Gallery() {
                 setDialogMessage,
                 startLoading,
                 finishLoading,
+                setNotificationAttributes,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
@@ -577,6 +590,10 @@ export default function Gallery() {
                     setLoading={setLoading}
                 />
                 <AlertBanner bannerMessage={bannerMessage} />
+                <ToastNotification
+                    attributes={notificationAttributes}
+                    clearAttributes={clearNotificationAttributes}
+                />
                 <MessageDialog
                     size="lg"
                     show={messageDialogView}

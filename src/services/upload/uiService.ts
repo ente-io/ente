@@ -9,8 +9,8 @@ class UIService {
     private perFileProgress: number;
     private filesUploaded: number;
     private totalFileCount: number;
-    private fileProgress: Map<string, number>;
-    private uploadResult: Map<string, FileUploadResults>;
+    private fileProgress: Map<number, number>;
+    private uploadResult: Map<number, FileUploadResults>;
     private progressUpdater: ProgressUpdater;
 
     init(progressUpdater: ProgressUpdater) {
@@ -20,8 +20,8 @@ class UIService {
     reset(count: number) {
         this.setTotalFileCount(count);
         this.filesUploaded = 0;
-        this.fileProgress = new Map<string, number>();
-        this.uploadResult = new Map<string, number>();
+        this.fileProgress = new Map<number, number>();
+        this.uploadResult = new Map<number, FileUploadResults>();
         this.updateProgressBarUI();
     }
 
@@ -30,8 +30,8 @@ class UIService {
         this.perFileProgress = 100 / this.totalFileCount;
     }
 
-    setFileProgress(filename: string, progress: number) {
-        this.fileProgress.set(filename, progress);
+    setFileProgress(key: number, progress: number) {
+        this.fileProgress.set(key, progress);
         this.updateProgressBarUI();
     }
 
@@ -43,14 +43,22 @@ class UIService {
         this.progressUpdater.setPercentComplete(percent);
     }
 
+    setFilenames(filenames: Map<number, string>) {
+        this.progressUpdater.setFilenames(filenames);
+    }
+
+    setHasLivePhoto(hasLivePhoto: boolean) {
+        this.progressUpdater.setHasLivePhotos(hasLivePhoto);
+    }
+
     increaseFileUploaded() {
         this.filesUploaded++;
         this.updateProgressBarUI();
     }
 
-    moveFileToResultList(filename: string, uploadResult: FileUploadResults) {
-        this.uploadResult.set(filename, uploadResult);
-        this.fileProgress.delete(filename);
+    moveFileToResultList(key: number, uploadResult: FileUploadResults) {
+        this.uploadResult.set(key, uploadResult);
+        this.fileProgress.delete(key);
         this.updateProgressBarUI();
     }
 
@@ -82,7 +90,7 @@ class UIService {
     }
 
     trackUploadProgress(
-        filename: string,
+        fileLocalID: number,
         percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
         index = 0
     ) {
@@ -97,18 +105,16 @@ class UIService {
         return {
             cancel,
             onUploadProgress: (event) => {
-                filename &&
-                    this.fileProgress.set(
-                        filename,
-                        Math.min(
-                            Math.round(
-                                percentPerPart * index +
-                                    (percentPerPart * event.loaded) /
-                                        event.total
-                            ),
-                            98
-                        )
-                    );
+                this.fileProgress.set(
+                    fileLocalID,
+                    Math.min(
+                        Math.round(
+                            percentPerPart * index +
+                                (percentPerPart * event.loaded) / event.total
+                        ),
+                        98
+                    )
+                );
                 this.updateProgressBarUI();
                 if (event.loaded === event.total) {
                     clearTimeout(timeout);

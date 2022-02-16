@@ -20,6 +20,7 @@ import {
     changeFileName,
     downloadFile,
     formatDateTime,
+    isLivePhoto,
     splitFilenameAndExtension,
     updateExistingFilePubMetadata,
 } from 'utils/file';
@@ -46,6 +47,10 @@ import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
 import { sleep } from 'utils/common';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
+import {
+    getLivePhotoInfoShownCount,
+    setLivePhotoInfoShownCount,
+} from 'utils/storage';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -525,6 +530,19 @@ function PhotoSwipe(props: Iprops) {
         setIsFav(isInFav(this?.currItem));
     }
 
+    function handleLivePhotoNotification() {
+        if (isLivePhoto(this?.currItem)) {
+            const infoShownCount = getLivePhotoInfoShownCount();
+            if (infoShownCount < 3) {
+                galleryContext.setNotificationAttributes({
+                    message: constants.PLAYBACK_SUPPORT_COMING,
+                    title: constants.LIVE_PHOTO,
+                });
+                setLivePhotoInfoShownCount(infoShownCount + 1);
+            }
+        }
+    }
+
     const openPhotoSwipe = () => {
         const { items, currentIndex } = props;
         const options = {
@@ -587,6 +605,7 @@ function PhotoSwipe(props: Iprops) {
         photoSwipe.listen('beforeChange', function () {
             updateInfo.call(this);
             updateFavButton.call(this);
+            handleLivePhotoNotification.call(this);
         });
         photoSwipe.listen('resize', checkExifAvailable);
         photoSwipe.init();
@@ -608,6 +627,8 @@ function PhotoSwipe(props: Iprops) {
             videoTag.pause();
         }
         handleCloseInfo();
+        // BE_AWARE: this will clear any notification set, even if they were not set in/by the photoswipe component
+        galleryContext.setNotificationAttributes(null);
     };
     const isInFav = (file) => {
         const { favItemIds } = props;
