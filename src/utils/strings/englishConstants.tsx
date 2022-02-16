@@ -99,7 +99,7 @@ const englishConstants = {
     ENTER_ALBUM_NAME: 'album name',
     CLOSE: 'close',
     NO: 'no',
-    NOTHING_HERE: 'nothing to see here eyes 👀',
+    NOTHING_HERE: 'nothing to see here yet 👀',
     UPLOAD: {
         0: 'preparing to upload',
         1: 'reading google metadata files',
