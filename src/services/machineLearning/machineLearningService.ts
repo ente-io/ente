@@ -242,24 +242,24 @@ class MachineLearningService {
         return [...uniqueFiles.values()];
     }
 
-    private async getOutOfSyncFilesNoIdx(syncContext: MLSyncContext) {
-        const existingFilesMap = await this.getLocalFilesMap(syncContext);
-        // existingFiles.sort(
-        //     (a, b) => b.metadata.creationTime - a.metadata.creationTime
-        // );
-        console.time('getUniqueOutOfSyncFiles');
-        syncContext.outOfSyncFiles = await this.getUniqueOutOfSyncFilesNoIdx(
-            syncContext,
-            [...existingFilesMap.values()]
-        );
-        console.timeEnd('getUniqueOutOfSyncFiles');
-        console.log(
-            'Got unique outOfSyncFiles: ',
-            syncContext.outOfSyncFiles.length,
-            'for batchSize: ',
-            syncContext.config.batchSize
-        );
-    }
+    // private async getOutOfSyncFilesNoIdx(syncContext: MLSyncContext) {
+    //     const existingFilesMap = await this.getLocalFilesMap(syncContext);
+    //     // existingFiles.sort(
+    //     //     (a, b) => b.metadata.creationTime - a.metadata.creationTime
+    //     // );
+    //     console.time('getUniqueOutOfSyncFiles');
+    //     syncContext.outOfSyncFiles = await this.getUniqueOutOfSyncFilesNoIdx(
+    //         syncContext,
+    //         [...existingFilesMap.values()]
+    //     );
+    //     console.timeEnd('getUniqueOutOfSyncFiles');
+    //     console.log(
+    //         'Got unique outOfSyncFiles: ',
+    //         syncContext.outOfSyncFiles.length,
+    //         'for batchSize: ',
+    //         syncContext.config.batchSize
+    //     );
+    // }
 
     private async syncFiles(syncContext: MLSyncContext) {
         try {
