@@ -30,6 +30,10 @@ interface Asset {
 
 const ENTE_LIVE_PHOTO_FORMAT = 'elp';
 
+const UNDERSCORE_THREE = '_3';
+
+const UNDERSCORE = '_';
+
 export function getLivePhotoFileType(
     imageFileTypeInfo: FileTypeInfo,
     videoTypeInfo: FileTypeInfo
@@ -198,10 +202,10 @@ function areFilesLivePhotoAssets(
         firstFileIdentifier.fileType !== secondFileIdentifier.fileType &&
         isImageOrVideo(firstFileIdentifier.fileType) &&
         isImageOrVideo(secondFileIdentifier.fileType) &&
-        removeUnderscoreSuffix(
+        removeUnderscoreThreeSuffix(
             splitFilenameAndExtension(firstFileIdentifier.name)[0]
         ) ===
-            removeUnderscoreSuffix(
+            removeUnderscoreThreeSuffix(
                 splitFilenameAndExtension(secondFileIdentifier.name)[0]
             )
     ) {
@@ -229,10 +233,9 @@ function areFilesLivePhotoAssets(
     return false;
 }
 
-function removeUnderscoreSuffix(filename: string) {
-    const indexOfUnderscore = filename.lastIndexOf('_');
-    if (indexOfUnderscore !== -1) {
-        return filename.slice(0, indexOfUnderscore);
+function removeUnderscoreThreeSuffix(filename: string) {
+    if (filename.endsWith(UNDERSCORE_THREE)) {
+        return filename.slice(0, filename.lastIndexOf(UNDERSCORE));
     } else {
         return filename;
     }
