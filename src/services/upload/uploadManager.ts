@@ -100,11 +100,9 @@ class UploadManager {
                     UploadService.clusterLivePhotoFiles(mediaFiles);
                 uiService.setFilenames(
                     new Map<number, string>(
-                        analysedMediaFiles.map(({ localID, file }) => [
-                            localID,
-                            UploadService.getFileMetadataAndFileTypeInfo(
-                                localID
-                            )?.metadata?.title ?? file.name,
+                        analysedMediaFiles.map((mediaFile) => [
+                            mediaFile.localID,
+                            UploadService.getAssetName(mediaFile),
                         ])
                     )
                 );

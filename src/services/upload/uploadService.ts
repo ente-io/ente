@@ -1,7 +1,7 @@
 import { Collection } from 'types/collection';
 import { logError } from 'utils/sentry';
 import UploadHttpClient from './uploadHttpClient';
-import { extractFileMetadata } from './fileService';
+import { extractFileMetadata, getFilename } from './fileService';
 import { getFileType } from './readFileService';
 import { handleUploadError } from 'utils/error';
 import {
@@ -24,6 +24,7 @@ import {
 } from 'types/upload';
 import {
     clusterLivePhotoFiles,
+    getLivePhotoName,
     getLivePhotoSize,
     readLivePhoto,
 } from './livePhotoService';
@@ -66,6 +67,12 @@ class UploadService {
         return isLivePhoto
             ? getLivePhotoSize(livePhotoAssets)
             : getFileSize(file);
+    }
+
+    getAssetName({ isLivePhoto, file, livePhotoAssets }: FileWithCollection) {
+        return isLivePhoto
+            ? getLivePhotoName(livePhotoAssets.image.name)
+            : getFilename(file);
     }
 
     async getFileType(reader: FileReader, file: File) {

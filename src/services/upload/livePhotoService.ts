@@ -45,15 +45,19 @@ export function getLivePhotoFileType(
 export function getLivePhotoMetadata(imageMetadata: Metadata) {
     return {
         ...imageMetadata,
-        title: `${
-            splitFilenameAndExtension(imageMetadata.title)[0]
-        }.${ENTE_LIVE_PHOTO_FORMAT}`,
+        title: getLivePhotoName(imageMetadata.title),
         fileType: FILE_TYPE.LIVE_PHOTO,
     };
 }
 
 export function getLivePhotoSize(livePhotoAssets: LivePhotoAssets) {
     return livePhotoAssets.image.size + livePhotoAssets.video.size;
+}
+
+export function getLivePhotoName(imageTitle: string) {
+    return `${
+        splitFilenameAndExtension(imageTitle)[0]
+    }.${ENTE_LIVE_PHOTO_FORMAT}`;
 }
 
 export async function readLivePhoto(

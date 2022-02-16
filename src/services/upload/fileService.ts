@@ -18,6 +18,10 @@ export function getFileSize(file: File) {
     return file.size;
 }
 
+export function getFilename(file: File) {
+    return file.name;
+}
+
 export async function readFile(
     reader: FileReader,
     fileTypeInfo: FileTypeInfo,
