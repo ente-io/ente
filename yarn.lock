@@ -5100,7 +5100,7 @@ peek-readable@^4.0.1:
   integrity sha512-7qmhptnR0WMSpxT5rMHG9bW/mYSR1uqaPFj2MHvT+y/aOUu6msJijpKt5SkTDKySwg65OWG2JwTMBlgcbwMHrQ==
 
 "photoswipe@file:./thirdparty/photoswipe":
-  version "4.1.3"
+  version "4.1.4"
 
 picomatch@^2.0.4, picomatch@^2.2.1:
   version "2.3.1"
