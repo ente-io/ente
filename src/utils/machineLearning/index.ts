@@ -11,6 +11,7 @@ import {
     AlignedFace,
     BLAZEFACE_FACE_SIZE,
     DetectedFace,
+    DetectedObject,
     Face,
     FaceImageBlob,
     MlFileData,
@@ -268,6 +269,18 @@ export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
     const gridPaddedY = leftFillNum(gridPt.y, 2, 0);
 
     return `${detectedFace.fileId}-${gridPaddedX}-${gridPaddedY}`;
+}
+
+export function getObjectId(
+    detectedObject: DetectedObject,
+    imageDims: Dimensions
+) {
+    const imgDimPoint = new Point(imageDims.width, imageDims.height);
+    const gridPt = imgDimPoint.floor().bound(0, 99);
+    const gridPaddedX = leftFillNum(gridPt.x, 2, 0);
+    const gridPaddedY = leftFillNum(gridPt.y, 2, 0);
+
+    return `${detectedObject.fileID}-${gridPaddedX}-${gridPaddedY}`;
 }
 
 export async function getTFImage(blob): Promise<tf.Tensor3D> {

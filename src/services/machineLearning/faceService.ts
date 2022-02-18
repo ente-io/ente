@@ -34,7 +34,7 @@ class FaceService {
             }));
 
             newMlFile.imageSource = oldMlFile.imageSource;
-            newMlFile.imageDimentions = oldMlFile.imageDimentions;
+            newMlFile.imageDimensions = oldMlFile.imageDimensions;
             newMlFile.faceDetectionMethod = oldMlFile.faceDetectionMethod;
             return;
         }
@@ -57,7 +57,7 @@ class FaceService {
         });
         newMlFile.faces = detectedFaces?.map((detectedFace) => ({
             ...detectedFace,
-            id: getFaceId(detectedFace, newMlFile.imageDimentions),
+            id: getFaceId(detectedFace, newMlFile.imageDimensions),
         }));
         // ?.filter((f) =>
         //     f.box.width > syncContext.config.faceDetection.minFaceSize

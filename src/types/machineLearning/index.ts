@@ -14,6 +14,7 @@ import { EnteFile } from 'types/file';
 import { Config } from 'types/common/config';
 import { Dimensions } from 'types/image';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
+import * as SSDMobileNet from 'ssd-mobilenet';
 
 export interface MLSyncResult {
     nOutOfSyncFiles: number;
@@ -91,6 +92,8 @@ export declare type Landmark = Point;
 export declare type ImageType = 'Original' | 'Preview';
 
 export declare type FaceDetectionMethod = 'BlazeFace' | 'FaceApiSSD';
+
+export declare type ObjectDetectionMethod = 'SSDMobileNetV2';
 
 export declare type FaceCropMethod = 'ArcFace';
 
@@ -178,15 +181,36 @@ export interface Person {
     displayImageUrl?: string;
 }
 
+export interface ObjectDetection {
+    bbox: [number, number, number, number];
+    class: string;
+    score: number;
+}
+
+export interface DetectedObject {
+    fileID: number;
+    detection: ObjectDetection;
+}
+
+export interface DetectedObjectWithId extends DetectedObject {
+    id: string;
+}
+
+export interface Object extends DetectedObjectWithId {
+    objectID?: number;
+}
+
 export interface MlFileData {
     fileId: number;
     faces?: Face[];
+    objects?: Object[];
     imageSource?: ImageType;
-    imageDimentions?: Dimensions;
+    imageDimensions?: Dimensions;
     faceDetectionMethod?: Versioned<FaceDetectionMethod>;
     faceCropMethod?: Versioned<FaceCropMethod>;
     faceAlignmentMethod?: Versioned<FaceAlignmentMethod>;
     faceEmbeddingMethod?: Versioned<FaceEmbeddingMethod>;
+    objectDetectionMethod?: Versioned<ObjectDetectionMethod>;
     mlVersion: number;
     errorCount: number;
     lastErrorMessage?: string;
@@ -258,6 +282,7 @@ export interface MLSyncContext {
     faceAlignmentService: FaceAlignmentService;
     faceEmbeddingService: FaceEmbeddingService;
     faceClusteringService: ClusteringService;
+    objectDetectionService?: ObjectDetectionService;
 
     localFilesMap: Map<number, EnteFile>;
     outOfSyncFiles: EnteFile[];
@@ -306,11 +331,19 @@ export const BLAZEFACE_SCORE_THRESHOLD = 0.75;
 export const BLAZEFACE_PASS1_SCORE_THRESHOLD = 0.4;
 export const BLAZEFACE_FACE_SIZE = 112;
 export const MOBILEFACENET_FACE_SIZE = 112;
+export const MOBILENETV2_OBJECT_SIZE = 256;
 
 export interface FaceDetectionService {
     method: Versioned<FaceDetectionMethod>;
     // init(): Promise<void>;
     detectFaces(image: ImageBitmap): Promise<Array<FaceDetection>>;
+    dispose(): Promise<void>;
+}
+
+export interface ObjectDetectionService {
+    method: Versioned<ObjectDetectionMethod>;
+    // init(): Promise<void>;
+    detectObjects(image: ImageBitmap): Promise<SSDMobileNet.DetectedObject[]>;
     dispose(): Promise<void>;
 }
 

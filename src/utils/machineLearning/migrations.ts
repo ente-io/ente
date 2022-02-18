@@ -40,7 +40,7 @@ export async function migrateFaceCropsToCache() {
         for (const face of file.faces) {
             if (!face['id']) {
                 const faceCropBlob = face.crop['image'];
-                const faceId = getFaceId(face, file.imageDimentions);
+                const faceId = getFaceId(face, file.imageDimensions);
                 face.crop = await storeFaceCropForBlob(
                     faceId,
                     face.crop.imageBox,
@@ -99,7 +99,7 @@ export async function migrateFaceInterfaceUpdate() {
                 personId: f.personId,
             } as Face;
             if (!updatedFace.id) {
-                updatedFace.id = getFaceId(updatedFace, file.imageDimentions);
+                updatedFace.id = getFaceId(updatedFace, file.imageDimensions);
             }
             return updatedFace;
         });
@@ -116,7 +116,7 @@ export async function migrateFaceInterfaceUpdate() {
 
             faces: updatedFaces,
 
-            imageDimentions: file.imageDimentions,
+            imageDimensions: file.imageDimensions,
             imageSource: file.imageSource,
             errorCount: file.errorCount,
             lastErrorMessage: file.lastErrorMessage,

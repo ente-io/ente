@@ -44,7 +44,7 @@ class ReaderService {
 
         fileContext.newMlFile.imageSource = syncContext.config.imageSource;
         const { width, height } = fileContext.imageBitmap;
-        fileContext.newMlFile.imageDimentions = { width, height };
+        fileContext.newMlFile.imageDimensions = { width, height };
         // console.log('2 TF Memory stats: ', tf.memory());
 
         return fileContext.imageBitmap;
