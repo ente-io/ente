@@ -46,7 +46,7 @@ If you like this project, please consider upgrading to a paid subscription.
 
 If you would like to motivate us to keep building, you can do so by [starring](https://github.com/ente-io/bada-frame/stargazers) this project.
 
-## ❤️ Community
+## ❤️ Join the Community
 
 Follow us on [Twitter](https://twitter.com/enteio) and join [r/enteio](https://reddit.com/r/enteio) to get regular updates, connect with other customers, and discuss your ideas.
 
