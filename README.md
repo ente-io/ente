@@ -32,13 +32,13 @@ The deployed application is accessible @ [web.ente.io](https://web.ente.io).
 
 Open [http://localhost:3000](http://localhost:3000) on your browser to see the live application.
 
-## 🧭 Roadmap
-
-We maintain a public roadmap, that's driven by our community @ [roadmap.ente.io](https://roadmap.ente.io).
-
 ## 🙋 Help
 
 We provide in-person support to our customers. Pease write to [support@ente.io](mailto:support@ente.io) sharing as many details as possible about whatever it is that you need help with, and we will get back to you as soon as possible.
+
+## 🧭 Roadmap
+
+We maintain a public roadmap, that's driven by our community @ [roadmap.ente.io](https://roadmap.ente.io).
 
 ## 🤗 Support
 
