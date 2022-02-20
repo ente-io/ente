@@ -51,7 +51,7 @@ You can alternatively install the build from PlayStore.
 
 ## 🙋 Help
 
-We provide in-person support to our customers. Pease write to [support@ente.io](mailto:support@ente.io) sharing as many details as possible about whatever it is that you need help with, and we will get back to you as soon as possible.
+We provide human support to our customers. Please write to [support@ente.io](mailto:support@ente.io) sharing as many details as possible about whatever it is that you need help with, and we will get back to you as soon as possible.
 
 ## 🧭 Roadmap
 
