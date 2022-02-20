@@ -23,7 +23,7 @@
     "axios": "^0.21.3",
     "bip39": "^3.0.4",
     "bootstrap": "^4.5.2",
-    "bs58" : "^4.0.1",
+    "bs58": "^4.0.1",
     "chrono-node": "^2.2.6",
     "comlink": "^4.3.0",
     "debounce-promise": "^3.1.2",
