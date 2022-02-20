@@ -49,13 +49,13 @@ You can alternatively install the build from PlayStore.
 4. For Android, run `flutter build apk --release --flavor independent`
 5. For iOS, run `flutter build ios` 
 
-## 🧭 Roadmap
-
-We maintain a public roadmap, that's driven by our community @ [roadmap.ente.io](https://roadmap.ente.io).
-
 ## 🙋 Help
 
 We provide in-person support to our customers. Pease write to [support@ente.io](mailto:support@ente.io) sharing as many details as possible about whatever it is that you need help with, and we will get back to you as soon as possible.
+
+## 🧭 Roadmap
+
+We maintain a public roadmap, that's driven by our community @ [roadmap.ente.io](https://roadmap.ente.io).
 
 ## 🤗 Support
 
