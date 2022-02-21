@@ -317,18 +317,23 @@ class PublicURL {
   String url;
   int deviceLimit;
   int validTill;
+  bool disableDownload = false;
+  bool passwordEnabled = false;
 
-  PublicURL({
-    this.url,
-    this.deviceLimit,
-    this.validTill,
-  });
+  PublicURL(
+      {this.url,
+      this.deviceLimit,
+      this.validTill,
+      this.disableDownload,
+      this.passwordEnabled});
 
   Map<String, dynamic> toMap() {
     return {
       'url': url,
       'deviceLimit': deviceLimit,
       'validTill': validTill,
+      'disableDownload': disableDownload,
+      'passwordEnabled': passwordEnabled,
     };
   }
 
@@ -338,7 +343,9 @@ class PublicURL {
     return PublicURL(
       url: map['url'],
       deviceLimit: map['deviceLimit'],
-      validTill: map['validTill'],
+      validTill: map['validTill'] ?? 0,
+      disableDownload: map['disableDownload'] ?? false,
+      passwordEnabled: map['passwordEnabled'] ?? false,
     );
   }
 
@@ -349,7 +356,7 @@ class PublicURL {
 
   @override
   String toString() =>
-      'PublicUrl( url: $url, deviceLimit: $deviceLimit, validTill: $validTill)';
+      'PublicUrl( url: $url, deviceLimit: $deviceLimit, validTill: $validTill, , disableDownload: $disableDownload, , passwordEnabled: $passwordEnabled)';
 
   @override
   bool operator ==(Object o) {
@@ -358,9 +365,16 @@ class PublicURL {
     return o is PublicURL &&
         o.deviceLimit == deviceLimit &&
         o.url == url &&
-        o.validTill == validTill;
+        o.validTill == validTill &&
+        o.disableDownload == disableDownload &&
+        o.passwordEnabled == passwordEnabled;
   }
 
   @override
-  int get hashCode => deviceLimit.hashCode ^ url.hashCode ^ validTill.hashCode;
+  int get hashCode =>
+      deviceLimit.hashCode ^
+      url.hashCode ^
+      validTill.hashCode ^
+      disableDownload.hashCode ^
+      passwordEnabled.hashCode;
 }

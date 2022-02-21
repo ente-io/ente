@@ -16,9 +16,11 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/manage_links_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -138,7 +140,7 @@ class _SharingDialogState extends State<SharingDialog> {
         ),
       ]);
       if (widget.collection.publicURLs?.isNotEmpty ?? false) {
-        children.add(_getShareableUrlWidget());
+        children.add(_getShareableUrlWidget(context));
       }
     }
 
@@ -209,7 +211,7 @@ class _SharingDialogState extends State<SharingDialog> {
     );
   }
 
-  Widget _getShareableUrlWidget() {
+  Widget _getShareableUrlWidget(BuildContext parentContext) {
     String collectionKey = Base58Encode(
         CollectionsService.instance.getCollectionKey(widget.collection.id));
     String url = "${widget.collection.publicURLs.first.url}#$collectionKey";
@@ -272,6 +274,35 @@ class _SharingDialogState extends State<SharingDialog> {
               ),
               onPressed: () {
                 shareText(url);
+                // _shareRecoveryKey(recoveryKey);
+              },
+            ),
+            TextButton(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.settings,
+                    color: Theme.of(context).buttonColor,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(4),
+                  ),
+                  Text(
+                    "manage link",
+                    style: TextStyle(
+                      color: Theme.of(context).buttonColor,
+                    ),
+                  ),
+                ],
+              ),
+              onPressed: () async {
+                routeToPage(
+                  parentContext,
+                  ManageSharedLinkWidget(),
+                );
+
+                // shareText(url);
                 // _shareRecoveryKey(recoveryKey);
               },
             ),
