@@ -26,7 +26,7 @@ The deployed application is accessible @ [web.ente.io](https://web.ente.io).
 ## 🧑‍💻 Building from source
 
 1. Clone this repository with `git clone git@github.com:ente-io/bada-frame.git` 
-2. Pull in all submodules with `git submodule init --update-recursive`
+2. Pull in all submodules with `git submodule update --init --recursive`
 3. Install dependencies with `yarn install`
 4. Finally, run the development server with `yarn dev`
 
