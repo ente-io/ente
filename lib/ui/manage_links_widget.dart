@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
@@ -13,6 +14,7 @@ import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/toast_util.dart';
 import 'package:tuple/tuple.dart';
 
 class ManageSharedLinkWidget extends StatefulWidget {
@@ -34,7 +36,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     // todo: make this time calculation perfect
     Tuple3(4, "after 1 month", Duration(days: 30).inMicroseconds),
     Tuple3(5, "after 1 year", Duration(days: 365).inMicroseconds),
-    Tuple3(6, "other", -1),
+    Tuple3(6, "set manually", -1),
   ];
 
   Tuple3<int, String, int> _selectedExpiry;
@@ -73,6 +75,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         icon: Icons.navigate_next),
                   ),
                   Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
+                  Divider(height: 4),
                   Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
                   SizedBox(
                     height: 36,
@@ -128,6 +131,33 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                   ),
                   Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
+                  Divider(height: 4),
+                  Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
+                  GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () async {
+                      var actionResult =
+                          await _displayDeviceLimitInput(context);
+                      if (actionResult == null || actionResult != 'ok') {
+                        return;
+                      }
+                      var newDeviceLimit =
+                          int.tryParse(_textFieldController.text.trim());
+                      if (newDeviceLimit != null &&
+                          newDeviceLimit > 0 &&
+                          newDeviceLimit <= 50) {
+                        await _updateUrlSettings(
+                            context, {'deviceLimit': newDeviceLimit});
+                        setState(() {});
+                      } else {
+                        showToast('device limit out of range');
+                      }
+                    },
+                    child: SettingsTextItem(
+                        text:
+                            "device limit: ${widget.collection.publicURLs.first.deviceLimit}",
+                        icon: Icons.navigate_next),
+                  ),
                 ],
               ),
             ),
@@ -186,7 +216,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       if (expireAfterInMicroseconds < 0) {
                         var timeInMicrosecondsFromEpoch =
                             await _showDateTimePicker();
-                        if (timeInMicrosecondsFromEpoch == null) {
+                        if (timeInMicrosecondsFromEpoch != null) {
                           newValidTill = timeInMicrosecondsFromEpoch;
                         }
                       } else if (expireAfterInMicroseconds == 0) {
@@ -241,7 +271,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   Future<int> _showDateTimePicker() async {
     final dateResult = await DatePicker.showDatePicker(
       context,
-      minTime: DateTime.now().add(Duration(minutes: 1)),
+      minTime: DateTime.now(),
       currentTime: DateTime.now(),
       locale: LocaleType.en,
       theme: kDatePickerTheme,
@@ -264,6 +294,49 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   final TextEditingController _textFieldController = TextEditingController();
+
+  Future<String> _displayDeviceLimitInput(BuildContext context) async {
+    _textFieldController.clear();
+    _textFieldController.value = TextEditingValue(
+        text: widget.collection.publicURLs?.first?.deviceLimit.toString() ??
+            "50");
+    return showDialog<String>(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: (context, setState) {
+            return AlertDialog(
+              title: Text('set device limit'),
+              content: TextFormField(
+                  controller: _textFieldController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                  ],
+                  decoration: InputDecoration(
+                    labelText: "range (1-50)",
+                    hintText: "range (1-50)",
+                  )),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('cancel'),
+                  onPressed: () {
+                    Navigator.pop(context, 'cancel');
+                  },
+                ),
+                TextButton(
+                  child: Text('ok'),
+                  onPressed: () {
+                    if (_textFieldController.text.trim().isEmpty) {
+                      return;
+                    }
+                    Navigator.pop(context, 'ok');
+                  },
+                ),
+              ],
+            );
+          });
+        });
+  }
 
   Future<String> _displayLinkPasswordInput(BuildContext context) async {
     _textFieldController.clear();
@@ -302,10 +375,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   setState(() {});
                 },
               ),
-              // content: TextField(
-              //   controller: _textFieldController,
-              //   decoration: InputDecoration(hintText: "enter link password"),
-              // ),
               actions: <Widget>[
                 TextButton(
                   child: Text('cancel'),
@@ -328,9 +397,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         });
   }
 
-  // todo: Review this approach. On the client side, this is little easy to
-  // attempt bruteforce attack. If we want to use crypto_pwhash, based on parameter,
-  // the client might not be able to generate it within reasonable time?
   Future<Map<String, dynamic>> _getEncryptedPassword(String pass) async {
     assert(Sodium.cryptoPwhashAlgArgon2id13 == Sodium.cryptoPwhashAlgDefault,
         "mismatch in expected default pw hashing algo");
@@ -356,17 +422,17 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       await dialog.hide();
     } catch (e) {
       await dialog.hide();
-      showGenericErrorDialog(context);
+      await showGenericErrorDialog(context);
     }
   }
 
   String _getPublicLinkExpiry() {
     int validTill = widget.collection.publicURLs?.first?.validTill ?? 0;
     if (validTill == 0) {
-      return 'no expiry';
+      return 'validity: no expiry';
     }
     if (validTill < DateTime.now().microsecondsSinceEpoch) {
-      return 'expired';
+      return 'validity: expired';
     }
     return 'expires on: ' +
         getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(validTill));
