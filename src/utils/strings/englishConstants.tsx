@@ -627,6 +627,7 @@ const englishConstants = {
     ALBUM_URL: 'album url',
     PUBLIC_SHARING: 'link sharing',
     NOT_FOUND: '404 - not found',
+    LINK_EXPIRED: 'the link has expired!',
     DISABLE_PUBLIC_SHARING: "'disable public sharing",
     DISABLE_PUBLIC_SHARING_MESSAGE:
         'are you sure you want to disable public sharing?',
