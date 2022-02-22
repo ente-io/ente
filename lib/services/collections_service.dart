@@ -298,6 +298,33 @@ class CollectionsService {
     }
   }
 
+  Future<void> updateShareUrl(
+      Collection collection, Map<String, dynamic> prop) async {
+    prop.putIfAbsent('collectionID', () => collection.id);
+    try {
+      final response = await _dio.put(
+        Configuration.instance.getHttpEndpoint() + "/collections/share-url",
+        data: json.encode(prop),
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
+      // remove existing url information
+      collection.publicURLs?.clear();
+      collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
+      await _db.insert(List.from([collection]));
+      _cacheCollectionAttributes(collection);
+      Bus.instance.fire(CollectionUpdatedEvent(collection.id, <File>[]));
+    } on DioError catch (e) {
+      if (e.response.statusCode == 402) {
+        throw SharingNotPermittedForFreeAccountsError();
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to rename collection", e, s);
+      rethrow;
+    }
+  }
+
   Future<void> disableShareUrl(Collection collection) async {
     try {
       await _dio.delete(

@@ -1,18 +1,24 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:photos/models/collection.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/common/widget_theme.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
-import 'package:photos/utils/toast_util.dart';
+import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/dialog_util.dart';
 import 'package:tuple/tuple.dart';
 
 class ManageSharedLinkWidget extends StatefulWidget {
-  ManageSharedLinkWidget({Key key}) : super(key: key);
+  final Collection collection;
+
+  ManageSharedLinkWidget({Key key, this.collection}) : super(key: key);
 
   @override
   _ManageSharedLinkWidgetState createState() => _ManageSharedLinkWidgetState();
@@ -22,9 +28,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   // index, title, milliseconds in future post which link should expire (when >0)
   List<Tuple3<int, String, int>> expiryOptions = [
     Tuple3(0, "never", 0),
-    Tuple3(1, "after 1 hour", Duration(days: 1).inMicroseconds),
+    Tuple3(1, "after 1 hour", Duration(hours: 1).inMicroseconds),
     Tuple3(2, "after 1 day", Duration(days: 1).inMicroseconds),
-    Tuple3(3, "after 1 week", Duration(days: 1).inMicroseconds),
+    Tuple3(3, "after 1 week", Duration(days: 7).inMicroseconds),
     // todo: make this time calculation perfect
     Tuple3(4, "after 1 month", Duration(days: 30).inMicroseconds),
     Tuple3(5, "after 1 year", Duration(days: 365).inMicroseconds),
@@ -57,15 +63,11 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       showPicker();
                     },
                     child: SettingsTextItem(
-                        text: "never expires", icon: Icons.navigate_next),
+                        text: _getPublicLinkExpiry(),
+                        icon: Icons.navigate_next),
                   ),
-                  Platform.isIOS
-                      ? Padding(padding: EdgeInsets.all(2))
-                      : Padding(padding: EdgeInsets.all(0)),
-                  Divider(height: 4),
-                  Platform.isIOS
-                      ? Padding(padding: EdgeInsets.all(2))
-                      : Padding(padding: EdgeInsets.all(4)),
+                  Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
+                  Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
                   SizedBox(
                     height: 36,
                     child: Row(
@@ -73,43 +75,53 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       children: [
                         Text("enable password"),
                         Switch.adaptive(
-                          value: Configuration.instance
-                              .shouldBackupOverMobileData(),
-                          onChanged: (value) async {
-                            Configuration.instance
-                                .setBackupOverMobileData(value);
+                          value: widget.collection.publicURLs?.first
+                                  ?.passwordEnabled ??
+                              false,
+                          onChanged: (enablePassword) async {
+                            if (enablePassword) {
+                              var inputResult =
+                                  await _displayLinkPasswordInput(context);
+                              if (inputResult != null &&
+                                  inputResult == 'ok' &&
+                                  _textFieldController.text.trim().isNotEmpty) {
+                                var propToUpdate = await _getEncryptedPassword(
+                                    _textFieldController.text);
+                                await _updateUrlSettings(context, propToUpdate);
+                              }
+                            } else {
+                              await _updateUrlSettings(
+                                  context, {'passHash': "", "nonce": ""});
+                            }
                             setState(() {});
                           },
                         ),
                       ],
                     ),
                   ),
-                  Platform.isIOS
-                      ? Padding(padding: EdgeInsets.all(2))
-                      : Padding(padding: EdgeInsets.all(4)),
+                  Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
                   Divider(height: 4),
-                  Platform.isIOS
-                      ? Padding(padding: EdgeInsets.all(2))
-                      : Padding(padding: EdgeInsets.all(4)),
+                  Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
                   SizedBox(
                     height: 36,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("hide download option"),
-                        Switch(
-                          value: Configuration.instance.shouldBackupVideos(),
+                        Text("show download option"),
+                        Switch.adaptive(
+                          value: widget.collection.publicURLs?.first
+                                  ?.enableDownload ??
+                              true,
                           onChanged: (value) async {
-                            Configuration.instance.setShouldBackupVideos(value);
+                            await _updateUrlSettings(
+                                context, {'enableDownload': value});
                             setState(() {});
                           },
                         ),
                       ],
                     ),
                   ),
-                  Platform.isIOS
-                      ? Padding(padding: EdgeInsets.all(4))
-                      : Padding(padding: EdgeInsets.all(2)),
+                  Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
                 ],
               ),
             ),
@@ -163,13 +175,28 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           color: Colors.white,
                         )),
                     onPressed: () async {
-                      int expiry = -1;
-                      if (_selectedExpiry.item3 < 0) {
-                        var showDateTimePicker = _showDateTimePicker(null);
+                      int newValidTill = -1;
+                      int expireAfterInMicroseconds = _selectedExpiry.item3;
+                      // need to manually select time
+                      if (expireAfterInMicroseconds < 0) {
+                        var timeInMicrosecondsFromEpoch =
+                            await _showDateTimePicker();
+                        if (timeInMicrosecondsFromEpoch == null) {
+                          newValidTill = timeInMicrosecondsFromEpoch;
+                        }
+                      } else if (expireAfterInMicroseconds == 0) {
+                        // no expiry
+                        newValidTill = 0;
                       } else {
-                        showToast('hello');
+                        newValidTill = DateTime.now().microsecondsSinceEpoch +
+                            expireAfterInMicroseconds;
                       }
-                      // Navigator.of(context).pop('');
+                      if (newValidTill >= 0) {
+                        await _updateUrlSettings(
+                            context, {'validTill': newValidTill});
+                        setState(() {});
+                      }
+                      Navigator.of(context).pop('');
                     },
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16.0,
@@ -189,7 +216,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 onSelectedItemChanged: (value) {
                   var firstWhere = expiryOptions
                       .firstWhere((element) => element.item1 == value);
-                  Logger('t').info('whats happening $firstWhere');
                   setState(() {
                     _selectedExpiry = firstWhere;
                   });
@@ -207,10 +233,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   // _showDateTimePicker return null if user doesn't select date-time
-  Future<int> _showDateTimePicker(File file) async {
+  Future<int> _showDateTimePicker() async {
     final dateResult = await DatePicker.showDatePicker(
       context,
-      minTime: DateTime.now(),
+      minTime: DateTime.now().add(Duration(minutes: 1)),
       currentTime: DateTime.now(),
       locale: LocaleType.en,
       theme: kDatePickerTheme,
@@ -230,5 +256,110 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     } else {
       return dateWithTimeResult.microsecondsSinceEpoch;
     }
+  }
+
+  final TextEditingController _textFieldController = TextEditingController();
+
+  Future<String> _displayLinkPasswordInput(BuildContext context) async {
+    _textFieldController.clear();
+    return showDialog<String>(
+        context: context,
+        builder: (context) {
+          bool _passwordVisible = false;
+          return StatefulBuilder(builder: (context, setState) {
+            return AlertDialog(
+              title: Text('enter link password'),
+              content: TextFormField(
+                autofillHints: const [AutofillHints.newPassword],
+                decoration: InputDecoration(
+                  hintText: "link password",
+                  contentPadding: EdgeInsets.all(20),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _passwordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Colors.white.withOpacity(0.5),
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      _passwordVisible = !_passwordVisible;
+                      setState(() {});
+                    },
+                  ),
+                ),
+                obscureText: !_passwordVisible,
+                controller: _textFieldController,
+                autofocus: false,
+                autocorrect: false,
+                keyboardType: TextInputType.visiblePassword,
+                onChanged: (_) {
+                  setState(() {});
+                },
+              ),
+              // content: TextField(
+              //   controller: _textFieldController,
+              //   decoration: InputDecoration(hintText: "enter link password"),
+              // ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('cancel'),
+                  onPressed: () {
+                    Navigator.pop(context, 'cancel');
+                  },
+                ),
+                TextButton(
+                  child: Text('ok'),
+                  onPressed: () {
+                    if (_textFieldController.text.trim().isEmpty) {
+                      return;
+                    }
+                    Navigator.pop(context, 'ok');
+                  },
+                ),
+              ],
+            );
+          });
+        });
+  }
+
+  // todo: Review this approach. On the client side, this is little easy to
+  // attempt bruteforce attack. If we want to use crypto_pwhash, based on parameter,
+  // the client might not be able to generate it within reasonable time?
+  Future<Map<String, dynamic>> _getEncryptedPassword(String pass) async {
+    final collectionKey =
+        CollectionsService.instance.getCollectionKey(widget.collection.id);
+    final String paddedPassword = pass.padRight(256, "0");
+    final result =
+        await CryptoUtil.encryptChaCha(utf8.encode(pass), collectionKey);
+    return {
+      'passHash': Sodium.bin2base64(result.encryptedData),
+      'nonce': Sodium.bin2base64(result.header)
+    };
+  }
+
+  Future<void> _updateUrlSettings(
+      BuildContext context, Map<String, dynamic> prop) async {
+    final dialog = createProgressDialog(context, "please wait...");
+    await dialog.show();
+    try {
+      await CollectionsService.instance.updateShareUrl(widget.collection, prop);
+      await dialog.hide();
+    } catch (e) {
+      await dialog.hide();
+      showGenericErrorDialog(context);
+    }
+  }
+
+  String _getPublicLinkExpiry() {
+    int validTill = widget.collection.publicURLs?.first?.validTill ?? 0;
+    if (validTill == 0) {
+      return 'no expiry';
+    }
+    if (validTill < DateTime.now().microsecondsSinceEpoch) {
+      return 'expired';
+    }
+    return 'expires on: ' +
+        getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(validTill));
   }
 }

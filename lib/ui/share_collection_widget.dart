@@ -299,7 +299,7 @@ class _SharingDialogState extends State<SharingDialog> {
               onPressed: () async {
                 routeToPage(
                   parentContext,
-                  ManageSharedLinkWidget(),
+                  ManageSharedLinkWidget(collection: widget.collection),
                 );
 
                 // shareText(url);
