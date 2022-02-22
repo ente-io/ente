@@ -327,14 +327,18 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   // attempt bruteforce attack. If we want to use crypto_pwhash, based on parameter,
   // the client might not be able to generate it within reasonable time?
   Future<Map<String, dynamic>> _getEncryptedPassword(String pass) async {
-    final collectionKey =
-        CollectionsService.instance.getCollectionKey(widget.collection.id);
-    final String paddedPassword = pass.padRight(256, "0");
-    final result =
-        await CryptoUtil.encryptChaCha(utf8.encode(pass), collectionKey);
+    assert(Sodium.cryptoPwhashAlgArgon2id13 == Sodium.cryptoPwhashAlgDefault,
+        "mismatch in expected default pw hashing algo");
+    int memLimit = Sodium.cryptoPwhashMemlimitInteractive;
+    int opsLimit = Sodium.cryptoPwhashOpslimitInteractive;
+    final kekSalt = CryptoUtil.getSaltToDeriveKey();
+    final result = await CryptoUtil.deriveKey(
+        utf8.encode(pass), kekSalt, memLimit, opsLimit);
     return {
-      'passHash': Sodium.bin2base64(result.encryptedData),
-      'nonce': Sodium.bin2base64(result.header)
+      'passHash': Sodium.bin2base64(result),
+      'nonce': Sodium.bin2base64(kekSalt),
+      'memLimit': memLimit,
+      'opsLimit': opsLimit,
     };
   }
 
