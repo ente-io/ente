@@ -40,6 +40,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   Tuple3<int, String, int> _selectedExpiry;
 
   @override
+  void initState() {
+    _selectedExpiry = expiryOptions.first;
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
