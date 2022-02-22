@@ -29,6 +29,7 @@ class SSDMobileNetV2 implements ObjectDetectionService {
         this.ssdMobileNetV2Model = await SSDMobileNet.load({
             base: 'mobilenet_v2',
             dataset: 'open_images',
+            modelUrl: '/models/open-images-ssd-mobilenet-v2/model.json',
         });
         console.log(
             'loaded ssdMobileNetV2Model',
