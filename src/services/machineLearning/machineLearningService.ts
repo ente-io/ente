@@ -3,6 +3,7 @@ import { EnteFile } from 'types/file';
 
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
+import '@tensorflow/tfjs-backend-cpu';
 // import '@tensorflow/tfjs-backend-wasm';
 // import { setWasmPaths } from '@tensorflow/tfjs-backend-wasm';
 // import '@tensorflow/tfjs-backend-cpu';
