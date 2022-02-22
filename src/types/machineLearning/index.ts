@@ -181,6 +181,11 @@ export interface Person {
     displayImageUrl?: string;
 }
 
+export interface Thing {
+    class: string;
+    files: Array<number>;
+}
+
 export interface ObjectDetection {
     bbox: [number, number, number, number];
     class: string;
@@ -192,13 +197,11 @@ export interface DetectedObject {
     detection: ObjectDetection;
 }
 
-export interface DetectedObjectWithId extends DetectedObject {
+export interface Object extends DetectedObject {
     id: string;
 }
 
-export interface Object extends DetectedObjectWithId {
-    objectID?: number;
-}
+export declare type ClusteredObjects = Map<string, Array<number>>;
 
 export interface MlFileData {
     fileId: number;

@@ -13,7 +13,13 @@ import {
     StoreNames,
 } from 'idb';
 import { Config } from 'types/common/config';
-import { Face, MlFileData, MLLibraryData, Person } from 'types/machineLearning';
+import {
+    Face,
+    MlFileData,
+    MLLibraryData,
+    Person,
+    Object,
+} from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
@@ -278,6 +284,21 @@ class MLIDbStorage {
         }
         await tx.done;
         console.timeEnd('updateFaces');
+    }
+
+    public async getAllObjectsMap() {
+        console.time('getAllObjectMap');
+        const db = await this.db;
+        const allFiles = await db.getAll('files');
+        const allObjectsMap = new Map<number, Array<Object>>();
+        allFiles.forEach(
+            (mlFileData) =>
+                mlFileData.objects &&
+                allObjectsMap.set(mlFileData.fileId, mlFileData.objects)
+        );
+        console.timeEnd('getAllObjectMap');
+
+        return allObjectsMap;
     }
 
     public async getPerson(id: number) {

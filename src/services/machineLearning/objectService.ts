@@ -2,8 +2,14 @@ import {
     MLSyncContext,
     MLSyncFileContext,
     DetectedObject,
+    ClusteredObjects,
 } from 'types/machineLearning';
-import { isDifferentOrOld, getObjectId } from 'utils/machineLearning';
+import {
+    isDifferentOrOld,
+    getObjectId,
+    getAllObjectsFromMap,
+} from 'utils/machineLearning';
+import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import ReaderService from './readerService';
 
 class ObjectService {
@@ -59,6 +65,25 @@ class ObjectService {
             '[MLService] Detected Objects: ',
             newMlFile.objects?.length
         );
+    }
+
+    async getAllSyncedObjectsMap() {
+        return await mlIDbStorage.getAllObjectsMap();
+    }
+
+    public async getClusteredObjects(): Promise<ClusteredObjects> {
+        const allObjectsMap = await this.getAllSyncedObjectsMap();
+        const allObjects = getAllObjectsFromMap(allObjectsMap);
+        const objectClusters = new Map<string, number[]>();
+        allObjects.map((object) => {
+            if (!objectClusters.has(object.detection.class)) {
+                objectClusters.set(object.detection.class, []);
+            }
+            const objectsInCluster = objectClusters.get(object.detection.class);
+            objectsInCluster.push(object.fileID);
+        });
+
+        return objectClusters;
     }
 }
 

@@ -8,6 +8,7 @@ import { getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { Dimensions } from 'types/image';
 import {
+    Object,
     AlignedFace,
     BLAZEFACE_FACE_SIZE,
     DetectedFace,
@@ -197,6 +198,14 @@ export function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
     const allFaces = [...allFacesMap.values()].flat();
 
     return allFaces;
+}
+
+export function getAllObjectsFromMap(
+    allObjectsMap: Map<number, Array<Object>>
+) {
+    const allObjects = [...allObjectsMap.values()].flat();
+
+    return allObjects;
 }
 
 export async function getLocalFile(fileId: number) {
