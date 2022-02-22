@@ -15,6 +15,8 @@ import {
     ClusteringMethod,
     ClusteringService,
     MLLibraryData,
+    ObjectDetectionService,
+    ObjectDetectionMethod,
 } from 'types/machineLearning';
 import { CONCURRENCY } from 'utils/common/concurrency';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
@@ -25,6 +27,7 @@ import hdbscanClusteringService from './hdbscanClusteringService';
 import blazeFaceDetectionService from './blazeFaceDetectionService';
 import mobileFaceNetEmbeddingService from './mobileFaceNetEmbeddingService';
 import dbscanClusteringService from './dbscanClusteringService';
+import ssdMobileNetV2Service from './ssdMobileNetV2Service';
 
 export class MLFactory {
     public static getFaceDetectionService(
@@ -35,6 +38,16 @@ export class MLFactory {
         }
 
         throw Error('Unknon face detection method: ' + method);
+    }
+
+    public static getObjectDetectionService(
+        method: ObjectDetectionMethod
+    ): ObjectDetectionService {
+        if (method === 'SSDMobileNetV2') {
+            return ssdMobileNetV2Service;
+        }
+
+        throw Error('Unknown object detection method: ' + method);
     }
 
     public static getFaceCropService(method: FaceCropMethod) {
@@ -97,6 +110,7 @@ export class LocalMLSyncContext implements MLSyncContext {
     public faceAlignmentService: FaceAlignmentService;
     public faceEmbeddingService: FaceEmbeddingService;
     public faceClusteringService: ClusteringService;
+    public objectDetectionService: ObjectDetectionService;
 
     public localFilesMap: Map<number, EnteFile>;
     public outOfSyncFiles: EnteFile[];
@@ -141,6 +155,10 @@ export class LocalMLSyncContext implements MLSyncContext {
         );
         this.faceClusteringService = MLFactory.getClusteringService(
             this.config.faceClustering.method
+        );
+
+        this.objectDetectionService = MLFactory.getObjectDetectionService(
+            this.config.ObjectDetection.method
         );
 
         this.outOfSyncFiles = [];
