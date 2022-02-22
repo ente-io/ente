@@ -43,6 +43,7 @@ export default function PublicCollectionGallery() {
     const url = useRef<string>(null);
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
+    const [errorMessage, setErrorMessage] = useState<String>(null);
     const appContext = useContext(AppContext);
     const [abuseReportFormView, setAbuseReportFormView] = useState(false);
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
@@ -135,9 +136,11 @@ export default function PublicCollectionGallery() {
             setPublicCollection(collection);
 
             await syncPublicFiles(token.current, collection, setPublicFiles);
+            setErrorMessage(null);
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
             if (parsedError.message === CustomError.TOKEN_EXPIRED) {
+                setErrorMessage(constants.LINK_EXPIRED);
                 // share has been disabled
                 // local cache should be cleared
                 removePublicCollectionWithFiles(
@@ -155,6 +158,11 @@ export default function PublicCollectionGallery() {
     if (!publicFiles && loading) {
         return <Loader />;
     }
+
+    if (errorMessage && !loading) {
+        return <Container>{errorMessage}</Container>;
+    }
+
     if (!publicFiles && !loading) {
         return <Container>{constants.NOT_FOUND}</Container>;
     }
