@@ -221,6 +221,10 @@ export interface FaceDetectionConfig {
     minFaceSize: number;
 }
 
+export interface ObjectDetectionConfig {
+    method: ObjectDetectionMethod;
+}
+
 export interface FaceCropConfig {
     enabled: boolean;
     method: FaceCropMethod;
@@ -264,6 +268,7 @@ export interface MLSyncConfig extends Config {
     faceAlignment: FaceAlignmentConfig;
     faceEmbedding: FaceEmbeddingConfig;
     faceClustering: FaceClusteringConfig;
+    ObjectDetection: ObjectDetectionConfig;
     tsne?: TSNEConfig;
     mlVersion: number;
 }

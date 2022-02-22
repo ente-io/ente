@@ -43,6 +43,9 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
         // maxDistanceInsideCluster: 0.4,
         generateDebugInfo: true,
     },
+    ObjectDetection: {
+        method: 'SSDMobileNetV2',
+    },
     // tsne: {
     //     samples: 200,
     //     dim: 2,
