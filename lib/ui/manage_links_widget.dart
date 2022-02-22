@@ -60,7 +60,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTap: () async {
-                      showPicker();
+                      await showPicker();
                     },
                     child: SettingsTextItem(
                         text: _getPublicLinkExpiry(),
@@ -136,7 +136,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       return Text(text, style: TextStyle(color: Colors.white));
     }
 
-    showCupertinoModalPopup(
+    return showCupertinoModalPopup(
       context: context,
       builder: (context) {
         return Column(
@@ -156,13 +156,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   CupertinoButton(
-                    child: Text('Cancel',
+                    child: Text('cancel',
                         style: TextStyle(
                           color: Colors.white,
                         )),
                     onPressed: () {
-                      print("wtf");
-                      // Navigator.of(context).pop('');
+                      Navigator.of(context).pop('cancel');
                     },
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8.0,
@@ -170,7 +169,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                   ),
                   CupertinoButton(
-                    child: Text('Confirm',
+                    child: Text('confirm',
                         style: TextStyle(
                           color: Colors.white,
                         )),
