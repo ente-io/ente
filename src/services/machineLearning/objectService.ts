@@ -55,7 +55,10 @@ class ObjectService {
         // ?.filter((f) =>
         //     f.box.width > syncContext.config.faceDetection.minFaceSize
         // );
-        console.log('[MLService] Detected Objects: ', newMlFile.faces?.length);
+        console.log(
+            '[MLService] Detected Objects: ',
+            newMlFile.objects?.length
+        );
     }
 }
 
