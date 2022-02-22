@@ -192,6 +192,13 @@ const PhotoFrame = ({
                     return false;
                 }
 
+                if (
+                    search.thing &&
+                    search.thing.files.indexOf(item.id) === -1
+                ) {
+                    return false;
+                }
+
                 if (isSharedFile(item) && !isSharedCollection) {
                     return false;
                 }

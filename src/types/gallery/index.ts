@@ -1,7 +1,7 @@
 import { SetDialogMessage } from 'components/MessageDialog';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { Person } from 'types/machineLearning';
+import { Person, Thing } from 'types/machineLearning';
 import { DateValue, Bbox } from 'types/search';
 
 export type SelectedState = {
@@ -19,6 +19,7 @@ export type Search = {
     location?: Bbox;
     fileIndex?: number;
     person?: Person;
+    thing?: Thing;
 };
 export interface SearchStats {
     resultCount: number;

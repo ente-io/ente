@@ -1,4 +1,4 @@
-import { Person } from 'types/machineLearning';
+import { Person, Thing } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 
 export type Bbox = [number, number, number, number];
@@ -16,6 +16,7 @@ export enum SuggestionType {
     VIDEO,
     PERSON,
     INDEX_STATUS,
+    OBJECT,
 }
 
 export interface DateValue {
@@ -27,6 +28,6 @@ export interface DateValue {
 export interface Suggestion {
     type: SuggestionType;
     label: string;
-    value: Bbox | DateValue | number | Person | IndexStatus;
+    value: Bbox | DateValue | number | Person | IndexStatus | Thing;
     hide?: boolean;
 }

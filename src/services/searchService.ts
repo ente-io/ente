@@ -16,6 +16,8 @@ import {
     Suggestion,
     SuggestionType,
 } from 'types/search';
+import ObjectService from './machineLearning/objectService';
+import { Thing } from 'types/machineLearning';
 
 const ENDPOINT = getEndpoint();
 
@@ -170,4 +172,15 @@ export function searchFiles(searchPhrase: string, files: EnteFile[]) {
         }))
         .filter(({ title }) => title.toLowerCase().includes(searchPhrase))
         .slice(0, 4);
+}
+
+export async function searchObject(searchPhrase: string) {
+    const clusteredObjects = await ObjectService.getClusteredObjects();
+    const matches = [] as Thing[];
+    for (const [key, value] of clusteredObjects.entries()) {
+        if (key.toLocaleLowerCase().includes(searchPhrase)) {
+            matches.push({ class: key, files: value });
+        }
+    }
+    return matches;
 }
