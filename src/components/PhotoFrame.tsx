@@ -69,6 +69,7 @@ interface Props {
     deleted?: number[];
     activeCollection: number;
     isSharedCollection: boolean;
+    enableDownload: boolean;
 }
 
 const PhotoFrame = ({
@@ -86,6 +87,7 @@ const PhotoFrame = ({
     deleted,
     activeCollection,
     isSharedCollection,
+    enableDownload = true,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -519,6 +521,7 @@ const PhotoFrame = ({
                         favItemIds={favItemIds}
                         isSharedCollection={isSharedCollection}
                         isTrashCollection={activeCollection === TRASH_SECTION}
+                        enableDownload={enableDownload === true}
                     />
                 </Container>
             )}

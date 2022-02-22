@@ -692,6 +692,7 @@ export default function Gallery() {
                         activeCollection,
                         collections
                     )}
+                    enableDownload={true}
                 />
                 {selected.count > 0 &&
                     selected.collectionID === activeCollection && (

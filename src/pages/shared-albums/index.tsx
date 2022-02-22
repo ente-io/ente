@@ -194,6 +194,9 @@ export default function PublicCollectionGallery() {
                 deleted={[]}
                 activeCollection={ALL_SECTION}
                 isSharedCollection
+                enableDownload={
+                    publicCollection?.publicURLs?.[0]?.enableDownload ?? true
+                }
             />
             <AbuseReportForm
                 show={abuseReportFormView}
