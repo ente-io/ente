@@ -139,8 +139,15 @@ export default function PublicCollectionGallery() {
             setErrorMessage(null);
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
-            if (parsedError.message === CustomError.TOKEN_EXPIRED) {
-                setErrorMessage(constants.LINK_EXPIRED);
+            if (
+                parsedError.message === CustomError.TOKEN_EXPIRED ||
+                parsedError.message === CustomError.TOO_MANY_REQUESTS
+            ) {
+                setErrorMessage(
+                    parsedError.message === CustomError.TOO_MANY_REQUESTS
+                        ? constants.LINK_TOO_MANY_REQUESTS
+                        : constants.LINK_EXPIRED
+                );
                 // share has been disabled
                 // local cache should be cleared
                 removePublicCollectionWithFiles(
