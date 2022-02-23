@@ -14,7 +14,6 @@ import {
 import { ibExtractFaceImageFromCrop } from 'utils/machineLearning/faceCrop';
 import { FaceCropsRow, FaceImagesRow, ImageBitmapView } from './ImageViews';
 import ssdMobileNetV2Service from 'services/machineLearning/ssdMobileNetV2Service';
-import { Box } from '../../../thirdparty/face-api/classes';
 
 interface MLFileDebugViewProps {
     file: File;
@@ -59,22 +58,19 @@ function drawFaceDetection(face: AlignedFace, ctx: CanvasRenderingContext2D) {
 }
 
 function drawBbox(object: ObjectDetection, ctx: CanvasRenderingContext2D) {
-    const objectBox = new Box({
-        left: object.bbox[1],
-        top: object.bbox[2],
-        right: object.bbox[3],
-        bottom: object.bbox[0],
-    });
-    console.log({ bbox: object.bbox });
-    const pointSize = Math.ceil(
-        Math.max(ctx.canvas.width / 512, objectBox.width / 32)
-    );
-    ctx.lineWidth = pointSize;
-    ctx.strokeRect(objectBox.x, objectBox.y, objectBox.width, objectBox.height);
-
-    ctx.restore();
-
+    ctx.font = '100px Arial';
     ctx.save();
+    ctx.restore();
+    ctx.rect(...object.bbox);
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = 'green';
+    ctx.fillStyle = 'green';
+    ctx.stroke();
+    ctx.fillText(
+        object.score.toFixed(3) + ' ' + object.class,
+        object.bbox[0],
+        object.bbox[1] > 10 ? object.bbox[1] - 5 : 10
+    );
 }
 
 export default function MLFileDebugView(props: MLFileDebugViewProps) {
@@ -101,7 +97,7 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             const objectDetections = await ssdMobileNetV2Service.detectObjects(
                 imageBitmap
             );
-            console.log('detectedObjects: ', objectDetections.length);
+            console.log('detectedObjects: ', objectDetections);
 
             const mlSyncConfig = await getMLSyncConfig();
             const faceCropPromises = faceDetections.map(async (faceDetection) =>
