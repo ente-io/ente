@@ -74,6 +74,7 @@ const englishConstants = {
     SENDING: 'sending...',
     SENT: 'sent!',
     PASSWORD: 'password',
+    LINK_PASSWORD: 'enter password to unlock the album',
     ENTER_PASSPHRASE: 'enter your password',
     RETURN_PASSPHRASE_HINT: 'password',
     SET_PASSPHRASE: 'set password',

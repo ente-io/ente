@@ -5,8 +5,10 @@ import {
     getLocalPublicCollection,
     getLocalPublicFiles,
     getPublicCollection,
+    getPublicCollectionPassword,
     getPublicCollectionUID,
     removePublicCollectionWithFiles,
+    setPublicCollectionPassword,
     syncPublicFiles,
 } from 'services/publicCollectionService';
 import { Collection } from 'types/collection';
@@ -28,6 +30,10 @@ import LoadingBar from 'react-top-loading-bar';
 import CryptoWorker from 'utils/crypto';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
+import LogoImg from 'components/LogoImg';
+import SingleInputForm from 'components/SingleInputForm';
+import { Card } from 'react-bootstrap';
+import { logError } from 'utils/sentry';
 
 const Loader = () => (
     <Container>
@@ -39,6 +45,7 @@ const Loader = () => (
 const bs58 = require('bs58');
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
+    const passwordToken = useRef<string>(null);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
@@ -54,6 +61,8 @@ export default function PublicCollectionGallery() {
     const loadingBar = useRef(null);
     const isLoadingBarRunning = useRef(false);
     const router = useRouter();
+    const [isPasswordProtected, setIsPasswordProtected] =
+        useState<boolean>(false);
 
     const openMessageDialog = () => setMessageDialogView(true);
     const closeMessageDialog = () => setMessageDialogView(false);
@@ -115,6 +124,9 @@ export default function PublicCollectionGallery() {
                         mergeMetadata(localFiles)
                     );
                     setPublicFiles(localPublicFiles);
+                    passwordToken.current = await getPublicCollectionPassword(
+                        collectionUID
+                    );
                 }
                 await syncWithRemote();
             } finally {
@@ -133,10 +145,23 @@ export default function PublicCollectionGallery() {
                 token.current,
                 collectionKey.current
             );
+            const collectionUID = getPublicCollectionUID(token.current);
             setPublicCollection(collection);
-
-            await syncPublicFiles(token.current, collection, setPublicFiles);
             setErrorMessage(null);
+            // check if we need to prompt user for the password
+            if (
+                (collection?.publicURLs?.[0]?.passwordEnabled ?? false) &&
+                (await getPublicCollectionPassword(collectionUID)) === ''
+            ) {
+                setIsPasswordProtected(true);
+                return;
+            } else {
+                await syncPublicFiles(
+                    token.current,
+                    collection,
+                    setPublicFiles
+                );
+            }
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
             if (
@@ -162,12 +187,77 @@ export default function PublicCollectionGallery() {
         }
     };
 
+    const verifyPassphrase = async (password, setFieldError) => {
+        try {
+            const cryptoWorker = await new CryptoWorker();
+            let hashedPassword: string = null;
+            try {
+                const publicUrl = publicCollection.publicURLs[0];
+                hashedPassword = await cryptoWorker.deriveKey(
+                    password,
+                    publicUrl.nonce,
+                    publicUrl.opsLimit,
+                    publicUrl.memLimit
+                );
+            } catch (e) {
+                setFieldError(
+                    'passphrase',
+                    `${constants.UNKNOWN_ERROR} ${e.message}`
+                );
+                return;
+            }
+            const collectionUID = getPublicCollectionUID(token.current);
+            try {
+                setPublicCollectionPassword(collectionUID, hashedPassword);
+                await syncWithRemote();
+                passwordToken.current = hashedPassword;
+                setIsPasswordProtected(false);
+                finishLoadingBar();
+            } catch (e) {
+                // reset local password token
+                passwordToken.current = null;
+                setPublicCollectionPassword(collectionUID, '');
+                logError(e, 'user entered a wrong password for album');
+                setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
+            }
+        } catch (e) {
+            setFieldError(
+                'passphrase',
+                `${constants.UNKNOWN_ERROR} ${e.message}`
+            );
+        }
+    };
+
     if (!publicFiles && loading) {
         return <Loader />;
     }
 
     if (errorMessage && !loading) {
         return <Container>{errorMessage}</Container>;
+    }
+    if (isPasswordProtected && !loading) {
+        return (
+            <Container>
+                <Card style={{ minWidth: '320px' }} className="text-center">
+                    <Card.Body style={{ padding: '40px 30px' }}>
+                        <Card.Title style={{ marginBottom: '24px' }}>
+                            <LogoImg src="/icon.svg" />
+                            {constants.PASSWORD}
+                        </Card.Title>
+                        <Card.Subtitle style={{ marginBottom: '32px' }}>
+                            {/* <LogoImg src="/icon.svg" /> */}
+                            {constants.LINK_PASSWORD}
+                        </Card.Subtitle>
+                        <SingleInputForm
+                            callback={verifyPassphrase}
+                            placeholder={constants.RETURN_PASSPHRASE_HINT}
+                            buttonText={'unlock'}
+                            fieldType="password"
+                        />
+                    </Card.Body>
+                </Card>
+            </Container>
+        );
     }
 
     if (!publicFiles && !loading) {
@@ -179,6 +269,7 @@ export default function PublicCollectionGallery() {
             value={{
                 ...defaultPublicCollectionGalleryContext,
                 token: token.current,
+                passwordToken: passwordToken.current,
                 accessedThroughSharedURL: true,
                 setDialogMessage,
                 openReportForm,
