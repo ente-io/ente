@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import '@tensorflow/tfjs-backend-webgl';
+import '@tensorflow/tfjs-backend-cpu';
 import arcfaceAlignmentService from 'services/machineLearning/arcfaceAlignmentService';
 import arcfaceCropService from 'services/machineLearning/arcfaceCropService';
 import blazeFaceDetectionService from 'services/machineLearning/blazeFaceDetectionService';
-import { AlignedFace, FaceCrop } from 'types/machineLearning';
+import { AlignedFace, FaceCrop, ObjectDetection } from 'types/machineLearning';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
 import {
     getAlignedFaceBox,
@@ -12,6 +13,8 @@ import {
 } from 'utils/machineLearning/faceAlign';
 import { ibExtractFaceImageFromCrop } from 'utils/machineLearning/faceCrop';
 import { FaceCropsRow, FaceImagesRow, ImageBitmapView } from './ImageViews';
+import ssdMobileNetV2Service from 'services/machineLearning/ssdMobileNetV2Service';
+import { Box } from '../../../thirdparty/face-api/classes';
 
 interface MLFileDebugViewProps {
     file: File;
@@ -55,6 +58,25 @@ function drawFaceDetection(face: AlignedFace, ctx: CanvasRenderingContext2D) {
     ctx.restore();
 }
 
+function drawBbox(object: ObjectDetection, ctx: CanvasRenderingContext2D) {
+    const objectBox = new Box({
+        left: object.bbox[1],
+        top: object.bbox[2],
+        right: object.bbox[3],
+        bottom: object.bbox[0],
+    });
+    console.log({ bbox: object.bbox });
+    const pointSize = Math.ceil(
+        Math.max(ctx.canvas.width / 512, objectBox.width / 32)
+    );
+    ctx.lineWidth = pointSize;
+    ctx.strokeRect(objectBox.x, objectBox.y, objectBox.width, objectBox.height);
+
+    ctx.restore();
+
+    ctx.save();
+}
+
 export default function MLFileDebugView(props: MLFileDebugViewProps) {
     // const [imageBitmap, setImageBitmap] = useState<ImageBitmap>();
     const [faceCrops, setFaceCrops] = useState<FaceCrop[]>();
@@ -70,10 +92,16 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
         const loadFile = async () => {
             // TODO: go through worker for these apis, to not include ml code in main bundle
             const imageBitmap = await createImageBitmap(props.file);
+            console.log(imageBitmap);
             const faceDetections = await blazeFaceDetectionService.detectFaces(
                 imageBitmap
             );
             console.log('detectedFaces: ', faceDetections.length);
+
+            const objectDetections = await ssdMobileNetV2Service.detectObjects(
+                imageBitmap
+            );
+            console.log('detectedObjects: ', objectDetections.length);
 
             const mlSyncConfig = await getMLSyncConfig();
             const faceCropPromises = faceDetections.map(async (faceDetection) =>
@@ -108,6 +136,8 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             alignedFaces.forEach((alignedFace) =>
                 drawFaceDetection(alignedFace, ctx)
             );
+
+            objectDetections.forEach((object) => drawBbox(object, ctx));
 
             const facesUsingCrops = await Promise.all(
                 alignedFaces.map((face, i) => {

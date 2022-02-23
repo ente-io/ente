@@ -176,6 +176,7 @@ export function searchFiles(searchPhrase: string, files: EnteFile[]) {
 
 export async function searchObject(searchPhrase: string) {
     const clusteredObjects = await ObjectService.getClusteredObjects();
+    console.log(clusteredObjects);
     const matches = [] as Thing[];
     for (const [key, value] of clusteredObjects.entries()) {
         if (key.toLocaleLowerCase().includes(searchPhrase)) {

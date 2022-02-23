@@ -1,12 +1,12 @@
 import * as tf from '@tensorflow/tfjs-core';
 import {
-    MOBILENETV2_OBJECT_SIZE,
+    // MOBILENETV2_OBJECT_SIZE,
     ObjectDetection,
     ObjectDetectionMethod,
     ObjectDetectionService,
     Versioned,
 } from 'types/machineLearning';
-import { resizeToSquare } from 'utils/image';
+// import { resizeToSquare } from 'utils/image';
 // import {
 //     load as ssdMobileNetV2Load,
 //     SSDMobileNetV2Model,
@@ -39,9 +39,27 @@ class SSDMobileNetV2 implements ObjectDetectionService {
     }
 
     public async detectObjects(image: ImageBitmap): Promise<ObjectDetection[]> {
-        const resized = resizeToSquare(image, MOBILENETV2_OBJECT_SIZE);
-        const result = await this.detectObjectUsingModel(resized.image);
-        return result;
+        // const resized = resizeToSquare(image, MOBILENETV2_OBJECT_SIZE);
+        const results = await this.detectObjectUsingModel(image);
+        // const sizeCorrectedResults = results.map((result) => {
+        //     const scale =
+        //         Math.max(image.height, image.width) / MOBILENETV2_OBJECT_SIZE;
+
+        //     const expandResultToOriginalSize: SSDMobileNet.DetectedObject = {
+        //         ...result,
+        //         bbox: result.bbox.map((x) => x * scale) as [
+        //             number,
+        //             number,
+        //             number,
+        //             number
+        //         ],
+        //     };
+        //     return expandResultToOriginalSize;
+        // });
+
+        // return sizeCorrectedResults;
+
+        return results;
     }
 
     private async getSSDMobileNetV2Model() {

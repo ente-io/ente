@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useContext, ChangeEvent } from 'react';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
@@ -485,44 +486,6 @@ export default function MLDebug() {
             <MLFileDebugView file={debugFile} />
 
             <hr />
-            <Row>Hdbscan MST: </Row>
-            <div
-                id="treeWrapper"
-                style={{
-                    width: '100%',
-                    height: '50em',
-                    backgroundColor: 'white',
-                }}>
-                {mstD3Tree && (
-                    <Tree
-                        data={mstD3Tree}
-                        orientation={'vertical'}
-                        nodeSize={nodeSize}
-                        zoom={0.25}
-                        renderCustomNodeElement={(rd3tProps) =>
-                            renderForeignObjectNode({
-                                ...rd3tProps,
-                                foreignObjectProps,
-                            })
-                        }
-                    />
-                )}
-            </div>
-
-            <hr />
-            <Row>TSNE of embeddings: </Row>
-            <Row>
-                <div
-                    id="tsneWrapper"
-                    style={{
-                        width: '840px',
-                        height: '840px',
-                        backgroundColor: 'white',
-                        overflow: 'auto',
-                    }}>
-                    {mlResult.tsne && <TSNEPlot mlResult={mlResult} />}
-                </div>
-            </Row>
         </Container>
     );
 }
