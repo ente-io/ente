@@ -250,7 +250,8 @@ const PhotoFrame = ({
             h: window.innerHeight,
         };
         if (
-            files[index].metadata.fileType === FILE_TYPE.VIDEO &&
+            (files[index].metadata.fileType === FILE_TYPE.VIDEO ||
+                files[index].metadata.fileType === FILE_TYPE.LIVE_PHOTO) &&
             !files[index].html
         ) {
             files[index].html = `
@@ -296,6 +297,15 @@ const PhotoFrame = ({
                     </div>
                 </div>
                 `;
+            }
+        } else if (files[index].metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+            if (await isPlaybackPossible(url)) {
+                files[index].html = `
+                <video controls autoplay loop>
+                    <source src="${url}" />
+                    Your browser does not support the video tag.
+                </video>
+            `;
             }
         } else {
             files[index].src = url;

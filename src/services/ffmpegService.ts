@@ -56,6 +56,38 @@ class FFmpegService {
             }
         }
     }
+
+    async convertLivePhotoToMP4(file: Uint8Array): Promise<Uint8Array> {
+        if (!this.ffmpeg) {
+            await this.init();
+        }
+        if (this.isLoading) {
+            await this.isLoading;
+        }
+
+        try {
+            this.ffmpeg.FS('writeFile', 'input.mov', file);
+            console.log('starting encoding', new Date().toLocaleTimeString());
+            await this.ffmpeg.run(
+                '-i',
+                'input.mov',
+                '-preset',
+                'ultrafast',
+                'output.mp4'
+            );
+            const convertedFile = await this.ffmpeg.FS(
+                'readFile',
+                'output.mp4'
+            );
+            console.log('done encoding', new Date().toLocaleTimeString());
+            await this.ffmpeg.FS('unlink', 'input.mov');
+            await this.ffmpeg.FS('unlink', 'output.mp4');
+            return convertedFile;
+        } catch (e) {
+            logError(e, 'ffmpeg live photo to MP4 conversion failed');
+            throw e;
+        }
+    }
 }
 
 async function generateThumbnailHelper(

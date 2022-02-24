@@ -333,7 +333,7 @@ export async function convertForPreview(file: EnteFile, fileBlob: Blob) {
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         const originalName = fileNameWithoutExtension(file.metadata.title);
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
-        fileBlob = new Blob([motionPhoto.image]);
+        fileBlob = new Blob([motionPhoto.video]);
     }
 
     const typeFromExtension = getFileExtension(file.metadata.title);
