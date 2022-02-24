@@ -1,6 +1,6 @@
 import { FILE_TYPE } from 'constants/file';
 import { logError } from 'utils/sentry';
-import { getExifData, ParsedEXIFData } from './exifService';
+import { getExifData, getUNIXTime, ParsedEXIFData } from './exifService';
 import {
     Metadata,
     ParsedMetadataJSON,
@@ -141,8 +141,8 @@ export async function parseMetadataJSON(
     }
 }
 
-export function parseFFmpegExtractedMetadata(metadata: Uint8Array) {
-    const metadataString = new TextDecoder().decode(metadata);
+export function parseFFmpegExtractedMetadata(encodedMetadata: Uint8Array) {
+    const metadataString = new TextDecoder().decode(encodedMetadata);
     const metadataPropertyArray = metadataString.split('\n');
     const metadataKeyValueArray = metadataPropertyArray.map((property) =>
         property.split('=')
@@ -151,16 +151,18 @@ export function parseFFmpegExtractedMetadata(metadata: Uint8Array) {
         (keyValueArray) => keyValueArray.length === 2
     ) as Array<[string, string]>;
 
-    const metadataMap = new Map(validKeyValuePairs);
+    const metadataMap = Object.fromEntries(validKeyValuePairs);
 
     const location = parseAppleISOLocation(
-        metadata[VideoMetadata.APPLE_LOCATION_ISO]
+        metadataMap[VideoMetadata.APPLE_LOCATION_ISO]
     );
 
+    const creationTime = parseCreationTime(
+        metadataMap[VideoMetadata.APPLE_CREATION_DATE] ??
+            metadataMap[VideoMetadata.CREATION_TIME]
+    );
     const parsedMetadata: ParsedVideoMetadata = {
-        creationTime:
-            metadataMap[VideoMetadata.APPLE_CREATION_DATE] ||
-            metadataMap[VideoMetadata.CREATION_TIME],
+        creationTime,
         location: {
             latitude: location.latitude,
             longitude: location.longitude,
@@ -170,11 +172,27 @@ export function parseFFmpegExtractedMetadata(metadata: Uint8Array) {
 }
 
 function parseAppleISOLocation(isoLocation: string) {
+    let location = NULL_LOCATION;
     if (isoLocation) {
-        const [latitude, longitude, altitude] = isoLocation
+        const [latitude, longitude] = isoLocation
             .match(/(\+|-)\d+\.*\d+/g)
             .map((x) => parseFloat(x));
 
-        return { latitude, longitude, altitude };
+        location = { latitude, longitude };
     }
+    return location;
+}
+
+function parseCreationTime(creationTime: string) {
+    let dateTime = null;
+    if (creationTime) {
+        dateTime = new Date(creationTime);
+        if (isNaN(dateTime.getTime())) {
+            dateTime = null;
+        }
+    }
+    if (dateTime) {
+        dateTime = getUNIXTime(dateTime);
+    }
+    return dateTime;
 }

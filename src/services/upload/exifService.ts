@@ -23,7 +23,7 @@ interface Exif {
     GPSLatitudeRef?: number;
     GPSLongitudeRef?: number;
 }
-interface ParsedEXIFData {
+export interface ParsedEXIFData {
     location: Location;
     creationTime: number;
 }
