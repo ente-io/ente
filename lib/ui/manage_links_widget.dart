@@ -100,7 +100,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                               }
                             } else {
                               await _updateUrlSettings(
-                                  context, {'passHash': "", "nonce": ""});
+                                  context, {'disablePassword': true});
                             }
                             setState(() {});
                           },
