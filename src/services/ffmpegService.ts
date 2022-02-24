@@ -2,6 +2,10 @@ import { createFFmpeg, FFmpeg } from '@ffmpeg/ffmpeg';
 import { CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import QueueProcessor from './queueProcessor';
+import {
+    ParsedVideoMetadata,
+    parseFFmpegExtractedMetadata,
+} from './upload/metadataService';
 import { getUint8ArrayView } from './upload/readFileService';
 
 class FFmpegService {
@@ -9,7 +13,7 @@ class FFmpegService {
     private isLoading = null;
     private fileReader: FileReader = null;
 
-    private generateThumbnailProcessor = new QueueProcessor<Uint8Array>(1);
+    private ffmpegTaskQueue = new QueueProcessor<any>(1);
     async init() {
         try {
             this.ffmpeg = createFFmpeg({
@@ -26,7 +30,7 @@ class FFmpegService {
         }
     }
 
-    async generateThumbnail(file: File) {
+    async generateThumbnail(file: File): Promise<Uint8Array> {
         if (!this.ffmpeg) {
             await this.init();
         }
@@ -36,7 +40,7 @@ class FFmpegService {
         if (this.isLoading) {
             await this.isLoading;
         }
-        const response = this.generateThumbnailProcessor.queueUpRequest(
+        const response = this.ffmpegTaskQueue.queueUpRequest(
             generateThumbnailHelper.bind(
                 null,
                 this.ffmpeg,
@@ -52,6 +56,37 @@ class FFmpegService {
                 return null;
             } else {
                 logError(e, 'ffmpeg thumbnail generation failed');
+                throw e;
+            }
+        }
+    }
+
+    async extractMetadata(file: File): Promise<ParsedVideoMetadata> {
+        if (!this.ffmpeg) {
+            await this.init();
+        }
+        if (!this.fileReader) {
+            this.fileReader = new FileReader();
+        }
+        if (this.isLoading) {
+            await this.isLoading;
+        }
+        const response = this.ffmpegTaskQueue.queueUpRequest(
+            extractVideoMetadataHelper.bind(
+                null,
+                this.ffmpeg,
+                this.fileReader,
+                file
+            )
+        );
+        try {
+            return await response.promise;
+        } catch (e) {
+            if (e.message === CustomError.REQUEST_CANCELLED) {
+                // ignore
+                return null;
+            } else {
+                logError(e, 'ffmpeg metadata extraction failed');
                 throw e;
             }
         }
@@ -97,6 +132,46 @@ async function generateThumbnailHelper(
         return thumb;
     } catch (e) {
         logError(e, 'ffmpeg thumbnail generation failed');
+        throw e;
+    }
+}
+
+async function extractVideoMetadataHelper(
+    ffmpeg: FFmpeg,
+    reader: FileReader,
+    file: File
+) {
+    try {
+        const inputFileName = `${Date.now().toString()}-${file.name}`;
+        const outFileName = `${Date.now().toString()}-metadata.txt`;
+        ffmpeg.FS(
+            'writeFile',
+            inputFileName,
+            await getUint8ArrayView(reader, file)
+        );
+        let metadata = null;
+
+        await ffmpeg.run(
+            '-i',
+            inputFileName,
+            '-c',
+            'copy',
+            '-map_metadata',
+            '0',
+            '-map_metadata:s:v',
+            '0:s:v',
+            '-map_metadata:s:a',
+            '0:s:a',
+            '-f',
+            'ffmetadata',
+            outFileName
+        );
+        metadata = ffmpeg.FS('readFile', outFileName);
+        ffmpeg.FS('unlink', outFileName);
+        ffmpeg.FS('unlink', inputFileName);
+        return parseFFmpegExtractedMetadata(metadata);
+    } catch (e) {
+        logError(e, 'ffmpeg metadata extraction failed');
         throw e;
     }
 }
