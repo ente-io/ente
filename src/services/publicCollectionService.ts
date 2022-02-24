@@ -321,6 +321,8 @@ export const removePublicCollectionWithFiles = async (
         )
     );
 
+    await localForage.removeItem(getPublicCollectionSyncTimeUID(collectionUID));
+
     const publicCollectionFiles =
         (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
             PUBLIC_COLLECTION_FILES_TABLE
