@@ -10,6 +10,7 @@ import {
     removePublicCollectionWithFiles,
     setPublicCollectionPassword,
     syncPublicFiles,
+    verifyPublicCollectionPassword,
 } from 'services/publicCollectionService';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
@@ -45,7 +46,8 @@ const Loader = () => (
 const bs58 = require('bs58');
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
-    const passwordToken = useRef<string>(null);
+    // passwordJWTToken refers to the jwt token which is used for album protected by password.
+    const passwordJWTToken = useRef<string>(null);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
@@ -124,9 +126,8 @@ export default function PublicCollectionGallery() {
                         mergeMetadata(localFiles)
                     );
                     setPublicFiles(localPublicFiles);
-                    passwordToken.current = await getPublicCollectionPassword(
-                        collectionUID
-                    );
+                    passwordJWTToken.current =
+                        await getPublicCollectionPassword(collectionUID);
                 }
                 await syncWithRemote();
             } finally {
@@ -187,8 +188,9 @@ export default function PublicCollectionGallery() {
         }
     };
 
-    const verifyPassphrase = async (password, setFieldError) => {
+    const verifyLinkPassword = async (password, setFieldError) => {
         try {
+            console.log('verify link password');
             const cryptoWorker = await new CryptoWorker();
             let hashedPassword: string = null;
             try {
@@ -208,18 +210,27 @@ export default function PublicCollectionGallery() {
             }
             const collectionUID = getPublicCollectionUID(token.current);
             try {
-                setPublicCollectionPassword(collectionUID, hashedPassword);
-                await syncWithRemote();
-                passwordToken.current = hashedPassword;
-                setIsPasswordProtected(false);
-                finishLoadingBar();
+                const jwtToken = await verifyPublicCollectionPassword(
+                    token.current,
+                    hashedPassword
+                );
+                setPublicCollectionPassword(collectionUID, jwtToken);
+                passwordJWTToken.current = jwtToken;
             } catch (e) {
                 // reset local password token
-                passwordToken.current = null;
+                passwordJWTToken.current = null;
                 setPublicCollectionPassword(collectionUID, '');
-                logError(e, 'user entered a wrong password for album');
-                setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
+                logError(e, 'failed to validate password for album');
+                const parsedError = parseSharingErrorCodes(e);
+                if (parsedError.message === CustomError.TOKEN_EXPIRED) {
+                    setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
+                    return;
+                }
+                throw e;
             }
+            await syncWithRemote();
+            setIsPasswordProtected(false);
+            finishLoadingBar();
         } catch (e) {
             setFieldError(
                 'passphrase',
@@ -249,7 +260,7 @@ export default function PublicCollectionGallery() {
                             {constants.LINK_PASSWORD}
                         </Card.Subtitle>
                         <SingleInputForm
-                            callback={verifyPassphrase}
+                            callback={verifyLinkPassword}
                             placeholder={constants.RETURN_PASSPHRASE_HINT}
                             buttonText={'unlock'}
                             fieldType="password"
@@ -269,7 +280,7 @@ export default function PublicCollectionGallery() {
             value={{
                 ...defaultPublicCollectionGalleryContext,
                 token: token.current,
-                passwordToken: passwordToken.current,
+                passwordToken: passwordJWTToken.current,
                 accessedThroughSharedURL: true,
                 setDialogMessage,
                 openReportForm,

@@ -302,6 +302,25 @@ export const getPublicCollection = async (
     }
 };
 
+export const verifyPublicCollectionPassword = async (
+    token: string,
+    passwordHash: string
+): Promise<string> => {
+    try {
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/public-collection/verify-password`,
+            { passHash: passwordHash },
+            null,
+            { 'Cache-Control': 'no-cache', 'X-Auth-Access-Token': token }
+        );
+        const jwtToken = resp.data?.jwtToken;
+        return jwtToken;
+    } catch (e) {
+        logError(e, 'failed to get public collection');
+        throw e;
+    }
+};
+
 const decryptCollectionName = async (
     collection: Collection,
     collectionKey: string
