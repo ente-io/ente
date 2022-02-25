@@ -3,12 +3,12 @@ import PhotoFrame from 'components/PhotoFrame';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
     getLocalPublicCollection,
+    getLocalPublicCollectionPassword,
     getLocalPublicFiles,
     getPublicCollection,
-    getPublicCollectionPassword,
     getPublicCollectionUID,
     removePublicCollectionWithFiles,
-    setPublicCollectionPassword,
+    savePublicCollectionPassword,
     syncPublicFiles,
     verifyPublicCollectionPassword,
 } from 'services/publicCollectionService';
@@ -47,7 +47,7 @@ const bs58 = require('bs58');
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
     // passwordJWTToken refers to the jwt token which is used for album protected by password.
-    const passwordJWTToken = useRef<string>(null);
+    const [passwordJWTToken, setPasswordJWTToken] = useState<string>(null);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
@@ -125,9 +125,11 @@ export default function PublicCollectionGallery() {
                     const localPublicFiles = sortFiles(
                         mergeMetadata(localFiles)
                     );
+                    const localPasswordJWTToken =
+                        await getLocalPublicCollectionPassword(collectionUID);
+
                     setPublicFiles(localPublicFiles);
-                    passwordJWTToken.current =
-                        await getPublicCollectionPassword(collectionUID);
+                    setPasswordJWTToken(localPasswordJWTToken);
                 }
                 await syncWithRemote();
             } finally {
@@ -146,16 +148,14 @@ export default function PublicCollectionGallery() {
                 token.current,
                 collectionKey.current
             );
-            const collectionUID = getPublicCollectionUID(token.current);
             setPublicCollection(collection);
             setErrorMessage(null);
             // check if we need to prompt user for the password
             if (
                 (collection?.publicURLs?.[0]?.passwordEnabled ?? false) &&
-                (await getPublicCollectionPassword(collectionUID)) === ''
+                !passwordJWTToken
             ) {
                 setIsPasswordProtected(true);
-                return;
             } else {
                 await syncPublicFiles(
                     token.current,
@@ -190,7 +190,6 @@ export default function PublicCollectionGallery() {
 
     const verifyLinkPassword = async (password, setFieldError) => {
         try {
-            console.log('verify link password');
             const cryptoWorker = await new CryptoWorker();
             let hashedPassword: string = null;
             try {
@@ -202,6 +201,7 @@ export default function PublicCollectionGallery() {
                     publicUrl.memLimit
                 );
             } catch (e) {
+                logError(e, 'failed to derive key for verifyLinkPassword');
                 setFieldError(
                     'passphrase',
                     `${constants.UNKNOWN_ERROR} ${e.message}`
@@ -214,12 +214,10 @@ export default function PublicCollectionGallery() {
                     token.current,
                     hashedPassword
                 );
-                setPublicCollectionPassword(collectionUID, jwtToken);
-                passwordJWTToken.current = jwtToken;
+                setPasswordJWTToken(jwtToken);
+                savePublicCollectionPassword(collectionUID, jwtToken);
             } catch (e) {
                 // reset local password token
-                passwordJWTToken.current = null;
-                setPublicCollectionPassword(collectionUID, '');
                 logError(e, 'failed to validate password for album');
                 const parsedError = parseSharingErrorCodes(e);
                 if (parsedError.message === CustomError.TOKEN_EXPIRED) {
@@ -229,7 +227,6 @@ export default function PublicCollectionGallery() {
                 throw e;
             }
             await syncWithRemote();
-            setIsPasswordProtected(false);
             finishLoadingBar();
         } catch (e) {
             setFieldError(
@@ -246,16 +243,16 @@ export default function PublicCollectionGallery() {
     if (errorMessage && !loading) {
         return <Container>{errorMessage}</Container>;
     }
-    if (isPasswordProtected && !loading) {
+    if (isPasswordProtected && !passwordJWTToken && !loading) {
         return (
             <Container>
-                <Card style={{ minWidth: '320px' }} className="text-center">
+                <Card style={{ width: '332px' }} className="text-center">
                     <Card.Body style={{ padding: '40px 30px' }}>
                         <Card.Title style={{ marginBottom: '24px' }}>
                             <LogoImg src="/icon.svg" />
                             {constants.PASSWORD}
                         </Card.Title>
-                        <Card.Subtitle style={{ marginBottom: '32px' }}>
+                        <Card.Subtitle style={{ marginBottom: '2rem' }}>
                             {/* <LogoImg src="/icon.svg" /> */}
                             {constants.LINK_PASSWORD}
                         </Card.Subtitle>
@@ -280,7 +277,7 @@ export default function PublicCollectionGallery() {
             value={{
                 ...defaultPublicCollectionGalleryContext,
                 token: token.current,
-                passwordToken: passwordJWTToken.current,
+                passwordToken: passwordJWTToken,
                 accessedThroughSharedURL: true,
                 setDialogMessage,
                 openReportForm,

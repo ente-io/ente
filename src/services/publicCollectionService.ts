@@ -59,7 +59,7 @@ export const savePublicCollectionFiles = async (
     );
 };
 
-export const getPublicCollectionPassword = async (
+export const getLocalPublicCollectionPassword = async (
     collectionKey: string
 ): Promise<string> => {
     return (
@@ -69,7 +69,7 @@ export const getPublicCollectionPassword = async (
     );
 };
 
-export const setPublicCollectionPassword = async (
+export const savePublicCollectionPassword = async (
     collectionKey: string,
     passToken: string
 ): Promise<string> => {
@@ -158,7 +158,7 @@ export const syncPublicFiles = async (
             const lastSyncTime = await getPublicCollectionLastSyncTime(
                 collectionUID
             );
-            const passwordToken = await getPublicCollectionPassword(
+            const passwordToken = await getLocalPublicCollectionPassword(
                 collectionUID
             );
             // if (collection.updationTime === lastSyncTime) {
@@ -284,7 +284,7 @@ export const getPublicCollection = async (
             null,
             { 'Cache-Control': 'no-cache', 'X-Auth-Access-Token': token }
         );
-        const fetchedCollection = resp.data?.collection;
+        const fetchedCollection = resp.data.collection;
         const collectionName = await decryptCollectionName(
             fetchedCollection,
             collectionKey
@@ -313,7 +313,7 @@ export const verifyPublicCollectionPassword = async (
             null,
             { 'Cache-Control': 'no-cache', 'X-Auth-Access-Token': token }
         );
-        const jwtToken = resp.data?.jwtToken;
+        const jwtToken = resp.data.jwtToken;
         return jwtToken;
     } catch (e) {
         logError(e, 'failed to get public collection');
