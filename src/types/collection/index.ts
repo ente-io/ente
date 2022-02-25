@@ -27,6 +27,8 @@ export interface PublicURL {
     enableDownload: boolean;
     passwordEnabled: boolean;
     nonce: string;
+    opsLimit: number;
+    memLimit: number;
 }
 
 export interface CreatePublicAccessTokenRequest {

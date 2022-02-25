@@ -410,7 +410,8 @@ const PhotoFrame = ({
                         url =
                             await PublicCollectionDownloadManager.getThumbnail(
                                 item,
-                                publicCollectionGalleryContext.token
+                                publicCollectionGalleryContext.token,
+                                publicCollectionGalleryContext.passwordToken
                             );
                     } else {
                         url = await DownloadManager.getThumbnail(item);
@@ -447,6 +448,7 @@ const PhotoFrame = ({
                         url = await PublicCollectionDownloadManager.getFile(
                             item,
                             publicCollectionGalleryContext.token,
+                            publicCollectionGalleryContext.passwordToken,
                             true
                         );
                     } else {

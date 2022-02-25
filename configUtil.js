@@ -28,6 +28,8 @@ module.exports = {
         'base-uri ': "'self'",
         'frame-ancestors': " 'none'",
         'form-action': "'none'",
+        'report-uri': ' https://csp-reporter.ente.io',
+        'report-to': ' https://csp-reporter.ente.io',
     },
 
     WORKBOX_CONFIG: {
@@ -38,10 +40,9 @@ module.exports = {
     ALL_ROUTES: '/(.*)',
 
     buildCSPHeader: (directives) => ({
-        'Content-Security-Policy': Object.entries(directives).reduce(
-            (acc, [key, value]) => acc + `${key} ${value};`,
-            ''
-        ),
+        'Content-Security-Policy-Report-Only': Object.entries(
+            directives
+        ).reduce((acc, [key, value]) => acc + `${key} ${value};`, ''),
     }),
 
     convertToNextHeaderFormat: (headers) =>

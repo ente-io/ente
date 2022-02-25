@@ -4,6 +4,7 @@ import { EnteFile } from 'types/file';
 
 export interface PublicCollectionGalleryContextType {
     token: string;
+    passwordToken: string;
     accessedThroughSharedURL: boolean;
     setDialogMessage: SetDialogMessage;
     openReportForm: () => void;
