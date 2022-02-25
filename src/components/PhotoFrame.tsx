@@ -521,7 +521,7 @@ const PhotoFrame = ({
                         favItemIds={favItemIds}
                         isSharedCollection={isSharedCollection}
                         isTrashCollection={activeCollection === TRASH_SECTION}
-                        enableDownload={enableDownload === true}
+                        enableDownload={enableDownload}
                     />
                 </Container>
             )}
