@@ -87,7 +87,7 @@ const PhotoFrame = ({
     deleted,
     activeCollection,
     isSharedCollection,
-    enableDownload = true,
+    enableDownload,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
