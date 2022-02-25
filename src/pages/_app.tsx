@@ -77,8 +77,8 @@ const GlobalStyles = createGlobalStyle`
 
     .live-photo-container > button {
         position: absolute;
-        bottom: 10vh;
-        left: calc(50% - 20px);
+        top: 6vh;
+        left: 4vh;
         height: 40px;
         width: 80px;
         background: #d7d7d7;
