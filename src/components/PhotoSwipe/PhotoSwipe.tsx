@@ -705,7 +705,8 @@ function PhotoSwipe(props: Iprops) {
         await downloadFile(
             file,
             publicCollectionGalleryContext.accessedThroughSharedURL,
-            publicCollectionGalleryContext.token
+            publicCollectionGalleryContext.token,
+            publicCollectionGalleryContext.passwordToken
         );
 
         galleryContext.finishLoading();
