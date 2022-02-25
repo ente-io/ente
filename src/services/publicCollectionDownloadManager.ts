@@ -19,7 +19,11 @@ class PublicCollectionDownloadManager {
     private fileObjectURLPromise = new Map<string, Promise<string>>();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
 
-    public async getThumbnail(file: EnteFile, token: string) {
+    public async getThumbnail(
+        file: EnteFile,
+        token: string,
+        passwordToken: string
+    ) {
         try {
             if (!token) {
                 return null;
@@ -42,7 +46,11 @@ class PublicCollectionDownloadManager {
                     if (cacheResp) {
                         return URL.createObjectURL(await cacheResp.blob());
                     }
-                    const thumb = await this.downloadThumb(token, file);
+                    const thumb = await this.downloadThumb(
+                        token,
+                        passwordToken,
+                        file
+                    );
                     const thumbBlob = new Blob([thumb]);
                     try {
                         await thumbnailCache?.put(
@@ -65,11 +73,18 @@ class PublicCollectionDownloadManager {
         }
     }
 
-    private downloadThumb = async (token: string, file: EnteFile) => {
+    private downloadThumb = async (
+        token: string,
+        passwordToken: string,
+        file: EnteFile
+    ) => {
         const resp = await HTTPService.get(
             getPublicCollectionThumbnailURL(file.id),
             null,
-            { 'X-Auth-Access-Token': token },
+            {
+                'X-Auth-Access-Token': token,
+                'X-Auth-Access-Token-JWT': passwordToken,
+            },
             { responseType: 'arraybuffer' }
         );
         if (typeof resp.data === 'undefined') {
@@ -84,14 +99,23 @@ class PublicCollectionDownloadManager {
         return decrypted;
     };
 
-    getFile = async (file: EnteFile, token: string, forPreview = false) => {
+    getFile = async (
+        file: EnteFile,
+        token: string,
+        passwordToken: string,
+        forPreview = false
+    ) => {
         const shouldBeConverted = forPreview && needsConversionForPreview(file);
         const fileKey = shouldBeConverted
             ? `${file.id}_converted`
             : `${file.id}`;
         try {
             const getFilePromise = async (convert: boolean) => {
-                const fileStream = await this.downloadFile(token, file);
+                const fileStream = await this.downloadFile(
+                    token,
+                    passwordToken,
+                    file
+                );
                 let fileBlob = await new Response(fileStream).blob();
                 if (convert) {
                     fileBlob = await convertForPreview(file, fileBlob);
@@ -117,7 +141,7 @@ class PublicCollectionDownloadManager {
         return await this.fileObjectURLPromise.get(file.id.toString());
     }
 
-    async downloadFile(token: string, file: EnteFile) {
+    async downloadFile(token: string, passwordToken: string, file: EnteFile) {
         const worker = await new CryptoWorker();
         if (!token) {
             return null;
@@ -129,7 +153,10 @@ class PublicCollectionDownloadManager {
             const resp = await HTTPService.get(
                 getPublicCollectionFileURL(file.id),
                 null,
-                { 'X-Auth-Access-Token': token },
+                {
+                    'X-Auth-Access-Token': token,
+                    'X-Auth-Access-Token-JWT': passwordToken,
+                },
                 { responseType: 'arraybuffer' }
             );
             if (typeof resp.data === 'undefined') {
