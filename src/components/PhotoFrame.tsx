@@ -101,6 +101,7 @@ const PhotoFrame = ({
     const filteredDataRef = useRef([]);
     const filteredData = filteredDataRef?.current ?? [];
     const router = useRouter();
+    const [livePhotoLoaded, setLivePhotoLoaded] = useState(false);
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Shift') {
@@ -241,6 +242,28 @@ const PhotoFrame = ({
         }
     }, [open]);
 
+    useEffect(() => {
+        const livePhotoVideo: HTMLVideoElement =
+            document.querySelector('video');
+        const livePhotoBtn: HTMLButtonElement =
+            document.querySelector('.live-photo-btn');
+        if (livePhotoVideo && livePhotoBtn) {
+            livePhotoBtn.addEventListener('mouseout', function () {
+                livePhotoVideo.pause();
+            });
+            livePhotoBtn.addEventListener('mouseover', function () {
+                livePhotoVideo.play().catch(() => {
+                    livePhotoVideo.pause();
+                });
+            });
+            livePhotoBtn.addEventListener('click', function () {
+                livePhotoVideo.play().catch(() => {
+                    livePhotoVideo.pause();
+                });
+            });
+        }
+    }, [livePhotoLoaded]);
+
     const updateURL = (index: number) => (url: string) => {
         files[index] = {
             ...files[index],
@@ -301,11 +324,34 @@ const PhotoFrame = ({
         } else if (files[index].metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             if (await isPlaybackPossible(url)) {
                 files[index].html = `
-                <video controls autoplay loop>
-                    <source src="${url}" />
-                    Your browser does not support the video tag.
-                </video>
-            `;
+                <div class = 'live-photo-container'>
+                    <button class = 'live-photo-btn'> 
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="25px"
+                        width="25px"
+                        fill="currentColor">
+                        <path d="M0 0h24v24H0V0z" fill="none" />
+                        <path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79zM1 10.5h3v2H1zM11 .55h2V3.5h-2zm8.04 2.495l1.408 1.407-1.79 1.79-1.407-1.408zm-1.8 15.115l1.79 1.8 1.41-1.41-1.8-1.79zM20 10.5h3v2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm-1 4h2v2.95h-2zm-7.45-.96l1.41 1.41 1.79-1.8-1.41-1.41z" />
+                    </svg> LIVE 
+                    </button>
+                    <video class = "live-photo">
+                        <source src="${url}" />
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                `;
+                setLivePhotoLoaded(true);
+            } else {
+                files[index].html = `
+                <div class="video-loading">
+                    <img src="${files[index].msrc}" />
+                    <div class="download-message" >
+                        ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
+                        <a class="btn btn-outline-success" href=${url} download="${files[index].metadata.title}"">Download</button>
+                    </div>
+                </div>
+                `;
             }
         } else {
             files[index].src = url;
@@ -461,6 +507,9 @@ const PhotoFrame = ({
                         url = await DownloadManager.getFile(item, true);
                     }
                     galleryContext.files.set(item.id, url);
+                }
+                if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+                    setLivePhotoLoaded(false);
                 }
                 await updateSrcURL(item.dataIndex, url);
                 item.html = files[item.dataIndex].html;

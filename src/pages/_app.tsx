@@ -69,6 +69,25 @@ const GlobalStyles = createGlobalStyle`
         height: 100%;
     }
 
+    .live-photo-container{
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+
+    .live-photo-container > button {
+        position: absolute;
+        bottom: 10vh;
+        left: calc(50% - 20px);
+        height: 40px;
+        width: 80px;
+        background: #d7d7d7;
+        outline: none;
+        border: none;
+        border-radius: 10%;
+        z-index: 10;
+    }
+
     .video-loading {
         width: 100%;
         height: 100%;
