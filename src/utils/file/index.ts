@@ -44,7 +44,8 @@ export function downloadAsFile(filename: string, content: string) {
 export async function downloadFile(
     file: EnteFile,
     accessedThroughSharedURL: boolean,
-    token?: string
+    token?: string,
+    passwordToken?: string
 ) {
     let fileURL: string;
     let tempURL: string;
@@ -58,6 +59,7 @@ export async function downloadFile(
                 await new Response(
                     await PublicCollectionDownloadManager.downloadFile(
                         token,
+                        passwordToken,
                         file
                     )
                 ).blob()

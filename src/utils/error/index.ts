@@ -35,6 +35,7 @@ export enum CustomError {
     REQUEST_CANCELLED = 'request canceled',
     REQUEST_FAILED = 'request failed',
     TOKEN_EXPIRED = 'token expired',
+    TOO_MANY_REQUESTS = 'too many requests',
     BAD_REQUEST = 'bad request',
     SUBSCRIPTION_NEEDED = 'subscription not present',
     NOT_FOUND = 'not found ',
@@ -121,8 +122,10 @@ export const parseSharingErrorCodes = (error) => {
                 break;
             case ServerErrorCodes.SESSION_EXPIRED:
             case ServerErrorCodes.TOKEN_EXPIRED:
-            case ServerErrorCodes.TOO_MANY_REQUEST:
                 parsedMessage = CustomError.TOKEN_EXPIRED;
+                break;
+            case ServerErrorCodes.TOO_MANY_REQUEST:
+                parsedMessage = CustomError.TOO_MANY_REQUESTS;
                 break;
             default:
                 parsedMessage = `${constants.UNKNOWN_ERROR} statusCode:${errorCode}`;

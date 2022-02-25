@@ -12,6 +12,7 @@ import {
 } from 'types/publicCollection';
 import CryptoWorker from 'utils/crypto';
 import { REPORT_REASON } from 'constants/publicCollection';
+import { CustomError, parseSharingErrorCodes } from 'utils/error';
 
 const ENDPOINT = getEndpoint();
 const PUBLIC_COLLECTION_FILES_TABLE = 'public-collection-files';
@@ -21,6 +22,9 @@ export const getPublicCollectionUID = (token: string) => `${token}`;
 
 const getPublicCollectionSyncTimeUID = (collectionUID: string) =>
     `public-${collectionUID}-time`;
+
+const getPublicCollectionPasswordKey = (collectionUID: string) =>
+    `public-${collectionUID}-passkey`;
 
 export const getLocalPublicFiles = async (collectionUID: string) => {
     const localSavedPublicCollectionFiles =
@@ -52,6 +56,26 @@ export const savePublicCollectionFiles = async (
             { collectionUID, files },
             ...publicCollectionFiles,
         ])
+    );
+};
+
+export const getLocalPublicCollectionPassword = async (
+    collectionKey: string
+): Promise<string> => {
+    return (
+        (await localForage.getItem<string>(
+            getPublicCollectionPasswordKey(collectionKey)
+        )) || ''
+    );
+};
+
+export const savePublicCollectionPassword = async (
+    collectionKey: string,
+    passToken: string
+): Promise<string> => {
+    return await localForage.setItem<string>(
+        getPublicCollectionPasswordKey(collectionKey),
+        passToken
     );
 };
 
@@ -134,11 +158,15 @@ export const syncPublicFiles = async (
             const lastSyncTime = await getPublicCollectionLastSyncTime(
                 collectionUID
             );
-            if (collection.updationTime === lastSyncTime) {
-                return files;
-            }
+            const passwordToken = await getLocalPublicCollectionPassword(
+                collectionUID
+            );
+            // if (collection.updationTime === lastSyncTime) {
+            //     return files;
+            // }
             const fetchedFiles = await getPublicFiles(
                 token,
+                passwordToken,
                 collection,
                 lastSyncTime,
                 files,
@@ -171,7 +199,12 @@ export const syncPublicFiles = async (
             );
             setPublicFiles([...sortFiles(mergeMetadata(files))]);
         } catch (e) {
+            const parsedError = parseSharingErrorCodes(e);
             logError(e, 'failed to sync shared collection files');
+            if (parsedError.message === CustomError.TOKEN_EXPIRED) {
+                console.log('invalid token or password');
+                throw e;
+            }
         }
         return [...sortFiles(mergeMetadata(files))];
     } catch (e) {
@@ -182,6 +215,7 @@ export const syncPublicFiles = async (
 
 const getPublicFiles = async (
     token: string,
+    passwordToken: string,
     collection: Collection,
     sinceTime: number,
     files: EnteFile[],
@@ -203,6 +237,7 @@ const getPublicFiles = async (
                 {
                     'Cache-Control': 'no-cache',
                     'X-Auth-Access-Token': token,
+                    'X-Auth-Access-Token-JWT': passwordToken,
                 }
             );
             decryptedFiles.push(
@@ -249,7 +284,7 @@ export const getPublicCollection = async (
             null,
             { 'Cache-Control': 'no-cache', 'X-Auth-Access-Token': token }
         );
-        const fetchedCollection = resp.data?.collection;
+        const fetchedCollection = resp.data.collection;
         const collectionName = await decryptCollectionName(
             fetchedCollection,
             collectionKey
@@ -261,6 +296,25 @@ export const getPublicCollection = async (
         };
         await savePublicCollection(collection);
         return collection;
+    } catch (e) {
+        logError(e, 'failed to get public collection');
+        throw e;
+    }
+};
+
+export const verifyPublicCollectionPassword = async (
+    token: string,
+    passwordHash: string
+): Promise<string> => {
+    try {
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/public-collection/verify-password`,
+            { passHash: passwordHash },
+            null,
+            { 'Cache-Control': 'no-cache', 'X-Auth-Access-Token': token }
+        );
+        const jwtToken = resp.data.jwtToken;
+        return jwtToken;
     } catch (e) {
         logError(e, 'failed to get public collection');
         throw e;
@@ -311,6 +365,7 @@ export const removePublicCollectionWithFiles = async (
     collectionKey: string
 ) => {
     const collectionUID = getPublicCollectionUID(token);
+    console.log('remove information about public collection ' + collectionUID);
     const publicCollections =
         (await localForage.getItem<Collection[]>(PUBLIC_COLLECTIONS_TABLE)) ||
         [];
@@ -320,7 +375,7 @@ export const removePublicCollectionWithFiles = async (
             (collection) => collection.key !== collectionKey
         )
     );
-
+    await localForage.removeItem(getPublicCollectionPasswordKey(collectionUID));
     await localForage.removeItem(getPublicCollectionSyncTimeUID(collectionUID));
 
     const publicCollectionFiles =
