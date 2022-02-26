@@ -140,6 +140,9 @@ class _SharingDialogState extends State<SharingDialog> {
         ),
       ]);
       if (widget.collection.publicURLs?.isNotEmpty ?? false) {
+        children.add(Padding(
+          padding: EdgeInsets.all(2),
+        ));
         children.add(_getShareableUrlWidget(context));
       }
     }
@@ -255,23 +258,26 @@ class _SharingDialogState extends State<SharingDialog> {
           ),
           Padding(padding: EdgeInsets.all(2)),
           TextButton(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.adaptive.share,
-                  color: Theme.of(context).buttonColor,
-                ),
-                Padding(
-                  padding: EdgeInsets.all(4),
-                ),
-                Text(
-                  "share link",
-                  style: TextStyle(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.adaptive.share,
                     color: Theme.of(context).buttonColor,
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: EdgeInsets.all(4),
+                  ),
+                  Text(
+                    "share link",
+                    style: TextStyle(
+                      color: Theme.of(context).buttonColor,
+                    ),
+                  ),
+                ],
+              ),
             ),
             onPressed: () {
               shareText(url);
