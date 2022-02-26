@@ -218,7 +218,6 @@ export default function PublicCollectionGallery() {
                 savePublicCollectionPassword(collectionUID, jwtToken);
             } catch (e) {
                 // reset local password token
-                logError(e, 'failed to validate password for album');
                 const parsedError = parseSharingErrorCodes(e);
                 if (parsedError.message === CustomError.TOKEN_EXPIRED) {
                     setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
@@ -229,6 +228,7 @@ export default function PublicCollectionGallery() {
             await syncWithRemote();
             finishLoadingBar();
         } catch (e) {
+            logError(e, 'failed to verifyLinkPassword');
             setFieldError(
                 'passphrase',
                 `${constants.UNKNOWN_ERROR} ${e.message}`
