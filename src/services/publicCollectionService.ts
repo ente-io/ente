@@ -60,21 +60,21 @@ export const savePublicCollectionFiles = async (
 };
 
 export const getLocalPublicCollectionPassword = async (
-    collectionKey: string
+    collectionUID: string
 ): Promise<string> => {
     return (
         (await localForage.getItem<string>(
-            getPublicCollectionPasswordKey(collectionKey)
+            getPublicCollectionPasswordKey(collectionUID)
         )) || ''
     );
 };
 
 export const savePublicCollectionPassword = async (
-    collectionKey: string,
+    collectionUID: string,
     passToken: string
 ): Promise<string> => {
     return await localForage.setItem<string>(
-        getPublicCollectionPasswordKey(collectionKey),
+        getPublicCollectionPasswordKey(collectionUID),
         passToken
     );
 };
@@ -359,7 +359,7 @@ export const reportAbuse = async (
 };
 
 export const removePublicCollectionWithFiles = async (
-    token: string,
+    collectionUID: string,
     collectionKey: string
 ) => {
     const publicCollections =
@@ -371,11 +371,10 @@ export const removePublicCollectionWithFiles = async (
             (collection) => collection.key !== collectionKey
         )
     );
-    await removePublicFiles(token);
+    await removePublicFiles(collectionUID);
 };
 
-export const removePublicFiles = async (token: string) => {
-    const collectionUID = getPublicCollectionUID(token);
+export const removePublicFiles = async (collectionUID: string) => {
     await localForage.removeItem(getPublicCollectionPasswordKey(collectionUID));
     await localForage.removeItem(getPublicCollectionSyncTimeUID(collectionUID));
 

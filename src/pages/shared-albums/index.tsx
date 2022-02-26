@@ -141,9 +141,9 @@ export default function PublicCollectionGallery() {
     useEffect(openMessageDialog, [dialogMessage]);
 
     const syncWithRemote = async () => {
+        const collectionUID = getPublicCollectionUID(token.current);
         try {
             startLoadingBar();
-            const collectionUID = getPublicCollectionUID(token.current);
             const collection = await getPublicCollection(
                 token.current,
                 collectionKey.current
@@ -180,7 +180,7 @@ export default function PublicCollectionGallery() {
                 }
             }
             if (isPasswordProtected && !passwordJWTToken.current) {
-                await removePublicFiles(token.current);
+                await removePublicFiles(collectionUID);
             }
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
@@ -196,7 +196,7 @@ export default function PublicCollectionGallery() {
                 // share has been disabled
                 // local cache should be cleared
                 removePublicCollectionWithFiles(
-                    token.current,
+                    collectionUID,
                     collectionKey.current
                 );
                 setPublicCollection(null);
