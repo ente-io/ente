@@ -69,6 +69,7 @@ interface Props {
     deleted?: number[];
     activeCollection: number;
     isSharedCollection: boolean;
+    enableDownload: boolean;
 }
 
 const PhotoFrame = ({
@@ -86,6 +87,7 @@ const PhotoFrame = ({
     deleted,
     activeCollection,
     isSharedCollection,
+    enableDownload,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -464,7 +466,8 @@ const PhotoFrame = ({
                         url =
                             await PublicCollectionDownloadManager.getThumbnail(
                                 item,
-                                publicCollectionGalleryContext.token
+                                publicCollectionGalleryContext.token,
+                                publicCollectionGalleryContext.passwordToken
                             );
                     } else {
                         url = await DownloadManager.getThumbnail(item);
@@ -501,6 +504,7 @@ const PhotoFrame = ({
                         url = await PublicCollectionDownloadManager.getFile(
                             item,
                             publicCollectionGalleryContext.token,
+                            publicCollectionGalleryContext.passwordToken,
                             true
                         );
                     } else {
@@ -578,6 +582,7 @@ const PhotoFrame = ({
                         favItemIds={favItemIds}
                         isSharedCollection={isSharedCollection}
                         isTrashCollection={activeCollection === TRASH_SECTION}
+                        enableDownload={enableDownload}
                     />
                 </Container>
             )}
