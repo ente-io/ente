@@ -10,7 +10,6 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/widget_theme.dart';
-import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -165,7 +164,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   ),
                   Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
                   Divider(height: 4),
-                  Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
+                  Padding(padding: EdgeInsets.all(8)),
                   GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTap: () async {
@@ -186,10 +185,28 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         showToast('device limit out of range');
                       }
                     },
-                    child: SettingsTextItem(
-                        text:
-                            "device limit: ${widget.collection.publicURLs.first.deviceLimit}",
-                        icon: Icons.navigate_next),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("device limit"),
+                            Padding(padding: EdgeInsets.all(4)),
+                            Text(
+                              widget.collection.publicURLs.first.deviceLimit
+                                  .toString(),
+                              style: TextStyle(
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Icon(Icons.navigate_next),
+                      ],
+                    ),
                   ),
                 ],
               ),
