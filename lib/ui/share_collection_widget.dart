@@ -157,6 +157,7 @@ class _SharingDialogState extends State<SharingDialog> {
           ],
         ),
       ),
+      contentPadding: EdgeInsets.fromLTRB(24, 24, 24, 4),
     );
   }
 
@@ -217,96 +218,85 @@ class _SharingDialogState extends State<SharingDialog> {
     String url = "${widget.collection.publicURLs.first.url}#$collectionKey";
     return SingleChildScrollView(
       child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(padding: EdgeInsets.all(4)),
-            GestureDetector(
-              onTap: () async {
-                await Clipboard.setData(ClipboardData(text: url));
-                showToast("link copied to clipboard");
-              },
-              child: Container(
-                padding: EdgeInsets.all(16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        url,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                          color: Colors.white.withOpacity(0.68),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(padding: EdgeInsets.all(4)),
+          GestureDetector(
+            onTap: () async {
+              await Clipboard.setData(ClipboardData(text: url));
+              showToast("link copied to clipboard");
+            },
+            child: Container(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Flexible(
+                    child: Text(
+                      url,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                        color: Colors.white.withOpacity(0.68),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Padding(padding: EdgeInsets.all(2)),
-                    Icon(
-                      Icons.copy,
-                      size: 18,
-                    ),
-                  ],
+                  ),
+                  Padding(padding: EdgeInsets.all(2)),
+                  Icon(
+                    Icons.copy,
+                    size: 18,
+                  ),
+                ],
+              ),
+              color: Colors.white.withOpacity(0.02),
+            ),
+          ),
+          Padding(padding: EdgeInsets.all(2)),
+          TextButton(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.adaptive.share,
+                  color: Theme.of(context).buttonColor,
                 ),
-                color: Colors.white.withOpacity(0.02),
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(2)),
-            TextButton(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.adaptive.share,
+                Padding(
+                  padding: EdgeInsets.all(4),
+                ),
+                Text(
+                  "share link",
+                  style: TextStyle(
                     color: Theme.of(context).buttonColor,
                   ),
-                  Padding(
-                    padding: EdgeInsets.all(4),
-                  ),
-                  Text(
-                    "share link",
-                    style: TextStyle(
-                      color: Theme.of(context).buttonColor,
-                    ),
-                  ),
-                ],
-              ),
-              onPressed: () {
-                shareText(url);
-                // _shareRecoveryKey(recoveryKey);
-              },
+                ),
+              ],
             ),
-            TextButton(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.settings,
-                    color: Theme.of(context).buttonColor,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(4),
-                  ),
-                  Text(
-                    "manage link",
-                    style: TextStyle(
-                      color: Theme.of(context).buttonColor,
-                    ),
-                  ),
-                ],
+            onPressed: () {
+              shareText(url);
+            },
+          ),
+          Padding(padding: EdgeInsets.all(4)),
+          TextButton(
+            child: Center(
+              child: Text(
+                "manage link",
+                style: TextStyle(
+                  color: Colors.white70,
+                  decoration: TextDecoration.underline,
+                ),
               ),
-              onPressed: () async {
-                routeToPage(
-                  parentContext,
-                  ManageSharedLinkWidget(collection: widget.collection),
-                );
-
-                // shareText(url);
-                // _shareRecoveryKey(recoveryKey);
-              },
             ),
-          ]),
+            onPressed: () async {
+              routeToPage(
+                parentContext,
+                ManageSharedLinkWidget(collection: widget.collection),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
