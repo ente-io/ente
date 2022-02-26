@@ -149,14 +149,12 @@ export default function PublicCollectionGallery() {
                 collectionKey.current
             );
             setPublicCollection(collection);
+            const isPasswordProtected =
+                collection?.publicURLs?.[0]?.passwordEnabled;
+            setIsPasswordProtected(isPasswordProtected);
             setErrorMessage(null);
             // check if we need to prompt user for the password
-            if (
-                (collection?.publicURLs?.[0]?.passwordEnabled ?? false) &&
-                !passwordJWTToken.current
-            ) {
-                setIsPasswordProtected(true);
-            } else {
+            if (isPasswordProtected && passwordJWTToken.current) {
                 await syncPublicFiles(
                     token.current,
                     passwordJWTToken.current,
@@ -236,40 +234,41 @@ export default function PublicCollectionGallery() {
         }
     };
 
-    if (!publicFiles && loading) {
-        return <Loader />;
-    }
-
-    if (errorMessage && !loading) {
-        return <Container>{errorMessage}</Container>;
-    }
-    if (isPasswordProtected && !passwordJWTToken.current && !loading) {
-        return (
-            <Container>
-                <Card style={{ width: '332px' }} className="text-center">
-                    <Card.Body style={{ padding: '40px 30px' }}>
-                        <Card.Title style={{ marginBottom: '24px' }}>
-                            <LogoImg src="/icon.svg" />
-                            {constants.PASSWORD}
-                        </Card.Title>
-                        <Card.Subtitle style={{ marginBottom: '2rem' }}>
-                            {/* <LogoImg src="/icon.svg" /> */}
-                            {constants.LINK_PASSWORD}
-                        </Card.Subtitle>
-                        <SingleInputForm
-                            callback={verifyLinkPassword}
-                            placeholder={constants.RETURN_PASSPHRASE_HINT}
-                            buttonText={'unlock'}
-                            fieldType="password"
-                        />
-                    </Card.Body>
-                </Card>
-            </Container>
-        );
-    }
-
-    if (!publicFiles && !loading) {
-        return <Container>{constants.NOT_FOUND}</Container>;
+    if (loading) {
+        if (!publicFiles) {
+            return <Loader />;
+        }
+    } else {
+        if (errorMessage) {
+            return <Container>{errorMessage}</Container>;
+        }
+        if (isPasswordProtected && !passwordJWTToken.current) {
+            return (
+                <Container>
+                    <Card style={{ width: '332px' }} className="text-center">
+                        <Card.Body style={{ padding: '40px 30px' }}>
+                            <Card.Title style={{ marginBottom: '24px' }}>
+                                <LogoImg src="/icon.svg" />
+                                {constants.PASSWORD}
+                            </Card.Title>
+                            <Card.Subtitle style={{ marginBottom: '2rem' }}>
+                                {/* <LogoImg src="/icon.svg" /> */}
+                                {constants.LINK_PASSWORD}
+                            </Card.Subtitle>
+                            <SingleInputForm
+                                callback={verifyLinkPassword}
+                                placeholder={constants.RETURN_PASSPHRASE_HINT}
+                                buttonText={'unlock'}
+                                fieldType="password"
+                            />
+                        </Card.Body>
+                    </Card>
+                </Container>
+            );
+        }
+        if (!publicFiles) {
+            return <Container>{constants.NOT_FOUND}</Container>;
+        }
     }
 
     return (
