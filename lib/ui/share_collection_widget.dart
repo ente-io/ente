@@ -16,9 +16,11 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/manage_links_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -138,7 +140,10 @@ class _SharingDialogState extends State<SharingDialog> {
         ),
       ]);
       if (widget.collection.publicURLs?.isNotEmpty ?? false) {
-        children.add(_getShareableUrlWidget());
+        children.add(Padding(
+          padding: EdgeInsets.all(2),
+        ));
+        children.add(_getShareableUrlWidget(context));
       }
     }
 
@@ -155,6 +160,7 @@ class _SharingDialogState extends State<SharingDialog> {
           ],
         ),
       ),
+      contentPadding: EdgeInsets.fromLTRB(24, 24, 24, 4),
     );
   }
 
@@ -209,49 +215,51 @@ class _SharingDialogState extends State<SharingDialog> {
     );
   }
 
-  Widget _getShareableUrlWidget() {
+  Widget _getShareableUrlWidget(BuildContext parentContext) {
     String collectionKey = Base58Encode(
         CollectionsService.instance.getCollectionKey(widget.collection.id));
     String url = "${widget.collection.publicURLs.first.url}#$collectionKey";
     return SingleChildScrollView(
       child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(padding: EdgeInsets.all(4)),
-            GestureDetector(
-              onTap: () async {
-                await Clipboard.setData(ClipboardData(text: url));
-                showToast("link copied to clipboard");
-              },
-              child: Container(
-                padding: EdgeInsets.all(16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        url,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                          color: Colors.white.withOpacity(0.68),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(padding: EdgeInsets.all(4)),
+          GestureDetector(
+            onTap: () async {
+              await Clipboard.setData(ClipboardData(text: url));
+              showToast("link copied to clipboard");
+            },
+            child: Container(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Flexible(
+                    child: Text(
+                      url,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                        color: Colors.white.withOpacity(0.68),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Padding(padding: EdgeInsets.all(2)),
-                    Icon(
-                      Icons.copy,
-                      size: 18,
-                    ),
-                  ],
-                ),
-                color: Colors.white.withOpacity(0.02),
+                  ),
+                  Padding(padding: EdgeInsets.all(2)),
+                  Icon(
+                    Icons.copy,
+                    size: 18,
+                  ),
+                ],
               ),
+              color: Colors.white.withOpacity(0.02),
             ),
-            Padding(padding: EdgeInsets.all(2)),
-            TextButton(
+          ),
+          Padding(padding: EdgeInsets.all(2)),
+          TextButton(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -270,12 +278,31 @@ class _SharingDialogState extends State<SharingDialog> {
                   ),
                 ],
               ),
-              onPressed: () {
-                shareText(url);
-                // _shareRecoveryKey(recoveryKey);
-              },
             ),
-          ]),
+            onPressed: () {
+              shareText(url);
+            },
+          ),
+          Padding(padding: EdgeInsets.all(4)),
+          TextButton(
+            child: Center(
+              child: Text(
+                "manage link",
+                style: TextStyle(
+                  color: Colors.white70,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+            onPressed: () async {
+              routeToPage(
+                parentContext,
+                ManageSharedLinkWidget(collection: widget.collection),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
