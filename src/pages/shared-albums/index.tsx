@@ -143,6 +143,7 @@ export default function PublicCollectionGallery() {
     const syncWithRemote = async () => {
         try {
             startLoadingBar();
+            const collectionUID = getPublicCollectionUID(token.current);
             const collection = await getPublicCollection(
                 token.current,
                 collectionKey.current
@@ -152,7 +153,12 @@ export default function PublicCollectionGallery() {
                 collection?.publicURLs?.[0]?.passwordEnabled;
             setIsPasswordProtected(isPasswordProtected);
             setErrorMessage(null);
-            // check if we need to prompt user for the password
+
+            // remove outdated password, sharer has disabled the password
+            if (!isPasswordProtected && passwordJWTToken.current) {
+                passwordJWTToken.current = null;
+                savePublicCollectionPassword(collectionUID, null);
+            }
             if (
                 !isPasswordProtected ||
                 (isPasswordProtected && passwordJWTToken.current)
@@ -167,6 +173,8 @@ export default function PublicCollectionGallery() {
                 } catch (e) {
                     const parsedError = parseSharingErrorCodes(e);
                     if (parsedError.message === CustomError.TOKEN_EXPIRED) {
+                        // passwordToken has expired, sharer has changed the password,
+                        // so,clearing local cache token value to prompt user to re-enter password
                         passwordJWTToken.current = null;
                     }
                 }
