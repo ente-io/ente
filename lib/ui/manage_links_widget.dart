@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -61,7 +60,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         child: ListBody(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
               child: Column(
                 children: [
                   Padding(padding: EdgeInsets.all(4)),
@@ -88,9 +87,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                   ),
                   Padding(padding: EdgeInsets.all(4)),
-                  Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
                   Divider(height: 4),
-                  Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
+                  Padding(padding: EdgeInsets.all(4)),
                   SizedBox(
                     height: 36,
                     child: Row(
@@ -122,9 +120,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       ],
                     ),
                   ),
-                  Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
+                  Padding(padding: EdgeInsets.all(4)),
                   Divider(height: 4),
-                  Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
+                  Padding(padding: EdgeInsets.all(4)),
                   SizedBox(
                     height: 36,
                     child: Row(
@@ -162,7 +160,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       ],
                     ),
                   ),
-                  Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
+                  Padding(padding: EdgeInsets.all(4)),
                   Divider(height: 4),
                   Padding(padding: EdgeInsets.all(8)),
                   GestureDetector(
