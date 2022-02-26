@@ -362,8 +362,6 @@ export const removePublicCollectionWithFiles = async (
     token: string,
     collectionKey: string
 ) => {
-    const collectionUID = getPublicCollectionUID(token);
-    console.log('remove information about public collection ' + collectionUID);
     const publicCollections =
         (await localForage.getItem<Collection[]>(PUBLIC_COLLECTIONS_TABLE)) ||
         [];
@@ -373,6 +371,11 @@ export const removePublicCollectionWithFiles = async (
             (collection) => collection.key !== collectionKey
         )
     );
+    await removePublicFiles(token);
+};
+
+export const removePublicFiles = async (token: string) => {
+    const collectionUID = getPublicCollectionUID(token);
     await localForage.removeItem(getPublicCollectionPasswordKey(collectionUID));
     await localForage.removeItem(getPublicCollectionSyncTimeUID(collectionUID));
 

@@ -8,6 +8,7 @@ import {
     getPublicCollection,
     getPublicCollectionUID,
     removePublicCollectionWithFiles,
+    removePublicFiles,
     savePublicCollectionPassword,
     syncPublicFiles,
     verifyPublicCollectionPassword,
@@ -154,13 +155,23 @@ export default function PublicCollectionGallery() {
             setIsPasswordProtected(isPasswordProtected);
             setErrorMessage(null);
             // check if we need to prompt user for the password
-            if (isPasswordProtected && passwordJWTToken.current) {
-                await syncPublicFiles(
-                    token.current,
-                    passwordJWTToken.current,
-                    collection,
-                    setPublicFiles
-                );
+            if (
+                !isPasswordProtected ||
+                (isPasswordProtected && passwordJWTToken.current)
+            ) {
+                try {
+                    await syncPublicFiles(
+                        token.current,
+                        passwordJWTToken.current,
+                        collection,
+                        setPublicFiles
+                    );
+                } catch (e) {
+                    passwordJWTToken.current = null;
+                }
+            }
+            if (isPasswordProtected && !passwordJWTToken.current) {
+                await removePublicFiles(token.current);
             }
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
@@ -283,7 +294,6 @@ export default function PublicCollectionGallery() {
             }}>
             <LoadingBar color="#51cd7c" ref={loadingBar} />
             <CollectionInfo collection={publicCollection} />
-
             <PhotoFrame
                 files={publicFiles}
                 setFiles={setPublicFiles}
