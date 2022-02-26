@@ -358,7 +358,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 ),
                 obscureText: !_passwordVisible,
                 controller: _textFieldController,
-                autofocus: false,
+                autofocus: true,
                 autocorrect: false,
                 keyboardType: TextInputType.visiblePassword,
                 onChanged: (_) {
