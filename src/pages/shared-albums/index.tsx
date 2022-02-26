@@ -3,11 +3,15 @@ import PhotoFrame from 'components/PhotoFrame';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
     getLocalPublicCollection,
+    getLocalPublicCollectionPassword,
     getLocalPublicFiles,
     getPublicCollection,
     getPublicCollectionUID,
     removePublicCollectionWithFiles,
+    removePublicFiles,
+    savePublicCollectionPassword,
     syncPublicFiles,
+    verifyPublicCollectionPassword,
 } from 'services/publicCollectionService';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
@@ -28,6 +32,10 @@ import LoadingBar from 'react-top-loading-bar';
 import CryptoWorker from 'utils/crypto';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
+import LogoImg from 'components/LogoImg';
+import SingleInputForm from 'components/SingleInputForm';
+import { Card } from 'react-bootstrap';
+import { logError } from 'utils/sentry';
 
 const Loader = () => (
     <Container>
@@ -39,6 +47,8 @@ const Loader = () => (
 const bs58 = require('bs58');
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
+    // passwordJWTToken refers to the jwt token which is used for album protected by password.
+    const passwordJWTToken = useRef<string>(null);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
@@ -54,6 +64,8 @@ export default function PublicCollectionGallery() {
     const loadingBar = useRef(null);
     const isLoadingBarRunning = useRef(false);
     const router = useRouter();
+    const [isPasswordProtected, setIsPasswordProtected] =
+        useState<boolean>(false);
 
     const openMessageDialog = () => setMessageDialogView(true);
     const closeMessageDialog = () => setMessageDialogView(false);
@@ -115,6 +127,8 @@ export default function PublicCollectionGallery() {
                         mergeMetadata(localFiles)
                     );
                     setPublicFiles(localPublicFiles);
+                    passwordJWTToken.current =
+                        await getLocalPublicCollectionPassword(collectionUID);
                 }
                 await syncWithRemote();
             } finally {
@@ -127,6 +141,7 @@ export default function PublicCollectionGallery() {
     useEffect(openMessageDialog, [dialogMessage]);
 
     const syncWithRemote = async () => {
+        const collectionUID = getPublicCollectionUID(token.current);
         try {
             startLoadingBar();
             const collection = await getPublicCollection(
@@ -134,17 +149,54 @@ export default function PublicCollectionGallery() {
                 collectionKey.current
             );
             setPublicCollection(collection);
-
-            await syncPublicFiles(token.current, collection, setPublicFiles);
+            const isPasswordProtected =
+                collection?.publicURLs?.[0]?.passwordEnabled;
+            setIsPasswordProtected(isPasswordProtected);
             setErrorMessage(null);
+
+            // remove outdated password, sharer has disabled the password
+            if (!isPasswordProtected && passwordJWTToken.current) {
+                passwordJWTToken.current = null;
+                savePublicCollectionPassword(collectionUID, null);
+            }
+            if (
+                !isPasswordProtected ||
+                (isPasswordProtected && passwordJWTToken.current)
+            ) {
+                try {
+                    await syncPublicFiles(
+                        token.current,
+                        passwordJWTToken.current,
+                        collection,
+                        setPublicFiles
+                    );
+                } catch (e) {
+                    const parsedError = parseSharingErrorCodes(e);
+                    if (parsedError.message === CustomError.TOKEN_EXPIRED) {
+                        // passwordToken has expired, sharer has changed the password,
+                        // so,clearing local cache token value to prompt user to re-enter password
+                        passwordJWTToken.current = null;
+                    }
+                }
+            }
+            if (isPasswordProtected && !passwordJWTToken.current) {
+                await removePublicFiles(collectionUID);
+            }
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
-            if (parsedError.message === CustomError.TOKEN_EXPIRED) {
-                setErrorMessage(constants.LINK_EXPIRED);
+            if (
+                parsedError.message === CustomError.TOKEN_EXPIRED ||
+                parsedError.message === CustomError.TOO_MANY_REQUESTS
+            ) {
+                setErrorMessage(
+                    parsedError.message === CustomError.TOO_MANY_REQUESTS
+                        ? constants.LINK_TOO_MANY_REQUESTS
+                        : constants.LINK_EXPIRED
+                );
                 // share has been disabled
                 // local cache should be cleared
                 removePublicCollectionWithFiles(
-                    token.current,
+                    collectionUID,
                     collectionKey.current
                 );
                 setPublicCollection(null);
@@ -155,16 +207,88 @@ export default function PublicCollectionGallery() {
         }
     };
 
-    if (!publicFiles && loading) {
-        return <Loader />;
-    }
+    const verifyLinkPassword = async (password, setFieldError) => {
+        try {
+            const cryptoWorker = await new CryptoWorker();
+            let hashedPassword: string = null;
+            try {
+                const publicUrl = publicCollection.publicURLs[0];
+                hashedPassword = await cryptoWorker.deriveKey(
+                    password,
+                    publicUrl.nonce,
+                    publicUrl.opsLimit,
+                    publicUrl.memLimit
+                );
+            } catch (e) {
+                logError(e, 'failed to derive key for verifyLinkPassword');
+                setFieldError(
+                    'passphrase',
+                    `${constants.UNKNOWN_ERROR} ${e.message}`
+                );
+                return;
+            }
+            const collectionUID = getPublicCollectionUID(token.current);
+            try {
+                const jwtToken = await verifyPublicCollectionPassword(
+                    token.current,
+                    hashedPassword
+                );
+                passwordJWTToken.current = jwtToken;
+                savePublicCollectionPassword(collectionUID, jwtToken);
+            } catch (e) {
+                const parsedError = parseSharingErrorCodes(e);
+                if (parsedError.message === CustomError.TOKEN_EXPIRED) {
+                    setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
+                    return;
+                }
+                throw e;
+            }
+            await syncWithRemote();
+            finishLoadingBar();
+        } catch (e) {
+            logError(e, 'failed to verifyLinkPassword');
+            setFieldError(
+                'passphrase',
+                `${constants.UNKNOWN_ERROR} ${e.message}`
+            );
+        }
+    };
 
-    if (errorMessage && !loading) {
-        return <Container>{errorMessage}</Container>;
-    }
-
-    if (!publicFiles && !loading) {
-        return <Container>{constants.NOT_FOUND}</Container>;
+    if (loading) {
+        if (!publicFiles) {
+            return <Loader />;
+        }
+    } else {
+        if (errorMessage) {
+            return <Container>{errorMessage}</Container>;
+        }
+        if (isPasswordProtected && !passwordJWTToken.current) {
+            return (
+                <Container>
+                    <Card style={{ width: '332px' }} className="text-center">
+                        <Card.Body style={{ padding: '40px 30px' }}>
+                            <Card.Title style={{ marginBottom: '24px' }}>
+                                <LogoImg src="/icon.svg" />
+                                {constants.PASSWORD}
+                            </Card.Title>
+                            <Card.Subtitle style={{ marginBottom: '1rem' }}>
+                                {/* <LogoImg src="/icon.svg" /> */}
+                                {constants.LINK_PASSWORD}
+                            </Card.Subtitle>
+                            <SingleInputForm
+                                callback={verifyLinkPassword}
+                                placeholder={constants.RETURN_PASSPHRASE_HINT}
+                                buttonText={'unlock'}
+                                fieldType="password"
+                            />
+                        </Card.Body>
+                    </Card>
+                </Container>
+            );
+        }
+        if (!publicFiles) {
+            return <Container>{constants.NOT_FOUND}</Container>;
+        }
     }
 
     return (
@@ -172,13 +296,13 @@ export default function PublicCollectionGallery() {
             value={{
                 ...defaultPublicCollectionGalleryContext,
                 token: token.current,
+                passwordToken: passwordJWTToken.current,
                 accessedThroughSharedURL: true,
                 setDialogMessage,
                 openReportForm,
             }}>
             <LoadingBar color="#51cd7c" ref={loadingBar} />
             <CollectionInfo collection={publicCollection} />
-
             <PhotoFrame
                 files={publicFiles}
                 setFiles={setPublicFiles}
@@ -194,6 +318,9 @@ export default function PublicCollectionGallery() {
                 deleted={[]}
                 activeCollection={ALL_SECTION}
                 isSharedCollection
+                enableDownload={
+                    publicCollection?.publicURLs?.[0]?.enableDownload ?? true
+                }
             />
             <AbuseReportForm
                 show={abuseReportFormView}
