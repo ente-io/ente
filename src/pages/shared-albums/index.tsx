@@ -218,7 +218,6 @@ export default function PublicCollectionGallery() {
                 passwordJWTToken.current = jwtToken;
                 savePublicCollectionPassword(collectionUID, jwtToken);
             } catch (e) {
-                // reset local password token
                 const parsedError = parseSharingErrorCodes(e);
                 if (parsedError.message === CustomError.TOKEN_EXPIRED) {
                     setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
