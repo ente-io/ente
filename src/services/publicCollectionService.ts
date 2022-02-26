@@ -159,9 +159,9 @@ export const syncPublicFiles = async (
             const lastSyncTime = await getPublicCollectionLastSyncTime(
                 collectionUID
             );
-            // if (collection.updationTime === lastSyncTime) {
-            //     return files;
-            // }
+            if (collection.updationTime === lastSyncTime) {
+                return files;
+            }
             const fetchedFiles = await getPublicFiles(
                 token,
                 passwordToken,
