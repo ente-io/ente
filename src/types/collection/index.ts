@@ -24,6 +24,11 @@ export interface PublicURL {
     url: string;
     deviceLimit: number;
     validTill: number;
+    enableDownload: boolean;
+    passwordEnabled: boolean;
+    nonce: string;
+    opsLimit: number;
+    memLimit: number;
 }
 
 export interface CreatePublicAccessTokenRequest {

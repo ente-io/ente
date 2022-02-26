@@ -71,6 +71,7 @@ interface Iprops {
     favItemIds: Set<number>;
     isSharedCollection: boolean;
     isTrashCollection: boolean;
+    enableDownload: boolean;
 }
 
 const LegendContainer = styled.div`
@@ -704,7 +705,8 @@ function PhotoSwipe(props: Iprops) {
         await downloadFile(
             file,
             publicCollectionGalleryContext.accessedThroughSharedURL,
-            publicCollectionGalleryContext.token
+            publicCollectionGalleryContext.token,
+            publicCollectionGalleryContext.passwordToken
         );
 
         galleryContext.finishLoading();
@@ -738,14 +740,15 @@ function PhotoSwipe(props: Iprops) {
                                 title={constants.CLOSE}
                             />
 
-                            <button
-                                className="pswp-custom download-btn"
-                                title={constants.DOWNLOAD}
-                                onClick={() =>
-                                    downloadFileHelper(photoSwipe.currItem)
-                                }
-                            />
-
+                            {props.enableDownload && (
+                                <button
+                                    className="pswp-custom download-btn"
+                                    title={constants.DOWNLOAD}
+                                    onClick={() =>
+                                        downloadFileHelper(photoSwipe.currItem)
+                                    }
+                                />
+                            )}
                             <button
                                 className="pswp__button pswp__button--fs"
                                 title={constants.TOGGLE_FULLSCREEN}
