@@ -13,7 +13,9 @@ Future<T> showChoiceDialog<T>(
   String title,
   String content, {
   String firstAction = 'ok',
+  Color firstActionColor,
   String secondAction = 'cancel',
+  Color secondActionColor,
   ActionType actionType = ActionType.confirm,
 }) {
   AlertDialog alert = AlertDialog(
@@ -34,8 +36,8 @@ Future<T> showChoiceDialog<T>(
         child: Text(
           firstAction,
           style: TextStyle(
-            color:
-                actionType == ActionType.critical ? Colors.red : Colors.white,
+            color: firstActionColor ??
+                (actionType == ActionType.critical ? Colors.red : Colors.white),
           ),
         ),
         onPressed: () {
@@ -47,7 +49,7 @@ Future<T> showChoiceDialog<T>(
         child: Text(
           secondAction,
           style: TextStyle(
-            color: Theme.of(context).buttonColor,
+            color: secondActionColor ?? Theme.of(context).buttonColor,
           ),
         ),
         onPressed: () {

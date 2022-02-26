@@ -8,6 +8,7 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/widget_theme.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -136,8 +137,26 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                                   ?.enableDownload ??
                               true,
                           onChanged: (value) async {
+                            if (!value) {
+                              final choice = await showChoiceDialog(
+                                context,
+                                'disable downloads',
+                                'are you sure that you want to disable the download button for files?',
+                                firstAction: 'no',
+                                secondAction: 'yes',
+                                firstActionColor: Theme.of(context).buttonColor,
+                                secondActionColor: Colors.white,
+                              );
+                              if (choice != DialogUserChoice.secondChoice) {
+                                return;
+                              }
+                            }
                             await _updateUrlSettings(
                                 context, {'enableDownload': value});
+                            if (!value) {
+                              showErrorDialog(context, "please note",
+                                  "viewers can still take screenshots or save a copy of your photos using external tools");
+                            }
                             setState(() {});
                           },
                         ),
