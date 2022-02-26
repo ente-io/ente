@@ -314,7 +314,7 @@ export const verifyPublicCollectionPassword = async (
         const jwtToken = resp.data.jwtToken;
         return jwtToken;
     } catch (e) {
-        logError(e, 'failed to get public collection');
+        logError(e, 'failed to verify public collection password');
         throw e;
     }
 };
