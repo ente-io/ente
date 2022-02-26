@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/models/collection.dart';
@@ -36,7 +35,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     // todo: make this time calculation perfect
     Tuple3(4, "after 1 month", Duration(days: 30).inMicroseconds),
     Tuple3(5, "after 1 year", Duration(days: 365).inMicroseconds),
-    Tuple3(6, "set manually", -1),
+    Tuple3(6, "custom", -1),
   ];
 
   Tuple3<int, String, int> _selectedExpiry;
@@ -62,18 +61,33 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         child: ListBody(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.all(4.0),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: Column(
                 children: [
+                  Padding(padding: EdgeInsets.all(4)),
                   GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTap: () async {
                       await showPicker();
                     },
-                    child: SettingsTextItem(
-                        text: _getPublicLinkExpiry(),
-                        icon: Icons.navigate_next),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("link expiry"),
+                            Padding(padding: EdgeInsets.all(4)),
+                            _getLinkExpiryTimeWidget(),
+                          ],
+                        ),
+                        Icon(Icons.navigate_next),
+                      ],
+                    ),
                   ),
+                  Padding(padding: EdgeInsets.all(4)),
                   Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
                   Divider(height: 4),
                   Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 4)),
@@ -116,7 +130,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("show download option"),
+                        Text("enable download"),
                         Switch.adaptive(
                           value: widget.collection.publicURLs?.first
                                   ?.enableDownload ??
@@ -245,7 +259,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               height: 220.0,
               color: Color(0xfff7f7f7),
               child: CupertinoPicker(
-                backgroundColor: Colors.black,
+                backgroundColor: Colors.black.withOpacity(0.95),
                 children:
                     expiryOptions.map((e) => getOptionText(e.item2)).toList(),
                 onSelectedItemChanged: (value) {
@@ -346,11 +360,11 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
           bool _passwordVisible = false;
           return StatefulBuilder(builder: (context, setState) {
             return AlertDialog(
-              title: Text('enter link password'),
+              title: Text('enter password'),
               content: TextFormField(
                 autofillHints: const [AutofillHints.newPassword],
                 decoration: InputDecoration(
-                  hintText: "link password",
+                  hintText: "password",
                   contentPadding: EdgeInsets.all(20),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -377,13 +391,23 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text('cancel'),
+                  child: Text(
+                    'cancel',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
                   onPressed: () {
                     Navigator.pop(context, 'cancel');
                   },
                 ),
                 TextButton(
-                  child: Text('ok'),
+                  child: Text(
+                    'ok',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
                   onPressed: () {
                     if (_textFieldController.text.trim().isEmpty) {
                       return;
@@ -420,21 +444,36 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     try {
       await CollectionsService.instance.updateShareUrl(widget.collection, prop);
       await dialog.hide();
+      showToast("album updated");
     } catch (e) {
       await dialog.hide();
       await showGenericErrorDialog(context);
     }
   }
 
-  String _getPublicLinkExpiry() {
+  Text _getLinkExpiryTimeWidget() {
     int validTill = widget.collection.publicURLs?.first?.validTill ?? 0;
     if (validTill == 0) {
-      return 'validity: no expiry';
+      return Text(
+        'never',
+        style: TextStyle(
+          color: Colors.grey,
+        ),
+      );
     }
     if (validTill < DateTime.now().microsecondsSinceEpoch) {
-      return 'validity: expired';
+      return Text(
+        'expired',
+        style: TextStyle(
+          color: Colors.orange[300],
+        ),
+      );
     }
-    return 'expires on: ' +
-        getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(validTill));
+    return Text(
+      getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(validTill)),
+      style: TextStyle(
+        color: Colors.grey,
+      ),
+    );
   }
 }
