@@ -262,7 +262,7 @@ export default function PublicCollectionGallery() {
                                 <LogoImg src="/icon.svg" />
                                 {constants.PASSWORD}
                             </Card.Title>
-                            <Card.Subtitle style={{ marginBottom: '2rem' }}>
+                            <Card.Subtitle style={{ marginBottom: '1rem' }}>
                                 {/* <LogoImg src="/icon.svg" /> */}
                                 {constants.LINK_PASSWORD}
                             </Card.Subtitle>
