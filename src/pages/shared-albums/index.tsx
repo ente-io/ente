@@ -153,7 +153,7 @@ export default function PublicCollectionGallery() {
             // check if we need to prompt user for the password
             if (
                 (collection?.publicURLs?.[0]?.passwordEnabled ?? false) &&
-                !passwordJWTToken
+                !passwordJWTToken.current
             ) {
                 setIsPasswordProtected(true);
             } else {
@@ -244,7 +244,7 @@ export default function PublicCollectionGallery() {
     if (errorMessage && !loading) {
         return <Container>{errorMessage}</Container>;
     }
-    if (isPasswordProtected && !passwordJWTToken && !loading) {
+    if (isPasswordProtected && !passwordJWTToken.current && !loading) {
         return (
             <Container>
                 <Card style={{ width: '332px' }} className="text-center">
