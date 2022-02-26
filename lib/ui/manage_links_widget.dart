@@ -96,7 +96,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("enable password"),
+                        Text("password lock"),
                         Switch.adaptive(
                           value: widget.collection.publicURLs?.first
                                   ?.passwordEnabled ??
@@ -130,7 +130,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("enable download"),
+                        Text("file download"),
                         Switch.adaptive(
                           value: widget.collection.publicURLs?.first
                                   ?.enableDownload ??
@@ -365,7 +365,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 autofillHints: const [AutofillHints.newPassword],
                 decoration: InputDecoration(
                   hintText: "password",
-                  contentPadding: EdgeInsets.all(20),
+                  contentPadding: EdgeInsets.all(12),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _passwordVisible
