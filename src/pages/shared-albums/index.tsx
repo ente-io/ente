@@ -32,7 +32,6 @@ import LoadingBar from 'react-top-loading-bar';
 import CryptoWorker from 'utils/crypto';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
-import LogoImg from 'components/LogoImg';
 import SingleInputForm from 'components/SingleInputForm';
 import { Card } from 'react-bootstrap';
 import { logError } from 'utils/sentry';
@@ -265,13 +264,9 @@ export default function PublicCollectionGallery() {
         if (isPasswordProtected && !passwordJWTToken.current) {
             return (
                 <Container>
-                    <Card style={{ width: '332px' }} className="text-center">
+                    <Card style={{ maxWidth: '332px' }} className="text-center">
                         <Card.Body style={{ padding: '40px 30px' }}>
-                            <Card.Title style={{ marginBottom: '24px' }}>
-                                <LogoImg src="/icon.svg" />
-                                {constants.PASSWORD}
-                            </Card.Title>
-                            <Card.Subtitle style={{ marginBottom: '1rem' }}>
+                            <Card.Subtitle style={{ marginBottom: '2rem' }}>
                                 {/* <LogoImg src="/icon.svg" /> */}
                                 {constants.LINK_PASSWORD}
                             </Card.Subtitle>
