@@ -47,7 +47,7 @@ const bs58 = require('bs58');
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
     // passwordJWTToken refers to the jwt token which is used for album protected by password.
-    const [passwordJWTToken, setPasswordJWTToken] = useState<string>(null);
+    const passwordJWTToken = useRef<string>(null);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
@@ -129,7 +129,7 @@ export default function PublicCollectionGallery() {
                         await getLocalPublicCollectionPassword(collectionUID);
 
                     setPublicFiles(localPublicFiles);
-                    setPasswordJWTToken(localPasswordJWTToken);
+                    passwordJWTToken.current = localPasswordJWTToken;
                 }
                 await syncWithRemote();
             } finally {
@@ -159,6 +159,7 @@ export default function PublicCollectionGallery() {
             } else {
                 await syncPublicFiles(
                     token.current,
+                    passwordJWTToken.current,
                     collection,
                     setPublicFiles
                 );
@@ -214,7 +215,7 @@ export default function PublicCollectionGallery() {
                     token.current,
                     hashedPassword
                 );
-                setPasswordJWTToken(jwtToken);
+                passwordJWTToken.current = jwtToken;
                 savePublicCollectionPassword(collectionUID, jwtToken);
             } catch (e) {
                 // reset local password token
@@ -277,7 +278,7 @@ export default function PublicCollectionGallery() {
             value={{
                 ...defaultPublicCollectionGalleryContext,
                 token: token.current,
-                passwordToken: passwordJWTToken,
+                passwordToken: passwordJWTToken.current,
                 accessedThroughSharedURL: true,
                 setDialogMessage,
                 openReportForm,

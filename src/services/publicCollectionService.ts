@@ -143,6 +143,7 @@ const setPublicCollectionLastSyncTime = async (
 
 export const syncPublicFiles = async (
     token: string,
+    passwordToken: string,
     collection: Collection,
     setPublicFiles: (files: EnteFile[]) => void
 ) => {
@@ -156,9 +157,6 @@ export const syncPublicFiles = async (
                 return files;
             }
             const lastSyncTime = await getPublicCollectionLastSyncTime(
-                collectionUID
-            );
-            const passwordToken = await getLocalPublicCollectionPassword(
                 collectionUID
             );
             // if (collection.updationTime === lastSyncTime) {
