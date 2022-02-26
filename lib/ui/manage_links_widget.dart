@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/models/collection.dart';
@@ -27,7 +26,7 @@ class ManageSharedLinkWidget extends StatefulWidget {
 
 class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   // index, title, milliseconds in future post which link should expire (when >0)
-  List<Tuple3<int, String, int>> expiryOptions = [
+  final List<Tuple3<int, String, int>> _expiryOptions = [
     Tuple3(0, "never", 0),
     Tuple3(1, "after 1 hour", Duration(hours: 1).inMicroseconds),
     Tuple3(2, "after 1 day", Duration(days: 1).inMicroseconds),
@@ -39,10 +38,11 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   ];
 
   Tuple3<int, String, int> _selectedExpiry;
+  int _selectedDeviceLimitIndex = 0;
 
   @override
   void initState() {
-    _selectedExpiry = expiryOptions.first;
+    _selectedExpiry = _expiryOptions.first;
     super.initState();
   }
 
@@ -167,23 +167,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   Padding(padding: EdgeInsets.all(8)),
                   GestureDetector(
                     behavior: HitTestBehavior.translucent,
-                    onTap: () async {
-                      var actionResult =
-                          await _displayDeviceLimitInput(context);
-                      if (actionResult == null || actionResult != 'ok') {
-                        return;
-                      }
-                      var newDeviceLimit =
-                          int.tryParse(_textFieldController.text.trim());
-                      if (newDeviceLimit != null &&
-                          newDeviceLimit > 0 &&
-                          newDeviceLimit <= 50) {
-                        await _updateUrlSettings(
-                            context, {'deviceLimit': newDeviceLimit});
-                        setState(() {});
-                      } else {
-                        showToast('device limit out of range');
-                      }
+                    onTap: () {
+                      _showDeviceLimitPicker();
                     },
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -230,7 +215,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
           children: <Widget>[
             Container(
               decoration: BoxDecoration(
-                color: Colors.black,
+                color: Colors.white.withOpacity(0.1),
                 border: Border(
                   bottom: BorderSide(
                     color: Color(0xff999999),
@@ -297,9 +282,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               child: CupertinoPicker(
                 backgroundColor: Colors.black.withOpacity(0.95),
                 children:
-                    expiryOptions.map((e) => getOptionText(e.item2)).toList(),
+                    _expiryOptions.map((e) => getOptionText(e.item2)).toList(),
                 onSelectedItemChanged: (value) {
-                  var firstWhere = expiryOptions
+                  var firstWhere = _expiryOptions
                       .firstWhere((element) => element.item1 == value);
                   setState(() {
                     _selectedExpiry = firstWhere;
@@ -344,49 +329,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   final TextEditingController _textFieldController = TextEditingController();
-
-  Future<String> _displayDeviceLimitInput(BuildContext context) async {
-    _textFieldController.clear();
-    _textFieldController.value = TextEditingValue(
-        text: widget.collection.publicURLs?.first?.deviceLimit.toString() ??
-            "50");
-    return showDialog<String>(
-        context: context,
-        builder: (context) {
-          return StatefulBuilder(builder: (context, setState) {
-            return AlertDialog(
-              title: Text('set device limit'),
-              content: TextFormField(
-                  controller: _textFieldController,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                  ],
-                  decoration: InputDecoration(
-                    labelText: "range (1-50)",
-                    hintText: "range (1-50)",
-                  )),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('cancel'),
-                  onPressed: () {
-                    Navigator.pop(context, 'cancel');
-                  },
-                ),
-                TextButton(
-                  child: Text('ok'),
-                  onPressed: () {
-                    if (_textFieldController.text.trim().isEmpty) {
-                      return;
-                    }
-                    Navigator.pop(context, 'ok');
-                  },
-                ),
-              ],
-            );
-          });
-        });
-  }
 
   Future<String> _displayLinkPasswordInput(BuildContext context) async {
     _textFieldController.clear();
@@ -510,6 +452,85 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       style: TextStyle(
         color: Colors.grey,
       ),
+    );
+  }
+
+  Future<void> _showDeviceLimitPicker() async {
+    List<Text> options = [];
+    for (int i = 50; i > 0; i--) {
+      options.add(Text(i.toString(), style: TextStyle(color: Colors.white)));
+    }
+    return showCupertinoModalPopup(
+      context: context,
+      builder: (context) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                border: Border(
+                  bottom: BorderSide(
+                    color: Color(0xff999999),
+                    width: 0.0,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  CupertinoButton(
+                    child: Text('cancel',
+                        style: TextStyle(
+                          color: Colors.white,
+                        )),
+                    onPressed: () {
+                      Navigator.of(context).pop('cancel');
+                    },
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 5.0,
+                    ),
+                  ),
+                  CupertinoButton(
+                    child: Text('confirm',
+                        style: TextStyle(
+                          color: Colors.white,
+                        )),
+                    onPressed: () async {
+                      await _updateUrlSettings(context, {
+                        'deviceLimit': int.tryParse(
+                            options[_selectedDeviceLimitIndex].data),
+                      });
+                      setState(() {});
+                      Navigator.of(context).pop('');
+                    },
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 2.0,
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Container(
+              height: 220.0,
+              color: Color(0xfff7f7f7),
+              child: CupertinoPicker(
+                backgroundColor: Colors.black.withOpacity(0.95),
+                children: options,
+                onSelectedItemChanged: (value) {
+                  _selectedDeviceLimitIndex = value;
+                },
+                magnification: 1.3,
+                useMagnifier: true,
+                itemExtent: 25,
+                diameterRatio: 1,
+              ),
+            )
+          ],
+        );
+      },
     );
   }
 }
