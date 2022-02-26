@@ -126,11 +126,9 @@ export default function PublicCollectionGallery() {
                     const localPublicFiles = sortFiles(
                         mergeMetadata(localFiles)
                     );
-                    const localPasswordJWTToken =
-                        await getLocalPublicCollectionPassword(collectionUID);
-
                     setPublicFiles(localPublicFiles);
-                    passwordJWTToken.current = localPasswordJWTToken;
+                    passwordJWTToken.current =
+                        await getLocalPublicCollectionPassword(collectionUID);
                 }
                 await syncWithRemote();
             } finally {
