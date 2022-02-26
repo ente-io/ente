@@ -333,9 +333,7 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
 
 export async function convertForPreview(file: EnteFile, fileBlob: Blob) {
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        const originalName = fileNameWithoutExtension(file.metadata.title);
-        const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
-        fileBlob = new Blob([motionPhoto.video]);
+        return fileBlob;
     }
 
     const typeFromExtension = getFileExtension(file.metadata.title);
@@ -348,6 +346,26 @@ export async function convertForPreview(file: EnteFile, fileBlob: Blob) {
         fileBlob = await HEICConverter.convert(fileBlob);
     }
     return fileBlob;
+}
+
+export async function splitLivePhoto(file: EnteFile, url: string) {
+    const fileBlob = await fetch(url).then((res) => res.blob());
+    const originalName = fileNameWithoutExtension(file.metadata.title);
+    const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
+    let image = new Blob([motionPhoto.image]);
+    const video = new Blob([motionPhoto.video]);
+
+    const typeFromExtension = getFileExtension(motionPhoto.imageNameTitle);
+    const reader = new FileReader();
+
+    const mimeType =
+        (await getFileTypeFromBlob(reader, image))?.mime ?? typeFromExtension;
+    if (isFileHEIC(mimeType)) {
+        image = await HEICConverter.convert(image);
+    }
+    const imageURL = URL.createObjectURL(image);
+    const videoURL = URL.createObjectURL(video);
+    return { imageURL, videoURL };
 }
 
 export function fileIsArchived(file: EnteFile) {

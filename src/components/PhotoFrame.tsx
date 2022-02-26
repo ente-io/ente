@@ -15,8 +15,8 @@ import {
     ARCHIVE_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
-import { isSharedFile } from 'utils/file';
-import { isPlaybackPossible } from 'utils/photoFrame';
+import { isSharedFile, splitLivePhoto } from 'utils/file';
+import { isPlaybackPossible, livePhotoBtnHTML } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
 import { SetFiles, SelectedState, Search, setSearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
@@ -71,6 +71,12 @@ interface Props {
     isSharedCollection: boolean;
     enableDownload: boolean;
 }
+
+type SourceURL = {
+    defaultURL?: string;
+    imageURL?: string;
+    videoURL?: string;
+};
 
 const PhotoFrame = ({
     files,
@@ -250,19 +256,26 @@ const PhotoFrame = ({
         const livePhotoBtn: HTMLButtonElement =
             document.querySelector('.live-photo-btn');
         if (livePhotoVideo && livePhotoBtn) {
-            livePhotoBtn.addEventListener('mouseout', function () {
+            const playVideo = () => {
+                livePhotoVideo.play().catch(() => {
+                    livePhotoVideo.pause();
+                });
+            };
+
+            const pauseVideo = () => {
                 livePhotoVideo.pause();
-            });
-            livePhotoBtn.addEventListener('mouseover', function () {
-                livePhotoVideo.play().catch(() => {
-                    livePhotoVideo.pause();
-                });
-            });
-            livePhotoBtn.addEventListener('click', function () {
-                livePhotoVideo.play().catch(() => {
-                    livePhotoVideo.pause();
-                });
-            });
+                livePhotoVideo.load();
+            };
+
+            livePhotoBtn.addEventListener('mouseout', pauseVideo);
+            livePhotoBtn.addEventListener('mouseover', playVideo);
+            livePhotoBtn.addEventListener('click', playVideo);
+
+            return () => {
+                livePhotoBtn.removeEventListener('mouseout', pauseVideo);
+                livePhotoBtn.removeEventListener('mouseover', playVideo);
+                livePhotoBtn.removeEventListener('click', playVideo);
+            };
         }
     }, [livePhotoLoaded]);
 
@@ -298,12 +311,13 @@ const PhotoFrame = ({
         setFiles(files);
     };
 
-    const updateSrcURL = async (index: number, url: string) => {
+    const updateSrcURL = async (index: number, srcurl: SourceURL) => {
         files[index] = {
             ...files[index],
             w: window.innerWidth,
             h: window.innerHeight,
         };
+        const url = srcurl.defaultURL;
         if (files[index].metadata.fileType === FILE_TYPE.VIDEO) {
             if (await isPlaybackPossible(url)) {
                 files[index].html = `
@@ -324,21 +338,13 @@ const PhotoFrame = ({
                 `;
             }
         } else if (files[index].metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            if (await isPlaybackPossible(url)) {
+            const { imageURL, videoURL } = srcurl;
+            if (await isPlaybackPossible(videoURL)) {
                 files[index].html = `
                 <div class = 'live-photo-container'>
-                    <button class = 'live-photo-btn'> 
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        height="25px"
-                        width="25px"
-                        fill="currentColor">
-                        <path d="M0 0h24v24H0V0z" fill="none" />
-                        <path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79zM1 10.5h3v2H1zM11 .55h2V3.5h-2zm8.04 2.495l1.408 1.407-1.79 1.79-1.407-1.408zm-1.8 15.115l1.79 1.8 1.41-1.41-1.8-1.79zM20 10.5h3v2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm-1 4h2v2.95h-2zm-7.45-.96l1.41 1.41 1.79-1.8-1.41-1.41z" />
-                    </svg> LIVE 
-                    </button>
-                    <video class = "live-photo" loop>
-                        <source src="${url}" />
+                    ${livePhotoBtnHTML}
+                    <video class = "live-photo" poster = "${imageURL}" loop muted>
+                        <source src="${videoURL}" />
                         Your browser does not support the video tag.
                     </video>
                 </div>
@@ -350,7 +356,7 @@ const PhotoFrame = ({
                     <img src="${files[index].msrc}" />
                     <div class="download-message" >
                         ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                        <a class="btn btn-outline-success" href=${url} download="${files[index].metadata.title}"">Download</button>
+                        <a class="btn btn-outline-success" href=${videoURL} download="${files[index].metadata.title}"">Download</button>
                     </div>
                 </div>
                 `;
@@ -510,12 +516,32 @@ const PhotoFrame = ({
                     } else {
                         url = await DownloadManager.getFile(item, true);
                     }
-                    galleryContext.files.set(item.id, url);
+                    if (item.metadata.fileType !== FILE_TYPE.LIVE_PHOTO) {
+                        galleryContext.files.set(item.id, url);
+                    }
                 }
                 if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+                    let imageURL;
+                    let videoURL;
+                    if (galleryContext.files.has(item.id)) {
+                        [imageURL, videoURL] = galleryContext.files
+                            .get(item.id)
+                            .split(',');
+                    } else {
+                        ({ imageURL, videoURL } = await splitLivePhoto(
+                            item,
+                            url
+                        ));
+                        galleryContext.files.set(
+                            item.id,
+                            imageURL + ',' + videoURL
+                        );
+                    }
                     setLivePhotoLoaded(false);
+                    await updateSrcURL(item.dataIndex, { imageURL, videoURL });
+                } else {
+                    await updateSrcURL(item.dataIndex, { defaultURL: url });
                 }
-                await updateSrcURL(item.dataIndex, url);
                 item.html = files[item.dataIndex].html;
                 item.src = files[item.dataIndex].src;
                 item.w = files[item.dataIndex].w;
