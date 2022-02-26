@@ -165,7 +165,10 @@ export default function PublicCollectionGallery() {
                         setPublicFiles
                     );
                 } catch (e) {
-                    passwordJWTToken.current = null;
+                    const parsedError = parseSharingErrorCodes(e);
+                    if (parsedError.message === CustomError.TOKEN_EXPIRED) {
+                        passwordJWTToken.current = null;
+                    }
                 }
             }
             if (isPasswordProtected && !passwordJWTToken.current) {
