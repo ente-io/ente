@@ -1,6 +1,5 @@
 import JSZip from 'jszip';
 import { fileExtensionWithDot } from 'utils/file';
-import FFmpegService from 'services/ffmpegService';
 
 class MotionPhoto {
     image: Uint8Array;
@@ -26,9 +25,8 @@ export const decodeMotionPhoto = async (
         } else if (zipFilename.startsWith('video')) {
             motionPhoto.videoNameTitle =
                 originalName + fileExtensionWithDot(zipFilename);
-            const video = await zip.files[zipFilename].async('uint8array');
-            motionPhoto.video = await FFmpegService.convertLivePhotoToMP4(
-                video
+            motionPhoto.video = await zip.files[zipFilename].async(
+                'uint8array'
             );
         }
     }

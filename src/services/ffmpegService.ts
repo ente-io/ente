@@ -10,6 +10,7 @@ class FFmpegService {
     private fileReader: FileReader = null;
 
     private generateThumbnailProcessor = new QueueProcessor<Uint8Array>(1);
+    private generateMP4ConversionProcessor = new QueueProcessor<Uint8Array>(1);
     async init() {
         try {
             this.ffmpeg = createFFmpeg({
@@ -57,7 +58,10 @@ class FFmpegService {
         }
     }
 
-    async convertLivePhotoToMP4(file: Uint8Array): Promise<Uint8Array> {
+    async convertToMP4(
+        file: Uint8Array,
+        fileName: string
+    ): Promise<Uint8Array> {
         if (!this.ffmpeg) {
             await this.init();
         }
@@ -65,27 +69,20 @@ class FFmpegService {
             await this.isLoading;
         }
 
+        const response = this.generateMP4ConversionProcessor.queueUpRequest(
+            convertToMP4Helper.bind(null, this.ffmpeg, file, fileName)
+        );
+
         try {
-            this.ffmpeg.FS('writeFile', 'input.mov', file);
-            console.log('starting encoding', new Date().toLocaleTimeString());
-            await this.ffmpeg.run(
-                '-i',
-                'input.mov',
-                '-preset',
-                'ultrafast',
-                'output.mp4'
-            );
-            const convertedFile = await this.ffmpeg.FS(
-                'readFile',
-                'output.mp4'
-            );
-            console.log('done encoding', new Date().toLocaleTimeString());
-            await this.ffmpeg.FS('unlink', 'input.mov');
-            await this.ffmpeg.FS('unlink', 'output.mp4');
-            return convertedFile;
+            return await response.promise;
         } catch (e) {
-            logError(e, 'ffmpeg live photo to MP4 conversion failed');
-            throw e;
+            if (e.message === CustomError.REQUEST_CANCELLED) {
+                // ignore
+                return null;
+            } else {
+                logError(e, 'ffmpeg MP4 conversion failed');
+                throw e;
+            }
         }
     }
 }
@@ -129,6 +126,30 @@ async function generateThumbnailHelper(
         return thumb;
     } catch (e) {
         logError(e, 'ffmpeg thumbnail generation failed');
+        throw e;
+    }
+}
+
+async function convertToMP4Helper(
+    ffmpeg: FFmpeg,
+    file: Uint8Array,
+    inputFileName: string
+) {
+    try {
+        ffmpeg.FS('writeFile', inputFileName, file);
+        await ffmpeg.run(
+            '-i',
+            inputFileName,
+            '-preset',
+            'ultrafast',
+            'output.mp4'
+        );
+        const convertedFile = await ffmpeg.FS('readFile', 'output.mp4');
+        ffmpeg.FS('unlink', inputFileName);
+        ffmpeg.FS('unlink', 'output.mp4');
+        return convertedFile;
+    } catch (e) {
+        logError(e, 'ffmpeg MP4 conversion failed');
         throw e;
     }
 }

@@ -24,6 +24,7 @@ import {
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import HEICConverter from 'services/HEICConverter';
+import ffmpegService from 'services/ffmpegService';
 
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
@@ -353,7 +354,13 @@ export async function splitLivePhoto(file: EnteFile, url: string) {
     const originalName = fileNameWithoutExtension(file.metadata.title);
     const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
     let image = new Blob([motionPhoto.image]);
-    const video = new Blob([motionPhoto.video]);
+
+    // can run conversion in parellel as video and image
+    // have different processes
+    const convertedVideo = ffmpegService.convertToMP4(
+        motionPhoto.video,
+        motionPhoto.videoNameTitle
+    );
 
     const typeFromExtension = getFileExtension(motionPhoto.imageNameTitle);
     const reader = new FileReader();
@@ -363,6 +370,9 @@ export async function splitLivePhoto(file: EnteFile, url: string) {
     if (isFileHEIC(mimeType)) {
         image = await HEICConverter.convert(image);
     }
+
+    const video = new Blob([await convertedVideo]);
+
     const imageURL = URL.createObjectURL(image);
     const videoURL = URL.createObjectURL(video);
     return { imageURL, videoURL };
