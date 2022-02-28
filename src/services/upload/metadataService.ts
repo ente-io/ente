@@ -8,7 +8,7 @@ import {
     FileTypeInfo,
     ParsedExtractedMetadata,
 } from 'types/upload';
-import { NULL_LOCATION } from 'constants/upload';
+import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
 import { splitFilenameAndExtension } from 'utils/file';
 import { getVideoMetadata } from './videoMetadataService';
 
@@ -27,7 +27,7 @@ export async function extractMetadata(
     receivedFile: File,
     fileTypeInfo: FileTypeInfo
 ) {
-    let extractedMetadata: ParsedExtractedMetadata = null;
+    let extractedMetadata: ParsedExtractedMetadata = NULL_EXTRACTED_METADATA;
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
         extractedMetadata = await getExifData(receivedFile, fileTypeInfo);
     } else if (fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
@@ -39,10 +39,10 @@ export async function extractMetadata(
             fileTypeInfo.exactType
         }`,
         creationTime:
-            extractedMetadata?.creationTime ?? receivedFile.lastModified * 1000,
+            extractedMetadata.creationTime ?? receivedFile.lastModified * 1000,
         modificationTime: receivedFile.lastModified * 1000,
-        latitude: extractedMetadata.location?.latitude,
-        longitude: extractedMetadata.location?.longitude,
+        latitude: extractedMetadata.location.latitude,
+        longitude: extractedMetadata.location.longitude,
         fileType: fileTypeInfo.fileType,
     };
     return metadata;
