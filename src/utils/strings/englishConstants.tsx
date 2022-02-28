@@ -332,6 +332,8 @@ const englishConstants = {
     SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'thank you',
     CANCEL_SUBSCRIPTION_ON_MOBILE:
         'please cancel your subscription from the mobile app to activate a subscription here',
+    PAYPAL_MANAGE_NOT_SUPPORTED:
+        'please contact support to manage your paypal plan',
     RENAME: 'rename',
     RENAME_COLLECTION: 'rename album',
     CONFIRM_DELETE_COLLECTION: 'confirm album deletion',
