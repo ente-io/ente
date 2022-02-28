@@ -336,7 +336,7 @@ const englishConstants = {
         <>
             please contact us at{' '}
             <a href="mailto:paypal@ente.io">paypal@ente.io</a> to manage your
-            paypal plan
+            subscription
         </>
     ),
     PAYPAL_MANAGE_NOT_SUPPORTED: 'manage paypal plan',
