@@ -1,4 +1,4 @@
-export function getUNIXTime(dateTime: Date) {
+export function getUnixTimeInMicroSeconds(dateTime: Date) {
     if (!dateTime || isNaN(dateTime.getTime())) {
         return null;
     }

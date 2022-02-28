@@ -13,7 +13,7 @@ import { EnteFile } from 'types/file';
 import { getRawExif } from './upload/exifService';
 import { getFileType } from './upload/readFileService';
 import { FILE_TYPE } from 'constants/file';
-import { getUNIXTime } from 'utils/time';
+import { getUnixTimeInMicroSeconds } from 'utils/time';
 
 export async function updateCreationTimeWithExif(
     filesToBeUpdated: EnteFile[],
@@ -34,7 +34,7 @@ export async function updateCreationTimeWithExif(
                 }
                 let correctCreationTime: number;
                 if (fixOption === FIX_OPTIONS.CUSTOM_TIME) {
-                    correctCreationTime = getUNIXTime(customTime);
+                    correctCreationTime = getUnixTimeInMicroSeconds(customTime);
                 } else {
                     const fileURL = await downloadManager.getFile(file);
                     const fileObject = await getFileFromURL(fileURL);
@@ -42,11 +42,13 @@ export async function updateCreationTimeWithExif(
                     const fileTypeInfo = await getFileType(reader, fileObject);
                     const exifData = await getRawExif(fileObject, fileTypeInfo);
                     if (fixOption === FIX_OPTIONS.DATE_TIME_ORIGINAL) {
-                        correctCreationTime = getUNIXTime(
+                        correctCreationTime = getUnixTimeInMicroSeconds(
                             exifData?.DateTimeOriginal
                         );
                     } else {
-                        correctCreationTime = getUNIXTime(exifData?.CreateDate);
+                        correctCreationTime = getUnixTimeInMicroSeconds(
+                            exifData?.CreateDate
+                        );
                     }
                 }
                 if (

@@ -5,7 +5,7 @@ import piexif from 'piexifjs';
 import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
 import { ParsedExtractedMetadata } from 'types/upload';
-import { getUNIXTime } from 'utils/time';
+import { getUnixTimeInMicroSeconds } from 'utils/time';
 
 const EXIF_TAGS_NEEDED = [
     'DateTimeOriginal',
@@ -38,7 +38,7 @@ export async function getExifData(
         }
         parsedEXIFData = {
             location: getEXIFLocation(exifData),
-            creationTime: getUNIXTime(
+            creationTime: getUnixTimeInMicroSeconds(
                 exifData.DateTimeOriginal ??
                     exifData.CreateDate ??
                     exifData.ModifyDate

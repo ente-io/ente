@@ -1,6 +1,6 @@
 import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
 import ffmpegService from 'services/ffmpegService';
-import { getUNIXTime } from 'utils/time';
+import { getUnixTimeInMicroSeconds } from 'utils/time';
 import { ParsedExtractedMetadata } from 'types/upload';
 import { logError } from 'utils/sentry';
 
@@ -68,7 +68,7 @@ function parseAppleISOLocation(isoLocation: string) {
 function parseCreationTime(creationTime: string) {
     let dateTime = null;
     if (creationTime) {
-        dateTime = getUNIXTime(new Date(creationTime));
+        dateTime = getUnixTimeInMicroSeconds(new Date(creationTime));
     }
     return dateTime;
 }
