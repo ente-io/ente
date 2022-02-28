@@ -158,10 +158,6 @@ async function extractVideoMetadataHelper(
             'copy',
             '-map_metadata',
             '0',
-            '-map_metadata:s:v',
-            '0:s:v',
-            '-map_metadata:s:a',
-            '0:s:a',
             '-f',
             'ffmetadata',
             outFileName
@@ -177,3 +173,12 @@ async function extractVideoMetadataHelper(
 }
 
 export default new FFmpegService();
+
+/*
+
+ffmpeg -i largeVideo.mp4 -c copy -map_metadata 0 -map_metadata:s:v 0:s:v -map_metadata:s:a 0:s:a -f ffmetadata out.txt
+
+explanation 
+"-c copy" => will copy all the stream without re-encoding
+-map_metadata[:metadata_spec_out] infile[:metadata_spec_in] (output,per-metadata) =>
+*/
