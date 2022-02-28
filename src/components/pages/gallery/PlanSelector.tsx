@@ -158,8 +158,8 @@ function PlanSelector(props: Props) {
             !isSubscriptionCancelled(subscription)
         ) {
             props.setDialogMessage({
-                title: constants.ERROR,
-                content: constants.PAYPAL_MANAGE_NOT_SUPPORTED,
+                title: constants.MANAGE_PLAN,
+                content: constants.PAYPAL_MANAGE_NOT_SUPPORTED_MESSAGE(),
                 close: { variant: 'danger' },
             });
         } else if (hasStripeSubscription(subscription)) {
