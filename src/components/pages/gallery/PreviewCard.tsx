@@ -194,7 +194,8 @@ export default function PreviewCard(props: IProps) {
                         url =
                             await PublicCollectionDownloadManager.getThumbnail(
                                 file,
-                                publicCollectionGalleryContext.token
+                                publicCollectionGalleryContext.token,
+                                publicCollectionGalleryContext.passwordToken
                             );
                     } else {
                         url = await DownloadManager.getThumbnail(file);

@@ -67,6 +67,7 @@ export default function Credentials() {
                     keyAttributes.keyDecryptionNonce,
                     kek
                 );
+
                 if (isFirstLogin()) {
                     await generateAndSaveIntermediateKeyAttributes(
                         passphrase,
