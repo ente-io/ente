@@ -3,7 +3,7 @@ import { CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import QueueProcessor from './queueProcessor';
 import {
-    ParsedVideoMetadata,
+    ParsedExtractedMetadata,
     parseFFmpegExtractedMetadata,
 } from './upload/metadataService';
 import { getUint8ArrayView } from './upload/readFileService';
@@ -61,7 +61,7 @@ class FFmpegService {
         }
     }
 
-    async extractMetadata(file: File): Promise<ParsedVideoMetadata> {
+    async extractMetadata(file: File): Promise<ParsedExtractedMetadata> {
         if (!this.ffmpeg) {
             await this.init();
         }

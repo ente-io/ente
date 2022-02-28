@@ -4,6 +4,7 @@ import exifr from 'exifr';
 import piexif from 'piexifjs';
 import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
+import { ParsedExtractedMetadata } from './metadataService';
 
 const EXIF_TAGS_NEEDED = [
     'DateTimeOriginal',
@@ -23,16 +24,12 @@ interface Exif {
     GPSLatitudeRef?: number;
     GPSLongitudeRef?: number;
 }
-export interface ParsedEXIFData {
-    location: Location;
-    creationTime: number;
-}
 
 export async function getExifData(
     receivedFile: File,
     fileTypeInfo: FileTypeInfo
-): Promise<ParsedEXIFData> {
-    const nullExifData: ParsedEXIFData = {
+): Promise<ParsedExtractedMetadata> {
+    const nullExifData: ParsedExtractedMetadata = {
         location: NULL_LOCATION,
         creationTime: null,
     };

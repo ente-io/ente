@@ -1,6 +1,6 @@
 import { FILE_TYPE } from 'constants/file';
 import { logError } from 'utils/sentry';
-import { getExifData, getUNIXTime, ParsedEXIFData } from './exifService';
+import { getExifData, getUNIXTime } from './exifService';
 import {
     Metadata,
     ParsedMetadataJSON,
@@ -30,7 +30,7 @@ const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     ...NULL_LOCATION,
 };
 
-export interface ParsedVideoMetadata {
+export interface ParsedExtractedMetadata {
     location: Location;
     creationTime: number;
 }
@@ -39,30 +39,25 @@ export async function extractMetadata(
     receivedFile: File,
     fileTypeInfo: FileTypeInfo
 ) {
-    let exifData: ParsedEXIFData = null;
-    let videoMetadata: ParsedVideoMetadata = null;
+    let extractedMetadata: ParsedExtractedMetadata = null;
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
-        exifData = await getExifData(receivedFile, fileTypeInfo);
+        extractedMetadata = await getExifData(receivedFile, fileTypeInfo);
     } else if (fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
-        videoMetadata = await ffmpegService.extractMetadata(receivedFile);
+        extractedMetadata = await ffmpegService.extractMetadata(receivedFile);
     }
 
-    const extractedMetadata: Metadata = {
+    const metadata: Metadata = {
         title: `${splitFilenameAndExtension(receivedFile.name)[0]}.${
             fileTypeInfo.exactType
         }`,
         creationTime:
-            exifData?.creationTime ??
-            videoMetadata.creationTime ??
-            receivedFile.lastModified * 1000,
+            extractedMetadata?.creationTime ?? receivedFile.lastModified * 1000,
         modificationTime: receivedFile.lastModified * 1000,
-        latitude:
-            exifData?.location?.latitude ?? videoMetadata.location?.latitude,
-        longitude:
-            exifData?.location?.longitude ?? videoMetadata.location?.longitude,
+        latitude: extractedMetadata.location?.latitude,
+        longitude: extractedMetadata.location?.longitude,
         fileType: fileTypeInfo.fileType,
     };
-    return extractedMetadata;
+    return metadata;
 }
 
 export const getMetadataJSONMapKey = (
@@ -161,7 +156,7 @@ export function parseFFmpegExtractedMetadata(encodedMetadata: Uint8Array) {
         metadataMap[VideoMetadata.APPLE_CREATION_DATE] ??
             metadataMap[VideoMetadata.CREATION_TIME]
     );
-    const parsedMetadata: ParsedVideoMetadata = {
+    const parsedMetadata: ParsedExtractedMetadata = {
         creationTime,
         location: {
             latitude: location.latitude,
