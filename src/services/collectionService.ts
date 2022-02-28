@@ -620,21 +620,23 @@ export const deleteShareableURL = async (collection: Collection) => {
     }
 };
 
-export const updateShareableURL = async (request: UpdatePublicURL) => {
+export const updateShareableURL = async (
+    request: UpdatePublicURL
+): Promise<PublicURL> => {
     try {
         const token = getToken();
         if (!token) {
             return null;
         }
-        await HTTPService.put(
-            `${ENDPOINT}/collections/share-url/`,
+        const res = await HTTPService.put(
+            `${ENDPOINT}/collections/share-url`,
             request,
-            null,
             null,
             {
                 'X-Auth-Token': token,
             }
         );
+        return res.data as PublicURL;
     } catch (e) {
         logError(e, 'updateShareableURL failed ');
         throw e;
