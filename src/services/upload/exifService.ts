@@ -5,6 +5,7 @@ import piexif from 'piexifjs';
 import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
 import { ParsedExtractedMetadata } from './metadataService';
+import { getUNIXTime } from 'utils/upload';
 
 const EXIF_TAGS_NEEDED = [
     'DateTimeOriginal',
@@ -126,22 +127,6 @@ export async function getRawExif(
         // ignore exif parsing errors
     }
     return exifData;
-}
-
-export function getUNIXTime(dateTime: Date) {
-    try {
-        if (!dateTime) {
-            return null;
-        }
-        const unixTime = dateTime.getTime() * 1000;
-        if (unixTime <= 0) {
-            return null;
-        } else {
-            return unixTime;
-        }
-    } catch (e) {
-        logError(e, 'getUNIXTime failed', { dateTime });
-    }
 }
 
 function getEXIFLocation(exifData): Location {
