@@ -288,12 +288,27 @@ const PhotoFrame = ({
             h: window.innerHeight,
         };
         if (
-            (files[index].metadata.fileType === FILE_TYPE.VIDEO ||
-                files[index].metadata.fileType === FILE_TYPE.LIVE_PHOTO) &&
+            files[index].metadata.fileType === FILE_TYPE.VIDEO &&
             !files[index].html
         ) {
             files[index].html = `
                 <div class="video-loading">
+                    <img src="${url}" />
+                    <div class="spinner-border text-light" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            `;
+            delete files[index].src;
+        } else if (
+            files[index].metadata.fileType === FILE_TYPE.LIVE_PHOTO &&
+            !files[index].html
+        ) {
+            files[index].html = `
+                <div class='video-loading'>
+                    <button class = 'live-photo-loading-btn'> 
+                        ${livePhotoBtnHTML}
+                    </button>
                     <img src="${url}" />
                     <div class="spinner-border text-light" role="status">
                         <span class="sr-only">Loading...</span>
@@ -342,7 +357,9 @@ const PhotoFrame = ({
             if (await isPlaybackPossible(videoURL)) {
                 files[index].html = `
                 <div class = 'live-photo-container'>
-                    ${livePhotoBtnHTML}
+                    <button class = 'live-photo-btn'> 
+                        ${livePhotoBtnHTML}
+                    </button>
                     <video class = "live-photo" poster = "${imageURL}" loop muted>
                         <source src="${videoURL}" />
                         Your browser does not support the video tag.
