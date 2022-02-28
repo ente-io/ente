@@ -2,11 +2,10 @@ import { createFFmpeg, FFmpeg } from '@ffmpeg/ffmpeg';
 import { CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import QueueProcessor from './queueProcessor';
-import {
-    ParsedExtractedMetadata,
-    parseFFmpegExtractedMetadata,
-} from './upload/metadataService';
+import { ParsedExtractedMetadata } from 'types/upload';
+
 import { getUint8ArrayView } from './upload/readFileService';
+import { parseFFmpegExtractedMetadata } from './upload/videoMetadataService';
 
 class FFmpegService {
     private ffmpeg: FFmpeg = null;

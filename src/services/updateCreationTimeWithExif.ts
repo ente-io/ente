@@ -10,9 +10,10 @@ import downloadManager from './downloadManager';
 import { updatePublicMagicMetadata } from './fileService';
 import { EnteFile } from 'types/file';
 
-import { getRawExif, getUNIXTime } from './upload/exifService';
+import { getRawExif } from './upload/exifService';
 import { getFileType } from './upload/readFileService';
 import { FILE_TYPE } from 'constants/file';
+import { getUNIXTime } from 'utils/time';
 
 export async function updateCreationTimeWithExif(
     filesToBeUpdated: EnteFile[],

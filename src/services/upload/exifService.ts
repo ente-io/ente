@@ -4,8 +4,8 @@ import exifr from 'exifr';
 import piexif from 'piexifjs';
 import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
-import { ParsedExtractedMetadata } from './metadataService';
-import { getUNIXTime } from 'utils/upload';
+import { ParsedExtractedMetadata } from 'types/upload';
+import { getUNIXTime } from 'utils/time';
 
 const EXIF_TAGS_NEEDED = [
     'DateTimeOriginal',

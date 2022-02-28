@@ -1,7 +1,7 @@
 import { NULL_LOCATION } from 'constants/upload';
 import ffmpegService from 'services/ffmpegService';
-import { getUNIXTime } from 'utils/upload';
-import { ParsedExtractedMetadata } from './metadataService';
+import { getUNIXTime } from 'utils/time';
+import { ParsedExtractedMetadata } from 'types/upload';
 
 enum VideoMetadata {
     CREATION_TIME = 'creation_time',

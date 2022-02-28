@@ -6,6 +6,7 @@ import {
     ParsedMetadataJSON,
     Location,
     FileTypeInfo,
+    ParsedExtractedMetadata,
 } from 'types/upload';
 import { NULL_LOCATION } from 'constants/upload';
 import { splitFilenameAndExtension } from 'utils/file';
@@ -21,11 +22,6 @@ const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     modificationTime: null,
     ...NULL_LOCATION,
 };
-
-export interface ParsedExtractedMetadata {
-    location: Location;
-    creationTime: number;
-}
 
 export async function extractMetadata(
     receivedFile: File,
