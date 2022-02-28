@@ -1,4 +1,4 @@
-import { NULL_LOCATION } from 'constants/upload';
+import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
 import { Location } from 'types/upload';
 import exifr from 'exifr';
 import piexif from 'piexifjs';
@@ -30,16 +30,13 @@ export async function getExifData(
     receivedFile: File,
     fileTypeInfo: FileTypeInfo
 ): Promise<ParsedExtractedMetadata> {
-    const nullExifData: ParsedExtractedMetadata = {
-        location: NULL_LOCATION,
-        creationTime: null,
-    };
+    let parsedEXIFData = NULL_EXTRACTED_METADATA;
     try {
         const exifData = await getRawExif(receivedFile, fileTypeInfo);
         if (!exifData) {
-            return nullExifData;
+            return parsedEXIFData;
         }
-        const parsedEXIFData = {
+        parsedEXIFData = {
             location: getEXIFLocation(exifData),
             creationTime: getUNIXTime(
                 exifData.DateTimeOriginal ??
@@ -47,11 +44,10 @@ export async function getExifData(
                     exifData.ModifyDate
             ),
         };
-        return parsedEXIFData;
     } catch (e) {
         logError(e, 'getExifData failed');
-        return nullExifData;
     }
+    return parsedEXIFData;
 }
 
 export async function updateFileCreationDateInEXIF(

@@ -1,7 +1,8 @@
-import { NULL_LOCATION } from 'constants/upload';
+import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
 import ffmpegService from 'services/ffmpegService';
 import { getUNIXTime } from 'utils/time';
 import { ParsedExtractedMetadata } from 'types/upload';
+import { logError } from 'utils/sentry';
 
 enum VideoMetadata {
     CREATION_TIME = 'creation_time',
@@ -11,8 +12,15 @@ enum VideoMetadata {
     APPLE_LOCATION_ISO = 'com.apple.quicktime.location.ISO6709',
 }
 
-export function getVideoMetadata(file: File) {
-    return ffmpegService.extractMetadata(file);
+export async function getVideoMetadata(file: File) {
+    let videoMetadata = NULL_EXTRACTED_METADATA;
+    try {
+        videoMetadata = await ffmpegService.extractMetadata(file);
+    } catch (e) {
+        logError(e, 'failed to get video metadata');
+    }
+
+    return videoMetadata;
 }
 
 export function parseFFmpegExtractedMetadata(encodedMetadata: Uint8Array) {
