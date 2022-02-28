@@ -151,6 +151,10 @@ async function extractVideoMetadataHelper(
         );
         let metadata = null;
 
+        // https://stackoverflow.com/questions/9464617/retrieving-and-saving-media-metadata-using-ffmpeg
+        // -c [short for codex] copy[(stream_specifier)[ffmpeg.org/ffmpeg.html#Stream-specifiers]] => copies all the stream without re-encoding
+        // -map_metadata [http://ffmpeg.org/ffmpeg.html#Advanced-options search for map_metadata] => copies all stream metadata to the out
+        // -f ffmetadata [https://ffmpeg.org/ffmpeg-formats.html#Metadata-1] => dump metadata from media files into a simple UTF-8-encoded INI-like text file
         await ffmpeg.run(
             '-i',
             inputFileName,
@@ -173,12 +177,3 @@ async function extractVideoMetadataHelper(
 }
 
 export default new FFmpegService();
-
-/*
-
-ffmpeg -i largeVideo.mp4 -c copy -map_metadata 0 -map_metadata:s:v 0:s:v -map_metadata:s:a 0:s:a -f ffmetadata out.txt
-
-explanation 
-"-c copy" => will copy all the stream without re-encoding
--map_metadata[:metadata_spec_out] infile[:metadata_spec_in] (output,per-metadata) =>
-*/
