@@ -12,11 +12,12 @@ import {
     unshareCollection,
     createShareableURL,
     deleteShareableURL,
+    updateShareableURL,
 } from 'services/collectionService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SubmitButton from './SubmitButton';
 import MessageDialog from './MessageDialog';
-import { Collection } from 'types/collection';
+import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import { appendCollectionKeyToShareURL } from 'utils/collection';
 import { FlexWrapper } from './Container';
 import { CodeBlock } from './CodeBlock';
@@ -43,6 +44,7 @@ function CollectionShare(props: Props) {
     const galleryContext = useContext(GalleryContext);
     const [sharableLinkError, setSharableLinkError] = useState(null);
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
+    const [publicShareProp, setPublicShareProp] = useState<PublicURL>(null);
 
     useEffect(() => {
         const main = async () => {
@@ -52,8 +54,12 @@ function CollectionShare(props: Props) {
                     props.collection.key
                 );
                 setPublicShareUrl(t);
+                setPublicShareProp(
+                    props.collection?.publicURLs?.[0] as PublicURL
+                );
             } else {
                 setPublicShareUrl(null);
+                setPublicShareProp(null);
             }
         };
         main();
@@ -145,12 +151,54 @@ function CollectionShare(props: Props) {
         });
     };
 
+    const disableFileDownload = () => {
+        galleryContext.setDialogMessage({
+            title: constants.DISABLE_FILE_DOWNLOAD,
+            content: constants.DISABLE_FILE_DOWNLOAD_MESSAGE,
+            close: { text: constants.CANCEL },
+            proceed: {
+                text: constants.DISABLE,
+                action: () =>
+                    updatePublicShareURLHelper({
+                        collectionID: props.collection.id,
+                        enableDownload: false,
+                    }),
+                variant: ButtonVariant.danger,
+            },
+        });
+    };
+
+    const updatePublicShareURLHelper = async (req: UpdatePublicURL) => {
+        try {
+            galleryContext.startLoading();
+            const response = await updateShareableURL(req);
+            setPublicShareProp(response);
+            galleryContext.syncWithRemote(false, true);
+        } catch (e) {
+            const errorMessage = handleSharingErrors(e);
+            setSharableLinkError(errorMessage);
+        } finally {
+            galleryContext.finishLoading();
+        }
+    };
+
     const handleCollectionPublicSharing = () => {
         setSharableLinkError(null);
         if (publicShareUrl) {
             disablePublicSharing();
         } else {
             createSharableURLHelper();
+        }
+    };
+
+    const handleFileDownloadSetting = () => {
+        if (publicShareProp.enableDownload) {
+            disableFileDownload();
+        } else {
+            updatePublicShareURLHelper({
+                collectionID: props.collection.id,
+                enableDownload: true,
+            });
         }
     };
 
@@ -293,6 +341,34 @@ function CollectionShare(props: Props) {
                 {publicShareUrl ? (
                     <div style={{ width: '100%', wordBreak: 'break-all' }}>
                         <CodeBlock key={publicShareUrl} code={publicShareUrl} />
+
+                        <div
+                            style={{
+                                height: '1px',
+                                marginTop: '10px',
+                                marginBottom: '18px',
+                                background: '#444',
+                                width: '100%',
+                            }}
+                        />
+                        <h6 style={{ marginTop: '2px' }}>
+                            {constants.MANAGE_LINK}
+                        </h6>
+                        <FlexWrapper>
+                            <FlexWrapper
+                                style={{ paddingTop: '5px', color: '#fff' }}>
+                                {constants.FILE_DOWNLOAD}
+                            </FlexWrapper>
+                            <Form.Switch
+                                style={{ marginLeft: '20px' }}
+                                checked={
+                                    publicShareProp?.enableDownload ?? false
+                                }
+                                id="public-sharing-file-download-toggler"
+                                className="custom-switch-md"
+                                onChange={handleFileDownloadSetting}
+                            />
+                        </FlexWrapper>
                     </div>
                 ) : (
                     <div style={{ height: '30px' }} />

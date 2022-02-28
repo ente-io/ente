@@ -629,10 +629,15 @@ const englishConstants = {
     PUBLIC_SHARING: 'link sharing',
     NOT_FOUND: '404 - not found',
     LINK_EXPIRED: 'this link has either expired or been disabled!',
+    MANAGE_LINK: 'manage link',
     LINK_TOO_MANY_REQUESTS: 'this album is too popular for us to handle!',
     DISABLE_PUBLIC_SHARING: "'disable public sharing",
     DISABLE_PUBLIC_SHARING_MESSAGE:
         'are you sure you want to disable public sharing?',
+    FILE_DOWNLOAD: 'file download',
+    DISABLE_FILE_DOWNLOAD: 'disable download',
+    DISABLE_FILE_DOWNLOAD_MESSAGE:
+        'are you sure that you want to disable the download button for files? \n viewers can still take screenshots or save a copy of your photos using external tools',
     ABUSE_REPORT: 'abuse report',
     ABUSE_REPORT_BUTTON_TEXT: 'report abuse?',
     MALICIOUS_CONTENT: 'contains malicious content',
