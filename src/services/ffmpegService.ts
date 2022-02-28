@@ -9,8 +9,7 @@ class FFmpegService {
     private isLoading = null;
     private fileReader: FileReader = null;
 
-    private generateThumbnailProcessor = new QueueProcessor<Uint8Array>(1);
-    private generateMP4ConversionProcessor = new QueueProcessor<Uint8Array>(1);
+    private generateQueueProcessor = new QueueProcessor<Uint8Array>(1);
     async init() {
         try {
             this.ffmpeg = createFFmpeg({
@@ -37,7 +36,7 @@ class FFmpegService {
         if (this.isLoading) {
             await this.isLoading;
         }
-        const response = this.generateThumbnailProcessor.queueUpRequest(
+        const response = this.generateQueueProcessor.queueUpRequest(
             generateThumbnailHelper.bind(
                 null,
                 this.ffmpeg,
@@ -69,7 +68,7 @@ class FFmpegService {
             await this.isLoading;
         }
 
-        const response = this.generateMP4ConversionProcessor.queueUpRequest(
+        const response = this.generateQueueProcessor.queueUpRequest(
             convertToMP4Helper.bind(null, this.ffmpeg, file, fileName)
         );
 
