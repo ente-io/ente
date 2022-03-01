@@ -9,7 +9,7 @@ class FFmpegService {
     private isLoading = null;
     private fileReader: FileReader = null;
 
-    private generateQueueProcessor = new QueueProcessor<Uint8Array>(1);
+    private ffmpegTaskQueue = new QueueProcessor<Uint8Array>(1);
     async init() {
         try {
             this.ffmpeg = createFFmpeg({
@@ -36,7 +36,7 @@ class FFmpegService {
         if (this.isLoading) {
             await this.isLoading;
         }
-        const response = this.generateQueueProcessor.queueUpRequest(
+        const response = this.ffmpegTaskQueue.queueUpRequest(
             generateThumbnailHelper.bind(
                 null,
                 this.ffmpeg,
@@ -68,7 +68,7 @@ class FFmpegService {
             await this.isLoading;
         }
 
-        const response = this.generateQueueProcessor.queueUpRequest(
+        const response = this.ffmpegTaskQueue.queueUpRequest(
             convertToMP4Helper.bind(null, this.ffmpeg, file, fileName)
         );
 
@@ -143,7 +143,7 @@ async function convertToMP4Helper(
             'ultrafast',
             'output.mp4'
         );
-        const convertedFile = await ffmpeg.FS('readFile', 'output.mp4');
+        const convertedFile = ffmpeg.FS('readFile', 'output.mp4');
         ffmpeg.FS('unlink', inputFileName);
         ffmpeg.FS('unlink', 'output.mp4');
         return convertedFile;

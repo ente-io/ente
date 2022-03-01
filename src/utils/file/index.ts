@@ -53,7 +53,7 @@ export async function downloadFile(
     if (accessedThroughSharedURL) {
         fileURL = await PublicCollectionDownloadManager.getCachedOriginalFile(
             file
-        );
+        )[0];
         tempURL;
         if (!fileURL) {
             tempURL = URL.createObjectURL(
@@ -69,7 +69,7 @@ export async function downloadFile(
             fileURL = tempURL;
         }
     } else {
-        fileURL = await DownloadManager.getCachedOriginalFile(file);
+        fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
         if (!fileURL) {
             tempURL = URL.createObjectURL(
                 await new Response(
@@ -332,50 +332,42 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
-export async function convertForPreview(file: EnteFile, fileBlob: Blob) {
-    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+export async function convertForPreview(
+    file: EnteFile,
+    fileBlob: Blob
+): Promise<Blob[]> {
+    const convertIfHEIC = async (fileName: string, fileBlob: Blob) => {
+        const typeFromExtension = getFileExtension(fileName);
+        const reader = new FileReader();
+        const mimeType =
+            (await getFileTypeFromBlob(reader, fileBlob))?.mime ??
+            typeFromExtension;
+        if (isFileHEIC(mimeType)) {
+            fileBlob = await HEICConverter.convert(fileBlob);
+        }
         return fileBlob;
+    };
+
+    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        const originalName = fileNameWithoutExtension(file.metadata.title);
+        const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
+        let image = new Blob([motionPhoto.image]);
+
+        // can run conversion in parellel as video and image
+        // have different processes
+        const convertedVideo = ffmpegService.convertToMP4(
+            motionPhoto.video,
+            motionPhoto.videoNameTitle
+        );
+
+        image = await convertIfHEIC(motionPhoto.imageNameTitle, image);
+        const video = new Blob([await convertedVideo]);
+
+        return [image, video];
     }
 
-    const typeFromExtension = getFileExtension(file.metadata.title);
-    const reader = new FileReader();
-
-    const mimeType =
-        (await getFileTypeFromBlob(reader, fileBlob))?.mime ??
-        typeFromExtension;
-    if (isFileHEIC(mimeType)) {
-        fileBlob = await HEICConverter.convert(fileBlob);
-    }
-    return fileBlob;
-}
-
-export async function splitLivePhoto(file: EnteFile, url: string) {
-    const fileBlob = await fetch(url).then((res) => res.blob());
-    const originalName = fileNameWithoutExtension(file.metadata.title);
-    const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
-    let image = new Blob([motionPhoto.image]);
-
-    // can run conversion in parellel as video and image
-    // have different processes
-    const convertedVideo = ffmpegService.convertToMP4(
-        motionPhoto.video,
-        motionPhoto.videoNameTitle
-    );
-
-    const typeFromExtension = getFileExtension(motionPhoto.imageNameTitle);
-    const reader = new FileReader();
-
-    const mimeType =
-        (await getFileTypeFromBlob(reader, image))?.mime ?? typeFromExtension;
-    if (isFileHEIC(mimeType)) {
-        image = await HEICConverter.convert(image);
-    }
-
-    const video = new Blob([await convertedVideo]);
-
-    const imageURL = URL.createObjectURL(image);
-    const videoURL = URL.createObjectURL(video);
-    return { imageURL, videoURL };
+    fileBlob = await convertIfHEIC(file.metadata.title, fileBlob);
+    return [fileBlob];
 }
 
 export function fileIsArchived(file: EnteFile) {

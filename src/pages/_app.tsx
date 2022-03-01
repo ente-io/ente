@@ -73,6 +73,27 @@ const GlobalStyles = createGlobalStyle`
         width: 100%;
         height: 100%;
         position: relative;
+        object-fit: contain;
+    }
+
+    .live-photo-container > img{
+        opacity: 1;
+        max-width: 100%;
+        max-height: 100%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .live-photo-container > video{
+        opacity: 0;
+        max-width: 100%;
+        max-height: 100%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
 
     .live-photo-container > button {

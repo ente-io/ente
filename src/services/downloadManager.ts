@@ -14,7 +14,7 @@ import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
 
 class DownloadManager {
-    private fileObjectURLPromise = new Map<string, Promise<string>>();
+    private fileObjectURLPromise = new Map<string, Promise<string[]>>();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
 
     public async getThumbnail(file: EnteFile) {
@@ -90,11 +90,17 @@ class DownloadManager {
         try {
             const getFilePromise = async (convert: boolean) => {
                 const fileStream = await this.downloadFile(file);
-                let fileBlob = await new Response(fileStream).blob();
+                const fileBlob = await new Response(fileStream).blob();
                 if (convert) {
-                    fileBlob = await convertForPreview(file, fileBlob);
+                    const convertedBlobs = await convertForPreview(
+                        file,
+                        fileBlob
+                    );
+                    return convertedBlobs.map((blob) =>
+                        URL.createObjectURL(blob)
+                    );
                 }
-                return URL.createObjectURL(fileBlob);
+                return [URL.createObjectURL(fileBlob)];
             };
             if (!this.fileObjectURLPromise.get(fileKey)) {
                 this.fileObjectURLPromise.set(
@@ -102,8 +108,8 @@ class DownloadManager {
                     getFilePromise(shouldBeConverted)
                 );
             }
-            const fileURL = await this.fileObjectURLPromise.get(fileKey);
-            return fileURL;
+            const fileURLs = await this.fileObjectURLPromise.get(fileKey);
+            return fileURLs;
         } catch (e) {
             this.fileObjectURLPromise.delete(fileKey);
             logError(e, 'Failed to get File');

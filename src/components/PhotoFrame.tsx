@@ -15,8 +15,9 @@ import {
     ARCHIVE_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
-import { isSharedFile, splitLivePhoto } from 'utils/file';
-import { isPlaybackPossible, livePhotoBtnHTML } from 'utils/photoFrame';
+import { isSharedFile } from 'utils/file';
+import { isPlaybackPossible } from 'utils/photoFrame';
+import { livePhotoBtnHTML } from './LivePhotoBtn';
 import { PhotoList } from './PhotoList';
 import { SetFiles, SelectedState, Search, setSearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
@@ -73,7 +74,6 @@ interface Props {
 }
 
 type SourceURL = {
-    defaultURL?: string;
     imageURL?: string;
     videoURL?: string;
 };
@@ -255,18 +255,64 @@ const PhotoFrame = ({
             document.querySelector('video');
         const livePhotoBtn: HTMLButtonElement =
             document.querySelector('.live-photo-btn');
+        const livePhotoImage: HTMLImageElement =
+            document.querySelector('.live-photo-image');
+
         if (livePhotoVideo && livePhotoBtn) {
-            const playVideo = () => {
-                livePhotoVideo.play().catch(() => {
+            const videoStyle = livePhotoVideo.style as React.CSSProperties;
+            const imageStyle = livePhotoImage.style as React.CSSProperties;
+
+            videoStyle.opacity = 0;
+            imageStyle.opacity = 1;
+
+            let videoPlaying = false;
+
+            const timer = (ms) => new Promise((res) => setTimeout(res, ms));
+
+            const showVideoEffect = async (prevOpacity) => {
+                for (let i = prevOpacity * 100; i < 100; i++) {
+                    videoStyle.opacity = i / 100;
+                    imageStyle.opacity = (100 - i) / 100;
+                    await timer(1);
+                    if (!videoPlaying) {
+                        return false;
+                    }
+                }
+                return true;
+            };
+
+            const hideVideoEffect = async (prevOpacity) => {
+                for (let i = prevOpacity * 100; i >= 0; i--) {
+                    videoStyle.opacity = i / 100;
+                    imageStyle.opacity = (100 - i) / 100;
+                    await timer(1);
+                    if (videoPlaying) {
+                        return false;
+                    }
+                }
+                return true;
+            };
+
+            const playVideo = async () => {
+                if (videoPlaying) return;
+                videoPlaying = true;
+                if (!(await showVideoEffect(videoStyle.opacity))) {
+                    return;
+                }
+                livePhotoVideo.play().catch(async () => {
                     livePhotoVideo.pause();
+                    if (!videoPlaying) return;
+                    videoPlaying = false;
+                    await hideVideoEffect(videoStyle.opacity);
                 });
             };
 
-            const pauseVideo = () => {
-                livePhotoVideo.pause();
+            const pauseVideo = async () => {
+                if (!videoPlaying) return;
+                videoPlaying = false;
+                await hideVideoEffect(videoStyle.opacity);
                 livePhotoVideo.load();
             };
-
             livePhotoBtn.addEventListener('mouseout', pauseVideo);
             livePhotoBtn.addEventListener('mouseover', playVideo);
             livePhotoBtn.addEventListener('click', playVideo);
@@ -326,47 +372,21 @@ const PhotoFrame = ({
         setFiles(files);
     };
 
-    const updateSrcURL = async (index: number, srcurl: SourceURL) => {
+    const updateSrcURL = async (index: number, srcURL: SourceURL) => {
         files[index] = {
             ...files[index],
             w: window.innerWidth,
             h: window.innerHeight,
         };
-        const url = srcurl.defaultURL;
+        const { imageURL, videoURL } = srcURL;
         if (files[index].metadata.fileType === FILE_TYPE.VIDEO) {
-            if (await isPlaybackPossible(url)) {
+            if (await isPlaybackPossible(videoURL)) {
                 files[index].html = `
                 <video controls>
-                    <source src="${url}" />
+                    <source src="${videoURL}" />
                     Your browser does not support the video tag.
                 </video>
             `;
-            } else {
-                files[index].html = `
-                <div class="video-loading">
-                    <img src="${files[index].msrc}" />
-                    <div class="download-message" >
-                        ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                        <a class="btn btn-outline-success" href=${url} download="${files[index].metadata.title}"">Download</button>
-                    </div>
-                </div>
-                `;
-            }
-        } else if (files[index].metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            const { imageURL, videoURL } = srcurl;
-            if (await isPlaybackPossible(videoURL)) {
-                files[index].html = `
-                <div class = 'live-photo-container'>
-                    <button class = 'live-photo-btn'> 
-                        ${livePhotoBtnHTML}
-                    </button>
-                    <video class = "live-photo" poster = "${imageURL}" loop muted>
-                        <source src="${videoURL}" />
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
-                `;
-                setLivePhotoLoaded(true);
             } else {
                 files[index].html = `
                 <div class="video-loading">
@@ -378,8 +398,35 @@ const PhotoFrame = ({
                 </div>
                 `;
             }
+        } else if (files[index].metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+            const { imageURL, videoURL } = srcURL;
+            if (await isPlaybackPossible(videoURL)) {
+                files[index].html = `
+                <div class = 'live-photo-container'>
+                    <button class = 'live-photo-btn'>
+                        ${livePhotoBtnHTML}
+                    </button>
+                    <img class = "live-photo-image" src="${imageURL}" />
+                    <video class = "live-photo-video" loop muted>
+                        <source src="${videoURL}" />
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                `;
+            } else {
+                files[index].html = `
+                <div class="video-loading">
+                    <img src="${files[index].msrc}" />
+                    <div class="download-message">
+                        ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
+                        <button class = "btn btn-outline-success">Download</button>
+                    </div>
+                </div>
+                `;
+            }
+            setLivePhotoLoaded(true);
         } else {
-            files[index].src = url;
+            files[index].src = imageURL;
         }
         setFiles(files);
     };
@@ -517,48 +564,37 @@ const PhotoFrame = ({
         if (!fetching[item.dataIndex]) {
             try {
                 fetching[item.dataIndex] = true;
-                let url: string;
+                let URLs: string[];
                 if (galleryContext.files.has(item.id)) {
-                    url = galleryContext.files.get(item.id);
+                    const mergedURL = galleryContext.files.get(item.id);
+                    URLs = mergedURL.split(',');
                 } else {
                     if (
                         publicCollectionGalleryContext.accessedThroughSharedURL
                     ) {
-                        url = await PublicCollectionDownloadManager.getFile(
+                        URLs = await PublicCollectionDownloadManager.getFile(
                             item,
                             publicCollectionGalleryContext.token,
                             publicCollectionGalleryContext.passwordToken,
                             true
                         );
                     } else {
-                        url = await DownloadManager.getFile(item, true);
+                        URLs = await DownloadManager.getFile(item, true);
                     }
-                    if (item.metadata.fileType !== FILE_TYPE.LIVE_PHOTO) {
-                        galleryContext.files.set(item.id, url);
-                    }
+                    const mergedURL = URLs.join(',');
+                    galleryContext.files.set(item.id, mergedURL);
                 }
+                let imageURL;
+                let videoURL;
                 if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                    let imageURL;
-                    let videoURL;
-                    if (galleryContext.files.has(item.id)) {
-                        [imageURL, videoURL] = galleryContext.files
-                            .get(item.id)
-                            .split(',');
-                    } else {
-                        ({ imageURL, videoURL } = await splitLivePhoto(
-                            item,
-                            url
-                        ));
-                        galleryContext.files.set(
-                            item.id,
-                            imageURL + ',' + videoURL
-                        );
-                    }
+                    [imageURL, videoURL] = URLs;
                     setLivePhotoLoaded(false);
-                    await updateSrcURL(item.dataIndex, { imageURL, videoURL });
+                } else if (item.metadata.fileType === FILE_TYPE.VIDEO) {
+                    [videoURL] = URLs;
                 } else {
-                    await updateSrcURL(item.dataIndex, { defaultURL: url });
+                    [imageURL] = URLs;
                 }
+                await updateSrcURL(item.dataIndex, { imageURL, videoURL });
                 item.html = files[item.dataIndex].html;
                 item.src = files[item.dataIndex].src;
                 item.w = files[item.dataIndex].w;
