@@ -130,3 +130,8 @@ export interface UploadFile extends BackupedFile {
     encryptedKey: string;
     keyDecryptionNonce: string;
 }
+
+export interface ParsedExtractedMetadata {
+    location: Location;
+    creationTime: number;
+}
