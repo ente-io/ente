@@ -10,6 +10,7 @@ enum VideoMetadata {
     APPLE_LIVE_PHOTO_IDENTIFIER = 'com.apple.quicktime.live-photo.auto',
     APPLE_CREATION_DATE = 'com.apple.quicktime.creationdate',
     APPLE_LOCATION_ISO = 'com.apple.quicktime.location.ISO6709',
+    LOCATION = 'location',
 }
 
 export async function getVideoMetadata(file: File) {
@@ -36,7 +37,8 @@ export function parseFFmpegExtractedMetadata(encodedMetadata: Uint8Array) {
     const metadataMap = Object.fromEntries(validKeyValuePairs);
 
     const location = parseAppleISOLocation(
-        metadataMap[VideoMetadata.APPLE_LOCATION_ISO]
+        metadataMap[VideoMetadata.APPLE_LOCATION_ISO] ??
+            metadataMap[VideoMetadata.LOCATION]
     );
 
     const creationTime = parseCreationTime(
