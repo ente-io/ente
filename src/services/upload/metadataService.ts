@@ -6,9 +6,11 @@ import {
     ParsedMetadataJSON,
     Location,
     FileTypeInfo,
+    ParsedExtractedMetadata,
 } from 'types/upload';
-import { NULL_LOCATION } from 'constants/upload';
+import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
 import { splitFilenameAndExtension } from 'utils/file';
+import { getVideoMetadata } from './videoMetadataService';
 
 interface ParsedMetadataJSONWithTitle {
     title: string;
@@ -25,23 +27,25 @@ export async function extractMetadata(
     receivedFile: File,
     fileTypeInfo: FileTypeInfo
 ) {
-    let exifData = null;
+    let extractedMetadata: ParsedExtractedMetadata = NULL_EXTRACTED_METADATA;
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
-        exifData = await getExifData(receivedFile, fileTypeInfo);
+        extractedMetadata = await getExifData(receivedFile, fileTypeInfo);
+    } else if (fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
+        extractedMetadata = await getVideoMetadata(receivedFile);
     }
 
-    const extractedMetadata: Metadata = {
+    const metadata: Metadata = {
         title: `${splitFilenameAndExtension(receivedFile.name)[0]}.${
             fileTypeInfo.exactType
         }`,
         creationTime:
-            exifData?.creationTime ?? receivedFile.lastModified * 1000,
+            extractedMetadata.creationTime ?? receivedFile.lastModified * 1000,
         modificationTime: receivedFile.lastModified * 1000,
-        latitude: exifData?.location?.latitude,
-        longitude: exifData?.location?.longitude,
+        latitude: extractedMetadata.location.latitude,
+        longitude: extractedMetadata.location.longitude,
         fileType: fileTypeInfo.fileType,
     };
-    return extractedMetadata;
+    return metadata;
 }
 
 export const getMetadataJSONMapKey = (

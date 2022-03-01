@@ -1,9 +1,11 @@
-import { NULL_LOCATION } from 'constants/upload';
+import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
 import { Location } from 'types/upload';
 import exifr from 'exifr';
 import piexif from 'piexifjs';
 import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
+import { ParsedExtractedMetadata } from 'types/upload';
+import { getUnixTimeInMicroSeconds } from 'utils/time';
 
 const EXIF_TAGS_NEEDED = [
     'DateTimeOriginal',
@@ -23,37 +25,29 @@ interface Exif {
     GPSLatitudeRef?: number;
     GPSLongitudeRef?: number;
 }
-interface ParsedEXIFData {
-    location: Location;
-    creationTime: number;
-}
 
 export async function getExifData(
     receivedFile: File,
     fileTypeInfo: FileTypeInfo
-): Promise<ParsedEXIFData> {
-    const nullExifData: ParsedEXIFData = {
-        location: NULL_LOCATION,
-        creationTime: null,
-    };
+): Promise<ParsedExtractedMetadata> {
+    let parsedEXIFData = NULL_EXTRACTED_METADATA;
     try {
         const exifData = await getRawExif(receivedFile, fileTypeInfo);
         if (!exifData) {
-            return nullExifData;
+            return parsedEXIFData;
         }
-        const parsedEXIFData = {
+        parsedEXIFData = {
             location: getEXIFLocation(exifData),
-            creationTime: getUNIXTime(
+            creationTime: getUnixTimeInMicroSeconds(
                 exifData.DateTimeOriginal ??
                     exifData.CreateDate ??
                     exifData.ModifyDate
             ),
         };
-        return parsedEXIFData;
     } catch (e) {
         logError(e, 'getExifData failed');
-        return nullExifData;
     }
+    return parsedEXIFData;
 }
 
 export async function updateFileCreationDateInEXIF(
@@ -129,22 +123,6 @@ export async function getRawExif(
         // ignore exif parsing errors
     }
     return exifData;
-}
-
-export function getUNIXTime(dateTime: Date) {
-    try {
-        if (!dateTime) {
-            return null;
-        }
-        const unixTime = dateTime.getTime() * 1000;
-        if (unixTime <= 0) {
-            return null;
-        } else {
-            return unixTime;
-        }
-    } catch (e) {
-        logError(e, 'getUNIXTime failed', { dateTime });
-    }
 }
 
 function getEXIFLocation(exifData): Location {
