@@ -262,56 +262,31 @@ const PhotoFrame = ({
             const videoStyle = livePhotoVideo.style as React.CSSProperties;
             const imageStyle = livePhotoImage.style as React.CSSProperties;
 
-            videoStyle.opacity = 0;
-            imageStyle.opacity = 1;
-
             let videoPlaying = false;
 
-            const timer = (ms) => new Promise((res) => setTimeout(res, ms));
-
-            const showVideoEffect = async (prevOpacity) => {
-                for (let i = prevOpacity * 100; i < 100; i++) {
-                    videoStyle.opacity = i / 100;
-                    imageStyle.opacity = (100 - i) / 100;
-                    await timer(1);
-                    if (!videoPlaying) {
-                        return false;
-                    }
-                }
-                return true;
+            const showVideoEffect = () => {
+                videoStyle.opacity = 1;
+                imageStyle.opacity = 0;
             };
 
-            const hideVideoEffect = async (prevOpacity) => {
-                for (let i = prevOpacity * 100; i >= 0; i--) {
-                    videoStyle.opacity = i / 100;
-                    imageStyle.opacity = (100 - i) / 100;
-                    await timer(1);
-                    if (videoPlaying) {
-                        return false;
-                    }
-                }
-                return true;
+            const hideVideoEffect = () => {
+                videoStyle.opacity = 0;
+                imageStyle.opacity = 1;
             };
 
             const playVideo = async () => {
                 if (videoPlaying) return;
                 videoPlaying = true;
-                if (!(await showVideoEffect(videoStyle.opacity))) {
-                    return;
-                }
-                livePhotoVideo.play().catch(async () => {
-                    livePhotoVideo.pause();
-                    if (!videoPlaying) return;
-                    videoPlaying = false;
-                    await hideVideoEffect(videoStyle.opacity);
-                });
+                showVideoEffect();
+                livePhotoVideo.load();
+                livePhotoVideo.play().catch(pauseVideo);
             };
 
             const pauseVideo = async () => {
                 if (!videoPlaying) return;
                 videoPlaying = false;
-                await hideVideoEffect(videoStyle.opacity);
-                livePhotoVideo.load();
+                livePhotoVideo.pause();
+                hideVideoEffect();
             };
             livePhotoBtn.addEventListener('mouseout', pauseVideo);
             livePhotoBtn.addEventListener('mouseover', playVideo);

@@ -84,6 +84,7 @@ const GlobalStyles = createGlobalStyle`
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        transition: opacity 1s ease;
     }
 
     .live-photo-container > video{
@@ -94,6 +95,7 @@ const GlobalStyles = createGlobalStyle`
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        transition: opacity 1s ease;
     }
 
     .live-photo-container > button {
