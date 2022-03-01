@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
+import Select from 'react-select';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
@@ -7,6 +8,7 @@ import FormControl from 'react-bootstrap/FormControl';
 import { Button, Col, Table } from 'react-bootstrap';
 import { DeadCenter, GalleryContext } from 'pages/gallery';
 import { User } from 'types/user';
+import { DateTime } from 'luxon';
 import {
     shareCollection,
     unshareCollection,
@@ -24,7 +26,7 @@ import { CodeBlock } from './CodeBlock';
 import { ButtonVariant, getVariantColor } from './pages/gallery/LinkButton';
 import { handleSharingErrors } from 'utils/error';
 import { sleep } from 'utils/common';
-
+import { SelectStyles } from './Search/SelectStyle';
 interface Props {
     show: boolean;
     onHide: () => void;
@@ -39,7 +41,67 @@ interface ShareeProps {
     collectionUnshare: (sharee: User) => void;
 }
 
+const style = {
+    ...SelectStyles,
+    dropdownIndicator: (style) => ({
+        ...style,
+        margin: '0px',
+    }),
+    singleValue: (style) => ({
+        ...style,
+        margin: '0px',
+        backgroundColor: '#282828',
+        color: '#d1d1d1',
+        display: 'block',
+        width: '120px',
+    }),
+    control: (style, { isFocused }) => ({
+        ...style,
+        backgroundColor: '#282828',
+        margin: '0px',
+        color: '#d1d1d1',
+        borderColor: isFocused ? '#51cd7c' : '#444',
+        boxShadow: 'none',
+        ':hover': {
+            borderColor: '#51cd7c',
+            cursor: 'text',
+            '&>.icon': { color: '#51cd7c' },
+        },
+    }),
+};
+
+const f = (i) => {
+    return { label: i.toString(), value: i };
+};
+
+const expiryOptions = [
+    { label: 'never', value: () => 0 },
+    {
+        label: 'after 1 hour',
+        value: () => DateTime.utc().plus({ hours: 1 }).toMillis() * 1000,
+    },
+    {
+        label: 'after 1 day',
+        value: () => DateTime.utc().plus({ days: 1 }).toMillis() * 1000,
+    },
+    {
+        label: 'after 1 week',
+        value: () => DateTime.utc().plus({ days: 7 }).toMillis() * 1000,
+    },
+    {
+        label: 'after 1 month',
+        value: () => DateTime.utc().plus({ months: 1 }).toMillis() * 1000,
+    },
+    {
+        label: 'after 1 year',
+        value: () => DateTime.utc().plus({ years: 1 }).toMillis() * 1000,
+    },
+];
+
 function CollectionShare(props: Props) {
+    const downloadOptions = [...Array(50).reverse().keys()].map((i) =>
+        f(i + 1)
+    );
     const [loading, setLoading] = useState(false);
     const galleryContext = useContext(GalleryContext);
     const [sharableLinkError, setSharableLinkError] = useState(null);
@@ -182,6 +244,21 @@ function CollectionShare(props: Props) {
         }
     };
 
+    const updateDeviceLimit = async (newLimit: number) => {
+        return updatePublicShareURLHelper({
+            collectionID: props.collection.id,
+            deviceLimit: newLimit,
+        });
+    };
+
+    const updateDeviceExpiry = async (optionFn) => {
+        DateTime.utc().plus({ months: 1 });
+        return updatePublicShareURLHelper({
+            collectionID: props.collection.id,
+            validTill: optionFn(),
+        });
+    };
+
     const handleCollectionPublicSharing = () => {
         setSharableLinkError(null);
         if (publicShareUrl) {
@@ -200,6 +277,16 @@ function CollectionShare(props: Props) {
                 enableDownload: true,
             });
         }
+    };
+
+    const _deviceExpiryTime = (): string => {
+        const validTill = publicShareProp?.validTill ?? 0;
+        if (validTill === 0) {
+            return 'never';
+        }
+        return DateTime.fromMillis(Math.round(validTill / 1000)).toLocaleString(
+            DateTime.DATETIME_MED
+        );
     };
 
     const ShareeRow = ({ sharee, collectionUnshare }: ShareeProps) => (
@@ -354,11 +441,11 @@ function CollectionShare(props: Props) {
                         <h6 style={{ marginTop: '2px' }}>
                             {constants.MANAGE_LINK}
                         </h6>
-                        <FlexWrapper>
-                            <FlexWrapper
-                                style={{ paddingTop: '5px', color: '#fff' }}>
-                                {constants.FILE_DOWNLOAD}
-                            </FlexWrapper>
+                        <FlexWrapper
+                            style={{ paddingTop: '5px', color: '#fff' }}>
+                            <div style={{ marginRight: '20px' }}>
+                                {constants.FILE_DOWNLOAD}{' '}
+                            </div>
                             <Form.Switch
                                 style={{ marginLeft: '20px' }}
                                 checked={
@@ -368,6 +455,41 @@ function CollectionShare(props: Props) {
                                 className="custom-switch-md"
                                 onChange={handleFileDownloadSetting}
                             />
+                        </FlexWrapper>
+                        <FlexWrapper
+                            style={{ paddingTop: '15px', color: '#fff' }}>
+                            <div style={{ marginRight: '10px' }}>
+                                {' '}
+                                {constants.LINK_DEVICE_LIMIT} :{' '}
+                            </div>
+                            <div style={{ minWidth: '80px' }}>
+                                <Select
+                                    options={downloadOptions}
+                                    isSearchable={false}
+                                    placeholder={publicShareProp?.deviceLimit?.toString()}
+                                    onChange={(e) => updateDeviceLimit(e.value)}
+                                    styles={style}
+                                />
+                            </div>
+                        </FlexWrapper>
+
+                        <FlexWrapper
+                            style={{ paddingTop: '15px', color: '#fff' }}>
+                            <div style={{ marginRight: '10px' }}>
+                                {' '}
+                                {constants.LINK_EXPIRY} : {_deviceExpiryTime()}{' '}
+                            </div>
+                            <div style={{ minWidth: '120px' }}>
+                                <Select
+                                    options={expiryOptions}
+                                    isSearchable={false}
+                                    placeholder={'change'}
+                                    onChange={(e) =>
+                                        updateDeviceExpiry(e.value)
+                                    }
+                                    styles={style}
+                                />
+                            </div>
                         </FlexWrapper>
                     </div>
                 ) : (

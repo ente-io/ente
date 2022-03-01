@@ -52,7 +52,7 @@ import {
     sortFiles,
     sortFilesIntoCollections,
 } from 'utils/file';
-import SearchBar from 'components/SearchBar';
+import SearchBar from 'components/Search/SearchBar';
 import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
 import CollectionSelector, {
     CollectionSelectorAttributes,

@@ -13,21 +13,22 @@ import {
 } from 'services/searchService';
 import { getFormattedDate } from 'utils/search';
 import constants from 'utils/strings/constants';
-import LocationIcon from './icons/LocationIcon';
-import DateIcon from './icons/DateIcon';
-import SearchIcon from './icons/SearchIcon';
-import CloseIcon from './icons/CloseIcon';
+import LocationIcon from '../icons/LocationIcon';
+import DateIcon from '../icons/DateIcon';
+import SearchIcon from '../icons/SearchIcon';
+import CloseIcon from '../icons/CloseIcon';
 import { Collection } from 'types/collection';
-import CollectionIcon from './icons/CollectionIcon';
+import CollectionIcon from '../icons/CollectionIcon';
 
-import ImageIcon from './icons/ImageIcon';
-import VideoIcon from './icons/VideoIcon';
-import { IconButton } from './Container';
+import ImageIcon from '../icons/ImageIcon';
+import VideoIcon from '../icons/VideoIcon';
+import { IconButton } from '../Container';
 import { EnteFile } from 'types/file';
 import { Suggestion, SuggestionType, DateValue, Bbox } from 'types/search';
 import { Search, SearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
 import { GalleryContext } from 'pages/gallery';
+import { SelectStyles } from './SelectStyle';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -251,58 +252,6 @@ export default function SearchBar(props: Props) {
             {props.children}
         </Control>
     );
-
-    const customStyles = {
-        control: (style, { isFocused }) => ({
-            ...style,
-            backgroundColor: '#282828',
-            color: '#d1d1d1',
-            borderColor: isFocused ? '#51cd7c' : '#444',
-            boxShadow: 'none',
-            ':hover': {
-                borderColor: '#51cd7c',
-                cursor: 'text',
-                '&>.icon': { color: '#51cd7c' },
-            },
-        }),
-        input: (style) => ({
-            ...style,
-            color: '#d1d1d1',
-        }),
-        menu: (style) => ({
-            ...style,
-            marginTop: '10px',
-            backgroundColor: '#282828',
-        }),
-        option: (style, { isFocused }) => ({
-            ...style,
-            backgroundColor: isFocused && '#343434',
-        }),
-        dropdownIndicator: (style) => ({
-            ...style,
-            display: 'none',
-        }),
-        indicatorSeparator: (style) => ({
-            ...style,
-            display: 'none',
-        }),
-        clearIndicator: (style) => ({
-            ...style,
-            display: 'none',
-        }),
-        singleValue: (style, state) => ({
-            ...style,
-            backgroundColor: '#282828',
-            color: '#d1d1d1',
-            display: state.selectProps.menuIsOpen ? 'none' : 'block',
-        }),
-        placeholder: (style) => ({
-            ...style,
-            color: '#686868',
-            wordSpacing: '2px',
-            whiteSpace: 'nowrap',
-        }),
-    };
     return (
         <>
             {props.searchStats && (
@@ -328,7 +277,7 @@ export default function SearchBar(props: Props) {
                             onChange={handleChange}
                             isClearable
                             escapeClearsValue
-                            styles={customStyles}
+                            styles={SelectStyles}
                             noOptionsMessage={() => null}
                         />
                     </div>

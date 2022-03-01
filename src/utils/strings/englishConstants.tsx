@@ -635,6 +635,9 @@ const englishConstants = {
     DISABLE_PUBLIC_SHARING_MESSAGE:
         'are you sure you want to disable public sharing?',
     FILE_DOWNLOAD: 'file download',
+    LINK_DEVICE_LIMIT: 'device limit',
+    LINK_EXPIRY: 'link expiry',
+    LINK_EXPIRY_NEVER: 'never',
     DISABLE_FILE_DOWNLOAD: 'disable download',
     DISABLE_FILE_DOWNLOAD_MESSAGE:
         'are you sure that you want to disable the download button for files? \n viewers can still take screenshots or save a copy of your photos using external tools',
