@@ -655,7 +655,6 @@ function PhotoSwipe(props: Iprops) {
     };
 
     const updateItems = (items = []) => {
-        console.log('items updated');
         if (photoSwipe) {
             photoSwipe.items.length = 0;
             items.forEach((item) => {

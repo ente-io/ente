@@ -291,7 +291,6 @@ export const preservePhotoswipeProps =
             const currentFile = currentFilesMap[file.id];
             return { ...currentFile, ...file };
         });
-        console.log(fileWithPreservedProperty);
         return fileWithPreservedProperty;
     };
 
