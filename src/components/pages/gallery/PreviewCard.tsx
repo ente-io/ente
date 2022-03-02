@@ -164,7 +164,7 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
 
 export default function PreviewCard(props: IProps) {
     const [imgSrc, setImgSrc] = useState<string>();
-    const { thumbs, files } = useContext(GalleryContext);
+    const { thumbs } = useContext(GalleryContext);
     const {
         file,
         onClick,
@@ -203,10 +203,6 @@ export default function PreviewCard(props: IProps) {
                     if (isMounted.current) {
                         setImgSrc(url);
                         thumbs.set(file.id, url);
-                        file.msrc = url;
-                        if (!file.src) {
-                            file.src = url;
-                        }
                         updateURL(url);
                     }
                 } catch (e) {
@@ -218,13 +214,6 @@ export default function PreviewCard(props: IProps) {
                 const thumbImgSrc = thumbs.get(file.id);
                 setImgSrc(thumbImgSrc);
                 file.msrc = thumbImgSrc;
-                if (!file.src) {
-                    if (files.has(file.id)) {
-                        file.src = files.get(file.id);
-                    } else {
-                        file.src = thumbImgSrc;
-                    }
-                }
             } else {
                 main();
             }

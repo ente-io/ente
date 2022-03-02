@@ -5,7 +5,7 @@ import { getDedicatedCryptoWorker } from 'utils/crypto';
 import {
     sortFilesIntoCollections,
     sortFiles,
-    removeUnnecessaryFileProps,
+    preservePhotoswipeProps,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
@@ -239,10 +239,8 @@ class UploadManager {
             if (fileUploadResult === FileUploadResults.UPLOADED) {
                 this.existingFiles.push(file);
                 this.existingFiles = sortFiles(this.existingFiles);
-                await setLocalFiles(
-                    removeUnnecessaryFileProps(this.existingFiles)
-                );
-                this.setFiles(this.existingFiles);
+                await setLocalFiles(this.existingFiles);
+                this.setFiles(preservePhotoswipeProps(this.existingFiles));
                 if (!this.existingFilesCollectionWise.has(file.collectionID)) {
                     this.existingFilesCollectionWise.set(file.collectionID, []);
                 }
