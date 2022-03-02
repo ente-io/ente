@@ -17,7 +17,6 @@ import {
 } from 'constants/collection';
 import { isSharedFile } from 'utils/file';
 import { isPlaybackPossible } from 'utils/photoFrame';
-import { livePhotoBtnHTML } from './LivePhotoBtn';
 import { PhotoList } from './PhotoList';
 import { SetFiles, SelectedState, Search, setSearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
@@ -277,9 +276,6 @@ const PhotoFrame = ({
         ) {
             files[index].html = `
                 <div class='video-loading'>
-                    <button class = 'live-photo-loading-btn'> 
-                        ${livePhotoBtnHTML}
-                    </button>
                     <img src="${url}" />
                     <div class="spinner-border text-light" role="status">
                         <span class="sr-only">Loading...</span>

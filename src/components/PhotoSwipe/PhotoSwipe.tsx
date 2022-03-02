@@ -614,15 +614,18 @@ function PhotoSwipe(props: Iprops) {
                     const downloadLivePhotoBtn =
                         downloadMessageDiv.firstElementChild as HTMLButtonElement;
 
-                    const download = () => {
+                    const downloadLivePhoto = () => {
                         downloadFileHelper(photoSwipe.currItem);
                     };
 
-                    downloadLivePhotoBtn.addEventListener('click', download);
+                    downloadLivePhotoBtn.addEventListener(
+                        'click',
+                        downloadLivePhoto
+                    );
                     return () => {
                         downloadLivePhotoBtn.removeEventListener(
                             'click',
-                            download
+                            downloadLivePhoto
                         );
                     };
                 }
