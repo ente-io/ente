@@ -505,7 +505,8 @@ function InfoModal({
 
 function PhotoSwipe(props: Iprops) {
     const pswpElement = useRef<HTMLDivElement>();
-    const [photoSwipe, setPhotoSwipe] = useState<Photoswipe<any>>();
+    const [photoSwipe, setPhotoSwipe] =
+        useState<Photoswipe<Photoswipe.Options>>();
 
     const { isOpen, items, isSourceLoaded } = props;
     const [isFav, setIsFav] = useState(false);
@@ -610,7 +611,9 @@ function PhotoSwipe(props: Iprops) {
                 `download-message`
             ) as HTMLCollectionOf<HTMLDivElement>;
             for (const downloadMessageDiv of downloadMessageDivs) {
-                if (downloadMessageDiv?.dataset?.id === item.id) {
+                if (
+                    String(downloadMessageDiv?.dataset?.id) === String(item.id)
+                ) {
                     const downloadLivePhotoBtn =
                         downloadMessageDiv.firstElementChild as HTMLButtonElement;
 

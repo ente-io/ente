@@ -250,18 +250,15 @@ const PhotoFrame = ({
     }, [open]);
 
     const updateURL = (index: number) => (url: string) => {
-        files[index] = {
-            ...files[index],
-            msrc: url,
-            src: files[index].src ? files[index].src : url,
-            w: window.innerWidth,
-            h: window.innerHeight,
-        };
-        if (
-            files[index].metadata.fileType === FILE_TYPE.VIDEO &&
-            !files[index].html
-        ) {
-            files[index].html = `
+        const updateFile = (file: EnteFile) => {
+            file = {
+                ...file,
+                msrc: url,
+                w: window.innerWidth,
+                h: window.innerHeight,
+            };
+            if (file.metadata.fileType === FILE_TYPE.VIDEO && !file.html) {
+                file.html = `
                 <div class="video-loading">
                     <img src="${url}" />
                     <div class="spinner-border text-light" role="status">
@@ -269,84 +266,94 @@ const PhotoFrame = ({
                     </div>
                 </div>
             `;
-            delete files[index].src;
-        } else if (
-            files[index].metadata.fileType === FILE_TYPE.LIVE_PHOTO &&
-            !files[index].html
-        ) {
-            files[index].html = `
-                <div class='video-loading'>
+            } else if (
+                file.metadata.fileType === FILE_TYPE.LIVE_PHOTO &&
+                !file.html
+            ) {
+                file.html = `
+                <div class="video-loading">
                     <img src="${url}" />
                     <div class="spinner-border text-light" role="status">
                         <span class="sr-only">Loading...</span>
                     </div>
                 </div>
             `;
-            delete files[index].src;
-        }
-        if (
-            files[index].metadata.fileType === FILE_TYPE.IMAGE &&
-            !files[index].src
-        ) {
-            files[index].src = url;
-        }
-        setFiles(files);
+            } else if (
+                file.metadata.fileType === FILE_TYPE.IMAGE &&
+                !file.src
+            ) {
+                file.src = url;
+            }
+            return file;
+        };
+        setFiles((files) => {
+            files[index] = updateFile(files[index]);
+            return [...files];
+        });
+        return updateFile(files[index]);
     };
 
     const updateSrcURL = async (index: number, srcURL: SourceURL) => {
-        files[index] = {
-            ...files[index],
-            w: window.innerWidth,
-            h: window.innerHeight,
-        };
-        const { imageURL, videoURL } = srcURL;
-        if (files[index].metadata.fileType === FILE_TYPE.VIDEO) {
-            if (await isPlaybackPossible(videoURL)) {
-                files[index].html = `
-                <video controls>
-                    <source src="${videoURL}" />
-                    Your browser does not support the video tag.
-                </video>
-            `;
-            } else {
-                files[index].html = `
-                <div class="video-loading">
-                    <img src="${files[index].msrc}" />
-                    <div class="download-message" >
-                        ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                        <a class="btn btn-outline-success" href=${videoURL} download="${files[index].metadata.title}"">Download</button>
-                    </div>
+        const { videoURL, imageURL } = srcURL;
+        const isPlayable = videoURL && (await isPlaybackPossible(videoURL));
+        const updateFile = (file: EnteFile) => {
+            file = {
+                ...file,
+                w: window.innerWidth,
+                h: window.innerHeight,
+            };
+            if (file.metadata.fileType === FILE_TYPE.VIDEO) {
+                if (isPlayable) {
+                    file.html = `
+            <video controls>
+                <source src="${videoURL}" />
+                Your browser does not support the video tag.
+            </video>
+        `;
+                } else {
+                    file.html = `
+            <div class="video-loading">
+                <img src="${file.msrc}" />
+                <div class="download-message" >
+                    ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
+                    <a class="btn btn-outline-success" href=${videoURL} download="${file.metadata.title}"">Download</button>
                 </div>
-                `;
-            }
-        } else if (files[index].metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            const { imageURL, videoURL } = srcURL;
-            if (await isPlaybackPossible(videoURL)) {
-                files[index].html = `
+            </div>
+            `;
+                }
+            } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+                if (isPlayable) {
+                    file.html = `
                 <div class = 'live-photo-container'>
-                    <img class = "live-photo-image-${files[index].id}" src="${imageURL}" />
-                    <video class = "live-photo-video-${files[index].id}" loop muted>
+                    <img class = "live-photo-image-${file.id}" src="${imageURL}" />
+                    <video class = "live-photo-video-${file.id}" loop muted>
                         <source src="${videoURL}" />
                         Your browser does not support the video tag.
                     </video>
                 </div>
                 `;
-            } else {
-                files[index].html = `
+                } else {
+                    file.html = `
                 <div class="video-loading">
-                    <img src="${files[index].msrc}" />
-                    <div class="download-message" data-id="${files[index].id}">
+                    <img src="${file.msrc}" />
+                    <div class="download-message" data-id="${file.id}">
                         ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
                         <button class = "btn btn-outline-success">Download</button>
                     </div>
                 </div>
                 `;
+                }
+            } else {
+                file.src = imageURL;
             }
-        } else {
-            files[index].src = imageURL;
-        }
+            return file;
+        };
+        setFiles((files) => {
+            files[index] = updateFile(files[index]);
+            return [...files];
+        });
         setIsSourceLoaded(true);
-        setFiles(files);
+        return updateFile(files[index]);
     };
 
     const handleClose = (needUpdate) => {
@@ -462,13 +469,13 @@ const PhotoFrame = ({
                     }
                     galleryContext.thumbs.set(item.id, url);
                 }
-                updateURL(item.dataIndex)(url);
-                item.msrc = url;
-                if (!item.src) {
-                    item.src = url;
-                }
-                item.w = window.innerWidth;
-                item.h = window.innerHeight;
+                const newFile = updateURL(item.dataIndex)(url);
+                item.msrc = newFile.msrc;
+                item.html = newFile.html;
+                item.src = newFile.src;
+                item.w = newFile.w;
+                item.h = newFile.h;
+
                 try {
                     instance.invalidateCurrItems();
                     instance.updateSize(true);
@@ -487,6 +494,7 @@ const PhotoFrame = ({
                     const mergedURL = galleryContext.files.get(item.id);
                     urls = mergedURL.split(',');
                 } else {
+                    galleryContext.startLoading();
                     if (
                         publicCollectionGalleryContext.accessedThroughSharedURL
                     ) {
@@ -499,6 +507,7 @@ const PhotoFrame = ({
                     } else {
                         urls = await DownloadManager.getFile(item, true);
                     }
+                    galleryContext.finishLoading();
                     const mergedURL = urls.join(',');
                     galleryContext.files.set(item.id, mergedURL);
                 }
@@ -512,11 +521,15 @@ const PhotoFrame = ({
                     [imageURL] = urls;
                 }
                 setIsSourceLoaded(false);
-                await updateSrcURL(item.dataIndex, { imageURL, videoURL });
-                item.html = files[item.dataIndex].html;
-                item.src = files[item.dataIndex].src;
-                item.w = files[item.dataIndex].w;
-                item.h = files[item.dataIndex].h;
+                const newFile = await updateSrcURL(item.dataIndex, {
+                    imageURL,
+                    videoURL,
+                });
+                item.msrc = newFile.msrc;
+                item.html = newFile.html;
+                item.src = newFile.src;
+                item.w = newFile.w;
+                item.h = newFile.h;
                 try {
                     instance.invalidateCurrItems();
                     instance.updateSize(true);
