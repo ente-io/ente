@@ -261,7 +261,7 @@ const PhotoFrame = ({
                 </div>
             `;
             }
-            if (file.metadata.fileType === FILE_TYPE.IMAGE && !file.src) {
+            if (!file.src) {
                 file.src = url;
             }
             return file;
