@@ -109,7 +109,7 @@ const PhotoFrame = ({
     const filteredDataRef = useRef([]);
     const filteredData = filteredDataRef?.current ?? [];
     const router = useRouter();
-    const [livePhotoLoaded, setLivePhotoLoaded] = useState(false);
+    const [isSourceLoaded, setIsSourceLoaded] = useState(false);
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Shift') {
@@ -250,56 +250,6 @@ const PhotoFrame = ({
         }
     }, [open]);
 
-    useEffect(() => {
-        const livePhotoVideo: HTMLVideoElement =
-            document.querySelector('video');
-        const livePhotoBtn: HTMLButtonElement =
-            document.querySelector('.live-photo-btn');
-        const livePhotoImage: HTMLImageElement =
-            document.querySelector('.live-photo-image');
-
-        if (livePhotoVideo && livePhotoBtn) {
-            const videoStyle = livePhotoVideo.style as React.CSSProperties;
-            const imageStyle = livePhotoImage.style as React.CSSProperties;
-
-            let videoPlaying = false;
-
-            const showVideoEffect = () => {
-                videoStyle.opacity = 1;
-                imageStyle.opacity = 0;
-            };
-
-            const hideVideoEffect = () => {
-                videoStyle.opacity = 0;
-                imageStyle.opacity = 1;
-            };
-
-            const playVideo = async () => {
-                if (videoPlaying) return;
-                videoPlaying = true;
-                showVideoEffect();
-                livePhotoVideo.load();
-                livePhotoVideo.play().catch(pauseVideo);
-            };
-
-            const pauseVideo = async () => {
-                if (!videoPlaying) return;
-                videoPlaying = false;
-                livePhotoVideo.pause();
-                hideVideoEffect();
-            };
-            livePhotoBtn.addEventListener('mouseout', pauseVideo);
-            livePhotoBtn.addEventListener('mouseover', playVideo);
-            livePhotoBtn.addEventListener('click', playVideo);
-
-            return () => {
-                livePhotoBtn.removeEventListener('mouseout', pauseVideo);
-                livePhotoBtn.removeEventListener('mouseover', playVideo);
-                livePhotoBtn.removeEventListener('click', playVideo);
-            };
-        }
-    }, [livePhotoLoaded]);
-
     const updateURL = (index: number) => (url: string) => {
         files[index] = {
             ...files[index],
@@ -378,11 +328,8 @@ const PhotoFrame = ({
             if (await isPlaybackPossible(videoURL)) {
                 files[index].html = `
                 <div class = 'live-photo-container'>
-                    <button class = 'live-photo-btn'>
-                        ${livePhotoBtnHTML}
-                    </button>
-                    <img class = "live-photo-image" src="${imageURL}" />
-                    <video class = "live-photo-video" loop muted>
+                    <img class = "live-photo-image-${files[index].id}" src="${imageURL}" />
+                    <video class = "live-photo-video-${files[index].id}" loop muted>
                         <source src="${videoURL}" />
                         Your browser does not support the video tag.
                     </video>
@@ -392,17 +339,17 @@ const PhotoFrame = ({
                 files[index].html = `
                 <div class="video-loading">
                     <img src="${files[index].msrc}" />
-                    <div class="download-message">
+                    <div class="download-message" data-id="${files[index].id}">
                         ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
                         <button class = "btn btn-outline-success">Download</button>
                     </div>
                 </div>
                 `;
             }
-            setLivePhotoLoaded(true);
         } else {
             files[index].src = imageURL;
         }
+        setIsSourceLoaded(true);
         setFiles(files);
     };
 
@@ -539,36 +486,36 @@ const PhotoFrame = ({
         if (!fetching[item.dataIndex]) {
             try {
                 fetching[item.dataIndex] = true;
-                let URLs: string[];
+                let urls: string[];
                 if (galleryContext.files.has(item.id)) {
                     const mergedURL = galleryContext.files.get(item.id);
-                    URLs = mergedURL.split(',');
+                    urls = mergedURL.split(',');
                 } else {
                     if (
                         publicCollectionGalleryContext.accessedThroughSharedURL
                     ) {
-                        URLs = await PublicCollectionDownloadManager.getFile(
+                        urls = await PublicCollectionDownloadManager.getFile(
                             item,
                             publicCollectionGalleryContext.token,
                             publicCollectionGalleryContext.passwordToken,
                             true
                         );
                     } else {
-                        URLs = await DownloadManager.getFile(item, true);
+                        urls = await DownloadManager.getFile(item, true);
                     }
-                    const mergedURL = URLs.join(',');
+                    const mergedURL = urls.join(',');
                     galleryContext.files.set(item.id, mergedURL);
                 }
                 let imageURL;
                 let videoURL;
                 if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                    [imageURL, videoURL] = URLs;
-                    setLivePhotoLoaded(false);
+                    [imageURL, videoURL] = urls;
                 } else if (item.metadata.fileType === FILE_TYPE.VIDEO) {
-                    [videoURL] = URLs;
+                    [videoURL] = urls;
                 } else {
-                    [imageURL] = URLs;
+                    [imageURL] = urls;
                 }
+                setIsSourceLoaded(false);
                 await updateSrcURL(item.dataIndex, { imageURL, videoURL });
                 item.html = files[item.dataIndex].html;
                 item.src = files[item.dataIndex].src;
@@ -637,6 +584,7 @@ const PhotoFrame = ({
                         isSharedCollection={isSharedCollection}
                         isTrashCollection={activeCollection === TRASH_SECTION}
                         enableDownload={enableDownload}
+                        isSourceLoaded={isSourceLoaded}
                     />
                 </Container>
             )}

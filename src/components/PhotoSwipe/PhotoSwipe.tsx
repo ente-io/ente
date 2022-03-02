@@ -35,6 +35,7 @@ import {
     Row,
     Value,
 } from 'components/Container';
+import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
 import { logError } from 'utils/sentry';
 
 import CloseIcon from 'components/icons/CloseIcon';
@@ -43,7 +44,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
-import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
+import { MAX_EDITED_FILE_NAME_LENGTH, FILE_TYPE } from 'constants/file';
 import { sleep } from 'utils/common';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
@@ -72,6 +73,7 @@ interface Iprops {
     isSharedCollection: boolean;
     isTrashCollection: boolean;
     enableDownload: boolean;
+    isSourceLoaded: boolean;
 }
 
 const LegendContainer = styled.div`
@@ -88,6 +90,19 @@ const Legend = styled.span`
 const Pre = styled.pre`
     color: #aaa;
     padding: 7px 15px;
+`;
+
+const LivePhotoBtn = styled.button`
+    position: absolute;
+    top: 6vh;
+    left: 4vh;
+    height: 40px;
+    width: 80px;
+    background: #d7d7d7;
+    outline: none;
+    border: none;
+    border-radius: 10%;
+    z-index: 10;
 `;
 
 const renderInfoItem = (label: string, value: string | JSX.Element) => (
@@ -492,11 +507,12 @@ function PhotoSwipe(props: Iprops) {
     const pswpElement = useRef<HTMLDivElement>();
     const [photoSwipe, setPhotoSwipe] = useState<Photoswipe<any>>();
 
-    const { isOpen, items } = props;
+    const { isOpen, items, isSourceLoaded } = props;
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
     const [metadata, setMetaData] = useState<EnteFile['metadata']>(null);
     const [exif, setExif] = useState<any>(null);
+    const [livePhotoBtn, setLivePhotoBtn] = useState(null);
     const needUpdate = useRef(false);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
@@ -526,6 +542,97 @@ function PhotoSwipe(props: Iprops) {
             photoSwipe.options.escKey = !showInfo;
         }
     }, [showInfo]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const item = items[photoSwipe?.getCurrentIndex()];
+        if (item && item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+            let videoPlaying = false;
+
+            const playVideo = async (livePhotoVideo, livePhotoImage) => {
+                if (videoPlaying) return;
+                videoPlaying = true;
+                livePhotoVideo.style.opacity = 1;
+                livePhotoImage.style.opacity = 0;
+                livePhotoVideo.load();
+                livePhotoVideo.play().catch(() => {
+                    pauseVideo(livePhotoVideo, livePhotoImage);
+                });
+            };
+
+            const pauseVideo = async (livePhotoVideo, livePhotoImage) => {
+                if (!videoPlaying) return;
+                videoPlaying = false;
+                livePhotoVideo.pause();
+                livePhotoVideo.style.opacity = 0;
+                livePhotoImage.style.opacity = 1;
+            };
+            setLivePhotoBtn(
+                <LivePhotoBtn
+                    onClick={() => {
+                        const video = document.getElementsByClassName(
+                            `live-photo-video-${item.id}`
+                        )[0];
+                        const image = document.getElementsByClassName(
+                            `live-photo-image-${item.id}`
+                        )[0];
+                        if (video && image) {
+                            playVideo(video, image);
+                        }
+                    }}
+                    onMouseEnter={() => {
+                        const video = document.getElementsByClassName(
+                            `live-photo-video-${item.id}`
+                        )[0];
+                        const image = document.getElementsByClassName(
+                            `live-photo-image-${item.id}`
+                        )[0];
+                        if (video && image) {
+                            playVideo(video, image);
+                        }
+                    }}
+                    onMouseLeave={() => {
+                        const video = document.getElementsByClassName(
+                            `live-photo-video-${item.id}`
+                        )[0];
+                        const image = document.getElementsByClassName(
+                            `live-photo-image-${item.id}`
+                        )[0];
+                        if (video && image) {
+                            pauseVideo(video, image);
+                        }
+                    }}>
+                    {livePhotoBtnHTML} LIVE
+                </LivePhotoBtn>
+            );
+
+            const downloadMessageDivs = document.getElementsByClassName(
+                `download-message`
+            ) as HTMLCollectionOf<HTMLDivElement>;
+            for (const downloadMessageDiv of downloadMessageDivs) {
+                if (downloadMessageDiv?.dataset?.id === item.id) {
+                    const downloadLivePhotoBtn =
+                        downloadMessageDiv.firstElementChild as HTMLButtonElement;
+
+                    const download = () => {
+                        downloadFileHelper(photoSwipe.currItem);
+                    };
+
+                    downloadLivePhotoBtn.addEventListener('click', download);
+                    return () => {
+                        downloadLivePhotoBtn.removeEventListener(
+                            'click',
+                            download
+                        );
+                    };
+                }
+            }
+        }
+
+        return () => {
+            setLivePhotoBtn(null);
+        };
+    }, [photoSwipe?.currItem, isOpen, isSourceLoaded]);
 
     function updateFavButton() {
         setIsFav(isInFav(this?.currItem));
@@ -726,6 +833,7 @@ function PhotoSwipe(props: Iprops) {
                 ref={pswpElement}>
                 <div className="pswp__bg" />
                 <div className="pswp__scroll-wrap">
+                    {livePhotoBtn}
                     <div className="pswp__container">
                         <div className="pswp__item" />
                         <div className="pswp__item" />
