@@ -29,7 +29,7 @@ module.exports = {
             "'self' https://*.ente.io http://localhost:8080 data: blob: https://ente-prod-eu.s3.eu-central-003.backblazeb2.com ",
         'base-uri ': "'self'",
         // to allow worker
-        'child-src': "'self'",
+        'child-src': "'self' blob:",
         'frame-ancestors': " 'none'",
         'form-action': "'none'",
         'report-uri': ' https://csp-reporter.ente.io/local',
