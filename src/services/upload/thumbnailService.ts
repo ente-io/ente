@@ -15,7 +15,7 @@ const MAX_THUMBNAIL_SIZE = 100 * 1024;
 const MIN_QUALITY = 0.5;
 const MAX_QUALITY = 0.7;
 
-const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
+const WAIT_TIME_THUMBNAIL_GENERATION = 30 * 1000;
 
 interface Dimension {
     width: number;
