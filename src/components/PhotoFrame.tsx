@@ -449,6 +449,7 @@ const PhotoFrame = ({
                 if (galleryContext.files.has(item.id)) {
                     url = galleryContext.files.get(item.id);
                 } else {
+                    galleryContext.startLoading();
                     if (
                         publicCollectionGalleryContext.accessedThroughSharedURL
                     ) {
@@ -461,6 +462,7 @@ const PhotoFrame = ({
                     } else {
                         url = await DownloadManager.getFile(item, true);
                     }
+                    galleryContext.finishLoading();
                     galleryContext.files.set(item.id, url);
                 }
                 const newFile = await updateSrcURL(item.dataIndex, url);
