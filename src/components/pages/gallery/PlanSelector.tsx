@@ -16,6 +16,8 @@ import {
     hasPaidSubscription,
     isOnFreePlan,
     planForSubscription,
+    hasMobileSubscription,
+    hasPaypalSubscription,
 } from 'utils/billing';
 import { reverseString } from 'utils/common';
 import { SetDialogMessage } from 'components/MessageDialog';
@@ -143,13 +145,21 @@ function PlanSelector(props: Props) {
 
     async function onPlanSelect(plan: Plan) {
         if (
-            hasPaidSubscription(subscription) &&
-            !hasStripeSubscription(subscription) &&
+            hasMobileSubscription(subscription) &&
             !isSubscriptionCancelled(subscription)
         ) {
             props.setDialogMessage({
                 title: constants.ERROR,
                 content: constants.CANCEL_SUBSCRIPTION_ON_MOBILE,
+                close: { variant: 'danger' },
+            });
+        } else if (
+            hasPaypalSubscription(subscription) &&
+            !isSubscriptionCancelled(subscription)
+        ) {
+            props.setDialogMessage({
+                title: constants.MANAGE_PLAN,
+                content: constants.PAYPAL_MANAGE_NOT_SUPPORTED_MESSAGE(),
                 close: { variant: 'danger' },
             });
         } else if (hasStripeSubscription(subscription)) {

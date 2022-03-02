@@ -1,6 +1,6 @@
 import { ENCRYPTION_CHUNK_SIZE } from 'constants/crypto';
 import { FILE_TYPE } from 'constants/file';
-import { Location } from 'types/upload';
+import { Location, ParsedExtractedMetadata } from 'types/upload';
 
 // list of format that were missed by type-detection for some files.
 export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
@@ -43,3 +43,8 @@ export enum FileUploadResults {
 export const MAX_FILE_SIZE_SUPPORTED = 5 * 1024 * 1024 * 1024; // 5 GB
 
 export const LIVE_PHOTO_ASSET_SIZE_LIMIT = 20 * 1024 * 1024; // 20MB
+
+export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
+    location: NULL_LOCATION,
+    creationTime: null,
+};

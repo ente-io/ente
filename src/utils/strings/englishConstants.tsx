@@ -332,6 +332,14 @@ const englishConstants = {
     SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'thank you',
     CANCEL_SUBSCRIPTION_ON_MOBILE:
         'please cancel your subscription from the mobile app to activate a subscription here',
+    PAYPAL_MANAGE_NOT_SUPPORTED_MESSAGE: () => (
+        <>
+            please contact us at{' '}
+            <a href="mailto:paypal@ente.io">paypal@ente.io</a> to manage your
+            subscription
+        </>
+    ),
+    PAYPAL_MANAGE_NOT_SUPPORTED: 'manage paypal plan',
     RENAME: 'rename',
     RENAME_COLLECTION: 'rename album',
     CONFIRM_DELETE_COLLECTION: 'confirm album deletion',
