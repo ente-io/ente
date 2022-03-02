@@ -260,8 +260,11 @@ const PhotoFrame = ({
                     </div>
                 </div>
             `;
-            }
-            if (!file.src) {
+            } else if (
+                (file.metadata.fileType === FILE_TYPE.IMAGE ||
+                    file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) &&
+                !file.src
+            ) {
                 file.src = url;
             }
             return file;
