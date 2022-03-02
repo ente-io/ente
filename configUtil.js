@@ -30,6 +30,7 @@ module.exports = {
         'base-uri ': "'self'",
         // to allow worker
         'child-src': "'self' blob:",
+        'object-src': "'none'",
         'frame-ancestors': " 'none'",
         'form-action': "'none'",
         'report-uri': ' https://csp-reporter.ente.io/local',
