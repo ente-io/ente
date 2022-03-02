@@ -6,9 +6,15 @@ import { EncryptionResult } from 'types/upload';
 import { Collection } from 'types/collection';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
-import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
+import {
+    decryptFile,
+    mergeMetadata,
+    preservePhotoswipeProps,
+    sortFiles,
+} from 'utils/file';
 import CryptoWorker from 'utils/crypto';
 import { EnteFile, TrashRequest, UpdateMagicMetadataRequest } from 'types/file';
+import { SetFiles } from 'types/gallery';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -28,13 +34,13 @@ const getCollectionLastSyncTime = async (collection: Collection) =>
 
 export const syncFiles = async (
     collections: Collection[],
-    setFiles: (files: EnteFile[]) => void
+    setFiles: SetFiles
 ) => {
     const localFiles = await getLocalFiles();
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     if (files.length !== localFiles.length) {
         await setLocalFiles(files);
-        setFiles([...sortFiles(mergeMetadata(files))]);
+        setFiles(preservePhotoswipeProps([...sortFiles(mergeMetadata(files))]));
     }
     for (const collection of collections) {
         if (!getToken()) {
@@ -70,7 +76,7 @@ export const syncFiles = async (
             `${collection.id}-time`,
             collection.updationTime
         );
-        setFiles([...sortFiles(mergeMetadata(files))]);
+        setFiles(preservePhotoswipeProps([...sortFiles(mergeMetadata(files))]));
     }
     return sortFiles(mergeMetadata(files));
 };
@@ -79,7 +85,7 @@ export const getFiles = async (
     collection: Collection,
     sinceTime: number,
     files: EnteFile[],
-    setFiles: (files: EnteFile[]) => void
+    setFiles: SetFiles
 ): Promise<EnteFile[]> => {
     try {
         const decryptedFiles: EnteFile[] = [];
@@ -116,10 +122,12 @@ export const getFiles = async (
                 time = resp.data.diff.slice(-1)[0].updationTime;
             }
             setFiles(
-                sortFiles(
-                    mergeMetadata(
-                        [...(files || []), ...decryptedFiles].filter(
-                            (item) => !item.isDeleted
+                preservePhotoswipeProps(
+                    sortFiles(
+                        mergeMetadata(
+                            [...(files || []), ...decryptedFiles].filter(
+                                (item) => !item.isDeleted
+                            )
                         )
                     )
                 )

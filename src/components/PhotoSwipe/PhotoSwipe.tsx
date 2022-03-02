@@ -490,7 +490,8 @@ function InfoModal({
 
 function PhotoSwipe(props: Iprops) {
     const pswpElement = useRef<HTMLDivElement>();
-    const [photoSwipe, setPhotoSwipe] = useState<Photoswipe<any>>();
+    const [photoSwipe, setPhotoSwipe] =
+        useState<Photoswipe<Photoswipe.Options>>();
 
     const { isOpen, items } = props;
     const [isFav, setIsFav] = useState(false);
