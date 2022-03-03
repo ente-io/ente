@@ -210,7 +210,7 @@ function CollectionShare(props: Props) {
         { linkPassword }: passFormValues,
         { setFieldError }: FormikHelpers<passFormValues>
     ) => {
-        if (linkPassword && linkPassword.length > 1) {
+        if (linkPassword && linkPassword.trim().length >= 1) {
             setConfigurePassword(!configurePassword);
             await enablePublicUrlPassword(linkPassword);
         } else {
