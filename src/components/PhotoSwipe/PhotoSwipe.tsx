@@ -94,8 +94,8 @@ const Pre = styled.pre`
 
 const LivePhotoBtn = styled.button`
     position: absolute;
-    top: 6vh;
-    left: 4vh;
+    bottom: 6vh;
+    right: 6vh;
     height: 40px;
     width: 80px;
     background: #d7d7d7;
