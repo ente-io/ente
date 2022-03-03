@@ -104,7 +104,7 @@ const englishConstants = {
     UPLOAD: {
         0: 'preparing to upload',
         1: 'reading google metadata files',
-        2: 'reading file metadata to organize file',
+        2: 'reading file metadata',
         3: (fileCounter) =>
             `${fileCounter.finished} / ${fileCounter.total} files backed up`,
         4: 'backup complete',
@@ -332,6 +332,14 @@ const englishConstants = {
     SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'thank you',
     CANCEL_SUBSCRIPTION_ON_MOBILE:
         'please cancel your subscription from the mobile app to activate a subscription here',
+    PAYPAL_MANAGE_NOT_SUPPORTED_MESSAGE: () => (
+        <>
+            please contact us at{' '}
+            <a href="mailto:paypal@ente.io">paypal@ente.io</a> to manage your
+            subscription
+        </>
+    ),
+    PAYPAL_MANAGE_NOT_SUPPORTED: 'manage paypal plan',
     RENAME: 'rename',
     RENAME_COLLECTION: 'rename album',
     CONFIRM_DELETE_COLLECTION: 'confirm album deletion',
@@ -674,6 +682,7 @@ const englishConstants = {
     ENTE_IO: 'ente.io',
     PLAYBACK_SUPPORT_COMING: 'playback support coming soon...',
     LIVE_PHOTO: 'this is a live photo',
+    LIVE: 'LIVE',
 };
 
 export default englishConstants;

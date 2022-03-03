@@ -20,7 +20,6 @@ import {
     changeFileName,
     downloadFile,
     formatDateTime,
-    isLivePhoto,
     splitFilenameAndExtension,
     updateExistingFilePubMetadata,
 } from 'utils/file';
@@ -35,6 +34,7 @@ import {
     Row,
     Value,
 } from 'components/Container';
+import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
 import { logError } from 'utils/sentry';
 
 import CloseIcon from 'components/icons/CloseIcon';
@@ -43,14 +43,11 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
-import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
+import { MAX_EDITED_FILE_NAME_LENGTH, FILE_TYPE } from 'constants/file';
 import { sleep } from 'utils/common';
+import { playVideo, pauseVideo } from 'utils/photoFrame';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
-import {
-    getLivePhotoInfoShownCount,
-    setLivePhotoInfoShownCount,
-} from 'utils/storage';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -72,6 +69,7 @@ interface Iprops {
     isSharedCollection: boolean;
     isTrashCollection: boolean;
     enableDownload: boolean;
+    isSourceLoaded: boolean;
 }
 
 const LegendContainer = styled.div`
@@ -89,6 +87,29 @@ const Pre = styled.pre`
     color: #aaa;
     padding: 7px 15px;
 `;
+
+const LivePhotoBtn = styled.button`
+    position: absolute;
+    bottom: 6vh;
+    right: 6vh;
+    height: 40px;
+    width: 80px;
+    background: #d7d7d7;
+    outline: none;
+    border: none;
+    border-radius: 10%;
+    z-index: 10;
+    cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+    }
+`;
+
+const livePhotoDefaultOptions = {
+    click: () => {},
+    hide: () => {},
+    show: () => {},
+    loading: false,
+    visible: false,
+};
 
 const renderInfoItem = (label: string, value: string | JSX.Element) => (
     <Row>
@@ -490,13 +511,17 @@ function InfoModal({
 
 function PhotoSwipe(props: Iprops) {
     const pswpElement = useRef<HTMLDivElement>();
-    const [photoSwipe, setPhotoSwipe] = useState<Photoswipe<any>>();
+    const [photoSwipe, setPhotoSwipe] =
+        useState<Photoswipe<Photoswipe.Options>>();
 
-    const { isOpen, items } = props;
+    const { isOpen, items, isSourceLoaded } = props;
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
     const [metadata, setMetaData] = useState<EnteFile['metadata']>(null);
     const [exif, setExif] = useState<any>(null);
+    const [livePhotoBtnOptions, setLivePhotoBtnOptions] = useState(
+        livePhotoDefaultOptions
+    );
     const needUpdate = useRef(false);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
@@ -527,21 +552,73 @@ function PhotoSwipe(props: Iprops) {
         }
     }, [showInfo]);
 
+    useEffect(() => {
+        if (!isOpen) return;
+        const item = items[photoSwipe?.getCurrentIndex()];
+        if (item && item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+            const getVideoAndImage = () => {
+                const video = document.getElementById(
+                    `live-photo-video-${item.id}`
+                );
+                const image = document.getElementById(
+                    `live-photo-image-${item.id}`
+                );
+                return { video, image };
+            };
+
+            const { video, image } = getVideoAndImage();
+
+            if (video && image) {
+                setLivePhotoBtnOptions({
+                    click: async () => {
+                        await playVideo(video, image);
+                    },
+                    hide: async () => {
+                        await pauseVideo(video, image);
+                    },
+                    show: async () => {
+                        await playVideo(video, image);
+                    },
+                    visible: true,
+                    loading: false,
+                });
+            } else {
+                setLivePhotoBtnOptions({
+                    ...livePhotoDefaultOptions,
+                    visible: true,
+                    loading: true,
+                });
+            }
+
+            const downloadLivePhotoBtn = document.getElementById(
+                `download-btn-${item.id}`
+            ) as HTMLButtonElement;
+            if (downloadLivePhotoBtn) {
+                const downloadLivePhoto = () => {
+                    downloadFileHelper(photoSwipe.currItem);
+                };
+
+                downloadLivePhotoBtn.addEventListener(
+                    'click',
+                    downloadLivePhoto
+                );
+                return () => {
+                    downloadLivePhotoBtn.removeEventListener(
+                        'click',
+                        downloadLivePhoto
+                    );
+                    setLivePhotoBtnOptions(livePhotoDefaultOptions);
+                };
+            }
+
+            return () => {
+                setLivePhotoBtnOptions(livePhotoDefaultOptions);
+            };
+        }
+    }, [photoSwipe?.currItem, isOpen, isSourceLoaded]);
+
     function updateFavButton() {
         setIsFav(isInFav(this?.currItem));
-    }
-
-    function handleLivePhotoNotification() {
-        if (isLivePhoto(this?.currItem)) {
-            const infoShownCount = getLivePhotoInfoShownCount();
-            if (infoShownCount < 3) {
-                galleryContext.setNotificationAttributes({
-                    message: constants.PLAYBACK_SUPPORT_COMING,
-                    title: constants.LIVE_PHOTO,
-                });
-                setLivePhotoInfoShownCount(infoShownCount + 1);
-            }
-        }
     }
 
     const openPhotoSwipe = () => {
@@ -606,7 +683,6 @@ function PhotoSwipe(props: Iprops) {
         photoSwipe.listen('beforeChange', function () {
             updateInfo.call(this);
             updateFavButton.call(this);
-            handleLivePhotoNotification.call(this);
         });
         photoSwipe.listen('resize', checkExifAvailable);
         photoSwipe.init();
@@ -726,6 +802,18 @@ function PhotoSwipe(props: Iprops) {
                 ref={pswpElement}>
                 <div className="pswp__bg" />
                 <div className="pswp__scroll-wrap">
+                    <LivePhotoBtn
+                        onClick={livePhotoBtnOptions.click}
+                        onMouseEnter={livePhotoBtnOptions.show}
+                        onMouseLeave={livePhotoBtnOptions.hide}
+                        disabled={livePhotoBtnOptions.loading}
+                        style={{
+                            display: livePhotoBtnOptions.visible
+                                ? 'block'
+                                : 'none',
+                        }}>
+                        {livePhotoBtnHTML} {constants.LIVE}
+                    </LivePhotoBtn>
                     <div className="pswp__container">
                         <div className="pswp__item" />
                         <div className="pswp__item" />

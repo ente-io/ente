@@ -2,7 +2,12 @@ import { SetFiles } from 'types/gallery';
 import { Collection } from 'types/collection';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
-import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
+import {
+    decryptFile,
+    mergeMetadata,
+    preservePhotoswipeProps,
+    sortFiles,
+} from 'utils/file';
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
 import { getCollection } from './collectionService';
@@ -120,7 +125,12 @@ export const updateTrash = async (
             updatedTrash = removeRestoredOrDeletedTrashItems(updatedTrash);
 
             setFiles(
-                sortFiles([...(files ?? []), ...getTrashedFiles(updatedTrash)])
+                preservePhotoswipeProps(
+                    sortFiles([
+                        ...(files ?? []),
+                        ...getTrashedFiles(updatedTrash),
+                    ])
+                )
             );
             await localForage.setItem(TRASH, updatedTrash);
             await localForage.setItem(TRASH_TIME, time);

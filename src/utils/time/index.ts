@@ -1,7 +1,11 @@
-export function getUTCMicroSecondsSinceEpoch(): number {
-    const now = new Date();
-    const utcMilllisecondsSinceEpoch =
-        now.getTime() + now.getTimezoneOffset() * 60 * 1000;
-    const utcSecondsSinceEpoch = Math.round(utcMilllisecondsSinceEpoch * 1000);
-    return utcSecondsSinceEpoch;
+export function getUnixTimeInMicroSeconds(dateTime: Date) {
+    if (!dateTime || isNaN(dateTime.getTime())) {
+        return null;
+    }
+    const unixTime = dateTime.getTime() * 1000;
+    if (unixTime <= 0) {
+        return null;
+    } else {
+        return unixTime;
+    }
 }

@@ -9,6 +9,9 @@ import { CustomError } from '../error';
 import { logError } from '../sentry';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';
+const PAYMENT_PROVIDER_APPSTORE = 'appstore';
+const PAYMENT_PROVIDER_PLAYSTORE = 'playstore';
+const PAYMENT_PROVIDER_PAYPAL = 'paypal';
 const FREE_PLAN = 'free';
 
 enum FAILURE_REASON {
@@ -93,6 +96,23 @@ export function hasStripeSubscription(subscription: Subscription) {
         hasPaidSubscription(subscription) &&
         subscription.paymentProvider.length > 0 &&
         subscription.paymentProvider === PAYMENT_PROVIDER_STRIPE
+    );
+}
+
+export function hasMobileSubscription(subscription: Subscription) {
+    return (
+        hasPaidSubscription(subscription) &&
+        subscription.paymentProvider.length > 0 &&
+        (subscription.paymentProvider === PAYMENT_PROVIDER_APPSTORE ||
+            subscription.paymentProvider === PAYMENT_PROVIDER_PLAYSTORE)
+    );
+}
+
+export function hasPaypalSubscription(subscription: Subscription) {
+    return (
+        hasPaidSubscription(subscription) &&
+        subscription.paymentProvider.length > 0 &&
+        subscription.paymentProvider === PAYMENT_PROVIDER_PAYPAL
     );
 }
 
