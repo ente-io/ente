@@ -93,7 +93,7 @@ const Pre = styled.pre`
     padding: 7px 15px;
 `;
 
-const LivePhotoBtn = styled.button`
+const LivePhotoBtn = styled.button<{ disabled: boolean }>`
     position: absolute;
     bottom: 6vh;
     right: 6vh;
@@ -104,12 +104,15 @@ const LivePhotoBtn = styled.button`
     border: none;
     border-radius: 10%;
     z-index: 10;
+    cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+    }
 `;
 
 const livePhotoDefaultOptions = {
     click: () => {},
     hide: () => {},
     show: () => {},
+    loading: false,
     visible: false,
 };
 
@@ -582,11 +585,13 @@ function PhotoSwipe(props: Iprops) {
                         await playVideo(video, image);
                     },
                     visible: true,
+                    loading: false,
                 });
             } else {
                 setLivePhotoBtnOptions({
                     ...livePhotoDefaultOptions,
                     visible: true,
+                    loading: true,
                 });
             }
 
@@ -820,6 +825,7 @@ function PhotoSwipe(props: Iprops) {
                         onClick={livePhotoBtnOptions.click}
                         onMouseEnter={livePhotoBtnOptions.show}
                         onMouseLeave={livePhotoBtnOptions.hide}
+                        disabled={livePhotoBtnOptions.loading}
                         style={{
                             display: livePhotoBtnOptions.visible
                                 ? 'block'
