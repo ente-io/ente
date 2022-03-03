@@ -29,7 +29,7 @@ interface FileProgresses {
     progress: number;
 }
 
-const FileList = styled.ul`
+export const FileList = styled.ul`
     padding-left: 30px;
     margin-top: 5px;
     margin-bottom: 0px;
