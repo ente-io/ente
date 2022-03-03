@@ -336,9 +336,9 @@ const PhotoFrame = ({
                     file.html = `
                 <div class="video-loading">
                     <img src="${file.msrc}" />
-                    <div class="download-message" data-id="${file.id}">
+                    <div class="download-message">
                         ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                        <button class = "btn btn-outline-success">Download</button>
+                        <button class = "btn btn-outline-success" id = "download-btn-${file.id}">Download</button>
                     </div>
                 </div>
                 `;

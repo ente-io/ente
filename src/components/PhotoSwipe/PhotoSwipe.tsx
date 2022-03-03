@@ -105,6 +105,13 @@ const LivePhotoBtn = styled.button`
     z-index: 10;
 `;
 
+const livePhotoDefaultOptions = {
+    click: () => {},
+    hide: () => {},
+    show: () => {},
+    visible: false,
+};
+
 const renderInfoItem = (label: string, value: string | JSX.Element) => (
     <Row>
         <Label width="30%">{label}</Label>
@@ -513,7 +520,9 @@ function PhotoSwipe(props: Iprops) {
     const [showInfo, setShowInfo] = useState(false);
     const [metadata, setMetaData] = useState<EnteFile['metadata']>(null);
     const [exif, setExif] = useState<any>(null);
-    const [livePhotoBtn, setLivePhotoBtn] = useState(null);
+    const [livePhotoBtnOptions, setLivePhotoBtnOptions] = useState(
+        livePhotoDefaultOptions
+    );
     const needUpdate = useRef(false);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
@@ -568,76 +577,65 @@ function PhotoSwipe(props: Iprops) {
                 livePhotoVideo.style.opacity = 0;
                 livePhotoImage.style.opacity = 1;
             };
-            setLivePhotoBtn(
-                <LivePhotoBtn
-                    onClick={() => {
-                        const video = document.getElementsByClassName(
-                            `live-photo-video-${item.id}`
-                        )[0];
-                        const image = document.getElementsByClassName(
-                            `live-photo-image-${item.id}`
-                        )[0];
-                        if (video && image) {
-                            playVideo(video, image);
-                        }
-                    }}
-                    onMouseEnter={() => {
-                        const video = document.getElementsByClassName(
-                            `live-photo-video-${item.id}`
-                        )[0];
-                        const image = document.getElementsByClassName(
-                            `live-photo-image-${item.id}`
-                        )[0];
-                        if (video && image) {
-                            playVideo(video, image);
-                        }
-                    }}
-                    onMouseLeave={() => {
-                        const video = document.getElementsByClassName(
-                            `live-photo-video-${item.id}`
-                        )[0];
-                        const image = document.getElementsByClassName(
-                            `live-photo-image-${item.id}`
-                        )[0];
-                        if (video && image) {
-                            pauseVideo(video, image);
-                        }
-                    }}>
-                    {livePhotoBtnHTML} LIVE
-                </LivePhotoBtn>
-            );
 
-            const downloadMessageDivs = document.getElementsByClassName(
-                `download-message`
-            ) as HTMLCollectionOf<HTMLDivElement>;
-            for (const downloadMessageDiv of downloadMessageDivs) {
-                if (
-                    String(downloadMessageDiv?.dataset?.id) === String(item.id)
-                ) {
-                    const downloadLivePhotoBtn =
-                        downloadMessageDiv.firstElementChild as HTMLButtonElement;
+            const getvideoAndImage = () => {
+                const video = document.getElementsByClassName(
+                    `live-photo-video-${item.id}`
+                )[0];
+                const image = document.getElementsByClassName(
+                    `live-photo-image-${item.id}`
+                )[0];
+                return { video, image };
+            };
 
-                    const downloadLivePhoto = () => {
-                        downloadFileHelper(photoSwipe.currItem);
-                    };
+            setLivePhotoBtnOptions({
+                click: () => {
+                    const { video, image } = getvideoAndImage();
+                    if (video && image) {
+                        playVideo(video, image);
+                    }
+                },
+                hide: () => {
+                    const { video, image } = getvideoAndImage();
+                    if (video && image) {
+                        pauseVideo(video, image);
+                    }
+                },
+                show: () => {
+                    const { video, image } = getvideoAndImage();
+                    if (video && image) {
+                        playVideo(video, image);
+                    }
+                },
+                visible: true,
+            });
 
-                    downloadLivePhotoBtn.addEventListener(
+            const downloadLivePhotoBtn = document.getElementById(
+                `download-btn-${item.id}`
+            ) as HTMLButtonElement;
+            console.log(downloadLivePhotoBtn);
+            if (downloadLivePhotoBtn) {
+                const downloadLivePhoto = () => {
+                    downloadFileHelper(photoSwipe.currItem);
+                };
+
+                downloadLivePhotoBtn.addEventListener(
+                    'click',
+                    downloadLivePhoto
+                );
+                return () => {
+                    downloadLivePhotoBtn.removeEventListener(
                         'click',
                         downloadLivePhoto
                     );
-                    return () => {
-                        downloadLivePhotoBtn.removeEventListener(
-                            'click',
-                            downloadLivePhoto
-                        );
-                    };
-                }
+                    setLivePhotoBtnOptions(livePhotoDefaultOptions);
+                };
             }
-        }
 
-        return () => {
-            setLivePhotoBtn(null);
-        };
+            return () => {
+                setLivePhotoBtnOptions(livePhotoDefaultOptions);
+            };
+        }
     }, [photoSwipe?.currItem, isOpen, isSourceLoaded]);
 
     function updateFavButton() {
@@ -839,7 +837,17 @@ function PhotoSwipe(props: Iprops) {
                 ref={pswpElement}>
                 <div className="pswp__bg" />
                 <div className="pswp__scroll-wrap">
-                    {livePhotoBtn}
+                    <LivePhotoBtn
+                        onClick={livePhotoBtnOptions.click}
+                        onMouseEnter={livePhotoBtnOptions.show}
+                        onMouseLeave={livePhotoBtnOptions.hide}
+                        style={{
+                            display: livePhotoBtnOptions.visible
+                                ? 'block'
+                                : 'none',
+                        }}>
+                        {livePhotoBtnHTML} LIVE
+                    </LivePhotoBtn>
                     <div className="pswp__container">
                         <div className="pswp__item" />
                         <div className="pswp__item" />
