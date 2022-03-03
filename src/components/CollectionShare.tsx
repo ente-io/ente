@@ -27,6 +27,7 @@ import { ButtonVariant, getVariantColor } from './pages/gallery/LinkButton';
 import { handleSharingErrors } from 'utils/error';
 import { sleep } from 'utils/common';
 import { SelectStyles } from './Search/SelectStyle';
+import CryptoWorker from 'utils/crypto';
 interface Props {
     show: boolean;
     onHide: () => void;
@@ -35,6 +36,10 @@ interface Props {
 }
 interface formValues {
     email: string;
+}
+
+interface passFormValues {
+    linkPassword: string;
 }
 interface ShareeProps {
     sharee: User;
@@ -107,6 +112,7 @@ function CollectionShare(props: Props) {
     const [sharableLinkError, setSharableLinkError] = useState(null);
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
     const [publicShareProp, setPublicShareProp] = useState<PublicURL>(null);
+    const [configurePassword, setCongiruingPassword] = useState(false);
 
     useEffect(() => {
         const main = async () => {
@@ -198,6 +204,47 @@ function CollectionShare(props: Props) {
         } finally {
             galleryContext.finishLoading();
         }
+    };
+
+    const savePassword = async (
+        { linkPassword }: passFormValues,
+        { setFieldError }: FormikHelpers<passFormValues>
+    ) => {
+        if (linkPassword && linkPassword.length > 1) {
+            setCongiruingPassword(!configurePassword);
+            await enablePublicUrlPassword(linkPassword);
+        } else {
+            setFieldError('linkPassword', 'can not be empty');
+        }
+    };
+
+    const handlePasswordChangeSetting = async () => {
+        if (publicShareProp.passwordEnabled) {
+            await disablePublicUrlPassword();
+        } else {
+            setCongiruingPassword(!configurePassword);
+        }
+    };
+
+    const disablePublicUrlPassword = async () => {
+        return updatePublicShareURLHelper({
+            collectionID: props.collection.id,
+            disablePassword: true,
+        });
+    };
+
+    const enablePublicUrlPassword = async (password: string) => {
+        const cryptoWorker = await new CryptoWorker();
+        const kekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
+        const kek = await cryptoWorker.deriveSensitiveKey(password, kekSalt);
+        const passHash = await cryptoWorker.toB64(kek.key);
+        return updatePublicShareURLHelper({
+            collectionID: props.collection.id,
+            passHash: passHash,
+            nonce: kekSalt,
+            opsLimit: kek.opsLimit,
+            memLimit: kek.memLimit,
+        });
     };
 
     const disablePublicSharing = () => {
@@ -491,6 +538,83 @@ function CollectionShare(props: Props) {
                                 />
                             </div>
                         </FlexWrapper>
+                        <FlexWrapper
+                            style={{ paddingTop: '5px', color: '#fff' }}>
+                            <div style={{ marginRight: '20px' }}>
+                                {constants.LINK_PASSWORD_LOCK}{' '}
+                            </div>
+                            <Form.Switch
+                                style={{ marginLeft: '20px' }}
+                                checked={
+                                    (publicShareProp?.passwordEnabled ||
+                                        configurePassword) ??
+                                    false
+                                }
+                                id="public-sharing-file-password-toggler"
+                                className="custom-switch-md"
+                                onChange={handlePasswordChangeSetting}
+                            />
+                        </FlexWrapper>
+                        {configurePassword ? (
+                            <DeadCenter
+                                style={{ width: '85%', margin: '20px' }}>
+                                <Formik<passFormValues>
+                                    initialValues={{ linkPassword: '' }}
+                                    validateOnChange={false}
+                                    validateOnBlur={false}
+                                    onSubmit={savePassword}>
+                                    {({
+                                        values,
+                                        errors,
+                                        touched,
+                                        handleChange,
+                                        handleSubmit,
+                                    }) => (
+                                        <Form
+                                            noValidate
+                                            onSubmit={handleSubmit}>
+                                            <Form.Row>
+                                                <Form.Group
+                                                    as={Col}
+                                                    xs={10}
+                                                    controlId="formHorizontalPassword">
+                                                    <Form.Control
+                                                        type="text"
+                                                        placeholder={
+                                                            'link password'
+                                                        }
+                                                        value={
+                                                            values.linkPassword
+                                                        }
+                                                        onChange={handleChange(
+                                                            'linkPassword'
+                                                        )}
+                                                        autoFocus
+                                                        disabled={loading}
+                                                    />
+                                                    <FormControl.Feedback type="invalid">
+                                                        {touched.linkPassword &&
+                                                            errors.linkPassword}
+                                                    </FormControl.Feedback>
+                                                </Form.Group>
+                                                <Form.Group
+                                                    as={Col}
+                                                    xs={10}
+                                                    controlId="formHorizontalEmail">
+                                                    <SubmitButton
+                                                        loading={loading}
+                                                        inline
+                                                        buttonText="save"
+                                                    />
+                                                </Form.Group>
+                                            </Form.Row>
+                                        </Form>
+                                    )}
+                                </Formik>
+                            </DeadCenter>
+                        ) : (
+                            <div />
+                        )}
                     </div>
                 ) : (
                     <div style={{ height: '30px' }} />
