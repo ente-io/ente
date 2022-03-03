@@ -112,7 +112,7 @@ function CollectionShare(props: Props) {
     const [sharableLinkError, setSharableLinkError] = useState(null);
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
     const [publicShareProp, setPublicShareProp] = useState<PublicURL>(null);
-    const [configurePassword, setCongiruingPassword] = useState(false);
+    const [configurePassword, setConfigurePassword] = useState(false);
 
     useEffect(() => {
         const main = async () => {
@@ -211,7 +211,7 @@ function CollectionShare(props: Props) {
         { setFieldError }: FormikHelpers<passFormValues>
     ) => {
         if (linkPassword && linkPassword.length > 1) {
-            setCongiruingPassword(!configurePassword);
+            setConfigurePassword(!configurePassword);
             await enablePublicUrlPassword(linkPassword);
         } else {
             setFieldError('linkPassword', 'can not be empty');
@@ -222,7 +222,7 @@ function CollectionShare(props: Props) {
         if (publicShareProp.passwordEnabled) {
             await disablePublicUrlPassword();
         } else {
-            setCongiruingPassword(!configurePassword);
+            setConfigurePassword(!configurePassword);
         }
     };
 
