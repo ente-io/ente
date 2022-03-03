@@ -325,8 +325,8 @@ const PhotoFrame = ({
                 if (isPlayable) {
                     file.html = `
                 <div class = 'live-photo-container'>
-                    <img class = "live-photo-image-${file.id}" src="${imageURL}" />
-                    <video class = "live-photo-video-${file.id}" loop muted>
+                    <img id = "live-photo-image-${file.id}" src="${imageURL}" />
+                    <video id = "live-photo-video-${file.id}" loop muted>
                         <source src="${videoURL}" />
                         Your browser does not support the video tag.
                     </video>

@@ -46,6 +46,7 @@ import EnteSpinner from 'components/EnteSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
 import { MAX_EDITED_FILE_NAME_LENGTH, FILE_TYPE } from 'constants/file';
 import { sleep } from 'utils/common';
+import { playVideo, pauseVideo } from 'utils/photoFrame';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
 import {
@@ -557,63 +558,41 @@ function PhotoSwipe(props: Iprops) {
         if (!isOpen) return;
         const item = items[photoSwipe?.getCurrentIndex()];
         if (item && item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            let videoPlaying = false;
-
-            const playVideo = async (livePhotoVideo, livePhotoImage) => {
-                if (videoPlaying) return;
-                videoPlaying = true;
-                livePhotoVideo.style.opacity = 1;
-                livePhotoImage.style.opacity = 0;
-                livePhotoVideo.load();
-                livePhotoVideo.play().catch(() => {
-                    pauseVideo(livePhotoVideo, livePhotoImage);
-                });
-            };
-
-            const pauseVideo = async (livePhotoVideo, livePhotoImage) => {
-                if (!videoPlaying) return;
-                videoPlaying = false;
-                livePhotoVideo.pause();
-                livePhotoVideo.style.opacity = 0;
-                livePhotoImage.style.opacity = 1;
-            };
-
             const getvideoAndImage = () => {
-                const video = document.getElementsByClassName(
+                const video = document.getElementById(
                     `live-photo-video-${item.id}`
-                )[0];
-                const image = document.getElementsByClassName(
+                );
+                const image = document.getElementById(
                     `live-photo-image-${item.id}`
-                )[0];
+                );
                 return { video, image };
             };
 
-            setLivePhotoBtnOptions({
-                click: () => {
-                    const { video, image } = getvideoAndImage();
-                    if (video && image) {
-                        playVideo(video, image);
-                    }
-                },
-                hide: () => {
-                    const { video, image } = getvideoAndImage();
-                    if (video && image) {
-                        pauseVideo(video, image);
-                    }
-                },
-                show: () => {
-                    const { video, image } = getvideoAndImage();
-                    if (video && image) {
-                        playVideo(video, image);
-                    }
-                },
-                visible: true,
-            });
+            const { video, image } = getvideoAndImage();
+
+            if (video && image) {
+                setLivePhotoBtnOptions({
+                    click: async () => {
+                        await playVideo(video, image);
+                    },
+                    hide: async () => {
+                        await pauseVideo(video, image);
+                    },
+                    show: async () => {
+                        await playVideo(video, image);
+                    },
+                    visible: true,
+                });
+            } else {
+                setLivePhotoBtnOptions({
+                    ...livePhotoDefaultOptions,
+                    visible: true,
+                });
+            }
 
             const downloadLivePhotoBtn = document.getElementById(
                 `download-btn-${item.id}`
             ) as HTMLButtonElement;
-            console.log(downloadLivePhotoBtn);
             if (downloadLivePhotoBtn) {
                 const downloadLivePhoto = () => {
                     downloadFileHelper(photoSwipe.currItem);
@@ -846,7 +825,7 @@ function PhotoSwipe(props: Iprops) {
                                 ? 'block'
                                 : 'none',
                         }}>
-                        {livePhotoBtnHTML} LIVE
+                        {livePhotoBtnHTML} {constants.LIVE}
                     </LivePhotoBtn>
                     <div className="pswp__container">
                         <div className="pswp__item" />
