@@ -34,6 +34,7 @@ import { FILE_TYPE } from 'constants/file';
 import uiService from './uiService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { dedupe } from 'utils/export';
+import { convertToHumanReadable } from 'utils/billing';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -257,7 +258,12 @@ class UploadManager {
                 setData(LS_KEYS.FAILED_UPLOADS, {
                     files: dedupe([
                         ...(getData(LS_KEYS.FAILED_UPLOADS)?.files ?? []),
-                        ...this.failedFiles.map((file) => file.file.name),
+                        ...this.failedFiles.map(
+                            (file) =>
+                                `${file.file.name}_${convertToHumanReadable(
+                                    file.file.size
+                                )}`
+                        ),
                     ]),
                 });
             } else if (fileUploadResult === FileUploadResults.BLOCKED) {
