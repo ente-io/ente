@@ -244,18 +244,15 @@ const PhotoFrame = ({
     }, [open]);
 
     const updateURL = (index: number) => (url: string) => {
-        files[index] = {
-            ...files[index],
-            msrc: url,
-            src: files[index].src ? files[index].src : url,
-            w: window.innerWidth,
-            h: window.innerHeight,
-        };
-        if (
-            files[index].metadata.fileType === FILE_TYPE.VIDEO &&
-            !files[index].html
-        ) {
-            files[index].html = `
+        const updateFile = (file: EnteFile) => {
+            file = {
+                ...file,
+                msrc: url,
+                w: window.innerWidth,
+                h: window.innerHeight,
+            };
+            if (file.metadata.fileType === FILE_TYPE.VIDEO && !file.html) {
+                file.html = `
                 <div class="video-loading">
                     <img src="${url}" />
                     <div class="spinner-border text-light" role="status">
@@ -263,46 +260,59 @@ const PhotoFrame = ({
                     </div>
                 </div>
             `;
-            delete files[index].src;
-        }
-        if (
-            files[index].metadata.fileType === FILE_TYPE.IMAGE &&
-            !files[index].src
-        ) {
-            files[index].src = url;
-        }
-        setFiles(files);
+            } else if (
+                (file.metadata.fileType === FILE_TYPE.IMAGE ||
+                    file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) &&
+                !file.src
+            ) {
+                file.src = url;
+            }
+            return file;
+        };
+        setFiles((files) => {
+            files[index] = updateFile(files[index]);
+            return [...files];
+        });
+        return updateFile(files[index]);
     };
 
     const updateSrcURL = async (index: number, url: string) => {
-        files[index] = {
-            ...files[index],
-            w: window.innerWidth,
-            h: window.innerHeight,
-        };
-        if (files[index].metadata.fileType === FILE_TYPE.VIDEO) {
-            if (await isPlaybackPossible(url)) {
-                files[index].html = `
-                <video controls>
-                    <source src="${url}" />
-                    Your browser does not support the video tag.
-                </video>
-            `;
-            } else {
-                files[index].html = `
-                <div class="video-loading">
-                    <img src="${files[index].msrc}" />
-                    <div class="download-message" >
-                        ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                        <a class="btn btn-outline-success" href=${url} download="${files[index].metadata.title}"">Download</button>
-                    </div>
+        const isPlayable = await isPlaybackPossible(url);
+        const updateFile = (file: EnteFile) => {
+            file = {
+                ...file,
+                w: window.innerWidth,
+                h: window.innerHeight,
+            };
+            if (file.metadata.fileType === FILE_TYPE.VIDEO) {
+                if (isPlayable) {
+                    file.html = `
+            <video controls>
+                <source src="${url}" />
+                Your browser does not support the video tag.
+            </video>
+        `;
+                } else {
+                    file.html = `
+            <div class="video-loading">
+                <img src="${file.msrc}" />
+                <div class="download-message" >
+                    ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
+                    <a class="btn btn-outline-success" href=${url} download="${file.metadata.title}"">Download</button>
                 </div>
-                `;
+            </div>
+            `;
+                }
+            } else {
+                file.src = url;
             }
-        } else {
-            files[index].src = url;
-        }
-        setFiles(files);
+            return file;
+        };
+        setFiles((files) => {
+            files[index] = updateFile(files[index]);
+            return [...files];
+        });
+        return updateFile(files[index]);
     };
 
     const handleClose = (needUpdate) => {
@@ -418,13 +428,13 @@ const PhotoFrame = ({
                     }
                     galleryContext.thumbs.set(item.id, url);
                 }
-                updateURL(item.dataIndex)(url);
-                item.msrc = url;
-                if (!item.src) {
-                    item.src = url;
-                }
-                item.w = window.innerWidth;
-                item.h = window.innerHeight;
+                const newFile = updateURL(item.dataIndex)(url);
+                item.msrc = newFile.msrc;
+                item.html = newFile.html;
+                item.src = newFile.src;
+                item.w = newFile.w;
+                item.h = newFile.h;
+
                 try {
                     instance.invalidateCurrItems();
                     instance.updateSize(true);
@@ -442,6 +452,7 @@ const PhotoFrame = ({
                 if (galleryContext.files.has(item.id)) {
                     url = galleryContext.files.get(item.id);
                 } else {
+                    galleryContext.startLoading();
                     if (
                         publicCollectionGalleryContext.accessedThroughSharedURL
                     ) {
@@ -454,13 +465,15 @@ const PhotoFrame = ({
                     } else {
                         url = await DownloadManager.getFile(item, true);
                     }
+                    galleryContext.finishLoading();
                     galleryContext.files.set(item.id, url);
                 }
-                await updateSrcURL(item.dataIndex, url);
-                item.html = files[item.dataIndex].html;
-                item.src = files[item.dataIndex].src;
-                item.w = files[item.dataIndex].w;
-                item.h = files[item.dataIndex].h;
+                const newFile = await updateSrcURL(item.dataIndex, url);
+                item.msrc = newFile.msrc;
+                item.html = newFile.html;
+                item.src = newFile.src;
+                item.w = newFile.w;
+                item.h = newFile.h;
                 try {
                     instance.invalidateCurrItems();
                     instance.updateSize(true);

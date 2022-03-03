@@ -281,20 +281,18 @@ export async function decryptFile(file: EnteFile, collectionKey: string) {
     }
 }
 
-export function removeUnnecessaryFileProps(files: EnteFile[]): EnteFile[] {
-    const stripedFiles = files.map((file) => {
-        delete file.src;
-        delete file.msrc;
-        delete file.file.objectKey;
-        delete file.thumbnail.objectKey;
-        delete file.h;
-        delete file.html;
-        delete file.w;
-
-        return file;
-    });
-    return stripedFiles;
-}
+export const preservePhotoswipeProps =
+    (newFiles: EnteFile[]) =>
+    (currentFiles: EnteFile[]): EnteFile[] => {
+        const currentFilesMap = Object.fromEntries(
+            currentFiles.map((file) => [file.id, file])
+        );
+        const fileWithPreservedProperty = newFiles.map((file) => {
+            const currentFile = currentFilesMap[file.id];
+            return { ...currentFile, ...file };
+        });
+        return fileWithPreservedProperty;
+    };
 
 export function fileNameWithoutExtension(filename) {
     const lastDotPosition = filename.lastIndexOf('.');
