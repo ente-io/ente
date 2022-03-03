@@ -104,7 +104,7 @@ const englishConstants = {
     UPLOAD: {
         0: 'preparing to upload',
         1: 'reading google metadata files',
-        2: 'reading file metadata to organize file',
+        2: 'reading file metadata',
         3: (fileCounter) =>
             `${fileCounter.finished} / ${fileCounter.total} files backed up`,
         4: 'backup complete',
