@@ -35,6 +35,7 @@ import { PAGES } from 'constants/pages';
 import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 import FixLargeThumbnails from './FixLargeThumbnail';
 import { SetLoading } from 'types/gallery';
+import FailedUploads from './FailedUploads';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -292,6 +293,7 @@ export default function Sidebar(props: Props) {
                         {constants.FIX_LARGE_THUMBNAILS}
                     </LinkButton>
                 </>
+                <FailedUploads />
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={openFeedbackURL}>
