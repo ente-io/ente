@@ -673,6 +673,7 @@ const englishConstants = {
     ENTE_IO: 'ente.io',
     PLAYBACK_SUPPORT_COMING: 'playback support coming soon...',
     LIVE_PHOTO: 'this is a live photo',
+    LIVE: 'LIVE',
 };
 
 export default englishConstants;

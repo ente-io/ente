@@ -90,6 +90,34 @@ class FFmpegService {
             }
         }
     }
+
+    async convertToMP4(
+        file: Uint8Array,
+        fileName: string
+    ): Promise<Uint8Array> {
+        if (!this.ffmpeg) {
+            await this.init();
+        }
+        if (this.isLoading) {
+            await this.isLoading;
+        }
+
+        const response = this.ffmpegTaskQueue.queueUpRequest(
+            convertToMP4Helper.bind(null, this.ffmpeg, file, fileName)
+        );
+
+        try {
+            return await response.promise;
+        } catch (e) {
+            if (e.message === CustomError.REQUEST_CANCELLED) {
+                // ignore
+                return null;
+            } else {
+                logError(e, 'ffmpeg MP4 conversion failed');
+                throw e;
+            }
+        }
+    }
 }
 
 async function generateThumbnailHelper(
@@ -171,6 +199,30 @@ async function extractVideoMetadataHelper(
         return parseFFmpegExtractedMetadata(metadata);
     } catch (e) {
         logError(e, 'ffmpeg metadata extraction failed');
+        throw e;
+    }
+}
+
+async function convertToMP4Helper(
+    ffmpeg: FFmpeg,
+    file: Uint8Array,
+    inputFileName: string
+) {
+    try {
+        ffmpeg.FS('writeFile', inputFileName, file);
+        await ffmpeg.run(
+            '-i',
+            inputFileName,
+            '-preset',
+            'ultrafast',
+            'output.mp4'
+        );
+        const convertedFile = ffmpeg.FS('readFile', 'output.mp4');
+        ffmpeg.FS('unlink', inputFileName);
+        ffmpeg.FS('unlink', 'output.mp4');
+        return convertedFile;
+    } catch (e) {
+        logError(e, 'ffmpeg MP4 conversion failed');
         throw e;
     }
 }
