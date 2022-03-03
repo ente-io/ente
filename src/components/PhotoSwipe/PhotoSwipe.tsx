@@ -558,7 +558,7 @@ function PhotoSwipe(props: Iprops) {
         if (!isOpen) return;
         const item = items[photoSwipe?.getCurrentIndex()];
         if (item && item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            const getvideoAndImage = () => {
+            const getVideoAndImage = () => {
                 const video = document.getElementById(
                     `live-photo-video-${item.id}`
                 );
@@ -568,7 +568,7 @@ function PhotoSwipe(props: Iprops) {
                 return { video, image };
             };
 
-            const { video, image } = getvideoAndImage();
+            const { video, image } = getVideoAndImage();
 
             if (video && image) {
                 setLivePhotoBtnOptions({
