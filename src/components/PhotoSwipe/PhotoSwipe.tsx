@@ -20,7 +20,6 @@ import {
     changeFileName,
     downloadFile,
     formatDateTime,
-    isLivePhoto,
     splitFilenameAndExtension,
     updateExistingFilePubMetadata,
 } from 'utils/file';
@@ -49,10 +48,6 @@ import { sleep } from 'utils/common';
 import { playVideo, pauseVideo } from 'utils/photoFrame';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
-import {
-    getLivePhotoInfoShownCount,
-    setLivePhotoInfoShownCount,
-} from 'utils/storage';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -626,19 +621,6 @@ function PhotoSwipe(props: Iprops) {
         setIsFav(isInFav(this?.currItem));
     }
 
-    function handleLivePhotoNotification() {
-        if (isLivePhoto(this?.currItem)) {
-            const infoShownCount = getLivePhotoInfoShownCount();
-            if (infoShownCount < 3) {
-                galleryContext.setNotificationAttributes({
-                    message: constants.PLAYBACK_SUPPORT_COMING,
-                    title: constants.LIVE_PHOTO,
-                });
-                setLivePhotoInfoShownCount(infoShownCount + 1);
-            }
-        }
-    }
-
     const openPhotoSwipe = () => {
         const { items, currentIndex } = props;
         const options = {
@@ -701,7 +683,6 @@ function PhotoSwipe(props: Iprops) {
         photoSwipe.listen('beforeChange', function () {
             updateInfo.call(this);
             updateFavButton.call(this);
-            handleLivePhotoNotification.call(this);
         });
         photoSwipe.listen('resize', checkExifAvailable);
         photoSwipe.init();
