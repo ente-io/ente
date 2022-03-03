@@ -236,7 +236,7 @@ function CollectionShare(props: Props) {
     const enablePublicUrlPassword = async (password: string) => {
         const cryptoWorker = await new CryptoWorker();
         const kekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
-        const kek = await cryptoWorker.deriveSensitiveKey(password, kekSalt);
+        const kek = await cryptoWorker.deriveInteractiveKey(password, kekSalt);
         const passHash = await cryptoWorker.toB64(kek.key);
         return updatePublicShareURLHelper({
             collectionID: props.collection.id,
@@ -531,9 +531,9 @@ function CollectionShare(props: Props) {
                                     options={expiryOptions}
                                     isSearchable={false}
                                     placeholder={'change'}
-                                    onChange={(e) =>
-                                        updateDeviceExpiry(e.value)
-                                    }
+                                    onChange={(e) => {
+                                        updateDeviceExpiry(e.value);
+                                    }}
                                     styles={style}
                                 />
                             </div>

@@ -1,5 +1,6 @@
 import sodium, { StateAddress } from 'libsodium-wrappers';
 import { ENCRYPTION_CHUNK_SIZE } from 'constants/crypto';
+import assert from 'assert';
 
 export async function decryptChaChaOneShot(
     data: Uint8Array,
@@ -288,6 +289,17 @@ export async function deriveSensitiveKey(passphrase: string, salt: string) {
             memLimit /= 2;
         }
     }
+}
+
+export async function deriveInteractiveKey(passphrase: string, salt: string) {
+    // default algo can change in future when we upgrade library.
+    // this assert act as a safegaurd for us to identify any such issue.
+    assert(
+        sodium.crypto_pwhash_ALG_DEFAULT ===
+            sodium.crypto_pwhash_ALG_ARGON2ID13,
+        'mismatch in expected password hashing algorithm'
+    );
+    return deriveIntermediateKey(passphrase, salt);
 }
 
 export async function deriveIntermediateKey(passphrase: string, salt: string) {
