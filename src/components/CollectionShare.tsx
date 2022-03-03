@@ -20,7 +20,10 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SubmitButton from './SubmitButton';
 import MessageDialog from './MessageDialog';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
-import { appendCollectionKeyToShareURL } from 'utils/collection';
+import {
+    appendCollectionKeyToShareURL,
+    selectIntOptions,
+} from 'utils/collection';
 import { FlexWrapper } from './Container';
 import { CodeBlock } from './CodeBlock';
 import { ButtonVariant, getVariantColor } from './pages/gallery/LinkButton';
@@ -75,10 +78,6 @@ const style = {
     }),
 };
 
-const f = (i) => {
-    return { label: i.toString(), value: i };
-};
-
 const expiryOptions = [
     { label: 'never', value: () => 0 },
     {
@@ -104,15 +103,13 @@ const expiryOptions = [
 ];
 
 function CollectionShare(props: Props) {
-    const downloadOptions = [...Array(50).reverse().keys()].map((i) =>
-        f(i + 1)
-    );
     const [loading, setLoading] = useState(false);
     const galleryContext = useContext(GalleryContext);
     const [sharableLinkError, setSharableLinkError] = useState(null);
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
     const [publicShareProp, setPublicShareProp] = useState<PublicURL>(null);
     const [configurePassword, setConfigurePassword] = useState(false);
+    const deviceLimitOptions = selectIntOptions(50);
 
     useEffect(() => {
         const main = async () => {
@@ -299,7 +296,6 @@ function CollectionShare(props: Props) {
     };
 
     const updateDeviceExpiry = async (optionFn) => {
-        DateTime.utc().plus({ months: 1 });
         return updatePublicShareURLHelper({
             collectionID: props.collection.id,
             validTill: optionFn(),
@@ -511,7 +507,7 @@ function CollectionShare(props: Props) {
                             </div>
                             <div style={{ minWidth: '80px' }}>
                                 <Select
-                                    options={downloadOptions}
+                                    options={deviceLimitOptions}
                                     isSearchable={false}
                                     placeholder={publicShareProp?.deviceLimit?.toString()}
                                     onChange={(e) => updateDeviceLimit(e.value)}

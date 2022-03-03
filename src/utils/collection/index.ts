@@ -126,3 +126,13 @@ export async function appendCollectionKeyToShareURL(
     sharableURL.hash = bs58.encode(bytes);
     return sharableURL.href;
 }
+
+const _intSelectOption = (i) => {
+    return { label: i.toString(), value: i };
+};
+
+export function selectIntOptions(upperLimit: number) {
+    return [...Array(upperLimit).reverse().keys()].map((i) =>
+        _intSelectOption(i + 1)
+    );
+}
