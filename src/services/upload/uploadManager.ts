@@ -252,10 +252,7 @@ class UploadManager {
                     .get(file.collectionID)
                     .push(file);
             }
-            if (
-                fileUploadResult === FileUploadResults.BLOCKED ||
-                fileUploadResult === FileUploadResults.FAILED
-            ) {
+            if (fileUploadResult === FileUploadResults.FAILED) {
                 this.failedFiles.push(fileWithCollection);
                 setData(LS_KEYS.FAILED_UPLOADS, {
                     files: dedupe([
@@ -263,6 +260,8 @@ class UploadManager {
                         ...this.failedFiles.map((file) => file.file.name),
                     ]),
                 });
+            } else if (fileUploadResult === FileUploadResults.BLOCKED) {
+                this.failedFiles.push(fileWithCollection);
             }
 
             UIService.moveFileToResultList(
