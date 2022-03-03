@@ -36,7 +36,7 @@ export async function updateCreationTimeWithExif(
                 if (fixOption === FIX_OPTIONS.CUSTOM_TIME) {
                     correctCreationTime = getUnixTimeInMicroSeconds(customTime);
                 } else {
-                    const fileURL = await downloadManager.getFile(file);
+                    const fileURL = await downloadManager.getFile(file)[0];
                     const fileObject = await getFileFromURL(fileURL);
                     const reader = new FileReader();
                     const fileTypeInfo = await getFileType(reader, fileObject);
