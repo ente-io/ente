@@ -14,6 +14,7 @@ export enum LS_KEYS {
     AnonymizeUserID = 'anonymizedUserID',
     THUMBNAIL_FIX_STATE = 'thumbnailFixState',
     LIVE_PHOTO_INFO_SHOWN_COUNT = 'livePhotoInfoShownCount',
+    FAILED_UPLOADS = 'failedUploads',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {
