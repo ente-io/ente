@@ -93,7 +93,7 @@ const Pre = styled.pre`
     padding: 7px 15px;
 `;
 
-const LivePhotoBtn = styled.button<{ disabled: boolean }>`
+const LivePhotoBtn = styled.button`
     position: absolute;
     bottom: 6vh;
     right: 6vh;
