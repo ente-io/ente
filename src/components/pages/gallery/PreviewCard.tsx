@@ -16,7 +16,7 @@ import { isLivePhoto } from 'utils/file';
 
 interface IProps {
     file: EnteFile;
-    updateURL: (url: string) => void;
+    updateURL: (url: string) => EnteFile;
     onClick?: () => void;
     forcedEnable?: boolean;
     selectable?: boolean;
@@ -203,7 +203,12 @@ export default function PreviewCard(props: IProps) {
                     if (isMounted.current) {
                         setImgSrc(url);
                         thumbs.set(file.id, url);
-                        updateURL(url);
+                        const newFile = updateURL(url);
+                        file.msrc = newFile.msrc;
+                        file.html = newFile.html;
+                        file.src = newFile.src;
+                        file.w = newFile.w;
+                        file.h = newFile.h;
                     }
                 } catch (e) {
                     // no-op
