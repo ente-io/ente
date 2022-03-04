@@ -58,11 +58,11 @@ function drawFaceDetection(face: AlignedFace, ctx: CanvasRenderingContext2D) {
 }
 
 function drawBbox(object: ObjectDetection, ctx: CanvasRenderingContext2D) {
-    ctx.font = '20px Arial';
+    ctx.font = '100px Arial';
     ctx.save();
     ctx.restore();
     ctx.rect(...object.bbox);
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 10;
     ctx.strokeStyle = 'green';
     ctx.fillStyle = 'green';
     ctx.stroke();

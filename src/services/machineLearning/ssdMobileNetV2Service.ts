@@ -12,7 +12,7 @@ import {
 //     SSDMobileNetV2Model,
 // } from './modelWrapper/SSDMobileNetV2';
 
-import * as SSDMobileNet from 'ssd-mobilenet';
+import * as SSDMobileNet from '@tensorflow-models/coco-ssd';
 
 class SSDMobileNetV2 implements ObjectDetectionService {
     private ssdMobileNetV2Model: SSDMobileNet.ObjectDetection;
@@ -27,7 +27,9 @@ class SSDMobileNetV2 implements ObjectDetectionService {
 
     private async init() {
         this.ssdMobileNetV2Model = await SSDMobileNet.load({
-            modelUrl: '/models/open-images-ssd-mobilenet-v2/model.json',
+            // base: 'mobilenet_v2',
+            // dataset: 'open_images',
+            // modelUrl: '/models/open-images-ssd-mobilenet-v2/model.json',
         });
         console.log(
             'loaded ssdMobileNetV2Model',
@@ -38,9 +40,7 @@ class SSDMobileNetV2 implements ObjectDetectionService {
 
     public async detectObjects(image: ImageBitmap): Promise<ObjectDetection[]> {
         // const resized = resizeToSquare(image, MOBILENETV2_OBJECT_SIZE);
-        // console.log(resized);
         const results = await this.detectObjectUsingModel(image);
-        return results;
         // const sizeCorrectedResults = results.map((result) => {
         //     const scale =
         //         Math.max(image.height, image.width) / MOBILENETV2_OBJECT_SIZE;
@@ -58,6 +58,8 @@ class SSDMobileNetV2 implements ObjectDetectionService {
         // });
 
         // return sizeCorrectedResults;
+
+        return results;
     }
 
     private async getSSDMobileNetV2Model() {
@@ -76,11 +78,8 @@ class SSDMobileNetV2 implements ObjectDetectionService {
 
     public async detectObjectUsingModel(imageBitmap: ImageBitmap) {
         const ssdMobileNetV2Model = await this.getSSDMobileNetV2Model();
-        const predictions = await ssdMobileNetV2Model.detect(
-            imageBitmap,
-            undefined,
-            0.1
-        );
+        const tfImage = tf.browser.fromPixels(imageBitmap);
+        const predictions = await ssdMobileNetV2Model.detect(tfImage);
         return predictions;
     }
 
