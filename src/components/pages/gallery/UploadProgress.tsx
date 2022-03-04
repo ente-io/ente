@@ -48,7 +48,7 @@ const SectionTitle = styled.div`
     cursor: pointer;
 `;
 
-export const Section = styled.div`
+const Section = styled.div`
     margin: 20px 0;
     & > .ReactCollapse--collapse {
         transition: height 200ms;
