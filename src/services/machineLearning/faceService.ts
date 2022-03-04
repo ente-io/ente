@@ -171,7 +171,7 @@ class FaceService {
         // console.log('5 TF Memory stats: ', tf.memory());
     }
 
-    private async saveFaceCrop(
+    async saveFaceCrop(
         imageBitmap: ImageBitmap,
         face: Face,
         syncContext: MLSyncContext
