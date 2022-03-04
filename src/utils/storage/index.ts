@@ -32,7 +32,7 @@ export function setLivePhotoInfoShownCount(count) {
 
 export function saveLogLine(log: Log) {
     setData(LS_KEYS.LOGS, {
-        logs: [...getLogs(), log].slice(0, MAX_LOG_LINES),
+        logs: [...getLogs(), log].slice(-1 * MAX_LOG_LINES),
     });
 }
 
