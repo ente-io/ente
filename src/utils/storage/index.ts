@@ -1,7 +1,11 @@
 import { convertToHumanReadable } from 'utils/billing';
-import { formatDate } from 'utils/file';
 import { getData, LS_KEYS, setData } from './localStorage';
 
+export interface Log {
+    type: string;
+    timestamp: number;
+    logLine: string;
+}
 export const isFirstLogin = () =>
     getData(LS_KEYS.IS_FIRST_LOGIN)?.status ?? false;
 
@@ -34,13 +38,12 @@ export function getLastAttemptedFile() {
     return getData(LS_KEYS.LAST_ATTEMPTED_FILE)?.file;
 }
 
-export function saveLogLine(line: string) {
-    const log = { time: formatDate(Date.now()), line };
-    setData(LS_KEYS.UPLOAD_LOGS, {
-        logs: [...getData(LS_KEYS.UPLOAD_LOGS), log],
+export function saveLogLine(log: Log) {
+    setData(LS_KEYS.LOGS, {
+        logs: [...getLogs(), log],
     });
 }
 
-export function getLogs() {
-    return getData(LS_KEYS.UPLOAD_LOGS)?.logs;
+export function getLogs(): Log[] {
+    return getData(LS_KEYS.LOGS)?.logs ?? [];
 }

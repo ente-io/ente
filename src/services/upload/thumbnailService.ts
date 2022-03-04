@@ -8,8 +8,7 @@ import { isFileHEIC } from 'utils/file';
 import { FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from './readFileService';
 import HEICConverter from 'services/HEICConverter';
-import { saveLogLine } from 'utils/storage';
-import { getFileNameSize } from 'utils/upload';
+import { getFileNameSize, logUploadInfo } from 'utils/upload';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
@@ -30,7 +29,7 @@ export async function generateThumbnail(
     fileTypeInfo: FileTypeInfo
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
-        saveLogLine(`generating thumbnail for ${getFileNameSize(file)}`);
+        logUploadInfo(`generating thumbnail for ${getFileNameSize(file)}`);
         let hasStaticThumbnail = false;
         let canvas = document.createElement('canvas');
         let thumbnail: Uint8Array;
@@ -40,14 +39,14 @@ export async function generateThumbnail(
                 canvas = await generateImageThumbnail(file, isHEIC);
             } else {
                 try {
-                    saveLogLine(
+                    logUploadInfo(
                         `ffmpeg generateThumbnail called for ${getFileNameSize(
                             file
                         )}`
                     );
 
                     const thumb = await FFmpegService.generateThumbnail(file);
-                    saveLogLine(
+                    logUploadInfo(
                         `ffmpeg thumbnail successfully generated ${getFileNameSize(
                             file
                         )}`
@@ -93,9 +92,9 @@ export async function generateImageThumbnail(file: File, isHEIC: boolean) {
     let timeout = null;
 
     if (isHEIC) {
-        saveLogLine(`HEICConverter called for ${getFileNameSize(file)}`);
+        logUploadInfo(`HEICConverter called for ${getFileNameSize(file)}`);
         file = new File([await HEICConverter.convert(file)], null, null);
-        saveLogLine(`${getFileNameSize(file)} successfully converted`);
+        logUploadInfo(`${getFileNameSize(file)} successfully converted`);
     }
     let image = new Image();
     imageURL = URL.createObjectURL(file);

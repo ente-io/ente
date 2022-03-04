@@ -676,6 +676,7 @@ const englishConstants = {
     LIVE: 'LIVE',
     LAST_ATTEMPTED_FILE_INFO: 'this was last file whose upload was attempted',
     UPLOAD_LOGS: 'upload logs',
+    DOWNLOAD_UPLOAD_LOGS: 'download debug logs',
 };
 
 export default englishConstants;

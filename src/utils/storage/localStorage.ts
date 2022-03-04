@@ -16,7 +16,7 @@ export enum LS_KEYS {
     LIVE_PHOTO_INFO_SHOWN_COUNT = 'livePhotoInfoShownCount',
     FAILED_UPLOADS = 'failedUploads',
     LAST_ATTEMPTED_FILE = 'lastAttemptedFile',
-    UPLOAD_LOGS = 'uploadLogs',
+    LOGS = 'logs',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {

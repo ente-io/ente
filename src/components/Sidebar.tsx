@@ -37,6 +37,8 @@ import FixLargeThumbnails from './FixLargeThumbnail';
 import { SetLoading } from 'types/gallery';
 import UploadLogs from './UploadLogs';
 import { getLastAttemptedFile } from 'utils/storage';
+import { downloadAsFile } from 'utils/file';
+import { getUploadLogs } from 'utils/upload';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -117,6 +119,14 @@ export default function Sidebar(props: Props) {
             });
         }
     }
+
+    const downloadUploadLogs = () => {
+        const logs = getUploadLogs();
+        if (logs.length > 0) {
+            const logString = logs.join('\n');
+            downloadAsFile(`upload_logs_${Date.now()}.txt`, logString);
+        }
+    };
 
     const router = useRouter();
     function onManageClick() {
@@ -317,7 +327,11 @@ export default function Sidebar(props: Props) {
                         />
                     </>
                 )}
-
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={downloadUploadLogs}>
+                    {constants.DOWNLOAD_UPLOAD_LOGS}
+                </LinkButton>
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={openFeedbackURL}>
