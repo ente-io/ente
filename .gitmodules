@@ -2,7 +2,3 @@
 	path = thirdparty/photoswipe
 	url = https://github.com/ente-io/PhotoSwipe.git
 	branch = master 
-[submodule "thirdparty/ssd-mobilenet"]
-	path = thirdparty/ssd-mobilenet
-	url = git@github.com:abhinavkgrd/tfjs-models.git
-	branch = open-images-ssd
