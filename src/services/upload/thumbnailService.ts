@@ -57,6 +57,11 @@ export async function generateThumbnail(
                         false
                     );
                 } catch (e) {
+                    logUploadInfo(
+                        `ffmpeg thumbnail generated failed  ${getFileNameSize(
+                            file
+                        )} error: ${e.message}`
+                    );
                     logError(e, 'failed to generate thumbnail using ffmpeg', {
                         fileFormat: fileTypeInfo.exactType,
                     });
@@ -68,10 +73,18 @@ export async function generateThumbnail(
             if (thumbnail.length === 0) {
                 throw Error('EMPTY THUMBNAIL');
             }
+            logUploadInfo(
+                `thumbnail successfully generated ${getFileNameSize(file)}`
+            );
         } catch (e) {
             logError(e, 'uploading static thumbnail', {
                 fileFormat: fileTypeInfo.exactType,
             });
+            logUploadInfo(
+                `thumbnail generation failed ${getFileNameSize(file)} error: ${
+                    e.message
+                }`
+            );
             thumbnail = Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) =>
                 c.charCodeAt(0)
             );

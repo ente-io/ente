@@ -150,7 +150,9 @@ class UploadManager {
             const reader = new FileReader();
             for (const { file, collectionID } of metadataFiles) {
                 try {
-                    logUploadInfo(`parsing file ${getFileNameSize(file)}`);
+                    logUploadInfo(
+                        `parsing metadata json file ${getFileNameSize(file)}`
+                    );
 
                     const parsedMetadataJSONWithTitle = await parseMetadataJSON(
                         reader,
@@ -165,8 +167,18 @@ class UploadManager {
                         );
                         UIService.increaseFileUploaded();
                     }
+                    logUploadInfo(
+                        `successfully parsed metadata json file ${getFileNameSize(
+                            file
+                        )}`
+                    );
                 } catch (e) {
                     logError(e, 'parsing failed for a file');
+                    logUploadInfo(
+                        `successfully parsed metadata json file ${getFileNameSize(
+                            file
+                        )} error: ${e.message}`
+                    );
                 }
             }
         } catch (e) {
@@ -216,6 +228,11 @@ class UploadManager {
                         return { fileTypeInfo, metadata };
                     })();
 
+                    logUploadInfo(
+                        `metadata extraction successful${getFileNameSize(
+                            file
+                        )} `
+                    );
                     this.metadataAndFileTypeInfoMap.set(localID, {
                         fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
                         metadata: metadata && { ...metadata },
@@ -223,6 +240,11 @@ class UploadManager {
                     UIService.increaseFileUploaded();
                 } catch (e) {
                     logError(e, 'metadata extraction failed for a file');
+                    logUploadInfo(
+                        `metadata extraction failed ${getFileNameSize(
+                            file
+                        )} error: ${e.message}`
+                    );
                 }
             }
         } catch (e) {

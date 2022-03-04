@@ -9,6 +9,7 @@ import {
     ParsedMetadataJSONMap,
 } from 'types/upload';
 import { logError } from 'utils/sentry';
+import { getFileNameSize, logUploadInfo } from 'utils/upload';
 import { encryptFiledata } from './encryptionService';
 import { extractMetadata, getMetadataJSONMapKey } from './metadataService';
 import { getFileData, getFileOriginalName } from './readFileService';
@@ -32,8 +33,11 @@ export async function readFile(
         rawFile,
         fileTypeInfo
     );
+    logUploadInfo(`reading file datal${getFileNameSize(rawFile)} `);
 
     const filedata = await getFileData(reader, rawFile);
+
+    logUploadInfo(`read file data successfully ${getFileNameSize(rawFile)} `);
 
     return {
         filedata,
