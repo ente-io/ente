@@ -16,12 +16,12 @@ import { isLivePhoto } from 'utils/file';
 
 interface IProps {
     file: EnteFile;
-    updateURL: (url: string) => EnteFile;
+    updateURL?: (url: string) => EnteFile;
     onClick?: () => void;
     forcedEnable?: boolean;
     selectable?: boolean;
     selected?: boolean;
-    onSelect: (checked: boolean) => void;
+    onSelect?: (checked: boolean) => void;
     onHover?: () => void;
     onRangeSelect?: () => void;
     isRangeSelectActive?: boolean;
