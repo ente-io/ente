@@ -37,6 +37,7 @@ import FixLargeThumbnails from './FixLargeThumbnail';
 import { SetLoading } from 'types/gallery';
 import { downloadAsFile } from 'utils/file';
 import { getUploadLogs } from 'utils/upload';
+import styled from 'styled-components';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -123,16 +124,12 @@ export default function Sidebar(props: Props) {
         galleryContext.showPlanSelectorModal();
     }
 
-    const Divider = () => (
-        <div
-            style={{
-                height: '1px',
-                marginTop: '40px',
-                background: '#242424',
-                width: '100%',
-            }}
-        />
-    );
+    const Divider = styled.div`
+        height: 1px;
+        margin-top: 40px;
+        background: #242424;
+        width: 100%;
+    `;
     return (
         <Menu
             isOpen={isOpen}
@@ -303,11 +300,6 @@ export default function Sidebar(props: Props) {
                 </>
                 <LinkButton
                     style={{ marginTop: '30px' }}
-                    onClick={downloadUploadLogs}>
-                    {constants.DOWNLOAD_UPLOAD_LOGS}
-                </LinkButton>
-                <LinkButton
-                    style={{ marginTop: '30px' }}
                     onClick={openFeedbackURL}>
                     {constants.REQUEST_FEATURE}
                 </LinkButton>
@@ -373,12 +365,24 @@ export default function Sidebar(props: Props) {
                     }>
                     {constants.DELETE_ACCOUNT}
                 </LinkButton>
+                <Divider style={{ marginTop: '36px' }} />
                 <div
                     style={{
                         marginTop: '40px',
                         width: '100%',
                     }}
                 />
+                <div
+                    style={{
+                        marginTop: '30px',
+                        fontSize: '14px',
+                        textAlign: 'center',
+                        color: 'grey',
+                        cursor: 'pointer',
+                    }}
+                    onClick={downloadUploadLogs}>
+                    {constants.DOWNLOAD_UPLOAD_LOGS}
+                </div>
             </div>
         </Menu>
     );
