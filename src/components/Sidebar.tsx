@@ -35,7 +35,8 @@ import { PAGES } from 'constants/pages';
 import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 import FixLargeThumbnails from './FixLargeThumbnail';
 import { SetLoading } from 'types/gallery';
-import FailedUploads from './FailedUploads';
+import UploadLogs from './UploadLogs';
+import { getLastAttemptedFile } from 'utils/storage';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -55,6 +56,10 @@ export default function Sidebar(props: Props) {
     const [exportModalView, setExportModalView] = useState(false);
     const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
     const galleryContext = useContext(GalleryContext);
+    const [failedFilesView, setFailedFilesView] = useState(false);
+    const [failedFiles, setFailedFiles] = useState([]);
+    const [lastAttemptedFile, setLastAttemptedFile] = useState(null);
+
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -69,6 +74,10 @@ export default function Sidebar(props: Props) {
                 email: userDetails.email,
             });
             setData(LS_KEYS.SUBSCRIPTION, userDetails.subscription);
+            const failedFiles = getData(LS_KEYS.FAILED_UPLOADS)?.files ?? [];
+            setFailedFiles(failedFiles);
+            const lastAttemptedFile = getLastAttemptedFile();
+            setLastAttemptedFile(lastAttemptedFile);
         };
         main();
     }, [isOpen]);
@@ -293,7 +302,22 @@ export default function Sidebar(props: Props) {
                         {constants.FIX_LARGE_THUMBNAILS}
                     </LinkButton>
                 </>
-                <FailedUploads />
+                {(lastAttemptedFile || failedFiles.length > 0) && (
+                    <>
+                        <LinkButton
+                            style={{ marginTop: '30px' }}
+                            onClick={() => setFailedFilesView(true)}>
+                            {constants.UPLOAD_LOGS}
+                        </LinkButton>
+                        <UploadLogs
+                            listView={failedFilesView}
+                            failedFiles={failedFiles}
+                            lastAttemptedFile={lastAttemptedFile}
+                            hideList={() => setFailedFilesView(false)}
+                        />
+                    </>
+                )}
+
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={openFeedbackURL}>
