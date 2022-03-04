@@ -35,7 +35,8 @@ import { PAGES } from 'constants/pages';
 import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 import FixLargeThumbnails from './FixLargeThumbnail';
 import { SetLoading } from 'types/gallery';
-import FailedUploads from './FailedUploads';
+import { downloadAsFile } from 'utils/file';
+import { getUploadLogs } from 'utils/upload';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -55,6 +56,7 @@ export default function Sidebar(props: Props) {
     const [exportModalView, setExportModalView] = useState(false);
     const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
     const galleryContext = useContext(GalleryContext);
+
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -108,6 +110,12 @@ export default function Sidebar(props: Props) {
             });
         }
     }
+
+    const downloadUploadLogs = () => {
+        const logs = getUploadLogs();
+        const logString = logs.join('\n');
+        downloadAsFile(`upload_logs_${Date.now()}.txt`, logString);
+    };
 
     const router = useRouter();
     function onManageClick() {
@@ -293,7 +301,11 @@ export default function Sidebar(props: Props) {
                         {constants.FIX_LARGE_THUMBNAILS}
                     </LinkButton>
                 </>
-                <FailedUploads />
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={downloadUploadLogs}>
+                    {constants.DOWNLOAD_UPLOAD_LOGS}
+                </LinkButton>
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={openFeedbackURL}>

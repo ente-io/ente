@@ -1,5 +1,8 @@
 import { FileWithCollection, Metadata } from 'types/upload';
 import { EnteFile } from 'types/file';
+import { convertToHumanReadable } from 'utils/billing';
+import { formatDateTime } from 'utils/file';
+import { getLogs, saveLogLine } from 'utils/storage';
 
 const TYPE_JSON = 'json';
 
@@ -48,4 +51,22 @@ export function segregateMetadataAndMediaFiles(
         }
     });
     return { mediaFiles, metadataJSONFiles };
+}
+
+export function logUploadInfo(log: string) {
+    saveLogLine({
+        type: 'upload',
+        timestamp: Date.now(),
+        logLine: log,
+    });
+}
+
+export function getUploadLogs() {
+    return getLogs()
+        .filter((log) => log.type === 'upload')
+        .map((log) => `[${formatDateTime(log.timestamp)}] ${log.logLine}`);
+}
+
+export function getFileNameSize(file: File) {
+    return `${file.name}_${convertToHumanReadable(file.size)}`;
 }
