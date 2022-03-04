@@ -93,7 +93,7 @@ export async function generateImageThumbnail(file: File, isHEIC: boolean) {
 
     if (isHEIC) {
         logUploadInfo(`HEICConverter called for ${getFileNameSize(file)}`);
-        file = new File([await HEICConverter.convert(file)], null, null);
+        file = new File([await HEICConverter.convert(file)], file.name);
         logUploadInfo(`${getFileNameSize(file)} successfully converted`);
     }
     let image = new Image();
