@@ -9,6 +9,7 @@ import UploadService from './uploadService';
 import { FILE_TYPE } from 'constants/file';
 import { FileUploadResults, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
 import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
+import { saveLogLine } from 'utils/storage';
 
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
@@ -21,7 +22,11 @@ export default async function uploader(
     fileWithCollection: FileWithCollection
 ): Promise<UploadResponse> {
     const { collection, localID, ...uploadAsset } = fileWithCollection;
+    const fileNameSize = `${UploadService.getAssetName(
+        fileWithCollection
+    )}_${UploadService.getAssetSize(uploadAsset)}`;
 
+    saveLogLine(`uploader called for  ${fileNameSize}`);
     UIService.setFileProgress(localID, 0);
     const { fileTypeInfo, metadata } =
         UploadService.getFileMetadataAndFileTypeInfo(localID);
@@ -40,6 +45,7 @@ export default async function uploader(
         if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
             return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
         }
+        saveLogLine(`reading asset ${fileNameSize}`);
 
         const file = await UploadService.readAsset(
             reader,
@@ -57,11 +63,15 @@ export default async function uploader(
             metadata,
         };
 
+        saveLogLine(`encryptAsset ${fileNameSize}`);
+
         const encryptedFile = await UploadService.encryptAsset(
             worker,
             fileWithMetadata,
             collection.key
         );
+
+        saveLogLine(`uploadToBucket ${fileNameSize}`);
 
         const backupedFile: BackupedFile = await UploadService.uploadToBucket(
             encryptedFile.file
@@ -72,6 +82,7 @@ export default async function uploader(
             backupedFile,
             encryptedFile.fileKey
         );
+        saveLogLine(`uploadFile ${fileNameSize}`);
 
         const uploadedFile = await UploadHttpClient.uploadFile(uploadFile);
         const decryptedFile = await decryptFile(uploadedFile, collection.key);

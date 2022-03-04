@@ -9,7 +9,7 @@ import {
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
-import { segregateMetadataAndMediaFiles } from 'utils/upload';
+import { getFileNameSize, segregateMetadataAndMediaFiles } from 'utils/upload';
 import uploader from './uploader';
 import UIService from './uiService';
 import UploadService from './uploadService';
@@ -35,6 +35,7 @@ import uiService from './uiService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { dedupe } from 'utils/export';
 import { convertToHumanReadable } from 'utils/billing';
+import { saveLogLine } from 'utils/storage';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -81,8 +82,13 @@ class UploadManager {
     ) {
         try {
             await this.init(newCreatedCollections);
+            saveLogLine(
+                `received ${fileWithCollectionToBeUploaded.length} files to upload`
+            );
             const { metadataJSONFiles, mediaFiles } =
                 segregateMetadataAndMediaFiles(fileWithCollectionToBeUploaded);
+            saveLogLine(`has ${metadataJSONFiles.length} metadata json files`);
+            saveLogLine(`has ${metadataJSONFiles.length} media files`);
             if (metadataJSONFiles.length) {
                 UIService.setUploadStage(
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES
@@ -99,6 +105,7 @@ class UploadManager {
                     this.metadataAndFileTypeInfoMap
                 );
                 UIService.setUploadStage(UPLOAD_STAGES.START);
+                saveLogLine(`clusterLivePhotoFiles called`);
                 const analysedMediaFiles =
                     UploadService.clusterLivePhotoFiles(mediaFiles);
                 uiService.setFilenames(
@@ -109,9 +116,16 @@ class UploadManager {
                         ])
                     )
                 );
+
                 UIService.setHasLivePhoto(
                     mediaFiles.length !== analysedMediaFiles.length
                 );
+                saveLogLine(
+                    `got live photos: ${
+                        mediaFiles.length !== analysedMediaFiles.length
+                    }`
+                );
+
                 await this.uploadMediaFiles(analysedMediaFiles);
             }
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
@@ -128,10 +142,14 @@ class UploadManager {
 
     private async parseMetadataJSONFiles(metadataFiles: FileWithCollection[]) {
         try {
+            saveLogLine(`parseMetadataJSONFiles function executed `);
+
             UIService.reset(metadataFiles.length);
             const reader = new FileReader();
             for (const { file, collectionID } of metadataFiles) {
                 try {
+                    saveLogLine(`parsing file ${getFileNameSize(file)}`);
+
                     const parsedMetadataJSONWithTitle = await parseMetadataJSON(
                         reader,
                         file
@@ -157,12 +175,19 @@ class UploadManager {
 
     private async extractMetadataFromFiles(mediaFiles: FileWithCollection[]) {
         try {
+            saveLogLine(`extractMetadataFromFiles executed`);
             UIService.reset(mediaFiles.length);
             const reader = new FileReader();
             for (const { file, localID, collectionID } of mediaFiles) {
                 try {
                     const { fileTypeInfo, metadata } = await (async () => {
                         if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
+                            saveLogLine(
+                                `${getFileNameSize(
+                                    file
+                                )} rejected  because of large size`
+                            );
+
                             return { fileTypeInfo: null, metadata: null };
                         }
                         const fileTypeInfo = await UploadService.getFileType(
@@ -170,8 +195,16 @@ class UploadManager {
                             file
                         );
                         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
+                            saveLogLine(
+                                `${getFileNameSize(
+                                    file
+                                )} rejected  because of unknown file format`
+                            );
                             return { fileTypeInfo, metadata: null };
                         }
+                        saveLogLine(
+                            ` extracting ${getFileNameSize(file)} metadata`
+                        );
                         const metadata =
                             (await UploadService.extractFileMetadata(
                                 file,
@@ -197,6 +230,7 @@ class UploadManager {
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
+        saveLogLine(`uploadMediaFiles called`);
         this.filesToBeUploaded.push(...mediaFiles);
         UIService.reset(mediaFiles.length);
 

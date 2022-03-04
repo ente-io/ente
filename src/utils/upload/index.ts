@@ -1,5 +1,6 @@
 import { FileWithCollection, Metadata } from 'types/upload';
 import { EnteFile } from 'types/file';
+import { convertToHumanReadable } from 'utils/billing';
 
 const TYPE_JSON = 'json';
 
@@ -48,4 +49,8 @@ export function segregateMetadataAndMediaFiles(
         }
     });
     return { mediaFiles, metadataJSONFiles };
+}
+
+export function getFileNameSize(file: File) {
+    return `${file.name}_${convertToHumanReadable(file.size)}`;
 }
