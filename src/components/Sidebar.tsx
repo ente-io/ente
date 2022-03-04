@@ -113,10 +113,8 @@ export default function Sidebar(props: Props) {
 
     const downloadUploadLogs = () => {
         const logs = getUploadLogs();
-        if (logs.length > 0) {
-            const logString = logs.join('\n');
-            downloadAsFile(`upload_logs_${Date.now()}.txt`, logString);
-        }
+        const logString = logs.join('\n');
+        downloadAsFile(`upload_logs_${Date.now()}.txt`, logString);
     };
 
     const router = useRouter();
