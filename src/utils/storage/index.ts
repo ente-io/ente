@@ -5,6 +5,9 @@ export interface Log {
     timestamp: number;
     logLine: string;
 }
+
+const MAX_LOG_LINES = 1000;
+
 export const isFirstLogin = () =>
     getData(LS_KEYS.IS_FIRST_LOGIN)?.status ?? false;
 
@@ -29,7 +32,7 @@ export function setLivePhotoInfoShownCount(count) {
 
 export function saveLogLine(log: Log) {
     setData(LS_KEYS.LOGS, {
-        logs: [...getLogs(), log],
+        logs: [...getLogs(), log].slice(0, MAX_LOG_LINES),
     });
 }
 
