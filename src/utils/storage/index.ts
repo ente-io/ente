@@ -1,4 +1,3 @@
-import { convertToHumanReadable } from 'utils/billing';
 import { getData, LS_KEYS, setData } from './localStorage';
 
 export interface Log {
@@ -26,16 +25,6 @@ export function getLivePhotoInfoShownCount() {
 
 export function setLivePhotoInfoShownCount(count) {
     setData(LS_KEYS.LIVE_PHOTO_INFO_SHOWN_COUNT, { count });
-}
-
-export function setLastAttemptedFile(file: File) {
-    setData(LS_KEYS.LAST_ATTEMPTED_FILE, {
-        file: `${file.name}_${convertToHumanReadable(file.size)}`,
-    });
-}
-
-export function getLastAttemptedFile() {
-    return getData(LS_KEYS.LAST_ATTEMPTED_FILE)?.file;
 }
 
 export function saveLogLine(log: Log) {

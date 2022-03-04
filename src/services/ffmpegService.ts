@@ -6,7 +6,6 @@ import { ParsedExtractedMetadata } from 'types/upload';
 
 import { getUint8ArrayView } from './upload/readFileService';
 import { parseFFmpegExtractedMetadata } from './upload/videoMetadataService';
-import { setLastAttemptedFile } from 'utils/storage';
 
 class FFmpegService {
     private ffmpeg: FFmpeg = null;
@@ -170,7 +169,6 @@ async function extractVideoMetadataHelper(
     file: File
 ) {
     try {
-        setLastAttemptedFile(file);
         const inputFileName = `${Date.now().toString()}-${file.name}`;
         const outFileName = `${Date.now().toString()}-metadata.txt`;
         ffmpeg.FS(
