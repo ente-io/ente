@@ -44,6 +44,7 @@ export default async function uploader(
         }
 
         if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
+            logUploadInfo(`skipped upload for  ${fileNameSize}`);
             return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
         }
         logUploadInfo(`reading asset ${fileNameSize}`);
