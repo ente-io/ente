@@ -288,7 +288,7 @@ const PhotoFrame = ({
         };
         setFiles((files) => {
             files[index] = updateFile(files[index]);
-            return [...files];
+            return files;
         });
         return updateFile(files[index]);
     };
@@ -350,7 +350,7 @@ const PhotoFrame = ({
         };
         setFiles((files) => {
             files[index] = updateFile(files[index]);
-            return [...files];
+            return files;
         });
         setIsSourceLoaded(true);
         return updateFile(files[index]);
