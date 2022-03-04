@@ -35,7 +35,9 @@ import { PAGES } from 'constants/pages';
 import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 import FixLargeThumbnails from './FixLargeThumbnail';
 import { SetLoading } from 'types/gallery';
-import FailedUploads from './FailedUploads';
+import { downloadAsFile } from 'utils/file';
+import { getUploadLogs } from 'utils/upload';
+import styled from 'styled-components';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -55,6 +57,7 @@ export default function Sidebar(props: Props) {
     const [exportModalView, setExportModalView] = useState(false);
     const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
     const galleryContext = useContext(GalleryContext);
+
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -109,22 +112,24 @@ export default function Sidebar(props: Props) {
         }
     }
 
+    const downloadUploadLogs = () => {
+        const logs = getUploadLogs();
+        const logString = logs.join('\n');
+        downloadAsFile(`upload_logs_${Date.now()}.txt`, logString);
+    };
+
     const router = useRouter();
     function onManageClick() {
         setIsOpen(false);
         galleryContext.showPlanSelectorModal();
     }
 
-    const Divider = () => (
-        <div
-            style={{
-                height: '1px',
-                marginTop: '40px',
-                background: '#242424',
-                width: '100%',
-            }}
-        />
-    );
+    const Divider = styled.div`
+        height: 1px;
+        margin-top: 40px;
+        background: #242424;
+        width: 100%;
+    `;
     return (
         <Menu
             isOpen={isOpen}
@@ -293,7 +298,6 @@ export default function Sidebar(props: Props) {
                         {constants.FIX_LARGE_THUMBNAILS}
                     </LinkButton>
                 </>
-                <FailedUploads />
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={openFeedbackURL}>
@@ -361,12 +365,24 @@ export default function Sidebar(props: Props) {
                     }>
                     {constants.DELETE_ACCOUNT}
                 </LinkButton>
+                <Divider style={{ marginTop: '36px' }} />
                 <div
                     style={{
                         marginTop: '40px',
                         width: '100%',
                     }}
                 />
+                <div
+                    style={{
+                        marginTop: '30px',
+                        fontSize: '14px',
+                        textAlign: 'center',
+                        color: 'grey',
+                        cursor: 'pointer',
+                    }}
+                    onClick={downloadUploadLogs}>
+                    {constants.DOWNLOAD_UPLOAD_LOGS}
+                </div>
             </div>
         </Menu>
     );

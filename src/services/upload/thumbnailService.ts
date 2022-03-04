@@ -8,6 +8,7 @@ import { isFileHEIC } from 'utils/file';
 import { FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from './readFileService';
 import HEICConverter from 'services/HEICConverter';
+import { getFileNameSize, logUploadInfo } from 'utils/upload';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
@@ -28,6 +29,7 @@ export async function generateThumbnail(
     fileTypeInfo: FileTypeInfo
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
+        logUploadInfo(`generating thumbnail for ${getFileNameSize(file)}`);
         let hasStaticThumbnail = false;
         let canvas = document.createElement('canvas');
         let thumbnail: Uint8Array;
@@ -37,13 +39,29 @@ export async function generateThumbnail(
                 canvas = await generateImageThumbnail(file, isHEIC);
             } else {
                 try {
+                    logUploadInfo(
+                        `ffmpeg generateThumbnail called for ${getFileNameSize(
+                            file
+                        )}`
+                    );
+
                     const thumb = await FFmpegService.generateThumbnail(file);
+                    logUploadInfo(
+                        `ffmpeg thumbnail successfully generated ${getFileNameSize(
+                            file
+                        )}`
+                    );
                     const dummyImageFile = new File([thumb], file.name);
                     canvas = await generateImageThumbnail(
                         dummyImageFile,
                         false
                     );
                 } catch (e) {
+                    logUploadInfo(
+                        `ffmpeg thumbnail generated failed  ${getFileNameSize(
+                            file
+                        )} error: ${e.message}`
+                    );
                     logError(e, 'failed to generate thumbnail using ffmpeg', {
                         fileFormat: fileTypeInfo.exactType,
                     });
@@ -55,10 +73,18 @@ export async function generateThumbnail(
             if (thumbnail.length === 0) {
                 throw Error('EMPTY THUMBNAIL');
             }
+            logUploadInfo(
+                `thumbnail successfully generated ${getFileNameSize(file)}`
+            );
         } catch (e) {
             logError(e, 'uploading static thumbnail', {
                 fileFormat: fileTypeInfo.exactType,
             });
+            logUploadInfo(
+                `thumbnail generation failed ${getFileNameSize(file)} error: ${
+                    e.message
+                }`
+            );
             thumbnail = Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) =>
                 c.charCodeAt(0)
             );
@@ -79,7 +105,9 @@ export async function generateImageThumbnail(file: File, isHEIC: boolean) {
     let timeout = null;
 
     if (isHEIC) {
-        file = new File([await HEICConverter.convert(file)], null, null);
+        logUploadInfo(`HEICConverter called for ${getFileNameSize(file)}`);
+        file = new File([await HEICConverter.convert(file)], file.name);
+        logUploadInfo(`${getFileNameSize(file)} successfully converted`);
     }
     let image = new Image();
     imageURL = URL.createObjectURL(file);

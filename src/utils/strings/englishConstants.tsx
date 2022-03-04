@@ -674,6 +674,7 @@ const englishConstants = {
     PLAYBACK_SUPPORT_COMING: 'playback support coming soon...',
     LIVE_PHOTO: 'this is a live photo',
     LIVE: 'LIVE',
+    DOWNLOAD_UPLOAD_LOGS: 'debug logs',
 };
 
 export default englishConstants;
