@@ -14,7 +14,7 @@ import { EnteFile } from 'types/file';
 import { Config } from 'types/common/config';
 import { Dimensions } from 'types/image';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
-import * as SSDMobileNet from 'ssd-mobilenet';
+import * as SSDMobileNet from '@tensorflow-models/coco-ssd';
 
 export interface MLSyncResult {
     nOutOfSyncFiles: number;
