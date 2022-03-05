@@ -37,7 +37,9 @@ Future<T> showChoiceDialog<T>(
           firstAction,
           style: TextStyle(
             color: firstActionColor ??
-                (actionType == ActionType.critical ? Colors.red : Colors.white),
+                (actionType == ActionType.critical
+                    ? Colors.red
+                    : Theme.of(context).colorScheme.onSurface),
           ),
         ),
         onPressed: () {

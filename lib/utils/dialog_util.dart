@@ -35,7 +35,7 @@ Future<dynamic> showErrorDialog(
         child: Text(
           "ok",
           style: TextStyle(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         onPressed: () {

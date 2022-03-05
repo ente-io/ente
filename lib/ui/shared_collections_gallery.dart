@@ -162,7 +162,9 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
         children: [
           Text(
             "no one is sharing with you",
-            style: TextStyle(color: Colors.white.withOpacity(0.6)),
+            style: TextStyle(
+                color:
+                    Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
           ),
           Container(
             padding: EdgeInsets.fromLTRB(28, 20, 28, 46),
@@ -184,13 +186,19 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 children: [
                   Icon(
                     Icons.outgoing_mail,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.7),
                   ),
                   Padding(padding: EdgeInsets.all(6)),
                   Text(
                     "invite",
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.8),
                     ),
                   ),
                 ],
@@ -212,7 +220,9 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
         children: [
           Text(
             "you aren't sharing anything",
-            style: TextStyle(color: Colors.white.withOpacity(0.6)),
+            style: TextStyle(
+                color:
+                    Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
           ),
           Container(
             padding: EdgeInsets.fromLTRB(28, 20, 28, 46),
@@ -234,13 +244,19 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 children: [
                   Icon(
                     Icons.person_add,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.7),
                   ),
                   Padding(padding: EdgeInsets.all(6)),
                   Text(
                     "share",
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.8),
                     ),
                   ),
                 ],

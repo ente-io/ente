@@ -41,7 +41,7 @@ class _VideoControlsState extends State<VideoControls> {
           : Center(
               child: Icon(
                 Icons.error,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 size: 42,
               ),
             );

@@ -61,8 +61,8 @@ class HugeListView<T> extends StatefulWidget {
     this.emptyResultBuilder,
     this.errorBuilder,
     this.firstShown,
-    this.thumbBackgroundColor = Colors.white,
-    this.thumbDrawColor = Colors.grey,
+    this.thumbBackgroundColor = Colors.red,// Colors.white,
+    this.thumbDrawColor = Colors.yellow, //Colors.grey,
     this.thumbHeight = 48.0,
     this.isDraggableScrollbarEnabled = true,
   })  : super(key: key);

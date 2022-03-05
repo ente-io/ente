@@ -146,7 +146,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
         children: [
-          getDayWidget(_files[0].creationTime),
+          getDayWidget(context, _files[0].creationTime),
           _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
         ],
       ),

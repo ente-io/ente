@@ -27,7 +27,8 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   void initState() {
     super.initState();
     _fetchUserDetails();
-    _userDetailsChangedEvent = Bus.instance.on<UserDetailsChangedEvent>().listen((event) {
+    _userDetailsChangedEvent =
+        Bus.instance.on<UserDetailsChangedEvent>().listen((event) {
       _fetchUserDetails();
     });
   }
@@ -101,7 +102,6 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
               centerText:
                   convertBytesToReadableFormat(_userDetails.usage) + "\nused",
               centerTextStyle: TextStyle(
-                color: Colors.white,
                 fontSize: 12,
               ),
               initialAngleInDegree: 270,
@@ -123,19 +123,13 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                 Padding(padding: EdgeInsets.all(6)),
                 Text(
                   _userDetails.fileCount.toString() + " memories preserved",
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 14,
-                  ),
+                  style: Theme.of(context).textTheme.caption,
                 ),
                 Padding(padding: EdgeInsets.all(3)),
                 Text(
                   _userDetails.sharedCollectionsCount.toString() +
                       " albums shared",
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 14,
-                  ),
+                  style: Theme.of(context).textTheme.caption,
                 ),
               ],
             ),

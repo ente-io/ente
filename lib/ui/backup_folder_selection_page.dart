@@ -72,11 +72,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             padding: const EdgeInsets.only(left: 32, right: 32),
             child: Text(
               "the selected folders will be end-to-end encrypted and backed up",
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.4),
-                fontSize: 14,
-                height: 1.3,
-              ),
+              style: Theme.of(context).textTheme.caption.copyWith(height: 1.3),
               textAlign: TextAlign.center,
             ),
           ),
@@ -96,10 +92,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                             ? "unselect all"
                             : "select all",
                         textAlign: TextAlign.right,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white.withOpacity(0.8),
-                        ),
+                        style: Theme.of(context).textTheme.overline,
                       ),
                     ),
                   ),
@@ -179,8 +172,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                 builder: (context, dragAnimation, inDrag) {
                   final t = dragAnimation.value;
                   final elevation = lerpDouble(0, 8, t);
-                  final color = Color.lerp(
-                      Colors.white, Colors.white.withOpacity(0.8), t);
+                  final themeColor = Theme.of(context).colorScheme.onSurface;
+                  final color =
+                      Color.lerp(themeColor, themeColor.withOpacity(0.8), t);
                   return SizeFadeTransition(
                     sizeFraction: 0.7,
                     curve: Curves.easeInOut,
@@ -208,7 +202,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.black,
+            color: Theme.of(context).primaryColor,
           ),
           borderRadius: BorderRadius.all(
             Radius.circular(10),

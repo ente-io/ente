@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 Map<int, String> _months = {
   1: "Jan",
   2: "Feb",
@@ -160,7 +161,7 @@ bool isLeapYear(DateTime dateTime) {
   }
 }
 
-Widget getDayWidget(int timestamp) {
+Widget getDayWidget(BuildContext context, int timestamp) {
   return Container(
     padding: const EdgeInsets.fromLTRB(10, 8, 0, 10),
     alignment: Alignment.centerLeft,
@@ -168,7 +169,7 @@ Widget getDayWidget(int timestamp) {
       getDayTitle(timestamp),
       style: TextStyle(
         fontSize: 14,
-        color: Colors.white.withOpacity(0.85),
+        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.85),
       ),
     ),
   );

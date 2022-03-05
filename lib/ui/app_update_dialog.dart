@@ -23,11 +23,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     for (final log in widget.latestVersionInfo.changelog) {
       changelog.add(Padding(
         padding: const EdgeInsets.fromLTRB(8, 4, 0, 4),
-        child: Text("- " + log,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.white.withOpacity(0.7),
-            )),
+        child: Text("- " + log, style: Theme.of(context).textTheme.caption),
       ));
     }
     final content = Column(
@@ -78,7 +74,9 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     return WillPopScope(
       onWillPop: () async => !shouldForceUpdate,
       child: AlertDialog(
-        title: Text(shouldForceUpdate? "critical update available" : "update available"),
+        title: Text(shouldForceUpdate
+            ? "critical update available"
+            : "update available"),
         content: content,
       ),
     );

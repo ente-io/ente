@@ -49,6 +49,11 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
   Widget _getWidget(BackupStatus status) {
     final count = status.localIDs.length;
     final formattedCount = NumberFormat().format(count);
+    final informationTextStyle = TextStyle(
+      fontSize: 14,
+      height: 1.3,
+      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+    );
     return Container(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -75,11 +80,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                             " file on this device has been backed up safely"
                         : formattedCount.toString() +
                             " files on this device have been backed up safely",
-                    style: TextStyle(
-                      fontSize: 14,
-                      height: 1.3,
-                      color: Colors.white.withOpacity(0.8),
-                    ),
+                    style: informationTextStyle,
                   ),
                 ),
               ],
@@ -100,11 +101,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                     (count == 1 ? "it" : "they") +
                         " can be deleted from this device to free up " +
                         formatBytes(status.size),
-                    style: TextStyle(
-                      fontSize: 14,
-                      height: 1.3,
-                      color: Colors.white.withOpacity(0.8),
-                    ),
+                    style: informationTextStyle,
                   ),
                 ),
               ],
@@ -125,11 +122,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                     "you can still access " +
                         (count == 1 ? "it" : "them") +
                         " on ente as long as you have an active subscription",
-                    style: TextStyle(
-                      fontSize: 14,
-                      height: 1.3,
-                      color: Colors.white.withOpacity(0.8),
-                    ),
+                    style: informationTextStyle,
                   ),
                 ),
               ],

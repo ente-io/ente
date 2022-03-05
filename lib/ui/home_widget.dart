@@ -441,7 +441,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget _buildBottomNavigationBar() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.90),
+        color: Theme.of(context).backgroundColor.withOpacity(0.30),
       ),
       child: SafeArea(
         child: Padding(
@@ -455,7 +455,8 @@ class _HomeWidgetState extends State<HomeWidget> {
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             duration: Duration(milliseconds: 400),
             tabMargin: EdgeInsets.only(left: 8, right: 8),
-            tabBackgroundColor: Color.fromRGBO(15, 25, 25, 0.7),
+            tabBackgroundColor:
+                Theme.of(context).cardColor.withOpacity(0.7), // review
             haptic: false,
             tabs: [
               GButton(

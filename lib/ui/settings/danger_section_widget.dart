@@ -72,6 +72,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
             ),
           ],
           style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             height: 1.5,
             fontFamily: 'Ubuntu',
             fontSize: 16,
@@ -103,7 +104,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
           child: Text(
             "ok",
             style: TextStyle(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           onPressed: () {

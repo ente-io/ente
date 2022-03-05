@@ -34,16 +34,14 @@ class GalleryFooterWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(
-                  Icons.cloud_upload,
-                  color: Colors.white,
-                ),
+              children: [
+                Icon(Icons.cloud_upload,
+                    color: Theme.of(context).colorScheme.onSurface),
                 Padding(padding: EdgeInsets.all(6)),
                 Text(
                   "preserve more",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onBackground,
                   ),
                 ),
               ],

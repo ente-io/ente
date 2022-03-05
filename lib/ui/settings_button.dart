@@ -13,7 +13,7 @@ class SettingsButton extends StatelessWidget {
       child: IconButton(
         icon: Icon(
           Icons.settings,
-          color: Colors.white.withOpacity(0.4),
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
         ),
         padding: EdgeInsets.fromLTRB(16, 4, 16, 18),
         onPressed: () async {

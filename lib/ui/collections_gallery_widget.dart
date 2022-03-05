@@ -207,7 +207,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       children: const [
                         Icon(
                           Icons.archive_outlined,
-                          color: Colors.white,
                         ),
                         Padding(padding: EdgeInsets.all(6)),
                         Text(
@@ -247,7 +246,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       children: const [
                         Icon(
                           Icons.delete_outline_sharp,
-                          color: Colors.white,
                         ),
                         Padding(padding: EdgeInsets.all(6)),
                         Text(
@@ -294,7 +292,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 13,
-          color: Colors.white.withOpacity(0.6),
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
         ),
       );
     }
