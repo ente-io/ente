@@ -10,7 +10,7 @@ import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/home_widget.dart';
 
-final themeData = ThemeData(
+final darkThemeData = ThemeData(
   fontFamily: 'Ubuntu',
   brightness: Brightness.dark,
   hintColor: Colors.grey,
@@ -71,7 +71,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "ente",
-      theme: themeData,
+      theme: darkThemeData,
       home: EnteApp._homeWidget,
       debugShowCheckedModeBanner: false,
       navigatorKey: Network.instance.getAlice().getNavigatorKey(),
