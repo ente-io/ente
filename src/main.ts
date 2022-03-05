@@ -7,6 +7,8 @@ import setupIpcComs from './utils/ipcComms';
 import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 import initSentry from './utils/sentry';
 
+const HOST_URL: string = 'next://app';
+
 let tray: Tray;
 let mainWindow: BrowserWindow;
 
@@ -29,7 +31,7 @@ export const setIsUpdateAvailable = (value: boolean): void => {
 };
 
 const serveNextAt = require('next-electron-server');
-serveNextAt('next://app', {
+serveNextAt(HOST_URL, {
     outputDir: './bada-frame/out',
 });
 
@@ -60,13 +62,14 @@ if (!gotTheLock) {
     app.on('ready', () => {
         initSentry();
         setIsUpdateAvailable(false);
-        mainWindow = createWindow();
+        mainWindow = createWindow(HOST_URL);
         Menu.setApplicationMenu(buildMenuBar());
 
         app.on('activate', function () {
             // On macOS it's common to re-create a window in the app when the
             // dock icon is clicked and there are no other windows open.
-            if (BrowserWindow.getAllWindows().length === 0) createWindow();
+            if (BrowserWindow.getAllWindows().length === 0)
+                createWindow(HOST_URL);
         });
 
         const trayImgPath = isDev
@@ -77,7 +80,7 @@ if (!gotTheLock) {
         tray.setToolTip('ente');
         tray.setContextMenu(buildContextMenu(mainWindow));
 
-        setupIpcComs(tray, mainWindow);
+        setupIpcComs(tray, mainWindow, HOST_URL);
         if (!isDev) {
             AppUpdater.checkForUpdate(tray, mainWindow);
         }

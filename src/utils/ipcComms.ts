@@ -4,7 +4,8 @@ import { buildContextMenu } from './menuUtil';
 
 export default function setupIpcComs(
     tray: Tray,
-    mainWindow: BrowserWindow
+    mainWindow: BrowserWindow,
+    HOST_URL: string
 ): void {
     ipcMain.on('select-dir', async (event) => {
         const dialogWindow = new BrowserWindow({
@@ -39,7 +40,7 @@ export default function setupIpcComs(
         new Notification(notification).show();
     });
     ipcMain.on('reload-window', (event, args) => {
-        const secondWindow = createWindow();
+        const secondWindow = createWindow(HOST_URL);
         mainWindow.destroy();
         mainWindow = secondWindow;
     });
