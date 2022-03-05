@@ -8,44 +8,11 @@ import { getUint8ArrayView } from './upload/readFileService';
 import { parseFFmpegExtractedMetadata } from './upload/videoMetadataService';
 
 class FFmpegService {
-    private ffmpeg: FFmpeg = null;
-    private isLoading = null;
-    private fileReader: FileReader = null;
-
     private ffmpegTaskQueue = new QueueProcessor<any>(1);
-    async init() {
-        try {
-            this.ffmpeg = createFFmpeg({
-                corePath: '/js/ffmpeg/ffmpeg-core.js',
-            });
-            this.isLoading = this.ffmpeg.load();
-            await this.isLoading;
-            this.isLoading = null;
-        } catch (e) {
-            logError(e, 'ffmpeg load failed');
-            this.ffmpeg = null;
-            this.isLoading = null;
-            throw e;
-        }
-    }
 
     async generateThumbnail(file: File): Promise<Uint8Array> {
-        if (!this.ffmpeg) {
-            await this.init();
-        }
-        if (!this.fileReader) {
-            this.fileReader = new FileReader();
-        }
-        if (this.isLoading) {
-            await this.isLoading;
-        }
         const response = this.ffmpegTaskQueue.queueUpRequest(
-            generateThumbnailHelper.bind(
-                null,
-                this.ffmpeg,
-                this.fileReader,
-                file
-            )
+            generateThumbnailHelper.bind(null, file)
         );
         try {
             return await response.promise;
@@ -61,22 +28,8 @@ class FFmpegService {
     }
 
     async extractMetadata(file: File): Promise<ParsedExtractedMetadata> {
-        if (!this.ffmpeg) {
-            await this.init();
-        }
-        if (!this.fileReader) {
-            this.fileReader = new FileReader();
-        }
-        if (this.isLoading) {
-            await this.isLoading;
-        }
         const response = this.ffmpegTaskQueue.queueUpRequest(
-            extractVideoMetadataHelper.bind(
-                null,
-                this.ffmpeg,
-                this.fileReader,
-                file
-            )
+            extractVideoMetadataHelper.bind(null, file)
         );
         try {
             return await response.promise;
@@ -91,41 +44,55 @@ class FFmpegService {
         }
     }
 
-    async convertToMP4(
-        file: Uint8Array,
-        fileName: string
-    ): Promise<Uint8Array> {
-        if (!this.ffmpeg) {
-            await this.init();
-        }
-        if (this.isLoading) {
-            await this.isLoading;
-        }
+    //     async convertToMP4(
+    //         file: Uint8Array,
+    //         fileName: string
+    //     ): Promise<Uint8Array> {
+    //         if (!this.ffmpeg) {
+    //             await this.init();
+    //         }
+    //         if (this.isLoading) {
+    //             await this.isLoading;
+    //         }
 
-        const response = this.ffmpegTaskQueue.queueUpRequest(
-            convertToMP4Helper.bind(null, this.ffmpeg, file, fileName)
-        );
+    //         const response = this.ffmpegTaskQueue.queueUpRequest(
+    //             convertToMP4Helper.bind(null, this.ffmpeg, file, fileName)
+    //         );
 
-        try {
-            return await response.promise;
-        } catch (e) {
-            if (e.message === CustomError.REQUEST_CANCELLED) {
-                // ignore
-                return null;
-            } else {
-                logError(e, 'ffmpeg MP4 conversion failed');
-                throw e;
-            }
-        }
-    }
+    //         try {
+    //             return await response.promise;
+    //         } catch (e) {
+    //             if (e.message === CustomError.REQUEST_CANCELLED) {
+    //                 // ignore
+    //                 return null;
+    //             } else {
+    //                 logError(e, 'ffmpeg MP4 conversion failed');
+    //                 throw e;
+    //             }
+    //         }
+    //     }
 }
 
-async function generateThumbnailHelper(
-    ffmpeg: FFmpeg,
-    reader: FileReader,
-    file: File
-) {
+async function getFFmpegInstance(): Promise<FFmpeg> {
     try {
+        const ffmpeg = createFFmpeg({
+            corePath: '/js/ffmpeg/ffmpeg-core.js',
+            mt: false,
+            // log: true,
+        });
+        await ffmpeg.load();
+        return ffmpeg;
+    } catch (e) {
+        logError(e, 'ffmpeg load failed');
+        this.ffmpeg = null;
+        this.isLoading = null;
+        throw e;
+    }
+}
+async function generateThumbnailHelper(file: File) {
+    const ffmpeg = await getFFmpegInstance();
+    try {
+        const reader = new FileReader();
         const inputFileName = `${Date.now().toString()}-${file.name}`;
         const thumbFileName = `${Date.now().toString()}-thumb.jpeg`;
         ffmpeg.FS(
@@ -156,19 +123,24 @@ async function generateThumbnailHelper(
             }
         }
         ffmpeg.FS('unlink', inputFileName);
+
         return thumb;
     } catch (e) {
         logError(e, 'ffmpeg thumbnail generation failed');
         throw e;
+    } finally {
+        try {
+            ffmpeg.exit();
+        } catch (e) {
+            // console.log(e);
+        }
     }
 }
 
-async function extractVideoMetadataHelper(
-    ffmpeg: FFmpeg,
-    reader: FileReader,
-    file: File
-) {
+async function extractVideoMetadataHelper(file: File) {
+    const ffmpeg = await getFFmpegInstance();
     try {
+        const reader = new FileReader();
         const inputFileName = `${Date.now().toString()}-${file.name}`;
         const outFileName = `${Date.now().toString()}-metadata.txt`;
         ffmpeg.FS(
@@ -200,31 +172,37 @@ async function extractVideoMetadataHelper(
     } catch (e) {
         logError(e, 'ffmpeg metadata extraction failed');
         throw e;
+    } finally {
+        try {
+            ffmpeg.exit();
+        } catch (e) {
+            // console.log(e);
+        }
     }
 }
 
-async function convertToMP4Helper(
-    ffmpeg: FFmpeg,
-    file: Uint8Array,
-    inputFileName: string
-) {
-    try {
-        ffmpeg.FS('writeFile', inputFileName, file);
-        await ffmpeg.run(
-            '-i',
-            inputFileName,
-            '-preset',
-            'ultrafast',
-            'output.mp4'
-        );
-        const convertedFile = ffmpeg.FS('readFile', 'output.mp4');
-        ffmpeg.FS('unlink', inputFileName);
-        ffmpeg.FS('unlink', 'output.mp4');
-        return convertedFile;
-    } catch (e) {
-        logError(e, 'ffmpeg MP4 conversion failed');
-        throw e;
-    }
-}
+// async function convertToMP4Helper(
+//     ffmpeg: FFmpeg,
+//     file: Uint8Array,
+//     inputFileName: string
+// ) {
+//     try {
+//         ffmpeg.FS('writeFile', inputFileName, file);
+//         await ffmpeg.run(
+//             '-i',
+//             inputFileName,
+//             '-preset',
+//             'ultrafast',
+//             'output.mp4'
+//         );
+//         const convertedFile = ffmpeg.FS('readFile', 'output.mp4');
+//         ffmpeg.FS('unlink', inputFileName);
+//         ffmpeg.FS('unlink', 'output.mp4');
+//         return convertedFile;
+//     } catch (e) {
+//         logError(e, 'ffmpeg MP4 conversion failed');
+//         throw e;
+//     }
+// }
 
 export default new FFmpegService();
