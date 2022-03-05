@@ -2,8 +2,9 @@ import { app, BrowserWindow, nativeImage } from 'electron';
 import * as path from 'path';
 import { isDev } from './common';
 import { isAppQuitting } from '../main';
+import { addAllowOriginHeader } from './cors';
 
-export function createWindow(): BrowserWindow {
+export function createWindow(HOST_URL: string): BrowserWindow {
     const appImgPath = isDev
         ? 'build/window-icon.png'
         : path.join(process.resourcesPath, 'window-icon.png');
@@ -28,16 +29,18 @@ export function createWindow(): BrowserWindow {
     });
     splash.maximize();
 
+    addAllowOriginHeader(mainWindow);
+
     if (isDev) {
         splash.loadFile(`../build/splash.html`);
-        mainWindow.loadURL('next://app');
+        mainWindow.loadURL(HOST_URL);
         // Open the DevTools.
         mainWindow.webContents.openDevTools();
     } else {
         splash.loadURL(
             `file://${path.join(process.resourcesPath, 'splash.html')}`
         );
-        mainWindow.loadURL('next://app');
+        mainWindow.loadURL(HOST_URL);
     }
     mainWindow.webContents.on('did-fail-load', () => {
         splash.close();

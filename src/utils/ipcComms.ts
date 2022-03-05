@@ -13,7 +13,8 @@ import { getFilesFromDir } from './upload';
 
 export default function setupIpcComs(
     tray: Tray,
-    mainWindow: BrowserWindow
+    mainWindow: BrowserWindow,
+    HOST_URL: string
 ): void {
     ipcMain.handle('select-dir', async () => {
         const result = await dialog.showOpenDialog({
@@ -38,7 +39,7 @@ export default function setupIpcComs(
         new Notification(notification).show();
     });
     ipcMain.on('reload-window', () => {
-        const secondWindow = createWindow();
+        const secondWindow = createWindow(HOST_URL);
         mainWindow.destroy();
         mainWindow = secondWindow;
     });
