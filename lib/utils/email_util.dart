@@ -5,12 +5,14 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/ui/log_file_viewer.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:super_logging/super_logging.dart';
 
+final Logger _logger = Logger('email_util');
 bool isValidEmail(String email) {
   return EmailValidator.validate(email);
 }
@@ -129,7 +131,8 @@ Future<void> _sendLogs(
   );
   try {
     await FlutterEmailSender.send(email);
-  } catch (e) {
+  } catch (e, s) {
+    _logger.severe('email sender failed', e, s);
     await Share.shareFiles([zipFilePath]);
   }
 }
