@@ -31,14 +31,14 @@ export function createWindow(): BrowserWindow {
 
     if (isDev) {
         splash.loadFile(`../build/splash.html`);
-        mainWindow.loadURL('http://localhost:3000');
+        mainWindow.loadURL('next://app');
         // Open the DevTools.
         mainWindow.webContents.openDevTools();
     } else {
         splash.loadURL(
             `file://${path.join(process.resourcesPath, 'splash.html')}`
         );
-        mainWindow.loadURL('http://web.ente.io');
+        mainWindow.loadURL('next://app');
     }
     mainWindow.webContents.on('did-fail-load', () => {
         splash.close();

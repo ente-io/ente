@@ -38,7 +38,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "lint": "eslint -c .eslintrc --ext .ts ./src",
-    "start": "yarn build && electron ./app/main.js",
+    "start": "concurrently \"yarn build && electron ./app/main.js\" \"cd bada-frame && yarn dev\"",
     "test-release": "yarn build && electron-builder",
     "release": "electron-builder -mwl --publish always"
   },
@@ -47,6 +47,7 @@
     "@sentry/cli": "^1.68.0",
     "@typescript-eslint/eslint-plugin": "^4.20.0",
     "@typescript-eslint/parser": "^4.20.0",
+    "concurrently": "^7.0.0",
     "electron": "^15.3.0",
     "electron-builder": "^22.10.5",
     "electron-builder-notarize": "^1.2.0",
@@ -62,6 +63,7 @@
     "electron-is-dev": "^2.0.0",
     "electron-log": "^4.3.5",
     "electron-updater": "^4.3.8",
+    "next-electron-server": "^0.0.8",
     "promise-fs": "^2.1.1"
   }
 }
