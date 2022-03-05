@@ -18,6 +18,7 @@ environment:
 
 dependencies:
   alice: ^0.2.4
+  adaptive_theme: ^2.3.0
   animate_do: ^2.0.0
   archive: ^3.1.2
   background_fetch: ^1.0.1
