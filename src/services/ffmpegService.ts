@@ -1,4 +1,4 @@
-import { createFFmpeg, FFmpeg } from '@ffmpeg/ffmpeg';
+import { createFFmpeg, FFmpeg } from 'ffmpeg-wasm';
 import { CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import QueueProcessor from './queueProcessor';
