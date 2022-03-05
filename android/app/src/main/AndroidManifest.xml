@@ -52,6 +52,14 @@
         <meta-data android:name="io.sentry.dsn" android:value="https://2235e5c99219488ea93da34b9ac1cb68@sentry.ente.io/4" />
     </application>
 
+    <!-- Android 11: https://developer.android.com/preview/privacy/package-visibility -->
+    <!-- https://developer.android.com/training/package-visibility/use-cases -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="mailto" />
+        </intent>
+    </queries>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
