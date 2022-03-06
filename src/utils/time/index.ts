@@ -5,6 +5,16 @@ export interface TimeDetla {
     years?: number;
 }
 
+export function dateStringWihMMH(microSecondsSinceEpoch: number): string {
+    return new Date(microSecondsSinceEpoch / 1000).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+}
+
 export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDetla): number {
     let currentDate = new Date();
     console.log(currentDate);

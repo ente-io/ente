@@ -30,7 +30,10 @@ import { handleSharingErrors } from 'utils/error';
 import { sleep } from 'utils/common';
 import { SelectStyles } from './Search/SelectStyle';
 import CryptoWorker from 'utils/crypto';
-import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
+import {
+    dateStringWihMMH,
+    getUnixTimeInMicroSecondsWithDelta,
+} from 'utils/time';
 interface Props {
     show: boolean;
     onHide: () => void;
@@ -327,13 +330,7 @@ function CollectionShare(props: Props) {
         if (validTill === 0) {
             return 'never';
         }
-        return new Date(validTill / 1000).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
+        return dateStringWihMMH(validTill);
     };
 
     const ShareeRow = ({ sharee, collectionUnshare }: ShareeProps) => (
