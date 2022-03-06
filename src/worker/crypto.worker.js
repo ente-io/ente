@@ -80,10 +80,6 @@ export class Crypto {
         return libsodium.deriveKey(passphrase, salt, opsLimit, memLimit);
     }
 
-    async deriveInteractiveKey(passphrase, salt) {
-        return libsodium.deriveInteractiveKey(passphrase, salt);
-    }
-
     async deriveSensitiveKey(passphrase, salt) {
         return libsodium.deriveSensitiveKey(passphrase, salt);
     }

@@ -291,7 +291,8 @@ export async function deriveSensitiveKey(passphrase: string, salt: string) {
     }
 }
 
-export async function deriveInteractiveKey(passphrase: string, salt: string) {
+export async function deriveIntermediateKey(passphrase: string, salt: string) {
+    await sodium.ready;
     // default algo can change in future when we upgrade library.
     // this assert act as a safegaurd for us to identify any such issue.
     assert(
@@ -299,11 +300,6 @@ export async function deriveInteractiveKey(passphrase: string, salt: string) {
             sodium.crypto_pwhash_ALG_ARGON2ID13,
         'mismatch in expected password hashing algorithm'
     );
-    return deriveIntermediateKey(passphrase, salt);
-}
-
-export async function deriveIntermediateKey(passphrase: string, salt: string) {
-    await sodium.ready;
     const key = await toB64(
         sodium.crypto_pwhash(
             sodium.crypto_secretbox_KEYBYTES,
