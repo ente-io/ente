@@ -17,6 +17,7 @@ import constants from 'utils/strings/constants';
 import { Collection } from 'types/collection';
 import { CollectionType } from 'constants/collection';
 import { getAlbumSiteHost } from 'constants/pages';
+import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -136,3 +137,27 @@ export function selectIntOptions(upperLimit: number) {
         _intSelectOption(i + 1)
     );
 }
+
+export const shareExpiryOptions = [
+    { label: 'never', value: () => 0 },
+    {
+        label: 'after 1 hour',
+        value: () => getUnixTimeInMicroSecondsWithDelta({ hours: 1 }),
+    },
+    {
+        label: 'after 1 day',
+        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 1 }),
+    },
+    {
+        label: 'after 1 week',
+        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 7 }),
+    },
+    {
+        label: 'after 1 month',
+        value: () => getUnixTimeInMicroSecondsWithDelta({ months: 1 }),
+    },
+    {
+        label: 'after 1 year',
+        value: () => getUnixTimeInMicroSecondsWithDelta({ years: 1 }),
+    },
+];

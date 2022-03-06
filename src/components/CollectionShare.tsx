@@ -22,6 +22,7 @@ import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import {
     appendCollectionKeyToShareURL,
     selectIntOptions,
+    shareExpiryOptions,
 } from 'utils/collection';
 import { FlexWrapper } from './Container';
 import { CodeBlock } from './CodeBlock';
@@ -30,10 +31,8 @@ import { handleSharingErrors } from 'utils/error';
 import { sleep } from 'utils/common';
 import { SelectStyles } from './Search/SelectStyle';
 import CryptoWorker from 'utils/crypto';
-import {
-    dateStringWihMMH,
-    getUnixTimeInMicroSecondsWithDelta,
-} from 'utils/time';
+import { dateStringWihMMH } from 'utils/time';
+
 interface Props {
     show: boolean;
     onHide: () => void;
@@ -81,30 +80,6 @@ const style = {
     }),
 };
 
-const expiryOptions = [
-    { label: 'never', value: () => 0 },
-    {
-        label: 'after 1 hour',
-        value: () => getUnixTimeInMicroSecondsWithDelta({ hours: 1 }),
-    },
-    {
-        label: 'after 1 day',
-        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 1 }),
-    },
-    {
-        label: 'after 1 week',
-        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 7 }),
-    },
-    {
-        label: 'after 1 month',
-        value: () => getUnixTimeInMicroSecondsWithDelta({ months: 1 }),
-    },
-    {
-        label: 'after 1 year',
-        value: () => getUnixTimeInMicroSecondsWithDelta({ years: 1 }),
-    },
-];
-
 function CollectionShare(props: Props) {
     const [loading, setLoading] = useState(false);
     const galleryContext = useContext(GalleryContext);
@@ -113,6 +88,7 @@ function CollectionShare(props: Props) {
     const [publicShareProp, setPublicShareProp] = useState<PublicURL>(null);
     const [configurePassword, setConfigurePassword] = useState(false);
     const deviceLimitOptions = selectIntOptions(50);
+    const expiryOptions = shareExpiryOptions;
 
     useEffect(() => {
         const main = async () => {
