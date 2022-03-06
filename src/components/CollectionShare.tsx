@@ -8,7 +8,6 @@ import FormControl from 'react-bootstrap/FormControl';
 import { Button, Col, Table } from 'react-bootstrap';
 import { DeadCenter, GalleryContext } from 'pages/gallery';
 import { User } from 'types/user';
-import { DateTime } from 'luxon';
 import {
     shareCollection,
     unshareCollection,
@@ -31,6 +30,7 @@ import { handleSharingErrors } from 'utils/error';
 import { sleep } from 'utils/common';
 import { SelectStyles } from './Search/SelectStyle';
 import CryptoWorker from 'utils/crypto';
+import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 interface Props {
     show: boolean;
     onHide: () => void;
@@ -82,23 +82,23 @@ const expiryOptions = [
     { label: 'never', value: () => 0 },
     {
         label: 'after 1 hour',
-        value: () => DateTime.utc().plus({ hours: 1 }).toMillis() * 1000,
+        value: () => getUnixTimeInMicroSecondsWithDelta({ hours: 1 }),
     },
     {
         label: 'after 1 day',
-        value: () => DateTime.utc().plus({ days: 1 }).toMillis() * 1000,
+        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 1 }),
     },
     {
         label: 'after 1 week',
-        value: () => DateTime.utc().plus({ days: 7 }).toMillis() * 1000,
+        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 7 }),
     },
     {
         label: 'after 1 month',
-        value: () => DateTime.utc().plus({ months: 1 }).toMillis() * 1000,
+        value: () => getUnixTimeInMicroSecondsWithDelta({ months: 1 }),
     },
     {
         label: 'after 1 year',
-        value: () => DateTime.utc().plus({ years: 1 }).toMillis() * 1000,
+        value: () => getUnixTimeInMicroSecondsWithDelta({ years: 1 }),
     },
 ];
 
@@ -327,9 +327,13 @@ function CollectionShare(props: Props) {
         if (validTill === 0) {
             return 'never';
         }
-        return DateTime.fromMillis(Math.round(validTill / 1000)).toLocaleString(
-            DateTime.DATETIME_MED
-        );
+        return new Date(validTill / 1000).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
     };
 
     const ShareeRow = ({ sharee, collectionUnshare }: ShareeProps) => (
