@@ -291,7 +291,7 @@ export async function deriveSensitiveKey(passphrase: string, salt: string) {
     }
 }
 
-export async function deriveIntermediateKey(passphrase: string, salt: string) {
+export async function deriveInteractiveKey(passphrase: string, salt: string) {
     await sodium.ready;
     // default algo can change in future when we upgrade library.
     // this assert act as a safegaurd for us to identify any such issue.
