@@ -31,7 +31,7 @@ import { handleSharingErrors } from 'utils/error';
 import { sleep } from 'utils/common';
 import { SelectStyles } from './Search/SelectStyle';
 import CryptoWorker from 'utils/crypto';
-import { dateStringWihMMH } from 'utils/time';
+import { dateStringWithMMH } from 'utils/time';
 
 interface Props {
     show: boolean;
@@ -306,7 +306,7 @@ function CollectionShare(props: Props) {
         if (validTill === 0) {
             return 'never';
         }
-        return dateStringWihMMH(validTill);
+        return dateStringWithMMH(validTill);
     };
 
     const ShareeRow = ({ sharee, collectionUnshare }: ShareeProps) => (

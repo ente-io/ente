@@ -1,12 +1,12 @@
-export interface TimeDetla {
+export interface TimeDelta {
     hours?: number;
     days?: number;
     months?: number;
     years?: number;
 }
 
-export function dateStringWihMMH(microSecondsSinceEpoch: number): string {
-    return new Date(microSecondsSinceEpoch / 1000).toLocaleDateString('en-US', {
+export function dateStringWithMMH(unixTimeInMicroSeconds: number): string {
+    return new Date(unixTimeInMicroSeconds / 1000).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -15,7 +15,7 @@ export function dateStringWihMMH(microSecondsSinceEpoch: number): string {
     });
 }
 
-export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDetla): number {
+export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDelta): number {
     let currentDate = new Date();
     if (delta?.hours) {
         currentDate = _addHours(currentDate, delta.hours);
