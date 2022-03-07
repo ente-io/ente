@@ -17,8 +17,6 @@ export function dateStringWihMMH(microSecondsSinceEpoch: number): string {
 
 export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDetla): number {
     let currentDate = new Date();
-    console.log(currentDate);
-    console.log(currentDate.getUTCMilliseconds());
     if (delta?.hours) {
         currentDate = _addHours(currentDate, delta.hours);
     }
@@ -31,7 +29,7 @@ export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDetla): number {
     if (delta?.years) {
         currentDate = _addYears(currentDate, delta.years);
     }
-    return currentDate.valueOf() * 1000;
+    return currentDate.getTime() * 1000;
 }
 
 export function getUnixTimeInMicroSeconds(dateTime: Date) {
