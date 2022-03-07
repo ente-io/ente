@@ -9,7 +9,6 @@ class FFmpegClient {
     constructor() {
         this.ffmpeg = createFFmpeg({
             corePath: '/js/ffmpeg/ffmpeg-core.js',
-            log: true,
             mt: false,
         });
 
