@@ -39,7 +39,8 @@
     "watch": "tsc -w",
     "lint": "eslint -c .eslintrc --ext .ts ./src",
     "start": "concurrently \"yarn build && electron ./app/main.js\" \"cd bada-frame && yarn dev\"",
-    "test-release": "yarn build && electron-builder",
+    "build-source" : "cd bada-frame && yarn && yarn build && cd ..",
+    "test-release": "yarn && yarn build-source && yarn build && electron-builder",
     "release": "electron-builder -mwl --publish always"
   },
   "author": "ente <code@ente.io>",
