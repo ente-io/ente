@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "albums": "next dev -p 3002",
-    "prebuild": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
+    "prebuild": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
     "build": "next build",
     "build-analyze": "ANALYZE=true next build",
     "postbuild": "next export",
