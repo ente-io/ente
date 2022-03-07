@@ -94,11 +94,12 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    final String stateChangeReason = 'app -> $state';
     if (state == AppLifecycleState.resumed) {
-      AppLifecycleService.instance.onAppInForeground();
+      AppLifecycleService.instance.onAppInForeground(stateChangeReason);
       SyncService.instance.sync();
     } else {
-      AppLifecycleService.instance.onAppInBackground();
+      AppLifecycleService.instance.onAppInBackground(stateChangeReason);
     }
   }
 
@@ -118,7 +119,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         ), (String taskId) async {
       await widget.runBackgroundTask(taskId);
     }, (taskId) {
-      _logger.info("BG task timeout");
+      _logger.info("BG task timeout taskID: $taskId");
       widget.killBackgroundTask(taskId);
     }).then((int status) {
       _logger.info('[BackgroundFetch] configure success: $status');

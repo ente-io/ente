@@ -162,7 +162,7 @@ class SuperLogging {
       $.info("detected debug mode; sentry & file logging disabled.");
     }
     if (fileIsEnabled) {
-      $.info("using this log file for today: $logFile");
+      $.info("log file for today: $logFile with prefix ${config.prefix}");
     }
     if (sentryIsEnabled) {
       $.info("sentry uploader started");

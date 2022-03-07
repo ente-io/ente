@@ -10,13 +10,13 @@ class AppLifecycleService {
 
   AppLifecycleService._privateConstructor();
 
-  void onAppInForeground() {
-    _logger.info("App in foreground");
+  void onAppInForeground(String reason) {
+    _logger.info("App in foreground via $reason");
     isForeground = true;
   }
 
-  void onAppInBackground() {
-    _logger.info("App in background");
+  void onAppInBackground(String reason) {
+    _logger.info("App in background $reason");
     isForeground = false;
   }
 }
