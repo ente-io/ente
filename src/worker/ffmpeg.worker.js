@@ -1,5 +1,5 @@
 import * as Comlink from 'comlink';
-import FFmpegClient from 'services/ffmpeg/FFmpegClient';
+import FFmpegClient from 'services/ffmpeg/ffmpegClient';
 
 export class FFmpeg {
     ffmpegClient;
