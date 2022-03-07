@@ -11,7 +11,7 @@ import { FileUploadResults, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
 import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
 import { logUploadInfo } from 'utils/upload';
 import { convertToHumanReadable } from 'utils/billing';
-import { sleep } from 'utils/common';
+// import { sleep } from 'utils/common';
 
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
@@ -59,17 +59,18 @@ export default async function uploader(
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
         }
+        metadata.fileType = FILE_TYPE.IMAGE;
         const fileWithMetadata = {
             localID,
-            filedata: file.filedata,
+            filedata: file.thumbnail,
             thumbnail: file.thumbnail,
             metadata,
         };
 
-        if (process.env.NEXT_PUBLIC_SKIP_PUT) {
-            await sleep(1000);
-            return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
-        }
+        // if (process.env.NEXT_PUBLIC_SKIP_PUT) {
+        //     await sleep(1000);
+        //     return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
+        // }
 
         logUploadInfo(`encryptAsset ${fileNameSize}`);
         const encryptedFile = await UploadService.encryptAsset(
