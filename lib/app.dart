@@ -87,6 +87,12 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   }
 
   @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       AppLifecycleService.instance.onAppInForeground();
