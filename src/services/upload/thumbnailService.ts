@@ -6,7 +6,7 @@ import FFmpegService from 'services/ffmpegService';
 import { convertToHumanReadable } from 'utils/billing';
 import { isFileHEIC } from 'utils/file';
 import { FileTypeInfo } from 'types/upload';
-import { getUint8ArrayView } from './readFileService';
+import { getUint8ArrayView } from '../readerService';
 import HEICConverter from 'services/HEICConverter';
 import { getFileNameSize, logUploadInfo } from 'utils/upload';
 
