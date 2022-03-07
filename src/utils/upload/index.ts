@@ -5,6 +5,7 @@ import { formatDateTime } from 'utils/file';
 import { getLogs, saveLogLine } from 'utils/storage';
 
 const TYPE_JSON = 'json';
+const DEDUPE_COLLECTION = new Set(['icloud library', 'icloudlibrary']);
 
 export function fileAlreadyInCollection(
     existingFilesInCollection: EnteFile[],
@@ -17,6 +18,14 @@ export function fileAlreadyInCollection(
     }
     return false;
 }
+
+export function shouldDedupleAcrossCollection(
+    collectionName?: string
+): boolean {
+    // using set to avoid unncessary regex for removing spaces for each upload
+    return DEDUPE_COLLECTION.has((collectionName ?? '').toLocaleLowerCase());
+}
+
 export function areFilesSame(
     existingFile: Metadata,
     newFile: Metadata

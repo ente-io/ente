@@ -2,7 +2,10 @@ import { EnteFile } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
 import { decryptFile } from 'utils/file';
 import { logError } from 'utils/sentry';
-import { fileAlreadyInCollection } from 'utils/upload';
+import {
+    fileAlreadyInCollection,
+    shouldDedupleAcrossCollection,
+} from 'utils/upload';
 import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
 import UploadService from './uploadService';
@@ -53,11 +56,12 @@ export default async function uploader(
         // This change allow users to export by albums, upload to ente. And export all photos -> upload files which are not already uploaded
         // as part of the albums
         if (
-            (fileWithCollection.collection?.name ?? '') ===
-                'iCloud Photos Dedupe' &&
+            shouldDedupleAcrossCollection(
+                fileWithCollection.collection?.name
+            ) &&
             fileAlreadyInCollection(existingFiles, metadata)
         ) {
-            logUploadInfo(`skipped upload for  ${fileNameSize}`);
+            logUploadInfo(`deduped upload for  ${fileNameSize}`);
             return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
         }
         logUploadInfo(`reading asset ${fileNameSize}`);
