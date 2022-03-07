@@ -5,15 +5,18 @@ import { parseFFmpegExtractedMetadata } from 'utils/ffmpeg';
 class FFmpegClient {
     private ffmpeg: FFmpeg;
     private fileReader: FileReader;
+    private ready: Promise<void> = null;
     constructor() {
         this.ffmpeg = createFFmpeg({
             corePath: '/js/ffmpeg/ffmpeg-core.js',
             log: true,
             mt: false,
         });
+
+        this.ready = this.init();
     }
 
-    private async ready() {
+    private async init() {
         if (!this.ffmpeg.isLoaded()) {
             await this.ffmpeg.load();
         }
@@ -23,7 +26,7 @@ class FFmpegClient {
     }
 
     async generateThumbnail(file: File) {
-        await this.ready();
+        await this.ready;
         const inputFileName = `${Date.now().toString()}-${file.name}`;
         const thumbFileName = `${Date.now().toString()}-thumb.jpeg`;
         this.ffmpeg.FS(
@@ -58,7 +61,7 @@ class FFmpegClient {
     }
 
     async extractVideoMetadata(file: File) {
-        await this.ready();
+        await this.ready;
         const inputFileName = `${Date.now().toString()}-${file.name}`;
         const outFileName = `${Date.now().toString()}-metadata.txt`;
         this.ffmpeg.FS(
@@ -90,7 +93,7 @@ class FFmpegClient {
     }
 
     async convertToMP4(file: Uint8Array, inputFileName: string) {
-        await this.ready();
+        await this.ready;
         this.ffmpeg.FS('writeFile', inputFileName, file);
         await this.ffmpeg.run(
             '-i',
