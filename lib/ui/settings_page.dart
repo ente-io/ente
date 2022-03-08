@@ -10,6 +10,7 @@ import 'package:photos/ui/settings/debug_section_widget.dart';
 import 'package:photos/ui/settings/details_section_widget.dart';
 import 'package:photos/ui/settings/info_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
+import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -42,6 +43,8 @@ class SettingsPage extends StatelessWidget {
       SecuritySectionWidget(),
       Padding(padding: EdgeInsets.all(12)),
       SupportSectionWidget(),
+      Padding(padding: EdgeInsets.all(12)),
+      SocialSectionWidget(),
       Padding(padding: EdgeInsets.all(12)),
       InfoSectionWidget(),
     ]);

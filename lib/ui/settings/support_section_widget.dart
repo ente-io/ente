@@ -58,14 +58,6 @@ class SupportSectionWidget extends StatelessWidget {
         Divider(height: 4),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
-          onTap: () {
-            launch("https://reddit.com/r/enteio");
-          },
-          child: SettingsTextItem(text: "community", icon: Icons.navigate_next),
-        ),
-        Divider(height: 4),
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
           onTap: () async {
             await sendLogs(context, "report bug", "bug@ente.io", postShare: () {
               showToast("thanks for reporting a bug!");
