@@ -55,7 +55,7 @@ Future<void> _runInForeground() async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
-    _scheduleFGSync();
+    _scheduleFGSync('appStart in FG');
     runApp(AppLock(
       builder: (args) => EnteApp(_runBackgroundTask, _killBGTask),
       lockScreen: LockScreen(),
@@ -68,7 +68,7 @@ Future<void> _runInForeground() async {
 Future<void> _runBackgroundTask(String taskId) async {
   if (Platform.isIOS && _isProcessRunning) {
     _logger.info("Background task triggered when process was already running");
-    await _sync();
+    await _sync('bgTaskActiveProcess');
     BackgroundFetch.finish(taskId);
   } else {
     _runWithLogs(() async {
@@ -94,7 +94,7 @@ Future<void> _runInBackground(String taskId) async {
   }
   await _init(true, via: 'runViaBackgroundTask');
   UpdateService.instance.showUpdateNotification();
-  await _sync();
+  await _sync('bgSync');
   BackgroundFetch.finish(taskId);
 }
 
@@ -141,9 +141,11 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   _logger.info("Initialization done");
 }
 
-Future<void> _sync() async {
+Future<void> _sync(String caller) async {
   if (!AppLifecycleService.instance.isForeground) {
-    _logger.info("Syncing in background");
+    _logger.info("Syncing in background caller $caller");
+  } else {
+    _logger.info("Syncing in foreground caller $caller");
   }
   try {
     await SyncService.instance.sync();
@@ -153,7 +155,6 @@ Future<void> _sync() async {
 }
 
 Future _runWithLogs(Function() function, {String prefix = ""}) async {
-  print('init logs wrapper with prefix = $prefix');
   await SuperLogging.main(LogConfig(
     body: function,
     logDirPath: (await getTemporaryDirectory()).path + "/logs",
@@ -174,10 +175,10 @@ Future<void> _scheduleHeartBeat(bool isBackground) async {
   });
 }
 
-Future<void> _scheduleFGSync() async {
-  await _sync();
+Future<void> _scheduleFGSync(String caller) async {
+  await _sync(caller);
   Future.delayed(kFGSyncFrequency, () async {
-    _scheduleFGSync();
+    _scheduleFGSync('fgSyncCron');
   });
 }
 
@@ -217,7 +218,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     _logger.info(
         "Background push received when app is alive and runningInFS: $isRunningInFG");
     if (PushService.shouldSync(message)) {
-      await _sync();
+      await _sync('firebaseBgSyncActiveProcess');
     }
   } else {
     // App is dead
@@ -228,7 +229,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       }
       await _init(true, via: 'firebasePush');
       if (PushService.shouldSync(message)) {
-        await _sync();
+        await _sync('firebaseBgSyncNoActiveProcess');
       }
     }, prefix: "[fbg]");
   }
