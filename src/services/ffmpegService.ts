@@ -4,7 +4,7 @@ import { logError } from 'utils/sentry';
 import QueueProcessor from './queueProcessor';
 import { ParsedExtractedMetadata } from 'types/upload';
 
-import { getUint8ArrayView } from './upload/readFileService';
+import { getUint8ArrayView } from 'services/readerService';
 import { parseFFmpegExtractedMetadata } from './upload/videoMetadataService';
 
 class FFmpegService {

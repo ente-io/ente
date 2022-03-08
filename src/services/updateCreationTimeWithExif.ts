@@ -11,7 +11,7 @@ import { updatePublicMagicMetadata } from './fileService';
 import { EnteFile } from 'types/file';
 
 import { getRawExif } from './upload/exifService';
-import { getFileType } from './upload/readFileService';
+import { getFileType } from 'services/typeDetectionService';
 import { FILE_TYPE } from 'constants/file';
 import { getUnixTimeInMicroSeconds } from 'utils/time';
 

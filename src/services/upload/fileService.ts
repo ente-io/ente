@@ -1,3 +1,4 @@
+import { MULTIPART_PART_SIZE, FILE_READER_CHUNK_SIZE } from 'constants/upload';
 import {
     FileTypeInfo,
     FileInMemory,
@@ -7,13 +8,17 @@ import {
     EncryptionResult,
     FileWithMetadata,
     ParsedMetadataJSONMap,
+    DataStream,
 } from 'types/upload';
+import { splitFilenameAndExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getFileNameSize, logUploadInfo } from 'utils/upload';
 import { encryptFiledata } from './encryptionService';
 import { extractMetadata, getMetadataJSONMapKey } from './metadataService';
-import { getFileData, getFileOriginalName } from './readFileService';
+import { getFileStream, getUint8ArrayView } from '../readerService';
 import { generateThumbnail } from './thumbnailService';
+
+const EDITED_FILE_SUFFIX = '-edited';
 
 export function getFileSize(file: File) {
     return file.size;
@@ -34,8 +39,12 @@ export async function readFile(
         fileTypeInfo
     );
     logUploadInfo(`reading file datal${getFileNameSize(rawFile)} `);
-
-    const filedata = await getFileData(reader, rawFile);
+    let filedata: Uint8Array | DataStream;
+    if (rawFile.size > MULTIPART_PART_SIZE) {
+        filedata = getFileStream(reader, rawFile, FILE_READER_CHUNK_SIZE);
+    } else {
+        filedata = await getUint8ArrayView(reader, rawFile);
+    }
 
     logUploadInfo(`read file data successfully ${getFileNameSize(rawFile)} `);
 
@@ -106,4 +115,29 @@ export async function encryptFile(
         logError(e, 'Error encrypting files');
         throw e;
     }
+}
+
+/*
+    Get the original file name for edited file to associate it to original file's metadataJSON file 
+    as edited file doesn't have their own metadata file
+*/
+function getFileOriginalName(file: File) {
+    let originalName: string = null;
+    const [nameWithoutExtension, extension] = splitFilenameAndExtension(
+        file.name
+    );
+
+    const isEditedFile = nameWithoutExtension.endsWith(EDITED_FILE_SUFFIX);
+    if (isEditedFile) {
+        originalName = nameWithoutExtension.slice(
+            0,
+            -1 * EDITED_FILE_SUFFIX.length
+        );
+    } else {
+        originalName = nameWithoutExtension;
+    }
+    if (extension) {
+        originalName += '.' + extension;
+    }
+    return originalName;
 }
