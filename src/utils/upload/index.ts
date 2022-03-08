@@ -19,9 +19,9 @@ export function fileAlreadyInCollection(
     return false;
 }
 
-export function shouldDedupeAcrossCollection(collectionName?: string): boolean {
+export function shouldDedupeAcrossCollection(collectionName: string): boolean {
     // using set to avoid unnecessary regex for removing spaces for each upload
-    return DEDUPE_COLLECTION.has((collectionName ?? '').toLocaleLowerCase());
+    return DEDUPE_COLLECTION.has(collectionName.toLocaleLowerCase());
 }
 
 export function areFilesSame(

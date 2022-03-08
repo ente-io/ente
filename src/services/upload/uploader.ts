@@ -56,7 +56,7 @@ export default async function uploader(
         // This change allow users to export by albums, upload to ente. And export all photos -> upload files which are not already uploaded
         // as part of the albums
         if (
-            shouldDedupeAcrossCollection(fileWithCollection.collection?.name) &&
+            shouldDedupeAcrossCollection(fileWithCollection.collection.name) &&
             fileAlreadyInCollection(existingFiles, metadata)
         ) {
             logUploadInfo(`deduped upload for  ${fileNameSize}`);
