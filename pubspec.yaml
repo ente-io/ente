@@ -148,6 +148,12 @@ flutter:
     fonts:
       - asset: fonts/Ubuntu-Regular.ttf
       - asset: fonts/Ubuntu-Light.ttf
+  - family: Inter
+    fonts:
+      - asset: fonts/Inter-Regular.ttf
+      - asset: fonts/Inter-Light.ttf
+      - asset: fonts/Inter-SemiBold.ttf
+      - asset: fonts/Inter-Bold.ttf
   - family: Montserrat
     fonts:
       - asset: fonts/Montserrat-Medium.ttf
