@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/app_update_dialog.dart';
@@ -69,46 +67,38 @@ class InfoSectionWidget extends StatelessWidget {
           child:
               SettingsTextItem(text: "source code", icon: Icons.navigate_next),
         ),
-        Divider(height: 4),
         UpdateService.instance.isIndependent()
-            ? GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () async {
-                  final dialog = createProgressDialog(context, "checking...");
-                  await dialog.show();
-                  final shouldUpdate =
-                      await UpdateService.instance.shouldUpdate();
-                  await dialog.hide();
-                  if (shouldUpdate) {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AppUpdateDialog(
-                            UpdateService.instance.getLatestVersionInfo());
-                      },
-                      barrierColor: Colors.black.withOpacity(0.85),
-                    );
-                  } else {
-                    showToast("you are on the latest version");
-                  }
-                },
-                child: SettingsTextItem(
-                    text: "check for updates", icon: Icons.navigate_next),
+            ? Column(
+                children: [
+                  Divider(height: 4),
+                  GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () async {
+                      final dialog =
+                          createProgressDialog(context, "checking...");
+                      await dialog.show();
+                      final shouldUpdate =
+                          await UpdateService.instance.shouldUpdate();
+                      await dialog.hide();
+                      if (shouldUpdate) {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AppUpdateDialog(
+                                UpdateService.instance.getLatestVersionInfo());
+                          },
+                          barrierColor: Colors.black.withOpacity(0.85),
+                        );
+                      } else {
+                        showToast("you are on the latest version");
+                      }
+                    },
+                    child: SettingsTextItem(
+                        text: "check for updates", icon: Icons.navigate_next),
+                  ),
+                ],
               )
-            : GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
-                  if (Platform.isAndroid) {
-                    launch(
-                        "https://play.google.com/store/apps/details?id=io.ente.photos");
-                  } else {
-                    launch(
-                        "https://apps.apple.com/in/app/ente-photos/id1542026904");
-                  }
-                },
-                child: SettingsTextItem(
-                    text: "store rating", icon: Icons.navigate_next),
-              ),
+            : Container(),
       ],
     );
   }
