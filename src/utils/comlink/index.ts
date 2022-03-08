@@ -16,4 +16,17 @@ export const getDedicatedConvertWorker = (): ComlinkWorker => {
         return { comlink, worker };
     }
 };
+
+const getDedicatedFFmpegWorker = (): ComlinkWorker => {
+    if (runningInBrowser()) {
+        const worker = new Worker(
+            new URL('worker/ffmpeg.worker.js', import.meta.url),
+            { name: 'ente-ffmpeg-worker' }
+        );
+        const comlink = Comlink.wrap(worker);
+        return { comlink, worker };
+    }
+};
 export const ConvertWorker: any = getDedicatedConvertWorker()?.comlink;
+
+export const FFmpegWorker: any = getDedicatedFFmpegWorker()?.comlink;

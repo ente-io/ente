@@ -24,7 +24,7 @@ import {
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import HEICConverter from 'services/HEICConverter';
-import ffmpegService from 'services/ffmpegService';
+import ffmpegService from 'services/ffmpeg/ffmpegService';
 
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {

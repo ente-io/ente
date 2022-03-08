@@ -73,7 +73,9 @@ class UIService {
             finished: this.filesUploaded,
             total: this.totalFileCount,
         });
-        let percentComplete = this.perFileProgress * this.uploadResult.size;
+        let percentComplete =
+            this.perFileProgress *
+            (this.uploadResult.size || this.filesUploaded);
         if (this.fileProgress) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             for (const [_, progress] of this.fileProgress) {
@@ -84,6 +86,7 @@ class UIService {
                 percentComplete += (this.perFileProgress * progress) / 100;
             }
         }
+
         setPercentComplete(percentComplete);
         setFileProgress(this.fileProgress);
         setUploadResult(this.uploadResult);

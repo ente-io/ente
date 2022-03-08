@@ -66,7 +66,6 @@ export default async function uploader(
         };
 
         logUploadInfo(`encryptAsset ${fileNameSize}`);
-
         const encryptedFile = await UploadService.encryptAsset(
             worker,
             fileWithMetadata,
