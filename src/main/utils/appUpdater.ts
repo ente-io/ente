@@ -1,7 +1,7 @@
 import { BrowserWindow, dialog, Tray } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
+import { setIsAppQuitting, setIsUpdateAvailable } from '..';
 import { buildContextMenu } from './menuUtil';
 
 class AppUpdater {

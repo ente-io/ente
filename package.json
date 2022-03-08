@@ -4,7 +4,7 @@
   "version": "1.5.1",
   "private": true,
   "description": "Desktop client for ente.io",
-  "main": "app/main/main.js",
+  "main": "app/main/index.js",
   "build": {
     "appId": "io.ente.bhari-frame",
     "artifactName": "${productName}-${version}.${ext}",
