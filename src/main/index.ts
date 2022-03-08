@@ -10,7 +10,7 @@ import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from '../config';
 import { isDev } from './utils/common';
 
 if (isDev) {
-    electronReload(__dirname, {}) as any;
+    electronReload(__dirname, {});
 }
 
 let tray: Tray;
