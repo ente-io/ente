@@ -1,8 +1,10 @@
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/ui/web_page.dart';
@@ -15,10 +17,17 @@ class SupportSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ExpandablePanel(
+      header: SettingsSectionTitle("Support"),
+      collapsed: Container(),
+      expanded: _getSectionOptions(context),
+      theme: getExpandableTheme(context),
+    );
+  }
+
+  Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        SettingsSectionTitle("support"),
-        Padding(padding: EdgeInsets.all(4)),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -33,9 +42,9 @@ class SupportSectionWidget extends StatelessWidget {
               launch("mailto:hey@ente.io");
             }
           },
-          child: SettingsTextItem(text: "email", icon: Icons.navigate_next),
+          child: SettingsTextItem(text: "Email", icon: Icons.navigate_next),
         ),
-        Divider(height: 4),
+        SectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
@@ -53,9 +62,9 @@ class SupportSectionWidget extends StatelessWidget {
               ),
             );
           },
-          child: SettingsTextItem(text: "roadmap", icon: Icons.navigate_next),
+          child: SettingsTextItem(text: "Roadmap", icon: Icons.navigate_next),
         ),
-        Divider(height: 4),
+        SectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -64,7 +73,7 @@ class SupportSectionWidget extends StatelessWidget {
             });
           },
           child: SettingsTextItem(
-              text: "report bug 🐞", icon: Icons.navigate_next),
+              text: "Report bug 🐞", icon: Icons.navigate_next),
         ),
       ],
     );

@@ -51,10 +51,7 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
               padding: const EdgeInsets.all(20),
               child: Text(
                 "app version: " + snapshot.data,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.white.withOpacity(0.6),
-                ),
+                style: Theme.of(context).textTheme.caption,
               ),
             );
           }

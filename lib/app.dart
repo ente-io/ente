@@ -14,7 +14,7 @@ final lightThemeData = ThemeData(
   fontFamily: 'Inter',
   brightness: Brightness.light,
   hintColor: Colors.grey,
-  iconTheme: IconThemeData(color: Colors.green),
+  iconTheme: IconThemeData(color: Colors.black),
   primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
   colorScheme: ColorScheme.light(primary: Colors.blue),
   accentColor: Color.fromRGBO(45, 194, 98, 0.2),
@@ -26,20 +26,20 @@ final lightThemeData = ThemeData(
   scaffoldBackgroundColor: Colors.white,
   backgroundColor: Colors.white,
   appBarTheme: AppBarTheme().copyWith(color: Colors.blue),
+  //https://api.flutter.dev/flutter/material/TextTheme-class.html
   textTheme: TextTheme().copyWith(
-      caption: TextStyle(
-        color: Colors.black.withOpacity(0.7),
-        fontSize: 14,
-      ),
-      overline: TextStyle(
-        color: Colors.black.withOpacity(0.8),
-        fontSize: 12,
-      )),
+      headline6: TextStyle(
+          color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
+      subtitle1: TextStyle(
+          color: Colors.black, fontSize: 15, fontWeight: FontWeight.w500),
+      caption: TextStyle(color: Colors.black.withOpacity(0.7), fontSize: 14),
+      overline: TextStyle(color: Colors.black.withOpacity(0.8), fontSize: 12)),
 
   primaryTextTheme: TextTheme().copyWith(
       bodyText2: TextStyle(color: Colors.yellow),
       bodyText1: TextStyle(color: Colors.orange)),
-  cardColor: Color.fromRGBO(250, 250, 250, 1.0), //
+  cardColor: Color.fromRGBO(250, 250, 250, 1.0),
+  //
   dialogTheme: DialogTheme().copyWith(
     backgroundColor: Color.fromRGBO(250, 250, 250, 1.0), //
   ),
@@ -69,6 +69,10 @@ final darkThemeData = ThemeData(
   ),
   // primaryColor: Colors.red,
   textTheme: TextTheme().copyWith(
+      headline6: TextStyle(
+          color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+      subtitle1: TextStyle(
+          color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
       caption: TextStyle(
         color: Colors.white.withOpacity(0.6),
         fontSize: 14,

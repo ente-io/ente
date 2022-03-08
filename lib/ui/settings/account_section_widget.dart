@@ -1,5 +1,5 @@
-import 'dart:io';
-
+import 'package:expandable/expandable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
@@ -9,6 +9,7 @@ import 'package:photos/ui/change_email_dialog.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/recovery_key_dialog.dart';
+import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/auth_util.dart';
@@ -25,12 +26,17 @@ class AccountSectionWidget extends StatefulWidget {
 class AccountSectionWidgetState extends State<AccountSectionWidget> {
   @override
   Widget build(BuildContext context) {
+    return ExpandablePanel(
+      header: SettingsSectionTitle("Account"),
+      collapsed: Container(),
+      expanded: _getSectionOptions(context),
+      theme: getExpandableTheme(context),
+    );
+  }
+
+  Column _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        SettingsSectionTitle("account"),
-        Padding(
-          padding: EdgeInsets.all(4),
-        ),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -43,15 +49,9 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             );
           },
           child: SettingsTextItem(
-              text: "subscription plan", icon: Icons.navigate_next),
+              text: "Subscription plan", icon: Icons.navigate_next),
         ),
-        Platform.isIOS
-            ? Padding(padding: EdgeInsets.all(2))
-            : Padding(padding: EdgeInsets.all(2)),
-        Divider(height: 4),
-        Platform.isIOS
-            ? Padding(padding: EdgeInsets.all(2))
-            : Padding(padding: EdgeInsets.all(4)),
+        SectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -82,15 +82,9 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             );
           },
           child:
-              SettingsTextItem(text: "recovery key", icon: Icons.navigate_next),
+              SettingsTextItem(text: "Recovery key", icon: Icons.navigate_next),
         ),
-        Platform.isIOS
-            ? Padding(padding: EdgeInsets.all(2))
-            : Padding(padding: EdgeInsets.all(4)),
-        Divider(height: 4),
-        Platform.isIOS
-            ? Padding(padding: EdgeInsets.all(2))
-            : Padding(padding: EdgeInsets.all(2)),
+        SectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -113,13 +107,9 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             );
           },
           child:
-              SettingsTextItem(text: "change email", icon: Icons.navigate_next),
+              SettingsTextItem(text: "Change email", icon: Icons.navigate_next),
         ),
-        Padding(padding: EdgeInsets.all(2)),
-        Divider(height: 4),
-        Platform.isIOS
-            ? Padding(padding: EdgeInsets.all(2))
-            : Padding(padding: EdgeInsets.all(4)),
+        SectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {

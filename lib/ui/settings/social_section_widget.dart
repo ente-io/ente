@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/services/update_service.dart';
+import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -11,32 +13,39 @@ class SocialSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ExpandablePanel(
+      header: SettingsSectionTitle("Social"),
+      collapsed: Container(),
+      expanded: _getSectionOptions(context),
+      theme: getExpandableTheme(context),
+    );
+  }
+
+  Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        SettingsSectionTitle("social"),
-        Padding(padding: EdgeInsets.all(4)),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
             launch("https://twitter.com/enteio");
           },
-          child: SettingsTextItem(text: "twitter", icon: Icons.navigate_next),
+          child: SettingsTextItem(text: "Twitter", icon: Icons.navigate_next),
         ),
-        Divider(height: 4),
+        SectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
             launch("https://discord.gg/uRqua3jSr5");
           },
-          child: SettingsTextItem(text: "discord", icon: Icons.navigate_next),
+          child: SettingsTextItem(text: "Discord", icon: Icons.navigate_next),
         ),
-        Divider(height: 4),
+        SectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
             launch("https://reddit.com/r/enteio");
           },
-          child: SettingsTextItem(text: "reddit", icon: Icons.navigate_next),
+          child: SettingsTextItem(text: "Reddit", icon: Icons.navigate_next),
         ),
         !UpdateService.instance.isIndependent()
             ? Column(
@@ -54,7 +63,7 @@ class SocialSectionWidget extends StatelessWidget {
                       }
                     },
                     child: SettingsTextItem(
-                        text: "rate us! ✨", icon: Icons.navigate_next),
+                        text: "Rate us! ✨", icon: Icons.navigate_next),
                   ),
                 ],
               )

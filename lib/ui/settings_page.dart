@@ -20,37 +20,41 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("settings"),
+        title: Text("Settings"),
       ),
-      body: _getBody(),
+      body: _getBody(context),
     );
   }
 
-  Widget _getBody() {
+  Widget _getBody(BuildContext context) {
     final hasLoggedIn = Configuration.instance.getToken() != null;
     final List<Widget> contents = [];
+    final sectionDivider = Divider(
+      height: 10,
+      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+    );
     if (hasLoggedIn) {
       contents.addAll([
         DetailsSectionWidget(),
-        Padding(padding: EdgeInsets.all(12)),
+        sectionDivider,
         BackupSectionWidget(),
-        Padding(padding: EdgeInsets.all(12)),
+        sectionDivider,
         AccountSectionWidget(),
-        Padding(padding: EdgeInsets.all(12)),
+        sectionDivider,
       ]);
     }
     contents.addAll([
       SecuritySectionWidget(),
-      Padding(padding: EdgeInsets.all(12)),
+      sectionDivider,
       SupportSectionWidget(),
-      Padding(padding: EdgeInsets.all(12)),
+      sectionDivider,
       SocialSectionWidget(),
-      Padding(padding: EdgeInsets.all(12)),
+      sectionDivider,
       InfoSectionWidget(),
     ]);
     if (hasLoggedIn) {
       contents.addAll([
-        Padding(padding: EdgeInsets.all(12)),
+        sectionDivider,
         DangerSectionWidget(),
       ]);
     }

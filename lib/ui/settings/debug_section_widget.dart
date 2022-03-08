@@ -1,25 +1,33 @@
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
+import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 
 class DebugSectionWidget extends StatelessWidget {
   const DebugSectionWidget({Key key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
+    return ExpandablePanel(
+      header: SettingsSectionTitle("Debug"),
+      collapsed: Container(),
+      expanded: _getSectionOptions(context),
+      theme: getExpandableTheme(context),
+    );
+  }
+
+  Widget _getSectionOptions(BuildContext context) {
     return Column(children: [
-      Padding(padding: EdgeInsets.all(12)),
-      SettingsSectionTitle("debug"),
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () async {
           _showKeyAttributesDialog(context);
         },
         child:
-            SettingsTextItem(text: "key attributes", icon: Icons.navigate_next),
+            SettingsTextItem(text: "Key attributes", icon: Icons.navigate_next),
       ),
       GestureDetector(
         behavior: HitTestBehavior.translucent,
@@ -27,7 +35,7 @@ class DebugSectionWidget extends StatelessWidget {
           Network.instance.getAlice().showInspector();
         },
         child: SettingsTextItem(
-            text: "network requests", icon: Icons.navigate_next),
+            text: "Network requests", icon: Icons.navigate_next),
       )
     ]);
   }

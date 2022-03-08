@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/backup_status.dart';
@@ -9,6 +10,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/deduplicate_page.dart';
 import 'package:photos/ui/free_space_page.dart';
+import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/data_util.dart';
@@ -27,39 +29,38 @@ class BackupSectionWidget extends StatefulWidget {
 class BackupSectionWidgetState extends State<BackupSectionWidget> {
   @override
   Widget build(BuildContext context) {
+    return ExpandablePanel(
+      header: SettingsSectionTitle("Backup"),
+      collapsed: Container(),
+      expanded: _getSectionOptions(context),
+      theme: getExpandableTheme(context),
+    );
+  }
+
+  Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        SettingsSectionTitle("backup"),
-        Padding(
-          padding: EdgeInsets.all(4),
-        ),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             routeToPage(
               context,
               BackupFolderSelectionPage(
-                buttonText: "backup",
+                buttonText: "Backup",
               ),
             );
           },
           child: SettingsTextItem(
-              text: "backed up folders", icon: Icons.navigate_next),
+              text: "Backed up folders", icon: Icons.navigate_next),
         ),
-        Platform.isIOS
-            ? Padding(padding: EdgeInsets.all(2))
-            : Padding(padding: EdgeInsets.all(0)),
-        Divider(height: 4),
-        Platform.isIOS
-            ? Padding(padding: EdgeInsets.all(2))
-            : Padding(padding: EdgeInsets.all(4)),
+        SectionOptionDivider,
         SizedBox(
           height: 36,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("backup over mobile data"),
-              Switch(
+              Text("Backup over mobile data"),
+              Switch.adaptive(
                 value: Configuration.instance.shouldBackupOverMobileData(),
                 onChanged: (value) async {
                   Configuration.instance.setBackupOverMobileData(value);
@@ -69,20 +70,14 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             ],
           ),
         ),
-        Platform.isIOS
-            ? Padding(padding: EdgeInsets.all(2))
-            : Padding(padding: EdgeInsets.all(4)),
-        Divider(height: 4),
-        Platform.isIOS
-            ? Padding(padding: EdgeInsets.all(2))
-            : Padding(padding: EdgeInsets.all(4)),
+        SectionOptionDivider,
         SizedBox(
           height: 36,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("backup videos"),
-              Switch(
+              Text("Backup videos"),
+              Switch.adaptive(
                 value: Configuration.instance.shouldBackupVideos(),
                 onChanged: (value) async {
                   Configuration.instance.setShouldBackupVideos(value);
@@ -92,13 +87,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             ],
           ),
         ),
-        Platform.isIOS
-            ? Padding(padding: EdgeInsets.all(4))
-            : Padding(padding: EdgeInsets.all(2)),
-        Divider(height: 4),
-        Platform.isIOS
-            ? Padding(padding: EdgeInsets.all(2))
-            : Padding(padding: EdgeInsets.all(2)),
+        SectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -117,17 +106,11 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             }
           },
           child: SettingsTextItem(
-            text: "free up space",
+            text: "Free up space",
             icon: Icons.navigate_next,
           ),
         ),
-        Platform.isIOS
-            ? Padding(padding: EdgeInsets.all(4))
-            : Padding(padding: EdgeInsets.all(2)),
-        Divider(height: 4),
-        Platform.isIOS
-            ? Padding(padding: EdgeInsets.all(2))
-            : Padding(padding: EdgeInsets.all(2)),
+        SectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -156,7 +139,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             }
           },
           child: SettingsTextItem(
-            text: "deduplicate files",
+            text: "Deduplicate files",
             icon: Icons.navigate_next,
           ),
         ),

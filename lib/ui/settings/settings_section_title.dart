@@ -18,11 +18,12 @@ class SettingsSectionTitle extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: Text(
           title,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-            color: color ?? Theme.of(context).buttonColor,
-          ),
+          style: color != null
+              ? Theme.of(context)
+                  .textTheme
+                  .headline6
+                  .merge(TextStyle(color: color))
+              : Theme.of(context).textTheme.headline6,
         ),
       ),
       Padding(padding: EdgeInsets.all(4)),
