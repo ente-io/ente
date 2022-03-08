@@ -5,13 +5,12 @@ import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
 import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 import initSentry from './utils/sentry';
+import electronReload from 'electron-reload';
 import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from '../config';
 import { isDev } from './utils/common';
 
 if (isDev) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const electronReload = require('electron-reload');
-    electronReload(__dirname, {});
+    electronReload(__dirname, {}) as any;
 }
 
 let tray: Tray;
