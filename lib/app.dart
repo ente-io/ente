@@ -11,7 +11,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/home_widget.dart';
 
 final lightThemeData = ThemeData(
-  fontFamily: 'Ubuntu',
+  fontFamily: 'Inter',
   brightness: Brightness.light,
   hintColor: Colors.grey,
   iconTheme: IconThemeData(color: Colors.green),
@@ -56,7 +56,7 @@ final lightThemeData = ThemeData(
 );
 
 final darkThemeData = ThemeData(
-  fontFamily: 'Ubuntu',
+  fontFamily: 'Inter',
   brightness: Brightness.dark,
   iconTheme: IconThemeData(color: Colors.white),
   primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
