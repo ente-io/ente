@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "module": "commonjs",
+        "esModuleInterop": true,
         "noImplicitAny": true,
         "sourceMap": true,
         "outDir": "app",
@@ -9,5 +10,5 @@
             "*": ["node_modules/*"]
         }
     },
-    "include": ["src/**/*"]
+    "include": ["src/main/**/*", "src/config.ts"]
 }

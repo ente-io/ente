@@ -1,7 +1,9 @@
 import { app, BrowserWindow, nativeImage } from 'electron';
 import * as isDev from 'electron-is-dev';
 import * as path from 'path';
-import { isAppQuitting } from '../main';
+import { isAppQuitting } from '..';
+import { addAllowOriginHeader } from './cors';
+import { PROD_HOST_URL } from '../../config';
 
 export function createWindow(): BrowserWindow {
     const appImgPath = isDev
@@ -29,16 +31,18 @@ export function createWindow(): BrowserWindow {
     });
     splash.maximize();
 
+    addAllowOriginHeader(mainWindow);
+
     if (isDev) {
         splash.loadFile(`../build/splash.html`);
-        mainWindow.loadURL('http://localhost:3000');
+        mainWindow.loadURL(PROD_HOST_URL);
         // Open the DevTools.
         mainWindow.webContents.openDevTools();
     } else {
         splash.loadURL(
             `file://${path.join(process.resourcesPath, 'splash.html')}`
         );
-        mainWindow.loadURL('http://web.ente.io');
+        mainWindow.loadURL(PROD_HOST_URL);
     }
     mainWindow.webContents.on('did-fail-load', () => {
         splash.close();
