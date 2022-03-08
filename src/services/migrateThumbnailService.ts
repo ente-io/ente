@@ -8,7 +8,7 @@ import HTTPService from 'services/HTTPService';
 import CryptoWorker from 'utils/crypto';
 import uploadHttpClient from 'services/upload/uploadHttpClient';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
-import { getFileType } from './upload/readFileService';
+import { getFileType } from 'services/typeDetectionService';
 import { getLocalTrash, getTrashedFiles } from './trashService';
 import { EncryptionResult, UploadURL } from 'types/upload';
 import { fileAttribute } from 'types/file';

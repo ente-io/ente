@@ -7,7 +7,7 @@ import {
     PublicMagicMetadataProps,
 } from 'types/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
-import { getFileTypeFromBlob } from 'services/upload/readFileService';
+import { getFileTypeFromBlob } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
 import { logError } from 'utils/sentry';
 import { User } from 'types/user';
@@ -24,7 +24,7 @@ import {
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import HEICConverter from 'services/HEICConverter';
-import ffmpegService from 'services/ffmpegService';
+import ffmpegService from 'services/ffmpeg/ffmpegService';
 
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {

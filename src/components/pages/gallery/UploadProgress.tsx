@@ -209,6 +209,7 @@ export default function UploadProgress(props: Props) {
             <Modal.Body>
                 {(props.uploadStage ===
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES ||
+                    props.uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA ||
                     props.uploadStage === UPLOAD_STAGES.UPLOADING) && (
                     <ProgressBar
                         now={props.now}

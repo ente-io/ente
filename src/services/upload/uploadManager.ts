@@ -295,6 +295,7 @@ class UploadManager {
                 worker,
                 reader,
                 existingFilesInCollection,
+                this.existingFiles,
                 { ...fileWithCollection, collection }
             );
             if (fileUploadResult === FileUploadResults.UPLOADED) {

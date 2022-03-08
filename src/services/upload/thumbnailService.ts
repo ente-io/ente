@@ -2,11 +2,11 @@ import { FILE_TYPE } from 'constants/file';
 import { CustomError, errorWithContext } from 'utils/error';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
-import FFmpegService from 'services/ffmpegService';
+import FFmpegService from 'services/ffmpeg/ffmpegService';
 import { convertToHumanReadable } from 'utils/billing';
 import { isFileHEIC } from 'utils/file';
 import { FileTypeInfo } from 'types/upload';
-import { getUint8ArrayView } from './readFileService';
+import { getUint8ArrayView } from '../readerService';
 import HEICConverter from 'services/HEICConverter';
 import { getFileNameSize, logUploadInfo } from 'utils/upload';
 
