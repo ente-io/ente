@@ -10,5 +10,5 @@
             "*": ["node_modules/*"]
         }
     },
-    "include": ["src/main/**/*", "src/*"]
+    "include": ["src/main/**/*", "src/config.ts"]
 }
