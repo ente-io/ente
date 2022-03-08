@@ -19,10 +19,8 @@ export function fileAlreadyInCollection(
     return false;
 }
 
-export function shouldDedupleAcrossCollection(
-    collectionName?: string
-): boolean {
-    // using set to avoid unncessary regex for removing spaces for each upload
+export function shouldDedupeAcrossCollection(collectionName?: string): boolean {
+    // using set to avoid unnecessary regex for removing spaces for each upload
     return DEDUPE_COLLECTION.has((collectionName ?? '').toLocaleLowerCase());
 }
 

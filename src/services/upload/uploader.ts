@@ -4,7 +4,7 @@ import { decryptFile } from 'utils/file';
 import { logError } from 'utils/sentry';
 import {
     fileAlreadyInCollection,
-    shouldDedupleAcrossCollection,
+    shouldDedupeAcrossCollection,
 } from 'utils/upload';
 import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
@@ -56,9 +56,7 @@ export default async function uploader(
         // This change allow users to export by albums, upload to ente. And export all photos -> upload files which are not already uploaded
         // as part of the albums
         if (
-            shouldDedupleAcrossCollection(
-                fileWithCollection.collection?.name
-            ) &&
+            shouldDedupeAcrossCollection(fileWithCollection.collection?.name) &&
             fileAlreadyInCollection(existingFiles, metadata)
         ) {
             logUploadInfo(`deduped upload for  ${fileNameSize}`);
