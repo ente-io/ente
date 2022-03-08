@@ -43,7 +43,7 @@ import 'package:photos/ui/landing_page_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/ui/nav_bar.dart';
-import 'package:photos/ui/settings_button.dart';
+import 'package:photos/ui/settings_page.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
 import 'package:photos/ui/sync_indicator.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -61,11 +61,12 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static const _deviceFolderGalleryWidget = CollectionsGalleryWidget();
   static const _sharedCollectionGallery = SharedCollectionGallery();
+  static const _settingsPage = SettingsPage();
   static const _headerWidget = HeaderWidget();
 
   final _logger = Logger("HomeWidgetState");
   final _selectedFiles = SelectedFiles();
-  final _settingsButton = SettingsButton();
+  // final _settingsButton = SettingsButton();
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
   Widget _headerWidgetWithSettingsButton;
@@ -89,9 +90,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     _headerWidgetWithSettingsButton = Container(
       margin: const EdgeInsets.only(top: 12),
       child: Stack(
-        children: [
+        children: const [
           _headerWidget,
-          _settingsButton,
         ],
       ),
     );
@@ -276,6 +276,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 : _getMainGalleryWidget(),
             _deviceFolderGalleryWidget,
             _sharedCollectionGallery,
+            _settingsPage,
           ],
           onPageChanged: (page) {
             Bus.instance.fire(TabChangedEvent(
@@ -440,50 +441,70 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget _buildBottomNavigationBar() {
     return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).backgroundColor.withOpacity(0.30),
-      ),
+      margin: EdgeInsets.fromLTRB(48, 12, 48, 4),
+      alignment: Alignment.bottomCenter,
+      height: 90,
+      width: 220,
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
-          child: GNav(
-            rippleColor: Theme.of(context).buttonColor.withOpacity(0.20),
-            hoverColor: Theme.of(context).buttonColor.withOpacity(0.20),
-            gap: 8,
-            activeColor: Theme.of(context).buttonColor.withOpacity(0.75),
-            iconSize: 24,
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            duration: Duration(milliseconds: 400),
-            tabMargin: EdgeInsets.only(left: 8, right: 8),
-            tabBackgroundColor:
-                Theme.of(context).cardColor.withOpacity(0.7), // review
-            haptic: false,
-            tabs: [
-              GButton(
-                icon: Icons.photo_library_outlined,
-                text: 'photos',
-                onPressed: () {
-                  _onTabChange(0); // To take care of occasional missing events
-                },
-              ),
-              GButton(
-                icon: Icons.folder_special_outlined,
-                text: 'albums',
-                onPressed: () {
-                  _onTabChange(1); // To take care of occasional missing events
-                },
-              ),
-              GButton(
-                icon: Icons.folder_shared_outlined,
-                text: 'shared',
-                onPressed: () {
-                  _onTabChange(2); // To take care of occasional missing events
-                },
-              ),
-            ],
-            selectedIndex: _selectedTabIndex,
-            onTabChange: _onTabChange,
-          ),
+        child: GNav(
+          curve: Curves.easeOutExpo,
+          backgroundColor: Theme.of(context).bottomAppBarColor,
+          mainAxisAlignment: MainAxisAlignment.center,
+          rippleColor: Theme.of(context).buttonColor.withOpacity(0.20),
+          hoverColor: Theme.of(context).buttonColor.withOpacity(0.20),
+          activeColor: Colors.black,
+          iconSize: 24,
+          padding: EdgeInsets.fromLTRB(2, 2, 1, 2),
+          duration: Duration(milliseconds: 200),
+          tabMargin: EdgeInsets.all(10),
+          gap: 0,
+          tabBorderRadius: 24,
+          tabBackgroundColor: Colors.white,
+          haptic: false,
+          tabShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: Offset(0, 3), // changes position of shadow
+            ),
+          ],
+          tabs: [
+            GButton(
+              icon: Icons.photo_library_outlined,
+              iconColor: Colors.black,
+              text: '',
+              onPressed: () {
+                _onTabChange(0); // To take care of occasional missing events
+              },
+            ),
+            GButton(
+              icon: Icons.folder_special_outlined,
+              iconColor: Colors.black,
+              text: '',
+              onPressed: () {
+                _onTabChange(1); // To take care of occasional missing events
+              },
+            ),
+            GButton(
+              icon: Icons.folder_shared_outlined,
+              iconColor: Colors.black,
+              text: '',
+              onPressed: () {
+                _onTabChange(2); // To take care of occasional missing events
+              },
+            ),
+            GButton(
+              icon: Icons.settings,
+              iconColor: Colors.black,
+              text: '',
+              onPressed: () {
+                _onTabChange(3); // To take care of occasional missing events
+              },
+            )
+          ],
+          selectedIndex: _selectedTabIndex,
+          onTabChange: _onTabChange,
         ),
       ),
     );

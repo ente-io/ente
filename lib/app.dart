@@ -24,6 +24,7 @@ final lightThemeData = ThemeData(
   ),
   toggleableActiveColor: Colors.red[400],
   scaffoldBackgroundColor: Colors.white,
+  bottomAppBarColor: Color.fromRGBO(196, 196, 196, 1.0),
   backgroundColor: Colors.white,
   appBarTheme: AppBarTheme().copyWith(color: Colors.blue),
   //https://api.flutter.dev/flutter/material/TextTheme-class.html
@@ -61,6 +62,8 @@ final darkThemeData = ThemeData(
   iconTheme: IconThemeData(color: Colors.white),
   primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
   hintColor: Colors.grey,
+  bottomAppBarColor: Color.fromRGBO(196, 196, 196, 1.0),
+
   colorScheme: ColorScheme.dark(),
   accentColor: Color.fromRGBO(45, 194, 98, 0.2),
   buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
