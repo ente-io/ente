@@ -213,10 +213,11 @@ Future<void> _killBGTask([String taskId]) async {
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  bool isRunningInFG = await _isRunningInForeground();
+  bool isInForeground = AppLifecycleService.instance.isForeground;
   if (_isProcessRunning) {
-    bool isRunningInFG = await _isRunningInForeground();
     _logger.info(
-        "Background push received when app is alive and runningInFS: $isRunningInFG");
+        "Background push received when app is alive and runningInFS: $isRunningInFG inForeground: $isInForeground");
     if (PushService.shouldSync(message)) {
       await _sync('firebaseBgSyncActiveProcess');
     }
