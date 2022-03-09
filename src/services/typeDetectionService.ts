@@ -4,7 +4,7 @@ import { CustomError } from 'utils/error';
 import { getFileExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getUint8ArrayView } from './readerService';
-import FileType from 'file-type/browser';
+import FileType from 'file-type';
 
 const TYPE_VIDEO = 'video';
 const TYPE_IMAGE = 'image';
