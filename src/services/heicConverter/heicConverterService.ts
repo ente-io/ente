@@ -29,7 +29,7 @@ class HEICConverter {
             });
         }
     }
-    async convert(fileBlob: Blob, format = 'PNG'): Promise<Blob> {
+    async convert(fileBlob: Blob, format = 'JPEG'): Promise<Blob> {
         await this.ready;
         const response = this.convertProcessor.queueUpRequest(async () => {
             const { id, worker } = this.workerPool.shift();
