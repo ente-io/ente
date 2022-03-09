@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -139,23 +140,26 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "ente",
-      themeMode: ThemeMode.system,
-      theme: lightThemeData,
-      darkTheme: darkThemeData,
-      home: EnteApp._homeWidget,
-      debugShowCheckedModeBanner: false,
-      navigatorKey: Network.instance.getAlice().getNavigatorKey(),
-      builder: EasyLoading.init(),
-      supportedLocales: L10n.all,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-    );
+    return AdaptiveTheme(
+        light: lightThemeData,
+        dark: darkThemeData,
+        initial: AdaptiveThemeMode.dark,
+        builder: (lightTheme, dartTheme) => MaterialApp(
+              title: "ente",
+              theme: lightTheme,
+              darkTheme: dartTheme,
+              home: EnteApp._homeWidget,
+              debugShowCheckedModeBanner: false,
+              navigatorKey: Network.instance.getAlice().getNavigatorKey(),
+              builder: EasyLoading.init(),
+              supportedLocales: L10n.all,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+              ],
+            ));
   }
 
   @override

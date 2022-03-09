@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -37,6 +38,7 @@ import 'package:super_logging/super_logging.dart';
 final _logger = Logger("main");
 
 bool _isProcessRunning = false;
+AdaptiveThemeMode _savedThemeMode;
 const kLastBGTaskHeartBeatTime = "bg_task_hb_time";
 const kLastFGTaskHeartBeatTime = "fg_task_hb_time";
 const kHeartBeatFrequency = Duration(seconds: 1);
@@ -108,6 +110,7 @@ void _headlessTaskHandler(HeadlessTask task) {
 Future<void> _init(bool isBackground) async {
   _isProcessRunning = true;
   _logger.info("Initializing...");
+  _savedThemeMode = await AdaptiveTheme.getThemeMode();
   _scheduleHeartBeat(isBackground);
   if (isBackground) {
     AppLifecycleService.instance.onAppInBackground();
