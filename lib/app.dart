@@ -16,7 +16,7 @@ final lightThemeData = ThemeData(
   hintColor: Colors.grey,
   iconTheme: IconThemeData(color: Colors.black),
   primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
-  colorScheme: ColorScheme.light(primary: Colors.blue),
+  colorScheme: ColorScheme.light(primary: Colors.black),
   accentColor: Color.fromRGBO(45, 194, 98, 0.2),
   buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
   buttonTheme: ButtonThemeData().copyWith(

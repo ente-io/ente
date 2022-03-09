@@ -12,6 +12,7 @@ import 'package:photos/ui/settings/info_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
+import 'package:photos/ui/settings/theme_switch_widget.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key key}) : super(key: key);
@@ -26,6 +27,10 @@ class SettingsPage extends StatelessWidget {
   Widget _getBody(BuildContext context) {
     final hasLoggedIn = Configuration.instance.getToken() != null;
     final List<Widget> contents = [];
+    contents.add(Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: const [ThemeSwitchWidget()]));
     final sectionDivider = Divider(
       height: 10,
       color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
