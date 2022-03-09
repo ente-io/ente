@@ -6,12 +6,20 @@ export async function convertHEIC(
     fileBlob: Blob,
     format: string
 ): Promise<Blob> {
-    const filedata = new Uint8Array(await fileBlob.arrayBuffer());
-    setTimeout(() => {
-        throw Error('wait time exceeded');
-    }, WAIT_TIME_IN_MICROSECONDS);
-    const result = await HeicConvert({ buffer: filedata, format });
-    const convertedFileData = new Uint8Array(result);
-    const convertedFileBlob = new Blob([convertedFileData]);
-    return convertedFileBlob;
+    return await new Promise((resolve, reject) => {
+        const main = async () => {
+            const filedata = new Uint8Array(await fileBlob.arrayBuffer());
+            const timeout = setTimeout(() => {
+                reject(Error('wait time exceeded'));
+            }, WAIT_TIME_IN_MICROSECONDS);
+            console.time('convertHEIC');
+            const result = await HeicConvert({ buffer: filedata, format });
+            console.timeEnd('convertHEIC');
+            clearTimeout(timeout);
+            const convertedFileData = new Uint8Array(result);
+            const convertedFileBlob = new Blob([convertedFileData]);
+            resolve(convertedFileBlob);
+        };
+        main();
+    });
 }
