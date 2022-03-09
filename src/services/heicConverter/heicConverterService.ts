@@ -3,8 +3,8 @@ import { getDedicatedConvertWorker } from 'utils/comlink';
 import { CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 
-const WORKER_POOL_SIZE = 4;
-const MAX_CONVERSION_IN_PARALLEL = 2;
+const WORKER_POOL_SIZE = 2;
+const MAX_CONVERSION_IN_PARALLEL = 1;
 
 class HEICConverter {
     private convertProcessor = new QueueProcessor<Blob>(
