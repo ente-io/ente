@@ -209,11 +209,17 @@ Future<void> _killBGTask([String taskId]) async {
   if (taskId != null) {
     BackgroundFetch.finish(taskId);
   }
-  Isolate.current.kill(priority: Isolate.immediate);
+  if (Platform.isIOS) {
+    _logger.info('avoid killing current isolate');
+  }
+  else {
+    _logger.info('kill current isolate');
+    Isolate.current.kill(priority: Isolate.immediate);
+  }
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  bool isRunningInFG = await _isRunningInForeground();
+  bool isRunningInFG = await _isRunningInForeground(); // hb
   bool isInForeground = AppLifecycleService.instance.isForeground;
   if (_isProcessRunning) {
     _logger.info(
