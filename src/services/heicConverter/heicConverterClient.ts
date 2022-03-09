@@ -12,9 +12,7 @@ export async function convertHEIC(
             const timeout = setTimeout(() => {
                 reject(Error('wait time exceeded'));
             }, WAIT_TIME_IN_MICROSECONDS);
-            console.time('convertHEIC');
             const result = await HeicConvert({ buffer: filedata, format });
-            console.timeEnd('convertHEIC');
             clearTimeout(timeout);
             const convertedFileData = new Uint8Array(result);
             const convertedFileBlob = new Blob([convertedFileData]);
