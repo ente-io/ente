@@ -295,19 +295,19 @@ export const preservePhotoswipeProps =
         return fileWithPreservedProperty;
     };
 
-export function fileNameWithoutExtension(filename) {
+export function fileNameWithoutExtension(filename: string) {
     const lastDotPosition = filename.lastIndexOf('.');
     if (lastDotPosition === -1) return filename;
     else return filename.substr(0, lastDotPosition);
 }
 
-export function fileExtensionWithDot(filename) {
+export function fileExtensionWithDot(filename: string) {
     const lastDotPosition = filename.lastIndexOf('.');
     if (lastDotPosition === -1) return '';
     else return filename.substr(lastDotPosition);
 }
 
-export function splitFilenameAndExtension(filename): [string, string] {
+export function splitFilenameAndExtension(filename: string): [string, string] {
     const lastDotPosition = filename.lastIndexOf('.');
     if (lastDotPosition === -1) return [filename, null];
     else
@@ -317,7 +317,7 @@ export function splitFilenameAndExtension(filename): [string, string] {
         ];
 }
 
-export function getFileExtension(filename) {
+export function getFileExtension(filename: string) {
     return splitFilenameAndExtension(filename)[1];
 }
 
