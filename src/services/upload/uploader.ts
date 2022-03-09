@@ -80,6 +80,7 @@ export default async function uploader(
             thumbnail: file.thumbnail,
             metadata,
         };
+        UIService.increaseFileUploaded();
         await sleep(100);
         return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
 
