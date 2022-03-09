@@ -19,7 +19,7 @@ class HEICConverter {
     async init() {
         this.workerPool = [];
         for (let i = 0; i < WORKER_POOL_SIZE; i++) {
-            const worker = getDedicatedConvertWorker().comlink;
+            const worker = getDedicatedConvertWorker()?.comlink;
             if (!worker) {
                 return;
             }
