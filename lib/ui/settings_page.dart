@@ -13,6 +13,7 @@ import 'package:photos/ui/settings/security_section_widget.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
+import 'package:photos/ui/settings/usage_details_widget.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key key}) : super(key: key);
@@ -38,6 +39,8 @@ class SettingsPage extends StatelessWidget {
     if (hasLoggedIn) {
       contents.addAll([
         DetailsSectionWidget(),
+        sectionDivider,
+        UsageDetailsWidget(),
         sectionDivider,
         BackupSectionWidget(),
         sectionDivider,
