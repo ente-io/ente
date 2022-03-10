@@ -12,7 +12,7 @@ export async function retryAsyncFunction<T>(
 
     for (
         let attemptNumber = 0;
-        attemptNumber < waitTimeBeforeNextTry.length;
+        attemptNumber <= waitTimeBeforeNextTry.length;
         attemptNumber++
     ) {
         try {
