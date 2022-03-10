@@ -1,5 +1,4 @@
 import { FILE_TYPE } from 'constants/file';
-import { FORMAT_MISSED_BY_FILE_TYPE_LIB } from 'constants/upload';
 import { FileTypeInfo } from 'types/upload';
 import { CustomError } from 'utils/error';
 import { getFileExtension } from 'utils/file';
@@ -10,6 +9,13 @@ import FileType from 'file-type/browser';
 const TYPE_VIDEO = 'video';
 const TYPE_IMAGE = 'image';
 const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
+
+// list of format that were missed by type-detection for some files.
+export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
+    { fileType: FILE_TYPE.IMAGE, exactType: 'jpeg' },
+    { fileType: FILE_TYPE.IMAGE, exactType: 'jpg' },
+    { fileType: FILE_TYPE.VIDEO, exactType: 'webm' },
+];
 
 export async function getFileType(
     reader: FileReader,
