@@ -3,6 +3,7 @@ import { CustomError } from 'utils/error';
 import { createNewConvertWorker } from 'utils/heicConverter';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
+import { logUploadInfo } from 'utils/upload';
 
 const WORKER_POOL_SIZE = 2;
 const MAX_CONVERSION_IN_PARALLEL = 1;
@@ -37,6 +38,7 @@ class HEICConverter {
                     this.workerPool.push({ comlink, worker });
                     return convertedHEIC;
                 } catch (e) {
+                    logUploadInfo('heic conversion failed-' + e.message);
                     logError(e, 'heic conversion failed');
                     worker.terminate();
                     this.workerPool.push(await createNewConvertWorker());
