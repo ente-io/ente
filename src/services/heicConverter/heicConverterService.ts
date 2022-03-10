@@ -1,6 +1,6 @@
 import QueueProcessor from 'services/queueProcessor';
-import { getDedicatedConvertWorker } from 'utils/comlink';
 import { CustomError } from 'utils/error';
+import { createNewConvertWorker } from 'utils/heicConverter';
 import { logError } from 'utils/sentry';
 
 const WORKER_POOL_SIZE = 2;
@@ -10,7 +10,7 @@ class HEICConverter {
     private convertProcessor = new QueueProcessor<Blob>(
         MAX_CONVERSION_IN_PARALLEL
     );
-    private workerPool: any[];
+    private workerPool: { comlink: any; worker: Worker }[];
     private ready: Promise<void>;
 
     constructor() {
@@ -19,24 +19,24 @@ class HEICConverter {
     async init() {
         this.workerPool = [];
         for (let i = 0; i < WORKER_POOL_SIZE; i++) {
-            const worker = getDedicatedConvertWorker()?.comlink;
-            if (!worker) {
-                return;
-            }
-            this.workerPool.push({
-                id: i,
-                worker: await new worker(),
-            });
+            this.workerPool.push(await createNewConvertWorker());
         }
     }
     async convert(fileBlob: Blob, format = 'JPEG'): Promise<Blob> {
         await this.ready;
         const response = this.convertProcessor.queueUpRequest(async () => {
-            const { id, worker } = this.workerPool.shift();
+            const { comlink, worker } = this.workerPool.shift();
             try {
-                return await worker.convertHEIC(fileBlob, format);
-            } finally {
-                this.workerPool.push({ id, worker });
+                const convertedHEIC = await comlink.convertHEIC(
+                    fileBlob,
+                    format
+                );
+                this.workerPool.push({ comlink, worker });
+                return convertedHEIC;
+            } catch (e) {
+                worker.terminate();
+                this.workerPool.push(await createNewConvertWorker());
+                throw e;
             }
         });
         try {
