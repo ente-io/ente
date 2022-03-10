@@ -40,17 +40,17 @@ export async function getFileType(
         }
         return { fileType, exactType: typeResult.ext };
     } catch (e) {
-        const fileFormat = getFileExtension(receivedFile.name);
+        const fileExtension = getFileExtension(receivedFile.name);
         const formatMissedByTypeDetection = FORMAT_MISSED_BY_FILE_TYPE_LIB.find(
-            (a) => a.exactType === fileFormat
+            (a) => a.exactType === fileExtension
         );
         if (formatMissedByTypeDetection) {
             return formatMissedByTypeDetection;
         }
         logError(e, CustomError.TYPE_DETECTION_FAILED, {
-            fileFormat,
+            fileFormat: fileExtension,
         });
-        return { fileType: FILE_TYPE.OTHERS, exactType: fileFormat };
+        return { fileType: FILE_TYPE.OTHERS, exactType: fileExtension };
     }
 }
 
