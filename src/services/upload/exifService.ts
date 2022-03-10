@@ -6,6 +6,7 @@ import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
 import { ParsedExtractedMetadata } from 'types/upload';
 import { getUnixTimeInMicroSeconds } from 'utils/time';
+import { CustomError } from 'utils/error';
 
 const EXIF_TAGS_NEEDED = [
     'DateTimeOriginal',
@@ -38,11 +39,7 @@ export async function getExifData(
         }
         parsedEXIFData = {
             location: getEXIFLocation(exifData),
-            creationTime: getUnixTimeInMicroSeconds(
-                exifData.DateTimeOriginal ??
-                    exifData.CreateDate ??
-                    exifData.ModifyDate
-            ),
+            creationTime: getExifTime(exifData),
         };
     } catch (e) {
         logError(e, 'getExifData failed');
@@ -130,6 +127,21 @@ function getEXIFLocation(exifData): Location {
         return NULL_LOCATION;
     }
     return { latitude: exifData.latitude, longitude: exifData.longitude };
+}
+
+function getExifTime(exifData: Exif) {
+    const time =
+        exifData.DateTimeOriginal ?? exifData.CreateDate ?? exifData.ModifyDate;
+    if (!time) {
+        return null;
+    }
+    if (time && !(time instanceof Date)) {
+        logError(Error(CustomError.NOT_A_DATE), ' date revive failed', {
+            time,
+        });
+        return null;
+    }
+    return getUnixTimeInMicroSeconds(time);
 }
 
 function convertToExifDateFormat(date: Date) {
