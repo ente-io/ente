@@ -1,7 +1,7 @@
 import * as HeicConvert from 'heic-convert';
 
-const WAIT_TIME_IN_MICROSECONDS = 60 * 1000;
-const BREATH_TIME_IN_MICROSECONDS = 100;
+const WAIT_TIME_IN_MICROSECONDS = 10 * 1000;
+const BREATH_TIME_IN_MICROSECONDS = 1000;
 
 export async function convertHEIC(
     fileBlob: Blob,
