@@ -7,7 +7,7 @@ import { logUploadInfo } from 'utils/upload';
 
 const WORKER_POOL_SIZE = 2;
 const MAX_CONVERSION_IN_PARALLEL = 1;
-const WAIT_TIME_BEFORE_NEXT_ATTEMPT_IN_MICROSECONDS = [100, 1000, 2000];
+const WAIT_TIME_BEFORE_NEXT_ATTEMPT_IN_MICROSECONDS = [100, 100];
 
 class HEICConverter {
     private convertProcessor = new QueueProcessor<Blob>(
