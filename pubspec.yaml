@@ -47,7 +47,7 @@ dependencies:
   flutter_cache_manager: ^3.3.0
   flutter_datetime_picker: ^1.5.1
   flutter_easyloading: ^3.0.0
-  flutter_email_sender: ^5.1.0
+  flutter_email_sender: 5.0.2
   flutter_image_compress: ^1.1.0
   flutter_inappwebview: ^5.3.2
   flutter_local_notifications: ^5.0.0+4
