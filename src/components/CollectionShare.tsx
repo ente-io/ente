@@ -68,8 +68,7 @@ const style = {
     }),
     control: (style, { isFocused }) => ({
         ...style,
-        minWidth: '120px',
-
+        minWidth: '130px',
         backgroundColor: '#282828',
         margin: '0px',
         color: '#d1d1d1',
@@ -476,24 +475,6 @@ function CollectionShare(props: Props) {
                                 <>
                                     <Row>
                                         <OptionLabel>
-                                            {constants.FILE_DOWNLOAD}
-                                        </OptionLabel>
-                                        <OptionValue>
-                                            <Form.Switch
-                                                checked={
-                                                    publicShareProp?.enableDownload ??
-                                                    false
-                                                }
-                                                id="public-sharing-file-download-toggler"
-                                                className="custom-switch-md"
-                                                onChange={
-                                                    handleFileDownloadSetting
-                                                }
-                                            />
-                                        </OptionValue>
-                                    </Row>
-                                    <Row>
-                                        <OptionLabel>
                                             {constants.LINK_DEVICE_LIMIT}
                                         </OptionLabel>
                                         <OptionValue
@@ -502,6 +483,7 @@ function CollectionShare(props: Props) {
                                                 flex: 1,
                                             }}>
                                             <Select
+                                                menuPosition="fixed"
                                                 options={deviceLimitOptions}
                                                 isSearchable={false}
                                                 placeholder={publicShareProp?.deviceLimit?.toString()}
@@ -520,6 +502,7 @@ function CollectionShare(props: Props) {
                                         </OptionLabel>
                                         <OptionValue>
                                             <Select
+                                                menuPosition="fixed"
                                                 options={expiryOptions}
                                                 isSearchable={false}
                                                 placeholder={'change'}
@@ -532,10 +515,31 @@ function CollectionShare(props: Props) {
                                     </Row>
                                     <Row>
                                         <OptionLabel>
+                                            {constants.FILE_DOWNLOAD}
+                                        </OptionLabel>
+                                        <OptionValue>
+                                            <Form.Switch
+                                                style={{ marginLeft: '10px' }}
+                                                checked={
+                                                    publicShareProp?.enableDownload ??
+                                                    false
+                                                }
+                                                id="public-sharing-file-download-toggler"
+                                                className="custom-switch-md"
+                                                onChange={
+                                                    handleFileDownloadSetting
+                                                }
+                                            />
+                                        </OptionValue>
+                                    </Row>
+
+                                    <Row>
+                                        <OptionLabel>
                                             {constants.LINK_PASSWORD_LOCK}{' '}
                                         </OptionLabel>
                                         <OptionValue>
                                             <Form.Switch
+                                                style={{ marginLeft: '10px' }}
                                                 checked={
                                                     (publicShareProp?.passwordEnabled ||
                                                         configurePassword) ??

@@ -354,6 +354,9 @@ const GlobalStyles = createGlobalStyle`
     .bg-upload-progress-bar {
         background-color: #51cd7c;
     }
+    .custom-switch.custom-switch-md{
+        z-index:0;
+    }
     .custom-switch.custom-switch-md .custom-control-label {
         padding-left: 2rem;
         padding-bottom: 1.5rem;
