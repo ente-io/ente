@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:background_fetch/background_fetch.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -54,8 +53,8 @@ void main() async {
 Future<void> _runInForeground() async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
-    await _init(false);
-    _scheduleFGSync();
+    await _init(false, via: 'mainMethod');
+    _scheduleFGSync('appStart in FG');
     runApp(AppLock(
       builder: (args) => EnteApp(_runBackgroundTask, _killBGTask),
       lockScreen: LockScreen(),
@@ -68,10 +67,11 @@ Future<void> _runInForeground() async {
 Future<void> _runBackgroundTask(String taskId) async {
   if (Platform.isIOS && _isProcessRunning) {
     _logger.info("Background task triggered when process was already running");
-    await _sync();
+    await _sync('bgTaskActiveProcess');
     BackgroundFetch.finish(taskId);
   } else {
     _runWithLogs(() async {
+      _logger.info("run background task");
       _runInBackground(taskId);
     }, prefix: "[bg]");
   }
@@ -80,7 +80,7 @@ Future<void> _runBackgroundTask(String taskId) async {
 Future<void> _runInBackground(String taskId) async {
   await Future.delayed(Duration(seconds: 3));
   if (await _isRunningInForeground()) {
-    _logger.info("FG task running, skipping BG task");
+    _logger.info("FG task running, skipping BG taskID: $taskId");
     BackgroundFetch.finish(taskId);
     return;
   } else {
@@ -89,11 +89,11 @@ Future<void> _runInBackground(String taskId) async {
   _logger.info("[BackgroundFetch] Event received: $taskId");
   _scheduleBGTaskKill(taskId);
   if (Platform.isIOS) {
-    _scheduleSuicide(kBGTaskTimeout); // To prevent OS from punishing us
+    _scheduleSuicide(kBGTaskTimeout, taskId); // To prevent OS from punishing us
   }
-  await _init(true);
+  await _init(true, via: 'runViaBackgroundTask');
   UpdateService.instance.showUpdateNotification();
-  await _sync();
+  await _sync('bgSync');
   BackgroundFetch.finish(taskId);
 }
 
@@ -105,14 +105,15 @@ void _headlessTaskHandler(HeadlessTask task) {
   }
 }
 
-Future<void> _init(bool isBackground) async {
+Future<void> _init(bool isBackground, {String via = ''}) async {
   _isProcessRunning = true;
-  _logger.info("Initializing...");
+  _logger.info("Initializing...  inBG =$isBackground via: $via");
+  await _logFGHeartBeatInfo();
   _scheduleHeartBeat(isBackground);
   if (isBackground) {
-    AppLifecycleService.instance.onAppInBackground();
+    AppLifecycleService.instance.onAppInBackground('init via: $via');
   } else {
-    AppLifecycleService.instance.onAppInForeground();
+    AppLifecycleService.instance.onAppInForeground('init via: $via');
   }
   InAppPurchaseConnection.enablePendingPurchases();
   CryptoUtil.init();
@@ -139,9 +140,11 @@ Future<void> _init(bool isBackground) async {
   _logger.info("Initialization done");
 }
 
-Future<void> _sync() async {
+Future<void> _sync(String caller) async {
   if (!AppLifecycleService.instance.isForeground) {
-    _logger.info("Syncing in background");
+    _logger.info("Syncing in background caller $caller");
+  } else {
+    _logger.info("Syncing in foreground caller $caller");
   }
   try {
     await SyncService.instance.sync();
@@ -171,16 +174,16 @@ Future<void> _scheduleHeartBeat(bool isBackground) async {
   });
 }
 
-Future<void> _scheduleFGSync() async {
-  await _sync();
+Future<void> _scheduleFGSync(String caller) async {
+  await _sync(caller);
   Future.delayed(kFGSyncFrequency, () async {
-    _scheduleFGSync();
+    _scheduleFGSync('fgSyncCron');
   });
 }
 
 void _scheduleBGTaskKill(String taskId) async {
   if (await _isRunningInForeground()) {
-    _logger.info("Found app in FG, committing seppuku.");
+    _logger.info("Found app in FG, committing seppuku. $taskId");
     await _killBGTask(taskId);
     return;
   }
@@ -205,14 +208,16 @@ Future<void> _killBGTask([String taskId]) async {
   if (taskId != null) {
     BackgroundFetch.finish(taskId);
   }
-  Isolate.current.kill(priority: Isolate.immediate);
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  bool isRunningInFG = await _isRunningInForeground(); // hb
+  bool isInForeground = AppLifecycleService.instance.isForeground;
   if (_isProcessRunning) {
-    _logger.info("Background push received when app is alive");
+    _logger.info(
+        "Background push received when app is alive and runningInFS: $isRunningInFG inForeground: $isInForeground");
     if (PushService.shouldSync(message)) {
-      await _sync();
+      await _sync('firebaseBgSyncActiveProcess');
     }
   } else {
     // App is dead
@@ -221,17 +226,30 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       if (Platform.isIOS) {
         _scheduleSuicide(kBGPushTimeout); // To prevent OS from punishing us
       }
-      await _init(true);
+      await _init(true, via: 'firebasePush');
       if (PushService.shouldSync(message)) {
-        await _sync();
+        await _sync('firebaseBgSyncNoActiveProcess');
       }
-    }, prefix: "[bg]");
+    }, prefix: "[fbg]");
   }
 }
 
+Future<void> _logFGHeartBeatInfo() async {
+  bool isRunningInFG = await _isRunningInForeground();
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.reload();
+  var lastFGTaskHeartBeatTime = prefs.getInt(kLastFGTaskHeartBeatTime) ?? 0;
+  String lastRun = lastFGTaskHeartBeatTime == 0
+      ? 'never'
+      : DateTime.fromMicrosecondsSinceEpoch(lastFGTaskHeartBeatTime).toString();
+  _logger.info('isAlreaduunningFG: $isRunningInFG, last Beat: $lastRun');
+}
+
 void _scheduleSuicide(Duration duration, [String taskID]) {
+  var taskIDVal = taskID ?? 'no taskID';
+  _logger.warning("Schedule seppuku taskID: $taskIDVal");
   Future.delayed(duration, () {
-    _logger.warning("TLE, committing seppuku");
+    _logger.warning("TLE, committing seppuku for taskID: $taskIDVal");
     _killBGTask(taskID);
   });
 }
