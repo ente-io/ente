@@ -37,6 +37,7 @@ class HEICConverter {
                     this.workerPool.push({ comlink, worker });
                     return convertedHEIC;
                 } catch (e) {
+                    logError(e, 'heic conversion failed');
                     worker.terminate();
                     this.workerPool.push(await createNewConvertWorker());
                     throw e;
@@ -49,10 +50,8 @@ class HEICConverter {
             if (e.message === CustomError.REQUEST_CANCELLED) {
                 // ignore
                 return null;
-            } else {
-                logError(e, 'heic conversion failed');
-                throw e;
             }
+            throw e;
         }
     }
 }
