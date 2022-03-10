@@ -501,16 +501,21 @@ function CollectionShare(props: Props) {
                                     </Row>
 
                                     <Row>
-                                        <OptionLabel>
-                                            {constants.LINK_EXPIRY} :{' '}
-                                            {_deviceExpiryTime()}{' '}
+                                        <OptionLabel
+                                            style={{ alignItems: 'center' }}>
+                                            <p style={{ margin: 0 }}>
+                                                {constants.LINK_EXPIRY}
+                                            </p>
+                                            <p style={{ margin: 0 }}>
+                                                ({_deviceExpiryTime()})
+                                            </p>
                                         </OptionLabel>
                                         <OptionValue>
                                             <Select
                                                 menuPosition="fixed"
                                                 options={expiryOptions}
                                                 isSearchable={false}
-                                                placeholder={'change'}
+                                                placeholder={constants.CHANGE}
                                                 onChange={(e) => {
                                                     updateDeviceExpiry(e.value);
                                                 }}
