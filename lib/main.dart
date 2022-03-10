@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:background_fetch/background_fetch.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -208,13 +207,6 @@ Future<void> _killBGTask([String taskId]) async {
   prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
     BackgroundFetch.finish(taskId);
-  }
-  if (Platform.isIOS) {
-    _logger.info('avoid killing current isolate');
-  }
-  else {
-    _logger.info('kill current isolate');
-    Isolate.current.kill(priority: Isolate.immediate);
   }
 }
 
