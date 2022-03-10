@@ -27,6 +27,5 @@ const getDedicatedFFmpegWorker = (): ComlinkWorker => {
         return { comlink, worker };
     }
 };
-export const ConvertWorker: any = getDedicatedConvertWorker()?.comlink;
 
 export const FFmpegWorker: any = getDedicatedFFmpegWorker()?.comlink;
