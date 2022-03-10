@@ -138,6 +138,7 @@ class _SharingDialogState extends State<SharingDialog> {
             ],
           ),
         ),
+        Padding(padding: EdgeInsets.all(8)),
       ]);
       if (widget.collection.publicURLs?.isNotEmpty ?? false) {
         children.add(Padding(
