@@ -683,6 +683,10 @@ const englishConstants = {
     PLAYBACK_SUPPORT_COMING: 'playback support coming soon...',
     LIVE_PHOTO: 'this is a live photo',
     LIVE: 'LIVE',
+    DISABLE_PASSWORD: 'disable password',
+    DISABLE_PASSWORD_MESSAGE: 'are you sure you want to disable password',
+    PASSWORD_LOCK: 'password lock',
+    LOCK: 'lock',
 };
 
 export default englishConstants;

@@ -33,6 +33,7 @@ import { SelectStyles } from './Search/SelectStyle';
 import CryptoWorker from 'utils/crypto';
 import { dateStringWithMMH } from 'utils/time';
 import styled from 'styled-components';
+import SingleInputForm from './SingleInputForm';
 
 interface Props {
     show: boolean;
@@ -44,9 +45,6 @@ interface formValues {
     email: string;
 }
 
-interface passFormValues {
-    linkPassword: string;
-}
 interface ShareeProps {
     sharee: User;
     collectionUnshare: (sharee: User) => void;
@@ -184,13 +182,11 @@ function CollectionShare(props: Props) {
         }
     };
 
-    const savePassword = async (
-        { linkPassword }: passFormValues,
-        { setFieldError }: FormikHelpers<passFormValues>
-    ) => {
-        if (linkPassword && linkPassword.trim().length >= 1) {
-            setConfigurePassword(!configurePassword);
-            await enablePublicUrlPassword(linkPassword);
+    const savePassword = async (passphrase, setFieldError) => {
+        if (passphrase && passphrase.trim().length >= 1) {
+            await enablePublicUrlPassword(passphrase);
+            setConfigurePassword(false);
+            publicShareProp.passwordEnabled = true;
         } else {
             setFieldError('linkPassword', 'can not be empty');
         }
@@ -200,14 +196,24 @@ function CollectionShare(props: Props) {
         if (publicShareProp.passwordEnabled) {
             await disablePublicUrlPassword();
         } else {
-            setConfigurePassword(!configurePassword);
+            setConfigurePassword(true);
         }
     };
 
     const disablePublicUrlPassword = async () => {
-        return updatePublicShareURLHelper({
-            collectionID: props.collection.id,
-            disablePassword: true,
+        galleryContext.setDialogMessage({
+            title: constants.DISABLE_PASSWORD,
+            content: constants.DISABLE_PASSWORD_MESSAGE,
+            close: { text: constants.CANCEL },
+            proceed: {
+                text: constants.DISABLE,
+                action: () =>
+                    updatePublicShareURLHelper({
+                        collectionID: props.collection.id,
+                        disablePassword: true,
+                    }),
+                variant: ButtonVariant.danger,
+            },
         });
     };
 
@@ -458,10 +464,9 @@ function CollectionShare(props: Props) {
                         </FlexWrapper>
                     )}
                 </div>
-                {publicShareUrl ? (
+                {publicShareUrl && (
                     <div style={{ width: '100%', wordBreak: 'break-all' }}>
                         <CodeBlock key={publicShareUrl} code={publicShareUrl} />
-
                         <Accordion
                             defaultActiveKey="0"
                             style={{ padding: '0 20px' }}>
@@ -541,9 +546,7 @@ function CollectionShare(props: Props) {
                                             <Form.Switch
                                                 style={{ marginLeft: '10px' }}
                                                 checked={
-                                                    (publicShareProp?.passwordEnabled ||
-                                                        configurePassword) ??
-                                                    false
+                                                    publicShareProp?.passwordEnabled
                                                 }
                                                 id="public-sharing-file-password-toggler"
                                                 className="custom-switch-md"
@@ -556,69 +559,21 @@ function CollectionShare(props: Props) {
                                 </>
                             </Accordion.Collapse>
                         </Accordion>
-                        {configurePassword ? (
-                            <DeadCenter
-                                style={{ width: '85%', margin: '20px' }}>
-                                <Formik<passFormValues>
-                                    initialValues={{ linkPassword: '' }}
-                                    validateOnChange={false}
-                                    validateOnBlur={false}
-                                    onSubmit={savePassword}>
-                                    {({
-                                        values,
-                                        errors,
-                                        touched,
-                                        handleChange,
-                                        handleSubmit,
-                                    }) => (
-                                        <Form
-                                            noValidate
-                                            onSubmit={handleSubmit}>
-                                            <Form.Row>
-                                                <Form.Group
-                                                    as={Col}
-                                                    xs={10}
-                                                    controlId="formHorizontalPassword">
-                                                    <Form.Control
-                                                        type="text"
-                                                        placeholder={
-                                                            'link password'
-                                                        }
-                                                        value={
-                                                            values.linkPassword
-                                                        }
-                                                        onChange={handleChange(
-                                                            'linkPassword'
-                                                        )}
-                                                        autoFocus
-                                                        disabled={loading}
-                                                    />
-                                                    <FormControl.Feedback type="invalid">
-                                                        {touched.linkPassword &&
-                                                            errors.linkPassword}
-                                                    </FormControl.Feedback>
-                                                </Form.Group>
-                                                <Form.Group
-                                                    as={Col}
-                                                    xs={10}
-                                                    controlId="formHorizontalEmail">
-                                                    <SubmitButton
-                                                        loading={loading}
-                                                        inline
-                                                        buttonText="save"
-                                                    />
-                                                </Form.Group>
-                                            </Form.Row>
-                                        </Form>
-                                    )}
-                                </Formik>
-                            </DeadCenter>
-                        ) : (
-                            <div />
-                        )}
+                        <MessageDialog
+                            show={configurePassword}
+                            onHide={() => setConfigurePassword(false)}
+                            size="sm"
+                            attributes={{
+                                title: constants.PASSWORD_LOCK,
+                            }}>
+                            <SingleInputForm
+                                callback={savePassword}
+                                placeholder={constants.RETURN_PASSPHRASE_HINT}
+                                buttonText={constants.LOCK}
+                                fieldType="text"
+                            />
+                        </MessageDialog>
                     </div>
-                ) : (
-                    <div style={{ height: '30px' }} />
                 )}
             </DeadCenter>
         </MessageDialog>
