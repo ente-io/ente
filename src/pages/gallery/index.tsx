@@ -132,6 +132,7 @@ const defaultGalleryContext: GalleryContextType = {
     startLoading: () => null,
     finishLoading: () => null,
     setNotificationAttributes: () => null,
+    setBlockingLoad: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -157,7 +158,7 @@ export default function Gallery() {
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [planModalView, setPlanModalView] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [blockingLoad, setBlockingLoad] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes>(null);
     const [collectionSelectorView, setCollectionSelectorView] = useState(false);
@@ -276,7 +277,11 @@ export default function Gallery() {
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (router.isReady && key) {
-            checkSubscriptionPurchase(setDialogMessage, router, setLoading);
+            checkSubscriptionPurchase(
+                setDialogMessage,
+                router,
+                setBlockingLoad
+            );
         }
     }, [router.isReady]);
 
@@ -568,11 +573,12 @@ export default function Gallery() {
                 startLoading,
                 finishLoading,
                 setNotificationAttributes,
+                setBlockingLoad,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
                 getInputProps={getInputProps}>
-                {loading && (
+                {blockingLoad && (
                     <LoadingOverlay>
                         <EnteSpinner />
                     </LoadingOverlay>
@@ -587,7 +593,7 @@ export default function Gallery() {
                     modalView={planModalView}
                     closeModal={() => setPlanModalView(false)}
                     setDialogMessage={setDialogMessage}
-                    setLoading={setLoading}
+                    setLoading={setBlockingLoad}
                 />
                 <AlertBanner bannerMessage={bannerMessage} />
                 <ToastNotification
@@ -657,7 +663,7 @@ export default function Gallery() {
                         null,
                         false
                     )}
-                    setLoading={setLoading}
+                    setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setDialogMessage={setDialogMessage}
                     setUploadInProgress={setUploadInProgress}
@@ -668,7 +674,7 @@ export default function Gallery() {
                 <Sidebar
                     collections={collections}
                     setDialogMessage={setDialogMessage}
-                    setLoading={setLoading}
+                    setLoading={setBlockingLoad}
                 />
                 <UploadButton
                     isFirstFetch={isFirstFetch}

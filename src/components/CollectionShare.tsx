@@ -276,7 +276,7 @@ function CollectionShare(props: Props) {
 
     const updatePublicShareURLHelper = async (req: UpdatePublicURL) => {
         try {
-            galleryContext.startLoading();
+            galleryContext.setBlockingLoad(true);
             const response = await updateShareableURL(req);
             setPublicShareProp(response);
             galleryContext.syncWithRemote(false, true);
@@ -284,7 +284,7 @@ function CollectionShare(props: Props) {
             const errorMessage = handleSharingErrors(e);
             setSharableLinkError(errorMessage);
         } finally {
-            galleryContext.finishLoading();
+            galleryContext.setBlockingLoad(false);
         }
     };
 
