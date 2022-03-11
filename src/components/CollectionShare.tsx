@@ -29,7 +29,7 @@ import { CodeBlock } from './CodeBlock';
 import { ButtonVariant, getVariantColor } from './pages/gallery/LinkButton';
 import { handleSharingErrors } from 'utils/error';
 import { sleep } from 'utils/common';
-import { SelectStyles } from './Search/SelectStyle';
+import { SelectStyles } from './Search/styles';
 import CryptoWorker from 'utils/crypto';
 import { dateStringWithMMH } from 'utils/time';
 import styled from 'styled-components';
