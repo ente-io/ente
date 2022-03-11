@@ -34,6 +34,7 @@ export type GalleryContextType = {
     startLoading: () => void;
     finishLoading: () => void;
     setNotificationAttributes: (attributes: NotificationAttributes) => void;
+    setBlockingLoad: (value: boolean) => void;
 };
 
 export interface NotificationAttributes {

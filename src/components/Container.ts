@@ -62,8 +62,7 @@ export const FlexWrapper = styled.div`
 `;
 
 export const FreeFlowText = styled.div`
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+    word-break: break-word;
     min-width: 30%;
     text-align: left;
 `;

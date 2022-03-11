@@ -30,6 +30,7 @@ export const CodeWrapper = styled.div`
 
 type Iprops = React.PropsWithChildren<{
     code: string;
+    wordBreak?: 'normal' | 'break-all' | 'keep-all' | 'break-word';
 }>;
 export const CodeBlock = (props: Iprops) => {
     const [copied, setCopied] = useState<boolean>(false);
@@ -56,7 +57,9 @@ export const CodeBlock = (props: Iprops) => {
         <Wrapper>
             <CodeWrapper>
                 {props.code ? (
-                    <FreeFlowText>{props.code}</FreeFlowText>
+                    <FreeFlowText style={{ wordBreak: props.wordBreak }}>
+                        {props.code}
+                    </FreeFlowText>
                 ) : (
                     <EnteSpinner />
                 )}

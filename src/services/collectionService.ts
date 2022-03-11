@@ -22,6 +22,7 @@ import {
     RemoveFromCollectionRequest,
     CreatePublicAccessTokenRequest,
     PublicURL,
+    UpdatePublicURL,
 } from 'types/collection';
 import { COLLECTION_SORT_BY, CollectionType } from 'constants/collection';
 
@@ -615,6 +616,29 @@ export const deleteShareableURL = async (collection: Collection) => {
         );
     } catch (e) {
         logError(e, 'deleteShareableURL failed ');
+        throw e;
+    }
+};
+
+export const updateShareableURL = async (
+    request: UpdatePublicURL
+): Promise<PublicURL> => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return null;
+        }
+        const res = await HTTPService.put(
+            `${ENDPOINT}/collections/share-url`,
+            request,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return res.data.result as PublicURL;
+    } catch (e) {
+        logError(e, 'updateShareableURL failed ');
         throw e;
     }
 };

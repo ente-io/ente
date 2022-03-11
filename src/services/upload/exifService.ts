@@ -6,6 +6,7 @@ import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
 import { ParsedExtractedMetadata } from 'types/upload';
 import { getUnixTimeInMicroSeconds } from 'utils/time';
+import { CustomError } from 'utils/error';
 
 const EXIF_TAGS_NEEDED = [
     'DateTimeOriginal',
@@ -38,11 +39,7 @@ export async function getExifData(
         }
         parsedEXIFData = {
             location: getEXIFLocation(exifData),
-            creationTime: getUnixTimeInMicroSeconds(
-                exifData.DateTimeOriginal ??
-                    exifData.CreateDate ??
-                    exifData.ModifyDate
-            ),
+            creationTime: getExifTime(exifData),
         };
     } catch (e) {
         logError(e, 'getExifData failed');
@@ -132,8 +129,34 @@ function getEXIFLocation(exifData): Location {
     return { latitude: exifData.latitude, longitude: exifData.longitude };
 }
 
+function getExifTime(exifData: Exif) {
+    let dateTime =
+        exifData.DateTimeOriginal ?? exifData.CreateDate ?? exifData.ModifyDate;
+    if (!dateTime) {
+        return null;
+    }
+    if (!(dateTime instanceof Date)) {
+        try {
+            dateTime = parseEXIFDate(dateTime);
+        } catch (e) {
+            logError(Error(CustomError.NOT_A_DATE), ' date revive failed', {
+                dateTime,
+            });
+            return null;
+        }
+    }
+    return getUnixTimeInMicroSeconds(dateTime);
+}
+
 function convertToExifDateFormat(date: Date) {
     return `${date.getFullYear()}:${
         date.getMonth() + 1
     }:${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+}
+
+function parseEXIFDate(dateTime: String) {
+    const [year, month, date, hour, minute, second] = dateTime
+        .match(/\d+/g)
+        .map((x) => parseInt(x));
+    return new Date(Date.UTC(year, month - 1, date, hour, minute, second));
 }
