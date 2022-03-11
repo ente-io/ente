@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
+import Select from 'react-select';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
@@ -12,17 +13,27 @@ import {
     unshareCollection,
     createShareableURL,
     deleteShareableURL,
+    updateShareableURL,
 } from 'services/collectionService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SubmitButton from './SubmitButton';
 import MessageDialog from './MessageDialog';
-import { Collection } from 'types/collection';
-import { appendCollectionKeyToShareURL } from 'utils/collection';
-import { FlexWrapper } from './Container';
+import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
+import {
+    appendCollectionKeyToShareURL,
+    selectIntOptions,
+    shareExpiryOptions,
+} from 'utils/collection';
+import { FlexWrapper, Label, Row, Value } from './Container';
 import { CodeBlock } from './CodeBlock';
 import { ButtonVariant, getVariantColor } from './pages/gallery/LinkButton';
 import { handleSharingErrors } from 'utils/error';
 import { sleep } from 'utils/common';
+import { SelectStyles } from './Search/styles';
+import CryptoWorker from 'utils/crypto';
+import { dateStringWithMMH } from 'utils/time';
+import styled from 'styled-components';
+import SingleInputForm from './SingleInputForm';
 
 interface Props {
     show: boolean;
@@ -33,16 +44,64 @@ interface Props {
 interface formValues {
     email: string;
 }
+
 interface ShareeProps {
     sharee: User;
     collectionUnshare: (sharee: User) => void;
 }
+
+const DropdownStyle = {
+    ...SelectStyles,
+    dropdownIndicator: (style) => ({
+        ...style,
+        margin: '0px',
+    }),
+    singleValue: (style) => ({
+        ...style,
+        color: '#d1d1d1',
+        width: '240px',
+    }),
+    control: (style, { isFocused }) => ({
+        ...style,
+        ...SelectStyles.control(style, { isFocused }),
+        minWidth: '240px',
+    }),
+};
+
+const linkExpiryStyle = {
+    ...DropdownStyle,
+    placeholder: (style) => ({
+        ...style,
+        color: '#d1d1d1',
+    }),
+};
+
+const OptionRow = styled(Row)`
+    flex-wrap: wrap;
+    justify-content: center;
+`;
+const OptionLabel = styled(Label)`
+    flex: 1 1 103px;
+    @media (min-width: 513px) {
+        text-align: left;
+    }
+    margin: 5px;
+`;
+const OptionValue = styled(Value)`
+    flex: 0 0 240px;
+    justify-content: center;
+    margin: 5px;
+`;
 
 function CollectionShare(props: Props) {
     const [loading, setLoading] = useState(false);
     const galleryContext = useContext(GalleryContext);
     const [sharableLinkError, setSharableLinkError] = useState(null);
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
+    const [publicShareProp, setPublicShareProp] = useState<PublicURL>(null);
+    const [configurePassword, setConfigurePassword] = useState(false);
+    const deviceLimitOptions = selectIntOptions(50);
+    const expiryOptions = shareExpiryOptions;
 
     useEffect(() => {
         const main = async () => {
@@ -52,8 +111,12 @@ function CollectionShare(props: Props) {
                     props.collection.key
                 );
                 setPublicShareUrl(t);
+                setPublicShareProp(
+                    props.collection?.publicURLs?.[0] as PublicURL
+                );
             } else {
                 setPublicShareUrl(null);
+                setPublicShareProp(null);
             }
         };
         main();
@@ -132,6 +195,55 @@ function CollectionShare(props: Props) {
         }
     };
 
+    const savePassword = async (passphrase, setFieldError) => {
+        if (passphrase && passphrase.trim().length >= 1) {
+            await enablePublicUrlPassword(passphrase);
+            setConfigurePassword(false);
+            publicShareProp.passwordEnabled = true;
+        } else {
+            setFieldError('linkPassword', 'can not be empty');
+        }
+    };
+
+    const handlePasswordChangeSetting = async () => {
+        if (publicShareProp.passwordEnabled) {
+            await disablePublicUrlPassword();
+        } else {
+            setConfigurePassword(true);
+        }
+    };
+
+    const disablePublicUrlPassword = async () => {
+        galleryContext.setDialogMessage({
+            title: constants.DISABLE_PASSWORD,
+            content: constants.DISABLE_PASSWORD_MESSAGE,
+            close: { text: constants.CANCEL },
+            proceed: {
+                text: constants.DISABLE,
+                action: () =>
+                    updatePublicShareURLHelper({
+                        collectionID: props.collection.id,
+                        disablePassword: true,
+                    }),
+                variant: ButtonVariant.danger,
+            },
+        });
+    };
+
+    const enablePublicUrlPassword = async (password: string) => {
+        const cryptoWorker = await new CryptoWorker();
+        const kekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
+        const kek = await cryptoWorker.deriveInteractiveKey(password, kekSalt);
+        const passHash = await cryptoWorker.toB64(kek.key);
+        return updatePublicShareURLHelper({
+            collectionID: props.collection.id,
+            passHash: passHash,
+            nonce: kekSalt,
+            opsLimit: kek.opsLimit,
+            memLimit: kek.memLimit,
+        });
+    };
+
     const disablePublicSharing = () => {
         galleryContext.setDialogMessage({
             title: constants.DISABLE_PUBLIC_SHARING,
@@ -145,12 +257,68 @@ function CollectionShare(props: Props) {
         });
     };
 
+    const disableFileDownload = () => {
+        galleryContext.setDialogMessage({
+            title: constants.DISABLE_FILE_DOWNLOAD,
+            content: constants.DISABLE_FILE_DOWNLOAD_MESSAGE,
+            close: { text: constants.CANCEL },
+            proceed: {
+                text: constants.DISABLE,
+                action: () =>
+                    updatePublicShareURLHelper({
+                        collectionID: props.collection.id,
+                        enableDownload: false,
+                    }),
+                variant: ButtonVariant.danger,
+            },
+        });
+    };
+
+    const updatePublicShareURLHelper = async (req: UpdatePublicURL) => {
+        try {
+            galleryContext.setBlockingLoad(true);
+            const response = await updateShareableURL(req);
+            setPublicShareProp(response);
+            galleryContext.syncWithRemote(false, true);
+        } catch (e) {
+            const errorMessage = handleSharingErrors(e);
+            setSharableLinkError(errorMessage);
+        } finally {
+            galleryContext.setBlockingLoad(false);
+        }
+    };
+
+    const updateDeviceLimit = async (newLimit: number) => {
+        return updatePublicShareURLHelper({
+            collectionID: props.collection.id,
+            deviceLimit: newLimit,
+        });
+    };
+
+    const updateDeviceExpiry = async (optionFn) => {
+        return updatePublicShareURLHelper({
+            collectionID: props.collection.id,
+            validTill: optionFn(),
+        });
+    };
+
     const handleCollectionPublicSharing = () => {
         setSharableLinkError(null);
         if (publicShareUrl) {
             disablePublicSharing();
         } else {
             createSharableURLHelper();
+        }
+    };
+
+    const handleFileDownloadSetting = () => {
+        if (publicShareProp.enableDownload) {
+            disableFileDownload();
+        } else {
+            updatePublicShareURLHelper({
+                collectionID: props.collection.id,
+                enableDownload: true,
+            });
         }
     };
 
@@ -178,11 +346,15 @@ function CollectionShare(props: Props) {
     if (!props.collection) {
         return <></>;
     }
+
     return (
         <MessageDialog
             show={props.show}
             onHide={props.onHide}
-            attributes={{ title: constants.SHARE_COLLECTION }}>
+            attributes={{
+                title: constants.SHARE_COLLECTION,
+                staticBackdrop: true,
+            }}>
             <DeadCenter style={{ width: '85%', margin: 'auto' }}>
                 <h6 style={{ marginTop: '8px' }}>
                     {constants.SHARE_WITH_PEOPLE}
@@ -291,11 +463,139 @@ function CollectionShare(props: Props) {
                     )}
                 </div>
                 {publicShareUrl ? (
-                    <div style={{ width: '100%', wordBreak: 'break-all' }}>
-                        <CodeBlock key={publicShareUrl} code={publicShareUrl} />
-                    </div>
+                    <>
+                        <CodeBlock
+                            wordBreak={'break-all'}
+                            code={publicShareUrl}
+                        />
+                        <details style={{ width: '100%' }}>
+                            <summary
+                                onClick={(e) => {
+                                    const lastOptionRow: Element =
+                                        e.currentTarget.nextElementSibling
+                                            .lastElementChild;
+                                    const main = async (
+                                        lastOptionRow: Element
+                                    ) => {
+                                        await sleep(0);
+                                        lastOptionRow.scrollIntoView(true);
+                                    };
+                                    main(lastOptionRow);
+                                }}
+                                className="manageLinkHeader"
+                                style={{ marginBottom: '20px' }}>
+                                {constants.MANAGE_LINK}
+                            </summary>
+                            <section>
+                                <OptionRow>
+                                    <OptionLabel>
+                                        {constants.LINK_DEVICE_LIMIT}
+                                    </OptionLabel>
+                                    <OptionValue>
+                                        <Select
+                                            menuPosition="fixed"
+                                            options={deviceLimitOptions}
+                                            isSearchable={false}
+                                            value={{
+                                                label: publicShareProp?.deviceLimit.toString(),
+                                                value: publicShareProp?.deviceLimit,
+                                            }}
+                                            onChange={(e) =>
+                                                updateDeviceLimit(e.value)
+                                            }
+                                            styles={DropdownStyle}
+                                        />
+                                    </OptionValue>
+                                </OptionRow>
+
+                                <OptionRow>
+                                    <OptionLabel
+                                        style={{ alignItems: 'center' }}>
+                                        {constants.LINK_EXPIRY}
+                                    </OptionLabel>
+                                    <OptionValue>
+                                        <Select
+                                            menuPosition="fixed"
+                                            options={expiryOptions}
+                                            isSearchable={false}
+                                            value={null}
+                                            placeholder={
+                                                publicShareProp?.validTill
+                                                    ? dateStringWithMMH(
+                                                          publicShareProp?.validTill
+                                                      )
+                                                    : 'never'
+                                            }
+                                            onChange={(e) => {
+                                                updateDeviceExpiry(e.value);
+                                            }}
+                                            styles={linkExpiryStyle}
+                                        />
+                                    </OptionValue>
+                                </OptionRow>
+                                <OptionRow>
+                                    <OptionLabel>
+                                        {constants.FILE_DOWNLOAD}
+                                    </OptionLabel>
+                                    <OptionValue>
+                                        <Form.Switch
+                                            style={{ marginLeft: '10px' }}
+                                            checked={
+                                                publicShareProp?.enableDownload ??
+                                                false
+                                            }
+                                            id="public-sharing-file-download-toggler"
+                                            className="custom-switch-md"
+                                            onChange={handleFileDownloadSetting}
+                                        />
+                                    </OptionValue>
+                                </OptionRow>
+
+                                <OptionRow>
+                                    <OptionLabel>
+                                        {constants.LINK_PASSWORD_LOCK}{' '}
+                                    </OptionLabel>
+                                    <OptionValue>
+                                        <Form.Switch
+                                            style={{ marginLeft: '10px' }}
+                                            checked={
+                                                publicShareProp?.passwordEnabled
+                                            }
+                                            id="public-sharing-file-password-toggler"
+                                            className="custom-switch-md"
+                                            onChange={
+                                                handlePasswordChangeSetting
+                                            }
+                                        />
+                                    </OptionValue>
+                                </OptionRow>
+                            </section>
+                            <MessageDialog
+                                show={configurePassword}
+                                onHide={() => setConfigurePassword(false)}
+                                size="sm"
+                                attributes={{
+                                    title: constants.PASSWORD_LOCK,
+                                }}>
+                                <SingleInputForm
+                                    callback={savePassword}
+                                    placeholder={
+                                        constants.RETURN_PASSPHRASE_HINT
+                                    }
+                                    buttonText={constants.LOCK}
+                                    fieldType="password"
+                                />
+                            </MessageDialog>
+                        </details>
+                    </>
                 ) : (
-                    <div style={{ height: '30px' }} />
+                    <div
+                        style={{
+                            height: '1px',
+                            marginTop: '28px',
+                            width: '100%',
+                        }}
+                    />
                 )}
             </DeadCenter>
         </MessageDialog>
