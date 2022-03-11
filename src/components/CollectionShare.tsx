@@ -70,15 +70,6 @@ const DropdownStyle = {
 
 const linkExpiryStyle = {
     ...DropdownStyle,
-    singleValue: (style) => ({
-        ...DropdownStyle.singleValue(style),
-        width: '240px',
-    }),
-    control: (style, { isFocused }) => ({
-        ...style,
-        ...DropdownStyle.control(style, { isFocused }),
-        minWidth: '240px',
-    }),
     placeholder: (style) => ({
         ...style,
         color: '#d1d1d1',
