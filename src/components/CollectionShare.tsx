@@ -5,7 +5,7 @@ import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
-import { Accordion, Button, Col, Table } from 'react-bootstrap';
+import { Button, Col, Table } from 'react-bootstrap';
 import { DeadCenter, GalleryContext } from 'pages/gallery';
 import { User } from 'types/user';
 import {
@@ -467,117 +467,105 @@ function CollectionShare(props: Props) {
                 {publicShareUrl && (
                     <div style={{ width: '100%', wordBreak: 'break-all' }}>
                         <CodeBlock key={publicShareUrl} code={publicShareUrl} />
-                        <Accordion
-                            defaultActiveKey="0"
-                            style={{ padding: '0 20px' }}>
-                            <Accordion.Toggle
-                                as={Button}
-                                variant="link"
-                                eventKey="0">
-                                <h6>{constants.MANAGE_LINK}</h6>
-                            </Accordion.Toggle>
-                            <Accordion.Collapse eventKey="0">
-                                <>
-                                    <Row>
-                                        <OptionLabel>
-                                            {constants.LINK_DEVICE_LIMIT}
-                                        </OptionLabel>
-                                        <OptionValue
-                                            style={{
-                                                minWidth: '60px',
-                                                flex: 1,
-                                            }}>
-                                            <Select
-                                                menuPosition="fixed"
-                                                options={deviceLimitOptions}
-                                                isSearchable={false}
-                                                placeholder={publicShareProp?.deviceLimit?.toString()}
-                                                onChange={(e) =>
-                                                    updateDeviceLimit(e.value)
-                                                }
-                                                styles={style}
-                                            />
-                                        </OptionValue>
-                                    </Row>
+                        <details style={{ padding: '0 20px' }}>
+                            <summary style={{ marginBottom: '20px' }}>
+                                {constants.MANAGE_LINK}
+                            </summary>
+                            <Row>
+                                <OptionLabel>
+                                    {constants.LINK_DEVICE_LIMIT}
+                                </OptionLabel>
+                                <OptionValue
+                                    style={{
+                                        minWidth: '60px',
+                                        flex: 1,
+                                    }}>
+                                    <Select
+                                        menuPosition="fixed"
+                                        options={deviceLimitOptions}
+                                        isSearchable={false}
+                                        placeholder={publicShareProp?.deviceLimit?.toString()}
+                                        onChange={(e) =>
+                                            updateDeviceLimit(e.value)
+                                        }
+                                        styles={style}
+                                    />
+                                </OptionValue>
+                            </Row>
 
-                                    <Row>
-                                        <OptionLabel
-                                            style={{ alignItems: 'center' }}>
-                                            <p style={{ margin: 0 }}>
-                                                {constants.LINK_EXPIRY}
-                                            </p>
-                                            <p style={{ margin: 0 }}>
-                                                ({_deviceExpiryTime()})
-                                            </p>
-                                        </OptionLabel>
-                                        <OptionValue>
-                                            <Select
-                                                menuPosition="fixed"
-                                                options={expiryOptions}
-                                                isSearchable={false}
-                                                placeholder={constants.CHANGE}
-                                                onChange={(e) => {
-                                                    updateDeviceExpiry(e.value);
-                                                }}
-                                                styles={style}
-                                            />
-                                        </OptionValue>
-                                    </Row>
-                                    <Row>
-                                        <OptionLabel>
-                                            {constants.FILE_DOWNLOAD}
-                                        </OptionLabel>
-                                        <OptionValue>
-                                            <Form.Switch
-                                                style={{ marginLeft: '10px' }}
-                                                checked={
-                                                    publicShareProp?.enableDownload ??
-                                                    false
-                                                }
-                                                id="public-sharing-file-download-toggler"
-                                                className="custom-switch-md"
-                                                onChange={
-                                                    handleFileDownloadSetting
-                                                }
-                                            />
-                                        </OptionValue>
-                                    </Row>
+                            <Row>
+                                <OptionLabel style={{ alignItems: 'center' }}>
+                                    <p style={{ margin: 0 }}>
+                                        {constants.LINK_EXPIRY}
+                                    </p>
+                                    <p style={{ margin: 0 }}>
+                                        ({_deviceExpiryTime()})
+                                    </p>
+                                </OptionLabel>
+                                <OptionValue>
+                                    <Select
+                                        menuPosition="fixed"
+                                        options={expiryOptions}
+                                        isSearchable={false}
+                                        placeholder={constants.CHANGE}
+                                        onChange={(e) => {
+                                            updateDeviceExpiry(e.value);
+                                        }}
+                                        styles={style}
+                                    />
+                                </OptionValue>
+                            </Row>
+                            <Row>
+                                <OptionLabel>
+                                    {constants.FILE_DOWNLOAD}
+                                </OptionLabel>
+                                <OptionValue>
+                                    <Form.Switch
+                                        style={{ marginLeft: '10px' }}
+                                        checked={
+                                            publicShareProp?.enableDownload ??
+                                            false
+                                        }
+                                        id="public-sharing-file-download-toggler"
+                                        className="custom-switch-md"
+                                        onChange={handleFileDownloadSetting}
+                                    />
+                                </OptionValue>
+                            </Row>
 
-                                    <Row>
-                                        <OptionLabel>
-                                            {constants.LINK_PASSWORD_LOCK}{' '}
-                                        </OptionLabel>
-                                        <OptionValue>
-                                            <Form.Switch
-                                                style={{ marginLeft: '10px' }}
-                                                checked={
-                                                    publicShareProp?.passwordEnabled
-                                                }
-                                                id="public-sharing-file-password-toggler"
-                                                className="custom-switch-md"
-                                                onChange={
-                                                    handlePasswordChangeSetting
-                                                }
-                                            />
-                                        </OptionValue>
-                                    </Row>
-                                </>
-                            </Accordion.Collapse>
-                        </Accordion>
-                        <MessageDialog
-                            show={configurePassword}
-                            onHide={() => setConfigurePassword(false)}
-                            size="sm"
-                            attributes={{
-                                title: constants.PASSWORD_LOCK,
-                            }}>
-                            <SingleInputForm
-                                callback={savePassword}
-                                placeholder={constants.RETURN_PASSPHRASE_HINT}
-                                buttonText={constants.LOCK}
-                                fieldType="text"
-                            />
-                        </MessageDialog>
+                            <Row>
+                                <OptionLabel>
+                                    {constants.LINK_PASSWORD_LOCK}{' '}
+                                </OptionLabel>
+                                <OptionValue>
+                                    <Form.Switch
+                                        style={{ marginLeft: '10px' }}
+                                        checked={
+                                            publicShareProp?.passwordEnabled
+                                        }
+                                        id="public-sharing-file-password-toggler"
+                                        className="custom-switch-md"
+                                        onChange={handlePasswordChangeSetting}
+                                    />
+                                </OptionValue>
+                            </Row>
+                            <MessageDialog
+                                show={configurePassword}
+                                onHide={() => setConfigurePassword(false)}
+                                size="sm"
+                                attributes={{
+                                    title: constants.PASSWORD_LOCK,
+                                }}>
+                                <SingleInputForm
+                                    callback={savePassword}
+                                    placeholder={
+                                        constants.RETURN_PASSPHRASE_HINT
+                                    }
+                                    buttonText={constants.LOCK}
+                                    fieldType="text"
+                                />
+                            </MessageDialog>
+                        </details>
                     </div>
                 )}
             </DeadCenter>
