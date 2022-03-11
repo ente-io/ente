@@ -585,7 +585,7 @@ function CollectionShare(props: Props) {
                                         constants.RETURN_PASSPHRASE_HINT
                                     }
                                     buttonText={constants.LOCK}
-                                    fieldType="text"
+                                    fieldType="password"
                                 />
                             </MessageDialog>
                         </details>
