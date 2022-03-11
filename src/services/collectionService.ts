@@ -636,7 +636,7 @@ export const updateShareableURL = async (
                 'X-Auth-Token': token,
             }
         );
-        return res.data as PublicURL;
+        return res.data.result as PublicURL;
     } catch (e) {
         logError(e, 'updateShareableURL failed ');
         throw e;
