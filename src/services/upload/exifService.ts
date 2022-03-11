@@ -136,10 +136,7 @@ function getExifTime(exifData: Exif) {
         return null;
     }
     if (time && !(time instanceof Date)) {
-        logError(Error(CustomError.NOT_A_DATE), ' date revive failed', {
-            time,
-        });
-        return null;
+        return parseEXIFDate(time);
     }
     return getUnixTimeInMicroSeconds(time);
 }
@@ -148,4 +145,19 @@ function convertToExifDateFormat(date: Date) {
     return `${date.getFullYear()}:${
         date.getMonth() + 1
     }:${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+}
+
+function parseEXIFDate(dateTime: String) {
+    const [year, month, date, hour, minute, second] = dateTime
+        .match(/\d+/g)
+        .map((x) => parseInt(x));
+    try {
+        return getUnixTimeInMicroSeconds(
+            new Date(Date.UTC(year, month - 1, date, hour, minute, second))
+        );
+    } catch (e) {
+        logError(Error(CustomError.NOT_A_DATE), ' date revive failed', {
+            dateTime,
+        });
+    }
 }
