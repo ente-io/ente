@@ -465,10 +465,13 @@ function CollectionShare(props: Props) {
                         </FlexWrapper>
                     )}
                 </div>
-                {publicShareUrl && (
-                    <div style={{ width: '100%', wordBreak: 'break-all' }}>
-                        <CodeBlock key={publicShareUrl} code={publicShareUrl} />
-                        <details style={{ padding: '0 20px' }}>
+                {publicShareUrl ? (
+                    <>
+                        <CodeBlock
+                            wordBreak={'break-all'}
+                            code={publicShareUrl}
+                        />
+                        <details style={{ width: '100%', padding: '0 20px' }}>
                             <summary
                                 className="manageLinkHeader"
                                 style={{ marginBottom: '20px' }}>
@@ -569,7 +572,15 @@ function CollectionShare(props: Props) {
                                 />
                             </MessageDialog>
                         </details>
-                    </div>
+                    </>
+                ) : (
+                    <div
+                        style={{
+                            height: '1px',
+                            marginTop: '28px',
+                            width: '100%',
+                        }}
+                    />
                 )}
             </DeadCenter>
         </MessageDialog>
