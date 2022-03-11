@@ -503,7 +503,10 @@ function CollectionShare(props: Props) {
                                             menuPosition="fixed"
                                             options={deviceLimitOptions}
                                             isSearchable={false}
-                                            placeholder={publicShareProp?.deviceLimit?.toString()}
+                                            defaultValue={{
+                                                label: publicShareProp?.deviceLimit.toString(),
+                                                value: publicShareProp?.deviceLimit,
+                                            }}
                                             onChange={(e) =>
                                                 updateDeviceLimit(e.value)
                                             }

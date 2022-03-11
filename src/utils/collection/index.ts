@@ -128,7 +128,7 @@ export async function appendCollectionKeyToShareURL(
     return sharableURL.href;
 }
 
-const _intSelectOption = (i) => {
+const _intSelectOption = (i: number) => {
     return { label: i.toString(), value: i };
 };
 
