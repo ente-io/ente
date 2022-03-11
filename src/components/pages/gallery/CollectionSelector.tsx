@@ -80,12 +80,7 @@ function CollectionSelector({
                 props.onHide();
             }}>
             <CollectionCard>
-                <PreviewCard
-                    file={item.file}
-                    updateURL={() => {}}
-                    onSelect={() => {}}
-                    forcedEnable
-                />
+                <PreviewCard file={item.file} forcedEnable />
                 <Card.Text className="text-center">
                     {item.collection.name}
                 </Card.Text>

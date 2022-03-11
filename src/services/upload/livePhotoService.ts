@@ -10,7 +10,7 @@ import {
 import { CustomError } from 'utils/error';
 import { isImageOrVideo, splitFilenameAndExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
-import { getUint8ArrayView } from './readFileService';
+import { getUint8ArrayView } from '../readerService';
 import { generateThumbnail } from './thumbnailService';
 import uploadService from './uploadService';
 import UploadService from './uploadService';

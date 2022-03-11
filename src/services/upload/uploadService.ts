@@ -2,7 +2,7 @@ import { Collection } from 'types/collection';
 import { logError } from 'utils/sentry';
 import UploadHttpClient from './uploadHttpClient';
 import { extractFileMetadata, getFilename } from './fileService';
-import { getFileType } from './readFileService';
+import { getFileType } from '../typeDetectionService';
 import { handleUploadError } from 'utils/error';
 import {
     B64EncryptionResult,

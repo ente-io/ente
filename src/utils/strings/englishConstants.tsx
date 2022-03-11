@@ -687,6 +687,7 @@ const englishConstants = {
     DISABLE_PASSWORD_MESSAGE: 'are you sure you want to disable password',
     PASSWORD_LOCK: 'password lock',
     LOCK: 'lock',
+    DOWNLOAD_UPLOAD_LOGS: 'debug logs',
 };
 
 export default englishConstants;

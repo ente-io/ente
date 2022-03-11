@@ -29,7 +29,7 @@ interface FileProgresses {
     progress: number;
 }
 
-const FileList = styled.ul`
+export const FileList = styled.ul`
     padding-left: 30px;
     margin-top: 5px;
     margin-bottom: 0px;
@@ -209,6 +209,7 @@ export default function UploadProgress(props: Props) {
             <Modal.Body>
                 {(props.uploadStage ===
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES ||
+                    props.uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA ||
                     props.uploadStage === UPLOAD_STAGES.UPLOADING) && (
                     <ProgressBar
                         now={props.now}
