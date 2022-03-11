@@ -521,7 +521,9 @@ const GlobalStyles = createGlobalStyle`
     .form-check-input:hover, .form-check-label :hover{
         cursor:pointer;
     }
-
+    .manageLinkHeader:hover{
+        color:#bbb;
+    }
 `;
 
 export const LogoImage = styled.img`

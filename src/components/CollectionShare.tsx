@@ -348,6 +348,7 @@ function CollectionShare(props: Props) {
     `;
     const OptionValue = styled(Value)`
         width: 30%;
+        justify-content: center;
     `;
     return (
         <MessageDialog
@@ -468,7 +469,9 @@ function CollectionShare(props: Props) {
                     <div style={{ width: '100%', wordBreak: 'break-all' }}>
                         <CodeBlock key={publicShareUrl} code={publicShareUrl} />
                         <details style={{ padding: '0 20px' }}>
-                            <summary style={{ marginBottom: '20px' }}>
+                            <summary
+                                className="manageLinkHeader"
+                                style={{ marginBottom: '20px' }}>
                                 {constants.MANAGE_LINK}
                             </summary>
                             <Row>
