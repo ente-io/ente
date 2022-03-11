@@ -159,5 +159,6 @@ function parseEXIFDate(dateTime: String) {
         logError(Error(CustomError.NOT_A_DATE), ' date revive failed', {
             dateTime,
         });
+        return null;
     }
 }
