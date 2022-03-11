@@ -50,7 +50,7 @@ interface ShareeProps {
     collectionUnshare: (sharee: User) => void;
 }
 
-const style = {
+const DropdownStyle = {
     ...SelectStyles,
     dropdownIndicator: (style) => ({
         ...style,
@@ -58,27 +58,49 @@ const style = {
     }),
     singleValue: (style) => ({
         ...style,
-        margin: '0px',
-        backgroundColor: '#282828',
         color: '#d1d1d1',
-        display: 'block',
-        width: '120px',
+        width: '240px',
     }),
     control: (style, { isFocused }) => ({
         ...style,
-        minWidth: '130px',
-        backgroundColor: '#282828',
-        margin: '0px',
-        color: '#d1d1d1',
-        borderColor: isFocused ? '#51cd7c' : '#444',
-        boxShadow: 'none',
-        ':hover': {
-            borderColor: '#51cd7c',
-            cursor: 'text',
-            '&>.icon': { color: '#51cd7c' },
-        },
+        ...SelectStyles.control(style, { isFocused }),
+        minWidth: '240px',
     }),
 };
+
+const linkExpiryStyle = {
+    ...DropdownStyle,
+    singleValue: (style) => ({
+        ...DropdownStyle.singleValue(style),
+        width: '240px',
+    }),
+    control: (style, { isFocused }) => ({
+        ...style,
+        ...DropdownStyle.control(style, { isFocused }),
+        minWidth: '240px',
+    }),
+    placeholder: (style) => ({
+        ...style,
+        color: '#d1d1d1',
+    }),
+};
+
+const OptionRow = styled(Row)`
+    flex-wrap: wrap;
+    justify-content: center;
+`;
+const OptionLabel = styled(Label)`
+    flex: 1 1 103px;
+    @media (min-width: 513px) {
+        text-align: left;
+    }
+    margin: 5px;
+`;
+const OptionValue = styled(Value)`
+    flex: 0 0 240px;
+    justify-content: center;
+    margin: 5px;
+`;
 
 function CollectionShare(props: Props) {
     const [loading, setLoading] = useState(false);
@@ -309,14 +331,6 @@ function CollectionShare(props: Props) {
         }
     };
 
-    const _deviceExpiryTime = (): string => {
-        const validTill = publicShareProp?.validTill ?? 0;
-        if (validTill === 0) {
-            return 'never';
-        }
-        return dateStringWithMMH(validTill);
-    };
-
     const ShareeRow = ({ sharee, collectionUnshare }: ShareeProps) => (
         <tr>
             <td>{sharee.email}</td>
@@ -342,14 +356,6 @@ function CollectionShare(props: Props) {
         return <></>;
     }
 
-    const OptionLabel = styled(Label)`
-        width: 70%;
-        text-align: left;
-    `;
-    const OptionValue = styled(Value)`
-        width: 30%;
-        justify-content: center;
-    `;
     return (
         <MessageDialog
             show={props.show}
@@ -471,7 +477,7 @@ function CollectionShare(props: Props) {
                             wordBreak={'break-all'}
                             code={publicShareUrl}
                         />
-                        <details style={{ width: '100%', padding: '0 20px' }}>
+                        <details style={{ width: '100%' }}>
                             <summary
                                 onClick={(e) => {
                                     const lastOptionRow: Element =
@@ -490,55 +496,53 @@ function CollectionShare(props: Props) {
                                 {constants.MANAGE_LINK}
                             </summary>
                             <section>
-                                <Row>
+                                <OptionRow>
                                     <OptionLabel>
                                         {constants.LINK_DEVICE_LIMIT}
                                     </OptionLabel>
-                                    <OptionValue
-                                        style={{
-                                            minWidth: '60px',
-                                            flex: 1,
-                                        }}>
+                                    <OptionValue>
                                         <Select
                                             menuPosition="fixed"
                                             options={deviceLimitOptions}
                                             isSearchable={false}
-                                            defaultValue={{
+                                            value={{
                                                 label: publicShareProp?.deviceLimit.toString(),
                                                 value: publicShareProp?.deviceLimit,
                                             }}
                                             onChange={(e) =>
                                                 updateDeviceLimit(e.value)
                                             }
-                                            styles={style}
+                                            styles={DropdownStyle}
                                         />
                                     </OptionValue>
-                                </Row>
+                                </OptionRow>
 
-                                <Row>
+                                <OptionRow>
                                     <OptionLabel
                                         style={{ alignItems: 'center' }}>
-                                        <p style={{ margin: 0 }}>
-                                            {constants.LINK_EXPIRY}
-                                        </p>
-                                        <p style={{ margin: 0 }}>
-                                            ({_deviceExpiryTime()})
-                                        </p>
+                                        {constants.LINK_EXPIRY}
                                     </OptionLabel>
                                     <OptionValue>
                                         <Select
                                             menuPosition="fixed"
                                             options={expiryOptions}
                                             isSearchable={false}
-                                            placeholder={constants.CHANGE}
+                                            value={null}
+                                            placeholder={
+                                                publicShareProp?.validTill
+                                                    ? dateStringWithMMH(
+                                                          publicShareProp?.validTill
+                                                      )
+                                                    : 'never'
+                                            }
                                             onChange={(e) => {
                                                 updateDeviceExpiry(e.value);
                                             }}
-                                            styles={style}
+                                            styles={linkExpiryStyle}
                                         />
                                     </OptionValue>
-                                </Row>
-                                <Row>
+                                </OptionRow>
+                                <OptionRow>
                                     <OptionLabel>
                                         {constants.FILE_DOWNLOAD}
                                     </OptionLabel>
@@ -554,9 +558,9 @@ function CollectionShare(props: Props) {
                                             onChange={handleFileDownloadSetting}
                                         />
                                     </OptionValue>
-                                </Row>
+                                </OptionRow>
 
-                                <Row>
+                                <OptionRow>
                                     <OptionLabel>
                                         {constants.LINK_PASSWORD_LOCK}{' '}
                                     </OptionLabel>
@@ -573,7 +577,7 @@ function CollectionShare(props: Props) {
                                             }
                                         />
                                     </OptionValue>
-                                </Row>
+                                </OptionRow>
                             </section>
                             <MessageDialog
                                 show={configurePassword}
