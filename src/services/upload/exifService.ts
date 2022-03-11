@@ -130,13 +130,20 @@ function getEXIFLocation(exifData): Location {
 }
 
 function getExifTime(exifData: Exif) {
-    const time =
+    let time =
         exifData.DateTimeOriginal ?? exifData.CreateDate ?? exifData.ModifyDate;
     if (!time) {
         return null;
     }
-    if (time && !(time instanceof Date)) {
-        return parseEXIFDate(time);
+    if (!(time instanceof Date)) {
+        try {
+            time = parseEXIFDate(time);
+        } catch (e) {
+            logError(Error(CustomError.NOT_A_DATE), ' date revive failed', {
+                time,
+            });
+            return null;
+        }
     }
     return getUnixTimeInMicroSeconds(time);
 }
@@ -151,14 +158,5 @@ function parseEXIFDate(dateTime: String) {
     const [year, month, date, hour, minute, second] = dateTime
         .match(/\d+/g)
         .map((x) => parseInt(x));
-    try {
-        return getUnixTimeInMicroSeconds(
-            new Date(Date.UTC(year, month - 1, date, hour, minute, second))
-        );
-    } catch (e) {
-        logError(Error(CustomError.NOT_A_DATE), ' date revive failed', {
-            dateTime,
-        });
-        return null;
-    }
+    return new Date(Date.UTC(year, month - 1, date, hour, minute, second));
 }
