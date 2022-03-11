@@ -473,88 +473,105 @@ function CollectionShare(props: Props) {
                         />
                         <details style={{ width: '100%', padding: '0 20px' }}>
                             <summary
+                                onClick={(e) => {
+                                    const lastOptionRow: Element =
+                                        e.currentTarget.nextElementSibling
+                                            .lastElementChild;
+                                    const main = async (
+                                        lastOptionRow: Element
+                                    ) => {
+                                        await sleep(0);
+                                        lastOptionRow.scrollIntoView(true);
+                                    };
+                                    main(lastOptionRow);
+                                }}
                                 className="manageLinkHeader"
                                 style={{ marginBottom: '20px' }}>
                                 {constants.MANAGE_LINK}
                             </summary>
-                            <Row>
-                                <OptionLabel>
-                                    {constants.LINK_DEVICE_LIMIT}
-                                </OptionLabel>
-                                <OptionValue
-                                    style={{
-                                        minWidth: '60px',
-                                        flex: 1,
-                                    }}>
-                                    <Select
-                                        menuPosition="fixed"
-                                        options={deviceLimitOptions}
-                                        isSearchable={false}
-                                        placeholder={publicShareProp?.deviceLimit?.toString()}
-                                        onChange={(e) =>
-                                            updateDeviceLimit(e.value)
-                                        }
-                                        styles={style}
-                                    />
-                                </OptionValue>
-                            </Row>
+                            <section>
+                                <Row>
+                                    <OptionLabel>
+                                        {constants.LINK_DEVICE_LIMIT}
+                                    </OptionLabel>
+                                    <OptionValue
+                                        style={{
+                                            minWidth: '60px',
+                                            flex: 1,
+                                        }}>
+                                        <Select
+                                            menuPosition="fixed"
+                                            options={deviceLimitOptions}
+                                            isSearchable={false}
+                                            placeholder={publicShareProp?.deviceLimit?.toString()}
+                                            onChange={(e) =>
+                                                updateDeviceLimit(e.value)
+                                            }
+                                            styles={style}
+                                        />
+                                    </OptionValue>
+                                </Row>
 
-                            <Row>
-                                <OptionLabel style={{ alignItems: 'center' }}>
-                                    <p style={{ margin: 0 }}>
-                                        {constants.LINK_EXPIRY}
-                                    </p>
-                                    <p style={{ margin: 0 }}>
-                                        ({_deviceExpiryTime()})
-                                    </p>
-                                </OptionLabel>
-                                <OptionValue>
-                                    <Select
-                                        menuPosition="fixed"
-                                        options={expiryOptions}
-                                        isSearchable={false}
-                                        placeholder={constants.CHANGE}
-                                        onChange={(e) => {
-                                            updateDeviceExpiry(e.value);
-                                        }}
-                                        styles={style}
-                                    />
-                                </OptionValue>
-                            </Row>
-                            <Row>
-                                <OptionLabel>
-                                    {constants.FILE_DOWNLOAD}
-                                </OptionLabel>
-                                <OptionValue>
-                                    <Form.Switch
-                                        style={{ marginLeft: '10px' }}
-                                        checked={
-                                            publicShareProp?.enableDownload ??
-                                            false
-                                        }
-                                        id="public-sharing-file-download-toggler"
-                                        className="custom-switch-md"
-                                        onChange={handleFileDownloadSetting}
-                                    />
-                                </OptionValue>
-                            </Row>
+                                <Row>
+                                    <OptionLabel
+                                        style={{ alignItems: 'center' }}>
+                                        <p style={{ margin: 0 }}>
+                                            {constants.LINK_EXPIRY}
+                                        </p>
+                                        <p style={{ margin: 0 }}>
+                                            ({_deviceExpiryTime()})
+                                        </p>
+                                    </OptionLabel>
+                                    <OptionValue>
+                                        <Select
+                                            menuPosition="fixed"
+                                            options={expiryOptions}
+                                            isSearchable={false}
+                                            placeholder={constants.CHANGE}
+                                            onChange={(e) => {
+                                                updateDeviceExpiry(e.value);
+                                            }}
+                                            styles={style}
+                                        />
+                                    </OptionValue>
+                                </Row>
+                                <Row>
+                                    <OptionLabel>
+                                        {constants.FILE_DOWNLOAD}
+                                    </OptionLabel>
+                                    <OptionValue>
+                                        <Form.Switch
+                                            style={{ marginLeft: '10px' }}
+                                            checked={
+                                                publicShareProp?.enableDownload ??
+                                                false
+                                            }
+                                            id="public-sharing-file-download-toggler"
+                                            className="custom-switch-md"
+                                            onChange={handleFileDownloadSetting}
+                                        />
+                                    </OptionValue>
+                                </Row>
 
-                            <Row>
-                                <OptionLabel>
-                                    {constants.LINK_PASSWORD_LOCK}{' '}
-                                </OptionLabel>
-                                <OptionValue>
-                                    <Form.Switch
-                                        style={{ marginLeft: '10px' }}
-                                        checked={
-                                            publicShareProp?.passwordEnabled
-                                        }
-                                        id="public-sharing-file-password-toggler"
-                                        className="custom-switch-md"
-                                        onChange={handlePasswordChangeSetting}
-                                    />
-                                </OptionValue>
-                            </Row>
+                                <Row>
+                                    <OptionLabel>
+                                        {constants.LINK_PASSWORD_LOCK}{' '}
+                                    </OptionLabel>
+                                    <OptionValue>
+                                        <Form.Switch
+                                            style={{ marginLeft: '10px' }}
+                                            checked={
+                                                publicShareProp?.passwordEnabled
+                                            }
+                                            id="public-sharing-file-password-toggler"
+                                            className="custom-switch-md"
+                                            onChange={
+                                                handlePasswordChangeSetting
+                                            }
+                                        />
+                                    </OptionValue>
+                                </Row>
+                            </section>
                             <MessageDialog
                                 show={configurePassword}
                                 onHide={() => setConfigurePassword(false)}
