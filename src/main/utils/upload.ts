@@ -93,7 +93,7 @@ export const getToUploadFiles = async () => {
                     lastModified: fileStats.mtime.valueOf(),
                     type: {
                         mimeType: mime.getType(filePath),
-                        ext: path.extname(filePath),
+                        ext: path.extname(filePath).substring(1),
                     },
                     createReadStream: async () => {
                         return await getFileStream(filePath);
