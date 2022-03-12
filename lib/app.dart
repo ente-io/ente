@@ -67,7 +67,8 @@ final lightThemeData = ThemeData(
       headline6: TextStyle(
           color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
       subtitle1: TextStyle(
-          color: Colors.black, fontSize: 15, fontWeight: FontWeight.w500),
+        fontFamily: 'Inter-Medium',
+          color: Colors.black, fontSize: 16, fontWeight: FontWeight.w500),
       caption: TextStyle(color: Colors.black.withOpacity(0.7), fontSize: 14),
       overline: TextStyle(color: Colors.black.withOpacity(0.8), fontSize: 12)),
 
@@ -109,7 +110,7 @@ final darkThemeData = ThemeData(
       headline6: TextStyle(
           color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
       subtitle1: TextStyle(
-          color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+          color: Colors.white, fontFamily: 'Inter-Medium', fontSize: 16, fontWeight: FontWeight.w500),
       caption: TextStyle(
         color: Colors.white.withOpacity(0.6),
         fontSize: 14,
