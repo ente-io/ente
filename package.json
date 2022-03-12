@@ -39,7 +39,7 @@
     "watch": "tsc -w",
     "lint": "eslint -c .eslintrc --ext .ts ./src",
     "pre-build": "concurrently \"yarn && yarn run build-main\" \"cd src/renderer && yarn\"",
-    "start": "yarn run pre-build && concurrently \"yarn run watch\" \"electron ./app/main/index.js\" \"cd src/renderer && yarn dev\"",
+    "start": "yarn run pre-build && concurrently \"yarn run watch\" \"electron ./app/main/index.js\"",
     "build-renderer": "cd src/renderer && yarn && yarn build && cd ../../",
     "test-release": "yarn && yarn build-renderer && yarn run build-main && electron-builder",
     "release": "electron-builder -mwl --publish always"
@@ -60,12 +60,15 @@
   },
   "dependencies": {
     "@sentry/electron": "^2.5.1",
+    "@types/mime": "^2.0.3",
     "@types/node": "^14.14.37",
     "@types/promise-fs": "^2.1.1",
     "electron-is-dev": "^2.0.0",
     "electron-log": "^4.3.5",
     "electron-reload": "^2.0.0-alpha.1",
+    "electron-store": "^8.0.1",
     "electron-updater": "^4.3.8",
+    "mime": "^3.0.0",
     "next-electron-server": "^0.0.8",
     "promise-fs": "^2.1.1"
   }

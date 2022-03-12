@@ -1,6 +1,11 @@
 import { Readable } from 'stream';
 import * as fs from 'promise-fs';
 import * as electron from 'electron';
+import {
+    getIfToUploadFilesExists,
+    getToUploadFiles,
+    setToUploadFiles,
+} from './utils/upload';
 
 const { ipcRenderer } = electron;
 
@@ -117,4 +122,7 @@ windowObject['ElectronAPIs'] = {
     registerRetryFailedExportListener,
     getExportRecord,
     setExportRecord,
+    setToUploadFiles,
+    getToUploadFiles,
+    getIfToUploadFilesExists,
 };

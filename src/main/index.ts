@@ -7,6 +7,7 @@ import setupIpcComs from './utils/ipcComms';
 import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 import initSentry from './utils/sentry';
 import electronReload from 'electron-reload';
+import Store from 'electron-store';
 import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from '../config';
 
 if (isDev) {
@@ -39,6 +40,7 @@ const serveNextAt = require('next-electron-server');
 serveNextAt(PROD_HOST_URL, {
     outputDir: RENDERER_OUTPUT_DIR,
 });
+const store = new Store();
 
 // Disable error dialogs by overriding
 dialog.showErrorBox = function (title, content) {
