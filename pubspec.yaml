@@ -151,6 +151,7 @@ flutter:
   - family: Inter
     fonts:
       - asset: fonts/Inter-Regular.ttf
+      - asset: fonts/Inter-Medium.ttf
       - asset: fonts/Inter-Light.ttf
       - asset: fonts/Inter-SemiBold.ttf
       - asset: fonts/Inter-Bold.ttf

@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:background_fetch/background_fetch.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -15,19 +18,50 @@ final lightThemeData = ThemeData(
   fontFamily: 'Inter',
   brightness: Brightness.light,
   hintColor: Colors.grey,
+  primaryColor: Colors.deepOrangeAccent,
   iconTheme: IconThemeData(color: Colors.black),
   primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
   colorScheme: ColorScheme.light(primary: Colors.black),
   accentColor: Color.fromRGBO(45, 194, 98, 0.2),
   buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
-  buttonTheme: ButtonThemeData().copyWith(
-    buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
+      textStyle: TextStyle(
+        fontWeight: FontWeight.w600,
+        fontFamily: 'Inter-SemiBold',
+        fontSize: 18,
+      ),
+    ).copyWith(
+      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+        (Set<MaterialState> states) {
+          if (states.contains(MaterialState.disabled)) {
+            return Colors.grey.shade500;
+          }
+          return Colors.black;
+        },
+      ),
+      foregroundColor: MaterialStateProperty.resolveWith<Color>(
+        (Set<MaterialState> states) {
+          if (states.contains(MaterialState.disabled)) {
+            return Colors.white;
+          }
+          return Colors.white;
+        },
+      ),
+      alignment: Alignment.center,
+    ),
   ),
   toggleableActiveColor: Colors.red[400],
   scaffoldBackgroundColor: Colors.white,
   bottomAppBarColor: Color.fromRGBO(196, 196, 196, 1.0),
   backgroundColor: Colors.white,
-  appBarTheme: AppBarTheme().copyWith(color: Colors.blue),
+  appBarTheme: AppBarTheme().copyWith(
+      backgroundColor: Colors.white,
+      iconTheme: IconThemeData(color: Colors.black)),
   //https://api.flutter.dev/flutter/material/TextTheme-class.html
   textTheme: TextTheme().copyWith(
       headline6: TextStyle(
@@ -41,7 +75,6 @@ final lightThemeData = ThemeData(
       bodyText2: TextStyle(color: Colors.yellow),
       bodyText1: TextStyle(color: Colors.orange)),
   cardColor: Color.fromRGBO(250, 250, 250, 1.0),
-  //
   dialogTheme: DialogTheme().copyWith(
     backgroundColor: Color.fromRGBO(250, 250, 250, 1.0), //
   ),
@@ -86,6 +119,37 @@ final darkThemeData = ThemeData(
         fontSize: 12,
       )),
   toggleableActiveColor: Colors.green[400],
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
+      textStyle: TextStyle(
+        fontWeight: FontWeight.w600,
+        fontFamily: 'Inter-SemiBold',
+        fontSize: 18,
+      ),
+    ).copyWith(
+      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+        (Set<MaterialState> states) {
+          if (states.contains(MaterialState.disabled)) {
+            return Colors.grey.shade500;
+          }
+          return Colors.white;
+        },
+      ),
+      foregroundColor: MaterialStateProperty.resolveWith<Color>(
+        (Set<MaterialState> states) {
+          if (states.contains(MaterialState.disabled)) {
+            return Colors.white;
+          }
+          return Colors.black;
+        },
+      ),
+      alignment: Alignment.center,
+    ),
+  ),
   scaffoldBackgroundColor: Colors.black,
   backgroundColor: Colors.black,
   appBarTheme: AppBarTheme().copyWith(
@@ -106,11 +170,6 @@ final darkThemeData = ThemeData(
     ),
   ),
 );
-
-extension CustomColorScheme on ColorScheme {
-  Color get defaultTextColor =>
-      brightness == Brightness.light ? Colors.black : Colors.white;
-}
 
 class EnteApp extends StatefulWidget {
   static const _homeWidget = HomeWidget();
@@ -139,14 +198,38 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     _configureBackgroundFetch();
   }
 
+  Widget debugBuild(BuildContext context) {
+    return MaterialApp(
+      title: "ente",
+      themeMode: ThemeMode.system,
+      theme: lightThemeData,
+      darkTheme: darkThemeData,
+      home: EnteApp._homeWidget,
+      debugShowCheckedModeBanner: false,
+      navigatorKey: Network.instance.getAlice().getNavigatorKey(),
+      builder: EasyLoading.init(),
+      supportedLocales: L10n.all,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (kDebugMode && Platform.isIOS) {
+      return debugBuild(context);
+    }
     return AdaptiveTheme(
         light: lightThemeData,
         dark: darkThemeData,
         initial: AdaptiveThemeMode.dark,
         builder: (lightTheme, dartTheme) => MaterialApp(
               title: "ente",
+              themeMode: ThemeMode.system,
               theme: lightTheme,
               darkTheme: dartTheme,
               home: EnteApp._homeWidget,
