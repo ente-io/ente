@@ -234,10 +234,10 @@ function CollectionShare(props: Props) {
         const cryptoWorker = await new CryptoWorker();
         const kekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
         const kek = await cryptoWorker.deriveInteractiveKey(password, kekSalt);
-        const passHash = await cryptoWorker.toB64(kek.key);
+
         return updatePublicShareURLHelper({
             collectionID: props.collection.id,
-            passHash: passHash,
+            passHash: kek.key,
             nonce: kekSalt,
             opsLimit: kek.opsLimit,
             memLimit: kek.memLimit,
