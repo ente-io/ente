@@ -200,6 +200,8 @@ export default function PublicCollectionGallery() {
                 );
                 setPublicCollection(null);
                 setPublicFiles(null);
+            } else {
+                logError(e, 'failed to sync with remote');
             }
         } finally {
             finishLoadingBar();
