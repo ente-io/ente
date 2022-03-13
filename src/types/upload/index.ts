@@ -67,14 +67,29 @@ export interface ProgressUpdater {
     setHasLivePhotos: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+export interface ElectronFile {
+    name: string;
+    path: string;
+    size: number;
+    lastModified: number;
+    type: {
+        mimeType: string;
+        ext: string;
+    };
+    createReadStream: () => Promise<ReadableStream<Uint8Array>>;
+    toBlob: () => Promise<Blob>;
+    toUInt8Array: () => Promise<Uint8Array>;
+}
+
 export interface UploadAsset {
     isLivePhoto?: boolean;
-    file?: File;
+    file?: File | ElectronFile;
     livePhotoAssets?: LivePhotoAssets;
+    isElectron?: boolean;
 }
 export interface LivePhotoAssets {
-    image: globalThis.File;
-    video: globalThis.File;
+    image: globalThis.File | ElectronFile;
+    video: globalThis.File | ElectronFile;
 }
 
 export interface FileWithCollection extends UploadAsset {

@@ -1,4 +1,4 @@
-import { FileWithCollection, Metadata } from 'types/upload';
+import { ElectronFile, FileWithCollection, Metadata } from 'types/upload';
 import { EnteFile } from 'types/file';
 import { convertToHumanReadable } from 'utils/billing';
 import { formatDateTime } from 'utils/file';
@@ -74,6 +74,6 @@ export function getUploadLogs() {
         .map((log) => `[${formatDateTime(log.timestamp)}] ${log.logLine}`);
 }
 
-export function getFileNameSize(file: File) {
+export function getFileNameSize(file: File | ElectronFile) {
     return `${file.name}_${convertToHumanReadable(file.size)}`;
 }

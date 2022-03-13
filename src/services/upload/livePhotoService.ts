@@ -2,6 +2,7 @@ import { FILE_TYPE } from 'constants/file';
 import { LIVE_PHOTO_ASSET_SIZE_LIMIT } from 'constants/upload';
 import { encodeMotionPhoto } from 'services/motionPhotoService';
 import {
+    ElectronFile,
     FileTypeInfo,
     FileWithCollection,
     LivePhotoAssets,
@@ -23,7 +24,7 @@ interface LivePhotoIdentifier {
 }
 
 interface Asset {
-    file: File;
+    file: File | ElectronFile;
     metadata: Metadata;
     fileTypeInfo: FileTypeInfo;
 }
@@ -78,9 +79,15 @@ export async function readLivePhoto(
         }
     );
 
-    const image = await getUint8ArrayView(reader, livePhotoAssets.image);
+    const image =
+        livePhotoAssets.image instanceof File
+            ? await getUint8ArrayView(reader, livePhotoAssets.image)
+            : await livePhotoAssets.image.toUInt8Array();
 
-    const video = await getUint8ArrayView(reader, livePhotoAssets.video);
+    const video =
+        livePhotoAssets.video instanceof File
+            ? await getUint8ArrayView(reader, livePhotoAssets.video)
+            : await livePhotoAssets.video.toUInt8Array();
 
     return {
         filedata: await encodeMotionPhoto({

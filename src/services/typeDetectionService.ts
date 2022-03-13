@@ -1,5 +1,5 @@
 import { FILE_TYPE } from 'constants/file';
-import { FileTypeInfo } from 'types/upload';
+import { ElectronFile, FileTypeInfo } from 'types/upload';
 import { CustomError } from 'utils/error';
 import { getFileExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -18,7 +18,7 @@ export const FORMATS_TO_SKIP_TYPE_DETECTION = [
 
 export async function getFileType(
     reader: FileReader,
-    receivedFile: File
+    receivedFile: File | ElectronFile
 ): Promise<FileTypeInfo> {
     const fileExtension = getFileExtension(receivedFile.name);
     try {
@@ -29,8 +29,16 @@ export async function getFileType(
             return formatToBeSkipped;
         }
         let fileType: FILE_TYPE;
-        const typeResult = await extractFileType(reader, receivedFile);
-        const mimTypeParts = typeResult.mime?.split('/');
+        let mimTypeParts: string[];
+        let ext: string;
+        if (receivedFile instanceof File) {
+            const typeResult = await extractFileType(reader, receivedFile);
+            mimTypeParts = typeResult.mime?.split('/');
+            ext = typeResult.ext;
+        } else {
+            mimTypeParts = receivedFile.type.mimeType.split('/');
+            ext = receivedFile.type.ext;
+        }
         if (mimTypeParts?.length !== 2) {
             throw Error(CustomError.TYPE_DETECTION_FAILED);
         }
@@ -44,7 +52,7 @@ export async function getFileType(
             default:
                 fileType = FILE_TYPE.OTHERS;
         }
-        return { fileType, exactType: typeResult.ext };
+        return { fileType, exactType: ext };
     } catch (e) {
         logError(e, CustomError.TYPE_DETECTION_FAILED, {
             fileExtension,

@@ -7,6 +7,7 @@ import {
     Location,
     FileTypeInfo,
     ParsedExtractedMetadata,
+    ElectronFile,
 } from 'types/upload';
 import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
 import { splitFilenameAndExtension } from 'utils/file';
@@ -26,11 +27,20 @@ const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
 };
 
 export async function extractMetadata(
-    receivedFile: File,
+    receivedFile: File | ElectronFile,
     fileTypeInfo: FileTypeInfo
 ) {
     let extractedMetadata: ParsedExtractedMetadata = NULL_EXTRACTED_METADATA;
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
+        if (!(receivedFile instanceof File)) {
+            receivedFile = new File(
+                [await receivedFile.toBlob()],
+                receivedFile.name,
+                {
+                    lastModified: receivedFile.lastModified,
+                }
+            );
+        }
         extractedMetadata = await getExifData(receivedFile, fileTypeInfo);
     } else if (fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
         logUploadInfo(
@@ -66,9 +76,15 @@ export const getMetadataJSONMapKey = (
 
 export async function parseMetadataJSON(
     reader: FileReader,
-    receivedFile: File
+    receivedFile: File | ElectronFile
 ) {
     try {
+        if (!(receivedFile instanceof File)) {
+            receivedFile = new File(
+                [await receivedFile.toBlob()],
+                receivedFile.name
+            );
+        }
         const metadataJSON: object = await new Promise((resolve, reject) => {
             reader.onabort = () => reject(Error('file reading was aborted'));
             reader.onerror = () => reject(Error('file reading has failed'));
@@ -79,7 +95,7 @@ export async function parseMetadataJSON(
                         : reader.result;
                 resolve(JSON.parse(result));
             };
-            reader.readAsText(receivedFile);
+            reader.readAsText(receivedFile as File);
         });
 
         const parsedMetadataJSON: ParsedMetadataJSON =

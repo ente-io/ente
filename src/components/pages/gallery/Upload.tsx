@@ -14,6 +14,8 @@ import { logError } from 'utils/sentry';
 import { FileRejection } from 'react-dropzone';
 import UploadManager from 'services/upload/uploadManager';
 import uploadManager from 'services/upload/uploadManager';
+import ImportService from 'services/importService';
+import isElectron from 'is-electron';
 import { METADATA_FOLDER_NAME } from 'constants/export';
 import { getUserFacingErrorMessage } from 'utils/error';
 import { Collection } from 'types/collection';
@@ -87,6 +89,15 @@ export default function Upload(props: Props) {
     }, []);
 
     useEffect(() => {
+        isElectron() &&
+            ImportService.getIfToUploadFilesExists().then((exists) => {
+                if (exists) {
+                    uploadFailedFiles();
+                }
+            });
+    }, []);
+
+    useEffect(() => {
         if (
             props.acceptedFiles?.length > 0 ||
             appContext.sharedFiles?.length > 0
@@ -119,6 +130,22 @@ export default function Upload(props: Props) {
         setPercentComplete(0);
         props.closeCollectionSelector();
         setProgressView(true);
+    };
+
+    const uploadFailedFiles = async () => {
+        try {
+            console.log('Uploading failed files');
+            uploadInit();
+            const { files, collections } =
+                await ImportService.getToUploadFiles();
+            await uploadFiles(files as any, collections as any);
+        } catch (e) {
+            logError(e, 'Failed to upload previously failed files');
+        } finally {
+            // set state to done for now even if failed else
+            // user could be stuck in upload view on every restart
+            await ImportService.setDoneUploadingFiles();
+        }
     };
 
     function analyseUploadFiles(): AnalysisResult {
@@ -245,10 +272,17 @@ export default function Upload(props: Props) {
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
             await props.syncWithRemote(true, true);
+            // set state to not done
+            await ImportService.setToUploadFiles(
+                filesWithCollectionToUpload,
+                collections
+            );
             await uploadManager.queueFilesForUpload(
                 filesWithCollectionToUpload,
                 collections
             );
+            // set state to done
+            await ImportService.setDoneUploadingFiles();
         } catch (err) {
             const message = getUserFacingErrorMessage(
                 err.message,
