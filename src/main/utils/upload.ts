@@ -7,9 +7,9 @@ import {
     FileWithCollection,
     StoreFileWithCollection,
 } from '../types';
+import { ENCRYPTION_CHUNK_SIZE } from '../../config';
 
 const store = new ElectronStore();
-const CHUNK_SIZE = 1024 * 1024 * 4;
 
 export const setToUploadFiles = (
     files: FileWithCollection[],
@@ -41,7 +41,7 @@ export const getFileStream = async (filePath: string) => {
     let offset = 0;
     const readableStream = new ReadableStream<Uint8Array>({
         async pull(controller) {
-            let buff = new Uint8Array(CHUNK_SIZE);
+            let buff = new Uint8Array(ENCRYPTION_CHUNK_SIZE);
             console.log(offset);
 
             // original types were not working correctly
@@ -49,7 +49,7 @@ export const getFileStream = async (filePath: string) => {
                 file,
                 buff,
                 0,
-                CHUNK_SIZE,
+                ENCRYPTION_CHUNK_SIZE,
                 offset
             )) as unknown as number;
             offset += bytesRead;
