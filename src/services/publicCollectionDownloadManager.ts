@@ -83,7 +83,9 @@ class PublicCollectionDownloadManager {
             null,
             {
                 'X-Auth-Access-Token': token,
-                'X-Auth-Access-Token-JWT': passwordToken,
+                ...(passwordToken && {
+                    'X-Auth-Access-Token-JWT': passwordToken,
+                }),
             },
             { responseType: 'arraybuffer' }
         );
@@ -161,7 +163,9 @@ class PublicCollectionDownloadManager {
                 null,
                 {
                     'X-Auth-Access-Token': token,
-                    'X-Auth-Access-Token-JWT': passwordToken,
+                    ...(passwordToken && {
+                        'X-Auth-Access-Token-JWT': passwordToken,
+                    }),
                 },
                 { responseType: 'arraybuffer' }
             );
