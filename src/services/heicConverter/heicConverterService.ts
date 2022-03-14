@@ -8,6 +8,8 @@ import { logUploadInfo } from 'utils/upload';
 const WORKER_POOL_SIZE = 2;
 const MAX_CONVERSION_IN_PARALLEL = 1;
 const WAIT_TIME_BEFORE_NEXT_ATTEMPT_IN_MICROSECONDS = [100, 100];
+const WAIT_TIME_IN_MICROSECONDS = 10 * 1000;
+const BREATH_TIME_IN_MICROSECONDS = 1000;
 
 class HEICConverter {
     private convertProcessor = new QueueProcessor<Blob>(
@@ -31,10 +33,33 @@ class HEICConverter {
             retryAsyncFunction<Blob>(async () => {
                 const { comlink, worker } = this.workerPool.shift();
                 try {
-                    const convertedHEIC = await comlink.convertHEIC(
-                        fileBlob,
-                        format
+                    const convertedHEIC = await new Promise<Blob>(
+                        (resolve, reject) => {
+                            const main = async () => {
+                                try {
+                                    const timeout = setTimeout(() => {
+                                        reject(Error('wait time exceeded'));
+                                    }, WAIT_TIME_IN_MICROSECONDS);
+                                    const convertedHEIC =
+                                        await comlink.convertHEIC(
+                                            fileBlob,
+                                            format
+                                        );
+                                    clearTimeout(timeout);
+                                    resolve(convertedHEIC);
+                                } catch (e) {
+                                    reject(e);
+                                }
+                            };
+                            main();
+                        }
                     );
+                    await new Promise((resolve) => {
+                        setTimeout(
+                            () => resolve(null),
+                            BREATH_TIME_IN_MICROSECONDS
+                        );
+                    });
                     this.workerPool.push({ comlink, worker });
                     return convertedHEIC;
                 } catch (e) {
