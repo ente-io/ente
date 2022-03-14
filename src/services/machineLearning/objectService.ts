@@ -25,12 +25,7 @@ class ObjectService {
             ) &&
             oldMlFile?.imageSource === syncContext.config.imageSource
         ) {
-            newMlFile.things = oldMlFile?.things?.map((existingObject) => ({
-                id: existingObject.id,
-                fileID: existingObject.fileID,
-                detection: existingObject.detection,
-            }));
-
+            newMlFile.things = oldMlFile?.things;
             newMlFile.imageSource = oldMlFile.imageSource;
             newMlFile.imageDimensions = oldMlFile.imageDimensions;
             newMlFile.objectDetectionMethod = oldMlFile.objectDetectionMethod;
@@ -54,9 +49,10 @@ class ObjectService {
                 detection,
             } as DetectedObject;
         });
-        newMlFile.things = detectedObjects?.map((detectedObjects) => ({
-            ...detectedObjects,
-            id: getObjectId(detectedObjects, newMlFile.imageDimensions),
+        newMlFile.things = detectedObjects?.map((detectedObject) => ({
+            ...detectedObject,
+            id: getObjectId(detectedObject, newMlFile.imageDimensions),
+            className: detectedObject.detection.class,
         }));
         // ?.filter((f) =>
         //     f.box.width > syncContext.config.faceDetection.minFaceSize
@@ -64,12 +60,19 @@ class ObjectService {
         console.log('[MLService] Detected Objects: ', newMlFile.things?.length);
     }
 
-    public async getAllSyncedThingsMap() {
-        return await mlIDbStorage.getAllThingsMap();
+    async getAllSyncedThingsMap(syncContext: MLSyncContext) {
+        if (syncContext.allSyncedThingsMap) {
+            return syncContext.allSyncedThingsMap;
+        }
+
+        syncContext.allSyncedThingsMap = await mlIDbStorage.getAllThingsMap();
+        return syncContext.allSyncedThingsMap;
     }
 
-    public async getThingClasses(): Promise<ThingClass[]> {
-        const allObjectsMap = await this.getAllSyncedThingsMap();
+    public async clusterThingClasses(
+        syncContext: MLSyncContext
+    ): Promise<ThingClass[]> {
+        const allObjectsMap = await this.getAllSyncedThingsMap(syncContext);
         const allObjects = getAllThingsFromMap(allObjectsMap);
         const objectClusters = new Map<string, number[]>();
         allObjects.map((object) => {
@@ -84,6 +87,40 @@ class ObjectService {
             className,
             files,
         }));
+    }
+
+    async syncThingClassesIndex(syncContext: MLSyncContext) {
+        const filesVersion = await mlIDbStorage.getIndexVersion('files');
+        console.log(
+            'thingClasses',
+            await mlIDbStorage.getIndexVersion('thingClasses')
+        );
+        if (
+            filesVersion <= (await mlIDbStorage.getIndexVersion('thingClasses'))
+        ) {
+            console.log(
+                '[MLService] Skipping people index as already synced to latest version'
+            );
+            return;
+        }
+
+        const thingClasses = await this.clusterThingClasses(syncContext);
+
+        if (!thingClasses || thingClasses.length < 1) {
+            return;
+        }
+
+        await mlIDbStorage.clearAllThingClasses();
+
+        for (const thingClass of thingClasses) {
+            await mlIDbStorage.putThingClass(thingClass);
+        }
+
+        await mlIDbStorage.setIndexVersion('thingClasses', filesVersion);
+    }
+
+    async getAllThingClasses() {
+        return await mlIDbStorage.getAllThingClasses();
     }
 }
 

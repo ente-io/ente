@@ -28,7 +28,7 @@ import { CustomError, parseServerError } from 'utils/error';
 import { MAX_ML_SYNC_ERROR_COUNT } from 'constants/machineLearning/config';
 import FaceService from './faceService';
 import PeopleService from './peopleService';
-import objectService from './objectService';
+import ObjectService from './objectService';
 class MachineLearningService {
     private initialized = false;
     // private faceDetectionService: FaceDetectionService;
@@ -406,7 +406,7 @@ class MachineLearningService {
             await FaceService.syncFileFaceEmbeddings(syncContext, fileContext);
         }
 
-        await objectService.syncFileObjectDetections(syncContext, fileContext);
+        await ObjectService.syncFileObjectDetections(syncContext, fileContext);
 
         fileContext.tfImage && fileContext.tfImage.dispose();
         fileContext.imageBitmap && fileContext.imageBitmap.close();
@@ -506,6 +506,8 @@ class MachineLearningService {
 
         // await this.init();
         await PeopleService.syncPeopleIndex(syncContext);
+
+        await ObjectService.syncThingClassesIndex(syncContext);
 
         await this.persistMLLibraryData(syncContext);
     }

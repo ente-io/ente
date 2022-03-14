@@ -194,6 +194,7 @@ export interface DetectedObject {
 
 export interface Thing extends DetectedObject {
     id: string;
+    className: string;
 }
 
 export interface ThingClass {
@@ -296,6 +297,7 @@ export interface MLSyncContext {
     nSyncedFiles: number;
     nSyncedFaces: number;
     allSyncedFacesMap?: Map<number, Array<Face>>;
+    allSyncedThingsMap?: Map<number, Array<Thing>>;
     tsne?: any;
 
     error?: Error;

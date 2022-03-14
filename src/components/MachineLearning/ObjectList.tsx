@@ -1,17 +1,17 @@
 import { Chip } from 'components/pages/gallery/Collections';
 import React, { useState, useEffect } from 'react';
-import objectService from 'services/machineLearning/objectService';
 import { EnteFile } from 'types/file';
+import mlIDbStorage from 'utils/storage/mlIDbStorage';
 
 export function ObjectLabelList(props: { file: EnteFile }) {
     const [objects, setObjects] = useState<Array<string>>([]);
     useEffect(() => {
         let didCancel = false;
         const main = async () => {
-            const objects = await objectService.getAllSyncedThingsMap();
+            const things = await mlIDbStorage.getAllThingsMap();
             const uniqueObjectNames = [
                 ...new Set(
-                    objects
+                    things
                         .get(props.file.id)
                         .map((object) => object.detection.class)
                 ),

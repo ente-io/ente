@@ -174,7 +174,7 @@ export function searchFiles(searchPhrase: string, files: EnteFile[]) {
 }
 
 export async function searchThing(searchPhrase: string) {
-    const thingClasses = await ObjectService.getThingClasses();
+    const thingClasses = await ObjectService.getAllThingClasses();
     return thingClasses
         .filter((thingClass) =>
             thingClass.className.toLocaleLowerCase().includes(searchPhrase)

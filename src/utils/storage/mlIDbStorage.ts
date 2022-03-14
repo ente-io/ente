@@ -19,6 +19,7 @@ import {
     MLLibraryData,
     Person,
     Thing,
+    ThingClass,
 } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { runningInBrowser } from 'utils/common';
@@ -38,6 +39,10 @@ interface MLDb extends DBSchema {
     people: {
         key: number;
         value: Person;
+    };
+    thingClasses: {
+        key: number;
+        value: ThingClass;
     };
     versions: {
         key: string;
@@ -95,6 +100,10 @@ class MLIDbStorage {
                     ]);
 
                     db.createObjectStore('people', {
+                        keyPath: 'id',
+                    });
+
+                    db.createObjectStore('thingClasses', {
                         keyPath: 'id',
                     });
 
@@ -319,6 +328,20 @@ class MLIDbStorage {
     public async clearAllPeople() {
         const db = await this.db;
         return db.clear('people');
+    }
+
+    public async getAllThingClasses() {
+        const db = await this.db;
+        return db.getAll('thingClasses');
+    }
+    public async putThingClass(thingClass: ThingClass) {
+        const db = await this.db;
+        return db.put('thingClasses', thingClass);
+    }
+
+    public async clearAllThingClasses() {
+        const db = await this.db;
+        return db.clear('thingClasses');
     }
 
     public async getIndexVersion(index: string) {
