@@ -69,7 +69,7 @@ const CollectionBar = styled.div`
     justify-content: flex-start;
 `;
 
-const Chip = styled.button<{ active: boolean }>`
+export const Chip = styled.button<{ active: boolean }>`
     border-radius: 8px;
     padding: 4px;
     padding-left: 24px;

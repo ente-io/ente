@@ -1,15 +1,22 @@
+import { Chip } from 'components/pages/gallery/Collections';
 import React, { useState, useEffect } from 'react';
 import objectService from 'services/machineLearning/objectService';
 import { EnteFile } from 'types/file';
-import { Object } from 'types/machineLearning';
 
 export function ObjectLabelList(props: { file: EnteFile }) {
-    const [objects, setObjects] = useState<Array<Object>>([]);
+    const [objects, setObjects] = useState<Array<string>>([]);
     useEffect(() => {
         let didCancel = false;
         const main = async () => {
             const objects = await objectService.getAllSyncedObjectsMap();
-            !didCancel && setObjects(objects.get(props.file.id));
+            const uniqueObjectNames = [
+                ...new Set(
+                    objects
+                        .get(props.file.id)
+                        .map((object) => object.detection.class)
+                ),
+            ];
+            !didCancel && setObjects(uniqueObjectNames);
         };
         main();
         return () => {
@@ -20,9 +27,16 @@ export function ObjectLabelList(props: { file: EnteFile }) {
     return (
         <div>
             {objects.map((object) => (
-                <span style={{ margin: '0 2px ' }} key={object.id}>
-                    {object.detection.class}
-                </span>
+                <Chip
+                    active={false}
+                    style={{
+                        paddingLeft: 0,
+                        padding: '5px 10px',
+                        cursor: 'default',
+                    }}
+                    key={object}>
+                    {object}
+                </Chip>
             ))}
         </div>
     );
