@@ -52,6 +52,7 @@ import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
 import { sleep } from 'utils/common';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
+import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -480,6 +481,12 @@ function InfoModal({
                         <UnidentifiedFaces
                             file={items[photoSwipe?.getCurrentIndex()]}
                         />
+                        <div>
+                            <Legend>{constants.OBJECTS}</Legend>
+                            <ObjectLabelList
+                                file={items[photoSwipe?.getCurrentIndex()]}
+                            />
+                        </div>
                     </>
                 )}
                 {exif && (
@@ -529,12 +536,12 @@ function PhotoSwipe(props: Iprops) {
         updateItems(items);
     }, [items]);
 
-    useEffect(() => {
-        if (photoSwipe) {
-            photoSwipe.options.arrowKeys = !showInfo;
-            photoSwipe.options.escKey = !showInfo;
-        }
-    }, [showInfo]);
+    // useEffect(() => {
+    //     if (photoSwipe) {
+    //         photoSwipe.options.arrowKeys = !showInfo;
+    //         photoSwipe.options.escKey = !showInfo;
+    //     }
+    // }, [showInfo]);
 
     function updateFavButton() {
         setIsFav(isInFav(this?.currItem));

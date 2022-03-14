@@ -67,7 +67,7 @@ class ObjectService {
         );
     }
 
-    async getAllSyncedObjectsMap() {
+    public async getAllSyncedObjectsMap() {
         return await mlIDbStorage.getAllObjectsMap();
     }
 

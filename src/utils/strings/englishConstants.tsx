@@ -436,6 +436,7 @@ const englishConstants = {
         `indexing people in ${nSyncedFiles} photos...`,
     INDEXING_DONE: (nSyncedFiles) => `indexed ${nSyncedFiles} photos`,
     UNIDENTIFIED_FACES: 'unidentified faces',
+    OBJECTS: 'objects',
     FILE_ID: 'file id',
     FILE_NAME: 'file name',
     CREATION_TIME: 'creation time',
