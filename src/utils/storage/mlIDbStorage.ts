@@ -18,7 +18,7 @@ import {
     MlFileData,
     MLLibraryData,
     Person,
-    Object,
+    Thing,
 } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { runningInBrowser } from 'utils/common';
@@ -286,19 +286,19 @@ class MLIDbStorage {
         console.timeEnd('updateFaces');
     }
 
-    public async getAllObjectsMap() {
-        console.time('getAllObjectMap');
+    public async getAllThingsMap() {
+        console.time('getAllThingsMap');
         const db = await this.db;
         const allFiles = await db.getAll('files');
-        const allObjectsMap = new Map<number, Array<Object>>();
+        const allThingsMap = new Map<number, Array<Thing>>();
         allFiles.forEach(
             (mlFileData) =>
-                mlFileData.objects &&
-                allObjectsMap.set(mlFileData.fileId, mlFileData.objects)
+                mlFileData.things &&
+                allThingsMap.set(mlFileData.fileId, mlFileData.things)
         );
-        console.timeEnd('getAllObjectMap');
+        console.timeEnd('getAllThingsMap');
 
-        return allObjectsMap;
+        return allThingsMap;
     }
 
     public async getPerson(id: number) {

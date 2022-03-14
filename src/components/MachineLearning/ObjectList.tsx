@@ -8,7 +8,7 @@ export function ObjectLabelList(props: { file: EnteFile }) {
     useEffect(() => {
         let didCancel = false;
         const main = async () => {
-            const objects = await objectService.getAllSyncedObjectsMap();
+            const objects = await objectService.getAllSyncedThingsMap();
             const uniqueObjectNames = [
                 ...new Set(
                     objects

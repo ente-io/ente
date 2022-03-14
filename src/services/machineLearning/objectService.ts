@@ -2,12 +2,12 @@ import {
     MLSyncContext,
     MLSyncFileContext,
     DetectedObject,
-    ClusteredObjects,
+    ThingClass,
 } from 'types/machineLearning';
 import {
     isDifferentOrOld,
     getObjectId,
-    getAllObjectsFromMap,
+    getAllThingsFromMap,
 } from 'utils/machineLearning';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import ReaderService from './readerService';
@@ -25,7 +25,7 @@ class ObjectService {
             ) &&
             oldMlFile?.imageSource === syncContext.config.imageSource
         ) {
-            newMlFile.objects = oldMlFile?.objects?.map((existingObject) => ({
+            newMlFile.things = oldMlFile?.things?.map((existingObject) => ({
                 id: existingObject.id,
                 fileID: existingObject.fileID,
                 detection: existingObject.detection,
@@ -54,26 +54,23 @@ class ObjectService {
                 detection,
             } as DetectedObject;
         });
-        newMlFile.objects = detectedObjects?.map((detectedObjects) => ({
+        newMlFile.things = detectedObjects?.map((detectedObjects) => ({
             ...detectedObjects,
             id: getObjectId(detectedObjects, newMlFile.imageDimensions),
         }));
         // ?.filter((f) =>
         //     f.box.width > syncContext.config.faceDetection.minFaceSize
         // );
-        console.log(
-            '[MLService] Detected Objects: ',
-            newMlFile.objects?.length
-        );
+        console.log('[MLService] Detected Objects: ', newMlFile.things?.length);
     }
 
-    public async getAllSyncedObjectsMap() {
-        return await mlIDbStorage.getAllObjectsMap();
+    public async getAllSyncedThingsMap() {
+        return await mlIDbStorage.getAllThingsMap();
     }
 
-    public async getClusteredObjects(): Promise<ClusteredObjects> {
-        const allObjectsMap = await this.getAllSyncedObjectsMap();
-        const allObjects = getAllObjectsFromMap(allObjectsMap);
+    public async getThingClasses(): Promise<ThingClass[]> {
+        const allObjectsMap = await this.getAllSyncedThingsMap();
+        const allObjects = getAllThingsFromMap(allObjectsMap);
         const objectClusters = new Map<string, number[]>();
         allObjects.map((object) => {
             if (!objectClusters.has(object.detection.class)) {
@@ -82,8 +79,11 @@ class ObjectService {
             const objectsInCluster = objectClusters.get(object.detection.class);
             objectsInCluster.push(object.fileID);
         });
-
-        return objectClusters;
+        return [...objectClusters.entries()].map(([className, files], id) => ({
+            id,
+            className,
+            files,
+        }));
     }
 }
 

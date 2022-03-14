@@ -8,7 +8,7 @@ import { getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { Dimensions } from 'types/image';
 import {
-    Object,
+    Thing,
     AlignedFace,
     BLAZEFACE_FACE_SIZE,
     DetectedFace,
@@ -200,12 +200,8 @@ export function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
     return allFaces;
 }
 
-export function getAllObjectsFromMap(
-    allObjectsMap: Map<number, Array<Object>>
-) {
-    const allObjects = [...allObjectsMap.values()].flat();
-
-    return allObjects;
+export function getAllThingsFromMap(allObjectsMap: Map<number, Array<Thing>>) {
+    return [...allObjectsMap.values()].flat();
 }
 
 export async function getLocalFile(fileId: number) {
@@ -285,7 +281,15 @@ export function getObjectId(
     imageDims: Dimensions
 ) {
     const imgDimPoint = new Point(imageDims.width, imageDims.height);
-    const gridPt = imgDimPoint.floor().bound(0, 99);
+    const objectCenterPoint = new Point(
+        detectedObject.detection.bbox[2] / 2,
+        detectedObject.detection.bbox[3] / 2
+    );
+    const gridPt = objectCenterPoint
+        .mul(new Point(100, 100))
+        .div(imgDimPoint)
+        .floor()
+        .bound(0, 99);
     const gridPaddedX = leftFillNum(gridPt.x, 2, 0);
     const gridPaddedY = leftFillNum(gridPt.y, 2, 0);
 

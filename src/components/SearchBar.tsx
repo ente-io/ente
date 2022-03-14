@@ -12,7 +12,7 @@ import {
     searchCollection,
     searchFiles,
     searchLocation,
-    searchObject,
+    searchThing,
 } from 'services/searchService';
 import { getFormattedDate } from 'utils/search';
 import constants from 'utils/strings/constants';
@@ -33,7 +33,7 @@ import { FILE_TYPE } from 'constants/file';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { Col } from 'react-bootstrap';
-import { Person, Thing } from 'types/machineLearning';
+import { Person, ThingClass } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { PeopleList } from './MachineLearning/PeopleList';
 
@@ -203,15 +203,15 @@ export default function SearchBar(props: Props) {
                     } as Suggestion)
             )
         );
-        const objectResults = await searchObject(searchPhrase);
+        const thingResults = await searchThing(searchPhrase);
 
         options.push(
-            ...objectResults.map(
+            ...thingResults.map(
                 (searchResult) =>
                     ({
                         type: SuggestionType.THING,
                         value: searchResult,
-                        label: searchResult.class,
+                        label: searchResult.className,
                     } as Suggestion)
             )
         );
@@ -252,7 +252,7 @@ export default function SearchBar(props: Props) {
                 props.setOpen(true);
                 break;
             case SuggestionType.THING:
-                props.setSearch({ thing: selectedOption.value as Thing });
+                props.setSearch({ thing: selectedOption.value as ThingClass });
                 props.setOpen(true);
                 break;
         }
