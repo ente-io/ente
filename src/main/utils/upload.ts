@@ -117,6 +117,7 @@ export const getToUploadFiles = async () => {
 };
 
 export const getIfToUploadFilesExists = async () => {
-    const done = store.get('done') as boolean;
-    return done ? false : true;
+    const doneUploadingFiles = store.get('done') as boolean;
+    if (doneUploadingFiles === undefined) return false;
+    return !doneUploadingFiles;
 };
