@@ -30,8 +30,9 @@ export function areFilesSame(
 ): boolean {
     if (
         existingFile.fileType === newFile.fileType &&
-        existingFile.creationTime === newFile.creationTime &&
-        existingFile.modificationTime === newFile.modificationTime &&
+        Math.abs(existingFile.creationTime - newFile.creationTime) < 1e6 &&
+        Math.abs(existingFile.modificationTime - newFile.modificationTime) <
+            1e6 && // 1 second
         existingFile.title === newFile.title
     ) {
         return true;
