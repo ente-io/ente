@@ -137,7 +137,10 @@ export default function Upload(props: Props) {
             uploadInit();
             const { files, collections } =
                 await ImportService.getToUploadFiles();
-            await uploadFiles(files as any, collections as any);
+            await uploadFiles(
+                files as FileWithCollection[],
+                collections as Collection[]
+            );
         } catch (e) {
             logError(e, 'Failed to upload previously failed files');
         } finally {

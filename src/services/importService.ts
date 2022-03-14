@@ -2,6 +2,11 @@ import { Collection } from 'types/collection';
 import { FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
 
+interface FilesAndCollections {
+    files: FileWithCollection[];
+    collections: Collection[];
+}
+
 class ImportService {
     ElectronAPIs: any;
     private allElectronAPIsExist: boolean = false;
@@ -16,7 +21,7 @@ class ImportService {
         collections?: Collection[]
     ) {
         if (this.allElectronAPIsExist) {
-            return this.ElectronAPIs.setToUploadFiles(
+            this.ElectronAPIs.setToUploadFiles(
                 filesWithCollectionToUpload,
                 collections,
                 false
@@ -26,17 +31,17 @@ class ImportService {
 
     async setDoneUploadingFiles() {
         if (this.allElectronAPIsExist) {
-            return this.ElectronAPIs.setToUploadFiles([], [], true);
+            this.ElectronAPIs.setToUploadFiles([], [], true);
         }
     }
 
-    async getToUploadFiles() {
+    async getToUploadFiles(): Promise<FilesAndCollections> {
         if (this.allElectronAPIsExist) {
             return this.ElectronAPIs.getToUploadFiles();
         }
     }
 
-    async getIfToUploadFilesExists() {
+    async getIfToUploadFilesExists(): Promise<boolean> {
         if (this.allElectronAPIsExist) {
             return this.ElectronAPIs.getIfToUploadFilesExists();
         }
