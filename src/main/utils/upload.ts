@@ -42,7 +42,6 @@ export const getFileStream = async (filePath: string) => {
     const readableStream = new ReadableStream<Uint8Array>({
         async pull(controller) {
             let buff = new Uint8Array(ENCRYPTION_CHUNK_SIZE);
-            console.log(offset);
 
             // original types were not working correctly
             const bytesRead = (await fs.read(
@@ -53,7 +52,6 @@ export const getFileStream = async (filePath: string) => {
                 offset
             )) as unknown as number;
             offset += bytesRead;
-            console.log(bytesRead, offset);
             if (bytesRead === 0) {
                 controller.close();
                 offset = 0;
