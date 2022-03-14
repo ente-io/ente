@@ -80,6 +80,9 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     return GestureDetector(
         onLongPressStart: (_) => {_onLongPressEvent(true)},
         onLongPressEnd: (_) => {_onLongPressEvent(false)},
+        onVerticalDragUpdate: (d) => {
+              if (d.delta.dy > kDragSensitivity) {Navigator.of(context).pop()}
+            },
         child: content);
   }
 
