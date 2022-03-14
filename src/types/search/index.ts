@@ -16,7 +16,7 @@ export enum SuggestionType {
     VIDEO,
     PERSON,
     INDEX_STATUS,
-    OBJECT,
+    THING,
 }
 
 export interface DateValue {

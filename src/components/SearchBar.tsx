@@ -209,7 +209,7 @@ export default function SearchBar(props: Props) {
             ...objectResults.map(
                 (searchResult) =>
                     ({
-                        type: SuggestionType.OBJECT,
+                        type: SuggestionType.THING,
                         value: searchResult,
                         label: searchResult.class,
                     } as Suggestion)
@@ -251,7 +251,7 @@ export default function SearchBar(props: Props) {
                 props.setSearch({ person: selectedOption.value as Person });
                 props.setOpen(true);
                 break;
-            case SuggestionType.OBJECT:
+            case SuggestionType.THING:
                 props.setSearch({ thing: selectedOption.value as Thing });
                 props.setOpen(true);
                 break;
