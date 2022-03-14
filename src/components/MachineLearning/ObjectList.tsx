@@ -28,7 +28,7 @@ export function ObjectLabelList(props: { file: EnteFile }) {
         <div>
             {objects.map((object) => (
                 <Chip
-                    active={false}
+                    active={true}
                     style={{
                         paddingLeft: 0,
                         padding: '5px 10px',
