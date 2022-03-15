@@ -397,17 +397,17 @@ class MachineLearningService {
             newMlFile.mlVersion = fileContext.oldMlFile.mlVersion;
         }
 
-        await FaceService.syncFileFaceDetections(syncContext, fileContext);
+        // await FaceService.syncFileFaceDetections(syncContext, fileContext);
 
-        if (newMlFile.faces && newMlFile.faces.length > 0) {
-            await FaceService.syncFileFaceCrops(syncContext, fileContext);
+        // if (newMlFile.faces && newMlFile.faces.length > 0) {
+        //     await FaceService.syncFileFaceCrops(syncContext, fileContext);
 
-            await FaceService.syncFileFaceAlignments(syncContext, fileContext);
+        //     await FaceService.syncFileFaceAlignments(syncContext, fileContext);
 
-            await FaceService.syncFileFaceEmbeddings(syncContext, fileContext);
-        }
+        //     await FaceService.syncFileFaceEmbeddings(syncContext, fileContext);
+        // }
 
-        await ObjectService.syncFileObjectDetections(syncContext, fileContext);
+        // await ObjectService.syncFileObjectDetections(syncContext, fileContext);
 
         await TextService.syncFileTextDetections(syncContext, fileContext);
 
