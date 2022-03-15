@@ -14,7 +14,7 @@ import { EnteFile } from 'types/file';
 import { Config } from 'types/common/config';
 import { Dimensions } from 'types/image';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
-import * as SSDMobileNet from '@tensorflow-models/coco-ssd';
+import Tesseract from 'tesseract.js';
 
 export interface MLSyncResult {
     nOutOfSyncFiles: number;
@@ -94,6 +94,8 @@ export declare type ImageType = 'Original' | 'Preview';
 export declare type FaceDetectionMethod = 'BlazeFace' | 'FaceApiSSD';
 
 export declare type ObjectDetectionMethod = 'SSDMobileNetV2';
+
+export declare type TextDetectionMethod = 'Tesseract';
 
 export declare type FaceCropMethod = 'ArcFace';
 
@@ -203,10 +205,18 @@ export interface ThingClass {
     files: Array<number>;
 }
 
+export declare type TextDetection = Tesseract.RecognizeResult;
+
+export interface DetectedText {
+    fileID: number;
+    detection: TextDetection;
+}
+
 export interface MlFileData {
     fileId: number;
     faces?: Face[];
     things?: Thing[];
+    text?: DetectedText;
     imageSource?: ImageType;
     imageDimensions?: Dimensions;
     faceDetectionMethod?: Versioned<FaceDetectionMethod>;
@@ -214,6 +224,7 @@ export interface MlFileData {
     faceAlignmentMethod?: Versioned<FaceAlignmentMethod>;
     faceEmbeddingMethod?: Versioned<FaceEmbeddingMethod>;
     objectDetectionMethod?: Versioned<ObjectDetectionMethod>;
+    textDetectionMethod?: Versioned<TextDetectionMethod>;
     mlVersion: number;
     errorCount: number;
     lastErrorMessage?: string;
@@ -291,6 +302,7 @@ export interface MLSyncContext {
     faceEmbeddingService: FaceEmbeddingService;
     faceClusteringService: ClusteringService;
     objectDetectionService?: ObjectDetectionService;
+    textDetectionService?: TextDetectionService;
 
     localFilesMap: Map<number, EnteFile>;
     outOfSyncFiles: EnteFile[];
@@ -298,6 +310,7 @@ export interface MLSyncContext {
     nSyncedFaces: number;
     allSyncedFacesMap?: Map<number, Array<Face>>;
     allSyncedThingsMap?: Map<number, Array<Thing>>;
+    allSyncedTextMap?: Map<number, DetectedText>;
     tsne?: any;
 
     error?: Error;
@@ -351,7 +364,14 @@ export interface FaceDetectionService {
 export interface ObjectDetectionService {
     method: Versioned<ObjectDetectionMethod>;
     // init(): Promise<void>;
-    detectObjects(image: ImageBitmap): Promise<SSDMobileNet.DetectedObject[]>;
+    detectObjects(image: ImageBitmap): Promise<ObjectDetection[]>;
+    dispose(): Promise<void>;
+}
+
+export interface TextDetectionService {
+    method: Versioned<TextDetectionMethod>;
+    // init(): Promise<void>;
+    detectText(image: Blob): Promise<TextDetection>;
     dispose(): Promise<void>;
 }
 

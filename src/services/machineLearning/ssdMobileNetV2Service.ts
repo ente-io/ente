@@ -31,12 +31,6 @@ class SSDMobileNetV2 implements ObjectDetectionService {
         );
     }
 
-    public async detectObjects(image: ImageBitmap): Promise<ObjectDetection[]> {
-        const results = await this.detectObjectUsingModel(image);
-
-        return results;
-    }
-
     private async getSSDMobileNetV2Model() {
         if (!this.ssdMobileNetV2Model) {
             await this.init();
@@ -45,23 +39,17 @@ class SSDMobileNetV2 implements ObjectDetectionService {
         return this.ssdMobileNetV2Model;
     }
 
-    private disposeSSDMobileNetV2Model() {
-        if (this.ssdMobileNetV2Model !== null) {
-            this.ssdMobileNetV2Model = null;
-        }
-    }
-
-    public async detectObjectUsingModel(imageBitmap: ImageBitmap) {
+    public async detectObjects(image: ImageBitmap): Promise<ObjectDetection[]> {
         const ssdMobileNetV2Model = await this.getSSDMobileNetV2Model();
-        const tfImage = tf.browser.fromPixels(imageBitmap);
-        const predictions = await ssdMobileNetV2Model.detect(tfImage);
-        return predictions;
+        const tfImage = tf.browser.fromPixels(image);
+        const detections = await ssdMobileNetV2Model.detect(tfImage);
+        return detections;
     }
 
     public async dispose() {
         const ssdMobileNetV2Model = await this.getSSDMobileNetV2Model();
         ssdMobileNetV2Model?.dispose();
-        this.disposeSSDMobileNetV2Model();
+        this.ssdMobileNetV2Model = null;
     }
 }
 

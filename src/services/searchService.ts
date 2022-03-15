@@ -17,6 +17,7 @@ import {
     SuggestionType,
 } from 'types/search';
 import ObjectService from './machineLearning/objectService';
+import textService from './machineLearning/textService';
 
 const ENDPOINT = getEndpoint();
 
@@ -180,4 +181,15 @@ export async function searchThing(searchPhrase: string) {
             thingClass.className.toLocaleLowerCase().includes(searchPhrase)
         )
         .map(({ className, files }) => ({ className, files }));
+}
+
+export async function searchText(searchPhrase: string) {
+    const texts = await textService.getAllText();
+    console.log(texts, searchPhrase);
+    return [];
+    // return texts
+    //     .filter((thingClass) =>
+    //         thingClass.className.toLocaleLowerCase().includes(searchPhrase)
+    //     )
+    //     .map(({ className, files }) => ({ className, files }));
 }

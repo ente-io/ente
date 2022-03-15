@@ -18,6 +18,7 @@ import {
     MlFileData,
     Person,
     Versioned,
+    DetectedText,
 } from 'types/machineLearning';
 // import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
 import { convertForPreview, needsConversionForPreview } from 'utils/file';
@@ -204,6 +205,9 @@ export function getAllThingsFromMap(allObjectsMap: Map<number, Array<Thing>>) {
     return [...allObjectsMap.values()].flat();
 }
 
+export function getAllTextFromMap(allTextMap: Map<number, DetectedText>) {
+    return [...allTextMap.values()];
+}
 export async function getLocalFile(fileId: number) {
     const localFiles = await getLocalFiles();
     return localFiles.find((f) => f.id === fileId);

@@ -29,6 +29,7 @@ import { MAX_ML_SYNC_ERROR_COUNT } from 'constants/machineLearning/config';
 import FaceService from './faceService';
 import PeopleService from './peopleService';
 import ObjectService from './objectService';
+import TextService from './textService';
 class MachineLearningService {
     private initialized = false;
     // private faceDetectionService: FaceDetectionService;
@@ -407,6 +408,8 @@ class MachineLearningService {
         }
 
         await ObjectService.syncFileObjectDetections(syncContext, fileContext);
+
+        await TextService.syncFileTextDetections(syncContext, fileContext);
 
         fileContext.tfImage && fileContext.tfImage.dispose();
         fileContext.imageBitmap && fileContext.imageBitmap.close();

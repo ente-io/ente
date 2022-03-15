@@ -14,6 +14,7 @@ import {
 } from 'idb';
 import { Config } from 'types/common/config';
 import {
+    DetectedText,
     Face,
     MlFileData,
     MLLibraryData,
@@ -308,6 +309,21 @@ class MLIDbStorage {
         console.timeEnd('getAllThingsMap');
 
         return allThingsMap;
+    }
+
+    public async getAllTextMap() {
+        console.time('getAllTextMap');
+        const db = await this.db;
+        const allFiles = await db.getAll('files');
+        const allTextMap = new Map<number, DetectedText>();
+        allFiles.forEach(
+            (mlFileData) =>
+                mlFileData.text &&
+                allTextMap.set(mlFileData.fileId, mlFileData.text)
+        );
+        console.timeEnd('getAllTextMap');
+
+        return allTextMap;
     }
 
     public async getPerson(id: number) {
