@@ -17,6 +17,8 @@ import {
     MLLibraryData,
     ObjectDetectionService,
     ObjectDetectionMethod,
+    TextDetectionMethod,
+    TextDetectionService,
 } from 'types/machineLearning';
 import { CONCURRENCY } from 'utils/common/concurrency';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
@@ -28,6 +30,7 @@ import blazeFaceDetectionService from './blazeFaceDetectionService';
 import mobileFaceNetEmbeddingService from './mobileFaceNetEmbeddingService';
 import dbscanClusteringService from './dbscanClusteringService';
 import ssdMobileNetV2Service from './ssdMobileNetV2Service';
+import tesseractService from './tesseractService';
 
 export class MLFactory {
     public static getFaceDetectionService(
@@ -48,6 +51,16 @@ export class MLFactory {
         }
 
         throw Error('Unknown object detection method: ' + method);
+    }
+
+    public static getTextDetectionService(
+        method: TextDetectionMethod
+    ): TextDetectionService {
+        if (method === 'Tesseract') {
+            return tesseractService;
+        }
+
+        throw Error('Unknown text detection method: ' + method);
     }
 
     public static getFaceCropService(method: FaceCropMethod) {
@@ -111,6 +124,7 @@ export class LocalMLSyncContext implements MLSyncContext {
     public faceEmbeddingService: FaceEmbeddingService;
     public faceClusteringService: ClusteringService;
     public objectDetectionService: ObjectDetectionService;
+    public textDetectionService?: TextDetectionService;
 
     public localFilesMap: Map<number, EnteFile>;
     public outOfSyncFiles: EnteFile[];
@@ -159,6 +173,10 @@ export class LocalMLSyncContext implements MLSyncContext {
 
         this.objectDetectionService = MLFactory.getObjectDetectionService(
             this.config.ObjectDetection.method
+        );
+
+        this.textDetectionService = MLFactory.getTextDetectionService(
+            this.config.TextDetection.method
         );
 
         this.outOfSyncFiles = [];

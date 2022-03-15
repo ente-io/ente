@@ -239,6 +239,10 @@ export interface ObjectDetectionConfig {
     method: ObjectDetectionMethod;
 }
 
+export interface TextDetectionConfig {
+    method: TextDetectionMethod;
+}
+
 export interface FaceCropConfig {
     enabled: boolean;
     method: FaceCropMethod;
@@ -283,6 +287,7 @@ export interface MLSyncConfig extends Config {
     faceEmbedding: FaceEmbeddingConfig;
     faceClustering: FaceClusteringConfig;
     ObjectDetection: ObjectDetectionConfig;
+    TextDetection: TextDetectionConfig;
     tsne?: TSNEConfig;
     mlVersion: number;
 }
