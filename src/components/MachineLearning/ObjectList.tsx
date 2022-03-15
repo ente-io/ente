@@ -11,9 +11,9 @@ export function ObjectLabelList(props: { file: EnteFile }) {
             const things = await mlIDbStorage.getAllThingsMap();
             const uniqueObjectNames = [
                 ...new Set(
-                    things
-                        .get(props.file.id)
-                        .map((object) => object.detection.class)
+                    (things.get(props.file.id) ?? []).map(
+                        (object) => object.detection.class
+                    )
                 ),
             ];
             !didCancel && setObjects(uniqueObjectNames);
