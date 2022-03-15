@@ -6,11 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_password_strength/flutter_password_strength.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/report_bug_popup.dart';
+//import 'package:photos/ui/common/report_bug_popup.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/web_page.dart';
@@ -61,21 +62,45 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     final appBar = AppBar(
+      leading: Icon(
+        Icons.arrow_back,
+        color: CupertinoColors.black,
+      ),
       title: Hero(
         tag: "sign_up",
         child: Material(
-          type: MaterialType.transparency,
-          child: Text(
-            "sign up",
-            style: TextStyle(
-              fontSize: 18,
-              letterSpacing: 0.6,
-            ),
-          ),
-        ),
+            type: MaterialType.transparency,
+            child: Row(
+              children: [
+                LinearPercentIndicator(
+                    width: screenWidth * 0.19,
+                    lineHeight: 4,
+                    percent: 0.5,
+                    backgroundColor: Colors.grey[200],
+                    progressColor: Theme.of(context).buttonColor),
+                LinearPercentIndicator(
+                    width: screenWidth * 0.19,
+                    lineHeight: 4,
+                    percent: 0.5,
+                    backgroundColor: Colors.grey[200],
+                    progressColor: Theme.of(context).buttonColor),
+                LinearPercentIndicator(
+                    width: screenWidth * 0.19,
+                    lineHeight: 4,
+                    percent: 0.5,
+                    backgroundColor: Colors.grey[200],
+                    progressColor: Theme.of(context).buttonColor),
+                LinearPercentIndicator(
+                    width: screenWidth * 0.19,
+                    lineHeight: 4,
+                    percent: 0.5,
+                    backgroundColor: Colors.grey[200],
+                    progressColor: Theme.of(context).buttonColor),
+              ],
+            )),
       ),
-      actions: <Widget>[reportBugPopupMenu(context)],
     );
     return Scaffold(
       appBar: appBar,
