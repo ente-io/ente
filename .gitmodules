@@ -2,3 +2,6 @@
 	path = thirdparty/photoswipe
 	url = https://github.com/ente-io/PhotoSwipe.git
 	branch = master 
+[submodule "thirdparty/tesseract"]
+	path = thirdparty/tesseract
+	url = git@github.com:naptha/tesseract.js.git

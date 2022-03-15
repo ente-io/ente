@@ -27,7 +27,6 @@ class TextService {
             newMlFile.textDetectionMethod = oldMlFile.textDetectionMethod;
             return;
         }
-
         newMlFile.textDetectionMethod = syncContext.textDetectionService.method;
         fileContext.newDetection = true;
         const imageBitmap = await ReaderService.getImageBitmap(

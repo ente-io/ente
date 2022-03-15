@@ -124,7 +124,7 @@ export class LocalMLSyncContext implements MLSyncContext {
     public faceEmbeddingService: FaceEmbeddingService;
     public faceClusteringService: ClusteringService;
     public objectDetectionService: ObjectDetectionService;
-    public textDetectionService?: TextDetectionService;
+    public textDetectionService: TextDetectionService;
 
     public localFilesMap: Map<number, EnteFile>;
     public outOfSyncFiles: EnteFile[];
@@ -174,7 +174,6 @@ export class LocalMLSyncContext implements MLSyncContext {
         this.objectDetectionService = MLFactory.getObjectDetectionService(
             this.config.ObjectDetection.method
         );
-
         this.textDetectionService = MLFactory.getTextDetectionService(
             this.config.TextDetection.method
         );
