@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_password_strength/flutter_password_strength.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
@@ -18,6 +17,7 @@ import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
+import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class EmailEntryPage extends StatefulWidget {
   EmailEntryPage({Key key}) : super(key: key);
@@ -64,6 +64,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final appBar = AppBar(
+      elevation: 0,
       leading: Icon(
         Icons.arrow_back,
         color: CupertinoColors.black,
@@ -72,33 +73,12 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         tag: "sign_up",
         child: Material(
             type: MaterialType.transparency,
-            child: Row(
-              children: [
-                LinearPercentIndicator(
-                    width: screenWidth * 0.19,
-                    lineHeight: 4,
-                    percent: 0.5,
-                    backgroundColor: Colors.grey[200],
-                    progressColor: Theme.of(context).buttonColor),
-                LinearPercentIndicator(
-                    width: screenWidth * 0.19,
-                    lineHeight: 4,
-                    percent: 0.5,
-                    backgroundColor: Colors.grey[200],
-                    progressColor: Theme.of(context).buttonColor),
-                LinearPercentIndicator(
-                    width: screenWidth * 0.19,
-                    lineHeight: 4,
-                    percent: 0.5,
-                    backgroundColor: Colors.grey[200],
-                    progressColor: Theme.of(context).buttonColor),
-                LinearPercentIndicator(
-                    width: screenWidth * 0.19,
-                    lineHeight: 4,
-                    percent: 0.5,
-                    backgroundColor: Colors.grey[200],
-                    progressColor: Theme.of(context).buttonColor),
-              ],
+            child: StepProgressIndicator(
+              totalSteps: 4,
+              currentStep: 1,
+              selectedColor: Theme.of(context).buttonColor,
+              roundedEdges: Radius.circular(10),
+              unselectedColor: Theme.of(context).bottomAppBarColor,
             )),
       ),
     );

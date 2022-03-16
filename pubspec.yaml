@@ -79,7 +79,6 @@ dependencies:
   page_transition: ^2.0.2
   path_provider: ^2.0.1
   pedantic: ^1.9.2
-  percent_indicator: ^4.0.0
   photo_manager:
     git: "https://github.com/ente-io/flutter_photo_manager.git"
   photo_view: ^0.13.0
@@ -95,6 +94,7 @@ dependencies:
   shared_preferences: ^2.0.5
   sqflite: ^2.0.0+3
   sqflite_migration: ^0.3.0
+  step_progress_indicator: ^1.0.2
   super_logging:
     path: thirdparty/super_logging
   syncfusion_flutter_core: ^19.2.49
