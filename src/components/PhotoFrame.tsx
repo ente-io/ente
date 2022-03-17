@@ -282,11 +282,7 @@ const PhotoFrame = ({
                 file.metadata.fileType === FILE_TYPE.IMAGE &&
                 !file.src
             ) {
-                file.html = `
-                <div class="pswp-item-container">
-                    <img src="${url}" />
-                </div>
-            `;
+                file.src = url;
             }
             return file;
         };
@@ -348,11 +344,7 @@ const PhotoFrame = ({
                 `;
                 }
             } else {
-                file.html = `
-                <div class="pswp-item-container">
-                    <img src="${imageURL}" />
-                </div>
-            `;
+                file.src = imageURL;
             }
             return file;
         };
