@@ -79,6 +79,7 @@ const GlobalStyles = createGlobalStyle`
     }
 
     .pswp-item-container > * {
+        position: absolute;
         transition: opacity 1s ease;
         max-width: 100%;
         max-height: 100%;
@@ -92,12 +93,8 @@ const GlobalStyles = createGlobalStyle`
         opacity: 0;
     }
 
-    .pswp-item-container > div.spinner-border {
-        position: absolute;
-    }
 
-    .pswp-item-container > div.download-banner {
-        position: absolute;
+    .pswp-item-container > div.download-banner {      
         width:100%;
         height: 16vh;
         padding:2vh 0;
