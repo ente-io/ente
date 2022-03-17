@@ -259,7 +259,7 @@ const PhotoFrame = ({
             };
             if (file.metadata.fileType === FILE_TYPE.VIDEO && !file.html) {
                 file.html = `
-                <div class="video-loading">
+                <div class="pswp-item-container">
                     <img src="${url}" />
                     <div class="spinner-border text-light" role="status">
                         <span class="sr-only">Loading...</span>
@@ -271,7 +271,7 @@ const PhotoFrame = ({
                 !file.html
             ) {
                 file.html = `
-                <div class="video-loading">
+                <div class="pswp-item-container">
                     <img src="${url}" />
                     <div class="spinner-border text-light" role="status">
                         <span class="sr-only">Loading...</span>
@@ -282,7 +282,11 @@ const PhotoFrame = ({
                 file.metadata.fileType === FILE_TYPE.IMAGE &&
                 !file.src
             ) {
-                file.src = url;
+                file.html = `
+                <div class="pswp-item-container">
+                    <img src="${url}" />
+                </div>
+            `;
             }
             return file;
         };
@@ -312,11 +316,11 @@ const PhotoFrame = ({
         `;
                 } else {
                     file.html = `
-            <div class="video-loading">
+            <div class="pswp-item-container">
                 <img src="${file.msrc}" />
-                <div class="download-message" >
+                <div class="download-banner" >
                     ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                    <a class="btn btn-outline-success" href=${videoURL} download="${file.metadata.title}"">Download</button>
+                    <a class="btn btn-outline-success" href=${videoURL} download="${file.metadata.title}"">Download</a>
                 </div>
             </div>
             `;
@@ -324,7 +328,7 @@ const PhotoFrame = ({
             } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
                 if (isPlayable) {
                     file.html = `
-                <div class = 'live-photo-container'>
+                <div class = 'pswp-item-container'>
                     <img id = "live-photo-image-${file.id}" src="${imageURL}" />
                     <video id = "live-photo-video-${file.id}" loop muted>
                         <source src="${videoURL}" />
@@ -334,9 +338,9 @@ const PhotoFrame = ({
                 `;
                 } else {
                     file.html = `
-                <div class="video-loading">
+                <div class="pswp-item-container">
                     <img src="${file.msrc}" />
-                    <div class="download-message">
+                    <div class="download-banner">
                         ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
                         <button class = "btn btn-outline-success" id = "download-btn-${file.id}">Download</button>
                     </div>
@@ -344,7 +348,11 @@ const PhotoFrame = ({
                 `;
                 }
             } else {
-                file.src = imageURL;
+                file.html = `
+                <div class="pswp-item-container">
+                    <img src="${imageURL}" />
+                </div>
+            `;
             }
             return file;
         };
