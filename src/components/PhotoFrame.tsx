@@ -259,8 +259,8 @@ const PhotoFrame = ({
             };
             if (file.metadata.fileType === FILE_TYPE.VIDEO && !file.html) {
                 file.html = `
-                <div class="video-loading">
-                    <img src="${url}" />
+                <div class="pswp-item-container">
+                    <img src="${url}" onContextMenu="return false;"/>
                     <div class="spinner-border text-light" role="status">
                         <span class="sr-only">Loading...</span>
                     </div>
@@ -271,8 +271,8 @@ const PhotoFrame = ({
                 !file.html
             ) {
                 file.html = `
-                <div class="video-loading">
-                    <img src="${url}" />
+                <div class="pswp-item-container">
+                    <img src="${url}" onContextMenu="return false;"/>
                     <div class="spinner-border text-light" role="status">
                         <span class="sr-only">Loading...</span>
                     </div>
@@ -305,18 +305,18 @@ const PhotoFrame = ({
             if (file.metadata.fileType === FILE_TYPE.VIDEO) {
                 if (isPlayable) {
                     file.html = `
-            <video controls>
+            <video controls onContextMenu="return false;">
                 <source src="${videoURL}" />
                 Your browser does not support the video tag.
             </video>
         `;
                 } else {
                     file.html = `
-            <div class="video-loading">
-                <img src="${file.msrc}" />
-                <div class="download-message" >
+            <div class="pswp-item-container">
+                <img src="${file.msrc}" onContextMenu="return false;"/>
+                <div class="download-banner" >
                     ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                    <a class="btn btn-outline-success" href=${videoURL} download="${file.metadata.title}"">Download</button>
+                    <a class="btn btn-outline-success" href=${videoURL} download="${file.metadata.title}"">Download</a>
                 </div>
             </div>
             `;
@@ -324,9 +324,9 @@ const PhotoFrame = ({
             } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
                 if (isPlayable) {
                     file.html = `
-                <div class = 'live-photo-container'>
-                    <img id = "live-photo-image-${file.id}" src="${imageURL}" />
-                    <video id = "live-photo-video-${file.id}" loop muted>
+                <div class = 'pswp-item-container'>
+                    <img id = "live-photo-image-${file.id}" src="${imageURL}" onContextMenu="return false;"/>
+                    <video id = "live-photo-video-${file.id}" loop muted onContextMenu="return false;">
                         <source src="${videoURL}" />
                         Your browser does not support the video tag.
                     </video>
@@ -334,9 +334,9 @@ const PhotoFrame = ({
                 `;
                 } else {
                     file.html = `
-                <div class="video-loading">
-                    <img src="${file.msrc}" />
-                    <div class="download-message">
+                <div class="pswp-item-container">
+                    <img src="${file.msrc}" onContextMenu="return false;"/>
+                    <div class="download-banner">
                         ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
                         <button class = "btn btn-outline-success" id = "download-btn-${file.id}">Download</button>
                     </div>
