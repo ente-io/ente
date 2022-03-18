@@ -21,14 +21,14 @@ import { getUserFacingErrorMessage } from 'utils/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
-import { FileWithCollection } from 'types/upload';
+import { ElectronFile, FileWithCollection } from 'types/upload';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setBannerMessage: (message: string | JSX.Element) => void;
-    acceptedFiles: File[];
+    acceptedFiles: File[] | ElectronFile[];
     closeCollectionSelector: () => void;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -39,6 +39,8 @@ interface Props {
     fileRejections: FileRejection[];
     setFiles: SetFiles;
     isFirstUpload: boolean;
+    electronFiles: ElectronFile[];
+    setElectronFiles: (files: ElectronFile[]) => void;
 }
 
 enum UPLOAD_STRATEGY {
@@ -73,6 +75,8 @@ export default function Upload(props: Props) {
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
 
+    let toUploadFiles: File[] | ElectronFile[];
+
     useEffect(() => {
         UploadManager.initUploader(
             {
@@ -100,19 +104,30 @@ export default function Upload(props: Props) {
     useEffect(() => {
         if (
             props.acceptedFiles?.length > 0 ||
-            appContext.sharedFiles?.length > 0
+            appContext.sharedFiles?.length > 0 ||
+            props.electronFiles?.length > 0
         ) {
             props.setLoading(true);
 
             let analysisResult: AnalysisResult;
-            if (props.acceptedFiles?.length > 0) {
-                // File selection by drag and drop or selection of file.
+            if (
+                props.acceptedFiles?.length > 0 ||
+                props.electronFiles?.length > 0
+            ) {
+                if (props.acceptedFiles?.length > 0) {
+                    // File selection by drag and drop or selection of file.
+                    toUploadFiles = props.acceptedFiles;
+                } else {
+                    // File selection from desktop app
+                    toUploadFiles = props.electronFiles;
+                }
+
                 analysisResult = analyseUploadFiles();
                 if (analysisResult) {
                     setAnalysisResult(analysisResult);
                 }
             } else {
-                props.acceptedFiles = appContext.sharedFiles;
+                toUploadFiles = appContext.sharedFiles;
             }
             handleCollectionCreationAndUpload(
                 analysisResult,
@@ -120,7 +135,7 @@ export default function Upload(props: Props) {
             );
             props.setLoading(false);
         }
-    }, [props.acceptedFiles, appContext.sharedFiles]);
+    }, [props.acceptedFiles, appContext.sharedFiles, props.electronFiles]);
 
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
@@ -151,10 +166,10 @@ export default function Upload(props: Props) {
     };
 
     function analyseUploadFiles(): AnalysisResult {
-        if (props.acceptedFiles.length === 0) {
+        if (toUploadFiles.length === 0) {
             return null;
         }
-        const paths: string[] = props.acceptedFiles.map((file) => file['path']);
+        const paths: string[] = toUploadFiles.map((file) => file['path']);
         const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
         paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
         const firstPath = paths[0];
@@ -182,8 +197,8 @@ export default function Upload(props: Props) {
         };
     }
     function getCollectionWiseFiles() {
-        const collectionWiseFiles = new Map<string, File[]>();
-        for (const file of props.acceptedFiles) {
+        const collectionWiseFiles = new Map<string, (File | ElectronFile)[]>();
+        for (const file of toUploadFiles) {
             const filePath = file['path'] as string;
 
             let folderPath = filePath.substr(0, filePath.lastIndexOf('/'));
@@ -203,9 +218,10 @@ export default function Upload(props: Props) {
 
     const uploadFilesToExistingCollection = async (collection) => {
         try {
+            console.log('uploadFilesToExistingCollection');
             uploadInit();
             const filesWithCollectionToUpload: FileWithCollection[] =
-                props.acceptedFiles.map((file, index) => ({
+                toUploadFiles.map((file, index) => ({
                     file,
                     localID: index,
                     collectionID: collection.id,
@@ -221,13 +237,17 @@ export default function Upload(props: Props) {
         collectionName?: string
     ) => {
         try {
+            console.log('uploadFilesToNewCollections');
             uploadInit();
 
             const filesWithCollectionToUpload: FileWithCollection[] = [];
             const collections: Collection[] = [];
-            let collectionWiseFiles = new Map<string, File[]>();
+            let collectionWiseFiles = new Map<
+                string,
+                (File | ElectronFile)[]
+            >();
             if (strategy === UPLOAD_STRATEGY.SINGLE_COLLECTION) {
-                collectionWiseFiles.set(collectionName, props.acceptedFiles);
+                collectionWiseFiles.set(collectionName, toUploadFiles);
             } else {
                 collectionWiseFiles = getCollectionWiseFiles();
             }
@@ -270,6 +290,7 @@ export default function Upload(props: Props) {
         filesWithCollectionToUpload: FileWithCollection[],
         collections?: Collection[]
     ) => {
+        console.log(collections);
         try {
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
@@ -320,6 +341,7 @@ export default function Upload(props: Props) {
     };
 
     const uploadToSingleNewCollection = (collectionName: string) => {
+        console.log('uploadToSingleNewCollection');
         if (collectionName) {
             uploadFilesToNewCollections(
                 UPLOAD_STRATEGY.SINGLE_COLLECTION,

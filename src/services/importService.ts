@@ -1,5 +1,5 @@
 import { Collection } from 'types/collection';
-import { FileWithCollection } from 'types/upload';
+import { ElectronFile, FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
 
 interface FilesAndCollections {
@@ -44,6 +44,24 @@ class ImportService {
     async getIfToUploadFilesExists(): Promise<boolean> {
         if (this.allElectronAPIsExist) {
             return this.ElectronAPIs.getIfToUploadFilesExists();
+        }
+    }
+
+    async getElectronFile(filePath: string): Promise<ElectronFile> {
+        if (this.allElectronAPIsExist) {
+            return this.ElectronAPIs.getElectronFile(filePath);
+        }
+    }
+
+    async showUploadFilesDialog(): Promise<string[]> {
+        if (this.allElectronAPIsExist) {
+            return this.ElectronAPIs.showUploadFilesDialog();
+        }
+    }
+
+    async showUploadDirsDialog(): Promise<string[]> {
+        if (this.allElectronAPIsExist) {
+            return this.ElectronAPIs.showUploadDirsDialog();
         }
     }
 }

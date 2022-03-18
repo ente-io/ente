@@ -1,3 +1,4 @@
+import isElectron from 'is-electron';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -14,9 +15,21 @@ const Wrapper = styled.div<{ isDisabled: boolean }>`
     cursor: pointer;
     opacity: ${(props) => (props.isDisabled ? 0 : 1)};
 `;
-function UploadButton({ openFileUploader, isFirstFetch }) {
+function UploadButton({
+    openFileUploader,
+    isFirstFetch,
+    setShowFiletypeModal,
+}) {
     return (
-        <Wrapper onClick={openFileUploader} isDisabled={isFirstFetch}>
+        <Wrapper
+            onClick={
+                isElectron()
+                    ? () => {
+                          setShowFiletypeModal(true);
+                      }
+                    : openFileUploader
+            }
+            isDisabled={isFirstFetch}>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
