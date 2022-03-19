@@ -184,11 +184,12 @@ export async function searchThing(searchPhrase: string) {
 }
 
 export async function searchText(searchPhrase: string) {
-    const texts = await textService.getAllText();
-    const files = texts
-        .filter((text) =>
-            text.detection.data.text.toLocaleLowerCase().includes(searchPhrase)
-        )
-        .map(({ fileID }) => fileID);
-    return { text: searchPhrase, files };
+    const texts = await textService.clusterWords();
+    return texts
+        .filter((text) => text.word.toLocaleLowerCase().includes(searchPhrase))
+        .map(({ word, files }) => ({
+            word,
+            files,
+        }))
+        .slice(0, 4);
 }

@@ -199,7 +199,7 @@ const PhotoFrame = ({
                     return false;
                 }
 
-                if (search.text && search.text.indexOf(item.id) === -1) {
+                if (search.text && search.text.files.indexOf(item.id) === -1) {
                     return false;
                 }
 

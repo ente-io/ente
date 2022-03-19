@@ -34,7 +34,7 @@ import { FILE_TYPE } from 'constants/file';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { Col } from 'react-bootstrap';
-import { Person, ThingClass } from 'types/machineLearning';
+import { Person, ThingClass, WordGroup } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { PeopleList } from './MachineLearning/PeopleList';
 
@@ -217,14 +217,18 @@ export default function SearchBar(props: Props) {
             )
         );
 
-        const textResult = await searchText(searchPhrase);
+        const textResults = await searchText(searchPhrase);
 
-        options.push({
-            type: SuggestionType.TEXT,
-            value: textResult.files,
-            label: textResult.text,
-        } as Suggestion);
-
+        options.push(
+            ...textResults.map(
+                (searchResult) =>
+                    ({
+                        type: SuggestionType.TEXT,
+                        value: searchResult,
+                        label: searchResult.word,
+                    } as Suggestion)
+            )
+        );
         return options;
     };
 
@@ -266,7 +270,7 @@ export default function SearchBar(props: Props) {
                 props.setOpen(true);
                 break;
             case SuggestionType.TEXT:
-                props.setSearch({ text: selectedOption.value as number[] });
+                props.setSearch({ text: selectedOption.value as WordGroup });
                 props.setOpen(true);
                 break;
         }

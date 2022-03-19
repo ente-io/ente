@@ -205,8 +205,8 @@ export function getAllThingsFromMap(allObjectsMap: Map<number, Array<Thing>>) {
     return [...allObjectsMap.values()].flat();
 }
 
-export function getAllTextFromMap(allTextMap: Map<number, DetectedText>) {
-    return [...allTextMap.values()];
+export function getAllTextFromMap(allTextMap: Map<number, DetectedText[]>) {
+    return [...allTextMap.values()].flat();
 }
 export async function getLocalFile(fileId: number) {
     const localFiles = await getLocalFiles();

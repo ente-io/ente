@@ -205,7 +205,16 @@ export interface ThingClass {
     files: Array<number>;
 }
 
-export declare type TextDetection = Tesseract.RecognizeResult;
+export interface WordGroup {
+    word: string;
+    files: Array<number>;
+}
+
+export interface TextDetection {
+    bbox: Tesseract.Bbox;
+    word: string;
+    confidence: number;
+}
 
 export interface DetectedText {
     fileID: number;
@@ -216,7 +225,7 @@ export interface MlFileData {
     fileId: number;
     faces?: Face[];
     things?: Thing[];
-    text?: DetectedText;
+    text?: DetectedText[];
     imageSource?: ImageType;
     imageDimensions?: Dimensions;
     faceDetectionMethod?: Versioned<FaceDetectionMethod>;
@@ -315,7 +324,7 @@ export interface MLSyncContext {
     nSyncedFaces: number;
     allSyncedFacesMap?: Map<number, Array<Face>>;
     allSyncedThingsMap?: Map<number, Array<Thing>>;
-    allSyncedTextMap?: Map<number, DetectedText>;
+    allSyncedTextMap?: Map<number, Array<DetectedText>>;
     tsne?: any;
 
     error?: Error;
@@ -376,7 +385,7 @@ export interface ObjectDetectionService {
 export interface TextDetectionService {
     method: Versioned<TextDetectionMethod>;
     // init(): Promise<void>;
-    detectText(image: Blob): Promise<TextDetection>;
+    detectText(image: File): Promise<Tesseract.RecognizeResult>;
     dispose(): Promise<void>;
 }
 

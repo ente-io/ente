@@ -315,7 +315,7 @@ class MLIDbStorage {
         console.time('getAllTextMap');
         const db = await this.db;
         const allFiles = await db.getAll('files');
-        const allTextMap = new Map<number, DetectedText>();
+        const allTextMap = new Map<number, DetectedText[]>();
         allFiles.forEach(
             (mlFileData) =>
                 mlFileData.text &&

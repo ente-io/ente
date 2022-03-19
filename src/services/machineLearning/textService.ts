@@ -2,6 +2,7 @@ import {
     MLSyncContext,
     MLSyncFileContext,
     DetectedText,
+    WordGroup,
 } from 'types/machineLearning';
 import { imageBitmapToBlob } from 'utils/image';
 import { isDifferentOrOld, getAllTextFromMap } from 'utils/machineLearning';
@@ -35,19 +36,24 @@ class TextService {
         );
         const textDetections =
             await syncContext.textDetectionService.detectText(
-                await imageBitmapToBlob(imageBitmap)
+                new File(
+                    [await imageBitmapToBlob(imageBitmap)],
+                    fileContext.enteFile.id.toString()
+                )
             );
-        // console.log('3 TF Memory stats: ', tf.memory());
-        // TODO: reenable faces filtering based on width
-        const detectedText: DetectedText = {
-            fileID: fileContext.enteFile.id,
-            detection: textDetections,
-        };
+
+        const detectedText: DetectedText[] = textDetections.data.words.map(
+            ({ bbox, confidence, text }) => ({
+                fileID: fileContext.enteFile.id,
+                detection: { bbox, confidence, word: text },
+            })
+        );
         newMlFile.text = detectedText;
-        // ?.filter((f) =>
-        //     f.box.width > syncContext.config.faceDetection.minFaceSize
-        // );
-        console.log('[MLService] Detected text: ', newMlFile.text);
+        console.log(
+            '[MLService] Detected text: ',
+            fileContext.enteFile.metadata.title,
+            newMlFile.text
+        );
     }
 
     async getAllSyncedTextMap(syncContext: MLSyncContext) {
@@ -59,31 +65,22 @@ class TextService {
         return syncContext.allSyncedTextMap;
     }
 
-    public async getAllText() {
+    public async clusterWords(): Promise<WordGroup[]> {
         const allTextMap = await mlIDbStorage.getAllTextMap();
         const allText = getAllTextFromMap(allTextMap);
-        return allText;
+        const textCluster = new Map<string, number[]>();
+        allText.map((text) => {
+            if (!textCluster.has(text.detection.word)) {
+                textCluster.set(text.detection.word, []);
+            }
+            const objectsInCluster = textCluster.get(text.detection.word);
+            objectsInCluster.push(text.fileID);
+        });
+        return [...textCluster.entries()].map(([word, files]) => ({
+            word,
+            files,
+        }));
     }
-
-    // public async clusterThingClasses(
-    //     syncContext: MLSyncContext
-    // ): Promise<ThingClass[]> {
-    //     const allTextMap = await this.getAllSyncedTextMap(syncContext);
-    //     const allText = getAllTextFromMap(allTextMap);
-    //     const textCluster = new Map<string, number[]>();
-    //     allObjects.map((object) => {
-    //         if (!objectClusters.has(object.detection.class)) {
-    //             objectClusters.set(object.detection.class, []);
-    //         }
-    //         const objectsInCluster = objectClusters.get(object.detection.class);
-    //         objectsInCluster.push(object.fileID);
-    //     });
-    //     return [...objectClusters.entries()].map(([className, files], id) => ({
-    //         id,
-    //         className,
-    //         files,
-    //     }));
-    // }
 
     // async syncThingClassesIndex(syncContext: MLSyncContext) {
     //     const filesVersion = await mlIDbStorage.getIndexVersion('files');
