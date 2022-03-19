@@ -17,6 +17,7 @@ export enum SuggestionType {
     PERSON,
     INDEX_STATUS,
     THING,
+    TEXT,
 }
 
 export interface DateValue {

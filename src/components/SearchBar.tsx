@@ -12,6 +12,7 @@ import {
     searchCollection,
     searchFiles,
     searchLocation,
+    searchText,
     searchThing,
 } from 'services/searchService';
 import { getFormattedDate } from 'utils/search';
@@ -215,6 +216,15 @@ export default function SearchBar(props: Props) {
                     } as Suggestion)
             )
         );
+
+        const textResult = await searchText(searchPhrase);
+
+        options.push({
+            type: SuggestionType.TEXT,
+            value: textResult.files,
+            label: textResult.text,
+        } as Suggestion);
+
         return options;
     };
 
@@ -253,6 +263,10 @@ export default function SearchBar(props: Props) {
                 break;
             case SuggestionType.THING:
                 props.setSearch({ thing: selectedOption.value as ThingClass });
+                props.setOpen(true);
+                break;
+            case SuggestionType.TEXT:
+                props.setSearch({ text: selectedOption.value as number[] });
                 props.setOpen(true);
                 break;
         }

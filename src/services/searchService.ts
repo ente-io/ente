@@ -185,11 +185,11 @@ export async function searchThing(searchPhrase: string) {
 
 export async function searchText(searchPhrase: string) {
     const texts = await textService.getAllText();
-    console.log(texts, searchPhrase);
-    return [];
-    // return texts
-    //     .filter((thingClass) =>
-    //         thingClass.className.toLocaleLowerCase().includes(searchPhrase)
-    //     )
-    //     .map(({ className, files }) => ({ className, files }));
+    const files = texts
+        .filter((text) =>
+            text.detection.data.text.toLocaleLowerCase().includes(searchPhrase)
+        )
+        .map(({ fileID }) => fileID);
+    console.log(files);
+    return { text: searchPhrase, files };
 }

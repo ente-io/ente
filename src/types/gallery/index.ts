@@ -20,6 +20,7 @@ export type Search = {
     fileIndex?: number;
     person?: Person;
     thing?: ThingClass;
+    text?: number[];
 };
 export interface SearchStats {
     resultCount: number;

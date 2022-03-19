@@ -199,6 +199,10 @@ const PhotoFrame = ({
                     return false;
                 }
 
+                if (search.text && search.text.indexOf(item.id) === -1) {
+                    return false;
+                }
+
                 if (isSharedFile(item) && !isSharedCollection) {
                     return false;
                 }

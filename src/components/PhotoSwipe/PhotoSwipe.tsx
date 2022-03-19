@@ -53,9 +53,7 @@ import { sleep } from 'utils/common';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
 import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
-import tesseractService from 'services/machineLearning/tesseractService';
-import downloadManager from 'services/downloadManager';
-import { CodeBlock } from 'components/CodeBlock';
+import { TextDetection } from 'components/MachineLearning/TextDetection';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -425,7 +423,6 @@ function InfoModal({
     metadata,
     exif,
     scheduleUpdate,
-    detectedText,
 }) {
     const appContext = useContext(AppContext);
     return (
@@ -495,7 +492,9 @@ function InfoModal({
                 )}
                 <div>
                     <Legend>{constants.TEXT}</Legend>
-                    <CodeBlock code={detectedText} />
+                    <TextDetection
+                        file={items[photoSwipe?.getCurrentIndex()]}
+                    />
                 </div>
                 {exif && (
                     <>
@@ -527,8 +526,6 @@ function PhotoSwipe(props: Iprops) {
     );
     const galleryContext = useContext(GalleryContext);
 
-    const [detectedText, setDetectedText] = useState(null);
-
     useEffect(() => {
         if (!pswpElement) return;
         if (isOpen) {
@@ -545,24 +542,6 @@ function PhotoSwipe(props: Iprops) {
     useEffect(() => {
         updateItems(items);
     }, [items]);
-
-    useEffect(() => {
-        const main = async () => {
-            if (!photoSwipe || !showInfo) {
-                return;
-            }
-            const file = items[photoSwipe?.getCurrentIndex()];
-            const fileURL = await downloadManager.getFile(file);
-            if (fileURL) {
-                const fileBlob = await (await fetch(fileURL)).blob();
-                const detectedText = await tesseractService.detectText(
-                    fileBlob
-                );
-                setDetectedText(detectedText.data.text);
-            }
-        };
-        main();
-    }, [showInfo]);
 
     function updateFavButton() {
         setIsFav(isInFav(this?.currItem));
@@ -630,7 +609,6 @@ function PhotoSwipe(props: Iprops) {
         photoSwipe.listen('beforeChange', function () {
             updateInfo.call(this);
             updateFavButton.call(this);
-            setDetectedText(null);
         });
         photoSwipe.listen('resize', checkExifAvailable);
         photoSwipe.init();
@@ -826,7 +804,6 @@ function PhotoSwipe(props: Iprops) {
                 metadata={metadata}
                 exif={exif}
                 scheduleUpdate={scheduleUpdate}
-                detectedText={detectedText}
             />
         </>
     );
