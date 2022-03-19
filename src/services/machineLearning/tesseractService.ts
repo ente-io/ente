@@ -9,7 +9,7 @@ import Tesseract, { createWorker, RecognizeResult } from 'tesseract.js';
 class TesseractService implements TextDetectionService {
     private tesseractWorker: Tesseract.Worker;
     public method: Versioned<TextDetectionMethod>;
-
+    private ready: Promise<void>;
     public constructor() {
         this.method = {
             value: 'Tesseract',
@@ -32,8 +32,10 @@ class TesseractService implements TextDetectionService {
 
     private async getTesseractWorker() {
         if (!this.tesseractWorker) {
-            await this.init();
+            this.ready = this.init();
         }
+
+        await this.ready;
 
         return this.tesseractWorker;
     }
