@@ -53,7 +53,7 @@ import { sleep } from 'utils/common';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
 import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
-import { TextDetection } from 'components/MachineLearning/TextDetection';
+import { WordList } from 'components/MachineLearning/WordList';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -490,7 +490,7 @@ function InfoModal({
                         </div>
                         <div>
                             <Legend>{constants.TEXT}</Legend>
-                            <TextDetection
+                            <WordList
                                 file={items[photoSwipe?.getCurrentIndex()]}
                             />
                         </div>
@@ -543,12 +543,12 @@ function PhotoSwipe(props: Iprops) {
         updateItems(items);
     }, [items]);
 
-    useEffect(() => {
-        if (photoSwipe) {
-            photoSwipe.options.arrowKeys = !showInfo;
-            photoSwipe.options.escKey = !showInfo;
-        }
-    }, [showInfo]);
+    // useEffect(() => {
+    //     if (photoSwipe) {
+    //         photoSwipe.options.arrowKeys = !showInfo;
+    //         photoSwipe.options.escKey = !showInfo;
+    //     }
+    // }, [showInfo]);
 
     function updateFavButton() {
         setIsFav(isInFav(this?.currItem));
