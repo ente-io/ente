@@ -74,7 +74,7 @@
     "scrypt-js": "^3.0.1",
     "similarity-transformation": "^0.0.1",
     "styled-components": "^5.2.0",
-    "tesseract.js": "file:./thirdparty/tesseract",
+    "tesseract.js": "^2.1.5",
     "transformation-matrix": "^2.10.0",
     "tsne-js": "^1.0.3",
     "workbox-precaching": "^6.1.5",
