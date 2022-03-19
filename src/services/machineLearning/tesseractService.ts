@@ -5,11 +5,14 @@ import {
 } from 'types/machineLearning';
 
 import Tesseract, { createWorker, RecognizeResult } from 'tesseract.js';
+import QueueProcessor from 'services/queueProcessor';
+import { CustomError } from 'utils/error';
 
 class TesseractService implements TextDetectionService {
     private tesseractWorker: Tesseract.Worker;
     public method: Versioned<TextDetectionMethod>;
     private ready: Promise<void>;
+    private textDetector = new QueueProcessor<Tesseract.RecognizeResult>(1);
     public constructor() {
         this.method = {
             value: 'Tesseract',
@@ -19,7 +22,6 @@ class TesseractService implements TextDetectionService {
 
     private async init() {
         this.tesseractWorker = createWorker({
-            logger: (m) => console.log(m),
             workerBlobURL: false,
             workerPath: '/js/tesseract/worker.min.js',
             corePath: '/js/tesseract/tesseract-core.wasm.js',
@@ -40,14 +42,25 @@ class TesseractService implements TextDetectionService {
         return this.tesseractWorker;
     }
 
-    async detectText(image: Blob): Promise<RecognizeResult> {
-        console.log('tesseract detectText');
-        const dummyFile = new File([image], 'dummy.jpg');
-        const tesseractWorker = await this.getTesseractWorker();
-        const detections = await tesseractWorker.recognize(dummyFile);
-        console.log('tesseract detectedText', detections);
+    async detectText(image: File): Promise<RecognizeResult> {
+        const response = this.textDetector.queueUpRequest(async () => {
+            console.log('tesseract detectText');
+            const tesseractWorker = await this.getTesseractWorker();
+            const detections = await tesseractWorker.recognize(image);
+            console.log('tesseract detectedText', detections);
 
-        return detections;
+            return detections;
+        });
+        try {
+            return await response.promise;
+        } catch (e) {
+            if (e.message === CustomError.REQUEST_CANCELLED) {
+                // ignore
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 
     public async dispose() {
