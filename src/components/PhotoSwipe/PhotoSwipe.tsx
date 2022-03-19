@@ -488,14 +488,14 @@ function InfoModal({
                                 file={items[photoSwipe?.getCurrentIndex()]}
                             />
                         </div>
+                        <div>
+                            <Legend>{constants.TEXT}</Legend>
+                            <TextDetection
+                                file={items[photoSwipe?.getCurrentIndex()]}
+                            />
+                        </div>
                     </>
                 )}
-                <div>
-                    <Legend>{constants.TEXT}</Legend>
-                    <TextDetection
-                        file={items[photoSwipe?.getCurrentIndex()]}
-                    />
-                </div>
                 {exif && (
                     <>
                         <ExifData exif={exif} />
