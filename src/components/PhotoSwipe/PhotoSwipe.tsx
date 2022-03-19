@@ -543,6 +543,13 @@ function PhotoSwipe(props: Iprops) {
         updateItems(items);
     }, [items]);
 
+    useEffect(() => {
+        if (photoSwipe) {
+            photoSwipe.options.arrowKeys = !showInfo;
+            photoSwipe.options.escKey = !showInfo;
+        }
+    }, [showInfo]);
+
     function updateFavButton() {
         setIsFav(isInFav(this?.currItem));
     }

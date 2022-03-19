@@ -190,6 +190,5 @@ export async function searchText(searchPhrase: string) {
             text.detection.data.text.toLocaleLowerCase().includes(searchPhrase)
         )
         .map(({ fileID }) => fileID);
-    console.log(files);
     return { text: searchPhrase, files };
 }
