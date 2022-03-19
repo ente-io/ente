@@ -4,4 +4,4 @@
 	branch = master 
 [submodule "thirdparty/tesseract"]
 	path = thirdparty/tesseract
-	url = git@github.com:naptha/tesseract.js.git
+	url = git@github.com:abhinavkgrd/tesseract.js.git
