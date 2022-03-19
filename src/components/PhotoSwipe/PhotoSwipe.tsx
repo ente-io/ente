@@ -53,6 +53,9 @@ import { sleep } from 'utils/common';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
 import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
+import tesseractService from 'services/machineLearning/tesseractService';
+import downloadManager from 'services/downloadManager';
+import { CodeBlock } from 'components/CodeBlock';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -64,7 +67,7 @@ const SmallLoadingSpinner = () => (
 );
 interface Iprops {
     isOpen: boolean;
-    items: any[];
+    items: EnteFile[];
     currentIndex?: number;
     onClose?: (needUpdate: boolean) => void;
     gettingData: (instance: any, index: number, item: EnteFile) => void;
@@ -422,6 +425,7 @@ function InfoModal({
     metadata,
     exif,
     scheduleUpdate,
+    detectedText,
 }) {
     const appContext = useContext(AppContext);
     return (
@@ -489,6 +493,10 @@ function InfoModal({
                         </div>
                     </>
                 )}
+                <div>
+                    <Legend>{constants.TEXT}</Legend>
+                    <CodeBlock code={detectedText} />
+                </div>
                 {exif && (
                     <>
                         <ExifData exif={exif} />
@@ -519,6 +527,8 @@ function PhotoSwipe(props: Iprops) {
     );
     const galleryContext = useContext(GalleryContext);
 
+    const [detectedText, setDetectedText] = useState(null);
+
     useEffect(() => {
         if (!pswpElement) return;
         if (isOpen) {
@@ -536,12 +546,23 @@ function PhotoSwipe(props: Iprops) {
         updateItems(items);
     }, [items]);
 
-    // useEffect(() => {
-    //     if (photoSwipe) {
-    //         photoSwipe.options.arrowKeys = !showInfo;
-    //         photoSwipe.options.escKey = !showInfo;
-    //     }
-    // }, [showInfo]);
+    useEffect(() => {
+        const main = async () => {
+            if (!photoSwipe || !showInfo) {
+                return;
+            }
+            const file = items[photoSwipe?.getCurrentIndex()];
+            const fileURL = await downloadManager.getFile(file);
+            if (fileURL) {
+                const fileBlob = await (await fetch(fileURL)).blob();
+                const detectedText = await tesseractService.detectText(
+                    fileBlob
+                );
+                setDetectedText(detectedText.data.text);
+            }
+        };
+        main();
+    }, [showInfo]);
 
     function updateFavButton() {
         setIsFav(isInFav(this?.currItem));
@@ -609,6 +630,7 @@ function PhotoSwipe(props: Iprops) {
         photoSwipe.listen('beforeChange', function () {
             updateInfo.call(this);
             updateFavButton.call(this);
+            setDetectedText(null);
         });
         photoSwipe.listen('resize', checkExifAvailable);
         photoSwipe.init();
@@ -804,6 +826,7 @@ function PhotoSwipe(props: Iprops) {
                 metadata={metadata}
                 exif={exif}
                 scheduleUpdate={scheduleUpdate}
+                detectedText={detectedText}
             />
         </>
     );
