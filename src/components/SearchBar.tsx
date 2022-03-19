@@ -37,6 +37,8 @@ import { Col } from 'react-bootstrap';
 import { Person, ThingClass, WordGroup } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { PeopleList } from './MachineLearning/PeopleList';
+import ObjectIcon from './icons/ObjectIcon';
+import TextIcon from './icons/TextIcon';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -303,6 +305,10 @@ export default function SearchBar(props: Props) {
                 return <ImageIcon />;
             case SuggestionType.VIDEO:
                 return <VideoIcon />;
+            case SuggestionType.THING:
+                return <ObjectIcon />;
+            case SuggestionType.TEXT:
+                return <TextIcon />;
             default:
                 return <SearchIcon />;
         }
