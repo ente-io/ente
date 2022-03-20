@@ -11,6 +11,7 @@ import * as SSDMobileNet from '@tensorflow-models/coco-ssd';
 class SSDMobileNetV2 implements ObjectDetectionService {
     private ssdMobileNetV2Model: SSDMobileNet.ObjectDetection;
     public method: Versioned<ObjectDetectionMethod>;
+    private ready: Promise<void>;
 
     public constructor() {
         this.method = {
@@ -32,10 +33,10 @@ class SSDMobileNetV2 implements ObjectDetectionService {
     }
 
     private async getSSDMobileNetV2Model() {
-        if (!this.ssdMobileNetV2Model) {
-            await this.init();
+        if (!this.ready) {
+            this.ready = this.init();
         }
-
+        await this.ready;
         return this.ssdMobileNetV2Model;
     }
 
