@@ -9,9 +9,9 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
-//import 'package:photos/services/user_service.dart';
+import 'package:photos/services/user_service.dart';
 //import 'package:photos/ui/common/report_bug_popup.dart';
-import 'package:photos/ui/common_elements.dart';
+//import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/data_util.dart';
@@ -116,6 +116,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: TextFormField(
+                    style: Theme.of(context).textTheme.subtitle1,
                     autofillHints: [AutofillHints.email],
                     decoration: InputDecoration(
                       fillColor: _emailInputFieldColor,
@@ -151,7 +152,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     },
                     autocorrect: false,
                     keyboardType: TextInputType.emailAddress,
-                    initialValue: _email,
+                    //initialValue: _email,
                     textInputAction: TextInputAction.next,
                   ),
                 ),
@@ -476,39 +477,47 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 ),
                 _getAgreement(),
                 Padding(padding: EdgeInsets.all(20)),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: CupertinoButton(
-                      color: Colors.black,
-                      onPressed: () {},
-                      // onPressed: _isFormValid()
-                      //     ? () {
-                      //         if (!isValidEmail(_email)) {
-                      //           showErrorDialog(context, "invalid email",
-                      //               "please enter a valid email address.");
-                      //         } else if (_passwordController1.text !=
-                      //             _passwordController2.text) {
-                      //           showErrorDialog(context, "uhm...",
-                      //               "the passwords you entered don't match");
-                      //         } else if (_passwordStrength <
-                      //             kPasswordStrengthThreshold) {
-                      //           showErrorDialog(context, "weak password",
-                      //               "the password you have chosen is too simple, please choose another one");
-                      //         } else {
-                      //           _config.setVolatilePassword(
-                      //               _passwordController1.text);
-                      //           _config.setEmail(_email);
-                      //           UserService.instance.getOtt(context, _email);
-                      //         }
-                      //       }
-                      //     : null,
-                      child: Text('Create Account'),
-                    ),
-                  ),
-                ),
               ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: CupertinoButton(
+              color: Colors.black,
+              onPressed: () {
+                if (_isFormValid()) {
+                  _config.setVolatilePassword(_passwordController1.text);
+                  _config.setEmail(_email);
+                  UserService.instance.getOtt(context, _email);
+                }
+              },
+              // onPressed: _isFormValid()
+              //     ? () {
+              //         if (!isValidEmail(_email)) {
+              //           showErrorDialog(context, "invalid email",
+              //               "please enter a valid email address.");
+              //         } else if (_passwordController1.text !=
+              //             _passwordController2.text) {
+              //           showErrorDialog(context, "uhm...",
+              //               "the passwords you entered don't match");
+              //         } else if (_passwordStrength <
+              //             kPasswordStrengthThreshold) {
+              //           showErrorDialog(context, "weak password",
+              //               "the password you have chosen is too simple, please choose another one");
+              //         } else {
+              //           _config.setVolatilePassword(
+              //               _passwordController1.text);
+              //           _config.setEmail(_email);
+              //           UserService.instance.getOtt(context, _email);
+              //         }
+              //       }
+              //     : null,
+              child: Text(
+                'Create Account', //hardcoded
+              ),
             ),
           ),
         ),
@@ -665,11 +674,18 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     );
   }
 
+  // bool _isFormValid() {
+  //   return _email != null &&
+  //       _email.isNotEmpty &&
+  //       _passwordController1.text.isNotEmpty &&
+  //       _passwordController2.text.isNotEmpty &&
+  //       _hasAgreedToTOS &&
+  //       _hasAgreedToE2E;
+  // }
+
   bool _isFormValid() {
-    return _email != null &&
-        _email.isNotEmpty &&
-        _passwordController1.text.isNotEmpty &&
-        _passwordController2.text.isNotEmpty &&
+    return _emailIsValid &&
+        _passwordsMatch &&
         _hasAgreedToTOS &&
         _hasAgreedToE2E;
   }
