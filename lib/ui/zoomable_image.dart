@@ -52,7 +52,8 @@ class _ZoomableImageState extends State<ZoomableImage>
       if (widget.shouldDisableScroll != null) {
         widget.shouldDisableScroll(value != PhotoViewScaleState.initial);
       }
-      _isZooming = value.isScaleStateZooming;
+      _isZooming = value != PhotoViewScaleState.initial;
+      // _logger.info('is reakky zooming $_isZooming with state $value');
     };
     super.initState();
   }
@@ -80,12 +81,17 @@ class _ZoomableImageState extends State<ZoomableImage>
     } else {
       content = loadWidget;
     }
-    return GestureDetector(
-      child: content,
-      onVerticalDragUpdate: ( d) => {
-        if (!_isZooming && d.delta.dy > kDragSensitivity) {Navigator.of(context).pop()}
-      },
-    );
+    if (_isZooming) {
+      return content;
+    } else {
+      return GestureDetector(
+        child: content,
+        onVerticalDragUpdate: (d) => {
+          if (!_isZooming && d.delta.dy > kDragSensitivity)
+            {Navigator.of(context).pop()}
+        },
+      );
+    }
   }
 
   void _loadNetworkImage() {
