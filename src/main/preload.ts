@@ -3,6 +3,9 @@ import * as fs from 'promise-fs';
 import * as electron from 'electron';
 import {
     getIfToUploadFilesExists,
+    getElectronFile,
+    showUploadFilesDialog,
+    showUploadDirsDialog,
     getToUploadFiles,
     setToUploadFiles,
 } from './utils/upload';
@@ -122,7 +125,10 @@ windowObject['ElectronAPIs'] = {
     registerRetryFailedExportListener,
     getExportRecord,
     setExportRecord,
-    setToUploadFiles,
-    getToUploadFiles,
     getIfToUploadFilesExists,
+    getElectronFile,
+    showUploadFilesDialog,
+    showUploadDirsDialog,
+    getToUploadFiles,
+    setToUploadFiles,
 };

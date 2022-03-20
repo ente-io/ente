@@ -2,41 +2,32 @@ import ElectronStore from 'electron-store';
 import path from 'path';
 import * as fs from 'promise-fs';
 import mime from 'mime';
-import {
-    Collection,
-    FileWithCollection,
-    StoreFileWithCollection,
-} from '../types';
 import { ENCRYPTION_CHUNK_SIZE } from '../../config';
+import { dialog } from '@electron/remote';
+import { ElectronFile } from '../types';
 
 const store = new ElectronStore();
 
-export const setToUploadFiles = (
-    files: FileWithCollection[],
-    collections: Collection[],
-    done: boolean
-) => {
-    store.set('done', done);
-    if (done) {
-        store.delete('files');
-        store.delete('collections');
-    } else {
-        const filesList: StoreFileWithCollection[] = files.map(
-            (file: FileWithCollection) => {
-                return {
-                    localID: file.localID,
-                    collection: file.collection,
-                    collectionID: file.collectionID,
-                    filePath: file.file.path,
-                };
-            }
-        );
-        store.set('files', filesList);
-        if (collections) store.set('collections', collections);
-    }
+const getFilesFromDir = (dirPath: string) => {
+    let files: string[] = [];
+
+    // https://stackoverflow.com/a/63111390
+    const getAllFilePaths = (dirPath: string) => {
+        fs.readdirSync(dirPath).forEach((filePath) => {
+            const absolute = path.join(dirPath, filePath);
+            if (fs.statSync(absolute).isDirectory())
+                return getAllFilePaths(absolute);
+            else return files.push(absolute);
+        });
+    };
+
+    if (fs.statSync(dirPath).isDirectory()) getAllFilePaths(dirPath);
+    else files.push(dirPath);
+
+    return files;
 };
 
-export const getFileStream = async (filePath: string) => {
+const getFileStream = async (filePath: string) => {
     const file = await fs.open(filePath, 'r');
     let offset = 0;
     const readableStream = new ReadableStream<Uint8Array>({
@@ -63,56 +54,81 @@ export const getFileStream = async (filePath: string) => {
     return readableStream;
 };
 
-export const getToUploadFiles = async () => {
-    const files = store.get('files') as StoreFileWithCollection[];
-    if (!files)
-        return {
-            files: [] as FileWithCollection[],
-            collections: [] as Collection[],
-        };
+export async function showUploadFilesDialog() {
+    const files = await dialog.showOpenDialog({
+        properties: ['openFile', 'multiSelections'],
+    });
+    return files.filePaths;
+}
 
-    const filesWithStream: FileWithCollection[] = [];
+export async function showUploadDirsDialog() {
+    const dir = await dialog.showOpenDialog({
+        properties: ['openDirectory', 'multiSelections'],
+    });
 
-    for (const file of files) {
-        const filePath = file.filePath;
+    let files: string[] = [];
+    for (const dirPath of dir.filePaths) {
+        files = files.concat(getFilesFromDir(dirPath));
+    }
 
-        if (fs.existsSync(filePath)) {
-            const fileStats = fs.statSync(filePath);
+    return files;
+}
 
-            const fileObj: FileWithCollection = {
-                localID: file.localID,
-                collection: file.collection,
-                collectionID: file.collectionID,
+export async function getElectronFile(filePath: string): Promise<ElectronFile> {
+    const fileStats = fs.statSync(filePath);
+    return {
+        path: filePath,
+        name: path.basename(filePath),
+        size: fileStats.size,
+        lastModified: fileStats.mtime.valueOf(),
+        type: {
+            mimeType: mime.getType(filePath),
+            ext: path.extname(filePath).substring(1),
+        },
+        createReadStream: async () => {
+            return await getFileStream(filePath);
+        },
+        toBlob: async () => {
+            const blob = await fs.readFile(filePath);
+            return new Blob([new Uint8Array(blob)]);
+        },
+        toUInt8Array: async () => {
+            const blob = await fs.readFile(filePath);
+            return new Uint8Array(blob);
+        },
+    };
+}
 
-                file: {
-                    path: filePath,
-                    name: path.basename(filePath),
-                    size: fileStats.size,
-                    lastModified: fileStats.mtime.valueOf(),
-                    type: {
-                        mimeType: mime.getType(filePath),
-                        ext: path.extname(filePath).substring(1),
-                    },
-                    createReadStream: async () => {
-                        return await getFileStream(filePath);
-                    },
-                    toBlob: async () => {
-                        const blob = await fs.readFile(filePath);
-                        return new Blob([new Uint8Array(blob)]);
-                    },
-                    toUInt8Array: async () => {
-                        const blob = await fs.readFile(filePath);
-                        return new Uint8Array(blob);
-                    },
-                },
-            };
-
-            filesWithStream.push(fileObj);
+export const setToUploadFiles = (
+    filePaths: string[],
+    collectionName: string,
+    collectionIDs: number[],
+    done: boolean
+) => {
+    store.set('done', done);
+    if (done) {
+        store.delete('filesPaths');
+        store.delete('collectionName');
+        store.delete('collectionIDs');
+    } else {
+        store.set('filesPaths', filePaths);
+        store.set('collectionIDs', collectionIDs);
+        if (collectionName) {
+            store.set('collectionName', collectionName);
+        } else {
+            store.delete('collectionName');
         }
     }
+};
+
+export const getToUploadFiles = () => {
+    const filesPaths = store.get('filesPaths') as string[];
+    const collectionName = store.get('collectionName') as string;
+    const collectionIDs = store.get('collectionIDs') as number[];
     return {
-        files: filesWithStream,
-        collections: store.get('collections') as Collection[],
+        filesPaths,
+        collectionName,
+        collectionIDs,
     };
 };
 
