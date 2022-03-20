@@ -81,17 +81,17 @@ class _ZoomableImageState extends State<ZoomableImage>
     } else {
       content = loadWidget;
     }
-    if (_isZooming) {
-      return content;
-    } else {
-      return GestureDetector(
-        child: content,
-        onVerticalDragUpdate: (d) => {
-          if (!_isZooming && d.delta.dy > kDragSensitivity)
-            {Navigator.of(context).pop()}
-        },
-      );
-    }
+
+    GestureDragUpdateCallback verticalDragCallback = _isZooming
+        ? null
+        : (d) => {
+              if (!_isZooming && d.delta.dy > kDragSensitivity)
+                {Navigator.of(context).pop()}
+            };
+    return GestureDetector(
+      child: content,
+      onVerticalDragUpdate: verticalDragCallback,
+    );
   }
 
   void _loadNetworkImage() {
