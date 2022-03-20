@@ -2,6 +2,7 @@ import { Modal, Button } from 'react-bootstrap';
 import React from 'react';
 import ImportService from 'services/importService';
 import { getElectronFiles } from 'utils/upload';
+import constants from 'utils/strings/constants';
 
 export default function FileTypeChoiceModal({
     setElectronFiles,
@@ -33,7 +34,7 @@ export default function FileTypeChoiceModal({
             centered>
             <Modal.Header closeButton onHide={hideFiletypeDialog}>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    Upload
+                    {constants.CHOOSE_UPLOAD_TYPE}
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body
@@ -44,10 +45,10 @@ export default function FileTypeChoiceModal({
                     height: '12vh',
                 }}>
                 <Button variant="outline-success" onClick={uploadFiles}>
-                    Upload Files
+                    {constants.UPLOAD_FILES}
                 </Button>
                 <Button variant="outline-success" onClick={uploadDirs}>
-                    Upload Folders
+                    {constants.UPLOAD_DIRS}
                 </Button>
             </Modal.Body>
         </Modal>

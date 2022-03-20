@@ -1,11 +1,7 @@
 import { Collection } from 'types/collection';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
-
-interface FilesAndCollections {
-    files: FileWithCollection[];
-    collections: Collection[];
-}
+import { getElectronFiles } from 'utils/upload';
 
 class ImportService {
     ElectronAPIs: any;
@@ -16,28 +12,9 @@ class ImportService {
         this.allElectronAPIsExist = !!this.ElectronAPIs?.exists;
     }
 
-    async setToUploadFiles(
-        filesWithCollectionToUpload: FileWithCollection[],
-        collections?: Collection[]
-    ) {
-        if (this.allElectronAPIsExist) {
-            this.ElectronAPIs.setToUploadFiles(
-                filesWithCollectionToUpload,
-                collections,
-                false
-            );
-        }
-    }
-
     async setDoneUploadingFiles() {
         if (this.allElectronAPIsExist) {
-            this.ElectronAPIs.setToUploadFiles([], [], true);
-        }
-    }
-
-    async getToUploadFiles(): Promise<FilesAndCollections> {
-        if (this.allElectronAPIsExist) {
-            return this.ElectronAPIs.getToUploadFiles();
+            this.ElectronAPIs.setToUploadFiles(null, null, null, true);
         }
     }
 
@@ -62,6 +39,41 @@ class ImportService {
     async showUploadDirsDialog(): Promise<string[]> {
         if (this.allElectronAPIsExist) {
             return this.ElectronAPIs.showUploadDirsDialog();
+        }
+    }
+
+    async getToUploadFiles() {
+        if (this.allElectronAPIsExist) {
+            const { filesPaths, collectionName, collectionIDs } =
+                this.ElectronAPIs.getToUploadFiles();
+            const files = await getElectronFiles(filesPaths);
+            return {
+                files,
+                collectionName,
+                collectionIDs,
+            };
+        }
+    }
+
+    async setToUploadFiles(
+        files: FileWithCollection[],
+        collections?: Collection[]
+    ) {
+        if (this.allElectronAPIsExist) {
+            let collectionName;
+            if (collections?.length > 0) {
+                collectionName = collections[0].name;
+            }
+            const filePaths = files.map(
+                (file) => (file.file as ElectronFile).path
+            );
+            const collectionIDs = files.map((file) => file.collectionID);
+            this.ElectronAPIs.setToUploadFiles(
+                filePaths,
+                collectionName,
+                collectionIDs,
+                false
+            );
         }
     }
 }

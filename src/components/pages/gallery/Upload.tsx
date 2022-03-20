@@ -149,13 +149,23 @@ export default function Upload(props: Props) {
 
     const uploadFailedFiles = async () => {
         try {
-            uploadInit();
-            const { files, collections } =
+            const { files, collectionName, collectionIDs } =
                 await ImportService.getToUploadFiles();
-            await uploadFiles(
-                files as FileWithCollection[],
-                collections as Collection[]
-            );
+
+            toUploadFiles = files;
+
+            if (collectionName) {
+                uploadToSingleNewCollection(collectionName);
+            } else {
+                uploadInit();
+                const filesWithCollectionToUpload: FileWithCollection[] =
+                    toUploadFiles.map((file, index) => ({
+                        file,
+                        localID: index,
+                        collectionID: collectionIDs[index],
+                    }));
+                await uploadFiles(filesWithCollectionToUpload);
+            }
         } catch (e) {
             logError(e, 'Failed to upload previously failed files');
         } finally {
@@ -218,7 +228,6 @@ export default function Upload(props: Props) {
 
     const uploadFilesToExistingCollection = async (collection) => {
         try {
-            console.log('uploadFilesToExistingCollection');
             uploadInit();
             const filesWithCollectionToUpload: FileWithCollection[] =
                 toUploadFiles.map((file, index) => ({
@@ -237,7 +246,6 @@ export default function Upload(props: Props) {
         collectionName?: string
     ) => {
         try {
-            console.log('uploadFilesToNewCollections');
             uploadInit();
 
             const filesWithCollectionToUpload: FileWithCollection[] = [];
@@ -290,7 +298,6 @@ export default function Upload(props: Props) {
         filesWithCollectionToUpload: FileWithCollection[],
         collections?: Collection[]
     ) => {
-        console.log(collections);
         try {
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
@@ -341,7 +348,6 @@ export default function Upload(props: Props) {
     };
 
     const uploadToSingleNewCollection = (collectionName: string) => {
-        console.log('uploadToSingleNewCollection');
         if (collectionName) {
             uploadFilesToNewCollections(
                 UPLOAD_STRATEGY.SINGLE_COLLECTION,
