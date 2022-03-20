@@ -26,7 +26,7 @@ class SocialSectionWidget extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
-            launch("https://discord.gg/uRqua3jSr5");
+            launch("https://ente.io/discord");
           },
           child: SettingsTextItem(text: "discord", icon: Icons.navigate_next),
         ),
