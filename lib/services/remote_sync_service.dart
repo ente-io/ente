@@ -217,7 +217,7 @@ class RemoteSyncService {
       // uploaded yet. These files should ignore video backup & ignored files filter
       filesToBeUploaded = await _db.getPendingManualUploads();
     }
-    _moveVideosToEnd(filesToBeUploaded);
+    _sortByTimeAndType(filesToBeUploaded);
     _logger.info(
         filesToBeUploaded.length.toString() + " new files to be uploaded.");
     return filesToBeUploaded;
@@ -453,10 +453,12 @@ class RemoteSyncService {
     return Platform.isIOS && !AppLifecycleService.instance.isForeground;
   }
 
-  void _moveVideosToEnd(List<File> file) {
+  // _sortByTimeAndType moves videos to end and sort by creation time (desc).
+  // This is done to upload most recent photo first.
+  void _sortByTimeAndType(List<File> file) {
     file.sort((first, second) {
       if (first.fileType == second.fileType) {
-        return 0;
+        return second.creationTime.compareTo(first.creationTime);
       } else if (first.fileType == FileType.video) {
         return 1;
       } else {
