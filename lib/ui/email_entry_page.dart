@@ -1,22 +1,22 @@
 import 'dart:io';
 
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_password_strength/flutter_password_strength.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
-import 'package:photos/services/user_service.dart';
+//import 'package:photos/services/user_service.dart';
 //import 'package:photos/ui/common/report_bug_popup.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/data_util.dart';
-import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/email_util.dart';
+//import 'package:photos/utils/dialog_util.dart';
+//import 'package:photos/utils/email_util.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class EmailEntryPage extends StatefulWidget {
@@ -34,15 +34,27 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       _passwordController2 = TextEditingController();
 
   String _email;
-  double _passwordStrength = 0;
+  String _password = null;
+  String _passwordInInputBox = '';
+  bool _emailIsValid = false;
   bool _hasAgreedToTOS = true;
   bool _hasAgreedToE2E = false;
   bool _password1Visible = false;
   bool _password2Visible = false;
+  bool _passwordsMatch = false;
   final _password1FocusNode = FocusNode();
   final _password2FocusNode = FocusNode();
   bool _password1InFocus = false;
   bool _password2InFocus = false;
+  bool _passwordIsValid = false;
+
+  bool _capitalLetterIsPresent = false;
+  bool _lenghtIsValid = false; //variables for checking password strength
+  bool _specialCharIsPresent = false;
+
+  Color _cnfPasswordInputFieldColor = null;
+  Color _emailInputFieldColor = null; //is this okay?
+  Color _passwordInputFieldColor = null;
 
   @override
   void initState() {
@@ -62,12 +74,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
     final appBar = AppBar(
       elevation: 0,
       leading: Icon(
         Icons.arrow_back,
-        color: CupertinoColors.black,
+        color: Theme.of(context).iconTheme.color,
       ),
       title: Hero(
         tag: "sign_up",
@@ -92,33 +103,50 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   Widget _getBody() {
     return Column(
       children: [
-        FlutterPasswordStrength(
-          password: _passwordController1.text,
-          backgroundColor: Colors.white.withOpacity(0.1),
-          strengthCallback: (strength) {
-            _passwordStrength = strength;
-          },
-          strengthColors: passwordStrengthColors,
-        ),
         Expanded(
           child: AutofillGroup(
             child: ListView(
               children: [
-                Padding(padding: EdgeInsets.all(40)),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                  child: Text('Create new account',
+                      style: Theme.of(context).textTheme.headline4),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: TextFormField(
                     autofillHints: [AutofillHints.email],
                     decoration: InputDecoration(
+                      fillColor: _emailInputFieldColor,
+                      filled: true,
                       hintText: 'email',
-                      hintStyle: TextStyle(
-                        color: Colors.white30,
-                      ),
-                      contentPadding: EdgeInsets.all(12),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                      border: UnderlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(6)),
+                      suffix: _emailIsValid
+                          ? Icon(
+                              Icons.check,
+                              color: Theme.of(context)
+                                  .inputDecorationTheme
+                                  .focusedBorder
+                                  .borderSide
+                                  .color,
+                            )
+                          : null,
                     ),
                     onChanged: (value) {
                       setState(() {
                         _email = value.trim();
+                        _emailIsValid = EmailValidator.validate(_email);
+                        if (_emailIsValid) {
+                          _emailInputFieldColor =
+                              Color.fromRGBO(45, 194, 98, 0.2);
+                        } else {
+                          _emailInputFieldColor = null;
+                        }
                       });
                     },
                     autocorrect: false,
@@ -127,9 +155,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     textInputAction: TextInputAction.next,
                   ),
                 ),
-                Padding(padding: EdgeInsets.all(8)),
+                Padding(padding: EdgeInsets.all(4)),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: TextFormField(
                     keyboardType: TextInputType.text,
                     controller: _passwordController1,
@@ -137,18 +165,18 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     enableSuggestions: true,
                     autofillHints: [AutofillHints.newPassword],
                     decoration: InputDecoration(
+                      fillColor: _passwordInputFieldColor,
+                      filled: true,
                       hintText: "password",
-                      hintStyle: TextStyle(
-                        color: Colors.white30,
-                      ),
-                      contentPadding: EdgeInsets.all(12),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                       suffixIcon: _password1InFocus
                           ? IconButton(
                               icon: Icon(
                                 _password1Visible
                                     ? Icons.visibility
                                     : Icons.visibility_off,
-                                color: Colors.white.withOpacity(0.5),
+                                color: Theme.of(context).iconTheme.color,
                                 size: 20,
                               ),
                               onPressed: () {
@@ -157,11 +185,32 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                 });
                               },
                             )
-                          : null,
+                          : _passwordIsValid
+                              ? Icon(
+                                  Icons.check,
+                                  color: Theme.of(context)
+                                      .inputDecorationTheme
+                                      .focusedBorder
+                                      .borderSide
+                                      .color,
+                                )
+                              : null,
+                      border: UnderlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(6)),
                     ),
                     focusNode: _password1FocusNode,
-                    onChanged: (_) {
-                      setState(() {});
+                    onChanged: (password) {
+                      setState(() {
+                        _passwordInInputBox = password;
+                        validatePassword(password);
+                        if (_passwordIsValid) {
+                          _passwordInputFieldColor =
+                              Color.fromRGBO(45, 194, 98, 0.2);
+                        } else {
+                          _passwordInputFieldColor = null;
+                        }
+                      });
                     },
                     onEditingComplete: () {
                       _password1FocusNode.unfocus();
@@ -170,74 +219,269 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     },
                   ),
                 ),
-                Padding(padding: EdgeInsets.all(8)),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-                  child: TextFormField(
-                    keyboardType: TextInputType.visiblePassword,
-                    controller: _passwordController2,
-                    obscureText: !_password2Visible,
-                    autofillHints: [AutofillHints.newPassword],
-                    onEditingComplete: () => TextInput.finishAutofillContext(),
-                    decoration: InputDecoration(
-                      hintText: "confirm password",
-                      hintStyle: TextStyle(
-                        color: Colors.white30,
+                Padding(padding: EdgeInsets.all(4)),
+                Stack(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      child: TextFormField(
+                        keyboardType: TextInputType.visiblePassword,
+                        controller: _passwordController2,
+                        obscureText: !_password2Visible,
+                        autofillHints: [AutofillHints.newPassword],
+                        onEditingComplete: () =>
+                            TextInput.finishAutofillContext(),
+                        decoration: InputDecoration(
+                          fillColor: _cnfPasswordInputFieldColor,
+                          filled: true,
+                          hintText: "confirm password",
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 15),
+                          suffixIcon: _password2InFocus
+                              ? IconButton(
+                                  icon: Icon(
+                                    _password2Visible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: Theme.of(context).iconTheme.color,
+                                    size: 20,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _password2Visible = !_password2Visible;
+                                    });
+                                  },
+                                )
+                              : _passwordsMatch
+                                  ? Icon(
+                                      Icons.check,
+                                      color: Theme.of(context)
+                                          .inputDecorationTheme
+                                          .focusedBorder
+                                          .borderSide
+                                          .color,
+                                    )
+                                  : null,
+                          border: UnderlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(6)),
+                        ),
+                        focusNode: _password2FocusNode,
+                        onChanged: (cnfPassword) {
+                          setState(() {
+                            if (_password != null) {
+                              if (_password == cnfPassword) {
+                                _cnfPasswordInputFieldColor =
+                                    Color.fromRGBO(45, 194, 98, 0.2);
+                                _passwordsMatch = true;
+                              } else {
+                                _cnfPasswordInputFieldColor = null;
+                              }
+                            }
+                          });
+                        },
                       ),
-                      contentPadding: EdgeInsets.all(12),
-                      suffixIcon: _password2InFocus
-                          ? IconButton(
-                              icon: Icon(
-                                _password2Visible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: Colors.white.withOpacity(0.5),
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _password2Visible = !_password2Visible;
-                                });
-                              },
-                            )
-                          : null,
                     ),
-                    focusNode: _password2FocusNode,
-                  ),
+                    Positioned(
+                      bottom: -120,
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: Divider(
+                        thickness: 1.5,
+                      ),
+                    ),
+                    Visibility(
+                      visible:
+                          (!_passwordIsValid && (_passwordInInputBox != '')),
+                      child: Positioned(
+                          bottom: -48,
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 20, //hardcoded
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Theme.of(context).hintColor,
+                                      width: 0.5),
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.zero,
+                                    topRight: Radius.zero,
+                                    bottomLeft: Radius.circular(5),
+                                    bottomRight: Radius.circular(5),
+                                  ),
+                                  color: Theme.of(context)
+                                      .dialogTheme
+                                      .backgroundColor,
+                                ),
+                                width: MediaQuery.of(context).size.width * 0.9,
+                                child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            4.0, 8, 4.0, 4.0),
+                                        child: Row(
+                                          children: [
+                                            Padding(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        10, 0, 8, 0),
+                                                child: _lenghtIsValid
+                                                    ? Icon(
+                                                        Icons.check,
+                                                        color: CupertinoColors
+                                                            .systemGrey2,
+                                                      )
+                                                    : Icon(
+                                                        Icons.check,
+                                                        color: CupertinoColors
+                                                            .systemGrey6,
+                                                      )),
+                                            Text(
+                                                'Must be minimum 9 characters long',
+                                                style: _lenghtIsValid
+                                                    ? TextStyle(
+                                                        decoration:
+                                                            TextDecoration
+                                                                .lineThrough,
+                                                        color: CupertinoColors
+                                                            .systemGrey)
+                                                    : TextStyle(
+                                                        color: Color.fromARGB(
+                                                            255,
+                                                            241,
+                                                            118,
+                                                            109)))
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(4.0),
+                                        child: Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              10, 0, 8, 0),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                  child: _specialCharIsPresent
+                                                      ? Icon(
+                                                          Icons.check,
+                                                          color: CupertinoColors
+                                                              .systemGrey2,
+                                                        )
+                                                      : Icon(
+                                                          Icons.check,
+                                                          color: CupertinoColors
+                                                              .systemGrey6,
+                                                        )),
+                                              Text(
+                                                  '  Must have special characters',
+                                                  style: _specialCharIsPresent
+                                                      ? TextStyle(
+                                                          decoration:
+                                                              TextDecoration
+                                                                  .lineThrough,
+                                                          color: CupertinoColors
+                                                              .systemGrey)
+                                                      : TextStyle(
+                                                          color: Color.fromARGB(
+                                                              255,
+                                                              241,
+                                                              118,
+                                                              109)))
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            4, 4, 4, 8),
+                                        child: Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              10, 0, 8, 0),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                  child: _capitalLetterIsPresent
+                                                      ? Icon(
+                                                          Icons.check,
+                                                          color: CupertinoColors
+                                                              .systemGrey2,
+                                                        )
+                                                      : Icon(
+                                                          Icons.check,
+                                                          color: CupertinoColors
+                                                              .systemGrey6,
+                                                        )),
+                                              Text(
+                                                  '  Must have a capital letter',
+                                                  style: _capitalLetterIsPresent
+                                                      ? TextStyle(
+                                                          decoration:
+                                                              TextDecoration
+                                                                  .lineThrough,
+                                                          color: CupertinoColors
+                                                              .systemGrey)
+                                                      : TextStyle(
+                                                          color: Color.fromARGB(
+                                                              255,
+                                                              241,
+                                                              118,
+                                                              109)))
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ]),
+                              ),
+                              SizedBox(
+                                width: 20,
+                              ),
+                            ],
+                          )),
+                    ),
+                  ],
+                  clipBehavior: Clip.none,
                 ),
                 Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
                 ),
                 _getAgreement(),
                 Padding(padding: EdgeInsets.all(20)),
-                Container(
-                  width: double.infinity,
-                  height: 64,
-                  padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-                  child: button(
-                    "sign up",
-                    onPressed: _isFormValid()
-                        ? () {
-                            if (!isValidEmail(_email)) {
-                              showErrorDialog(context, "invalid email",
-                                  "please enter a valid email address.");
-                            } else if (_passwordController1.text !=
-                                _passwordController2.text) {
-                              showErrorDialog(context, "uhm...",
-                                  "the passwords you entered don't match");
-                            } else if (_passwordStrength <
-                                kPasswordStrengthThreshold) {
-                              showErrorDialog(context, "weak password",
-                                  "the password you have chosen is too simple, please choose another one");
-                            } else {
-                              _config.setVolatilePassword(
-                                  _passwordController1.text);
-                              _config.setEmail(_email);
-                              UserService.instance.getOtt(context, _email);
-                            }
-                          }
-                        : null,
-                    fontSize: 18,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: CupertinoButton(
+                      color: Colors.black,
+                      onPressed: () {},
+                      // onPressed: _isFormValid()
+                      //     ? () {
+                      //         if (!isValidEmail(_email)) {
+                      //           showErrorDialog(context, "invalid email",
+                      //               "please enter a valid email address.");
+                      //         } else if (_passwordController1.text !=
+                      //             _passwordController2.text) {
+                      //           showErrorDialog(context, "uhm...",
+                      //               "the passwords you entered don't match");
+                      //         } else if (_passwordStrength <
+                      //             kPasswordStrengthThreshold) {
+                      //           showErrorDialog(context, "weak password",
+                      //               "the password you have chosen is too simple, please choose another one");
+                      //         } else {
+                      //           _config.setVolatilePassword(
+                      //               _passwordController1.text);
+                      //           _config.setEmail(_email);
+                      //           UserService.instance.getOtt(context, _email);
+                      //         }
+                      //       }
+                      //     : null,
+                      child: Text('Create Account'),
+                    ),
                   ),
                 ),
               ],
@@ -272,6 +516,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         children: [
           Checkbox(
               value: _hasAgreedToTOS,
+              activeColor: Colors.black,
               onChanged: (value) {
                 setState(() {
                   _hasAgreedToTOS = value;
@@ -287,7 +532,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   TextSpan(
                     text: "terms of service",
                     style: TextStyle(
-                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
                       fontFamily: 'Ubuntu',
                     ),
                     recognizer: TapGestureRecognizer()
@@ -305,7 +550,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   TextSpan(
                     text: "privacy policy",
                     style: TextStyle(
-                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
                       fontFamily: 'Ubuntu',
                     ),
                     recognizer: TapGestureRecognizer()
@@ -324,8 +569,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 style: TextStyle(
                   height: 1.25,
                   fontSize: 12,
-                  fontFamily: 'Ubuntu',
-                  color: Colors.white70,
+                  fontFamily: 'inter',
+                  color: Colors.black,
                 ),
               ),
               textAlign: TextAlign.left,
@@ -348,6 +593,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         children: [
           Checkbox(
               value: _hasAgreedToE2E,
+              activeColor: Colors.black,
               onChanged: (value) {
                 setState(() {
                   _hasAgreedToE2E = value;
@@ -364,7 +610,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   TextSpan(
                     text: "end-to-end encrypted",
                     style: TextStyle(
-                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
                       fontFamily: 'Ubuntu',
                     ),
                     recognizer: TapGestureRecognizer()
@@ -382,11 +628,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   TextSpan(text: " with ente"),
                 ],
                 style: TextStyle(
-                  height: 1.5,
-                  fontSize: 12,
-                  fontFamily: 'Ubuntu',
-                  color: Colors.white70,
-                ),
+                    height: 1.25,
+                    fontSize: 12,
+                    fontFamily: 'inter',
+                    color: Colors.black),
               ),
               textAlign: TextAlign.left,
             ),
@@ -403,6 +648,31 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         _passwordController2.text.isNotEmpty &&
         _hasAgreedToTOS &&
         _hasAgreedToE2E;
+  }
+
+  void validatePassword(String password) {
+    var len = password.length;
+    _lenghtIsValid = true;
+    _specialCharIsPresent = true;
+    _capitalLetterIsPresent = true;
+    _passwordIsValid = true;
+    if (len < 9) {
+      _passwordIsValid = false;
+      _lenghtIsValid = false;
+    }
+    if (!RegExp(r"[!@#$%^&*()_+\-=\[\]{};':\\|,.<>\/?]+").hasMatch(password)) {
+      _specialCharIsPresent = false;
+      _passwordIsValid = false;
+    }
+    if (!RegExp(r"(.*[A-Z].*)").hasMatch(password)) {
+      _capitalLetterIsPresent = false;
+      _passwordIsValid = false;
+    }
+    if (_passwordIsValid) {
+      _password = password;
+    } else {
+      _password = null;
+    }
   }
 }
 

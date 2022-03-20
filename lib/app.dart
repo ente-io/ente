@@ -64,6 +64,8 @@ final lightThemeData = ThemeData(
       iconTheme: IconThemeData(color: Colors.black)),
   //https://api.flutter.dev/flutter/material/TextTheme-class.html
   textTheme: TextTheme().copyWith(
+      headline4: TextStyle(
+          color: Colors.black, fontSize: 30, fontWeight: FontWeight.w600),
       headline6: TextStyle(
           color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
       subtitle1: TextStyle(
@@ -176,6 +178,13 @@ final darkThemeData = ThemeData(
     ),
   ),
 );
+
+// class AppColors {
+//   final green = const Color(0xFF58BB54);
+//   const AppColors();
+// }
+
+// const colors = AppColors();
 
 class EnteApp extends StatefulWidget {
   static const _homeWidget = HomeWidget();
