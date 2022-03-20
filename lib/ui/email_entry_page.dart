@@ -298,145 +298,169 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           bottom: -48,
                           child: Row(
                             children: [
+                              // SizedBox(
+                              //   width: 20, //hardcoded
+                              // ),
                               SizedBox(
-                                width: 20, //hardcoded
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: Theme.of(context).hintColor,
-                                      width: 0.5),
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.zero,
-                                    topRight: Radius.zero,
-                                    bottomLeft: Radius.circular(5),
-                                    bottomRight: Radius.circular(5),
+                                width: MediaQuery.of(context).size.width,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Theme.of(context).hintColor,
+                                          width: 0.5),
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.zero,
+                                        topRight: Radius.zero,
+                                        bottomLeft: Radius.circular(5),
+                                        bottomRight: Radius.circular(5),
+                                      ),
+                                      color: Theme.of(context)
+                                          .dialogTheme
+                                          .backgroundColor,
+                                    ),
+                                    //width: MediaQuery.of(context).size.width,
+                                    width: double.infinity,
+                                    child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                4.0, 8, 4.0, 4.0),
+                                            child: Row(
+                                              children: [
+                                                Padding(
+                                                    padding: const EdgeInsets
+                                                        .fromLTRB(10, 0, 8, 0),
+                                                    child: _lenghtIsValid
+                                                        ? Icon(
+                                                            Icons.check,
+                                                            color:
+                                                                CupertinoColors
+                                                                    .systemGrey2,
+                                                          )
+                                                        : Icon(
+                                                            Icons.check,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .dialogTheme
+                                                                .backgroundColor,
+                                                          )),
+                                                Text(
+                                                    'Must be minimum 9 characters long',
+                                                    style: _lenghtIsValid
+                                                        ? TextStyle(
+                                                            decoration:
+                                                                TextDecoration
+                                                                    .lineThrough,
+                                                            color:
+                                                                CupertinoColors
+                                                                    .systemGrey)
+                                                        : TextStyle(
+                                                            color:
+                                                                Color.fromARGB(
+                                                                    255,
+                                                                    241,
+                                                                    118,
+                                                                    109)))
+                                              ],
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(4.0),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      10, 0, 8, 0),
+                                              child: Row(
+                                                children: [
+                                                  Container(
+                                                      child:
+                                                          _specialCharIsPresent
+                                                              ? Icon(
+                                                                  Icons.check,
+                                                                  color: CupertinoColors
+                                                                      .systemGrey2,
+                                                                )
+                                                              : Icon(
+                                                                  Icons.check,
+                                                                  color: Theme.of(
+                                                                          context)
+                                                                      .dialogTheme
+                                                                      .backgroundColor,
+                                                                )),
+                                                  Text(
+                                                      '  Must have special characters',
+                                                      style: _specialCharIsPresent
+                                                          ? TextStyle(
+                                                              decoration:
+                                                                  TextDecoration
+                                                                      .lineThrough,
+                                                              color:
+                                                                  CupertinoColors
+                                                                      .systemGrey)
+                                                          : TextStyle(
+                                                              color: Color
+                                                                  .fromARGB(
+                                                                      255,
+                                                                      241,
+                                                                      118,
+                                                                      109)))
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                4, 4, 4, 8),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      10, 0, 8, 0),
+                                              child: Row(
+                                                children: [
+                                                  Container(
+                                                      child:
+                                                          _capitalLetterIsPresent
+                                                              ? Icon(
+                                                                  Icons.check,
+                                                                  color: CupertinoColors
+                                                                      .systemGrey2,
+                                                                )
+                                                              : Icon(
+                                                                  Icons.check,
+                                                                  color: Theme.of(
+                                                                          context)
+                                                                      .dialogTheme
+                                                                      .backgroundColor,
+                                                                )),
+                                                  Text(
+                                                      '  Must have a capital letter',
+                                                      style: _capitalLetterIsPresent
+                                                          ? TextStyle(
+                                                              decoration:
+                                                                  TextDecoration
+                                                                      .lineThrough,
+                                                              color:
+                                                                  CupertinoColors
+                                                                      .systemGrey)
+                                                          : TextStyle(
+                                                              color: Color
+                                                                  .fromARGB(
+                                                                      255,
+                                                                      241,
+                                                                      118,
+                                                                      109)))
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ]),
                                   ),
-                                  color: Theme.of(context)
-                                      .dialogTheme
-                                      .backgroundColor,
                                 ),
-                                width: MediaQuery.of(context).size.width * 0.9,
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            4.0, 8, 4.0, 4.0),
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                                padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                        10, 0, 8, 0),
-                                                child: _lenghtIsValid
-                                                    ? Icon(
-                                                        Icons.check,
-                                                        color: CupertinoColors
-                                                            .systemGrey2,
-                                                      )
-                                                    : Icon(
-                                                        Icons.check,
-                                                        color: CupertinoColors
-                                                            .systemGrey6,
-                                                      )),
-                                            Text(
-                                                'Must be minimum 9 characters long',
-                                                style: _lenghtIsValid
-                                                    ? TextStyle(
-                                                        decoration:
-                                                            TextDecoration
-                                                                .lineThrough,
-                                                        color: CupertinoColors
-                                                            .systemGrey)
-                                                    : TextStyle(
-                                                        color: Color.fromARGB(
-                                                            255,
-                                                            241,
-                                                            118,
-                                                            109)))
-                                          ],
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(4.0),
-                                        child: Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              10, 0, 8, 0),
-                                          child: Row(
-                                            children: [
-                                              Container(
-                                                  child: _specialCharIsPresent
-                                                      ? Icon(
-                                                          Icons.check,
-                                                          color: CupertinoColors
-                                                              .systemGrey2,
-                                                        )
-                                                      : Icon(
-                                                          Icons.check,
-                                                          color: CupertinoColors
-                                                              .systemGrey6,
-                                                        )),
-                                              Text(
-                                                  '  Must have special characters',
-                                                  style: _specialCharIsPresent
-                                                      ? TextStyle(
-                                                          decoration:
-                                                              TextDecoration
-                                                                  .lineThrough,
-                                                          color: CupertinoColors
-                                                              .systemGrey)
-                                                      : TextStyle(
-                                                          color: Color.fromARGB(
-                                                              255,
-                                                              241,
-                                                              118,
-                                                              109)))
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            4, 4, 4, 8),
-                                        child: Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              10, 0, 8, 0),
-                                          child: Row(
-                                            children: [
-                                              Container(
-                                                  child: _capitalLetterIsPresent
-                                                      ? Icon(
-                                                          Icons.check,
-                                                          color: CupertinoColors
-                                                              .systemGrey2,
-                                                        )
-                                                      : Icon(
-                                                          Icons.check,
-                                                          color: CupertinoColors
-                                                              .systemGrey6,
-                                                        )),
-                                              Text(
-                                                  '  Must have a capital letter',
-                                                  style: _capitalLetterIsPresent
-                                                      ? TextStyle(
-                                                          decoration:
-                                                              TextDecoration
-                                                                  .lineThrough,
-                                                          color: CupertinoColors
-                                                              .systemGrey)
-                                                      : TextStyle(
-                                                          color: Color.fromARGB(
-                                                              255,
-                                                              241,
-                                                              118,
-                                                              109)))
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ]),
                               ),
                               SizedBox(
                                 width: 20,
