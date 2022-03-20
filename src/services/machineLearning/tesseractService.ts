@@ -29,6 +29,14 @@ class TesseractService implements TextDetectionService {
         await this.tesseractWorker.load();
         await this.tesseractWorker.loadLanguage('eng');
         await this.tesseractWorker.initialize('eng');
+        await this.tesseractWorker.setParameters({
+            tessedit_char_whitelist:
+                '0123456789' +
+                'abcdefghijklmnopqrstuvwxyz' +
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
+                ' ',
+            preserve_interword_spaces: '1',
+        });
         console.log('loaded tesseract worker');
     }
 
