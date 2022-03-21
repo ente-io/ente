@@ -338,12 +338,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     } else {
       header = _headerWidget;
     }
-    final archivedCollectionIds =
-        CollectionsService.instance.getArchivedCollections();
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final importantPaths = Configuration.instance.getPathsToBackUp();
         final ownerID = Configuration.instance.getUserID();
+        final archivedCollectionIds =
+        CollectionsService.instance.getArchivedCollections();
         FileLoadResult result;
         if (importantPaths.isNotEmpty) {
           result = await FilesDB.instance.getImportantFiles(creationStartTime,
