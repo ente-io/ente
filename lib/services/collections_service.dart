@@ -319,7 +319,7 @@ class CollectionsService {
           header: Sodium.bin2base64(encryptedMMd.header),
         ),
       );
-      await _dio.post(
+      await _dio.put(
         Configuration.instance.getHttpEndpoint() +
             "/collections/magic-metadata",
         data: params,
