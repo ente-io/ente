@@ -327,6 +327,7 @@ class CollectionsService {
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
       );
       collection.mMdVersion = currentVersion + 1;
+      _cacheCollectionAttributes(collection);
       // trigger sync to fetch the latest collection state from server
       sync();
     } on DioError catch (e) {
