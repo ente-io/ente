@@ -1,25 +1,9 @@
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Container, Row } from 'react-bootstrap';
 import React from 'react';
 import ImportService from 'services/importService';
 import { getElectronFiles } from 'utils/upload';
 import constants from 'utils/strings/constants';
 import { IoIosArrowForward, IoMdClose } from 'react-icons/io';
-import styled from 'styled-components';
-
-const LeftAlignedDiv = styled.div`
-    float: left;
-    display: flex;
-    gap: 0.8em;
-    justify-content: center;
-    align-items: center;
-`;
-
-const RightAlignedDiv = styled.div`
-    float: right;
-    position: relative;
-    top: 50%;
-    transform: translateY(-50%);
-`;
 
 export default function FileTypeChoiceModal({
     setElectronFiles,
@@ -50,7 +34,12 @@ export default function FileTypeChoiceModal({
             aria-labelledby="contained-modal-title-vcenter"
             centered
             dialogClassName="file-type-choice-modal">
-            <Modal.Header onHide={hideFiletypeDialog}>
+            <Modal.Header
+                onHide={hideFiletypeDialog}
+                style={{
+                    borderBottom: 'none',
+                    height: '8vh',
+                }}>
                 <Modal.Title
                     id="contained-modal-title-vcenter"
                     style={{
@@ -68,38 +57,50 @@ export default function FileTypeChoiceModal({
             </Modal.Header>
             <Modal.Body
                 style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'space-around',
                     height: '20vh',
                 }}>
-                <Button
-                    variant="light"
-                    onClick={uploadFiles}
-                    style={{
-                        width: '90%',
-                    }}>
-                    <LeftAlignedDiv>
-                        <img src="/images/file-upload.svg"></img>
-                        <b>{constants.UPLOAD_FILES}</b>
-                    </LeftAlignedDiv>
-                    <RightAlignedDiv>
-                        <IoIosArrowForward />
-                    </RightAlignedDiv>
-                </Button>
-                <Button
-                    variant="light"
-                    onClick={uploadDirs}
-                    style={{ width: '90%' }}>
-                    <LeftAlignedDiv>
-                        <img src="/images/folder-upload.svg"></img>
-                        <b>{constants.UPLOAD_DIRS}</b>
-                    </LeftAlignedDiv>
-                    <RightAlignedDiv>
-                        <IoIosArrowForward />
-                    </RightAlignedDiv>
-                </Button>
+                <Container>
+                    <Row className="justify-content-md-center py-2">
+                        <Button
+                            variant="light"
+                            onClick={uploadFiles}
+                            style={{ width: '90%', height: '6vh' }}>
+                            <Container>
+                                <Row>
+                                    <div>
+                                        <img
+                                            src="/images/file-upload.svg"
+                                            className="mr-2"></img>
+                                        <b>{constants.UPLOAD_FILES}</b>
+                                    </div>
+                                    <div className="ml-auto d-flex align-items-center">
+                                        <IoIosArrowForward />
+                                    </div>
+                                </Row>
+                            </Container>
+                        </Button>
+                    </Row>
+                    <Row className="justify-content-md-center py-2">
+                        <Button
+                            variant="light"
+                            onClick={uploadDirs}
+                            style={{ width: '90%', height: '6vh' }}>
+                            <Container>
+                                <Row>
+                                    <div>
+                                        <img
+                                            src="/images/folder-upload.svg"
+                                            className="mr-2"></img>
+                                        <b>{constants.UPLOAD_DIRS}</b>
+                                    </div>
+                                    <div className="ml-auto d-flex align-items-center">
+                                        <IoIosArrowForward />
+                                    </div>
+                                </Row>
+                            </Container>
+                        </Button>
+                    </Row>
+                </Container>
             </Modal.Body>
         </Modal>
     );
