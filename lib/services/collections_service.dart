@@ -19,7 +19,9 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
+import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
@@ -27,7 +29,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectionsService {
   static final _collectionSyncTimeKeyPrefix = "collection_sync_time_";
-  static final _collectionsSyncTimeKey = "collections_sync_time";
+  static final _collectionsSyncTimeKey = "collections_sync_time_x";
 
   static const int kMaximumWriteAttempts = 5;
 
@@ -55,7 +57,10 @@ class CollectionsService {
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     final collections = await _db.getAllCollections();
+
     for (final collection in collections) {
+      _logger.info(
+          'collectionName ${collection.name} and metadata ${collection.mMdEncodedJson}');
       _cacheCollectionAttributes(collection);
     }
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
@@ -74,8 +79,7 @@ class CollectionsService {
         _prefs.getInt(_collectionsSyncTimeKey) ?? 0;
 
     // Might not have synced the collection fully
-    final fetchedCollections =
-        await _fetchCollections(lastCollectionUpdationTime ?? 0);
+    final fetchedCollections = await _fetchCollections(0);
     final updatedCollections = <Collection>[];
     int maxUpdationTime = lastCollectionUpdationTime;
     final ownerID = _config.getUserID();
@@ -125,6 +129,14 @@ class CollectionsService {
       }
     }
     return updatedCollections;
+  }
+
+  Set<int> getArchivedCollections() {
+    return _collectionIDToCollections.values
+        .toList()
+        .where((element) => element.isArchived())
+        .map((e) => e.id)
+        .toSet();
   }
 
   int getCollectionSyncTime(int collectionID) {
@@ -273,6 +285,60 @@ class CollectionsService {
     }
   }
 
+  Future<void> updateMagicMetadata(
+      Collection collection, Map<String, dynamic> newMetadataUpdate) async {
+    final int ownerID = Configuration.instance.getUserID();
+    try {
+      if (collection.owner.id != ownerID) {
+        throw AssertionError("cannot modify albums not owned by you");
+      }
+      // read the existing magic metadata and apply new updates to existing data
+      // current update is simple replace. This will be enhanced in the future,
+      // as required.
+      Map<String, dynamic> jsonToUpdate =
+          jsonDecode(collection.mMdEncodedJson ?? '{}');
+      newMetadataUpdate.forEach((key, value) {
+        jsonToUpdate[key] = value;
+      });
+
+      // update the local information so that it's reflected on UI
+      collection.mMdEncodedJson = jsonEncode(jsonToUpdate);
+      collection.magicMetadata = CollectionMagicMetadata.fromJson(jsonToUpdate);
+
+      final key = getCollectionKey(collection.id);
+      final encryptedMMd = await CryptoUtil.encryptChaCha(
+          utf8.encode(jsonEncode(jsonToUpdate)), key);
+      final params = UpdateMagicMetadataRequest(
+        id: collection.id,
+        magicMetadata: MetadataRequest(
+          version: ,
+          count: jsonToUpdate.length,
+          data: Sodium.bin2base64(encryptedMMd.encryptedData),
+          header: Sodium.bin2base64(encryptedMMd.header),
+        ),
+      );
+      await _dio.post(
+        Configuration.instance.getHttpEndpoint() +
+            "/collections/magic-metadata",
+        data: params,
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
+      collection.mMdVersion = collection.mMdVersion + 1;
+      // trigger sync to fetch the latest collection state from server
+      sync();
+    } on DioError catch (e) {
+      if (e.response != null && e.response.statusCode == 409) {
+        _logger.severe('collection magic data out of sync');
+        sync();
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to sync magic metadata", e, s);
+      rethrow;
+    }
+  }
+
   Future<void> createShareUrl(Collection collection) async {
     try {
       final response = await _dio.post(
@@ -361,8 +427,20 @@ class CollectionsService {
       final List<Collection> collections = [];
       if (response != null) {
         final c = response.data["collections"];
-        for (final collection in c) {
-          collections.add(Collection.fromMap(collection));
+        for (final collectionData in c) {
+          final collection = Collection.fromMap(collectionData);
+          if (collectionData['magicMetadata'] != null) {
+            final decryptionKey = _getDecryptedKey(collection);
+            final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+                Sodium.base642bin(collectionData['magicMetadata']['data']),
+                decryptionKey,
+                Sodium.base642bin(collectionData['magicMetadata']['header']));
+            collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
+            collection.mMdVersion = collectionData['magicMetadata']['version'];
+            collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
+                collection.mMdEncodedJson);
+          }
+          collections.add(collection);
         }
       }
       return collections;
@@ -408,7 +486,19 @@ class CollectionsService {
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
       );
       assert(response != null && response.data != null);
-      final collection = Collection.fromMap(response.data["collection"]);
+      final collectionData = response.data["collection"];
+      final collection = Collection.fromMap(collectionData);
+      if (collectionData['magicMetadata'] != null) {
+        final decryptionKey = _getDecryptedKey(collection);
+        final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+            Sodium.base642bin(collectionData['magicMetadata']['data']),
+            decryptionKey,
+            Sodium.base642bin(collectionData['magicMetadata']['header']));
+        collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
+        collection.mMdVersion = collectionData['magicMetadata']['version'];
+        collection.magicMetadata =
+            CollectionMagicMetadata.fromEncodedJson(collection.mMdEncodedJson);
+      }
       await _db.insert(List.from([collection]));
       _cacheCollectionAttributes(collection);
       return collection;

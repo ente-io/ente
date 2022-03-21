@@ -62,3 +62,30 @@ class PubMagicMetadata {
     );
   }
 }
+
+class CollectionMagicMetadata {
+  // 0 -> visible
+  // 1 -> archived
+  // 2 -> hidden etc?
+  int visibility;
+
+  CollectionMagicMetadata({this.visibility});
+
+  factory CollectionMagicMetadata.fromEncodedJson(String encodedJson) =>
+      CollectionMagicMetadata.fromJson(jsonDecode(encodedJson));
+
+  factory CollectionMagicMetadata.fromJson(dynamic json) => CollectionMagicMetadata.fromMap(json);
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map[kMagicKeyVisibility] = visibility;
+    return map;
+  }
+
+  factory CollectionMagicMetadata.fromMap(Map<String, dynamic> map) {
+    if (map == null) return null;
+    return CollectionMagicMetadata(
+      visibility: map[kMagicKeyVisibility] ?? kVisibilityVisible,
+    );
+  }
+}

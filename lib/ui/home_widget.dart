@@ -338,6 +338,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     } else {
       header = _headerWidget;
     }
+    final archivedCollectionIds =
+        CollectionsService.instance.getArchivedCollections();
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final importantPaths = Configuration.instance.getPathsToBackUp();
@@ -346,16 +348,22 @@ class _HomeWidgetState extends State<HomeWidget> {
         if (importantPaths.isNotEmpty) {
           result = await FilesDB.instance.getImportantFiles(creationStartTime,
               creationEndTime, ownerID, importantPaths.toList(),
-              limit: limit, asc: asc);
+              limit: limit,
+              asc: asc,
+              ignoredCollectionIDs: archivedCollectionIds);
         } else {
           if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
             result = await FilesDB.instance.getAllLocalAndUploadedFiles(
                 creationStartTime, creationEndTime, ownerID,
-                limit: limit, asc: asc);
+                limit: limit,
+                asc: asc,
+                ignoredCollectionIDs: archivedCollectionIds);
           } else {
             result = await FilesDB.instance.getAllUploadedFiles(
                 creationStartTime, creationEndTime, ownerID,
-                limit: limit, asc: asc);
+                limit: limit,
+                asc: asc,
+                ignoredCollectionIDs: archivedCollectionIds);
           }
         }
         // hide ignored files from home page UI

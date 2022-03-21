@@ -166,21 +166,37 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
-    if (widget.type == GalleryAppBarType.owned_collection &&
-        widget.collection.type == CollectionType.album) {
+    if (widget.type == GalleryAppBarType.owned_collection) {
       actions.add(PopupMenuButton(
         itemBuilder: (context) {
           final List<PopupMenuItem> items = [];
+          if (widget.collection.type == CollectionType.album) {
+            items.add(
+              PopupMenuItem(
+                value: 1,
+                child: Row(
+                  children: const [
+                    Icon(Icons.edit),
+                    Padding(
+                      padding: EdgeInsets.all(8),
+                    ),
+                    Text("rename"),
+                  ],
+                ),
+              ),
+            );
+          }
+          bool isArchived = widget.collection.isArchived();
           items.add(
             PopupMenuItem(
-              value: 1,
+              value: 2,
               child: Row(
-                children: const [
-                  Icon(Icons.edit),
+                children: [
+                  Icon(isArchived ? Icons.unarchive : Icons.archive),
                   Padding(
                     padding: EdgeInsets.all(8),
                   ),
-                  Text("rename"),
+                  Text(isArchived ? "unarchive" : "arvhive"),
                 ],
               ),
             ),
@@ -190,6 +206,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         onSelected: (value) async {
           if (value == 1) {
             await _renameAlbum(context);
+          }
+          if (value == 2) {
+            await changeCollectionVisiblity(
+                context,
+                widget.collection,
+                widget.collection.isArchived()
+                    ? kVisibilityVisible
+                    : kVisibilityArchive);
           }
         },
       ));
