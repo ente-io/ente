@@ -489,7 +489,8 @@ class CollectionItem extends StatelessWidget {
                   tag: "collection" + c.thumbnail.tag(),
                   child: ThumbnailWidget(
                     c.thumbnail,
-                    key: Key("collection" + c.thumbnail.tag()),
+                    shouldShowArchiveStatus: c.collection.isArchived(),
+                    key: Key("collection" + c.thumbnail.tag(),),
                   )),
               height: 140,
               width: 140,

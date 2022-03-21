@@ -21,6 +21,7 @@ class ThumbnailWidget extends StatefulWidget {
   final File file;
   final BoxFit fit;
   final bool shouldShowSyncStatus;
+  final bool shouldShowArchiveStatus;
   final bool shouldShowLivePhotoOverlay;
   final Duration diskLoadDeferDuration;
   final Duration serverLoadDeferDuration;
@@ -31,6 +32,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.fit = BoxFit.cover,
     this.shouldShowSyncStatus = true,
     this.shouldShowLivePhotoOverlay = false,
+    this.shouldShowArchiveStatus = false,
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
   }) : super(key: key ?? Key(file.tag()));
@@ -69,6 +71,18 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       child: Icon(
         Icons.wb_sunny_outlined,
         size: 14,
+        color: Colors.white.withOpacity(0.9),
+      ),
+    ),
+  );
+
+  static final kArchiveIconOverlay = Align(
+    alignment: Alignment.bottomRight,
+    child: Padding(
+      padding: const EdgeInsets.only(right: 8, bottom: 8),
+      child: Icon(
+        Icons.archive_outlined,
+        size: 42,
         color: Colors.white.withOpacity(0.9),
       ),
     ),
@@ -173,18 +187,22 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         content = image;
       }
     }
+    List<Widget> viewChildrens = [
+      loadingWidget,
+      AnimatedOpacity(
+        opacity: content == null ? 0 : 1.0,
+        duration: Duration(milliseconds: 200),
+        child: content,
+      ),
+      widget.shouldShowSyncStatus && widget.file.uploadedFileID == null
+          ? kUnsyncedIconOverlay
+          : getFileInfoContainer(widget.file),
+    ];
+    if (widget.shouldShowArchiveStatus) {
+      viewChildrens.add(kArchiveIconOverlay);
+    }
     return Stack(
-      children: [
-        loadingWidget,
-        AnimatedOpacity(
-          opacity: content == null ? 0 : 1.0,
-          duration: Duration(milliseconds: 200),
-          child: content,
-        ),
-        widget.shouldShowSyncStatus && widget.file.uploadedFileID == null
-            ? kUnsyncedIconOverlay
-            : getFileInfoContainer(widget.file),
-      ],
+      children: viewChildrens,
       fit: StackFit.expand,
     );
   }
