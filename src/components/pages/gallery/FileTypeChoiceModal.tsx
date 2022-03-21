@@ -16,6 +16,9 @@ const LeftAlignedDiv = styled.div`
 
 const RightAlignedDiv = styled.div`
     float: right;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
 `;
 
 export default function FileTypeChoiceModal({
@@ -78,7 +81,7 @@ export default function FileTypeChoiceModal({
                         width: '90%',
                     }}>
                     <LeftAlignedDiv>
-                        <img src="/images/file-upload.svg"></img>{' '}
+                        <img src="/images/file-upload.svg"></img>
                         <b>{constants.UPLOAD_FILES}</b>
                     </LeftAlignedDiv>
                     <RightAlignedDiv>
@@ -90,7 +93,7 @@ export default function FileTypeChoiceModal({
                     onClick={uploadDirs}
                     style={{ width: '90%' }}>
                     <LeftAlignedDiv>
-                        <img src="/images/folder-upload.svg"></img>{' '}
+                        <img src="/images/folder-upload.svg"></img>
                         <b>{constants.UPLOAD_DIRS}</b>
                     </LeftAlignedDiv>
                     <RightAlignedDiv>
