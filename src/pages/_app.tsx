@@ -519,6 +519,10 @@ const GlobalStyles = createGlobalStyle`
         cursor:pointer;
     }
 
+    .file-type-choice-modal{
+        width: 30vw;
+    }
+
 `;
 
 export const LogoImage = styled.img`

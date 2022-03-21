@@ -45,7 +45,8 @@ export default function FileTypeChoiceModal({
         <Modal
             show={showFiletypeModal}
             aria-labelledby="contained-modal-title-vcenter"
-            centered>
+            centered
+            dialogClassName="file-type-choice-modal">
             <Modal.Header onHide={hideFiletypeDialog}>
                 <Modal.Title
                     id="contained-modal-title-vcenter"
