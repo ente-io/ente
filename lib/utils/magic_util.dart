@@ -34,7 +34,7 @@ Future<void> changeVisibility(
   }
 }
 
-Future<void> changeCollectionVisiblity(
+Future<void> changeCollectionVisibility(
     BuildContext context, Collection collection, int newVisibility) async {
   final dialog = createProgressDialog(context,
       newVisibility == kVisibilityArchive ? "archiving..." : "unarchiving...");
