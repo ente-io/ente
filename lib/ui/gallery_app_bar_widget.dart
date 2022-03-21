@@ -196,7 +196,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   Padding(
                     padding: EdgeInsets.all(8),
                   ),
-                  Text(isArchived ? "unarchive" : "arvhive"),
+                  Text(isArchived ? "unarchive" : "archive"),
                 ],
               ),
             ),
@@ -208,7 +208,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             await _renameAlbum(context);
           }
           if (value == 2) {
-            await changeCollectionVisiblity(
+            await changeCollectionVisibility(
                 context,
                 widget.collection,
                 widget.collection.isArchived()
