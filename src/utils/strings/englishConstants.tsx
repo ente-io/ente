@@ -675,9 +675,9 @@ const englishConstants = {
     LIVE_PHOTO: 'this is a live photo',
     LIVE: 'LIVE',
     DOWNLOAD_UPLOAD_LOGS: 'debug logs',
-    CHOOSE_UPLOAD_TYPE: 'Choose Upload Type',
-    UPLOAD_FILES: 'Upload Files',
-    UPLOAD_DIRS: 'Upload Folders',
+    CHOOSE_UPLOAD_TYPE: 'Upload',
+    UPLOAD_FILES: 'File Upload',
+    UPLOAD_DIRS: 'Folder Upload',
 };
 
 export default englishConstants;

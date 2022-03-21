@@ -3,6 +3,20 @@ import React from 'react';
 import ImportService from 'services/importService';
 import { getElectronFiles } from 'utils/upload';
 import constants from 'utils/strings/constants';
+import { IoIosArrowForward, IoMdClose } from 'react-icons/io';
+import styled from 'styled-components';
+
+const LeftAlignedDiv = styled.div`
+    float: left;
+    display: flex;
+    gap: 0.8em;
+    justify-content: center;
+    align-items: center;
+`;
+
+const RightAlignedDiv = styled.div`
+    float: right;
+`;
 
 export default function FileTypeChoiceModal({
     setElectronFiles,
@@ -32,23 +46,55 @@ export default function FileTypeChoiceModal({
             show={showFiletypeModal}
             aria-labelledby="contained-modal-title-vcenter"
             centered>
-            <Modal.Header closeButton onHide={hideFiletypeDialog}>
-                <Modal.Title id="contained-modal-title-vcenter">
-                    {constants.CHOOSE_UPLOAD_TYPE}
+            <Modal.Header onHide={hideFiletypeDialog}>
+                <Modal.Title
+                    id="contained-modal-title-vcenter"
+                    style={{
+                        fontSize: '1.8em',
+                        marginLeft: '5%',
+                        color: 'white',
+                    }}>
+                    <b>{constants.CHOOSE_UPLOAD_TYPE}</b>
                 </Modal.Title>
+                <IoMdClose
+                    size={30}
+                    onClick={hideFiletypeDialog}
+                    style={{ cursor: 'pointer' }}
+                />
             </Modal.Header>
             <Modal.Body
                 style={{
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'space-around',
-                    height: '12vh',
+                    height: '20vh',
                 }}>
-                <Button variant="outline-success" onClick={uploadFiles}>
-                    {constants.UPLOAD_FILES}
+                <Button
+                    variant="light"
+                    onClick={uploadFiles}
+                    style={{
+                        width: '90%',
+                    }}>
+                    <LeftAlignedDiv>
+                        <img src="/images/file-upload.svg"></img>{' '}
+                        <b>{constants.UPLOAD_FILES}</b>
+                    </LeftAlignedDiv>
+                    <RightAlignedDiv>
+                        <IoIosArrowForward />
+                    </RightAlignedDiv>
                 </Button>
-                <Button variant="outline-success" onClick={uploadDirs}>
-                    {constants.UPLOAD_DIRS}
+                <Button
+                    variant="light"
+                    onClick={uploadDirs}
+                    style={{ width: '90%' }}>
+                    <LeftAlignedDiv>
+                        <img src="/images/folder-upload.svg"></img>{' '}
+                        <b>{constants.UPLOAD_DIRS}</b>
+                    </LeftAlignedDiv>
+                    <RightAlignedDiv>
+                        <IoIosArrowForward />
+                    </RightAlignedDiv>
                 </Button>
             </Modal.Body>
         </Modal>
