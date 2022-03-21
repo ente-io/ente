@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -59,8 +60,6 @@ class CollectionsService {
     final collections = await _db.getAllCollections();
 
     for (final collection in collections) {
-      _logger.info(
-          'collectionName ${collection.name} and metadata ${collection.mMdEncodedJson}');
       _cacheCollectionAttributes(collection);
     }
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
@@ -308,10 +307,13 @@ class CollectionsService {
       final key = getCollectionKey(collection.id);
       final encryptedMMd = await CryptoUtil.encryptChaCha(
           utf8.encode(jsonEncode(jsonToUpdate)), key);
+      // for required field, the json validator on golang doesn't treat 0 as valid
+      // value. Instead of changing version to ptr, decided to start version with 1.
+      int currentVersion = max(collection.mMdVersion, 1);
       final params = UpdateMagicMetadataRequest(
         id: collection.id,
         magicMetadata: MetadataRequest(
-          version: ,
+          version: currentVersion,
           count: jsonToUpdate.length,
           data: Sodium.bin2base64(encryptedMMd.encryptedData),
           header: Sodium.bin2base64(encryptedMMd.header),
@@ -324,7 +326,7 @@ class CollectionsService {
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
       );
-      collection.mMdVersion = collection.mMdVersion + 1;
+      collection.mMdVersion = currentVersion + 1;
       // trigger sync to fetch the latest collection state from server
       sync();
     } on DioError catch (e) {
