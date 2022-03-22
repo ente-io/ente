@@ -4,6 +4,8 @@ import ImportService from 'services/importService';
 import { getElectronFiles } from 'utils/upload';
 import constants from 'utils/strings/constants';
 import { IoIosArrowForward, IoMdClose } from 'react-icons/io';
+import FileUploadIcon from 'components/icons/FileUploadIcon';
+import FolderUploadIcon from 'components/icons/FolderUploadIcon';
 
 export default function FileTypeChoiceModal({
     setElectronFiles,
@@ -68,10 +70,10 @@ export default function FileTypeChoiceModal({
                             <Container>
                                 <Row>
                                     <div>
-                                        <img
-                                            src="/images/file-upload.svg"
-                                            className="mr-2"></img>
-                                        <b>{constants.UPLOAD_FILES}</b>
+                                        <FileUploadIcon />
+                                        <b className="ml-2">
+                                            {constants.UPLOAD_FILES}
+                                        </b>
                                     </div>
                                     <div className="ml-auto d-flex align-items-center">
                                         <IoIosArrowForward />
@@ -88,10 +90,10 @@ export default function FileTypeChoiceModal({
                             <Container>
                                 <Row>
                                     <div>
-                                        <img
-                                            src="/images/folder-upload.svg"
-                                            className="mr-2"></img>
-                                        <b>{constants.UPLOAD_DIRS}</b>
+                                        <FolderUploadIcon />
+                                        <b className="ml-2">
+                                            {constants.UPLOAD_DIRS}
+                                        </b>
                                     </div>
                                     <div className="ml-auto d-flex align-items-center">
                                         <IoIosArrowForward />
