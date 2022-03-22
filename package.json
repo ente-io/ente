@@ -60,7 +60,6 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
-    "@electron/remote": "^2.0.8",
     "@sentry/electron": "^2.5.1",
     "@types/mime": "^2.0.3",
     "@types/node": "^14.14.37",
