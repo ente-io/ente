@@ -5,7 +5,7 @@ import constants from 'utils/strings/constants';
 import { SetDialogMessage } from 'components/MessageDialog';
 import UploadProgress from './UploadProgress';
 
-import ChoiceModal from './ChoiceModal';
+import UploadStrategyChoiceModal from './UploadStrategyChoiceModal';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
 import { GalleryContext } from 'pages/gallery';
@@ -395,7 +395,7 @@ export default function Upload(props: Props) {
 
     return (
         <>
-            <ChoiceModal
+            <UploadStrategyChoiceModal
                 show={choiceModalView}
                 onHide={() => setChoiceModalView(false)}
                 uploadToSingleCollection={() =>

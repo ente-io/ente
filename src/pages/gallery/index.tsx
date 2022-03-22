@@ -106,7 +106,7 @@ import Collections from 'components/pages/gallery/Collections';
 import { VISIBILITY_STATE } from 'constants/file';
 import ToastNotification from 'components/ToastNotification';
 import { ElectronFile } from 'types/upload';
-import FileTypeChoiceModal from 'components/pages/gallery/FileTypeChoiceModal';
+import UploadTypeChoiceModal from 'components/pages/gallery/UploadTypeChoiceModal';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -209,7 +209,8 @@ export default function Gallery() {
     const clearNotificationAttributes = () => setNotificationAttributes(null);
 
     const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
-    const [showFiletypeModal, setShowFiletypeModal] = useState(false);
+    const [showUploadTypeChoiceModal, setShowUploadTypeChoiceModal] =
+        useState(false);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -680,12 +681,12 @@ export default function Gallery() {
                 <UploadButton
                     isFirstFetch={isFirstFetch}
                     openFileUploader={openFileUploader}
-                    setShowFiletypeModal={setShowFiletypeModal}
+                    setShowUploadTypeChoiceModal={setShowUploadTypeChoiceModal}
                 />
-                <FileTypeChoiceModal
+                <UploadTypeChoiceModal
                     setElectronFiles={setElectronFiles}
-                    showFiletypeModal={showFiletypeModal}
-                    setShowFiletypeModal={setShowFiletypeModal}
+                    showUploadTypeChoiceModal={showUploadTypeChoiceModal}
+                    setShowUploadTypeChoiceModal={setShowUploadTypeChoiceModal}
                 />
                 <PhotoFrame
                     files={files}

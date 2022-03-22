@@ -7,13 +7,13 @@ import { IoIosArrowForward, IoMdClose } from 'react-icons/io';
 import FileUploadIcon from 'components/icons/FileUploadIcon';
 import FolderUploadIcon from 'components/icons/FolderUploadIcon';
 
-export default function FileTypeChoiceModal({
+export default function UploadTypeChoiceModal({
     setElectronFiles,
-    showFiletypeModal,
-    setShowFiletypeModal,
+    showUploadTypeChoiceModal,
+    setShowUploadTypeChoiceModal,
 }) {
     const hideFiletypeDialog = () => {
-        setShowFiletypeModal(false);
+        setShowUploadTypeChoiceModal(false);
     };
 
     const uploadFiles = async () => {
@@ -32,7 +32,7 @@ export default function FileTypeChoiceModal({
 
     return (
         <Modal
-            show={showFiletypeModal}
+            show={showUploadTypeChoiceModal}
             aria-labelledby="contained-modal-title-vcenter"
             centered
             dialogClassName="file-type-choice-modal">

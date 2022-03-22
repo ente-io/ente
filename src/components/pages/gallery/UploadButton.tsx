@@ -18,14 +18,14 @@ const Wrapper = styled.div<{ isDisabled: boolean }>`
 function UploadButton({
     openFileUploader,
     isFirstFetch,
-    setShowFiletypeModal,
+    setShowUploadTypeChoiceModal,
 }) {
     return (
         <Wrapper
             onClick={
                 isElectron()
                     ? () => {
-                          setShowFiletypeModal(true);
+                          setShowUploadTypeChoiceModal(true);
                       }
                     : openFileUploader
             }
