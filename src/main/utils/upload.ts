@@ -1,28 +1,56 @@
-import ElectronStore from 'electron-store';
+import Store, { Schema } from 'electron-store';
 import path from 'path';
 import * as fs from 'promise-fs';
 import mime from 'mime';
-import { ENCRYPTION_CHUNK_SIZE } from '../../config';
+import { FILE_STREAM_CHUNK_SIZE } from '../../config';
 import { dialog } from '@electron/remote';
-import { ElectronFile } from '../types';
+import { ElectronFile, StoreType } from '../types';
 
-const store = new ElectronStore();
+const storeSchema: Schema<StoreType> = {
+    done: {
+        type: 'boolean',
+    },
+    filesPaths: {
+        type: 'array',
+        items: {
+            type: 'string',
+        },
+    },
+    collectionName: {
+        type: 'string',
+    },
+    collectionIDs: {
+        type: 'array',
+        items: {
+            type: 'number',
+        },
+    },
+};
 
-const getFilesFromDir = (dirPath: string) => {
+const store = new Store({
+    name: 'upload-status',
+    schema: storeSchema,
+});
+
+// https://stackoverflow.com/a/63111390
+const getAllFilePaths = async (dirPath: string) => {
+    if (!(await fs.stat(dirPath)).isDirectory()) {
+        return [dirPath];
+    }
+
     let files: string[] = [];
+    const filePaths = await fs.readdir(dirPath);
 
-    // https://stackoverflow.com/a/63111390
-    const getAllFilePaths = (dirPath: string) => {
-        fs.readdirSync(dirPath).forEach((filePath) => {
-            const absolute = path.join(dirPath, filePath);
-            if (fs.statSync(absolute).isDirectory())
-                return getAllFilePaths(absolute);
-            else return files.push(absolute);
-        });
-    };
+    for (const filePath of filePaths) {
+        const absolute = path.join(dirPath, filePath);
+        files = files.concat(await getAllFilePaths(absolute));
+    }
 
-    if (fs.statSync(dirPath).isDirectory()) getAllFilePaths(dirPath);
-    else files.push(dirPath);
+    return files;
+};
+
+const getFilesFromDir = async (dirPath: string) => {
+    const files: string[] = await getAllFilePaths(dirPath);
 
     return files;
 };
@@ -32,20 +60,19 @@ const getFileStream = async (filePath: string) => {
     let offset = 0;
     const readableStream = new ReadableStream<Uint8Array>({
         async pull(controller) {
-            let buff = new Uint8Array(ENCRYPTION_CHUNK_SIZE);
+            let buff = new Uint8Array(FILE_STREAM_CHUNK_SIZE);
 
             // original types were not working correctly
             const bytesRead = (await fs.read(
                 file,
                 buff,
                 0,
-                ENCRYPTION_CHUNK_SIZE,
+                FILE_STREAM_CHUNK_SIZE,
                 offset
             )) as unknown as number;
             offset += bytesRead;
             if (bytesRead === 0) {
                 controller.close();
-                offset = 0;
             } else {
                 controller.enqueue(buff);
             }
@@ -68,14 +95,14 @@ export async function showUploadDirsDialog() {
 
     let files: string[] = [];
     for (const dirPath of dir.filePaths) {
-        files = files.concat(getFilesFromDir(dirPath));
+        files = files.concat(await getFilesFromDir(dirPath));
     }
 
     return files;
 }
 
 export async function getElectronFile(filePath: string): Promise<ElectronFile> {
-    const fileStats = fs.statSync(filePath);
+    const fileStats = await fs.stat(filePath);
     return {
         path: filePath,
         name: path.basename(filePath),
@@ -85,14 +112,14 @@ export async function getElectronFile(filePath: string): Promise<ElectronFile> {
             mimeType: mime.getType(filePath),
             ext: path.extname(filePath).substring(1),
         },
-        createReadStream: async () => {
+        stream: async () => {
             return await getFileStream(filePath);
         },
-        toBlob: async () => {
+        blob: async () => {
             const blob = await fs.readFile(filePath);
             return new Blob([new Uint8Array(blob)]);
         },
-        toUInt8Array: async () => {
+        arrayBuffer: async () => {
             const blob = await fs.readFile(filePath);
             return new Uint8Array(blob);
         },
@@ -121,7 +148,7 @@ export const setToUploadFiles = (
     }
 };
 
-export const getToUploadFiles = () => {
+export const pendingToUploadFilePaths = () => {
     const filesPaths = store.get('filesPaths') as string[];
     const collectionName = store.get('collectionName') as string;
     const collectionIDs = store.get('collectionIDs') as number[];

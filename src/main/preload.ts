@@ -6,7 +6,7 @@ import {
     getElectronFile,
     showUploadFilesDialog,
     showUploadDirsDialog,
-    getToUploadFiles,
+    pendingToUploadFilePaths,
     setToUploadFiles,
 } from './utils/upload';
 
@@ -129,6 +129,6 @@ windowObject['ElectronAPIs'] = {
     getElectronFile,
     showUploadFilesDialog,
     showUploadDirsDialog,
-    getToUploadFiles,
+    pendingToUploadFilePaths,
     setToUploadFiles,
 };
