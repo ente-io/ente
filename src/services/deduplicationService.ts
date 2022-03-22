@@ -56,9 +56,16 @@ class DeduplicationService {
                 }
             }
 
+            if (missingFileIDs.length > 0) {
+                logError(
+                    new Error(`Missing files: ${missingFileIDs}`),
+                    'missing files'
+                );
+            }
+
             return result;
         } catch (e) {
-            logError(e, 'failed to get');
+            logError(e, 'failed to get duplicate files');
         }
     }
 
@@ -118,7 +125,7 @@ class DeduplicationService {
             );
             return (response.data as DuplicatesResponse).duplicates;
         } catch (e) {
-            logError(e, 'failed to get');
+            logError(e, 'failed to fetch duplicate file IDs');
         }
     }
 }
