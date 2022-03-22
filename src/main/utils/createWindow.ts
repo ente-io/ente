@@ -33,8 +33,6 @@ export function createWindow(): BrowserWindow {
 
     addAllowOriginHeader(mainWindow);
 
-    require('@electron/remote/main').enable(mainWindow.webContents);
-
     if (isDev) {
         splash.loadFile(`../../build/splash.html`);
         mainWindow.loadURL(PROD_HOST_URL);

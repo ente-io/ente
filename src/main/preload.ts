@@ -4,8 +4,6 @@ import * as electron from 'electron';
 import {
     getIfToUploadFilesExists,
     getElectronFile,
-    showUploadFilesDialog,
-    showUploadDirsDialog,
     pendingToUploadFilePaths,
     setToUploadFiles,
 } from './utils/upload';
@@ -106,6 +104,26 @@ const getExportRecord = async (filePath: string) => {
 const setExportRecord = async (filePath: string, data: string) => {
     const filepath = `${filePath}`;
     await fs.writeFile(filepath, data);
+};
+
+const showUploadFilesDialog = async () => {
+    try {
+        const filePaths = ipcRenderer.sendSync('show-upload-files-dialog');
+        return filePaths;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};
+
+const showUploadDirsDialog = async () => {
+    try {
+        const filePaths = ipcRenderer.sendSync('show-upload-dirs-dialog');
+        return filePaths;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
 };
 
 const windowObject: any = window;

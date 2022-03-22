@@ -3,7 +3,6 @@ import path from 'path';
 import * as fs from 'promise-fs';
 import mime from 'mime';
 import { FILE_STREAM_CHUNK_SIZE } from '../../config';
-import { dialog } from '@electron/remote';
 import { ElectronFile, StoreType } from '../types';
 
 const storeSchema: Schema<StoreType> = {
@@ -49,7 +48,7 @@ const getAllFilePaths = async (dirPath: string) => {
     return files;
 };
 
-const getFilesFromDir = async (dirPath: string) => {
+export const getFilesFromDir = async (dirPath: string) => {
     const files: string[] = await getAllFilePaths(dirPath);
 
     return files;
@@ -80,26 +79,6 @@ const getFileStream = async (filePath: string) => {
     });
     return readableStream;
 };
-
-export async function showUploadFilesDialog() {
-    const files = await dialog.showOpenDialog({
-        properties: ['openFile', 'multiSelections'],
-    });
-    return files.filePaths;
-}
-
-export async function showUploadDirsDialog() {
-    const dir = await dialog.showOpenDialog({
-        properties: ['openDirectory', 'multiSelections'],
-    });
-
-    let files: string[] = [];
-    for (const dirPath of dir.filePaths) {
-        files = files.concat(await getFilesFromDir(dirPath));
-    }
-
-    return files;
-}
 
 export async function getElectronFile(filePath: string): Promise<ElectronFile> {
     const fileStats = await fs.stat(filePath);

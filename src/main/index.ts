@@ -8,7 +8,6 @@ import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 import initSentry from './utils/sentry';
 import Store from 'electron-store';
 import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from '../config';
-require('@electron/remote/main').initialize();
 
 if (isDev) {
     const electronReload = require('electron-reload');
