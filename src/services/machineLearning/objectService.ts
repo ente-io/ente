@@ -40,7 +40,10 @@ class ObjectService {
             fileContext
         );
         const objectDetections =
-            await syncContext.objectDetectionService.detectObjects(imageBitmap);
+            await syncContext.objectDetectionService.detectObjects(
+                imageBitmap,
+                syncContext.config.objectDetection.minScore
+            );
         // console.log('3 TF Memory stats: ', tf.memory());
         // TODO: reenable faces filtering based on width
         const detectedObjects = objectDetections?.map((detection) => {

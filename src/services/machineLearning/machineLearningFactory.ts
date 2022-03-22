@@ -172,10 +172,10 @@ export class LocalMLSyncContext implements MLSyncContext {
         );
 
         this.objectDetectionService = MLFactory.getObjectDetectionService(
-            this.config.ObjectDetection.method
+            this.config.objectDetection.method
         );
         this.textDetectionService = MLFactory.getTextDetectionService(
-            this.config.TextDetection.method
+            this.config.textDetection.method
         );
 
         this.outOfSyncFiles = [];

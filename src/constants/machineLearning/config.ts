@@ -43,10 +43,14 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
         // maxDistanceInsideCluster: 0.4,
         generateDebugInfo: true,
     },
-    ObjectDetection: {
+    objectDetection: {
         method: 'SSDMobileNetV2',
+        minScore: 0.2,
     },
-    TextDetection: { method: 'Tesseract' },
+    textDetection: {
+        method: 'Tesseract',
+        minAccuracy: 75,
+    },
     // tsne: {
     //     samples: 200,
     //     dim: 2,
@@ -66,3 +70,5 @@ export const ML_SYNC_DOWNLOAD_TIMEOUT_MS = 300000;
 export const MAX_FACE_DISTANCE_PERCENT = Math.sqrt(2) / 100;
 
 export const MAX_ML_SYNC_ERROR_COUNT = 4;
+
+export const ML_DETECTION_TIMEOUT_MS = 30000;

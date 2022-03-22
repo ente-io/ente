@@ -14,6 +14,7 @@ import {
 import { ibExtractFaceImageFromCrop } from 'utils/machineLearning/faceCrop';
 import { FaceCropsRow, FaceImagesRow, ImageBitmapView } from './ImageViews';
 import ssdMobileNetV2Service from 'services/machineLearning/ssdMobileNetV2Service';
+import { DEFAULT_ML_SYNC_CONFIG } from 'constants/machineLearning/config';
 
 interface MLFileDebugViewProps {
     file: File;
@@ -94,7 +95,8 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             console.log('detectedFaces: ', faceDetections.length);
 
             const objectDetections = await ssdMobileNetV2Service.detectObjects(
-                imageBitmap
+                imageBitmap,
+                DEFAULT_ML_SYNC_CONFIG.objectDetection.minScore
             );
             console.log('detectedObjects: ', objectDetections);
 

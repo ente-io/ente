@@ -25,11 +25,15 @@ import { MLFactory } from './machineLearningFactory';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
 import { CustomError, parseServerError } from 'utils/error';
-import { MAX_ML_SYNC_ERROR_COUNT } from 'constants/machineLearning/config';
+import {
+    MAX_ML_SYNC_ERROR_COUNT,
+    ML_DETECTION_TIMEOUT_MS,
+} from 'constants/machineLearning/config';
 import FaceService from './faceService';
 import PeopleService from './peopleService';
 import ObjectService from './objectService';
 import TextService from './textService';
+import { promiseWithTimeout } from 'utils/common/promiseTimeout';
 class MachineLearningService {
     private initialized = false;
     // private faceDetectionService: FaceDetectionService;
@@ -382,7 +386,9 @@ class MachineLearningService {
         localFile?: globalThis.File
     ) {
         const fileContext: MLSyncFileContext = { enteFile, localFile };
-        fileContext.oldMlFile = await this.getMLFileData(enteFile.id);
+        const oldMlFile = (fileContext.oldMlFile = await this.getMLFileData(
+            enteFile.id
+        ));
         if (
             fileContext.oldMlFile?.mlVersion === syncContext.config.mlVersion
             // TODO: reset mlversion of all files when user changes image source
@@ -396,34 +402,49 @@ class MachineLearningService {
         } else if (fileContext.oldMlFile?.mlVersion) {
             newMlFile.mlVersion = fileContext.oldMlFile.mlVersion;
         }
+        try {
+            await FaceService.syncFileFaceDetections(syncContext, fileContext);
 
-        await FaceService.syncFileFaceDetections(syncContext, fileContext);
+            if (newMlFile.faces && newMlFile.faces.length > 0) {
+                await FaceService.syncFileFaceCrops(syncContext, fileContext);
 
-        if (newMlFile.faces && newMlFile.faces.length > 0) {
-            await FaceService.syncFileFaceCrops(syncContext, fileContext);
+                await FaceService.syncFileFaceAlignments(
+                    syncContext,
+                    fileContext
+                );
 
-            await FaceService.syncFileFaceAlignments(syncContext, fileContext);
+                await FaceService.syncFileFaceEmbeddings(
+                    syncContext,
+                    fileContext
+                );
+            }
 
-            await FaceService.syncFileFaceEmbeddings(syncContext, fileContext);
+            await ObjectService.syncFileObjectDetections(
+                syncContext,
+                fileContext
+            );
+
+            await promiseWithTimeout(
+                TextService.syncFileTextDetections(syncContext, fileContext),
+                ML_DETECTION_TIMEOUT_MS
+            );
+        } catch (e) {
+            newMlFile.mlVersion = oldMlFile.mlVersion;
+            throw e;
+        } finally {
+            fileContext.tfImage && fileContext.tfImage.dispose();
+            fileContext.imageBitmap && fileContext.imageBitmap.close();
+            // console.log('8 TF Memory stats: ', tf.memory());
+            newMlFile.errorCount = 0;
+            newMlFile.lastErrorMessage = undefined;
+            await this.persistMLFileData(syncContext, newMlFile);
+
+            // TODO: enable once faceId changes go in
+            // await removeOldFaceCrops(
+            //     fileContext.oldMlFile,
+            //     fileContext.newMlFile
+            // );
         }
-
-        await ObjectService.syncFileObjectDetections(syncContext, fileContext);
-
-        await TextService.syncFileTextDetections(syncContext, fileContext);
-
-        fileContext.tfImage && fileContext.tfImage.dispose();
-        fileContext.imageBitmap && fileContext.imageBitmap.close();
-        // console.log('8 TF Memory stats: ', tf.memory());
-
-        newMlFile.errorCount = 0;
-        newMlFile.lastErrorMessage = undefined;
-        await this.persistMLFileData(syncContext, newMlFile);
-
-        // TODO: enable once faceId changes go in
-        // await removeOldFaceCrops(
-        //     fileContext.oldMlFile,
-        //     fileContext.newMlFile
-        // );
 
         return newMlFile;
     }

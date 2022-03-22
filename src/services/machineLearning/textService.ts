@@ -42,12 +42,15 @@ class TextService {
                 )
             );
 
-        const detectedText: DetectedText[] = textDetections.data.words.map(
-            ({ bbox, confidence, text }) => ({
+        const detectedText: DetectedText[] = textDetections.data.words
+            .filter(
+                ({ confidence }) =>
+                    confidence >= syncContext.config.textDetection.minAccuracy
+            )
+            .map(({ bbox, confidence, text }) => ({
                 fileID: fileContext.enteFile.id,
                 detection: { bbox, confidence, word: text },
-            })
-        );
+            }));
         newMlFile.text = detectedText;
         console.log(
             '[MLService] Detected text: ',

@@ -40,10 +40,17 @@ class SSDMobileNetV2 implements ObjectDetectionService {
         return this.ssdMobileNetV2Model;
     }
 
-    public async detectObjects(image: ImageBitmap): Promise<ObjectDetection[]> {
+    public async detectObjects(
+        image: ImageBitmap,
+        minScore?: number
+    ): Promise<ObjectDetection[]> {
         const ssdMobileNetV2Model = await this.getSSDMobileNetV2Model();
         const tfImage = tf.browser.fromPixels(image);
-        const detections = await ssdMobileNetV2Model.detect(tfImage);
+        const detections = await ssdMobileNetV2Model.detect(
+            tfImage,
+            undefined,
+            minScore
+        );
         return detections;
     }
 

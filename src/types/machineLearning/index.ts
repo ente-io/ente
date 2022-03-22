@@ -246,10 +246,12 @@ export interface FaceDetectionConfig {
 
 export interface ObjectDetectionConfig {
     method: ObjectDetectionMethod;
+    minScore: number;
 }
 
 export interface TextDetectionConfig {
     method: TextDetectionMethod;
+    minAccuracy: number;
 }
 
 export interface FaceCropConfig {
@@ -295,8 +297,8 @@ export interface MLSyncConfig extends Config {
     faceAlignment: FaceAlignmentConfig;
     faceEmbedding: FaceEmbeddingConfig;
     faceClustering: FaceClusteringConfig;
-    ObjectDetection: ObjectDetectionConfig;
-    TextDetection: TextDetectionConfig;
+    objectDetection: ObjectDetectionConfig;
+    textDetection: TextDetectionConfig;
     tsne?: TSNEConfig;
     mlVersion: number;
 }
@@ -378,7 +380,10 @@ export interface FaceDetectionService {
 export interface ObjectDetectionService {
     method: Versioned<ObjectDetectionMethod>;
     // init(): Promise<void>;
-    detectObjects(image: ImageBitmap): Promise<ObjectDetection[]>;
+    detectObjects(
+        image: ImageBitmap,
+        minScore?: number
+    ): Promise<ObjectDetection[]>;
     dispose(): Promise<void>;
 }
 
