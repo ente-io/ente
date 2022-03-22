@@ -34,7 +34,7 @@ export async function generateThumbnail(
         let canvas = document.createElement('canvas');
         let thumbnail: Uint8Array;
         if (!(file instanceof File)) {
-            file = new File([await file.toBlob()], file.name);
+            file = new File([await file.blob()], file.name);
         }
         try {
             if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {

@@ -150,7 +150,7 @@ export default function Upload(props: Props) {
     const uploadFailedFiles = async () => {
         try {
             const { files, collectionName, collectionIDs } =
-                await ImportService.getToUploadFiles();
+                await ImportService.getPendingUploads();
 
             toUploadFiles = files;
 

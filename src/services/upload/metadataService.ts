@@ -34,7 +34,7 @@ export async function extractMetadata(
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
         if (!(receivedFile instanceof File)) {
             receivedFile = new File(
-                [await receivedFile.toBlob()],
+                [await receivedFile.blob()],
                 receivedFile.name,
                 {
                     lastModified: receivedFile.lastModified,
@@ -81,7 +81,7 @@ export async function parseMetadataJSON(
     try {
         if (!(receivedFile instanceof File)) {
             receivedFile = new File(
-                [await receivedFile.toBlob()],
+                [await receivedFile.blob()],
                 receivedFile.name
             );
         }

@@ -49,7 +49,7 @@ export async function getElectronFileStream(
 ) {
     const chunkCount = Math.ceil(file.size / chunkSize);
     return {
-        stream: await file.createReadStream(),
+        stream: await file.stream(),
         chunkCount,
     };
 }

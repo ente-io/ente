@@ -82,12 +82,12 @@ export async function readLivePhoto(
     const image =
         livePhotoAssets.image instanceof File
             ? await getUint8ArrayView(reader, livePhotoAssets.image)
-            : await livePhotoAssets.image.toUInt8Array();
+            : await livePhotoAssets.image.arrayBuffer();
 
     const video =
         livePhotoAssets.video instanceof File
             ? await getUint8ArrayView(reader, livePhotoAssets.video)
-            : await livePhotoAssets.video.toUInt8Array();
+            : await livePhotoAssets.video.arrayBuffer();
 
     return {
         filedata: await encodeMotionPhoto({

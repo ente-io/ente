@@ -42,10 +42,10 @@ class ImportService {
         }
     }
 
-    async getToUploadFiles() {
+    async getPendingUploads() {
         if (this.allElectronAPIsExist) {
             const { filesPaths, collectionName, collectionIDs } =
-                this.ElectronAPIs.getToUploadFiles();
+                this.ElectronAPIs.pendingToUploadFilePaths();
             const files = await getElectronFiles(filesPaths);
             return {
                 files,

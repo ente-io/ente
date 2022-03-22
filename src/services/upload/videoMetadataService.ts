@@ -6,9 +6,8 @@ import { logError } from 'utils/sentry';
 export async function getVideoMetadata(file: File | ElectronFile) {
     let videoMetadata = NULL_EXTRACTED_METADATA;
     if (!(file instanceof File)) {
-        file = new File([await file.toBlob()], file.name, {
+        file = new File([await file.blob()], file.name, {
             lastModified: file.lastModified,
-            type: file.type.mimeType,
         });
     }
     try {

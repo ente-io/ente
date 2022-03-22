@@ -76,9 +76,9 @@ export interface ElectronFile {
         mimeType: string;
         ext: string;
     };
-    createReadStream: () => Promise<ReadableStream<Uint8Array>>;
-    toBlob: () => Promise<Blob>;
-    toUInt8Array: () => Promise<Uint8Array>;
+    stream: () => Promise<ReadableStream<Uint8Array>>;
+    blob: () => Promise<Blob>;
+    arrayBuffer: () => Promise<Uint8Array>;
 }
 
 export interface UploadAsset {
