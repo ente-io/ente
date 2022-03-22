@@ -36,7 +36,7 @@ export function createWindow(): BrowserWindow {
     require('@electron/remote/main').enable(mainWindow.webContents);
 
     if (isDev) {
-        splash.loadFile(`../build/splash.html`);
+        splash.loadFile(`../../build/splash.html`);
         mainWindow.loadURL(PROD_HOST_URL);
         // Open the DevTools.
         mainWindow.webContents.openDevTools();
@@ -50,7 +50,7 @@ export function createWindow(): BrowserWindow {
         splash.close();
         mainWindow.show();
         isDev
-            ? mainWindow.loadFile(`../build/error.html`)
+            ? mainWindow.loadFile(`../../build/error.html`)
             : splash.loadURL(
                   `file://${path.join(process.resourcesPath, 'error.html')}`
               );
