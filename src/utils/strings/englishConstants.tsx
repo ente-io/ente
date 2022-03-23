@@ -684,10 +684,14 @@ const englishConstants = {
     LIVE_PHOTO: 'this is a live photo',
     LIVE: 'LIVE',
     DISABLE_PASSWORD: 'disable password lock',
-    DISABLE_PASSWORD_MESSAGE: 'are you sure that you want to disable the password lock?',
+    DISABLE_PASSWORD_MESSAGE:
+        'are you sure that you want to disable the password lock?',
     PASSWORD_LOCK: 'password lock',
     LOCK: 'lock',
     DOWNLOAD_UPLOAD_LOGS: 'debug logs',
+    DEDUPLICATE_FILES: 'deduplicate files',
+    NO_DUPLICATES_FOUND: "you've no duplicate files that can be cleared",
+    CLUB_BY_CAPTURE_TIME: 'club by capture time',
 };
 
 export default englishConstants;

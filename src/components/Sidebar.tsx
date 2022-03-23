@@ -285,6 +285,13 @@ export default function Sidebar(props: Props) {
                     }}>
                     {constants.UPDATE_EMAIL}
                 </LinkButton>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => {
+                        router.push(PAGES.DEDUPLICATE);
+                    }}>
+                    {constants.DEDUPLICATE_FILES}
+                </LinkButton>
                 <Divider />
                 <>
                     <FixLargeThumbnails

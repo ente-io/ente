@@ -62,10 +62,10 @@ interface Props {
     ) => void;
     selected: SelectedState;
     isFirstLoad;
-    openFileUploader;
+    openFileUploader?;
     isInSearchMode: boolean;
-    search: Search;
-    setSearchStats: setSearchStats;
+    search?: Search;
+    setSearchStats?: setSearchStats;
     deleted?: number[];
     activeCollection: number;
     isSharedCollection: boolean;
@@ -147,7 +147,7 @@ const PhotoFrame = ({
                 timeTaken: (Date.now() - startTime) / 1000,
             });
         }
-        if (search.fileIndex || search.fileIndex === 0) {
+        if (search?.fileIndex || search?.fileIndex === 0) {
             const filteredDataIdx = filteredData.findIndex(
                 (data) => data.dataIndex === search.fileIndex
             );
@@ -186,7 +186,7 @@ const PhotoFrame = ({
                     return false;
                 }
                 if (
-                    search.date &&
+                    search?.date &&
                     !isSameDayAnyYear(search.date)(
                         new Date(item.metadata.creationTime / 1000)
                     )
@@ -194,7 +194,7 @@ const PhotoFrame = ({
                     return false;
                 }
                 if (
-                    search.location &&
+                    search?.location &&
                     !isInsideBox(item.metadata, search.location)
                 ) {
                     return false;

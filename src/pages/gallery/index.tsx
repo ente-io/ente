@@ -121,7 +121,7 @@ const AlertContainer = styled.div`
     text-align: center;
 `;
 
-const defaultGalleryContext: GalleryContextType = {
+export const defaultGalleryContext: GalleryContextType = {
     thumbs: new Map(),
     files: new Map(),
     showPlanSelectorModal: () => null,
