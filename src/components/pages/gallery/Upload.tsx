@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { syncCollections, createAlbum } from 'services/collectionService';
 import constants from 'utils/strings/constants';
@@ -28,7 +28,7 @@ const FIRST_ALBUM_NAME = 'My First Album';
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setBannerMessage: (message: string | JSX.Element) => void;
-    acceptedFiles: File[] | ElectronFile[];
+    acceptedFiles: File[];
     closeCollectionSelector: () => void;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -75,7 +75,7 @@ export default function Upload(props: Props) {
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
 
-    let toUploadFiles: File[] | ElectronFile[];
+    const toUploadFiles = useRef<File[] | ElectronFile[]>(null);
 
     useEffect(() => {
         UploadManager.initUploader(
@@ -90,15 +90,14 @@ export default function Upload(props: Props) {
             },
             props.setFiles
         );
-    }, []);
 
-    useEffect(() => {
-        isElectron() &&
-            ImportService.getIfToUploadFilesExists().then((exists) => {
+        if (isElectron()) {
+            ImportService.hasPendingUploads().then((exists) => {
                 if (exists) {
                     uploadFailedFiles();
                 }
             });
+        }
     }, []);
 
     useEffect(() => {
@@ -116,10 +115,10 @@ export default function Upload(props: Props) {
             ) {
                 if (props.acceptedFiles?.length > 0) {
                     // File selection by drag and drop or selection of file.
-                    toUploadFiles = props.acceptedFiles;
+                    toUploadFiles.current = props.acceptedFiles;
                 } else {
                     // File selection from desktop app
-                    toUploadFiles = props.electronFiles;
+                    toUploadFiles.current = props.electronFiles;
                 }
 
                 analysisResult = analyseUploadFiles();
@@ -127,7 +126,7 @@ export default function Upload(props: Props) {
                     setAnalysisResult(analysisResult);
                 }
             } else {
-                toUploadFiles = appContext.sharedFiles;
+                toUploadFiles.current = appContext.sharedFiles;
             }
             handleCollectionCreationAndUpload(
                 analysisResult,
@@ -152,14 +151,14 @@ export default function Upload(props: Props) {
             const { files, collectionName, collectionIDs } =
                 await ImportService.getPendingUploads();
 
-            toUploadFiles = files;
+            toUploadFiles.current = files;
 
             if (collectionName) {
                 uploadToSingleNewCollection(collectionName);
             } else {
                 uploadInit();
                 const filesWithCollectionToUpload: FileWithCollection[] =
-                    toUploadFiles.map((file, index) => ({
+                    toUploadFiles.current.map((file, index) => ({
                         file,
                         localID: index,
                         collectionID: collectionIDs[index],
@@ -176,10 +175,12 @@ export default function Upload(props: Props) {
     };
 
     function analyseUploadFiles(): AnalysisResult {
-        if (toUploadFiles.length === 0) {
+        if (toUploadFiles.current.length === 0) {
             return null;
         }
-        const paths: string[] = toUploadFiles.map((file) => file['path']);
+        const paths: string[] = toUploadFiles.current.map(
+            (file) => file['path']
+        );
         const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
         paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
         const firstPath = paths[0];
@@ -208,7 +209,7 @@ export default function Upload(props: Props) {
     }
     function getCollectionWiseFiles() {
         const collectionWiseFiles = new Map<string, (File | ElectronFile)[]>();
-        for (const file of toUploadFiles) {
+        for (const file of toUploadFiles.current) {
             const filePath = file['path'] as string;
 
             let folderPath = filePath.substr(0, filePath.lastIndexOf('/'));
@@ -230,7 +231,7 @@ export default function Upload(props: Props) {
         try {
             uploadInit();
             const filesWithCollectionToUpload: FileWithCollection[] =
-                toUploadFiles.map((file, index) => ({
+                toUploadFiles.current.map((file, index) => ({
                     file,
                     localID: index,
                     collectionID: collection.id,
@@ -255,7 +256,7 @@ export default function Upload(props: Props) {
                 (File | ElectronFile)[]
             >();
             if (strategy === UPLOAD_STRATEGY.SINGLE_COLLECTION) {
-                collectionWiseFiles.set(collectionName, toUploadFiles);
+                collectionWiseFiles.set(collectionName, toUploadFiles.current);
             } else {
                 collectionWiseFiles = getCollectionWiseFiles();
             }

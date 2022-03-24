@@ -4,6 +4,7 @@ import { convertToHumanReadable } from 'utils/billing';
 import { formatDateTime } from 'utils/file';
 import { getLogs, saveLogLine } from 'utils/storage';
 import ImportService from 'services/importService';
+import { A_SEC_IN_MICROSECONDS } from 'constants/upload';
 
 const TYPE_JSON = 'json';
 const DEDUPE_COLLECTION = new Set(['icloud library', 'icloudlibrary']);
@@ -31,9 +32,10 @@ export function areFilesSame(
 ): boolean {
     if (
         existingFile.fileType === newFile.fileType &&
-        Math.abs(existingFile.creationTime - newFile.creationTime) < 1e6 &&
+        Math.abs(existingFile.creationTime - newFile.creationTime) <
+            A_SEC_IN_MICROSECONDS &&
         Math.abs(existingFile.modificationTime - newFile.modificationTime) <
-            1e6 && // 1 second
+            A_SEC_IN_MICROSECONDS &&
         existingFile.title === newFile.title
     ) {
         return true;

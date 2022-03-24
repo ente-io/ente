@@ -20,16 +20,16 @@ function UploadButton({
     isFirstFetch,
     setShowUploadTypeChoiceModal,
 }) {
+    const handleClick = () => {
+        if (isElectron()) {
+            setShowUploadTypeChoiceModal(true);
+        } else {
+            openFileUploader();
+        }
+    };
+
     return (
-        <Wrapper
-            onClick={
-                isElectron()
-                    ? () => {
-                          setShowUploadTypeChoiceModal(true);
-                      }
-                    : openFileUploader
-            }
-            isDisabled={isFirstFetch}>
+        <Wrapper onClick={handleClick} isDisabled={isFirstFetch}>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"

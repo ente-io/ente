@@ -18,7 +18,7 @@ class ImportService {
         }
     }
 
-    async getIfToUploadFilesExists(): Promise<boolean> {
+    async hasPendingUploads(): Promise<boolean> {
         if (this.allElectronAPIsExist) {
             return this.ElectronAPIs.getIfToUploadFilesExists();
         }
