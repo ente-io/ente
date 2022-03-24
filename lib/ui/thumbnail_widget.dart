@@ -82,7 +82,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       padding: const EdgeInsets.only(right: 8, bottom: 8),
       child: Icon(
         Icons.archive_outlined,
-        size: 42,
+        size: 24,
         color: Colors.white.withOpacity(0.9),
       ),
     ),
