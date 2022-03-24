@@ -4,7 +4,7 @@ import { CustomError } from 'utils/error';
 import { getFileExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getUint8ArrayView } from './readerService';
-import FileType from 'file-type';
+import FileType, { FileTypeResult } from 'file-type';
 
 const TYPE_VIDEO = 'video';
 const TYPE_IMAGE = 'image';
@@ -29,16 +29,18 @@ export async function getFileType(
             return formatToBeSkipped;
         }
         let fileType: FILE_TYPE;
-        let mimTypeParts: string[];
-        let ext: string;
+        let typeResult: FileTypeResult;
+
         if (receivedFile instanceof File) {
-            const typeResult = await extractFileType(reader, receivedFile);
-            mimTypeParts = typeResult.mime?.split('/');
-            ext = typeResult.ext;
+            typeResult = await extractFileType(reader, receivedFile);
         } else {
-            mimTypeParts = receivedFile.type.mimeType.split('/');
-            ext = receivedFile.type.ext;
+            typeResult = await extractFileTypeFromElectronFile(receivedFile);
+            console.log('typeResult', typeResult);
         }
+
+        const mimTypeParts: string[] = typeResult.mime?.split('/');
+        const ext: string = typeResult.ext;
+
         if (mimTypeParts?.length !== 2) {
             throw Error(CustomError.TYPE_DETECTION_FAILED);
         }
@@ -64,6 +66,14 @@ export async function getFileType(
 async function extractFileType(reader: FileReader, file: File) {
     const fileChunkBlob = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
     return getFileTypeFromBlob(reader, fileChunkBlob);
+}
+
+async function extractFileTypeFromElectronFile(file: ElectronFile) {
+    const stream = await file.stream();
+    const reader = stream.getReader();
+    const { value } = await reader.read();
+    const fileTypeResult = await FileType.fromBuffer(value);
+    return fileTypeResult;
 }
 
 export async function getFileTypeFromBlob(reader: FileReader, fileBlob: Blob) {
