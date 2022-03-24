@@ -72,10 +72,6 @@ export interface ElectronFile {
     path: string;
     size: number;
     lastModified: number;
-    type: {
-        mimeType: string;
-        ext: string;
-    };
     stream: () => Promise<ReadableStream<Uint8Array>>;
     blob: () => Promise<Blob>;
     arrayBuffer: () => Promise<Uint8Array>;
