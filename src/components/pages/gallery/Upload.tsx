@@ -79,6 +79,8 @@ export default function Upload(props: Props) {
     const galleryContext = useContext(GalleryContext);
 
     const toUploadFiles = useRef<File[] | ElectronFile[]>(null);
+    const hasPendingUploads = useRef(false);
+    const pendingUploadsCollectionName = useRef<string>('');
 
     useEffect(() => {
         UploadManager.initUploader(
@@ -97,6 +99,7 @@ export default function Upload(props: Props) {
         if (isElectron()) {
             ImportService.hasPendingUploads().then((exists) => {
                 if (exists) {
+                    hasPendingUploads.current = true;
                     uploadFailedFiles();
                 }
             });
@@ -154,15 +157,10 @@ export default function Upload(props: Props) {
             const { files, collectionName } =
                 await ImportService.getPendingUploads();
 
-            toUploadFiles.current = files;
-
-            uploadToSingleNewCollection(collectionName);
+            pendingUploadsCollectionName.current = collectionName;
+            props.setElectronFiles(files);
         } catch (e) {
-            logError(e, 'Failed to upload previously failed files');
-        } finally {
-            // set state to done for now even if failed else
-            // user could be stuck in upload view on every restart
-            await ImportService.setDoneUploadingFiles();
+            logError(e, 'Failed to get previously failed files');
         }
     };
 
@@ -304,8 +302,6 @@ export default function Upload(props: Props) {
                 filesWithCollectionToUpload,
                 collections
             );
-            // set state to done
-            await ImportService.setDoneUploadingFiles();
         } catch (err) {
             const message = getUserFacingErrorMessage(
                 err.message,
@@ -315,6 +311,8 @@ export default function Upload(props: Props) {
             setProgressView(false);
             throw err;
         } finally {
+            // set state to done
+            await ImportService.setDoneUploadingFiles();
             appContext.resetSharedFiles();
             props.setUploadInProgress(false);
             props.syncWithRemote();
@@ -363,7 +361,10 @@ export default function Upload(props: Props) {
         analysisResult: AnalysisResult,
         isFirstUpload: boolean
     ) => {
-        if (isFirstUpload) {
+        if (hasPendingUploads.current) {
+            hasPendingUploads.current = false;
+            uploadToSingleNewCollection(pendingUploadsCollectionName.current);
+        } else if (isFirstUpload) {
             const collectionName =
                 analysisResult.suggestedCollectionName ?? FIRST_ALBUM_NAME;
 
