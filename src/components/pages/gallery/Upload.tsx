@@ -22,6 +22,7 @@ import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import { ElectronFile, FileWithCollection } from 'types/upload';
+import UploadTypeChoiceModal from './UploadTypeChoiceModal';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -41,6 +42,8 @@ interface Props {
     isFirstUpload: boolean;
     electronFiles: ElectronFile[];
     setElectronFiles: (files: ElectronFile[]) => void;
+    showUploadTypeChoiceModal: boolean;
+    setShowUploadTypeChoiceModal: (open: boolean) => void;
 }
 
 enum UPLOAD_STRATEGY {
@@ -408,6 +411,13 @@ export default function Upload(props: Props) {
                     uploadFilesToNewCollections(
                         UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
                     )
+                }
+            />
+            <UploadTypeChoiceModal
+                setElectronFiles={props.setElectronFiles}
+                showUploadTypeChoiceModal={props.showUploadTypeChoiceModal}
+                setShowUploadTypeChoiceModal={
+                    props.setShowUploadTypeChoiceModal
                 }
             />
             <UploadProgress

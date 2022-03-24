@@ -1,3 +1,37 @@
+import DeleteBtn from 'components/DeleteBtn';
+import EnteSpinner from 'components/EnteSpinner';
+import FixCreationTime, {
+    FixCreationTimeAttributes,
+} from 'components/FixCreationTime';
+import FullScreenDropZone from 'components/FullScreenDropZone';
+import { LoadingOverlay } from 'components/LoadingOverlay';
+import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
+import AlertBanner from 'components/pages/gallery/AlertBanner';
+import CollectionNamer, {
+    CollectionNamerAttributes,
+} from 'components/pages/gallery/CollectionNamer';
+import Collections from 'components/pages/gallery/Collections';
+import CollectionSelector, {
+    CollectionSelectorAttributes,
+} from 'components/pages/gallery/CollectionSelector';
+import PlanSelector from 'components/pages/gallery/PlanSelector';
+import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
+import Upload from 'components/pages/gallery/Upload';
+import UploadButton from 'components/pages/gallery/UploadButton';
+import PhotoFrame from 'components/PhotoFrame';
+import SearchBar from 'components/SearchBar';
+import Sidebar from 'components/Sidebar';
+import ToastNotification from 'components/ToastNotification';
+import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    CollectionType,
+    TRASH_SECTION,
+} from 'constants/collection';
+import { VISIBILITY_STATE } from 'constants/file';
+import { PAGES } from 'constants/pages';
+import { useRouter } from 'next/router';
+import { AppContext } from 'pages/_app';
 import React, {
     createContext,
     useContext,
@@ -5,44 +39,53 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { useRouter } from 'next/router';
-import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import {
-    getLocalFiles,
-    syncFiles,
-    updateMagicMetadata,
-    trashFiles,
-    deleteFromTrash,
-} from 'services/fileService';
-import styled from 'styled-components';
+import { useDropzone } from 'react-dropzone';
 import LoadingBar from 'react-top-loading-bar';
+import billingService from 'services/billingService';
 import {
-    syncCollections,
+    createCollection,
     getCollectionsAndTheirLatestFile,
     getFavItemIds,
     getLocalCollections,
     getNonEmptyCollections,
-    createCollection,
+    syncCollections,
 } from 'services/collectionService';
-import constants from 'utils/strings/constants';
-import billingService from 'services/billingService';
-import { checkSubscriptionPurchase } from 'utils/billing';
-
-import FullScreenDropZone from 'components/FullScreenDropZone';
-import Sidebar from 'components/Sidebar';
-import { checkConnectivity } from 'utils/common';
 import {
-    isFirstLogin,
-    justSignedUp,
-    setIsFirstLogin,
-    setJustSignedUp,
-} from 'utils/storage';
+    deleteFromTrash,
+    getLocalFiles,
+    syncFiles,
+    trashFiles,
+    updateMagicMetadata,
+} from 'services/fileService';
+import {
+    clearLocalTrash,
+    emptyTrash,
+    getLocalTrash,
+    getTrashedFiles,
+    syncTrash,
+} from 'services/trashService';
 import { isTokenValid, logoutUser } from 'services/userService';
-import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
-import { useDropzone } from 'react-dropzone';
-import EnteSpinner from 'components/EnteSpinner';
-import { LoadingOverlay } from 'components/LoadingOverlay';
-import PhotoFrame from 'components/PhotoFrame';
+import styled from 'styled-components';
+import { Collection, CollectionAndItsLatestFile } from 'types/collection';
+import { EnteFile } from 'types/file';
+import {
+    GalleryContextType,
+    NotificationAttributes,
+    Search,
+    SelectedState,
+} from 'types/gallery';
+import { Trash } from 'types/trash';
+import { ElectronFile } from 'types/upload';
+import { checkSubscriptionPurchase } from 'utils/billing';
+import {
+    COLLECTION_OPS_TYPE,
+    getSelectedCollection,
+    handleCollectionOps,
+    isFavoriteCollection,
+    isSharedCollection,
+} from 'utils/collection';
+import { checkConnectivity } from 'utils/common';
+import { CustomError, ServerErrorCodes } from 'utils/error';
 import {
     changeFilesVisibility,
     downloadFiles,
@@ -52,61 +95,15 @@ import {
     sortFiles,
     sortFilesIntoCollections,
 } from 'utils/file';
-import SearchBar from 'components/SearchBar';
-import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
-import CollectionSelector, {
-    CollectionSelectorAttributes,
-} from 'components/pages/gallery/CollectionSelector';
-import CollectionNamer, {
-    CollectionNamerAttributes,
-} from 'components/pages/gallery/CollectionNamer';
-import AlertBanner from 'components/pages/gallery/AlertBanner';
-import UploadButton from 'components/pages/gallery/UploadButton';
-import PlanSelector from 'components/pages/gallery/PlanSelector';
-import Upload from 'components/pages/gallery/Upload';
-import {
-    ALL_SECTION,
-    ARCHIVE_SECTION,
-    CollectionType,
-    TRASH_SECTION,
-} from 'constants/collection';
-import { AppContext } from 'pages/_app';
-import { CustomError, ServerErrorCodes } from 'utils/error';
-import { PAGES } from 'constants/pages';
-import {
-    COLLECTION_OPS_TYPE,
-    isSharedCollection,
-    handleCollectionOps,
-    getSelectedCollection,
-    isFavoriteCollection,
-} from 'utils/collection';
 import { logError } from 'utils/sentry';
 import {
-    clearLocalTrash,
-    emptyTrash,
-    getLocalTrash,
-    getTrashedFiles,
-    syncTrash,
-} from 'services/trashService';
-import { Trash } from 'types/trash';
-
-import DeleteBtn from 'components/DeleteBtn';
-import FixCreationTime, {
-    FixCreationTimeAttributes,
-} from 'components/FixCreationTime';
-import { Collection, CollectionAndItsLatestFile } from 'types/collection';
-import { EnteFile } from 'types/file';
-import {
-    GalleryContextType,
-    SelectedState,
-    Search,
-    NotificationAttributes,
-} from 'types/gallery';
-import Collections from 'components/pages/gallery/Collections';
-import { VISIBILITY_STATE } from 'constants/file';
-import ToastNotification from 'components/ToastNotification';
-import { ElectronFile } from 'types/upload';
-import UploadTypeChoiceModal from 'components/pages/gallery/UploadTypeChoiceModal';
+    isFirstLogin,
+    justSignedUp,
+    setIsFirstLogin,
+    setJustSignedUp,
+} from 'utils/storage';
+import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import constants from 'utils/strings/constants';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -672,6 +669,8 @@ export default function Gallery() {
                     isFirstUpload={collectionsAndTheirLatestFile?.length === 0}
                     electronFiles={electronFiles}
                     setElectronFiles={setElectronFiles}
+                    showUploadTypeChoiceModal={showUploadTypeChoiceModal}
+                    setShowUploadTypeChoiceModal={setShowUploadTypeChoiceModal}
                 />
                 <Sidebar
                     collections={collections}
@@ -681,11 +680,6 @@ export default function Gallery() {
                 <UploadButton
                     isFirstFetch={isFirstFetch}
                     openFileUploader={openFileUploader}
-                    setShowUploadTypeChoiceModal={setShowUploadTypeChoiceModal}
-                />
-                <UploadTypeChoiceModal
-                    setElectronFiles={setElectronFiles}
-                    showUploadTypeChoiceModal={showUploadTypeChoiceModal}
                     setShowUploadTypeChoiceModal={setShowUploadTypeChoiceModal}
                 />
                 <PhotoFrame
