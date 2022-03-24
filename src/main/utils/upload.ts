@@ -1,7 +1,6 @@
 import Store, { Schema } from 'electron-store';
 import path from 'path';
 import * as fs from 'promise-fs';
-import mime from 'mime';
 import { FILE_STREAM_CHUNK_SIZE } from '../../config';
 import { ElectronFile, StoreType } from '../types';
 
@@ -87,10 +86,6 @@ export async function getElectronFile(filePath: string): Promise<ElectronFile> {
         name: path.basename(filePath),
         size: fileStats.size,
         lastModified: fileStats.mtime.valueOf(),
-        type: {
-            mimeType: mime.getType(filePath),
-            ext: path.extname(filePath).substring(1),
-        },
         stream: async () => {
             return await getFileStream(filePath);
         },

@@ -68,7 +68,6 @@
     "electron-log": "^4.3.5",
     "electron-store": "^8.0.1",
     "electron-updater": "^4.3.8",
-    "mime": "^3.0.0",
     "next-electron-server": "^0.0.8",
     "promise-fs": "^2.1.1"
   }
