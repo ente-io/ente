@@ -8,7 +8,7 @@ const storeSchema: Schema<StoreType> = {
     done: {
         type: 'boolean',
     },
-    filesPaths: {
+    filePaths: {
         type: 'array',
         items: {
             type: 'string',
@@ -16,12 +16,6 @@ const storeSchema: Schema<StoreType> = {
     },
     collectionName: {
         type: 'string',
-    },
-    collectionIDs: {
-        type: 'array',
-        items: {
-            type: 'number',
-        },
     },
 };
 
@@ -103,33 +97,24 @@ export async function getElectronFile(filePath: string): Promise<ElectronFile> {
 export const setToUploadFiles = (
     filePaths: string[],
     collectionName: string,
-    collectionIDs: number[],
     done: boolean
 ) => {
     store.set('done', done);
     if (done) {
-        store.delete('filesPaths');
+        store.delete('filePaths');
         store.delete('collectionName');
-        store.delete('collectionIDs');
     } else {
-        store.set('filesPaths', filePaths);
-        store.set('collectionIDs', collectionIDs);
-        if (collectionName) {
-            store.set('collectionName', collectionName);
-        } else {
-            store.delete('collectionName');
-        }
+        store.set('filePaths', filePaths);
+        store.set('collectionName', collectionName);
     }
 };
 
-export const pendingToUploadFilePaths = () => {
-    const filesPaths = store.get('filesPaths') as string[];
+export const pendingToUploadFiles = async () => {
+    const filePaths = store.get('filePaths') as string[];
     const collectionName = store.get('collectionName') as string;
-    const collectionIDs = store.get('collectionIDs') as number[];
     return {
-        filesPaths,
+        files: await Promise.all(filePaths.map(getElectronFile)),
         collectionName,
-        collectionIDs,
     };
 };
 
@@ -137,4 +122,8 @@ export const getIfToUploadFilesExists = async () => {
     const doneUploadingFiles = store.get('done') as boolean;
     if (doneUploadingFiles === undefined) return false;
     return !doneUploadingFiles;
+};
+
+export const updatePendingUploadsFilePaths = (filePaths: string[]) => {
+    store.set('filePaths', filePaths);
 };

@@ -10,7 +10,6 @@ export interface ElectronFile {
 
 export interface StoreType {
     done: boolean;
-    filesPaths: string[];
+    filePaths: string[];
     collectionName: string;
-    collectionIDs: number[];
 }

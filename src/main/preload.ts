@@ -4,8 +4,9 @@ import * as electron from 'electron';
 import {
     getIfToUploadFilesExists,
     getElectronFile,
-    pendingToUploadFilePaths,
+    pendingToUploadFiles,
     setToUploadFiles,
+    updatePendingUploadsFilePaths,
 } from './utils/upload';
 
 const { ipcRenderer } = electron;
@@ -147,6 +148,7 @@ windowObject['ElectronAPIs'] = {
     getElectronFile,
     showUploadFilesDialog,
     showUploadDirsDialog,
-    pendingToUploadFilePaths,
+    pendingToUploadFiles,
     setToUploadFiles,
+    updatePendingUploadsFilePaths,
 };
