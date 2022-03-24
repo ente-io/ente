@@ -151,23 +151,12 @@ export default function Upload(props: Props) {
 
     const uploadFailedFiles = async () => {
         try {
-            const { files, collectionName, collectionIDs } =
+            const { files, collectionName } =
                 await ImportService.getPendingUploads();
 
             toUploadFiles.current = files;
 
-            if (collectionName) {
-                uploadToSingleNewCollection(collectionName);
-            } else {
-                uploadInit();
-                const filesWithCollectionToUpload: FileWithCollection[] =
-                    toUploadFiles.current.map((file, index) => ({
-                        file,
-                        localID: index,
-                        collectionID: collectionIDs[index],
-                    }));
-                await uploadFiles(filesWithCollectionToUpload);
-            }
+            uploadToSingleNewCollection(collectionName);
         } catch (e) {
             logError(e, 'Failed to upload previously failed files');
         } finally {

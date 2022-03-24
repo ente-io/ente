@@ -17,6 +17,7 @@ import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import {
+    ElectronFile,
     FileWithCollection,
     MetadataAndFileTypeInfo,
     MetadataAndFileTypeInfoMap,
@@ -36,6 +37,8 @@ import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { dedupe } from 'utils/export';
 import { convertToHumanReadable } from 'utils/billing';
 import { logUploadInfo } from 'utils/upload';
+import isElectron from 'is-electron';
+import ImportService from 'services/importService';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -45,6 +48,7 @@ class UploadManager {
     private parsedMetadataJSONMap: ParsedMetadataJSONMap;
     private metadataAndFileTypeInfoMap: MetadataAndFileTypeInfoMap;
     private filesToBeUploaded: FileWithCollection[];
+    private remainingFiles: FileWithCollection[] = [];
     private failedFiles: FileWithCollection[];
     private existingFilesCollectionWise: Map<number, EnteFile[]>;
     private existingFiles: EnteFile[];
@@ -256,6 +260,11 @@ class UploadManager {
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
         logUploadInfo(`uploadMediaFiles called`);
         this.filesToBeUploaded.push(...mediaFiles);
+
+        if (isElectron()) {
+            this.remainingFiles.push(...mediaFiles);
+        }
+
         UIService.reset(mediaFiles.length);
 
         await UploadService.setFileCount(mediaFiles.length);
@@ -325,6 +334,18 @@ class UploadManager {
                 });
             } else if (fileUploadResult === FileUploadResults.BLOCKED) {
                 this.failedFiles.push(fileWithCollection);
+            }
+
+            if (fileUploadResult && isElectron()) {
+                this.remainingFiles = this.remainingFiles.filter(
+                    (file) =>
+                        (file.file as ElectronFile).path !==
+                        (fileWithCollection.file as ElectronFile).path
+                );
+
+                if (this.remainingFiles.length > 0) {
+                    ImportService.updatePendingUploads(this.remainingFiles);
+                }
             }
 
             UIService.moveFileToResultList(
