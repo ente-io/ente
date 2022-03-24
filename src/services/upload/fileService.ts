@@ -129,9 +129,6 @@ export async function encryptFile(
     as edited file doesn't have their own metadata file
 */
 function getFileOriginalName(file: File | ElectronFile) {
-    if (!(file instanceof File)) {
-        return file.name;
-    }
     let originalName: string = null;
     const [nameWithoutExtension, extension] = splitFilenameAndExtension(
         file.name
