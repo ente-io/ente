@@ -49,6 +49,7 @@ export default function Deduplicate() {
     const resync = useRef(false);
     const appContext = useContext(AppContext);
     const [clubByTime, setClubByTime] = useState(false);
+    const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
 
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
@@ -105,6 +106,8 @@ export default function Deduplicate() {
                 );
             }
 
+            const currFileSizeMap = new Map<number, number>();
+
             let allDuplicateFiles: EnteFile[] = [];
             let toSelectFileIDs: number[] = [];
             let count = 0;
@@ -116,8 +119,13 @@ export default function Deduplicate() {
                     dupe.files.slice(1).map((f) => f.id)
                 );
                 count += dupe.files.length - 1;
+
+                for (const file of dupe.files) {
+                    currFileSizeMap.set(file.id, dupe.size);
+                }
             }
             setDuplicateFiles(allDuplicateFiles);
+            setFileSizeMap(currFileSizeMap);
 
             const selectedFiles = {
                 count: count,
@@ -257,7 +265,10 @@ export default function Deduplicate() {
                     activeCollection={ALL_SECTION}
                     isSharedCollection={false}
                     enableDownload={true}
-                    deduplicating={{ clubByTime: clubByTime }}
+                    deduplicating={{
+                        clubByTime: clubByTime,
+                        fileSizeMap: fileSizeMap,
+                    }}
                 />
             ) : (
                 <b

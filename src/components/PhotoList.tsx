@@ -215,16 +215,17 @@ export function PhotoList({
 
     const groupByFileSize = (timeStampList: TimeStampListItem[]) => {
         let index = 0;
-
         while (index < filteredData.length) {
             const file = filteredData[index];
-            const currentFileSize = file.file.size;
+            const currentFileSize = deduplicating.fileSizeMap.get(file.id);
             const currentCreationTime = file.metadata.creationTime;
             let lastFileIndex = index;
 
             while (lastFileIndex < filteredData.length) {
                 if (
-                    filteredData[lastFileIndex].file.size !== currentFileSize ||
+                    deduplicating.fileSizeMap.get(
+                        filteredData[lastFileIndex].id
+                    ) !== currentFileSize ||
                     (deduplicating.clubByTime &&
                         filteredData[lastFileIndex].metadata.creationTime !==
                             currentCreationTime)

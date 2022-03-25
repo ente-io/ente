@@ -44,4 +44,5 @@ export interface NotificationAttributes {
 
 export interface DeduplicatingType {
     clubByTime: boolean;
+    fileSizeMap: Map<number, number>;
 }

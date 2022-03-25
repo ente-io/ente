@@ -5,7 +5,6 @@ export interface fileAttribute {
     encryptedData?: DataStream | Uint8Array;
     objectKey?: string;
     decryptionHeader: string;
-    size?: number;
 }
 
 export interface MagicMetadataCore {
