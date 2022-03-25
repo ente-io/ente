@@ -36,7 +36,7 @@ import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 import FixLargeThumbnails from './FixLargeThumbnail';
 import { SetLoading } from 'types/gallery';
 import { downloadAsFile } from 'utils/file';
-import { getUploadLogs } from 'utils/upload';
+import { getUploadLogs, logUploadInfo } from 'utils/upload';
 import styled from 'styled-components';
 interface Props {
     collections: Collection[];
@@ -113,6 +113,7 @@ export default function Sidebar(props: Props) {
     }
 
     const downloadUploadLogs = () => {
+        logUploadInfo('exporting logs');
         const logs = getUploadLogs();
         const logString = logs.join('\n');
         downloadAsFile(`upload_logs_${Date.now()}.txt`, logString);
