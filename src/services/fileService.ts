@@ -15,6 +15,7 @@ import {
 import CryptoWorker from 'utils/crypto';
 import { EnteFile, TrashRequest, UpdateMagicMetadataRequest } from 'types/file';
 import { SetFiles } from 'types/gallery';
+import { MAX_TRASH_BATCH_SIZE } from 'constants/file';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -157,15 +158,42 @@ export const trashFiles = async (filesToTrash: EnteFile[]) => {
         if (!token) {
             return;
         }
-        const trashRequest: TrashRequest = {
-            items: filesToTrash.map((file) => ({
-                fileID: file.id,
-                collectionID: file.collectionID,
-            })),
+
+        let currentBatchSize = 0;
+        const trashBatch: TrashRequest = {
+            items: [],
         };
-        await HTTPService.post(`${ENDPOINT}/files/trash`, trashRequest, null, {
-            'X-Auth-Token': token,
-        });
+
+        for (const file of filesToTrash) {
+            trashBatch.items.push({
+                collectionID: file.collectionID,
+                fileID: file.id,
+            });
+            currentBatchSize++;
+            if (currentBatchSize >= MAX_TRASH_BATCH_SIZE) {
+                await HTTPService.post(
+                    `${ENDPOINT}/files/trash`,
+                    trashBatch,
+                    null,
+                    {
+                        'X-Auth-Token': token,
+                    }
+                );
+                currentBatchSize = 0;
+                trashBatch.items = [];
+            }
+        }
+
+        if (currentBatchSize > 0) {
+            await HTTPService.post(
+                `${ENDPOINT}/files/trash`,
+                trashBatch,
+                null,
+                {
+                    'X-Auth-Token': token,
+                }
+            );
+        }
     } catch (e) {
         logError(e, 'trash file failed');
         throw e;
