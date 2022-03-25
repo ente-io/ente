@@ -55,6 +55,15 @@ final lightThemeData = ThemeData(
       alignment: Alignment.center,
     ),
   ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    textStyle: TextStyle(
+      fontWeight: FontWeight.w600,
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 18,
+    ),
+  )),
   toggleableActiveColor: Colors.red[400],
   scaffoldBackgroundColor: Colors.white,
   bottomAppBarColor: Color.fromRGBO(196, 196, 196, 1.0),
@@ -83,15 +92,35 @@ final lightThemeData = ThemeData(
   dialogTheme: DialogTheme().copyWith(
     backgroundColor: Color.fromRGBO(250, 250, 250, 1.0), //
   ),
-  textSelectionTheme: TextSelectionThemeData().copyWith(
-    cursorColor: Colors.white.withOpacity(0.5),
-  ),
+  // textSelectionTheme: TextSelectionThemeData().copyWith(
+  //   cursorColor: Colors.black.withOpacity(0.5),
+  // ),
   inputDecorationTheme: InputDecorationTheme().copyWith(
     focusedBorder: UnderlineInputBorder(
       borderSide: BorderSide(
         color: Color.fromRGBO(45, 194, 98, 1.0),
       ),
     ),
+  ),
+  checkboxTheme: CheckboxThemeData(
+    side: BorderSide(
+      color: Colors.black,
+      width: 2,
+    ),
+    fillColor: MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.selected)) {
+        return Colors.black;
+      } else {
+        return Colors.white;
+      }
+    }),
+    checkColor: MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.selected)) {
+        return Colors.white;
+      } else {
+        return Colors.black;
+      }
+    }),
   ),
 );
 
@@ -158,6 +187,17 @@ final darkThemeData = ThemeData(
       alignment: Alignment.center,
     ),
   ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+    primary: Colors.grey[700],
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    textStyle: TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.w600,
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 18,
+    ),
+  )),
   scaffoldBackgroundColor: Colors.black,
   backgroundColor: Colors.black,
   appBarTheme: AppBarTheme().copyWith(
@@ -167,15 +207,35 @@ final darkThemeData = ThemeData(
   dialogTheme: DialogTheme().copyWith(
     backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
   ),
-  textSelectionTheme: TextSelectionThemeData().copyWith(
-    cursorColor: Colors.white.withOpacity(0.5),
-  ),
+  // textSelectionTheme: TextSelectionThemeData().copyWith(
+  //   cursorColor: Colors.white.withOpacity(0.5),
+  // ),
   inputDecorationTheme: InputDecorationTheme().copyWith(
     focusedBorder: UnderlineInputBorder(
       borderSide: BorderSide(
         color: Color.fromRGBO(45, 194, 98, 1.0),
       ),
     ),
+  ),
+  checkboxTheme: CheckboxThemeData(
+    side: BorderSide(
+      color: Colors.grey,
+      width: 2,
+    ),
+    fillColor: MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.selected)) {
+        return Colors.grey;
+      } else {
+        return Colors.black;
+      }
+    }),
+    checkColor: MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.selected)) {
+        return Colors.black;
+      } else {
+        return Colors.grey;
+      }
+    }),
   ),
 );
 

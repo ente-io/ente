@@ -226,8 +226,8 @@ class UserService {
             context, "oops", "your verification code has expired");
         Navigator.of(context).pop();
       } else {
-        showErrorDialog(context, "incorrect code",
-            "authentication failed, please try again");
+        showErrorDialog(context, "Incorrect code",
+            "Sorry, the code you've entered is incorrect");
       }
     } catch (e) {
       await dialog.hide();

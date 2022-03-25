@@ -76,9 +76,12 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   Widget build(BuildContext context) {
     final appBar = AppBar(
       elevation: 0,
-      leading: Icon(
-        Icons.arrow_back,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back),
         color: Theme.of(context).iconTheme.color,
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
       ),
       title: Hero(
         tag: "sign_up",
@@ -483,10 +486,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: CupertinoButton(
-              color: Colors.black,
+          child: Container(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              style: Theme.of(context).elevatedButtonTheme.style,
               onPressed: () {
                 if (_isFormValid()) {
                   _config.setVolatilePassword(_passwordController1.text);
@@ -516,7 +520,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               //       }
               //     : null,
               child: Text(
-                'Create Account', //hardcoded
+                'Create Account',
               ),
             ),
           ),
@@ -549,7 +553,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         children: [
           Checkbox(
               value: _hasAgreedToTOS,
-              activeColor: Colors.black,
+              side: CheckboxTheme.of(context).side,
               onChanged: (value) {
                 setState(() {
                   _hasAgreedToTOS = value;
@@ -566,7 +570,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     text: "terms of service",
                     style: TextStyle(
                       decoration: TextDecoration.underline,
-                      fontFamily: 'Ubuntu',
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
@@ -584,7 +587,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     text: "privacy policy",
                     style: TextStyle(
                       decoration: TextDecoration.underline,
-                      fontFamily: 'Ubuntu',
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
@@ -599,12 +601,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       },
                   ),
                 ],
-                style: TextStyle(
-                  height: 1.25,
-                  fontSize: 12,
-                  fontFamily: 'inter',
-                  color: Colors.black,
-                ),
+                style: Theme.of(context)
+                    .textTheme
+                    .subtitle1
+                    .copyWith(fontSize: 12),
               ),
               textAlign: TextAlign.left,
             ),
@@ -625,13 +625,14 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       child: Row(
         children: [
           Checkbox(
-              value: _hasAgreedToE2E,
-              activeColor: Colors.black,
-              onChanged: (value) {
-                setState(() {
-                  _hasAgreedToE2E = value;
-                });
-              }),
+            value: _hasAgreedToE2E,
+            side: CheckboxTheme.of(context).side,
+            onChanged: (value) {
+              setState(() {
+                _hasAgreedToE2E = value;
+              });
+            },
+          ),
           Expanded(
             child: RichText(
               text: TextSpan(
@@ -644,7 +645,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     text: "end-to-end encrypted",
                     style: TextStyle(
                       decoration: TextDecoration.underline,
-                      fontFamily: 'Ubuntu',
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
@@ -660,11 +660,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   ),
                   TextSpan(text: " with ente"),
                 ],
-                style: TextStyle(
-                    height: 1.25,
-                    fontSize: 12,
-                    fontFamily: 'inter',
-                    color: Colors.black),
+                style: Theme.of(context)
+                    .textTheme
+                    .subtitle1
+                    .copyWith(fontSize: 12),
               ),
               textAlign: TextAlign.left,
             ),

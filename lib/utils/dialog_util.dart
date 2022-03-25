@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
@@ -7,18 +8,16 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/progress_dialog.dart';
 
 ProgressDialog createProgressDialog(BuildContext context, String message) {
-  final dialog = ProgressDialog(
-    context,
-    type: ProgressDialogType.Normal,
-    isDismissible: false,
-    barrierColor: Colors.black.withOpacity(0.85),
-  );
+  final dialog = ProgressDialog(context,
+      type: ProgressDialogType.Normal,
+      isDismissible: false,
+      barrierColor: Colors.black12);
   dialog.style(
     message: message,
-    messageTextStyle: TextStyle(color: Colors.white),
-    backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
+    messageTextStyle: Theme.of(context).textTheme.caption,
+    backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
     progressWidget: loadWidget,
-    borderRadius: 4.0,
+    borderRadius: 10,
     elevation: 10.0,
     insetAnimCurve: Curves.easeInOut,
   );
@@ -28,12 +27,16 @@ ProgressDialog createProgressDialog(BuildContext context, String message) {
 Future<dynamic> showErrorDialog(
     BuildContext context, String title, String content) {
   AlertDialog alert = AlertDialog(
-    title: Text(title),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    title: Text(
+      title,
+      style: Theme.of(context).textTheme.headline4,
+    ),
     content: Text(content),
     actions: [
       TextButton(
         child: Text(
-          "ok",
+          "OK",
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
           ),
@@ -48,9 +51,12 @@ Future<dynamic> showErrorDialog(
   return showDialog(
     context: context,
     builder: (BuildContext context) {
-      return alert;
+      return BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: alert,
+      );
     },
-    barrierColor: Colors.black87,
+    barrierColor: Colors.black12,
   );
 }
 
