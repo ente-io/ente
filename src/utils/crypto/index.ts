@@ -74,7 +74,7 @@ export async function generateAndSaveIntermediateKeyAttributes(
     const cryptoWorker = await new CryptoWorker();
     const intermediateKekSalt: string =
         await cryptoWorker.generateSaltToDeriveKey();
-    const intermediateKek: KEK = await cryptoWorker.deriveIntermediateKey(
+    const intermediateKek: KEK = await cryptoWorker.deriveInteractiveKey(
         passphrase,
         intermediateKekSalt
     );

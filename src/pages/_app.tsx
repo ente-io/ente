@@ -69,59 +69,33 @@ const GlobalStyles = createGlobalStyle`
         height: 100%;
     }
 
-    .live-photo-container{
+    .pswp-item-container {
         width: 100%;
         height: 100%;
-        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         object-fit: contain;
     }
 
-    .live-photo-container > img{
-        opacity: 1;
+    .pswp-item-container > * {
+        position: absolute;
+        transition: opacity 1s ease;
         max-width: 100%;
         max-height: 100%;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        transition: opacity 1s ease;
     }
-
-    .live-photo-container > video{
-        opacity: 0;
-        max-width: 100%;
-        max-height: 100%;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        transition: opacity 1s ease;
-    }
-
-    .video-loading {
-        width: 100%;
-        height: 100%;
-        position: relative;
-    }
-
-    .video-loading > img {
-        object-fit: contain;
-        width: 100%;
-        height: 100%;
-    }
-
-    .video-loading > div.spinner-border {
-        position: relative;
-        top: -50vh;
-        left: 50vw;
-    }
-
     
+    .pswp-item-container > img{
+        opacity: 1;
+    }
 
-    .video-loading > div.download-message {
-        position: relative;
-        top: -60vh;
-        left: 0;
+    .pswp-item-container > video{
+        opacity: 0;
+    }
+
+
+    .pswp-item-container > div.download-banner {      
+        width:100%;
         height: 16vh;
         padding:2vh 0;
         background-color: #151414;
@@ -133,7 +107,8 @@ const GlobalStyles = createGlobalStyle`
         opacity: 0.8;
         font-size:20px;
     }
-    .download-message > a{
+
+    .download-banner > a{
         width: 130px;
     }
 
@@ -354,6 +329,9 @@ const GlobalStyles = createGlobalStyle`
     .bg-upload-progress-bar {
         background-color: #51cd7c;
     }
+    .custom-switch.custom-switch-md{
+        z-index:0;
+    }
     .custom-switch.custom-switch-md .custom-control-label {
         padding-left: 2rem;
         padding-bottom: 1.5rem;
@@ -523,6 +501,9 @@ const GlobalStyles = createGlobalStyle`
         width: 30vw;
     }
 
+    .manageLinkHeader:hover{
+        color:#bbb;
+    }
 `;
 
 export const LogoImage = styled.img`

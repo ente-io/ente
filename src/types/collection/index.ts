@@ -26,9 +26,21 @@ export interface PublicURL {
     validTill: number;
     enableDownload: boolean;
     passwordEnabled: boolean;
-    nonce: string;
-    opsLimit: number;
-    memLimit: number;
+    nonce?: string;
+    opsLimit?: number;
+    memLimit?: number;
+}
+
+export interface UpdatePublicURL {
+    collectionID: number;
+    disablePassword?: boolean;
+    enableDownload?: boolean;
+    validTill?: number;
+    deviceLimit?: number;
+    passHash?: string;
+    nonce?: string;
+    opsLimit?: number;
+    memLimit?: number;
 }
 
 export interface CreatePublicAccessTokenRequest {

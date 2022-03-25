@@ -38,7 +38,7 @@ export async function generateThumbnail(
         }
         try {
             if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
-                const isHEIC = isFileHEIC(getFileExtension(file.name));
+                const isHEIC = isFileHEIC(fileTypeInfo.exactType);
                 canvas = await generateImageThumbnail(file, isHEIC);
             } else {
                 try {
