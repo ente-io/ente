@@ -89,8 +89,20 @@ const SelectedFileOptions = ({
                 <div
                     style={{
                         marginLeft: '0.5em',
+                        fontSize: '16px',
+                        marginRight: '0.8em',
                     }}>
                     {constants.CLUB_BY_CAPTURE_TIME}
+                </div>
+                <div className="vertical-line">
+                    <div
+                        style={{
+                            position: 'absolute',
+                            width: '1px',
+                            top: 0,
+                            bottom: 0,
+                            background: '#303030',
+                        }}></div>
                 </div>
                 <IconWithMessage message={constants.DELETE}>
                     <IconButton onClick={trashHandler}>
