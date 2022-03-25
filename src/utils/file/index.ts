@@ -23,7 +23,7 @@ import {
     VISIBILITY_STATE,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
-import HEICConverter from 'services/HEICConverter';
+import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
 
 export function downloadAsFile(filename: string, content: string) {
