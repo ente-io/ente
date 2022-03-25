@@ -692,6 +692,8 @@ const englishConstants = {
     DEDUPLICATE_FILES: 'deduplicate files',
     NO_DUPLICATES_FOUND: "you've no duplicate files that can be cleared",
     CLUB_BY_CAPTURE_TIME: 'club by capture time',
+    FILES: 'files',
+    EACH: 'each',
 };
 
 export default englishConstants;

@@ -41,3 +41,7 @@ export interface NotificationAttributes {
     message: string;
     title: string;
 }
+
+export interface DeduplicatingType {
+    clubByTime: boolean;
+}

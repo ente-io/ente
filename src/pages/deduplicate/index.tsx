@@ -257,6 +257,7 @@ export default function Deduplicate() {
                     activeCollection={ALL_SECTION}
                     isSharedCollection={false}
                     enableDownload={true}
+                    deduplicating={{ clubByTime: clubByTime }}
                 />
             ) : (
                 <b
