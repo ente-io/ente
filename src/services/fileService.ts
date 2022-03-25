@@ -159,7 +159,6 @@ export const trashFiles = async (filesToTrash: EnteFile[]) => {
             return;
         }
 
-        let currentBatchSize = 0;
         const trashBatch: TrashRequest = {
             items: [],
         };
@@ -169,30 +168,14 @@ export const trashFiles = async (filesToTrash: EnteFile[]) => {
                 collectionID: file.collectionID,
                 fileID: file.id,
             });
-            currentBatchSize++;
-            if (currentBatchSize >= MAX_TRASH_BATCH_SIZE) {
-                await HTTPService.post(
-                    `${ENDPOINT}/files/trash`,
-                    trashBatch,
-                    null,
-                    {
-                        'X-Auth-Token': token,
-                    }
-                );
-                currentBatchSize = 0;
+            if (trashBatch.items.length >= MAX_TRASH_BATCH_SIZE) {
+                await trashFilesFromServer(trashBatch, token);
                 trashBatch.items = [];
             }
         }
 
-        if (currentBatchSize > 0) {
-            await HTTPService.post(
-                `${ENDPOINT}/files/trash`,
-                trashBatch,
-                null,
-                {
-                    'X-Auth-Token': token,
-                }
-            );
+        if (trashBatch.items.length > 0) {
+            await trashFilesFromServer(trashBatch, token);
         }
     } catch (e) {
         logError(e, 'trash file failed');
@@ -292,3 +275,9 @@ export const updatePublicMagicMetadata = async (files: EnteFile[]) => {
         })
     );
 };
+
+async function trashFilesFromServer(trashBatch: TrashRequest, token: any) {
+    await HTTPService.post(`${ENDPOINT}/files/trash`, trashBatch, null, {
+        'X-Auth-Token': token,
+    });
+}
