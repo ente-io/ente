@@ -19,7 +19,7 @@ import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
 import Upload from 'components/pages/gallery/Upload';
 import UploadButton from 'components/pages/gallery/UploadButton';
 import PhotoFrame from 'components/PhotoFrame';
-import SearchBar from 'components/SearchBar';
+import SearchBar from 'components/Search';
 import Sidebar from 'components/Sidebar';
 import ToastNotification from 'components/ToastNotification';
 import {
