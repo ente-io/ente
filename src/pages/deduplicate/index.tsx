@@ -1,8 +1,8 @@
 import { IconButton } from 'components/Container';
 import LeftArrow from 'components/icons/LeftArrow';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
-import SelectedDuplicatesOptions from 'components/pages/deduplicate/SelectedDuplicatesOptions';
 import AlertBanner from 'components/pages/gallery/AlertBanner';
+import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
 import PhotoFrame from 'components/PhotoFrame';
 import ToastNotification from 'components/ToastNotification';
 import { ALL_SECTION } from 'constants/collection';
@@ -20,12 +20,13 @@ import React, {
 import LoadingBar from 'react-top-loading-bar';
 import { syncCollections } from 'services/collectionService';
 import {
-    getDuplicateFiles,
     clubDuplicatesByTime,
+    getDuplicateFiles,
 } from 'services/deduplicationService';
 import { getLocalFiles, syncFiles, trashFiles } from 'services/fileService';
 import { getLocalTrash, getTrashedFiles } from 'services/trashService';
 import { isTokenValid, logoutUser } from 'services/userService';
+import { DeduplicateContextType } from 'types/deduplicating';
 import { EnteFile } from 'types/file';
 import { NotificationAttributes, SelectedState } from 'types/gallery';
 import { checkConnectivity } from 'utils/common';
@@ -34,10 +35,10 @@ import { getSelectedFiles, mergeMetadata, sortFiles } from 'utils/file';
 import { isFirstLogin, setIsFirstLogin, setJustSignedUp } from 'utils/storage';
 import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import constants from 'utils/strings/constants';
-import { DeduplicateContextType } from 'types/deduplicating';
 
 const defaultDeduplicateContext: DeduplicateContextType = {
     clubByTime: false,
+    setClubByTime: null,
     fileSizeMap: new Map<number, number>(),
     state: false,
 };
@@ -242,6 +243,7 @@ export default function Deduplicate() {
             value={{
                 ...defaultDeduplicateContext,
                 clubByTime,
+                setClubByTime,
                 fileSizeMap,
                 state: true,
             }}>
@@ -294,13 +296,11 @@ export default function Deduplicate() {
                 )}
 
                 {selected.count > 0 ? (
-                    <SelectedDuplicatesOptions
+                    <SelectedFileOptions
                         setDialogMessage={setDialogMessage}
                         deleteFileHelper={deleteFileHelper}
                         count={selected.count}
                         clearSelection={clearSelection}
-                        clubByTime={clubByTime}
-                        setClubByTime={setClubByTime}
                     />
                 ) : (
                     <div

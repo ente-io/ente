@@ -1,5 +1,5 @@
 import { SetDialogMessage } from 'components/MessageDialog';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
 import styled from 'styled-components';
 import Navbar from 'components/Navbar';
@@ -26,24 +26,25 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { FIX_CREATION_TIME_VISIBLE_TO_USER_IDS } from 'constants/user';
 import DownloadIcon from 'components/icons/DownloadIcon';
 import { User } from 'types/user';
+import { DeduplicateContext } from 'pages/deduplicate';
 
 interface Props {
-    addToCollectionHelper: (collection: Collection) => void;
-    moveToCollectionHelper: (collection: Collection) => void;
-    restoreToCollectionHelper: (collection: Collection) => void;
-    showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
+    addToCollectionHelper?: (collection: Collection) => void;
+    moveToCollectionHelper?: (collection: Collection) => void;
+    restoreToCollectionHelper?: (collection: Collection) => void;
+    showCreateCollectionModal?: (opsType: COLLECTION_OPS_TYPE) => () => void;
     setDialogMessage: SetDialogMessage;
-    setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
+    setCollectionSelectorAttributes?: SetCollectionSelectorAttributes;
     deleteFileHelper: (permanent?: boolean) => void;
-    removeFromCollectionHelper: () => void;
-    fixTimeHelper: () => void;
-    downloadHelper: () => void;
+    removeFromCollectionHelper?: () => void;
+    fixTimeHelper?: () => void;
+    downloadHelper?: () => void;
     count: number;
     clearSelection: () => void;
-    archiveFilesHelper: () => void;
-    unArchiveFilesHelper: () => void;
-    activeCollection: number;
-    isFavoriteCollection: boolean;
+    archiveFilesHelper?: () => void;
+    unArchiveFilesHelper?: () => void;
+    activeCollection?: number;
+    isFavoriteCollection?: boolean;
 }
 
 const SelectionBar = styled(Navbar)`
@@ -92,6 +93,8 @@ const SelectedFileOptions = ({
     isFavoriteCollection,
 }: Props) => {
     const [showFixCreationTime, setShowFixCreationTime] = useState(false);
+    const deduplicateContext = useContext(DeduplicateContext);
+
     useEffect(() => {
         const user: User = getData(LS_KEYS.USER);
         const showFixCreationTime =
@@ -173,7 +176,45 @@ const SelectedFileOptions = ({
                     {count} {constants.SELECTED}
                 </div>
             </SelectionContainer>
-            {activeCollection === TRASH_SECTION ? (
+            {deduplicateContext.state ? (
+                <>
+                    <input
+                        type="checkbox"
+                        style={{
+                            width: '1em',
+                            height: '1em',
+                        }}
+                        value={deduplicateContext.clubByTime ? 'true' : 'false'}
+                        onChange={() => {
+                            deduplicateContext.setClubByTime(
+                                !deduplicateContext.clubByTime
+                            );
+                        }}></input>
+                    <div
+                        style={{
+                            marginLeft: '0.5em',
+                            fontSize: '16px',
+                            marginRight: '0.8em',
+                        }}>
+                        {constants.CLUB_BY_CAPTURE_TIME}
+                    </div>
+                    <div className="vertical-line">
+                        <div
+                            style={{
+                                position: 'absolute',
+                                width: '1px',
+                                top: 0,
+                                bottom: 0,
+                                background: '#303030',
+                            }}></div>
+                    </div>
+                    <IconWithMessage message={constants.DELETE}>
+                        <IconButton onClick={trashHandler}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </IconWithMessage>
+                </>
+            ) : activeCollection === TRASH_SECTION ? (
                 <>
                     <IconWithMessage message={constants.RESTORE}>
                         <IconButton onClick={restoreHandler}>
