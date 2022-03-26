@@ -33,6 +33,7 @@ dependencies:
   device_info: ^2.0.2
   dio: ^4.0.0
   dots_indicator: ^2.0.0
+  dotted_border: ^2.0.0+2
   email_validator: ^2.0.1
   event_bus: ^2.0.0
   exif: ^3.0.0

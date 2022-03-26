@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/app_version_widget.dart';
@@ -12,9 +13,10 @@ import 'package:photos/ui/settings/security_section_widget.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
+import 'package:photos/utils/dialog_util.dart';
 
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({Key key}) : super(key: key);
+class RecoveryKeyPage extends StatelessWidget {
+  const RecoveryKeyPage({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +48,8 @@ class SettingsPage extends StatelessWidget {
     }
     contents.addAll([
       SecuritySectionWidget(),
+      sectionDivider,
+      test(),
       sectionDivider,
       SupportSectionWidget(),
       sectionDivider,

@@ -30,6 +30,7 @@ final lightThemeData = ThemeData(
         borderRadius: BorderRadius.circular(8),
       ),
       padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
+      alignment: Alignment.center,
       textStyle: TextStyle(
         fontWeight: FontWeight.w600,
         fontFamily: 'Inter-SemiBold',
@@ -64,11 +65,23 @@ final lightThemeData = ThemeData(
       iconTheme: IconThemeData(color: Colors.black)),
   //https://api.flutter.dev/flutter/material/TextTheme-class.html
   textTheme: TextTheme().copyWith(
+      headline4: TextStyle(
+          fontFamily: 'Inter-SemiBold',
+          color: Colors.black,
+          fontSize: 32,
+          fontWeight: FontWeight.w600),
       headline6: TextStyle(
           color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
       subtitle1: TextStyle(
-        fontFamily: 'Inter-Medium',
-          color: Colors.black, fontSize: 16, fontWeight: FontWeight.w500),
+          fontFamily: 'Inter-Medium',
+          color: Colors.black,
+          fontSize: 16,
+          fontWeight: FontWeight.w500),
+      bodyText1: TextStyle(
+          fontFamily: 'Inter-Medium',
+          color: Colors.black,
+          fontSize: 16,
+          fontWeight: FontWeight.w400),
       caption: TextStyle(color: Colors.black.withOpacity(0.7), fontSize: 14),
       overline: TextStyle(color: Colors.black.withOpacity(0.8), fontSize: 12)),
 
@@ -107,10 +120,23 @@ final darkThemeData = ThemeData(
   ),
   // primaryColor: Colors.red,
   textTheme: TextTheme().copyWith(
+      headline4: TextStyle(
+          fontFamily: 'Inter-SemiBold',
+          color: Colors.white,
+          fontSize: 32,
+          fontWeight: FontWeight.w600),
       headline6: TextStyle(
           color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
       subtitle1: TextStyle(
-          color: Colors.white, fontFamily: 'Inter-Medium', fontSize: 16, fontWeight: FontWeight.w500),
+          color: Colors.white,
+          fontFamily: 'Inter-Medium',
+          fontSize: 16,
+          fontWeight: FontWeight.w500),
+      bodyText1: TextStyle(
+          fontFamily: 'Inter-Medium',
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.w400),
       caption: TextStyle(
         color: Colors.white.withOpacity(0.6),
         fontSize: 14,
@@ -125,6 +151,7 @@ final darkThemeData = ThemeData(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
+      alignment: Alignment.center,
       padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
       textStyle: TextStyle(
         fontWeight: FontWeight.w600,

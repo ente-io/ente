@@ -135,7 +135,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.only(
-                  left: 24, right:24, bottom: Platform.isIOS ? 60 : 32),
+                  left: 24, right: 24, bottom: Platform.isIOS ? 60 : 32),
               child: OutlinedButton(
                 child: Text(widget.buttonText),
                 onPressed: _selectedFolders.isEmpty
@@ -278,11 +278,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                           fontSize: 12,
                           color: isSelected
                               ? Colors.white
-
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  ,
+                              : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
