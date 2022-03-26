@@ -4,8 +4,10 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/ui/rename_dialog.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -27,6 +29,28 @@ Future<void> changeVisibility(
     await dialog.hide();
   } catch (e, s) {
     _logger.severe("failed to update file visibility", e, s);
+    await dialog.hide();
+    rethrow;
+  }
+}
+
+Future<void> changeCollectionVisibility(
+    BuildContext context, Collection collection, int newVisibility) async {
+  final dialog = createProgressDialog(context,
+      newVisibility == kVisibilityArchive ? "archiving..." : "unarchiving...");
+  await dialog.show();
+  try {
+    Map<String, dynamic> update = {kMagicKeyVisibility: newVisibility};
+    await CollectionsService.instance.updateMagicMetadata(collection, update);
+    // Force reload home gallery to pull in the now unarchived files
+    Bus.instance.fire(ForceReloadHomeGalleryEvent());
+    showShortToast(newVisibility == kVisibilityArchive
+        ? "successfully archived"
+        : "successfully unarchived");
+
+    await dialog.hide();
+  } catch (e, s) {
+    _logger.severe("failed to update collection visibility", e, s);
     await dialog.hide();
     rethrow;
   }

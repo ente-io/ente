@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/ui/video_controls.dart';
@@ -118,6 +119,12 @@ class _VideoWidgetState extends State<VideoWidget> {
             _videoPlayerController.value.isInitialized
         ? _getVideoPlayer()
         : _getLoadingWidget();
+    final contentWithDetector = GestureDetector(
+      child: content,
+      onVerticalDragUpdate: (d) => {
+        if (d.delta.dy > kDragSensitivity) {Navigator.of(context).pop()}
+      },
+    );
     return VisibilityDetector(
       key: Key(widget.file.tag()),
       onVisibilityChanged: (info) {
@@ -129,7 +136,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       },
       child: Hero(
         tag: widget.tagPrefix + widget.file.tag(),
-        child: content,
+        child: contentWithDetector,
       ),
     );
   }

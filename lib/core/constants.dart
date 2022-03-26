@@ -24,3 +24,6 @@ const kThumbnailServerLoadDeferDuration = Duration(milliseconds: 80);
 // 256 bit key maps to 24 words
 // https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#Generating_the_mnemonic
 const kMnemonicKeyWordCount = 24;
+
+// https://stackoverflow.com/a/61162219
+const kDragSensitivity = 8;
