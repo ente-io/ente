@@ -37,8 +37,8 @@ import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import constants from 'utils/strings/constants';
 
 const defaultDeduplicateContext: DeduplicateContextType = {
-    clubByTime: false,
-    setClubByTime: null,
+    clubSameTimeFilesOnly: false,
+    setClubSameTimeFilesOnly: null,
     fileSizeMap: new Map<number, number>(),
     state: false,
 };
@@ -67,7 +67,7 @@ export default function Deduplicate() {
     const syncInProgress = useRef(true);
     const resync = useRef(false);
     const appContext = useContext(AppContext);
-    const [clubByTime, setClubByTime] = useState(false);
+    const [clubSameTimeFilesOnly, setClubSameTimeFilesOnly] = useState(false);
     const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
 
     const [notificationAttributes, setNotificationAttributes] =
@@ -119,7 +119,7 @@ export default function Deduplicate() {
             await syncFiles(collections, setLocalFiles);
 
             let duplicates = await getDuplicateFiles();
-            if (clubByTime) {
+            if (clubSameTimeFilesOnly) {
                 duplicates = await clubDuplicatesByTime(duplicates);
             }
 
@@ -191,7 +191,7 @@ export default function Deduplicate() {
         };
         sync();
         finishLoading();
-    }, [clubByTime]);
+    }, [clubSameTimeFilesOnly]);
 
     const clearSelection = function () {
         setSelected({ count: 0, collectionID: 0 });
@@ -242,8 +242,8 @@ export default function Deduplicate() {
         <DeduplicateContext.Provider
             value={{
                 ...defaultDeduplicateContext,
-                clubByTime,
-                setClubByTime,
+                clubSameTimeFilesOnly,
+                setClubSameTimeFilesOnly,
                 fileSizeMap,
                 state: true,
             }}>

@@ -230,7 +230,7 @@ export function PhotoList({
                     deduplicateContext.fileSizeMap.get(
                         filteredData[lastFileIndex].id
                     ) !== currentFileSize ||
-                    (deduplicateContext.clubByTime &&
+                    (deduplicateContext.clubSameTimeFilesOnly &&
                         filteredData[lastFileIndex].metadata.creationTime !==
                             currentCreationTime)
                 ) {

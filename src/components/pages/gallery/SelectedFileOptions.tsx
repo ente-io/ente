@@ -184,10 +184,14 @@ const SelectedFileOptions = ({
                             width: '1em',
                             height: '1em',
                         }}
-                        value={deduplicateContext.clubByTime ? 'true' : 'false'}
+                        value={
+                            deduplicateContext.clubSameTimeFilesOnly
+                                ? 'true'
+                                : 'false'
+                        }
                         onChange={() => {
-                            deduplicateContext.setClubByTime(
-                                !deduplicateContext.clubByTime
+                            deduplicateContext.setClubSameTimeFilesOnly(
+                                !deduplicateContext.clubSameTimeFilesOnly
                             );
                         }}></input>
                     <div
