@@ -1,6 +1,5 @@
-import EnteSpinner from 'components/EnteSpinner';
+import { IconButton } from 'components/Container';
 import LeftArrow from 'components/icons/LeftArrow';
-import { LoadingOverlay } from 'components/LoadingOverlay';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
 import SelectedDuplicatesOptions from 'components/pages/deduplicate/SelectedDuplicatesOptions';
 import AlertBanner from 'components/pages/gallery/AlertBanner';
@@ -11,10 +10,19 @@ import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import { defaultGalleryContext, GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
 import LoadingBar from 'react-top-loading-bar';
 import { syncCollections } from 'services/collectionService';
-import deduplicationService from 'services/deduplicationService';
+import {
+    getDuplicateFiles,
+    clubDuplicatesByTime,
+} from 'services/deduplicationService';
 import { getLocalFiles, syncFiles, trashFiles } from 'services/fileService';
 import { getLocalTrash, getTrashedFiles } from 'services/trashService';
 import { isTokenValid, logoutUser } from 'services/userService';
@@ -26,6 +34,17 @@ import { getSelectedFiles, mergeMetadata, sortFiles } from 'utils/file';
 import { isFirstLogin, setIsFirstLogin, setJustSignedUp } from 'utils/storage';
 import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import constants from 'utils/strings/constants';
+import { DeduplicateContextType } from 'types/deduplicating';
+
+const defaultDeduplicateContext: DeduplicateContextType = {
+    clubByTime: false,
+    fileSizeMap: new Map<number, number>(),
+    state: false,
+};
+
+export const DeduplicateContext = createContext<DeduplicateContextType>(
+    defaultDeduplicateContext
+);
 
 export default function Deduplicate() {
     const router = useRouter();
@@ -42,7 +61,6 @@ export default function Deduplicate() {
     });
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
-    const [blockingLoad, setBlockingLoad] = useState(false);
     const loadingBar = useRef(null);
     const isLoadingBarRunning = useRef(false);
     const syncInProgress = useRef(true);
@@ -99,11 +117,9 @@ export default function Deduplicate() {
             const collections = await syncCollections();
             await syncFiles(collections, setLocalFiles);
 
-            let duplicates = await deduplicationService.getDuplicateFiles();
+            let duplicates = await getDuplicateFiles();
             if (clubByTime) {
-                duplicates = await deduplicationService.clubDuplicatesByTime(
-                    duplicates
-                );
+                duplicates = await clubDuplicatesByTime(duplicates);
             }
 
             const currFileSizeMap = new Map<number, number>();
@@ -222,88 +238,87 @@ export default function Deduplicate() {
     };
 
     return (
-        <GalleryContext.Provider
+        <DeduplicateContext.Provider
             value={{
-                ...defaultGalleryContext,
-                closeMessageDialog,
-                syncWithRemote,
-                setDialogMessage,
-                startLoading,
-                finishLoading,
-                setNotificationAttributes,
-                setBlockingLoad,
+                ...defaultDeduplicateContext,
+                clubByTime,
+                fileSizeMap,
+                state: true,
             }}>
-            {blockingLoad && (
-                <LoadingOverlay>
-                    <EnteSpinner />
-                </LoadingOverlay>
-            )}
-
-            <LoadingBar color="#51cd7c" ref={loadingBar} />
-            <AlertBanner bannerMessage={bannerMessage} />
-            <ToastNotification
-                attributes={notificationAttributes}
-                clearAttributes={clearNotificationAttributes}
-            />
-            <MessageDialog
-                size="lg"
-                show={messageDialogView}
-                onHide={closeMessageDialog}
-                attributes={dialogMessage}
-            />
-            {duplicateFiles.length > 0 ? (
-                <PhotoFrame
-                    files={duplicateFiles}
-                    setFiles={setDuplicateFiles}
-                    syncWithRemote={syncWithRemote}
-                    favItemIds={new Set()}
-                    setSelected={setSelected}
-                    selected={selected}
-                    isFirstLoad={isFirstLoad}
-                    isInSearchMode={false}
-                    deleted={[]}
-                    activeCollection={ALL_SECTION}
-                    isSharedCollection={false}
-                    enableDownload={true}
-                    deduplicating={{
-                        clubByTime: clubByTime,
-                        fileSizeMap: fileSizeMap,
-                    }}
+            <GalleryContext.Provider
+                value={{
+                    ...defaultGalleryContext,
+                    closeMessageDialog,
+                    syncWithRemote,
+                    setDialogMessage,
+                    startLoading,
+                    finishLoading,
+                    setNotificationAttributes,
+                }}>
+                <LoadingBar color="#51cd7c" ref={loadingBar} />
+                <AlertBanner bannerMessage={bannerMessage} />
+                <ToastNotification
+                    attributes={notificationAttributes}
+                    clearAttributes={clearNotificationAttributes}
                 />
-            ) : (
-                <b
-                    style={{
-                        fontSize: '2em',
-                        textAlign: 'center',
-                        marginTop: '20%',
-                    }}>
-                    {constants.NO_DUPLICATES_FOUND}
-                </b>
-            )}
-
-            {selected.count > 0 ? (
-                <SelectedDuplicatesOptions
-                    setDialogMessage={setDialogMessage}
-                    deleteFileHelper={deleteFileHelper}
-                    count={selected.count}
-                    clearSelection={clearSelection}
-                    clubByTime={clubByTime}
-                    setClubByTime={setClubByTime}
+                <MessageDialog
+                    size="lg"
+                    show={messageDialogView}
+                    onHide={closeMessageDialog}
+                    attributes={dialogMessage}
                 />
-            ) : (
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: '1em',
-                        left: '1em',
-                        zIndex: 10,
-                    }}
-                    onClick={() => {
-                        router.push(PAGES.GALLERY);
-                    }}>
-                    <LeftArrow />
-                </div>
-            )}
-        </GalleryContext.Provider>
+                {duplicateFiles.length > 0 ? (
+                    <PhotoFrame
+                        files={duplicateFiles}
+                        setFiles={setDuplicateFiles}
+                        syncWithRemote={syncWithRemote}
+                        favItemIds={new Set()}
+                        setSelected={setSelected}
+                        selected={selected}
+                        isFirstLoad={isFirstLoad}
+                        isInSearchMode={false}
+                        deleted={[]}
+                        activeCollection={ALL_SECTION}
+                        isSharedCollection={false}
+                        enableDownload={true}
+                    />
+                ) : (
+                    <b
+                        style={{
+                            fontSize: '2em',
+                            textAlign: 'center',
+                            marginTop: '20%',
+                        }}>
+                        {constants.NO_DUPLICATES_FOUND}
+                    </b>
+                )}
+
+                {selected.count > 0 ? (
+                    <SelectedDuplicatesOptions
+                        setDialogMessage={setDialogMessage}
+                        deleteFileHelper={deleteFileHelper}
+                        count={selected.count}
+                        clearSelection={clearSelection}
+                        clubByTime={clubByTime}
+                        setClubByTime={setClubByTime}
+                    />
+                ) : (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: '1em',
+                            left: '1em',
+                            zIndex: 10,
+                        }}
+                        onClick={() => {
+                            router.push(PAGES.GALLERY);
+                        }}>
+                        <IconButton>
+                            <LeftArrow />
+                        </IconButton>
+                    </div>
+                )}
+            </GalleryContext.Provider>
+        </DeduplicateContext.Provider>
     );
 }

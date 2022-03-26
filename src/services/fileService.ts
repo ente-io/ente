@@ -277,7 +277,12 @@ export const updatePublicMagicMetadata = async (files: EnteFile[]) => {
 };
 
 async function trashFilesFromServer(trashBatch: TrashRequest, token: any) {
-    await HTTPService.post(`${ENDPOINT}/files/trash`, trashBatch, null, {
-        'X-Auth-Token': token,
-    });
+    try {
+        await HTTPService.post(`${ENDPOINT}/files/trash`, trashBatch, null, {
+            'X-Auth-Token': token,
+        });
+    } catch (e) {
+        logError(e, 'trash files from server failed');
+        throw e;
+    }
 }

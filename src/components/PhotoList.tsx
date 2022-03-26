@@ -16,7 +16,7 @@ import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
 import { getVariantColor, ButtonVariant } from './pages/gallery/LinkButton';
 import { getReadableSizeFromBytes } from 'utils/photoList';
-import { DeduplicatingType } from 'types/gallery';
+import { DeduplicateContext } from 'pages/deduplicate';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const NO_OF_PAGES = 2;
@@ -25,7 +25,7 @@ const FOOTER_HEIGHT = 90;
 enum ITEM_TYPE {
     TIME = 'TIME',
     TILE = 'TILE',
-    SIZE_AND_CNT = 'SIZE_AND_CNT',
+    SIZE_AND_COUNT = 'SIZE_AND_COUNT',
     OTHER = 'OTHER',
 }
 
@@ -140,7 +140,6 @@ interface Props {
     getThumbnail: (files: EnteFile[], index: number) => JSX.Element;
     activeCollection: number;
     resetFetching: () => void;
-    deduplicating?: DeduplicatingType;
 }
 
 export function PhotoList({
@@ -151,7 +150,6 @@ export function PhotoList({
     getThumbnail,
     activeCollection,
     resetFetching,
-    deduplicating,
 }: Props) {
     const timeStampListRef = useRef([]);
     const timeStampList = timeStampListRef?.current ?? [];
@@ -161,6 +159,8 @@ export function PhotoList({
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
+    const deduplicateContext = useContext(DeduplicateContext);
+
     let columns = Math.floor(width / IMAGE_CONTAINER_MAX_WIDTH);
     let listItemHeight = IMAGE_CONTAINER_MAX_HEIGHT;
 
@@ -178,13 +178,17 @@ export function PhotoList({
 
     useEffect(() => {
         let timeStampList: TimeStampListItem[] = [];
-        if (deduplicating) {
+        if (deduplicateContext.state) {
             groupByFileSize(timeStampList);
         } else {
             groupByTime(timeStampList);
         }
 
-        if (!skipMerge && !deduplicating) {
+        if (deduplicateContext.state) {
+            skipMerge = true;
+        }
+
+        if (!skipMerge) {
             timeStampList = mergeTimeStampList(timeStampList, columns);
         }
         if (timeStampList.length === 0) {
@@ -217,16 +221,16 @@ export function PhotoList({
         let index = 0;
         while (index < filteredData.length) {
             const file = filteredData[index];
-            const currentFileSize = deduplicating.fileSizeMap.get(file.id);
+            const currentFileSize = deduplicateContext.fileSizeMap.get(file.id);
             const currentCreationTime = file.metadata.creationTime;
             let lastFileIndex = index;
 
             while (lastFileIndex < filteredData.length) {
                 if (
-                    deduplicating.fileSizeMap.get(
+                    deduplicateContext.fileSizeMap.get(
                         filteredData[lastFileIndex].id
                     ) !== currentFileSize ||
-                    (deduplicating.clubByTime &&
+                    (deduplicateContext.clubByTime &&
                         filteredData[lastFileIndex].metadata.creationTime !==
                             currentCreationTime)
                 ) {
@@ -236,7 +240,7 @@ export function PhotoList({
             }
             lastFileIndex--;
             timeStampList.push({
-                itemType: ITEM_TYPE.SIZE_AND_CNT,
+                itemType: ITEM_TYPE.SIZE_AND_COUNT,
                 fileSize: currentFileSize,
                 fileCount: lastFileIndex - index + 1,
             });
@@ -454,7 +458,7 @@ export function PhotoList({
         switch (timeStampList[index].itemType) {
             case ITEM_TYPE.TIME:
                 return DATE_CONTAINER_HEIGHT;
-            case ITEM_TYPE.SIZE_AND_CNT:
+            case ITEM_TYPE.SIZE_AND_COUNT:
                 return SIZE_AND_COUNT_CONTAINER_HEIGHT;
             case ITEM_TYPE.TILE:
                 return listItemHeight;
@@ -495,7 +499,7 @@ export function PhotoList({
                         {listItem.date}
                     </DateContainer>
                 );
-            case ITEM_TYPE.SIZE_AND_CNT:
+            case ITEM_TYPE.SIZE_AND_COUNT:
                 return (
                     <SizeAndCountContainer span={columns}>
                         {listItem.fileCount} {constants.FILES},{' '}

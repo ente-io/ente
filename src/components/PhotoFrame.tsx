@@ -18,13 +18,7 @@ import {
 import { isSharedFile } from 'utils/file';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
-import {
-    SetFiles,
-    SelectedState,
-    Search,
-    setSearchStats,
-    DeduplicatingType,
-} from 'types/gallery';
+import { SetFiles, SelectedState, Search, setSearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
@@ -76,7 +70,6 @@ interface Props {
     activeCollection: number;
     isSharedCollection: boolean;
     enableDownload: boolean;
-    deduplicating?: DeduplicatingType;
 }
 
 type SourceURL = {
@@ -100,7 +93,6 @@ const PhotoFrame = ({
     activeCollection,
     isSharedCollection,
     enableDownload,
-    deduplicating,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -588,7 +580,6 @@ const PhotoFrame = ({
                                     files.length < 30 && !isInSearchMode
                                 }
                                 resetFetching={resetFetching}
-                                deduplicating={deduplicating}
                             />
                         )}
                     </AutoSizer>
