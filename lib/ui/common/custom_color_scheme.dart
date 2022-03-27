@@ -13,4 +13,10 @@ extension CustomColorScheme on ColorScheme {
   Color get boxUnSelectColor => brightness == Brightness.light
       ? Color.fromRGBO(240, 240, 240, 1)
       : Color.fromRGBO(8, 18, 18, 0.4);
+
+  Color get fabBackgroundColor =>
+      brightness == Brightness.light ? Colors.black : Colors.grey[700];
+
+  Color get fabTextOrIconColor =>
+      brightness == Brightness.light ? Colors.white : Colors.white54;
 }

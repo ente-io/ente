@@ -57,6 +57,7 @@ final lightThemeData = ThemeData(
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
+    primary: Colors.black,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     textStyle: TextStyle(
       fontWeight: FontWeight.w600,
@@ -74,7 +75,9 @@ final lightThemeData = ThemeData(
   //https://api.flutter.dev/flutter/material/TextTheme-class.html
   textTheme: TextTheme().copyWith(
       headline4: TextStyle(
-          color: Colors.black, fontSize: 30, fontWeight: FontWeight.w600),
+          color: Colors.black, fontSize: 32, fontWeight: FontWeight.w600),
+      headline5: TextStyle(
+          color: Colors.black, fontSize: 24, fontWeight: FontWeight.w600),
       headline6: TextStyle(
           color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
       subtitle1: TextStyle(
@@ -90,8 +93,15 @@ final lightThemeData = ThemeData(
       bodyText1: TextStyle(color: Colors.orange)),
   cardColor: Color.fromRGBO(250, 250, 250, 1.0),
   dialogTheme: DialogTheme().copyWith(
-    backgroundColor: Color.fromRGBO(250, 250, 250, 1.0), //
-  ),
+      backgroundColor: Color.fromRGBO(250, 250, 250, 1.0), //
+      titleTextStyle: TextStyle(
+          color: Colors.black, fontSize: 32, fontWeight: FontWeight.w600),
+      contentTextStyle: TextStyle(
+          fontFamily: 'Inter-Medium',
+          color: Colors.black,
+          fontSize: 14,
+          fontWeight: FontWeight.w500),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
   // textSelectionTheme: TextSelectionThemeData().copyWith(
   //   cursorColor: Colors.black.withOpacity(0.5),
   // ),
@@ -140,6 +150,10 @@ final darkThemeData = ThemeData(
   ),
   // primaryColor: Colors.red,
   textTheme: TextTheme().copyWith(
+      headline4: TextStyle(
+          color: Colors.white, fontSize: 32, fontWeight: FontWeight.w600),
+      headline5: TextStyle(
+          color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600),
       headline6: TextStyle(
           color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
       subtitle1: TextStyle(
@@ -205,8 +219,15 @@ final darkThemeData = ThemeData(
   ),
   cardColor: Color.fromRGBO(10, 15, 15, 1.0),
   dialogTheme: DialogTheme().copyWith(
-    backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
-  ),
+      backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
+      titleTextStyle: TextStyle(
+          color: Colors.white, fontSize: 32, fontWeight: FontWeight.w600),
+      contentTextStyle: TextStyle(
+          fontFamily: 'Inter-Medium',
+          color: Colors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.w500),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
   // textSelectionTheme: TextSelectionThemeData().copyWith(
   //   cursorColor: Colors.white.withOpacity(0.5),
   // ),
@@ -276,7 +297,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   Widget debugBuild(BuildContext context) {
     return MaterialApp(
       title: "ente",
-      themeMode: ThemeMode.light,
+      themeMode: ThemeMode.dark,
       theme: lightThemeData,
       darkTheme: darkThemeData,
       home: EnteApp._homeWidget,
