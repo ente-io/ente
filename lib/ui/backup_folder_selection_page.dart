@@ -62,22 +62,24 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(""),
-      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: EdgeInsets.all(24),
-            child: Text(
-              'Select folders for backup',
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontFamily: 'Inter-Bold',
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold),
+          SizedBox(
+            height: 0,
+          ),
+          SafeArea(
+            child: Container(
+              padding: EdgeInsets.all(24),
+              child: Text(
+                'Select folders for backup',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontFamily: 'Inter-Bold',
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold),
+              ),
             ),
           ),
           Padding(
@@ -127,26 +129,35 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     setState(() {});
                   }),
           Expanded(child: _getFolders()),
-          Padding(
-            padding: EdgeInsets.all(20),
-          ),
           Hero(
             tag: "select_folders",
             child: Container(
               width: double.infinity,
-              padding: EdgeInsets.only(
-                  left: 24, right:24, bottom: Platform.isIOS ? 60 : 32),
-              child: OutlinedButton(
-                child: Text(widget.buttonText),
-                onPressed: _selectedFolders.isEmpty
-                    ? null
-                    : () async {
-                        await Configuration.instance
-                            .setPathsToBackUp(_selectedFolders);
-                        Bus.instance.fire(BackupFoldersUpdatedEvent());
-                        Navigator.of(context).pop();
-                      },
-                // padding: EdgeInsets.fromLTRB(12, 20, 12, 20),
+              // padding: EdgeInsets.only(
+              //     left: 20, right: 20, bottom: Platform.isIOS ? 60 : 32),
+              padding: EdgeInsets.only(left: 20, right: 20, bottom: 40),
+              child: Container(
+                height: 56,
+                decoration: BoxDecoration(boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(context).backgroundColor,
+                    spreadRadius: 175,
+                    blurRadius: 50,
+                    offset: Offset(0, 150),
+                  )
+                ]),
+                child: OutlinedButton(
+                  child: Text(widget.buttonText),
+                  onPressed: _selectedFolders.isEmpty
+                      ? null
+                      : () async {
+                          await Configuration.instance
+                              .setPathsToBackUp(_selectedFolders);
+                          Bus.instance.fire(BackupFoldersUpdatedEvent());
+                          Navigator.of(context).pop();
+                        },
+                  // padding: EdgeInsets.fromLTRB(12, 20, 12, 20),
+                ),
               ),
             ),
           ),
@@ -162,7 +173,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     _sortFiles();
     final scrollController = ScrollController();
     return Container(
-      padding: EdgeInsets.only(left: 20, right: 24),
+      padding: EdgeInsets.symmetric(horizontal: 20),
       child: Scrollbar(
         controller: scrollController,
         isAlwaysShown: true,
@@ -278,18 +289,14 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                           fontSize: 12,
                           color: isSelected
                               ? Colors.white
-
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  ,
+                              : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
                   ),
                 ],
               ),
-              _getThumbnail(file),
+              _getThumbnail(file, isSelected),
             ],
           ),
           onTap: () {
@@ -324,15 +331,25 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     });
   }
 
-  Widget _getThumbnail(File file) {
+  Widget _getThumbnail(File file, bool isSelected) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(4.0),
+      borderRadius: BorderRadius.circular(8),
       child: SizedBox(
-        child: ThumbnailWidget(
-          file,
-          shouldShowSyncStatus: false,
-          key: Key("backup_selection_widget" + file.tag()),
-        ),
+        child: Stack(alignment: AlignmentDirectional.bottomEnd, children: [
+          ThumbnailWidget(
+            file,
+            shouldShowSyncStatus: false,
+            key: Key("backup_selection_widget" + file.tag()),
+          ),
+          Padding(
+              padding: const EdgeInsets.all(9),
+              child: isSelected
+                  ? Icon(
+                      Icons.local_police,
+                      color: Colors.white,
+                    )
+                  : null),
+        ]),
         height: 88,
         width: 88,
       ),

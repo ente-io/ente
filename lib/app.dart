@@ -297,7 +297,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   Widget debugBuild(BuildContext context) {
     return MaterialApp(
       title: "ente",
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.light,
       theme: lightThemeData,
       darkTheme: darkThemeData,
       home: EnteApp._homeWidget,

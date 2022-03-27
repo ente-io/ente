@@ -46,7 +46,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
               context,
               BackupFolderSelectionPage(
                 shouldSelectAll: true,
-                buttonText: "start backup",
+                buttonText: "Start backup",
               ));
         }
       }

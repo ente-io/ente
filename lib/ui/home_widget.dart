@@ -424,7 +424,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                         context,
                         BackupFolderSelectionPage(
                           shouldSelectAll: true,
-                          buttonText: "start backup",
+                          buttonText: "Start backup",
                         ),
                       );
                     }
