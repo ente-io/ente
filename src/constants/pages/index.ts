@@ -13,7 +13,6 @@ export enum PAGES {
     VERIFY = '/verify',
     ROOT = '/',
     SHARED_ALBUMS = '/shared-albums',
-    DEDUPLICATE = '/deduplicate',
 }
 export const getAlbumSiteHost = () =>
     process.env.NODE_ENV === 'production'

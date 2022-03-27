@@ -16,7 +16,7 @@ import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
 import { getVariantColor, ButtonVariant } from './pages/gallery/LinkButton';
 import { getReadableSizeFromBytes } from 'utils/photoList';
-import { DeduplicateContext } from 'pages/deduplicate';
+import { GalleryContext } from 'pages/gallery';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const NO_OF_PAGES = 2;
@@ -159,7 +159,7 @@ export function PhotoList({
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
-    const deduplicateContext = useContext(DeduplicateContext);
+    const galleryContext = useContext(GalleryContext);
 
     let columns = Math.floor(width / IMAGE_CONTAINER_MAX_WIDTH);
     let listItemHeight = IMAGE_CONTAINER_MAX_HEIGHT;
@@ -178,13 +178,13 @@ export function PhotoList({
 
     useEffect(() => {
         let timeStampList: TimeStampListItem[] = [];
-        if (deduplicateContext.state) {
+        if (galleryContext.state) {
             groupByFileSize(timeStampList);
         } else {
             groupByTime(timeStampList);
         }
 
-        if (deduplicateContext.state) {
+        if (galleryContext.state) {
             skipMerge = true;
         }
 
@@ -221,16 +221,16 @@ export function PhotoList({
         let index = 0;
         while (index < filteredData.length) {
             const file = filteredData[index];
-            const currentFileSize = deduplicateContext.fileSizeMap.get(file.id);
+            const currentFileSize = galleryContext.fileSizeMap.get(file.id);
             const currentCreationTime = file.metadata.creationTime;
             let lastFileIndex = index;
 
             while (lastFileIndex < filteredData.length) {
                 if (
-                    deduplicateContext.fileSizeMap.get(
+                    galleryContext.fileSizeMap.get(
                         filteredData[lastFileIndex].id
                     ) !== currentFileSize ||
-                    (deduplicateContext.clubSameTimeFilesOnly &&
+                    (galleryContext.clubSameTimeFilesOnly &&
                         filteredData[lastFileIndex].metadata.creationTime !==
                             currentCreationTime)
                 ) {

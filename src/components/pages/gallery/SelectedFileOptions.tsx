@@ -26,7 +26,7 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { FIX_CREATION_TIME_VISIBLE_TO_USER_IDS } from 'constants/user';
 import DownloadIcon from 'components/icons/DownloadIcon';
 import { User } from 'types/user';
-import { DeduplicateContext } from 'pages/deduplicate';
+import { GalleryContext } from 'pages/gallery';
 
 interface Props {
     addToCollectionHelper?: (collection: Collection) => void;
@@ -93,7 +93,7 @@ const SelectedFileOptions = ({
     isFavoriteCollection,
 }: Props) => {
     const [showFixCreationTime, setShowFixCreationTime] = useState(false);
-    const deduplicateContext = useContext(DeduplicateContext);
+    const galleryContext = useContext(GalleryContext);
 
     useEffect(() => {
         const user: User = getData(LS_KEYS.USER);
@@ -176,7 +176,7 @@ const SelectedFileOptions = ({
                     {count} {constants.SELECTED}
                 </div>
             </SelectionContainer>
-            {deduplicateContext.state ? (
+            {galleryContext.state ? (
                 <>
                     <input
                         type="checkbox"
@@ -185,13 +185,13 @@ const SelectedFileOptions = ({
                             height: '1em',
                         }}
                         value={
-                            deduplicateContext.clubSameTimeFilesOnly
+                            galleryContext.clubSameTimeFilesOnly
                                 ? 'true'
                                 : 'false'
                         }
                         onChange={() => {
-                            deduplicateContext.setClubSameTimeFilesOnly(
-                                !deduplicateContext.clubSameTimeFilesOnly
+                            galleryContext.setClubSameTimeFilesOnly(
+                                !galleryContext.clubSameTimeFilesOnly
                             );
                         }}></input>
                     <div

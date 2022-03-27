@@ -105,6 +105,12 @@ import {
 import Collections from 'components/pages/gallery/Collections';
 import { VISIBILITY_STATE } from 'constants/file';
 import ToastNotification from 'components/ToastNotification';
+import {
+    clubDuplicatesByTime,
+    getDuplicateFiles,
+} from 'services/deduplicationService';
+import { IconButton } from 'components/Container';
+import LeftArrow from 'components/icons/LeftArrow';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -133,6 +139,11 @@ export const defaultGalleryContext: GalleryContextType = {
     finishLoading: () => null,
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
+    clubSameTimeFilesOnly: false,
+    setClubSameTimeFilesOnly: null,
+    fileSizeMap: new Map<number, number>(),
+    state: false,
+    setIsDeduplicatePage: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -202,6 +213,11 @@ export default function Gallery() {
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
 
+    const [isDeduplicatePage, setIsDeduplicatePage] = useState(false);
+    const [duplicateFiles, setDuplicateFiles] = useState<EnteFile[]>([]);
+    const [clubSameTimeFilesOnly, setClubSameTimeFilesOnly] = useState(false);
+    const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
+
     const showPlanSelectorModal = () => setPlanModalView(true);
     const closeMessageDialog = () => setMessageDialogView(false);
 
@@ -229,7 +245,9 @@ export default function Gallery() {
             setFiles(sortFiles([...files, ...trashedFile]));
             setCollections(collections);
             setTrash(trash);
-            await setDerivativeState(collections, files);
+            if (!isDeduplicatePage) {
+                await setDerivativeState(collections, files);
+            }
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -237,7 +255,7 @@ export default function Gallery() {
         };
         main();
         appContext.showNavBar(true);
-    }, []);
+    }, [isDeduplicatePage]);
 
     useEffect(() => setMessageDialogView(true), [dialogMessage]);
 
@@ -285,6 +303,15 @@ export default function Gallery() {
         }
     }, [router.isReady]);
 
+    useEffect(() => {
+        startLoading();
+        const sync = async () => {
+            await syncWithRemote();
+        };
+        sync();
+        finishLoading();
+    }, [clubSameTimeFilesOnly]);
+
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
             resync.current = true;
@@ -301,9 +328,48 @@ export default function Gallery() {
             const collections = await syncCollections();
             setCollections(collections);
             const files = await syncFiles(collections, setFiles);
-            await setDerivativeState(collections, files);
-            const trash = await syncTrash(collections, setFiles, files);
-            setTrash(trash);
+
+            if (isDeduplicatePage) {
+                let duplicates = await getDuplicateFiles();
+                if (clubSameTimeFilesOnly) {
+                    duplicates = await clubDuplicatesByTime(duplicates);
+                }
+
+                const currFileSizeMap = new Map<number, number>();
+
+                let allDuplicateFiles: EnteFile[] = [];
+                let toSelectFileIDs: number[] = [];
+                let count = 0;
+
+                for (const dupe of duplicates) {
+                    allDuplicateFiles = allDuplicateFiles.concat(dupe.files);
+                    // select all except first file
+                    toSelectFileIDs = toSelectFileIDs.concat(
+                        dupe.files.slice(1).map((f) => f.id)
+                    );
+                    count += dupe.files.length - 1;
+
+                    for (const file of dupe.files) {
+                        currFileSizeMap.set(file.id, dupe.size);
+                    }
+                }
+                setDuplicateFiles(allDuplicateFiles);
+                setFileSizeMap(currFileSizeMap);
+
+                const selectedFiles = {
+                    count: count,
+                    collectionID: 0,
+                };
+
+                for (const fileID of toSelectFileIDs) {
+                    selectedFiles[fileID] = true;
+                }
+                setSelected(selectedFiles);
+            } else {
+                await setDerivativeState(collections, files);
+                const trash = await syncTrash(collections, setFiles, files);
+                setTrash(trash);
+            }
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
@@ -574,27 +640,16 @@ export default function Gallery() {
                 finishLoading,
                 setNotificationAttributes,
                 setBlockingLoad,
+                clubSameTimeFilesOnly,
+                setClubSameTimeFilesOnly,
+                fileSizeMap,
+                setIsDeduplicatePage,
+                state: isDeduplicatePage,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
                 getInputProps={getInputProps}>
-                {blockingLoad && (
-                    <LoadingOverlay>
-                        <EnteSpinner />
-                    </LoadingOverlay>
-                )}
                 <LoadingBar color="#51cd7c" ref={loadingBar} />
-                {isFirstLoad && (
-                    <AlertContainer>
-                        {constants.INITIAL_LOAD_DELAY_WARNING}
-                    </AlertContainer>
-                )}
-                <PlanSelector
-                    modalView={planModalView}
-                    closeModal={() => setPlanModalView(false)}
-                    setDialogMessage={setDialogMessage}
-                    setLoading={setBlockingLoad}
-                />
                 <AlertBanner bannerMessage={bannerMessage} />
                 <ToastNotification
                     attributes={notificationAttributes}
@@ -606,102 +661,153 @@ export default function Gallery() {
                     onHide={closeMessageDialog}
                     attributes={dialogMessage}
                 />
-                <SearchBar
-                    isOpen={isInSearchMode}
-                    setOpen={setIsInSearchMode}
-                    isFirstFetch={isFirstFetch}
-                    collections={collections}
-                    files={getNonTrashedUniqueUserFiles(files)}
-                    setActiveCollection={setActiveCollection}
-                    setSearch={updateSearch}
-                    searchStats={searchStats}
-                />
-                <Collections
-                    collections={collections}
-                    collectionAndTheirLatestFile={collectionsAndTheirLatestFile}
-                    isInSearchMode={isInSearchMode}
-                    activeCollection={activeCollection}
-                    setActiveCollection={setActiveCollection}
-                    syncWithRemote={syncWithRemote}
-                    setDialogMessage={setDialogMessage}
-                    setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    startLoading={startLoading}
-                    finishLoading={finishLoading}
-                    collectionFilesCount={collectionFilesCount}
-                />
-                <CollectionNamer
-                    show={collectionNamerView}
-                    onHide={setCollectionNamerView.bind(null, false)}
-                    attributes={collectionNamerAttributes}
-                />
-                <CollectionSelector
-                    show={collectionSelectorView}
-                    onHide={closeCollectionSelector}
-                    collectionsAndTheirLatestFile={
-                        collectionsAndTheirLatestFile
-                    }
-                    attributes={collectionSelectorAttributes}
-                />
-                <FixCreationTime
-                    isOpen={fixCreationTimeView}
-                    hide={() => setFixCreationTimeView(false)}
-                    show={() => setFixCreationTimeView(true)}
-                    attributes={fixCreationTimeAttributes}
-                />
-                <Upload
-                    syncWithRemote={syncWithRemote}
-                    setBannerMessage={setBannerMessage}
-                    acceptedFiles={acceptedFiles}
-                    showCollectionSelector={setCollectionSelectorView.bind(
-                        null,
-                        true
-                    )}
-                    setCollectionSelectorAttributes={
-                        setCollectionSelectorAttributes
-                    }
-                    closeCollectionSelector={setCollectionSelectorView.bind(
-                        null,
-                        false
-                    )}
-                    setLoading={setBlockingLoad}
-                    setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    setDialogMessage={setDialogMessage}
-                    setUploadInProgress={setUploadInProgress}
-                    fileRejections={fileRejections}
-                    setFiles={setFiles}
-                    isFirstUpload={collectionsAndTheirLatestFile?.length === 0}
-                />
-                <Sidebar
-                    collections={collections}
-                    setDialogMessage={setDialogMessage}
-                    setLoading={setBlockingLoad}
-                />
-                <UploadButton
-                    isFirstFetch={isFirstFetch}
-                    openFileUploader={openFileUploader}
-                />
-                <PhotoFrame
-                    files={files}
-                    setFiles={setFiles}
-                    syncWithRemote={syncWithRemote}
-                    favItemIds={favItemIds}
-                    setSelected={setSelected}
-                    selected={selected}
-                    isFirstLoad={isFirstLoad}
-                    openFileUploader={openFileUploader}
-                    isInSearchMode={isInSearchMode}
-                    search={search}
-                    setSearchStats={setSearchStats}
-                    deleted={deleted}
-                    activeCollection={activeCollection}
-                    isSharedCollection={isSharedCollection(
-                        activeCollection,
-                        collections
-                    )}
-                    enableDownload={true}
-                />
-                {selected.count > 0 &&
-                    selected.collectionID === activeCollection && (
+                {isDeduplicatePage ? (
+                    <>
+                        {!(duplicateFiles.length > 0) && (
+                            <b
+                                style={{
+                                    fontSize: '2em',
+                                    textAlign: 'center',
+                                    marginTop: '20%',
+                                }}>
+                                {constants.NO_DUPLICATES_FOUND}
+                            </b>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        {blockingLoad && (
+                            <LoadingOverlay>
+                                <EnteSpinner />
+                            </LoadingOverlay>
+                        )}
+                        {isFirstLoad && (
+                            <AlertContainer>
+                                {constants.INITIAL_LOAD_DELAY_WARNING}
+                            </AlertContainer>
+                        )}
+                        <PlanSelector
+                            modalView={planModalView}
+                            closeModal={() => setPlanModalView(false)}
+                            setDialogMessage={setDialogMessage}
+                            setLoading={setBlockingLoad}
+                        />
+                        <SearchBar
+                            isOpen={isInSearchMode}
+                            setOpen={setIsInSearchMode}
+                            isFirstFetch={isFirstFetch}
+                            collections={collections}
+                            files={getNonTrashedUniqueUserFiles(files)}
+                            setActiveCollection={setActiveCollection}
+                            setSearch={updateSearch}
+                            searchStats={searchStats}
+                        />
+                        <Collections
+                            collections={collections}
+                            collectionAndTheirLatestFile={
+                                collectionsAndTheirLatestFile
+                            }
+                            isInSearchMode={isInSearchMode}
+                            activeCollection={activeCollection}
+                            setActiveCollection={setActiveCollection}
+                            syncWithRemote={syncWithRemote}
+                            setDialogMessage={setDialogMessage}
+                            setCollectionNamerAttributes={
+                                setCollectionNamerAttributes
+                            }
+                            startLoading={startLoading}
+                            finishLoading={finishLoading}
+                            collectionFilesCount={collectionFilesCount}
+                        />
+                        <CollectionNamer
+                            show={collectionNamerView}
+                            onHide={setCollectionNamerView.bind(null, false)}
+                            attributes={collectionNamerAttributes}
+                        />
+                        <CollectionSelector
+                            show={collectionSelectorView}
+                            onHide={closeCollectionSelector}
+                            collectionsAndTheirLatestFile={
+                                collectionsAndTheirLatestFile
+                            }
+                            attributes={collectionSelectorAttributes}
+                        />
+                        <FixCreationTime
+                            isOpen={fixCreationTimeView}
+                            hide={() => setFixCreationTimeView(false)}
+                            show={() => setFixCreationTimeView(true)}
+                            attributes={fixCreationTimeAttributes}
+                        />
+                        <Upload
+                            syncWithRemote={syncWithRemote}
+                            setBannerMessage={setBannerMessage}
+                            acceptedFiles={acceptedFiles}
+                            showCollectionSelector={setCollectionSelectorView.bind(
+                                null,
+                                true
+                            )}
+                            setCollectionSelectorAttributes={
+                                setCollectionSelectorAttributes
+                            }
+                            closeCollectionSelector={setCollectionSelectorView.bind(
+                                null,
+                                false
+                            )}
+                            setLoading={setBlockingLoad}
+                            setCollectionNamerAttributes={
+                                setCollectionNamerAttributes
+                            }
+                            setDialogMessage={setDialogMessage}
+                            setUploadInProgress={setUploadInProgress}
+                            fileRejections={fileRejections}
+                            setFiles={setFiles}
+                            isFirstUpload={
+                                collectionsAndTheirLatestFile?.length === 0
+                            }
+                        />
+                        <Sidebar
+                            collections={collections}
+                            setDialogMessage={setDialogMessage}
+                            setLoading={setBlockingLoad}
+                        />
+                        <UploadButton
+                            isFirstFetch={isFirstFetch}
+                            openFileUploader={openFileUploader}
+                        />
+                        {activeCollection === TRASH_SECTION &&
+                            trash?.length > 0 && (
+                                <DeleteBtn onClick={emptyTrashHandler} />
+                            )}
+                    </>
+                )}
+                {!isDeduplicatePage || duplicateFiles.length > 0 ? (
+                    <PhotoFrame
+                        files={isDeduplicatePage ? duplicateFiles : files}
+                        setFiles={
+                            isDeduplicatePage ? setDuplicateFiles : setFiles
+                        }
+                        syncWithRemote={syncWithRemote}
+                        favItemIds={favItemIds}
+                        setSelected={setSelected}
+                        selected={selected}
+                        isFirstLoad={isFirstLoad}
+                        openFileUploader={openFileUploader}
+                        isInSearchMode={isInSearchMode}
+                        search={search}
+                        setSearchStats={setSearchStats}
+                        deleted={deleted}
+                        activeCollection={activeCollection}
+                        isSharedCollection={isSharedCollection(
+                            activeCollection,
+                            collections
+                        )}
+                        enableDownload={true}
+                    />
+                ) : null}
+
+                {selected.count > 0 ? (
+                    (selected.collectionID === activeCollection ||
+                        isDeduplicatePage) && (
                         <SelectedFileOptions
                             addToCollectionHelper={collectionOpsHelper(
                                 COLLECTION_OPS_TYPE.ADD
@@ -748,10 +854,23 @@ export default function Gallery() {
                                 collections
                             )}
                         />
-                    )}
-                {activeCollection === TRASH_SECTION && trash?.length > 0 && (
-                    <DeleteBtn onClick={emptyTrashHandler} />
-                )}
+                    )
+                ) : isDeduplicatePage ? (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: '1em',
+                            left: '1em',
+                            zIndex: 10,
+                        }}
+                        onClick={() => {
+                            setIsDeduplicatePage(false);
+                        }}>
+                        <IconButton>
+                            <LeftArrow />
+                        </IconButton>
+                    </div>
+                ) : null}
             </FullScreenDropZone>
         </GalleryContext.Provider>
     );
