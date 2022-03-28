@@ -22,8 +22,7 @@ export async function getFileType(
         if (receivedFile instanceof File) {
             typeResult = await extractFileType(reader, receivedFile);
         } else {
-            typeResult = await extractFileTypeFromElectronFile(receivedFile);
-            console.log('typeResult', typeResult);
+            typeResult = await extractElectronFileType(receivedFile);
         }
 
         const mimTypeParts: string[] = typeResult.mime?.split('/');
@@ -63,7 +62,7 @@ async function extractFileType(reader: FileReader, file: File) {
     return getFileTypeFromBlob(reader, fileChunkBlob);
 }
 
-async function extractFileTypeFromElectronFile(file: ElectronFile) {
+async function extractElectronFileType(file: ElectronFile) {
     const stream = await file.stream();
     const reader = stream.getReader();
     const { value } = await reader.read();

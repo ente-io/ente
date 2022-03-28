@@ -79,8 +79,8 @@ export default function Upload(props: Props) {
     const galleryContext = useContext(GalleryContext);
 
     const toUploadFiles = useRef<File[] | ElectronFile[]>(null);
-    const hasPendingUploads = useRef(false);
-    const pendingUploadsCollectionName = useRef<string>('');
+    const isPendingDesktopUpload = useRef(false);
+    const pendingDesktopUploadCollectionName = useRef<string>('');
 
     useEffect(() => {
         UploadManager.initUploader(
@@ -99,8 +99,8 @@ export default function Upload(props: Props) {
         if (isElectron()) {
             ImportService.hasPendingUploads().then((exists) => {
                 if (exists) {
-                    hasPendingUploads.current = true;
-                    uploadFailedFiles();
+                    isPendingDesktopUpload.current = true;
+                    resumeDesktopUpload();
                 }
             });
         }
@@ -152,12 +152,12 @@ export default function Upload(props: Props) {
         setProgressView(true);
     };
 
-    const uploadFailedFiles = async () => {
+    const resumeDesktopUpload = async () => {
         try {
             const { files, collectionName } =
                 await ImportService.getPendingUploads();
 
-            pendingUploadsCollectionName.current = collectionName;
+            pendingDesktopUploadCollectionName.current = collectionName;
             props.setElectronFiles(files);
         } catch (e) {
             logError(e, 'Failed to get previously failed files');
@@ -361,9 +361,17 @@ export default function Upload(props: Props) {
         analysisResult: AnalysisResult,
         isFirstUpload: boolean
     ) => {
-        if (hasPendingUploads.current) {
-            hasPendingUploads.current = false;
-            uploadToSingleNewCollection(pendingUploadsCollectionName.current);
+        if (isPendingDesktopUpload.current) {
+            isPendingDesktopUpload.current = false;
+            if (pendingDesktopUploadCollectionName.current) {
+                uploadToSingleNewCollection(
+                    pendingDesktopUploadCollectionName.current
+                );
+            } else {
+                uploadFilesToNewCollections(
+                    UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
+                );
+            }
         } else if (isFirstUpload) {
             const collectionName =
                 analysisResult.suggestedCollectionName ?? FIRST_ALBUM_NAME;

@@ -20,7 +20,7 @@ class ImportService {
 
     async hasPendingUploads(): Promise<boolean> {
         if (this.allElectronAPIsExist) {
-            return this.ElectronAPIs.getIfToUploadFilesExists();
+            return this.ElectronAPIs.hasPendingUploads();
         }
     }
 
@@ -45,7 +45,7 @@ class ImportService {
     async getPendingUploads() {
         if (this.allElectronAPIsExist) {
             const { files, collectionName } =
-                (await this.ElectronAPIs.pendingToUploadFiles()) as {
+                (await this.ElectronAPIs.getPendingUploads()) as {
                     files: ElectronFile[];
                     collectionName: string;
                 };
