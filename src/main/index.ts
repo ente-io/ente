@@ -8,6 +8,7 @@ import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 import initSentry from './utils/sentry';
 import Store from 'electron-store';
 import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from '../config';
+import { uploadStoreSchema } from './utils/upload';
 
 if (isDev) {
     const electronReload = require('electron-reload');
@@ -40,7 +41,10 @@ const serveNextAt = require('next-electron-server');
 serveNextAt(PROD_HOST_URL, {
     outputDir: RENDERER_OUTPUT_DIR,
 });
-const store = new Store();
+const store = new Store({
+    name: 'upload-status',
+    schema: uploadStoreSchema,
+});
 
 // Disable error dialogs by overriding
 dialog.showErrorBox = function (title, content) {

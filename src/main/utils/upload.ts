@@ -4,10 +4,7 @@ import * as fs from 'promise-fs';
 import { FILE_STREAM_CHUNK_SIZE } from '../../config';
 import { ElectronFile, StoreType } from '../types';
 
-const storeSchema: Schema<StoreType> = {
-    done: {
-        type: 'boolean',
-    },
+export const uploadStoreSchema: Schema<StoreType> = {
     filePaths: {
         type: 'array',
         items: {
@@ -21,11 +18,11 @@ const storeSchema: Schema<StoreType> = {
 
 const store = new Store({
     name: 'upload-status',
-    schema: storeSchema,
+    schema: uploadStoreSchema,
 });
 
 // https://stackoverflow.com/a/63111390
-const getAllFilePaths = async (dirPath: string) => {
+export const getFilesFromDir = async (dirPath: string) => {
     if (!(await fs.stat(dirPath)).isDirectory()) {
         return [dirPath];
     }
@@ -35,14 +32,8 @@ const getAllFilePaths = async (dirPath: string) => {
 
     for (const filePath of filePaths) {
         const absolute = path.join(dirPath, filePath);
-        files = files.concat(await getAllFilePaths(absolute));
+        files = files.concat(await getFilesFromDir(absolute));
     }
-
-    return files;
-};
-
-export const getFilesFromDir = async (dirPath: string) => {
-    const files: string[] = await getAllFilePaths(dirPath);
 
     return files;
 };
@@ -99,7 +90,6 @@ export const setToUploadFiles = (
     collectionName: string,
     done: boolean
 ) => {
-    store.set('done', done);
     if (done) {
         store.delete('filePaths');
         store.delete('collectionName');
@@ -109,7 +99,7 @@ export const setToUploadFiles = (
     }
 };
 
-export const pendingToUploadFiles = async () => {
+export const getPendingUploads = async () => {
     const filePaths = store.get('filePaths') as string[];
     const collectionName = store.get('collectionName') as string;
     return {
@@ -118,10 +108,9 @@ export const pendingToUploadFiles = async () => {
     };
 };
 
-export const getIfToUploadFilesExists = async () => {
-    const doneUploadingFiles = store.get('done') as boolean;
-    if (doneUploadingFiles === undefined) return false;
-    return !doneUploadingFiles;
+export const hasPendingUploads = async () => {
+    const pendingFiles = store.get('filePaths');
+    return pendingFiles && pendingFiles.length > 0;
 };
 
 export const updatePendingUploadsFilePaths = (filePaths: string[]) => {

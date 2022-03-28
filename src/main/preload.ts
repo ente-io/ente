@@ -2,9 +2,9 @@ import { Readable } from 'stream';
 import * as fs from 'promise-fs';
 import * as electron from 'electron';
 import {
-    getIfToUploadFilesExists,
+    hasPendingUploads,
     getElectronFile,
-    pendingToUploadFiles,
+    getPendingUploads,
     setToUploadFiles,
     updatePendingUploadsFilePaths,
 } from './utils/upload';
@@ -144,11 +144,11 @@ windowObject['ElectronAPIs'] = {
     registerRetryFailedExportListener,
     getExportRecord,
     setExportRecord,
-    getIfToUploadFilesExists,
+    hasPendingUploads,
     getElectronFile,
     showUploadFilesDialog,
     showUploadDirsDialog,
-    pendingToUploadFiles,
+    getPendingUploads,
     setToUploadFiles,
     updatePendingUploadsFilePaths,
 };
