@@ -661,6 +661,29 @@ export default function Gallery() {
                     onHide={closeMessageDialog}
                     attributes={dialogMessage}
                 />
+                <Upload
+                    syncWithRemote={syncWithRemote}
+                    setBannerMessage={setBannerMessage}
+                    acceptedFiles={acceptedFiles}
+                    showCollectionSelector={setCollectionSelectorView.bind(
+                        null,
+                        true
+                    )}
+                    setCollectionSelectorAttributes={
+                        setCollectionSelectorAttributes
+                    }
+                    closeCollectionSelector={setCollectionSelectorView.bind(
+                        null,
+                        false
+                    )}
+                    setLoading={setBlockingLoad}
+                    setCollectionNamerAttributes={setCollectionNamerAttributes}
+                    setDialogMessage={setDialogMessage}
+                    setUploadInProgress={setUploadInProgress}
+                    fileRejections={fileRejections}
+                    setFiles={setFiles}
+                    isFirstUpload={collectionsAndTheirLatestFile?.length === 0}
+                />
                 {isDeduplicatePage ? (
                     <>
                         {!(duplicateFiles.length > 0) && (
@@ -737,33 +760,6 @@ export default function Gallery() {
                             hide={() => setFixCreationTimeView(false)}
                             show={() => setFixCreationTimeView(true)}
                             attributes={fixCreationTimeAttributes}
-                        />
-                        <Upload
-                            syncWithRemote={syncWithRemote}
-                            setBannerMessage={setBannerMessage}
-                            acceptedFiles={acceptedFiles}
-                            showCollectionSelector={setCollectionSelectorView.bind(
-                                null,
-                                true
-                            )}
-                            setCollectionSelectorAttributes={
-                                setCollectionSelectorAttributes
-                            }
-                            closeCollectionSelector={setCollectionSelectorView.bind(
-                                null,
-                                false
-                            )}
-                            setLoading={setBlockingLoad}
-                            setCollectionNamerAttributes={
-                                setCollectionNamerAttributes
-                            }
-                            setDialogMessage={setDialogMessage}
-                            setUploadInProgress={setUploadInProgress}
-                            fileRejections={fileRejections}
-                            setFiles={setFiles}
-                            isFirstUpload={
-                                collectionsAndTheirLatestFile?.length === 0
-                            }
                         />
                         <Sidebar
                             collections={collections}

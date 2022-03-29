@@ -503,7 +503,7 @@ export function PhotoList({
                 return (
                     <SizeAndCountContainer span={columns}>
                         {listItem.fileCount} {constants.FILES},{' '}
-                        {getReadableSizeFromBytes(listItem.fileSize)}{' '}
+                        {getReadableSizeFromBytes(listItem.fileSize || 0)}{' '}
                         {constants.EACH}
                     </SizeAndCountContainer>
                 );
