@@ -11,6 +11,7 @@ export default function UploadTypeChoiceModal({
     setElectronFiles,
     showUploadTypeChoiceModal,
     setShowUploadTypeChoiceModal,
+    setIsUploadDirs,
 }) {
     const hideFiletypeDialog = () => {
         setShowUploadTypeChoiceModal(false);
@@ -20,6 +21,7 @@ export default function UploadTypeChoiceModal({
         const filePaths = await ImportService.showUploadFilesDialog();
         hideFiletypeDialog();
         const files = await getElectronFiles(filePaths);
+        setIsUploadDirs(false);
         setElectronFiles(files);
     };
 
@@ -27,6 +29,7 @@ export default function UploadTypeChoiceModal({
         const filePaths = await ImportService.showUploadDirsDialog();
         hideFiletypeDialog();
         const files = await getElectronFiles(filePaths);
+        setIsUploadDirs(true);
         setElectronFiles(files);
     };
 

@@ -81,6 +81,7 @@ export default function Upload(props: Props) {
     const toUploadFiles = useRef<File[] | ElectronFile[]>(null);
     const isPendingDesktopUpload = useRef(false);
     const pendingDesktopUploadCollectionName = useRef<string>('');
+    const [isUploadDirs, setIsUploadDirs] = useState(false);
 
     useEffect(() => {
         UploadManager.initUploader(
@@ -168,6 +169,13 @@ export default function Upload(props: Props) {
         if (toUploadFiles.current.length === 0) {
             return null;
         }
+        if (isElectron() && !isUploadDirs) {
+            return {
+                suggestedCollectionName: null,
+                multipleFolders: false,
+            };
+        }
+
         const paths: string[] = toUploadFiles.current.map(
             (file) => file['path']
         );
@@ -417,6 +425,7 @@ export default function Upload(props: Props) {
                 setShowUploadTypeChoiceModal={
                     props.setShowUploadTypeChoiceModal
                 }
+                setIsUploadDirs={setIsUploadDirs}
             />
             <UploadProgress
                 now={percentComplete}
