@@ -67,7 +67,7 @@ const getFileStream = async (filePath: string) => {
 export async function getElectronFile(filePath: string): Promise<ElectronFile> {
     const fileStats = await fs.stat(filePath);
     return {
-        path: filePath,
+        path: filePath.split(path.sep).join(path.posix.sep),
         name: path.basename(filePath),
         size: fileStats.size,
         lastModified: fileStats.mtime.valueOf(),
