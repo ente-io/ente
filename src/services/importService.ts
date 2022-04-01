@@ -5,10 +5,23 @@ import { runningInBrowser } from 'utils/common';
 class ImportService {
     ElectronAPIs: any;
     private allElectronAPIsExist: boolean = false;
+    private skipUpdatePendingUploads = false;
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
         this.allElectronAPIsExist = !!this.ElectronAPIs?.exists;
+    }
+
+    setSkipUpdatePendingUploads(skip: boolean) {
+        this.skipUpdatePendingUploads = skip;
+    }
+
+    async getElectronFilesFromGoogleZip(
+        zipPath: string
+    ): Promise<ElectronFile[]> {
+        if (this.allElectronAPIsExist) {
+            return this.ElectronAPIs.getElectronFilesFromGoogleZip(zipPath);
+        }
     }
 
     async showUploadFilesDialog(): Promise<string[]> {
@@ -20,6 +33,12 @@ class ImportService {
     async showUploadDirsDialog(): Promise<string[]> {
         if (this.allElectronAPIsExist) {
             return this.ElectronAPIs.showUploadDirsDialog();
+        }
+    }
+
+    async showUploadZipDialog(): Promise<string[]> {
+        if (this.allElectronAPIsExist) {
+            return this.ElectronAPIs.showUploadZipDialog();
         }
     }
 
@@ -41,7 +60,7 @@ class ImportService {
         files: FileWithCollection[],
         collections: Collection[]
     ) {
-        if (this.allElectronAPIsExist) {
+        if (this.allElectronAPIsExist && !this.skipUpdatePendingUploads) {
             let collectionName: string;
             if (collections.length === 1) {
                 collectionName = collections[0].name;
@@ -54,7 +73,7 @@ class ImportService {
     }
 
     updatePendingUploads(files: FileWithCollection[]) {
-        if (this.allElectronAPIsExist) {
+        if (this.allElectronAPIsExist && !this.skipUpdatePendingUploads) {
             const filePaths = files.map(
                 (file) => (file.file as ElectronFile).path
             );

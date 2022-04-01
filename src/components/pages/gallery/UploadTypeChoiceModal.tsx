@@ -5,6 +5,7 @@ import constants from 'utils/strings/constants';
 import { IoIosArrowForward, IoMdClose } from 'react-icons/io';
 import FileUploadIcon from 'components/icons/FileUploadIcon';
 import FolderUploadIcon from 'components/icons/FolderUploadIcon';
+import { BsGoogle } from 'react-icons/bs';
 
 export default function UploadTypeChoiceModal({
     setElectronFiles,
@@ -19,6 +20,7 @@ export default function UploadTypeChoiceModal({
     const uploadFiles = async () => {
         const files = await ImportService.showUploadFilesDialog();
         hideFiletypeDialog();
+        ImportService.setSkipUpdatePendingUploads(false);
         setIsUploadDirs(false);
         setElectronFiles(files);
     };
@@ -26,8 +28,22 @@ export default function UploadTypeChoiceModal({
     const uploadDirs = async () => {
         const files = await ImportService.showUploadDirsDialog();
         hideFiletypeDialog();
+        ImportService.setSkipUpdatePendingUploads(false);
         setIsUploadDirs(true);
         setElectronFiles(files);
+    };
+
+    const uploadGoogleTakeout = async () => {
+        const filePaths = await ImportService.showUploadZipDialog();
+        hideFiletypeDialog();
+        if (filePaths?.length > 0) {
+            const files = await ImportService.getElectronFilesFromGoogleZip(
+                filePaths[0]
+            );
+            ImportService.setSkipUpdatePendingUploads(true);
+            setIsUploadDirs(true);
+            setElectronFiles(files);
+        }
     };
 
     return (
@@ -93,6 +109,32 @@ export default function UploadTypeChoiceModal({
                                         <FolderUploadIcon />
                                         <b className="ml-2">
                                             {constants.UPLOAD_DIRS}
+                                        </b>
+                                    </div>
+                                    <div className="ml-auto d-flex align-items-center">
+                                        <IoIosArrowForward />
+                                    </div>
+                                </Row>
+                            </Container>
+                        </Button>
+                    </Row>
+                    <Row className="justify-content-md-center py-2">
+                        <Button
+                            variant="light"
+                            onClick={uploadGoogleTakeout}
+                            style={{ width: '90%', height: '6vh' }}>
+                            <Container>
+                                <Row>
+                                    <div>
+                                        <BsGoogle
+                                            size={25}
+                                            style={{
+                                                marginRight: '0.2em',
+                                                marginLeft: '0.2em',
+                                            }}
+                                        />
+                                        <b className="ml-2">
+                                            Upload Google Takeout
                                         </b>
                                     </div>
                                     <div className="ml-auto d-flex align-items-center">
