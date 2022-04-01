@@ -6,6 +6,7 @@ import {
     getPendingUploads,
     setToUploadFiles,
     updatePendingUploadsFilePaths,
+    getElectronFilesFromGoogleZip,
 } from './utils/upload';
 
 const { ipcRenderer } = electron;
@@ -132,6 +133,16 @@ const showUploadDirsDialog = async () => {
     }
 };
 
+const showUploadZipDialog = async () => {
+    try {
+        const filePaths = ipcRenderer.sendSync('show-upload-zip-dialog');
+        return filePaths;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};
+
 const windowObject: any = window;
 windowObject['ElectronAPIs'] = {
     exists,
@@ -155,4 +166,6 @@ windowObject['ElectronAPIs'] = {
     getPendingUploads,
     setToUploadFiles,
     updatePendingUploadsFilePaths,
+    showUploadZipDialog,
+    getElectronFilesFromGoogleZip,
 };
