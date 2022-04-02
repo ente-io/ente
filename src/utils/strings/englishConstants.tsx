@@ -691,9 +691,10 @@ const englishConstants = {
     LOCK: 'lock',
     DOWNLOAD_UPLOAD_LOGS: 'debug logs',
     CHOOSE_UPLOAD_TYPE: 'Upload',
-    UPLOAD_FILES: 'File Upload',
-    UPLOAD_DIRS: 'Folder Upload',
     CANCEL_UPLOADS: 'cancel uploads',
+    UPLOAD_FILES: 'File',
+    UPLOAD_DIRS: 'Folder',
+    UPLOAD_GOOGLE_TAKEOUT: 'Google Takeout',
 };
 
 export default englishConstants;
