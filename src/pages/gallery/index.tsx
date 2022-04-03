@@ -261,7 +261,7 @@ export default function Gallery() {
                 startLoading();
                 let duplicates = await getDuplicateFiles();
                 if (clubSameTimeFilesOnly) {
-                    duplicates = await clubDuplicatesByTime(duplicates);
+                    duplicates = clubDuplicatesByTime(duplicates);
                 }
 
                 const currFileSizeMap = new Map<number, number>();

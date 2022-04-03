@@ -53,7 +53,7 @@ export async function getDuplicateFiles() {
     }
 }
 
-export async function clubDuplicatesByTime(dupes: DuplicateFiles[]) {
+export function clubDuplicatesByTime(dupes: DuplicateFiles[]) {
     const result: DuplicateFiles[] = [];
     for (const dupe of dupes) {
         let files: EnteFile[] = [];

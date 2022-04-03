@@ -1,7 +1,6 @@
 import { GalleryContext } from 'pages/gallery';
 import PreviewCard from './pages/gallery/PreviewCard';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Button } from 'react-bootstrap';
 import { EnteFile } from 'types/file';
 import styled from 'styled-components';
 import DownloadManager from 'services/downloadManager';
@@ -23,6 +22,7 @@ import { FILE_TYPE } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
+import EmptyScreen from './EmptyScreen';
 
 const Container = styled.div`
     display: block;
@@ -34,19 +34,6 @@ const Container = styled.div`
     .pswp-thumbnail {
         display: inline-block;
         cursor: pointer;
-    }
-`;
-
-const EmptyScreen = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    flex: 1;
-    color: #51cd7c;
-
-    & > svg {
-        filter: drop-shadow(3px 3px 5px rgba(45, 194, 98, 0.5));
     }
 `;
 
@@ -547,37 +534,7 @@ const PhotoFrame = ({
     return (
         <>
             {!isFirstLoad && files.length === 0 && !isInSearchMode ? (
-                <EmptyScreen>
-                    {galleryContext.isDeduplicating ? (
-                        <b
-                            style={{
-                                fontSize: '2em',
-                            }}>
-                            {constants.NO_DUPLICATES_FOUND}
-                        </b>
-                    ) : (
-                        <>
-                            <img height={150} src="/images/gallery.png" />
-                            <div
-                                style={{ color: '#a6a6a6', marginTop: '16px' }}>
-                                {constants.UPLOAD_FIRST_PHOTO_DESCRIPTION}
-                            </div>
-                            <Button
-                                variant="outline-success"
-                                onClick={openFileUploader}
-                                style={{
-                                    marginTop: '32px',
-                                    paddingLeft: '32px',
-                                    paddingRight: '32px',
-                                    paddingTop: '12px',
-                                    paddingBottom: '12px',
-                                    fontWeight: 900,
-                                }}>
-                                {constants.UPLOAD_FIRST_PHOTO}
-                            </Button>
-                        </>
-                    )}
-                </EmptyScreen>
+                <EmptyScreen openFileUploader={openFileUploader} />
             ) : (
                 <Container>
                     <AutoSizer>
