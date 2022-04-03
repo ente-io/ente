@@ -544,27 +544,46 @@ const PhotoFrame = ({
         }
     };
 
+    console.log(
+        galleryContext.isDeduplicating,
+        files,
+        isFirstLoad,
+        isInSearchMode
+    );
+
     return (
         <>
             {!isFirstLoad && files.length === 0 && !isInSearchMode ? (
                 <EmptyScreen>
-                    <img height={150} src="/images/gallery.png" />
-                    <div style={{ color: '#a6a6a6', marginTop: '16px' }}>
-                        {constants.UPLOAD_FIRST_PHOTO_DESCRIPTION}
-                    </div>
-                    <Button
-                        variant="outline-success"
-                        onClick={openFileUploader}
-                        style={{
-                            marginTop: '32px',
-                            paddingLeft: '32px',
-                            paddingRight: '32px',
-                            paddingTop: '12px',
-                            paddingBottom: '12px',
-                            fontWeight: 900,
-                        }}>
-                        {constants.UPLOAD_FIRST_PHOTO}
-                    </Button>
+                    {galleryContext.isDeduplicating ? (
+                        <b
+                            style={{
+                                fontSize: '2em',
+                            }}>
+                            {constants.NO_DUPLICATES_FOUND}
+                        </b>
+                    ) : (
+                        <>
+                            <img height={150} src="/images/gallery.png" />
+                            <div
+                                style={{ color: '#a6a6a6', marginTop: '16px' }}>
+                                {constants.UPLOAD_FIRST_PHOTO_DESCRIPTION}
+                            </div>
+                            <Button
+                                variant="outline-success"
+                                onClick={openFileUploader}
+                                style={{
+                                    marginTop: '32px',
+                                    paddingLeft: '32px',
+                                    paddingRight: '32px',
+                                    paddingTop: '12px',
+                                    paddingBottom: '12px',
+                                    fontWeight: 900,
+                                }}>
+                                {constants.UPLOAD_FIRST_PHOTO}
+                            </Button>
+                        </>
+                    )}
                 </EmptyScreen>
             ) : (
                 <Container>

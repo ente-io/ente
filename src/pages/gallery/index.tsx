@@ -111,6 +111,7 @@ import {
 } from 'services/deduplicationService';
 import { IconButton } from 'components/Container';
 import LeftArrow from 'components/icons/LeftArrow';
+import ClubDuplicateFilesByTime from 'components/ClubDuplicateFilesByTime';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -127,7 +128,7 @@ const AlertContainer = styled.div`
     text-align: center;
 `;
 
-export const defaultGalleryContext: GalleryContextType = {
+const defaultGalleryContext: GalleryContextType = {
     thumbs: new Map(),
     files: new Map(),
     showPlanSelectorModal: () => null,
@@ -245,9 +246,7 @@ export default function Gallery() {
             setFiles(sortFiles([...files, ...trashedFile]));
             setCollections(collections);
             setTrash(trash);
-            if (!isDeduplicating) {
-                await setDerivativeState(collections, files);
-            }
+            await setDerivativeState(collections, files);
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -255,7 +254,58 @@ export default function Gallery() {
         };
         main();
         appContext.showNavBar(true);
-    }, [isDeduplicating]);
+    }, []);
+
+    useEffect(() => {
+        const main = async () => {
+            if (isDeduplicating) {
+                startLoading();
+                let duplicates = await getDuplicateFiles();
+                if (clubSameTimeFilesOnly) {
+                    duplicates = await clubDuplicatesByTime(duplicates);
+                }
+
+                const currFileSizeMap = new Map<number, number>();
+
+                let allDuplicateFiles: EnteFile[] = [];
+                let toSelectFileIDs: number[] = [];
+                let count = 0;
+
+                for (const dupe of duplicates) {
+                    allDuplicateFiles = allDuplicateFiles.concat(dupe.files);
+                    // select all except first file
+                    toSelectFileIDs = toSelectFileIDs.concat(
+                        dupe.files.slice(1).map((f) => f.id)
+                    );
+                    count += dupe.files.length - 1;
+
+                    for (const file of dupe.files) {
+                        currFileSizeMap.set(file.id, dupe.size);
+                    }
+                }
+                setDuplicateFiles(allDuplicateFiles);
+                setFileSizeMap(currFileSizeMap);
+
+                const selectedFiles = {
+                    count: count,
+                    collectionID: ALL_SECTION,
+                };
+
+                for (const fileID of toSelectFileIDs) {
+                    selectedFiles[fileID] = true;
+                }
+                setSelected(selectedFiles);
+                setActiveCollection(ALL_SECTION);
+                finishLoading();
+            } else {
+                setDuplicateFiles([]);
+                setFileSizeMap(new Map<number, number>());
+                setClubSameTimeFilesOnly(false);
+            }
+        };
+
+        main();
+    }, [isDeduplicating, clubSameTimeFilesOnly]);
 
     useEffect(() => setMessageDialogView(true), [dialogMessage]);
 
@@ -303,15 +353,6 @@ export default function Gallery() {
         }
     }, [router.isReady]);
 
-    useEffect(() => {
-        startLoading();
-        const sync = async () => {
-            await syncWithRemote();
-        };
-        sync();
-        finishLoading();
-    }, [clubSameTimeFilesOnly]);
-
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
             resync.current = true;
@@ -329,47 +370,9 @@ export default function Gallery() {
             setCollections(collections);
             const files = await syncFiles(collections, setFiles);
 
-            if (isDeduplicating) {
-                let duplicates = await getDuplicateFiles();
-                if (clubSameTimeFilesOnly) {
-                    duplicates = await clubDuplicatesByTime(duplicates);
-                }
-
-                const currFileSizeMap = new Map<number, number>();
-
-                let allDuplicateFiles: EnteFile[] = [];
-                let toSelectFileIDs: number[] = [];
-                let count = 0;
-
-                for (const dupe of duplicates) {
-                    allDuplicateFiles = allDuplicateFiles.concat(dupe.files);
-                    // select all except first file
-                    toSelectFileIDs = toSelectFileIDs.concat(
-                        dupe.files.slice(1).map((f) => f.id)
-                    );
-                    count += dupe.files.length - 1;
-
-                    for (const file of dupe.files) {
-                        currFileSizeMap.set(file.id, dupe.size);
-                    }
-                }
-                setDuplicateFiles(allDuplicateFiles);
-                setFileSizeMap(currFileSizeMap);
-
-                const selectedFiles = {
-                    count: count,
-                    collectionID: 0,
-                };
-
-                for (const fileID of toSelectFileIDs) {
-                    selectedFiles[fileID] = true;
-                }
-                setSelected(selectedFiles);
-            } else {
-                await setDerivativeState(collections, files);
-                const trash = await syncTrash(collections, setFiles, files);
-                setTrash(trash);
-            }
+            await setDerivativeState(collections, files);
+            const trash = await syncTrash(collections, setFiles, files);
+            setTrash(trash);
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
@@ -684,20 +687,7 @@ export default function Gallery() {
                     setFiles={setFiles}
                     isFirstUpload={collectionsAndTheirLatestFile?.length === 0}
                 />
-                {isDeduplicating ? (
-                    <>
-                        {!(duplicateFiles.length > 0) && (
-                            <b
-                                style={{
-                                    fontSize: '2em',
-                                    textAlign: 'center',
-                                    marginTop: '20%',
-                                }}>
-                                {constants.NO_DUPLICATES_FOUND}
-                            </b>
-                        )}
-                    </>
-                ) : (
+                {!isDeduplicating && (
                     <>
                         {blockingLoad && (
                             <LoadingOverlay>
@@ -761,11 +751,6 @@ export default function Gallery() {
                             show={() => setFixCreationTimeView(true)}
                             attributes={fixCreationTimeAttributes}
                         />
-                        <Sidebar
-                            collections={collections}
-                            setDialogMessage={setDialogMessage}
-                            setLoading={setBlockingLoad}
-                        />
                         <UploadButton
                             isFirstFetch={isFirstFetch}
                             openFileUploader={openFileUploader}
@@ -776,34 +761,53 @@ export default function Gallery() {
                             )}
                     </>
                 )}
-                {!isDeduplicating || duplicateFiles.length > 0 ? (
-                    <PhotoFrame
-                        files={isDeduplicating ? duplicateFiles : files}
-                        setFiles={
-                            isDeduplicating ? setDuplicateFiles : setFiles
-                        }
-                        syncWithRemote={syncWithRemote}
-                        favItemIds={favItemIds}
-                        setSelected={setSelected}
-                        selected={selected}
-                        isFirstLoad={isFirstLoad}
-                        openFileUploader={openFileUploader}
-                        isInSearchMode={isInSearchMode}
-                        search={search}
-                        setSearchStats={setSearchStats}
-                        deleted={deleted}
-                        activeCollection={activeCollection}
-                        isSharedCollection={isSharedCollection(
-                            activeCollection,
-                            collections
-                        )}
-                        enableDownload={true}
-                    />
-                ) : null}
 
-                {selected.count > 0 ? (
-                    (selected.collectionID === activeCollection ||
-                        isDeduplicating) && (
+                {isDeduplicating ? (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: '1em',
+                            left: '1em',
+                            zIndex: 10,
+                        }}
+                        onClick={() => {
+                            setIsDeduplicating(false);
+                        }}>
+                        <IconButton>
+                            <LeftArrow />
+                        </IconButton>
+                    </div>
+                ) : (
+                    <Sidebar
+                        collections={collections}
+                        setDialogMessage={setDialogMessage}
+                        setLoading={setBlockingLoad}
+                    />
+                )}
+
+                <PhotoFrame
+                    files={isDeduplicating ? duplicateFiles : files}
+                    setFiles={isDeduplicating ? setDuplicateFiles : setFiles}
+                    syncWithRemote={syncWithRemote}
+                    favItemIds={favItemIds}
+                    setSelected={setSelected}
+                    selected={selected}
+                    isFirstLoad={isFirstLoad}
+                    openFileUploader={openFileUploader}
+                    isInSearchMode={isInSearchMode}
+                    search={search}
+                    setSearchStats={setSearchStats}
+                    deleted={deleted}
+                    activeCollection={activeCollection}
+                    isSharedCollection={isSharedCollection(
+                        activeCollection,
+                        collections
+                    )}
+                    enableDownload={true}
+                />
+
+                {selected.count > 0 &&
+                    selected.collectionID === activeCollection && (
                         <SelectedFileOptions
                             addToCollectionHelper={collectionOpsHelper(
                                 COLLECTION_OPS_TYPE.ADD
@@ -850,23 +854,9 @@ export default function Gallery() {
                                 collections
                             )}
                         />
-                    )
-                ) : isDeduplicating ? (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            top: '1em',
-                            left: '1em',
-                            zIndex: 10,
-                        }}
-                        onClick={() => {
-                            setIsDeduplicating(false);
-                        }}>
-                        <IconButton>
-                            <LeftArrow />
-                        </IconButton>
-                    </div>
-                ) : null}
+                    )}
+
+                {isDeduplicating && <ClubDuplicateFilesByTime />}
             </FullScreenDropZone>
         </GalleryContext.Provider>
     );
