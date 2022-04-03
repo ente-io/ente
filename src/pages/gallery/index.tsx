@@ -109,9 +109,8 @@ import {
     clubDuplicatesByTime,
     getDuplicateFiles,
 } from 'services/deduplicationService';
-import { IconButton } from 'components/Container';
-import LeftArrow from 'components/icons/LeftArrow';
 import ClubDuplicateFilesByTime from 'components/ClubDuplicateFilesByTime';
+import BackButton from 'components/BackButton';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -689,22 +688,6 @@ export default function Gallery() {
                 />
                 {!isDeduplicating && (
                     <>
-                        {blockingLoad && (
-                            <LoadingOverlay>
-                                <EnteSpinner />
-                            </LoadingOverlay>
-                        )}
-                        {isFirstLoad && (
-                            <AlertContainer>
-                                {constants.INITIAL_LOAD_DELAY_WARNING}
-                            </AlertContainer>
-                        )}
-                        <PlanSelector
-                            modalView={planModalView}
-                            closeModal={() => setPlanModalView(false)}
-                            setDialogMessage={setDialogMessage}
-                            setLoading={setBlockingLoad}
-                        />
                         <SearchBar
                             isOpen={isInSearchMode}
                             setOpen={setIsInSearchMode}
@@ -732,57 +715,61 @@ export default function Gallery() {
                             finishLoading={finishLoading}
                             collectionFilesCount={collectionFilesCount}
                         />
-                        <CollectionNamer
-                            show={collectionNamerView}
-                            onHide={setCollectionNamerView.bind(null, false)}
-                            attributes={collectionNamerAttributes}
-                        />
-                        <CollectionSelector
-                            show={collectionSelectorView}
-                            onHide={closeCollectionSelector}
-                            collectionsAndTheirLatestFile={
-                                collectionsAndTheirLatestFile
-                            }
-                            attributes={collectionSelectorAttributes}
-                        />
-                        <FixCreationTime
-                            isOpen={fixCreationTimeView}
-                            hide={() => setFixCreationTimeView(false)}
-                            show={() => setFixCreationTimeView(true)}
-                            attributes={fixCreationTimeAttributes}
-                        />
+                    </>
+                )}
+                {blockingLoad && (
+                    <LoadingOverlay>
+                        <EnteSpinner />
+                    </LoadingOverlay>
+                )}
+                {isFirstLoad && (
+                    <AlertContainer>
+                        {constants.INITIAL_LOAD_DELAY_WARNING}
+                    </AlertContainer>
+                )}
+                <PlanSelector
+                    modalView={planModalView}
+                    closeModal={() => setPlanModalView(false)}
+                    setDialogMessage={setDialogMessage}
+                    setLoading={setBlockingLoad}
+                />
+                <CollectionNamer
+                    show={collectionNamerView}
+                    onHide={setCollectionNamerView.bind(null, false)}
+                    attributes={collectionNamerAttributes}
+                />
+                <CollectionSelector
+                    show={collectionSelectorView}
+                    onHide={closeCollectionSelector}
+                    collectionsAndTheirLatestFile={
+                        collectionsAndTheirLatestFile
+                    }
+                    attributes={collectionSelectorAttributes}
+                />
+                <FixCreationTime
+                    isOpen={fixCreationTimeView}
+                    hide={() => setFixCreationTimeView(false)}
+                    show={() => setFixCreationTimeView(true)}
+                    attributes={fixCreationTimeAttributes}
+                />
+
+                {isDeduplicating ? (
+                    <>
+                        <BackButton setIsDeduplicating={setIsDeduplicating} />
+                        <ClubDuplicateFilesByTime />
+                    </>
+                ) : (
+                    <>
                         <UploadButton
                             isFirstFetch={isFirstFetch}
                             openFileUploader={openFileUploader}
                         />
-                        {activeCollection === TRASH_SECTION &&
-                            trash?.length > 0 && (
-                                <DeleteBtn onClick={emptyTrashHandler} />
-                            )}
+                        <Sidebar
+                            collections={collections}
+                            setDialogMessage={setDialogMessage}
+                            setLoading={setBlockingLoad}
+                        />
                     </>
-                )}
-
-                {isDeduplicating ? (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            top: '1em',
-                            left: '1em',
-                            zIndex: 10,
-                        }}
-                        onClick={() => {
-                            setIsDeduplicating(false);
-                        }}>
-                        <IconButton>
-                            <LeftArrow />
-                        </IconButton>
-                    </div>
-                ) : (
-                    <Sidebar
-                        collections={collections}
-                        setDialogMessage={setDialogMessage}
-                        setLoading={setBlockingLoad}
-                    />
                 )}
 
                 <PhotoFrame
@@ -855,8 +842,9 @@ export default function Gallery() {
                             )}
                         />
                     )}
-
-                {isDeduplicating && <ClubDuplicateFilesByTime />}
+                {activeCollection === TRASH_SECTION && trash?.length > 0 && (
+                    <DeleteBtn onClick={emptyTrashHandler} />
+                )}
             </FullScreenDropZone>
         </GalleryContext.Provider>
     );

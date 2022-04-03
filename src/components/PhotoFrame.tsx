@@ -544,13 +544,6 @@ const PhotoFrame = ({
         }
     };
 
-    console.log(
-        galleryContext.isDeduplicating,
-        files,
-        isFirstLoad,
-        isInSearchMode
-    );
-
     return (
         <>
             {!isFirstLoad && files.length === 0 && !isInSearchMode ? (
