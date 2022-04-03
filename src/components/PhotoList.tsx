@@ -15,8 +15,8 @@ import constants from 'utils/strings/constants';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
 import { getVariantColor, ButtonVariant } from './pages/gallery/LinkButton';
-import { getReadableSizeFromBytes } from 'utils/photoList';
 import { GalleryContext } from 'pages/gallery';
+import { convertBytesToHumanReadable } from 'utils/billing';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const NO_OF_PAGES = 2;
@@ -178,13 +178,13 @@ export function PhotoList({
 
     useEffect(() => {
         let timeStampList: TimeStampListItem[] = [];
-        if (galleryContext.state) {
+        if (galleryContext.isDeduplicating) {
             groupByFileSize(timeStampList);
         } else {
             groupByTime(timeStampList);
         }
 
-        if (galleryContext.state) {
+        if (galleryContext.isDeduplicating) {
             skipMerge = true;
         }
 
@@ -503,7 +503,7 @@ export function PhotoList({
                 return (
                     <SizeAndCountContainer span={columns}>
                         {listItem.fileCount} {constants.FILES},{' '}
-                        {getReadableSizeFromBytes(listItem.fileSize || 0)}{' '}
+                        {convertBytesToHumanReadable(listItem.fileSize || 0)}{' '}
                         {constants.EACH}
                     </SizeAndCountContainer>
                 );
