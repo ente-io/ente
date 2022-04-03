@@ -142,8 +142,8 @@ export const defaultGalleryContext: GalleryContextType = {
     clubSameTimeFilesOnly: false,
     setClubSameTimeFilesOnly: null,
     fileSizeMap: new Map<number, number>(),
-    state: false,
-    setIsDeduplicatePage: null,
+    isDeduplicating: false,
+    setIsDeduplicating: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -213,7 +213,7 @@ export default function Gallery() {
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
 
-    const [isDeduplicatePage, setIsDeduplicatePage] = useState(false);
+    const [isDeduplicating, setIsDeduplicating] = useState(false);
     const [duplicateFiles, setDuplicateFiles] = useState<EnteFile[]>([]);
     const [clubSameTimeFilesOnly, setClubSameTimeFilesOnly] = useState(false);
     const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
@@ -245,7 +245,7 @@ export default function Gallery() {
             setFiles(sortFiles([...files, ...trashedFile]));
             setCollections(collections);
             setTrash(trash);
-            if (!isDeduplicatePage) {
+            if (!isDeduplicating) {
                 await setDerivativeState(collections, files);
             }
             await syncWithRemote(true);
@@ -255,7 +255,7 @@ export default function Gallery() {
         };
         main();
         appContext.showNavBar(true);
-    }, [isDeduplicatePage]);
+    }, [isDeduplicating]);
 
     useEffect(() => setMessageDialogView(true), [dialogMessage]);
 
@@ -329,7 +329,7 @@ export default function Gallery() {
             setCollections(collections);
             const files = await syncFiles(collections, setFiles);
 
-            if (isDeduplicatePage) {
+            if (isDeduplicating) {
                 let duplicates = await getDuplicateFiles();
                 if (clubSameTimeFilesOnly) {
                     duplicates = await clubDuplicatesByTime(duplicates);
@@ -643,8 +643,8 @@ export default function Gallery() {
                 clubSameTimeFilesOnly,
                 setClubSameTimeFilesOnly,
                 fileSizeMap,
-                setIsDeduplicatePage,
-                state: isDeduplicatePage,
+                setIsDeduplicating: setIsDeduplicating,
+                isDeduplicating: isDeduplicating,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
@@ -684,7 +684,7 @@ export default function Gallery() {
                     setFiles={setFiles}
                     isFirstUpload={collectionsAndTheirLatestFile?.length === 0}
                 />
-                {isDeduplicatePage ? (
+                {isDeduplicating ? (
                     <>
                         {!(duplicateFiles.length > 0) && (
                             <b
@@ -776,11 +776,11 @@ export default function Gallery() {
                             )}
                     </>
                 )}
-                {!isDeduplicatePage || duplicateFiles.length > 0 ? (
+                {!isDeduplicating || duplicateFiles.length > 0 ? (
                     <PhotoFrame
-                        files={isDeduplicatePage ? duplicateFiles : files}
+                        files={isDeduplicating ? duplicateFiles : files}
                         setFiles={
-                            isDeduplicatePage ? setDuplicateFiles : setFiles
+                            isDeduplicating ? setDuplicateFiles : setFiles
                         }
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}
@@ -803,7 +803,7 @@ export default function Gallery() {
 
                 {selected.count > 0 ? (
                     (selected.collectionID === activeCollection ||
-                        isDeduplicatePage) && (
+                        isDeduplicating) && (
                         <SelectedFileOptions
                             addToCollectionHelper={collectionOpsHelper(
                                 COLLECTION_OPS_TYPE.ADD
@@ -851,7 +851,7 @@ export default function Gallery() {
                             )}
                         />
                     )
-                ) : isDeduplicatePage ? (
+                ) : isDeduplicating ? (
                     <div
                         style={{
                             position: 'absolute',
@@ -860,7 +860,7 @@ export default function Gallery() {
                             zIndex: 10,
                         }}
                         onClick={() => {
-                            setIsDeduplicatePage(false);
+                            setIsDeduplicating(false);
                         }}>
                         <IconButton>
                             <LeftArrow />

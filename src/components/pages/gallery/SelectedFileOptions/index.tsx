@@ -1,6 +1,6 @@
 import { SetDialogMessage } from 'components/MessageDialog';
 import React, { useEffect, useState, useContext } from 'react';
-import { SetCollectionSelectorAttributes } from './CollectionSelector';
+import { SetCollectionSelectorAttributes } from '../CollectionSelector';
 import styled from 'styled-components';
 import Navbar from 'components/Navbar';
 import DeleteIcon from 'components/icons/DeleteIcon';
@@ -27,6 +27,7 @@ import { FIX_CREATION_TIME_VISIBLE_TO_USER_IDS } from 'constants/user';
 import DownloadIcon from 'components/icons/DownloadIcon';
 import { User } from 'types/user';
 import { GalleryContext } from 'pages/gallery';
+import DeduplicatingOptions from './DeduplicatingOptions';
 
 interface Props {
     addToCollectionHelper?: (collection: Collection) => void;
@@ -176,48 +177,8 @@ const SelectedFileOptions = ({
                     {count} {constants.SELECTED}
                 </div>
             </SelectionContainer>
-            {galleryContext.state ? (
-                <>
-                    <input
-                        type="checkbox"
-                        style={{
-                            width: '1em',
-                            height: '1em',
-                        }}
-                        value={
-                            galleryContext.clubSameTimeFilesOnly
-                                ? 'true'
-                                : 'false'
-                        }
-                        onChange={() => {
-                            galleryContext.setClubSameTimeFilesOnly(
-                                !galleryContext.clubSameTimeFilesOnly
-                            );
-                        }}></input>
-                    <div
-                        style={{
-                            marginLeft: '0.5em',
-                            fontSize: '16px',
-                            marginRight: '0.8em',
-                        }}>
-                        {constants.CLUB_BY_CAPTURE_TIME}
-                    </div>
-                    <div className="vertical-line">
-                        <div
-                            style={{
-                                position: 'absolute',
-                                width: '1px',
-                                top: 0,
-                                bottom: 0,
-                                background: '#303030',
-                            }}></div>
-                    </div>
-                    <IconWithMessage message={constants.DELETE}>
-                        <IconButton onClick={trashHandler}>
-                            <DeleteIcon />
-                        </IconButton>
-                    </IconWithMessage>
-                </>
+            {galleryContext.isDeduplicating ? (
+                <DeduplicatingOptions trashHandler={trashHandler} />
             ) : activeCollection === TRASH_SECTION ? (
                 <>
                     <IconWithMessage message={constants.RESTORE}>

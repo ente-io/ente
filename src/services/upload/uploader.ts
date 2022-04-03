@@ -13,7 +13,7 @@ import { FILE_TYPE } from 'constants/file';
 import { FileUploadResults, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
 import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
 import { logUploadInfo } from 'utils/upload';
-import { convertToHumanReadable } from 'utils/billing';
+import { convertBytesToHumanReadable } from 'utils/billing';
 
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
@@ -29,7 +29,7 @@ export default async function uploader(
     const { collection, localID, ...uploadAsset } = fileWithCollection;
     const fileNameSize = `${UploadService.getAssetName(
         fileWithCollection
-    )}_${convertToHumanReadable(UploadService.getAssetSize(uploadAsset))}`;
+    )}_${convertBytesToHumanReadable(UploadService.getAssetSize(uploadAsset))}`;
 
     logUploadInfo(`uploader called for  ${fileNameSize}`);
     UIService.setFileProgress(localID, 0);
