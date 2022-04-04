@@ -108,8 +108,11 @@ const setExportRecord = async (filePath: string, data: string) => {
 
 const showUploadFilesDialog = async () => {
     try {
-        const filePaths = ipcRenderer.sendSync('show-upload-files-dialog');
-        return filePaths;
+        const filePaths: string[] = ipcRenderer.sendSync(
+            'show-upload-files-dialog'
+        );
+        const files = await Promise.all(filePaths.map(getElectronFile));
+        return files;
     } catch (e) {
         console.error(e);
         throw e;
@@ -118,8 +121,11 @@ const showUploadFilesDialog = async () => {
 
 const showUploadDirsDialog = async () => {
     try {
-        const filePaths = ipcRenderer.sendSync('show-upload-dirs-dialog');
-        return filePaths;
+        const filePaths: string[] = ipcRenderer.sendSync(
+            'show-upload-dirs-dialog'
+        );
+        const files = await Promise.all(filePaths.map(getElectronFile));
+        return files;
     } catch (e) {
         console.error(e);
         throw e;
