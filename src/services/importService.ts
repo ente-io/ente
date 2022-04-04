@@ -1,7 +1,6 @@
 import { Collection } from 'types/collection';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
-import { getCollection } from './collectionService';
 
 class ImportService {
     ElectronAPIs: any;
@@ -58,16 +57,12 @@ class ImportService {
 
     async setToUploadFiles(
         files: FileWithCollection[],
-        collections?: Collection[]
+        collections: Collection[]
     ) {
         if (this.allElectronAPIsExist) {
             let collectionName: string;
-            if (collections?.length > 0) {
+            if (collections.length === 1) {
                 collectionName = collections[0].name;
-            } else {
-                const collectionID = files[0].collectionID;
-                const collection = await getCollection(collectionID);
-                collectionName = collection.name;
             }
             const filePaths = files.map(
                 (file) => (file.file as ElectronFile).path
