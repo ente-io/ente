@@ -87,9 +87,13 @@ export const setToUploadFiles = (
 export const getPendingUploads = async () => {
     const filePaths = uploadStatusStore.get('filePaths') as string[];
     const collectionName = uploadStatusStore.get('collectionName') as string;
+    const validFilePaths = filePaths?.filter(
+        async (filePath) =>
+            await fs.stat(filePath).then((stat) => stat.isFile())
+    );
     return {
-        files: filePaths
-            ? await Promise.all(filePaths.map(getElectronFile))
+        files: validFilePaths
+            ? await Promise.all(validFilePaths.map(getElectronFile))
             : [],
         collectionName,
     };
