@@ -337,10 +337,7 @@ class UploadManager {
                         (file.file as ElectronFile).path !==
                         (fileWithCollection.file as ElectronFile).path
                 );
-
-                if (this.remainingFiles.length > 0) {
-                    ImportService.updatePendingUploads(this.remainingFiles);
-                }
+                ImportService.updatePendingUploads(this.remainingFiles);
             }
 
             UIService.moveFileToResultList(

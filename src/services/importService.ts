@@ -11,18 +11,6 @@ class ImportService {
         this.allElectronAPIsExist = !!this.ElectronAPIs?.exists;
     }
 
-    async setDoneUploadingFiles() {
-        if (this.allElectronAPIsExist) {
-            this.ElectronAPIs.setToUploadFiles(null, null, true);
-        }
-    }
-
-    async hasPendingUploads(): Promise<boolean> {
-        if (this.allElectronAPIsExist) {
-            return this.ElectronAPIs.hasPendingUploads();
-        }
-    }
-
     async getElectronFile(filePath: string): Promise<ElectronFile> {
         if (this.allElectronAPIsExist) {
             return this.ElectronAPIs.getElectronFile(filePath);
@@ -67,11 +55,7 @@ class ImportService {
             const filePaths = files.map(
                 (file) => (file.file as ElectronFile).path
             );
-            this.ElectronAPIs.setToUploadFiles(
-                filePaths,
-                collectionName,
-                false
-            );
+            this.ElectronAPIs.setToUploadFiles(filePaths, collectionName);
         }
     }
 

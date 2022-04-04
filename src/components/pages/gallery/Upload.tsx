@@ -98,12 +98,14 @@ export default function Upload(props: Props) {
         );
 
         if (isElectron()) {
-            ImportService.hasPendingUploads().then((exists) => {
-                if (exists) {
-                    isPendingDesktopUpload.current = true;
-                    resumeDesktopUpload();
+            ImportService.getPendingUploads().then(
+                ({ files, collectionName }) => {
+                    if (files && files?.length > 0) {
+                        isPendingDesktopUpload.current = true;
+                        resumeDesktopUpload(files, collectionName);
+                    }
                 }
-            });
+            );
         }
     }, []);
 
@@ -153,11 +155,8 @@ export default function Upload(props: Props) {
         setProgressView(true);
     };
 
-    const resumeDesktopUpload = async () => {
+    const resumeDesktopUpload = async (files, collectionName) => {
         try {
-            const { files, collectionName } =
-                await ImportService.getPendingUploads();
-
             pendingDesktopUploadCollectionName.current = collectionName;
             props.setElectronFiles(files);
         } catch (e) {
@@ -319,8 +318,6 @@ export default function Upload(props: Props) {
             setProgressView(false);
             throw err;
         } finally {
-            // set state to done
-            await ImportService.setDoneUploadingFiles();
             appContext.resetSharedFiles();
             props.setUploadInProgress(false);
             props.syncWithRemote();
