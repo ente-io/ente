@@ -135,8 +135,15 @@ const showUploadDirsDialog = async () => {
 
 const showUploadZipDialog = async () => {
     try {
-        const filePaths = ipcRenderer.sendSync('show-upload-zip-dialog');
-        return filePaths;
+        const filePaths: string[] = await ipcRenderer.invoke(
+            'show-upload-zip-dialog'
+        );
+        const filesList = await Promise.all(
+            filePaths.map(getElectronFilesFromGoogleZip)
+        );
+        const files = filesList.flat();
+        console.log(files);
+        return files;
     } catch (e) {
         console.error(e);
         throw e;

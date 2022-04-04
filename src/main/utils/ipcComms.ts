@@ -42,12 +42,12 @@ export default function setupIpcComs(
         return files.filePaths;
     });
 
-    ipcMain.on('show-upload-zip-dialog', async (event) => {
+    ipcMain.handle('show-upload-zip-dialog', async (event) => {
         const files = await dialog.showOpenDialog({
             properties: ['openFile', 'multiSelections'],
             filters: [{ name: 'Zip File', extensions: ['zip'] }],
         });
-        event.returnValue = files.filePaths;
+        return files.filePaths;
     });
 
     ipcMain.handle('show-upload-dirs-dialog', async () => {
