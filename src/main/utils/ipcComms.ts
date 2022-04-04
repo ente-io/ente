@@ -45,14 +45,14 @@ export default function setupIpcComs(
         mainWindow = secondWindow;
     });
 
-    ipcMain.on('show-upload-files-dialog', async (event) => {
+    ipcMain.handle('show-upload-files-dialog', async () => {
         const files = await dialog.showOpenDialog({
             properties: ['openFile', 'multiSelections'],
         });
-        event.returnValue = files.filePaths;
+        return files.filePaths;
     });
 
-    ipcMain.on('show-upload-dirs-dialog', async (event) => {
+    ipcMain.handle('show-upload-dirs-dialog', async () => {
         const dir = await dialog.showOpenDialog({
             properties: ['openDirectory', 'multiSelections'],
         });
@@ -62,6 +62,6 @@ export default function setupIpcComs(
             files = files.concat(await getFilesFromDir(dirPath));
         }
 
-        event.returnValue = files;
+        return files;
     });
 }

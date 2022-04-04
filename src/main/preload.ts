@@ -108,7 +108,7 @@ const setExportRecord = async (filePath: string, data: string) => {
 
 const showUploadFilesDialog = async () => {
     try {
-        const filePaths: string[] = ipcRenderer.sendSync(
+        const filePaths: string[] = await ipcRenderer.invoke(
             'show-upload-files-dialog'
         );
         const files = await Promise.all(filePaths.map(getElectronFile));
@@ -121,7 +121,7 @@ const showUploadFilesDialog = async () => {
 
 const showUploadDirsDialog = async () => {
     try {
-        const filePaths: string[] = ipcRenderer.sendSync(
+        const filePaths: string[] = await ipcRenderer.invoke(
             'show-upload-dirs-dialog'
         );
         const files = await Promise.all(filePaths.map(getElectronFile));
