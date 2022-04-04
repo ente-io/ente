@@ -1,7 +1,6 @@
 import { Modal, Button, Container, Row } from 'react-bootstrap';
 import React from 'react';
 import ImportService from 'services/importService';
-import { getElectronFiles } from 'utils/upload';
 import constants from 'utils/strings/constants';
 import { IoIosArrowForward, IoMdClose } from 'react-icons/io';
 import FileUploadIcon from 'components/icons/FileUploadIcon';
@@ -18,17 +17,15 @@ export default function UploadTypeChoiceModal({
     };
 
     const uploadFiles = async () => {
-        const filePaths = await ImportService.showUploadFilesDialog();
+        const files = await ImportService.showUploadFilesDialog();
         hideFiletypeDialog();
-        const files = await getElectronFiles(filePaths);
         setIsUploadDirs(false);
         setElectronFiles(files);
     };
 
     const uploadDirs = async () => {
-        const filePaths = await ImportService.showUploadDirsDialog();
+        const files = await ImportService.showUploadDirsDialog();
         hideFiletypeDialog();
-        const files = await getElectronFiles(filePaths);
         setIsUploadDirs(true);
         setElectronFiles(files);
     };

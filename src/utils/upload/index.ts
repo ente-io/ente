@@ -3,7 +3,6 @@ import { EnteFile } from 'types/file';
 import { convertToHumanReadable } from 'utils/billing';
 import { formatDateTime } from 'utils/file';
 import { getLogs, saveLogLine } from 'utils/storage';
-import ImportService from 'services/importService';
 import { A_SEC_IN_MICROSECONDS } from 'constants/upload';
 
 const TYPE_JSON = 'json';
@@ -80,14 +79,4 @@ export function getUploadLogs() {
 
 export function getFileNameSize(file: File | ElectronFile) {
     return `${file.name}_${convertToHumanReadable(file.size)}`;
-}
-
-export async function getElectronFiles(
-    filePaths: string[]
-): Promise<ElectronFile[]> {
-    const files = [];
-    for (const filePath of filePaths) {
-        files.push(await ImportService.getElectronFile(filePath));
-    }
-    return files;
 }
