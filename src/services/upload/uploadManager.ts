@@ -8,7 +8,11 @@ import {
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
-import { getFileNameSize, segregateMetadataAndMediaFiles } from 'utils/upload';
+import {
+    areSameElectronFiles,
+    getFileNameSize,
+    segregateMetadataAndMediaFiles,
+} from 'utils/upload';
 import uploader from './uploader';
 import UIService from './uiService';
 import UploadService from './uploadService';
@@ -16,7 +20,6 @@ import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import {
-    ElectronFile,
     FileWithCollection,
     MetadataAndFileTypeInfo,
     MetadataAndFileTypeInfoMap,
@@ -333,9 +336,7 @@ class UploadManager {
 
             if (fileUploadResult && isElectron()) {
                 this.remainingFiles = this.remainingFiles.filter(
-                    (file) =>
-                        (file.file as ElectronFile).path !==
-                        (fileWithCollection.file as ElectronFile).path
+                    (file) => !areSameElectronFiles(file, fileWithCollection)
                 );
                 ImportService.updatePendingUploads(this.remainingFiles);
             }

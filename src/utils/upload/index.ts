@@ -80,3 +80,13 @@ export function getUploadLogs() {
 export function getFileNameSize(file: File | ElectronFile) {
     return `${file.name}_${convertToHumanReadable(file.size)}`;
 }
+
+export function areSameElectronFiles(
+    file: FileWithCollection,
+    fileWithCollection: FileWithCollection
+): boolean {
+    return (
+        (file.file as ElectronFile).path ===
+        (fileWithCollection.file as ElectronFile).path
+    );
+}
