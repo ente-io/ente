@@ -72,8 +72,16 @@ export const setToUploadFiles = (
     filePaths: string[],
     collectionName: string
 ) => {
-    uploadStatusStore.set('filePaths', filePaths);
-    uploadStatusStore.set('collectionName', collectionName);
+    if (filePaths && filePaths.length > 0) {
+        uploadStatusStore.set('filePaths', filePaths);
+    } else {
+        uploadStatusStore.delete('filePaths');
+    }
+    if (collectionName) {
+        uploadStatusStore.set('collectionName', collectionName);
+    } else {
+        uploadStatusStore.delete('collectionName');
+    }
 };
 
 export const getPendingUploads = async () => {
