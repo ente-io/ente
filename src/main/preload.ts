@@ -2,7 +2,6 @@ import { Readable } from 'stream';
 import * as fs from 'promise-fs';
 import * as electron from 'electron';
 import {
-    hasPendingUploads,
     getElectronFile,
     getPendingUploads,
     setToUploadFiles,
@@ -144,7 +143,6 @@ windowObject['ElectronAPIs'] = {
     registerRetryFailedExportListener,
     getExportRecord,
     setExportRecord,
-    hasPendingUploads,
     getElectronFile,
     showUploadFilesDialog,
     showUploadDirsDialog,
