@@ -225,7 +225,7 @@ export default function Upload(props: Props) {
         return collectionWiseFiles;
     }
 
-    const uploadFilesToExistingCollection = async (collection) => {
+    const uploadFilesToExistingCollection = async (collection: Collection) => {
         try {
             uploadInit();
             const filesWithCollectionToUpload: FileWithCollection[] =
@@ -234,7 +234,7 @@ export default function Upload(props: Props) {
                     localID: index,
                     collectionID: collection.id,
                 }));
-            await uploadFiles(filesWithCollectionToUpload);
+            await uploadFiles(filesWithCollectionToUpload, [collection]);
         } catch (e) {
             logError(e, 'Failed to upload files to existing collections');
         }
@@ -295,7 +295,7 @@ export default function Upload(props: Props) {
 
     const uploadFiles = async (
         filesWithCollectionToUpload: FileWithCollection[],
-        collections?: Collection[]
+        collections: Collection[]
     ) => {
         try {
             props.setUploadInProgress(true);

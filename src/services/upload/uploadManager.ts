@@ -1,5 +1,4 @@
 import { getLocalFiles, setLocalFiles } from '../fileService';
-import { getLocalCollections } from '../collectionService';
 import { SetFiles } from 'types/gallery';
 import { getDedicatedCryptoWorker } from 'utils/crypto';
 import {
@@ -59,7 +58,7 @@ class UploadManager {
         this.setFiles = setFiles;
     }
 
-    private async init(newCollections?: Collection[]) {
+    private async init(collections: Collection[]) {
         this.filesToBeUploaded = [];
         this.failedFiles = [];
         this.parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
@@ -71,10 +70,6 @@ class UploadManager {
         this.existingFilesCollectionWise = sortFilesIntoCollections(
             this.existingFiles
         );
-        const collections = await getLocalCollections();
-        if (newCollections) {
-            collections.push(...newCollections);
-        }
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection])
         );
