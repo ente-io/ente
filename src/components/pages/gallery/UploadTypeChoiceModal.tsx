@@ -6,7 +6,6 @@ import { IoIosArrowForward, IoMdClose } from 'react-icons/io';
 import FileUploadIcon from 'components/icons/FileUploadIcon';
 import FolderUploadIcon from 'components/icons/FolderUploadIcon';
 import { BsGoogle } from 'react-icons/bs';
-import { ElectronFile } from 'types/upload';
 
 function UploadTypeRow({ uploadFunc, Icon, uploadName }) {
     return (
@@ -70,21 +69,11 @@ export default function UploadTypeChoiceModal({
     };
 
     const uploadGoogleTakeout = async () => {
-        const filePaths = await ImportService.showUploadZipDialog();
+        const files = await ImportService.showUploadZipDialog();
         hideFiletypeDialog();
-        if (filePaths?.length > 0) {
-            const files: ElectronFile[] = [];
-            for (const filePath of filePaths) {
-                files.push(
-                    ...(await ImportService.getElectronFilesFromGoogleZip(
-                        filePath
-                    ))
-                );
-            }
-            ImportService.setSkipUpdatePendingUploads(true);
-            setIsUploadDirs(true);
-            setElectronFiles(files);
-        }
+        ImportService.setSkipUpdatePendingUploads(true);
+        setIsUploadDirs(true);
+        setElectronFiles(files);
     };
 
     return (
