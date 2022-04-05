@@ -14,6 +14,7 @@ import { FileUploadResults, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
 import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
 import { logUploadInfo } from 'utils/upload';
 import { convertToHumanReadable } from 'utils/billing';
+import { sleep } from 'utils/common';
 
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
@@ -33,6 +34,7 @@ export default async function uploader(
 
     logUploadInfo(`uploader called for  ${fileNameSize}`);
     UIService.setFileProgress(localID, 0);
+    await sleep(0);
     const { fileTypeInfo, metadata } =
         UploadService.getFileMetadataAndFileTypeInfo(localID);
     try {
