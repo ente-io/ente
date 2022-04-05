@@ -15,7 +15,6 @@ import {
     deleteFromTrash,
 } from 'services/fileService';
 import styled from 'styled-components';
-import LoadingBar from 'react-top-loading-bar';
 import {
     syncCollections,
     getCollectionsAndTheirLatestFile,
@@ -129,8 +128,6 @@ const defaultGalleryContext: GalleryContextType = {
     setActiveCollection: () => null,
     syncWithRemote: () => null,
     setDialogMessage: () => null,
-    startLoading: () => null,
-    finishLoading: () => null,
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
 };
@@ -183,10 +180,8 @@ export default function Gallery() {
         disabled: uploadInProgress,
     });
 
-    const loadingBar = useRef(null);
     const [isInSearchMode, setIsInSearchMode] = useState(false);
     const [searchStats, setSearchStats] = useState(null);
-    const isLoadingBarRunning = useRef(false);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
     const [deleted, setDeleted] = useState<number[]>([]);
@@ -296,7 +291,7 @@ export default function Gallery() {
             if (!(await isTokenValid())) {
                 throw new Error(ServerErrorCodes.SESSION_EXPIRED);
             }
-            !silent && startLoading();
+            !silent && appContext.startLoading();
             await billingService.syncSubscription();
             const collections = await syncCollections();
             setCollections(collections);
@@ -326,7 +321,7 @@ export default function Gallery() {
                     break;
             }
         } finally {
-            !silent && finishLoading();
+            !silent && appContext.finishLoading();
         }
         syncInProgress.current = false;
         if (resync.current) {
@@ -360,21 +355,12 @@ export default function Gallery() {
         setSelected({ count: 0, collectionID: 0 });
     };
 
-    const startLoading = () => {
-        !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
-        isLoadingBarRunning.current = true;
-    };
-    const finishLoading = () => {
-        isLoadingBarRunning.current && loadingBar.current?.complete();
-        isLoadingBarRunning.current = false;
-    };
-
     if (!files) {
         return <div />;
     }
     const collectionOpsHelper =
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
-            startLoading();
+            appContext.startLoading();
             try {
                 await handleCollectionOps(
                     ops,
@@ -395,14 +381,14 @@ export default function Gallery() {
                 });
             } finally {
                 await syncWithRemote(false, true);
-                finishLoading();
+                appContext.finishLoading();
             }
         };
 
     const changeFilesVisibilityHelper = async (
         visibility: VISIBILITY_STATE
     ) => {
-        startLoading();
+        appContext.startLoading();
         try {
             const updatedFiles = await changeFilesVisibility(
                 files,
@@ -431,7 +417,7 @@ export default function Gallery() {
             });
         } finally {
             await syncWithRemote(false, true);
-            finishLoading();
+            appContext.finishLoading();
         }
     };
 
@@ -465,7 +451,7 @@ export default function Gallery() {
     };
 
     const deleteFileHelper = async (permanent?: boolean) => {
-        startLoading();
+        appContext.startLoading();
         try {
             const selectedFiles = getSelectedFiles(selected, files);
             if (permanent) {
@@ -496,7 +482,7 @@ export default function Gallery() {
             });
         } finally {
             await syncWithRemote(false, true);
-            finishLoading();
+            appContext.finishLoading();
         }
     };
 
@@ -526,7 +512,7 @@ export default function Gallery() {
             close: { text: constants.CANCEL },
         });
     const emptyTrashHelper = async () => {
-        startLoading();
+        appContext.startLoading();
         try {
             await emptyTrash();
             if (selected.collectionID === TRASH_SECTION) {
@@ -543,7 +529,7 @@ export default function Gallery() {
             });
         } finally {
             await syncWithRemote(false, true);
-            finishLoading();
+            appContext.finishLoading();
         }
     };
 
@@ -556,9 +542,9 @@ export default function Gallery() {
     const downloadHelper = async () => {
         const selectedFiles = getSelectedFiles(selected, files);
         clearSelection();
-        startLoading();
+        appContext.startLoading();
         await downloadFiles(selectedFiles);
-        finishLoading();
+        appContext.finishLoading();
     };
 
     return (
@@ -570,8 +556,6 @@ export default function Gallery() {
                 setActiveCollection,
                 syncWithRemote,
                 setDialogMessage,
-                startLoading,
-                finishLoading,
                 setNotificationAttributes,
                 setBlockingLoad,
             }}>
@@ -583,7 +567,6 @@ export default function Gallery() {
                         <EnteSpinner />
                     </LoadingOverlay>
                 )}
-                <LoadingBar color="#51cd7c" ref={loadingBar} />
                 {isFirstLoad && (
                     <AlertContainer>
                         {constants.INITIAL_LOAD_DELAY_WARNING}
@@ -625,8 +608,8 @@ export default function Gallery() {
                     syncWithRemote={syncWithRemote}
                     setDialogMessage={setDialogMessage}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    startLoading={startLoading}
-                    finishLoading={finishLoading}
+                    startLoading={appContext.startLoading}
+                    finishLoading={appContext.finishLoading}
                     collectionFilesCount={collectionFilesCount}
                 />
                 <CollectionNamer

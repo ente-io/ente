@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useRef, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
@@ -17,6 +17,7 @@ import Head from 'next/head';
 import { getAlbumSiteHost } from 'constants/pages';
 import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 import { logUploadInfo } from 'utils/upload';
+import LoadingBar from 'react-top-loading-bar';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -535,6 +536,8 @@ type AppContextType = {
     setDisappearingFlashMessage: (message: FlashMessage) => void;
     redirectURL: string;
     setRedirectURL: (url: string) => void;
+    startLoading: () => void;
+    finishLoading: () => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -566,6 +569,8 @@ export default function App({ Component, err }) {
     const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
     const [redirectURL, setRedirectURL] = useState(null);
     const [isAlbumsDomain, setIsAlbumsDomain] = useState(false);
+    const isLoadingBarRunning = useRef(false);
+    const loadingBar = useRef(null);
 
     useEffect(() => {
         if (
@@ -674,6 +679,15 @@ export default function App({ Component, err }) {
         setTimeout(() => setFlashMessage(null), 5000);
     };
 
+    const startLoading = () => {
+        !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
+        isLoadingBarRunning.current = true;
+    };
+    const finishLoading = () => {
+        isLoadingBarRunning.current && loadingBar.current?.complete();
+        isLoadingBarRunning.current = false;
+    };
+
     return (
         <>
             <Head>
@@ -711,6 +725,8 @@ export default function App({ Component, err }) {
                     onClose={() => setFlashMessage(null)}
                 />
             )}
+            <LoadingBar color="#51cd7c" ref={loadingBar} />
+
             <AppContext.Provider
                 value={{
                     showNavBar,
@@ -719,6 +735,8 @@ export default function App({ Component, err }) {
                     setDisappearingFlashMessage,
                     redirectURL,
                     setRedirectURL,
+                    startLoading,
+                    finishLoading,
                 }}>
                 {loading ? (
                     <Container>
