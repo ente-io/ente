@@ -46,7 +46,14 @@ export async function readFile(
     logUploadInfo(`reading file datal${getFileNameSize(rawFile)} `);
     let filedata: Uint8Array | DataStream;
     if (!(rawFile instanceof File)) {
-        filedata = await getElectronFileStream(rawFile, FILE_READER_CHUNK_SIZE);
+        if (rawFile.size > MULTIPART_PART_SIZE) {
+            filedata = await getElectronFileStream(
+                rawFile,
+                FILE_READER_CHUNK_SIZE
+            );
+        } else {
+            filedata = await rawFile.arrayBuffer();
+        }
     } else if (rawFile.size > MULTIPART_PART_SIZE) {
         filedata = getFileStream(reader, rawFile, FILE_READER_CHUNK_SIZE);
     } else {
