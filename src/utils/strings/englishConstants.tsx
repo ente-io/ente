@@ -694,6 +694,20 @@ const englishConstants = {
     CLUB_BY_CAPTURE_TIME: 'club by capture time',
     FILES: 'files',
     EACH: 'each',
+    DEDUPLICATION_LOGIC_MESSAGE: (captureTime: boolean) => (
+        <>
+            the following files were clubbed based on their{' '}
+            <span style={{ color: '#51cd7c' }}>sizes </span>{' '}
+            {captureTime && (
+                <>
+                    and <span style={{ color: '#51cd7c' }}> capture time</span>
+                </>
+            )}
+            , please review and{' '}
+            <span style={{ color: '#c93f3f' }}>delete </span> items you believe
+            are duplicates{' '}
+        </>
+    ),
 };
 
 export default englishConstants;

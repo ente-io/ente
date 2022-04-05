@@ -22,10 +22,15 @@ import DeduplicateOptions from 'components/pages/gallery/SelectedFileOptions/Ded
 import { PAGES } from 'constants/pages';
 import router from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import styled from 'styled-components';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext
 );
+export const Info = styled.div`
+    padding: 24px;
+    font-size: 18px;
+`;
 
 export default function Deduplicate() {
     const {
@@ -141,6 +146,9 @@ export default function Deduplicate() {
                 fileSizeMap,
                 isOnDeduplicatePage: true,
             }}>
+            <Info>
+                {constants.DEDUPLICATION_LOGIC_MESSAGE(clubSameTimeFilesOnly)}
+            </Info>
             <PhotoFrame
                 files={duplicateFiles}
                 setFiles={setDuplicateFiles}
