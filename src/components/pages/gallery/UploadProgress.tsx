@@ -7,7 +7,6 @@ import { FileRejection } from 'react-dropzone';
 import styled from 'styled-components';
 import { DESKTOP_APP_DOWNLOAD_URL } from 'utils/common';
 import constants from 'utils/strings/constants';
-import { Collapse } from 'react-collapse';
 import { ButtonVariant, getVariantColor } from './LinkButton';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 
@@ -40,7 +39,7 @@ export const FileList = styled.ul`
     }
 `;
 
-const SectionTitle = styled.div`
+const SectionTitle = styled.summary`
     display: flex;
     justify-content: space-between;
     color: #eee;
@@ -48,11 +47,8 @@ const SectionTitle = styled.div`
     cursor: pointer;
 `;
 
-const Section = styled.div`
+const Section = styled.details`
     margin: 20px 0;
-    & > .ReactCollapse--collapse {
-        transition: height 200ms;
-    }
     word-break: break-word;
     padding: 0 20px;
 `;
@@ -61,7 +57,7 @@ const SectionInfo = styled.div`
     padding-left: 15px;
 `;
 
-const Content = styled.div`
+const SectionContent = styled.div`
     padding-right: 30px;
 `;
 
@@ -92,18 +88,16 @@ const ResultSection = (props: ResultSectionProps) => {
                 {props.sectionTitle}
                 {listView ? <ExpandLess /> : <ExpandMore />}
             </SectionTitle>
-            <Collapse isOpened={listView}>
-                <Content>
-                    {props.sectionInfo && (
-                        <SectionInfo>{props.sectionInfo}</SectionInfo>
-                    )}
-                    <FileList>
-                        {fileList.map((fileID) => (
-                            <li key={fileID}>{props.filenames.get(fileID)}</li>
-                        ))}
-                    </FileList>
-                </Content>
-            </Collapse>
+            <SectionContent>
+                {props.sectionInfo && (
+                    <SectionInfo>{props.sectionInfo}</SectionInfo>
+                )}
+                <FileList>
+                    {fileList.map((fileID) => (
+                        <li key={fileID}>{props.filenames.get(fileID)}</li>
+                    ))}
+                </FileList>
+            </SectionContent>
         </Section>
     );
 };
@@ -119,27 +113,23 @@ const InProgressSection = (props: InProgressProps) => {
     const fileList = props.fileProgressStatuses;
 
     return (
-        <Section>
+        <Section open>
             <SectionTitle onClick={() => setListView(!listView)}>
                 {props.sectionTitle}
                 {listView ? <ExpandLess /> : <ExpandMore />}
             </SectionTitle>
-            <Collapse isOpened={listView}>
-                <Content>
-                    {props.sectionInfo && (
-                        <SectionInfo>{props.sectionInfo}</SectionInfo>
-                    )}
-                    <FileList>
-                        {fileList.map(({ fileID, progress }) => (
-                            <li key={fileID}>
-                                {`${props.filenames.get(
-                                    fileID
-                                )} - ${progress}%`}
-                            </li>
-                        ))}
-                    </FileList>
-                </Content>
-            </Collapse>
+            <SectionContent>
+                {props.sectionInfo && (
+                    <SectionInfo>{props.sectionInfo}</SectionInfo>
+                )}
+                <FileList>
+                    {fileList.map(({ fileID, progress }) => (
+                        <li key={fileID}>
+                            {`${props.filenames.get(fileID)} - ${progress}%`}
+                        </li>
+                    ))}
+                </FileList>
+            </SectionContent>
         </Section>
     );
 };

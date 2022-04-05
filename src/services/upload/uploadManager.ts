@@ -48,6 +48,7 @@ class UploadManager {
     private failedFiles: FileWithCollection[];
     private existingFilesCollectionWise: Map<number, EnteFile[]>;
     private existingFiles: EnteFile[];
+    private count = 10000;
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
     public initUploader(progressUpdater: ProgressUpdater, setFiles: SetFiles) {
@@ -284,8 +285,8 @@ class UploadManager {
     }
 
     private async uploadNextFileInQueue(worker: any, reader: FileReader) {
-        while (this.filesToBeUploaded.length > 0) {
-            const fileWithCollection = this.filesToBeUploaded.pop();
+        while (this.filesToBeUploaded.length > 0 && this.count--) {
+            const fileWithCollection = this.filesToBeUploaded.shift();
             const { collectionID } = fileWithCollection;
             const existingFilesInCollection =
                 this.existingFilesCollectionWise.get(collectionID) ?? [];
@@ -332,6 +333,7 @@ class UploadManager {
                 fileUploadResult
             );
             UploadService.reducePendingUploadCount();
+            this.filesToBeUploaded.push(fileWithCollection);
         }
     }
 
