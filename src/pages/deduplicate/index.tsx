@@ -19,15 +19,23 @@ import {
 } from 'types/deduplicate';
 import Router from 'next/router';
 import DeduplicateOptions from 'components/pages/gallery/SelectedFileOptions/DeduplicateOptions';
+import { PAGES } from 'constants/pages';
+import router from 'next/router';
+import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext
 );
 
 export default function Deduplicate() {
-    const { setDialogMessage, startLoading, finishLoading, showNavBar } =
-        useContext(AppContext);
-    const [duplicateFiles, setDuplicateFiles] = useState<EnteFile[]>([]);
+    const {
+        setDialogMessage,
+        startLoading,
+        finishLoading,
+        showNavBar,
+        setRedirectURL,
+    } = useContext(AppContext);
+    const [duplicateFiles, setDuplicateFiles] = useState<EnteFile[]>(null);
     const [clubSameTimeFilesOnly, setClubSameTimeFilesOnly] = useState(false);
     const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
     const [selected, setSelected] = useState<SelectedState>({
@@ -36,11 +44,17 @@ export default function Deduplicate() {
     });
     const closeDeduplication = function () {
         Router.back();
-        setSelected({ count: 0, collectionID: 0 });
     };
     useEffect(() => {
+        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        if (!key) {
+            setRedirectURL(router.asPath);
+            router.push(PAGES.ROOT);
+            return;
+        }
         showNavBar(true);
-    });
+        setDuplicateFiles([]);
+    }, []);
 
     useEffect(() => {
         syncWithRemote();
@@ -113,6 +127,10 @@ export default function Deduplicate() {
             finishLoading();
         }
     };
+
+    if (!duplicateFiles) {
+        return <></>;
+    }
 
     return (
         <DeduplicateContext.Provider
