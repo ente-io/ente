@@ -34,25 +34,22 @@ export default async function uploader(
 
     logUploadInfo(`uploader called for  ${fileNameSize}`);
     UIService.setFileProgress(localID, 0);
+    await sleep(0);
     const { fileTypeInfo, metadata } =
         UploadService.getFileMetadataAndFileTypeInfo(localID);
     try {
         const fileSize = UploadService.getAssetSize(uploadAsset);
         if (fileSize >= MAX_FILE_SIZE_SUPPORTED) {
-            await sleep(100);
             return { fileUploadResult: FileUploadResults.TOO_LARGE };
         }
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
-            await sleep(100);
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         if (!metadata) {
-            await sleep(100);
             throw Error(CustomError.NO_METADATA);
         }
 
         if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
-            await sleep(100);
             logUploadInfo(`skipped upload for  ${fileNameSize}`);
             return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
         }
@@ -64,7 +61,6 @@ export default async function uploader(
             shouldDedupeAcrossCollection(fileWithCollection.collection.name) &&
             fileAlreadyInCollection(existingFiles, metadata)
         ) {
-            await sleep(100);
             logUploadInfo(`deduped upload for  ${fileNameSize}`);
             return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
         }
@@ -112,7 +108,6 @@ export default async function uploader(
         UIService.increaseFileUploaded();
         logUploadInfo(`${fileNameSize} successfully uploaded`);
 
-        await sleep(100);
         return {
             fileUploadResult: FileUploadResults.UPLOADED,
             file: decryptedFile,
