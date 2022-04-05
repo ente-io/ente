@@ -27,6 +27,7 @@ import { DeadCenter, GalleryContext } from 'pages/gallery';
 import billingService from 'services/billingService';
 import { SetLoading } from 'types/gallery';
 import { logError } from 'utils/sentry';
+import { AppContext } from 'pages/_app';
 
 export const PlanIcon = styled.div<{ currentlySubscribed: boolean }>`
     border-radius: 20px;
@@ -90,6 +91,7 @@ function PlanSelector(props: Props) {
     const [plans, setPlans] = useState<Plan[]>(null);
     const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(PLAN_PERIOD.YEAR);
     const galleryContext = useContext(GalleryContext);
+    const appContext = useContext(AppContext);
 
     const togglePeriod = () => {
         setPlanPeriod((prevPeriod) =>
@@ -99,7 +101,7 @@ function PlanSelector(props: Props) {
         );
     };
     function onReopenClick() {
-        galleryContext.closeMessageDialog();
+        appContext.closeMessageDialog();
         galleryContext.showPlanSelectorModal();
     }
     useEffect(() => {

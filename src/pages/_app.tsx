@@ -18,6 +18,10 @@ import { getAlbumSiteHost } from 'constants/pages';
 import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 import { logUploadInfo } from 'utils/upload';
 import LoadingBar from 'react-top-loading-bar';
+import MessageDialog, {
+    MessageAttributes,
+    SetDialogMessage,
+} from 'components/MessageDialog';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -538,6 +542,8 @@ type AppContextType = {
     setRedirectURL: (url: string) => void;
     startLoading: () => void;
     finishLoading: () => void;
+    closeMessageDialog: () => void;
+    setDialogMessage: SetDialogMessage;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -571,6 +577,8 @@ export default function App({ Component, err }) {
     const [isAlbumsDomain, setIsAlbumsDomain] = useState(false);
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
+    const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
+    const [messageDialogView, setMessageDialogView] = useState(false);
 
     useEffect(() => {
         if (
@@ -673,6 +681,8 @@ export default function App({ Component, err }) {
         }
     }, []);
 
+    useEffect(() => setMessageDialogView(true), [dialogMessage]);
+
     const showNavBar = (show: boolean) => setShowNavBar(show);
     const setDisappearingFlashMessage = (flashMessages: FlashMessage) => {
         setFlashMessage(flashMessages);
@@ -687,6 +697,8 @@ export default function App({ Component, err }) {
         isLoadingBarRunning.current && loadingBar.current?.complete();
         isLoadingBarRunning.current = false;
     };
+
+    const closeMessageDialog = () => setMessageDialogView(false);
 
     return (
         <>
@@ -727,6 +739,13 @@ export default function App({ Component, err }) {
             )}
             <LoadingBar color="#51cd7c" ref={loadingBar} />
 
+            <MessageDialog
+                size="lg"
+                show={messageDialogView}
+                onHide={closeMessageDialog}
+                attributes={dialogMessage}
+            />
+
             <AppContext.Provider
                 value={{
                     showNavBar,
@@ -737,6 +756,8 @@ export default function App({ Component, err }) {
                     setRedirectURL,
                     startLoading,
                     finishLoading,
+                    closeMessageDialog,
+                    setDialogMessage,
                 }}>
                 {loading ? (
                     <Container>

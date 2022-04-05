@@ -218,7 +218,7 @@ function CollectionShare(props: Props) {
     };
 
     const disablePublicUrlPassword = async () => {
-        galleryContext.setDialogMessage({
+        appContext.setDialogMessage({
             title: constants.DISABLE_PASSWORD,
             content: constants.DISABLE_PASSWORD_MESSAGE,
             close: { text: constants.CANCEL },
@@ -249,7 +249,7 @@ function CollectionShare(props: Props) {
     };
 
     const disablePublicSharing = () => {
-        galleryContext.setDialogMessage({
+        appContext.setDialogMessage({
             title: constants.DISABLE_PUBLIC_SHARING,
             content: constants.DISABLE_PUBLIC_SHARING_MESSAGE,
             close: { text: constants.CANCEL },
@@ -262,7 +262,7 @@ function CollectionShare(props: Props) {
     };
 
     const disableFileDownload = () => {
-        galleryContext.setDialogMessage({
+        appContext.setDialogMessage({
             title: constants.DISABLE_FILE_DOWNLOAD,
             content: constants.DISABLE_FILE_DOWNLOAD_MESSAGE,
             close: { text: constants.CANCEL },
