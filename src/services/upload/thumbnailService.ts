@@ -7,7 +7,7 @@ import { convertBytesToHumanReadable } from 'utils/billing';
 import { isFileHEIC } from 'utils/file';
 import { FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from '../readerService';
-import HEICConverter from 'services/HEICConverter';
+import HEICConverter from 'services/heicConverter/heicConverterService';
 import { getFileNameSize, logUploadInfo } from 'utils/upload';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
