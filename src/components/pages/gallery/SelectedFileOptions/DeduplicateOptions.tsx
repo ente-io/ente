@@ -9,7 +9,6 @@ import DeleteIcon from 'components/icons/DeleteIcon';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { DeduplicateContext } from 'pages/deduplicate';
-import CloseIcon from 'components/icons/CloseIcon';
 import LeftArrow from 'components/icons/LeftArrow';
 import { SetDialogMessage } from 'components/MessageDialog';
 
@@ -53,11 +52,7 @@ export default function DeduplicateOptions({
         <SelectionBar>
             <SelectionContainer>
                 <IconButton onClick={close}>
-                    {deduplicateContext.isOnDeduplicatePage ? (
-                        <LeftArrow />
-                    ) : (
-                        <CloseIcon />
-                    )}
+                    <LeftArrow />
                 </IconButton>
                 <div>
                     {count} {constants.SELECTED}
