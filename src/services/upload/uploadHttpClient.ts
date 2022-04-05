@@ -4,8 +4,8 @@ import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
 import { EnteFile } from 'types/file';
 import { CustomError, handleUploadError } from 'utils/error';
-import { retryAsyncFunction } from 'utils/network';
 import { UploadFile, UploadURL, MultipartUploadURLs } from 'types/upload';
+import { retryHTTPCall } from 'utils/upload/uploadRetrier';
 
 const ENDPOINT = getEndpoint();
 const MAX_URL_REQUESTS = 50;
@@ -19,7 +19,7 @@ class UploadHttpClient {
             if (!token) {
                 return;
             }
-            const response = await retryAsyncFunction(
+            const response = await retryHTTPCall(
                 () =>
                     HTTPService.post(`${ENDPOINT}/files`, uploadFile, null, {
                         'X-Auth-Token': token,
@@ -90,7 +90,7 @@ class UploadHttpClient {
         progressTracker
     ): Promise<string> {
         try {
-            await retryAsyncFunction(() =>
+            await retryHTTPCall(() =>
                 HTTPService.put(
                     fileUploadURL.url,
                     file,
@@ -112,7 +112,7 @@ class UploadHttpClient {
         progressTracker
     ) {
         try {
-            const response = await retryAsyncFunction(async () => {
+            const response = await retryHTTPCall(async () => {
                 const resp = await HTTPService.put(
                     partUploadURL,
                     filePart,
@@ -136,7 +136,7 @@ class UploadHttpClient {
 
     async completeMultipartUpload(completeURL: string, reqBody: any) {
         try {
-            await retryAsyncFunction(() =>
+            await retryHTTPCall(() =>
                 HTTPService.post(completeURL, reqBody, null, {
                     'content-type': 'text/xml',
                 })

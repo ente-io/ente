@@ -21,6 +21,7 @@ import MessageDialog, {
     MessageAttributes,
     SetDialogMessage,
 } from 'components/MessageDialog';
+import { logUploadInfo } from 'utils/upload';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -670,6 +671,10 @@ export default function App({ Component, err }) {
     }, [redirectName]);
 
     useEffect(() => {
+        logUploadInfo(`app started`);
+        logUploadInfo(
+            `latest commit id :${process.env.NEXT_PUBLIC_LATEST_COMMIT_HASH}`
+        );
         const currentURL = new URL(window.location.href);
         if (currentURL.host === getAlbumSiteHost()) {
             setIsAlbumsDomain(true);
