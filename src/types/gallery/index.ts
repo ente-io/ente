@@ -1,4 +1,3 @@
-import { SetDialogMessage } from 'components/MessageDialog';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { DateValue, Bbox } from 'types/search';
@@ -27,10 +26,9 @@ export type GalleryContextType = {
     thumbs: Map<number, string>;
     files: Map<number, string>;
     showPlanSelectorModal: () => void;
-    closeMessageDialog: () => void;
     setActiveCollection: (collection: number) => void;
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
-    setDialogMessage: SetDialogMessage;
+
     setNotificationAttributes: (attributes: NotificationAttributes) => void;
     setBlockingLoad: (value: boolean) => void;
     clubSameTimeFilesOnly: boolean;

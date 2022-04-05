@@ -37,7 +37,6 @@ import {
     setJustSignedUp,
 } from 'utils/storage';
 import { isTokenValid, logoutUser } from 'services/userService';
-import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
 import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
@@ -130,10 +129,8 @@ const defaultGalleryContext: GalleryContextType = {
     thumbs: new Map(),
     files: new Map(),
     showPlanSelectorModal: () => null,
-    closeMessageDialog: () => null,
     setActiveCollection: () => null,
     syncWithRemote: () => null,
-    setDialogMessage: () => null,
 
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
@@ -164,8 +161,6 @@ export default function Gallery() {
         count: 0,
         collectionID: 0,
     });
-    const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
-    const [messageDialogView, setMessageDialogView] = useState(false);
     const [planModalView, setPlanModalView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
@@ -197,7 +192,8 @@ export default function Gallery() {
     const syncInProgress = useRef(true);
     const resync = useRef(false);
     const [deleted, setDeleted] = useState<number[]>([]);
-    const appContext = useContext(AppContext);
+    const { startLoading, finishLoading, setDialogMessage, ...appContext } =
+        useContext(AppContext);
     const [collectionFilesCount, setCollectionFilesCount] =
         useState<Map<number, number>>();
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
@@ -215,7 +211,6 @@ export default function Gallery() {
     const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
 
     const showPlanSelectorModal = () => setPlanModalView(true);
-    const closeMessageDialog = () => setMessageDialogView(false);
 
     const clearNotificationAttributes = () => setNotificationAttributes(null);
 
@@ -254,7 +249,7 @@ export default function Gallery() {
     useEffect(() => {
         const main = async () => {
             if (isDeduplicating) {
-                appContext.startLoading();
+                startLoading();
                 let duplicates = await getDuplicateFiles();
                 if (clubSameTimeFilesOnly) {
                     duplicates = clubDuplicatesByTime(duplicates);
@@ -291,7 +286,7 @@ export default function Gallery() {
                 }
                 setSelected(selectedFiles);
                 setActiveCollection(ALL_SECTION);
-                appContext.finishLoading();
+                finishLoading();
             } else {
                 setDuplicateFiles([]);
                 setFileSizeMap(new Map<number, number>());
@@ -301,8 +296,6 @@ export default function Gallery() {
 
         main();
     }, [isDeduplicating, clubSameTimeFilesOnly]);
-
-    useEffect(() => setMessageDialogView(true), [dialogMessage]);
 
     useEffect(
         () => collectionSelectorAttributes && setCollectionSelectorView(true),
@@ -359,7 +352,7 @@ export default function Gallery() {
             if (!(await isTokenValid())) {
                 throw new Error(ServerErrorCodes.SESSION_EXPIRED);
             }
-            !silent && appContext.startLoading();
+            !silent && startLoading();
             await billingService.syncSubscription();
             const collections = await syncCollections();
             setCollections(collections);
@@ -390,7 +383,7 @@ export default function Gallery() {
                     break;
             }
         } finally {
-            !silent && appContext.finishLoading();
+            !silent && finishLoading();
         }
         syncInProgress.current = false;
         if (resync.current) {
@@ -429,7 +422,7 @@ export default function Gallery() {
     }
     const collectionOpsHelper =
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
-            appContext.startLoading();
+            startLoading();
             try {
                 await handleCollectionOps(
                     ops,
@@ -450,14 +443,14 @@ export default function Gallery() {
                 });
             } finally {
                 await syncWithRemote(false, true);
-                appContext.finishLoading();
+                finishLoading();
             }
         };
 
     const changeFilesVisibilityHelper = async (
         visibility: VISIBILITY_STATE
     ) => {
-        appContext.startLoading();
+        startLoading();
         try {
             const updatedFiles = await changeFilesVisibility(
                 files,
@@ -486,7 +479,7 @@ export default function Gallery() {
             });
         } finally {
             await syncWithRemote(false, true);
-            appContext.finishLoading();
+            finishLoading();
         }
     };
 
@@ -520,7 +513,7 @@ export default function Gallery() {
     };
 
     const deleteFileHelper = async (permanent?: boolean) => {
-        appContext.startLoading();
+        startLoading();
         try {
             const selectedFiles = getSelectedFiles(selected, files);
             if (permanent) {
@@ -551,7 +544,7 @@ export default function Gallery() {
             });
         } finally {
             await syncWithRemote(false, true);
-            appContext.finishLoading();
+            finishLoading();
         }
     };
 
@@ -581,7 +574,7 @@ export default function Gallery() {
             close: { text: constants.CANCEL },
         });
     const emptyTrashHelper = async () => {
-        appContext.startLoading();
+        startLoading();
         try {
             await emptyTrash();
             if (selected.collectionID === TRASH_SECTION) {
@@ -598,7 +591,7 @@ export default function Gallery() {
             });
         } finally {
             await syncWithRemote(false, true);
-            appContext.finishLoading();
+            finishLoading();
         }
     };
 
@@ -611,9 +604,9 @@ export default function Gallery() {
     const downloadHelper = async () => {
         const selectedFiles = getSelectedFiles(selected, files);
         clearSelection();
-        appContext.startLoading();
+        startLoading();
         await downloadFiles(selectedFiles);
-        appContext.finishLoading();
+        finishLoading();
     };
 
     return (
@@ -621,10 +614,8 @@ export default function Gallery() {
             value={{
                 ...defaultGalleryContext,
                 showPlanSelectorModal,
-                closeMessageDialog,
                 setActiveCollection,
                 syncWithRemote,
-                setDialogMessage,
 
                 setNotificationAttributes,
                 setBlockingLoad,
@@ -642,12 +633,7 @@ export default function Gallery() {
                     attributes={notificationAttributes}
                     clearAttributes={clearNotificationAttributes}
                 />
-                <MessageDialog
-                    size="lg"
-                    show={messageDialogView}
-                    onHide={closeMessageDialog}
-                    attributes={dialogMessage}
-                />
+
                 <Upload
                     syncWithRemote={syncWithRemote}
                     setBannerMessage={setBannerMessage}
