@@ -1,7 +1,7 @@
 import ExpandLess from 'components/icons/ExpandLess';
 import ExpandMore from 'components/icons/ExpandMore';
 import React, { useState } from 'react';
-import { Button, Modal, ProgressBar } from 'react-bootstrap';
+import { Accordion, Button, Modal, ProgressBar } from 'react-bootstrap';
 import { FileRejection } from 'react-dropzone';
 
 import styled from 'styled-components';
@@ -39,7 +39,7 @@ export const FileList = styled.ul`
     }
 `;
 
-const SectionTitle = styled.summary`
+const SectionTitle = styled.div`
     display: flex;
     justify-content: space-between;
     color: #eee;
@@ -47,7 +47,7 @@ const SectionTitle = styled.summary`
     cursor: pointer;
 `;
 
-const Section = styled.details`
+const Section = styled.div`
     margin: 20px 0;
     word-break: break-word;
     padding: 0 20px;
@@ -83,22 +83,30 @@ const ResultSection = (props: ResultSectionProps) => {
         return <></>;
     }
     return (
-        <Section>
-            <SectionTitle onClick={() => setListView(!listView)}>
-                {props.sectionTitle}
-                {listView ? <ExpandLess /> : <ExpandMore />}
-            </SectionTitle>
-            <SectionContent>
-                {props.sectionInfo && (
-                    <SectionInfo>{props.sectionInfo}</SectionInfo>
-                )}
-                <FileList>
-                    {fileList.map((fileID) => (
-                        <li key={fileID}>{props.filenames.get(fileID)}</li>
-                    ))}
-                </FileList>
-            </SectionContent>
-        </Section>
+        <Accordion defaultActiveKey="1">
+            <Section>
+                <Accordion.Toggle eventKey="0" as="div">
+                    <SectionTitle onClick={() => setListView(!listView)}>
+                        {props.sectionTitle}
+                        {listView ? <ExpandLess /> : <ExpandMore />}
+                    </SectionTitle>
+                </Accordion.Toggle>
+                <Accordion.Collapse eventKey="0">
+                    <SectionContent>
+                        {props.sectionInfo && (
+                            <SectionInfo>{props.sectionInfo}</SectionInfo>
+                        )}
+                        <FileList>
+                            {fileList.map((fileID) => (
+                                <li key={fileID}>
+                                    {props.filenames.get(fileID)}
+                                </li>
+                            ))}
+                        </FileList>
+                    </SectionContent>
+                </Accordion.Collapse>
+            </Section>
+        </Accordion>
     );
 };
 
@@ -113,24 +121,32 @@ const InProgressSection = (props: InProgressProps) => {
     const fileList = props.fileProgressStatuses;
 
     return (
-        <Section open>
-            <SectionTitle onClick={() => setListView(!listView)}>
-                {props.sectionTitle}
-                {listView ? <ExpandLess /> : <ExpandMore />}
-            </SectionTitle>
-            <SectionContent>
-                {props.sectionInfo && (
-                    <SectionInfo>{props.sectionInfo}</SectionInfo>
-                )}
-                <FileList>
-                    {fileList.map(({ fileID, progress }) => (
-                        <li key={fileID}>
-                            {`${props.filenames.get(fileID)} - ${progress}%`}
-                        </li>
-                    ))}
-                </FileList>
-            </SectionContent>
-        </Section>
+        <Accordion defaultActiveKey="0">
+            <Section>
+                <Accordion.Toggle eventKey="0" as="div">
+                    <SectionTitle onClick={() => setListView(!listView)}>
+                        {props.sectionTitle}
+                        {listView ? <ExpandLess /> : <ExpandMore />}
+                    </SectionTitle>
+                </Accordion.Toggle>
+                <Accordion.Collapse eventKey="0">
+                    <SectionContent>
+                        {props.sectionInfo && (
+                            <SectionInfo>{props.sectionInfo}</SectionInfo>
+                        )}
+                        <FileList>
+                            {fileList.map(({ fileID, progress }) => (
+                                <li key={fileID}>
+                                    {`${props.filenames.get(
+                                        fileID
+                                    )} - ${progress}%`}
+                                </li>
+                            ))}
+                        </FileList>
+                    </SectionContent>
+                </Accordion.Collapse>
+            </Section>
+        </Accordion>
     );
 };
 
