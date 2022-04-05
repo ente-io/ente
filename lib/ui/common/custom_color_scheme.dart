@@ -15,8 +15,8 @@ extension CustomColorScheme on ColorScheme {
       : Color.fromRGBO(8, 18, 18, 0.4);
 
   Color get fabBackgroundColor =>
-      brightness == Brightness.light ? Colors.black : Colors.grey[700];
+      brightness == Brightness.light ? Colors.black : Colors.grey[850];
 
   Color get fabTextOrIconColor =>
-      brightness == Brightness.light ? Colors.white : Colors.white54;
+      brightness == Brightness.light ? Colors.white : Colors.white;
 }

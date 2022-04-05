@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,6 +11,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/common/custom_color_scheme.dart';
 //import 'package:photos/ui/common/report_bug_popup.dart';
 //import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -74,6 +76,80 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom != 0;
+
+    Widget fab() {
+      if (isKeypadOpen) {
+        return Container(
+          decoration: BoxDecoration(boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).backgroundColor,
+              spreadRadius: 200,
+              blurRadius: 100,
+              offset: Offset(0, 230),
+            )
+          ]),
+          width: double.infinity,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              FloatingActionButton(
+                  //mini: true,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.fabBackgroundColor,
+                  foregroundColor:
+                      Theme.of(context).colorScheme.fabTextOrIconColor,
+                  child: Transform.rotate(
+                    angle: _isFormValid() ? 0 : math.pi / 2,
+                    child: Icon(
+                      Icons.chevron_right,
+                      size: 36,
+                    ),
+                  ),
+                  onPressed: _isFormValid()
+                      ? () {
+                          _config
+                              .setVolatilePassword(_passwordController1.text);
+                          _config.setEmail(_email);
+                          UserService.instance.getOtt(context, _email);
+                        }
+                      : () {
+                          FocusScope.of(context).unfocus();
+                        } //keypad down here
+                  ),
+            ],
+          ),
+        );
+      } else {
+        return Container(
+          width: double.infinity,
+          height: 56,
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: OutlinedButton(
+            //style: Theme.of(context).elevatedButtonTheme.style,
+            onPressed: _isFormValid()
+                ? () {
+                    _config.setVolatilePassword(_passwordController1.text);
+                    _config.setEmail(_email);
+                    UserService.instance.getOtt(context, _email);
+                  }
+                : null,
+            child: Text(
+              'Create Account',
+            ),
+          ),
+        );
+      }
+    }
+
+    FloatingActionButtonLocation fabLocation() {
+      if (isKeypadOpen) {
+        return null;
+      } else {
+        return FloatingActionButtonLocation.centerFloat;
+      }
+    }
+
     final appBar = AppBar(
       elevation: 0,
       leading: IconButton(
@@ -97,10 +173,12 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       ),
     );
     return Scaffold(
-      appBar: appBar,
-      body: _getBody(),
-      // resizeToAvoidBottomInset: false,
-    );
+        appBar: appBar,
+        body: _getBody(),
+        floatingActionButton: fab(),
+        floatingActionButtonLocation: fabLocation()
+        // resizeToAvoidBottomInset: false,
+        );
   }
 
   Widget _getBody() {
@@ -481,47 +559,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 _getAgreement(),
                 Padding(padding: EdgeInsets.all(20)),
               ],
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
-          child: Container(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton(
-              style: Theme.of(context).elevatedButtonTheme.style,
-              onPressed: () {
-                if (_isFormValid()) {
-                  _config.setVolatilePassword(_passwordController1.text);
-                  _config.setEmail(_email);
-                  UserService.instance.getOtt(context, _email);
-                }
-              },
-              // onPressed: _isFormValid()
-              //     ? () {
-              //         if (!isValidEmail(_email)) {
-              //           showErrorDialog(context, "invalid email",
-              //               "please enter a valid email address.");
-              //         } else if (_passwordController1.text !=
-              //             _passwordController2.text) {
-              //           showErrorDialog(context, "uhm...",
-              //               "the passwords you entered don't match");
-              //         } else if (_passwordStrength <
-              //             kPasswordStrengthThreshold) {
-              //           showErrorDialog(context, "weak password",
-              //               "the password you have chosen is too simple, please choose another one");
-              //         } else {
-              //           _config.setVolatilePassword(
-              //               _passwordController1.text);
-              //           _config.setEmail(_email);
-              //           UserService.instance.getOtt(context, _email);
-              //         }
-              //       }
-              //     : null,
-              child: Text(
-                'Create Account',
-              ),
             ),
           ),
         ),

@@ -25,24 +25,23 @@ class GalleryFooterWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               padding: EdgeInsets.fromLTRB(50, 20, 50, 20),
-              side: BorderSide(
-                width: 2,
-                color: Theme.of(context).buttonColor.withOpacity(1),
-              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.cloud_upload,
-                    color: Theme.of(context).colorScheme.onSurface),
+                Icon(
+                  Icons.cloud_upload,
+                  //color: Theme.of(context).colorScheme.onSurface
+                  color: Theme.of(context).backgroundColor,
+                ),
                 Padding(padding: EdgeInsets.all(6)),
                 Text(
                   "preserve more",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onBackground,
-                  ),
+                  // style: TextStyle(
+                  //   color: Theme.of(context).colorScheme.onBackground,
+                  // ),
                 ),
               ],
             ),
