@@ -31,11 +31,6 @@ export type GalleryContextType = {
 
     setNotificationAttributes: (attributes: NotificationAttributes) => void;
     setBlockingLoad: (value: boolean) => void;
-    clubSameTimeFilesOnly: boolean;
-    setClubSameTimeFilesOnly: (clubSameTimeFilesOnly: boolean) => void;
-    fileSizeMap: Map<number, number>;
-    isDeduplicating: boolean;
-    setIsDeduplicating: (value: boolean) => void;
 };
 
 export interface NotificationAttributes {

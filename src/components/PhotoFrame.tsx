@@ -24,6 +24,7 @@ import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
 import EmptyScreen from './EmptyScreen';
 import { AppContext } from 'pages/_app';
+import { DeduplicateContext } from 'pages/deduplicate';
 
 const Container = styled.div`
     display: block;
@@ -44,20 +45,20 @@ interface Props {
     files: EnteFile[];
     setFiles: SetFiles;
     syncWithRemote: () => Promise<void>;
-    favItemIds: Set<number>;
+    favItemIds?: Set<number>;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState)
     ) => void;
     selected: SelectedState;
-    isFirstLoad;
+    isFirstLoad?;
     openFileUploader?;
-    isInSearchMode: boolean;
+    isInSearchMode?: boolean;
     search?: Search;
     setSearchStats?: setSearchStats;
     deleted?: number[];
     activeCollection: number;
-    isSharedCollection: boolean;
-    enableDownload: boolean;
+    isSharedCollection?: boolean;
+    enableDownload?: boolean;
 }
 
 type SourceURL = {
@@ -88,6 +89,7 @@ const PhotoFrame = ({
     const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);
+    const deduplicateContext = useContext(DeduplicateContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
@@ -171,7 +173,7 @@ const PhotoFrame = ({
                 }),
             }))
             .filter((item) => {
-                if (deleted.includes(item.id)) {
+                if (deleted?.includes(item.id)) {
                     return false;
                 }
                 if (
@@ -550,7 +552,7 @@ const PhotoFrame = ({
                                 showAppDownloadBanner={
                                     files.length < 30 &&
                                     !isInSearchMode &&
-                                    !galleryContext.isDeduplicating
+                                    !deduplicateContext.isOnDeduplicatePage
                                 }
                                 resetFetching={resetFetching}
                             />

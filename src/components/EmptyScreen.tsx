@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Button } from 'react-bootstrap';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
-import { GalleryContext } from 'pages/gallery';
+import { DeduplicateContext } from 'pages/deduplicate';
 
 const Wrapper = styled.div`
     display: flex;
@@ -18,10 +18,10 @@ const Wrapper = styled.div`
 `;
 
 export default function EmptyScreen({ openFileUploader }) {
-    const galleryContext = useContext(GalleryContext);
+    const deduplicateContext = useContext(DeduplicateContext);
     return (
         <Wrapper>
-            {galleryContext.isDeduplicating ? (
+            {deduplicateContext.isOnDeduplicatePage ? (
                 <b
                     style={{
                         fontSize: '2em',
