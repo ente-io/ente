@@ -4583,11 +4583,6 @@ react-burger-menu@^3.0.4:
     prop-types "^15.7.2"
     snapsvg-cjs "0.0.6"
 
-react-collapse@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.npmjs.org/react-collapse/-/react-collapse-5.1.0.tgz"
-  integrity sha512-5v0ywsn9HjiR/odNzbRDs0RZfrnbdSippJebWOBCFFDA12Vx8DddrbI4qWVf1P2wTiVagrpcSy07AU0b6+gM9Q==
-
 react-datepicker@^4.3.0:
   version "4.3.0"
   resolved "https://registry.npmjs.org/react-datepicker/-/react-datepicker-4.3.0.tgz"
