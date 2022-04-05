@@ -1,18 +1,16 @@
 import { EnteFile } from 'types/file';
 import { Bbox, DateValue } from 'types/search';
+import { Location } from 'types/upload';
 
-export function isInsideBox(
-    file: { longitude: number; latitude: number },
-    bbox: Bbox
-) {
-    if (file.latitude === null && file.longitude === null) {
+export function isInsideBox({ latitude, longitude }: Location, bbox: Bbox) {
+    if (latitude === null && longitude === null) {
         return false;
     }
     if (
-        file.longitude >= bbox[0] &&
-        file.latitude >= bbox[1] &&
-        file.longitude <= bbox[2] &&
-        file.latitude <= bbox[3]
+        longitude >= bbox[0] &&
+        latitude >= bbox[1] &&
+        longitude <= bbox[2] &&
+        latitude <= bbox[3]
     ) {
         return true;
     }

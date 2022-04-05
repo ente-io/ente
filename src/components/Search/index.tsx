@@ -149,11 +149,26 @@ export default function SearchBar(props: Props) {
 
         const locationResults = await searchLocation(searchPhrase);
 
+        const locationResultsHasFiles: boolean[] = new Array(
+            locationResults.length
+        ).fill(false);
+        props.files.map((file) => {
+            for (const [index, location] of locationResults.entries()) {
+                if (
+                    isInsideBox(
+                        {
+                            latitude: file.metadata.latitude,
+                            longitude: file.metadata.longitude,
+                        },
+                        location.bbox
+                    )
+                ) {
+                    locationResultsHasFiles[index] = true;
+                }
+            }
+        });
         const filteredLocationWithFiles = locationResults.filter(
-            (locationResult) =>
-                props.files.find((file) =>
-                    isInsideBox(file.metadata, locationResult.bbox)
-                )
+            (_, index) => locationResultsHasFiles[index]
         );
         options.push(
             ...filteredLocationWithFiles.map(
