@@ -31,8 +31,6 @@ export type GalleryContextType = {
     setActiveCollection: (collection: number) => void;
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setDialogMessage: SetDialogMessage;
-    startLoading: () => void;
-    finishLoading: () => void;
     setNotificationAttributes: (attributes: NotificationAttributes) => void;
     setBlockingLoad: (value: boolean) => void;
     clubSameTimeFilesOnly: boolean;

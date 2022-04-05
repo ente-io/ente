@@ -777,7 +777,7 @@ function PhotoSwipe(props: Iprops) {
     };
 
     const downloadFileHelper = async (file) => {
-        galleryContext.startLoading();
+        appContext.startLoading();
         await downloadFile(
             file,
             publicCollectionGalleryContext.accessedThroughSharedURL,
@@ -785,7 +785,7 @@ function PhotoSwipe(props: Iprops) {
             publicCollectionGalleryContext.passwordToken
         );
 
-        galleryContext.finishLoading();
+        appContext.finishLoading();
     };
     const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;
