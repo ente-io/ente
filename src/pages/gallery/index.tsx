@@ -15,7 +15,6 @@ import {
     deleteFromTrash,
 } from 'services/fileService';
 import styled from 'styled-components';
-import LoadingBar from 'react-top-loading-bar';
 import {
     syncCollections,
     getCollectionsAndTheirLatestFile,
@@ -38,7 +37,6 @@ import {
     setJustSignedUp,
 } from 'utils/storage';
 import { isTokenValid, logoutUser } from 'services/userService';
-import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
 import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
@@ -53,7 +51,7 @@ import {
     sortFilesIntoCollections,
 } from 'utils/file';
 import SearchBar from 'components/Search';
-import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
+import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions/GalleryOptions';
 import CollectionSelector, {
     CollectionSelectorAttributes,
 } from 'components/pages/gallery/CollectionSelector';
@@ -105,12 +103,6 @@ import {
 import Collections from 'components/pages/gallery/Collections';
 import { VISIBILITY_STATE } from 'constants/file';
 import ToastNotification from 'components/ToastNotification';
-import {
-    clubDuplicatesByTime,
-    getDuplicateFiles,
-} from 'services/deduplicationService';
-import ClubDuplicateFilesByTime from 'components/ClubDuplicateFilesByTime';
-import BackButton from 'components/BackButton';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -131,19 +123,11 @@ const defaultGalleryContext: GalleryContextType = {
     thumbs: new Map(),
     files: new Map(),
     showPlanSelectorModal: () => null,
-    closeMessageDialog: () => null,
     setActiveCollection: () => null,
     syncWithRemote: () => null,
-    setDialogMessage: () => null,
-    startLoading: () => null,
-    finishLoading: () => null,
+
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
-    clubSameTimeFilesOnly: false,
-    setClubSameTimeFilesOnly: null,
-    fileSizeMap: new Map<number, number>(),
-    isDeduplicating: false,
-    setIsDeduplicating: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -166,8 +150,6 @@ export default function Gallery() {
         count: 0,
         collectionID: 0,
     });
-    const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
-    const [messageDialogView, setMessageDialogView] = useState(false);
     const [planModalView, setPlanModalView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
@@ -194,14 +176,13 @@ export default function Gallery() {
         disabled: uploadInProgress,
     });
 
-    const loadingBar = useRef(null);
     const [isInSearchMode, setIsInSearchMode] = useState(false);
     const [searchStats, setSearchStats] = useState(null);
-    const isLoadingBarRunning = useRef(false);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
     const [deleted, setDeleted] = useState<number[]>([]);
-    const appContext = useContext(AppContext);
+    const { startLoading, finishLoading, setDialogMessage, ...appContext } =
+        useContext(AppContext);
     const [collectionFilesCount, setCollectionFilesCount] =
         useState<Map<number, number>>();
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
@@ -213,13 +194,7 @@ export default function Gallery() {
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
 
-    const [isDeduplicating, setIsDeduplicating] = useState(false);
-    const [duplicateFiles, setDuplicateFiles] = useState<EnteFile[]>([]);
-    const [clubSameTimeFilesOnly, setClubSameTimeFilesOnly] = useState(false);
-    const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
-
     const showPlanSelectorModal = () => setPlanModalView(true);
-    const closeMessageDialog = () => setMessageDialogView(false);
 
     const clearNotificationAttributes = () => setNotificationAttributes(null);
 
@@ -254,59 +229,6 @@ export default function Gallery() {
         main();
         appContext.showNavBar(true);
     }, []);
-
-    useEffect(() => {
-        const main = async () => {
-            if (isDeduplicating) {
-                startLoading();
-                let duplicates = await getDuplicateFiles();
-                if (clubSameTimeFilesOnly) {
-                    duplicates = clubDuplicatesByTime(duplicates);
-                }
-
-                const currFileSizeMap = new Map<number, number>();
-
-                let allDuplicateFiles: EnteFile[] = [];
-                let toSelectFileIDs: number[] = [];
-                let count = 0;
-
-                for (const dupe of duplicates) {
-                    allDuplicateFiles = allDuplicateFiles.concat(dupe.files);
-                    // select all except first file
-                    toSelectFileIDs = toSelectFileIDs.concat(
-                        dupe.files.slice(1).map((f) => f.id)
-                    );
-                    count += dupe.files.length - 1;
-
-                    for (const file of dupe.files) {
-                        currFileSizeMap.set(file.id, dupe.size);
-                    }
-                }
-                setDuplicateFiles(allDuplicateFiles);
-                setFileSizeMap(currFileSizeMap);
-
-                const selectedFiles = {
-                    count: count,
-                    collectionID: ALL_SECTION,
-                };
-
-                for (const fileID of toSelectFileIDs) {
-                    selectedFiles[fileID] = true;
-                }
-                setSelected(selectedFiles);
-                setActiveCollection(ALL_SECTION);
-                finishLoading();
-            } else {
-                setDuplicateFiles([]);
-                setFileSizeMap(new Map<number, number>());
-                setClubSameTimeFilesOnly(false);
-            }
-        };
-
-        main();
-    }, [isDeduplicating, clubSameTimeFilesOnly]);
-
-    useEffect(() => setMessageDialogView(true), [dialogMessage]);
 
     useEffect(
         () => collectionSelectorAttributes && setCollectionSelectorView(true),
@@ -426,15 +348,6 @@ export default function Gallery() {
 
     const clearSelection = function () {
         setSelected({ count: 0, collectionID: 0 });
-    };
-
-    const startLoading = () => {
-        !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
-        isLoadingBarRunning.current = true;
-    };
-    const finishLoading = () => {
-        isLoadingBarRunning.current && loadingBar.current?.complete();
-        isLoadingBarRunning.current = false;
     };
 
     if (!files) {
@@ -634,35 +547,21 @@ export default function Gallery() {
             value={{
                 ...defaultGalleryContext,
                 showPlanSelectorModal,
-                closeMessageDialog,
                 setActiveCollection,
                 syncWithRemote,
-                setDialogMessage,
-                startLoading,
-                finishLoading,
+
                 setNotificationAttributes,
                 setBlockingLoad,
-                clubSameTimeFilesOnly,
-                setClubSameTimeFilesOnly,
-                fileSizeMap,
-                setIsDeduplicating: setIsDeduplicating,
-                isDeduplicating: isDeduplicating,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
                 getInputProps={getInputProps}>
-                <LoadingBar color="#51cd7c" ref={loadingBar} />
                 <AlertBanner bannerMessage={bannerMessage} />
                 <ToastNotification
                     attributes={notificationAttributes}
                     clearAttributes={clearNotificationAttributes}
                 />
-                <MessageDialog
-                    size="lg"
-                    show={messageDialogView}
-                    onHide={closeMessageDialog}
-                    attributes={dialogMessage}
-                />
+
                 <Upload
                     syncWithRemote={syncWithRemote}
                     setBannerMessage={setBannerMessage}
@@ -686,37 +585,29 @@ export default function Gallery() {
                     setFiles={setFiles}
                     isFirstUpload={collectionsAndTheirLatestFile?.length === 0}
                 />
-                {!isDeduplicating && (
-                    <>
-                        <SearchBar
-                            isOpen={isInSearchMode}
-                            setOpen={setIsInSearchMode}
-                            isFirstFetch={isFirstFetch}
-                            collections={collections}
-                            files={getNonTrashedUniqueUserFiles(files)}
-                            setActiveCollection={setActiveCollection}
-                            setSearch={updateSearch}
-                            searchStats={searchStats}
-                        />
-                        <Collections
-                            collections={collections}
-                            collectionAndTheirLatestFile={
-                                collectionsAndTheirLatestFile
-                            }
-                            isInSearchMode={isInSearchMode}
-                            activeCollection={activeCollection}
-                            setActiveCollection={setActiveCollection}
-                            syncWithRemote={syncWithRemote}
-                            setDialogMessage={setDialogMessage}
-                            setCollectionNamerAttributes={
-                                setCollectionNamerAttributes
-                            }
-                            startLoading={startLoading}
-                            finishLoading={finishLoading}
-                            collectionFilesCount={collectionFilesCount}
-                        />
-                    </>
-                )}
+
+                <SearchBar
+                    isOpen={isInSearchMode}
+                    setOpen={setIsInSearchMode}
+                    isFirstFetch={isFirstFetch}
+                    collections={collections}
+                    files={getNonTrashedUniqueUserFiles(files)}
+                    setActiveCollection={setActiveCollection}
+                    setSearch={updateSearch}
+                    searchStats={searchStats}
+                />
+                <Collections
+                    collections={collections}
+                    collectionAndTheirLatestFile={collectionsAndTheirLatestFile}
+                    isInSearchMode={isInSearchMode}
+                    activeCollection={activeCollection}
+                    setActiveCollection={setActiveCollection}
+                    syncWithRemote={syncWithRemote}
+                    setDialogMessage={setDialogMessage}
+                    setCollectionNamerAttributes={setCollectionNamerAttributes}
+                    collectionFilesCount={collectionFilesCount}
+                />
+
                 {blockingLoad && (
                     <LoadingOverlay>
                         <EnteSpinner />
@@ -753,28 +644,19 @@ export default function Gallery() {
                     attributes={fixCreationTimeAttributes}
                 />
 
-                {isDeduplicating ? (
-                    <>
-                        <BackButton setIsDeduplicating={setIsDeduplicating} />
-                        <ClubDuplicateFilesByTime />
-                    </>
-                ) : (
-                    <>
-                        <UploadButton
-                            isFirstFetch={isFirstFetch}
-                            openFileUploader={openFileUploader}
-                        />
-                        <Sidebar
-                            collections={collections}
-                            setDialogMessage={setDialogMessage}
-                            setLoading={setBlockingLoad}
-                        />
-                    </>
-                )}
+                <UploadButton
+                    isFirstFetch={isFirstFetch}
+                    openFileUploader={openFileUploader}
+                />
+                <Sidebar
+                    collections={collections}
+                    setDialogMessage={setDialogMessage}
+                    setLoading={setBlockingLoad}
+                />
 
                 <PhotoFrame
-                    files={isDeduplicating ? duplicateFiles : files}
-                    setFiles={isDeduplicating ? setDuplicateFiles : setFiles}
+                    files={files}
+                    setFiles={setFiles}
                     syncWithRemote={syncWithRemote}
                     favItemIds={favItemIds}
                     setSelected={setSelected}

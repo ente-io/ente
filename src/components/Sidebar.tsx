@@ -291,7 +291,7 @@ export default function Sidebar(props: Props) {
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={() => {
-                        galleryContext.setIsDeduplicating(true);
+                        router.push(PAGES.DEDUPLICATE);
                     }}>
                     {constants.DEDUPLICATE_FILES}
                 </LinkButton>

@@ -1,5 +1,5 @@
 import { SetDialogMessage } from 'components/MessageDialog';
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SetCollectionSelectorAttributes } from '../CollectionSelector';
 import styled from 'styled-components';
 import Navbar from 'components/Navbar';
@@ -17,7 +17,6 @@ import {
     TRASH_SECTION,
 } from 'constants/collection';
 import UnArchive from 'components/icons/UnArchive';
-import { OverlayTrigger } from 'react-bootstrap';
 import { Collection } from 'types/collection';
 import RemoveIcon from 'components/icons/RemoveIcon';
 import RestoreIcon from 'components/icons/RestoreIcon';
@@ -26,8 +25,7 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { FIX_CREATION_TIME_VISIBLE_TO_USER_IDS } from 'constants/user';
 import DownloadIcon from 'components/icons/DownloadIcon';
 import { User } from 'types/user';
-import { GalleryContext } from 'pages/gallery';
-import DeduplicatingOptions from './DeduplicatingOptions';
+import { OverlayTrigger } from 'react-bootstrap';
 
 interface Props {
     addToCollectionHelper?: (collection: Collection) => void;
@@ -48,7 +46,7 @@ interface Props {
     isFavoriteCollection?: boolean;
 }
 
-const SelectionBar = styled(Navbar)`
+export const SelectionBar = styled(Navbar)`
     position: fixed;
     top: 0;
     color: #fff;
@@ -57,7 +55,7 @@ const SelectionBar = styled(Navbar)`
     padding: 0 16px;
 `;
 
-const SelectionContainer = styled.div`
+export const SelectionContainer = styled.div`
     flex: 1;
     align-items: center;
     display: flex;
@@ -67,6 +65,7 @@ interface IconWithMessageProps {
     children?: any;
     message: string;
 }
+
 export const IconWithMessage = (props: IconWithMessageProps) => (
     <OverlayTrigger
         placement="bottom"
@@ -94,7 +93,6 @@ const SelectedFileOptions = ({
     isFavoriteCollection,
 }: Props) => {
     const [showFixCreationTime, setShowFixCreationTime] = useState(false);
-    const galleryContext = useContext(GalleryContext);
 
     useEffect(() => {
         const user: User = getData(LS_KEYS.USER);
@@ -177,9 +175,7 @@ const SelectedFileOptions = ({
                     {count} {constants.SELECTED}
                 </div>
             </SelectionContainer>
-            {galleryContext.isDeduplicating ? (
-                <DeduplicatingOptions trashHandler={trashHandler} />
-            ) : activeCollection === TRASH_SECTION ? (
+            {activeCollection === TRASH_SECTION ? (
                 <>
                     <IconWithMessage message={constants.RESTORE}>
                         <IconButton onClick={restoreHandler}>

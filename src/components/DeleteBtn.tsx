@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
-import { IconWithMessage } from './pages/gallery/SelectedFileOptions';
+import { IconWithMessage } from './pages/gallery/SelectedFileOptions/GalleryOptions';
 
 const Wrapper = styled.button`
     border: none;

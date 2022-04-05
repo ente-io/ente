@@ -48,6 +48,7 @@ import { sleep } from 'utils/common';
 import { playVideo, pauseVideo } from 'utils/photoFrame';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
+import { AppContext } from 'pages/_app';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -527,6 +528,7 @@ function PhotoSwipe(props: Iprops) {
         PublicCollectionGalleryContext
     );
     const galleryContext = useContext(GalleryContext);
+    const appContext = useContext(AppContext);
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -777,7 +779,7 @@ function PhotoSwipe(props: Iprops) {
     };
 
     const downloadFileHelper = async (file) => {
-        galleryContext.startLoading();
+        appContext.startLoading();
         await downloadFile(
             file,
             publicCollectionGalleryContext.accessedThroughSharedURL,
@@ -785,7 +787,7 @@ function PhotoSwipe(props: Iprops) {
             publicCollectionGalleryContext.passwordToken
         );
 
-        galleryContext.finishLoading();
+        appContext.finishLoading();
     };
     const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;

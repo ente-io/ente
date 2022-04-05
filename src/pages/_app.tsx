@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useRef, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
@@ -16,6 +16,11 @@ import FlashMessageBar from 'components/FlashMessageBar';
 import Head from 'next/head';
 import { getAlbumSiteHost } from 'constants/pages';
 import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
+import LoadingBar from 'react-top-loading-bar';
+import MessageDialog, {
+    MessageAttributes,
+    SetDialogMessage,
+} from 'components/MessageDialog';
 import { logUploadInfo } from 'utils/upload';
 
 const GlobalStyles = createGlobalStyle`
@@ -535,6 +540,10 @@ type AppContextType = {
     setDisappearingFlashMessage: (message: FlashMessage) => void;
     redirectURL: string;
     setRedirectURL: (url: string) => void;
+    startLoading: () => void;
+    finishLoading: () => void;
+    closeMessageDialog: () => void;
+    setDialogMessage: SetDialogMessage;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -566,6 +575,10 @@ export default function App({ Component, err }) {
     const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
     const [redirectURL, setRedirectURL] = useState(null);
     const [isAlbumsDomain, setIsAlbumsDomain] = useState(false);
+    const isLoadingBarRunning = useRef(false);
+    const loadingBar = useRef(null);
+    const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
+    const [messageDialogView, setMessageDialogView] = useState(false);
 
     useEffect(() => {
         if (
@@ -668,11 +681,24 @@ export default function App({ Component, err }) {
         }
     }, []);
 
+    useEffect(() => setMessageDialogView(true), [dialogMessage]);
+
     const showNavBar = (show: boolean) => setShowNavBar(show);
     const setDisappearingFlashMessage = (flashMessages: FlashMessage) => {
         setFlashMessage(flashMessages);
         setTimeout(() => setFlashMessage(null), 5000);
     };
+
+    const startLoading = () => {
+        !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
+        isLoadingBarRunning.current = true;
+    };
+    const finishLoading = () => {
+        isLoadingBarRunning.current && loadingBar.current?.complete();
+        isLoadingBarRunning.current = false;
+    };
+
+    const closeMessageDialog = () => setMessageDialogView(false);
 
     return (
         <>
@@ -711,6 +737,15 @@ export default function App({ Component, err }) {
                     onClose={() => setFlashMessage(null)}
                 />
             )}
+            <LoadingBar color="#51cd7c" ref={loadingBar} />
+
+            <MessageDialog
+                size="lg"
+                show={messageDialogView}
+                onHide={closeMessageDialog}
+                attributes={dialogMessage}
+            />
+
             <AppContext.Provider
                 value={{
                     showNavBar,
@@ -719,6 +754,10 @@ export default function App({ Component, err }) {
                     setDisappearingFlashMessage,
                     redirectURL,
                     setRedirectURL,
+                    startLoading,
+                    finishLoading,
+                    closeMessageDialog,
+                    setDialogMessage,
                 }}>
                 {loading ? (
                     <Container>
