@@ -117,12 +117,7 @@ interface InProgressProps {
 const InProgressSection = (props: InProgressProps) => {
     const [listView, setListView] = useState(true);
     const fileList = props.fileProgressStatuses;
-    if (!fileList?.length) {
-        return <></>;
-    }
-    if (!fileList?.length) {
-        return <></>;
-    }
+
     return (
         <Section>
             <SectionTitle onClick={() => setListView(!listView)}>
@@ -217,12 +212,14 @@ export default function UploadProgress(props: Props) {
                         variant="upload-progress-bar"
                     />
                 )}
-                <InProgressSection
-                    filenames={props.filenames}
-                    fileProgressStatuses={fileProgressStatuses}
-                    sectionTitle={constants.INPROGRESS_UPLOADS}
-                    sectionInfo={sectionInfo}
-                />
+                {props.uploadStage === UPLOAD_STAGES.UPLOADING && (
+                    <InProgressSection
+                        filenames={props.filenames}
+                        fileProgressStatuses={fileProgressStatuses}
+                        sectionTitle={constants.INPROGRESS_UPLOADS}
+                        sectionInfo={sectionInfo}
+                    />
+                )}
 
                 <ResultSection
                     filenames={props.filenames}
