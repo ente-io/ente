@@ -13,11 +13,7 @@ import { logError } from 'utils/sentry';
 import { User } from 'types/user';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import {
-    convertImageToDataURL,
-    dataURIToBlob,
-    updateFileCreationDateInEXIF,
-} from 'services/upload/exifService';
+import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
 import {
     TYPE_JPEG,
     TYPE_JPG,
@@ -67,6 +63,14 @@ export async function downloadFile(
                     file
                 )
             ).blob();
+            fileBlob = new Blob([fileBlob], {
+                type: (
+                    await getFileType(
+                        new FileReader(),
+                        new File([fileBlob], file.metadata.title)
+                    )
+                ).mimeType,
+            });
             tempURL = URL.createObjectURL(fileBlob);
             fileURL = tempURL;
         }
@@ -76,6 +80,14 @@ export async function downloadFile(
             fileBlob = await new Response(
                 await DownloadManager.downloadFile(file)
             ).blob();
+            fileBlob = new Blob([fileBlob], {
+                type: (
+                    await getFileType(
+                        new FileReader(),
+                        new File([fileBlob], file.metadata.title)
+                    )
+                ).mimeType,
+            });
             tempURL = URL.createObjectURL(fileBlob);
             fileURL = tempURL;
         }
@@ -116,9 +128,6 @@ export async function downloadFile(
 }
 
 async function downloadUsingAnchor(link: string, name: string) {
-    let dataURI = await convertImageToDataURL(new FileReader(), link);
-    dataURI = dataURI.replace(/^data:[^;]*;/, 'data:image/jpeg;');
-    link = URL.createObjectURL(dataURIToBlob(dataURI));
     const a = document.createElement('a');
     a.style.display = 'none';
     a.href = link;
