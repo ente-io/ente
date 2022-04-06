@@ -70,7 +70,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Two-factor"),
+                Text("Two-factor", style: Theme.of(context).textTheme.subtitle1,),
                 FutureBuilder(
                   future: UserService.instance.fetchTwoFactorStatus(),
                   builder: (_, snapshot) {
@@ -117,7 +117,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Lockscreen"),
+            Text("Lockscreen", style: Theme.of(context).textTheme.subtitle1,),
             Switch.adaptive(
               value: _config.shouldShowLockScreen(),
               onChanged: (value) async {
@@ -147,7 +147,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Hide from recents"),
+                Text("Hide from recents", style: Theme.of(context).textTheme.subtitle1),
                 Switch.adaptive(
                   value: _config.shouldHideFromRecents(),
                   onChanged: (value) async {

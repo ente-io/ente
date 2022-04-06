@@ -133,7 +133,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             );
           },
           child: SettingsTextItem(
-              text: "change password", icon: Icons.navigate_next),
+              text: "Change password", icon: Icons.navigate_next),
         ),
       ],
     );

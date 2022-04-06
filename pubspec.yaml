@@ -11,7 +11,7 @@ description: ente photos application
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.5.6+285
+version: 0.5.11+291
 
 environment:
   sdk: ">=2.10.0 <3.0.0"
@@ -33,6 +33,7 @@ dependencies:
   device_info: ^2.0.2
   dio: ^4.0.0
   dots_indicator: ^2.0.0
+  dotted_border: ^2.0.0+2
   email_validator: ^2.0.1
   event_bus: ^2.0.0
   exif: ^3.0.0
@@ -49,7 +50,7 @@ dependencies:
   flutter_cache_manager: ^3.3.0
   flutter_datetime_picker: ^1.5.1
   flutter_easyloading: ^3.0.0
-  flutter_email_sender: ^5.1.0
+  flutter_email_sender: 5.0.2
   flutter_image_compress: ^1.1.0
   flutter_inappwebview: ^5.3.2
   flutter_local_notifications: ^5.0.0+4
@@ -151,6 +152,7 @@ flutter:
   - family: Inter
     fonts:
       - asset: fonts/Inter-Regular.ttf
+      - asset: fonts/Inter-Medium.ttf
       - asset: fonts/Inter-Light.ttf
       - asset: fonts/Inter-SemiBold.ttf
       - asset: fonts/Inter-Bold.ttf

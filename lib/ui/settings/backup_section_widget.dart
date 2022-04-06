@@ -10,6 +10,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/deduplicate_page.dart';
 import 'package:photos/ui/free_space_page.dart';
+import 'package:photos/ui/recovery_page.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
@@ -44,11 +45,14 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             routeToPage(
-              context,
-              BackupFolderSelectionPage(
-                buttonText: "Backup",
-              ),
-            );
+                context,
+                RecoveryPage(
+                  showAppBar: true,
+                )
+                // BackupFolderSelectionPage(
+                //   buttonText: "Backup",
+                // ),
+                );
           },
           child: SettingsTextItem(
               text: "Backed up folders", icon: Icons.navigate_next),
@@ -59,7 +63,10 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Backup over mobile data"),
+              Text(
+                "Backup over mobile data",
+                style: Theme.of(context).textTheme.subtitle1,
+              ),
               Switch.adaptive(
                 value: Configuration.instance.shouldBackupOverMobileData(),
                 onChanged: (value) async {
@@ -76,7 +83,10 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Backup videos"),
+              Text(
+                "Backup videos",
+                style: Theme.of(context).textTheme.subtitle1,
+              ),
               Switch.adaptive(
                 value: Configuration.instance.shouldBackupVideos(),
                 onChanged: (value) async {

@@ -69,13 +69,13 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    String title = "set password";
+    String title = "Set password";
     if (widget.mode == PasswordEntryMode.update) {
-      title = "change password";
+      title = "Change password";
     } else if (widget.mode == PasswordEntryMode.reset) {
-      title = "reset password";
+      title = "Reset password";
     } else if (_password != null) {
-      title = "encryption keys";
+      title = "Encryption keys";
     }
     return Scaffold(
       appBar: AppBar(

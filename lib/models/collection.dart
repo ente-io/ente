@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:core';
 
 import 'package:flutter/foundation.dart';
+import 'package:photos/models/magic_metadata.dart';
 
 class Collection {
   final int id;
@@ -16,6 +18,14 @@ class Collection {
   final List<PublicURL> publicURLs;
   final int updationTime;
   final bool isDeleted;
+  String mMdEncodedJson;
+  int mMdVersion = 0;
+  CollectionMagicMetadata _mmd;
+
+  CollectionMagicMetadata get magicMetadata =>
+      _mmd ?? CollectionMagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
+
+  set magicMetadata(val) => _mmd = val;
 
   Collection(
     this.id,
@@ -32,6 +42,10 @@ class Collection {
     this.updationTime, {
     this.isDeleted = false,
   });
+
+  bool isArchived() {
+    return mMdVersion > 0 && magicMetadata.visibility == kVisibilityArchive;
+  }
 
   static CollectionType typeFromString(String type) {
     switch (type) {
@@ -54,22 +68,23 @@ class Collection {
     }
   }
 
-  Collection copyWith({
-    int id,
-    User owner,
-    String encryptedKey,
-    String keyDecryptionNonce,
-    String name,
-    String encryptedName,
-    String nameDecryptionNonce,
-    CollectionType type,
-    CollectionAttributes attributes,
-    List<User> sharees,
-    List<PublicURL> publicURLs,
-    int updationTime,
-    bool isDeleted,
-  }) {
-    return Collection(
+  Collection copyWith(
+      {int id,
+      User owner,
+      String encryptedKey,
+      String keyDecryptionNonce,
+      String name,
+      String encryptedName,
+      String nameDecryptionNonce,
+      CollectionType type,
+      CollectionAttributes attributes,
+      List<User> sharees,
+      List<PublicURL> publicURLs,
+      int updationTime,
+      bool isDeleted,
+      String mMdEncodedJson,
+      int mMdVersion}) {
+    Collection result = Collection(
       id ?? this.id,
       owner ?? this.owner,
       encryptedKey ?? this.encryptedKey,
@@ -84,6 +99,9 @@ class Collection {
       updationTime ?? this.updationTime,
       isDeleted: isDeleted ?? this.isDeleted,
     );
+    result.mMdVersion = mMdVersion ?? this.mMdVersion;
+    result.mMdEncodedJson = mMdEncodedJson ?? this.mMdEncodedJson;
+    return result;
   }
 
   Map<String, dynamic> toMap() {
