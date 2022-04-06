@@ -2,6 +2,7 @@ import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/ui/common/custom_color_scheme.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/login_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
@@ -87,7 +88,6 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
               dotsCount: 3,
               position: _featureIndex,
               decorator: DotsDecorator(
-                color: Colors.white24, // Inactive color
                 activeColor: Theme.of(context).buttonColor,
               ),
             ),
@@ -95,33 +95,20 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
               padding: EdgeInsets.all(28),
             ),
             _getSignUpButton(context),
-            Padding(
-              padding: EdgeInsets.all(4),
-            ),
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(28),
-                child: Center(
-                  child: Hero(
-                    tag: "log_in",
-                    child: Material(
-                      type: MaterialType.transparency,
-                      child: Text(
-                        "log in",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          letterSpacing: 0.6,
-                          color: Colors.white.withOpacity(0.95),
-                        ),
-                      ),
-                    ),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.fromLTRB(24, 12, 24, 28),
+              child: Hero(
+                tag: "log_in",
+                child: ElevatedButton(
+                  style:
+                      Theme.of(context).colorScheme.optionalActionButtonStyle,
+                  child: Text(
+                    "Existing User",
                   ),
+                  onPressed: _navigateToSignInPage,
                 ),
               ),
-              onTap: _navigateToSignInPage,
             ),
             Padding(
               padding: EdgeInsets.all(20),
@@ -133,33 +120,14 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   }
 
   Widget _getSignUpButton(BuildContext context) {
-    return SizedBox(
-      width: 200,
-      height: 64,
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
-          side: BorderSide(
-            width: 2,
-            color: Theme.of(context).buttonColor,
-          ),
-        ),
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 24),
+      child: ElevatedButton(
+        style: Theme.of(context).colorScheme.primaryActionButtonStyle,
         child: Hero(
           tag: "sign_up",
-          child: Material(
-            type: MaterialType.transparency,
-            child: Text(
-              "sign up",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                letterSpacing: 0.6,
-              ),
-            ),
-          ),
+          child: Text("New to ente"),
         ),
         onPressed: _navigateToSignUpPage,
       ),
@@ -272,18 +240,14 @@ class FeatureItemWidget extends StatelessWidget {
           children: [
             Text(
               featureTitle,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).buttonColor,
-              ),
+              style: Theme.of(context).textTheme.headline6,
             ),
             Padding(padding: EdgeInsets.all(12)),
             Text(
               firstLine,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.9),
               ),
             ),
             Padding(padding: EdgeInsets.all(2)),
@@ -291,7 +255,7 @@ class FeatureItemWidget extends StatelessWidget {
               secondLine,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.9),
               ),
             ),
           ],

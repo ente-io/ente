@@ -94,7 +94,10 @@ final lightThemeData = ThemeData(
         fontFamily: 'Inter-SemiBold',
       ),
       headline6: TextStyle(
-          color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
+          color: Colors.black,
+          fontFamily: 'Inter-Medium',
+          fontSize: 18,
+          fontWeight: FontWeight.w600),
       subtitle1: TextStyle(
           fontFamily: 'Inter-Medium',
           color: Colors.black,
@@ -183,7 +186,10 @@ final darkThemeData = ThemeData(
         fontFamily: 'Inter-SemiBold',
       ),
       headline6: TextStyle(
-          color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+          color: Colors.white,
+          fontSize: 18,
+          fontFamily: 'Inter-Medium',
+          fontWeight: FontWeight.w600),
       subtitle1: TextStyle(
           color: Colors.white,
           fontFamily: 'Inter-Medium',

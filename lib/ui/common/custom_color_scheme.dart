@@ -23,7 +23,7 @@ extension CustomColorScheme on ColorScheme {
   ButtonStyle get primaryActionButtonStyle => ElevatedButton.styleFrom(
         onPrimary: Colors.white,
         primary: Color.fromRGBO(29, 185, 84, 1.0),
-        minimumSize: Size(88, 36),
+        minimumSize: Size(88, 56),
         alignment: Alignment.center,
         textStyle: TextStyle(
           fontWeight: FontWeight.w600,
@@ -39,7 +39,7 @@ extension CustomColorScheme on ColorScheme {
   ButtonStyle get optionalActionButtonStyle => ElevatedButton.styleFrom(
         onPrimary: Colors.black87,
         primary: Color.fromRGBO(240, 240, 240, 1),
-        minimumSize: Size(88, 36),
+        minimumSize: Size(88, 56),
         alignment: Alignment.center,
         textStyle: TextStyle(
           fontWeight: FontWeight.w600,
