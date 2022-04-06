@@ -53,7 +53,7 @@ async function extractFileType(reader: FileReader, file: File) {
     return getFileTypeFromBlob(reader, fileChunkBlob);
 }
 
-export async function getFileTypeFromBlob(reader: FileReader, fileBlob: Blob) {
+async function getFileTypeFromBlob(reader: FileReader, fileBlob: Blob) {
     try {
         const initialFiledata = await getUint8ArrayView(reader, fileBlob);
         return await FileType.fromBuffer(initialFiledata);

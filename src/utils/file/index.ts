@@ -7,13 +7,17 @@ import {
     PublicMagicMetadataProps,
 } from 'types/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
-import { getFileTypeFromBlob } from 'services/typeDetectionService';
+import { getFileType } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
 import { logError } from 'utils/sentry';
 import { User } from 'types/user';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
+import {
+    convertImageToDataURL,
+    dataURIToBlob,
+    updateFileCreationDateInEXIF,
+} from 'services/upload/exifService';
 import {
     TYPE_JPEG,
     TYPE_JPG,
@@ -25,7 +29,6 @@ import {
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
-import FileSaver from 'file-saver';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -50,31 +53,30 @@ export async function downloadFile(
 ) {
     let fileURL: string;
     let tempURL: string;
+    let fileBlob: Blob;
     if (accessedThroughSharedURL) {
         fileURL = await PublicCollectionDownloadManager.getCachedOriginalFile(
             file
         )[0];
         tempURL;
         if (!fileURL) {
-            tempURL = URL.createObjectURL(
-                await new Response(
-                    await PublicCollectionDownloadManager.downloadFile(
-                        token,
-                        passwordToken,
-                        file
-                    )
-                ).blob()
-            );
+            fileBlob = await new Response(
+                await PublicCollectionDownloadManager.downloadFile(
+                    token,
+                    passwordToken,
+                    file
+                )
+            ).blob();
+            tempURL = URL.createObjectURL(fileBlob);
             fileURL = tempURL;
         }
     } else {
         fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
         if (!fileURL) {
-            tempURL = URL.createObjectURL(
-                await new Response(
-                    await DownloadManager.downloadFile(file)
-                ).blob()
-            );
+            fileBlob = await new Response(
+                await DownloadManager.downloadFile(file)
+            ).blob();
+            tempURL = URL.createObjectURL(fileBlob);
             fileURL = tempURL;
         }
     }
@@ -85,8 +87,6 @@ export async function downloadFile(
         file.pubMagicMetadata?.data.editedTime &&
         (fileType === TYPE_JPEG || fileType === TYPE_JPG)
     ) {
-        let fileBlob = await (await fetch(fileURL)).blob();
-
         fileBlob = await updateFileCreationDateInEXIF(
             new FileReader(),
             fileBlob,
@@ -99,15 +99,14 @@ export async function downloadFile(
     let tempVideoURL: string;
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        const fileBlob = await (await fetch(fileURL)).blob();
         const originalName = fileNameWithoutExtension(file.metadata.title);
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
         tempImageURL = URL.createObjectURL(new Blob([motionPhoto.image]));
         tempVideoURL = URL.createObjectURL(new Blob([motionPhoto.video]));
-        FileSaver.saveAs(tempImageURL, motionPhoto.imageNameTitle);
-        FileSaver.saveAs(tempVideoURL, motionPhoto.videoNameTitle);
+        downloadUsingAnchor(tempImageURL, motionPhoto.imageNameTitle);
+        downloadUsingAnchor(tempVideoURL, motionPhoto.videoNameTitle);
     } else {
-        FileSaver.saveAs(fileURL, file.metadata.title);
+        await downloadUsingAnchor(fileURL, file.metadata.title);
     }
 
     tempURL && URL.revokeObjectURL(tempURL);
@@ -116,15 +115,18 @@ export async function downloadFile(
     tempVideoURL && URL.revokeObjectURL(tempVideoURL);
 }
 
-// function downloadUsingAnchor(name: string, link: string) {
-//     const a = document.createElement('a');
-//     a.style.display = 'none';
-//     a.href = link;
-//     a.download = name;
-//     document.body.appendChild(a);
-//     a.click();
-//     a.remove();
-// }
+async function downloadUsingAnchor(link: string, name: string) {
+    let dataURI = await convertImageToDataURL(new FileReader(), link);
+    dataURI = dataURI.replace(/^data:[^;]*;/, 'data:image/jpeg;');
+    link = URL.createObjectURL(dataURIToBlob(dataURI));
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = link;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+}
 
 export function isFileHEIC(mimeType: string) {
     return (
@@ -334,11 +336,10 @@ export async function convertForPreview(
     fileBlob: Blob
 ): Promise<Blob[]> {
     const convertIfHEIC = async (fileName: string, fileBlob: Blob) => {
-        const typeFromExtension = getFileExtension(fileName);
         const reader = new FileReader();
-        const mimeType =
-            (await getFileTypeFromBlob(reader, fileBlob))?.mime ??
-            typeFromExtension;
+        const mimeType = (
+            await getFileType(reader, new File([fileBlob], file.metadata.title))
+        ).exactType;
         if (isFileHEIC(mimeType)) {
             fileBlob = await HEICConverter.convert(fileBlob);
         }

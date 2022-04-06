@@ -83,7 +83,7 @@ export async function convertImageToDataURL(reader: FileReader, url: string) {
     return dataURL;
 }
 
-function dataURIToBlob(dataURI) {
+export function dataURIToBlob(dataURI) {
     // convert base64 to raw binary data held in a string
     // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
     const byteString = atob(dataURI.split(',')[1]);
