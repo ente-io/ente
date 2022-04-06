@@ -13,7 +13,10 @@ import { logError } from 'utils/sentry';
 import { User } from 'types/user';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
+import {
+    convertImageToDataURL,
+    updateFileCreationDateInEXIF,
+} from 'services/upload/exifService';
 import {
     TYPE_JPEG,
     TYPE_JPG,
@@ -47,14 +50,13 @@ export async function downloadFile(
     token?: string,
     passwordToken?: string
 ) {
-    let fileURL: string;
-    let tempURL: string;
     let fileBlob: Blob;
+    const fileReader = new FileReader();
     if (accessedThroughSharedURL) {
-        fileURL = await PublicCollectionDownloadManager.getCachedOriginalFile(
-            file
-        )[0];
-        tempURL;
+        const fileURL =
+            await PublicCollectionDownloadManager.getCachedOriginalFile(
+                file
+            )[0];
         if (!fileURL) {
             fileBlob = await new Response(
                 await PublicCollectionDownloadManager.downloadFile(
@@ -63,74 +65,81 @@ export async function downloadFile(
                     file
                 )
             ).blob();
-            fileBlob = new Blob([fileBlob], {
-                type: (
-                    await getFileType(
-                        new FileReader(),
-                        new File([fileBlob], file.metadata.title)
-                    )
-                ).mimeType,
-            });
-            tempURL = URL.createObjectURL(fileBlob);
-            fileURL = tempURL;
+        } else {
+            fileBlob = await (await fetch(fileURL)).blob();
         }
     } else {
-        fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
+        const fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
         if (!fileURL) {
             fileBlob = await new Response(
                 await DownloadManager.downloadFile(file)
             ).blob();
-            fileBlob = new Blob([fileBlob], {
-                type: (
-                    await getFileType(
-                        new FileReader(),
-                        new File([fileBlob], file.metadata.title)
-                    )
-                ).mimeType,
-            });
-            tempURL = URL.createObjectURL(fileBlob);
-            fileURL = tempURL;
+        } else {
+            fileBlob = await (await fetch(fileURL)).blob();
         }
     }
 
-    const fileType = getFileExtension(file.metadata.title);
-    let tempEditedFileURL: string;
+    const fileType = await getFileType(
+        fileReader,
+        new File([fileBlob], file.metadata.title)
+    );
     if (
         file.pubMagicMetadata?.data.editedTime &&
-        (fileType === TYPE_JPEG || fileType === TYPE_JPG)
+        (fileType.exactType === TYPE_JPEG || fileType.exactType === TYPE_JPG)
     ) {
         fileBlob = await updateFileCreationDateInEXIF(
-            new FileReader(),
+            fileReader,
             fileBlob,
             new Date(file.pubMagicMetadata.data.editedTime / 1000)
         );
-        tempEditedFileURL = URL.createObjectURL(fileBlob);
-        fileURL = tempEditedFileURL;
     }
     let tempImageURL: string;
     let tempVideoURL: string;
+    let tempURL: string;
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         const originalName = fileNameWithoutExtension(file.metadata.title);
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
-        tempImageURL = URL.createObjectURL(new Blob([motionPhoto.image]));
-        tempVideoURL = URL.createObjectURL(new Blob([motionPhoto.video]));
-        downloadUsingAnchor(tempImageURL, motionPhoto.imageNameTitle);
-        downloadUsingAnchor(tempVideoURL, motionPhoto.videoNameTitle);
+        const image = new File([motionPhoto.image], motionPhoto.imageNameTitle);
+        const imageType = await getFileType(fileReader, image);
+        tempImageURL = URL.createObjectURL(
+            new Blob([motionPhoto.image], { type: imageType.mimeType })
+        );
+        const video = new File([motionPhoto.video], motionPhoto.videoNameTitle);
+        const videoType = await getFileType(fileReader, video);
+        tempVideoURL = URL.createObjectURL(
+            new Blob([motionPhoto.video], { type: videoType.mimeType })
+        );
+        downloadUsingAnchor(
+            fileReader,
+            tempImageURL,
+            motionPhoto.imageNameTitle
+        );
+        downloadUsingAnchor(
+            fileReader,
+            tempVideoURL,
+            motionPhoto.videoNameTitle
+        );
     } else {
-        await downloadUsingAnchor(fileURL, file.metadata.title);
+        fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
+        tempURL = URL.createObjectURL(fileBlob);
+        await downloadUsingAnchor(fileReader, tempURL, file.metadata.title);
     }
 
     tempURL && URL.revokeObjectURL(tempURL);
-    tempEditedFileURL && URL.revokeObjectURL(tempEditedFileURL);
     tempImageURL && URL.revokeObjectURL(tempImageURL);
     tempVideoURL && URL.revokeObjectURL(tempVideoURL);
 }
 
-async function downloadUsingAnchor(link: string, name: string) {
+async function downloadUsingAnchor(
+    fileReader: FileReader,
+    link: string,
+    name: string
+) {
+    const dataURI = await convertImageToDataURL(fileReader, link);
     const a = document.createElement('a');
     a.style.display = 'none';
-    a.href = link;
+    a.href = dataURI;
     a.download = name;
     document.body.appendChild(a);
     a.click();
