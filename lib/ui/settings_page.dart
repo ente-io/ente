@@ -12,7 +12,6 @@ import 'package:photos/ui/settings/security_section_widget.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
-import 'package:photos/ui/settings/usage_details_widget.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key key}) : super(key: key);
@@ -26,11 +25,23 @@ class SettingsPage extends StatelessWidget {
 
   Widget _getBody(BuildContext context) {
     final hasLoggedIn = Configuration.instance.getToken() != null;
+    final String email = Configuration.instance.getEmail();
     final List<Widget> contents = [];
-    contents.add(Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: const [ThemeSwitchWidget()]));
+    contents.add(Container(
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                email,
+                style: Theme.of(context)
+                    .textTheme
+                    .subtitle1
+                    .copyWith(overflow: TextOverflow.ellipsis),
+              ),
+              ThemeSwitchWidget()
+            ])));
     final sectionDivider = Divider(
       height: 10,
       color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
@@ -38,8 +49,6 @@ class SettingsPage extends StatelessWidget {
     if (hasLoggedIn) {
       contents.addAll([
         DetailsSectionWidget(),
-        sectionDivider,
-        UsageDetailsWidget(),
         sectionDivider,
         BackupSectionWidget(),
         sectionDivider,
