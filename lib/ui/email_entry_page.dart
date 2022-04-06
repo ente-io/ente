@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,7 +10,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/custom_color_scheme.dart';
 import 'package:photos/ui/common/fabCreateAccount.dart';
 //import 'package:photos/ui/common/report_bug_popup.dart';
 //import 'package:photos/ui/common_elements.dart';
@@ -218,9 +216,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       border: UnderlineInputBorder(
                           borderSide: BorderSide.none,
                           borderRadius: BorderRadius.circular(6)),
-                      suffix: _emailIsValid
+                      suffixIcon: _emailIsValid
                           ? Icon(
                               Icons.check,
+                              size: 20,
                               color: Theme.of(context)
                                   .inputDecorationTheme
                                   .focusedBorder
