@@ -13,10 +13,7 @@ import { logError } from 'utils/sentry';
 import { User } from 'types/user';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import {
-    convertImageToDataURL,
-    updateFileCreationDateInEXIF,
-} from 'services/upload/exifService';
+import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
 import {
     TYPE_JPEG,
     TYPE_JPG,
@@ -110,20 +107,12 @@ export async function downloadFile(
         tempVideoURL = URL.createObjectURL(
             new Blob([motionPhoto.video], { type: videoType.mimeType })
         );
-        downloadUsingAnchor(
-            fileReader,
-            tempImageURL,
-            motionPhoto.imageNameTitle
-        );
-        downloadUsingAnchor(
-            fileReader,
-            tempVideoURL,
-            motionPhoto.videoNameTitle
-        );
+        downloadUsingAnchor(tempImageURL, motionPhoto.imageNameTitle);
+        downloadUsingAnchor(tempVideoURL, motionPhoto.videoNameTitle);
     } else {
         fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
         tempURL = URL.createObjectURL(fileBlob);
-        await downloadUsingAnchor(fileReader, tempURL, file.metadata.title);
+        downloadUsingAnchor(tempURL, file.metadata.title);
     }
 
     tempURL && URL.revokeObjectURL(tempURL);
@@ -131,15 +120,10 @@ export async function downloadFile(
     tempVideoURL && URL.revokeObjectURL(tempVideoURL);
 }
 
-async function downloadUsingAnchor(
-    fileReader: FileReader,
-    link: string,
-    name: string
-) {
-    const dataURI = await convertImageToDataURL(fileReader, link);
+function downloadUsingAnchor(link: string, name: string) {
     const a = document.createElement('a');
     a.style.display = 'none';
-    a.href = dataURI;
+    a.href = link;
     a.download = name;
     document.body.appendChild(a);
     a.click();
