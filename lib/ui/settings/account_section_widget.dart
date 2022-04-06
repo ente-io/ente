@@ -8,12 +8,13 @@ import 'package:photos/ui/app_lock.dart';
 import 'package:photos/ui/change_email_dialog.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/payment/subscription.dart';
-import 'package:photos/ui/recovery_key_dialog.dart';
+import 'package:photos/ui/recovery_key_page.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/auth_util.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class AccountSectionWidget extends StatefulWidget {
@@ -72,17 +73,13 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
               showGenericErrorDialog(context);
               return;
             }
-
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return RecoveryKeyDialog(recoveryKey, "ok", () {});
-              },
-              barrierColor: Colors.black.withOpacity(0.85),
-            );
+            routeToPage(
+                context,
+                RecoveryKeyPage(recoveryKey, "OK",
+                    showAppBar: true, onDone: () {}));
           },
           child:
-              SettingsTextItem(text: "Recovery key", icon: Icons.navigate_next),
+              SettingsTextItem(text: "Recovery Key", icon: Icons.navigate_next),
         ),
         SectionOptionDivider,
         GestureDetector(

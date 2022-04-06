@@ -10,7 +10,6 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/common/custom_color_scheme.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 
@@ -133,31 +132,19 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             tag: "select_folders",
             child: Container(
               width: double.infinity,
-              // padding: EdgeInsets.only(
-              //     left: 20, right: 20, bottom: Platform.isIOS ? 60 : 32),
-              padding: EdgeInsets.only(left: 20, right: 20, bottom: 40),
-              child: Container(
-                height: 56,
-                decoration: BoxDecoration(boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).backgroundColor,
-                    spreadRadius: 175,
-                    blurRadius: 50,
-                    offset: Offset(0, 150),
-                  )
-                ]),
-                child: OutlinedButton(
-                  child: Text(widget.buttonText),
-                  onPressed: _selectedFolders.isEmpty
-                      ? null
-                      : () async {
-                          await Configuration.instance
-                              .setPathsToBackUp(_selectedFolders);
-                          Bus.instance.fire(BackupFoldersUpdatedEvent());
-                          Navigator.of(context).pop();
-                        },
-                  // padding: EdgeInsets.fromLTRB(12, 20, 12, 20),
-                ),
+              padding: EdgeInsets.only(
+                  left: 24, right: 24, bottom: Platform.isIOS ? 60 : 32),
+              child: OutlinedButton(
+                child: Text(widget.buttonText),
+                onPressed: _selectedFolders.isEmpty
+                    ? null
+                    : () async {
+                        await Configuration.instance
+                            .setPathsToBackUp(_selectedFolders);
+                        Bus.instance.fire(BackupFoldersUpdatedEvent());
+                        Navigator.of(context).pop();
+                      },
+                // padding: EdgeInsets.fromLTRB(12, 20, 12, 20),
               ),
             ),
           ),

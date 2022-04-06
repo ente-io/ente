@@ -8,7 +8,8 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/lifecycle_event_handler.dart';
-import 'package:photos/ui/recovery_key_dialog.dart';
+import 'package:photos/ui/recovery_key_page.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:pinput/pin_put/pin_put.dart';
 
@@ -264,26 +265,23 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     final success = await UserService.instance
         .enableTwoFactor(context, widget.secretCode, code);
     if (success) {
-      _showSuccessDialog();
+      _showSuccessPage();
     }
   }
 
-  void _showSuccessDialog() {
+  void _showSuccessPage() {
     final recoveryKey = Sodium.bin2hex(Configuration.instance.getRecoveryKey());
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return RecoveryKeyDialog(
+    routeToPage(
+        context,
+        RecoveryKeyPage(
           recoveryKey,
-          "ok",
-          () {},
+          "OK",
+          showAppBar: true,
+          onDone: () {},
           title: "⚡ setup complete",
           text: "save your recovery key if you haven't already",
           subText:
               "this can be used to recover your account if you lose your second factor",
-        );
-      },
-      barrierColor: Colors.black.withOpacity(0.85),
-    );
+        ));
   }
 }

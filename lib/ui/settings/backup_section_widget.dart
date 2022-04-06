@@ -59,7 +59,10 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Backup over mobile data", style: Theme.of(context).textTheme.subtitle1,),
+              Text(
+                "Backup over mobile data",
+                style: Theme.of(context).textTheme.subtitle1,
+              ),
               Switch.adaptive(
                 value: Configuration.instance.shouldBackupOverMobileData(),
                 onChanged: (value) async {
@@ -76,7 +79,10 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Backup videos", style: Theme.of(context).textTheme.subtitle1,),
+              Text(
+                "Backup videos",
+                style: Theme.of(context).textTheme.subtitle1,
+              ),
               Switch.adaptive(
                 value: Configuration.instance.shouldBackupVideos(),
                 onChanged: (value) async {

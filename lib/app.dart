@@ -30,6 +30,7 @@ final lightThemeData = ThemeData(
         borderRadius: BorderRadius.circular(8),
       ),
       padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
+      alignment: Alignment.center,
       textStyle: TextStyle(
         fontWeight: FontWeight.w600,
         fontFamily: 'Inter-SemiBold',
@@ -57,14 +58,20 @@ final lightThemeData = ThemeData(
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
+    onPrimary: Colors.white,
     primary: Colors.black,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    alignment: Alignment.center,
     textStyle: TextStyle(
       fontWeight: FontWeight.w600,
       fontFamily: 'Inter-SemiBold',
       fontSize: 18,
     ),
+    padding: EdgeInsets.symmetric(vertical: 14),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
+    ),
   )),
+
   toggleableActiveColor: Colors.red[400],
   scaffoldBackgroundColor: Colors.white,
   bottomAppBarColor: Color.fromRGBO(196, 196, 196, 1.0),
@@ -75,9 +82,17 @@ final lightThemeData = ThemeData(
   //https://api.flutter.dev/flutter/material/TextTheme-class.html
   textTheme: TextTheme().copyWith(
       headline4: TextStyle(
-          color: Colors.black, fontSize: 32, fontWeight: FontWeight.w600),
+        color: Colors.black,
+        fontSize: 32,
+        fontWeight: FontWeight.w600,
+        fontFamily: 'Inter-SemiBold',
+      ),
       headline5: TextStyle(
-          color: Colors.black, fontSize: 24, fontWeight: FontWeight.w600),
+        color: Colors.black,
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+        fontFamily: 'Inter-SemiBold',
+      ),
       headline6: TextStyle(
           color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
       subtitle1: TextStyle(
@@ -85,6 +100,11 @@ final lightThemeData = ThemeData(
           color: Colors.black,
           fontSize: 16,
           fontWeight: FontWeight.w500),
+      bodyText1: TextStyle(
+          fontFamily: 'Inter-Medium',
+          color: Colors.black,
+          fontSize: 16,
+          fontWeight: FontWeight.w400),
       caption: TextStyle(color: Colors.black.withOpacity(0.7), fontSize: 14),
       overline: TextStyle(color: Colors.black.withOpacity(0.8), fontSize: 12)),
 
@@ -151,9 +171,17 @@ final darkThemeData = ThemeData(
   // primaryColor: Colors.red,
   textTheme: TextTheme().copyWith(
       headline4: TextStyle(
-          color: Colors.white, fontSize: 32, fontWeight: FontWeight.w600),
+        color: Colors.white,
+        fontSize: 32,
+        fontWeight: FontWeight.w600,
+        fontFamily: 'Inter-SemiBold',
+      ),
       headline5: TextStyle(
-          color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600),
+        color: Colors.white,
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+        fontFamily: 'Inter-SemiBold',
+      ),
       headline6: TextStyle(
           color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
       subtitle1: TextStyle(
@@ -161,6 +189,11 @@ final darkThemeData = ThemeData(
           fontFamily: 'Inter-Medium',
           fontSize: 16,
           fontWeight: FontWeight.w500),
+      bodyText1: TextStyle(
+          fontFamily: 'Inter-Medium',
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.w400),
       caption: TextStyle(
         color: Colors.white.withOpacity(0.6),
         fontSize: 14,
@@ -175,6 +208,7 @@ final darkThemeData = ThemeData(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
+      alignment: Alignment.center,
       padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
       textStyle: TextStyle(
         fontWeight: FontWeight.w600,
@@ -203,13 +237,18 @@ final darkThemeData = ThemeData(
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-    primary: Colors.grey[700],
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    onPrimary: Colors.black,
+    primary: Colors.white,
+    minimumSize: Size(88, 36),
+    alignment: Alignment.center,
     textStyle: TextStyle(
-      color: Colors.white,
       fontWeight: FontWeight.w600,
       fontFamily: 'Inter-SemiBold',
       fontSize: 18,
+    ),
+    padding: EdgeInsets.symmetric(vertical: 14),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
     ),
   )),
   scaffoldBackgroundColor: Colors.black,

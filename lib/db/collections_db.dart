@@ -27,6 +27,9 @@ class CollectionsDB {
   static final columnVersion = 'version';
   static final columnSharees = 'sharees';
   static final columnPublicURLs = 'public_urls';
+  // MMD -> Magic Metadata
+  static final columnMMdEncodedJson = 'mmd_encoded_json';
+  static final columnMMdVersion = 'mmd_ver';
   static final columnUpdationTime = 'updation_time';
   static final columnIsDeleted = 'is_deleted';
 
@@ -37,6 +40,7 @@ class CollectionsDB {
     ...addVersion(),
     ...addIsDeleted(),
     ...addPublicURLs(),
+    ...addPrivateMetadata(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -138,6 +142,17 @@ class CollectionsDB {
     ];
   }
 
+  static List<String> addPrivateMetadata() {
+    return [
+      '''
+        ALTER TABLE $table ADD COLUMN $columnMMdEncodedJson TEXT DEFAULT '{}';
+      ''',
+      '''
+        ALTER TABLE $table ADD COLUMN $columnMMdVersion INTEGER DEFAULT 0;
+      '''
+    ];
+  }
+
   Future<List<dynamic>> insert(List<Collection> collections) async {
     final db = await instance.database;
     var batch = db.batch();
@@ -204,11 +219,13 @@ class CollectionsDB {
     } else {
       row[columnIsDeleted] = _sqlBoolFalse;
     }
+    row[columnMMdVersion] = collection.mMdVersion ?? 0;
+    row[columnMMdEncodedJson] = collection.mMdEncodedJson ?? '{}';
     return row;
   }
 
   Collection _convertToCollection(Map<String, dynamic> row) {
-    return Collection(
+    Collection result = Collection(
       row[columnID],
       User.fromJson(row[columnOwner]),
       row[columnEncryptedKey],
@@ -232,5 +249,8 @@ class CollectionsDB {
       // default to False is columnIsDeleted is not set
       isDeleted: (row[columnIsDeleted] ?? _sqlBoolFalse) == _sqlBoolTrue,
     );
+    result.mMdVersion = row[columnMMdVersion] ?? 0;
+    result.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
+    return result;
   }
 }

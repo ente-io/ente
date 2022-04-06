@@ -399,7 +399,10 @@ class FilesDB {
 
   Future<FileLoadResult> getAllUploadedFiles(
       int startTime, int endTime, int ownerID,
-      {int limit, bool asc, int visibility = kVisibilityVisible}) async {
+      {int limit,
+      bool asc,
+      int visibility = kVisibilityVisible,
+      Set<int> ignoredCollectionIDs}) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
@@ -413,13 +416,14 @@ class FilesDB {
       limit: limit,
     );
     final files = _convertToFiles(results);
-    List<File> deduplicatedFiles = _deduplicatedFiles(files);
+    List<File> deduplicatedFiles =
+        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
   Future<FileLoadResult> getAllLocalAndUploadedFiles(
       int startTime, int endTime, int ownerID,
-      {int limit, bool asc}) async {
+      {int limit, bool asc, Set<int> ignoredCollectionIDs}) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
@@ -433,13 +437,14 @@ class FilesDB {
       limit: limit,
     );
     final files = _convertToFiles(results);
-    List<File> deduplicatedFiles = _deduplicatedFiles(files);
+    List<File> deduplicatedFiles =
+        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
   Future<FileLoadResult> getImportantFiles(
       int startTime, int endTime, int ownerID, List<String> paths,
-      {int limit, bool asc}) async {
+      {int limit, bool asc, Set<int> ignoredCollectionIDs}) async {
     final db = await instance.database;
     String inParam = "";
     for (final path in paths) {
@@ -458,15 +463,21 @@ class FilesDB {
       limit: limit,
     );
     final files = _convertToFiles(results);
-    List<File> deduplicatedFiles = _deduplicatedFiles(files);
+    List<File> deduplicatedFiles =
+        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
-  List<File> _deduplicatedFiles(List<File> files) {
+  List<File> _deduplicatedAndFilterIgnoredFiles(
+      List<File> files, Set<int> ignoredCollectionIDs) {
     final uploadedFileIDs = <int>{};
     final List<File> deduplicatedFiles = [];
     for (final file in files) {
       final id = file.uploadedFileID;
+      if (ignoredCollectionIDs != null &&
+          ignoredCollectionIDs.contains(file.collectionID)) {
+        continue;
+      }
       if (id != null && id != -1 && uploadedFileIDs.contains(id)) {
         continue;
       }
