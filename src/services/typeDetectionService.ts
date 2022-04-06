@@ -32,7 +32,11 @@ export async function getFileType(
             default:
                 fileType = FILE_TYPE.OTHERS;
         }
-        return { fileType, exactType: typeResult.ext };
+        return {
+            fileType,
+            exactType: typeResult.ext,
+            mimeType: typeResult.mime,
+        };
     } catch (e) {
         const fileFormat = getFileExtension(receivedFile.name);
         const formatMissedByTypeDetection = FORMAT_MISSED_BY_FILE_TYPE_LIB.find(
@@ -44,7 +48,11 @@ export async function getFileType(
         logError(e, CustomError.TYPE_DETECTION_FAILED, {
             fileFormat,
         });
-        return { fileType: FILE_TYPE.OTHERS, exactType: fileFormat };
+        return {
+            fileType: FILE_TYPE.OTHERS,
+            exactType: fileFormat,
+            mimeType: receivedFile.type,
+        };
     }
 }
 
@@ -53,7 +61,7 @@ async function extractFileType(reader: FileReader, file: File) {
     return getFileTypeFromBlob(reader, fileChunkBlob);
 }
 
-export async function getFileTypeFromBlob(reader: FileReader, fileBlob: Blob) {
+async function getFileTypeFromBlob(reader: FileReader, fileBlob: Blob) {
     try {
         const initialFiledata = await getUint8ArrayView(reader, fileBlob);
         return await FileType.fromBuffer(initialFiledata);

@@ -74,7 +74,7 @@ export async function updateFileCreationDateInEXIF(
     }
 }
 
-export async function convertImageToDataURL(reader: FileReader, url: string) {
+async function convertImageToDataURL(reader: FileReader, url: string) {
     const blob = await fetch(url).then((r) => r.blob());
     const dataURL = await new Promise<string>((resolve) => {
         reader.onload = () => resolve(reader.result as string);
