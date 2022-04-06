@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:photos/models/user_details.dart';
+import 'package:photos/utils/data_util.dart';
+import 'package:photos/utils/date_time_util.dart';
 
 class UsageDetailsWidget extends StatelessWidget {
-  const UsageDetailsWidget({Key key}) : super(key: key);
+  final UserDetails userDetails;
+
+  const UsageDetailsWidget(this.userDetails, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -85,11 +90,15 @@ class UsageDetailsWidget extends StatelessWidget {
                           ),
                           Positioned.fill(
                             child: Align(
-                              alignment: Alignment.bottomRight,
+                              alignment: Alignment.bottomCenter,
                               child: Container(
                                 width: 229,
                                 height: 226,
-                                child: FlutterLogo(size: 226),
+                                child: Image.asset(
+                                  "assets/preserved_green.png",
+                                  height: 226,
+                                ),
+                                // child: FlutterLogo(size: 226),
                               ),
                             ),
                           ),
@@ -144,12 +153,12 @@ class UsageDetailsWidget extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  left: 224,
+                  left: 210,
                   top: 20,
                   child: Opacity(
                     opacity: 0.50,
                     child: Text(
-                      "Ends 22 Jan’23",
+                      "Ends ${getDateAndMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(userDetails.subscription.expiryTime))}",
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         color: Colors.white,
@@ -164,7 +173,8 @@ class UsageDetailsWidget extends StatelessWidget {
                   left: 16,
                   top: 40,
                   child: Text(
-                    "10 GB",
+                    convertBytesToReadableFormat(
+                        userDetails.subscription.storage),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -189,9 +199,9 @@ class UsageDetailsWidget extends StatelessWidget {
                         Padding(padding: EdgeInsets.fromLTRB(0, 12, 0, 0)),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
+                          children: [
                             Text(
-                              "2.3 GB of 10 GB used",
+                              "${convertBytesToReadableFormat(userDetails.usage)} of ${convertBytesToReadableFormat(userDetails.subscription.storage)} used",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
@@ -200,7 +210,7 @@ class UsageDetailsWidget extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              "3,846 Memories",
+                              "${userDetails.fileCount.toString()} Memories",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
