@@ -6,7 +6,6 @@ export const defaultPublicCollectionGalleryContext: PublicCollectionGalleryConte
         token: null,
         passwordToken: null,
         accessedThroughSharedURL: false,
-
         openReportForm: () => null,
     };
 

@@ -56,7 +56,6 @@ export default function PublicCollectionGallery() {
     const [loading, setLoading] = useState(true);
     const openReportForm = () => setAbuseReportFormView(true);
     const closeReportForm = () => setAbuseReportFormView(false);
-
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
         useState<boolean>(false);
@@ -276,7 +275,6 @@ export default function PublicCollectionGallery() {
                 token: token.current,
                 passwordToken: passwordJWTToken.current,
                 accessedThroughSharedURL: true,
-
                 openReportForm,
             }}>
             <CollectionInfo collection={publicCollection} />

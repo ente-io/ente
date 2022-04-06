@@ -5,7 +5,6 @@ export interface PublicCollectionGalleryContextType {
     token: string;
     passwordToken: string;
     accessedThroughSharedURL: boolean;
-
     openReportForm: () => void;
 }
 
