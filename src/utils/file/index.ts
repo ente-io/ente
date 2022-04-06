@@ -104,10 +104,10 @@ export async function downloadFile(
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
         tempImageURL = URL.createObjectURL(new Blob([motionPhoto.image]));
         tempVideoURL = URL.createObjectURL(new Blob([motionPhoto.video]));
-        FileSaver.saveAs(motionPhoto.imageNameTitle, tempImageURL);
-        FileSaver.saveAs(motionPhoto.videoNameTitle, tempVideoURL);
+        FileSaver.saveAs(tempImageURL, motionPhoto.imageNameTitle);
+        FileSaver.saveAs(tempVideoURL, motionPhoto.videoNameTitle);
     } else {
-        FileSaver.saveAs(file.metadata.title, fileURL);
+        FileSaver.saveAs(fileURL, file.metadata.title);
     }
 
     tempURL && URL.revokeObjectURL(tempURL);
