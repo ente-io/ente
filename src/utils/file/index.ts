@@ -25,7 +25,7 @@ import {
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
-
+import FileSaver from 'file-saver';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -65,7 +65,6 @@ export async function downloadFile(
                     )
                 ).blob()
             );
-            console.log({ tempURL });
             fileURL = tempURL;
         }
     } else {
@@ -105,10 +104,10 @@ export async function downloadFile(
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
         tempImageURL = URL.createObjectURL(new Blob([motionPhoto.image]));
         tempVideoURL = URL.createObjectURL(new Blob([motionPhoto.video]));
-        downloadUsingAnchor(motionPhoto.imageNameTitle, tempImageURL);
-        downloadUsingAnchor(motionPhoto.videoNameTitle, tempVideoURL);
+        FileSaver.saveAs(motionPhoto.imageNameTitle, tempImageURL);
+        FileSaver.saveAs(motionPhoto.videoNameTitle, tempVideoURL);
     } else {
-        downloadUsingAnchor(file.metadata.title, fileURL);
+        FileSaver.saveAs(file.metadata.title, fileURL);
     }
 
     tempURL && URL.revokeObjectURL(tempURL);
@@ -117,15 +116,15 @@ export async function downloadFile(
     tempVideoURL && URL.revokeObjectURL(tempVideoURL);
 }
 
-function downloadUsingAnchor(name: string, link: string) {
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = link;
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-}
+// function downloadUsingAnchor(name: string, link: string) {
+//     const a = document.createElement('a');
+//     a.style.display = 'none';
+//     a.href = link;
+//     a.download = name;
+//     document.body.appendChild(a);
+//     a.click();
+//     a.remove();
+// }
 
 export function isFileHEIC(mimeType: string) {
     return (
