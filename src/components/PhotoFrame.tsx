@@ -23,6 +23,7 @@ import { FILE_TYPE } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
+import { AppContext } from 'pages/_app';
 
 const Container = styled.div`
     display: block;
@@ -99,6 +100,7 @@ const PhotoFrame = ({
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
     const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
+    const appContext = useContext(AppContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
@@ -494,7 +496,7 @@ const PhotoFrame = ({
                     const mergedURL = galleryContext.files.get(item.id);
                     urls = mergedURL.split(',');
                 } else {
-                    galleryContext.startLoading();
+                    appContext.startLoading();
                     if (
                         publicCollectionGalleryContext.accessedThroughSharedURL
                     ) {
@@ -507,7 +509,7 @@ const PhotoFrame = ({
                     } else {
                         urls = await DownloadManager.getFile(item, true);
                     }
-                    galleryContext.finishLoading();
+                    appContext.finishLoading();
                     const mergedURL = urls.join(',');
                     galleryContext.files.set(item.id, mergedURL);
                 }

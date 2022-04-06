@@ -27,8 +27,8 @@ import { EnteFile } from 'types/file';
 import { Suggestion, SuggestionType, DateValue, Bbox } from 'types/search';
 import { Search, SearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
-import { GalleryContext } from 'pages/gallery';
 import { SelectStyles } from './styles';
+import { AppContext } from 'pages/_app';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -91,7 +91,7 @@ interface Props {
 }
 export default function SearchBar(props: Props) {
     const [value, setValue] = useState<Suggestion>(null);
-    const galleryContext = useContext(GalleryContext);
+    const appContext = useContext(AppContext);
     const handleChange = (value) => {
         setValue(value);
     };
@@ -193,10 +193,10 @@ export default function SearchBar(props: Props) {
     };
     const resetSearch = () => {
         if (props.isOpen) {
-            galleryContext.startLoading();
+            appContext.startLoading();
             props.setSearch({});
             setTimeout(() => {
-                galleryContext.finishLoading();
+                appContext.finishLoading();
             }, 10);
             props.setOpen(false);
             setValue(null);
