@@ -48,6 +48,7 @@ export interface MultipartUploadURLs {
 export interface FileTypeInfo {
     fileType: FILE_TYPE;
     exactType: string;
+    mimeType: string;
     imageType?: string;
     videoType?: string;
 }
