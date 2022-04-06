@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/common/fabCreateAccount.dart';
 import 'package:photos/ui/common/report_bug_popup.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
@@ -24,6 +25,16 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom != 0;
+
+    FloatingActionButtonLocation fabLocation() {
+      if (isKeypadOpen) {
+        return null;
+      } else {
+        return FloatingActionButtonLocation.centerFloat;
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -48,14 +59,29 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
         ),
       ),
       body: _getBody(),
+      floatingActionButton: FABCreateAccount(
+        isKeypadOpen: isKeypadOpen,
+        isFormValid: !(_verificationCodeController.text == null ||
+            _verificationCodeController.text.isEmpty),
+        buttonText: 'Verify',
+        onPressedFunction: () {
+          if (widget.isChangeEmail) {
+            UserService.instance.changeEmail(
+                context, widget.email, _verificationCodeController.text);
+          } else {
+            UserService.instance
+                .verifyEmail(context, _verificationCodeController.text);
+          }
+        },
+      ),
+      floatingActionButtonLocation: fabLocation(),
     );
   }
 
   Widget _getBody() {
     //return SingleChildScrollView(
     //child:
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return ListView(
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,30 +192,6 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               ),
             ),
           ],
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-          child: Container(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton(
-              child: Text('verify'),
-              onPressed: _verificationCodeController.text == null ||
-                      _verificationCodeController.text.isEmpty
-                  ? () {
-                      print('yo'); //hardcoded
-                    }
-                  : () {
-                      if (widget.isChangeEmail) {
-                        UserService.instance.changeEmail(context, widget.email,
-                            _verificationCodeController.text);
-                      } else {
-                        UserService.instance.verifyEmail(
-                            context, _verificationCodeController.text);
-                      }
-                    },
-            ),
-          ),
         ),
       ],
     );

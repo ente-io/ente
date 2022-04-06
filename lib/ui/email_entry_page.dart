@@ -12,6 +12,7 @@ import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/custom_color_scheme.dart';
+import 'package:photos/ui/common/fabCreateAccount.dart';
 //import 'package:photos/ui/common/report_bug_popup.dart';
 //import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -78,69 +79,69 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom != 0;
 
-    Widget fab() {
-      if (isKeypadOpen) {
-        return Container(
-          decoration: BoxDecoration(boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).backgroundColor,
-              spreadRadius: 200,
-              blurRadius: 100,
-              offset: Offset(0, 230),
-            )
-          ]),
-          width: double.infinity,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              FloatingActionButton(
-                  //mini: true,
-                  backgroundColor:
-                      Theme.of(context).colorScheme.fabBackgroundColor,
-                  foregroundColor:
-                      Theme.of(context).colorScheme.fabTextOrIconColor,
-                  child: Transform.rotate(
-                    angle: _isFormValid() ? 0 : math.pi / 2,
-                    child: Icon(
-                      Icons.chevron_right,
-                      size: 36,
-                    ),
-                  ),
-                  onPressed: _isFormValid()
-                      ? () {
-                          _config
-                              .setVolatilePassword(_passwordController1.text);
-                          _config.setEmail(_email);
-                          UserService.instance.getOtt(context, _email);
-                        }
-                      : () {
-                          FocusScope.of(context).unfocus();
-                        } //keypad down here
-                  ),
-            ],
-          ),
-        );
-      } else {
-        return Container(
-          width: double.infinity,
-          height: 56,
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: OutlinedButton(
-            //style: Theme.of(context).elevatedButtonTheme.style,
-            onPressed: _isFormValid()
-                ? () {
-                    _config.setVolatilePassword(_passwordController1.text);
-                    _config.setEmail(_email);
-                    UserService.instance.getOtt(context, _email);
-                  }
-                : null,
-            child: Text(
-              'Create Account',
-            ),
-          ),
-        );
-      }
-    }
+    // Widget fab() {
+    //   if (isKeypadOpen) {
+    //     return Container(
+    //       decoration: BoxDecoration(boxShadow: [
+    //         BoxShadow(
+    //           color: Theme.of(context).backgroundColor,
+    //           spreadRadius: 200,
+    //           blurRadius: 100,
+    //           offset: Offset(0, 230),
+    //         )
+    //       ]),
+    //       width: double.infinity,
+    //       child: Row(
+    //         mainAxisAlignment: MainAxisAlignment.end,
+    //         children: [
+    //           FloatingActionButton(
+    //               //mini: true,
+    //               backgroundColor:
+    //                   Theme.of(context).colorScheme.fabBackgroundColor,
+    //               foregroundColor:
+    //                   Theme.of(context).colorScheme.fabTextOrIconColor,
+    //               child: Transform.rotate(
+    //                 angle: _isFormValid() ? 0 : math.pi / 2,
+    //                 child: Icon(
+    //                   Icons.chevron_right,
+    //                   size: 36,
+    //                 ),
+    //               ),
+    //               onPressed: _isFormValid()
+    //                   ? () {
+    //                       _config
+    //                           .setVolatilePassword(_passwordController1.text);
+    //                       _config.setEmail(_email);
+    //                       UserService.instance.getOtt(context, _email);
+    //                     }
+    //                   : () {
+    //                       FocusScope.of(context).unfocus();
+    //                     } //keypad down here
+    //               ),
+    //         ],
+    //       ),
+    //     );
+    //   } else {
+    //     return Container(
+    //       width: double.infinity,
+    //       height: 56,
+    //       padding: EdgeInsets.symmetric(horizontal: 20),
+    //       child: OutlinedButton(
+    //         //style: Theme.of(context).elevatedButtonTheme.style,
+    //         onPressed: _isFormValid()
+    //             ? () {
+    //                 _config.setVolatilePassword(_passwordController1.text);
+    //                 _config.setEmail(_email);
+    //                 UserService.instance.getOtt(context, _email);
+    //               }
+    //             : null,
+    //         child: Text(
+    //           'Create Account',
+    //         ),
+    //       ),
+    //     );
+    //   }
+    // }
 
     FloatingActionButtonLocation fabLocation() {
       if (isKeypadOpen) {
@@ -175,7 +176,16 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     return Scaffold(
         appBar: appBar,
         body: _getBody(),
-        floatingActionButton: fab(),
+        floatingActionButton: FABCreateAccount(
+          isKeypadOpen: isKeypadOpen,
+          isFormValid: _isFormValid(),
+          buttonText: 'Create Account',
+          onPressedFunction: () {
+            _config.setVolatilePassword(_passwordController1.text);
+            _config.setEmail(_email);
+            UserService.instance.getOtt(context, _email);
+          },
+        ),
         floatingActionButtonLocation: fabLocation()
         // resizeToAvoidBottomInset: false,
         );
@@ -568,7 +578,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   Container _getAgreement() {
     return Container(
-      padding: const EdgeInsets.only(left: 20, right: 20),
+      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
       child: Column(
         children: [
           _getTOSAgreement(),
