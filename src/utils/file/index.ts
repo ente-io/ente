@@ -7,7 +7,7 @@ import {
     PublicMagicMetadataProps,
 } from 'types/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
-import { getFileTypeFromBlob } from 'services/typeDetectionService';
+import { getFileType } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
 import { logError } from 'utils/sentry';
 import { User } from 'types/user';
@@ -25,7 +25,6 @@ import {
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
-
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -48,76 +47,80 @@ export async function downloadFile(
     token?: string,
     passwordToken?: string
 ) {
-    let fileURL: string;
-    let tempURL: string;
+    let fileBlob: Blob;
+    const fileReader = new FileReader();
     if (accessedThroughSharedURL) {
-        fileURL = await PublicCollectionDownloadManager.getCachedOriginalFile(
-            file
-        )[0];
-        tempURL;
+        const fileURL =
+            await PublicCollectionDownloadManager.getCachedOriginalFile(
+                file
+            )[0];
         if (!fileURL) {
-            tempURL = URL.createObjectURL(
-                await new Response(
-                    await PublicCollectionDownloadManager.downloadFile(
-                        token,
-                        passwordToken,
-                        file
-                    )
-                ).blob()
-            );
-            console.log({ tempURL });
-            fileURL = tempURL;
+            fileBlob = await new Response(
+                await PublicCollectionDownloadManager.downloadFile(
+                    token,
+                    passwordToken,
+                    file
+                )
+            ).blob();
+        } else {
+            fileBlob = await (await fetch(fileURL)).blob();
         }
     } else {
-        fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
+        const fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
         if (!fileURL) {
-            tempURL = URL.createObjectURL(
-                await new Response(
-                    await DownloadManager.downloadFile(file)
-                ).blob()
-            );
-            fileURL = tempURL;
+            fileBlob = await new Response(
+                await DownloadManager.downloadFile(file)
+            ).blob();
+        } else {
+            fileBlob = await (await fetch(fileURL)).blob();
         }
     }
 
-    const fileType = getFileExtension(file.metadata.title);
-    let tempEditedFileURL: string;
+    const fileType = await getFileType(
+        fileReader,
+        new File([fileBlob], file.metadata.title)
+    );
     if (
         file.pubMagicMetadata?.data.editedTime &&
-        (fileType === TYPE_JPEG || fileType === TYPE_JPG)
+        (fileType.exactType === TYPE_JPEG || fileType.exactType === TYPE_JPG)
     ) {
-        let fileBlob = await (await fetch(fileURL)).blob();
-
         fileBlob = await updateFileCreationDateInEXIF(
-            new FileReader(),
+            fileReader,
             fileBlob,
             new Date(file.pubMagicMetadata.data.editedTime / 1000)
         );
-        tempEditedFileURL = URL.createObjectURL(fileBlob);
-        fileURL = tempEditedFileURL;
     }
     let tempImageURL: string;
     let tempVideoURL: string;
+    let tempURL: string;
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        const fileBlob = await (await fetch(fileURL)).blob();
         const originalName = fileNameWithoutExtension(file.metadata.title);
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
-        tempImageURL = URL.createObjectURL(new Blob([motionPhoto.image]));
-        tempVideoURL = URL.createObjectURL(new Blob([motionPhoto.video]));
-        downloadUsingAnchor(motionPhoto.imageNameTitle, tempImageURL);
-        downloadUsingAnchor(motionPhoto.videoNameTitle, tempVideoURL);
+        const image = new File([motionPhoto.image], motionPhoto.imageNameTitle);
+        const imageType = await getFileType(fileReader, image);
+        tempImageURL = URL.createObjectURL(
+            new Blob([motionPhoto.image], { type: imageType.mimeType })
+        );
+        const video = new File([motionPhoto.video], motionPhoto.videoNameTitle);
+        const videoType = await getFileType(fileReader, video);
+        tempVideoURL = URL.createObjectURL(
+            new Blob([motionPhoto.video], { type: videoType.mimeType })
+        );
+        downloadUsingAnchor(tempImageURL, motionPhoto.imageNameTitle);
+        downloadUsingAnchor(tempVideoURL, motionPhoto.videoNameTitle);
     } else {
-        downloadUsingAnchor(file.metadata.title, fileURL);
+        fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
+        tempURL = URL.createObjectURL(fileBlob);
+        downloadUsingAnchor(tempURL, file.metadata.title);
     }
 
     tempURL && URL.revokeObjectURL(tempURL);
-    tempEditedFileURL && URL.revokeObjectURL(tempEditedFileURL);
     tempImageURL && URL.revokeObjectURL(tempImageURL);
     tempVideoURL && URL.revokeObjectURL(tempVideoURL);
 }
 
-function downloadUsingAnchor(name: string, link: string) {
+function downloadUsingAnchor(link: string, name: string) {
     const a = document.createElement('a');
     a.style.display = 'none';
     a.href = link;
@@ -335,11 +338,10 @@ export async function convertForPreview(
     fileBlob: Blob
 ): Promise<Blob[]> {
     const convertIfHEIC = async (fileName: string, fileBlob: Blob) => {
-        const typeFromExtension = getFileExtension(fileName);
         const reader = new FileReader();
-        const mimeType =
-            (await getFileTypeFromBlob(reader, fileBlob))?.mime ??
-            typeFromExtension;
+        const mimeType = (
+            await getFileType(reader, new File([fileBlob], file.metadata.title))
+        ).exactType;
         if (isFileHEIC(mimeType)) {
             fileBlob = await HEICConverter.convert(fileBlob);
         }
