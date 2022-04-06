@@ -15,7 +15,6 @@ import {
     deleteFromTrash,
 } from 'services/fileService';
 import styled from 'styled-components';
-import LoadingBar from 'react-top-loading-bar';
 import {
     syncCollections,
     getCollectionsAndTheirLatestFile,
@@ -38,7 +37,6 @@ import {
     setJustSignedUp,
 } from 'utils/storage';
 import { isTokenValid, logoutUser } from 'services/userService';
-import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
 import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
@@ -125,12 +123,8 @@ const defaultGalleryContext: GalleryContextType = {
     thumbs: new Map(),
     files: new Map(),
     showPlanSelectorModal: () => null,
-    closeMessageDialog: () => null,
     setActiveCollection: () => null,
     syncWithRemote: () => null,
-    setDialogMessage: () => null,
-    startLoading: () => null,
-    finishLoading: () => null,
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
 };
@@ -155,8 +149,6 @@ export default function Gallery() {
         count: 0,
         collectionID: 0,
     });
-    const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
-    const [messageDialogView, setMessageDialogView] = useState(false);
     const [planModalView, setPlanModalView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
@@ -183,14 +175,13 @@ export default function Gallery() {
         disabled: uploadInProgress,
     });
 
-    const loadingBar = useRef(null);
     const [isInSearchMode, setIsInSearchMode] = useState(false);
     const [searchStats, setSearchStats] = useState(null);
-    const isLoadingBarRunning = useRef(false);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
     const [deleted, setDeleted] = useState<number[]>([]);
-    const appContext = useContext(AppContext);
+    const { startLoading, finishLoading, setDialogMessage, ...appContext } =
+        useContext(AppContext);
     const [collectionFilesCount, setCollectionFilesCount] =
         useState<Map<number, number>>();
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
@@ -203,7 +194,6 @@ export default function Gallery() {
         useState<NotificationAttributes>(null);
 
     const showPlanSelectorModal = () => setPlanModalView(true);
-    const closeMessageDialog = () => setMessageDialogView(false);
 
     const clearNotificationAttributes = () => setNotificationAttributes(null);
 
@@ -238,8 +228,6 @@ export default function Gallery() {
         main();
         appContext.showNavBar(true);
     }, []);
-
-    useEffect(() => setMessageDialogView(true), [dialogMessage]);
 
     useEffect(
         () => collectionSelectorAttributes && setCollectionSelectorView(true),
@@ -358,15 +346,6 @@ export default function Gallery() {
 
     const clearSelection = function () {
         setSelected({ count: 0, collectionID: 0 });
-    };
-
-    const startLoading = () => {
-        !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
-        isLoadingBarRunning.current = true;
-    };
-    const finishLoading = () => {
-        isLoadingBarRunning.current && loadingBar.current?.complete();
-        isLoadingBarRunning.current = false;
     };
 
     if (!files) {
@@ -566,12 +545,8 @@ export default function Gallery() {
             value={{
                 ...defaultGalleryContext,
                 showPlanSelectorModal,
-                closeMessageDialog,
                 setActiveCollection,
                 syncWithRemote,
-                setDialogMessage,
-                startLoading,
-                finishLoading,
                 setNotificationAttributes,
                 setBlockingLoad,
             }}>
@@ -583,7 +558,6 @@ export default function Gallery() {
                         <EnteSpinner />
                     </LoadingOverlay>
                 )}
-                <LoadingBar color="#51cd7c" ref={loadingBar} />
                 {isFirstLoad && (
                     <AlertContainer>
                         {constants.INITIAL_LOAD_DELAY_WARNING}
@@ -599,12 +573,6 @@ export default function Gallery() {
                 <ToastNotification
                     attributes={notificationAttributes}
                     clearAttributes={clearNotificationAttributes}
-                />
-                <MessageDialog
-                    size="lg"
-                    show={messageDialogView}
-                    onHide={closeMessageDialog}
-                    attributes={dialogMessage}
                 />
                 <SearchBar
                     isOpen={isInSearchMode}
