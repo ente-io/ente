@@ -74,7 +74,7 @@ export async function updateFileCreationDateInEXIF(
     }
 }
 
-export async function convertImageToDataURL(reader: FileReader, url: string) {
+async function convertImageToDataURL(reader: FileReader, url: string) {
     const blob = await fetch(url).then((r) => r.blob());
     const dataURL = await new Promise<string>((resolve) => {
         reader.onload = () => resolve(reader.result as string);
@@ -83,7 +83,7 @@ export async function convertImageToDataURL(reader: FileReader, url: string) {
     return dataURL;
 }
 
-export function dataURIToBlob(dataURI) {
+function dataURIToBlob(dataURI) {
     // convert base64 to raw binary data held in a string
     // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
     const byteString = atob(dataURI.split(',')[1]);
