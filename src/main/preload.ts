@@ -142,7 +142,6 @@ const showUploadZipDialog = async () => {
             filePaths.map(getElectronFilesFromGoogleZip)
         );
         const files = filesList.flat();
-        console.log(files);
         return files;
     } catch (e) {
         console.error(e);
