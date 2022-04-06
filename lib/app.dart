@@ -56,6 +56,22 @@ final lightThemeData = ThemeData(
       alignment: Alignment.center,
     ),
   ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+    onPrimary: Colors.white,
+    primary: Colors.black,
+    alignment: Alignment.center,
+    textStyle: TextStyle(
+      fontWeight: FontWeight.w600,
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 18,
+    ),
+    padding: EdgeInsets.symmetric(vertical: 14),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
+    ),
+  )),
+
   toggleableActiveColor: Colors.red[400],
   scaffoldBackgroundColor: Colors.white,
   bottomAppBarColor: Color.fromRGBO(196, 196, 196, 1.0),
@@ -178,6 +194,22 @@ final darkThemeData = ThemeData(
       alignment: Alignment.center,
     ),
   ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+    onPrimary: Colors.black,
+    primary: Colors.white,
+    minimumSize: Size(88, 36),
+    alignment: Alignment.center,
+    textStyle: TextStyle(
+      fontWeight: FontWeight.w600,
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 18,
+    ),
+    padding: EdgeInsets.symmetric(vertical: 14),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
+    ),
+  )),
   scaffoldBackgroundColor: Colors.black,
   backgroundColor: Colors.black,
   appBarTheme: AppBarTheme().copyWith(
