@@ -10,7 +10,6 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/deduplicate_page.dart';
 import 'package:photos/ui/free_space_page.dart';
-import 'package:photos/ui/recovery_page.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
@@ -45,14 +44,11 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             routeToPage(
-                context,
-                RecoveryPage(
-                  showAppBar: true,
-                )
-                // BackupFolderSelectionPage(
-                //   buttonText: "Backup",
-                // ),
-                );
+              context,
+              BackupFolderSelectionPage(
+                buttonText: "Backup",
+              ),
+            );
           },
           child: SettingsTextItem(
               text: "Backed up folders", icon: Icons.navigate_next),

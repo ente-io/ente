@@ -6,11 +6,9 @@ import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:dotted_border/dotted_border.dart';
 
 class RecoveryPage extends StatefulWidget {
-  final bool showAppBar;
-  const RecoveryPage({Key key, @required this.showAppBar}) : super(key: key);
+  const RecoveryPage({Key key}) : super(key: key);
 
   @override
   _RecoveryPageState createState() => _RecoveryPageState();
@@ -22,71 +20,108 @@ class _RecoveryPageState extends State<RecoveryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.showAppBar
-          ? AppBar(
-              title: Text(""),
-            )
-          : null,
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          // mainAxisAlignment: MainAxisAlignment.center,
-
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Text("Recovery Key", style: Theme.of(context).textTheme.headline4),
-            Padding(padding: EdgeInsets.all(12)),
-            Text(
-              "If you forget your password, the only way you can recover your data is with this key.",
-              style: Theme.of(context).textTheme.subtitle1,
+      appBar: AppBar(
+        title: Text(
+          "recover account",
+          style: TextStyle(
+            fontSize: 18,
+          ),
+        ),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
+            child: TextFormField(
+              decoration: InputDecoration(
+                hintText: "enter your recovery key",
+                contentPadding: EdgeInsets.all(20),
+              ),
+              style: TextStyle(
+                fontSize: 14,
+                fontFeatures: [FontFeature.tabularFigures()],
+              ),
+              controller: _recoveryKey,
+              autofocus: false,
+              autocorrect: false,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              onChanged: (_) {
+                setState(() {});
+              },
             ),
-            Padding(padding: EdgeInsets.only(top: 24)),
-            DottedBorder(
-              color: Color.fromRGBO(17, 127, 56, 1), //color of dotted/dash line
-              strokeWidth: 1, //thickness of dash/dots
-              dashPattern: const [6, 6],
-              radius: Radius.circular(8),
-              //dash patterns, 10 is dash width, 6 is space width
-              child: SizedBox(
-                //inner container
-                height: 200, //height of inner container
-                width:
-                    double.infinity, //width to 100% match to parent container.
-                // ignore: prefer_const_literals_to_create_immutables
-                child: Column(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Color.fromRGBO(49, 155, 86, .2),
-                        ),
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(12),
-                        ),
-                        color: Color.fromRGBO(49, 155, 86, .2),
-                      ),
-                      // color: Color.fromRGBO(49, 155, 86, .2),
-                      height: 120,
-                      width: double.infinity,
-                      child: const Text('1'),
-                    ),
-                    SizedBox(
-                      height: 80,
-                      width: double.infinity,
-                      child: Padding(
-                          child: Text(
-                            "we don’t store this key, please save this in a safe place",
-                            style: Theme.of(context).textTheme.bodyText1,
+          ),
+          Padding(padding: EdgeInsets.all(12)),
+          Container(
+            padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
+            width: double.infinity,
+            height: 64,
+            child: button(
+              "recover",
+              fontSize: 18,
+              onPressed: _recoveryKey.text.isNotEmpty
+                  ? () async {
+                      final dialog =
+                          createProgressDialog(context, "decrypting...");
+                      await dialog.show();
+                      try {
+                        await Configuration.instance
+                            .recover(_recoveryKey.text.trim());
+                        await dialog.hide();
+                        showToast("recovery successful!");
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) {
+                              return WillPopScope(
+                                onWillPop: () async => false,
+                                child: PasswordEntryPage(
+                                  mode: PasswordEntryMode.reset,
+                                ),
+                              );
+                            },
                           ),
-                          padding: EdgeInsets.all(20)),
-                    ),
-                  ],
+                        );
+                      } catch (e) {
+                        await dialog.hide();
+                        String errMessage =
+                            'the recovery key you entered is incorrect';
+                        if (e is AssertionError) {
+                          errMessage = '$errMessage : ${e.message}';
+                        }
+                        showErrorDialog(
+                            context, "incorrect recovery key", errMessage);
+                      }
+                    }
+                  : null,
+            ),
+          ),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () {
+              showErrorDialog(
+                context,
+                "sorry",
+                "due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key",
+              );
+            },
+            child: Container(
+              padding: EdgeInsets.all(40),
+              child: Center(
+                child: Text(
+                  "no recovery key?",
+                  style: TextStyle(
+                    decoration: TextDecoration.underline,
+                    fontSize: 12,
+                    color: Colors.white.withOpacity(0.9),
+                  ),
                 ),
               ),
-            )
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
