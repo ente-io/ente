@@ -604,6 +604,8 @@ export default function Gallery() {
                     syncWithRemote={syncWithRemote}
                     setDialogMessage={setDialogMessage}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
+                    startLoading={startLoading}
+                    finishLoading={finishLoading}
                     collectionFilesCount={collectionFilesCount}
                 />
 

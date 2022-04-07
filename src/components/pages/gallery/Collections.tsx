@@ -3,7 +3,7 @@ import { SetDialogMessage } from 'components/MessageDialog';
 import NavigationButton, {
     SCROLL_DIRECTION,
 } from 'components/NavigationButton';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { sortCollections } from 'services/collectionService';
 import { User } from 'types/user';
@@ -24,7 +24,6 @@ import {
     COLLECTION_SORT_BY,
     TRASH_SECTION,
 } from 'constants/collection';
-import { AppContext } from 'pages/_app';
 
 interface CollectionProps {
     collections: Collection[];
@@ -34,6 +33,8 @@ interface CollectionProps {
     setDialogMessage: SetDialogMessage;
     syncWithRemote: () => Promise<void>;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
+    startLoading: () => void;
+    finishLoading: () => void;
     isInSearchMode: boolean;
     collectionFilesCount: Map<number, number>;
 }
@@ -108,7 +109,6 @@ const Hider = styled.div<{ hide: boolean }>`
 `;
 
 export default function Collections(props: CollectionProps) {
-    const appContext = useContext(AppContext);
     const { activeCollection, collections, setActiveCollection } = props;
     const [selectedCollectionID, setSelectedCollectionID] =
         useState<number>(null);
@@ -168,8 +168,8 @@ export default function Collections(props: CollectionProps) {
         collections: props.collections,
         selectedCollectionID,
         setDialogMessage: props.setDialogMessage,
-        startLoading: appContext.startLoading,
-        finishLoading: appContext.finishLoading,
+        startLoading: props.startLoading,
+        finishLoading: props.finishLoading,
         showCollectionShareModal: setCollectionShareModalView.bind(null, true),
         redirectToAll: setActiveCollection.bind(null, ALL_SECTION),
     });
