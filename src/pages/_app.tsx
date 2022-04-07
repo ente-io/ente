@@ -16,11 +16,6 @@ import FlashMessageBar from 'components/FlashMessageBar';
 import Head from 'next/head';
 import { getAlbumSiteHost } from 'constants/pages';
 import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
-import LoadingBar from 'react-top-loading-bar';
-import MessageDialog, {
-    MessageAttributes,
-    SetDialogMessage,
-} from 'components/MessageDialog';
 import { logUploadInfo } from 'utils/upload';
 import LoadingBar from 'react-top-loading-bar';
 import MessageDialog, {
