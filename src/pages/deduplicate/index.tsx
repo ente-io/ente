@@ -74,13 +74,10 @@ export default function Deduplicate() {
         if (clubSameTimeFilesOnly) {
             duplicates = clubDuplicatesByTime(duplicates);
         }
-
         const currFileSizeMap = new Map<number, number>();
-
         let allDuplicateFiles: EnteFile[] = [];
         let toSelectFileIDs: number[] = [];
         let count = 0;
-
         for (const dupe of duplicates) {
             allDuplicateFiles = allDuplicateFiles.concat(dupe.files);
             // select all except first file
@@ -95,12 +92,10 @@ export default function Deduplicate() {
         }
         setDuplicateFiles(allDuplicateFiles);
         setFileSizeMap(currFileSizeMap);
-
         const selectedFiles = {
             count: count,
             collectionID: ALL_SECTION,
         };
-
         for (const fileID of toSelectFileIDs) {
             selectedFiles[fileID] = true;
         }
