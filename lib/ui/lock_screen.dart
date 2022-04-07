@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/ui/app_lock.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/utils/auth_util.dart';
 
 class LockScreen extends StatefulWidget {
@@ -29,9 +28,8 @@ class _LockScreenState extends State<LockScreen> {
           width: double.infinity,
           height: 64,
           padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-          child: button(
-            "unlock",
-            fontSize: 18,
+          child: OutlinedButton(
+            child: Text("unlock"),
             onPressed: () async {
               _showLockScreen();
             },

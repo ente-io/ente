@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/report_bug_popup.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
@@ -82,10 +81,10 @@ class _LoginPageState extends State<LoginPage> {
           padding: const EdgeInsets.all(12),
           child: RichText(
             text: TextSpan(
+              style:
+                  Theme.of(context).textTheme.subtitle1.copyWith(fontSize: 12),
               children: [
-                TextSpan(
-                  text: "by clicking log in, I agree to the ",
-                ),
+                TextSpan(text: "by clicking log in, I agree to the "),
                 TextSpan(
                   text: "terms of service",
                   style: TextStyle(
@@ -123,12 +122,6 @@ class _LoginPageState extends State<LoginPage> {
                     },
                 ),
               ],
-              style: TextStyle(
-                height: 1.25,
-                fontSize: 12,
-                fontFamily: 'Ubuntu',
-                color: Colors.white70,
-              ),
             ),
             textAlign: TextAlign.center,
           ),
@@ -138,8 +131,8 @@ class _LoginPageState extends State<LoginPage> {
           width: double.infinity,
           height: 64,
           padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-          child: button(
-            "log in",
+          child: ElevatedButton(
+            child: Text("log in"),
             onPressed: _email != null && _email.isNotEmpty
                 ? () {
                     if (!isValidEmail(_email)) {
@@ -151,7 +144,6 @@ class _LoginPageState extends State<LoginPage> {
                     UserService.instance.getOtt(context, _email);
                   }
                 : null,
-            fontSize: 18,
           ),
         ),
       ],

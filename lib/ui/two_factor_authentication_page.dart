@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/lifecycle_event_handler.dart';
 import 'package:pinput/pin_put/pin_put.dart';
 
@@ -112,9 +111,8 @@ class _TwoFactorAuthenticationPageState
           padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
           width: double.infinity,
           height: 64,
-          child: button(
-            "verify",
-            fontSize: 18,
+          child: OutlinedButton(
+            child: Text("verify"),
             onPressed: _code.length == 6
                 ? () async {
                     _verifyTwoFactorCode(_code);

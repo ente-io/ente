@@ -78,6 +78,7 @@ final lightThemeData = ThemeData(
   backgroundColor: Colors.white,
   appBarTheme: AppBarTheme().copyWith(
       backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
       iconTheme: IconThemeData(color: Colors.black)),
   //https://api.flutter.dev/flutter/material/TextTheme-class.html
   textTheme: TextTheme().copyWith(
@@ -104,6 +105,11 @@ final lightThemeData = ThemeData(
           fontSize: 16,
           fontWeight: FontWeight.w500), // medium body weight
       bodyText1: TextStyle(
+          fontFamily: 'Inter-Medium',
+          color: Colors.black,
+          fontSize: 16,
+          fontWeight: FontWeight.w400),
+      bodyText2: TextStyle(
           fontFamily: 'Inter-Medium',
           color: Colors.black,
           fontSize: 16,

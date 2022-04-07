@@ -4,7 +4,6 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/recovery_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -89,12 +88,11 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         ),
         Padding(padding: EdgeInsets.all(12)),
         Container(
-          padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
+          padding: const EdgeInsets.symmetric(horizontal: 60),
           width: double.infinity,
           height: 64,
-          child: button(
-            "log in",
-            fontSize: 18,
+          child: OutlinedButton(
+            child: Text("log in"),
             onPressed: _passwordController.text.isNotEmpty
                 ? () async {
                     final dialog =

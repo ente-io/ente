@@ -226,9 +226,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     width: double.infinity,
                     height: 64,
                     padding: EdgeInsets.fromLTRB(40, 0, 40, 0),
-                    child: button(
-                      buttonText,
-                      fontSize: 18,
+                    child: ElevatedButton(
+                      child: Text(buttonText),
                       onPressed: _passwordController1.text.isNotEmpty &&
                               _passwordController2.text.isNotEmpty
                           ? _onButtonPress

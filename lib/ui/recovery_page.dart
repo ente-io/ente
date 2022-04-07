@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -59,9 +58,8 @@ class _RecoveryPageState extends State<RecoveryPage> {
             padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
             width: double.infinity,
             height: 64,
-            child: button(
-              "recover",
-              fontSize: 18,
+            child: OutlinedButton(
+              child: Text("recover"),
               onPressed: _recoveryKey.text.isNotEmpty
                   ? () async {
                       final dialog =
@@ -112,11 +110,10 @@ class _RecoveryPageState extends State<RecoveryPage> {
               child: Center(
                 child: Text(
                   "no recovery key?",
-                  style: TextStyle(
-                    decoration: TextDecoration.underline,
-                    fontSize: 12,
-                    color: Colors.white.withOpacity(0.9),
-                  ),
+                  style: Theme.of(context)
+                      .textTheme
+                      .caption
+                      .copyWith(decoration: TextDecoration.underline),
                 ),
               ),
             ),
