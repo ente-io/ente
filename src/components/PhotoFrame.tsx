@@ -186,7 +186,13 @@ const PhotoFrame = ({
                 }
                 if (
                     search?.location &&
-                    !isInsideBox(item.metadata, search.location)
+                    !isInsideBox(
+                        {
+                            latitude: item.metadata.latitude,
+                            longitude: item.metadata.longitude,
+                        },
+                        search.location
+                    )
                 ) {
                     return false;
                 }

@@ -11,7 +11,7 @@ import {
     searchFiles,
     searchLocation,
 } from 'services/searchService';
-import { getFormattedDate } from 'utils/search';
+import { getFormattedDate, isInsideBox } from 'utils/search';
 import constants from 'utils/strings/constants';
 import LocationIcon from '../icons/LocationIcon';
 import DateIcon from '../icons/DateIcon';
@@ -148,8 +148,30 @@ export default function SearchBar(props: Props) {
         );
 
         const locationResults = await searchLocation(searchPhrase);
+
+        const locationResultsHasFiles: boolean[] = new Array(
+            locationResults.length
+        ).fill(false);
+        props.files.map((file) => {
+            for (const [index, location] of locationResults.entries()) {
+                if (
+                    isInsideBox(
+                        {
+                            latitude: file.metadata.latitude,
+                            longitude: file.metadata.longitude,
+                        },
+                        location.bbox
+                    )
+                ) {
+                    locationResultsHasFiles[index] = true;
+                }
+            }
+        });
+        const filteredLocationWithFiles = locationResults.filter(
+            (_, index) => locationResultsHasFiles[index]
+        );
         options.push(
-            ...locationResults.map(
+            ...filteredLocationWithFiles.map(
                 (searchResult) =>
                     ({
                         type: SuggestionType.LOCATION,
