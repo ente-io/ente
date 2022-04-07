@@ -22,12 +22,13 @@ export default function EmptyScreen({ openFileUploader }) {
     return (
         <Wrapper>
             {deduplicateContext.isOnDeduplicatePage ? (
-                <b
+                <div
                     style={{
-                        fontSize: '2em',
+                        color: '#a6a6a6',
+                        fontSize: '18px',
                     }}>
                     {constants.NO_DUPLICATES_FOUND}
-                </b>
+                </div>
             ) : (
                 <>
                     <img height={150} src="/images/gallery.png" />
