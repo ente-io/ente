@@ -8,7 +8,7 @@ interface Iprops {
 
 export const Wrapper = styled.div`
     padding-left: 30px;
-    margin-top: 5px;
+    margin-top: 15px;
     margin-bottom: 0px;
 `;
 
@@ -20,9 +20,9 @@ export default function FileList(props: Iprops) {
     return (
         <Wrapper>
             <List
-                height={Math.min(35 * props.fileList.length, 150)}
+                height={Math.min(30 * props.fileList.length, 135)}
                 width={'100%'}
-                itemSize={35}
+                itemSize={30}
                 itemCount={props.fileList.length}>
                 {Row}
             </List>
