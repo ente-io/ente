@@ -289,7 +289,6 @@ export default function Gallery() {
             const collections = await syncCollections();
             setCollections(collections);
             const files = await syncFiles(collections, setFiles);
-
             await setDerivativeState(collections, files);
             const trash = await syncTrash(collections, setFiles, files);
             setTrash(trash);
@@ -548,43 +547,33 @@ export default function Gallery() {
                 showPlanSelectorModal,
                 setActiveCollection,
                 syncWithRemote,
-
                 setNotificationAttributes,
                 setBlockingLoad,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
                 getInputProps={getInputProps}>
+                {blockingLoad && (
+                    <LoadingOverlay>
+                        <EnteSpinner />
+                    </LoadingOverlay>
+                )}
+                {isFirstLoad && (
+                    <AlertContainer>
+                        {constants.INITIAL_LOAD_DELAY_WARNING}
+                    </AlertContainer>
+                )}
+                <PlanSelector
+                    modalView={planModalView}
+                    closeModal={() => setPlanModalView(false)}
+                    setDialogMessage={setDialogMessage}
+                    setLoading={setBlockingLoad}
+                />
                 <AlertBanner bannerMessage={bannerMessage} />
                 <ToastNotification
                     attributes={notificationAttributes}
                     clearAttributes={clearNotificationAttributes}
                 />
-
-                <Upload
-                    syncWithRemote={syncWithRemote}
-                    setBannerMessage={setBannerMessage}
-                    acceptedFiles={acceptedFiles}
-                    showCollectionSelector={setCollectionSelectorView.bind(
-                        null,
-                        true
-                    )}
-                    setCollectionSelectorAttributes={
-                        setCollectionSelectorAttributes
-                    }
-                    closeCollectionSelector={setCollectionSelectorView.bind(
-                        null,
-                        false
-                    )}
-                    setLoading={setBlockingLoad}
-                    setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    setDialogMessage={setDialogMessage}
-                    setUploadInProgress={setUploadInProgress}
-                    fileRejections={fileRejections}
-                    setFiles={setFiles}
-                    isFirstUpload={collectionsAndTheirLatestFile?.length === 0}
-                />
-
                 <SearchBar
                     isOpen={isInSearchMode}
                     setOpen={setIsInSearchMode}
@@ -608,23 +597,6 @@ export default function Gallery() {
                     finishLoading={finishLoading}
                     collectionFilesCount={collectionFilesCount}
                 />
-
-                {blockingLoad && (
-                    <LoadingOverlay>
-                        <EnteSpinner />
-                    </LoadingOverlay>
-                )}
-                {isFirstLoad && (
-                    <AlertContainer>
-                        {constants.INITIAL_LOAD_DELAY_WARNING}
-                    </AlertContainer>
-                )}
-                <PlanSelector
-                    modalView={planModalView}
-                    closeModal={() => setPlanModalView(false)}
-                    setDialogMessage={setDialogMessage}
-                    setLoading={setBlockingLoad}
-                />
                 <CollectionNamer
                     show={collectionNamerView}
                     onHide={setCollectionNamerView.bind(null, false)}
@@ -644,17 +616,38 @@ export default function Gallery() {
                     show={() => setFixCreationTimeView(true)}
                     attributes={fixCreationTimeAttributes}
                 />
-
-                <UploadButton
-                    isFirstFetch={isFirstFetch}
-                    openFileUploader={openFileUploader}
+                <Upload
+                    syncWithRemote={syncWithRemote}
+                    setBannerMessage={setBannerMessage}
+                    acceptedFiles={acceptedFiles}
+                    showCollectionSelector={setCollectionSelectorView.bind(
+                        null,
+                        true
+                    )}
+                    setCollectionSelectorAttributes={
+                        setCollectionSelectorAttributes
+                    }
+                    closeCollectionSelector={setCollectionSelectorView.bind(
+                        null,
+                        false
+                    )}
+                    setLoading={setBlockingLoad}
+                    setCollectionNamerAttributes={setCollectionNamerAttributes}
+                    setDialogMessage={setDialogMessage}
+                    setUploadInProgress={setUploadInProgress}
+                    fileRejections={fileRejections}
+                    setFiles={setFiles}
+                    isFirstUpload={collectionsAndTheirLatestFile?.length === 0}
                 />
                 <Sidebar
                     collections={collections}
                     setDialogMessage={setDialogMessage}
                     setLoading={setBlockingLoad}
                 />
-
+                <UploadButton
+                    isFirstFetch={isFirstFetch}
+                    openFileUploader={openFileUploader}
+                />
                 <PhotoFrame
                     files={files}
                     setFiles={setFiles}
@@ -675,7 +668,6 @@ export default function Gallery() {
                     )}
                     enableDownload={true}
                 />
-
                 {selected.count > 0 &&
                     selected.collectionID === activeCollection && (
                         <SelectedFileOptions
