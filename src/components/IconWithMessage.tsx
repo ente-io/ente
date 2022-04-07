@@ -1,4 +1,4 @@
-import { OverlayTrigger } from 'react-bootstrap';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import React from 'react';
 
 interface IconWithMessageProps {
@@ -9,7 +9,11 @@ interface IconWithMessageProps {
 export const IconWithMessage = (props: IconWithMessageProps) => (
     <OverlayTrigger
         placement="bottom"
-        overlay={<p style={{ zIndex: 1002 }}>{props.message}</p>}>
+        overlay={
+            <Tooltip id="on-hover-info" style={{ zIndex: 1002 }}>
+                {props.message}
+            </Tooltip>
+        }>
         {props.children}
     </OverlayTrigger>
 );
