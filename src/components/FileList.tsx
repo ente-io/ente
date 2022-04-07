@@ -20,7 +20,7 @@ export default function FileList(props: Iprops) {
     return (
         <Wrapper>
             <List
-                height={Math.min(35 * props.fileList.length, 140)}
+                height={Math.min(35 * props.fileList.length, 150)}
                 width={'100%'}
                 itemSize={35}
                 itemCount={props.fileList.length}>
