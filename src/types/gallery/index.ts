@@ -28,7 +28,6 @@ export type GalleryContextType = {
     showPlanSelectorModal: () => void;
     setActiveCollection: (collection: number) => void;
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
-
     setNotificationAttributes: (attributes: NotificationAttributes) => void;
     setBlockingLoad: (value: boolean) => void;
 };

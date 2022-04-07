@@ -125,7 +125,6 @@ const defaultGalleryContext: GalleryContextType = {
     showPlanSelectorModal: () => null,
     setActiveCollection: () => null,
     syncWithRemote: () => null,
-
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
 };

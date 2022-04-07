@@ -22,6 +22,11 @@ import MessageDialog, {
     SetDialogMessage,
 } from 'components/MessageDialog';
 import { logUploadInfo } from 'utils/upload';
+import LoadingBar from 'react-top-loading-bar';
+import MessageDialog, {
+    MessageAttributes,
+    SetDialogMessage,
+} from 'components/MessageDialog';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */

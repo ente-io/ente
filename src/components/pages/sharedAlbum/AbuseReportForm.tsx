@@ -10,6 +10,7 @@ import constants from 'utils/strings/constants';
 import * as Yup from 'yup';
 import styled from 'styled-components';
 import { AbuseReportDetails, AbuseReportRequest } from 'types/publicCollection';
+import { AppContext } from 'pages/_app';
 
 interface Iprops {
     url: string;
@@ -57,6 +58,7 @@ const Wrapper = styled.div`
 
 export function AbuseReportForm({ show, close, url }: Iprops) {
     const [loading, setLoading] = useState(false);
+    const appContext = useContext(AppContext);
     const publicCollectionGalleryContent = useContext(
         PublicCollectionGalleryContext
     );
@@ -83,7 +85,7 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
                 details
             );
             close();
-            publicCollectionGalleryContent.setDialogMessage({
+            appContext.setDialogMessage({
                 title: constants.REPORT_SUBMIT_SUCCESS_TITLE,
                 content: constants.REPORT_SUBMIT_SUCCESS_CONTENT,
                 close: { text: constants.OK },
