@@ -40,7 +40,7 @@ export default function UploadTypeChoiceModal({
                 onHide={hideFiletypeDialog}
                 style={{
                     borderBottom: 'none',
-                    height: '8vh',
+                    height: '4em',
                 }}>
                 <Modal.Title
                     id="contained-modal-title-vcenter"
@@ -59,14 +59,14 @@ export default function UploadTypeChoiceModal({
             </Modal.Header>
             <Modal.Body
                 style={{
-                    height: '20vh',
+                    height: '10em',
                 }}>
                 <Container>
                     <Row className="justify-content-md-center py-2">
                         <Button
                             variant="light"
                             onClick={uploadFiles}
-                            style={{ width: '90%', height: '6vh' }}>
+                            style={{ width: '90%', height: '3em' }}>
                             <Container>
                                 <Row>
                                     <div>
@@ -86,7 +86,7 @@ export default function UploadTypeChoiceModal({
                         <Button
                             variant="light"
                             onClick={uploadDirs}
-                            style={{ width: '90%', height: '6vh' }}>
+                            style={{ width: '90%', height: '3em' }}>
                             <Container>
                                 <Row>
                                     <div>

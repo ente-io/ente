@@ -497,8 +497,10 @@ const GlobalStyles = createGlobalStyle`
         cursor:pointer;
     }
 
-    .file-type-choice-modal{
-        width: 30vw;
+    @media (min-width: 450px) {
+        .file-type-choice-modal{
+            width: 25em;
+        }
     }
 
     .manageLinkHeader:hover{
