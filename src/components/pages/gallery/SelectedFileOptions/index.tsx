@@ -1,4 +1,4 @@
-import { Navbar } from 'react-bootstrap';
+import Navbar from 'components/Navbar';
 import styled from 'styled-components';
 
 export const SelectionBar = styled(Navbar)`
