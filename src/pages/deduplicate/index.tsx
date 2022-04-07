@@ -7,7 +7,7 @@ import {
     getDuplicateFiles,
     clubDuplicatesByTime,
 } from 'services/deduplicationService';
-import { trashFiles } from 'services/fileService';
+import { syncFiles, trashFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { SelectedState } from 'types/gallery';
 
@@ -23,6 +23,7 @@ import { PAGES } from 'constants/pages';
 import router from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import styled from 'styled-components';
+import { syncCollections } from 'services/collectionService';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext
@@ -67,6 +68,8 @@ export default function Deduplicate() {
 
     const syncWithRemote = async () => {
         startLoading();
+        const collection = await syncCollections();
+        await syncFiles(collection, () => null);
         let duplicates = await getDuplicateFiles();
         if (clubSameTimeFilesOnly) {
             duplicates = clubDuplicatesByTime(duplicates);
@@ -110,7 +113,6 @@ export default function Deduplicate() {
             startLoading();
             const selectedFiles = getSelectedFiles(selected, duplicateFiles);
             await trashFiles(selectedFiles);
-            closeDeduplication();
         } catch (e) {
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
@@ -146,9 +148,13 @@ export default function Deduplicate() {
                 fileSizeMap,
                 isOnDeduplicatePage: true,
             }}>
-            <Info>
-                {constants.DEDUPLICATION_LOGIC_MESSAGE(clubSameTimeFilesOnly)}
-            </Info>
+            {duplicateFiles.length > 0 && (
+                <Info>
+                    {constants.DEDUPLICATION_LOGIC_MESSAGE(
+                        clubSameTimeFilesOnly
+                    )}
+                </Info>
+            )}
             <PhotoFrame
                 files={duplicateFiles}
                 setFiles={setDuplicateFiles}
