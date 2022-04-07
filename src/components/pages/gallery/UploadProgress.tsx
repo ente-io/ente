@@ -9,7 +9,7 @@ import { DESKTOP_APP_DOWNLOAD_URL } from 'utils/common';
 import constants from 'utils/strings/constants';
 import { ButtonVariant, getVariantColor } from './LinkButton';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
-
+import FileList from 'components/FileList';
 interface Props {
     fileCounter;
     uploadStage;
@@ -28,17 +28,6 @@ interface FileProgresses {
     progress: number;
 }
 
-export const FileList = styled.ul`
-    padding-left: 30px;
-    margin-top: 5px;
-    margin-bottom: 0px;
-    & > li {
-        padding-left: 5px;
-        margin-bottom: 10px;
-        color: #ccc;
-    }
-`;
-
 const SectionTitle = styled.div`
     display: flex;
     justify-content: space-between;
@@ -49,7 +38,6 @@ const SectionTitle = styled.div`
 
 const Section = styled.div`
     margin: 20px 0;
-    word-break: break-word;
     padding: 0 20px;
 `;
 const SectionInfo = styled.div`
@@ -67,6 +55,16 @@ const NotUploadSectionHeader = styled.div`
     color: ${getVariantColor(ButtonVariant.warning)};
     border-bottom: 1px solid ${getVariantColor(ButtonVariant.warning)};
     margin: 0 20px;
+`;
+
+const ItemContainer = styled.li`
+    padding-left: 5px;
+    margin-bottom: 10px;
+    color: #ccc;
+    max-width: 366px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 `;
 
 interface ResultSectionProps {
@@ -96,13 +94,13 @@ const ResultSection = (props: ResultSectionProps) => {
                         {props.sectionInfo && (
                             <SectionInfo>{props.sectionInfo}</SectionInfo>
                         )}
-                        <FileList>
-                            {fileList.map((fileID) => (
-                                <li key={fileID}>
+                        <FileList
+                            fileList={fileList.map((fileID) => (
+                                <ItemContainer key={fileID}>
                                     {props.filenames.get(fileID)}
-                                </li>
+                                </ItemContainer>
                             ))}
-                        </FileList>
+                        />
                     </SectionContent>
                 </Accordion.Collapse>
             </Section>
@@ -118,7 +116,7 @@ interface InProgressProps {
 }
 const InProgressSection = (props: InProgressProps) => {
     const [listView, setListView] = useState(true);
-    const fileList = props.fileProgressStatuses;
+    const fileList = props.fileProgressStatuses ?? [];
 
     return (
         <Accordion defaultActiveKey="0">
@@ -134,15 +132,15 @@ const InProgressSection = (props: InProgressProps) => {
                         {props.sectionInfo && (
                             <SectionInfo>{props.sectionInfo}</SectionInfo>
                         )}
-                        <FileList>
-                            {fileList.map(({ fileID, progress }) => (
-                                <li key={fileID}>
+                        <FileList
+                            fileList={fileList.map(({ fileID, progress }) => (
+                                <ItemContainer key={fileID}>
                                     {`${props.filenames.get(
                                         fileID
                                     )} - ${progress}%`}
-                                </li>
+                                </ItemContainer>
                             ))}
-                        </FileList>
+                        />
                     </SectionContent>
                 </Accordion.Collapse>
             </Section>
