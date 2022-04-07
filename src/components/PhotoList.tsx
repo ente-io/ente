@@ -9,11 +9,14 @@ import {
     DATE_CONTAINER_HEIGHT,
     GAP_BTW_TILES,
     SPACE_BTW_DATES,
+    SIZE_AND_COUNT_CONTAINER_HEIGHT,
 } from 'constants/gallery';
 import constants from 'utils/strings/constants';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
 import { getVariantColor, ButtonVariant } from './pages/gallery/LinkButton';
+import { convertBytesToHumanReadable } from 'utils/billing';
+import { DeduplicateContext } from 'pages/deduplicate';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const NO_OF_PAGES = 2;
@@ -22,6 +25,7 @@ const FOOTER_HEIGHT = 90;
 enum ITEM_TYPE {
     TIME = 'TIME',
     TILE = 'TILE',
+    SIZE_AND_COUNT = 'SIZE_AND_COUNT',
     OTHER = 'OTHER',
 }
 
@@ -38,6 +42,8 @@ interface TimeStampListItem {
     item?: any;
     id?: string;
     height?: number;
+    fileSize?: number;
+    fileCount?: number;
 }
 
 const ListItem = styled.div`
@@ -83,6 +89,18 @@ const DateContainer = styled.div<{ span: number }>`
     display: flex;
     align-items: center;
     height: ${DATE_CONTAINER_HEIGHT}px;
+`;
+
+const SizeAndCountContainer = styled.div<{ span: number }>`
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    grid-column: span ${(props) => props.span};
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+    height: ${SIZE_AND_COUNT_CONTAINER_HEIGHT}px;
 `;
 
 const FooterContainer = styled.div<{ span: number }>`
@@ -141,6 +159,8 @@ export function PhotoList({
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
+    const deduplicateContext = useContext(DeduplicateContext);
+
     let columns = Math.floor(width / IMAGE_CONTAINER_MAX_WIDTH);
     let listItemHeight = IMAGE_CONTAINER_MAX_HEIGHT;
 
@@ -158,6 +178,83 @@ export function PhotoList({
 
     useEffect(() => {
         let timeStampList: TimeStampListItem[] = [];
+        if (deduplicateContext.isOnDeduplicatePage) {
+            skipMerge = true;
+            groupByFileSize(timeStampList);
+        } else {
+            groupByTime(timeStampList);
+        }
+
+        if (!skipMerge) {
+            timeStampList = mergeTimeStampList(timeStampList, columns);
+        }
+        if (timeStampList.length === 0) {
+            timeStampList.push(getEmptyListItem());
+        }
+        if (
+            showAppDownloadBanner ||
+            publicCollectionGalleryContext.accessedThroughSharedURL
+        ) {
+            timeStampList.push(getVacuumItem(timeStampList));
+            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+                timeStampList.push(getAlbumsFooter());
+            } else {
+                timeStampList.push(getAppDownloadFooter());
+            }
+        }
+
+        timeStampListRef.current = timeStampList;
+        filteredDataCopyRef.current = filteredData;
+        refreshList();
+    }, [
+        width,
+        height,
+        filteredData,
+        showAppDownloadBanner,
+        publicCollectionGalleryContext.accessedThroughSharedURL,
+    ]);
+
+    const groupByFileSize = (timeStampList: TimeStampListItem[]) => {
+        let index = 0;
+        while (index < filteredData.length) {
+            const file = filteredData[index];
+            const currentFileSize = deduplicateContext.fileSizeMap.get(file.id);
+            const currentCreationTime = file.metadata.creationTime;
+            let lastFileIndex = index;
+
+            while (lastFileIndex < filteredData.length) {
+                if (
+                    deduplicateContext.fileSizeMap.get(
+                        filteredData[lastFileIndex].id
+                    ) !== currentFileSize ||
+                    (deduplicateContext.clubSameTimeFilesOnly &&
+                        filteredData[lastFileIndex].metadata.creationTime !==
+                            currentCreationTime)
+                ) {
+                    break;
+                }
+                lastFileIndex++;
+            }
+            lastFileIndex--;
+            timeStampList.push({
+                itemType: ITEM_TYPE.SIZE_AND_COUNT,
+                fileSize: currentFileSize,
+                fileCount: lastFileIndex - index + 1,
+            });
+
+            while (index <= lastFileIndex) {
+                const tileSize = Math.min(columns, lastFileIndex - index + 1);
+                timeStampList.push({
+                    itemType: ITEM_TYPE.TILE,
+                    items: filteredData.slice(index, index + tileSize),
+                    itemStartIndex: index,
+                });
+                index += tileSize;
+            }
+        }
+    };
+
+    const groupByTime = (timeStampList: TimeStampListItem[]) => {
         let listItemIndex = 0;
         let currentDate = -1;
 
@@ -205,35 +302,7 @@ export function PhotoList({
                 });
             }
         });
-
-        if (!skipMerge) {
-            timeStampList = mergeTimeStampList(timeStampList, columns);
-        }
-        if (timeStampList.length === 0) {
-            timeStampList.push(getEmptyListItem());
-        }
-        if (
-            showAppDownloadBanner ||
-            publicCollectionGalleryContext.accessedThroughSharedURL
-        ) {
-            timeStampList.push(getVacuumItem(timeStampList));
-            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
-                timeStampList.push(getAlbumsFooter());
-            } else {
-                timeStampList.push(getAppDownloadFooter());
-            }
-        }
-
-        timeStampListRef.current = timeStampList;
-        filteredDataCopyRef.current = filteredData;
-        refreshList();
-    }, [
-        width,
-        height,
-        filteredData,
-        showAppDownloadBanner,
-        publicCollectionGalleryContext.accessedThroughSharedURL,
-    ]);
+    };
 
     const isSameDay = (first, second) =>
         first.getFullYear() === second.getFullYear() &&
@@ -386,6 +455,8 @@ export function PhotoList({
         switch (timeStampList[index].itemType) {
             case ITEM_TYPE.TIME:
                 return DATE_CONTAINER_HEIGHT;
+            case ITEM_TYPE.SIZE_AND_COUNT:
+                return SIZE_AND_COUNT_CONTAINER_HEIGHT;
             case ITEM_TYPE.TILE:
                 return listItemHeight;
             default:
@@ -424,6 +495,14 @@ export function PhotoList({
                     <DateContainer span={columns}>
                         {listItem.date}
                     </DateContainer>
+                );
+            case ITEM_TYPE.SIZE_AND_COUNT:
+                return (
+                    <SizeAndCountContainer span={columns}>
+                        {listItem.fileCount} {constants.FILES},{' '}
+                        {convertBytesToHumanReadable(listItem.fileSize || 0)}{' '}
+                        {constants.EACH}
+                    </SizeAndCountContainer>
                 );
             case ITEM_TYPE.OTHER:
                 return listItem.item;

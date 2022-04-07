@@ -31,7 +31,10 @@ export function convertBytesToGBs(bytes, precision?): string {
     return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2);
 }
 
-export function convertToHumanReadable(bytes: number, precision = 2): string {
+export function convertBytesToHumanReadable(
+    bytes: number,
+    precision = 2
+): string {
     if (bytes === 0) {
         return '0 MB';
     }
