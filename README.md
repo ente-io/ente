@@ -51,3 +51,8 @@ If you would like to motivate us to keep building, you can do so by [starring](h
 Follow us on [Twitter](https://twitter.com/enteio) and join [r/enteio](https://reddit.com/r/enteio) to get regular updates, connect with other customers, and discuss your ideas.
 
 An important part of our journey is to build better software by consistently listening to community feedback. Please feel free to [share your thoughts](mailto:feedback@ente.io) with us at any time.
+
+---
+
+Cross-browser testing provided by 
+[<img src="https://d98b8t1nnulk5.cloudfront.net/production/images/layout/logo-header.png?1469004780" width="115" height="25">](https://www.browserstack.com/open-source)
