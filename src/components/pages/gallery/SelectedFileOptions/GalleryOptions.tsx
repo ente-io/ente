@@ -27,22 +27,22 @@ import { IconWithMessage } from 'components/IconWithMessage';
 import { SelectionBar, SelectionContainer } from '.';
 
 interface Props {
-    addToCollectionHelper?: (collection: Collection) => void;
-    moveToCollectionHelper?: (collection: Collection) => void;
-    restoreToCollectionHelper?: (collection: Collection) => void;
-    showCreateCollectionModal?: (opsType: COLLECTION_OPS_TYPE) => () => void;
+    addToCollectionHelper: (collection: Collection) => void;
+    moveToCollectionHelper: (collection: Collection) => void;
+    restoreToCollectionHelper: (collection: Collection) => void;
+    showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
     setDialogMessage: SetDialogMessage;
-    setCollectionSelectorAttributes?: SetCollectionSelectorAttributes;
+    setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     deleteFileHelper: (permanent?: boolean) => void;
-    removeFromCollectionHelper?: () => void;
-    fixTimeHelper?: () => void;
-    downloadHelper?: () => void;
+    removeFromCollectionHelper: () => void;
+    fixTimeHelper: () => void;
+    downloadHelper: () => void;
     count: number;
     clearSelection: () => void;
-    archiveFilesHelper?: () => void;
-    unArchiveFilesHelper?: () => void;
-    activeCollection?: number;
-    isFavoriteCollection?: boolean;
+    archiveFilesHelper: () => void;
+    unArchiveFilesHelper: () => void;
+    activeCollection: number;
+    isFavoriteCollection: boolean;
 }
 
 const SelectedFileOptions = ({
