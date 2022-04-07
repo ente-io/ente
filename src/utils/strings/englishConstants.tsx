@@ -684,13 +684,15 @@ const englishConstants = {
     LIVE_PHOTO: 'this is a live photo',
     LIVE: 'LIVE',
     DISABLE_PASSWORD: 'disable password lock',
-    DISABLE_PASSWORD_MESSAGE: 'are you sure that you want to disable the password lock?',
+    DISABLE_PASSWORD_MESSAGE:
+        'are you sure that you want to disable the password lock?',
     PASSWORD_LOCK: 'password lock',
     LOCK: 'lock',
     DOWNLOAD_UPLOAD_LOGS: 'debug logs',
     CHOOSE_UPLOAD_TYPE: 'Upload',
     UPLOAD_FILES: 'File Upload',
     UPLOAD_DIRS: 'Folder Upload',
+    CANCEL_UPLOADS: 'Cancel Uploads',
 };
 
 export default englishConstants;

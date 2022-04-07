@@ -352,6 +352,10 @@ class UploadManager {
     async retryFailedFiles() {
         await this.queueFilesForUpload(this.failedFiles);
     }
+
+    clearRemainingFiles() {
+        this.remainingFiles = [];
+    }
 }
 
 export default new UploadManager();

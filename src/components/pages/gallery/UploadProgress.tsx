@@ -23,6 +23,8 @@ interface Props {
     fileRejections: FileRejection[];
     uploadResult: Map<number, FileUploadResults>;
     hasLivePhotos: boolean;
+    isPendingDesktopUpload: boolean;
+    cancelDesktopUploads: () => void;
 }
 interface FileProgresses {
     fileID: number;
@@ -286,6 +288,16 @@ export default function UploadProgress(props: Props) {
                     sectionInfo={constants.TOO_LARGE_INFO}
                 />
             </Modal.Body>
+            {props.isPendingDesktopUpload && (
+                <Modal.Footer style={{ border: 'none' }}>
+                    <Button
+                        variant="outline-danger"
+                        style={{ width: '100%' }}
+                        onClick={props.cancelDesktopUploads}>
+                        {constants.CANCEL_UPLOADS}
+                    </Button>
+                </Modal.Footer>
+            )}
             {props.uploadStage === UPLOAD_STAGES.FINISH && (
                 <Modal.Footer style={{ border: 'none' }}>
                     {props.uploadStage === UPLOAD_STAGES.FINISH &&

@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import router from 'next/router';
 
 import { syncCollections, createAlbum } from 'services/collectionService';
 import constants from 'utils/strings/constants';
@@ -321,6 +322,8 @@ export default function Upload(props: Props) {
             appContext.resetSharedFiles();
             props.setUploadInProgress(false);
             props.syncWithRemote();
+            if (isPendingDesktopUpload.current)
+                isPendingDesktopUpload.current = false;
         }
     };
     const retryFailed = async () => {
@@ -367,7 +370,6 @@ export default function Upload(props: Props) {
         isFirstUpload: boolean
     ) => {
         if (isPendingDesktopUpload.current) {
-            isPendingDesktopUpload.current = false;
             if (pendingDesktopUploadCollectionName.current) {
                 uploadToSingleNewCollection(
                     pendingDesktopUploadCollectionName.current
@@ -398,6 +400,13 @@ export default function Upload(props: Props) {
                 title: constants.UPLOAD_TO_COLLECTION,
             });
         }
+    };
+
+    const cancelPendingDesktopUploads = () => {
+        UploadManager.clearRemainingFiles();
+        ImportService.updatePendingUploads([]);
+        setProgressView(false);
+        router.reload();
     };
 
     return (
@@ -436,6 +445,8 @@ export default function Upload(props: Props) {
                 retryFailed={retryFailed}
                 fileRejections={props.fileRejections}
                 uploadResult={uploadResult}
+                isPendingDesktopUpload={isPendingDesktopUpload.current}
+                cancelDesktopUploads={cancelPendingDesktopUploads}
             />
         </>
     );
