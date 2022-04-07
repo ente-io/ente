@@ -1,9 +1,5 @@
 import { IconButton } from 'components/Container';
-import {
-    IconWithMessage,
-    SelectionBar,
-    SelectionContainer,
-} from './GalleryOptions';
+import { SelectionBar, SelectionContainer } from '.';
 import constants from 'utils/strings/constants';
 import DeleteIcon from 'components/icons/DeleteIcon';
 import React, { useContext } from 'react';
@@ -11,6 +7,7 @@ import styled from 'styled-components';
 import { DeduplicateContext } from 'pages/deduplicate';
 import LeftArrow from 'components/icons/LeftArrow';
 import { SetDialogMessage } from 'components/MessageDialog';
+import { IconWithMessage } from 'components/IconWithMessage';
 
 const VerticalLine = styled.div`
     position: absolute;

@@ -1,8 +1,6 @@
 import { SetDialogMessage } from 'components/MessageDialog';
 import React, { useEffect, useState } from 'react';
 import { SetCollectionSelectorAttributes } from '../CollectionSelector';
-import styled from 'styled-components';
-import Navbar from 'components/Navbar';
 import DeleteIcon from 'components/icons/DeleteIcon';
 import CloseIcon from 'components/icons/CloseIcon';
 import AddIcon from 'components/icons/AddIcon';
@@ -25,7 +23,8 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { FIX_CREATION_TIME_VISIBLE_TO_USER_IDS } from 'constants/user';
 import DownloadIcon from 'components/icons/DownloadIcon';
 import { User } from 'types/user';
-import { OverlayTrigger } from 'react-bootstrap';
+import { IconWithMessage } from 'components/IconWithMessage';
+import { SelectionBar, SelectionContainer } from '.';
 
 interface Props {
     addToCollectionHelper?: (collection: Collection) => void;
@@ -45,34 +44,6 @@ interface Props {
     activeCollection?: number;
     isFavoriteCollection?: boolean;
 }
-
-export const SelectionBar = styled(Navbar)`
-    position: fixed;
-    top: 0;
-    color: #fff;
-    z-index: 1001;
-    width: 100%;
-    padding: 0 16px;
-`;
-
-export const SelectionContainer = styled.div`
-    flex: 1;
-    align-items: center;
-    display: flex;
-`;
-
-interface IconWithMessageProps {
-    children?: any;
-    message: string;
-}
-
-export const IconWithMessage = (props: IconWithMessageProps) => (
-    <OverlayTrigger
-        placement="bottom"
-        overlay={<p style={{ zIndex: 1002 }}>{props.message}</p>}>
-        {props.children}
-    </OverlayTrigger>
-);
 
 const SelectedFileOptions = ({
     addToCollectionHelper,
