@@ -9,6 +9,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/network.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/l10n/l10n.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -24,28 +25,14 @@ final lightThemeData = ThemeData(
   colorScheme: ColorScheme.light(primary: Colors.black),
   accentColor: Color.fromRGBO(45, 194, 98, 0.2),
   buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
-  outlinedButtonTheme: _outlinedButtonThemeData(
+  outlinedButtonTheme: buildOutlinedButtonThemeData(
     bgDisabled: Colors.grey.shade500,
     bgEnabled: Colors.black,
     fgDisabled: Colors.white,
     fgEnabled: Colors.white,
   ),
-  elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-    onPrimary: Colors.white,
-    primary: Colors.black,
-    alignment: Alignment.center,
-    textStyle: TextStyle(
-      fontWeight: FontWeight.w600,
-      fontFamily: 'Inter-SemiBold',
-      fontSize: 18,
-    ),
-    padding: EdgeInsets.symmetric(vertical: 14),
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(8)),
-    ),
-  )),
-
+  elevatedButtonTheme: buildElevatedButtonThemeData(
+      onPrimary: Colors.white, primary: Colors.black),
   toggleableActiveColor: Colors.red[400],
   scaffoldBackgroundColor: Colors.white,
   bottomAppBarColor: Color.fromRGBO(196, 196, 196, 1.0),
@@ -115,27 +102,13 @@ final darkThemeData = ThemeData(
   // primaryColor: Colors.red,
   textTheme: _buildTextTheme(Colors.white),
   toggleableActiveColor: Colors.green[400],
-  outlinedButtonTheme: _outlinedButtonThemeData(
+  outlinedButtonTheme: buildOutlinedButtonThemeData(
       bgDisabled: Colors.grey.shade500,
       bgEnabled: Colors.white,
       fgDisabled: Colors.white,
       fgEnabled: Colors.black),
-  elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-    onPrimary: Colors.black,
-    primary: Colors.white,
-    minimumSize: Size(88, 36),
-    alignment: Alignment.center,
-    textStyle: TextStyle(
-      fontWeight: FontWeight.w600,
-      fontFamily: 'Inter-SemiBold',
-      fontSize: 18,
-    ),
-    padding: EdgeInsets.symmetric(vertical: 14),
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(8)),
-    ),
-  )),
+  elevatedButtonTheme: buildElevatedButtonThemeData(
+      onPrimary: Colors.black, primary: Colors.white),
   scaffoldBackgroundColor: Colors.black,
   backgroundColor: Colors.black,
   appBarTheme: AppBarTheme().copyWith(
@@ -221,42 +194,6 @@ TextTheme _buildTextTheme(Color textColor) {
         color: textColor.withOpacity(0.8),
         fontSize: 12,
       ));
-}
-
-OutlinedButtonThemeData _outlinedButtonThemeData(
-    {Color bgDisabled, Color bgEnabled, Color fgDisabled, Color fgEnabled}) {
-  return OutlinedButtonThemeData(
-    style: OutlinedButton.styleFrom(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      alignment: Alignment.center,
-      padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
-      textStyle: TextStyle(
-        fontWeight: FontWeight.w600,
-        fontFamily: 'Inter-SemiBold',
-        fontSize: 18,
-      ),
-    ).copyWith(
-      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
-            return bgDisabled;
-          }
-          return bgEnabled;
-        },
-      ),
-      foregroundColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
-            return fgDisabled;
-          }
-          return fgEnabled;
-        },
-      ),
-      alignment: Alignment.center,
-    ),
-  );
 }
 
 class EnteApp extends StatefulWidget {

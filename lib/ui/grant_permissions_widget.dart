@@ -3,9 +3,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/sync_service.dart';
-import 'package:photos/ui/common/custom_color_scheme.dart';
-import 'package:photos/ui/common_elements.dart';
 
 class GrantPermissionsWidget extends StatelessWidget {
   @override
