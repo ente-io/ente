@@ -28,6 +28,7 @@ export enum UPLOAD_STAGES {
     EXTRACTING_METADATA,
     UPLOADING,
     FINISH,
+    CANCELLED,
 }
 
 export enum FileUploadResults {

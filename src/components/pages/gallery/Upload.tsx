@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import router from 'next/router';
 
 import { syncCollections, createAlbum } from 'services/collectionService';
 import constants from 'utils/strings/constants';
@@ -101,10 +100,7 @@ export default function Upload(props: Props) {
         if (isElectron()) {
             ImportService.getPendingUploads().then(
                 ({ files, collectionName }) => {
-                    if (files && files?.length > 0) {
-                        isPendingDesktopUpload.current = true;
-                        resumeDesktopUpload(files, collectionName);
-                    }
+                    resumeUploadsIfAny(files, collectionName);
                 }
             );
         }
@@ -155,6 +151,13 @@ export default function Upload(props: Props) {
         props.closeCollectionSelector();
         setProgressView(true);
     };
+
+    function resumeUploadsIfAny(files: ElectronFile[], collectionName: string) {
+        if (files && files?.length > 0) {
+            isPendingDesktopUpload.current = true;
+            resumeDesktopUpload(files, collectionName);
+        }
+    }
 
     const resumeDesktopUpload = async (files, collectionName) => {
         try {
@@ -301,7 +304,6 @@ export default function Upload(props: Props) {
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
             await props.syncWithRemote(true, true);
-            // set state to not done
             await ImportService.setToUploadFiles(
                 filesWithCollectionToUpload,
                 collections
@@ -322,8 +324,6 @@ export default function Upload(props: Props) {
             appContext.resetSharedFiles();
             props.setUploadInProgress(false);
             props.syncWithRemote();
-            if (isPendingDesktopUpload.current)
-                isPendingDesktopUpload.current = false;
         }
     };
     const retryFailed = async () => {
@@ -370,6 +370,7 @@ export default function Upload(props: Props) {
         isFirstUpload: boolean
     ) => {
         if (isPendingDesktopUpload.current) {
+            isPendingDesktopUpload.current = false;
             if (pendingDesktopUploadCollectionName.current) {
                 uploadToSingleNewCollection(
                     pendingDesktopUploadCollectionName.current
@@ -402,11 +403,13 @@ export default function Upload(props: Props) {
         }
     };
 
-    const cancelPendingDesktopUploads = () => {
-        UploadManager.clearRemainingFiles();
-        ImportService.updatePendingUploads([]);
-        setProgressView(false);
-        router.reload();
+    const cancelUploads = async () => {
+        setUploadStage(UPLOAD_STAGES.CANCELLED);
+        await UploadManager.clearRemainingFiles();
+        if (isElectron()) {
+            ImportService.updatePendingUploads([]);
+        }
+        await props.syncWithRemote();
     };
 
     return (
@@ -445,8 +448,7 @@ export default function Upload(props: Props) {
                 retryFailed={retryFailed}
                 fileRejections={props.fileRejections}
                 uploadResult={uploadResult}
-                isPendingDesktopUpload={isPendingDesktopUpload.current}
-                cancelDesktopUploads={cancelPendingDesktopUploads}
+                cancelUploads={cancelUploads}
             />
         </>
     );

@@ -108,6 +108,7 @@ const englishConstants = {
         3: (fileCounter) =>
             `${fileCounter.finished} / ${fileCounter.total} files backed up`,
         4: 'backup complete',
+        5: 'cancelling remaining uploads',
     },
     UPLOADING_FILES: 'file upload',
     FILE_NOT_UPLOADED_LIST: 'the following files were not uploaded',
@@ -692,7 +693,7 @@ const englishConstants = {
     CHOOSE_UPLOAD_TYPE: 'Upload',
     UPLOAD_FILES: 'File Upload',
     UPLOAD_DIRS: 'Folder Upload',
-    CANCEL_UPLOADS: 'Cancel Uploads',
+    CANCEL_UPLOADS: 'cancel uploads',
 };
 
 export default englishConstants;

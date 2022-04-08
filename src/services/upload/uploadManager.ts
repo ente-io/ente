@@ -353,8 +353,9 @@ class UploadManager {
         await this.queueFilesForUpload(this.failedFiles);
     }
 
-    clearRemainingFiles() {
+    async clearRemainingFiles() {
         this.remainingFiles = [];
+        await this.init([]);
     }
 }
 

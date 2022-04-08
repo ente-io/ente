@@ -82,11 +82,11 @@ export function getFileNameSize(file: File | ElectronFile) {
 }
 
 export function areSameElectronFiles(
-    file: FileWithCollection,
-    fileWithCollection: FileWithCollection
+    firstFile: FileWithCollection,
+    secondFile: FileWithCollection
 ): boolean {
     return (
-        (file.file as ElectronFile).path ===
-        (fileWithCollection.file as ElectronFile).path
+        (firstFile.file as ElectronFile).path ===
+        (secondFile.file as ElectronFile).path
     );
 }
