@@ -8,23 +8,13 @@ export default function setupIpcComs(
     mainWindow: BrowserWindow
 ): void {
     ipcMain.handle('select-dir', async () => {
-        const dialogWindow = new BrowserWindow({
-            width: 800,
-            height: 600,
-            webPreferences: {
-                nodeIntegration: false,
-                contextIsolation: true,
-                sandbox: true,
-            },
-        });
-        const result = await dialog.showOpenDialog(dialogWindow, {
+        const result = await dialog.showOpenDialog({
             properties: ['openDirectory'],
         });
         const dir =
             result.filePaths &&
             result.filePaths.length > 0 &&
             result.filePaths[0];
-        dialogWindow.close();
         return dir;
     });
 
