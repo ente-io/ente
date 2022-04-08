@@ -7,7 +7,7 @@ export default function setupIpcComs(
     tray: Tray,
     mainWindow: BrowserWindow
 ): void {
-    ipcMain.on('select-dir', async (event) => {
+    ipcMain.handle('select-dir', async () => {
         const dialogWindow = new BrowserWindow({
             width: 800,
             height: 600,
@@ -25,7 +25,7 @@ export default function setupIpcComs(
             result.filePaths.length > 0 &&
             result.filePaths[0];
         dialogWindow.close();
-        event.returnValue = dir;
+        return dir;
     });
 
     ipcMain.on('update-tray', (event, args) => {

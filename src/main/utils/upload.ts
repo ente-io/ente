@@ -75,7 +75,7 @@ export const setToUploadFiles = (
     if (filePaths && filePaths.length > 0) {
         uploadStatusStore.set('filePaths', filePaths);
     } else {
-        uploadStatusStore.delete('filePaths');
+        uploadStatusStore.set('filePaths', []);
     }
     if (collectionName) {
         uploadStatusStore.set('collectionName', collectionName);

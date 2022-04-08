@@ -53,7 +53,7 @@ const saveFileToDisk = async (path: string, file: any) => {
 
 const selectRootDirectory = async () => {
     try {
-        return await ipcRenderer.sendSync('select-dir');
+        return await ipcRenderer.invoke('select-dir');
     } catch (e) {
         console.error(e);
         throw e;
