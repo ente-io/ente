@@ -46,7 +46,7 @@ const SectionInfo = styled.div`
 `;
 
 const SectionContent = styled.div`
-    padding-right: 30px;
+    padding-right: 35px;
 `;
 
 const NotUploadSectionHeader = styled.div`
@@ -57,11 +57,29 @@ const NotUploadSectionHeader = styled.div`
     margin: 0 20px;
 `;
 
-const ItemContainer = styled.li`
-    padding-left: 5px;
-    margin-bottom: 10px;
-    color: #ccc;
-    max-width: 366px;
+const InProgressItemContainer = styled.div`
+    display: inline-block;
+    & > span {
+        display: inline-block;
+    }
+    & > span:first-of-type {
+        position: relative;
+        top: 5px;
+        max-width: 287px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    & > .separator {
+        margin: 0 5px;
+    }
+`;
+
+const ResultItemContainer = styled.div`
+    position: relative;
+    top: 5px;
+    display: inline-block;
+    max-width: 334px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -96,9 +114,9 @@ const ResultSection = (props: ResultSectionProps) => {
                         )}
                         <FileList
                             fileList={fileList.map((fileID) => (
-                                <ItemContainer key={fileID}>
+                                <ResultItemContainer key={fileID}>
                                     {props.filenames.get(fileID)}
-                                </ItemContainer>
+                                </ResultItemContainer>
                             ))}
                         />
                     </SectionContent>
@@ -134,11 +152,11 @@ const InProgressSection = (props: InProgressProps) => {
                         )}
                         <FileList
                             fileList={fileList.map(({ fileID, progress }) => (
-                                <ItemContainer key={fileID}>
-                                    {`${props.filenames.get(
-                                        fileID
-                                    )} - ${progress}%`}
-                                </ItemContainer>
+                                <InProgressItemContainer key={fileID}>
+                                    <span>{props.filenames.get(fileID)}</span>
+                                    <span className="separator">{`-`}</span>
+                                    <span>{`${progress}%`}</span>
+                                </InProgressItemContainer>
                             ))}
                         />
                     </SectionContent>

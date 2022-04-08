@@ -12,17 +12,22 @@ export const Wrapper = styled.div`
     margin-bottom: 0px;
 `;
 
+const ItemLiWrapper = styled.li`
+    padding-left: 5px;
+    color: #ccc;
+`;
+
 export default function FileList(props: Iprops) {
     const Row = ({ index, style }) => (
-        <div style={style}>{props.fileList[index % props.fileList.length]}</div>
+        <ItemLiWrapper style={style}>{props.fileList[index]}</ItemLiWrapper>
     );
 
     return (
         <Wrapper>
             <List
-                height={Math.min(30 * props.fileList.length, 135)}
+                height={Math.min(35 * props.fileList.length, 160)}
                 width={'100%'}
-                itemSize={30}
+                itemSize={35}
                 itemCount={props.fileList.length}>
                 {Row}
             </List>
