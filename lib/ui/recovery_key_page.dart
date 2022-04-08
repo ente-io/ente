@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/ui/common/custom_color_scheme.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -23,12 +23,12 @@ class RecoveryKeyPage extends StatefulWidget {
 
   const RecoveryKeyPage(this.recoveryKey, this.doneText,
       {Key key,
-        this.showAppBar,
-        this.onDone,
-        this.isDismissible,
-        this.title,
-        this.text,
-        this.subText})
+      this.showAppBar,
+      this.onDone,
+      this.isDismissible,
+      this.title,
+      this.text,
+      this.subText})
       : super(key: key);
 
   @override
@@ -44,9 +44,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
   @override
   Widget build(BuildContext context) {
     final String recoveryKey = bip39.entropyToMnemonic(widget.recoveryKey);
-    if (recoveryKey
-        .split(' ')
-        .length != kMnemonicKeyWordCount) {
+    if (recoveryKey.split(' ').length != kMnemonicKeyWordCount) {
       throw AssertionError(
           'recovery code should have $kMnemonicKeyWordCount words');
     }
@@ -54,8 +52,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     return Scaffold(
       appBar: widget.showAppBar
           ? AppBar(
-        title: Text(""),
-      )
+              title: Text(""),
+            )
           : null,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
@@ -66,18 +64,12 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
           mainAxisSize: MainAxisSize.max,
           children: [
             Text(widget.title ?? "Recovery Key",
-                style: Theme
-                    .of(context)
-                    .textTheme
-                    .headline4),
+                style: Theme.of(context).textTheme.headline4),
             Padding(padding: EdgeInsets.all(12)),
             Text(
               widget.text ??
                   "If you forget your password, the only way you can recover your data is with this key.",
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .subtitle1,
+              style: Theme.of(context).textTheme.subtitle1,
             ),
             Padding(padding: EdgeInsets.only(top: 24)),
             DottedBorder(
@@ -92,14 +84,14 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                 //inner container
                 height: 200, //height of inner container
                 width:
-                double.infinity, //width to 100% match to parent container.
+                    double.infinity, //width to 100% match to parent container.
                 // ignore: prefer_const_literals_to_create_immutables
                 child: Column(
                   children: [
                     GestureDetector(
                       onTap: () async {
-                        await Clipboard.setData(ClipboardData(
-                            text: recoveryKey));
+                        await Clipboard.setData(
+                            ClipboardData(text: recoveryKey));
                         showToast("recovery key copied to clipboard");
                         setState(() {
                           _hasTriedToSave = true;
@@ -121,10 +113,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                         width: double.infinity,
                         child: Text(
                           recoveryKey,
-                          style: Theme
-                              .of(context)
-                              .textTheme
-                              .bodyText1,
+                          style: Theme.of(context).textTheme.bodyText1,
                         ),
                       ),
                     ),
@@ -135,10 +124,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                           child: Text(
                             widget.subText ??
                                 "we don’t store this key, please save this in a safe place",
-                            style: Theme
-                                .of(context)
-                                .textTheme
-                                .bodyText1,
+                            style: Theme.of(context).textTheme.bodyText1,
                           ),
                           padding: EdgeInsets.all(20)),
                     ),
@@ -168,10 +154,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     if (!_hasTriedToSave) {
       childrens.add(ElevatedButton(
         child: Text('Save Later'),
-        style: Theme
-            .of(context)
-            .colorScheme
-            .optionalActionButtonStyle,
+        style: Theme.of(context).colorScheme.optionalActionButtonStyle,
         onPressed: () async {
           await _saveKeys();
         },
@@ -181,10 +164,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
 
     childrens.add(ElevatedButton(
       child: Text('Save'),
-      style: Theme
-          .of(context)
-          .colorScheme
-          .primaryActionButtonStyle,
+      style: Theme.of(context).colorScheme.primaryActionButtonStyle,
       onPressed: () async {
         await _shareRecoveryKey(recoveryKey);
       },

@@ -9,6 +9,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/network.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/l10n/l10n.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -24,54 +25,14 @@ final lightThemeData = ThemeData(
   colorScheme: ColorScheme.light(primary: Colors.black),
   accentColor: Color.fromRGBO(45, 194, 98, 0.2),
   buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
-  outlinedButtonTheme: OutlinedButtonThemeData(
-    style: OutlinedButton.styleFrom(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
-      alignment: Alignment.center,
-      textStyle: TextStyle(
-        fontWeight: FontWeight.w600,
-        fontFamily: 'Inter-SemiBold',
-        fontSize: 18,
-      ),
-    ).copyWith(
-      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
-            return Colors.grey.shade500;
-          }
-          return Colors.black;
-        },
-      ),
-      foregroundColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
-            return Colors.white;
-          }
-          return Colors.white;
-        },
-      ),
-      alignment: Alignment.center,
-    ),
+  outlinedButtonTheme: buildOutlinedButtonThemeData(
+    bgDisabled: Colors.grey.shade500,
+    bgEnabled: Colors.black,
+    fgDisabled: Colors.white,
+    fgEnabled: Colors.white,
   ),
-  elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-    onPrimary: Colors.white,
-    primary: Colors.black,
-    alignment: Alignment.center,
-    textStyle: TextStyle(
-      fontWeight: FontWeight.w600,
-      fontFamily: 'Inter-SemiBold',
-      fontSize: 18,
-    ),
-    padding: EdgeInsets.symmetric(vertical: 14),
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(8)),
-    ),
-  )),
-
+  elevatedButtonTheme: buildElevatedButtonThemeData(
+      onPrimary: Colors.white, primary: Colors.black),
   toggleableActiveColor: Colors.red[400],
   scaffoldBackgroundColor: Colors.white,
   bottomAppBarColor: Color.fromRGBO(196, 196, 196, 1.0),
@@ -81,42 +42,7 @@ final lightThemeData = ThemeData(
       foregroundColor: Colors.black,
       iconTheme: IconThemeData(color: Colors.black)),
   //https://api.flutter.dev/flutter/material/TextTheme-class.html
-  textTheme: TextTheme().copyWith(
-      headline4: TextStyle(
-        color: Colors.black,
-        fontSize: 32,
-        fontWeight: FontWeight.w600,
-        fontFamily: 'Inter-SemiBold',
-      ),
-      headline5: TextStyle(
-        color: Colors.black,
-        fontSize: 24,
-        fontWeight: FontWeight.w600,
-        fontFamily: 'Inter-SemiBold',
-      ),
-      headline6: TextStyle(
-          color: Colors.black,
-          fontFamily: 'Inter-Medium',
-          fontSize: 18,
-          fontWeight: FontWeight.w600),
-      subtitle1: TextStyle(
-          fontFamily: 'Inter-Medium',
-          color: Colors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.w500), // medium body weight
-      bodyText1: TextStyle(
-          fontFamily: 'Inter-Medium',
-          color: Colors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.w400),
-      bodyText2: TextStyle(
-          fontFamily: 'Inter-Medium',
-          color: Colors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.w400),
-      caption: TextStyle(color: Colors.black.withOpacity(0.7), fontSize: 14),
-      overline: TextStyle(color: Colors.black.withOpacity(0.8), fontSize: 12)),
-
+  textTheme: _buildTextTheme(Colors.black),
   primaryTextTheme: TextTheme().copyWith(
       bodyText2: TextStyle(color: Colors.yellow),
       bodyText1: TextStyle(color: Colors.orange)),
@@ -147,18 +73,14 @@ final lightThemeData = ThemeData(
       width: 2,
     ),
     fillColor: MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.selected)) {
-        return Colors.black;
-      } else {
-        return Colors.white;
-      }
+      return states.contains(MaterialState.selected)
+          ? Colors.black
+          : Colors.white;
     }),
     checkColor: MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.selected)) {
-        return Colors.white;
-      } else {
-        return Colors.black;
-      }
+      return states.contains(MaterialState.selected)
+          ? Colors.white
+          : Colors.black;
     }),
   ),
 );
@@ -178,91 +100,15 @@ final darkThemeData = ThemeData(
     buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
   ),
   // primaryColor: Colors.red,
-  textTheme: TextTheme().copyWith(
-      headline4: TextStyle(
-        color: Colors.white,
-        fontSize: 32,
-        fontWeight: FontWeight.w600,
-        fontFamily: 'Inter-SemiBold',
-      ),
-      headline5: TextStyle(
-        color: Colors.white,
-        fontSize: 24,
-        fontWeight: FontWeight.w600,
-        fontFamily: 'Inter-SemiBold',
-      ),
-      headline6: TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontFamily: 'Inter-Medium',
-          fontWeight: FontWeight.w600),
-      subtitle1: TextStyle(
-          color: Colors.white,
-          fontFamily: 'Inter-Medium',
-          fontSize: 16,
-          fontWeight: FontWeight.w500),
-      bodyText1: TextStyle(
-          fontFamily: 'Inter-Medium',
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.w400),
-      caption: TextStyle(
-        color: Colors.white.withOpacity(0.6),
-        fontSize: 14,
-      ),
-      overline: TextStyle(
-        color: Colors.white.withOpacity(0.8),
-        fontSize: 12,
-      )),
+  textTheme: _buildTextTheme(Colors.white),
   toggleableActiveColor: Colors.green[400],
-  outlinedButtonTheme: OutlinedButtonThemeData(
-    style: OutlinedButton.styleFrom(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      alignment: Alignment.center,
-      padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
-      textStyle: TextStyle(
-        fontWeight: FontWeight.w600,
-        fontFamily: 'Inter-SemiBold',
-        fontSize: 18,
-      ),
-    ).copyWith(
-      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
-            return Colors.grey.shade500;
-          }
-          return Colors.white;
-        },
-      ),
-      foregroundColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
-            return Colors.white;
-          }
-          return Colors.black;
-        },
-      ),
-      alignment: Alignment.center,
-    ),
-  ),
-  elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-    onPrimary: Colors.black,
-    primary: Colors.white,
-    minimumSize: Size(88, 36),
-    alignment: Alignment.center,
-    textStyle: TextStyle(
-      fontWeight: FontWeight.w600,
-      fontFamily: 'Inter-SemiBold',
-      fontSize: 18,
-    ),
-    padding: EdgeInsets.symmetric(vertical: 14),
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(8)),
-    ),
-  )),
+  outlinedButtonTheme: buildOutlinedButtonThemeData(
+      bgDisabled: Colors.grey.shade500,
+      bgEnabled: Colors.white,
+      fgDisabled: Colors.white,
+      fgEnabled: Colors.black),
+  elevatedButtonTheme: buildElevatedButtonThemeData(
+      onPrimary: Colors.black, primary: Colors.white),
   scaffoldBackgroundColor: Colors.black,
   backgroundColor: Colors.black,
   appBarTheme: AppBarTheme().copyWith(
@@ -311,12 +157,44 @@ final darkThemeData = ThemeData(
   ),
 );
 
-// class AppColors {
-//   final green = const Color(0xFF58BB54);
-//   const AppColors();
-// }
-
-// const colors = AppColors();
+TextTheme _buildTextTheme(Color textColor) {
+  return TextTheme().copyWith(
+      headline4: TextStyle(
+        color: textColor,
+        fontSize: 32,
+        fontWeight: FontWeight.w600,
+        fontFamily: 'Inter-SemiBold',
+      ),
+      headline5: TextStyle(
+        color: textColor,
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+        fontFamily: 'Inter-SemiBold',
+      ),
+      headline6: TextStyle(
+          color: textColor,
+          fontSize: 18,
+          fontFamily: 'Inter-Medium',
+          fontWeight: FontWeight.w600),
+      subtitle1: TextStyle(
+          color: textColor,
+          fontFamily: 'Inter-Medium',
+          fontSize: 16,
+          fontWeight: FontWeight.w500),
+      bodyText1: TextStyle(
+          fontFamily: 'Inter-Medium',
+          color: textColor,
+          fontSize: 16,
+          fontWeight: FontWeight.w400),
+      caption: TextStyle(
+        color: textColor.withOpacity(0.6),
+        fontSize: 14,
+      ),
+      overline: TextStyle(
+        color: textColor.withOpacity(0.8),
+        fontSize: 12,
+      ));
+}
 
 class EnteApp extends StatefulWidget {
   static const _homeWidget = HomeWidget();
