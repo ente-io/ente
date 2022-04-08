@@ -127,7 +127,10 @@ export const updateTrash = async (
             setFiles(
                 preservePhotoswipeProps(
                     sortFiles([
-                        ...(files ?? []),
+                        ...(files ?? []).map((file) => ({
+                            ...file,
+                            isTrashed: false,
+                        })),
                         ...getTrashedFiles(updatedTrash),
                     ])
                 )

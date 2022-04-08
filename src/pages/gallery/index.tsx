@@ -51,7 +51,7 @@ import {
     sortFilesIntoCollections,
 } from 'utils/file';
 import SearchBar from 'components/Search';
-import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
+import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions/GalleryOptions';
 import CollectionSelector, {
     CollectionSelectorAttributes,
 } from 'components/pages/gallery/CollectionSelector';

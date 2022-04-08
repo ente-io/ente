@@ -12,7 +12,7 @@ import {
     isOnFreePlan,
     isSubscriptionCancelled,
     isSubscribed,
-    convertToHumanReadable,
+    convertBytesToHumanReadable,
 } from 'utils/billing';
 
 import isElectron from 'is-electron';
@@ -65,7 +65,7 @@ export default function Sidebar(props: Props) {
             }
             const userDetails = await getUserDetails();
             setUser({ ...user, email: userDetails.email });
-            SetUsage(convertToHumanReadable(userDetails.usage));
+            SetUsage(convertBytesToHumanReadable(userDetails.usage));
             setSubscription(userDetails.subscription);
             setData(LS_KEYS.USER, {
                 ...getData(LS_KEYS.USER),
@@ -207,7 +207,9 @@ export default function Sidebar(props: Props) {
                         {usage ? (
                             constants.USAGE_INFO(
                                 usage,
-                                convertToHumanReadable(subscription?.storage)
+                                convertBytesToHumanReadable(
+                                    subscription?.storage
+                                )
                             )
                         ) : (
                             <div style={{ textAlign: 'center' }}>
@@ -285,6 +287,13 @@ export default function Sidebar(props: Props) {
                         router.push(PAGES.CHANGE_EMAIL);
                     }}>
                     {constants.UPDATE_EMAIL}
+                </LinkButton>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => {
+                        router.push(PAGES.DEDUPLICATE);
+                    }}>
+                    {constants.DEDUPLICATE_FILES}
                 </LinkButton>
                 <Divider />
                 <>

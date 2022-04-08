@@ -458,7 +458,6 @@ const GlobalStyles = createGlobalStyle`
     }
     .tooltip-inner{
         background-color: #282828;
-        margin:6px 0;
     }
     .react-datepicker__input-container > input {
         width:100%;
