@@ -27,12 +27,12 @@ class EmailEntryPage extends StatefulWidget {
   _EmailEntryPageState createState() => _EmailEntryPageState();
 }
 
-class _EmailEntryPageState extends State<EmailEntryPage> {
+class _EmailEntryPageState extends State<EmailEntryPage> with ChangeNotifier {
   static const kPasswordStrengthThreshold = 0.4;
 
   final _config = Configuration.instance;
-  final _passwordController1 = TextEditingController(),
-      _passwordController2 = TextEditingController();
+  final _passwordController1 = TextEditingController();
+  final _passwordController2 = TextEditingController();
 
   String _email;
   String _password = null;
@@ -76,70 +76,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom != 0;
-
-    // Widget fab() {
-    //   if (isKeypadOpen) {
-    //     return Container(
-    //       decoration: BoxDecoration(boxShadow: [
-    //         BoxShadow(
-    //           color: Theme.of(context).backgroundColor,
-    //           spreadRadius: 200,
-    //           blurRadius: 100,
-    //           offset: Offset(0, 230),
-    //         )
-    //       ]),
-    //       width: double.infinity,
-    //       child: Row(
-    //         mainAxisAlignment: MainAxisAlignment.end,
-    //         children: [
-    //           FloatingActionButton(
-    //               //mini: true,
-    //               backgroundColor:
-    //                   Theme.of(context).colorScheme.fabBackgroundColor,
-    //               foregroundColor:
-    //                   Theme.of(context).colorScheme.fabTextOrIconColor,
-    //               child: Transform.rotate(
-    //                 angle: _isFormValid() ? 0 : math.pi / 2,
-    //                 child: Icon(
-    //                   Icons.chevron_right,
-    //                   size: 36,
-    //                 ),
-    //               ),
-    //               onPressed: _isFormValid()
-    //                   ? () {
-    //                       _config
-    //                           .setVolatilePassword(_passwordController1.text);
-    //                       _config.setEmail(_email);
-    //                       UserService.instance.getOtt(context, _email);
-    //                     }
-    //                   : () {
-    //                       FocusScope.of(context).unfocus();
-    //                     } //keypad down here
-    //               ),
-    //         ],
-    //       ),
-    //     );
-    //   } else {
-    //     return Container(
-    //       width: double.infinity,
-    //       height: 56,
-    //       padding: EdgeInsets.symmetric(horizontal: 20),
-    //       child: OutlinedButton(
-    //         //style: Theme.of(context).elevatedButtonTheme.style,
-    //         onPressed: _isFormValid()
-    //             ? () {
-    //                 _config.setVolatilePassword(_passwordController1.text);
-    //                 _config.setEmail(_email);
-    //                 UserService.instance.getOtt(context, _email);
-    //               }
-    //             : null,
-    //         child: Text(
-    //           'Create Account',
-    //         ),
-    //       ),
-    //     );
-    //   }
-    // }
 
     FloatingActionButtonLocation fabLocation() {
       if (isKeypadOpen) {
@@ -292,6 +228,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     ),
                     focusNode: _password1FocusNode,
                     onChanged: (password) {
+                      notifyListeners();
                       setState(() {
                         _passwordInInputBox = password;
                         validatePassword(password);
@@ -359,14 +296,16 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         ),
                         focusNode: _password2FocusNode,
                         onChanged: (cnfPassword) {
+                          notifyListeners();
                           setState(() {
-                            if (_password != null) {
+                            if (_password != null || _password != '') {
                               if (_password == cnfPassword) {
                                 _cnfPasswordInputFieldColor =
                                     Color.fromRGBO(45, 194, 98, 0.2);
                                 _passwordsMatch = true;
                               } else {
                                 _cnfPasswordInputFieldColor = null;
+                                _passwordsMatch = false;
                               }
                             }
                           });
@@ -383,15 +322,13 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       ),
                     ),
                     Visibility(
-                      visible:
-                          (!_passwordIsValid && (_passwordInInputBox != '')),
+                      visible: (!_passwordIsValid &&
+                          (_passwordInInputBox != '') &&
+                          _password1InFocus),
                       child: Positioned(
                           bottom: -48,
                           child: Row(
                             children: [
-                              // SizedBox(
-                              //   width: 20, //hardcoded
-                              // ),
                               SizedBox(
                                 width: MediaQuery.of(context).size.width,
                                 child: Padding(
@@ -412,7 +349,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                           .dialogTheme
                                           .backgroundColor,
                                     ),
-                                    //width: MediaQuery.of(context).size.width,
                                     width: double.infinity,
                                     child: Column(
                                         crossAxisAlignment:
