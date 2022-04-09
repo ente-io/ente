@@ -18,6 +18,7 @@ import { Collection } from 'types/collection';
 import { CollectionType } from 'constants/collection';
 import { getAlbumSiteHost } from 'constants/pages';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
+import { IsArchived } from 'utils/magicMetadata';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -161,3 +162,7 @@ export const shareExpiryOptions = [
         value: () => getUnixTimeInMicroSecondsWithDelta({ years: 1 }),
     },
 ];
+
+export const getArchivedCollections = (collections: Collection[]) => {
+    return collections.filter(IsArchived).map((collection) => collection.id);
+};

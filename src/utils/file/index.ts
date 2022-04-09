@@ -2,9 +2,9 @@ import { SelectedState } from 'types/gallery';
 import {
     EnteFile,
     fileAttribute,
-    MagicMetadataProps,
+    FileMagicMetadataProps,
     NEW_MAGIC_METADATA,
-    PublicMagicMetadataProps,
+    FilePublicMagicMetadataProps,
 } from 'types/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getFileType } from 'services/typeDetectionService';
@@ -20,11 +20,11 @@ import {
     TYPE_HEIC,
     TYPE_HEIF,
     FILE_TYPE,
-    VISIBILITY_STATE,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
+import { VISIBILITY_STATE } from 'types/magicMetadata';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -369,23 +369,9 @@ export async function convertForPreview(
     fileBlob = await convertIfHEIC(file.metadata.title, fileBlob);
     return [fileBlob];
 }
-
-export function fileIsArchived(file: EnteFile) {
-    if (
-        !file ||
-        !file.magicMetadata ||
-        !file.magicMetadata.data ||
-        typeof file.magicMetadata.data === 'string' ||
-        typeof file.magicMetadata.data.visibility === 'undefined'
-    ) {
-        return false;
-    }
-    return file.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
-}
-
 export async function updateMagicMetadataProps(
     file: EnteFile,
-    magicMetadataUpdates: MagicMetadataProps
+    magicMetadataUpdates: FileMagicMetadataProps
 ) {
     const worker = await new CryptoWorker();
 
@@ -397,12 +383,12 @@ export async function updateMagicMetadataProps(
             file.magicMetadata.data,
             file.magicMetadata.header,
             file.key
-        )) as MagicMetadataProps;
+        )) as FileMagicMetadataProps;
     }
     if (magicMetadataUpdates) {
         // copies the existing magic metadata properties of the files and updates the visibility value
         // The expected behaviour while updating magic metadata is to let the existing property as it is and update/add the property you want
-        const magicMetadataProps: MagicMetadataProps = {
+        const magicMetadataProps: FileMagicMetadataProps = {
             ...file.magicMetadata.data,
             ...magicMetadataUpdates,
         };
@@ -421,7 +407,7 @@ export async function updateMagicMetadataProps(
 }
 export async function updatePublicMagicMetadataProps(
     file: EnteFile,
-    publicMetadataUpdates: PublicMagicMetadataProps
+    publicMetadataUpdates: FilePublicMagicMetadataProps
 ) {
     const worker = await new CryptoWorker();
 
@@ -433,7 +419,7 @@ export async function updatePublicMagicMetadataProps(
             file.pubMagicMetadata.data,
             file.pubMagicMetadata.header,
             file.key
-        )) as PublicMagicMetadataProps;
+        )) as FilePublicMagicMetadataProps;
     }
 
     if (publicMetadataUpdates) {
@@ -462,7 +448,7 @@ export async function changeFilesVisibility(
     const selectedFiles = getSelectedFiles(selected, files);
     const updatedFiles: EnteFile[] = [];
     for (const file of selectedFiles) {
-        const updatedMagicMetadataProps: MagicMetadataProps = {
+        const updatedMagicMetadataProps: FileMagicMetadataProps = {
             visibility,
         };
 
@@ -477,7 +463,7 @@ export async function changeFileCreationTime(
     file: EnteFile,
     editedTime: number
 ) {
-    const updatedPublicMagicMetadataProps: PublicMagicMetadataProps = {
+    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedTime,
     };
 
@@ -488,7 +474,7 @@ export async function changeFileCreationTime(
 }
 
 export async function changeFileName(file: EnteFile, editedName: string) {
-    const updatedPublicMagicMetadataProps: PublicMagicMetadataProps = {
+    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedName,
     };
 
