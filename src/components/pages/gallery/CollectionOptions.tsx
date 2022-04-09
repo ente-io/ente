@@ -8,6 +8,7 @@ import { SetCollectionNamerAttributes } from './CollectionNamer';
 import LinkButton, { ButtonVariant, LinkButtonProps } from './LinkButton';
 import { sleep } from 'utils/common';
 import { Collection } from 'types/collection';
+import { IsArchived } from 'utils/magicMetadata';
 
 interface CollectionOptionsProps {
     syncWithRemote: () => Promise<void>;
@@ -112,6 +113,15 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         });
     };
 
+    const archivingNotAvailableOnWeb = () => {
+        props.setDialogMessage({
+            title: constants.CONFIRM_ARCHIVE_COLLECTION,
+            content: constants.ARCHIVE_COLLECTION_MESSAGE(),
+            staticBackdrop: true,
+            close: {},
+        });
+    };
+
     const downloadCollectionHelper = async () => {
         props.startLoading();
         await downloadCollection(
@@ -139,6 +149,18 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     <MenuItem>
                         <MenuLink onClick={confirmDownloadCollection}>
                             {constants.DOWNLOAD}
+                        </MenuLink>
+                    </MenuItem>
+                    <MenuItem>
+                        <MenuLink onClick={archivingNotAvailableOnWeb}>
+                            {IsArchived(
+                                getSelectedCollection(
+                                    props.selectedCollectionID,
+                                    props.collections
+                                )
+                            )
+                                ? constants.ARCHIVE
+                                : constants.UNARCHIVE}
                         </MenuLink>
                     </MenuItem>
                     <MenuItem>
