@@ -7,6 +7,8 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/ui/recovery_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 
+import 'common/fabCreateAccount.dart';
+
 class PasswordReentryPage extends StatefulWidget {
   PasswordReentryPage({Key key}) : super(key: key);
 
@@ -32,137 +34,202 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom != 0;
+
+    FloatingActionButtonLocation fabLocation() {
+      if (isKeypadOpen) {
+        return null;
+      } else {
+        return FloatingActionButtonLocation.centerFloat;
+      }
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "password",
+        appBar: AppBar(
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            color: Theme.of(context).iconTheme.color,
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
         ),
-      ),
-      body: _getBody(),
-    );
+        body: _getBody(),
+        floatingActionButton: FABCreateAccount(
+          isKeypadOpen: isKeypadOpen,
+          isFormValid: _passwordController.text.isNotEmpty,
+          buttonText: 'Log in',
+          onPressedFunction: () async {
+            final dialog = createProgressDialog(context, "please wait...");
+            await dialog.show();
+            try {
+              await Configuration.instance.decryptAndSaveSecrets(
+                  _passwordController.text,
+                  Configuration.instance.getKeyAttributes());
+            } catch (e) {
+              Logger("PRP").warning(e);
+              await dialog.hide();
+              showErrorDialog(
+                  context, "incorrect password", "please try again");
+              return;
+            }
+            await dialog.hide();
+            Bus.instance.fire(SubscriptionPurchasedEvent());
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          },
+        ),
+        floatingActionButtonLocation: fabLocation());
   }
 
   Widget _getBody() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.max,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
-          child: TextFormField(
-            autofillHints: [AutofillHints.password],
-            decoration: InputDecoration(
-              hintText: "enter your password",
-              contentPadding: EdgeInsets.all(20),
-              suffixIcon: _passwordInFocus
-                  ? IconButton(
-                      icon: Icon(
-                        _passwordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                        color: Colors.white.withOpacity(0.5),
-                        size: 20,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _passwordVisible = !_passwordVisible;
-                        });
+        Expanded(
+          child: ListView(
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                child: Text('Welcome back!',
+                    style: Theme.of(context).textTheme.headline4),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                child: TextFormField(
+                  autofillHints: [AutofillHints.password],
+                  decoration: InputDecoration(
+                    hintText: "enter your password",
+                    filled: true,
+                    contentPadding: EdgeInsets.all(20),
+                    border: UnderlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(6)),
+                    suffixIcon: _passwordInFocus
+                        ? IconButton(
+                            icon: Icon(
+                              _passwordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: Theme.of(context).iconTheme.color,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _passwordVisible = !_passwordVisible;
+                              });
+                            },
+                          )
+                        : null,
+                  ),
+                  style: TextStyle(
+                    fontSize: 14,
+                  ),
+                  controller: _passwordController,
+                  autofocus: true,
+                  autocorrect: false,
+                  obscureText: !_passwordVisible,
+                  keyboardType: TextInputType.visiblePassword,
+                  focusNode: _passwordFocusNode,
+                  onChanged: (_) {
+                    setState(() {});
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                child: Divider(
+                  thickness: 1,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) {
+                              return RecoveryPage();
+                            },
+                          ),
+                        );
                       },
-                    )
-                  : null,
-            ),
-            style: TextStyle(
-              fontSize: 14,
-            ),
-            controller: _passwordController,
-            autofocus: false,
-            autocorrect: false,
-            obscureText: !_passwordVisible,
-            keyboardType: TextInputType.visiblePassword,
-            focusNode: _passwordFocusNode,
-            onChanged: (_) {
-              setState(() {});
-            },
-          ),
-        ),
-        Padding(padding: EdgeInsets.all(12)),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 60),
-          width: double.infinity,
-          height: 64,
-          child: OutlinedButton(
-            child: Text("log in"),
-            onPressed: _passwordController.text.isNotEmpty
-                ? () async {
-                    final dialog =
-                        createProgressDialog(context, "please wait...");
-                    await dialog.show();
-                    try {
-                      await Configuration.instance.decryptAndSaveSecrets(
-                          _passwordController.text,
-                          Configuration.instance.getKeyAttributes());
-                    } catch (e) {
-                      Logger("PRP").warning(e);
-                      await dialog.hide();
-                      showErrorDialog(
-                          context, "incorrect password", "please try again");
-                      return;
-                    }
-                    await dialog.hide();
-                    Bus.instance.fire(SubscriptionPurchasedEvent());
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  }
-                : null,
-          ),
-        ),
-        Padding(padding: EdgeInsets.all(30)),
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return RecoveryPage();
-                },
-              ),
-            );
-          },
-          child: Container(
-            padding: EdgeInsets.all(10),
-            child: Center(
-              child: Text(
-                "forgot password?",
-                style: TextStyle(
-                  decoration: TextDecoration.underline,
-                  fontSize: 12,
+                      child: Container(
+                        child: Center(
+                          child: Text("forgot password",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .subtitle1
+                                  .copyWith(
+                                      fontSize: 14,
+                                      decoration: TextDecoration.underline)),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () async {
+                        final dialog =
+                            createProgressDialog(context, "please wait...");
+                        await dialog.show();
+                        await Configuration.instance.logout();
+                        await dialog.hide();
+                        Navigator.of(context)
+                            .popUntil((route) => route.isFirst);
+                      },
+                      child: Container(
+                        child: Center(
+                          child: Text("change email",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .subtitle1
+                                  .copyWith(
+                                      fontSize: 14,
+                                      decoration: TextDecoration.underline)),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ),
+              )
+            ],
           ),
         ),
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () async {
-            final dialog = createProgressDialog(context, "please wait...");
-            await dialog.show();
-            await Configuration.instance.logout();
-            await dialog.hide();
-            Navigator.of(context).popUntil((route) => route.isFirst);
-          },
-          child: Container(
-            padding: EdgeInsets.all(16),
-            child: Center(
-              child: Text(
-                "change email?",
-                style: TextStyle(
-                  decoration: TextDecoration.underline,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
-        ),
+        // Padding(padding: EdgeInsets.all(12)),
+        // Container(
+        //   padding: const EdgeInsets.symmetric(horizontal: 60),
+        //   width: double.infinity,
+        //   height: 64,
+        //   child: OutlinedButton(
+        //     child: Text("log in"),
+        //     onPressed: _passwordController.text.isNotEmpty
+        //         ? () async {
+        //             final dialog =
+        //                 createProgressDialog(context, "please wait...");
+        //             await dialog.show();
+        //             try {
+        //               await Configuration.instance.decryptAndSaveSecrets(
+        //                   _passwordController.text,
+        //                   Configuration.instance.getKeyAttributes());
+        //             } catch (e) {
+        //               Logger("PRP").warning(e);
+        //               await dialog.hide();
+        //               showErrorDialog(
+        //                   context, "incorrect password", "please try again");
+        //               return;
+        //             }
+        //             await dialog.hide();
+        //             Bus.instance.fire(SubscriptionPurchasedEvent());
+        //             Navigator.of(context).popUntil((route) => route.isFirst);
+        //           }
+        //         : null,
+        //   ),
+        // ),
+        // Padding(padding: EdgeInsets.all(30)),
       ],
     );
   }

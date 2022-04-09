@@ -27,7 +27,7 @@ class EmailEntryPage extends StatefulWidget {
   _EmailEntryPageState createState() => _EmailEntryPageState();
 }
 
-class _EmailEntryPageState extends State<EmailEntryPage> with ChangeNotifier {
+class _EmailEntryPageState extends State<EmailEntryPage> {
   static const kPasswordStrengthThreshold = 0.4;
 
   final _config = Configuration.instance;
@@ -117,7 +117,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> with ChangeNotifier {
           onPressedFunction: () {
             _config.setVolatilePassword(_passwordController1.text);
             _config.setEmail(_email);
-            UserService.instance.getOtt(context, _email);
+            UserService.instance
+                .getOtt(context, _email, isCreateAccountScreen: true);
           },
         ),
         floatingActionButtonLocation: fabLocation()
@@ -228,7 +229,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> with ChangeNotifier {
                     ),
                     focusNode: _password1FocusNode,
                     onChanged: (password) {
-                      notifyListeners();
                       setState(() {
                         _passwordInInputBox = password;
                         validatePassword(password);
@@ -296,7 +296,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> with ChangeNotifier {
                         ),
                         focusNode: _password2FocusNode,
                         onChanged: (cnfPassword) {
-                          notifyListeners();
                           setState(() {
                             if (_password != null || _password != '') {
                               if (_password == cnfPassword) {

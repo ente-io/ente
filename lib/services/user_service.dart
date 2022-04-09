@@ -43,6 +43,7 @@ class UserService {
     BuildContext context,
     String email, {
     bool isChangeEmail = false,
+    bool isCreateAccountScreen,
   }) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
@@ -59,10 +60,9 @@ class UserService {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return OTTVerificationPage(
-                email,
-                isChangeEmail: isChangeEmail,
-              );
+              return OTTVerificationPage(email,
+                  isChangeEmail: isChangeEmail,
+                  isCreateAccountScreen: isCreateAccountScreen);
             },
           ),
         );

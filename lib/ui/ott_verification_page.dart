@@ -9,10 +9,12 @@ import 'package:step_progress_indicator/step_progress_indicator.dart';
 class OTTVerificationPage extends StatefulWidget {
   final String email;
   final bool isChangeEmail;
+  final bool isCreateAccountScreen;
 
   OTTVerificationPage(
     this.email, {
     this.isChangeEmail = false,
+    this.isCreateAccountScreen,
     Key key,
   }) : super(key: key);
 
@@ -45,18 +47,20 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             Navigator.of(context).pop();
           },
         ),
-        title: Hero(
-          tag: "sign_up",
-          child: Material(
-              type: MaterialType.transparency,
-              child: StepProgressIndicator(
-                totalSteps: 4,
-                currentStep: 1,
-                selectedColor: Theme.of(context).buttonColor,
-                roundedEdges: Radius.circular(10),
-                unselectedColor: Theme.of(context).bottomAppBarColor,
-              )),
-        ),
+        title: widget.isCreateAccountScreen
+            ? Hero(
+                tag: "sign_up",
+                child: Material(
+                    type: MaterialType.transparency,
+                    child: StepProgressIndicator(
+                      totalSteps: 4,
+                      currentStep: 1,
+                      selectedColor: Theme.of(context).buttonColor,
+                      roundedEdges: Radius.circular(10),
+                      unselectedColor: Theme.of(context).bottomAppBarColor,
+                    )),
+              )
+            : null,
       ),
       body: _getBody(),
       floatingActionButton: FABCreateAccount(
@@ -179,7 +183,8 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                   TextButton(
                     onPressed: () {
                       //Navigator.of(context).pop();
-                      UserService.instance.getOtt(context, widget.email);
+                      UserService.instance.getOtt(context, widget.email,
+                          isCreateAccountScreen: widget.isCreateAccountScreen);
                     },
                     child: Text("resend email",
                         style: Theme.of(context).textTheme.subtitle1.copyWith(
