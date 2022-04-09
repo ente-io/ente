@@ -8,6 +8,7 @@ import {
     updatePendingUploadsFilePaths,
     getElectronFilesFromGoogleZip,
 } from './utils/upload';
+import { logError } from './utils/logging';
 
 const { ipcRenderer } = electron;
 
@@ -56,8 +57,7 @@ const selectRootDirectory = async () => {
     try {
         return await ipcRenderer.invoke('select-dir');
     } catch (e) {
-        console.error(e);
-        throw e;
+        logError(e, 'error while selecting root directory');
     }
 };
 
@@ -115,8 +115,7 @@ const showUploadFilesDialog = async () => {
         const files = await Promise.all(filePaths.map(getElectronFile));
         return files;
     } catch (e) {
-        console.error(e);
-        throw e;
+        logError(e, 'error while selecting files');
     }
 };
 
@@ -128,8 +127,7 @@ const showUploadDirsDialog = async () => {
         const files = await Promise.all(filePaths.map(getElectronFile));
         return files;
     } catch (e) {
-        console.error(e);
-        throw e;
+        logError(e, 'error while selecting folders');
     }
 };
 
@@ -144,8 +142,7 @@ const showUploadZipDialog = async () => {
         const files = filesList.flat();
         return files;
     } catch (e) {
-        console.error(e);
-        throw e;
+        logError(e, 'error while selecting zips');
     }
 };
 

@@ -8,7 +8,13 @@ export interface ElectronFile {
     arrayBuffer: () => Promise<Uint8Array>;
 }
 
-export interface StoreType {
+export interface UploadStoreType {
     filePaths: string[];
     collectionName: string;
+}
+
+export interface KeysStoreType {
+    AnonymizeUserID: {
+        id: string;
+    };
 }

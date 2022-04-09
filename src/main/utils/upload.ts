@@ -115,7 +115,7 @@ const getZipFileStream = async (
     return readableStream;
 };
 
-async function getElectronFileWithZip(
+async function getZipEntryasElectronFile(
     zip: StreamZip.StreamZipAsync,
     entry: StreamZip.ZipEntry
 ): Promise<ElectronFile> {
@@ -194,13 +194,6 @@ export const updatePendingUploadsFilePaths = (filePaths: string[]) => {
     uploadStatusStore.set('filePaths', filePaths);
 };
 
-const getValidFilePaths = async (filePaths: string[]) => {
-    return filePaths?.filter(
-        async (filePath) =>
-            await fs.stat(filePath).then((stat) => stat.isFile())
-    );
-};
-
 export const getElectronFilesFromGoogleZip = async (filePath: string) => {
     const zip = new StreamZip.async({
         file: filePath,
@@ -211,7 +204,7 @@ export const getElectronFilesFromGoogleZip = async (filePath: string) => {
 
     for (const entry of Object.values(entries)) {
         if (entry.name.startsWith(GOOGLE_PHOTOS_DIR)) {
-            files.push(await getElectronFileWithZip(zip, entry));
+            files.push(await getZipEntryasElectronFile(zip, entry));
         }
     }
 
