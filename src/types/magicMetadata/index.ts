@@ -16,7 +16,7 @@ export enum VISIBILITY_STATE {
 }
 
 export const NEW_MAGIC_METADATA: MagicMetadataCore = {
-    version: 0,
+    version: 1,
     data: {},
     header: null,
     count: 0,
