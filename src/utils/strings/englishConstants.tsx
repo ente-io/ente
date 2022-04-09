@@ -380,13 +380,6 @@ const englishConstants = {
             <p>all files will be queued for download sequentially</p>
         </>
     ),
-    CONFIRM_ARCHIVE_COLLECTION: 'archive album',
-    ARCHIVE_COLLECTION_MESSAGE: () => (
-        <>
-            <p>archiving albums is not supported on web currently</p>
-            <p>please use the mobile app to archive albums</p>
-        </>
-    ),
     ARCHIVED_ALBUM: 'archived album',
     DOWNLOAD_COLLECTION_FAILED: 'album downloading failed, please try again',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',

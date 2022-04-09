@@ -130,15 +130,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         });
     };
 
-    const archivingNotAvailableOnWeb = () => {
-        props.setDialogMessage({
-            title: constants.CONFIRM_ARCHIVE_COLLECTION,
-            content: constants.ARCHIVE_COLLECTION_MESSAGE(),
-            staticBackdrop: true,
-            close: {},
-        });
-    };
-
     const downloadCollectionHelper = async () => {
         props.startLoading();
         await downloadCollection(
