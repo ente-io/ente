@@ -10,7 +10,7 @@ import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
     getLocalFiles,
     syncFiles,
-    updateMagicMetadata,
+    updateFileMagicMetadata,
     trashFiles,
     deleteFromTrash,
 } from 'services/fileService';
@@ -395,7 +395,7 @@ export default function Gallery() {
                 selected,
                 visibility
             );
-            await updateMagicMetadata(updatedFiles);
+            await updateFileMagicMetadata(updatedFiles);
             clearSelection();
         } catch (e) {
             logError(e, 'change file visibility failed');

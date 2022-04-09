@@ -13,9 +13,10 @@ import {
     sortFiles,
 } from 'utils/file';
 import CryptoWorker from 'utils/crypto';
-import { EnteFile, TrashRequest, UpdateMagicMetadataRequest } from 'types/file';
+import { EnteFile, TrashRequest } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { MAX_TRASH_BATCH_SIZE } from 'constants/file';
+import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -203,12 +204,12 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
     }
 };
 
-export const updateMagicMetadata = async (files: EnteFile[]) => {
+export const updateFileMagicMetadata = async (files: EnteFile[]) => {
     const token = getToken();
     if (!token) {
         return;
     }
-    const reqBody: UpdateMagicMetadataRequest = { metadataList: [] };
+    const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
     const worker = await new CryptoWorker();
     for (const file of files) {
         const { file: encryptedMagicMetadata }: EncryptionResult =
@@ -237,12 +238,12 @@ export const updateMagicMetadata = async (files: EnteFile[]) => {
     );
 };
 
-export const updatePublicMagicMetadata = async (files: EnteFile[]) => {
+export const updateFilePublicMagicMetadata = async (files: EnteFile[]) => {
     const token = getToken();
     if (!token) {
         return;
     }
-    const reqBody: UpdateMagicMetadataRequest = { metadataList: [] };
+    const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
     const worker = await new CryptoWorker();
     for (const file of files) {
         const { file: encryptedPubMagicMetadata }: EncryptionResult =

@@ -3,7 +3,6 @@ import {
     EnteFile,
     fileAttribute,
     FileMagicMetadataProps,
-    NEW_MAGIC_METADATA,
     FilePublicMagicMetadataProps,
 } from 'types/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
@@ -25,6 +24,7 @@ import PublicCollectionDownloadManager from 'services/publicCollectionDownloadMa
 import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
+import { updateMagicMetadataProps } from 'utils/magicMetadata';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -369,76 +369,6 @@ export async function convertForPreview(
     fileBlob = await convertIfHEIC(file.metadata.title, fileBlob);
     return [fileBlob];
 }
-export async function updateMagicMetadataProps(
-    file: EnteFile,
-    magicMetadataUpdates: FileMagicMetadataProps
-) {
-    const worker = await new CryptoWorker();
-
-    if (!file.magicMetadata) {
-        file.magicMetadata = NEW_MAGIC_METADATA;
-    }
-    if (typeof file.magicMetadata.data === 'string') {
-        file.magicMetadata.data = (await worker.decryptMetadata(
-            file.magicMetadata.data,
-            file.magicMetadata.header,
-            file.key
-        )) as FileMagicMetadataProps;
-    }
-    if (magicMetadataUpdates) {
-        // copies the existing magic metadata properties of the files and updates the visibility value
-        // The expected behaviour while updating magic metadata is to let the existing property as it is and update/add the property you want
-        const magicMetadataProps: FileMagicMetadataProps = {
-            ...file.magicMetadata.data,
-            ...magicMetadataUpdates,
-        };
-
-        return {
-            ...file,
-            magicMetadata: {
-                ...file.magicMetadata,
-                data: magicMetadataProps,
-                count: Object.keys(file.magicMetadata.data).length,
-            },
-        };
-    } else {
-        return file;
-    }
-}
-export async function updatePublicMagicMetadataProps(
-    file: EnteFile,
-    publicMetadataUpdates: FilePublicMagicMetadataProps
-) {
-    const worker = await new CryptoWorker();
-
-    if (!file.pubMagicMetadata) {
-        file.pubMagicMetadata = NEW_MAGIC_METADATA;
-    }
-    if (typeof file.pubMagicMetadata.data === 'string') {
-        file.pubMagicMetadata.data = (await worker.decryptMetadata(
-            file.pubMagicMetadata.data,
-            file.pubMagicMetadata.header,
-            file.key
-        )) as FilePublicMagicMetadataProps;
-    }
-
-    if (publicMetadataUpdates) {
-        const publicMetadataProps = {
-            ...file.pubMagicMetadata.data,
-            ...publicMetadataUpdates,
-        };
-        return {
-            ...file,
-            pubMagicMetadata: {
-                ...file.pubMagicMetadata,
-                data: publicMetadataProps,
-                count: Object.keys(file.pubMagicMetadata.data).length,
-            },
-        };
-    } else {
-        return file;
-    }
-}
 
 export async function changeFilesVisibility(
     files: EnteFile[],
@@ -452,9 +382,14 @@ export async function changeFilesVisibility(
             visibility,
         };
 
-        updatedFiles.push(
-            await updateMagicMetadataProps(file, updatedMagicMetadataProps)
-        );
+        updatedFiles.push({
+            ...file,
+            magicMetadata: await updateMagicMetadataProps(
+                file.magicMetadata,
+                file.key,
+                updatedMagicMetadataProps
+            ),
+        });
     }
     return updatedFiles;
 }
@@ -467,10 +402,14 @@ export async function changeFileCreationTime(
         editedTime,
     };
 
-    return await updatePublicMagicMetadataProps(
-        file,
-        updatedPublicMagicMetadataProps
-    );
+    return {
+        ...file,
+        publicMagicMetadata: await updateMagicMetadataProps(
+            file.pubMagicMetadata,
+            file.key,
+            updatedPublicMagicMetadataProps
+        ),
+    } as EnteFile;
 }
 
 export async function changeFileName(file: EnteFile, editedName: string) {
@@ -478,10 +417,14 @@ export async function changeFileName(file: EnteFile, editedName: string) {
         editedName,
     };
 
-    return await updatePublicMagicMetadataProps(
-        file,
-        updatedPublicMagicMetadataProps
-    );
+    return {
+        ...file,
+        publicMagicMetadata: await updateMagicMetadataProps(
+            file.pubMagicMetadata,
+            file.key,
+            updatedPublicMagicMetadataProps
+        ),
+    } as EnteFile;
 }
 
 export function isSharedFile(file: EnteFile) {

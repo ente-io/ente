@@ -6,10 +6,6 @@ export interface fileAttribute {
     objectKey?: string;
     decryptionHeader: string;
 }
-export interface EncryptedMagicMetadataCore
-    extends Omit<MagicMetadataCore, 'data'> {
-    data: string;
-}
 
 export interface FileMagicMetadataProps {
     visibility?: VISIBILITY_STATE;
@@ -52,22 +48,6 @@ export interface EnteFile {
     dataIndex: number;
     updationTime: number;
 }
-
-export interface UpdateMagicMetadataRequest {
-    metadataList: UpdateMagicMetadata[];
-}
-
-export interface UpdateMagicMetadata {
-    id: number;
-    magicMetadata: EncryptedMagicMetadataCore;
-}
-
-export const NEW_MAGIC_METADATA: MagicMetadataCore = {
-    version: 0,
-    data: {},
-    header: null,
-    count: 0,
-};
 
 export interface TrashRequest {
     items: TrashRequestItems[];

@@ -2,7 +2,11 @@ import React from 'react';
 import { SetDialogMessage } from 'components/MessageDialog';
 import { ListGroup, Popover } from 'react-bootstrap';
 import { deleteCollection, renameCollection } from 'services/collectionService';
-import { downloadCollection, getSelectedCollection } from 'utils/collection';
+import {
+    changeCollectionVisibilityHelper,
+    downloadCollection,
+    getSelectedCollection,
+} from 'utils/collection';
 import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import LinkButton, { ButtonVariant, LinkButtonProps } from './LinkButton';
@@ -97,6 +101,19 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         });
     };
 
+    const archiveCollectionHelper = () => {
+        changeCollectionVisibilityHelper(
+            getSelectedCollection(
+                props.selectedCollectionID,
+                props.collections
+            ),
+            props.startLoading,
+            props.finishLoading,
+            props.setDialogMessage,
+            props.syncWithRemote
+        );
+    };
+
     const confirmDownloadCollection = () => {
         props.setDialogMessage({
             title: constants.CONFIRM_DOWNLOAD_COLLECTION,
@@ -131,7 +148,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         await sleep(1000);
         props.finishLoading();
     };
-
+    console.log(
+        getSelectedCollection(props.selectedCollectionID, props.collections)
+    );
     return (
         <Popover id="collection-options" style={{ borderRadius: '10px' }}>
             <Popover.Content style={{ padding: 0, border: 'none' }}>
@@ -152,7 +171,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                         </MenuLink>
                     </MenuItem>
                     <MenuItem>
-                        <MenuLink onClick={archivingNotAvailableOnWeb}>
+                        <MenuLink onClick={archiveCollectionHelper}>
                             {IsArchived(
                                 getSelectedCollection(
                                     props.selectedCollectionID,
