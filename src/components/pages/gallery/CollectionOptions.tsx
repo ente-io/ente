@@ -139,9 +139,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         await sleep(1000);
         props.finishLoading();
     };
-    console.log(
-        getSelectedCollection(props.selectedCollectionID, props.collections)
-    );
+
     return (
         <Popover id="collection-options" style={{ borderRadius: '10px' }}>
             <Popover.Content style={{ padding: 0, border: 'none' }}>
