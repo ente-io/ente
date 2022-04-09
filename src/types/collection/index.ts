@@ -1,6 +1,7 @@
 import { User } from 'types/user';
 import { EnteFile } from 'types/file';
 import { CollectionType } from 'constants/collection';
+import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
 
 export interface Collection {
     id: number;
@@ -18,6 +19,7 @@ export interface Collection {
     isDeleted: boolean;
     isSharedCollection?: boolean;
     publicURLs?: PublicURL[];
+    magicMetadata?: CollectionMagicMetadata;
 }
 
 export interface PublicURL {
@@ -79,4 +81,13 @@ export interface CollectionAndItsLatestFile {
 export interface RemoveFromCollectionRequest {
     collectionID: number;
     fileIDs: number[];
+}
+
+export interface CollectionMagicMetadataProps {
+    visibility?: VISIBILITY_STATE;
+}
+
+export interface CollectionMagicMetadata
+    extends Omit<MagicMetadataCore, 'data'> {
+    data: CollectionMagicMetadataProps;
 }

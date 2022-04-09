@@ -16,8 +16,3 @@ export enum FILE_TYPE {
     LIVE_PHOTO,
     OTHERS,
 }
-
-export enum VISIBILITY_STATE {
-    VISIBLE,
-    ARCHIVED,
-}

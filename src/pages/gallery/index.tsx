@@ -10,7 +10,7 @@ import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
     getLocalFiles,
     syncFiles,
-    updateMagicMetadata,
+    updateFileMagicMetadata,
     trashFiles,
     deleteFromTrash,
 } from 'services/fileService';
@@ -77,6 +77,7 @@ import {
     handleCollectionOps,
     getSelectedCollection,
     isFavoriteCollection,
+    getArchivedCollections,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 import {
@@ -101,7 +102,7 @@ import {
     NotificationAttributes,
 } from 'types/gallery';
 import Collections from 'components/pages/gallery/Collections';
-import { VISIBILITY_STATE } from 'constants/file';
+import { VISIBILITY_STATE } from 'types/magicMetadata';
 import ToastNotification from 'components/ToastNotification';
 
 export const DeadCenter = styled.div`
@@ -192,6 +193,9 @@ export default function Gallery() {
 
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
+
+    const [archivedCollections, setArchivedCollections] =
+        useState<Set<number>>();
 
     const showPlanSelectorModal = () => setPlanModalView(true);
 
@@ -342,6 +346,9 @@ export default function Gallery() {
             collectionFilesCount.set(id, files.length);
         }
         setCollectionFilesCount(collectionFilesCount);
+
+        const archivedCollections = getArchivedCollections(collections);
+        setArchivedCollections(new Set(archivedCollections));
     };
 
     const clearSelection = function () {
@@ -388,7 +395,7 @@ export default function Gallery() {
                 selected,
                 visibility
             );
-            await updateMagicMetadata(updatedFiles);
+            await updateFileMagicMetadata(updatedFiles);
             clearSelection();
         } catch (e) {
             logError(e, 'change file visibility failed');
@@ -653,6 +660,7 @@ export default function Gallery() {
                     setFiles={setFiles}
                     syncWithRemote={syncWithRemote}
                     favItemIds={favItemIds}
+                    archivedCollections={archivedCollections}
                     setSelected={setSelected}
                     selected={selected}
                     isFirstLoad={isFirstLoad}
