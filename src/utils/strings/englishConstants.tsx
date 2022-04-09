@@ -387,6 +387,7 @@ const englishConstants = {
             <p>please use the mobile app to archive albums</p>
         </>
     ),
+    ARCHIVED_ALBUM: 'archived album',
     DOWNLOAD_COLLECTION_FAILED: 'album downloading failed, please try again',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
 

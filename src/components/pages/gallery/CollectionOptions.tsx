@@ -159,8 +159,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                                     props.collections
                                 )
                             )
-                                ? constants.ARCHIVE
-                                : constants.UNARCHIVE}
+                                ? constants.UNARCHIVE
+                                : constants.ARCHIVE}
                         </MenuLink>
                     </MenuItem>
                     <MenuItem>
