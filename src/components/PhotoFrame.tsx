@@ -202,7 +202,7 @@ const PhotoFrame = ({
                 if (
                     activeCollection === ALL_SECTION &&
                     (IsArchived(item) ||
-                        archivedCollections.has(item.collectionID))
+                        archivedCollections?.has(item.collectionID))
                 ) {
                     return false;
                 }
