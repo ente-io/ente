@@ -7,7 +7,7 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from 'services/collectionService';
-import { updatePublicMagicMetadata } from 'services/fileService';
+import { updateFilePublicMagicMetadata } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import constants from 'utils/strings/constants';
 import exifr from 'exifr';
@@ -151,7 +151,7 @@ function RenderCreationTime({
                     unixTimeInMicroSec
                 );
                 updatedFile = (
-                    await updatePublicMagicMetadata([updatedFile])
+                    await updateFilePublicMagicMetadata([updatedFile])
                 )[0];
                 updateExistingFilePubMetadata(file, updatedFile);
                 scheduleUpdate();
@@ -342,7 +342,7 @@ function RenderFileName({
                 const newTitle = getFileTitle(newFilename, extension);
                 let updatedFile = await changeFileName(file, newTitle);
                 updatedFile = (
-                    await updatePublicMagicMetadata([updatedFile])
+                    await updateFilePublicMagicMetadata([updatedFile])
                 )[0];
                 updateExistingFilePubMetadata(file, updatedFile);
                 scheduleUpdate();

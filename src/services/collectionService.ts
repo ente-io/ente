@@ -25,6 +25,8 @@ import {
     UpdatePublicURL,
 } from 'types/collection';
 import { COLLECTION_SORT_BY, CollectionType } from 'constants/collection';
+import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
+import { EncryptionResult } from 'types/upload';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -63,6 +65,14 @@ const getCollectionWithSecrets = async (
             collection.nameDecryptionNonce,
             decryptedKey
         ));
+
+    if (collection.magicMetadata?.data) {
+        collection.magicMetadata.data = await worker.decryptMetadata(
+            collection.magicMetadata.data,
+            collection.magicMetadata.header,
+            decryptedKey
+        );
+    }
     return {
         ...collection,
         key: decryptedKey,
@@ -275,6 +285,7 @@ export const createCollection = async (
             sharees: null,
             updationTime: null,
             isDeleted: false,
+            magicMetadata: null,
         };
         let createdCollection: Collection = await postCollection(
             newCollection,
@@ -492,6 +503,48 @@ export const deleteCollection = async (
             close: { variant: 'danger' },
         });
     }
+};
+
+export const updateCollectionMagicMetadata = async (collection: Collection) => {
+    const token = getToken();
+    if (!token) {
+        return;
+    }
+
+    const worker = await new CryptoWorker();
+
+    const { file: encryptedMagicMetadata }: EncryptionResult =
+        await worker.encryptMetadata(
+            collection.magicMetadata.data,
+            collection.key
+        );
+
+    const reqBody: UpdateMagicMetadataRequest = {
+        id: collection.id,
+        magicMetadata: {
+            version: collection.magicMetadata.version,
+            count: collection.magicMetadata.count,
+            data: encryptedMagicMetadata.encryptedData as unknown as string,
+            header: encryptedMagicMetadata.decryptionHeader,
+        },
+    };
+
+    await HTTPService.put(
+        `${ENDPOINT}/collections/magic-metadata`,
+        reqBody,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+    const updatedCollection: Collection = {
+        ...collection,
+        magicMetadata: {
+            ...collection.magicMetadata,
+            version: collection.magicMetadata.version + 1,
+        },
+    };
+    return updatedCollection;
 };
 
 export const renameCollection = async (

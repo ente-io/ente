@@ -3,21 +3,27 @@ import {
     moveToCollection,
     removeFromCollection,
     restoreToCollection,
+    updateCollectionMagicMetadata,
 } from 'services/collectionService';
 import { downloadFiles, getSelectedFiles } from 'utils/file';
 import { getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
-import { CustomError } from 'utils/error';
+import { CustomError, ServerErrorCodes } from 'utils/error';
 import { SelectedState } from 'types/gallery';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { SetDialogMessage } from 'components/MessageDialog';
 import { logError } from 'utils/sentry';
 import constants from 'utils/strings/constants';
-import { Collection } from 'types/collection';
+import { Collection, CollectionMagicMetadataProps } from 'types/collection';
 import { CollectionType } from 'constants/collection';
 import { getAlbumSiteHost } from 'constants/pages';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
+import {
+    NEW_COLLECTION_MAGIC_METADATA,
+    VISIBILITY_STATE,
+} from 'types/magicMetadata';
+import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -161,3 +167,56 @@ export const shareExpiryOptions = [
         value: () => getUnixTimeInMicroSecondsWithDelta({ years: 1 }),
     },
 ];
+
+export const changeCollectionVisibilityHelper = async (
+    collection: Collection,
+    startLoading: () => void,
+    finishLoading: () => void,
+    setDialogMessage: SetDialogMessage,
+    syncWithRemote: () => Promise<void>
+) => {
+    startLoading();
+    try {
+        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
+            visibility: collection.magicMetadata?.data.visibility
+                ? VISIBILITY_STATE.VISIBLE
+                : VISIBILITY_STATE.ARCHIVED,
+        };
+
+        const updatedCollection = {
+            ...collection,
+            magicMetadata: await updateMagicMetadataProps(
+                collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
+                collection.key,
+                updatedMagicMetadataProps
+            ),
+        } as Collection;
+
+        await updateCollectionMagicMetadata(updatedCollection);
+    } catch (e) {
+        logError(e, 'change file visibility failed');
+        switch (e.status?.toString()) {
+            case ServerErrorCodes.FORBIDDEN:
+                setDialogMessage({
+                    title: constants.ERROR,
+                    staticBackdrop: true,
+                    close: { variant: 'danger' },
+                    content: constants.NOT_FILE_OWNER,
+                });
+                return;
+        }
+        setDialogMessage({
+            title: constants.ERROR,
+            staticBackdrop: true,
+            close: { variant: 'danger' },
+            content: constants.UNKNOWN_ERROR,
+        });
+    } finally {
+        await syncWithRemote();
+        finishLoading();
+    }
+};
+
+export const getArchivedCollections = (collections: Collection[]) => {
+    return collections.filter(IsArchived).map((collection) => collection.id);
+};

@@ -2,9 +2,8 @@ import { SelectedState } from 'types/gallery';
 import {
     EnteFile,
     fileAttribute,
-    MagicMetadataProps,
-    NEW_MAGIC_METADATA,
-    PublicMagicMetadataProps,
+    FileMagicMetadataProps,
+    FilePublicMagicMetadataProps,
 } from 'types/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getFileType } from 'services/typeDetectionService';
@@ -20,11 +19,12 @@ import {
     TYPE_HEIC,
     TYPE_HEIF,
     FILE_TYPE,
-    VISIBILITY_STATE,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
+import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
+import { updateMagicMetadataProps } from 'utils/magicMetadata';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -370,90 +370,6 @@ export async function convertForPreview(
     return [fileBlob];
 }
 
-export function fileIsArchived(file: EnteFile) {
-    if (
-        !file ||
-        !file.magicMetadata ||
-        !file.magicMetadata.data ||
-        typeof file.magicMetadata.data === 'string' ||
-        typeof file.magicMetadata.data.visibility === 'undefined'
-    ) {
-        return false;
-    }
-    return file.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
-}
-
-export async function updateMagicMetadataProps(
-    file: EnteFile,
-    magicMetadataUpdates: MagicMetadataProps
-) {
-    const worker = await new CryptoWorker();
-
-    if (!file.magicMetadata) {
-        file.magicMetadata = NEW_MAGIC_METADATA;
-    }
-    if (typeof file.magicMetadata.data === 'string') {
-        file.magicMetadata.data = (await worker.decryptMetadata(
-            file.magicMetadata.data,
-            file.magicMetadata.header,
-            file.key
-        )) as MagicMetadataProps;
-    }
-    if (magicMetadataUpdates) {
-        // copies the existing magic metadata properties of the files and updates the visibility value
-        // The expected behaviour while updating magic metadata is to let the existing property as it is and update/add the property you want
-        const magicMetadataProps: MagicMetadataProps = {
-            ...file.magicMetadata.data,
-            ...magicMetadataUpdates,
-        };
-
-        return {
-            ...file,
-            magicMetadata: {
-                ...file.magicMetadata,
-                data: magicMetadataProps,
-                count: Object.keys(file.magicMetadata.data).length,
-            },
-        };
-    } else {
-        return file;
-    }
-}
-export async function updatePublicMagicMetadataProps(
-    file: EnteFile,
-    publicMetadataUpdates: PublicMagicMetadataProps
-) {
-    const worker = await new CryptoWorker();
-
-    if (!file.pubMagicMetadata) {
-        file.pubMagicMetadata = NEW_MAGIC_METADATA;
-    }
-    if (typeof file.pubMagicMetadata.data === 'string') {
-        file.pubMagicMetadata.data = (await worker.decryptMetadata(
-            file.pubMagicMetadata.data,
-            file.pubMagicMetadata.header,
-            file.key
-        )) as PublicMagicMetadataProps;
-    }
-
-    if (publicMetadataUpdates) {
-        const publicMetadataProps = {
-            ...file.pubMagicMetadata.data,
-            ...publicMetadataUpdates,
-        };
-        return {
-            ...file,
-            pubMagicMetadata: {
-                ...file.pubMagicMetadata,
-                data: publicMetadataProps,
-                count: Object.keys(file.pubMagicMetadata.data).length,
-            },
-        };
-    } else {
-        return file;
-    }
-}
-
 export async function changeFilesVisibility(
     files: EnteFile[],
     selected: SelectedState,
@@ -462,13 +378,18 @@ export async function changeFilesVisibility(
     const selectedFiles = getSelectedFiles(selected, files);
     const updatedFiles: EnteFile[] = [];
     for (const file of selectedFiles) {
-        const updatedMagicMetadataProps: MagicMetadataProps = {
+        const updatedMagicMetadataProps: FileMagicMetadataProps = {
             visibility,
         };
 
-        updatedFiles.push(
-            await updateMagicMetadataProps(file, updatedMagicMetadataProps)
-        );
+        updatedFiles.push({
+            ...file,
+            magicMetadata: await updateMagicMetadataProps(
+                file.magicMetadata ?? NEW_FILE_MAGIC_METADATA,
+                file.key,
+                updatedMagicMetadataProps
+            ),
+        });
     }
     return updatedFiles;
 }
@@ -477,25 +398,33 @@ export async function changeFileCreationTime(
     file: EnteFile,
     editedTime: number
 ) {
-    const updatedPublicMagicMetadataProps: PublicMagicMetadataProps = {
+    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedTime,
     };
 
-    return await updatePublicMagicMetadataProps(
-        file,
-        updatedPublicMagicMetadataProps
-    );
+    return {
+        ...file,
+        publicMagicMetadata: await updateMagicMetadataProps(
+            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+            file.key,
+            updatedPublicMagicMetadataProps
+        ),
+    } as EnteFile;
 }
 
 export async function changeFileName(file: EnteFile, editedName: string) {
-    const updatedPublicMagicMetadataProps: PublicMagicMetadataProps = {
+    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedName,
     };
 
-    return await updatePublicMagicMetadataProps(
-        file,
-        updatedPublicMagicMetadataProps
-    );
+    return {
+        ...file,
+        publicMagicMetadata: await updateMagicMetadataProps(
+            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+            file.key,
+            updatedPublicMagicMetadataProps
+        ),
+    } as EnteFile;
 }
 
 export function isSharedFile(file: EnteFile) {
@@ -590,4 +519,4 @@ export const isLivePhoto = (file: EnteFile) =>
     file.metadata.fileType === FILE_TYPE.LIVE_PHOTO;
 
 export const isImageOrVideo = (fileType: FILE_TYPE) =>
-    fileType in [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO];
+    [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);

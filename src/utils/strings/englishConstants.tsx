@@ -380,8 +380,10 @@ const englishConstants = {
             <p>all files will be queued for download sequentially</p>
         </>
     ),
+    ARCHIVED_ALBUM: 'archived album',
     DOWNLOAD_COLLECTION_FAILED: 'album downloading failed, please try again',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
+
     SEARCH_HINT: () => (
         <span>try searching for New York, April 14, Christmas...</span>
     ),

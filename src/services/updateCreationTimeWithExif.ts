@@ -7,7 +7,7 @@ import {
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import downloadManager from './downloadManager';
-import { updatePublicMagicMetadata } from './fileService';
+import { updateFilePublicMagicMetadata } from './fileService';
 import { EnteFile } from 'types/file';
 
 import { getRawExif } from './upload/exifService';
@@ -60,7 +60,7 @@ export async function updateCreationTimeWithExif(
                         correctCreationTime
                     );
                     updatedFile = (
-                        await updatePublicMagicMetadata([updatedFile])
+                        await updateFilePublicMagicMetadata([updatedFile])
                     )[0];
                     updateExistingFilePubMetadata(file, updatedFile);
                 }
