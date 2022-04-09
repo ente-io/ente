@@ -8,7 +8,7 @@ import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
-import { fileIsArchived, formatDateRelative } from 'utils/file';
+import { formatDateRelative } from 'utils/file';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
@@ -25,6 +25,7 @@ import { useRouter } from 'next/router';
 import EmptyScreen from './EmptyScreen';
 import { AppContext } from 'pages/_app';
 import { DeduplicateContext } from 'pages/deduplicate';
+import { IsArchived } from 'utils/magicMetadata';
 
 const Container = styled.div`
     display: block;
@@ -46,6 +47,7 @@ interface Props {
     setFiles: SetFiles;
     syncWithRemote: () => Promise<void>;
     favItemIds?: Set<number>;
+    archivedCollections?: Set<number>;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState)
     ) => void;
@@ -71,6 +73,7 @@ const PhotoFrame = ({
     setFiles,
     syncWithRemote,
     favItemIds,
+    archivedCollections,
     setSelected,
     selected,
     isFirstLoad,
@@ -196,13 +199,14 @@ const PhotoFrame = ({
                 ) {
                     return false;
                 }
-                if (activeCollection === ALL_SECTION && fileIsArchived(item)) {
+                if (
+                    activeCollection === ALL_SECTION &&
+                    (IsArchived(item) ||
+                        archivedCollections.has(item.collectionID))
+                ) {
                     return false;
                 }
-                if (
-                    activeCollection === ARCHIVE_SECTION &&
-                    !fileIsArchived(item)
-                ) {
+                if (activeCollection === ARCHIVE_SECTION && !IsArchived(item)) {
                     return false;
                 }
 

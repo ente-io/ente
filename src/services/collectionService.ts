@@ -63,6 +63,14 @@ const getCollectionWithSecrets = async (
             collection.nameDecryptionNonce,
             decryptedKey
         ));
+
+    if (collection.magicMetadata?.data) {
+        collection.magicMetadata.data = await worker.decryptMetadata(
+            collection.magicMetadata.data,
+            collection.magicMetadata.header,
+            decryptedKey
+        );
+    }
     return {
         ...collection,
         key: decryptedKey,
@@ -275,6 +283,7 @@ export const createCollection = async (
             sharees: null,
             updationTime: null,
             isDeleted: false,
+            magicMetadata: null,
         };
         let createdCollection: Collection = await postCollection(
             newCollection,
