@@ -15,7 +15,14 @@ export enum VISIBILITY_STATE {
     ARCHIVED,
 }
 
-export const NEW_MAGIC_METADATA: MagicMetadataCore = {
+export const NEW_FILE_MAGIC_METADATA: MagicMetadataCore = {
+    version: 0,
+    data: {},
+    header: null,
+    count: 0,
+};
+
+export const NEW_COLLECTION_MAGIC_METADATA: MagicMetadataCore = {
     version: 1,
     data: {},
     header: null,

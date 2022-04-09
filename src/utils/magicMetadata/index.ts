@@ -1,10 +1,6 @@
 import { Collection } from 'types/collection';
 import { EnteFile, FileMagicMetadataProps } from 'types/file';
-import {
-    MagicMetadataCore,
-    NEW_MAGIC_METADATA,
-    VISIBILITY_STATE,
-} from 'types/magicMetadata';
+import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
 import CryptoWorker from 'utils/crypto';
 
 export function IsArchived(item: Collection | EnteFile) {
@@ -28,7 +24,7 @@ export async function updateMagicMetadataProps(
     const worker = await new CryptoWorker();
 
     if (!originalMagicMetadata) {
-        originalMagicMetadata = NEW_MAGIC_METADATA;
+        throw Error('invalid originalMagicMetadata ');
     }
     if (typeof originalMagicMetadata.data === 'string') {
         originalMagicMetadata.data = (await worker.decryptMetadata(

@@ -19,7 +19,10 @@ import { Collection, CollectionMagicMetadataProps } from 'types/collection';
 import { CollectionType } from 'constants/collection';
 import { getAlbumSiteHost } from 'constants/pages';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
-import { VISIBILITY_STATE } from 'types/magicMetadata';
+import {
+    NEW_COLLECTION_MAGIC_METADATA,
+    VISIBILITY_STATE,
+} from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 
 export enum COLLECTION_OPS_TYPE {
@@ -183,7 +186,7 @@ export const changeCollectionVisibilityHelper = async (
         const updatedCollection = {
             ...collection,
             magicMetadata: await updateMagicMetadataProps(
-                collection.magicMetadata,
+                collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
                 collection.key,
                 updatedMagicMetadataProps
             ),

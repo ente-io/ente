@@ -23,7 +23,7 @@ import {
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
-import { VISIBILITY_STATE } from 'types/magicMetadata';
+import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
 import { updateMagicMetadataProps } from 'utils/magicMetadata';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
@@ -385,7 +385,7 @@ export async function changeFilesVisibility(
         updatedFiles.push({
             ...file,
             magicMetadata: await updateMagicMetadataProps(
-                file.magicMetadata,
+                file.magicMetadata ?? NEW_FILE_MAGIC_METADATA,
                 file.key,
                 updatedMagicMetadataProps
             ),
@@ -405,7 +405,7 @@ export async function changeFileCreationTime(
     return {
         ...file,
         publicMagicMetadata: await updateMagicMetadataProps(
-            file.pubMagicMetadata,
+            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
             file.key,
             updatedPublicMagicMetadataProps
         ),
@@ -420,7 +420,7 @@ export async function changeFileName(file: EnteFile, editedName: string) {
     return {
         ...file,
         publicMagicMetadata: await updateMagicMetadataProps(
-            file.pubMagicMetadata,
+            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
             file.key,
             updatedPublicMagicMetadataProps
         ),
