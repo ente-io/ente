@@ -1,4 +1,4 @@
-import { VISIBILITY_STATE } from 'constants/file';
+import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
 import { DataStream, Metadata } from 'types/upload';
 
 export interface fileAttribute {
@@ -6,34 +6,27 @@ export interface fileAttribute {
     objectKey?: string;
     decryptionHeader: string;
 }
-
-export interface MagicMetadataCore {
-    version: number;
-    count: number;
-    header: string;
-    data: Record<string, any>;
-}
-
 export interface EncryptedMagicMetadataCore
     extends Omit<MagicMetadataCore, 'data'> {
     data: string;
 }
 
-export interface MagicMetadataProps {
+export interface FileMagicMetadataProps {
     visibility?: VISIBILITY_STATE;
 }
 
-export interface MagicMetadata extends Omit<MagicMetadataCore, 'data'> {
-    data: MagicMetadataProps;
+export interface FileMagicMetadata extends Omit<MagicMetadataCore, 'data'> {
+    data: FileMagicMetadataProps;
 }
 
-export interface PublicMagicMetadataProps {
+export interface FilePublicMagicMetadataProps {
     editedTime?: number;
     editedName?: string;
 }
 
-export interface PublicMagicMetadata extends Omit<MagicMetadataCore, 'data'> {
-    data: PublicMagicMetadataProps;
+export interface FilePublicMagicMetadata
+    extends Omit<MagicMetadataCore, 'data'> {
+    data: FilePublicMagicMetadataProps;
 }
 
 export interface EnteFile {
@@ -43,8 +36,8 @@ export interface EnteFile {
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: Metadata;
-    magicMetadata: MagicMetadata;
-    pubMagicMetadata: PublicMagicMetadata;
+    magicMetadata: FileMagicMetadata;
+    pubMagicMetadata: FilePublicMagicMetadata;
     encryptedKey: string;
     keyDecryptionNonce: string;
     key: string;
