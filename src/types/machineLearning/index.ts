@@ -370,6 +370,10 @@ export const BLAZEFACE_PASS1_SCORE_THRESHOLD = 0.4;
 export const BLAZEFACE_FACE_SIZE = 112;
 export const MOBILEFACENET_FACE_SIZE = 112;
 
+export const TESSERACT_MIN_IMAGE_WIDTH = 44;
+export const TESSERACT_MIN_IMAGE_HEIGHT = 20;
+export const TESSERACT_MAX_IMAGE_DIMENSION = 720;
+
 export interface FaceDetectionService {
     method: Versioned<FaceDetectionMethod>;
     // init(): Promise<void>;
@@ -390,7 +394,9 @@ export interface ObjectDetectionService {
 export interface TextDetectionService {
     method: Versioned<TextDetectionMethod>;
     // init(): Promise<void>;
-    detectText(image: File): Promise<Tesseract.RecognizeResult>;
+    detectText(
+        imageBitmap: ImageBitmap
+    ): Promise<Tesseract.RecognizeResult | Error>;
     dispose(): Promise<void>;
 }
 

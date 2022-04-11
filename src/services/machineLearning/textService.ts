@@ -4,7 +4,6 @@ import {
     DetectedText,
     WordGroup,
 } from 'types/machineLearning';
-import { imageBitmapToBlob } from 'utils/image';
 import { isDifferentOrOld, getAllTextFromMap } from 'utils/machineLearning';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import ReaderService from './readerService';
@@ -34,25 +33,16 @@ class TextService {
             syncContext,
             fileContext
         );
-        if (
-            !(
-                (imageBitmap.width >= 44 && imageBitmap.height >= 20) ||
-                (imageBitmap.width >= 20 && imageBitmap.height >= 44)
-            )
-        ) {
-            return;
-        }
 
         console.time('detecting text ' + fileContext.enteFile.id);
         const textDetections =
-            await syncContext.textDetectionService.detectText(
-                new File(
-                    [await imageBitmapToBlob(imageBitmap)],
-                    fileContext.enteFile.id.toString()
-                )
-            );
+            await syncContext.textDetectionService.detectText(imageBitmap);
         console.timeEnd('detecting text ' + fileContext.enteFile.id);
-
+        if (textDetections instanceof Error) {
+            newMlFile.errorCount = 2;
+            newMlFile.lastErrorMessage = textDetections.message;
+            return;
+        }
         const detectedText: DetectedText[] = textDetections.data.words
             .filter(
                 ({ confidence }) =>
