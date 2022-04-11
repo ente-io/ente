@@ -402,7 +402,8 @@ class MachineLearningService {
         } else if (fileContext.oldMlFile?.mlVersion) {
             newMlFile.mlVersion = fileContext.oldMlFile.mlVersion;
         }
-        try {
+
+        const faceDetection = async () => {
             await FaceService.syncFileFaceDetections(syncContext, fileContext);
 
             if (newMlFile.faces && newMlFile.faces.length > 0) {
@@ -418,16 +419,16 @@ class MachineLearningService {
                     fileContext
                 );
             }
-
-            await ObjectService.syncFileObjectDetections(
-                syncContext,
-                fileContext
-            );
-
-            await promiseWithTimeout(
+        };
+        try {
+            await Promise.all([
+                faceDetection(),
+                ObjectService.syncFileObjectDetections(
+                    syncContext,
+                    fileContext
+                ),
                 TextService.syncFileTextDetections(syncContext, fileContext),
-                ML_DETECTION_TIMEOUT_MS
-            );
+            ]);
         } catch (e) {
             newMlFile.mlVersion = oldMlFile.mlVersion;
             throw e;
