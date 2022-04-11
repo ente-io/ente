@@ -1,7 +1,7 @@
 import { getEndpoint, getPaymentsURL } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { setData, LS_KEYS } from 'utils/storage/localStorage';
-import { convertToHumanReadable } from 'utils/billing';
+import { convertBytesToHumanReadable } from 'utils/billing';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { getPaymentToken } from './userService';
@@ -188,7 +188,7 @@ class billingService {
                     'X-Auth-Token': getToken(),
                 }
             );
-            return convertToHumanReadable(response.data.usage);
+            return convertBytesToHumanReadable(response.data.usage);
         } catch (e) {
             logError(e, 'error getting usage');
         }

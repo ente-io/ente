@@ -1,6 +1,6 @@
 import { ElectronFile, FileWithCollection, Metadata } from 'types/upload';
 import { EnteFile } from 'types/file';
-import { convertToHumanReadable } from 'utils/billing';
+import { convertBytesToHumanReadable } from 'utils/billing';
 import { formatDateTime } from 'utils/file';
 import { getLogs, saveLogLine } from 'utils/storage';
 import { A_SEC_IN_MICROSECONDS } from 'constants/upload';
@@ -78,7 +78,7 @@ export function getUploadLogs() {
 }
 
 export function getFileNameSize(file: File | ElectronFile) {
-    return `${file.name}_${convertToHumanReadable(file.size)}`;
+    return `${file.name}_${convertBytesToHumanReadable(file.size)}`;
 }
 
 export function areSameElectronFiles(

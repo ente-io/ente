@@ -11,7 +11,7 @@ import {
     searchFiles,
     searchLocation,
 } from 'services/searchService';
-import { getFormattedDate } from 'utils/search';
+import { getFormattedDate, isInsideBox } from 'utils/search';
 import constants from 'utils/strings/constants';
 import LocationIcon from '../icons/LocationIcon';
 import DateIcon from '../icons/DateIcon';
@@ -27,8 +27,8 @@ import { EnteFile } from 'types/file';
 import { Suggestion, SuggestionType, DateValue, Bbox } from 'types/search';
 import { Search, SearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
-import { GalleryContext } from 'pages/gallery';
 import { SelectStyles } from './styles';
+import { AppContext } from 'pages/_app';
 
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
@@ -91,7 +91,7 @@ interface Props {
 }
 export default function SearchBar(props: Props) {
     const [value, setValue] = useState<Suggestion>(null);
-    const galleryContext = useContext(GalleryContext);
+    const appContext = useContext(AppContext);
     const handleChange = (value) => {
         setValue(value);
     };
@@ -148,8 +148,30 @@ export default function SearchBar(props: Props) {
         );
 
         const locationResults = await searchLocation(searchPhrase);
+
+        const locationResultsHasFiles: boolean[] = new Array(
+            locationResults.length
+        ).fill(false);
+        props.files.map((file) => {
+            for (const [index, location] of locationResults.entries()) {
+                if (
+                    isInsideBox(
+                        {
+                            latitude: file.metadata.latitude,
+                            longitude: file.metadata.longitude,
+                        },
+                        location.bbox
+                    )
+                ) {
+                    locationResultsHasFiles[index] = true;
+                }
+            }
+        });
+        const filteredLocationWithFiles = locationResults.filter(
+            (_, index) => locationResultsHasFiles[index]
+        );
         options.push(
-            ...locationResults.map(
+            ...filteredLocationWithFiles.map(
                 (searchResult) =>
                     ({
                         type: SuggestionType.LOCATION,
@@ -193,10 +215,10 @@ export default function SearchBar(props: Props) {
     };
     const resetSearch = () => {
         if (props.isOpen) {
-            galleryContext.startLoading();
+            appContext.startLoading();
             props.setSearch({});
             setTimeout(() => {
-                galleryContext.finishLoading();
+                appContext.finishLoading();
             }, 10);
             props.setOpen(false);
             setValue(null);

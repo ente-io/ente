@@ -1,16 +1,15 @@
 import ExpandLess from 'components/icons/ExpandLess';
 import ExpandMore from 'components/icons/ExpandMore';
 import React, { useState } from 'react';
-import { Button, Modal, ProgressBar } from 'react-bootstrap';
+import { Accordion, Button, Modal, ProgressBar } from 'react-bootstrap';
 import { FileRejection } from 'react-dropzone';
 
 import styled from 'styled-components';
 import { DESKTOP_APP_DOWNLOAD_URL } from 'utils/common';
 import constants from 'utils/strings/constants';
-import { Collapse } from 'react-collapse';
 import { ButtonVariant, getVariantColor } from './LinkButton';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
-
+import FileList from 'components/FileList';
 interface Props {
     fileCounter;
     uploadStage;
@@ -30,17 +29,6 @@ interface FileProgresses {
     progress: number;
 }
 
-export const FileList = styled.ul`
-    padding-left: 30px;
-    margin-top: 5px;
-    margin-bottom: 0px;
-    & > li {
-        padding-left: 5px;
-        margin-bottom: 10px;
-        color: #ccc;
-    }
-`;
-
 const SectionTitle = styled.div`
     display: flex;
     justify-content: space-between;
@@ -51,10 +39,6 @@ const SectionTitle = styled.div`
 
 const Section = styled.div`
     margin: 20px 0;
-    & > .ReactCollapse--collapse {
-        transition: height 200ms;
-    }
-    word-break: break-word;
     padding: 0 20px;
 `;
 const SectionInfo = styled.div`
@@ -62,8 +46,8 @@ const SectionInfo = styled.div`
     padding-left: 15px;
 `;
 
-const Content = styled.div`
-    padding-right: 30px;
+const SectionContent = styled.div`
+    padding-right: 35px;
 `;
 
 const NotUploadSectionHeader = styled.div`
@@ -72,6 +56,34 @@ const NotUploadSectionHeader = styled.div`
     color: ${getVariantColor(ButtonVariant.warning)};
     border-bottom: 1px solid ${getVariantColor(ButtonVariant.warning)};
     margin: 0 20px;
+`;
+
+const InProgressItemContainer = styled.div`
+    display: inline-block;
+    & > span {
+        display: inline-block;
+    }
+    & > span:first-of-type {
+        position: relative;
+        top: 5px;
+        max-width: 287px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    & > .separator {
+        margin: 0 5px;
+    }
+`;
+
+const ResultItemContainer = styled.div`
+    position: relative;
+    top: 5px;
+    display: inline-block;
+    max-width: 334px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 `;
 
 interface ResultSectionProps {
@@ -88,24 +100,30 @@ const ResultSection = (props: ResultSectionProps) => {
         return <></>;
     }
     return (
-        <Section>
-            <SectionTitle onClick={() => setListView(!listView)}>
-                {props.sectionTitle}
-                {listView ? <ExpandLess /> : <ExpandMore />}
-            </SectionTitle>
-            <Collapse isOpened={listView}>
-                <Content>
-                    {props.sectionInfo && (
-                        <SectionInfo>{props.sectionInfo}</SectionInfo>
-                    )}
-                    <FileList>
-                        {fileList.map((fileID) => (
-                            <li key={fileID}>{props.filenames.get(fileID)}</li>
-                        ))}
-                    </FileList>
-                </Content>
-            </Collapse>
-        </Section>
+        <Accordion defaultActiveKey="1">
+            <Section>
+                <Accordion.Toggle eventKey="0" as="div">
+                    <SectionTitle onClick={() => setListView(!listView)}>
+                        {props.sectionTitle}
+                        {listView ? <ExpandLess /> : <ExpandMore />}
+                    </SectionTitle>
+                </Accordion.Toggle>
+                <Accordion.Collapse eventKey="0">
+                    <SectionContent>
+                        {props.sectionInfo && (
+                            <SectionInfo>{props.sectionInfo}</SectionInfo>
+                        )}
+                        <FileList
+                            fileList={fileList.map((fileID) => (
+                                <ResultItemContainer key={fileID}>
+                                    {props.filenames.get(fileID)}
+                                </ResultItemContainer>
+                            ))}
+                        />
+                    </SectionContent>
+                </Accordion.Collapse>
+            </Section>
+        </Accordion>
     );
 };
 
@@ -117,36 +135,35 @@ interface InProgressProps {
 }
 const InProgressSection = (props: InProgressProps) => {
     const [listView, setListView] = useState(true);
-    const fileList = props.fileProgressStatuses;
-    if (!fileList?.length) {
-        return <></>;
-    }
-    if (!fileList?.length) {
-        return <></>;
-    }
+    const fileList = props.fileProgressStatuses ?? [];
+
     return (
-        <Section>
-            <SectionTitle onClick={() => setListView(!listView)}>
-                {props.sectionTitle}
-                {listView ? <ExpandLess /> : <ExpandMore />}
-            </SectionTitle>
-            <Collapse isOpened={listView}>
-                <Content>
-                    {props.sectionInfo && (
-                        <SectionInfo>{props.sectionInfo}</SectionInfo>
-                    )}
-                    <FileList>
-                        {fileList.map(({ fileID, progress }) => (
-                            <li key={fileID}>
-                                {`${props.filenames.get(
-                                    fileID
-                                )} - ${progress}%`}
-                            </li>
-                        ))}
-                    </FileList>
-                </Content>
-            </Collapse>
-        </Section>
+        <Accordion defaultActiveKey="0">
+            <Section>
+                <Accordion.Toggle eventKey="0" as="div">
+                    <SectionTitle onClick={() => setListView(!listView)}>
+                        {props.sectionTitle}
+                        {listView ? <ExpandLess /> : <ExpandMore />}
+                    </SectionTitle>
+                </Accordion.Toggle>
+                <Accordion.Collapse eventKey="0">
+                    <SectionContent>
+                        {props.sectionInfo && (
+                            <SectionInfo>{props.sectionInfo}</SectionInfo>
+                        )}
+                        <FileList
+                            fileList={fileList.map(({ fileID, progress }) => (
+                                <InProgressItemContainer key={fileID}>
+                                    <span>{props.filenames.get(fileID)}</span>
+                                    <span className="separator">{`-`}</span>
+                                    <span>{`${progress}%`}</span>
+                                </InProgressItemContainer>
+                            ))}
+                        />
+                    </SectionContent>
+                </Accordion.Collapse>
+            </Section>
+        </Accordion>
     );
 };
 
@@ -218,12 +235,14 @@ export default function UploadProgress(props: Props) {
                         variant="upload-progress-bar"
                     />
                 )}
-                <InProgressSection
-                    filenames={props.filenames}
-                    fileProgressStatuses={fileProgressStatuses}
-                    sectionTitle={constants.INPROGRESS_UPLOADS}
-                    sectionInfo={sectionInfo}
-                />
+                {props.uploadStage === UPLOAD_STAGES.UPLOADING && (
+                    <InProgressSection
+                        filenames={props.filenames}
+                        fileProgressStatuses={fileProgressStatuses}
+                        sectionTitle={constants.INPROGRESS_UPLOADS}
+                        sectionInfo={sectionInfo}
+                    />
+                )}
 
                 <ResultSection
                     filenames={props.filenames}

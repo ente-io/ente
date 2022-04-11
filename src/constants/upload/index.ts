@@ -4,9 +4,9 @@ import { Location, ParsedExtractedMetadata } from 'types/upload';
 
 // list of format that were missed by type-detection for some files.
 export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
-    { fileType: FILE_TYPE.IMAGE, exactType: 'jpeg' },
-    { fileType: FILE_TYPE.IMAGE, exactType: 'jpg' },
-    { fileType: FILE_TYPE.VIDEO, exactType: 'webm' },
+    { fileType: FILE_TYPE.IMAGE, exactType: 'jpeg', mimeType: 'image/jpeg' },
+    { fileType: FILE_TYPE.IMAGE, exactType: 'jpg', mimeType: 'image/jpeg' },
+    { fileType: FILE_TYPE.VIDEO, exactType: 'webm', mimeType: 'video/webm' },
 ];
 
 // this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.

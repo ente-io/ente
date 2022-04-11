@@ -12,7 +12,7 @@ import {
     isOnFreePlan,
     isSubscriptionCancelled,
     isSubscribed,
-    convertToHumanReadable,
+    convertBytesToHumanReadable,
 } from 'utils/billing';
 
 import isElectron from 'is-electron';
@@ -36,7 +36,7 @@ import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 import FixLargeThumbnails from './FixLargeThumbnail';
 import { SetLoading } from 'types/gallery';
 import { downloadAsFile } from 'utils/file';
-import { getUploadLogs } from 'utils/upload';
+import { getUploadLogs, logUploadInfo } from 'utils/upload';
 import styled from 'styled-components';
 interface Props {
     collections: Collection[];
@@ -65,7 +65,7 @@ export default function Sidebar(props: Props) {
             }
             const userDetails = await getUserDetails();
             setUser({ ...user, email: userDetails.email });
-            SetUsage(convertToHumanReadable(userDetails.usage));
+            SetUsage(convertBytesToHumanReadable(userDetails.usage));
             setSubscription(userDetails.subscription);
             setData(LS_KEYS.USER, {
                 ...getData(LS_KEYS.USER),
@@ -113,6 +113,7 @@ export default function Sidebar(props: Props) {
     }
 
     const downloadUploadLogs = () => {
+        logUploadInfo('exporting logs');
         const logs = getUploadLogs();
         const logString = logs.join('\n');
         downloadAsFile(`upload_logs_${Date.now()}.txt`, logString);
@@ -206,7 +207,9 @@ export default function Sidebar(props: Props) {
                         {usage ? (
                             constants.USAGE_INFO(
                                 usage,
-                                convertToHumanReadable(subscription?.storage)
+                                convertBytesToHumanReadable(
+                                    subscription?.storage
+                                )
                             )
                         ) : (
                             <div style={{ textAlign: 'center' }}>
@@ -284,6 +287,13 @@ export default function Sidebar(props: Props) {
                         router.push(PAGES.CHANGE_EMAIL);
                     }}>
                     {constants.UPDATE_EMAIL}
+                </LinkButton>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => {
+                        router.push(PAGES.DEDUPLICATE);
+                    }}>
+                    {constants.DEDUPLICATE_FILES}
                 </LinkButton>
                 <Divider />
                 <>

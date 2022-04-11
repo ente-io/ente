@@ -37,7 +37,7 @@ import { FILE_TYPE } from 'constants/file';
 import uiService from './uiService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { dedupe } from 'utils/export';
-import { convertToHumanReadable } from 'utils/billing';
+import { convertBytesToHumanReadable } from 'utils/billing';
 import { logUploadInfo } from 'utils/upload';
 import isElectron from 'is-electron';
 import ImportService from 'services/importService';
@@ -324,7 +324,9 @@ class UploadManager {
                         ...(getData(LS_KEYS.FAILED_UPLOADS)?.files ?? []),
                         ...this.failedFiles.map(
                             (file) =>
-                                `${file.file.name}_${convertToHumanReadable(
+                                `${
+                                    file.file.name
+                                }_${convertBytesToHumanReadable(
                                     file.file.size
                                 )}`
                         ),

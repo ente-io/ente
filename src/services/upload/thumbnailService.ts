@@ -3,11 +3,11 @@ import { CustomError, errorWithContext } from 'utils/error';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
 import FFmpegService from 'services/ffmpeg/ffmpegService';
-import { convertToHumanReadable } from 'utils/billing';
+import { convertBytesToHumanReadable } from 'utils/billing';
 import { isFileHEIC } from 'utils/file';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from '../readerService';
-import HEICConverter from 'services/HEICConverter';
+import HEICConverter from 'services/heicConverter/heicConverterService';
 import { getFileNameSize, logUploadInfo } from 'utils/upload';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
@@ -237,7 +237,7 @@ async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
         logError(
             Error('thumbnail_too_large'),
             'thumbnail greater than max limit',
-            { thumbnailSize: convertToHumanReadable(thumbnailBlob.size) }
+            { thumbnailSize: convertBytesToHumanReadable(thumbnailBlob.size) }
         );
     }
 

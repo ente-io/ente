@@ -24,6 +24,9 @@ import {
     COLLECTION_SORT_BY,
     TRASH_SECTION,
 } from 'constants/collection';
+import { IsArchived } from 'utils/magicMetadata';
+import Archive from 'components/icons/Archive';
+import { IconWithMessage } from 'components/IconWithMessage';
 
 interface CollectionProps {
     collections: Collection[];
@@ -69,10 +72,11 @@ const CollectionBar = styled.div`
     justify-content: flex-start;
 `;
 
-const Chip = styled.button<{ active: boolean }>`
+const Chip = styled.button<{ active: boolean; archived?: boolean }>`
     border-radius: 8px;
     padding: 4px;
-    padding-left: 24px;
+    padding-left: 15px;
+    ${({ archived }) => !archived && 'padding-left: 24px;'}
     margin: 3px;
     border: none;
     background-color: ${(props) =>
@@ -227,7 +231,20 @@ export default function Collections(props: CollectionProps) {
                                 <Chip
                                     ref={collectionChipsRef[item.id]}
                                     active={activeCollection === item.id}
-                                    onClick={clickHandler(item.id)}>
+                                    onClick={clickHandler(item.id)}
+                                    archived={IsArchived(item)}>
+                                    {IsArchived(item) && (
+                                        <IconWithMessage
+                                            message={constants.ARCHIVED_ALBUM}>
+                                            <div
+                                                style={{
+                                                    display: 'inline-block',
+                                                    marginRight: '5px',
+                                                }}>
+                                                <Archive />
+                                            </div>
+                                        </IconWithMessage>
+                                    )}
                                     {item.name}
                                     {item.type !== CollectionType.favorites &&
                                     item.owner.id === user?.id ? (

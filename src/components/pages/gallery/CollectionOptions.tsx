@@ -2,12 +2,17 @@ import React from 'react';
 import { SetDialogMessage } from 'components/MessageDialog';
 import { ListGroup, Popover } from 'react-bootstrap';
 import { deleteCollection, renameCollection } from 'services/collectionService';
-import { downloadCollection, getSelectedCollection } from 'utils/collection';
+import {
+    changeCollectionVisibilityHelper,
+    downloadCollection,
+    getSelectedCollection,
+} from 'utils/collection';
 import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import LinkButton, { ButtonVariant, LinkButtonProps } from './LinkButton';
 import { sleep } from 'utils/common';
 import { Collection } from 'types/collection';
+import { IsArchived } from 'utils/magicMetadata';
 
 interface CollectionOptionsProps {
     syncWithRemote: () => Promise<void>;
@@ -96,6 +101,19 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         });
     };
 
+    const archiveCollectionHelper = () => {
+        changeCollectionVisibilityHelper(
+            getSelectedCollection(
+                props.selectedCollectionID,
+                props.collections
+            ),
+            props.startLoading,
+            props.finishLoading,
+            props.setDialogMessage,
+            props.syncWithRemote
+        );
+    };
+
     const confirmDownloadCollection = () => {
         props.setDialogMessage({
             title: constants.CONFIRM_DOWNLOAD_COLLECTION,
@@ -139,6 +157,18 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     <MenuItem>
                         <MenuLink onClick={confirmDownloadCollection}>
                             {constants.DOWNLOAD}
+                        </MenuLink>
+                    </MenuItem>
+                    <MenuItem>
+                        <MenuLink onClick={archiveCollectionHelper}>
+                            {IsArchived(
+                                getSelectedCollection(
+                                    props.selectedCollectionID,
+                                    props.collections
+                                )
+                            )
+                                ? constants.UNARCHIVE
+                                : constants.ARCHIVE}
                         </MenuLink>
                     </MenuItem>
                     <MenuItem>
