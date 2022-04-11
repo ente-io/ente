@@ -334,7 +334,7 @@ class UploadManager {
                 this.failedFiles.push(fileWithCollection);
             }
 
-            if (fileUploadResult && isElectron()) {
+            if (fileUploadResult !== null && isElectron()) {
                 this.remainingFiles = this.remainingFiles.filter(
                     (file) => !areSameElectronFiles(file, fileWithCollection)
                 );
