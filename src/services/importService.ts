@@ -11,13 +11,13 @@ class ImportService {
         this.allElectronAPIsExist = !!this.ElectronAPIs?.exists;
     }
 
-    async showUploadFilesDialog(): Promise<string[]> {
+    async showUploadFilesDialog(): Promise<ElectronFile[]> {
         if (this.allElectronAPIsExist) {
             return this.ElectronAPIs.showUploadFilesDialog();
         }
     }
 
-    async showUploadDirsDialog(): Promise<string[]> {
+    async showUploadDirsDialog(): Promise<ElectronFile[]> {
         if (this.allElectronAPIsExist) {
             return this.ElectronAPIs.showUploadDirsDialog();
         }

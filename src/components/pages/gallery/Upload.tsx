@@ -51,6 +51,11 @@ enum UPLOAD_STRATEGY {
     COLLECTION_PER_FOLDER,
 }
 
+enum DESKTOP_UPLOAD_TYPE {
+    FILES,
+    FOLDERS,
+}
+
 interface AnalysisResult {
     suggestedCollectionName: string;
     multipleFolders: boolean;
@@ -81,7 +86,6 @@ export default function Upload(props: Props) {
     const toUploadFiles = useRef<File[] | ElectronFile[]>(null);
     const isPendingDesktopUpload = useRef(false);
     const pendingDesktopUploadCollectionName = useRef<string>('');
-    const [isUploadDirs, setIsUploadDirs] = useState(false);
 
     useEffect(() => {
         UploadManager.initUploader(
@@ -171,12 +175,6 @@ export default function Upload(props: Props) {
     function analyseUploadFiles(): AnalysisResult {
         if (toUploadFiles.current.length === 0) {
             return null;
-        }
-        if (isElectron() && !isUploadDirs) {
-            return {
-                suggestedCollectionName: null,
-                multipleFolders: false,
-            };
         }
 
         const paths: string[] = toUploadFiles.current.map(
@@ -402,6 +400,16 @@ export default function Upload(props: Props) {
             });
         }
     };
+    const handleDesktopUpload = async (type: DESKTOP_UPLOAD_TYPE) => {
+        let files: ElectronFile[];
+        if (type === DESKTOP_UPLOAD_TYPE.FILES) {
+            files = await ImportService.showUploadFilesDialog();
+        } else {
+            files = await ImportService.showUploadDirsDialog();
+        }
+        props.setElectronFiles(files);
+        props.setShowUploadTypeChoiceModal(false);
+    };
 
     const cancelUploads = async () => {
         setUploadStage(UPLOAD_STAGES.CANCELLED);
@@ -429,12 +437,14 @@ export default function Upload(props: Props) {
                 }
             />
             <UploadTypeChoiceModal
-                setElectronFiles={props.setElectronFiles}
-                showUploadTypeChoiceModal={props.showUploadTypeChoiceModal}
-                setShowUploadTypeChoiceModal={
-                    props.setShowUploadTypeChoiceModal
+                show={props.showUploadTypeChoiceModal}
+                onHide={() => props.setShowUploadTypeChoiceModal(false)}
+                uploadFiles={() =>
+                    handleDesktopUpload(DESKTOP_UPLOAD_TYPE.FILES)
                 }
-                setIsUploadDirs={setIsUploadDirs}
+                uploadFolders={() =>
+                    handleDesktopUpload(DESKTOP_UPLOAD_TYPE.FOLDERS)
+                }
             />
             <UploadProgress
                 now={percentComplete}

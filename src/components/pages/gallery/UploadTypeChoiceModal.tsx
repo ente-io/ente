@@ -1,43 +1,24 @@
 import { Modal, Button, Container, Row } from 'react-bootstrap';
 import React from 'react';
-import ImportService from 'services/importService';
 import constants from 'utils/strings/constants';
 import { IoIosArrowForward, IoMdClose } from 'react-icons/io';
 import FileUploadIcon from 'components/icons/FileUploadIcon';
 import FolderUploadIcon from 'components/icons/FolderUploadIcon';
 
 export default function UploadTypeChoiceModal({
-    setElectronFiles,
-    showUploadTypeChoiceModal,
-    setShowUploadTypeChoiceModal,
-    setIsUploadDirs,
+    onHide,
+    show,
+    uploadFiles,
+    uploadFolders,
 }) {
-    const hideFiletypeDialog = () => {
-        setShowUploadTypeChoiceModal(false);
-    };
-
-    const uploadFiles = async () => {
-        const files = await ImportService.showUploadFilesDialog();
-        hideFiletypeDialog();
-        setIsUploadDirs(false);
-        setElectronFiles(files);
-    };
-
-    const uploadDirs = async () => {
-        const files = await ImportService.showUploadDirsDialog();
-        hideFiletypeDialog();
-        setIsUploadDirs(true);
-        setElectronFiles(files);
-    };
-
     return (
         <Modal
-            show={showUploadTypeChoiceModal}
+            show={show}
             aria-labelledby="contained-modal-title-vcenter"
             centered
             dialogClassName="file-type-choice-modal">
             <Modal.Header
-                onHide={hideFiletypeDialog}
+                onHide={onHide}
                 style={{
                     borderBottom: 'none',
                     height: '4em',
@@ -53,7 +34,7 @@ export default function UploadTypeChoiceModal({
                 </Modal.Title>
                 <IoMdClose
                     size={30}
-                    onClick={hideFiletypeDialog}
+                    onClick={onHide}
                     style={{ cursor: 'pointer' }}
                 />
             </Modal.Header>
@@ -85,7 +66,7 @@ export default function UploadTypeChoiceModal({
                     <Row className="justify-content-md-center py-2">
                         <Button
                             variant="light"
-                            onClick={uploadDirs}
+                            onClick={uploadFolders}
                             style={{ width: '90%', height: '3em' }}>
                             <Container>
                                 <Row>
