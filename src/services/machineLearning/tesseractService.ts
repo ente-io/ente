@@ -78,6 +78,9 @@ class TesseractService implements TextDetectionService {
                 );
             }
             if (imageHeight > TESSERACT_MAX_IMAGE_DIMENSION) {
+                console.log(
+                    `original dimension (${imageBitmap.width}px,${imageBitmap.height}px)`
+                );
                 imageBitmap = resizeToSquare(
                     imageBitmap,
                     TESSERACT_MAX_IMAGE_DIMENSION
@@ -103,6 +106,9 @@ class TesseractService implements TextDetectionService {
 
             const tesseractWorker = await this.getTesseractWorker();
             const id = makeID(6);
+            console.log(
+                `detecting text (${imageBitmap.width}px,${imageBitmap.height}px) fileType=${fileTypeInfo.exactType}`
+            );
             console.time('detecting text ' + id);
 
             const detections = await tesseractWorker.recognize(file);
