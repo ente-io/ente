@@ -7,20 +7,19 @@ import {
     Versioned,
 } from 'types/machineLearning';
 
-import Tesseract, { createWorker, RecognizeResult } from 'tesseract.js';
+import Tesseract, { createWorker } from 'tesseract.js';
 import QueueProcessor from 'services/queueProcessor';
 import { CustomError } from 'utils/error';
 import { imageBitmapToBlob, resizeToSquare } from 'utils/image';
 import { getFileType } from 'services/upload/readFileService';
 import { FILE_TYPE } from 'constants/file';
+import { makeID } from 'utils/user';
 
 class TesseractService implements TextDetectionService {
     private tesseractWorker: Tesseract.Worker;
     public method: Versioned<TextDetectionMethod>;
     private ready: Promise<void>;
-    private textDetector = new QueueProcessor<
-        Tesseract.RecognizeResult | Error
-    >(1);
+    private textDetector = new QueueProcessor<Tesseract.Word[] | Error>(1);
     public constructor() {
         this.method = {
             value: 'Tesseract',
@@ -59,8 +58,9 @@ class TesseractService implements TextDetectionService {
     }
 
     async detectText(
-        imageBitmap: ImageBitmap
-    ): Promise<RecognizeResult | Error> {
+        imageBitmap: ImageBitmap,
+        minAccuracy: number
+    ): Promise<Tesseract.Word[] | Error> {
         const response = this.textDetector.queueUpRequest(async () => {
             const imageHeight = Math.min(imageBitmap.width, imageBitmap.height);
             const imageWidth = Math.max(imageBitmap.width, imageBitmap.height);
@@ -102,9 +102,17 @@ class TesseractService implements TextDetectionService {
             }
 
             const tesseractWorker = await this.getTesseractWorker();
-            const detections = await tesseractWorker.recognize(file);
+            const id = makeID(6);
+            console.time('detecting text ' + id);
 
-            return detections;
+            const detections = await tesseractWorker.recognize(file);
+            console.timeEnd('detecting text ' + id);
+
+            const filteredDetections = detections.data.words.filter(
+                ({ confidence }) => confidence >= minAccuracy
+            );
+
+            return filteredDetections;
         });
         try {
             return await response.promise;

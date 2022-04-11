@@ -34,24 +34,22 @@ class TextService {
             fileContext
         );
 
-        console.time('detecting text ' + fileContext.enteFile.id);
         const textDetections =
-            await syncContext.textDetectionService.detectText(imageBitmap);
-        console.timeEnd('detecting text ' + fileContext.enteFile.id);
+            await syncContext.textDetectionService.detectText(
+                imageBitmap,
+                syncContext.config.textDetection.minAccuracy
+            );
         if (textDetections instanceof Error) {
             newMlFile.errorCount = 2;
             newMlFile.lastErrorMessage = textDetections.message;
             return;
         }
-        const detectedText: DetectedText[] = textDetections.data.words
-            .filter(
-                ({ confidence }) =>
-                    confidence >= syncContext.config.textDetection.minAccuracy
-            )
-            .map(({ bbox, confidence, text }) => ({
+        const detectedText: DetectedText[] = textDetections.map(
+            ({ bbox, confidence, text }) => ({
                 fileID: fileContext.enteFile.id,
                 detection: { bbox, confidence, word: text.toLocaleLowerCase() },
-            }));
+            })
+        );
         newMlFile.text = detectedText;
         console.log(
             '[MLService] Detected text: ',
