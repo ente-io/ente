@@ -411,7 +411,8 @@ export default function Upload(props: Props) {
     };
 
     const cancelUploads = async () => {
-        setUploadStage(UPLOAD_STAGES.CANCELLED);
+        setProgressView(false);
+        UploadManager.cancelRemainingUploads();
         if (isElectron()) {
             ImportService.updatePendingUploads([]);
         }

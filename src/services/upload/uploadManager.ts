@@ -61,7 +61,7 @@ class UploadManager {
         this.setFiles = setFiles;
     }
 
-    private async init(collections: Collection[]) {
+    private resetState() {
         this.filesToBeUploaded = [];
         this.remainingFiles = [];
         this.failedFiles = [];
@@ -70,6 +70,10 @@ class UploadManager {
             number,
             MetadataAndFileTypeInfo
         >();
+    }
+
+    private async init(collections: Collection[]) {
+        this.resetState();
         this.existingFiles = await getLocalFiles();
         this.existingFilesCollectionWise = sortFilesIntoCollections(
             this.existingFiles
@@ -355,6 +359,10 @@ class UploadManager {
 
     async retryFailedFiles() {
         await this.queueFilesForUpload(this.failedFiles);
+    }
+
+    cancelRemainingUploads() {
+        this.resetState();
     }
 }
 
