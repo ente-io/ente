@@ -401,15 +401,12 @@ export async function changeFileCreationTime(
     const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedTime,
     };
-
-    return {
-        ...file,
-        publicMagicMetadata: await updateMagicMetadataProps(
-            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
-            file.key,
-            updatedPublicMagicMetadataProps
-        ),
-    } as EnteFile;
+    file.pubMagicMetadata = await updateMagicMetadataProps(
+        file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+        file.key,
+        updatedPublicMagicMetadataProps
+    );
+    return file;
 }
 
 export async function changeFileName(file: EnteFile, editedName: string) {
@@ -417,14 +414,12 @@ export async function changeFileName(file: EnteFile, editedName: string) {
         editedName,
     };
 
-    return {
-        ...file,
-        publicMagicMetadata: await updateMagicMetadataProps(
-            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
-            file.key,
-            updatedPublicMagicMetadataProps
-        ),
-    } as EnteFile;
+    file.pubMagicMetadata = await updateMagicMetadataProps(
+        file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+        file.key,
+        updatedPublicMagicMetadataProps
+    );
+    return file;
 }
 
 export function isSharedFile(file: EnteFile) {
