@@ -31,7 +31,8 @@
           "**/*"
         ]
       }
-    ]
+    ],
+    "extends": null
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
