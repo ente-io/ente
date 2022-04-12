@@ -53,9 +53,7 @@ class TesseractService implements TextDetectionService {
         if (!this.tesseractWorker) {
             this.ready = this.init();
         }
-
         await this.ready;
-
         return this.tesseractWorker;
     }
 
