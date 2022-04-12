@@ -246,6 +246,7 @@ export interface FaceDetectionConfig {
 
 export interface ObjectDetectionConfig {
     method: ObjectDetectionMethod;
+    maxNumBoxes: number;
     minScore: number;
 }
 
@@ -386,7 +387,8 @@ export interface ObjectDetectionService {
     // init(): Promise<void>;
     detectObjects(
         image: ImageBitmap,
-        minScore?: number
+        maxNumBoxes: number,
+        minScore: number
     ): Promise<ObjectDetection[]>;
     dispose(): Promise<void>;
 }

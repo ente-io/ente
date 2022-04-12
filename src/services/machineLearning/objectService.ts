@@ -42,6 +42,7 @@ class ObjectService {
         const objectDetections =
             await syncContext.objectDetectionService.detectObjects(
                 imageBitmap,
+                syncContext.config.objectDetection.maxNumBoxes,
                 syncContext.config.objectDetection.minScore
             );
         // console.log('3 TF Memory stats: ', tf.memory());

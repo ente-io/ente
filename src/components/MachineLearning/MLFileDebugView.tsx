@@ -97,6 +97,7 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
 
             const objectDetections = await ssdMobileNetV2Service.detectObjects(
                 imageBitmap,
+                DEFAULT_ML_SYNC_CONFIG.objectDetection.maxNumBoxes,
                 DEFAULT_ML_SYNC_CONFIG.objectDetection.minScore
             );
             console.log('detectedObjects: ', objectDetections);

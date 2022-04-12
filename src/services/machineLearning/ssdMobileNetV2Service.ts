@@ -42,13 +42,14 @@ class SSDMobileNetV2 implements ObjectDetectionService {
 
     public async detectObjects(
         image: ImageBitmap,
-        minScore?: number
+        maxNumberBoxes: number,
+        minScore: number
     ): Promise<ObjectDetection[]> {
         const ssdMobileNetV2Model = await this.getSSDMobileNetV2Model();
         const tfImage = tf.browser.fromPixels(image);
         const detections = await ssdMobileNetV2Model.detect(
             tfImage,
-            undefined,
+            maxNumberBoxes,
             minScore
         );
         return detections;

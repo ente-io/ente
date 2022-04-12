@@ -45,6 +45,7 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     },
     objectDetection: {
         method: 'SSDMobileNetV2',
+        maxNumBoxes: 20,
         minScore: 0.2,
     },
     textDetection: {
