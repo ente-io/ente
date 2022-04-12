@@ -135,7 +135,7 @@ export default function Upload(props: Props) {
                 if (analysisResult) {
                     setAnalysisResult(analysisResult);
                 }
-            } else {
+            } else if (appContext.sharedFiles.length > 0) {
                 toUploadFiles.current = appContext.sharedFiles;
             }
             handleCollectionCreationAndUpload(
