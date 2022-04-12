@@ -30,10 +30,20 @@ class TextService {
         }
         newMlFile.textDetectionMethod = syncContext.textDetectionService.method;
         fileContext.newDetection = true;
-        const imageBitmap = await ReaderService.getImageBitmap(
+        const imageBitmap: ImageBitmap = await ReaderService.getImageBitmap(
             syncContext,
             fileContext
         );
+        if (
+            !(
+                (imageBitmap.width >= 44 && imageBitmap.height >= 20) ||
+                (imageBitmap.width >= 20 && imageBitmap.height >= 44)
+            )
+        ) {
+            return;
+        }
+
+        console.time('detecting text ' + fileContext.enteFile.id);
         const textDetections =
             await syncContext.textDetectionService.detectText(
                 new File(
@@ -41,6 +51,7 @@ class TextService {
                     fileContext.enteFile.id.toString()
                 )
             );
+        console.timeEnd('detecting text ' + fileContext.enteFile.id);
 
         const detectedText: DetectedText[] = textDetections.data.words
             .filter(
@@ -49,7 +60,7 @@ class TextService {
             )
             .map(({ bbox, confidence, text }) => ({
                 fileID: fileContext.enteFile.id,
-                detection: { bbox, confidence, word: text },
+                detection: { bbox, confidence, word: text.toLocaleLowerCase() },
             }));
         newMlFile.text = detectedText;
         console.log(
@@ -79,10 +90,12 @@ class TextService {
             const objectsInCluster = textCluster.get(text.detection.word);
             objectsInCluster.push(text.fileID);
         });
-        return [...textCluster.entries()].map(([word, files]) => ({
-            word,
-            files,
-        }));
+        return [...textCluster.entries()]
+            .map(([word, files]) => ({
+                word,
+                files,
+            }))
+            .sort((a, b) => b.files.length - a.files.length);
     }
 
     // async syncThingClassesIndex(syncContext: MLSyncContext) {
