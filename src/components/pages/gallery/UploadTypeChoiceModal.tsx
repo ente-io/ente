@@ -43,7 +43,7 @@ export default function UploadTypeChoiceModal({
                     height: '10em',
                 }}>
                 <Container>
-                    <Row className="justify-content-md-center py-2">
+                    <Row className="justify-content-center py-2">
                         <Button
                             variant="light"
                             onClick={uploadFiles}
@@ -63,7 +63,7 @@ export default function UploadTypeChoiceModal({
                             </Container>
                         </Button>
                     </Row>
-                    <Row className="justify-content-md-center py-2">
+                    <Row className="justify-content-center py-2">
                         <Button
                             variant="light"
                             onClick={uploadFolders}
