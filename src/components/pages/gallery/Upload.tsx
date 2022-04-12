@@ -104,7 +104,7 @@ export default function Upload(props: Props) {
         if (isElectron()) {
             ImportService.getPendingUploads().then(
                 ({ files, collectionName }) => {
-                    resumeUploadsIfAny(files, collectionName);
+                    resumeDesktopUpload(files, collectionName);
                 }
             );
         }
@@ -156,17 +156,16 @@ export default function Upload(props: Props) {
         setProgressView(true);
     };
 
-    function resumeUploadsIfAny(files: ElectronFile[], collectionName: string) {
-        if (files && files?.length > 0) {
-            isPendingDesktopUpload.current = true;
-            resumeDesktopUpload(files, collectionName);
-        }
-    }
-
-    const resumeDesktopUpload = async (files, collectionName) => {
+    const resumeDesktopUpload = async (
+        files: ElectronFile[],
+        collectionName: string
+    ) => {
         try {
-            pendingDesktopUploadCollectionName.current = collectionName;
-            props.setElectronFiles(files);
+            if (files && files?.length > 0) {
+                isPendingDesktopUpload.current = true;
+                pendingDesktopUploadCollectionName.current = collectionName;
+                props.setElectronFiles(files);
+            }
         } catch (e) {
             logError(e, 'Failed to get previously failed files');
         }
