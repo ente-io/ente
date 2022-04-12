@@ -42,7 +42,7 @@
     "start": "yarn run pre-build && concurrently \"yarn run watch\" \"electron ./app/main/index.js\" \"cd src/renderer && yarn dev\"",
     "build-renderer": "cd src/renderer && yarn && yarn build && cd ../../",
     "test-release": "yarn && yarn build-renderer && yarn run build-main && electron-builder",
-    "release": "electron-builder -mwl --publish always"
+    "release": "yarn && yarn build-renderer && yarn run build-main && electron-builder -mwl --publish always"
   },
   "author": "ente <code@ente.io>",
   "devDependencies": {
