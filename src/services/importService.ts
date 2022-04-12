@@ -43,6 +43,15 @@ class ImportService {
     ) {
         if (this.allElectronAPIsExist) {
             let collectionName: string;
+            /* collection being one suggest one of two things
+                1. Either the user has upload to a single existing collection
+                2. Created a new single collection to upload to 
+                    may have had multiple folder, but chose to upload
+                    to one album
+                hence saving the collection name when upload collection count is 1
+                helps the info of user choosing this options
+                and on next upload we can directly start uploading to this collection 
+            */
             if (collections.length === 1) {
                 collectionName = collections[0].name;
             }
