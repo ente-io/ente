@@ -37,12 +37,12 @@
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
     "build-main": "tsc",
-    "build-renderer": "cd src/renderer && yarn && yarn build && cd ../../",
-    "pre-build": "concurrently \"yarn && yarn run build-main\" \"cd src/renderer && yarn\"",
-    "build": "yarn && yarn build-renderer && yarn run build-main",
+    "build-ui": "cd src/ui && yarn && yarn build && cd ../../",
+    "pre-build": "concurrently \"yarn && yarn run build-main\" \"cd src/ui && yarn\"",
+    "build": "yarn && yarn build-ui && yarn run build-main",
     "watch": "tsc -w",
     "lint": "eslint -c .eslintrc --ext .ts ./src",
-    "start": "yarn run pre-build && concurrently \"yarn run watch\" \"electron ./app/main/index.js\" \"cd src/renderer && yarn dev\"",
+    "start": "yarn run pre-build && concurrently \"yarn run watch\" \"electron ./app/main/index.js\" \"cd src/ui && yarn dev\"",
     "test-release": "yarn build && electron-builder"
   },
   "author": "ente <code@ente.io>",

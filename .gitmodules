@@ -1,4 +1,4 @@
-[submodule "src/renderer"]
-	path = src/renderer
+[submodule "src/ui"]
+	path = src/ui
 	url = https://github.com/ente-io/bada-frame
 	branch = recover-failed-imports
