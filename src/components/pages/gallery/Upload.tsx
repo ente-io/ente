@@ -399,7 +399,7 @@ export default function Upload(props: Props) {
             });
         }
     };
-    const handleDesktopUpload = async (type: DESKTOP_UPLOAD_TYPE) => {
+    const handleDesktopUploadTypes = async (type: DESKTOP_UPLOAD_TYPE) => {
         let files: ElectronFile[];
         if (type === DESKTOP_UPLOAD_TYPE.FILES) {
             files = await ImportService.showUploadFilesDialog();
@@ -439,10 +439,10 @@ export default function Upload(props: Props) {
                 show={props.showUploadTypeChoiceModal}
                 onHide={() => props.setShowUploadTypeChoiceModal(false)}
                 uploadFiles={() =>
-                    handleDesktopUpload(DESKTOP_UPLOAD_TYPE.FILES)
+                    handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FILES)
                 }
                 uploadFolders={() =>
-                    handleDesktopUpload(DESKTOP_UPLOAD_TYPE.FOLDERS)
+                    handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FOLDERS)
                 }
             />
             <UploadProgress
