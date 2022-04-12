@@ -30,7 +30,6 @@ import FaceService from './faceService';
 import PeopleService from './peopleService';
 import ObjectService from './objectService';
 import TextService from './textService';
-import { promiseWithTimeout } from 'utils/common/promiseTimeout';
 class MachineLearningService {
     private initialized = false;
     // private faceDetectionService: FaceDetectionService;

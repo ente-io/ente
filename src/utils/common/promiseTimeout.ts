@@ -10,5 +10,5 @@ export const promiseWithTimeout = async (
             timeout
         );
     });
-    await Promise.race([request, rejectOnTimeout]);
+    return await Promise.race([request, rejectOnTimeout]);
 };

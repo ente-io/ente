@@ -15,6 +15,7 @@ import { getFileType } from 'services/upload/readFileService';
 import { FILE_TYPE } from 'constants/file';
 import { makeID } from 'utils/user';
 import { TEXT_DETECTION_TIMEOUT_MS } from 'constants/machineLearning/config';
+import { promiseWithTimeout } from 'utils/common/promiseTimeout';
 
 class TesseractService implements TextDetectionService {
     private tesseractWorker: Tesseract.Worker;
@@ -63,79 +64,9 @@ class TesseractService implements TextDetectionService {
         minAccuracy: number,
         attemptNumber: number
     ): Promise<Tesseract.Word[] | Error> {
-        const response = this.textDetector.queueUpRequest(async () => {
-            const imageHeight = Math.min(imageBitmap.width, imageBitmap.height);
-            const imageWidth = Math.max(imageBitmap.width, imageBitmap.height);
-            if (
-                !(
-                    imageWidth >= TESSERACT_MIN_IMAGE_WIDTH &&
-                    imageHeight >= TESSERACT_MIN_IMAGE_HEIGHT
-                )
-            ) {
-                console.log(
-                    `file too small for tesseract- (${imageWidth},${imageHeight}) skipping text detection...`
-                );
-                return Error(
-                    `file too small for tesseract- (${imageWidth},${imageHeight}) skipping text detection...`
-                );
-            }
-            if (imageHeight > TESSERACT_MAX_IMAGE_DIMENSION) {
-                console.log(
-                    `original dimension (${imageBitmap.width}px,${imageBitmap.height}px)`
-                );
-                imageBitmap = resizeToSquare(
-                    imageBitmap,
-                    TESSERACT_MAX_IMAGE_DIMENSION
-                ).image;
-            }
-            const file = new File(
-                [await imageBitmapToBlob(imageBitmap)],
-                'text-detection-dummy-image'
-            );
-            const fileTypeInfo = await getFileType(new FileReader(), file);
-
-            if (
-                fileTypeInfo.fileType !== FILE_TYPE.IMAGE &&
-                !['png', 'jpg', 'bmp', 'pbm'].includes(fileTypeInfo.exactType)
-            ) {
-                console.log(
-                    `unsupported file type- ${fileTypeInfo.exactType}, skipping text detection....`
-                );
-                return Error(
-                    `unsupported file type- ${fileTypeInfo.exactType}, skipping text detection....`
-                );
-            }
-
-            const tesseractWorker = await this.getTesseractWorker();
-            const id = makeID(6);
-            console.log(
-                `detecting text (${imageBitmap.width}px,${imageBitmap.height}px) fileType=${fileTypeInfo.exactType}`
-            );
-            console.time('detecting text ' + id);
-            const detections = await new Promise<Tesseract.RecognizeResult>(
-                (resolve, reject) => {
-                    const timeout = setTimeout(() => {
-                        this.dispose();
-                        reject(Error('TIMEOUT'));
-                    }, TEXT_DETECTION_TIMEOUT_MS[attemptNumber]);
-                    const main = async () => {
-                        const detections = await tesseractWorker.recognize(
-                            file
-                        );
-                        clearTimeout(timeout);
-                        resolve(detections);
-                    };
-                    main();
-                }
-            );
-            console.timeEnd('detecting text ' + id);
-
-            const filteredDetections = detections.data.words.filter(
-                ({ confidence }) => confidence >= minAccuracy
-            );
-
-            return filteredDetections;
-        });
+        const response = this.textDetector.queueUpRequest(() =>
+            this.detectTextUsingModel(imageBitmap, minAccuracy, attemptNumber)
+        );
         try {
             return await response.promise;
         } catch (e) {
@@ -147,6 +78,77 @@ class TesseractService implements TextDetectionService {
             }
         }
     }
+
+    private detectTextUsingModel = async (
+        imageBitmap: ImageBitmap,
+        minAccuracy: number,
+        attemptNumber: number
+    ) => {
+        const imageHeight = Math.min(imageBitmap.width, imageBitmap.height);
+        const imageWidth = Math.max(imageBitmap.width, imageBitmap.height);
+        if (
+            !(
+                imageWidth >= TESSERACT_MIN_IMAGE_WIDTH &&
+                imageHeight >= TESSERACT_MIN_IMAGE_HEIGHT
+            )
+        ) {
+            console.log(
+                `file too small for tesseract- (${imageWidth},${imageHeight}) skipping text detection...`
+            );
+            return Error(
+                `file too small for tesseract- (${imageWidth},${imageHeight}) skipping text detection...`
+            );
+        }
+        if (imageHeight > TESSERACT_MAX_IMAGE_DIMENSION) {
+            console.log(
+                `original dimension (${imageBitmap.width}px,${imageBitmap.height}px)`
+            );
+            imageBitmap = resizeToSquare(
+                imageBitmap,
+                TESSERACT_MAX_IMAGE_DIMENSION
+            ).image;
+        }
+        const file = new File(
+            [await imageBitmapToBlob(imageBitmap)],
+            'text-detection-dummy-image'
+        );
+        const fileTypeInfo = await getFileType(new FileReader(), file);
+
+        if (
+            fileTypeInfo.fileType !== FILE_TYPE.IMAGE &&
+            !['png', 'jpg', 'bmp', 'pbm'].includes(fileTypeInfo.exactType)
+        ) {
+            console.log(
+                `unsupported file type- ${fileTypeInfo.exactType}, skipping text detection....`
+            );
+            return Error(
+                `unsupported file type- ${fileTypeInfo.exactType}, skipping text detection....`
+            );
+        }
+
+        const tesseractWorker = await this.getTesseractWorker();
+        const id = makeID(6);
+        console.log(
+            `detecting text (${imageBitmap.width}px,${imageBitmap.height}px) fileType=${fileTypeInfo.exactType}`
+        );
+        try {
+            console.time('detecting text ' + id);
+            const detections = (await promiseWithTimeout(
+                tesseractWorker.recognize(file),
+                TEXT_DETECTION_TIMEOUT_MS[attemptNumber]
+            )) as Tesseract.RecognizeResult;
+            console.timeEnd('detecting text ' + id);
+            const filteredDetections = detections.data.words.filter(
+                ({ confidence }) => confidence >= minAccuracy
+            );
+            return filteredDetections;
+        } catch (e) {
+            if (e.message === CustomError.WAIT_TIME_EXCEEDED) {
+                this.dispose();
+            }
+            throw e;
+        }
+    };
 
     public async dispose() {
         const tesseractWorker = await this.getTesseractWorker();
