@@ -64,7 +64,6 @@
     "@types/mime": "^2.0.3",
     "@types/node": "^14.14.37",
     "@types/promise-fs": "^2.1.1",
-    "electron-is-dev": "^2.0.0",
     "electron-log": "^4.3.5",
     "electron-reload": "^2.0.0-alpha.1",
     "electron-store": "^8.0.1",

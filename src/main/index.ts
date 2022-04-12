@@ -1,8 +1,7 @@
 import { app, BrowserWindow, Menu, Tray, dialog, nativeImage } from 'electron';
 import * as path from 'path';
-import * as isDev from 'electron-is-dev';
 import AppUpdater from './utils/appUpdater';
-import { createWindow } from './utils/createWindow';
+import { createWindow, isDev } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
 import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 import initSentry from './utils/sentry';

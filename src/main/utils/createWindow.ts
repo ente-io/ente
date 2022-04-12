@@ -1,5 +1,4 @@
 import { app, BrowserWindow, nativeImage } from 'electron';
-import * as isDev from 'electron-is-dev';
 import * as path from 'path';
 import { isAppQuitting } from '..';
 import { addAllowOriginHeader } from './cors';
@@ -68,3 +67,5 @@ export function createWindow(): BrowserWindow {
     });
     return mainWindow;
 }
+
+export const isDev = !app.isPackaged;
