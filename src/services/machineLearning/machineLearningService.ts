@@ -425,6 +425,9 @@ class MachineLearningService {
                 ),
                 TextService.syncFileTextDetections(syncContext, fileContext),
             ]);
+            newMlFile.errorCount = 0;
+            newMlFile.lastErrorMessage = undefined;
+            await this.persistMLFileData(syncContext, newMlFile);
         } catch (e) {
             newMlFile.mlVersion = oldMlFile.mlVersion;
             throw e;
@@ -432,9 +435,6 @@ class MachineLearningService {
             fileContext.tfImage && fileContext.tfImage.dispose();
             fileContext.imageBitmap && fileContext.imageBitmap.close();
             // console.log('8 TF Memory stats: ', tf.memory());
-            newMlFile.errorCount = 0;
-            newMlFile.lastErrorMessage = undefined;
-            await this.persistMLFileData(syncContext, newMlFile);
 
             // TODO: enable once faceId changes go in
             // await removeOldFaceCrops(
