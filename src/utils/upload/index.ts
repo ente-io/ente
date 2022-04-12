@@ -81,12 +81,9 @@ export function getFileNameSize(file: File | ElectronFile) {
     return `${file.name}_${convertBytesToHumanReadable(file.size)}`;
 }
 
-export function areSameElectronFiles(
+export function areSameFileWithCollections(
     firstFile: FileWithCollection,
     secondFile: FileWithCollection
 ): boolean {
-    return (
-        (firstFile.file as ElectronFile).path ===
-        (secondFile.file as ElectronFile).path
-    );
+    return firstFile.localID === secondFile.localID;
 }
