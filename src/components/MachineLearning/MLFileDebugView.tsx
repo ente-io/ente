@@ -103,7 +103,8 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
 
             const textDetections = await tesseractService.detectText(
                 imageBitmap,
-                DEFAULT_ML_SYNC_CONFIG.textDetection.minAccuracy
+                DEFAULT_ML_SYNC_CONFIG.textDetection.minAccuracy,
+                0
             );
             console.log('detectedTexts: ', textDetections);
 
