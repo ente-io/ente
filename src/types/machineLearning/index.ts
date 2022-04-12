@@ -396,7 +396,8 @@ export interface TextDetectionService {
     // init(): Promise<void>;
     detectText(
         imageBitmap: ImageBitmap,
-        minAccuracy: number
+        minAccuracy: number,
+        attemptNumber: number
     ): Promise<Tesseract.Word[] | Error>;
     dispose(): Promise<void>;
 }

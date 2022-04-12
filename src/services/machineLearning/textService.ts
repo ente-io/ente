@@ -19,7 +19,8 @@ class TextService {
                 oldMlFile?.textDetectionMethod,
                 syncContext.textDetectionService.method
             ) &&
-            oldMlFile?.imageSource === syncContext.config.imageSource
+            oldMlFile?.imageSource === syncContext.config.imageSource &&
+            oldMlFile?.lastErrorMessage === null
         ) {
             newMlFile.text = oldMlFile?.text;
             newMlFile.imageSource = oldMlFile.imageSource;
@@ -37,7 +38,8 @@ class TextService {
         const textDetections =
             await syncContext.textDetectionService.detectText(
                 imageBitmap,
-                syncContext.config.textDetection.minAccuracy
+                syncContext.config.textDetection.minAccuracy,
+                oldMlFile?.errorCount ?? 0
             );
         if (textDetections instanceof Error) {
             newMlFile.errorCount = 2;

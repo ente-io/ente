@@ -14,6 +14,7 @@ import { imageBitmapToBlob, resizeToSquare } from 'utils/image';
 import { getFileType } from 'services/upload/readFileService';
 import { FILE_TYPE } from 'constants/file';
 import { makeID } from 'utils/user';
+import { TEXT_DETECTION_TIMEOUT_MS } from 'constants/machineLearning/config';
 
 class TesseractService implements TextDetectionService {
     private tesseractWorker: Tesseract.Worker;
@@ -59,7 +60,8 @@ class TesseractService implements TextDetectionService {
 
     async detectText(
         imageBitmap: ImageBitmap,
-        minAccuracy: number
+        minAccuracy: number,
+        attemptNumber: number
     ): Promise<Tesseract.Word[] | Error> {
         const response = this.textDetector.queueUpRequest(async () => {
             const imageHeight = Math.min(imageBitmap.width, imageBitmap.height);
@@ -115,7 +117,7 @@ class TesseractService implements TextDetectionService {
                     const timeout = setTimeout(() => {
                         this.dispose();
                         reject(Error('TIMEOUT'));
-                    }, 10000);
+                    }, TEXT_DETECTION_TIMEOUT_MS[attemptNumber]);
                     const main = async () => {
                         const detections = await tesseractWorker.recognize(
                             file
