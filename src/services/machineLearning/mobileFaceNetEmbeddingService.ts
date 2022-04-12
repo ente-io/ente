@@ -1,11 +1,11 @@
 import * as tf from '@tensorflow/tfjs-core';
 import { TFLiteModel } from '@tensorflow/tfjs-tflite';
+import { MOBILEFACENET_FACE_SIZE } from 'constants/machineLearning/config';
 import PQueue from 'p-queue';
 import {
     FaceEmbedding,
     FaceEmbeddingMethod,
     FaceEmbeddingService,
-    MOBILEFACENET_FACE_SIZE,
     Versioned,
 } from 'types/machineLearning';
 import { imageBitmapsToTensor4D } from 'utils/machineLearning';

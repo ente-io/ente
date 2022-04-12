@@ -1,7 +1,4 @@
 import {
-    TESSERACT_MAX_IMAGE_DIMENSION,
-    TESSERACT_MIN_IMAGE_HEIGHT,
-    TESSERACT_MIN_IMAGE_WIDTH,
     TextDetectionMethod,
     TextDetectionService,
     Versioned,
@@ -14,7 +11,12 @@ import { imageBitmapToBlob, resizeToSquare } from 'utils/image';
 import { getFileType } from 'services/upload/readFileService';
 import { FILE_TYPE } from 'constants/file';
 import { makeID } from 'utils/user';
-import { TEXT_DETECTION_TIMEOUT_MS } from 'constants/machineLearning/config';
+import {
+    TESSERACT_MAX_IMAGE_DIMENSION,
+    TESSERACT_MIN_IMAGE_HEIGHT,
+    TESSERACT_MIN_IMAGE_WIDTH,
+    TEXT_DETECTION_TIMEOUT_MS,
+} from 'constants/machineLearning/config';
 import { promiseWithTimeout } from 'utils/common/promiseTimeout';
 
 class TesseractService implements TextDetectionService {

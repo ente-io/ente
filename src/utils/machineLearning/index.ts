@@ -1,6 +1,9 @@
 import { NormalizedFace } from 'blazeface-back';
 import * as tf from '@tensorflow/tfjs-core';
-import { ML_SYNC_DOWNLOAD_TIMEOUT_MS } from 'constants/machineLearning/config';
+import {
+    BLAZEFACE_FACE_SIZE,
+    ML_SYNC_DOWNLOAD_TIMEOUT_MS,
+} from 'constants/machineLearning/config';
 import { euclidean } from 'hdbscan';
 import PQueue from 'p-queue';
 import DownloadManager from 'services/downloadManager';
@@ -10,7 +13,6 @@ import { Dimensions } from 'types/image';
 import {
     Thing,
     AlignedFace,
-    BLAZEFACE_FACE_SIZE,
     DetectedFace,
     DetectedObject,
     Face,

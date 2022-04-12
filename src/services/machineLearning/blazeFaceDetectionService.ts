@@ -6,12 +6,6 @@ import {
 import * as tf from '@tensorflow/tfjs-core';
 import { GraphModel } from '@tensorflow/tfjs-converter';
 import {
-    BLAZEFACE_FACE_SIZE,
-    BLAZEFACE_INPUT_SIZE,
-    BLAZEFACE_IOU_THRESHOLD,
-    BLAZEFACE_MAX_FACES,
-    BLAZEFACE_PASS1_SCORE_THRESHOLD,
-    BLAZEFACE_SCORE_THRESHOLD,
     FaceDetection,
     FaceDetectionMethod,
     FaceDetectionService,
@@ -30,7 +24,15 @@ import {
     removeDuplicateDetections,
     transformPaddedToImage,
 } from 'utils/machineLearning/faceDetection';
-import { MAX_FACE_DISTANCE_PERCENT } from 'constants/machineLearning/config';
+import {
+    BLAZEFACE_FACE_SIZE,
+    BLAZEFACE_INPUT_SIZE,
+    BLAZEFACE_IOU_THRESHOLD,
+    BLAZEFACE_MAX_FACES,
+    BLAZEFACE_PASS1_SCORE_THRESHOLD,
+    BLAZEFACE_SCORE_THRESHOLD,
+    MAX_FACE_DISTANCE_PERCENT,
+} from 'constants/machineLearning/config';
 
 class BlazeFaceDetectionService implements FaceDetectionService {
     private blazeFaceModel: Promise<BlazeFaceModel>;
