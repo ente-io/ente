@@ -9,7 +9,7 @@ import {
 import { logError } from 'utils/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
 import {
-    areSameFileWithCollections,
+    areFileWithCollectionsSame,
     getFileNameSize,
     segregateMetadataAndMediaFiles,
 } from 'utils/upload';
@@ -344,7 +344,7 @@ class UploadManager {
             if (fileUploadResult !== null && isElectron()) {
                 this.remainingFiles = this.remainingFiles.filter(
                     (file) =>
-                        !areSameFileWithCollections(file, fileWithCollection)
+                        !areFileWithCollectionsSame(file, fileWithCollection)
                 );
                 ImportService.updatePendingUploads(this.remainingFiles);
             }
