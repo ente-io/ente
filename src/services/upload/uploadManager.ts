@@ -63,6 +63,7 @@ class UploadManager {
 
     private async init(collections: Collection[]) {
         this.filesToBeUploaded = [];
+        this.remainingFiles = [];
         this.failedFiles = [];
         this.parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
         this.metadataAndFileTypeInfoMap = new Map<
@@ -354,11 +355,6 @@ class UploadManager {
 
     async retryFailedFiles() {
         await this.queueFilesForUpload(this.failedFiles);
-    }
-
-    async clearRemainingFiles() {
-        this.remainingFiles = [];
-        await this.init([]);
     }
 }
 

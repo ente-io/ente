@@ -412,7 +412,6 @@ export default function Upload(props: Props) {
 
     const cancelUploads = async () => {
         setUploadStage(UPLOAD_STAGES.CANCELLED);
-        await UploadManager.clearRemainingFiles();
         if (isElectron()) {
             ImportService.updatePendingUploads([]);
         }
