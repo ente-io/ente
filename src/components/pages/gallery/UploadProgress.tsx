@@ -341,28 +341,26 @@ export default function UploadProgress(props: Props) {
                     </Modal.Footer>
                 )}
             </Modal>
-            {showCancelDialog && (
-                <MessageDialog
-                    show={showCancelDialog}
-                    onHide={() => {
-                        setShowCancelDialog(false);
-                    }}
-                    attributes={{
-                        title: constants.STOP_UPLOADS_HEADER,
-                        content: constants.STOP_ALL_UPLOADS_MESSAGE,
-                        proceed: {
-                            text: constants.YES_STOP_UPLOADS,
-                            variant: 'danger',
-                            action: props.cancelUploads,
-                        },
-                        close: {
-                            text: constants.NO,
-                            variant: 'secondary',
-                            action: () => {},
-                        },
-                    }}
-                />
-            )}
+            <MessageDialog
+                show={showCancelDialog}
+                onHide={() => {
+                    setShowCancelDialog(false);
+                }}
+                attributes={{
+                    title: constants.STOP_UPLOADS_HEADER,
+                    content: constants.STOP_ALL_UPLOADS_MESSAGE,
+                    proceed: {
+                        text: constants.YES_STOP_UPLOADS,
+                        variant: 'danger',
+                        action: props.cancelUploads,
+                    },
+                    close: {
+                        text: constants.NO,
+                        variant: 'secondary',
+                        action: () => {},
+                    },
+                }}
+            />
         </>
     );
 }
