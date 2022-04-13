@@ -708,6 +708,10 @@ const englishConstants = {
             you believe are duplicates{' '}
         </>
     ),
+    STOP_ALL_UPLOADS_MESSAGE:
+        'are you sure that you want to stop all the uploads in progress?',
+    STOP_UPLOADS_HEADER: 'stop uploads?',
+    YES_STOP_UPLOADS: 'yes, stop uploads',
 };
 
 export default englishConstants;
