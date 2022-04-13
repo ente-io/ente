@@ -51,7 +51,17 @@ class ImportService {
     }
 
     updatePendingUploads(files: FileWithCollection[]) {
-        const filePaths = files.map((file) => (file.file as ElectronFile).path);
+        const filePaths = [];
+        for (const file of files) {
+            if (file.isLivePhoto) {
+                filePaths.push(
+                    (file.livePhotoAssets.image as ElectronFile).path,
+                    (file.livePhotoAssets.video as ElectronFile).path
+                );
+            } else {
+                filePaths.push((file.file as ElectronFile).path);
+            }
+        }
         this.ElectronAPIs.updatePendingUploadsFilePaths(filePaths);
     }
 }
