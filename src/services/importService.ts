@@ -8,7 +8,7 @@ class ImportService {
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.allElectronAPIsExist = !!this.ElectronAPIs?.exists;
+        this.allElectronAPIsExist = !!this.ElectronAPIs?.getPendingUploads;
     }
 
     async showUploadFilesDialog(): Promise<ElectronFile[]> {
