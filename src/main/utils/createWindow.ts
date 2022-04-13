@@ -3,6 +3,7 @@ import * as path from 'path';
 import { isAppQuitting } from '..';
 import { addAllowOriginHeader } from './cors';
 import { PROD_HOST_URL } from '../../config';
+import { isDev } from './common';
 
 export function createWindow(): BrowserWindow {
     const appImgPath = isDev
@@ -67,5 +68,3 @@ export function createWindow(): BrowserWindow {
     });
     return mainWindow;
 }
-
-export const isDev = !app.isPackaged;

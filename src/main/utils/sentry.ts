@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/electron/dist/main';
-import { isDev } from './createWindow';
+import { isDev } from './common';
 
 const SENTRY_DSN = 'https://e9268b784d1042a7a116f53c58ad2165@sentry.ente.io/5';
 

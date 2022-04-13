@@ -1,11 +1,12 @@
 import { app, BrowserWindow, Menu, Tray, dialog, nativeImage } from 'electron';
 import * as path from 'path';
 import AppUpdater from './utils/appUpdater';
-import { createWindow, isDev } from './utils/createWindow';
+import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
 import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 import initSentry from './utils/sentry';
 import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from '../config';
+import { isDev } from './utils/common';
 
 if (isDev) {
     const electronReload = require('electron-reload');
