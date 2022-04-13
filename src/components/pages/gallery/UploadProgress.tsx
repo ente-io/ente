@@ -1,6 +1,6 @@
 import ExpandLess from 'components/icons/ExpandLess';
 import ExpandMore from 'components/icons/ExpandMore';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Accordion, Button, Modal, ProgressBar } from 'react-bootstrap';
 import { FileRejection } from 'react-dropzone';
 
@@ -10,7 +10,7 @@ import constants from 'utils/strings/constants';
 import { ButtonVariant, getVariantColor } from './LinkButton';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import FileList from 'components/FileList';
-import MessageDialog from 'components/MessageDialog';
+import { AppContext } from 'pages/_app';
 interface Props {
     fileCounter;
     uploadStage;
@@ -169,7 +169,7 @@ const InProgressSection = (props: InProgressProps) => {
 };
 
 export default function UploadProgress(props: Props) {
-    const [showCancelDialog, setShowCancelDialog] = useState(false);
+    const appContext = useContext(AppContext);
 
     const fileProgressStatuses = [] as FileProgresses[];
     const fileUploadResultMap = new Map<FileUploadResults, number[]>();
@@ -200,17 +200,32 @@ export default function UploadProgress(props: Props) {
         sectionInfo = constants.LIVE_PHOTOS_DETECTED();
     }
 
+    function handleHideModal(): () => void {
+        return props.uploadStage !== UPLOAD_STAGES.FINISH
+            ? () => {
+                  appContext.setDialogMessage({
+                      title: constants.STOP_UPLOADS_HEADER,
+                      content: constants.STOP_ALL_UPLOADS_MESSAGE,
+                      proceed: {
+                          text: constants.YES_STOP_UPLOADS,
+                          variant: 'danger',
+                          action: props.cancelUploads,
+                      },
+                      close: {
+                          text: constants.NO,
+                          variant: 'secondary',
+                          action: () => {},
+                      },
+                  });
+              }
+            : props.closeModal;
+    }
+
     return (
         <>
             <Modal
                 show={props.show}
-                onHide={
-                    props.uploadStage !== UPLOAD_STAGES.FINISH
-                        ? () => {
-                              setShowCancelDialog(true);
-                          }
-                        : props.closeModal
-                }
+                onHide={handleHideModal()}
                 aria-labelledby="contained-modal-title-vcenter"
                 centered
                 backdrop={fileProgressStatuses?.length !== 0 ? 'static' : true}>
@@ -341,26 +356,6 @@ export default function UploadProgress(props: Props) {
                     </Modal.Footer>
                 )}
             </Modal>
-            <MessageDialog
-                show={showCancelDialog}
-                onHide={() => {
-                    setShowCancelDialog(false);
-                }}
-                attributes={{
-                    title: constants.STOP_UPLOADS_HEADER,
-                    content: constants.STOP_ALL_UPLOADS_MESSAGE,
-                    proceed: {
-                        text: constants.YES_STOP_UPLOADS,
-                        variant: 'danger',
-                        action: props.cancelUploads,
-                    },
-                    close: {
-                        text: constants.NO,
-                        variant: 'secondary',
-                        action: () => {},
-                    },
-                }}
-            />
         </>
     );
 }
