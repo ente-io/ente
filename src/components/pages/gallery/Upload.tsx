@@ -301,10 +301,12 @@ export default function Upload(props: Props) {
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
             await props.syncWithRemote(true, true);
-            await ImportService.setToUploadFiles(
-                filesWithCollectionToUpload,
-                collections
-            );
+            if (isElectron()) {
+                await ImportService.setToUploadFiles(
+                    filesWithCollectionToUpload,
+                    collections
+                );
+            }
             await uploadManager.queueFilesForUpload(
                 filesWithCollectionToUpload,
                 collections
