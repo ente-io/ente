@@ -5,7 +5,7 @@ import {
     getElectronFile,
     getPendingUploads,
     setToUploadFiles,
-    updatePendingUploadsFilePaths,
+    setToUploadCollection,
 } from './utils/upload';
 
 const { ipcRenderer } = electron;
@@ -154,5 +154,5 @@ windowObject['ElectronAPIs'] = {
     showUploadDirsDialog,
     getPendingUploads,
     setToUploadFiles,
-    updatePendingUploadsFilePaths,
+    setToUploadCollection,
 };

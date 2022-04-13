@@ -68,15 +68,15 @@ export async function getElectronFile(filePath: string): Promise<ElectronFile> {
     };
 }
 
-export const setToUploadFiles = (
-    filePaths: string[],
-    collectionName: string
-) => {
+export const setToUploadFiles = (filePaths: string[]) => {
     if (filePaths && filePaths.length > 0) {
         uploadStatusStore.set('filePaths', filePaths);
     } else {
         uploadStatusStore.set('filePaths', []);
     }
+};
+
+export const setToUploadCollection = (collectionName: string) => {
     if (collectionName) {
         uploadStatusStore.set('collectionName', collectionName);
     } else {
@@ -97,8 +97,4 @@ export const getPendingUploads = async () => {
             : [],
         collectionName,
     };
-};
-
-export const updatePendingUploadsFilePaths = (filePaths: string[]) => {
-    uploadStatusStore.set('filePaths', filePaths);
 };
