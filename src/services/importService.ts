@@ -4,37 +4,46 @@ import { runningInBrowser } from 'utils/common';
 
 class ImportService {
     ElectronAPIs: any;
+    private allElectronAPIsExist: boolean = false;
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
+        this.allElectronAPIsExist = !!this.ElectronAPIs?.exists;
     }
 
     async showUploadFilesDialog(): Promise<ElectronFile[]> {
-        return this.ElectronAPIs.showUploadFilesDialog();
+        if (this.allElectronAPIsExist) {
+            return this.ElectronAPIs.showUploadFilesDialog();
+        }
     }
 
     async showUploadDirsDialog(): Promise<ElectronFile[]> {
-        return this.ElectronAPIs.showUploadDirsDialog();
+        if (this.allElectronAPIsExist) {
+            return this.ElectronAPIs.showUploadDirsDialog();
+        }
     }
 
     async getPendingUploads() {
-        const { files, collectionName } =
-            (await this.ElectronAPIs.getPendingUploads()) as {
-                files: ElectronFile[];
-                collectionName: string;
+        if (this.allElectronAPIsExist) {
+            const { files, collectionName } =
+                (await this.ElectronAPIs.getPendingUploads()) as {
+                    files: ElectronFile[];
+                    collectionName: string;
+                };
+            return {
+                files,
+                collectionName,
             };
-        return {
-            files,
-            collectionName,
-        };
+        }
     }
 
     async setToUploadFiles(
         files: FileWithCollection[],
         collections: Collection[]
     ) {
-        let collectionName: string;
-        /* collection being one suggest one of two things
+        if (this.allElectronAPIsExist) {
+            let collectionName: string;
+            /* collection being one suggest one of two things
                 1. Either the user has upload to a single existing collection
                 2. Created a new single collection to upload to 
                     may have had multiple folder, but chose to upload
@@ -42,30 +51,41 @@ class ImportService {
                 hence saving the collection name when upload collection count is 1
                 helps the info of user choosing this options
                 and on next upload we can directly start uploading to this collection 
-        */
-        if (collections.length === 1) {
-            collectionName = collections[0].name;
-        }
-        const filePaths = files.map((file) => (file.file as ElectronFile).path);
-        this.ElectronAPIs.setToUploadFiles(filePaths);
-        this.ElectronAPIs.setToUploadCollection(collectionName);
-    }
-
-    updatePendingUploads(files: FileWithCollection[]) {
-        const filePaths = [];
-        for (const fileWithCollection of files) {
-            if (fileWithCollection.isLivePhoto) {
-                filePaths.push(
-                    (fileWithCollection.livePhotoAssets.image as ElectronFile)
-                        .path,
-                    (fileWithCollection.livePhotoAssets.video as ElectronFile)
-                        .path
-                );
-            } else {
-                filePaths.push((fileWithCollection.file as ElectronFile).path);
+            */
+            if (collections.length === 1) {
+                collectionName = collections[0].name;
             }
+            const filePaths = files.map(
+                (file) => (file.file as ElectronFile).path
+            );
+            this.ElectronAPIs.setToUploadFiles(filePaths);
+            this.ElectronAPIs.setToUploadCollection(collectionName);
         }
-        this.ElectronAPIs.setToUploadFiles(filePaths);
+    }
+    updatePendingUploads(files: FileWithCollection[]) {
+        if (this.allElectronAPIsExist) {
+            const filePaths = [];
+            for (const fileWithCollection of files) {
+                if (fileWithCollection.isLivePhoto) {
+                    filePaths.push(
+                        (
+                            fileWithCollection.livePhotoAssets
+                                .image as ElectronFile
+                        ).path,
+                        (
+                            fileWithCollection.livePhotoAssets
+                                .video as ElectronFile
+                        ).path
+                    );
+                } else {
+                    filePaths.push(
+                        (fileWithCollection.file as ElectronFile).path
+                    );
+                }
+            }
+            this.ElectronAPIs.setToUploadFiles(filePaths);
+        }
     }
 }
+
 export default new ImportService();
