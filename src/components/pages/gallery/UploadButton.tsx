@@ -1,5 +1,5 @@
-import isElectron from 'is-electron';
 import React from 'react';
+import importService from 'services/importService';
 import styled from 'styled-components';
 
 const Wrapper = styled.div<{ isDisabled: boolean }>`
@@ -21,7 +21,7 @@ function UploadButton({
     setShowUploadTypeChoiceModal,
 }) {
     const handleClick = () => {
-        if (isElectron()) {
+        if (importService.checkAllElectronAPIsExists()) {
             setShowUploadTypeChoiceModal(true);
         } else {
             openFileUploader();

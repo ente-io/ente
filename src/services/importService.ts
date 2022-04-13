@@ -11,6 +11,8 @@ class ImportService {
         this.allElectronAPIsExist = !!this.ElectronAPIs?.getPendingUploads;
     }
 
+    checkAllElectronAPIsExists = () => this.allElectronAPIsExist;
+
     async showUploadFilesDialog(): Promise<ElectronFile[]> {
         if (this.allElectronAPIsExist) {
             return this.ElectronAPIs.showUploadFilesDialog();
