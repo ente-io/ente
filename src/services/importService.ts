@@ -47,7 +47,8 @@ class ImportService {
             collectionName = collections[0].name;
         }
         const filePaths = files.map((file) => (file.file as ElectronFile).path);
-        this.ElectronAPIs.setToUploadFiles(filePaths, collectionName);
+        this.ElectronAPIs.setToUploadFiles(filePaths);
+        this.ElectronAPIs.setToUploadCollection(collectionName);
     }
 
     updatePendingUploads(files: FileWithCollection[]) {
@@ -62,7 +63,7 @@ class ImportService {
                 filePaths.push((file.file as ElectronFile).path);
             }
         }
-        this.ElectronAPIs.updatePendingUploadsFilePaths(filePaths);
+        this.ElectronAPIs.setToUploadFiles(filePaths);
     }
 }
 export default new ImportService();
