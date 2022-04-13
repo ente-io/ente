@@ -9,6 +9,7 @@ import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from '../config';
 import { isDev } from './utils/common';
 
 if (isDev) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const electronReload = require('electron-reload');
     electronReload(__dirname, {});
 }
