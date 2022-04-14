@@ -160,14 +160,10 @@ export default function Upload(props: Props) {
         files: ElectronFile[],
         collectionName: string
     ) => {
-        try {
-            if (files && files?.length > 0) {
-                isPendingDesktopUpload.current = true;
-                pendingDesktopUploadCollectionName.current = collectionName;
-                props.setElectronFiles(files);
-            }
-        } catch (e) {
-            logError(e, 'Failed to get previously failed files');
+        if (files && files?.length > 0) {
+            isPendingDesktopUpload.current = true;
+            pendingDesktopUploadCollectionName.current = collectionName;
+            props.setElectronFiles(files);
         }
     };
 
