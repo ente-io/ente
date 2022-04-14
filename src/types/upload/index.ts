@@ -68,6 +68,14 @@ export interface ProgressUpdater {
     setHasLivePhotos: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+/*
+ * ElectronFile is a custom interface that is used to represent
+ * any file on disk as a File-like object in the Electron desktop app.
+ *
+ * This was added to support the auto-resuming of failed uploads
+ * which needed absolute paths to the files which the
+ * normal File interface does not provide.
+ */
 export interface ElectronFile {
     name: string;
     path: string;
