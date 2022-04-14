@@ -103,8 +103,8 @@ export default function Upload(props: Props) {
 
         if (isElectron()) {
             ImportService.getPendingUploads().then(
-                ({ files, collectionName }) => {
-                    resumeDesktopUpload(files, collectionName);
+                ({ files: electronFiles, collectionName }) => {
+                    resumeDesktopUpload(electronFiles, collectionName);
                 }
             );
         }
@@ -157,13 +157,13 @@ export default function Upload(props: Props) {
     };
 
     const resumeDesktopUpload = async (
-        files: ElectronFile[],
+        electronFiles: ElectronFile[],
         collectionName: string
     ) => {
-        if (files && files?.length > 0) {
+        if (electronFiles && electronFiles?.length > 0) {
             isPendingDesktopUpload.current = true;
             pendingDesktopUploadCollectionName.current = collectionName;
-            props.setElectronFiles(files);
+            props.setElectronFiles(electronFiles);
         }
     };
 
