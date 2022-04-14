@@ -29,6 +29,12 @@ export function areFilesSame(
     existingFile: Metadata,
     newFile: Metadata
 ): boolean {
+    /*
+     * The maximum difference in the creation/modification times of two similar files is set to 1 second.
+     * This is because while uploading files in the web - browsers and users could have set reduced
+     * precision of file times to prevent timing attacks and fingerprinting.
+     * Context: https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
+     */
     if (
         existingFile.fileType === newFile.fileType &&
         Math.abs(existingFile.creationTime - newFile.creationTime) <
