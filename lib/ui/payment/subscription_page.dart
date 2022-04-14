@@ -11,6 +11,7 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
+import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
@@ -29,16 +30,17 @@ class SubscriptionPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-   State<SubscriptionPage> createState() => _SubscriptionPageState();
+  State<SubscriptionPage> createState() => _SubscriptionPageState();
 }
 
 class _SubscriptionPageState extends State<SubscriptionPage> {
   final _logger = Logger("SubscriptionPage");
   final _billingService = BillingService.instance;
+  final _userService = UserService.instance;
   Subscription _currentSubscription;
   StreamSubscription _purchaseUpdateSubscription;
   ProgressDialog _dialog;
-  Future<int> _usageFuture;
+  int _usage;
   bool _hasActiveSubscription;
   FreePlan _freePlan;
   List<BillingPlan> _plans;
@@ -48,8 +50,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   @override
   void initState() {
     _billingService.setIsOnSubscriptionPage(true);
-    _billingService.fetchSubscription().then((subscription) async {
-      _currentSubscription = subscription;
+    _userService.getUserDetailsV2(memberCount: false).then((userDetails) async {
+      _currentSubscription = userDetails.subscription;
       _hasActiveSubscription = _currentSubscription.isValid();
       final billingPlans = await _billingService.getBillingPlans();
       _isActiveStripeSubscriber =
@@ -59,12 +61,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         final productID = _isActiveStripeSubscriber
             ? plan.stripeID
             : Platform.isAndroid
-            ? plan.androidID
-            : plan.iosID;
+                ? plan.androidID
+                : plan.iosID;
         return productID != null && productID.isNotEmpty;
       }).toList();
       _freePlan = billingPlans.freePlan;
-      _usageFuture = _billingService.fetchUsage();
+      _usage = userDetails.usage;
       _hasLoadedData = true;
       setState(() {});
     });
@@ -160,7 +162,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final widgets = <Widget>[];
     widgets.add(SubscriptionHeaderWidget(
       isOnboarding: widget.isOnboarding,
-      usageFuture: _usageFuture,
+      currentUsage: _usage,
     ));
 
     widgets.addAll([
@@ -177,7 +179,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       widgets.add(ValidityWidget(currentSubscription: _currentSubscription));
     }
 
-    if ( _currentSubscription.productID == kFreeProductID) {
+    if (_currentSubscription.productID == kFreeProductID) {
       if (widget.isOnboarding) {
         widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
       }
@@ -306,18 +308,17 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 return;
               }
               await _dialog.show();
-              if (_usageFuture != null) {
-                final usage = await _usageFuture;
-                if (usage > plan.storage) {
-                  await _dialog.hide();
-                  showErrorDialog(
-                      context, "sorry", "you cannot downgrade to this plan");
-                  return;
-                }
+
+              if (_usage > plan.storage) {
+                await _dialog.hide();
+                showErrorDialog(
+                    context, "sorry", "you cannot downgrade to this plan");
+                return;
               }
+
               final ProductDetailsResponse response =
-              await InAppPurchaseConnection.instance
-                  .queryProductDetails({productID});
+                  await InAppPurchaseConnection.instance
+                      .queryProductDetails({productID});
               if (response.notFoundIDs.isNotEmpty) {
                 _logger.severe("Could not find products: " +
                     response.notFoundIDs.toString());
@@ -331,8 +332,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   _currentSubscription.productID != plan.androidID;
               if (isCrossGradingOnAndroid) {
                 final existingProductDetailsResponse =
-                await InAppPurchaseConnection.instance
-                    .queryProductDetails({_currentSubscription.productID});
+                    await InAppPurchaseConnection.instance
+                        .queryProductDetails({_currentSubscription.productID});
                 if (existingProductDetailsResponse.notFoundIDs.isNotEmpty) {
                   _logger.severe("Could not find existing products: " +
                       response.notFoundIDs.toString());
@@ -401,4 +402,3 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 }
-

@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/ui/billing_questions_widget.dart';
-import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 
 class SubscriptionHeaderWidget extends StatefulWidget {
   final bool isOnboarding;
-  final Future<int> usageFuture;
+  final int currentUsage;
 
-  const SubscriptionHeaderWidget({Key key, this.isOnboarding, this.usageFuture})
+  const SubscriptionHeaderWidget(
+      {Key key, this.isOnboarding, this.currentUsage})
       : super(key: key);
 
   @override
@@ -36,23 +36,9 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
     } else {
       return SizedBox(
         height: 50,
-        child: FutureBuilder(
-          future: widget.usageFuture,
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if (snapshot.hasData) {
-              return Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text("current usage is " + formatBytes(snapshot.data)),
-              );
-            } else if (snapshot.hasError) {
-              return Container();
-            } else {
-              return Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: loadWidget,
-              );
-            }
-          },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text("current usage is " + formatBytes(widget.currentUsage)),
         ),
       );
     }

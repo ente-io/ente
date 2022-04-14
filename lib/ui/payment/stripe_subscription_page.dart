@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
+import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/payment/payment_web_page.dart';
@@ -34,9 +35,10 @@ class StripeSubscriptionPage extends StatefulWidget {
 class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   final _logger = Logger("StripeSubscriptionPage");
   final _billingService = BillingService.instance;
+  final _userService = UserService.instance;
   Subscription _currentSubscription;
   ProgressDialog _dialog;
-  Future<int> _usageFuture;
+  int _usage;
 
   // indicates if user's subscription plan is still active
   bool _hasActiveSubscription;
@@ -54,12 +56,12 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   Future<void> _fetchSub() async {
-    return _billingService.fetchSubscription().then((subscription) async {
-      _currentSubscription = subscription;
+    return _userService.getUserDetailsV2().then((userDetails) async {
+      _currentSubscription = userDetails.subscription;
       _showYearlyPlan = _currentSubscription.isYearlyPlan();
       _hasActiveSubscription = _currentSubscription.isValid();
       _isStripeSubscriber = _currentSubscription.paymentProvider == kStripe;
-      _usageFuture = _billingService.fetchUsage();
+      _usage = userDetails.usage;
       return _filterStripeForUI().then((value) {
         _hasLoadedData = true;
         setState(() {});
@@ -128,7 +130,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
     widgets.add(SubscriptionHeaderWidget(
       isOnboarding: widget.isOnboarding,
-      usageFuture: _usageFuture,
+      currentUsage: _usage,
     ));
 
     widgets.addAll([
@@ -308,16 +310,12 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                     "please cancel your existing subscription from ${_currentSubscription.paymentProvider} first");
                 return;
               }
-              await _dialog.show();
-              if (_usageFuture != null) {
-                final usage = await _usageFuture;
-                await _dialog.hide();
-                if (usage > plan.storage) {
-                  showErrorDialog(
-                      context, "sorry", "you cannot downgrade to this plan");
-                  return;
-                }
+              if (_usage > plan.storage) {
+                showErrorDialog(
+                    context, "sorry", "you cannot downgrade to this plan");
+                return;
               }
+              await _dialog.show();
               String stripPurChaseAction = 'buy';
               if (_isStripeSubscriber && _hasActiveSubscription) {
                 // confirm if user wants to change plan or not

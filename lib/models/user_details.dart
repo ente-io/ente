@@ -67,9 +67,9 @@ class FamilyData {
 
   // Storage available based on the family plan
   final int storage;
-  final int expiry;
+  final int expiryTime;
 
-  FamilyData(this.members, this.storage, this.expiry);
+  FamilyData(this.members, this.storage, this.expiryTime);
 
   factory FamilyData.fromMap(Map<String, dynamic> map) {
     if (map == null) {
@@ -81,7 +81,7 @@ class FamilyData {
     return FamilyData(
       members,
       map['storage'] as int,
-      map['expiry'] as int,
+      map['expiryTime'] as int,
     );
   }
 
@@ -89,7 +89,7 @@ class FamilyData {
     return {
       'members': members.map((x) => x?.toMap())?.toList(),
       'storage': storage,
-      'expiry': expiry
+      'expiryTime': expiryTime
     };
   }
 }
