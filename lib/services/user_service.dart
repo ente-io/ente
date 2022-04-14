@@ -121,6 +121,24 @@ class UserService {
     }
   }
 
+  Future<UserDetails> getUserDetailsV2({bool memberCount = true}) async {
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() +
+            "/users/details/v2?memoryCount=$memberCount",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      return UserDetails.fromMap(response.data);
+    } on DioError catch (e) {
+      _logger.info(e);
+      rethrow;
+    }
+  }
+
   Future<Sessions> getActiveSessions() async {
     try {
       final response = await _dio.get(
