@@ -2562,10 +2562,8 @@ natural-compare@^1.4.0:
   resolved "https://registry.npmjs.org/natural-compare/-/natural-compare-1.4.0.tgz"
   integrity sha1-Sr6/7tdUHywnrPspvbvRXI1bpPc=
 
-next-electron-server@^0.0.8:
+"next-electron-server@file:./thirdparty/next-electron-server":
   version "0.0.8"
-  resolved "https://registry.npmjs.org/next-electron-server/-/next-electron-server-0.0.8.tgz"
-  integrity sha512-LQhqf1Lrw9QVPntWN8NtqQk4WMufxXinsfg2ODgfqiHpvhcG58MOVIfvtDL37yGRvswORLXUHYRNB+p59LAd/w==
 
 node-addon-api@^1.6.3:
   version "1.7.2"
