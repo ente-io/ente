@@ -149,7 +149,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       filled: true,
                       hintText: 'email',
                       contentPadding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       border: UnderlineInputBorder(
                           borderSide: BorderSide.none,
                           borderRadius: BorderRadius.circular(6)),
@@ -197,7 +197,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       filled: true,
                       hintText: "password",
                       contentPadding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       suffixIcon: _password1InFocus
                           ? IconButton(
                               icon: Icon(
@@ -264,7 +264,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           filled: true,
                           hintText: "confirm password",
                           contentPadding: EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 20),
+                              horizontal: 16, vertical: 14),
                           suffixIcon: _password2InFocus
                               ? IconButton(
                                   icon: Icon(
