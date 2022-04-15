@@ -6,6 +6,7 @@ import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { getPaymentToken } from './userService';
 import { Plan, Subscription } from 'types/billing';
+import isElectron from 'is-electron';
 
 const ENDPOINT = getEndpoint();
 
@@ -154,9 +155,7 @@ class billingService {
         action: string
     ) {
         try {
-            window.location.href = `${getPaymentsURL()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${
-                window.location.origin
-            }/gallery`;
+            window.location.href = `${getPaymentsURL()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${this.getRedirectionURL()}`;
         } catch (e) {
             logError(e, 'unable to get payments url');
             throw e;
@@ -167,7 +166,7 @@ class billingService {
         try {
             const response = await HTTPService.get(
                 `${ENDPOINT}/billing/stripe/customer-portal`,
-                { redirectURL: `${window.location.origin}/gallery` },
+                { redirectURL: this.getRedirectionURL() },
                 {
                     'X-Auth-Token': getToken(),
                 }
@@ -192,6 +191,15 @@ class billingService {
         } catch (e) {
             logError(e, 'error getting usage');
         }
+    }
+    private getRedirectionURL() {
+        let redirectURL: string;
+        if (isElectron()) {
+            redirectURL = `${getPaymentsURL()}/desktop-redirect`;
+        } else {
+            redirectURL = `${window.location.origin}/gallery`;
+        }
+        return redirectURL;
     }
 }
 
