@@ -27,3 +27,5 @@ const kMnemonicKeyWordCount = 24;
 
 // https://stackoverflow.com/a/61162219
 const kDragSensitivity = 8;
+
+const kFamilyPlanManagementUrl = "https://family.ente.io";
