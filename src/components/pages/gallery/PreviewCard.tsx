@@ -6,13 +6,11 @@ import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
 import { GalleryContext } from 'pages/gallery';
 import { GAP_BTW_TILES } from 'constants/gallery';
-import {
-    defaultPublicCollectionGalleryContext,
-    PublicCollectionGalleryContext,
-} from 'utils/publicCollectionGallery';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import LivePhotoIndicatorOverlay from 'components/icons/LivePhotoIndicatorOverlay';
 import { isLivePhoto } from 'utils/file';
+import { DeduplicateContext } from 'pages/deduplicate';
 
 interface IProps {
     file: EnteFile;
@@ -122,6 +120,21 @@ export const InSelectRangeOverLay = styled.div<{ active: boolean }>`
     ${(props) => props.active && 'background:rgba(81, 205, 124, 0.25)'};
 `;
 
+export const FileAndCollectionNameOverlay = styled.div`
+    left: 0;
+    bottom: 0;
+    outline: none;
+    height: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: #fff;
+    font-weight: 900;
+    position: absolute;
+`;
+
 const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
     background: #222;
     display: flex;
@@ -180,9 +193,13 @@ export default function PreviewCard(props: IProps) {
         isInsSelectRange,
     } = props;
     const isMounted = useRef(true);
-    const publicCollectionGalleryContext =
-        useContext(PublicCollectionGalleryContext) ??
-        defaultPublicCollectionGalleryContext;
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
+    const deduplicateContext = useContext(DeduplicateContext);
+
+    const collectionName = useRef(null);
+
     useLayoutEffect(() => {
         if (file && !file.msrc) {
             const main = async () => {
@@ -223,6 +240,9 @@ export default function PreviewCard(props: IProps) {
                 main();
             }
         }
+        collectionName.current = deduplicateContext.collections.find(
+            (a) => a.id === file.collectionID
+        )?.name;
         return () => {
             // cool cool cool
             isMounted.current = false;
@@ -257,6 +277,8 @@ export default function PreviewCard(props: IProps) {
             onHover();
         }
     };
+
+    console.log(deduplicateContext.isOnDeduplicatePage);
     return (
         <Cont
             id={`thumb-${file?.id}`}
@@ -281,6 +303,12 @@ export default function PreviewCard(props: IProps) {
                 active={isRangeSelectActive && isInsSelectRange}
             />
             {isLivePhoto(file) && <LivePhotoIndicatorOverlay />}
+            {deduplicateContext.isOnDeduplicatePage && (
+                <FileAndCollectionNameOverlay>
+                    <p>{file.metadata.title}</p>
+                    <p>{collectionName.current}</p>
+                </FileAndCollectionNameOverlay>
+            )}
         </Cont>
     );
 }
