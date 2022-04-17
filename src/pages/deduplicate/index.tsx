@@ -61,11 +61,8 @@ export default function Deduplicate() {
             router.push(PAGES.ROOT);
             return;
         }
-        const main = async () => {
-            showNavBar(true);
-            setDuplicateFiles([]);
-        };
-        main();
+        showNavBar(true);
+        setDuplicateFiles([]);
     }, []);
 
     useEffect(() => {
