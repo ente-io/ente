@@ -306,27 +306,23 @@ export default function Upload(props: Props) {
         analysisResult: AnalysisResult,
         isFirstUpload: boolean
     ) => {
-        if (isFirstUpload) {
-            const collectionName =
-                analysisResult.suggestedCollectionName ?? FIRST_ALBUM_NAME;
-
-            uploadToSingleNewCollection(collectionName);
-        } else {
-            let showNextModal = () => {};
-            if (analysisResult.multipleFolders) {
-                showNextModal = () => setChoiceModalView(true);
-            } else {
-                showNextModal = () =>
-                    uploadToSingleNewCollection(
-                        analysisResult.suggestedCollectionName
-                    );
-            }
-            props.setCollectionSelectorAttributes({
-                callback: uploadFilesToExistingCollection,
-                showNextModal,
-                title: constants.UPLOAD_TO_COLLECTION,
-            });
+        if (isFirstUpload && !analysisResult.suggestedCollectionName) {
+            analysisResult.suggestedCollectionName = FIRST_ALBUM_NAME;
         }
+        let showNextModal = () => {};
+        if (analysisResult.multipleFolders) {
+            showNextModal = () => setChoiceModalView(true);
+        } else {
+            showNextModal = () =>
+                uploadToSingleNewCollection(
+                    analysisResult.suggestedCollectionName
+                );
+        }
+        props.setCollectionSelectorAttributes({
+            callback: uploadFilesToExistingCollection,
+            showNextModal,
+            title: constants.UPLOAD_TO_COLLECTION,
+        });
     };
 
     return (

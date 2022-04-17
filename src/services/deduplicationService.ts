@@ -2,7 +2,6 @@ import { EnteFile } from 'types/file';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
-import { getLocalFiles } from './fileService';
 import HTTPService from './HTTPService';
 
 const ENDPOINT = getEndpoint();
@@ -14,34 +13,50 @@ interface DuplicatesResponse {
     }>;
 }
 
+const DuplicateItemSortingOrderDescBasedOnCollectionName = Object.fromEntries([
+    ['icloud library', 0],
+    ['icloudlibrary', 1],
+    ['recents', 2],
+    ['recently added', 3],
+    ['my photo stream', 4],
+]);
+
+const OtherCollectionNameRanking = 5;
+
 interface DuplicateFiles {
     files: EnteFile[];
     size: number;
 }
 
-export async function getDuplicateFiles() {
+export async function getDuplicateFiles(
+    files: EnteFile[],
+    collectionNameMap: Map<number, string>
+) {
     try {
         const dupes = await fetchDuplicateFileIDs();
 
-        const localFiles = await getLocalFiles();
         const fileMap = new Map<number, EnteFile>();
-        for (const file of localFiles) {
+        for (const file of files) {
             fileMap.set(file.id, file);
         }
 
         const result: DuplicateFiles[] = [];
 
         for (const dupe of dupes) {
-            const files: EnteFile[] = [];
+            let duplicateFiles: EnteFile[] = [];
             for (const fileID of dupe.fileIDs) {
                 if (fileMap.has(fileID)) {
-                    files.push(fileMap.get(fileID));
+                    duplicateFiles.push(fileMap.get(fileID));
                 }
             }
+            duplicateFiles = await sortDuplicateFiles(
+                duplicateFiles,
+                collectionNameMap
+            );
 
-            if (files.length > 1) {
+            if (duplicateFiles.length > 1) {
                 result.push({
-                    files,
+                    files: duplicateFiles,
                     size: dupe.size,
                 });
             }
@@ -111,4 +126,27 @@ async function fetchDuplicateFileIDs() {
     } catch (e) {
         logError(e, 'failed to fetch duplicate file IDs');
     }
+}
+
+async function sortDuplicateFiles(
+    files: EnteFile[],
+    collectionNameMap: Map<number, string>
+) {
+    return files.sort((firstFile, secondFile) => {
+        const firstCollectionName = collectionNameMap
+            .get(firstFile.collectionID)
+            .toLocaleLowerCase();
+        const secondCollectionName = collectionNameMap
+            .get(secondFile.collectionID)
+            .toLocaleLowerCase();
+        const firstFileRanking =
+            DuplicateItemSortingOrderDescBasedOnCollectionName[
+                firstCollectionName
+            ] ?? OtherCollectionNameRanking;
+        const secondFileRanking =
+            DuplicateItemSortingOrderDescBasedOnCollectionName[
+                secondCollectionName
+            ] ?? OtherCollectionNameRanking;
+        return secondFileRanking - firstFileRanking;
+    });
 }
