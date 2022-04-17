@@ -5,7 +5,7 @@ import PlayCircleOutline from 'components/icons/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
 import { GalleryContext } from 'pages/gallery';
-import { GAP_BTW_TILES } from 'constants/gallery';
+import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import LivePhotoIndicatorOverlay from 'components/icons/LivePhotoIndicatorOverlay';
@@ -93,11 +93,6 @@ export const HoverOverlay = styled.div<{ checked: boolean }>`
     outline: none;
     height: 40%;
     width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #fff;
-    font-weight: 900;
     position: absolute;
     ${(props) =>
         !props.checked &&
@@ -111,31 +106,43 @@ export const InSelectRangeOverLay = styled.div<{ active: boolean }>`
     outline: none;
     height: 100%;
     width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #fff;
-    font-weight: 900;
     position: absolute;
     ${(props) => props.active && 'background:rgba(81, 205, 124, 0.25)'};
 `;
 
 export const FileAndCollectionNameOverlay = styled.div`
-    outline: none;
-    height: 100%;
-    margin: auto;
-    width: 100%;
-    padding: 0 5px;
+    bottom: 0;
+    left: 0;
+    max-height: 40%;
+    background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 2));
+    & > p {
+        max-width: calc(${IMAGE_CONTAINER_MAX_WIDTH}px - 10px);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        margin: 2px;
+        text-align: center;
+    }
+    padding: 7px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
     flex-direction: column;
     color: #fff;
-    font-weight: 900;
     position: absolute;
 `;
 
-const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
+export const SelectedOverlay = styled.div<{ selected: boolean }>`
+    z-index: 5;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    ${(props) => props.selected && 'border: 5px solid #51cd7c;'}
+`;
+
+const Cont = styled.div<{ disabled: boolean }>`
     background: #222;
     display: flex;
     width: fit-content;
@@ -151,7 +158,6 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
         max-width: 100%;
         min-height: 100%;
         flex: 1;
-        ${(props) => props.selected && 'border: 5px solid #51cd7c;'}
         pointer-events: none;
     }
 
@@ -278,14 +284,12 @@ export default function PreviewCard(props: IProps) {
         }
     };
 
-    console.log(deduplicateContext.isOnDeduplicatePage);
     return (
         <Cont
             id={`thumb-${file?.id}`}
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!forcedEnable && !file?.msrc && !imgSrc}
-            selected={selected}
             {...(selectable ? useLongPress(longPressCallback, 500) : {})}>
             {selectable && (
                 <Check
@@ -298,6 +302,7 @@ export default function PreviewCard(props: IProps) {
             )}
             {(file?.msrc || imgSrc) && <img src={file?.msrc || imgSrc} />}
             {file?.metadata.fileType === 1 && <PlayCircleOutline />}
+            <SelectedOverlay selected={selected} />
             <HoverOverlay checked={selected} />
             <InSelectRangeOverLay
                 active={isRangeSelectActive && isInsSelectRange}
