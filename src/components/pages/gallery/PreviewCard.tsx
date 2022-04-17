@@ -121,13 +121,13 @@ export const InSelectRangeOverLay = styled.div<{ active: boolean }>`
 `;
 
 export const FileAndCollectionNameOverlay = styled.div`
-    left: 0;
-    bottom: 0;
     outline: none;
-    height: 50%;
+    height: 100%;
+    margin: auto;
     width: 100%;
+    padding: 0 5px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
     flex-direction: column;
     color: #fff;
