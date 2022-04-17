@@ -2,6 +2,7 @@ import { EnteFile } from 'types/file';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
+import { getLocalCollections } from './collectionService';
 import { getLocalFiles } from './fileService';
 import HTTPService from './HTTPService';
 
@@ -14,6 +15,15 @@ interface DuplicatesResponse {
     }>;
 }
 
+const DuplicateItemSortingOrderDesc = new Map(
+    Object.entries({
+        'icloud library': 0,
+        icloudlibrary: 1,
+        recents: 2,
+        'recently added': 3,
+        'my photo stream': 4,
+    })
+);
 interface DuplicateFiles {
     files: EnteFile[];
     size: number;
@@ -32,13 +42,13 @@ export async function getDuplicateFiles() {
         const result: DuplicateFiles[] = [];
 
         for (const dupe of dupes) {
-            const files: EnteFile[] = [];
+            let files: EnteFile[] = [];
             for (const fileID of dupe.fileIDs) {
                 if (fileMap.has(fileID)) {
                     files.push(fileMap.get(fileID));
                 }
             }
-
+            files = await sortDuplicateFiles(files);
             if (files.length > 1) {
                 result.push({
                     files,
@@ -111,4 +121,25 @@ async function fetchDuplicateFileIDs() {
     } catch (e) {
         logError(e, 'failed to fetch duplicate file IDs');
     }
+}
+
+async function sortDuplicateFiles(files: EnteFile[]) {
+    const localCollections = await getLocalCollections();
+    const collectionMap = new Map<number, string>();
+    for (const collection of localCollections) {
+        collectionMap.set(collection.id, collection.name);
+    }
+
+    return files.sort((firstFile, secondFile) => {
+        const firstCollectionName = collectionMap
+            .get(firstFile.collectionID)
+            .toLocaleLowerCase();
+        const secondCollectionName = collectionMap
+            .get(secondFile.collectionID)
+            .toLocaleLowerCase();
+        return (
+            DuplicateItemSortingOrderDesc[secondCollectionName] -
+            DuplicateItemSortingOrderDesc[firstCollectionName]
+        );
+    });
 }
