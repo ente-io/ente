@@ -1,4 +1,3 @@
-import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
@@ -31,7 +30,7 @@ interface DuplicateFiles {
 
 export async function getDuplicateFiles(
     files: EnteFile[],
-    collections: Collection[]
+    collectionNameMap: Map<number, string>
 ) {
     try {
         const dupes = await fetchDuplicateFileIDs();
@@ -52,7 +51,7 @@ export async function getDuplicateFiles(
             }
             duplicateFiles = await sortDuplicateFiles(
                 duplicateFiles,
-                collections
+                collectionNameMap
             );
 
             if (duplicateFiles.length > 1) {
@@ -131,18 +130,13 @@ async function fetchDuplicateFileIDs() {
 
 async function sortDuplicateFiles(
     files: EnteFile[],
-    collections: Collection[]
+    collectionNameMap: Map<number, string>
 ) {
-    const collectionMap = new Map<number, string>();
-    for (const collection of collections) {
-        collectionMap.set(collection.id, collection.name);
-    }
-
     return files.sort((firstFile, secondFile) => {
-        const firstCollectionName = collectionMap
+        const firstCollectionName = collectionNameMap
             .get(firstFile.collectionID)
             .toLocaleLowerCase();
-        const secondCollectionName = collectionMap
+        const secondCollectionName = collectionNameMap
             .get(secondFile.collectionID)
             .toLocaleLowerCase();
         const firstFileRanking =
