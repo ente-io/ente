@@ -3,6 +3,7 @@ export type DeduplicateContextType = {
     setClubSameTimeFilesOnly: (clubSameTimeFilesOnly: boolean) => void;
     fileSizeMap: Map<number, number>;
     isOnDeduplicatePage: boolean;
+    collectionNameMap: Map<number, string>;
 };
 
 export const DefaultDeduplicateContext = {
@@ -10,4 +11,5 @@ export const DefaultDeduplicateContext = {
     setClubSameTimeFilesOnly: () => null,
     fileSizeMap: new Map<number, number>(),
     isOnDeduplicatePage: false,
+    collectionNameMap: new Map<number, string>(),
 };
