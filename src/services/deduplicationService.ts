@@ -14,13 +14,13 @@ interface DuplicatesResponse {
     }>;
 }
 
-const DuplicateItemSortingOrderDescBasedOnCollectionName = {
-    'icloud library': 0,
-    icloudlibrary: 1,
-    recents: 2,
-    'recently added': 3,
-    'my photo stream': 4,
-};
+const DuplicateItemSortingOrderDescBasedOnCollectionName = Object.fromEntries([
+    ['icloud library', 0],
+    ['icloudlibrary', 1],
+    ['recents', 2],
+    ['recently added', 3],
+    ['my photo stream', 4],
+]);
 
 const OtherCollectionNameRanking = 5;
 
