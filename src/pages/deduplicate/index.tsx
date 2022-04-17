@@ -7,7 +7,7 @@ import {
     getDuplicateFiles,
     clubDuplicatesByTime,
 } from 'services/deduplicationService';
-import { getLocalFiles, syncFiles, trashFiles } from 'services/fileService';
+import { syncFiles, trashFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { SelectedState } from 'types/gallery';
 
@@ -23,11 +23,7 @@ import { PAGES } from 'constants/pages';
 import router from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import styled from 'styled-components';
-import {
-    getLocalCollections,
-    syncCollections,
-} from 'services/collectionService';
-import { Collection } from 'types/collection';
+import { syncCollections } from 'services/collectionService';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext
@@ -45,11 +41,12 @@ export default function Deduplicate() {
         showNavBar,
         setRedirectURL,
     } = useContext(AppContext);
-    const [files, setFiles] = useState<EnteFile[]>([]);
-    const [collections, setCollections] = useState<Collection[]>([]);
     const [duplicateFiles, setDuplicateFiles] = useState<EnteFile[]>(null);
     const [clubSameTimeFilesOnly, setClubSameTimeFilesOnly] = useState(false);
     const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
+    const [collectionNameMap, setCollectionNameMap] = useState(
+        new Map<number, string>()
+    );
     const [selected, setSelected] = useState<SelectedState>({
         count: 0,
         collectionID: 0,
@@ -65,10 +62,6 @@ export default function Deduplicate() {
             return;
         }
         const main = async () => {
-            const files = await getLocalFiles();
-            const collections = await getLocalCollections();
-            setFiles(files);
-            setCollections(collections);
             showNavBar(true);
             setDuplicateFiles([]);
         };
@@ -82,8 +75,15 @@ export default function Deduplicate() {
     const syncWithRemote = async () => {
         startLoading();
         const collections = await syncCollections();
-        setCollections(collections);
-        const files = await syncFiles(collections, setFiles);
+        setCollectionNameMap(
+            new Map(
+                collections.map((collection) => [
+                    collection.id,
+                    collection.name,
+                ])
+            )
+        );
+        const files = await syncFiles(collections, () => null);
         let duplicates = await getDuplicateFiles(files, collections);
         if (clubSameTimeFilesOnly) {
             duplicates = clubDuplicatesByTime(duplicates);
@@ -152,8 +152,7 @@ export default function Deduplicate() {
         <DeduplicateContext.Provider
             value={{
                 ...DefaultDeduplicateContext,
-                files,
-                collections,
+                collectionNameMap,
                 clubSameTimeFilesOnly,
                 setClubSameTimeFilesOnly,
                 fileSizeMap,

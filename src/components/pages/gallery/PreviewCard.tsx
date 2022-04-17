@@ -204,8 +204,6 @@ export default function PreviewCard(props: IProps) {
     );
     const deduplicateContext = useContext(DeduplicateContext);
 
-    const collectionName = useRef(null);
-
     useLayoutEffect(() => {
         if (file && !file.msrc) {
             const main = async () => {
@@ -246,9 +244,7 @@ export default function PreviewCard(props: IProps) {
                 main();
             }
         }
-        collectionName.current = deduplicateContext.collections.find(
-            (a) => a.id === file.collectionID
-        )?.name;
+
         return () => {
             // cool cool cool
             isMounted.current = false;
@@ -311,7 +307,11 @@ export default function PreviewCard(props: IProps) {
             {deduplicateContext.isOnDeduplicatePage && (
                 <FileAndCollectionNameOverlay>
                     <p>{file.metadata.title}</p>
-                    <p>{collectionName.current}</p>
+                    <p>
+                        {deduplicateContext.collectionNameMap.get(
+                            file.collectionID
+                        )}
+                    </p>
                 </FileAndCollectionNameOverlay>
             )}
         </Cont>

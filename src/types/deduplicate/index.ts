@@ -1,13 +1,9 @@
-import { Collection } from 'types/collection';
-import { EnteFile } from 'types/file';
-
 export type DeduplicateContextType = {
     clubSameTimeFilesOnly: boolean;
     setClubSameTimeFilesOnly: (clubSameTimeFilesOnly: boolean) => void;
     fileSizeMap: Map<number, number>;
     isOnDeduplicatePage: boolean;
-    files: EnteFile[];
-    collections: Collection[];
+    collectionNameMap: Map<number, string>;
 };
 
 export const DefaultDeduplicateContext = {
@@ -15,6 +11,5 @@ export const DefaultDeduplicateContext = {
     setClubSameTimeFilesOnly: () => null,
     fileSizeMap: new Map<number, number>(),
     isOnDeduplicatePage: false,
-    files: [],
-    collections: [],
+    collectionNameMap: new Map<number, string>(),
 };
