@@ -1,7 +1,12 @@
 import { Collection } from 'types/collection';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
+import { logError } from 'utils/sentry';
 
+interface PendingUploads {
+    files: ElectronFile[];
+    collectionName: string;
+}
 class ImportService {
     ElectronAPIs: any;
     private allElectronAPIsExist: boolean = false;
@@ -25,17 +30,16 @@ class ImportService {
         }
     }
 
-    async getPendingUploads() {
-        if (this.allElectronAPIsExist) {
-            const { files, collectionName } =
-                (await this.ElectronAPIs.getPendingUploads()) as {
-                    files: ElectronFile[];
-                    collectionName: string;
-                };
-            return {
-                files,
-                collectionName,
-            };
+    async getPendingUploads(): Promise<PendingUploads> {
+        try {
+            if (this.allElectronAPIsExist) {
+                const pendingUploads =
+                    (await this.ElectronAPIs.getPendingUploads()) as PendingUploads;
+                return pendingUploads;
+            }
+        } catch (e) {
+            logError(e, 'failed to getPendingUploads ');
+            return { files: [], collectionName: null };
         }
     }
 
