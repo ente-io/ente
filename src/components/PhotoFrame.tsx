@@ -53,7 +53,7 @@ interface Props {
     ) => void;
     selected: SelectedState;
     isFirstLoad?;
-    openFileUploader?;
+    openUploader?;
     isInSearchMode?: boolean;
     search?: Search;
     setSearchStats?: setSearchStats;
@@ -77,7 +77,7 @@ const PhotoFrame = ({
     setSelected,
     selected,
     isFirstLoad,
-    openFileUploader,
+    openUploader,
     isInSearchMode,
     search,
     setSearchStats,
@@ -548,7 +548,7 @@ const PhotoFrame = ({
     return (
         <>
             {!isFirstLoad && files.length === 0 && !isInSearchMode ? (
-                <EmptyScreen openFileUploader={openFileUploader} />
+                <EmptyScreen openUploader={openUploader} />
             ) : (
                 <Container>
                     <AutoSizer>

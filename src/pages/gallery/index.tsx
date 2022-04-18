@@ -105,6 +105,7 @@ import Collections from 'components/pages/gallery/Collections';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import ToastNotification from 'components/ToastNotification';
 import { ElectronFile } from 'types/upload';
+import importService from 'services/importService';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -552,6 +553,14 @@ export default function Gallery() {
         finishLoading();
     };
 
+    const openUploader = () => {
+        if (importService.checkAllElectronAPIsExists()) {
+            setShowUploadTypeChoiceModal(true);
+        } else {
+            openFileUploader();
+        }
+    };
+
     return (
         <GalleryContext.Provider
             value={{
@@ -662,8 +671,7 @@ export default function Gallery() {
                 />
                 <UploadButton
                     isFirstFetch={isFirstFetch}
-                    openFileUploader={openFileUploader}
-                    setShowUploadTypeChoiceModal={setShowUploadTypeChoiceModal}
+                    openUploader={openUploader}
                 />
                 <PhotoFrame
                     files={files}
@@ -674,7 +682,7 @@ export default function Gallery() {
                     setSelected={setSelected}
                     selected={selected}
                     isFirstLoad={isFirstLoad}
-                    openFileUploader={openFileUploader}
+                    openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
                     search={search}
                     setSearchStats={setSearchStats}

@@ -1,5 +1,4 @@
 import React from 'react';
-import importService from 'services/importService';
 import styled from 'styled-components';
 
 const Wrapper = styled.div<{ isDisabled: boolean }>`
@@ -15,21 +14,9 @@ const Wrapper = styled.div<{ isDisabled: boolean }>`
     cursor: pointer;
     opacity: ${(props) => (props.isDisabled ? 0 : 1)};
 `;
-function UploadButton({
-    openFileUploader,
-    isFirstFetch,
-    setShowUploadTypeChoiceModal,
-}) {
-    const handleClick = () => {
-        if (importService.checkAllElectronAPIsExists()) {
-            setShowUploadTypeChoiceModal(true);
-        } else {
-            openFileUploader();
-        }
-    };
-
+function UploadButton({ isFirstFetch, openUploader }) {
     return (
-        <Wrapper onClick={handleClick} isDisabled={isFirstFetch}>
+        <Wrapper onClick={openUploader} isDisabled={isFirstFetch}>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
