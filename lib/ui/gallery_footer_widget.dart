@@ -12,13 +12,12 @@ class GalleryFooterWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(padding: EdgeInsets.all(12)),
+        Padding(padding: EdgeInsets.all(6)),
         Divider(
           height: 1,
-          color: Theme.of(context).buttonColor.withOpacity(0.4),
         ),
         Container(
-          padding: EdgeInsets.fromLTRB(28, 36, 28, 46),
+          padding: EdgeInsets.fromLTRB(20, 24, 20, 72),
           child: OutlinedButton(
             style: OutlinedButton.styleFrom(
               shape: RoundedRectangleBorder(
@@ -29,19 +28,15 @@ class GalleryFooterWidget extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
+              //mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   Icons.cloud_upload,
-                  //color: Theme.of(context).colorScheme.onSurface
                   color: Theme.of(context).backgroundColor,
                 ),
                 Padding(padding: EdgeInsets.all(6)),
                 Text(
-                  "preserve more",
-                  // style: TextStyle(
-                  //   color: Theme.of(context).colorScheme.onBackground,
-                  // ),
+                  "Preserve more",
                 ),
               ],
             ),

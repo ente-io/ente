@@ -1,7 +1,6 @@
 library google_nav_bar;
 
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -88,7 +87,6 @@ class _GNavState extends State<GNav> {
                       key: t.key,
                       border: t.border ?? widget.tabBorder,
                       activeBorder: t.activeBorder ?? widget.tabActiveBorder,
-                      shadow: t.shadow ?? widget.tabShadow,
                       borderRadius:
                           t.borderRadius ?? widget.tabBorderRadius != null
                               ? BorderRadius.all(
@@ -109,8 +107,6 @@ class _GNavState extends State<GNav> {
                           widget.hoverColor ??
                           Colors.transparent,
                       padding: t.padding ?? widget.padding,
-                      textStyle: t.textStyle ?? widget.textStyle,
-                      text: t.text,
                       icon: t.icon,
                       haptic: widget.haptic ?? true,
                       leading: t.leading,
@@ -235,11 +231,6 @@ class _GButtonState extends State<GButton> {
         iconActiveColor: widget.iconActiveColor,
         iconColor: widget.iconColor,
         icon: widget.icon,
-        text: Text(
-          widget.text,
-          style: widget.textStyle ??
-              TextStyle(fontWeight: FontWeight.w600, color: widget.textColor),
-        ),
       ),
     );
   }
@@ -380,47 +371,6 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
             child: FittedBox(
               fit: BoxFit.fitHeight,
               child: Stack(children: [
-                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  icon,
-                  Container(
-//               width: double.infinity,
-
-                    child: Container(
-                      //color: Colors.blue.withOpacity(.2),
-                      child: Align(
-                          alignment: Alignment.centerRight,
-                          widthFactor: curveValue,
-                          child: Container(
-                            //width: 100,
-                            //color: Colors.red.withOpacity(.2),
-                            child: Opacity(
-                                opacity: _expanded
-                                    ? pow(expandController.value, 13)
-                                    : expandController
-                                        .drive(CurveTween(curve: Curves.easeIn))
-                                        .value,
-                                //width: 100,
-                                child: Padding(
-                                  padding: EdgeInsets.only(
-                                      left: widget.gap +
-                                          8 -
-                                          (8 *
-                                              expandController
-                                                  .drive(CurveTween(
-                                                      curve:
-                                                          Curves.easeOutSine))
-                                                  .value),
-                                      right: 8 *
-                                          expandController
-                                              .drive(CurveTween(
-                                                  curve: Curves.easeOutSine))
-                                              .value),
-                                  child: widget.text,
-                                )),
-                          )),
-                    ),
-                  ),
-                ]),
                 Align(alignment: Alignment.centerLeft, child: icon),
               ]),
             ),
