@@ -37,6 +37,7 @@ import FixLargeThumbnails from './FixLargeThumbnail';
 import { AppContext } from 'pages/_app';
 import { canEnableMlSearch } from 'utils/machineLearning/compatibility';
 import { SetLoading } from 'types/gallery';
+import mlIDbStorage from 'utils/storage/mlIDbStorage';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -62,6 +63,7 @@ export default function Sidebar(props: Props) {
     };
     const disableMlSearch = async () => {
         await appContext.updateMlSearchEnabled(false);
+        await mlIDbStorage.clearMLDB();
     };
     useEffect(() => {
         const main = async () => {
