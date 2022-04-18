@@ -85,10 +85,10 @@ class UploadManager {
 
     public async queueFilesForUpload(
         fileWithCollectionToBeUploaded: FileWithCollection[],
-        newCreatedCollections?: Collection[]
+        collections: Collection[]
     ) {
         try {
-            await this.init(newCreatedCollections);
+            await this.init(collections);
             logUploadInfo(
                 `received ${fileWithCollectionToBeUploaded.length} files to upload`
             );
@@ -358,7 +358,9 @@ class UploadManager {
     }
 
     async retryFailedFiles() {
-        await this.queueFilesForUpload(this.failedFiles);
+        await this.queueFilesForUpload(this.failedFiles, [
+            ...this.collections.values(),
+        ]);
     }
 
     cancelRemainingUploads() {
