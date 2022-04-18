@@ -13,6 +13,7 @@ class TextService {
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext
     ) {
+        console.time(`text detection time taken ${fileContext.enteFile.id}`);
         const { oldMlFile, newMlFile } = fileContext;
         if (
             !isDifferentOrOld(
@@ -42,6 +43,10 @@ class TextService {
                 oldMlFile?.errorCount ?? 0
             );
         if (textDetections instanceof Error) {
+            console.timeEnd(
+                `text detection time taken ${fileContext.enteFile.id}`
+            );
+
             newMlFile.errorCount = 2;
             newMlFile.lastErrorMessage = textDetections.message;
             return;
@@ -53,10 +58,11 @@ class TextService {
             })
         );
         newMlFile.text = detectedText;
+        console.timeEnd(`text detection time taken ${fileContext.enteFile.id}`);
         console.log(
             '[MLService] Detected text: ',
             fileContext.enteFile.metadata.title,
-            newMlFile.text
+            newMlFile.text?.length
         );
     }
 

@@ -400,6 +400,7 @@ class MachineLearningService {
         }
 
         const faceDetection = async () => {
+            console.time(`face detection time taken ${enteFile.id}`);
             await FaceService.syncFileFaceDetections(syncContext, fileContext);
 
             if (newMlFile.faces && newMlFile.faces.length > 0) {
@@ -415,6 +416,7 @@ class MachineLearningService {
                     fileContext
                 );
             }
+            console.timeEnd(`face detection time taken ${enteFile.id}`);
         };
         try {
             await Promise.all([
