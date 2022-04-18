@@ -86,6 +86,7 @@ export default function Upload(props: Props) {
     const toUploadFiles = useRef<File[] | ElectronFile[]>(null);
     const isPendingDesktopUpload = useRef(false);
     const pendingDesktopUploadCollectionName = useRef<string>('');
+    const desktopUploadType = useRef<DESKTOP_UPLOAD_TYPE>(null);
 
     useEffect(() => {
         UploadManager.initUploader(
@@ -171,7 +172,10 @@ export default function Upload(props: Props) {
         if (toUploadFiles.current.length === 0) {
             return null;
         }
-
+        if (desktopUploadType.current === DESKTOP_UPLOAD_TYPE.FILES) {
+            desktopUploadType.current = null;
+            return { suggestedCollectionName: '', multipleFolders: false };
+        }
         const paths: string[] = toUploadFiles.current.map(
             (file) => file['path']
         );
@@ -397,6 +401,7 @@ export default function Upload(props: Props) {
     };
     const handleDesktopUploadTypes = async (type: DESKTOP_UPLOAD_TYPE) => {
         let files: ElectronFile[];
+        desktopUploadType.current = type;
         if (type === DESKTOP_UPLOAD_TYPE.FILES) {
             files = await ImportService.showUploadFilesDialog();
         } else {
