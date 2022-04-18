@@ -1,7 +1,7 @@
 {
   "name": "ente",
   "productName": "ente",
-  "version": "1.4.0-alpha6",
+  "version": "1.4.0-alpha7",
   "private": true,
   "description": "Desktop client for ente.io",
   "main": "app/main/index.js",
