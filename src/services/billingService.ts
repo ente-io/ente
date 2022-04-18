@@ -1,7 +1,6 @@
 import { getEndpoint, getPaymentsURL } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { setData, LS_KEYS } from 'utils/storage/localStorage';
-import { convertBytesToHumanReadable } from 'utils/billing';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { getPaymentToken } from './userService';
@@ -178,20 +177,6 @@ class billingService {
         }
     }
 
-    public async getUsage() {
-        try {
-            const response = await HTTPService.get(
-                `${ENDPOINT}/billing/usage`,
-                { startTime: 0, endTime: Date.now() * 1000 },
-                {
-                    'X-Auth-Token': getToken(),
-                }
-            );
-            return convertBytesToHumanReadable(response.data.usage);
-        } catch (e) {
-            logError(e, 'error getting usage');
-        }
-    }
     private getRedirectionURL() {
         let redirectURL: string;
         if (isElectron()) {

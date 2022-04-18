@@ -44,6 +44,9 @@ export default function Deduplicate() {
     const [duplicateFiles, setDuplicateFiles] = useState<EnteFile[]>(null);
     const [clubSameTimeFilesOnly, setClubSameTimeFilesOnly] = useState(false);
     const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
+    const [collectionNameMap, setCollectionNameMap] = useState(
+        new Map<number, string>()
+    );
     const [selected, setSelected] = useState<SelectedState>({
         count: 0,
         collectionID: 0,
@@ -68,9 +71,14 @@ export default function Deduplicate() {
 
     const syncWithRemote = async () => {
         startLoading();
-        const collection = await syncCollections();
-        await syncFiles(collection, () => null);
-        let duplicates = await getDuplicateFiles();
+        const collections = await syncCollections();
+        const collectionNameMap = new Map<number, string>();
+        for (const collection of collections) {
+            collectionNameMap.set(collection.id, collection.name);
+        }
+        setCollectionNameMap(collectionNameMap);
+        const files = await syncFiles(collections, () => null);
+        let duplicates = await getDuplicateFiles(files, collectionNameMap);
         if (clubSameTimeFilesOnly) {
             duplicates = clubDuplicatesByTime(duplicates);
         }
@@ -138,6 +146,7 @@ export default function Deduplicate() {
         <DeduplicateContext.Provider
             value={{
                 ...DefaultDeduplicateContext,
+                collectionNameMap,
                 clubSameTimeFilesOnly,
                 setClubSameTimeFilesOnly,
                 fileSizeMap,
