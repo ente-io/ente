@@ -19,11 +19,16 @@ import {
 } from 'constants/machineLearning/config';
 import { promiseWithTimeout } from 'utils/common/promiseTimeout';
 
+const TESSERACT_MAX_CONCURRENT_PROCESSES = 4;
 class TesseractService implements TextDetectionService {
-    private tesseractWorker: Tesseract.Worker;
     public method: Versioned<TextDetectionMethod>;
     private ready: Promise<void>;
-    private textDetector = new QueueProcessor<Tesseract.Word[] | Error>(1);
+    private textDetector = new QueueProcessor<Tesseract.Word[] | Error>(
+        TESSERACT_MAX_CONCURRENT_PROCESSES
+    );
+    private tesseractWorkerPool = new Array<Tesseract.Worker>(
+        TESSERACT_MAX_CONCURRENT_PROCESSES
+    );
     public constructor() {
         this.method = {
             value: 'Tesseract',
@@ -31,16 +36,16 @@ class TesseractService implements TextDetectionService {
         };
     }
 
-    private async init() {
-        this.tesseractWorker = createWorker({
+    private async createTesseractWorker() {
+        const tesseractWorker = createWorker({
             workerBlobURL: false,
             workerPath: '/js/tesseract/worker.min.js',
             corePath: '/js/tesseract/tesseract-core.wasm.js',
         });
-        await this.tesseractWorker.load();
-        await this.tesseractWorker.loadLanguage('eng');
-        await this.tesseractWorker.initialize('eng');
-        await this.tesseractWorker.setParameters({
+        await tesseractWorker.load();
+        await tesseractWorker.loadLanguage('eng');
+        await tesseractWorker.initialize('eng');
+        await tesseractWorker.setParameters({
             tessedit_char_whitelist:
                 '0123456789' +
                 'abcdefghijklmnopqrstuvwxyz' +
@@ -48,15 +53,27 @@ class TesseractService implements TextDetectionService {
                 ' ',
             preserve_interword_spaces: '1',
         });
-        console.log('loaded tesseract worker');
+        return tesseractWorker;
+    }
+
+    private async init() {
+        for (let i = 0; i < TESSERACT_MAX_CONCURRENT_PROCESSES; i++) {
+            this.tesseractWorkerPool[i] = await this.createTesseractWorker();
+            console.log('loaded tesseract worker no', i);
+        }
+        console.log('loaded tesseract worker pool');
     }
 
     private async getTesseractWorker() {
-        if (!this.tesseractWorker) {
+        if (!this.ready && typeof this.tesseractWorkerPool[0] === 'undefined') {
             this.ready = this.init();
         }
         await this.ready;
-        return this.tesseractWorker;
+        return this.tesseractWorkerPool.shift();
+    }
+
+    private releaseWorker(tesseractWorker: Tesseract.Worker) {
+        this.tesseractWorkerPool.push(tesseractWorker);
     }
 
     async detectText(
@@ -126,7 +143,7 @@ class TesseractService implements TextDetectionService {
             );
         }
 
-        const tesseractWorker = await this.getTesseractWorker();
+        let tesseractWorker = await this.getTesseractWorker();
         const id = makeID(6);
         console.log(
             `detecting text (${imageBitmap.width}px,${imageBitmap.height}px) fileType=${fileTypeInfo.exactType}`
@@ -144,16 +161,22 @@ class TesseractService implements TextDetectionService {
             return filteredDetections;
         } catch (e) {
             if (e.message === CustomError.WAIT_TIME_EXCEEDED) {
-                this.dispose();
+                tesseractWorker?.terminate();
+                tesseractWorker = await this.createTesseractWorker();
             }
             throw e;
+        } finally {
+            this.releaseWorker(tesseractWorker);
         }
     };
 
+    public replaceWorkerWithNewOne() {}
+
     public async dispose() {
-        const tesseractWorker = await this.getTesseractWorker();
-        tesseractWorker?.terminate();
-        this.tesseractWorker = null;
+        for (let i = 0; i < TESSERACT_MAX_CONCURRENT_PROCESSES; i++) {
+            this.tesseractWorkerPool[i]?.terminate();
+            this.tesseractWorkerPool[i] = undefined;
+        }
     }
 }
 
