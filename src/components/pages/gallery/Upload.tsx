@@ -417,6 +417,7 @@ export default function Upload(props: Props) {
         if (isElectron()) {
             ImportService.updatePendingUploads([]);
         }
+        await props.setUploadInProgress(false);
         await props.syncWithRemote();
     };
 
