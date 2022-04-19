@@ -1,30 +1,21 @@
 import { BrowserWindow, dialog, ipcMain, Tray, Notification } from 'electron';
 import { createWindow } from './createWindow';
 import { buildContextMenu } from './menuUtil';
+import { getFilesFromDir } from './upload';
 
 export default function setupIpcComs(
     tray: Tray,
     mainWindow: BrowserWindow
 ): void {
-    ipcMain.on('select-dir', async (event) => {
-        const dialogWindow = new BrowserWindow({
-            width: 800,
-            height: 600,
-            webPreferences: {
-                nodeIntegration: false,
-                contextIsolation: true,
-                sandbox: true,
-            },
-        });
-        const result = await dialog.showOpenDialog(dialogWindow, {
+    ipcMain.handle('select-dir', async () => {
+        const result = await dialog.showOpenDialog({
             properties: ['openDirectory'],
         });
         const dir =
             result.filePaths &&
             result.filePaths.length > 0 &&
             result.filePaths[0];
-        dialogWindow.close();
-        event.returnValue = dir;
+        return dir;
     });
 
     ipcMain.on('update-tray', (event, args) => {
@@ -42,5 +33,25 @@ export default function setupIpcComs(
         const secondWindow = createWindow();
         mainWindow.destroy();
         mainWindow = secondWindow;
+    });
+
+    ipcMain.handle('show-upload-files-dialog', async () => {
+        const files = await dialog.showOpenDialog({
+            properties: ['openFile', 'multiSelections'],
+        });
+        return files.filePaths;
+    });
+
+    ipcMain.handle('show-upload-dirs-dialog', async () => {
+        const dir = await dialog.showOpenDialog({
+            properties: ['openDirectory', 'multiSelections'],
+        });
+
+        let files: string[] = [];
+        for (const dirPath of dir.filePaths) {
+            files = files.concat(await getFilesFromDir(dirPath));
+        }
+
+        return files;
     });
 }

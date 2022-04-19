@@ -1,10 +1,12 @@
 {
     "compilerOptions": {
+        "target": "es2017",
         "module": "commonjs",
+        "esModuleInterop": true,
         "noImplicitAny": true,
         "sourceMap": true,
         "outDir": "app",
-        "baseUrl": ".",
+        "baseUrl": "./src",
         "paths": {
             "*": ["node_modules/*"]
         }

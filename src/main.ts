@@ -1,11 +1,17 @@
 import { app, BrowserWindow, Menu, Tray, dialog, nativeImage } from 'electron';
 import * as path from 'path';
-import * as isDev from 'electron-is-dev';
 import AppUpdater from './utils/appUpdater';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
 import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 import initSentry from './utils/sentry';
+import { isDev } from './utils/common';
+
+if (isDev) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const electronReload = require('electron-reload');
+    electronReload(__dirname, {});
+}
 
 let tray: Tray;
 let mainWindow: BrowserWindow;

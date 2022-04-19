@@ -1,6 +1,12 @@
 import { Readable } from 'stream';
 import * as fs from 'promise-fs';
 import * as electron from 'electron';
+import {
+    getElectronFile,
+    getPendingUploads,
+    setToUploadFiles,
+    setToUploadCollection,
+} from './utils/upload';
 
 const { ipcRenderer } = electron;
 
@@ -47,7 +53,7 @@ const saveFileToDisk = async (path: string, file: any) => {
 
 const selectRootDirectory = async () => {
     try {
-        return await ipcRenderer.sendSync('select-dir');
+        return await ipcRenderer.invoke('select-dir');
     } catch (e) {
         console.error(e);
         throw e;
@@ -100,6 +106,32 @@ const setExportRecord = async (filePath: string, data: string) => {
     await fs.writeFile(filepath, data);
 };
 
+const showUploadFilesDialog = async () => {
+    try {
+        const filePaths: string[] = await ipcRenderer.invoke(
+            'show-upload-files-dialog'
+        );
+        const files = await Promise.all(filePaths.map(getElectronFile));
+        return files;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};
+
+const showUploadDirsDialog = async () => {
+    try {
+        const filePaths: string[] = await ipcRenderer.invoke(
+            'show-upload-dirs-dialog'
+        );
+        const files = await Promise.all(filePaths.map(getElectronFile));
+        return files;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};
+
 const windowObject: any = window;
 windowObject['ElectronAPIs'] = {
     exists,
@@ -117,4 +149,10 @@ windowObject['ElectronAPIs'] = {
     registerRetryFailedExportListener,
     getExportRecord,
     setExportRecord,
+    getElectronFile,
+    showUploadFilesDialog,
+    showUploadDirsDialog,
+    getPendingUploads,
+    setToUploadFiles,
+    setToUploadCollection,
 };

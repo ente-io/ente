@@ -1,6 +1,7 @@
 import { app, BrowserWindow, nativeImage } from 'electron';
-import * as isDev from 'electron-is-dev';
 import * as path from 'path';
+import { isDev } from './common';
+import { PROD_HOST_URL } from '../config';
 import { isAppQuitting } from '../main';
 
 export function createWindow(): BrowserWindow {
@@ -38,13 +39,13 @@ export function createWindow(): BrowserWindow {
         splash.loadURL(
             `file://${path.join(process.resourcesPath, 'splash.html')}`
         );
-        mainWindow.loadURL('http://web.ente.io');
+        mainWindow.loadURL(PROD_HOST_URL);
     }
     mainWindow.webContents.on('did-fail-load', () => {
         splash.close();
         mainWindow.show();
         isDev
-            ? mainWindow.loadFile(`../build/error.html`)
+            ? mainWindow.loadFile(`../../build/error.html`)
             : splash.loadURL(
                   `file://${path.join(process.resourcesPath, 'error.html')}`
               );

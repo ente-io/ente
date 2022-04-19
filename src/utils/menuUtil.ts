@@ -16,12 +16,14 @@ export function buildContextMenu(
 ): Menu {
     const { export_progress, retry_export, paused } = args;
     const contextMenu = Menu.buildFromTemplate([
-        ...(isUpdateAvailable() && [
-            {
-                label: 'update available',
-                click: () => showUpdateDialog(),
-            },
-        ]),
+        ...(isUpdateAvailable()
+            ? [
+                  {
+                      label: 'update available',
+                      click: () => showUpdateDialog(),
+                  },
+              ]
+            : []),
         { type: 'separator' },
         ...(export_progress
             ? [
@@ -90,12 +92,14 @@ export function buildMenuBar(): Menu {
         {
             label: app.name,
             submenu: [
-                ...((isMac && [
-                    {
-                        label: 'about',
-                        role: 'about',
-                    },
-                ]) as MenuItemConstructorOptions[]),
+                ...((isMac
+                    ? [
+                          {
+                              label: 'about',
+                              role: 'about',
+                          },
+                      ]
+                    : []) as MenuItemConstructorOptions[]),
                 {
                     label: 'faq',
                     click: () => shell.openExternal('https://ente.io/faq/'),
