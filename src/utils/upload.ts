@@ -1,7 +1,7 @@
 import path from 'path';
 import StreamZip from 'node-stream-zip';
 import * as fs from 'promise-fs';
-import { FILE_STREAM_CHUNK_SIZE, GOOGLE_PHOTOS_DIR } from '../config';
+import { FILE_STREAM_CHUNK_SIZE } from '../config';
 import { uploadStatusStore } from '../services/store';
 import { ElectronFile } from '../types';
 
@@ -115,7 +115,7 @@ const getZipFileStream = async (
     return readableStream;
 };
 
-async function getZipEntryasElectronFile(
+async function getZipEntryAsElectronFile(
     zip: StreamZip.StreamZipAsync,
     entry: StreamZip.ZipEntry
 ): Promise<ElectronFile> {
@@ -203,8 +203,10 @@ export const getElectronFilesFromGoogleZip = async (filePath: string) => {
     const files: ElectronFile[] = [];
 
     for (const entry of Object.values(entries)) {
-        if (entry.name.startsWith(GOOGLE_PHOTOS_DIR)) {
-            files.push(await getZipEntryasElectronFile(zip, entry));
+        const basename = entry.name.substring(entry.name.lastIndexOf('/'));
+        if (entry.isFile && basename.length > 1 && basename[1] !== '.') {
+            console.log(basename);
+            files.push(await getZipEntryAsElectronFile(zip, entry));
         }
     }
 
