@@ -52,63 +52,78 @@ const getZipFileStream = async (
     zip: StreamZip.StreamZipAsync,
     filePath: string
 ) => {
+    console.log('called getZipFileStream');
     const stream = await zip.stream(filePath);
-    stream.pause();
 
-    let chunkToConsume = new Uint8Array(),
-        chunkArray: number[] = [],
-        closed = false;
+    const done = { current: false };
 
-    let resolveObj: (value?: any) => void, rejectObj: (reason?: any) => void;
+    let resolveObj: (value?: any) => void = null;
+    let rejectObj: (reason?: any) => void = null;
 
-    stream.on('data', (chunk: Uint8Array) => {
-        for (const byte of chunk) {
-            chunkArray.push(byte);
-        }
-        if (chunkArray.length >= FILE_STREAM_CHUNK_SIZE) {
-            chunkToConsume = new Uint8Array(
-                chunkArray.slice(0, FILE_STREAM_CHUNK_SIZE)
-            );
-            chunkArray = chunkArray.slice(FILE_STREAM_CHUNK_SIZE);
-            resolveObj();
+    stream.on('readable', () => {
+        console.log('readable');
+        if (resolveObj) {
+            const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
+            if (chunk) {
+                console.log(
+                    'from readable',
+                    done.current,
+                    chunk?.length,
+                    FILE_STREAM_CHUNK_SIZE
+                );
+                resolveObj(new Uint8Array(chunk));
+                resolveObj = null;
+            }
         }
     });
 
     stream.on('end', () => {
-        closed = true;
-        resolveObj();
+        console.log('stream ended');
+        done.current = true;
     });
 
-    const resumeDataStream = () => {
-        return new Promise((resolve, reject) => {
-            resolveObj = resolve;
-            rejectObj = reject;
-            if (closed) {
-                resolveObj();
+    stream.on('error', (e) => {
+        done.current = true;
+        if (rejectObj) {
+            rejectObj(e);
+            rejectObj = null;
+        }
+    });
+
+    const readStreamData = () => {
+        return new Promise<Uint8Array>((resolve, reject) => {
+            console.log('stream status done=', done.current);
+            if (done.current) {
+                const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
+                console.log(
+                    'ended stream reading',
+                    done.current,
+                    chunk?.length,
+                    FILE_STREAM_CHUNK_SIZE
+                );
+                resolve(chunk);
             } else {
-                stream.resume();
+                resolveObj = resolve;
+                rejectObj = reject;
             }
         });
     };
 
     const readableStream = new ReadableStream<Uint8Array>({
         async pull(controller) {
-            resumeDataStream().then(() => {
-                if (chunkToConsume.length > 0) {
-                    controller.enqueue(chunkToConsume);
-                    chunkToConsume = new Uint8Array();
-                } else if (chunkArray.length > 0) {
-                    controller.enqueue(
-                        new Uint8Array(
-                            chunkArray.slice(0, FILE_STREAM_CHUNK_SIZE)
-                        )
-                    );
-                    chunkArray = chunkArray.slice(FILE_STREAM_CHUNK_SIZE);
+            try {
+                console.log('pull called', done.current);
+                const data = await readStreamData();
+                if (data) {
+                    controller.enqueue(data);
                 } else {
+                    console.log('closed');
                     controller.close();
                 }
-                stream.pause();
-            });
+            } catch (e) {
+                console.log(e);
+                controller.close();
+            }
         },
     });
 
