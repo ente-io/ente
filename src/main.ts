@@ -5,7 +5,6 @@ import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
 import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 import initSentry from './utils/sentry';
-import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from '../config';
 import { isDev } from './utils/common';
 
 if (isDev) {
@@ -24,7 +23,6 @@ let updateIsAvailable = false;
 export const isAppQuitting = (): boolean => {
     return appIsQuitting;
 };
-
 export const setIsAppQuitting = (value: boolean): void => {
     appIsQuitting = value;
 };
@@ -36,11 +34,6 @@ export const setIsUpdateAvailable = (value: boolean): void => {
     updateIsAvailable = value;
 };
 
-const serveNextAt = require('next-electron-server');
-serveNextAt(PROD_HOST_URL, {
-    outputDir: RENDERER_OUTPUT_DIR,
-});
-
 // Disable error dialogs by overriding
 dialog.showErrorBox = function (title, content) {
     console.log(`${title}\n${content}`);
@@ -50,7 +43,6 @@ const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
     app.quit();
 } else {
-    app.commandLine.appendSwitch('enable-features', 'SharedArrayBuffer');
     app.on('second-instance', () => {
         // Someone tried to run a second instance, we should focus our window.
         if (mainWindow) {

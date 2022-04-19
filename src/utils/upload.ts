@@ -1,6 +1,6 @@
 import path from 'path';
 import * as fs from 'promise-fs';
-import { FILE_STREAM_CHUNK_SIZE } from '../../config';
+import { FILE_STREAM_CHUNK_SIZE } from '../config';
 import { uploadStatusStore } from '../services/store';
 import { ElectronFile } from '../types';
 
@@ -26,7 +26,7 @@ const getFileStream = async (filePath: string) => {
     let offset = 0;
     const readableStream = new ReadableStream<Uint8Array>({
         async pull(controller) {
-            let buff = new Uint8Array(FILE_STREAM_CHUNK_SIZE);
+            const buff = new Uint8Array(FILE_STREAM_CHUNK_SIZE);
 
             // original types were not working correctly
             const bytesRead = (await fs.read(

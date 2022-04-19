@@ -4,7 +4,7 @@
   "version": "1.4.0-alpha8",
   "private": true,
   "description": "Desktop client for ente.io",
-  "main": "app/main/index.js",
+  "main": "app/main.js",
   "build": {
     "appId": "io.ente.bhari-frame",
     "artifactName": "${productName}-${version}.${ext}",
@@ -36,13 +36,10 @@
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
-    "build-main": "tsc",
-    "build-ui": "cd src/ui && yarn && yarn build && cd ../../",
-    "pre-build": "concurrently \"yarn && yarn run build-main\" \"cd src/ui && yarn\"",
-    "build": "yarn && yarn build-ui && yarn run build-main",
+    "build": "tsc",
     "watch": "tsc -w",
     "lint": "eslint -c .eslintrc --ext .ts ./src",
-    "start": "yarn run pre-build && concurrently \"yarn run watch\" \"electron ./app/main/index.js\" \"cd src/ui && yarn dev\"",
+    "start": "yarn build && electron ./app/main.js",
     "test-release": "yarn build && electron-builder"
   },
   "author": "ente <code@ente.io>",
@@ -50,7 +47,6 @@
     "@sentry/cli": "^1.68.0",
     "@typescript-eslint/eslint-plugin": "^4.20.0",
     "@typescript-eslint/parser": "^4.20.0",
-    "concurrently": "^7.0.0",
     "electron": "^15.3.0",
     "electron-builder": "^22.10.5",
     "electron-builder-notarize": "^1.2.0",
@@ -68,7 +64,6 @@
     "electron-reload": "^2.0.0-alpha.1",
     "electron-store": "^8.0.1",
     "electron-updater": "^4.3.8",
-    "next-electron-server": "file:./thirdparty/next-electron-server",
     "promise-fs": "^2.1.1"
   }
 }

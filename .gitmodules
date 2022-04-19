@@ -1,8 +1,0 @@
-[submodule "src/ui"]
-	path = src/ui
-	url = https://github.com/ente-io/bada-frame
-	branch = recover-failed-imports
-[submodule "thirdparty/next-electron-server"]
-	path = thirdparty/next-electron-server
-	url = https://github.com/ente-io/next-electron-server
-	branch = desktop
