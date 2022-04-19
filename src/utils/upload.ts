@@ -54,7 +54,7 @@ const getZipFileStream = async (
 ) => {
     console.log('called getZipFileStream');
     const stream = await zip.stream(filePath);
-
+    let chunks: number[] = [];
     const done = { current: false };
 
     let resolveObj: (value?: any) => void = null;
@@ -63,15 +63,19 @@ const getZipFileStream = async (
     stream.on('readable', () => {
         console.log('readable');
         if (resolveObj) {
-            const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
-            if (chunk) {
-                console.log(
-                    'from readable',
-                    done.current,
-                    chunk?.length,
-                    FILE_STREAM_CHUNK_SIZE
-                );
-                resolveObj(new Uint8Array(chunk));
+            let chunk: Buffer;
+            while (null !== (chunk = stream.read() as Buffer)) {
+                for (const byte of chunk) {
+                    chunks.push(byte);
+                }
+                if (chunks.length >= FILE_STREAM_CHUNK_SIZE) {
+                    break;
+                }
+            }
+            if (chunks.length >= FILE_STREAM_CHUNK_SIZE) {
+                const chunkToConsume = chunks.slice(0, FILE_STREAM_CHUNK_SIZE);
+                chunks = chunks.slice(FILE_STREAM_CHUNK_SIZE);
+                resolveObj(new Uint8Array(chunkToConsume));
                 resolveObj = null;
             }
         }
