@@ -17,7 +17,7 @@ const Wrapper = styled.div`
     }
 `;
 
-export default function EmptyScreen({ openFileUploader }) {
+export default function EmptyScreen({ openUploader }) {
     const deduplicateContext = useContext(DeduplicateContext);
     return (
         <Wrapper>
@@ -37,7 +37,7 @@ export default function EmptyScreen({ openFileUploader }) {
                     </div>
                     <Button
                         variant="outline-success"
-                        onClick={openFileUploader}
+                        onClick={openUploader}
                         style={{
                             marginTop: '32px',
                             paddingLeft: '32px',

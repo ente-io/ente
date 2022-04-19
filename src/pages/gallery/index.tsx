@@ -104,6 +104,8 @@ import {
 import Collections from 'components/pages/gallery/Collections';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import ToastNotification from 'components/ToastNotification';
+import { ElectronFile } from 'types/upload';
+import importService from 'services/importService';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -200,6 +202,10 @@ export default function Gallery() {
     const showPlanSelectorModal = () => setPlanModalView(true);
 
     const clearNotificationAttributes = () => setNotificationAttributes(null);
+
+    const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
+    const [showUploadTypeChoiceModal, setShowUploadTypeChoiceModal] =
+        useState(false);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -547,6 +553,14 @@ export default function Gallery() {
         finishLoading();
     };
 
+    const openUploader = () => {
+        if (importService.checkAllElectronAPIsExists()) {
+            setShowUploadTypeChoiceModal(true);
+        } else {
+            openFileUploader();
+        }
+    };
+
     return (
         <GalleryContext.Provider
             value={{
@@ -645,6 +659,10 @@ export default function Gallery() {
                     fileRejections={fileRejections}
                     setFiles={setFiles}
                     isFirstUpload={collectionsAndTheirLatestFile?.length === 0}
+                    electronFiles={electronFiles}
+                    setElectronFiles={setElectronFiles}
+                    showUploadTypeChoiceModal={showUploadTypeChoiceModal}
+                    setShowUploadTypeChoiceModal={setShowUploadTypeChoiceModal}
                 />
                 <Sidebar
                     collections={collections}
@@ -653,7 +671,7 @@ export default function Gallery() {
                 />
                 <UploadButton
                     isFirstFetch={isFirstFetch}
-                    openFileUploader={openFileUploader}
+                    openUploader={openUploader}
                 />
                 <PhotoFrame
                     files={files}
@@ -664,7 +682,7 @@ export default function Gallery() {
                     setSelected={setSelected}
                     selected={selected}
                     isFirstLoad={isFirstLoad}
-                    openFileUploader={openFileUploader}
+                    openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
                     search={search}
                     setSearchStats={setSearchStats}

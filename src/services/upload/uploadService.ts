@@ -7,6 +7,7 @@ import { handleUploadError } from 'utils/error';
 import {
     B64EncryptionResult,
     BackupedFile,
+    ElectronFile,
     EncryptedFile,
     FileTypeInfo,
     FileWithCollection,
@@ -75,7 +76,7 @@ class UploadService {
             : getFilename(file);
     }
 
-    async getFileType(reader: FileReader, file: File) {
+    async getFileType(reader: FileReader, file: File | ElectronFile) {
         return getFileType(reader, file);
     }
 
@@ -90,7 +91,7 @@ class UploadService {
     }
 
     async extractFileMetadata(
-        file: File,
+        file: File | ElectronFile,
         collectionID: number,
         fileTypeInfo: FileTypeInfo
     ): Promise<Metadata> {

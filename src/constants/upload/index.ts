@@ -48,3 +48,5 @@ export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
     location: NULL_LOCATION,
     creationTime: null,
 };
+
+export const A_SEC_IN_MICROSECONDS = 1e6;
