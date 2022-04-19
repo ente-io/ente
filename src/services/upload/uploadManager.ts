@@ -9,7 +9,7 @@ import {
 import { logError } from 'utils/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
 import {
-    areSameElectronFiles,
+    areFileWithCollectionsSame,
     getFileNameSize,
     segregateMetadataAndMediaFiles,
 } from 'utils/upload';
@@ -37,7 +37,7 @@ import { FILE_TYPE } from 'constants/file';
 import uiService from './uiService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { dedupe } from 'utils/export';
-import { convertToHumanReadable } from 'utils/billing';
+import { convertBytesToHumanReadable } from 'utils/billing';
 import { logUploadInfo } from 'utils/upload';
 import isElectron from 'is-electron';
 import ImportService from 'services/importService';
@@ -60,15 +60,22 @@ class UploadManager {
         UIService.init(progressUpdater);
         this.setFiles = setFiles;
     }
+    private uploadCancelled: boolean;
 
-    private async init(collections: Collection[]) {
+    private resetState() {
+        this.uploadCancelled = false;
         this.filesToBeUploaded = [];
+        this.remainingFiles = [];
         this.failedFiles = [];
         this.parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
         this.metadataAndFileTypeInfoMap = new Map<
             number,
             MetadataAndFileTypeInfo
         >();
+    }
+
+    private async init(collections: Collection[]) {
+        this.resetState();
         this.existingFiles = await getLocalFiles();
         this.existingFilesCollectionWise = sortFilesIntoCollections(
             this.existingFiles
@@ -80,10 +87,10 @@ class UploadManager {
 
     public async queueFilesForUpload(
         fileWithCollectionToBeUploaded: FileWithCollection[],
-        newCreatedCollections?: Collection[]
+        collections: Collection[]
     ) {
         try {
-            await this.init(newCreatedCollections);
+            await this.init(collections);
             logUploadInfo(
                 `received ${fileWithCollectionToBeUploaded.length} files to upload`
             );
@@ -152,6 +159,9 @@ class UploadManager {
             const reader = new FileReader();
             for (const { file, collectionID } of metadataFiles) {
                 try {
+                    if (this.uploadCancelled) {
+                        break;
+                    }
                     logUploadInfo(
                         `parsing metadata json file ${getFileNameSize(file)}`
                     );
@@ -196,6 +206,9 @@ class UploadManager {
             const reader = new FileReader();
             for (const { file, localID, collectionID } of mediaFiles) {
                 try {
+                    if (this.uploadCancelled) {
+                        break;
+                    }
                     const { fileTypeInfo, metadata } = await (async () => {
                         if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
                             logUploadInfo(
@@ -256,6 +269,9 @@ class UploadManager {
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
+        if (this.uploadCancelled) {
+            return;
+        }
         logUploadInfo(`uploadMediaFiles called`);
         this.filesToBeUploaded.push(...mediaFiles);
 
@@ -292,6 +308,9 @@ class UploadManager {
 
     private async uploadNextFileInQueue(worker: any, reader: FileReader) {
         while (this.filesToBeUploaded.length > 0) {
+            if (this.uploadCancelled) {
+                return;
+            }
             const fileWithCollection = this.filesToBeUploaded.pop();
             const { collectionID } = fileWithCollection;
             const existingFilesInCollection =
@@ -324,7 +343,9 @@ class UploadManager {
                         ...(getData(LS_KEYS.FAILED_UPLOADS)?.files ?? []),
                         ...this.failedFiles.map(
                             (file) =>
-                                `${file.file.name}_${convertToHumanReadable(
+                                `${
+                                    file.file.name
+                                }_${convertBytesToHumanReadable(
                                     file.file.size
                                 )}`
                         ),
@@ -334,9 +355,10 @@ class UploadManager {
                 this.failedFiles.push(fileWithCollection);
             }
 
-            if (fileUploadResult && isElectron()) {
+            if (isElectron()) {
                 this.remainingFiles = this.remainingFiles.filter(
-                    (file) => !areSameElectronFiles(file, fileWithCollection)
+                    (file) =>
+                        !areFileWithCollectionsSame(file, fileWithCollection)
                 );
                 ImportService.updatePendingUploads(this.remainingFiles);
             }
@@ -350,12 +372,14 @@ class UploadManager {
     }
 
     async retryFailedFiles() {
-        await this.queueFilesForUpload(this.failedFiles);
+        await this.queueFilesForUpload(this.failedFiles, [
+            ...this.collections.values(),
+        ]);
     }
 
-    async clearRemainingFiles() {
+    cancelRemainingUploads() {
         this.remainingFiles = [];
-        await this.init([]);
+        this.uploadCancelled = true;
     }
 }
 

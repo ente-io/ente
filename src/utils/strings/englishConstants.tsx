@@ -381,8 +381,10 @@ const englishConstants = {
             <p>all files will be queued for download sequentially</p>
         </>
     ),
+    ARCHIVED_ALBUM: 'archived album',
     DOWNLOAD_COLLECTION_FAILED: 'album downloading failed, please try again',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
+
     SEARCH_HINT: () => (
         <span>try searching for New York, April 14, Christmas...</span>
     ),
@@ -695,6 +697,22 @@ const englishConstants = {
     UPLOAD_FILES: 'File',
     UPLOAD_DIRS: 'Folder',
     UPLOAD_GOOGLE_TAKEOUT: 'Google Takeout',
+    DEDUPLICATE_FILES: 'deduplicate files',
+    NO_DUPLICATES_FOUND: "you've no duplicate files that can be cleared",
+    CLUB_BY_CAPTURE_TIME: 'club by capture time',
+    FILES: 'files',
+    EACH: 'each',
+    DEDUPLICATION_LOGIC_MESSAGE: (captureTime: boolean) => (
+        <>
+            the following files were clubbed based on their sizes
+            {captureTime && ` and capture time`}, please review and delete items
+            you believe are duplicates{' '}
+        </>
+    ),
+    STOP_ALL_UPLOADS_MESSAGE:
+        'are you sure that you want to stop all the uploads in progress?',
+    STOP_UPLOADS_HEADER: 'stop uploads?',
+    YES_STOP_UPLOADS: 'yes, stop uploads',
 };
 
 export default englishConstants;

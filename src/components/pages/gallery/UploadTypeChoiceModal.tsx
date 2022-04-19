@@ -1,6 +1,5 @@
 import { Modal, Button, Container, Row } from 'react-bootstrap';
 import React from 'react';
-import ImportService from 'services/importService';
 import constants from 'utils/strings/constants';
 import { IoIosArrowForward, IoMdClose } from 'react-icons/io';
 import FileUploadIcon from 'components/icons/FileUploadIcon';
@@ -43,47 +42,20 @@ function GoogleIcon() {
 }
 
 export default function UploadTypeChoiceModal({
-    setElectronFiles,
-    showUploadTypeChoiceModal,
-    setShowUploadTypeChoiceModal,
-    setIsUploadDirs,
+    onHide,
+    show,
+    uploadFiles,
+    uploadFolders,
+    uploadGoogleTakeoutZips,
 }) {
-    const hideFiletypeDialog = () => {
-        setShowUploadTypeChoiceModal(false);
-    };
-
-    const uploadFiles = async () => {
-        const files = await ImportService.showUploadFilesDialog();
-        hideFiletypeDialog();
-        ImportService.setSkipUpdatePendingUploads(false);
-        setIsUploadDirs(false);
-        setElectronFiles(files);
-    };
-
-    const uploadDirs = async () => {
-        const files = await ImportService.showUploadDirsDialog();
-        hideFiletypeDialog();
-        ImportService.setSkipUpdatePendingUploads(false);
-        setIsUploadDirs(true);
-        setElectronFiles(files);
-    };
-
-    const uploadGoogleTakeout = async () => {
-        const files = await ImportService.showUploadZipDialog();
-        hideFiletypeDialog();
-        ImportService.setSkipUpdatePendingUploads(true);
-        setIsUploadDirs(true);
-        setElectronFiles(files);
-    };
-
     return (
         <Modal
-            show={showUploadTypeChoiceModal}
+            show={show}
             aria-labelledby="contained-modal-title-vcenter"
             centered
             dialogClassName="file-type-choice-modal">
             <Modal.Header
-                onHide={hideFiletypeDialog}
+                onHide={onHide}
                 style={{
                     borderBottom: 'none',
                     height: '4em',
@@ -99,7 +71,7 @@ export default function UploadTypeChoiceModal({
                 </Modal.Title>
                 <IoMdClose
                     size={30}
-                    onClick={hideFiletypeDialog}
+                    onClick={onHide}
                     style={{ cursor: 'pointer' }}
                 />
             </Modal.Header>
@@ -114,12 +86,12 @@ export default function UploadTypeChoiceModal({
                         uploadName={constants.UPLOAD_FILES}
                     />
                     <UploadTypeRow
-                        uploadFunc={uploadDirs}
+                        uploadFunc={uploadFolders}
                         Icon={FolderUploadIcon}
                         uploadName={constants.UPLOAD_DIRS}
                     />
                     <UploadTypeRow
-                        uploadFunc={uploadGoogleTakeout}
+                        uploadFunc={uploadGoogleTakeoutZips}
                         Icon={GoogleIcon}
                         uploadName={constants.UPLOAD_GOOGLE_TAKEOUT}
                     />

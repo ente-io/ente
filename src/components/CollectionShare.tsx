@@ -34,6 +34,7 @@ import CryptoWorker from 'utils/crypto';
 import { dateStringWithMMH } from 'utils/time';
 import styled from 'styled-components';
 import SingleInputForm from './SingleInputForm';
+import { AppContext } from 'pages/_app';
 
 interface Props {
     show: boolean;
@@ -97,6 +98,7 @@ const OptionValue = styled(Value)`
 
 function CollectionShare(props: Props) {
     const [loading, setLoading] = useState(false);
+    const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
     const [sharableLinkError, setSharableLinkError] = useState(null);
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
@@ -130,7 +132,7 @@ function CollectionShare(props: Props) {
     ) => {
         try {
             setLoading(true);
-            galleryContext.startLoading();
+            appContext.startLoading();
             const user: User = getData(LS_KEYS.USER);
             if (email === user.email) {
                 setFieldError('email', constants.SHARE_WITH_SELF);
@@ -151,23 +153,23 @@ function CollectionShare(props: Props) {
             setFieldError('email', errorMessage);
         } finally {
             setLoading(false);
-            galleryContext.finishLoading();
+            appContext.finishLoading();
         }
     };
     const collectionUnshare = async (sharee) => {
         try {
-            galleryContext.startLoading();
+            appContext.startLoading();
             await unshareCollection(props.collection, sharee.email);
             await sleep(2000);
             await galleryContext.syncWithRemote(false, true);
         } finally {
-            galleryContext.finishLoading();
+            appContext.finishLoading();
         }
     };
 
     const createSharableURLHelper = async () => {
         try {
-            galleryContext.startLoading();
+            appContext.startLoading();
             const publicURL = await createShareableURL(props.collection);
             const sharableURL = await appendCollectionKeyToShareURL(
                 publicURL.url,
@@ -179,13 +181,13 @@ function CollectionShare(props: Props) {
             const errorMessage = handleSharingErrors(e);
             setSharableLinkError(errorMessage);
         } finally {
-            galleryContext.finishLoading();
+            appContext.finishLoading();
         }
     };
 
     const disablePublicSharingHelper = async () => {
         try {
-            galleryContext.startLoading();
+            appContext.startLoading();
             await deleteShareableURL(props.collection);
             setPublicShareUrl(null);
             galleryContext.syncWithRemote(false, true);
@@ -193,7 +195,7 @@ function CollectionShare(props: Props) {
             const errorMessage = handleSharingErrors(e);
             setSharableLinkError(errorMessage);
         } finally {
-            galleryContext.finishLoading();
+            appContext.finishLoading();
         }
     };
 
@@ -216,7 +218,7 @@ function CollectionShare(props: Props) {
     };
 
     const disablePublicUrlPassword = async () => {
-        galleryContext.setDialogMessage({
+        appContext.setDialogMessage({
             title: constants.DISABLE_PASSWORD,
             content: constants.DISABLE_PASSWORD_MESSAGE,
             close: { text: constants.CANCEL },
@@ -247,7 +249,7 @@ function CollectionShare(props: Props) {
     };
 
     const disablePublicSharing = () => {
-        galleryContext.setDialogMessage({
+        appContext.setDialogMessage({
             title: constants.DISABLE_PUBLIC_SHARING,
             content: constants.DISABLE_PUBLIC_SHARING_MESSAGE,
             close: { text: constants.CANCEL },
@@ -260,7 +262,7 @@ function CollectionShare(props: Props) {
     };
 
     const disableFileDownload = () => {
-        galleryContext.setDialogMessage({
+        appContext.setDialogMessage({
             title: constants.DISABLE_FILE_DOWNLOAD,
             content: constants.DISABLE_FILE_DOWNLOAD_MESSAGE,
             close: { text: constants.CANCEL },

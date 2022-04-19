@@ -1,7 +1,6 @@
 import { GalleryContext } from 'pages/gallery';
 import PreviewCard from './pages/gallery/PreviewCard';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Button } from 'react-bootstrap';
 import { EnteFile } from 'types/file';
 import styled from 'styled-components';
 import DownloadManager from 'services/downloadManager';
@@ -9,7 +8,7 @@ import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
-import { fileIsArchived, formatDateRelative } from 'utils/file';
+import { formatDateRelative } from 'utils/file';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
@@ -23,6 +22,10 @@ import { FILE_TYPE } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
+import EmptyScreen from './EmptyScreen';
+import { AppContext } from 'pages/_app';
+import { DeduplicateContext } from 'pages/deduplicate';
+import { IsArchived } from 'utils/magicMetadata';
 
 const Container = styled.div`
     display: block;
@@ -37,39 +40,27 @@ const Container = styled.div`
     }
 `;
 
-const EmptyScreen = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    flex: 1;
-    color: #51cd7c;
-
-    & > svg {
-        filter: drop-shadow(3px 3px 5px rgba(45, 194, 98, 0.5));
-    }
-`;
-
 const PHOTOSWIPE_HASH_SUFFIX = '&opened';
 
 interface Props {
     files: EnteFile[];
     setFiles: SetFiles;
     syncWithRemote: () => Promise<void>;
-    favItemIds: Set<number>;
+    favItemIds?: Set<number>;
+    archivedCollections?: Set<number>;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState)
     ) => void;
     selected: SelectedState;
-    isFirstLoad;
-    openFileUploader;
-    isInSearchMode: boolean;
-    search: Search;
-    setSearchStats: setSearchStats;
+    isFirstLoad?;
+    openUploader?;
+    isInSearchMode?: boolean;
+    search?: Search;
+    setSearchStats?: setSearchStats;
     deleted?: number[];
     activeCollection: number;
-    isSharedCollection: boolean;
-    enableDownload: boolean;
+    isSharedCollection?: boolean;
+    enableDownload?: boolean;
 }
 
 type SourceURL = {
@@ -82,10 +73,11 @@ const PhotoFrame = ({
     setFiles,
     syncWithRemote,
     favItemIds,
+    archivedCollections,
     setSelected,
     selected,
     isFirstLoad,
-    openFileUploader,
+    openUploader,
     isInSearchMode,
     search,
     setSearchStats,
@@ -99,6 +91,8 @@ const PhotoFrame = ({
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
     const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
+    const appContext = useContext(AppContext);
+    const deduplicateContext = useContext(DeduplicateContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
@@ -147,7 +141,7 @@ const PhotoFrame = ({
                 timeTaken: (Date.now() - startTime) / 1000,
             });
         }
-        if (search.fileIndex || search.fileIndex === 0) {
+        if (search?.fileIndex || search?.fileIndex === 0) {
             const filteredDataIdx = filteredData.findIndex(
                 (data) => data.dataIndex === search.fileIndex
             );
@@ -182,11 +176,11 @@ const PhotoFrame = ({
                 }),
             }))
             .filter((item) => {
-                if (deleted.includes(item.id)) {
+                if (deleted?.includes(item.id)) {
                     return false;
                 }
                 if (
-                    search.date &&
+                    search?.date &&
                     !isSameDayAnyYear(search.date)(
                         new Date(item.metadata.creationTime / 1000)
                     )
@@ -194,18 +188,25 @@ const PhotoFrame = ({
                     return false;
                 }
                 if (
-                    search.location &&
-                    !isInsideBox(item.metadata, search.location)
+                    search?.location &&
+                    !isInsideBox(
+                        {
+                            latitude: item.metadata.latitude,
+                            longitude: item.metadata.longitude,
+                        },
+                        search.location
+                    )
                 ) {
-                    return false;
-                }
-                if (activeCollection === ALL_SECTION && fileIsArchived(item)) {
                     return false;
                 }
                 if (
-                    activeCollection === ARCHIVE_SECTION &&
-                    !fileIsArchived(item)
+                    activeCollection === ALL_SECTION &&
+                    (IsArchived(item) ||
+                        archivedCollections?.has(item.collectionID))
                 ) {
+                    return false;
+                }
+                if (activeCollection === ARCHIVE_SECTION && !IsArchived(item)) {
                     return false;
                 }
 
@@ -494,7 +495,7 @@ const PhotoFrame = ({
                     const mergedURL = galleryContext.files.get(item.id);
                     urls = mergedURL.split(',');
                 } else {
-                    galleryContext.startLoading();
+                    appContext.startLoading();
                     if (
                         publicCollectionGalleryContext.accessedThroughSharedURL
                     ) {
@@ -507,7 +508,7 @@ const PhotoFrame = ({
                     } else {
                         urls = await DownloadManager.getFile(item, true);
                     }
-                    galleryContext.finishLoading();
+                    appContext.finishLoading();
                     const mergedURL = urls.join(',');
                     galleryContext.files.set(item.id, mergedURL);
                 }
@@ -547,25 +548,7 @@ const PhotoFrame = ({
     return (
         <>
             {!isFirstLoad && files.length === 0 && !isInSearchMode ? (
-                <EmptyScreen>
-                    <img height={150} src="/images/gallery.png" />
-                    <div style={{ color: '#a6a6a6', marginTop: '16px' }}>
-                        {constants.UPLOAD_FIRST_PHOTO_DESCRIPTION}
-                    </div>
-                    <Button
-                        variant="outline-success"
-                        onClick={openFileUploader}
-                        style={{
-                            marginTop: '32px',
-                            paddingLeft: '32px',
-                            paddingRight: '32px',
-                            paddingTop: '12px',
-                            paddingBottom: '12px',
-                            fontWeight: 900,
-                        }}>
-                        {constants.UPLOAD_FIRST_PHOTO}
-                    </Button>
-                </EmptyScreen>
+                <EmptyScreen openUploader={openUploader} />
             ) : (
                 <Container>
                     <AutoSizer>
@@ -577,7 +560,9 @@ const PhotoFrame = ({
                                 filteredData={filteredData}
                                 activeCollection={activeCollection}
                                 showAppDownloadBanner={
-                                    files.length < 30 && !isInSearchMode
+                                    files.length < 30 &&
+                                    !isInSearchMode &&
+                                    !deduplicateContext.isOnDeduplicatePage
                                 }
                                 resetFetching={resetFetching}
                             />

@@ -19,7 +19,6 @@ import { mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
 import { CollectionInfo } from 'components/pages/sharedAlbum/CollectionInfo';
 import { AbuseReportForm } from 'components/pages/sharedAlbum/AbuseReportForm';
-import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
 import {
     defaultPublicCollectionGalleryContext,
     PublicCollectionGalleryContext,
@@ -28,7 +27,6 @@ import { CustomError, parseSharingErrorCodes } from 'utils/error';
 import Container from 'components/Container';
 import constants from 'utils/strings/constants';
 import EnteSpinner from 'components/EnteSpinner';
-import LoadingBar from 'react-top-loading-bar';
 import CryptoWorker from 'utils/crypto';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
@@ -55,28 +53,12 @@ export default function PublicCollectionGallery() {
     const [errorMessage, setErrorMessage] = useState<String>(null);
     const appContext = useContext(AppContext);
     const [abuseReportFormView, setAbuseReportFormView] = useState(false);
-    const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
-    const [messageDialogView, setMessageDialogView] = useState(false);
     const [loading, setLoading] = useState(true);
     const openReportForm = () => setAbuseReportFormView(true);
     const closeReportForm = () => setAbuseReportFormView(false);
-    const loadingBar = useRef(null);
-    const isLoadingBarRunning = useRef(false);
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
         useState<boolean>(false);
-
-    const openMessageDialog = () => setMessageDialogView(true);
-    const closeMessageDialog = () => setMessageDialogView(false);
-
-    const startLoadingBar = () => {
-        !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
-        isLoadingBarRunning.current = true;
-    };
-    const finishLoadingBar = () => {
-        isLoadingBarRunning.current && loadingBar.current?.complete();
-        isLoadingBarRunning.current = false;
-    };
 
     useEffect(() => {
         appContext.showNavBar(true);
@@ -137,12 +119,10 @@ export default function PublicCollectionGallery() {
         main();
     }, []);
 
-    useEffect(openMessageDialog, [dialogMessage]);
-
     const syncWithRemote = async () => {
         const collectionUID = getPublicCollectionUID(token.current);
         try {
-            startLoadingBar();
+            appContext.startLoading();
             const collection = await getPublicCollection(
                 token.current,
                 collectionKey.current
@@ -204,7 +184,7 @@ export default function PublicCollectionGallery() {
                 logError(e, 'failed to sync public album with remote');
             }
         } finally {
-            finishLoadingBar();
+            appContext.finishLoading();
         }
     };
 
@@ -245,7 +225,7 @@ export default function PublicCollectionGallery() {
                 throw e;
             }
             await syncWithRemote();
-            finishLoadingBar();
+            appContext.finishLoading();
         } catch (e) {
             logError(e, 'failed to verifyLinkPassword');
             setFieldError(
@@ -295,10 +275,8 @@ export default function PublicCollectionGallery() {
                 token: token.current,
                 passwordToken: passwordJWTToken.current,
                 accessedThroughSharedURL: true,
-                setDialogMessage,
                 openReportForm,
             }}>
-            <LoadingBar color="#51cd7c" ref={loadingBar} />
             <CollectionInfo collection={publicCollection} />
             <PhotoFrame
                 files={publicFiles}
@@ -308,7 +286,7 @@ export default function PublicCollectionGallery() {
                 setSelected={() => null}
                 selected={{ count: 0, collectionID: null }}
                 isFirstLoad={true}
-                openFileUploader={() => null}
+                openUploader={() => null}
                 isInSearchMode={false}
                 search={{}}
                 setSearchStats={() => null}
@@ -323,12 +301,6 @@ export default function PublicCollectionGallery() {
                 show={abuseReportFormView}
                 close={closeReportForm}
                 url={url.current}
-            />
-            <MessageDialog
-                size="lg"
-                show={messageDialogView}
-                onHide={closeMessageDialog}
-                attributes={dialogMessage}
             />
         </PublicCollectionGalleryContext.Provider>
     );

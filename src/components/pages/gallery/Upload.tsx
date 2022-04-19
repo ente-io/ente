@@ -51,6 +51,12 @@ enum UPLOAD_STRATEGY {
     COLLECTION_PER_FOLDER,
 }
 
+enum DESKTOP_UPLOAD_TYPE {
+    FILES,
+    FOLDERS,
+    GOOGLE_TAKEOUT_ZIPS,
+}
+
 interface AnalysisResult {
     suggestedCollectionName: string;
     multipleFolders: boolean;
@@ -81,7 +87,7 @@ export default function Upload(props: Props) {
     const toUploadFiles = useRef<File[] | ElectronFile[]>(null);
     const isPendingDesktopUpload = useRef(false);
     const pendingDesktopUploadCollectionName = useRef<string>('');
-    const [isUploadDirs, setIsUploadDirs] = useState(false);
+    const desktopUploadType = useRef<DESKTOP_UPLOAD_TYPE>(null);
 
     useEffect(() => {
         UploadManager.initUploader(
@@ -99,8 +105,8 @@ export default function Upload(props: Props) {
 
         if (isElectron()) {
             ImportService.getPendingUploads().then(
-                ({ files, collectionName }) => {
-                    resumeUploadsIfAny(files, collectionName);
+                ({ files: electronFiles, collectionName }) => {
+                    resumeDesktopUpload(electronFiles, collectionName);
                 }
             );
         }
@@ -131,7 +137,7 @@ export default function Upload(props: Props) {
                 if (analysisResult) {
                     setAnalysisResult(analysisResult);
                 }
-            } else {
+            } else if (appContext.sharedFiles.length > 0) {
                 toUploadFiles.current = appContext.sharedFiles;
             }
             handleCollectionCreationAndUpload(
@@ -152,19 +158,14 @@ export default function Upload(props: Props) {
         setProgressView(true);
     };
 
-    function resumeUploadsIfAny(files: ElectronFile[], collectionName: string) {
-        if (files && files?.length > 0) {
+    const resumeDesktopUpload = async (
+        electronFiles: ElectronFile[],
+        collectionName: string
+    ) => {
+        if (electronFiles && electronFiles?.length > 0) {
             isPendingDesktopUpload.current = true;
-            resumeDesktopUpload(files, collectionName);
-        }
-    }
-
-    const resumeDesktopUpload = async (files, collectionName) => {
-        try {
             pendingDesktopUploadCollectionName.current = collectionName;
-            props.setElectronFiles(files);
-        } catch (e) {
-            logError(e, 'Failed to get previously failed files');
+            props.setElectronFiles(electronFiles);
         }
     };
 
@@ -172,13 +173,10 @@ export default function Upload(props: Props) {
         if (toUploadFiles.current.length === 0) {
             return null;
         }
-        if (isElectron() && !isUploadDirs) {
-            return {
-                suggestedCollectionName: null,
-                multipleFolders: false,
-            };
+        if (desktopUploadType.current === DESKTOP_UPLOAD_TYPE.FILES) {
+            desktopUploadType.current = null;
+            return { suggestedCollectionName: '', multipleFolders: false };
         }
-
         const paths: string[] = toUploadFiles.current.map(
             (file) => file['path']
         );
@@ -304,10 +302,12 @@ export default function Upload(props: Props) {
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
             await props.syncWithRemote(true, true);
-            await ImportService.setToUploadFiles(
-                filesWithCollectionToUpload,
-                collections
-            );
+            if (isElectron()) {
+                await ImportService.setToUploadFiles(
+                    filesWithCollectionToUpload,
+                    collections
+                );
+            }
             await uploadManager.queueFilesForUpload(
                 filesWithCollectionToUpload,
                 collections
@@ -380,35 +380,49 @@ export default function Upload(props: Props) {
                     UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
                 );
             }
-        } else if (isFirstUpload) {
-            const collectionName =
-                analysisResult.suggestedCollectionName ?? FIRST_ALBUM_NAME;
-
-            uploadToSingleNewCollection(collectionName);
-        } else {
-            let showNextModal = () => {};
-            if (analysisResult.multipleFolders) {
-                showNextModal = () => setChoiceModalView(true);
-            } else {
-                showNextModal = () =>
-                    uploadToSingleNewCollection(
-                        analysisResult.suggestedCollectionName
-                    );
-            }
-            props.setCollectionSelectorAttributes({
-                callback: uploadFilesToExistingCollection,
-                showNextModal,
-                title: constants.UPLOAD_TO_COLLECTION,
-            });
+            return;
         }
+        if (isFirstUpload && !analysisResult.suggestedCollectionName) {
+            analysisResult.suggestedCollectionName = FIRST_ALBUM_NAME;
+        }
+        let showNextModal = () => {};
+        if (analysisResult.multipleFolders) {
+            showNextModal = () => setChoiceModalView(true);
+        } else {
+            showNextModal = () =>
+                uploadToSingleNewCollection(
+                    analysisResult.suggestedCollectionName
+                );
+        }
+        props.setCollectionSelectorAttributes({
+            callback: uploadFilesToExistingCollection,
+            showNextModal,
+            title: constants.UPLOAD_TO_COLLECTION,
+        });
+    };
+    const handleDesktopUploadTypes = async (type: DESKTOP_UPLOAD_TYPE) => {
+        let files: ElectronFile[];
+        desktopUploadType.current = type;
+        if (type === DESKTOP_UPLOAD_TYPE.FILES) {
+            files = await ImportService.showUploadFilesDialog();
+        } else if (type === DESKTOP_UPLOAD_TYPE.FOLDERS) {
+            files = await ImportService.showUploadDirsDialog();
+        } else {
+            files = await ImportService.showUploadZipDialog();
+            ImportService.setSkipUpdatePendingUploads(true);
+        }
+
+        props.setElectronFiles(files);
+        props.setShowUploadTypeChoiceModal(false);
     };
 
     const cancelUploads = async () => {
-        setUploadStage(UPLOAD_STAGES.CANCELLED);
-        await UploadManager.clearRemainingFiles();
+        setProgressView(false);
+        UploadManager.cancelRemainingUploads();
         if (isElectron()) {
             ImportService.updatePendingUploads([]);
         }
+        await props.setUploadInProgress(false);
         await props.syncWithRemote();
     };
 
@@ -429,12 +443,17 @@ export default function Upload(props: Props) {
                 }
             />
             <UploadTypeChoiceModal
-                setElectronFiles={props.setElectronFiles}
-                showUploadTypeChoiceModal={props.showUploadTypeChoiceModal}
-                setShowUploadTypeChoiceModal={
-                    props.setShowUploadTypeChoiceModal
+                show={props.showUploadTypeChoiceModal}
+                onHide={() => props.setShowUploadTypeChoiceModal(false)}
+                uploadFiles={() =>
+                    handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FILES)
                 }
-                setIsUploadDirs={setIsUploadDirs}
+                uploadFolders={() =>
+                    handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FOLDERS)
+                }
+                uploadGoogleTakeoutZips={() =>
+                    handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FOLDERS)
+                }
             />
             <UploadProgress
                 now={percentComplete}

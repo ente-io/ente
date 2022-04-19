@@ -5,7 +5,7 @@ import { OverlayTrigger } from 'react-bootstrap';
 import { COLLECTION_SORT_BY } from 'constants/collection';
 import constants from 'utils/strings/constants';
 import CollectionSortOptions from './CollectionSortOptions';
-import { IconWithMessage } from './SelectedFileOptions';
+import { IconWithMessage } from 'components/IconWithMessage';
 
 interface Props {
     setCollectionSortBy: (sortBy: COLLECTION_SORT_BY) => void;

@@ -2,12 +2,11 @@ import { SelectedState } from 'types/gallery';
 import {
     EnteFile,
     fileAttribute,
-    MagicMetadataProps,
-    NEW_MAGIC_METADATA,
-    PublicMagicMetadataProps,
+    FileMagicMetadataProps,
+    FilePublicMagicMetadataProps,
 } from 'types/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
-import { getFileTypeFromBlob } from 'services/typeDetectionService';
+import { getFileType } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
 import { logError } from 'utils/sentry';
 import { User } from 'types/user';
@@ -20,12 +19,12 @@ import {
     TYPE_HEIC,
     TYPE_HEIF,
     FILE_TYPE,
-    VISIBILITY_STATE,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
-import HEICConverter from 'services/HEICConverter';
+import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
-
+import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
+import { updateMagicMetadataProps } from 'utils/magicMetadata';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -48,76 +47,80 @@ export async function downloadFile(
     token?: string,
     passwordToken?: string
 ) {
-    let fileURL: string;
-    let tempURL: string;
+    let fileBlob: Blob;
+    const fileReader = new FileReader();
     if (accessedThroughSharedURL) {
-        fileURL = await PublicCollectionDownloadManager.getCachedOriginalFile(
-            file
-        )[0];
-        tempURL;
+        const fileURL =
+            await PublicCollectionDownloadManager.getCachedOriginalFile(
+                file
+            )[0];
         if (!fileURL) {
-            tempURL = URL.createObjectURL(
-                await new Response(
-                    await PublicCollectionDownloadManager.downloadFile(
-                        token,
-                        passwordToken,
-                        file
-                    )
-                ).blob()
-            );
-            console.log({ tempURL });
-            fileURL = tempURL;
+            fileBlob = await new Response(
+                await PublicCollectionDownloadManager.downloadFile(
+                    token,
+                    passwordToken,
+                    file
+                )
+            ).blob();
+        } else {
+            fileBlob = await (await fetch(fileURL)).blob();
         }
     } else {
-        fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
+        const fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
         if (!fileURL) {
-            tempURL = URL.createObjectURL(
-                await new Response(
-                    await DownloadManager.downloadFile(file)
-                ).blob()
-            );
-            fileURL = tempURL;
+            fileBlob = await new Response(
+                await DownloadManager.downloadFile(file)
+            ).blob();
+        } else {
+            fileBlob = await (await fetch(fileURL)).blob();
         }
     }
 
-    const fileType = getFileExtension(file.metadata.title);
-    let tempEditedFileURL: string;
+    const fileType = await getFileType(
+        fileReader,
+        new File([fileBlob], file.metadata.title)
+    );
     if (
         file.pubMagicMetadata?.data.editedTime &&
-        (fileType === TYPE_JPEG || fileType === TYPE_JPG)
+        (fileType.exactType === TYPE_JPEG || fileType.exactType === TYPE_JPG)
     ) {
-        let fileBlob = await (await fetch(fileURL)).blob();
-
         fileBlob = await updateFileCreationDateInEXIF(
-            new FileReader(),
+            fileReader,
             fileBlob,
             new Date(file.pubMagicMetadata.data.editedTime / 1000)
         );
-        tempEditedFileURL = URL.createObjectURL(fileBlob);
-        fileURL = tempEditedFileURL;
     }
     let tempImageURL: string;
     let tempVideoURL: string;
+    let tempURL: string;
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        const fileBlob = await (await fetch(fileURL)).blob();
         const originalName = fileNameWithoutExtension(file.metadata.title);
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
-        tempImageURL = URL.createObjectURL(new Blob([motionPhoto.image]));
-        tempVideoURL = URL.createObjectURL(new Blob([motionPhoto.video]));
-        downloadUsingAnchor(motionPhoto.imageNameTitle, tempImageURL);
-        downloadUsingAnchor(motionPhoto.videoNameTitle, tempVideoURL);
+        const image = new File([motionPhoto.image], motionPhoto.imageNameTitle);
+        const imageType = await getFileType(fileReader, image);
+        tempImageURL = URL.createObjectURL(
+            new Blob([motionPhoto.image], { type: imageType.mimeType })
+        );
+        const video = new File([motionPhoto.video], motionPhoto.videoNameTitle);
+        const videoType = await getFileType(fileReader, video);
+        tempVideoURL = URL.createObjectURL(
+            new Blob([motionPhoto.video], { type: videoType.mimeType })
+        );
+        downloadUsingAnchor(tempImageURL, motionPhoto.imageNameTitle);
+        downloadUsingAnchor(tempVideoURL, motionPhoto.videoNameTitle);
     } else {
-        downloadUsingAnchor(file.metadata.title, fileURL);
+        fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
+        tempURL = URL.createObjectURL(fileBlob);
+        downloadUsingAnchor(tempURL, file.metadata.title);
     }
 
     tempURL && URL.revokeObjectURL(tempURL);
-    tempEditedFileURL && URL.revokeObjectURL(tempEditedFileURL);
     tempImageURL && URL.revokeObjectURL(tempImageURL);
     tempVideoURL && URL.revokeObjectURL(tempVideoURL);
 }
 
-function downloadUsingAnchor(name: string, link: string) {
+function downloadUsingAnchor(link: string, name: string) {
     const a = document.createElement('a');
     a.style.display = 'none';
     a.href = link;
@@ -335,11 +338,10 @@ export async function convertForPreview(
     fileBlob: Blob
 ): Promise<Blob[]> {
     const convertIfHEIC = async (fileName: string, fileBlob: Blob) => {
-        const typeFromExtension = getFileExtension(fileName);
         const reader = new FileReader();
-        const mimeType =
-            (await getFileTypeFromBlob(reader, fileBlob))?.mime ??
-            typeFromExtension;
+        const mimeType = (
+            await getFileType(reader, new File([fileBlob], file.metadata.title))
+        ).exactType;
         if (isFileHEIC(mimeType)) {
             fileBlob = await HEICConverter.convert(fileBlob);
         }
@@ -368,90 +370,6 @@ export async function convertForPreview(
     return [fileBlob];
 }
 
-export function fileIsArchived(file: EnteFile) {
-    if (
-        !file ||
-        !file.magicMetadata ||
-        !file.magicMetadata.data ||
-        typeof file.magicMetadata.data === 'string' ||
-        typeof file.magicMetadata.data.visibility === 'undefined'
-    ) {
-        return false;
-    }
-    return file.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
-}
-
-export async function updateMagicMetadataProps(
-    file: EnteFile,
-    magicMetadataUpdates: MagicMetadataProps
-) {
-    const worker = await new CryptoWorker();
-
-    if (!file.magicMetadata) {
-        file.magicMetadata = NEW_MAGIC_METADATA;
-    }
-    if (typeof file.magicMetadata.data === 'string') {
-        file.magicMetadata.data = (await worker.decryptMetadata(
-            file.magicMetadata.data,
-            file.magicMetadata.header,
-            file.key
-        )) as MagicMetadataProps;
-    }
-    if (magicMetadataUpdates) {
-        // copies the existing magic metadata properties of the files and updates the visibility value
-        // The expected behaviour while updating magic metadata is to let the existing property as it is and update/add the property you want
-        const magicMetadataProps: MagicMetadataProps = {
-            ...file.magicMetadata.data,
-            ...magicMetadataUpdates,
-        };
-
-        return {
-            ...file,
-            magicMetadata: {
-                ...file.magicMetadata,
-                data: magicMetadataProps,
-                count: Object.keys(file.magicMetadata.data).length,
-            },
-        };
-    } else {
-        return file;
-    }
-}
-export async function updatePublicMagicMetadataProps(
-    file: EnteFile,
-    publicMetadataUpdates: PublicMagicMetadataProps
-) {
-    const worker = await new CryptoWorker();
-
-    if (!file.pubMagicMetadata) {
-        file.pubMagicMetadata = NEW_MAGIC_METADATA;
-    }
-    if (typeof file.pubMagicMetadata.data === 'string') {
-        file.pubMagicMetadata.data = (await worker.decryptMetadata(
-            file.pubMagicMetadata.data,
-            file.pubMagicMetadata.header,
-            file.key
-        )) as PublicMagicMetadataProps;
-    }
-
-    if (publicMetadataUpdates) {
-        const publicMetadataProps = {
-            ...file.pubMagicMetadata.data,
-            ...publicMetadataUpdates,
-        };
-        return {
-            ...file,
-            pubMagicMetadata: {
-                ...file.pubMagicMetadata,
-                data: publicMetadataProps,
-                count: Object.keys(file.pubMagicMetadata.data).length,
-            },
-        };
-    } else {
-        return file;
-    }
-}
-
 export async function changeFilesVisibility(
     files: EnteFile[],
     selected: SelectedState,
@@ -460,13 +378,18 @@ export async function changeFilesVisibility(
     const selectedFiles = getSelectedFiles(selected, files);
     const updatedFiles: EnteFile[] = [];
     for (const file of selectedFiles) {
-        const updatedMagicMetadataProps: MagicMetadataProps = {
+        const updatedMagicMetadataProps: FileMagicMetadataProps = {
             visibility,
         };
 
-        updatedFiles.push(
-            await updateMagicMetadataProps(file, updatedMagicMetadataProps)
-        );
+        updatedFiles.push({
+            ...file,
+            magicMetadata: await updateMagicMetadataProps(
+                file.magicMetadata ?? NEW_FILE_MAGIC_METADATA,
+                file.key,
+                updatedMagicMetadataProps
+            ),
+        });
     }
     return updatedFiles;
 }
@@ -475,25 +398,28 @@ export async function changeFileCreationTime(
     file: EnteFile,
     editedTime: number
 ) {
-    const updatedPublicMagicMetadataProps: PublicMagicMetadataProps = {
+    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedTime,
     };
-
-    return await updatePublicMagicMetadataProps(
-        file,
+    file.pubMagicMetadata = await updateMagicMetadataProps(
+        file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+        file.key,
         updatedPublicMagicMetadataProps
     );
+    return file;
 }
 
 export async function changeFileName(file: EnteFile, editedName: string) {
-    const updatedPublicMagicMetadataProps: PublicMagicMetadataProps = {
+    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedName,
     };
 
-    return await updatePublicMagicMetadataProps(
-        file,
+    file.pubMagicMetadata = await updateMagicMetadataProps(
+        file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+        file.key,
         updatedPublicMagicMetadataProps
     );
+    return file;
 }
 
 export function isSharedFile(file: EnteFile) {
@@ -588,4 +514,4 @@ export const isLivePhoto = (file: EnteFile) =>
     file.metadata.fileType === FILE_TYPE.LIVE_PHOTO;
 
 export const isImageOrVideo = (fileType: FILE_TYPE) =>
-    fileType in [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO];
+    [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);

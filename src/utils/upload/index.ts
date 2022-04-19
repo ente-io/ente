@@ -1,6 +1,6 @@
 import { ElectronFile, FileWithCollection, Metadata } from 'types/upload';
 import { EnteFile } from 'types/file';
-import { convertToHumanReadable } from 'utils/billing';
+import { convertBytesToHumanReadable } from 'utils/billing';
 import { formatDateTime } from 'utils/file';
 import { getLogs, saveLogLine } from 'utils/storage';
 import { A_SEC_IN_MICROSECONDS } from 'constants/upload';
@@ -29,6 +29,12 @@ export function areFilesSame(
     existingFile: Metadata,
     newFile: Metadata
 ): boolean {
+    /*
+     * The maximum difference in the creation/modification times of two similar files is set to 1 second.
+     * This is because while uploading files in the web - browsers and users could have set reduced
+     * precision of file times to prevent timing attacks and fingerprinting.
+     * Context: https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
+     */
     if (
         existingFile.fileType === newFile.fileType &&
         Math.abs(existingFile.creationTime - newFile.creationTime) <
@@ -78,15 +84,12 @@ export function getUploadLogs() {
 }
 
 export function getFileNameSize(file: File | ElectronFile) {
-    return `${file.name}_${convertToHumanReadable(file.size)}`;
+    return `${file.name}_${convertBytesToHumanReadable(file.size)}`;
 }
 
-export function areSameElectronFiles(
+export function areFileWithCollectionsSame(
     firstFile: FileWithCollection,
     secondFile: FileWithCollection
 ): boolean {
-    return (
-        (firstFile.file as ElectronFile).path ===
-        (secondFile.file as ElectronFile).path
-    );
+    return firstFile.localID === secondFile.localID;
 }
