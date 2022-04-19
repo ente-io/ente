@@ -50,4 +50,5 @@ jobs:
           API_KEY_ISSUER_ID: ${{ secrets.api_key_issuer_id }}
           # setry crash reporting token
           SENTRY_AUTH_TOKEN: ${{secrets.sentry_auth_token}}
+          USE_HARD_LINKS: false 
 

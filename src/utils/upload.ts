@@ -1,7 +1,7 @@
 import path from 'path';
 import StreamZip from 'node-stream-zip';
 import * as fs from 'promise-fs';
-import { FILE_STREAM_CHUNK_SIZE, GOOGLE_PHOTOS_DIR } from '../../config';
+import { FILE_STREAM_CHUNK_SIZE, GOOGLE_PHOTOS_DIR } from '../config';
 import { uploadStatusStore } from '../services/store';
 import { ElectronFile } from '../types';
 
@@ -27,7 +27,7 @@ const getFileStream = async (filePath: string) => {
     let offset = 0;
     const readableStream = new ReadableStream<Uint8Array>({
         async pull(controller) {
-            let buff = new Uint8Array(FILE_STREAM_CHUNK_SIZE);
+            const buff = new Uint8Array(FILE_STREAM_CHUNK_SIZE);
 
             // original types were not working correctly
             const bytesRead = (await fs.read(
@@ -159,15 +159,15 @@ export async function getElectronFile(filePath: string): Promise<ElectronFile> {
     };
 }
 
-export const setToUploadFiles = (
-    filePaths: string[],
-    collectionName: string
-) => {
+export const setToUploadFiles = (filePaths: string[]) => {
     if (filePaths && filePaths.length > 0) {
         uploadStatusStore.set('filePaths', filePaths);
     } else {
         uploadStatusStore.set('filePaths', []);
     }
+};
+
+export const setToUploadCollection = (collectionName: string) => {
     if (collectionName) {
         uploadStatusStore.set('collectionName', collectionName);
     } else {

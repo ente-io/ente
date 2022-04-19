@@ -6,10 +6,10 @@
         "noImplicitAny": true,
         "sourceMap": true,
         "outDir": "app",
-        "baseUrl": ".",
+        "baseUrl": "./src",
         "paths": {
             "*": ["node_modules/*"]
         }
     },
-    "include": ["src/main/**/*", "src/config.ts"]
+    "include": ["src/**/*"]
 }

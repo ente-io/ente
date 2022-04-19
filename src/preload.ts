@@ -7,8 +7,10 @@ import {
     setToUploadFiles,
     updatePendingUploadsFilePaths,
     getElectronFilesFromGoogleZip,
+    setToUploadCollection,
 } from './utils/upload';
 import { logError } from './utils/logging';
+import { ElectronFile } from './types';
 
 const { ipcRenderer } = electron;
 
@@ -136,10 +138,10 @@ const showUploadZipDialog = async () => {
         const filePaths: string[] = await ipcRenderer.invoke(
             'show-upload-zip-dialog'
         );
-        const filesList = await Promise.all(
-            filePaths.map(getElectronFilesFromGoogleZip)
-        );
-        const files = filesList.flat();
+        const files: ElectronFile[] = [];
+        for (const filePath of filePaths) {
+            files.push(...(await getElectronFilesFromGoogleZip(filePath)));
+        }
         return files;
     } catch (e) {
         logError(e, 'error while selecting zips');
@@ -171,4 +173,5 @@ windowObject['ElectronAPIs'] = {
     updatePendingUploadsFilePaths,
     showUploadZipDialog,
     getElectronFilesFromGoogleZip,
+    setToUploadCollection,
 };
