@@ -1,6 +1,5 @@
 node_modules
 app
-.next/
 dist
 .vscode
 buildingSteps.md
