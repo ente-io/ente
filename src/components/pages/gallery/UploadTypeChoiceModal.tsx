@@ -8,11 +8,11 @@ import { BsGoogle } from 'react-icons/bs';
 
 function UploadTypeRow({ uploadFunc, Icon, uploadName }) {
     return (
-        <Row className="justify-content-md-center py-2">
+        <Row className="justify-content-sm-center py-2">
             <Button
                 variant="light"
                 onClick={uploadFunc}
-                style={{ width: '90%', height: '6vh' }}>
+                style={{ width: '90%', height: '50px' }}>
                 <Container>
                     <Row>
                         <div>
@@ -75,10 +75,7 @@ export default function UploadTypeChoiceModal({
                     style={{ cursor: 'pointer' }}
                 />
             </Modal.Header>
-            <Modal.Body
-                style={{
-                    height: '10em',
-                }}>
+            <Modal.Body>
                 <Container>
                     <UploadTypeRow
                         uploadFunc={uploadFiles}
