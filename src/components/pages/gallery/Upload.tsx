@@ -400,6 +400,7 @@ export default function Upload(props: Props) {
         }
         if (desktopUploadType.current === DESKTOP_UPLOAD_TYPE.ZIPS) {
             uploadFilesToNewCollections(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
+            return;
         }
         if (isFirstUpload && !analysisResult.suggestedCollectionName) {
             analysisResult.suggestedCollectionName = FIRST_ALBUM_NAME;
