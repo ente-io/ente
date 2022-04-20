@@ -1,4 +1,5 @@
 import constants from 'utils/strings/constants';
+import { CustomError } from 'utils/error';
 
 export const DESKTOP_APP_DOWNLOAD_URL =
     'https://github.com/ente-io/bhari-frame/releases/latest';
@@ -30,3 +31,25 @@ export function reverseString(title: string) {
         ?.split(' ')
         .reduce((reversedString, currWord) => `${currWord} ${reversedString}`);
 }
+
+export const promiseWithTimeout = async (
+    request: Promise<any>,
+    timeout: number
+) => {
+    const timeoutRef = { current: null };
+    const rejectOnTimeout = new Promise((_, reject) => {
+        timeoutRef.current = setTimeout(
+            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
+            timeout
+        );
+    });
+    const requestWithTimeOutCancellation = async () => {
+        const resp = await request;
+        clearTimeout(timeoutRef.current);
+        return resp;
+    };
+    return await Promise.race([
+        requestWithTimeOutCancellation,
+        rejectOnTimeout,
+    ]);
+};
