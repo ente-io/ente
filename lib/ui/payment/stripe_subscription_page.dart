@@ -1,17 +1,16 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/constants.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
+import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/payment_web_page.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
@@ -40,6 +39,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   final _userService = UserService.instance;
   Subscription _currentSubscription;
   ProgressDialog _dialog;
+  UserDetails _userDetails;
   int _usage;
 
   // indicates if user's subscription plan is still active
@@ -59,6 +59,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   Future<void> _fetchSub() async {
     return _userService.getUserDetailsV2().then((userDetails) async {
+      _userDetails = userDetails;
       _currentSubscription = userDetails.subscription;
       _showYearlyPlan = _currentSubscription.isYearlyPlan();
       _hasActiveSubscription = _currentSubscription.isValid();
@@ -122,6 +123,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   Widget _getBody() {
     if (_hasLoadedData) {
+      if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
+        return ChildSubscriptionWidget(userDetails: _userDetails);
+      }
       return _buildPlans();
     }
     return loadWidget;
@@ -185,7 +189,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               }
             },
             child: Container(
-              padding: EdgeInsets.fromLTRB(40, 80, 40, 40),
+              padding: EdgeInsets.fromLTRB(40, 80, 40, 20),
               child: Column(
                 children: [
                   RichText(
@@ -213,11 +217,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           alignment: Alignment.topCenter,
           child: GestureDetector(
             onTap: () async {
-              if (Platform.isAndroid) {
-                _launchFamilyPortal();
-              } else {
-                showToast('visit web.ente.io to manage family');
-              }
+              _launchFamilyPortal();
             },
             child: Container(
               padding: EdgeInsets.fromLTRB(40, 0, 40, 80),
@@ -225,11 +225,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 children: [
                   RichText(
                     text: TextSpan(
-                      text: Platform.isAndroid
-                          ? "manage family"
-                          : "visit website to manage family plan",
+                      text: "manage family",
                       style: TextStyle(
-                        color: Platform.isAndroid ? Colors.blue : Colors.white,
+                        color: Colors.blue,
                         fontFamily: 'Ubuntu',
                         fontSize: 15,
                       ),
@@ -273,12 +271,13 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Future<void> _launchFamilyPortal() async {
     await _dialog.show();
     try {
-      String jwtToken = await _userService.getPaymentToken();
+      final String jwtToken = await _userService.getFamiliesToken();
+      final bool familyExist = _userDetails.isPartOfFamily();
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
-            return WebPage(
-                "family", '$kFamilyPlanManagementUrl?token=$jwtToken');
+            return WebPage("family",
+                '$kFamilyPlanManagementUrl?token=$jwtToken&familyCreated=$familyExist');
           },
         ),
       ).then((value) => onWebPaymentGoBack);

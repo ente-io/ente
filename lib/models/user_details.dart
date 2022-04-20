@@ -17,6 +17,17 @@ class UserDetails {
     this.familyData,
   );
 
+  bool isPartOfFamily() {
+    return familyData?.members?.isNotEmpty ?? false;
+  }
+
+  bool isFamilyAdmin() {
+    assert(isPartOfFamily(), "verify user is part of family before calling");
+    final FamilyMember currentUserMember = familyData?.members
+        ?.firstWhere((element) => element.email.trim() == email.trim());
+    return currentUserMember.isAdmin;
+  }
+
   factory UserDetails.fromMap(Map<String, dynamic> map) {
     return UserDetails(
       map['email'] as String,
