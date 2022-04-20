@@ -177,7 +177,6 @@ export const getPendingUploads = async () => {
     const filePaths = (uploadStatusStore.get('filePaths') as string[]) ?? [];
     const zipPaths = (uploadStatusStore.get('zipPaths') as string[]) ?? [];
     const collectionName = uploadStatusStore.get('collectionName') as string;
-    console.log(filePaths, zipPaths, collectionName);
 
     const validZipPaths = zipPaths.filter(
         async (zipPath) => await fs.stat(zipPath).then((stat) => stat.isFile())
