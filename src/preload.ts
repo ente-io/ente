@@ -100,7 +100,7 @@ const getExportRecord = async (filePath: string) => {
         return recordFile;
     } catch (e) {
         // ignore exportFile missing
-        console.log(e);
+        logError(e, 'error while selecting files');
     }
 };
 
