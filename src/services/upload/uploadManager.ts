@@ -115,6 +115,9 @@ class UploadManager {
                 UploadService.setMetadataAndFileTypeInfoMap(
                     this.metadataAndFileTypeInfoMap
                 );
+                if (this.uploadCancelled) {
+                    return;
+                }
                 UIService.setUploadStage(UPLOAD_STAGES.START);
                 logUploadInfo(`clusterLivePhotoFiles called`);
                 const analysedMediaFiles =
