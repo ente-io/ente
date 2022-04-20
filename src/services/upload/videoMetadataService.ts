@@ -7,11 +7,13 @@ import { logUploadInfo } from 'utils/upload';
 export async function getVideoMetadata(file: File | ElectronFile) {
     let videoMetadata = NULL_EXTRACTED_METADATA;
     if (!(file instanceof File)) {
-        logUploadInfo('getting file blob for video metadata extraction');
+        logUploadInfo('get file blob for video metadata extraction');
         file = new File([await file.blob()], file.name, {
             lastModified: file.lastModified,
         });
-        logUploadInfo('file blob for video metadata extraction successfully');
+        logUploadInfo(
+            'get file blob for video metadata extraction successfully'
+        );
     }
     try {
         videoMetadata = await ffmpegService.extractMetadata(file);
