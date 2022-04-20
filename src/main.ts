@@ -35,11 +35,6 @@ export const setIsUpdateAvailable = (value: boolean): void => {
     updateIsAvailable = value;
 };
 
-// Disable error dialogs by overriding
-dialog.showErrorBox = function (title, content) {
-    console.log(`${title}\n${content}`);
-};
-
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
     app.quit();
