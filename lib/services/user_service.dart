@@ -690,6 +690,27 @@ class UserService {
     }
   }
 
+  Future<String> getFamiliesToken() async {
+    try {
+      var response = await _dio.get(
+        _config.getHttpEndpoint() + "/users/families-token",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      if (response != null && response.statusCode == 200) {
+        return response.data["familiesToken"];
+      } else {
+        throw Exception("non 200 ok response");
+      }
+    } catch (e, s) {
+      _logger.severe("failed to fetch families token", e, s);
+      rethrow;
+    }
+  }
+
   Future<void> _saveConfiguration(Response response) async {
     await Configuration.instance.setUserID(response.data["id"]);
     if (response.data["encryptedToken"] != null) {
