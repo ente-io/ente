@@ -25,7 +25,9 @@ export enum FILE_PATH_TYPE {
     ZIPS = 'zips',
 }
 
-export const FILE_PATH_KEYS = {
+export const FILE_PATH_KEYS: {
+    [k in FILE_PATH_TYPE]: keyof UploadStoreType;
+} = {
     [FILE_PATH_TYPE.ZIPS]: 'zipPaths',
     [FILE_PATH_TYPE.FILES]: 'filePaths',
 };

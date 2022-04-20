@@ -158,10 +158,10 @@ export async function getElectronFile(filePath: string): Promise<ElectronFile> {
 
 export const setToUploadFiles = (type: FILE_PATH_TYPE, filePaths: string[]) => {
     const key = FILE_PATH_KEYS[type];
-    if (filePaths && filePaths.length > 0) {
+    if (filePaths) {
         uploadStatusStore.set(key, filePaths);
     } else {
-        uploadStatusStore.set(key, []);
+        uploadStatusStore.delete(key);
     }
 };
 
@@ -173,32 +173,38 @@ export const setToUploadCollection = (collectionName: string) => {
     }
 };
 
-export const getPendingUploads = async () => {
-    const filePaths = (uploadStatusStore.get('filePaths') as string[]) ?? [];
-    const zipPaths = (uploadStatusStore.get('zipPaths') as string[]) ?? [];
-    const collectionName = uploadStatusStore.get('collectionName') as string;
+export const getSavedPaths = (type: FILE_PATH_TYPE) => {
+    const paths =
+        (uploadStatusStore.get(FILE_PATH_KEYS[type]) as string[]) ?? [];
 
-    const validZipPaths = zipPaths.filter(
-        async (zipPath) => await fs.stat(zipPath).then((stat) => stat.isFile())
-    );
+    const validPaths = paths.filter(async (path) => {
+        try {
+            await fs.stat(path).then((stat) => stat.isFile());
+        } catch (e) {
+            return false;
+        }
+    });
+    setToUploadFiles(type, validPaths);
+    return validPaths;
+};
+
+export const getPendingUploads = async () => {
+    const filePaths = getSavedPaths(FILE_PATH_TYPE.FILES);
+    const zipPaths = getSavedPaths(FILE_PATH_TYPE.ZIPS);
+    const collectionName = uploadStatusStore.get('collectionName');
+
     let files: ElectronFile[] = [];
     let type: FILE_PATH_TYPE;
-    if (validZipPaths.length) {
+    if (zipPaths.length) {
         type = FILE_PATH_TYPE.ZIPS;
         for (const zipPath of zipPaths) {
             files.push(...(await getElectronFilesFromGoogleZip(zipPath)));
         }
         const pendingFilePaths = new Set(filePaths);
         files = files.filter((file) => pendingFilePaths.has(file.path));
-    } else {
-        const validFilePaths = filePaths.filter(
-            async (filePath) =>
-                await fs.stat(filePath).then((stat) => stat.isFile())
-        );
-        if (validFilePaths.length) {
-            type = FILE_PATH_TYPE.FILES;
-            files = await Promise.all(validFilePaths.map(getElectronFile));
-        }
+    } else if (filePaths.length) {
+        type = FILE_PATH_TYPE.FILES;
+        files = await Promise.all(filePaths.map(getElectronFile));
     }
     return {
         files,
