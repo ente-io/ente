@@ -187,10 +187,6 @@ export const getPendingUploads = async () => {
     };
 };
 
-export const updatePendingUploadsFilePaths = (filePaths: string[]) => {
-    uploadStatusStore.set('filePaths', filePaths);
-};
-
 export const getElectronFilesFromGoogleZip = async (filePath: string) => {
     const zip = new StreamZip.async({
         file: filePath,

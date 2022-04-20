@@ -5,7 +5,6 @@ import {
     getElectronFile,
     getPendingUploads,
     setToUploadFiles,
-    updatePendingUploadsFilePaths,
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
 } from './utils/upload';
@@ -170,7 +169,6 @@ windowObject['ElectronAPIs'] = {
     showUploadDirsDialog,
     getPendingUploads,
     setToUploadFiles,
-    updatePendingUploadsFilePaths,
     showUploadZipDialog,
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
