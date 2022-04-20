@@ -52,37 +52,23 @@ const getZipFileStream = async (
     zip: StreamZip.StreamZipAsync,
     filePath: string
 ) => {
-    console.log('called getZipFileStream');
     const stream = await zip.stream(filePath);
-    let chunks: number[] = [];
     const done = { current: false };
 
     let resolveObj: (value?: any) => void = null;
     let rejectObj: (reason?: any) => void = null;
 
     stream.on('readable', () => {
-        console.log('readable');
         if (resolveObj) {
-            let chunk: Buffer;
-            while (null !== (chunk = stream.read() as Buffer)) {
-                for (const byte of chunk) {
-                    chunks.push(byte);
-                }
-                if (chunks.length >= FILE_STREAM_CHUNK_SIZE) {
-                    break;
-                }
-            }
-            if (chunks.length >= FILE_STREAM_CHUNK_SIZE) {
-                const chunkToConsume = chunks.slice(0, FILE_STREAM_CHUNK_SIZE);
-                chunks = chunks.slice(FILE_STREAM_CHUNK_SIZE);
-                resolveObj(new Uint8Array(chunkToConsume));
+            const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
+            if (chunk) {
+                resolveObj(new Uint8Array(chunk));
                 resolveObj = null;
             }
         }
     });
 
     stream.on('end', () => {
-        console.log('stream ended');
         done.current = true;
     });
 
@@ -96,15 +82,8 @@ const getZipFileStream = async (
 
     const readStreamData = () => {
         return new Promise<Uint8Array>((resolve, reject) => {
-            console.log('stream status done=', done.current);
-            if (done.current) {
-                const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
-                console.log(
-                    'ended stream reading',
-                    done.current,
-                    chunk?.length,
-                    FILE_STREAM_CHUNK_SIZE
-                );
+            const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
+            if (chunk || done.current) {
                 resolve(chunk);
             } else {
                 resolveObj = resolve;
@@ -116,12 +95,10 @@ const getZipFileStream = async (
     const readableStream = new ReadableStream<Uint8Array>({
         async pull(controller) {
             try {
-                console.log('pull called', done.current);
                 const data = await readStreamData();
                 if (data) {
                     controller.enqueue(data);
                 } else {
-                    console.log('closed');
                     controller.close();
                 }
             } catch (e) {
