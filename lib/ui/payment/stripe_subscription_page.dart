@@ -123,8 +123,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     if (_hasLoadedData) {
       if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
         return ChildSubscriptionWidget(userDetails: _userDetails);
+      } else {
+        return _buildPlans();
       }
-      return _buildPlans();
     }
     return loadWidget;
   }
@@ -210,34 +211,36 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         ),
       ]);
 
-      widgets.addAll([
-        Align(
-          alignment: Alignment.topCenter,
-          child: GestureDetector(
-            onTap: () async {
-              _launchFamilyPortal();
-            },
-            child: Container(
-              padding: EdgeInsets.fromLTRB(40, 0, 40, 80),
-              child: Column(
-                children: [
-                  RichText(
-                    text: TextSpan(
-                      text: "manage family",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontFamily: 'Ubuntu',
-                        fontSize: 15,
+      if (!widget.isOnboarding) {
+        widgets.addAll([
+          Align(
+            alignment: Alignment.topCenter,
+            child: GestureDetector(
+              onTap: () async {
+                await _launchFamilyPortal();
+              },
+              child: Container(
+                padding: EdgeInsets.fromLTRB(40, 0, 40, 80),
+                child: Column(
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        text: "manage family",
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontFamily: 'Ubuntu',
+                          fontSize: 15,
+                        ),
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ]);
+        ]);
+      }
     }
 
     return SingleChildScrollView(
@@ -278,7 +281,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 '$kFamilyPlanManagementUrl?token=$jwtToken&familyCreated=$familyExist');
           },
         ),
-      ).then((value) => onWebPaymentGoBack);
+      );
     } catch (e) {
       await _dialog.hide();
       showGenericErrorDialog(context);

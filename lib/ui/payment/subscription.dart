@@ -13,7 +13,7 @@ StatefulWidget getSubscriptionPage({bool isOnBoarding = false}) {
       _isUserCreatedPostStripeSupport()) {
     return StripeSubscriptionPage(isOnboarding: isOnBoarding);
   } else {
-    return StripeSubscriptionPage(isOnboarding: isOnBoarding);
+    return SubscriptionPage(isOnboarding: isOnBoarding);
   }
 }
 

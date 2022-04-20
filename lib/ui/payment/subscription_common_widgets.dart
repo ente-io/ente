@@ -8,9 +8,10 @@ import 'package:photos/utils/date_time_util.dart';
 class SubscriptionHeaderWidget extends StatefulWidget {
   final bool isOnboarding;
   final int currentUsage;
+  final int familyUsage;
 
   const SubscriptionHeaderWidget(
-      {Key key, this.isOnboarding, this.currentUsage})
+      {Key key, this.isOnboarding, this.currentUsage, this.familyUsage})
       : super(key: key);
 
   @override
