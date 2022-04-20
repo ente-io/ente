@@ -173,6 +173,20 @@ class UserService {
     }
   }
 
+  Future<void> leaveFamilyPlan() async {
+    try {
+      await _dio.delete(_config.getHttpEndpoint() + "/family/leave",
+          options: Options(
+            headers: {
+              "X-Auth-Token": _config.getToken(),
+            },
+          ));
+    } on DioError catch (e) {
+      _logger.warning('failed to leave family plan', e);
+      rethrow;
+    }
+  }
+
   Future<void> logout(BuildContext context) async {
     final dialog = createProgressDialog(context, "logging out...");
     await dialog.show();
