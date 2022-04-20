@@ -51,10 +51,10 @@ enum UPLOAD_STRATEGY {
     COLLECTION_PER_FOLDER,
 }
 
-enum DESKTOP_UPLOAD_TYPE {
-    FILES,
-    FOLDERS,
-    ZIPS,
+export enum DESKTOP_UPLOAD_TYPE {
+    FILES = 'files',
+    FOLDERS = 'folders',
+    ZIPS = 'zips',
 }
 
 interface AnalysisResult {
@@ -88,6 +88,7 @@ export default function Upload(props: Props) {
     const isPendingDesktopUpload = useRef(false);
     const pendingDesktopUploadCollectionName = useRef<string>('');
     const desktopUploadType = useRef<DESKTOP_UPLOAD_TYPE>(null);
+    const zipPaths = useRef<string[]>(null);
 
     useEffect(() => {
         UploadManager.initUploader(
@@ -105,8 +106,8 @@ export default function Upload(props: Props) {
 
         if (isElectron()) {
             ImportService.getPendingUploads().then(
-                ({ files: electronFiles, collectionName }) => {
-                    resumeDesktopUpload(electronFiles, collectionName);
+                ({ files: electronFiles, collectionName, type }) => {
+                    resumeDesktopUpload(type, electronFiles, collectionName);
                 }
             );
         }
@@ -159,12 +160,14 @@ export default function Upload(props: Props) {
     };
 
     const resumeDesktopUpload = async (
+        type: DESKTOP_UPLOAD_TYPE,
         electronFiles: ElectronFile[],
         collectionName: string
     ) => {
         if (electronFiles && electronFiles?.length > 0) {
             isPendingDesktopUpload.current = true;
             pendingDesktopUploadCollectionName.current = collectionName;
+            desktopUploadType.current = type;
             props.setElectronFiles(electronFiles);
         }
     };
@@ -302,10 +305,20 @@ export default function Upload(props: Props) {
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
             await props.syncWithRemote(true, true);
-            if (isElectron()) {
+            if (isElectron() && !isPendingDesktopUpload.current) {
+                await ImportService.setToUploadCollection(collections);
+                if (zipPaths.current) {
+                    await ImportService.setToUploadFiles(
+                        DESKTOP_UPLOAD_TYPE.ZIPS,
+                        zipPaths.current
+                    );
+                    zipPaths.current = null;
+                }
                 await ImportService.setToUploadFiles(
-                    filesWithCollectionToUpload,
-                    collections
+                    DESKTOP_UPLOAD_TYPE.FILES,
+                    filesWithCollectionToUpload.map(
+                        ({ file }) => (file as ElectronFile).path
+                    )
                 );
             }
             await uploadManager.queueFilesForUpload(
@@ -408,7 +421,9 @@ export default function Upload(props: Props) {
         } else if (type === DESKTOP_UPLOAD_TYPE.FOLDERS) {
             files = await ImportService.showUploadDirsDialog();
         } else {
-            files = await ImportService.showUploadZipDialog();
+            const response = await ImportService.showUploadZipDialog();
+            files = response.files;
+            zipPaths.current = response.zipPaths;
         }
 
         props.setElectronFiles(files);
@@ -419,7 +434,7 @@ export default function Upload(props: Props) {
         setProgressView(false);
         UploadManager.cancelRemainingUploads();
         if (isElectron()) {
-            ImportService.updatePendingUploads([]);
+            ImportService.cancelRemainingUploads();
         }
         await props.setUploadInProgress(false);
         await props.syncWithRemote();
