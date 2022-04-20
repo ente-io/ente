@@ -21,12 +21,6 @@ extension CustomColorScheme on ColorScheme {
       brightness == Brightness.light ? Colors.white : Colors.white;
 
   // todo: use brightness == Brightness.light for changing color for dark/light theme
-  ButtonStyle get primaryActionButtonStyle => buildElevatedButtonThemeData(
-        onPrimary: Colors.white,
-        primary: Color.fromRGBO(29, 185, 84, 1.0),
-      ).style;
-
-  // todo: use brightness == Brightness.light for changing color for dark/light theme
   ButtonStyle get optionalActionButtonStyle => buildElevatedButtonThemeData(
         onPrimary: Colors.black87,
         primary: Color.fromRGBO(240, 240, 240, 1),
