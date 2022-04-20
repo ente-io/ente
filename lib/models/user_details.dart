@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:photos/models/subscription.dart';
 
 class UserDetails {
@@ -26,6 +27,17 @@ class UserDetails {
     final FamilyMember currentUserMember = familyData?.members
         ?.firstWhere((element) => element.email.trim() == email.trim());
     return currentUserMember.isAdmin;
+  }
+
+  // getFamilyOrPersonalUsage will return total usage for family if user
+  // belong to family group. Otherwise, it will return storage consumed by
+  // current user
+  int getFamilyOrPersonalUsage() {
+    return isPartOfFamily() ? familyData.getTotalUsage() : usage;
+  }
+
+  int getPersonalUsage() {
+    return usage;
   }
 
   factory UserDetails.fromMap(Map<String, dynamic> map) {
@@ -81,6 +93,10 @@ class FamilyData {
   final int expiryTime;
 
   FamilyData(this.members, this.storage, this.expiryTime);
+
+  int getTotalUsage() {
+    return members.map((e) => e.usage).toList().sum;
+  }
 
   factory FamilyData.fromMap(Map<String, dynamic> map) {
     if (map == null) {

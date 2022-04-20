@@ -40,7 +40,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Subscription _currentSubscription;
   ProgressDialog _dialog;
   UserDetails _userDetails;
-  int _usage;
 
   // indicates if user's subscription plan is still active
   bool _hasActiveSubscription;
@@ -64,7 +63,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       _showYearlyPlan = _currentSubscription.isYearlyPlan();
       _hasActiveSubscription = _currentSubscription.isValid();
       _isStripeSubscriber = _currentSubscription.paymentProvider == kStripe;
-      _usage = userDetails.usage;
       return _filterStripeForUI().then((value) {
         _hasLoadedData = true;
         setState(() {});
@@ -136,7 +134,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
     widgets.add(SubscriptionHeaderWidget(
       isOnboarding: widget.isOnboarding,
-      currentUsage: _usage,
+      currentUsage: _userDetails.getPersonalUsage(),
     ));
 
     widgets.addAll([
@@ -365,12 +363,11 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                     "please cancel your existing subscription from ${_currentSubscription.paymentProvider} first");
                 return;
               }
-              if (_usage > plan.storage) {
+              if (_userDetails.getFamilyOrPersonalUsage() > plan.storage) {
                 showErrorDialog(
                     context, "sorry", "you cannot downgrade to this plan");
                 return;
               }
-              await _dialog.show();
               String stripPurChaseAction = 'buy';
               if (_isStripeSubscriber && _hasActiveSubscription) {
                 // confirm if user wants to change plan or not
