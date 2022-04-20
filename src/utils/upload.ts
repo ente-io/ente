@@ -158,7 +158,6 @@ export async function getElectronFile(filePath: string): Promise<ElectronFile> {
 
 export const setToUploadFiles = (type: FILE_PATH_TYPE, filePaths: string[]) => {
     const key = FILE_PATH_KEYS[type];
-    console.log(type, filePaths, key);
     if (filePaths && filePaths.length > 0) {
         uploadStatusStore.set(key, filePaths);
     } else {
@@ -179,22 +178,27 @@ export const getPendingUploads = async () => {
     const zipPaths = (uploadStatusStore.get('zipPaths') as string[]) ?? [];
     const collectionName = uploadStatusStore.get('collectionName') as string;
     console.log(filePaths, zipPaths, collectionName);
-    const validFilePaths = filePaths.filter(
-        async (filePath) =>
-            await fs.stat(filePath).then((stat) => stat.isFile())
-    );
+
     const validZipPaths = zipPaths.filter(
         async (zipPath) => await fs.stat(zipPath).then((stat) => stat.isFile())
     );
-    const files: ElectronFile[] = [];
+    let files: ElectronFile[] = [];
     let type: FILE_PATH_TYPE;
-    if (validFilePaths.length) {
-        type = FILE_PATH_TYPE.FILES;
-        files.concat(await Promise.all(validFilePaths.map(getElectronFile)));
-    } else if (validZipPaths.length) {
+    if (validZipPaths.length) {
         type = FILE_PATH_TYPE.ZIPS;
         for (const zipPath of zipPaths) {
             files.push(...(await getElectronFilesFromGoogleZip(zipPath)));
+        }
+        const pendingFilePaths = new Set(filePaths);
+        files = files.filter((file) => pendingFilePaths.has(file.path));
+    } else {
+        const validFilePaths = filePaths.filter(
+            async (filePath) =>
+                await fs.stat(filePath).then((stat) => stat.isFile())
+        );
+        if (validFilePaths.length) {
+            type = FILE_PATH_TYPE.FILES;
+            files = await Promise.all(validFilePaths.map(getElectronFile));
         }
     }
     return {
