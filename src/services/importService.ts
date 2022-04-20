@@ -10,15 +10,10 @@ interface PendingUploads {
 class ImportService {
     ElectronAPIs: any;
     private allElectronAPIsExist: boolean = false;
-    private skipUpdatePendingUploads = false;
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
         this.allElectronAPIsExist = !!this.ElectronAPIs?.getPendingUploads;
-    }
-
-    setSkipUpdatePendingUploads(skip: boolean) {
-        this.skipUpdatePendingUploads = skip;
     }
 
     async getElectronFilesFromGoogleZip(
@@ -65,7 +60,7 @@ class ImportService {
         files: FileWithCollection[],
         collections: Collection[]
     ) {
-        if (this.allElectronAPIsExist && !this.skipUpdatePendingUploads) {
+        if (this.allElectronAPIsExist) {
             let collectionName: string;
             /* collection being one suggest one of two things
                 1. Either the user has upload to a single existing collection
@@ -87,7 +82,7 @@ class ImportService {
         }
     }
     updatePendingUploads(files: FileWithCollection[]) {
-        if (this.allElectronAPIsExist && !this.skipUpdatePendingUploads) {
+        if (this.allElectronAPIsExist) {
             const filePaths = [];
             for (const fileWithCollection of files) {
                 if (fileWithCollection.isLivePhoto) {

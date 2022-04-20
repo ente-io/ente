@@ -409,7 +409,6 @@ export default function Upload(props: Props) {
             files = await ImportService.showUploadDirsDialog();
         } else {
             files = await ImportService.showUploadZipDialog();
-            ImportService.setSkipUpdatePendingUploads(true);
         }
 
         props.setElectronFiles(files);
