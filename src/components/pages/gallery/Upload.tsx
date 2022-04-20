@@ -54,7 +54,7 @@ enum UPLOAD_STRATEGY {
 enum DESKTOP_UPLOAD_TYPE {
     FILES,
     FOLDERS,
-    GOOGLE_TAKEOUT_ZIPS,
+    ZIPS,
 }
 
 interface AnalysisResult {
@@ -452,9 +452,7 @@ export default function Upload(props: Props) {
                     handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FOLDERS)
                 }
                 uploadGoogleTakeoutZips={() =>
-                    handleDesktopUploadTypes(
-                        DESKTOP_UPLOAD_TYPE.GOOGLE_TAKEOUT_ZIPS
-                    )
+                    handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.ZIPS)
                 }
             />
             <UploadProgress
