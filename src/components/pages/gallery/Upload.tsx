@@ -126,12 +126,13 @@ export default function Upload(props: Props) {
                 props.acceptedFiles?.length > 0 ||
                 props.electronFiles?.length > 0
             ) {
-                if (props.acceptedFiles?.length > 0) {
-                    // File selection by drag and drop or selection of file.
-                    toUploadFiles.current = props.acceptedFiles;
-                } else {
+                if (props.electronFiles?.length > 0) {
                     // File selection from desktop app
                     toUploadFiles.current = props.electronFiles;
+                    props.setElectronFiles([]);
+                } else {
+                    // File selection by drag and drop or selection of file.
+                    toUploadFiles.current = props.acceptedFiles;
                 }
 
                 analysisResult = analyseUploadFiles();
