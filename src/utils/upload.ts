@@ -65,12 +65,12 @@ const getZipFileStream = async (
         if (resolveObj) {
             const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
             if (chunk) {
-                console.log(
-                    'from readable',
-                    done.current,
-                    chunk?.length,
-                    FILE_STREAM_CHUNK_SIZE
-                );
+                // console.log(
+                //     'from readable',
+                //     done.current,
+                //     chunk?.length,
+                //     FILE_STREAM_CHUNK_SIZE
+                // );
                 resolveObj(new Uint8Array(chunk));
                 resolveObj = null;
             }
@@ -92,15 +92,15 @@ const getZipFileStream = async (
 
     const readStreamData = () => {
         return new Promise<Uint8Array>((resolve, reject) => {
-            console.log('stream status done=', done.current);
-            if (done.current) {
-                const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
-                console.log(
-                    'ended stream reading',
-                    done.current,
-                    chunk?.length,
-                    FILE_STREAM_CHUNK_SIZE
-                );
+            // console.log('stream status done=', done.current);
+            const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
+            console.log(
+                'ended stream reading',
+                done.current,
+                chunk?.length,
+                FILE_STREAM_CHUNK_SIZE
+            );
+            if (chunk || done.current) {
                 resolve(chunk);
             } else {
                 resolveObj = resolve;
@@ -112,8 +112,10 @@ const getZipFileStream = async (
     const readableStream = new ReadableStream<Uint8Array>({
         async pull(controller) {
             try {
-                console.log('pull called', done.current);
+                const x = Math.random() * 1000;
+                console.log('pull called', done.current, x);
                 const data = await readStreamData();
+                console.log('got data', x);
                 if (data) {
                     controller.enqueue(data);
                 } else {
