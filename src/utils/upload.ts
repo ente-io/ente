@@ -4,6 +4,7 @@ import * as fs from 'promise-fs';
 import { FILE_STREAM_CHUNK_SIZE } from '../config';
 import { uploadStatusStore } from '../services/store';
 import { ElectronFile } from '../types';
+import { logError } from './logging';
 
 // https://stackoverflow.com/a/63111390
 export const getFilesFromDir = async (dirPath: string) => {
@@ -102,7 +103,7 @@ const getZipFileStream = async (
                     controller.close();
                 }
             } catch (e) {
-                console.log(e);
+                logError(e, 'stream reading failed');
                 controller.close();
             }
         },
@@ -201,7 +202,6 @@ export const getElectronFilesFromGoogleZip = async (filePath: string) => {
     for (const entry of Object.values(entries)) {
         const basename = entry.name.substring(entry.name.lastIndexOf('/'));
         if (entry.isFile && basename.length > 1 && basename[1] !== '.') {
-            console.log(basename);
             files.push(await getZipEntryAsElectronFile(zip, entry));
         }
     }
