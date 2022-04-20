@@ -187,9 +187,12 @@ export const getPendingUploads = async () => {
         async (zipPath) => await fs.stat(zipPath).then((stat) => stat.isFile())
     );
     const files: ElectronFile[] = [];
+    let type: FILE_PATH_TYPE;
     if (validFilePaths.length) {
+        type = FILE_PATH_TYPE.FILES;
         files.concat(await Promise.all(validFilePaths.map(getElectronFile)));
     } else if (validZipPaths.length) {
+        type = FILE_PATH_TYPE.ZIPS;
         for (const zipPath of zipPaths) {
             files.push(...(await getElectronFilesFromGoogleZip(zipPath)));
         }
@@ -197,6 +200,7 @@ export const getPendingUploads = async () => {
     return {
         files,
         collectionName,
+        type,
     };
 };
 
@@ -209,8 +213,8 @@ export const getElectronFilesFromGoogleZip = async (filePath: string) => {
     const files: ElectronFile[] = [];
 
     for (const entry of Object.values(entries)) {
-        const basename = entry.name.substring(entry.name.lastIndexOf('/'));
-        if (entry.isFile && basename.length > 1 && basename[1] !== '.') {
+        const basename = path.basename(entry.name);
+        if (entry.isFile && basename.length > 0 && basename[0] !== '.') {
             files.push(await getZipEntryAsElectronFile(zip, entry));
         }
     }
