@@ -3,7 +3,7 @@ import StreamZip from 'node-stream-zip';
 import * as fs from 'promise-fs';
 import { FILE_STREAM_CHUNK_SIZE } from '../config';
 import { uploadStatusStore } from '../services/store';
-import { ElectronFile } from '../types';
+import { ElectronFile, FILE_PATH_KEYS, FILE_PATH_TYPE } from '../types';
 import { logError } from './logging';
 
 // https://stackoverflow.com/a/63111390
@@ -156,11 +156,13 @@ export async function getElectronFile(filePath: string): Promise<ElectronFile> {
     };
 }
 
-export const setToUploadFiles = (filePaths: string[]) => {
+export const setToUploadFiles = (type: FILE_PATH_TYPE, filePaths: string[]) => {
+    const key = FILE_PATH_KEYS[type];
+    console.log(type, filePaths, key);
     if (filePaths && filePaths.length > 0) {
-        uploadStatusStore.set('filePaths', filePaths);
+        uploadStatusStore.set(key, filePaths);
     } else {
-        uploadStatusStore.set('filePaths', []);
+        uploadStatusStore.set(key, []);
     }
 };
 
@@ -173,16 +175,27 @@ export const setToUploadCollection = (collectionName: string) => {
 };
 
 export const getPendingUploads = async () => {
-    const filePaths = uploadStatusStore.get('filePaths') as string[];
+    const filePaths = (uploadStatusStore.get('filePaths') as string[]) ?? [];
+    const zipPaths = (uploadStatusStore.get('zipPaths') as string[]) ?? [];
     const collectionName = uploadStatusStore.get('collectionName') as string;
-    const validFilePaths = filePaths?.filter(
+    console.log(filePaths, zipPaths, collectionName);
+    const validFilePaths = filePaths.filter(
         async (filePath) =>
             await fs.stat(filePath).then((stat) => stat.isFile())
     );
+    const validZipPaths = zipPaths.filter(
+        async (zipPath) => await fs.stat(zipPath).then((stat) => stat.isFile())
+    );
+    const files: ElectronFile[] = [];
+    if (validFilePaths.length) {
+        files.concat(await Promise.all(validFilePaths.map(getElectronFile)));
+    } else if (validZipPaths.length) {
+        for (const zipPath of zipPaths) {
+            files.push(...(await getElectronFilesFromGoogleZip(zipPath)));
+        }
+    }
     return {
-        files: validFilePaths
-            ? await Promise.all(validFilePaths.map(getElectronFile))
-            : [],
+        files,
         collectionName,
     };
 };

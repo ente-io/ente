@@ -8,6 +8,12 @@ export const uploadStoreSchema: Schema<UploadStoreType> = {
             type: 'string',
         },
     },
+    zipPaths: {
+        type: 'array',
+        items: {
+            type: 'string',
+        },
+    },
     collectionName: {
         type: 'string',
     },

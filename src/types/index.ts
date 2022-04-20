@@ -10,6 +10,7 @@ export interface ElectronFile {
 
 export interface UploadStoreType {
     filePaths: string[];
+    zipPaths: string[];
     collectionName: string;
 }
 
@@ -18,3 +19,13 @@ export interface KeysStoreType {
         id: string;
     };
 }
+
+export enum FILE_PATH_TYPE {
+    FILES = 'files',
+    ZIPS = 'zips',
+}
+
+export const FILE_PATH_KEYS = {
+    [FILE_PATH_TYPE.ZIPS]: 'zipPaths',
+    [FILE_PATH_TYPE.FILES]: 'filePaths',
+};

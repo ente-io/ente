@@ -141,7 +141,7 @@ const showUploadZipDialog = async () => {
         for (const filePath of filePaths) {
             files.push(...(await getElectronFilesFromGoogleZip(filePath)));
         }
-        return files;
+        return { zipPaths: filePaths, files };
     } catch (e) {
         logError(e, 'error while selecting zips');
     }
