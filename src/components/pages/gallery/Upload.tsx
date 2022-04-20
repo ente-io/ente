@@ -187,19 +187,21 @@ export default function Upload(props: Props) {
         paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
         const firstPath = paths[0];
         const lastPath = paths[paths.length - 1];
+
         const L = firstPath.length;
         let i = 0;
-        const firstFileFolder = firstPath.substr(0, firstPath.lastIndexOf('/'));
-        const lastFileFolder = lastPath.substr(0, lastPath.lastIndexOf('/'));
+        const firstFileFolder = firstPath.slice(0, firstPath.lastIndexOf('/'));
+        const lastFileFolder = lastPath.slice(0, lastPath.lastIndexOf('/'));
         while (i < L && firstPath.charAt(i) === lastPath.charAt(i)) i++;
-        let commonPathPrefix = firstPath.substring(0, i);
+        let commonPathPrefix = firstPath.slice(0, i);
+
         if (commonPathPrefix) {
-            commonPathPrefix = commonPathPrefix.substr(
-                1,
-                commonPathPrefix.lastIndexOf('/') - 1
+            commonPathPrefix = commonPathPrefix.slice(
+                0,
+                commonPathPrefix.lastIndexOf('/')
             );
             if (commonPathPrefix) {
-                commonPathPrefix = commonPathPrefix.substr(
+                commonPathPrefix = commonPathPrefix.slice(
                     commonPathPrefix.lastIndexOf('/') + 1
                 );
             }
@@ -214,11 +216,11 @@ export default function Upload(props: Props) {
         for (const file of toUploadFiles.current) {
             const filePath = file['path'] as string;
 
-            let folderPath = filePath.substr(0, filePath.lastIndexOf('/'));
+            let folderPath = filePath.slice(0, filePath.lastIndexOf('/'));
             if (folderPath.endsWith(METADATA_FOLDER_NAME)) {
-                folderPath = folderPath.substr(0, folderPath.lastIndexOf('/'));
+                folderPath = folderPath.slice(0, folderPath.lastIndexOf('/'));
             }
-            const folderName = folderPath.substr(
+            const folderName = folderPath.slice(
                 folderPath.lastIndexOf('/') + 1
             );
             if (!collectionWiseFiles.has(folderName)) {

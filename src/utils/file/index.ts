@@ -298,25 +298,25 @@ export const preservePhotoswipeProps =
         return fileWithPreservedProperty;
     };
 
-export function fileNameWithoutExtension(filename) {
+export function fileNameWithoutExtension(filename: string) {
     const lastDotPosition = filename.lastIndexOf('.');
     if (lastDotPosition === -1) return filename;
-    else return filename.substr(0, lastDotPosition);
+    else return filename.slice(0, lastDotPosition);
 }
 
-export function fileExtensionWithDot(filename) {
+export function fileExtensionWithDot(filename: string) {
     const lastDotPosition = filename.lastIndexOf('.');
     if (lastDotPosition === -1) return '';
-    else return filename.substr(lastDotPosition);
+    else return filename.slice(lastDotPosition);
 }
 
-export function splitFilenameAndExtension(filename): [string, string] {
+export function splitFilenameAndExtension(filename: string): [string, string] {
     const lastDotPosition = filename.lastIndexOf('.');
     if (lastDotPosition === -1) return [filename, null];
     else
         return [
-            filename.substr(0, lastDotPosition),
-            filename.substr(lastDotPosition + 1),
+            filename.slice(0, lastDotPosition),
+            filename.slice(lastDotPosition + 1),
         ];
 }
 
