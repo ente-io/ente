@@ -49,7 +49,7 @@ export const promiseWithTimeout = async (
         return resp;
     };
     return await Promise.race([
-        requestWithTimeOutCancellation,
+        requestWithTimeOutCancellation(),
         rejectOnTimeout,
     ]);
 };
