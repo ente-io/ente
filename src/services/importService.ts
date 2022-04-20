@@ -86,9 +86,6 @@ class ImportService {
         type: DESKTOP_UPLOAD_TYPE.FILES | DESKTOP_UPLOAD_TYPE.ZIPS,
         filePaths: string[]
     ) {
-        if (type === DESKTOP_UPLOAD_TYPE.ZIPS) {
-            console.trace(filePaths);
-        }
         this.ElectronAPIs.setToUploadFiles(type, filePaths);
     }
 
