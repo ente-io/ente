@@ -124,14 +124,14 @@ export default function Upload(props: Props) {
             !props.uploadInProgress &&
             (props.electronFiles?.length > 0 ||
                 props.droppedFiles?.length > 0 ||
-                appContext.sharedFiles.length > 0)
+                appContext.sharedFiles?.length > 0)
         ) {
             props.setLoading(true);
             if (props.droppedFiles?.length > 0) {
                 // File selection by drag and drop or selection of file.
                 toUploadFiles.current = props.droppedFiles;
                 props.clearDroppedFiles();
-            } else if (appContext.sharedFiles.length > 0) {
+            } else if (appContext.sharedFiles?.length > 0) {
                 toUploadFiles.current = appContext.sharedFiles;
                 appContext.resetSharedFiles();
             } else if (props.electronFiles?.length > 0) {
@@ -175,8 +175,9 @@ export default function Upload(props: Props) {
 
     function analyseUploadFiles(): AnalysisResult {
         if (
-            desktopUploadType.current === DESKTOP_UPLOAD_TYPE.FILES ||
-            (isElectron() && !desktopUploadType.current)
+            isElectron() &&
+            (desktopUploadType.current === DESKTOP_UPLOAD_TYPE.FILES ||
+                !desktopUploadType.current)
         ) {
             return NULL_ANALYSIS_RESULT;
         }
@@ -336,7 +337,6 @@ export default function Upload(props: Props) {
             setProgressView(false);
             throw err;
         } finally {
-            appContext.resetSharedFiles();
             props.setUploadInProgress(false);
             props.syncWithRemote();
         }
@@ -387,6 +387,7 @@ export default function Upload(props: Props) {
         if (isPendingDesktopUpload.current) {
             isPendingDesktopUpload.current = false;
             if (pendingDesktopUploadCollectionName.current) {
+                pendingDesktopUploadCollectionName.current = null;
                 uploadToSingleNewCollection(
                     pendingDesktopUploadCollectionName.current
                 );
@@ -397,7 +398,10 @@ export default function Upload(props: Props) {
             }
             return;
         }
-        if (desktopUploadType.current === DESKTOP_UPLOAD_TYPE.ZIPS) {
+        if (
+            isElectron() &&
+            desktopUploadType.current === DESKTOP_UPLOAD_TYPE.ZIPS
+        ) {
             uploadFilesToNewCollections(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
             return;
         }
