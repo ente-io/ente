@@ -23,6 +23,7 @@ import { SetLoading, SetFiles } from 'types/gallery';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import UploadTypeChoiceModal from './UploadTypeChoiceModal';
+import Router from 'next/router';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -234,7 +235,6 @@ export default function Upload(props: Props) {
 
     const uploadFilesToExistingCollection = async (collection: Collection) => {
         try {
-            uploadInit();
             const filesWithCollectionToUpload: FileWithCollection[] =
                 toUploadFiles.current.map((file, index) => ({
                     file,
@@ -252,8 +252,6 @@ export default function Upload(props: Props) {
         collectionName?: string
     ) => {
         try {
-            uploadInit();
-
             const filesWithCollectionToUpload: FileWithCollection[] = [];
             const collections: Collection[] = [];
             let collectionWiseFiles = new Map<
@@ -305,6 +303,7 @@ export default function Upload(props: Props) {
         collections: Collection[]
     ) => {
         try {
+            uploadInit();
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
             await props.syncWithRemote(true, true);
@@ -439,12 +438,11 @@ export default function Upload(props: Props) {
 
     const cancelUploads = async () => {
         setProgressView(false);
-        UploadManager.cancelRemainingUploads();
         if (isElectron()) {
             ImportService.cancelRemainingUploads();
         }
         await props.setUploadInProgress(false);
-        await props.syncWithRemote();
+        Router.reload();
     };
 
     return (
