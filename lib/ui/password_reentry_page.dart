@@ -7,7 +7,7 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/ui/recovery_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 
-import 'common/fabCreateAccount.dart';
+import 'common/dynamicFAB.dart';
 
 class PasswordReentryPage extends StatefulWidget {
   PasswordReentryPage({Key key}) : super(key: key);
@@ -56,7 +56,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           ),
         ),
         body: _getBody(),
-        floatingActionButton: FABCreateAccount(
+        floatingActionButton: DynamicFAB(
           isKeypadOpen: isKeypadOpen,
           isFormValid: _passwordController.text.isNotEmpty,
           buttonText: 'Log in',

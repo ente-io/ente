@@ -10,7 +10,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/fabCreateAccount.dart';
+import 'package:photos/ui/common/dynamicFAB.dart';
 //import 'package:photos/ui/common/report_bug_popup.dart';
 //import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -110,7 +110,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     return Scaffold(
         appBar: appBar,
         body: _getBody(),
-        floatingActionButton: FABCreateAccount(
+        floatingActionButton: DynamicFAB(
           isKeypadOpen: isKeypadOpen,
           isFormValid: _isFormValid(),
           buttonText: 'Create Account',

@@ -98,7 +98,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
             _getSignUpButton(context),
             Container(
               width: double.infinity,
-              padding: EdgeInsets.fromLTRB(24, 12, 24, 28),
+              padding: EdgeInsets.fromLTRB(20, 12, 20, 28),
               child: Hero(
                 tag: "log_in",
                 child: ElevatedButton(

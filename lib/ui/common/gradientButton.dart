@@ -6,7 +6,8 @@ class GradientButton extends StatelessWidget {
   final List<Color> linearGradientColors;
   final Function onTap;
 
-  GradientButton({this.child, this.linearGradientColors, this.onTap});
+  GradientButton({Key key, this.child, this.linearGradientColors, this.onTap})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +16,14 @@ class GradientButton extends StatelessWidget {
       child: Container(
         height: 56,
         decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              spreadRadius: 0,
+              offset: Offset(0, 4),
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 2,
+            )
+          ],
           gradient: LinearGradient(
             begin: Alignment(0.1, -0.9),
             end: Alignment(-0.6, 0.9),

@@ -474,13 +474,13 @@ class _HomeWidgetState extends State<HomeWidget> {
           width: 180,
           child: ClipRect(
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: GNav(
                 curve: Curves.easeOutExpo,
                 backgroundColor: Theme.of(context).bottomAppBarColor,
                 mainAxisAlignment: MainAxisAlignment.center,
-                rippleColor: Theme.of(context).buttonColor.withOpacity(0.20),
-                hoverColor: Theme.of(context).buttonColor.withOpacity(0.20),
+                rippleColor: Colors.white.withOpacity(0.2),
+                hoverColor: Colors.white.withOpacity(0.2),
                 activeColor: Colors.black,
                 iconSize: 24,
                 padding: EdgeInsets.fromLTRB(16, 8, 16, 8),

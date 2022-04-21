@@ -6,7 +6,7 @@ import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
-import 'common/fabCreateAccount.dart';
+import 'common/dynamicFAB.dart';
 
 class RecoveryPage extends StatefulWidget {
   const RecoveryPage({Key key}) : super(key: key);
@@ -31,7 +31,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
           },
         ),
       ),
-      floatingActionButton: FABCreateAccount(
+      floatingActionButton: DynamicFAB(
           isKeypadOpen: false,
           isFormValid: _recoveryKey.text.isNotEmpty,
           buttonText: 'Recover',

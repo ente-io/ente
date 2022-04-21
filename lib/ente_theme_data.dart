@@ -22,9 +22,10 @@ extension CustomColorScheme on ColorScheme {
 
   // todo: use brightness == Brightness.light for changing color for dark/light theme
   ButtonStyle get optionalActionButtonStyle => buildElevatedButtonThemeData(
-        onPrimary: Colors.black87,
-        primary: Color.fromRGBO(240, 240, 240, 1),
-      ).style;
+          onPrimary: Color(0xFF777777),
+          primary: Color(0xFFF0F0F0),
+          elevation: 0)
+      .style;
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(
@@ -65,10 +66,12 @@ OutlinedButtonThemeData buildOutlinedButtonThemeData(
 
 ElevatedButtonThemeData buildElevatedButtonThemeData(
     {@required Color onPrimary, // text button color
-    @required Color primary // background color of button
+    @required Color primary,
+    double elevation = 2 // background color of button
     }) {
   return ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
+    elevation: elevation,
     onPrimary: onPrimary,
     primary: primary,
     alignment: Alignment.center,
@@ -77,7 +80,7 @@ ElevatedButtonThemeData buildElevatedButtonThemeData(
       fontFamily: 'Inter-SemiBold',
       fontSize: 18,
     ),
-    padding: EdgeInsets.symmetric(vertical: 14),
+    padding: EdgeInsets.symmetric(vertical: 18),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(8)),
     ),
