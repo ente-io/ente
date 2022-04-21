@@ -7,6 +7,9 @@ import { SetLoading } from 'types/gallery';
 import { getData, LS_KEYS } from '../storage/localStorage';
 import { CustomError } from '../error';
 import { logError } from '../sentry';
+import { getFamilyPortalRedirectURL } from 'services/userService';
+import { FamilyData, FamilyMember, User } from 'types/user';
+import assert from 'assert';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';
 const PAYMENT_PROVIDER_APPSTORE = 'appstore';
@@ -79,8 +82,55 @@ export function isSubscriptionCancelled(subscription?: Subscription) {
     return subscription && subscription.attributes.isCancelled;
 }
 
+// isPartOfFamily return true if the current user is part of some family plan
+export function isPartOfFamily(familyData?: FamilyData): boolean {
+    familyData = familyData ?? getFamilyData();
+    return familyData && familyData.members && familyData.members.length > 0;
+}
+
+export function isFamilyAdmin(familyData?: FamilyData): boolean {
+    const familyAdmin: FamilyMember = getFamilyPlanAdmin(familyData);
+    const user: User = getData(LS_KEYS.USER);
+    return familyAdmin.email === user.email;
+}
+
+export function getFamilyPlanAdmin(familyData?: FamilyData): FamilyMember {
+    familyData = familyData ?? getFamilyData();
+    assert(
+        isPartOfFamily(familyData),
+        'verify user is part of family plan before calling this method'
+    );
+    return familyData.members.find((x) => x.isAdmin);
+}
+
+export function getStorage(): number {
+    const subscription: Subscription = getUserSubscription();
+    const familyData: FamilyData = getFamilyData();
+    return isPartOfFamily(familyData)
+        ? familyData.storage
+        : subscription.storage;
+}
+
+// getFamilyUsage will return total usage for family if user
+// belong to family group. Otherwise, it will return storage consumed by
+// current user
+export function getFamilyUsage(): number {
+    const familyData: FamilyData = getFamilyData();
+    if (isPartOfFamily(familyData)) {
+        let usage = 0;
+        familyData.members.forEach((f) => (usage += f.usage));
+        return usage;
+    } else {
+        return 0;
+    }
+}
+
 export function getUserSubscription(): Subscription {
     return getData(LS_KEYS.SUBSCRIPTION);
+}
+
+export function getFamilyData(): FamilyData {
+    return getData(LS_KEYS.FAMILY_DATA);
 }
 
 export function getPlans(): Plan[] {
@@ -197,6 +247,24 @@ export async function updatePaymentMethod(
     try {
         setLoading(true);
         await billingService.redirectToCustomerPortal();
+    } catch (error) {
+        setLoading(false);
+        setDialogMessage({
+            title: constants.ERROR,
+            content: constants.UNKNOWN_ERROR,
+            close: { variant: 'danger' },
+        });
+    }
+}
+
+export async function manageFamilyMethod(
+    setDialogMessage: SetDialogMessage,
+    setLoading: SetLoading
+) {
+    try {
+        setLoading(true);
+        const url = await getFamilyPortalRedirectURL();
+        window.location.href = url;
     } catch (error) {
         setLoading(false);
         setDialogMessage({

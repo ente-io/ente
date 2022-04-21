@@ -18,6 +18,7 @@ import {
     planForSubscription,
     hasMobileSubscription,
     hasPaypalSubscription,
+    manageFamilyMethod,
 } from 'utils/billing';
 import { reverseString } from 'utils/common';
 import { SetDialogMessage } from 'components/MessageDialog';
@@ -380,6 +381,17 @@ function PlanSelector(props: Props) {
                                 )}
                                 style={{ marginTop: '20px' }}>
                                 {constants.MANAGEMENT_PORTAL}
+                            </LinkButton>
+
+                            <LinkButton
+                                variant="primary"
+                                onClick={manageFamilyMethod.bind(
+                                    null,
+                                    props.setDialogMessage,
+                                    props.setLoading
+                                )}
+                                style={{ marginTop: '20px' }}>
+                                {constants.MANAGE_FAMILY_PORTAL}
                             </LinkButton>
                         </>
                     ) : (

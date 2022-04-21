@@ -147,6 +147,19 @@ class billingService {
         }
     }
 
+    public async leaveFamily(): Promise<boolean> {
+        if (!getToken()) return true;
+        try {
+            await HTTPService.delete(`${ENDPOINT}/family/leave`, null, null, {
+                'X-Auth-Token': getToken(),
+            });
+            setData(LS_KEYS.FAMILY_DATA, null);
+        } catch (e) {
+            logError(e, '/family/leave failed');
+            throw e;
+        }
+    }
+
     public async redirectToPayments(
         paymentToken: string,
         productID: string,

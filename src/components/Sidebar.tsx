@@ -13,14 +13,19 @@ import {
     isSubscriptionCancelled,
     isSubscribed,
     convertBytesToHumanReadable,
+    getFamilyData,
+    isPartOfFamily,
+    getStorage,
+    isFamilyAdmin,
+    getFamilyPlanAdmin,
 } from 'utils/billing';
-
+import billingService from 'services/billingService';
 import isElectron from 'is-electron';
 import { Collection } from 'types/collection';
 import { useRouter } from 'next/router';
 import LinkButton from './pages/gallery/LinkButton';
 import { downloadApp } from 'utils/common';
-import { getUserDetails, logoutUser } from 'services/userService';
+import { getUserDetailsV2, logoutUser } from 'services/userService';
 import { LogoImage } from 'pages/_app';
 import { SetDialogMessage } from './MessageDialog';
 import EnteSpinner from './EnteSpinner';
@@ -38,6 +43,7 @@ import { SetLoading } from 'types/gallery';
 import { downloadAsFile } from 'utils/file';
 import { getUploadLogs, logUploadInfo } from 'utils/upload';
 import styled from 'styled-components';
+import { FamilyData } from 'types/user';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -47,9 +53,11 @@ export default function Sidebar(props: Props) {
     const [usage, SetUsage] = useState<string>(null);
     const [user, setUser] = useState(null);
     const [subscription, setSubscription] = useState<Subscription>(null);
+    const [familyData, setFamilyData] = useState<FamilyData>(null);
     useEffect(() => {
         setUser(getData(LS_KEYS.USER));
         setSubscription(getUserSubscription());
+        setFamilyData(getFamilyData());
     }, []);
     const [isOpen, setIsOpen] = useState(false);
     const [recoverModalView, setRecoveryModalView] = useState(false);
@@ -63,7 +71,7 @@ export default function Sidebar(props: Props) {
             if (!isOpen) {
                 return;
             }
-            const userDetails = await getUserDetails();
+            const userDetails = await getUserDetailsV2();
             setUser({ ...user, email: userDetails.email });
             SetUsage(convertBytesToHumanReadable(userDetails.usage));
             setSubscription(userDetails.subscription);
@@ -72,6 +80,7 @@ export default function Sidebar(props: Props) {
                 email: userDetails.email,
             });
             setData(LS_KEYS.SUBSCRIPTION, userDetails.subscription);
+            setData(LS_KEYS.FAMILY_DATA, userDetails.familyData);
         };
         main();
     }, [isOpen]);
@@ -125,6 +134,11 @@ export default function Sidebar(props: Props) {
         galleryContext.showPlanSelectorModal();
     }
 
+    async function onLeaveFamilyClick() {
+        await billingService.leaveFamily();
+        setIsOpen(false);
+    }
+
     const Divider = styled.div`
         height: 1px;
         margin-top: 40px;
@@ -169,34 +183,62 @@ export default function Sidebar(props: Props) {
                             {constants.SUBSCRIPTION_PLAN}
                         </h5>
                     </div>
-                    <div style={{ color: '#959595' }}>
-                        {isSubscriptionActive(subscription) ? (
-                            isOnFreePlan(subscription) ? (
-                                constants.FREE_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime
-                                )
-                            ) : isSubscriptionCancelled(subscription) ? (
-                                constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime
+                    {!isPartOfFamily(familyData) ||
+                    isFamilyAdmin(familyData) ? (
+                        <div style={{ color: '#959595' }}>
+                            {isSubscriptionActive(subscription) ? (
+                                isOnFreePlan(subscription) ? (
+                                    constants.FREE_SUBSCRIPTION_INFO(
+                                        subscription?.expiryTime
+                                    )
+                                ) : isSubscriptionCancelled(subscription) ? (
+                                    constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
+                                        subscription?.expiryTime
+                                    )
+                                ) : (
+                                    constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
+                                        subscription?.expiryTime
+                                    )
                                 )
                             ) : (
-                                constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime
-                                )
-                            )
-                        ) : (
-                            <p>{constants.SUBSCRIPTION_EXPIRED}</p>
-                        )}
-                        <Button
-                            variant="outline-success"
-                            block
-                            size="sm"
-                            onClick={onManageClick}>
-                            {isSubscribed(subscription)
-                                ? constants.MANAGE
-                                : constants.SUBSCRIBE}
-                        </Button>
-                    </div>
+                                <p>{constants.SUBSCRIPTION_EXPIRED}</p>
+                            )}
+                            <Button
+                                variant="outline-success"
+                                block
+                                size="sm"
+                                onClick={onManageClick}>
+                                {isSubscribed(subscription)
+                                    ? constants.MANAGE
+                                    : constants.SUBSCRIBE}
+                            </Button>
+                        </div>
+                    ) : (
+                        <div style={{ color: '#959595' }}>
+                            {constants.FAMILY_PLAN_MANAGE_ADMIN_ONLY(
+                                getFamilyPlanAdmin()?.email
+                            )}
+                            <Button
+                                variant="outline-success"
+                                block
+                                size="sm"
+                                onClick={() =>
+                                    props.setDialogMessage({
+                                        title: `${constants.LEAVE_FAMILY}`,
+                                        content: constants.LEAVE_FAMILY_CONFIRM,
+                                        staticBackdrop: true,
+                                        proceed: {
+                                            text: constants.LEAVE_FAMILY,
+                                            action: onLeaveFamilyClick,
+                                            variant: 'danger',
+                                        },
+                                        close: { text: constants.CANCEL },
+                                    })
+                                }>
+                                {constants.LEAVE_FAMILY}
+                            </Button>
+                        </div>
+                    )}
                 </div>
                 <div style={{ outline: 'none', marginTop: '30px' }} />
                 <div>
@@ -205,10 +247,17 @@ export default function Sidebar(props: Props) {
                     </h5>
                     <div style={{ color: '#959595' }}>
                         {usage ? (
-                            constants.USAGE_INFO(
-                                usage,
-                                convertBytesToHumanReadable(
-                                    subscription?.storage
+                            isPartOfFamily() ? (
+                                constants.FAMILY_USAGE_INFO(
+                                    usage,
+                                    convertBytesToHumanReadable(getStorage())
+                                )
+                            ) : (
+                                constants.USAGE_INFO(
+                                    usage,
+                                    convertBytesToHumanReadable(
+                                        subscription?.storage
+                                    )
                                 )
                             )
                         ) : (

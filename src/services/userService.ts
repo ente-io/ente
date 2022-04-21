@@ -258,13 +258,17 @@ export const changeEmail = async (email: string, ott: string) => {
     );
 };
 
-export const getUserDetails = async (): Promise<UserDetails> => {
+export const getUserDetailsV2 = async (): Promise<UserDetails> => {
     const token = getToken();
 
-    const resp = await HTTPService.get(`${ENDPOINT}/users/details`, null, {
-        'X-Auth-Token': token,
-    });
-    return resp.data['details'];
+    const resp = await HTTPService.get(
+        `${ENDPOINT}/users/details/v2?memoryCount=true`,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+    return resp.data;
 };
 
 export const getFamilyPortalRedirectURL = async () => {

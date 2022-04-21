@@ -6,6 +6,7 @@ export enum LS_KEYS {
     KEY_ATTRIBUTES = 'keyAttributes',
     ORIGINAL_KEY_ATTRIBUTES = 'originalKeyAttributes',
     SUBSCRIPTION = 'subscription',
+    FAMILY_DATA = 'familyData',
     PLANS = 'plans',
     IS_FIRST_LOGIN = 'isFirstLogin',
     JUST_SIGNED_UP = 'justSignedUp',
@@ -37,7 +38,7 @@ export const getData = (key: LS_KEYS) => {
         const data = localStorage.getItem(key);
         return data && JSON.parse(data);
     } catch (e) {
-        logError(e, 'Failed to Parse JSON');
+        logError(e, 'Failed to Parse JSON for key ' + key);
     }
 };
 
