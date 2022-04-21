@@ -135,7 +135,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
     widgets.add(SubscriptionHeaderWidget(
       isOnboarding: widget.isOnboarding,
-      currentUsage: _userDetails.getPersonalUsage(),
+      currentUsage: _userDetails.getFamilyOrPersonalUsage(),
     ));
 
     widgets.addAll([

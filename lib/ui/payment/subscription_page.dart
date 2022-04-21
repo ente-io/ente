@@ -169,7 +169,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final widgets = <Widget>[];
     widgets.add(SubscriptionHeaderWidget(
       isOnboarding: widget.isOnboarding,
-      currentUsage: _userDetails.getPersonalUsage(),
+      currentUsage: _userDetails.getFamilyOrPersonalUsage(),
     ));
 
     widgets.addAll([
