@@ -1,5 +1,8 @@
 import React, { createContext, useEffect, useRef, useState } from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
+import styled, {
+    createGlobalStyle,
+    ThemeProvider as SThemeProvider,
+} from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
 import { useRouter } from 'next/router';
@@ -22,7 +25,7 @@ import MessageDialog, {
     MessageAttributes,
     SetDialogMessage,
 } from 'components/MessageDialog';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider as MThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'darkThemeOptions';
 
 const GlobalStyles = createGlobalStyle`
@@ -718,73 +721,77 @@ export default function App({ Component, err }) {
                 />
             </Head>
             <GlobalStyles />
-            <ThemeProvider theme={darkThemeOptions}>
-                {showNavbar && (
-                    <Navbar>
-                        <FlexContainer shouldJustifyLeft={isAlbumsDomain}>
-                            <LogoImage
-                                style={{ height: '24px', padding: '3px' }}
-                                alt="logo"
-                                src="/icon.svg"
-                            />
-                        </FlexContainer>
-                        {isAlbumsDomain && <GoToEnte />}
-                    </Navbar>
-                )}
-                <MessageContainer>
-                    {offline && constants.OFFLINE_MSG}
-                </MessageContainer>
-                {sharedFiles &&
-                    (router.pathname === '/gallery' ? (
-                        <MessageContainer>
-                            {constants.FILES_TO_BE_UPLOADED(sharedFiles.length)}
-                        </MessageContainer>
-                    ) : (
-                        <MessageContainer>
-                            {constants.LOGIN_TO_UPLOAD_FILES(
-                                sharedFiles.length
-                            )}
-                        </MessageContainer>
-                    ))}
-                {flashMessage && (
-                    <FlashMessageBar
-                        flashMessage={flashMessage}
-                        onClose={() => setFlashMessage(null)}
-                    />
-                )}
-                <LoadingBar color="#51cd7c" ref={loadingBar} />
-
-                <MessageDialog
-                    size="lg"
-                    show={messageDialogView}
-                    onHide={closeMessageDialog}
-                    attributes={dialogMessage}
-                />
-
-                <AppContext.Provider
-                    value={{
-                        showNavBar,
-                        sharedFiles,
-                        resetSharedFiles,
-                        setDisappearingFlashMessage,
-                        redirectURL,
-                        setRedirectURL,
-                        startLoading,
-                        finishLoading,
-                        closeMessageDialog,
-                        setDialogMessage,
-                    }}>
-                    {loading ? (
-                        <Container>
-                            <EnteSpinner>
-                                <span className="sr-only">Loading...</span>
-                            </EnteSpinner>
-                        </Container>
-                    ) : (
-                        <Component err={err} setLoading={setLoading} />
+            <MThemeProvider theme={darkThemeOptions}>
+                <SThemeProvider theme={darkThemeOptions}>
+                    {showNavbar && (
+                        <Navbar>
+                            <FlexContainer shouldJustifyLeft={isAlbumsDomain}>
+                                <LogoImage
+                                    style={{ height: '24px', padding: '3px' }}
+                                    alt="logo"
+                                    src="/icon.svg"
+                                />
+                            </FlexContainer>
+                            {isAlbumsDomain && <GoToEnte />}
+                        </Navbar>
                     )}
-                </AppContext.Provider>
-            </ThemeProvider>
+                    <MessageContainer>
+                        {offline && constants.OFFLINE_MSG}
+                    </MessageContainer>
+                    {sharedFiles &&
+                        (router.pathname === '/gallery' ? (
+                            <MessageContainer>
+                                {constants.FILES_TO_BE_UPLOADED(
+                                    sharedFiles.length
+                                )}
+                            </MessageContainer>
+                        ) : (
+                            <MessageContainer>
+                                {constants.LOGIN_TO_UPLOAD_FILES(
+                                    sharedFiles.length
+                                )}
+                            </MessageContainer>
+                        ))}
+                    {flashMessage && (
+                        <FlashMessageBar
+                            flashMessage={flashMessage}
+                            onClose={() => setFlashMessage(null)}
+                        />
+                    )}
+                    <LoadingBar color="#51cd7c" ref={loadingBar} />
+
+                    <MessageDialog
+                        size="lg"
+                        show={messageDialogView}
+                        onHide={closeMessageDialog}
+                        attributes={dialogMessage}
+                    />
+
+                    <AppContext.Provider
+                        value={{
+                            showNavBar,
+                            sharedFiles,
+                            resetSharedFiles,
+                            setDisappearingFlashMessage,
+                            redirectURL,
+                            setRedirectURL,
+                            startLoading,
+                            finishLoading,
+                            closeMessageDialog,
+                            setDialogMessage,
+                        }}>
+                        {loading ? (
+                            <Container>
+                                <EnteSpinner>
+                                    <span className="sr-only">Loading...</span>
+                                </EnteSpinner>
+                            </Container>
+                        ) : (
+                            <Component err={err} setLoading={setLoading} />
+                        )}
+                    </AppContext.Provider>
+                </SThemeProvider>
+            </MThemeProvider>
         </>
     );
 }
