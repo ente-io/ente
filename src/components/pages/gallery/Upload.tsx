@@ -176,12 +176,11 @@ export default function Upload(props: Props) {
     function analyseUploadFiles(): AnalysisResult {
         if (
             isElectron() &&
-            (desktopUploadType.current === DESKTOP_UPLOAD_TYPE.FILES ||
-                !desktopUploadType.current)
+            (!desktopUploadType.current ||
+                desktopUploadType.current === DESKTOP_UPLOAD_TYPE.FILES)
         ) {
             return NULL_ANALYSIS_RESULT;
         }
-        desktopUploadType.current = null;
 
         const paths: string[] = toUploadFiles.current.map(
             (file) => file['path']
@@ -387,10 +386,10 @@ export default function Upload(props: Props) {
         if (isPendingDesktopUpload.current) {
             isPendingDesktopUpload.current = false;
             if (pendingDesktopUploadCollectionName.current) {
-                pendingDesktopUploadCollectionName.current = null;
                 uploadToSingleNewCollection(
                     pendingDesktopUploadCollectionName.current
                 );
+                pendingDesktopUploadCollectionName.current = null;
             } else {
                 uploadFilesToNewCollections(
                     UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
