@@ -213,16 +213,24 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       padding: const EdgeInsets.only(bottom: 1, right: 1),
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(
-            color: Theme.of(context).colorScheme.boxUnSelectColor,
-          ),
-          borderRadius: BorderRadius.all(
-            Radius.circular(12),
-          ),
-          color: isSelected
-              ? Theme.of(context).colorScheme.boxSelectColor
-              : Theme.of(context).colorScheme.boxUnSelectColor,
-        ),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.boxUnSelectColor,
+            ),
+            borderRadius: BorderRadius.all(
+              Radius.circular(12),
+            ),
+            // color: isSelected
+            //     ? Theme.of(context).colorScheme.boxSelectColor
+            //     : Theme.of(context).colorScheme.boxUnSelectColor,
+            gradient: isSelected
+                ? LinearGradient(colors: const [
+                    Color(0xFF00DD4D),
+                    Color(0xFF43BA6C)
+                  ]) //same for both themes
+                : LinearGradient(colors: [
+                    Theme.of(context).colorScheme.boxUnSelectColor,
+                    Theme.of(context).colorScheme.boxUnSelectColor
+                  ])),
         padding: EdgeInsets.fromLTRB(8, 4, 4, 4),
         child: InkWell(
           child: Row(
