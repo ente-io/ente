@@ -26,11 +26,10 @@ class GalleryFooterWidget extends StatelessWidget {
               color: Colors.white,
             ),
             Padding(padding: EdgeInsets.all(6)),
-            Text("Preserve more",
-                style: Theme.of(context)
-                    .textTheme
-                    .headline6
-                    .copyWith(color: Colors.white)),
+            Text(
+              "Preserve more",
+              style: gradientButtonTextTheme(),
+            ),
           ],
         ),
         linearGradientColors: const [

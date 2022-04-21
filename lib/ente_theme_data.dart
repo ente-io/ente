@@ -83,3 +83,12 @@ ElevatedButtonThemeData buildElevatedButtonThemeData(
     ),
   ));
 }
+
+TextStyle gradientButtonTextTheme() {
+  return TextStyle(
+    color: Colors.white,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 18,
+  );
+}

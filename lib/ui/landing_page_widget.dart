@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/ui/common/gradientButton.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/login_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
@@ -122,16 +123,34 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   Widget _getSignUpButton(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 24),
-      child: ElevatedButton(
-        style: Theme.of(context).colorScheme.primaryActionButtonStyle,
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      child: GradientButton(
         child: Hero(
           tag: "sign_up",
-          child: Text("New to ente"),
+          child: Text(
+            "New to ente",
+            style: gradientButtonTextTheme(),
+          ),
         ),
-        onPressed: _navigateToSignUpPage,
+        linearGradientColors: const [
+          Color(0xFF2CD267),
+          Color(0xFF1DB954),
+        ],
+        onTap: _navigateToSignUpPage,
       ),
     );
+    // return Container(
+    //   width: double.infinity,
+    //   padding: EdgeInsets.symmetric(horizontal: 24),
+    // child: ElevatedButton(
+    //   style: Theme.of(context).colorScheme.primaryActionButtonStyle,
+    //   child: Hero(
+    //     tag: "sign_up",
+    //     child: Text("New to ente"),
+    //   ),
+    //   onPressed: _navigateToSignUpPage,
+    // ),
+    //);
   }
 
   Widget _getFeatureSlider() {

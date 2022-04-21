@@ -22,7 +22,7 @@ class GradientButton extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: child,
+        child: Center(child: child),
       ),
     );
   }

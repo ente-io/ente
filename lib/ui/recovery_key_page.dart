@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/ui/common/gradientButton.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -162,10 +163,16 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       childrens.add(SizedBox(height: 10));
     }
 
-    childrens.add(ElevatedButton(
-      child: Text('Save'),
-      style: Theme.of(context).colorScheme.primaryActionButtonStyle,
-      onPressed: () async {
+    childrens.add(GradientButton(
+      child: Text(
+        'Save',
+        style: gradientButtonTextTheme(),
+      ),
+      linearGradientColors: const [
+        Color(0xFF2CD267),
+        Color(0xFF1DB954),
+      ],
+      onTap: () async {
         await _shareRecoveryKey(recoveryKey);
       },
     ));
@@ -173,7 +180,6 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       childrens.add(SizedBox(height: 10));
       childrens.add(ElevatedButton(
         child: Text(widget.doneText),
-        // style: Theme.of(context).colorScheme.primaryActionButtonStyle,
         onPressed: () async {
           await _saveKeys();
         },
