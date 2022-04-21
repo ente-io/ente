@@ -17,10 +17,10 @@ allprojects {
     repositories {
         google()
         jcenter()
-        // mavenLocal() // for FDroid
-        maven {
-            url "${project(':background_fetch').projectDir}/libs"
-        }
+        mavenLocal() // for FDroid
+//        maven {
+//            url "${project(':background_fetch').projectDir}/libs"
+//        }
     }
 }
 

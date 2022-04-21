@@ -1,0 +1,3 @@
+- faster syncs
+- swipe down to close the image view
+- archive albums to reduce noise
