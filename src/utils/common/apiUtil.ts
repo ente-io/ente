@@ -42,3 +42,12 @@ export const getPaymentsURL = () => {
     }
     return `https://payments.ente.io`;
 };
+
+// getFamilyPortalURL returns the endpoint for the family dashboard which can be used to
+// create or manage family.
+export const getFamilyPortalURL = () => {
+    if (process.env.NEXT_PUBLIC_ENTE_FAMILY_PORTAL_ENDPOINT !== undefined) {
+        return process.env.NEXT_PUBLIC_ENTE_FAMILY_PORTAL_ENDPOINT;
+    }
+    return `https://families.ente.io`;
+};

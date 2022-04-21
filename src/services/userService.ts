@@ -1,5 +1,5 @@
 import { PAGES } from 'constants/pages';
-import { getEndpoint } from 'utils/common/apiUtil';
+import { getEndpoint, getFamilyPortalURL } from 'utils/common/apiUtil';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import router from 'next/router';
 import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -51,6 +51,19 @@ export const getPaymentToken = async () => {
         }
     );
     return resp.data['paymentToken'];
+};
+
+export const getFamiliesToken = async () => {
+    const token = getToken();
+
+    const resp = await HTTPService.get(
+        `${ENDPOINT}/users/families-token`,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+    return resp.data['familiesToken'];
 };
 
 export const verifyOtt = (email: string, ott: string) =>
@@ -252,4 +265,18 @@ export const getUserDetails = async (): Promise<UserDetails> => {
         'X-Auth-Token': token,
     });
     return resp.data['details'];
+};
+
+export const getFamilyPortalRedirectURL = async () => {
+    try {
+        const jwtToken = await getFamiliesToken();
+        const isFamilyCreated = false;
+        return `${getFamilyPortalURL()}?token=${jwtToken}&isFamilyCreated=${isFamilyCreated}&redirectURL=${
+            window.location.origin
+        }/gallery`;
+    } catch (e) {
+        alert(e);
+        logError(e, 'unable to redirect to family portal');
+        throw e;
+    }
 };

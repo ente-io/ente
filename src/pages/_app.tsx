@@ -22,6 +22,7 @@ import MessageDialog, {
     MessageAttributes,
     SetDialogMessage,
 } from 'components/MessageDialog';
+import { getFamilyPortalRedirectURL } from 'services/userService';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -558,8 +559,9 @@ export interface FlashMessage {
 export const AppContext = createContext<AppContextType>(null);
 
 const redirectMap = {
-    roadmap: (token: string) =>
+    roadmap: async (token: string) =>
         `${getEndpoint()}/users/roadmap?token=${encodeURIComponent(token)}`,
+    families: async () => getFamilyPortalRedirectURL(),
 };
 
 export default function App({ Component, err }) {
@@ -630,12 +632,18 @@ export default function App({ Component, err }) {
                 'font-size: 20px;'
             );
         }
+
+        const redirectTo = async (redirect, token) => {
+            const url = await redirectMap[redirect](token);
+            window.location.href = url;
+        };
+
         const query = new URLSearchParams(window.location.search);
         const redirect = query.get('redirect');
         if (redirect && redirectMap[redirect]) {
             const user = getData(LS_KEYS.USER);
             if (user?.token) {
-                window.location.href = redirectMap[redirect](user.token);
+                redirectTo(redirect, user.token);
             } else {
                 setRedirectName(redirect);
             }
@@ -649,9 +657,7 @@ export default function App({ Component, err }) {
             if (redirectName) {
                 const user = getData(LS_KEYS.USER);
                 if (user?.token) {
-                    window.location.href = redirectMap[redirectName](
-                        user.token
-                    );
+                    redirectTo(redirectName, user.token);
                 }
             }
         });
