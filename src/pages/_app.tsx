@@ -710,6 +710,10 @@ export default function App({ Component, err }) {
         <>
             <Head>
                 <title>{constants.TITLE}</title>
+                <meta
+                    name="viewport"
+                    content="initial-scale=1, width=device-width"
+                />
             </Head>
             <GlobalStyles />
             {showNavbar && (
