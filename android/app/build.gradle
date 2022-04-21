@@ -72,6 +72,11 @@ android {
         playstore {
             dimension "default"
         }
+        fdroid {
+            dimension "default"
+            applicationIdSuffix ".fdroid"
+            signingConfig null
+        }
     }
 
     buildTypes {
@@ -86,6 +91,14 @@ android {
               arguments "-DANDROID_PACKAGE_NAME=${android.defaultConfig.applicationId}${applicationIdSuffix}"
             }
           }
+        }
+    }
+
+    android.applicationVariants.all { variant ->
+        if (variant.flavorName == "fdroid") {
+            variant.outputs.all { output ->
+                output.outputFileName = "app-fdroid-release.apk"
+            }
         }
     }
 }
