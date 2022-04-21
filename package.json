@@ -14,6 +14,9 @@
   },
   "dependencies": {
     "@ente-io/next-with-workbox": "^1.0.3",
+    "@mui/material": "^5.6.2",
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
+    "@mui/styled-engine-sc": "^5.6.1",
     "@sentry/nextjs": "^6.7.1",
     "@stripe/stripe-js": "^1.13.2",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
@@ -40,6 +43,7 @@
     "libsodium-wrappers": "^0.7.8",
     "localforage": "^1.9.0",
     "next": "^12.1.0",
+    "next-transpile-modules": "^9.0.0",
     "photoswipe": "file:./thirdparty/photoswipe",
     "piexifjs": "^1.0.6",
     "react": "^17.0.2",
@@ -55,7 +59,7 @@
     "react-window": "^1.8.6",
     "react-window-infinite-loader": "^1.0.5",
     "scrypt-js": "^3.0.1",
-    "styled-components": "^5.2.0",
+    "styled-components": "^5.3.5",
     "workbox-precaching": "^6.1.5",
     "workbox-recipes": "^6.1.5",
     "workbox-routing": "^6.1.5",
@@ -97,5 +101,8 @@
       "eslint --fix",
       "prettier --write --ignore-unknown"
     ]
+  },
+  "resolutions": {
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest"
   }
 }
