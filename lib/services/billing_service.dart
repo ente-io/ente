@@ -15,7 +15,7 @@ const kWebPaymentBaseEndpoint = String.fromEnvironment("web-payment",
     defaultValue: "https://payments.ente.io");
 
 const kFamilyPlanManagementUrl = String.fromEnvironment("web-family",
-    defaultValue: "https://family.ente.io");
+    defaultValue: "https://families.ente.io");
 
 class BillingService {
   BillingService._privateConstructor();
