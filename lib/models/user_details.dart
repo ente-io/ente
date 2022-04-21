@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:photos/models/subscription.dart';
 
@@ -34,6 +36,14 @@ class UserDetails {
   // current user
   int getFamilyOrPersonalUsage() {
     return isPartOfFamily() ? familyData.getTotalUsage() : usage;
+  }
+
+  int getFreeStorage() {
+    return max(
+        isPartOfFamily()
+            ? (familyData.storage - familyData.getTotalUsage())
+            : (subscription.storage - usage),
+        0);
   }
 
   int getPersonalUsage() {
