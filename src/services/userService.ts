@@ -279,8 +279,7 @@ export const getFamilyPortalRedirectURL = async () => {
             window.location.origin
         }/gallery`;
     } catch (e) {
-        alert(e);
-        logError(e, 'unable to redirect to family portal');
+        logError(e, 'unable to generate to family portal URL');
         throw e;
     }
 };

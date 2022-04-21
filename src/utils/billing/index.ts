@@ -103,26 +103,12 @@ export function getFamilyPlanAdmin(familyData?: FamilyData): FamilyMember {
     return familyData.members.find((x) => x.isAdmin);
 }
 
-export function getStorage(): number {
+export function getStorage(familyData?: FamilyData): number {
     const subscription: Subscription = getUserSubscription();
-    const familyData: FamilyData = getFamilyData();
+    familyData = familyData ?? getFamilyData();
     return isPartOfFamily(familyData)
         ? familyData.storage
         : subscription.storage;
-}
-
-// getFamilyUsage will return total usage for family if user
-// belong to family group. Otherwise, it will return storage consumed by
-// current user
-export function getFamilyUsage(): number {
-    const familyData: FamilyData = getFamilyData();
-    if (isPartOfFamily(familyData)) {
-        let usage = 0;
-        familyData.members.forEach((f) => (usage += f.usage));
-        return usage;
-    } else {
-        return 0;
-    }
 }
 
 export function getUserSubscription(): Subscription {

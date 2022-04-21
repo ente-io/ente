@@ -250,7 +250,9 @@ export default function Sidebar(props: Props) {
                             isPartOfFamily() ? (
                                 constants.FAMILY_USAGE_INFO(
                                     usage,
-                                    convertBytesToHumanReadable(getStorage())
+                                    convertBytesToHumanReadable(
+                                        getStorage(familyData)
+                                    )
                                 )
                             ) : (
                                 constants.USAGE_INFO(
