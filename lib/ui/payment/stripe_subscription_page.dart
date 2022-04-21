@@ -274,14 +274,12 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     try {
       final String jwtToken = await _userService.getFamiliesToken();
       final bool familyExist = _userDetails.isPartOfFamily();
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (BuildContext context) {
-            return WebPage("family",
-                '$kFamilyPlanManagementUrl?token=$jwtToken&familyCreated=$familyExist');
-          },
-        ),
-      );
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (BuildContext context) {
+          return WebPage("family",
+              '$kFamilyPlanManagementUrl?token=$jwtToken&familyCreated=$familyExist');
+        },
+      )).then((value) => onWebPaymentGoBack);
     } catch (e) {
       await _dialog.hide();
       showGenericErrorDialog(context);

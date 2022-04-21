@@ -54,7 +54,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   void initState() {
     _billingService.setIsOnSubscriptionPage(true);
     _userService.getUserDetailsV2(memberCount: false).then((userDetails) async {
-      _userDetails = _userDetails;
+      _userDetails = userDetails;
       _currentSubscription = userDetails.subscription;
       _hasActiveSubscription = _currentSubscription.isValid();
       final billingPlans = await _billingService.getBillingPlans();
@@ -213,7 +213,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               }
             },
             child: Container(
-              padding: EdgeInsets.fromLTRB(40, 80, 40, 80),
+              padding: EdgeInsets.fromLTRB(40, 80, 40, 20),
               child: Column(
                 children: [
                   RichText(
@@ -434,17 +434,17 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
-  Future<void> _launchStripePortal() async {
+  Future<void> _launchFamilyPortal() async {
     await _dialog.show();
     try {
-      String url = await _billingService.getStripeCustomerPortalUrl();
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (BuildContext context) {
-            return WebPage("payment details", url);
-          },
-        ),
-      ).then((value) => onWebPaymentGoBack);
+      final String jwtToken = await _userService.getFamiliesToken();
+      final bool familyExist = _userDetails.isPartOfFamily();
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (BuildContext context) {
+          return WebPage("family",
+              '$kFamilyPlanManagementUrl?token=$jwtToken&familyCreated=$familyExist');
+        },
+      ));
     } catch (e) {
       await _dialog.hide();
       showGenericErrorDialog(context);
