@@ -30,13 +30,15 @@ const FIRST_ALBUM_NAME = 'My First Album';
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setBannerMessage: (message: string | JSX.Element) => void;
-    acceptedFiles: File[];
+    droppedFiles: File[];
+    clearDroppedFiles: () => void;
     closeCollectionSelector: () => void;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setLoading: SetLoading;
     setDialogMessage: SetDialogMessage;
-    setUploadInProgress: any;
+    uploadInProgress: boolean;
+    setUploadInProgress: (value: boolean) => void;
     showCollectionSelector: () => void;
     fileRejections: FileRejection[];
     setFiles: SetFiles;
@@ -63,6 +65,11 @@ interface AnalysisResult {
     multipleFolders: boolean;
 }
 
+const NULL_ANALYSIS_RESULT = {
+    suggestedCollectionName: '',
+    multipleFolders: false,
+};
+
 export default function Upload(props: Props) {
     const [progressView, setProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
@@ -78,10 +85,8 @@ export default function Upload(props: Props) {
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
 
     const [choiceModalView, setChoiceModalView] = useState(false);
-    const [analysisResult, setAnalysisResult] = useState<AnalysisResult>({
-        suggestedCollectionName: '',
-        multipleFolders: false,
-    });
+    const [analysisResult, setAnalysisResult] =
+        useState<AnalysisResult>(NULL_ANALYSIS_RESULT);
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
 
@@ -116,40 +121,34 @@ export default function Upload(props: Props) {
 
     useEffect(() => {
         if (
-            props.acceptedFiles?.length > 0 ||
-            appContext.sharedFiles?.length > 0 ||
-            props.electronFiles?.length > 0
+            !props.uploadInProgress &&
+            (props.electronFiles?.length > 0 ||
+                props.droppedFiles?.length > 0 ||
+                appContext.sharedFiles.length > 0)
         ) {
             props.setLoading(true);
-
-            let analysisResult: AnalysisResult;
-            if (
-                props.acceptedFiles?.length > 0 ||
-                props.electronFiles?.length > 0
-            ) {
-                if (props.electronFiles?.length > 0) {
-                    // File selection from desktop app
-                    toUploadFiles.current = props.electronFiles;
-                    props.setElectronFiles([]);
-                } else {
-                    // File selection by drag and drop or selection of file.
-                    toUploadFiles.current = props.acceptedFiles;
-                }
-
-                analysisResult = analyseUploadFiles();
-                if (analysisResult) {
-                    setAnalysisResult(analysisResult);
-                }
+            if (props.droppedFiles?.length > 0) {
+                // File selection by drag and drop or selection of file.
+                toUploadFiles.current = props.droppedFiles;
+                props.clearDroppedFiles();
             } else if (appContext.sharedFiles.length > 0) {
                 toUploadFiles.current = appContext.sharedFiles;
+                appContext.resetSharedFiles();
+            } else if (props.electronFiles?.length > 0) {
+                // File selection from desktop app
+                toUploadFiles.current = props.electronFiles;
+                props.setElectronFiles([]);
             }
+            const analysisResult = analyseUploadFiles();
+            setAnalysisResult(analysisResult);
+
             handleCollectionCreationAndUpload(
                 analysisResult,
                 props.isFirstUpload
             );
             props.setLoading(false);
         }
-    }, [props.acceptedFiles, appContext.sharedFiles, props.electronFiles]);
+    }, [props.droppedFiles, appContext.sharedFiles, props.electronFiles]);
 
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
@@ -175,13 +174,14 @@ export default function Upload(props: Props) {
     };
 
     function analyseUploadFiles(): AnalysisResult {
-        if (toUploadFiles.current.length === 0) {
-            return null;
+        if (
+            desktopUploadType.current === DESKTOP_UPLOAD_TYPE.FILES ||
+            (isElectron() && !desktopUploadType.current)
+        ) {
+            return NULL_ANALYSIS_RESULT;
         }
-        if (desktopUploadType.current === DESKTOP_UPLOAD_TYPE.FILES) {
-            desktopUploadType.current = null;
-            return { suggestedCollectionName: '', multipleFolders: false };
-        }
+        desktopUploadType.current = null;
+
         const paths: string[] = toUploadFiles.current.map(
             (file) => file['path']
         );
