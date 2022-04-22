@@ -205,6 +205,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   double _opacity = 1;
   PageController _pageController;
   bool _shouldDisableScroll = false;
+  final GlobalKey shareButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -231,9 +232,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         elevation: 0,
         actions: [
           IconButton(
+            key: shareButtonKey,
             icon: Icon(Icons.share),
             onPressed: () {
-              share(context, [file]);
+              share(context, [file], shareButtonKey: shareButtonKey);
             },
           ),
         ],
