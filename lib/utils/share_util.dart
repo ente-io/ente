@@ -31,7 +31,12 @@ Future<void> share(BuildContext context, List<File> files) async {
   }
   final paths = await Future.wait(pathFutures);
   await dialog.hide();
-  return Share.shareFiles(paths);
+  final Size size = MediaQuery.of(context).size;
+  return Share.shareFiles(
+    paths,
+    // required for ipad https://github.com/flutter/flutter/issues/47220#issuecomment-608453383
+    sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+  );
 }
 
 Future<void> shareText(String text) async {
