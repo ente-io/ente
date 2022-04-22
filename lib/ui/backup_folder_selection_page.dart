@@ -104,10 +104,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                             ? "Unselect all"
                             : "Select all",
                         textAlign: TextAlign.right,
-                        style: Theme.of(context)
-                            .textTheme
-                            .overline
-                            .copyWith(decoration: TextDecoration.underline),
+                        style: Theme.of(context).textTheme.overline.copyWith(
+                            decoration: TextDecoration.underline,
+                            fontSize: 16,
+                            letterSpacing: 1),
                       ),
                     ),
                   ),
@@ -133,7 +133,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.only(
-                  left: 24, right: 24, bottom: Platform.isIOS ? 60 : 32),
+                  left: 20, right: 20, bottom: Platform.isIOS ? 60 : 32),
               child: OutlinedButton(
                 child: Text(widget.buttonText),
                 onPressed: _selectedFolders.isEmpty

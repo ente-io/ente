@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:loading_animations/loading_animations.dart';
 import 'package:lottie/lottie.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -19,10 +18,10 @@ class LoadingPhotosWidget extends StatefulWidget {
 
 class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   StreamSubscription<SyncStatusUpdate> _firstImportEvent;
-  int _currentPage = 0;
-  final PageController _pageController = PageController(
-    initialPage: 0,
-  );
+  // final int _currentPage = 0;
+  // final PageController _pageController = PageController(
+  //   initialPage: 0,
+  // );
 
   @override
   void initState() {
@@ -38,7 +37,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
               context,
               BackupFolderSelectionPage(
                 shouldSelectAll: true,
-                buttonText: "Start backup",
+                buttonText: "Start Backup",
               ));
         }
       }
@@ -56,18 +55,12 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     return Scaffold(
       body: Center(
         child: Column(
-          //mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(
               height: 56,
             ),
             Lottie.asset('assets/loadingGalleryLottie.json'),
-            // LoadingBouncingGrid.square(
-            //   inverted: true,
-            //   backgroundColor: Theme.of(context).buttonColor,
-            //   size: 64,
-            // ),
             Text("Did you know?",
                 style: Theme.of(context).textTheme.headline6.copyWith(
                     fontFamily: "Inter",
