@@ -172,8 +172,7 @@ export default function CollectionBar(props: CollectionProps) {
                             <CollectionTileWithActiveIndicator
                                 key={item.id}
                                 latestFile={
-                                    collectionSummaries?.get(item.id)
-                                        ?.latestFile
+                                    collectionSummaries.get(item.id)?.latestFile
                                 }
                                 ref={collectionChipsRef[item.id]}
                                 active={activeCollection === item.id}

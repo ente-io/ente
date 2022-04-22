@@ -26,6 +26,8 @@ import EmptyScreen from './EmptyScreen';
 import { AppContext } from 'pages/_app';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { IsArchived } from 'utils/magicMetadata';
+import { CollectionSummaries } from 'types/collection';
+import CollectionInfo from './photoFrame/CollectionInfo';
 
 const Container = styled.div`
     display: block;
@@ -61,6 +63,7 @@ interface Props {
     activeCollection: number;
     isSharedCollection?: boolean;
     enableDownload?: boolean;
+    collectionSummaries: CollectionSummaries;
 }
 
 type SourceURL = {
@@ -85,6 +88,7 @@ const PhotoFrame = ({
     activeCollection,
     isSharedCollection,
     enableDownload,
+    collectionSummaries,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -551,6 +555,11 @@ const PhotoFrame = ({
                 <EmptyScreen openUploader={openUploader} />
             ) : (
                 <Container>
+                    <CollectionInfo
+                        collectionSummary={collectionSummaries.get(
+                            activeCollection
+                        )}
+                    />
                     <AutoSizer>
                         {({ height, width }) => (
                             <PhotoList

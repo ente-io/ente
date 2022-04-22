@@ -13,11 +13,10 @@ import {
     syncPublicFiles,
     verifyPublicCollectionPassword,
 } from 'services/publicCollectionService';
-import { Collection } from 'types/collection';
+import { Collection, CollectionSummaries } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
-import { CollectionInfo } from 'components/pages/sharedAlbum/CollectionInfo';
 import { AbuseReportForm } from 'components/pages/sharedAlbum/AbuseReportForm';
 import {
     defaultPublicCollectionGalleryContext,
@@ -59,6 +58,8 @@ export default function PublicCollectionGallery() {
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
         useState<boolean>(false);
+    const [collectionSummaries, setCollectionSummaries] =
+        useState<CollectionSummaries>(new Map());
 
     useEffect(() => {
         appContext.showNavBar(true);
@@ -132,7 +133,7 @@ export default function PublicCollectionGallery() {
                 collection?.publicURLs?.[0]?.passwordEnabled;
             setIsPasswordProtected(isPasswordProtected);
             setErrorMessage(null);
-
+            let files = [];
             // remove outdated password, sharer has disabled the password
             if (!isPasswordProtected && passwordJWTToken.current) {
                 passwordJWTToken.current = null;
@@ -143,7 +144,7 @@ export default function PublicCollectionGallery() {
                 (isPasswordProtected && passwordJWTToken.current)
             ) {
                 try {
-                    await syncPublicFiles(
+                    files = await syncPublicFiles(
                         token.current,
                         passwordJWTToken.current,
                         collection,
@@ -161,6 +162,12 @@ export default function PublicCollectionGallery() {
             if (isPasswordProtected && !passwordJWTToken.current) {
                 await removePublicFiles(collectionUID);
             }
+            collectionSummaries.set(collection.id, {
+                collectionName: collection.name,
+                latestFile: files[0],
+                fileCount: files.length,
+            });
+            setCollectionSummaries(collectionSummaries);
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
             if (
@@ -277,7 +284,6 @@ export default function PublicCollectionGallery() {
                 accessedThroughSharedURL: true,
                 openReportForm,
             }}>
-            <CollectionInfo collection={publicCollection} />
             <PhotoFrame
                 files={publicFiles}
                 setFiles={setPublicFiles}
@@ -296,6 +302,7 @@ export default function PublicCollectionGallery() {
                 enableDownload={
                     publicCollection?.publicURLs?.[0]?.enableDownload ?? true
                 }
+                collectionSummaries={collectionSummaries}
             />
             <AbuseReportForm
                 show={abuseReportFormView}

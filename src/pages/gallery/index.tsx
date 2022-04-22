@@ -190,7 +190,7 @@ export default function Gallery() {
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
         useContext(AppContext);
     const [collectionSummaries, setCollectionSummaries] =
-        useState<CollectionSummaries>();
+        useState<CollectionSummaries>(new Map());
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
     const [trash, setTrash] = useState<Trash>([]);
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
@@ -688,6 +688,7 @@ export default function Gallery() {
                         collections
                     )}
                     enableDownload={true}
+                    collectionSummaries={collectionSummaries}
                 />
                 {selected.count > 0 &&
                     selected.collectionID === activeCollection && (
