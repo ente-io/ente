@@ -142,6 +142,7 @@ Future<void> _sendLogs(
     if (result != null && result == DialogUserChoice.firstChoice) {
       await Clipboard.setData(ClipboardData(text: toEmail));
     }
-    await Share.shareFiles([zipFilePath]);
+    final Size size = MediaQuery.of(context).size;
+    await Share.shareFiles([zipFilePath], sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
   }
 }
