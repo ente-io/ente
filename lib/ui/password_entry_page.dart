@@ -17,7 +17,7 @@ import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
-import 'common/fabCreateAccount.dart';
+import 'common/dynamicFAB.dart';
 
 enum PasswordEntryMode {
   set,
@@ -114,7 +114,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         elevation: 0,
       ),
       body: _getBody(title),
-      floatingActionButton: FABCreateAccount(
+      floatingActionButton: DynamicFAB(
           isKeypadOpen: isKeypadOpen,
           isFormValid: _passwordsMatch,
           buttonText: title,

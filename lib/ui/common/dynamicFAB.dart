@@ -3,13 +3,13 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 
-class FABCreateAccount extends StatelessWidget {
+class DynamicFAB extends StatelessWidget {
   final bool isKeypadOpen;
   final bool isFormValid;
   final String buttonText;
   final Function onPressedFunction;
 
-  const FABCreateAccount(
+  const DynamicFAB(
       {this.isKeypadOpen,
       this.buttonText,
       this.isFormValid,

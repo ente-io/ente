@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -275,7 +276,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 ? _getBackupFolderSelectionHook()
                 : _getMainGalleryWidget(),
             _deviceFolderGalleryWidget,
-            _sharedCollectionGallery,
+            //_sharedCollectionGallery,
             _settingsPage,
           ],
           onPageChanged: (page) {
@@ -286,6 +287,22 @@ class _HomeWidgetState extends State<HomeWidget> {
           },
           physics: NeverScrollableScrollPhysics(),
           controller: _pageController,
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            height: 8,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).backgroundColor,
+                  spreadRadius: 42,
+                  blurRadius: 42, // changes position of shadow
+                ),
+              ],
+            ),
+          ),
         ),
         Align(
           alignment: Alignment.bottomCenter,
@@ -344,7 +361,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         final importantPaths = Configuration.instance.getPathsToBackUp();
         final ownerID = Configuration.instance.getUserID();
         final archivedCollectionIds =
-        CollectionsService.instance.getArchivedCollections();
+            CollectionsService.instance.getArchivedCollections();
         FileLoadResult result;
         if (importantPaths.isNotEmpty) {
           result = await FilesDB.instance.getImportantFiles(creationStartTime,
@@ -392,7 +409,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     return Stack(
       children: [
         Container(
-          margin: const EdgeInsets.only(bottom: 80),
           child: gallery,
         ),
         HomePageAppBar(_selectedFiles),
@@ -448,71 +464,76 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _buildBottomNavigationBar() {
-    return Container(
-      margin: EdgeInsets.fromLTRB(48, 12, 48, 4),
-      alignment: Alignment.bottomCenter,
-      height: 90,
-      width: 220,
-      child: SafeArea(
-        child: GNav(
-          curve: Curves.easeOutExpo,
-          backgroundColor: Theme.of(context).bottomAppBarColor,
-          mainAxisAlignment: MainAxisAlignment.center,
-          rippleColor: Theme.of(context).buttonColor.withOpacity(0.20),
-          hoverColor: Theme.of(context).buttonColor.withOpacity(0.20),
-          activeColor: Colors.black,
-          iconSize: 24,
-          padding: EdgeInsets.fromLTRB(2, 2, 1, 2),
-          duration: Duration(milliseconds: 200),
-          tabMargin: EdgeInsets.all(10),
-          gap: 0,
-          tabBorderRadius: 24,
-          tabBackgroundColor: Colors.white,
-          haptic: false,
-          tabShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 5,
-              blurRadius: 7,
-              offset: Offset(0, 3), // changes position of shadow
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(36),
+        child: Container(
+          alignment: Alignment.bottomCenter,
+          height: 52,
+          width: 180,
+          child: ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: GNav(
+                curve: Curves.easeOutExpo,
+                backgroundColor: Theme.of(context).bottomAppBarColor,
+                mainAxisAlignment: MainAxisAlignment.center,
+                rippleColor: Colors.white.withOpacity(0.2),
+                hoverColor: Colors.white.withOpacity(0.2),
+                activeColor: Colors.black,
+                iconSize: 24,
+                padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                duration: Duration(milliseconds: 200),
+                gap: 0,
+                tabBorderRadius: 24,
+                tabBackgroundColor: Colors.white,
+                haptic: false,
+                tabs: [
+                  GButton(
+                    margin: EdgeInsets.fromLTRB(6, 6, 0, 6),
+                    icon: Icons.home,
+                    iconColor: Colors.black,
+                    text: '',
+                    onPressed: () {
+                      _onTabChange(
+                          0); // To take care of occasional missing events
+                    },
+                  ),
+                  GButton(
+                    margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                    icon: Icons.photo_library,
+                    iconColor: Colors.black,
+                    text: '',
+                    onPressed: () {
+                      _onTabChange(
+                          1); // To take care of occasional missing events
+                    },
+                  ),
+                  // GButton(
+                  //   icon: Icons.folder_shared_outlined,
+                  //   iconColor: Colors.black,
+                  //   text: '',
+                  //   onPressed: () {
+                  //     _onTabChange(2); // To take care of occasional missing events
+                  //   },
+                  // ),
+                  GButton(
+                    margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
+                    icon: Icons.person,
+                    iconColor: Colors.black,
+                    text: '',
+                    onPressed: () {
+                      _onTabChange(
+                          3); // To take care of occasional missing events
+                    },
+                  )
+                ],
+                selectedIndex: _selectedTabIndex,
+                onTabChange: _onTabChange,
+              ),
             ),
-          ],
-          tabs: [
-            GButton(
-              icon: Icons.photo_library_outlined,
-              iconColor: Colors.black,
-              text: '',
-              onPressed: () {
-                _onTabChange(0); // To take care of occasional missing events
-              },
-            ),
-            GButton(
-              icon: Icons.folder_special_outlined,
-              iconColor: Colors.black,
-              text: '',
-              onPressed: () {
-                _onTabChange(1); // To take care of occasional missing events
-              },
-            ),
-            GButton(
-              icon: Icons.folder_shared_outlined,
-              iconColor: Colors.black,
-              text: '',
-              onPressed: () {
-                _onTabChange(2); // To take care of occasional missing events
-              },
-            ),
-            GButton(
-              icon: Icons.settings,
-              iconColor: Colors.black,
-              text: '',
-              onPressed: () {
-                _onTabChange(3); // To take care of occasional missing events
-              },
-            )
-          ],
-          selectedIndex: _selectedTabIndex,
-          onTabChange: _onTabChange,
+          ),
         ),
       ),
     );

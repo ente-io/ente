@@ -10,7 +10,7 @@ import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 
-import 'common/fabCreateAccount.dart';
+import 'common/dynamicFAB.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         body: _getBody(),
-        floatingActionButton: FABCreateAccount(
+        floatingActionButton: DynamicFAB(
           isKeypadOpen: isKeypadOpen,
           isFormValid: _emailIsValid,
           buttonText: 'Log in',

@@ -163,16 +163,15 @@ bool isLeapYear(DateTime dateTime) {
 
 Widget getDayWidget(BuildContext context, int timestamp) {
   return Container(
-    padding: const EdgeInsets.fromLTRB(10, 8, 0, 10),
-    alignment: Alignment.centerLeft,
-    child: Text(
-      getDayTitle(timestamp),
-      style: TextStyle(
-        fontSize: 14,
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.85),
-      ),
-    ),
-  );
+      padding: const EdgeInsets.fromLTRB(10, 14, 0, 12),
+      alignment: Alignment.centerLeft,
+      child: Text(getDayTitle(timestamp),
+          style: getDayTitle(timestamp) == "Today"
+              ? Theme.of(context).textTheme.headline5
+              : Theme.of(context).textTheme.caption.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Inter-SemiBold')));
 }
 
 String getDayTitle(int timestamp) {

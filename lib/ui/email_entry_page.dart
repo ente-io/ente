@@ -10,7 +10,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/fabCreateAccount.dart';
+import 'package:photos/ui/common/dynamicFAB.dart';
 //import 'package:photos/ui/common/report_bug_popup.dart';
 //import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -110,7 +110,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     return Scaffold(
         appBar: appBar,
         body: _getBody(),
-        floatingActionButton: FABCreateAccount(
+        floatingActionButton: DynamicFAB(
           isKeypadOpen: isKeypadOpen,
           isFormValid: _isFormValid(),
           buttonText: 'Create Account',
@@ -149,7 +149,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       filled: true,
                       hintText: 'email',
                       contentPadding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       border: UnderlineInputBorder(
                           borderSide: BorderSide.none,
                           borderRadius: BorderRadius.circular(6)),
@@ -197,7 +197,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       filled: true,
                       hintText: "password",
                       contentPadding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       suffixIcon: _password1InFocus
                           ? IconButton(
                               icon: Icon(
@@ -264,7 +264,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           filled: true,
                           hintText: "confirm password",
                           contentPadding: EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 20),
+                              horizontal: 16, vertical: 14),
                           suffixIcon: _password2InFocus
                               ? IconButton(
                                   icon: Icon(

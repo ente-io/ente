@@ -89,9 +89,11 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           fileDate.day == galleryDate.day;
     });
     if (filesUpdatedThisDay.isNotEmpty) {
-      _logger.info(filesUpdatedThisDay.length.toString() +
-          " files were updated on " +
-          getDayTitle(galleryDate.microsecondsSinceEpoch));
+      _logger.info(
+        filesUpdatedThisDay.length.toString() +
+            " files were updated on " +
+            getDayTitle(galleryDate.microsecondsSinceEpoch),
+      );
       if (event.type == EventType.addedOrUpdated) {
         final dayStartTime =
             DateTime(galleryDate.year, galleryDate.month, galleryDate.day);

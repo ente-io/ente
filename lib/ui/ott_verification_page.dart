@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/fabCreateAccount.dart';
+import 'package:photos/ui/common/dynamicFAB.dart';
 import 'package:photos/ui/common/report_bug_popup.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
@@ -63,7 +63,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             : null,
       ),
       body: _getBody(),
-      floatingActionButton: FABCreateAccount(
+      floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: !(_verificationCodeController.text == null ||
             _verificationCodeController.text.isEmpty),
