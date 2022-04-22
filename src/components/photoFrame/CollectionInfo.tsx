@@ -25,8 +25,8 @@ export default function collectionInfo(props: Iprops) {
                     {collectionSummary.fileCount} {constants.PHOTOS}
                 </Typography>
             </div>
-            <IconButton>
-                <OptionIcon style={{ transform: 'rotate(90deg)' }} />
+            <IconButton style={{ transform: 'rotate(90deg)' }}>
+                <OptionIcon />
             </IconButton>
         </Header>
     );
