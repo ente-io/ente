@@ -37,9 +37,9 @@ class DynamicFAB extends StatelessWidget {
             FloatingActionButton(
                 //mini: true,
                 backgroundColor:
-                    Theme.of(context).colorScheme.fabBackgroundColor,
+                    Theme.of(context).colorScheme.dynamicFABBackgroundColor,
                 foregroundColor:
-                    Theme.of(context).colorScheme.fabTextOrIconColor,
+                    Theme.of(context).colorScheme.dynamicFABTextColor,
                 child: Transform.rotate(
                   angle: isFormValid ? 0 : math.pi / 2, //var here
                   child: Icon(

@@ -358,9 +358,13 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                       horizontal: 20),
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      border: Border.all(
+                                      boxShadow: [
+                                        BoxShadow(
+                                          spreadRadius: 0.5,
                                           color: Theme.of(context).hintColor,
-                                          width: 0.5),
+                                          offset: Offset(0, -0.325),
+                                        ),
+                                      ],
                                       borderRadius: BorderRadius.only(
                                         topLeft: Radius.zero,
                                         topRight: Radius.zero,

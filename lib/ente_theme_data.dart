@@ -14,11 +14,10 @@ extension CustomColorScheme on ColorScheme {
       ? Color.fromRGBO(240, 240, 240, 1)
       : Color.fromRGBO(8, 18, 18, 0.4);
 
-  Color get fabBackgroundColor =>
+  Color get dynamicFABBackgroundColor =>
       brightness == Brightness.light ? Colors.black : Colors.grey[850];
 
-  Color get fabTextOrIconColor =>
-      brightness == Brightness.light ? Colors.white : Colors.white;
+  Color get dynamicFABTextColor => Colors.white; //same for both themes
 
   // todo: use brightness == Brightness.light for changing color for dark/light theme
   ButtonStyle get optionalActionButtonStyle => buildElevatedButtonThemeData(

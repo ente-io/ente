@@ -12,6 +12,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -33,7 +34,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/app_update_dialog.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
-import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/common/gradientButton.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
@@ -421,10 +422,18 @@ class _HomeWidgetState extends State<HomeWidget> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _headerWidgetWithSettingsButton,
-        Image.asset(
-          "assets/preserved.png",
-          height: 160,
+        Padding(
+          padding: const EdgeInsets.only(top: 64),
+          child: Image.asset(
+            "assets/preserved.png",
+            height: 206,
+          ),
         ),
+        Text('No photos are being backed up right now',
+            style: Theme.of(context)
+                .textTheme
+                .caption
+                .copyWith(fontFamily: 'Inter-Medium', fontSize: 16)),
         Center(
           child: Hero(
             tag: "select_folders",
@@ -433,13 +442,17 @@ class _HomeWidgetState extends State<HomeWidget> {
               child: Container(
                 width: double.infinity,
                 height: 64,
-                padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
-                child: button(
-                  "start backup",
-                  fontSize: 16,
-                  lineHeight: 1.5,
-                  padding: EdgeInsets.only(bottom: 4),
-                  onPressed: () async {
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                child: GradientButton(
+                  child: Text(
+                    'Start Backup',
+                    style: gradientButtonTextTheme(),
+                  ),
+                  linearGradientColors: const [
+                    Color(0xFF2CD267),
+                    Color(0xFF1DB954),
+                  ],
+                  onTap: () async {
                     if (LocalSyncService.instance
                         .hasGrantedLimitedPermissions()) {
                       PhotoManager.presentLimited();
@@ -448,12 +461,32 @@ class _HomeWidgetState extends State<HomeWidget> {
                         context,
                         BackupFolderSelectionPage(
                           shouldSelectAll: true,
-                          buttonText: "Start backup",
+                          buttonText: "Start Backup",
                         ),
                       );
                     }
                   },
                 ),
+                // child: button(
+                //   "start backup",
+                //   fontSize: 16,
+                //   lineHeight: 1.5,
+                //   padding: EdgeInsets.only(bottom: 4),
+                //   onPressed: () async {
+                //     if (LocalSyncService.instance
+                //         .hasGrantedLimitedPermissions()) {
+                //       PhotoManager.presentLimited();
+                //     } else {
+                //       routeToPage(
+                //         context,
+                //         BackupFolderSelectionPage(
+                //           shouldSelectAll: true,
+                //           buttonText: "Start backup",
+                //         ),
+                //       );
+                //     }
+                //   },
+                // ),
               ),
             ),
           ),
@@ -474,7 +507,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           width: 180,
           child: ClipRect(
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
               child: GNav(
                 curve: Curves.easeOutExpo,
                 backgroundColor: Theme.of(context).bottomAppBarColor,
