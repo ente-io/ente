@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:loading_animations/loading_animations.dart';
+import 'package:lottie/lottie.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
@@ -21,16 +23,6 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   final PageController _pageController = PageController(
     initialPage: 0,
   );
-  final List<String> _messages = [
-    "web.ente.io has a slick uploader",
-    "we have preserved over a million memories so far",
-    "all our apps are open source",
-    "our encryption protocols have been reviewed by engineers at Google, Apple, Amazon, and Facebook",
-    "you can share files and folders with your loved ones, end-to-end encrypted",
-    "our mobile apps run in the background to encrypt and backup new photos you take",
-    "we use Xchacha20Poly1305 to safely encrypt your data",
-    "one of our data centers is in a fall out shelter 25m underground",
-  ];
 
   @override
   void initState() {
@@ -51,23 +43,6 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         }
       }
     });
-
-    Timer.periodic(Duration(seconds: 5), (Timer timer) {
-      if (!mounted) {
-        return;
-      }
-      if (_currentPage < _messages.length - 1) {
-        _currentPage++;
-      } else {
-        _currentPage = 0;
-      }
-
-      _pageController.animateToPage(
-        _currentPage,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeIn,
-      );
-    });
   }
 
   @override
@@ -81,47 +56,34 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          //mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            LoadingBouncingGrid.square(
-              inverted: true,
-              backgroundColor: Theme.of(context).buttonColor,
-              size: 64,
-            ),
-            Padding(padding: const EdgeInsets.all(20.0)),
-            Text(
-              "loading your gallery...",
-              style: TextStyle(
-                fontSize: 16,
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(10)),
-            Text(
-              "this might take upto 30 seconds 🐣",
-              style: TextStyle(color: Colors.white.withOpacity(0.3)),
-            ),
-            Padding(padding: const EdgeInsets.all(70)),
-            Text(
-              "did you know?",
-              style: TextStyle(
-                fontSize: 16,
-                color: Theme.of(context).buttonColor,
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(8)),
             SizedBox(
-              height: 80,
-              child: PageView.builder(
-                scrollDirection: Axis.vertical,
-                controller: _pageController,
-                itemBuilder: (context, index) {
-                  return _getMessage(_messages[index]);
-                },
-                itemCount: _messages.length,
-                physics: NeverScrollableScrollPhysics(),
-              ),
+              height: 56,
             ),
+            Lottie.asset('assets/loadingGalleryLottie.json'),
+            // LoadingBouncingGrid.square(
+            //   inverted: true,
+            //   backgroundColor: Theme.of(context).buttonColor,
+            //   size: 64,
+            // ),
+            Text("Did you know?",
+                style: Theme.of(context).textTheme.headline6.copyWith(
+                    fontFamily: "Inter",
+                    color: Theme.of(context)
+                        .colorScheme
+                        .defaultTextColor
+                        .withOpacity(0.4))),
+            SizedBox(
+              height: 16,
+            ),
+            Text(
+              "ente is amazing",
+              style: Theme.of(context).textTheme.headline6.copyWith(
+                  fontFamily: "Inter",
+                  color: Theme.of(context).colorScheme.defaultTextColor),
+            )
           ],
         ),
       ),
