@@ -25,6 +25,7 @@ import MessageDialog, {
 } from 'components/MessageDialog';
 import { ThemeProvider as MThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'darkThemeOptions';
+import { CssBaseline } from '@mui/material';
 
 export const LogoImage = styled.img`
     max-height: 28px;
@@ -231,6 +232,7 @@ export default function App({ Component, err }) {
 
             <MThemeProvider theme={darkThemeOptions}>
                 <SThemeProvider theme={darkThemeOptions}>
+                    <CssBaseline />
                     {showNavbar && (
                         <Navbar>
                             <FlexContainer shouldJustifyLeft={isAlbumsDomain}>
