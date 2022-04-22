@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import NavigateNext from './icons/NavigateNext';
 
 export enum SCROLL_DIRECTION {
@@ -8,19 +8,27 @@ export enum SCROLL_DIRECTION {
 }
 
 const Wrapper = styled.button<{ direction: SCROLL_DIRECTION }>`
-    height: 40px;
-    width: 40px;
-    background-color: #191919;
+    top: 7px;
+    height: 50px;
+    width: 50px;
+
+    border-radius: 50%;
+    background-color: ${({ theme }) => theme.palette.background.paper};
     border: none;
-    color: #eee;
-    z-index: 1;
+    color: ${({ theme }) => theme.palette.text.primary};
     position: absolute;
     ${(props) =>
         props.direction === SCROLL_DIRECTION.LEFT
-            ? 'margin-right: 10px;'
-            : 'margin-left: 10px;'}
-    ${(props) =>
-        props.direction === SCROLL_DIRECTION.LEFT ? 'left: 0;' : 'right: 0;'}
+            ? css`
+                  left: 0;
+                  text-align: right;
+                  transform: translate(-50%, 0%);
+              `
+            : css`
+                  right: 0;
+                  text-align: left;
+                  transform: translate(50%, 0%);
+              `}
 
     & > svg {
         ${(props) =>
@@ -31,33 +39,8 @@ const Wrapper = styled.button<{ direction: SCROLL_DIRECTION }>`
         width: 30px;
     }
 
-    &:hover > svg {
-        background-color: #555;
-    }
-
     &:hover {
         color: #fff;
-    }
-
-    &::after {
-        content: ' ';
-        background: linear-gradient(
-            to
-                ${(props) =>
-                    props.direction === SCROLL_DIRECTION.LEFT
-                        ? 'right'
-                        : 'left'},
-            #191919 5%,
-            rgba(255, 255, 255, 0) 80%
-        );
-        position: absolute;
-        top: 0;
-        width: 40px;
-        height: 40px;
-        ${(props) =>
-            props.direction === SCROLL_DIRECTION.LEFT
-                ? 'left: 40px;'
-                : 'right: 40px;'}
     }
 `;
 

@@ -554,7 +554,7 @@ const englishConstants = {
         'these files were not uploaded as they exceed our maximum file size limit',
     UPLOAD_TO_COLLECTION: 'upload to album',
     ARCHIVE: 'archive',
-    ALL: 'all',
+    ALL_SECTION_NAME: 'All Photos',
     MOVE_TO_COLLECTION: 'move to album',
     UNARCHIVE: 'un-archive',
     MOVE: 'move',
@@ -712,6 +712,9 @@ const englishConstants = {
         'are you sure that you want to stop all the uploads in progress?',
     STOP_UPLOADS_HEADER: 'stop uploads?',
     YES_STOP_UPLOADS: 'yes, stop uploads',
+    ALBUMS: 'Albums',
+    NEW: 'New',
+    ALL_ALBUMS: 'View all Albums',
 };
 
 export default englishConstants;
