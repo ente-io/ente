@@ -156,9 +156,12 @@ svg {
     margin:auto;
 }
 .pswp-custom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     opacity: 0.75;
     transition: opacity .2s;
-    display: inline-block;
+    padding-top: 4px;
     float: right;
     cursor: pointer;
     border: none;

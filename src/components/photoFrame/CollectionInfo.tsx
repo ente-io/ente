@@ -26,7 +26,7 @@ export default function collectionInfo(props: Iprops) {
                 </Typography>
             </div>
             <IconButton>
-                <OptionIcon />
+                <OptionIcon style={{ transform: 'rotate(90deg)' }} />
             </IconButton>
         </Header>
     );
