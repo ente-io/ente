@@ -829,6 +829,10 @@ function PhotoSwipe(props: Iprops) {
                     <div className="pswp__ui ">
                         <div className="pswp__top-bar">
                             <div className="pswp__counter" />
+                            <button
+                                className="pswp__button pswp__button--close"
+                                title={constants.CLOSE}
+                            />
                             <div className="pswp-custom">
                                 <OptionIcon className="pswp-custom" />
                             </div>
@@ -837,11 +841,6 @@ function PhotoSwipe(props: Iprops) {
                                     <InfoIcon className="pswp-custom" />
                                 </div>
                             )}
-                            {/* <button
-                                className="pswp__button pswp__button--close"
-                                title={constants.CLOSE}
-                            /> */}
-
                             {props.enableDownload && (
                                 <div className="pswp-custom">
                                     <DownloadIcon className="pswp-custom" />
