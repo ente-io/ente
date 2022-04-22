@@ -14,10 +14,10 @@ const withTM = require('next-transpile-modules')([
 const {
     getGitSha,
     convertToNextHeaderFormat,
-    buildCSPHeader,
+    // buildCSPHeader,
     COOP_COEP_HEADERS,
     WEB_SECURITY_HEADERS,
-    CSP_DIRECTIVES,
+    // CSP_DIRECTIVES,
     WORKBOX_CONFIG,
     ALL_ROUTES,
     getIsSentryEnabled,
@@ -46,7 +46,7 @@ module.exports = (phase) =>
                                 headers: convertToNextHeaderFormat({
                                     ...COOP_COEP_HEADERS,
                                     ...WEB_SECURITY_HEADERS,
-                                    ...buildCSPHeader(CSP_DIRECTIVES),
+                                    // ...buildCSPHeader(CSP_DIRECTIVES),
                                 }),
                             },
                         ];
