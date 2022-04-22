@@ -110,6 +110,7 @@ import { VISIBILITY_STATE } from 'types/magicMetadata';
 import ToastNotification from 'components/ToastNotification';
 import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
+import CollectionInfo from 'components/photoFrame/CollectionInfo';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -612,6 +613,11 @@ export default function Gallery() {
                     activeCollection={activeCollection}
                     setActiveCollection={setActiveCollection}
                     collectionSummaries={collectionSummaries}
+                />
+                <CollectionInfo
+                    collectionSummary={collectionSummaries.get(
+                        activeCollection
+                    )}
                 />
                 <CollectionNamer
                     show={collectionNamerView}

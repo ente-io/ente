@@ -132,13 +132,13 @@ export default function CollectionBar(props: CollectionProps) {
 
     return (
         <Hider hide={props.isInSearchMode}>
+            <Header>
+                <Typography>{constants.ALBUMS}</Typography>
+                {scrollObj.scrollWidth > scrollObj.clientWidth && (
+                    <Link component="button">{constants.ALL_ALBUMS}</Link>
+                )}
+            </Header>
             <CollectionBarWrapper>
-                <Header>
-                    <Typography>{constants.ALBUMS}</Typography>
-                    {scrollObj.scrollWidth > scrollObj.clientWidth && (
-                        <Link component="button">{constants.ALL_ALBUMS}</Link>
-                    )}
-                </Header>
                 <CollectionWithNavigationContainer>
                     {scrollObj.scrollLeft > 0 && (
                         <NavigationButton

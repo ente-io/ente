@@ -16,6 +16,11 @@ export const Header = styled.div`
     align-items: center;
     justify-content: space-between;
     margin-bottom: 8px;
+    margin-top: 16px;
+    padding: 0 24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * 4}px) {
+        padding: 0 4px;
+    }
 `;
 
 export const CollectionWithNavigationContainer = styled.div`
