@@ -12,7 +12,7 @@ import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
-import { sortFiles } from 'utils/file';
+import { sortFiles, sortFilesIntoCollections } from 'utils/file';
 import {
     Collection,
     CollectionAndItsLatestFile,
@@ -23,6 +23,7 @@ import {
     CreatePublicAccessTokenRequest,
     PublicURL,
     UpdatePublicURL,
+    CollectionSummaries,
 } from 'types/collection';
 import { COLLECTION_SORT_BY, CollectionType } from 'constants/collection';
 import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
@@ -794,4 +795,42 @@ function moveFavCollectionToFront(collections: Collection[]) {
             ? 1
             : 0
     );
+}
+
+export function getCollectionSummaries(
+    collections: Collection[],
+    files: EnteFile[]
+): CollectionSummaries {
+    const CollectionSummaries: CollectionSummaries = new Map();
+    const collectionAndTheirLatestFile = getCollectionsAndTheirLatestFile(
+        collections,
+        files
+    );
+    const collectionAndTheirLatestFileMap = new Map();
+    for (const collectionAndItsLatestFile of collectionAndTheirLatestFile) {
+        collectionAndTheirLatestFileMap.set(
+            collectionAndItsLatestFile.collection.id,
+            collectionAndItsLatestFile.file
+        );
+    }
+    const collectionFilesCount = getCollectionsFileCount(files);
+
+    for (const collection of collections) {
+        CollectionSummaries.set(collection.id, {
+            collectionName: collection.name,
+            latestFile: collectionAndTheirLatestFileMap.get(collection.id),
+            fileCount: collectionFilesCount.get(collection.id),
+        });
+    }
+
+    return CollectionSummaries;
+}
+
+function getCollectionsFileCount(files: EnteFile[]) {
+    const collectionWiseFiles = sortFilesIntoCollections(files);
+    const collectionFilesCount = new Map<number, number>();
+    for (const [id, files] of collectionWiseFiles) {
+        collectionFilesCount.set(id, files.length);
+    }
+    return collectionFilesCount;
 }

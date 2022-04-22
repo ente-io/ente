@@ -22,6 +22,7 @@ import {
     getLocalCollections,
     getNonEmptyCollections,
     createCollection,
+    getCollectionSummaries,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import billingService from 'services/billingService';
@@ -48,7 +49,6 @@ import {
     getSelectedFiles,
     mergeMetadata,
     sortFiles,
-    sortFilesIntoCollections,
 } from 'utils/file';
 import SearchBar from 'components/Search';
 import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions/GalleryOptions';
@@ -93,7 +93,11 @@ import DeleteBtn from 'components/DeleteBtn';
 import FixCreationTime, {
     FixCreationTimeAttributes,
 } from 'components/FixCreationTime';
-import { Collection, CollectionAndItsLatestFile } from 'types/collection';
+import {
+    Collection,
+    CollectionAndItsLatestFile,
+    CollectionSummaries,
+} from 'types/collection';
 import { EnteFile } from 'types/file';
 import {
     GalleryContextType,
@@ -101,7 +105,7 @@ import {
     Search,
     NotificationAttributes,
 } from 'types/gallery';
-import Collections from 'components/pages/gallery/Collections';
+import CollectionBar from 'components/pages/gallery/Collections';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import ToastNotification from 'components/ToastNotification';
 import { ElectronFile } from 'types/upload';
@@ -185,8 +189,8 @@ export default function Gallery() {
     const [deleted, setDeleted] = useState<number[]>([]);
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
         useContext(AppContext);
-    const [collectionFilesCount, setCollectionFilesCount] =
-        useState<Map<number, number>>();
+    const [collectionSummaries, setCollectionSummaries] =
+        useState<CollectionSummaries>();
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
     const [trash, setTrash] = useState<Trash>([]);
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
@@ -346,12 +350,9 @@ export default function Gallery() {
             files
         );
         setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
-        const collectionWiseFiles = sortFilesIntoCollections(files);
-        const collectionFilesCount = new Map<number, number>();
-        for (const [id, files] of collectionWiseFiles) {
-            collectionFilesCount.set(id, files.length);
-        }
-        setCollectionFilesCount(collectionFilesCount);
+        const collectionSummaries = getCollectionSummaries(collections, files);
+
+        setCollectionSummaries(collectionSummaries);
 
         const archivedCollections = getArchivedCollections(collections);
         setArchivedCollections(new Set(archivedCollections));
@@ -605,18 +606,12 @@ export default function Gallery() {
                     setSearch={updateSearch}
                     searchStats={searchStats}
                 />
-                <Collections
+                <CollectionBar
                     collections={collections}
-                    collectionAndTheirLatestFile={collectionsAndTheirLatestFile}
                     isInSearchMode={isInSearchMode}
                     activeCollection={activeCollection}
                     setActiveCollection={setActiveCollection}
-                    syncWithRemote={syncWithRemote}
-                    setDialogMessage={setDialogMessage}
-                    setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    startLoading={startLoading}
-                    finishLoading={finishLoading}
-                    collectionFilesCount={collectionFilesCount}
+                    collectionSummaries={collectionSummaries}
                 />
                 <CollectionNamer
                     show={collectionNamerView}

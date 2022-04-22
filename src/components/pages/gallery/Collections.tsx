@@ -1,127 +1,87 @@
-import { SetDialogMessage } from 'components/MessageDialog';
 import NavigationButton, {
     SCROLL_DIRECTION,
 } from 'components/NavigationButton';
-import React, { useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
-import { IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
-import { Collection, CollectionAndItsLatestFile } from 'types/collection';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { Collection, CollectionSummaries } from 'types/collection';
 import constants from 'utils/strings/constants';
-import { SetCollectionNamerAttributes } from './CollectionNamer';
 import { ALL_SECTION } from 'constants/collection';
-import { Link } from '@mui/material';
+import { Link, Typography } from '@mui/material';
+import {
+    CollectionTileWrapper,
+    CollectionTile,
+    ActiveIndicator,
+    Hider,
+    CollectionBarWrapper,
+    Header,
+    CollectionWithNavigationContainer,
+    ScrollContainer,
+    EmptyCollectionTile,
+} from 'components/collection';
+import { GalleryContext } from 'pages/gallery';
+import downloadManager from 'services/downloadManager';
+import { EnteFile } from 'types/file';
 
 interface CollectionProps {
     collections: Collection[];
-    collectionAndTheirLatestFile: CollectionAndItsLatestFile[];
     activeCollection?: number;
     setActiveCollection: (id?: number) => void;
-    setDialogMessage: SetDialogMessage;
-    syncWithRemote: () => Promise<void>;
-    setCollectionNamerAttributes: SetCollectionNamerAttributes;
-    startLoading: () => void;
-    finishLoading: () => void;
     isInSearchMode: boolean;
-    collectionFilesCount: Map<number, number>;
+    collectionSummaries: CollectionSummaries;
 }
 
-const SAMPLE_URL =
-    'https://images.unsplash.com/photo-1615789591457-74a63395c990?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8YmFieSUyMGNhdHxlbnwwfHwwfHw%3D&w=1000&q=80';
-
-const CollectionContainer = styled.div`
-    overflow: hidden;
-    height: 86px;
-    display: flex;
-    position: relative;
-`;
-
-const ScrollWrapper = styled.div`
-    width: calc(100%- 80px);
-    height: 100px;
-    overflow: auto;
-    max-width: 100%;
-    scroll-behavior: smooth;
-    display: flex;
-`;
-
-const CollectionBar = styled.div`
-    width: 100%;
-    margin: 10px auto;
-    padding: 0 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * 4}px) {
-        padding: 0 4px;
-    }
-    border-bottom: 1px solid ${({ theme }) => theme.palette.grey.A400};
-`;
-
-const EmptyCollectionTile = styled.div`
-    flex-shrink: 0;
-    display: flex;
-    width: 80px;
-    height: 64px;
-    border-radius: 4px;
-    padding: 4px 6px;
-    align-items: flex-end;
-    border: 1px dashed ${({ theme }) => theme.palette.grey.A200};
-    justify-content: space-between;
-    user-select: none;
-    cursor: pointer;
-`;
-
-const CollectionTile = styled(EmptyCollectionTile)<{ coverImgURL: string }>`
-    background-image: url(${({ coverImgURL }) => coverImgURL});
-    background-size: cover;
-    border: none;
-`;
-
-const CollectionTileWrapper = styled.div`
-    margin-right: 6px;
-`;
-
-const ActiveIndicator = styled.div`
-    height: 3px;
-    background-color: ${({ theme }) => theme.palette.text.primary};
-    margin-top: 18px;
-    border-radius: 2px;
-`;
-
-const Hider = styled.div<{ hide: boolean }>`
-    opacity: ${(props) => (props.hide ? '0' : '100')};
-    height: ${(props) => (props.hide ? '0' : 'auto')};
-`;
-
-const Header = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-`;
 const CollectionTileWithActiveIndicator = React.forwardRef(
     (
         props: {
             children;
-
             active: boolean;
-            coverImgURL: string;
+            latestFile: EnteFile;
             onClick: () => void;
         },
         ref: any
     ) => {
+        const [coverImageURL, setCoverImageURL] = useState(null);
+        const galleryContext = useContext(GalleryContext);
+        const { latestFile: file, onClick, active, children } = props;
+        useEffect(() => {
+            const main = async () => {
+                if (!file) {
+                    return;
+                }
+                if (!galleryContext.thumbs.has(file.id)) {
+                    const url = await downloadManager.getThumbnail(file);
+                    galleryContext.thumbs.set(file.id, url);
+                }
+                setCoverImageURL(galleryContext.thumbs.get(file.id));
+            };
+            main();
+        }, [file]);
         return (
             <CollectionTileWrapper ref={ref}>
-                <CollectionTile
-                    coverImgURL={props.coverImgURL}
-                    onClick={props.onClick}>
-                    {props.children}
+                <CollectionTile coverImgURL={coverImageURL} onClick={onClick}>
+                    {children}
                 </CollectionTile>
-                {props.active && <ActiveIndicator />}
+                {active && <ActiveIndicator />}
             </CollectionTileWrapper>
         );
     }
 );
 
-export default function Collections(props: CollectionProps) {
-    const { activeCollection, collections, setActiveCollection } = props;
+const CreateNewCollectionHookTile = () => {
+    return (
+        <EmptyCollectionTile>
+            <div>{constants.NEW} </div>
+            <div>{'+'}</div>
+        </EmptyCollectionTile>
+    );
+};
+
+export default function CollectionBar(props: CollectionProps) {
+    const {
+        activeCollection,
+        collections,
+        setActiveCollection,
+        collectionSummaries,
+    } = props;
     const collectionWrapperRef = useRef<HTMLDivElement>(null);
     const collectionChipsRef = props.collections.reduce(
         (refMap, collection) => {
@@ -172,25 +132,25 @@ export default function Collections(props: CollectionProps) {
 
     return (
         <Hider hide={props.isInSearchMode}>
-            <CollectionBar>
+            <CollectionBarWrapper>
                 <Header>
-                    {constants.ALBUMS}
+                    <Typography>{constants.ALBUMS}</Typography>
                     {scrollObj.scrollWidth > scrollObj.clientWidth && (
                         <Link component="button">{constants.ALL_ALBUMS}</Link>
                     )}
                 </Header>
-                <CollectionContainer>
-                    {/* {scrollObj.scrollLeft > 0 && ( */}
-                    <NavigationButton
-                        scrollDirection={SCROLL_DIRECTION.LEFT}
-                        onClick={scrollCollection(SCROLL_DIRECTION.LEFT)}
-                    />
-                    {/* )} */}
-                    <ScrollWrapper
+                <CollectionWithNavigationContainer>
+                    {scrollObj.scrollLeft > 0 && (
+                        <NavigationButton
+                            scrollDirection={SCROLL_DIRECTION.LEFT}
+                            onClick={scrollCollection(SCROLL_DIRECTION.LEFT)}
+                        />
+                    )}
+                    <ScrollContainer
                         ref={collectionWrapperRef}
                         onScroll={updateScrollObj}>
                         <CollectionTileWithActiveIndicator
-                            coverImgURL={SAMPLE_URL}
+                            latestFile={null}
                             active={activeCollection === ALL_SECTION}
                             onClick={clickHandler(ALL_SECTION)}>
                             {constants.ALL_SECTION_NAME}
@@ -211,27 +171,27 @@ export default function Collections(props: CollectionProps) {
                         ].map((item) => (
                             <CollectionTileWithActiveIndicator
                                 key={item.id}
+                                latestFile={
+                                    collectionSummaries?.get(item.id)
+                                        ?.latestFile
+                                }
                                 ref={collectionChipsRef[item.id]}
                                 active={activeCollection === item.id}
-                                onClick={clickHandler(item.id)}
-                                coverImgURL={SAMPLE_URL}>
+                                onClick={clickHandler(item.id)}>
                                 {item.name}
                             </CollectionTileWithActiveIndicator>
                         ))}
-                        <EmptyCollectionTile>
-                            <div>{constants.NEW} </div>
-                            <div>{'+'}</div>
-                        </EmptyCollectionTile>
-                    </ScrollWrapper>
-                    {/* {scrollObj.scrollLeft < */}
-                    {/* scrollObj.scrollWidth - scrollObj.clientWidth && ( */}
-                    <NavigationButton
-                        scrollDirection={SCROLL_DIRECTION.RIGHT}
-                        onClick={scrollCollection(SCROLL_DIRECTION.RIGHT)}
-                    />
-                    {/* )}  */}
-                </CollectionContainer>
-            </CollectionBar>
+                        <CreateNewCollectionHookTile />
+                    </ScrollContainer>
+                    {scrollObj.scrollLeft <
+                        scrollObj.scrollWidth - scrollObj.clientWidth && (
+                        <NavigationButton
+                            scrollDirection={SCROLL_DIRECTION.RIGHT}
+                            onClick={scrollCollection(SCROLL_DIRECTION.RIGHT)}
+                        />
+                    )}
+                </CollectionWithNavigationContainer>
+            </CollectionBarWrapper>
         </Hider>
     );
 }
