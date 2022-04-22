@@ -171,20 +171,28 @@ svg {
 .pswp-custom:hover {
     opacity: 1;
 }
-.download-btn{
-    background: url('/download_icon.png') no-repeat;
-    background-size: 20px 20px;
-    background-position: center;
+
+.pswp__button--arrow--left::before, .pswp__button--arrow--right::before {
+    background-color: #333333;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    top:0;
 }
-.info-btn{
-    background: url('/info_icon.png') no-repeat;
-    background-size: 20px 20px;
-    background-position: center;
+
+.pswp__button--arrow--left::before {   
+    background-position: -128px -32px;
 }
-.share-btn{
-    background: url('/share_icon.png') no-repeat;
-    background-size: 20px 20px;
-    background-position: center;
+
+.pswp__button--arrow--left{
+    margin-left: 20px;
+}
+
+.pswp__button--arrow--right{
+    margin-right: 20px;
+}
+.pswp__button--arrow--right::before {   
+    background-position: -83px -30px;
 }
 .btn.focus , .btn:focus{
     box-shadow: none;
