@@ -17,7 +17,8 @@ import 'package:share_plus/share_plus.dart';
 
 final _logger = Logger("ShareUtil");
 // share is used to share media/files from ente to other apps
-Future<void> share(BuildContext context, List<File> files, {GlobalKey shareButtonKey}) async {
+Future<void> share(BuildContext context, List<File> files,
+    {GlobalKey shareButtonKey}) async {
   final dialog = createProgressDialog(context, "preparing...");
   await dialog.show();
   final List<Future<String>> pathFutures = [];
@@ -40,22 +41,20 @@ Future<void> share(BuildContext context, List<File> files, {GlobalKey shareButto
 }
 
 Rect shareButtonRect(BuildContext context, GlobalKey shareButtonKey) {
-  Size size = MediaQuery
-      .of(context)
-      .size;
+  Size size = MediaQuery.of(context).size;
   RenderBox renderBox = shareButtonKey?.currentContext?.findRenderObject();
   if (renderBox == null) {
     return Rect.fromLTWH(0, 0, size.width, size.height / 2);
   }
   size = renderBox.size;
   Offset position = renderBox.localToGlobal(Offset.zero);
-  showToast('using soln');
   return Rect.fromCenter(
     center: position + Offset(size.width / 2, size.height / 2),
     width: size.width,
     height: size.height,
   );
 }
+
 Future<void> shareText(String text) async {
   return Share.share(text);
 }
