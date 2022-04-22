@@ -138,7 +138,7 @@ Future<void> _sendLogs(
     _logger.severe('email sender failed', e, s);
     final result = await showChoiceDialog(
         context, "email logs", "please send the logs to $toEmail",
-        firstAction: "copy email", secondAction: "ok");
+        firstAction: "copy email", secondAction: "send");
     if (result != null && result == DialogUserChoice.firstChoice) {
       await Clipboard.setData(ClipboardData(text: toEmail));
     }
