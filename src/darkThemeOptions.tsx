@@ -2,6 +2,11 @@ import { createTheme } from '@mui/material/styles';
 
 // Create a theme instance.
 const darkThemeOptions = createTheme({
+    components: {
+        MuiPaper: {
+            styleOverrides: { root: { backgroundImage: 'none' } },
+        },
+    },
     palette: {
         mode: 'dark',
         primary: {

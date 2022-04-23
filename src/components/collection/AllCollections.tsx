@@ -10,14 +10,11 @@ interface Iprops {
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
-import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
 import Slide from '@mui/material/Slide';
 import constants from 'utils/strings/constants';
 import { FlexWrapper, TwoScreenSpacedOptions } from 'components/Container';
-import IconButton from '@mui/material/IconButton';
 import { CollectionTile } from '.';
 import { styled } from '@mui/material/styles';
 import { default as styledComponent } from 'styled-components';
@@ -26,8 +23,9 @@ import Divider from '@mui/material/Divider';
 import { useState } from 'react';
 import CollectionSort from 'components/pages/gallery/CollectionSort';
 import { COLLECTION_SORT_BY } from 'constants/collection';
+import { DialogTitleWithCloseButton } from 'components/MessageDialog';
 
-const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+const StyledDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
         padding: theme.spacing(2),
     },
@@ -35,7 +33,6 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
         padding: theme.spacing(1),
     },
     '& .MuiPaper-root': {
-        backgroundImage: 'none',
         maxWidth: '510px',
     },
     '& .MuiDialog-container': {
@@ -43,30 +40,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const BootstrapDialogTitle = (props) => {
-    const { children, onClose, ...other } = props;
-
-    return (
-        <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
-            {children}
-            {onClose ? (
-                <IconButton
-                    aria-label="close"
-                    onClick={onClose}
-                    sx={{
-                        position: 'absolute',
-                        right: 8,
-                        top: 8,
-                        color: (theme) => theme.palette.grey[500],
-                    }}>
-                    <CloseIcon />
-                </IconButton>
-            ) : null}
-        </DialogTitle>
-    );
-};
-
-BootstrapDialogTitle.propTypes = {
+StyledDialog.propTypes = {
     children: PropTypes.node,
     onClose: PropTypes.func.isRequired,
 };
@@ -97,11 +71,11 @@ export default function AllCollections(props: Iprops) {
 
     return (
         <div>
-            <BootstrapDialog
+            <StyledDialog
                 TransitionComponent={Transition}
                 onClose={close}
                 open={isOpen}>
-                <BootstrapDialogTitle onClose={close}>
+                <DialogTitleWithCloseButton onClose={close}>
                     <Typography variant="h6">
                         <strong>{constants.ALL_ALBUMS}</strong>
                     </Typography>
@@ -116,7 +90,7 @@ export default function AllCollections(props: Iprops) {
                             setCollectionSortBy={setCollectionSortBy}
                         />
                     </TwoScreenSpacedOptions>
-                </BootstrapDialogTitle>
+                </DialogTitleWithCloseButton>
                 <Divider />
                 <DialogContent>
                     <FlexWrapper>
@@ -145,7 +119,7 @@ export default function AllCollections(props: Iprops) {
                         )}
                     </FlexWrapper>
                 </DialogContent>
-            </BootstrapDialog>
+            </StyledDialog>
         </div>
     );
 }

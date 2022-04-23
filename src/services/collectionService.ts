@@ -711,6 +711,7 @@ export const getNonEmptyCollections = (
     collections: Collection[],
     files: EnteFile[]
 ) => {
+    return collections; // testing change
     const nonEmptyCollectionsIds = new Set<number>();
     for (const file of files) {
         nonEmptyCollectionsIds.add(file.collectionID);

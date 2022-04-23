@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
-import { Form } from 'react-bootstrap';
+import React from 'react';
+import { Dialog, DialogContent, TextField } from '@mui/material';
 import constants from 'utils/strings/constants';
+import SubmitButton from 'components/SubmitButton';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import SubmitButton from 'components/SubmitButton';
-import MessageDialog from 'components/MessageDialog';
+import { DialogTitleWithCloseButton } from 'components/MessageDialog';
 
 export interface CollectionNamerAttributes {
     callback: (name) => void;
@@ -27,68 +27,63 @@ interface formValues {
 }
 
 export default function CollectionNamer({ attributes, ...props }: Props) {
-    const collectionNameInputRef = useRef(null);
-    useEffect(() => {
-        if (attributes) {
-            setTimeout(() => {
-                collectionNameInputRef.current?.focus();
-            }, 200);
-        }
-    }, [attributes]);
     if (!attributes) {
-        return (
-            <MessageDialog show={false} onHide={() => null} attributes={{}} />
-        );
+        return <></>;
     }
     const onSubmit = ({ albumName }: formValues) => {
         attributes.callback(albumName);
         props.onHide();
     };
+
     return (
-        <MessageDialog
-            show={props.show}
-            onHide={props.onHide}
-            size="sm"
-            attributes={{
-                title: attributes?.title,
-            }}>
-            <Formik<formValues>
-                initialValues={{ albumName: attributes.autoFilledName ?? '' }}
-                validationSchema={Yup.object().shape({
-                    albumName: Yup.string().required(constants.REQUIRED),
-                })}
-                validateOnChange={false}
-                validateOnBlur={false}
-                onSubmit={onSubmit}>
-                {({ values, touched, errors, handleChange, handleSubmit }) => (
-                    <Form noValidate onSubmit={handleSubmit}>
-                        <Form.Group>
-                            <Form.Control
-                                className="text-center"
+        <Dialog open={props.show} onClose={props.onHide} maxWidth="xs">
+            <DialogTitleWithCloseButton onClose={props.onHide}>
+                {attributes?.title}
+            </DialogTitleWithCloseButton>
+            <DialogContent>
+                <Formik<formValues>
+                    initialValues={{
+                        albumName: attributes.autoFilledName ?? '',
+                    }}
+                    validationSchema={Yup.object().shape({
+                        albumName: Yup.string().required(constants.REQUIRED),
+                    })}
+                    validateOnChange={false}
+                    validateOnBlur={false}
+                    onSubmit={onSubmit}>
+                    {({
+                        values,
+                        touched,
+                        errors,
+                        handleChange,
+                        handleSubmit,
+                    }) => (
+                        <form noValidate onSubmit={handleSubmit}>
+                            <TextField
+                                margin="normal"
+                                fullWidth
                                 type="text"
+                                label={constants.ENTER_ALBUM_NAME}
                                 value={values.albumName}
                                 onChange={handleChange('albumName')}
-                                isInvalid={Boolean(
-                                    touched.albumName && errors.albumName
-                                )}
-                                placeholder={constants.ENTER_ALBUM_NAME}
-                                ref={collectionNameInputRef}
                                 autoFocus
+                                required
+                                error={
+                                    touched.albumName &&
+                                    Boolean(errors.albumName)
+                                }
+                                helperText={
+                                    touched.albumName && errors.albumName
+                                }
                             />
-
-                            <Form.Control.Feedback
-                                type="invalid"
-                                className="text-center">
-                                {errors.albumName}
-                            </Form.Control.Feedback>
-                        </Form.Group>
-                        <SubmitButton
-                            buttonText={attributes.buttonText}
-                            loading={false}
-                        />
-                    </Form>
-                )}
-            </Formik>
-        </MessageDialog>
+                            <SubmitButton
+                                buttonText={attributes.buttonText}
+                                loading={false}
+                            />
+                        </form>
+                    )}
+                </Formik>
+            </DialogContent>
+        </Dialog>
     );
 }

@@ -458,24 +458,28 @@ export default function Gallery() {
         }
     };
 
-    const showCreateCollectionModal = (ops: COLLECTION_OPS_TYPE) => {
+    const showCreateCollectionModal = (ops?: COLLECTION_OPS_TYPE) => {
         const callback = async (collectionName: string) => {
             try {
+                startLoading();
                 const collection = await createCollection(
                     collectionName,
                     CollectionType.album,
                     collections
                 );
-
-                await collectionOpsHelper(ops)(collection);
+                if (ops) {
+                    await collectionOpsHelper(ops)(collection);
+                }
             } catch (e) {
-                logError(e, 'create and collection ops failed');
+                logError(e, 'create and collection ops failed', { ops });
                 setDialogMessage({
                     title: constants.ERROR,
                     staticBackdrop: true,
                     close: { variant: 'danger' },
                     content: constants.UNKNOWN_ERROR,
                 });
+            } finally {
+                finishLoading();
             }
         };
         return () =>
@@ -642,6 +646,7 @@ export default function Gallery() {
                     activeCollection={activeCollection}
                     setActiveCollection={setActiveCollection}
                     collectionSummaries={collectionSummaries}
+                    showCreateCollectionModal={showCreateCollectionModal()}
                 />
                 <CollectionInfo
                     collectionSummary={collectionSummaries.get(

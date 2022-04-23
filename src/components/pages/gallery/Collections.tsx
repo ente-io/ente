@@ -8,6 +8,7 @@ interface Iprops {
     setActiveCollection: (id?: number) => void;
     isInSearchMode: boolean;
     collectionSummaries: CollectionSummaries;
+    showCreateCollectionModal: (collectionName: string) => void;
 }
 export function Collections(props: Iprops) {
     const {
@@ -16,6 +17,7 @@ export function Collections(props: Iprops) {
         activeCollection,
         setActiveCollection,
         collectionSummaries,
+        showCreateCollectionModal,
     } = props;
 
     const [allCollectionView, setAllCollectionView] = useState(false);
@@ -28,6 +30,7 @@ export function Collections(props: Iprops) {
                 setActiveCollection={setActiveCollection}
                 collectionSummaries={collectionSummaries}
                 showAllCollections={() => setAllCollectionView(true)}
+                showCreateCollectionModal={showCreateCollectionModal}
             />
 
             <AllCollections

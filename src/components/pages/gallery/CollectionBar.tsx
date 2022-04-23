@@ -24,14 +24,15 @@ interface IProps {
     isInSearchMode: boolean;
     collectionSummaries: CollectionSummaries;
     showAllCollections: () => void;
+    showCreateCollectionModal: (collectionName: string) => void;
 }
 
 const CollectionTitleWithDashedBorder = styled(CollectionTile)`
     border: 1px dashed ${({ theme }) => theme.palette.grey.A200};
 `;
-const CreateNewCollectionTile = () => {
+export const CreateNewCollectionTile = (props) => {
     return (
-        <CollectionTitleWithDashedBorder>
+        <CollectionTitleWithDashedBorder {...props}>
             <div>{constants.NEW} </div>
             <div>{'+'}</div>
         </CollectionTitleWithDashedBorder>
@@ -45,6 +46,7 @@ export default function CollectionBar(props: IProps) {
         setActiveCollection,
         collectionSummaries,
         showAllCollections,
+        showCreateCollectionModal,
     } = props;
     const collectionWrapperRef = useRef<HTMLDivElement>(null);
     const collectionChipsRef = props.collections.reduce(
@@ -133,7 +135,9 @@ export default function CollectionBar(props: IProps) {
                                 {item.name}
                             </CollectionCardWithActiveIndicator>
                         ))}
-                        <CreateNewCollectionTile />
+                        <CreateNewCollectionTile
+                            onClick={showCreateCollectionModal}
+                        />
                     </ScrollContainer>
                     {scrollObj.scrollLeft <
                         scrollObj.scrollWidth - scrollObj.clientWidth && (
