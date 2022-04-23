@@ -36,7 +36,9 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
         backgroundImage: 'none',
         maxWidth: '510px',
     },
-    left: '40%',
+    '& .MuiDialog-container': {
+        justifyContent: 'flex-end',
+    },
 }));
 
 const BootstrapDialogTitle = (props) => {
