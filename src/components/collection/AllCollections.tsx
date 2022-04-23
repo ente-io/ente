@@ -17,13 +17,15 @@ import Typography from '@mui/material/Typography';
 import Slide from '@mui/material/Slide';
 import constants from 'utils/strings/constants';
 import { FlexWrapper, TwoScreenSpacedOptions } from 'components/Container';
-import SortIcon from 'components/icons/SortIcon';
 import IconButton from '@mui/material/IconButton';
 import { CollectionTile } from '.';
 import { styled } from '@mui/material/styles';
 import { default as styledComponent } from 'styled-components';
 import CollectionCard from './CollectionCard';
 import Divider from '@mui/material/Divider';
+import { useState } from 'react';
+import CollectionSort from 'components/pages/gallery/CollectionSort';
+import { COLLECTION_SORT_BY } from 'constants/collection';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -69,9 +71,11 @@ BootstrapDialogTitle.propTypes = {
     onClose: PropTypes.func.isRequired,
 };
 
-const Transition = React.forwardRef((props, ref) => {
-    return <Slide direction="left" ref={ref} {...props} />;
-});
+const Transition = React.forwardRef(
+    (props: { children: React.ReactElement<any, any> }, ref) => {
+        return <Slide direction="left" ref={ref} {...props} />;
+    }
+);
 
 const LargerCollectionTile = styledComponent(CollectionTile)`
     width: 150px;
@@ -84,10 +88,13 @@ export default function AllCollections(props: Iprops) {
     const { collectionSummaries, isOpen, close, setActiveCollection } = props;
 
     const onCollectionClick = (collectionID: number) => {
-        console.log(collectionID);
         setActiveCollection(collectionID);
         close();
     };
+
+    const [collectionSortBy, setCollectionSortBy] =
+        useState<COLLECTION_SORT_BY>(COLLECTION_SORT_BY.LATEST_FILE);
+
     return (
         <div>
             <BootstrapDialog
@@ -99,14 +106,15 @@ export default function AllCollections(props: Iprops) {
                         <strong>{constants.ALL_ALBUMS}</strong>
                     </Typography>
                     <TwoScreenSpacedOptions>
-                        <Typography variant="subtitle">
+                        <Typography variant="subtitle1">
                             {`${[...props.collectionSummaries.keys()].length} ${
                                 constants.ALBUMS
                             }`}
                         </Typography>
-                        <IconButton>
-                            <SortIcon />
-                        </IconButton>
+                        <CollectionSort
+                            activeSortBy={collectionSortBy}
+                            setCollectionSortBy={setCollectionSortBy}
+                        />
                     </TwoScreenSpacedOptions>
                 </BootstrapDialogTitle>
                 <Divider />
