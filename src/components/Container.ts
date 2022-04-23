@@ -55,14 +55,18 @@ export const Value = styled.div<{ width?: string }>`
 `;
 
 export const FlexWrapper = styled.div`
-    width: 100%;
     display: flex;
-    text-align: center;
-    justify-content: center;
+    flex-wrap: wrap;
 `;
 
 export const FreeFlowText = styled.div`
     word-break: break-word;
     min-width: 30%;
     text-align: left;
+`;
+
+export const TwoScreenSpacedOptions = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 `;

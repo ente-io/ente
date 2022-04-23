@@ -1,11 +1,19 @@
 import React from 'react';
 import { Typography } from '@mui/material';
 import constants from 'utils/strings/constants';
-import { Header } from 'components/collection';
 import { IconButton } from 'components/Container';
 import OptionIcon from 'components/icons/OptionIcon-2';
 import { CollectionSummary } from 'types/collection';
+import { TwoScreenSpacedOptionsWithBodyPadding } from 'components/collection';
+import styled from 'styled-components';
 
+const InvertedIconButton = styled(IconButton)`
+    background-color: ${({ theme }) => theme.palette.primary.main};
+    color: ${({ theme }) => theme.palette.background.default};
+    &:hover {
+        background-color: ${({ theme }) => theme.palette.grey.A100};
+    }
+`;
 interface Iprops {
     collectionSummary: CollectionSummary;
 }
@@ -16,7 +24,7 @@ export default function collectionInfo(props: Iprops) {
     }
 
     return (
-        <Header>
+        <TwoScreenSpacedOptionsWithBodyPadding>
             <div>
                 <Typography variant="h5">
                     <strong>{collectionSummary.collectionName}</strong>
@@ -25,9 +33,12 @@ export default function collectionInfo(props: Iprops) {
                     {collectionSummary.fileCount} {constants.PHOTOS}
                 </Typography>
             </div>
-            <IconButton style={{ transform: 'rotate(90deg)' }}>
+            <InvertedIconButton
+                style={{
+                    transform: 'rotate(90deg)',
+                }}>
                 <OptionIcon />
-            </IconButton>
-        </Header>
+            </InvertedIconButton>
+        </TwoScreenSpacedOptionsWithBodyPadding>
     );
 }

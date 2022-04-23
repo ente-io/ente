@@ -714,7 +714,8 @@ const englishConstants = {
     YES_STOP_UPLOADS: 'yes, stop uploads',
     ALBUMS: 'Albums',
     NEW: 'New',
-    ALL_ALBUMS: 'View all Albums',
+    VIEW_ALL_ALBUMS: 'View all Albums',
+    ALL_ALBUMS: 'All Albums',
     PHOTOS: 'Photos',
 };
 

@@ -358,9 +358,7 @@ a:hover {
     text-decoration: none;
     background-color: #e9ecef;
 }
-hr{
-    border-top: 1rem solid #444 !important;
-}
+
 .list-group-item:hover{
     background-color:#343434 !important;
 }

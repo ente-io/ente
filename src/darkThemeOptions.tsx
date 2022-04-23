@@ -11,8 +11,9 @@ const darkThemeOptions = createTheme({
             primary: '#fff',
             secondary: '#777',
         },
-        background: { default: '#191919', paper: '#202020' },
+        background: { default: '#191919', paper: '#191919' },
         grey: {
+            A100: '#ccc',
             A200: '#777',
             A400: '#4E4E4E',
         },

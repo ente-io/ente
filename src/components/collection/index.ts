@@ -1,3 +1,4 @@
+import { TwoScreenSpacedOptions } from 'components/Container';
 import { IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
 import styled from 'styled-components';
 
@@ -11,10 +12,9 @@ export const CollectionBarWrapper = styled.div`
     border-bottom: 1px solid ${({ theme }) => theme.palette.grey.A400};
 `;
 
-export const Header = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+export const TwoScreenSpacedOptionsWithBodyPadding = styled(
+    TwoScreenSpacedOptions
+)`
     margin-bottom: 8px;
     margin-top: 16px;
     padding: 0 24px;
@@ -39,7 +39,9 @@ export const ScrollContainer = styled.div`
     display: flex;
 `;
 
-export const EmptyCollectionTile = styled.div`
+export const CollectionTile = styled.div<{
+    coverImgURL?: string;
+}>`
     flex-shrink: 0;
     display: flex;
     width: 80px;
@@ -47,15 +49,9 @@ export const EmptyCollectionTile = styled.div`
     border-radius: 4px;
     padding: 4px 6px;
     align-items: flex-end;
-    border: 1px dashed ${({ theme }) => theme.palette.grey.A200};
     justify-content: space-between;
     user-select: none;
     cursor: pointer;
-`;
-
-export const CollectionTile = styled(EmptyCollectionTile)<{
-    coverImgURL: string;
-}>`
     background-image: url(${({ coverImgURL }) => coverImgURL});
     background-size: cover;
     border: none;
