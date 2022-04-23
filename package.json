@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@ente-io/next-with-workbox": "^1.0.3",
+    "@mui/icons-material": "^5.6.2",
     "@mui/material": "^5.6.2",
     "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
     "@mui/styled-engine-sc": "^5.6.1",
