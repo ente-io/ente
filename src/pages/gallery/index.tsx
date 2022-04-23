@@ -105,12 +105,12 @@ import {
     Search,
     NotificationAttributes,
 } from 'types/gallery';
-import CollectionBar from 'components/pages/gallery/Collections';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import ToastNotification from 'components/ToastNotification';
 import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
 import CollectionInfo from 'components/photoFrame/CollectionInfo';
+import { Collections } from 'components/pages/gallery/Collections';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -344,18 +344,47 @@ export default function Gallery() {
     ) => {
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
-        const nonEmptyCollections = getNonEmptyCollections(collections, files);
+        let nonEmptyCollections = getNonEmptyCollections(collections, files);
+        nonEmptyCollections = [
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+            ...nonEmptyCollections,
+        ];
+        nonEmptyCollections = nonEmptyCollections.map((c) => ({
+            ...c,
+            id: Math.round(Math.random() * 1000),
+        }));
         setCollections(nonEmptyCollections);
         const collectionsAndTheirLatestFile = getCollectionsAndTheirLatestFile(
             nonEmptyCollections,
             files
         );
         setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
-        const collectionSummaries = getCollectionSummaries(collections, files);
+        const collectionSummaries = getCollectionSummaries(
+            nonEmptyCollections,
+            files
+        );
 
         setCollectionSummaries(collectionSummaries);
 
-        const archivedCollections = getArchivedCollections(collections);
+        const archivedCollections = getArchivedCollections(nonEmptyCollections);
         setArchivedCollections(new Set(archivedCollections));
     };
 
@@ -607,7 +636,7 @@ export default function Gallery() {
                     setSearch={updateSearch}
                     searchStats={searchStats}
                 />
-                <CollectionBar
+                <Collections
                     collections={collections}
                     isInSearchMode={isInSearchMode}
                     activeCollection={activeCollection}

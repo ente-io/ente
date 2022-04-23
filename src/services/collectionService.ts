@@ -813,16 +813,16 @@ export function getCollectionSummaries(
             collectionAndItsLatestFile.file
         );
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const collectionFilesCount = getCollectionsFileCount(files);
 
     for (const collection of collections) {
         CollectionSummaries.set(collection.id, {
             collectionName: collection.name,
-            latestFile: collectionAndTheirLatestFileMap.get(collection.id),
-            fileCount: collectionFilesCount.get(collection.id),
+            latestFile: files[0], // collectionAndTheirLatestFileMap.get(collection.id), for testing
+            fileCount: files.length, // collectionFilesCount.get(collection.id),
         });
     }
-
     return CollectionSummaries;
 }
 
