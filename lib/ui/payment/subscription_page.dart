@@ -29,7 +29,7 @@ class SubscriptionPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-   State<SubscriptionPage> createState() => _SubscriptionPageState();
+  State<SubscriptionPage> createState() => _SubscriptionPageState();
 }
 
 class _SubscriptionPageState extends State<SubscriptionPage> {
@@ -59,8 +59,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         final productID = _isActiveStripeSubscriber
             ? plan.stripeID
             : Platform.isAndroid
-            ? plan.androidID
-            : plan.iosID;
+                ? plan.androidID
+                : plan.iosID;
         return productID != null && productID.isNotEmpty;
       }).toList();
       _freePlan = billingPlans.freePlan;
@@ -177,7 +177,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       widgets.add(ValidityWidget(currentSubscription: _currentSubscription));
     }
 
-    if ( _currentSubscription.productID == kFreeProductID) {
+    if (_currentSubscription.productID == kFreeProductID) {
       if (widget.isOnboarding) {
         widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
       }
@@ -257,7 +257,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               if (isActive) {
                 return;
               }
-              showErrorDialog(context, "sorry",
+              showErrorDialog(context, "Sorry",
                   "please visit web.ente.io to manage your subscription");
             },
             child: SubscriptionPlanWidget(
@@ -311,13 +311,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 if (usage > plan.storage) {
                   await _dialog.hide();
                   showErrorDialog(
-                      context, "sorry", "you cannot downgrade to this plan");
+                      context, "Sorry", "you cannot downgrade to this plan");
                   return;
                 }
               }
               final ProductDetailsResponse response =
-              await InAppPurchaseConnection.instance
-                  .queryProductDetails({productID});
+                  await InAppPurchaseConnection.instance
+                      .queryProductDetails({productID});
               if (response.notFoundIDs.isNotEmpty) {
                 _logger.severe("Could not find products: " +
                     response.notFoundIDs.toString());
@@ -331,8 +331,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   _currentSubscription.productID != plan.androidID;
               if (isCrossGradingOnAndroid) {
                 final existingProductDetailsResponse =
-                await InAppPurchaseConnection.instance
-                    .queryProductDetails({_currentSubscription.productID});
+                    await InAppPurchaseConnection.instance
+                        .queryProductDetails({_currentSubscription.productID});
                 if (existingProductDetailsResponse.notFoundIDs.isNotEmpty) {
                   _logger.severe("Could not find existing products: " +
                       response.notFoundIDs.toString());
@@ -401,4 +401,3 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 }
-

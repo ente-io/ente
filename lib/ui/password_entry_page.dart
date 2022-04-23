@@ -701,7 +701,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       await dialog.hide();
       if (e is UnsupportedError) {
         showErrorDialog(context, "insecure device",
-            "sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.");
+            "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.");
       } else {
         showGenericErrorDialog(context);
       }

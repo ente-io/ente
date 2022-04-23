@@ -22,9 +22,14 @@ class MemoriesWidget extends StatelessWidget {
         if (snapshot.hasError || !snapshot.hasData || snapshot.data.isEmpty) {
           return Container();
         } else {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: _buildMemories(snapshot.data),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildMemories(snapshot.data),
+              Divider(
+                thickness: 1,
+              )
+            ],
           );
         }
       },
@@ -96,7 +101,7 @@ class _MemoryWidgetState extends State<MemoryWidget> {
       },
       child: SizedBox(
         width: 100,
-        height: 120,
+        height: 100,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -109,10 +114,10 @@ class _MemoryWidgetState extends State<MemoryWidget> {
                   type: MaterialType.transparency,
                   child: Text(
                     title,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.white60,
-                    ),
+                    style: Theme.of(context)
+                        .textTheme
+                        .subtitle1
+                        .copyWith(fontSize: 12),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -139,8 +144,8 @@ class _MemoryWidgetState extends State<MemoryWidget> {
       ),
       child: ClipOval(
         child: SizedBox(
-          width: isSeen ? 76 : 72,
-          height: isSeen ? 76 : 72,
+          width: isSeen ? 60 : 56,
+          height: isSeen ? 60 : 56,
           child: Hero(
             tag: "memories" + memory.file.tag(),
             child: ThumbnailWidget(

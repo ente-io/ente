@@ -304,7 +304,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               if (!_isStripeSubscriber &&
                   _hasActiveSubscription &&
                   _currentSubscription.productID != kFreeProductID) {
-                showErrorDialog(context, "sorry",
+                showErrorDialog(context, "Sorry",
                     "please cancel your existing subscription from ${_currentSubscription.paymentProvider} first");
                 return;
               }
@@ -314,7 +314,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 await _dialog.hide();
                 if (usage > plan.storage) {
                   showErrorDialog(
-                      context, "sorry", "you cannot downgrade to this plan");
+                      context, "Sorry", "you cannot downgrade to this plan");
                   return;
                 }
               }

@@ -397,9 +397,9 @@ class _SharingDialogState extends State<SharingDialog> {
 
   void _showUnSupportedAlert() {
     AlertDialog alert = AlertDialog(
-      title: Text("sorry"),
+      title: Text("Sorry"),
       content:
-          Text("sharing is not permitted for free accounts, please subscribe"),
+          Text("Sharing is not permitted for free accounts, please subscribe"),
       actions: [
         TextButton(
           child: Text(
