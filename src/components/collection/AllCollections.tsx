@@ -25,31 +25,36 @@ import CollectionSort from 'components/pages/gallery/CollectionSort';
 import { COLLECTION_SORT_BY } from 'constants/collection';
 import { DialogTitleWithCloseButton } from 'components/MessageDialog';
 
-const StyledDialog = styled(Dialog)(({ theme }) => ({
-    '& .MuiDialogContent-root': {
-        padding: theme.spacing(2),
-    },
-    '& .MuiDialogActions-root': {
-        padding: theme.spacing(1),
-    },
-    '& .MuiPaper-root': {
-        maxWidth: '510px',
-    },
-    '& .MuiDialog-container': {
-        justifyContent: 'flex-end',
-    },
-}));
+export const FloatingSidebar = styled(Dialog)<{ position: 'left' | 'right' }>(
+    ({ position, theme }) => ({
+        '& .MuiDialogContent-root': {
+            padding: theme.spacing(2),
+        },
+        '& .MuiDialogActions-root': {
+            padding: theme.spacing(1),
+        },
+        '& .MuiPaper-root': {
+            maxWidth: '510px',
+        },
+        '& .MuiDialog-container': {
+            justifyContent: position === 'left' ? 'flex-start' : 'flex-end',
+        },
+    })
+);
 
-StyledDialog.propTypes = {
+FloatingSidebar.propTypes = {
     children: PropTypes.node,
     onClose: PropTypes.func.isRequired,
 };
 
-const Transition = React.forwardRef(
-    (props: { children: React.ReactElement<any, any> }, ref) => {
-        return <Slide direction="left" ref={ref} {...props} />;
-    }
-);
+export const Transition = (direction: 'left' | 'right') =>
+    React.forwardRef(
+        (props: { children: React.ReactElement<any, any> }, ref) => {
+            return <Slide direction={direction} ref={ref} {...props} />;
+        }
+    );
+
+const LeftSlideTransition = Transition('left');
 
 const LargerCollectionTile = styledComponent(CollectionTile)`
     width: 150px;
@@ -71,8 +76,9 @@ export default function AllCollections(props: Iprops) {
 
     return (
         <div>
-            <StyledDialog
-                TransitionComponent={Transition}
+            <FloatingSidebar
+                position="right"
+                TransitionComponent={LeftSlideTransition}
                 onClose={close}
                 open={isOpen}>
                 <DialogTitleWithCloseButton onClose={close}>
@@ -119,7 +125,7 @@ export default function AllCollections(props: Iprops) {
                         )}
                     </FlexWrapper>
                 </DialogContent>
-            </StyledDialog>
+            </FloatingSidebar>
         </div>
     );
 }

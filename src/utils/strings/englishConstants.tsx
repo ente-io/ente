@@ -717,6 +717,7 @@ const englishConstants = {
     VIEW_ALL_ALBUMS: 'View all Albums',
     ALL_ALBUMS: 'All Albums',
     PHOTOS: 'Photos',
+    ENTE: 'ente',
 };
 
 export default englishConstants;

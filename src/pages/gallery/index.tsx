@@ -308,6 +308,7 @@ export default function Gallery() {
             const trash = await syncTrash(collections, setFiles, files);
             setTrash(trash);
         } catch (e) {
+            console.log(e);
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
                     setBannerMessage(constants.SESSION_EXPIRED_MESSAGE);
