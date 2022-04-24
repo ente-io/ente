@@ -65,7 +65,7 @@ export default function Sidebar(props: Props) {
     const galleryContext = useContext(GalleryContext);
     const [subscription, setSubscription] = useState<Subscription>(null);
     useEffect(() => {
-        setUser((getData(LS_KEYS.USER) as User).usage);
+        setUser(getData(LS_KEYS.USER));
         setSubscription(getUserSubscription());
     }, []);
 
