@@ -1,21 +1,22 @@
 import React from 'react';
 import { Typography } from '@mui/material';
 import constants from 'utils/strings/constants';
-import { IconButton } from 'components/Container';
-import OptionIcon from 'components/icons/OptionIcon-2';
-import { CollectionSummary } from 'types/collection';
+import { Collection, CollectionSummary } from 'types/collection';
 import { TwoScreenSpacedOptionsWithBodyPadding } from 'components/collection';
-import styled from 'styled-components';
+import CollectionOptions from 'components/pages/gallery/CollectionOptions';
+import { SetCollectionNamerAttributes } from 'components/pages/gallery/CollectionNamer';
+import { SetDialogMessage } from 'components/MessageDialog';
 
-const InvertedIconButton = styled(IconButton)`
-    background-color: ${({ theme }) => theme.palette.primary.main};
-    color: ${({ theme }) => theme.palette.background.default};
-    &:hover {
-        background-color: ${({ theme }) => theme.palette.grey.A100};
-    }
-`;
 interface Iprops {
     collectionSummary: CollectionSummary;
+    syncWithRemote: () => Promise<void>;
+    setCollectionNamerAttributes: SetCollectionNamerAttributes;
+    collections: Collection[];
+    activeCollection: number;
+    setDialogMessage: SetDialogMessage;
+    startLoading: () => void;
+    finishLoading: () => void;
+    redirectToAll: () => void;
 }
 export default function collectionInfo(props: Iprops) {
     const { collectionSummary } = props;
@@ -23,6 +24,7 @@ export default function collectionInfo(props: Iprops) {
         return <></>;
     }
 
+    const showCollectionShareModal = () => null;
     return (
         <TwoScreenSpacedOptionsWithBodyPadding>
             <div>
@@ -33,12 +35,10 @@ export default function collectionInfo(props: Iprops) {
                     {collectionSummary.fileCount} {constants.PHOTOS}
                 </Typography>
             </div>
-            <InvertedIconButton
-                style={{
-                    transform: 'rotate(90deg)',
-                }}>
-                <OptionIcon />
-            </InvertedIconButton>
+            <CollectionOptions
+                {...props}
+                showCollectionShareModal={showCollectionShareModal}
+            />
         </TwoScreenSpacedOptionsWithBodyPadding>
     );
 }

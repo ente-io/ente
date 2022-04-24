@@ -70,3 +70,11 @@ export const TwoScreenSpacedOptions = styled.div`
     align-items: center;
     justify-content: space-between;
 `;
+
+export const InvertedIconButton = styled(IconButton)`
+    background-color: ${({ theme }) => theme.palette.primary.main};
+    color: ${({ theme }) => theme.palette.background.default};
+    &:hover {
+        background-color: ${({ theme }) => theme.palette.grey.A100};
+    }
+`;

@@ -351,21 +351,6 @@ export default function Gallery() {
             ...nonEmptyCollections,
             ...nonEmptyCollections,
             ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
         ];
         nonEmptyCollections = nonEmptyCollections.map((c) => ({
             ...c,
@@ -652,6 +637,14 @@ export default function Gallery() {
                     collectionSummary={collectionSummaries.get(
                         activeCollection
                     )}
+                    syncWithRemote={syncWithRemote}
+                    collections={collections}
+                    setCollectionNamerAttributes={setCollectionNamerAttributes}
+                    activeCollection={activeCollection}
+                    setDialogMessage={setDialogMessage}
+                    startLoading={startLoading}
+                    finishLoading={finishLoading}
+                    redirectToAll={() => setActiveCollection(ALL_SECTION)}
                 />
                 <CollectionNamer
                     show={collectionNamerView}

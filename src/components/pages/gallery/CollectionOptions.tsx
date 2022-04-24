@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SetDialogMessage } from 'components/MessageDialog';
-import { ListGroup, Popover } from 'react-bootstrap';
 import { deleteCollection, renameCollection } from 'services/collectionService';
 import {
     changeCollectionVisibilityHelper,
@@ -9,16 +8,20 @@ import {
 } from 'utils/collection';
 import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
-import LinkButton, { ButtonVariant, LinkButtonProps } from './LinkButton';
 import { sleep } from 'utils/common';
 import { Collection } from 'types/collection';
 import { IsArchived } from 'utils/magicMetadata';
+import { InvertedIconButton } from 'components/Container';
+import OptionIcon from 'components/icons/OptionIcon-2';
+import Paper from '@mui/material/Paper';
+import MenuList from '@mui/material/MenuList';
+import { ListItem, Menu, MenuItem } from '@mui/material';
 
 interface CollectionOptionsProps {
     syncWithRemote: () => Promise<void>;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     collections: Collection[];
-    selectedCollectionID: number;
+    activeCollection: number;
     setDialogMessage: SetDialogMessage;
     startLoading: () => void;
     finishLoading: () => void;
@@ -26,28 +29,10 @@ interface CollectionOptionsProps {
     redirectToAll: () => void;
 }
 
-export const MenuLink = ({ children, ...props }: LinkButtonProps) => (
-    <LinkButton
-        style={{ fontSize: '14px', fontWeight: 700, padding: '8px 1em' }}
-        {...props}>
-        {children}
-    </LinkButton>
-);
-
-export const MenuItem = (props: { children: any }) => (
-    <ListGroup.Item
-        style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: '#282828',
-            padding: 0,
-        }}>
-        {props.children}
-    </ListGroup.Item>
-);
-
 const CollectionOptions = (props: CollectionOptionsProps) => {
+    const [optionEl, setOptionEl] = useState(null);
+    const handleClose = () => setOptionEl(null);
+
     const collectionRename = async (
         selectedCollection: Collection,
         newName: string
@@ -62,14 +47,14 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             title: constants.RENAME_COLLECTION,
             buttonText: constants.RENAME,
             autoFilledName: getSelectedCollection(
-                props.selectedCollectionID,
+                props.activeCollection,
                 props.collections
             )?.name,
             callback: (newName) => {
                 props.startLoading();
                 collectionRename(
                     getSelectedCollection(
-                        props.selectedCollectionID,
+                        props.activeCollection,
                         props.collections
                     ),
                     newName
@@ -87,7 +72,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 action: () => {
                     props.startLoading();
                     deleteCollection(
-                        props.selectedCollectionID,
+                        props.activeCollection,
                         props.syncWithRemote,
                         props.redirectToAll,
                         props.setDialogMessage
@@ -103,10 +88,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const archiveCollectionHelper = () => {
         changeCollectionVisibilityHelper(
-            getSelectedCollection(
-                props.selectedCollectionID,
-                props.collections
-            ),
+            getSelectedCollection(props.activeCollection, props.collections),
             props.startLoading,
             props.finishLoading,
             props.setDialogMessage,
@@ -133,7 +115,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const downloadCollectionHelper = async () => {
         props.startLoading();
         await downloadCollection(
-            props.selectedCollectionID,
+            props.activeCollection,
             props.setDialogMessage
         );
         await sleep(1000);
@@ -141,46 +123,70 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     return (
-        <Popover id="collection-options" style={{ borderRadius: '10px' }}>
-            <Popover.Content style={{ padding: 0, border: 'none' }}>
-                <ListGroup style={{ borderRadius: '8px' }}>
-                    <MenuItem>
-                        <MenuLink onClick={showRenameCollectionModal}>
-                            {constants.RENAME}
-                        </MenuLink>
-                    </MenuItem>
-                    <MenuItem>
-                        <MenuLink onClick={props.showCollectionShareModal}>
-                            {constants.SHARE}
-                        </MenuLink>
-                    </MenuItem>
-                    <MenuItem>
-                        <MenuLink onClick={confirmDownloadCollection}>
-                            {constants.DOWNLOAD}
-                        </MenuLink>
-                    </MenuItem>
-                    <MenuItem>
-                        <MenuLink onClick={archiveCollectionHelper}>
-                            {IsArchived(
-                                getSelectedCollection(
-                                    props.selectedCollectionID,
-                                    props.collections
+        <>
+            <InvertedIconButton
+                style={{
+                    transform: 'rotate(90deg)',
+                }}
+                onClick={(event) => setOptionEl(event.currentTarget)}
+                aria-controls={optionEl ? 'basic-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={optionEl ? 'true' : undefined}>
+                <OptionIcon />
+            </InvertedIconButton>
+            <Menu
+                id="basic-menu"
+                anchorEl={optionEl}
+                open={Boolean(optionEl)}
+                onClose={handleClose}
+                MenuListProps={{
+                    'aria-labelledby': 'basic-button',
+                }}>
+                <Paper sx={{ borderRadius: '10px' }}>
+                    <MenuList
+                        sx={{
+                            padding: 0,
+                            border: 'none',
+                            borderRadius: '8px',
+                        }}>
+                        <MenuItem>
+                            <ListItem onClick={showRenameCollectionModal}>
+                                {constants.RENAME}
+                            </ListItem>
+                        </MenuItem>
+                        <MenuItem>
+                            <ListItem onClick={props.showCollectionShareModal}>
+                                {constants.SHARE}
+                            </ListItem>
+                        </MenuItem>
+                        <MenuItem>
+                            <ListItem onClick={confirmDownloadCollection}>
+                                {constants.DOWNLOAD}
+                            </ListItem>
+                        </MenuItem>
+                        <MenuItem>
+                            <ListItem onClick={archiveCollectionHelper}>
+                                {IsArchived(
+                                    getSelectedCollection(
+                                        props.activeCollection,
+                                        props.collections
+                                    )
                                 )
-                            )
-                                ? constants.UNARCHIVE
-                                : constants.ARCHIVE}
-                        </MenuLink>
-                    </MenuItem>
-                    <MenuItem>
-                        <MenuLink
-                            variant={ButtonVariant.danger}
-                            onClick={confirmDeleteCollection}>
-                            {constants.DELETE}
-                        </MenuLink>
-                    </MenuItem>
-                </ListGroup>
-            </Popover.Content>
-        </Popover>
+                                    ? constants.UNARCHIVE
+                                    : constants.ARCHIVE}
+                            </ListItem>
+                        </MenuItem>
+                        <MenuItem>
+                            <ListItem
+                                color="danger"
+                                onClick={confirmDeleteCollection}>
+                                {constants.DELETE}
+                            </ListItem>
+                        </MenuItem>
+                    </MenuList>
+                </Paper>
+            </Menu>
+        </>
     );
 };
 
