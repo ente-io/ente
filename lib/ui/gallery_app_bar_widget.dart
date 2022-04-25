@@ -56,7 +56,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   StreamSubscription _userAuthEventSubscription;
   Function() _selectedFilesListener;
   String _appBarTitle;
-
+  final GlobalKey shareButtonKey = GlobalKey();
   @override
   void initState() {
     _selectedFilesListener = () {
@@ -341,6 +341,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       Tooltip(
         message: "share",
         child: IconButton(
+          key: shareButtonKey,
           icon: Icon(
               Platform.isAndroid ? Icons.share_outlined : CupertinoIcons.share),
           onPressed: () {
@@ -468,7 +469,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   void _shareSelected(BuildContext context) {
-    share(context, widget.selectedFiles.files.toList());
+    share(context, widget.selectedFiles.files.toList(), shareButtonKey: shareButtonKey);
   }
 
   void _showRemoveFromCollectionSheet(BuildContext context) {
