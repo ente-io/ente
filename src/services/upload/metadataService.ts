@@ -174,11 +174,15 @@ export function extractDateFromFileName(filename: string): number {
         );
     } else if (filename.startsWith('signal-')) {
         // signal images
-        const dateStringParts = filename.split('-');
-        const dateString = `${dateStringParts[1]}${dateStringParts[2]}${dateStringParts[3]}-${dateStringParts[4]}`;
+        const dateString = convertSignalNameToFusedDateString(filename);
         parsedDate = parseDateFromFusedDateString(dateString);
     } else {
         parsedDate = tryToParseDateTime(filename);
     }
     return getUnixTimeInMicroSeconds(parsedDate);
+}
+
+function convertSignalNameToFusedDateString(filename: string) {
+    const dateStringParts = filename.split('-');
+    return `${dateStringParts[1]}${dateStringParts[2]}${dateStringParts[3]}-${dateStringParts[4]}`;
 }
