@@ -252,6 +252,9 @@ const PhotoFrame = ({
 
     const updateURL = (index: number) => (url: string) => {
         const updateFile = (file: EnteFile) => {
+            if (!file) {
+                return;
+            }
             file = {
                 ...file,
                 msrc: url,
@@ -298,6 +301,9 @@ const PhotoFrame = ({
         const { videoURL, imageURL } = srcURL;
         const isPlayable = videoURL && (await isPlaybackPossible(videoURL));
         const updateFile = (file: EnteFile) => {
+            if (!file) {
+                return;
+            }
             file = {
                 ...file,
                 w: window.innerWidth,
