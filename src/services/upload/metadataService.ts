@@ -162,24 +162,30 @@ export async function parseMetadataJSON(
 
 // tries to extract date from file name if available else returns null
 export function extractDateFromFileName(filename: string): number {
-    filename = filename.trim();
-    let parsedDate: Date;
-    if (filename.startsWith('IMG-') || filename.startsWith('VID-')) {
-        // Whatsapp media files
-        parsedDate = parseDateFromFusedDateString(filename.split('-')[1]);
-    } else if (filename.startsWith('Screenshot_')) {
-        // Screenshots on droid
-        parsedDate = parseDateFromFusedDateString(
-            filename.replaceAll('Screenshot_', '')
-        );
-    } else if (filename.startsWith('signal-')) {
-        // signal images
-        const dateString = convertSignalNameToFusedDateString(filename);
-        parsedDate = parseDateFromFusedDateString(dateString);
-    } else {
-        parsedDate = tryToParseDateTime(filename);
+    try {
+        filename = filename.trim();
+        let parsedDate: Date;
+        if (filename.startsWith('IMG-') || filename.startsWith('VID-')) {
+            // Whatsapp media files
+            parsedDate = parseDateFromFusedDateString(filename.split('-')[1]);
+        } else if (filename.startsWith('Screenshot_')) {
+            // Screenshots on droid
+            parsedDate = parseDateFromFusedDateString(
+                filename.replaceAll('Screenshot_', '')
+            );
+        } else if (filename.startsWith('signal-')) {
+            // signal images
+            const dateString = convertSignalNameToFusedDateString(filename);
+            parsedDate = parseDateFromFusedDateString(dateString);
+        }
+        if (!parsedDate) {
+            parsedDate = tryToParseDateTime(filename);
+        }
+        return getUnixTimeInMicroSeconds(parsedDate);
+    } catch (e) {
+        logError(e, 'failed to extract date From FileName ');
+        return null;
     }
-    return getUnixTimeInMicroSeconds(parsedDate);
 }
 
 function convertSignalNameToFusedDateString(filename: string) {
