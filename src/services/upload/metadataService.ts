@@ -14,6 +14,11 @@ import { splitFilenameAndExtension } from 'utils/file';
 import { getVideoMetadata } from './videoMetadataService';
 import { getFileNameSize } from 'utils/upload';
 import { logUploadInfo } from 'utils/upload';
+import {
+    parseDateFromFusedDateString,
+    getUnixTimeInMicroSeconds,
+    tryToParseDateTime,
+} from 'utils/time';
 
 interface ParsedMetadataJSONWithTitle {
     title: string;
@@ -51,6 +56,11 @@ export async function extractMetadata(
             `videoMetadata successfully extracted ${getFileNameSize(
                 receivedFile
             )}`
+        );
+    }
+    if (!extractedMetadata.creationTime) {
+        extractedMetadata.creationTime = extractDateFromFileName(
+            receivedFile.name
         );
     }
 
@@ -148,4 +158,40 @@ export async function parseMetadataJSON(
         logError(e, 'parseMetadataJSON failed');
         // ignore
     }
+}
+
+// tries to extract date from file name if available else returns null
+export function extractDateFromFileName(filename: string): number {
+    try {
+        filename = filename.trim();
+        let parsedDate: Date;
+        if (filename.startsWith('IMG-') || filename.startsWith('VID-')) {
+            // Whatsapp media files
+            // sample name IMG-20171218-WA0028.jpg
+            parsedDate = parseDateFromFusedDateString(filename.split('-')[1]);
+        } else if (filename.startsWith('Screenshot_')) {
+            // Screenshots on droid
+            // sample name Screenshot_20181227-152914.jpg
+            parsedDate = parseDateFromFusedDateString(
+                filename.replaceAll('Screenshot_', '')
+            );
+        } else if (filename.startsWith('signal-')) {
+            // signal images
+            // sample name :signal-2018-08-21-100217.jpg
+            const dateString = convertSignalNameToFusedDateString(filename);
+            parsedDate = parseDateFromFusedDateString(dateString);
+        }
+        if (!parsedDate) {
+            parsedDate = tryToParseDateTime(filename);
+        }
+        return getUnixTimeInMicroSeconds(parsedDate);
+    } catch (e) {
+        logError(e, 'failed to extract date From FileName ');
+        return null;
+    }
+}
+
+function convertSignalNameToFusedDateString(filename: string) {
+    const dateStringParts = filename.split('-');
+    return `${dateStringParts[1]}${dateStringParts[2]}${dateStringParts[3]}-${dateStringParts[4]}`;
 }
