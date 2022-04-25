@@ -23,6 +23,7 @@ let updateIsAvailable = false;
 export const isAppQuitting = (): boolean => {
     return appIsQuitting;
 };
+
 export const setIsAppQuitting = (value: boolean): void => {
     appIsQuitting = value;
 };
@@ -32,11 +33,6 @@ export const isUpdateAvailable = (): boolean => {
 };
 export const setIsUpdateAvailable = (value: boolean): void => {
     updateIsAvailable = value;
-};
-
-// Disable error dialogs by overriding
-dialog.showErrorBox = function (title, content) {
-    console.log(`${title}\n${content}`);
 };
 
 const gotTheLock = app.requestSingleInstanceLock();

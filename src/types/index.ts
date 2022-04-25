@@ -8,7 +8,26 @@ export interface ElectronFile {
     arrayBuffer: () => Promise<Uint8Array>;
 }
 
-export interface StoreType {
+export interface UploadStoreType {
     filePaths: string[];
+    zipPaths: string[];
     collectionName: string;
 }
+
+export interface KeysStoreType {
+    AnonymizeUserID: {
+        id: string;
+    };
+}
+
+export enum FILE_PATH_TYPE {
+    FILES = 'files',
+    ZIPS = 'zips',
+}
+
+export const FILE_PATH_KEYS: {
+    [k in FILE_PATH_TYPE]: keyof UploadStoreType;
+} = {
+    [FILE_PATH_TYPE.ZIPS]: 'zipPaths',
+    [FILE_PATH_TYPE.FILES]: 'filePaths',
+};

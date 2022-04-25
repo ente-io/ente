@@ -1,6 +1,7 @@
 import { BrowserWindow, dialog, ipcMain, Tray, Notification } from 'electron';
 import { createWindow } from './createWindow';
 import { buildContextMenu } from './menuUtil';
+import { logErrorSentry } from './sentry';
 import { getFilesFromDir } from './upload';
 
 export default function setupIpcComs(
@@ -42,6 +43,14 @@ export default function setupIpcComs(
         return files.filePaths;
     });
 
+    ipcMain.handle('show-upload-zip-dialog', async (event) => {
+        const files = await dialog.showOpenDialog({
+            properties: ['openFile', 'multiSelections'],
+            filters: [{ name: 'Zip File', extensions: ['zip'] }],
+        });
+        return files.filePaths;
+    });
+
     ipcMain.handle('show-upload-dirs-dialog', async () => {
         const dir = await dialog.showOpenDialog({
             properties: ['openDirectory', 'multiSelections'],
@@ -53,5 +62,9 @@ export default function setupIpcComs(
         }
 
         return files;
+    });
+
+    ipcMain.handle('log-error', (event, err, msg, info?) => {
+        logErrorSentry(err, msg, info);
     });
 }

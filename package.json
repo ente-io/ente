@@ -1,7 +1,7 @@
 {
   "name": "ente",
   "productName": "ente",
-  "version": "1.4.0-alpha12",
+  "version": "1.4.0-alpha15",
   "private": true,
   "description": "Desktop client for ente.io",
   "main": "app/main.js",
@@ -62,6 +62,7 @@
     "electron-reload": "^2.0.0-alpha.1",
     "electron-store": "^8.0.1",
     "electron-updater": "^4.3.8",
+    "node-stream-zip": "^1.15.0",
     "promise-fs": "^2.1.1"
   }
 }

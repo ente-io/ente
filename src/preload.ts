@@ -5,8 +5,11 @@ import {
     getElectronFile,
     getPendingUploads,
     setToUploadFiles,
+    getElectronFilesFromGoogleZip,
     setToUploadCollection,
 } from './utils/upload';
+import { logError } from './utils/logging';
+import { ElectronFile } from './types';
 
 const { ipcRenderer } = electron;
 
@@ -55,8 +58,7 @@ const selectRootDirectory = async () => {
     try {
         return await ipcRenderer.invoke('select-dir');
     } catch (e) {
-        console.error(e);
-        throw e;
+        logError(e, 'error while selecting root directory');
     }
 };
 
@@ -97,7 +99,7 @@ const getExportRecord = async (filePath: string) => {
         return recordFile;
     } catch (e) {
         // ignore exportFile missing
-        console.log(e);
+        logError(e, 'error while selecting files');
     }
 };
 
@@ -114,8 +116,7 @@ const showUploadFilesDialog = async () => {
         const files = await Promise.all(filePaths.map(getElectronFile));
         return files;
     } catch (e) {
-        console.error(e);
-        throw e;
+        logError(e, 'error while selecting files');
     }
 };
 
@@ -127,8 +128,22 @@ const showUploadDirsDialog = async () => {
         const files = await Promise.all(filePaths.map(getElectronFile));
         return files;
     } catch (e) {
-        console.error(e);
-        throw e;
+        logError(e, 'error while selecting folders');
+    }
+};
+
+const showUploadZipDialog = async () => {
+    try {
+        const filePaths: string[] = await ipcRenderer.invoke(
+            'show-upload-zip-dialog'
+        );
+        const files: ElectronFile[] = [];
+        for (const filePath of filePaths) {
+            files.push(...(await getElectronFilesFromGoogleZip(filePath)));
+        }
+        return { zipPaths: filePaths, files };
+    } catch (e) {
+        logError(e, 'error while selecting zips');
     }
 };
 
@@ -154,5 +169,7 @@ windowObject['ElectronAPIs'] = {
     showUploadDirsDialog,
     getPendingUploads,
     setToUploadFiles,
+    showUploadZipDialog,
+    getElectronFilesFromGoogleZip,
     setToUploadCollection,
 };

@@ -1,8 +1,10 @@
 import path from 'path';
+import StreamZip from 'node-stream-zip';
 import * as fs from 'promise-fs';
 import { FILE_STREAM_CHUNK_SIZE } from '../config';
 import { uploadStatusStore } from '../services/store';
-import { ElectronFile } from '../types';
+import { ElectronFile, FILE_PATH_KEYS, FILE_PATH_TYPE } from '../types';
+import { logError } from './logging';
 
 // https://stackoverflow.com/a/63111390
 export const getFilesFromDir = async (dirPath: string) => {
@@ -47,6 +49,92 @@ const getFileStream = async (filePath: string) => {
     return readableStream;
 };
 
+const getZipFileStream = async (
+    zip: StreamZip.StreamZipAsync,
+    filePath: string
+) => {
+    const stream = await zip.stream(filePath);
+    const done = { current: false };
+
+    let resolveObj: (value?: any) => void = null;
+    let rejectObj: (reason?: any) => void = null;
+
+    stream.on('readable', () => {
+        if (resolveObj) {
+            const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
+            if (chunk) {
+                resolveObj(new Uint8Array(chunk));
+                resolveObj = null;
+            }
+        }
+    });
+
+    stream.on('end', () => {
+        done.current = true;
+    });
+
+    stream.on('error', (e) => {
+        done.current = true;
+        if (rejectObj) {
+            rejectObj(e);
+            rejectObj = null;
+        }
+    });
+
+    const readStreamData = () => {
+        return new Promise<Uint8Array>((resolve, reject) => {
+            const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
+            if (chunk || done.current) {
+                resolve(chunk);
+            } else {
+                resolveObj = resolve;
+                rejectObj = reject;
+            }
+        });
+    };
+
+    const readableStream = new ReadableStream<Uint8Array>({
+        async pull(controller) {
+            try {
+                const data = await readStreamData();
+                if (data) {
+                    controller.enqueue(data);
+                } else {
+                    controller.close();
+                }
+            } catch (e) {
+                logError(e, 'stream reading failed');
+                controller.close();
+            }
+        },
+    });
+
+    return readableStream;
+};
+
+async function getZipEntryAsElectronFile(
+    zip: StreamZip.StreamZipAsync,
+    entry: StreamZip.ZipEntry
+): Promise<ElectronFile> {
+    return {
+        path: entry.name,
+        name: path.basename(entry.name),
+        size: entry.size,
+        lastModified: entry.time,
+        stream: async () => {
+            return await getZipFileStream(zip, entry.name);
+        },
+        blob: async () => {
+            const buffer = await zip.entryData(entry.name);
+            return new Blob([new Uint8Array(buffer)]);
+        },
+        arrayBuffer: async () => {
+            const buffer = await zip.entryData(entry.name);
+            return new Uint8Array(buffer);
+        },
+    };
+}
+
 export async function getElectronFile(filePath: string): Promise<ElectronFile> {
     const fileStats = await fs.stat(filePath);
     return {
@@ -68,11 +156,12 @@ export async function getElectronFile(filePath: string): Promise<ElectronFile> {
     };
 }
 
-export const setToUploadFiles = (filePaths: string[]) => {
-    if (filePaths && filePaths.length > 0) {
-        uploadStatusStore.set('filePaths', filePaths);
+export const setToUploadFiles = (type: FILE_PATH_TYPE, filePaths: string[]) => {
+    const key = FILE_PATH_KEYS[type];
+    if (filePaths) {
+        uploadStatusStore.set(key, filePaths);
     } else {
-        uploadStatusStore.set('filePaths', []);
+        uploadStatusStore.delete(key);
     }
 };
 
@@ -84,17 +173,60 @@ export const setToUploadCollection = (collectionName: string) => {
     }
 };
 
+export const getSavedPaths = (type: FILE_PATH_TYPE) => {
+    const paths =
+        (uploadStatusStore.get(FILE_PATH_KEYS[type]) as string[]) ?? [];
+
+    const validPaths = paths.filter(async (path) => {
+        try {
+            await fs.stat(path).then((stat) => stat.isFile());
+        } catch (e) {
+            return false;
+        }
+    });
+    setToUploadFiles(type, validPaths);
+    return validPaths;
+};
+
 export const getPendingUploads = async () => {
-    const filePaths = uploadStatusStore.get('filePaths') as string[];
-    const collectionName = uploadStatusStore.get('collectionName') as string;
-    const validFilePaths = filePaths?.filter(
-        async (filePath) =>
-            await fs.stat(filePath).then((stat) => stat.isFile())
-    );
+    const filePaths = getSavedPaths(FILE_PATH_TYPE.FILES);
+    const zipPaths = getSavedPaths(FILE_PATH_TYPE.ZIPS);
+    const collectionName = uploadStatusStore.get('collectionName');
+
+    let files: ElectronFile[] = [];
+    let type: FILE_PATH_TYPE;
+    if (zipPaths.length) {
+        type = FILE_PATH_TYPE.ZIPS;
+        for (const zipPath of zipPaths) {
+            files.push(...(await getElectronFilesFromGoogleZip(zipPath)));
+        }
+        const pendingFilePaths = new Set(filePaths);
+        files = files.filter((file) => pendingFilePaths.has(file.path));
+    } else if (filePaths.length) {
+        type = FILE_PATH_TYPE.FILES;
+        files = await Promise.all(filePaths.map(getElectronFile));
+    }
     return {
-        files: validFilePaths
-            ? await Promise.all(validFilePaths.map(getElectronFile))
-            : [],
+        files,
         collectionName,
+        type,
     };
+};
+
+export const getElectronFilesFromGoogleZip = async (filePath: string) => {
+    const zip = new StreamZip.async({
+        file: filePath,
+    });
+
+    const entries = await zip.entries();
+    const files: ElectronFile[] = [];
+
+    for (const entry of Object.values(entries)) {
+        const basename = path.basename(entry.name);
+        if (entry.isFile && basename.length > 0 && basename[0] !== '.') {
+            files.push(await getZipEntryAsElectronFile(zip, entry));
+        }
+    }
+
+    return files;
 };
