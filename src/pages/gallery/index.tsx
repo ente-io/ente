@@ -206,6 +206,7 @@ export default function Gallery() {
     const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
     const [showUploadTypeChoiceModal, setShowUploadTypeChoiceModal] =
         useState(false);
+    const [droppedFiles, setDroppedFiles] = useState([]);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -252,6 +253,8 @@ export default function Gallery() {
         () => fixCreationTimeAttributes && setFixCreationTimeView(true),
         [fixCreationTimeAttributes]
     );
+
+    useEffect(() => setDroppedFiles(acceptedFiles), [acceptedFiles]);
 
     useEffect(() => {
         if (typeof activeCollection === 'undefined') {
@@ -640,7 +643,8 @@ export default function Gallery() {
                 <Upload
                     syncWithRemote={syncWithRemote}
                     setBannerMessage={setBannerMessage}
-                    acceptedFiles={acceptedFiles}
+                    droppedFiles={droppedFiles}
+                    clearDroppedFiles={() => setDroppedFiles([])}
                     showCollectionSelector={setCollectionSelectorView.bind(
                         null,
                         true
@@ -655,6 +659,7 @@ export default function Gallery() {
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setDialogMessage={setDialogMessage}
+                    uploadInProgress={uploadInProgress}
                     setUploadInProgress={setUploadInProgress}
                     fileRejections={fileRejections}
                     setFiles={setFiles}

@@ -60,10 +60,8 @@ class UploadManager {
         UIService.init(progressUpdater);
         this.setFiles = setFiles;
     }
-    private uploadCancelled: boolean;
 
     private resetState() {
-        this.uploadCancelled = false;
         this.filesToBeUploaded = [];
         this.remainingFiles = [];
         this.failedFiles = [];
@@ -115,6 +113,7 @@ class UploadManager {
                 UploadService.setMetadataAndFileTypeInfoMap(
                     this.metadataAndFileTypeInfoMap
                 );
+
                 UIService.setUploadStage(UPLOAD_STAGES.START);
                 logUploadInfo(`clusterLivePhotoFiles called`);
                 const analysedMediaFiles =
@@ -159,9 +158,6 @@ class UploadManager {
             const reader = new FileReader();
             for (const { file, collectionID } of metadataFiles) {
                 try {
-                    if (this.uploadCancelled) {
-                        break;
-                    }
                     logUploadInfo(
                         `parsing metadata json file ${getFileNameSize(file)}`
                     );
@@ -206,9 +202,6 @@ class UploadManager {
             const reader = new FileReader();
             for (const { file, localID, collectionID } of mediaFiles) {
                 try {
-                    if (this.uploadCancelled) {
-                        break;
-                    }
                     const { fileTypeInfo, metadata } = await (async () => {
                         if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
                             logUploadInfo(
@@ -269,9 +262,6 @@ class UploadManager {
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
-        if (this.uploadCancelled) {
-            return;
-        }
         logUploadInfo(`uploadMediaFiles called`);
         this.filesToBeUploaded.push(...mediaFiles);
 
@@ -308,9 +298,6 @@ class UploadManager {
 
     private async uploadNextFileInQueue(worker: any, reader: FileReader) {
         while (this.filesToBeUploaded.length > 0) {
-            if (this.uploadCancelled) {
-                return;
-            }
             const fileWithCollection = this.filesToBeUploaded.pop();
             const { collectionID } = fileWithCollection;
             const existingFilesInCollection =
@@ -375,11 +362,6 @@ class UploadManager {
         await this.queueFilesForUpload(this.failedFiles, [
             ...this.collections.values(),
         ]);
-    }
-
-    cancelRemainingUploads() {
-        this.remainingFiles = [];
-        this.uploadCancelled = true;
     }
 }
 

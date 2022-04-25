@@ -4,12 +4,49 @@ import constants from 'utils/strings/constants';
 import { IoIosArrowForward, IoMdClose } from 'react-icons/io';
 import FileUploadIcon from 'components/icons/FileUploadIcon';
 import FolderUploadIcon from 'components/icons/FolderUploadIcon';
+import { BsGoogle } from 'react-icons/bs';
+
+function UploadTypeRow({ uploadFunc, Icon, uploadName }) {
+    return (
+        <Row className="justify-content-sm-center py-2">
+            <Button
+                variant="light"
+                onClick={uploadFunc}
+                style={{ width: '90%', height: '50px' }}>
+                <Container>
+                    <Row>
+                        <div>
+                            <Icon />
+                            <b className="ml-2">{uploadName}</b>
+                        </div>
+                        <div className="ml-auto d-flex align-items-center">
+                            <IoIosArrowForward />
+                        </div>
+                    </Row>
+                </Container>
+            </Button>
+        </Row>
+    );
+}
+
+function GoogleIcon() {
+    return (
+        <BsGoogle
+            size={25}
+            style={{
+                marginRight: '0.2em',
+                marginLeft: '0.2em',
+            }}
+        />
+    );
+}
 
 export default function UploadTypeChoiceModal({
     onHide,
     show,
     uploadFiles,
     uploadFolders,
+    uploadGoogleTakeoutZips,
 }) {
     return (
         <Modal
@@ -38,51 +75,23 @@ export default function UploadTypeChoiceModal({
                     style={{ cursor: 'pointer' }}
                 />
             </Modal.Header>
-            <Modal.Body
-                style={{
-                    height: '10em',
-                }}>
+            <Modal.Body>
                 <Container>
-                    <Row className="justify-content-center py-2">
-                        <Button
-                            variant="light"
-                            onClick={uploadFiles}
-                            style={{ width: '90%', height: '3em' }}>
-                            <Container>
-                                <Row>
-                                    <div>
-                                        <FileUploadIcon />
-                                        <b className="ml-2">
-                                            {constants.UPLOAD_FILES}
-                                        </b>
-                                    </div>
-                                    <div className="ml-auto d-flex align-items-center">
-                                        <IoIosArrowForward />
-                                    </div>
-                                </Row>
-                            </Container>
-                        </Button>
-                    </Row>
-                    <Row className="justify-content-center py-2">
-                        <Button
-                            variant="light"
-                            onClick={uploadFolders}
-                            style={{ width: '90%', height: '3em' }}>
-                            <Container>
-                                <Row>
-                                    <div>
-                                        <FolderUploadIcon />
-                                        <b className="ml-2">
-                                            {constants.UPLOAD_DIRS}
-                                        </b>
-                                    </div>
-                                    <div className="ml-auto d-flex align-items-center">
-                                        <IoIosArrowForward />
-                                    </div>
-                                </Row>
-                            </Container>
-                        </Button>
-                    </Row>
+                    <UploadTypeRow
+                        uploadFunc={uploadFiles}
+                        Icon={FileUploadIcon}
+                        uploadName={constants.UPLOAD_FILES}
+                    />
+                    <UploadTypeRow
+                        uploadFunc={uploadFolders}
+                        Icon={FolderUploadIcon}
+                        uploadName={constants.UPLOAD_DIRS}
+                    />
+                    <UploadTypeRow
+                        uploadFunc={uploadGoogleTakeoutZips}
+                        Icon={GoogleIcon}
+                        uploadName={constants.UPLOAD_GOOGLE_TAKEOUT}
+                    />
                 </Container>
             </Modal.Body>
         </Modal>

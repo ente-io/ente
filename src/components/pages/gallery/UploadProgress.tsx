@@ -11,6 +11,7 @@ import { ButtonVariant, getVariantColor } from './LinkButton';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import FileList from 'components/FileList';
 import { AppContext } from 'pages/_app';
+import { IoMdClose } from 'react-icons/io';
 interface Props {
     fileCounter;
     uploadStage;
@@ -225,7 +226,6 @@ export default function UploadProgress(props: Props) {
         <>
             <Modal
                 show={props.show}
-                onHide={handleHideModal()}
                 aria-labelledby="contained-modal-title-vcenter"
                 centered
                 backdrop={fileProgressStatuses?.length !== 0 ? 'static' : true}>
@@ -237,8 +237,7 @@ export default function UploadProgress(props: Props) {
                         borderBottom: 'none',
                         paddingTop: '30px',
                         paddingBottom: '0px',
-                    }}
-                    closeButton={true}>
+                    }}>
                     <h4 style={{ width: '100%' }}>
                         {props.uploadStage === UPLOAD_STAGES.UPLOADING
                             ? constants.UPLOAD[props.uploadStage](
@@ -246,6 +245,11 @@ export default function UploadProgress(props: Props) {
                               )
                             : constants.UPLOAD[props.uploadStage]}
                     </h4>
+                    <IoMdClose
+                        size={30}
+                        onClick={handleHideModal()}
+                        style={{ cursor: 'pointer' }}
+                    />
                 </Modal.Header>
                 <Modal.Body>
                     {(props.uploadStage ===
