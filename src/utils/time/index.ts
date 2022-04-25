@@ -105,17 +105,20 @@ export function tryToParseDateTime(dateTime: string): Date {
         minute: null,
         second: null,
     };
+
     dateComponent = getDateComponentsFromSymbolJoinedString(dateTime);
     if (isDateComponentValid(dateComponent)) {
         return getDateFromComponents(dateComponent);
+    } else if (
+        dateComponent.year.length === 8 &&
+        dateComponent.month.length === 6
+    ) {
+        // the filename has size 8 consecutive and then 6 consecutive digits
+        // high possibility that the it is some unhandled date time encoding
+        const possibleDateTime = dateComponent.year + '-' + dateComponent.month;
+        return parseDateFromFusedDateString(possibleDateTime);
     } else {
-        if (dateComponent.year.length === 8) {
-            let possibleDateTime = dateComponent.year;
-            if (dateComponent.month.length > 0) {
-                possibleDateTime += '-' + dateComponent.month;
-            }
-            return parseDateFromFusedDateString(possibleDateTime);
-        }
+        return null;
     }
 }
 
@@ -127,15 +130,12 @@ function getDateComponentsFromSymbolJoinedString(
     return { year, month, day, hour, minute, second };
 }
 
-// the six digits extracted are of correct length
+//  has length number of digits in the components
 function isDateComponentValid(dateComponent: DateComponent<string>) {
     return (
         dateComponent.year.length === 4 &&
         dateComponent.month.length === 2 &&
-        dateComponent.day.length === 2 &&
-        (!dateComponent.hour || dateComponent.hour.length === 2) &&
-        (!dateComponent.minute || dateComponent.minute.length === 2) &&
-        (!dateComponent.second || dateComponent.second.length === 2)
+        dateComponent.day.length === 2
     );
 }
 
