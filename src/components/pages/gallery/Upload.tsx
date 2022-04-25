@@ -192,18 +192,21 @@ export default function Upload(props: Props) {
 
         const L = firstPath.length;
         let i = 0;
-        const firstFileFolder = firstPath.slice(0, firstPath.lastIndexOf('/'));
-        const lastFileFolder = lastPath.slice(0, lastPath.lastIndexOf('/'));
+        const firstFileFolder = firstPath.substring(
+            0,
+            firstPath.lastIndexOf('/')
+        );
+        const lastFileFolder = lastPath.substring(0, lastPath.lastIndexOf('/'));
         while (i < L && firstPath.charAt(i) === lastPath.charAt(i)) i++;
-        let commonPathPrefix = firstPath.slice(0, i);
+        let commonPathPrefix = firstPath.substring(0, i);
 
         if (commonPathPrefix) {
-            commonPathPrefix = commonPathPrefix.slice(
+            commonPathPrefix = commonPathPrefix.substring(
                 0,
                 commonPathPrefix.lastIndexOf('/')
             );
             if (commonPathPrefix) {
-                commonPathPrefix = commonPathPrefix.slice(
+                commonPathPrefix = commonPathPrefix.substring(
                     commonPathPrefix.lastIndexOf('/') + 1
                 );
             }
@@ -218,11 +221,14 @@ export default function Upload(props: Props) {
         for (const file of toUploadFiles.current) {
             const filePath = file['path'] as string;
 
-            let folderPath = filePath.slice(0, filePath.lastIndexOf('/'));
+            let folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
             if (folderPath.endsWith(METADATA_FOLDER_NAME)) {
-                folderPath = folderPath.slice(0, folderPath.lastIndexOf('/'));
+                folderPath = folderPath.substring(
+                    0,
+                    folderPath.lastIndexOf('/')
+                );
             }
-            const folderName = folderPath.slice(
+            const folderName = folderPath.substring(
                 folderPath.lastIndexOf('/') + 1
             );
             if (!collectionWiseFiles.has(folderName)) {
