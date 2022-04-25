@@ -434,9 +434,10 @@ export default function Upload(props: Props) {
             files = response.files;
             zipPaths.current = response.zipPaths;
         }
-
-        props.setElectronFiles(files);
-        props.setShowUploadTypeChoiceModal(false);
+        if (files?.length > 0) {
+            props.setElectronFiles(files);
+            props.setShowUploadTypeChoiceModal(false);
+        }
     };
 
     const cancelUploads = async () => {
