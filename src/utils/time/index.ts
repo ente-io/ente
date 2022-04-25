@@ -69,34 +69,23 @@ function _addYears(date: Date, years: number) {
 }
 
 export function parseDateTime(dateTimeString: string) {
-    let year = 0;
-    let month = 0;
-    let day = 0;
-    let hour = 0;
-    let min = 0;
-    let sec = 0;
-    let date;
-    let time;
-
-    if (dateTimeString.length > 15) {
-        dateTimeString = dateTimeString.slice(0, 15);
-    }
+    let date: string = '';
+    let time: string = '';
     if (dateTimeString.includes('T')) {
         [date, time] = dateTimeString.split('T');
     } else {
         date = dateTimeString.slice(0, 8);
     }
+    const year = parseInt(date.slice(0, 4));
+    const month = parseInt(date.slice(4, 6)) - 1;
+    const day = parseInt(date.slice(6, 8));
+    const hour = parseInt(time.slice(0, 2));
+    const min = parseInt(time.slice(2, 4));
+    const sec = parseInt(time.slice(4, 6));
 
-    if (date?.length === 8) {
-        year = parseInt(dateTimeString.slice(0, 4));
-        month = parseInt(dateTimeString.slice(4, 6)) - 1;
-        day = parseInt(dateTimeString.slice(6, 8));
-    }
-    if (time?.length === 6) {
-        hour = parseInt(time.slice(0, 2));
-        min = parseInt(time.slice(2, 4));
-        sec = parseInt(time.slice(4, 6));
-    }
-    const parsedDate = new Date(year, month, day, hour, min, sec);
+    const hasTimeValues = hour && min && sec;
+    const parsedDate = hasTimeValues
+        ? new Date(year, month, day, hour, min, sec)
+        : new Date(year, month, day);
     return getUnixTimeInMicroSeconds(parsedDate);
 }
