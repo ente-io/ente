@@ -74,7 +74,7 @@ export function parseDateTime(dateTimeString: string) {
     if (dateTimeString.includes('T')) {
         [date, time] = dateTimeString.split('T');
     } else {
-        date = dateTimeString.slice(0, 8);
+        date = dateTimeString;
     }
     const year = parseInt(date.slice(0, 4));
     const month = parseInt(date.slice(4, 6)) - 1;
