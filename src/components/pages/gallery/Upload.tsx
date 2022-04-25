@@ -142,8 +142,6 @@ export default function Upload(props: Props) {
             const analysisResult = analyseUploadFiles();
             setAnalysisResult(analysisResult);
 
-            props.setLoading(false);
-            return;
             handleCollectionCreationAndUpload(
                 analysisResult,
                 props.isFirstUpload
