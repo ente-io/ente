@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
-import 'package:photos/ui/blurred_file_backdrop.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/file_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
@@ -10,6 +8,7 @@ import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
+import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class MemoriesWidget extends StatelessWidget {
   const MemoriesWidget({Key key}) : super(key: key);
@@ -230,27 +229,69 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     final file = widget.memories[_index].file;
     return Scaffold(
       appBar: AppBar(
-        title: Text(getFormattedDate(
-            DateTime.fromMicrosecondsSinceEpoch(file.creationTime))),
+        toolbarHeight: 84,
+        automaticallyImplyLeading: false,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            StepProgressIndicator(
+              totalSteps: widget.memories.length,
+              currentStep: _index + 1,
+              size: 2,
+              selectedColor: Colors.white, //same for both themes
+              unselectedColor: Colors.white.withOpacity(0.4),
+            ),
+            SizedBox(
+              height: 18,
+            ),
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Icon(
+                      Icons.close,
+                      color: Colors.white, //same for both themes
+                    ),
+                  ),
+                ),
+                Text(
+                  getFormattedDate(
+                      DateTime.fromMicrosecondsSinceEpoch(file.creationTime)),
+                  style: Theme.of(context).textTheme.subtitle1.copyWith(
+                      fontSize: 14, color: Colors.white), //same for both themes
+                ),
+              ],
+            ),
+          ],
+        ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.black.withOpacity(0.6),
+              Colors.black.withOpacity(0.5),
+              Colors.transparent,
+            ],
+            stops: const [0, 0.6, 1],
+          )),
+        ),
         backgroundColor: Color(0x00000000),
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.share),
-            onPressed: () {
-              share(context, [file]);
-            },
-          ),
-        ],
       ),
       extendBodyBehindAppBar: true,
       body: Container(
         color: Colors.black,
-        child: Stack(children: [
-          BlurredFileBackdrop(file),
+        child: Stack(alignment: Alignment.bottomCenter, children: [
           _buildSwiper(),
+          bottomGradient(),
           _buildTitleText(),
-          _buildIndexText(),
+          _buildBottomIcons(),
         ]),
       ),
     );
@@ -261,37 +302,50 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       tag: widget.title,
       child: Container(
         alignment: Alignment.bottomCenter,
-        padding: EdgeInsets.fromLTRB(0, 0, 0, 160),
+        padding: EdgeInsets.fromLTRB(0, 0, 0, 28),
         child: AnimatedOpacity(
           opacity: _opacity,
           duration: Duration(milliseconds: 500),
-          child: Material(
-            type: MaterialType.transparency,
-            child: Text(
-              widget.title,
-              style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.none),
-            ),
-          ),
+          child: Text(widget.title,
+              style: Theme.of(context)
+                  .textTheme
+                  .headline4
+                  .copyWith(color: Colors.white)),
         ),
       ),
     );
   }
 
-  Widget _buildIndexText() {
+  Widget _buildBottomIcons() {
+    final file = widget.memories[_index].file;
     return Container(
-      alignment: Alignment.bottomCenter,
-      padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
-      child: Text(
-        (_index + 1).toString() + " / " + widget.memories.length.toString(),
-        style: TextStyle(
-          fontSize: 24,
-          decoration: TextDecoration.none,
-          color: Colors.white60,
-        ),
-      ),
+        alignment: Alignment.bottomRight,
+        padding: EdgeInsets.fromLTRB(0, 0, 26, 20),
+        child: IconButton(
+          icon: Icon(
+            Icons.adaptive.share,
+            color: Colors.white,
+          ), //same for both themes
+          onPressed: () {
+            share(context, [file]);
+          },
+        ));
+  }
+
+  Widget bottomGradient() {
+    return Container(
+      height: 124,
+      width: double.infinity,
+      decoration: BoxDecoration(
+          gradient: LinearGradient(
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+        colors: [
+          Colors.black.withOpacity(0.5), //same for both themes
+          Colors.transparent,
+        ],
+        stops: const [0, 0.8],
+      )),
     );
   }
 

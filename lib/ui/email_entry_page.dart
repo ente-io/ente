@@ -11,13 +11,9 @@ import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamicFAB.dart';
-//import 'package:photos/ui/common/report_bug_popup.dart';
-//import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/data_util.dart';
-//import 'package:photos/utils/dialog_util.dart';
-//import 'package:photos/utils/email_util.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class EmailEntryPage extends StatefulWidget {
