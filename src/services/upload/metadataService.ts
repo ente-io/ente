@@ -14,6 +14,7 @@ import { splitFilenameAndExtension } from 'utils/file';
 import { getVideoMetadata } from './videoMetadataService';
 import { getFileNameSize } from 'utils/upload';
 import { logUploadInfo } from 'utils/upload';
+import { parseDateTime } from 'utils/time';
 
 interface ParsedMetadataJSONWithTitle {
     title: string;
@@ -51,6 +52,11 @@ export async function extractMetadata(
             `videoMetadata successfully extracted ${getFileNameSize(
                 receivedFile
             )}`
+        );
+    }
+    if (!extractedMetadata.creationTime) {
+        extractedMetadata.creationTime = extractDateFromFileName(
+            receivedFile.name
         );
     }
 
@@ -147,5 +153,25 @@ export async function parseMetadataJSON(
     } catch (e) {
         logError(e, 'parseMetadataJSON failed');
         // ignore
+    }
+}
+
+export function extractDateFromFileName(filename: string): number {
+    if (filename.startsWith('IMG-') || filename.startsWith('VID-')) {
+        // Whatsapp media files
+        return parseDateTime(filename.split('-')[1]);
+    } else if (filename.startsWith('Screenshot_')) {
+        // Screenshots on droid
+        return parseDateTime(
+            filename.replaceAll('Screenshot_', '').replaceAll('-', 'T')
+        );
+    } else {
+        return parseDateTime(
+            filename
+                .replaceAll('IMG_', '')
+                .replaceAll('VID_', '')
+                .replaceAll('DCIM_', '')
+                .replaceAll('_', 'T')
+        );
     }
 }
