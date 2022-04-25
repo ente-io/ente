@@ -26,6 +26,7 @@ import EmptyScreen from './EmptyScreen';
 import { AppContext } from 'pages/_app';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { IsArchived } from 'utils/magicMetadata';
+import { logError } from 'utils/sentry';
 
 const Container = styled.div`
     display: block;
@@ -250,10 +251,14 @@ const PhotoFrame = ({
         }
     }, [open]);
 
-    const updateURL = (index: number) => (url: string) => {
+    const updateURL = (id: number) => (url: string) => {
         const updateFile = (file: EnteFile) => {
             if (!file) {
-                return;
+                logError(
+                    Error('file not found'),
+                    'update called for null/undefined file '
+                );
+                return file;
             }
             file = {
                 ...file,
@@ -291,18 +296,24 @@ const PhotoFrame = ({
             return file;
         };
         setFiles((files) => {
+            const index = files.findIndex((file) => file.id === id);
             files[index] = updateFile(files[index]);
             return files;
         });
+        const index = files.findIndex((file) => file.id === id);
         return updateFile(files[index]);
     };
 
-    const updateSrcURL = async (index: number, srcURL: SourceURL) => {
+    const updateSrcURL = async (id: number, srcURL: SourceURL) => {
         const { videoURL, imageURL } = srcURL;
         const isPlayable = videoURL && (await isPlaybackPossible(videoURL));
         const updateFile = (file: EnteFile) => {
             if (!file) {
-                return;
+                logError(
+                    Error('file not found'),
+                    'update called for null/undefined file '
+                );
+                return file;
             }
             file = {
                 ...file,
@@ -356,10 +367,12 @@ const PhotoFrame = ({
             return file;
         };
         setFiles((files) => {
+            const index = files.findIndex((file) => file.id === id);
             files[index] = updateFile(files[index]);
             return files;
         });
         setIsSourceLoaded(true);
+        const index = files.findIndex((file) => file.id === id);
         return updateFile(files[index]);
     };
 
@@ -430,7 +443,7 @@ const PhotoFrame = ({
                     selected[files[index].id] ?? false
                 }`}
                 file={files[index]}
-                updateURL={updateURL(files[index].dataIndex)}
+                updateURL={updateURL(files[index].id)}
                 onClick={onThumbnailClick(index)}
                 selectable={!isSharedCollection}
                 onSelect={handleSelect(files[index].id, index)}
@@ -476,7 +489,7 @@ const PhotoFrame = ({
                     }
                     galleryContext.thumbs.set(item.id, url);
                 }
-                const newFile = updateURL(item.dataIndex)(url);
+                const newFile = updateURL(item.id)(url);
                 item.msrc = newFile.msrc;
                 item.html = newFile.html;
                 item.src = newFile.src;
@@ -493,9 +506,9 @@ const PhotoFrame = ({
                 // no-op
             }
         }
-        if (!fetching[item.dataIndex]) {
+        if (!fetching[item.id]) {
             try {
-                fetching[item.dataIndex] = true;
+                fetching[item.id] = true;
                 let urls: string[];
                 if (galleryContext.files.has(item.id)) {
                     const mergedURL = galleryContext.files.get(item.id);
@@ -528,7 +541,7 @@ const PhotoFrame = ({
                     [imageURL] = urls;
                 }
                 setIsSourceLoaded(false);
-                const newFile = await updateSrcURL(item.dataIndex, {
+                const newFile = await updateSrcURL(item.id, {
                     imageURL,
                     videoURL,
                 });
@@ -546,7 +559,7 @@ const PhotoFrame = ({
             } catch (e) {
                 // no-op
             } finally {
-                fetching[item.dataIndex] = false;
+                fetching[item.id] = false;
             }
         }
     };
