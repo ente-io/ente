@@ -5,6 +5,15 @@ export interface TimeDelta {
     years?: number;
 }
 
+interface DateComponent<T = number> {
+    year: T;
+    month: T;
+    day: T;
+    hour: T;
+    minute: T;
+    second: T;
+}
+
 export function dateStringWithMMH(unixTimeInMicroSeconds: number): string {
     return new Date(unixTimeInMicroSeconds / 1000).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -68,24 +77,87 @@ function _addYears(date: Date, years: number) {
     return result;
 }
 
-export function parseDateTime(dateTimeString: string) {
-    let date: string = '';
-    let time: string = '';
-    if (dateTimeString.includes('T')) {
-        [date, time] = dateTimeString.split('T');
-    } else {
-        date = dateTimeString;
-    }
-    const year = parseInt(date.slice(0, 4));
-    const month = parseInt(date.slice(4, 6)) - 1;
-    const day = parseInt(date.slice(6, 8));
-    const hour = parseInt(time.slice(0, 2));
-    const min = parseInt(time.slice(2, 4));
-    const sec = parseInt(time.slice(4, 6));
+/*
+generates data component for date in format YYYYMMDD-HHMMSS
+ */
+export function parseDateFromFusedDateString(dateTime: string) {
+    const dateComponent: DateComponent<string> = {
+        year: dateTime.slice(0, 4),
+        month: dateTime.slice(4, 6),
+        day: dateTime.slice(6, 8),
+        hour: dateTime.slice(9, 11),
+        minute: dateTime.slice(11, 13),
+        second: dateTime.slice(13, 15),
+    };
+    return getDateFromComponents(dateComponent);
+}
 
-    const hasTimeValues = hour && min && sec;
-    const parsedDate = hasTimeValues
-        ? new Date(year, month, day, hour, min, sec)
+/* sample date format = 2018-08-19 12:34:45
+ the date has six symbol separated number values
+ which we would extract and use to form the date
+ */
+export function tryToParseDateTime(dateTime: string): Date {
+    let dateComponent: DateComponent<string> = {
+        year: null,
+        month: null,
+        day: null,
+        hour: null,
+        minute: null,
+        second: null,
+    };
+    dateComponent = getDateComponentsFromSymbolJoinedString(dateTime);
+    if (isDateComponentValid(dateComponent)) {
+        return getDateFromComponents(dateComponent);
+    } else {
+        if (dateComponent.year.length === 8) {
+            let possibleDateTime = dateComponent.year;
+            if (dateComponent.month.length > 0) {
+                possibleDateTime += '-' + dateComponent.month;
+            }
+            return parseDateFromFusedDateString(possibleDateTime);
+        }
+    }
+}
+
+function getDateComponentsFromSymbolJoinedString(
+    dateTime: string
+): DateComponent<string> {
+    const [year, month, day, hour, minute, second] = dateTime.match(/\d+/g);
+
+    return { year, month, day, hour, minute, second };
+}
+
+// the six digits extracted are of correct length
+function isDateComponentValid(dateComponent: DateComponent<string>) {
+    return (
+        dateComponent.year.length === 4 &&
+        dateComponent.month.length === 2 &&
+        dateComponent.day.length === 2 &&
+        (!dateComponent.hour || dateComponent.hour.length === 2) &&
+        (!dateComponent.minute || dateComponent.minute.length === 2) &&
+        (!dateComponent.second || dateComponent.second.length === 2)
+    );
+}
+
+function parseDateComponentToNumber(
+    dateComponent: DateComponent<string>
+): DateComponent<number> {
+    return {
+        year: parseInt(dateComponent.year),
+        month: parseInt(dateComponent.month) - 1,
+        day: parseInt(dateComponent.day),
+        hour: parseInt(dateComponent.hour),
+        minute: parseInt(dateComponent.minute),
+        second: parseInt(dateComponent.second),
+    };
+}
+
+function getDateFromComponents(dateComponent: DateComponent<string>) {
+    const { year, month, day, hour, minute, second } =
+        parseDateComponentToNumber(dateComponent);
+    const hasTimeValues = hour && minute && second;
+
+    return hasTimeValues
+        ? new Date(year, month, day, hour, minute, second)
         : new Date(year, month, day);
-    return getUnixTimeInMicroSeconds(parsedDate);
 }

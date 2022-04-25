@@ -14,7 +14,11 @@ import { splitFilenameAndExtension } from 'utils/file';
 import { getVideoMetadata } from './videoMetadataService';
 import { getFileNameSize } from 'utils/upload';
 import { logUploadInfo } from 'utils/upload';
-import { parseDateTime } from 'utils/time';
+import {
+    parseDateFromFusedDateString,
+    getUnixTimeInMicroSeconds,
+    tryToParseDateTime,
+} from 'utils/time';
 
 interface ParsedMetadataJSONWithTitle {
     title: string;
@@ -156,22 +160,25 @@ export async function parseMetadataJSON(
     }
 }
 
+// tries to extract date from file name if available else returns null
 export function extractDateFromFileName(filename: string): number {
+    filename = filename.trim();
+    let parsedDate: Date;
     if (filename.startsWith('IMG-') || filename.startsWith('VID-')) {
         // Whatsapp media files
-        return parseDateTime(filename.split('-')[1]);
+        parsedDate = parseDateFromFusedDateString(filename.split('-')[1]);
     } else if (filename.startsWith('Screenshot_')) {
         // Screenshots on droid
-        return parseDateTime(
-            filename.replaceAll('Screenshot_', '').replaceAll('-', 'T')
+        parsedDate = parseDateFromFusedDateString(
+            filename.replaceAll('Screenshot_', '')
         );
+    } else if (filename.startsWith('signal-')) {
+        // signal images
+        const dateStringParts = filename.split('-');
+        const dateString = `${dateStringParts[1]}${dateStringParts[2]}${dateStringParts[3]}-${dateStringParts[4]}`;
+        parsedDate = parseDateFromFusedDateString(dateString);
     } else {
-        return parseDateTime(
-            filename
-                .replaceAll('IMG_', '')
-                .replaceAll('VID_', '')
-                .replaceAll('DCIM_', '')
-                .replaceAll('_', 'T')
-        );
+        parsedDate = tryToParseDateTime(filename);
     }
+    return getUnixTimeInMicroSeconds(parsedDate);
 }
