@@ -97,21 +97,12 @@ export function parseDateFromFusedDateString(dateTime: string) {
  which we would extract and use to form the date
  */
 export function tryToParseDateTime(dateTime: string): Date {
-    let dateComponent: DateComponent<string> = {
-        year: null,
-        month: null,
-        day: null,
-        hour: null,
-        minute: null,
-        second: null,
-    };
-
-    dateComponent = getDateComponentsFromSymbolJoinedString(dateTime);
+    const dateComponent = getDateComponentsFromSymbolJoinedString(dateTime);
     if (isDateComponentValid(dateComponent)) {
         return getDateFromComponents(dateComponent);
     } else if (
-        dateComponent.year.length === 8 &&
-        dateComponent.month.length === 6
+        dateComponent.year?.length === 8 &&
+        dateComponent.month?.length === 6
     ) {
         // the filename has size 8 consecutive and then 6 consecutive digits
         // high possibility that the it is some unhandled date time encoding
@@ -125,7 +116,8 @@ export function tryToParseDateTime(dateTime: string): Date {
 function getDateComponentsFromSymbolJoinedString(
     dateTime: string
 ): DateComponent<string> {
-    const [year, month, day, hour, minute, second] = dateTime.match(/\d+/g);
+    const [year, month, day, hour, minute, second] =
+        dateTime.match(/\d+/g) ?? [];
 
     return { year, month, day, hour, minute, second };
 }
@@ -133,9 +125,9 @@ function getDateComponentsFromSymbolJoinedString(
 //  has length number of digits in the components
 function isDateComponentValid(dateComponent: DateComponent<string>) {
     return (
-        dateComponent.year.length === 4 &&
-        dateComponent.month.length === 2 &&
-        dateComponent.day.length === 2
+        dateComponent.year?.length === 4 &&
+        dateComponent.month?.length === 2 &&
+        dateComponent.day?.length === 2
     );
 }
 
