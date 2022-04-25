@@ -144,6 +144,7 @@ function parseDateComponentToNumber(
 ): DateComponent<number> {
     return {
         year: parseInt(dateComponent.year),
+        // https://stackoverflow.com/questions/2552483/why-does-the-month-argument-range-from-0-to-11-in-javascripts-date-constructor
         month: parseInt(dateComponent.month) - 1,
         day: parseInt(dateComponent.day),
         hour: parseInt(dateComponent.hour),
