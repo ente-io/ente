@@ -9,7 +9,6 @@ import { CustomError } from '../error';
 import { logError } from '../sentry';
 import { getFamilyPortalRedirectURL } from 'services/userService';
 import { FamilyData, FamilyMember, User } from 'types/user';
-import assert from 'assert';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';
 const PAYMENT_PROVIDER_APPSTORE = 'appstore';
@@ -96,11 +95,13 @@ export function isFamilyAdmin(familyData?: FamilyData): boolean {
 
 export function getFamilyPlanAdmin(familyData?: FamilyData): FamilyMember {
     familyData = familyData ?? getFamilyData();
-    assert(
-        isPartOfFamily(familyData),
-        'verify user is part of family plan before calling this method'
-    );
-    return familyData.members.find((x) => x.isAdmin);
+    if (isPartOfFamily(familyData)) {
+        return familyData.members.find((x) => x.isAdmin);
+    } else {
+        throw Error(
+            'verify user is part of family plan before calling this method'
+        );
+    }
 }
 
 export function getStorage(familyData?: FamilyData): number {

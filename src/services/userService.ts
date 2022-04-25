@@ -263,7 +263,7 @@ export const getUserDetailsV2 = async (): Promise<UserDetails> => {
     const token = getToken();
 
     const resp = await HTTPService.get(
-        `${ENDPOINT}/users/details/v2?memoryCount=true`,
+        `${ENDPOINT}/users/details/v2?memoryCount=false`,
         null,
         {
             'X-Auth-Token': token,
