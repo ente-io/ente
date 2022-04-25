@@ -167,14 +167,17 @@ export function extractDateFromFileName(filename: string): number {
         let parsedDate: Date;
         if (filename.startsWith('IMG-') || filename.startsWith('VID-')) {
             // Whatsapp media files
+            // sample name IMG-20171218-WA0028.jpg
             parsedDate = parseDateFromFusedDateString(filename.split('-')[1]);
         } else if (filename.startsWith('Screenshot_')) {
             // Screenshots on droid
+            // sample name Screenshot_20181227-152914.jpg
             parsedDate = parseDateFromFusedDateString(
                 filename.replaceAll('Screenshot_', '')
             );
         } else if (filename.startsWith('signal-')) {
             // signal images
+            // sample name :signal-2018-08-21-100217.jpg
             const dateString = convertSignalNameToFusedDateString(filename);
             parsedDate = parseDateFromFusedDateString(dateString);
         }
