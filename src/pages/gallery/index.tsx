@@ -106,7 +106,6 @@ import { VISIBILITY_STATE } from 'types/magicMetadata';
 import ToastNotification from 'components/ToastNotification';
 import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
-import { extractDateFromFileName } from 'services/upload/metadataService';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -210,18 +209,6 @@ export default function Gallery() {
     const [droppedFiles, setDroppedFiles] = useState([]);
 
     useEffect(() => {
-        const sample = [
-            'Screenshot_20181227-152914.jpg', // (Screenshot)
-            'IMG-20190330-WA0002(1).jpg',
-            'IMG-20171218-WA0028.jpg',
-            'VID-20171218-WA0028.mp4', // (Whatsapp Image/Video Format)
-            'IMG_20130816_145041-MOTION(1).gif',
-            'VID-WA0028.mp4',
-        ];
-        sample.forEach((x) =>
-            console.log(x, '=>', new Date(extractDateFromFileName(x) / 1000))
-        );
-
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
             appContext.setRedirectURL(router.asPath);
