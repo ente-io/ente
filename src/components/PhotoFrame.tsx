@@ -253,13 +253,6 @@ const PhotoFrame = ({
 
     const updateURL = (id: number) => (url: string) => {
         const updateFile = (file: EnteFile) => {
-            if (!file) {
-                logError(
-                    Error('file not found'),
-                    'update called for null/undefined file '
-                );
-                return file;
-            }
             file = {
                 ...file,
                 msrc: url,
@@ -297,10 +290,26 @@ const PhotoFrame = ({
         };
         setFiles((files) => {
             const index = files.findIndex((file) => file.id === id);
+            if (index === -1) {
+                logError(
+                    Error('file not found'),
+                    'update url called for non-existing file'
+                ),
+                    { fileID: id };
+                return;
+            }
             files[index] = updateFile(files[index]);
             return files;
         });
         const index = files.findIndex((file) => file.id === id);
+        if (index === -1) {
+            logError(
+                Error('file not found'),
+                'update url called for non-existing file'
+            ),
+                { fileID: id };
+            return;
+        }
         return updateFile(files[index]);
     };
 
@@ -308,13 +317,6 @@ const PhotoFrame = ({
         const { videoURL, imageURL } = srcURL;
         const isPlayable = videoURL && (await isPlaybackPossible(videoURL));
         const updateFile = (file: EnteFile) => {
-            if (!file) {
-                logError(
-                    Error('file not found'),
-                    'update called for null/undefined file '
-                );
-                return file;
-            }
             file = {
                 ...file,
                 w: window.innerWidth,
@@ -368,11 +370,27 @@ const PhotoFrame = ({
         };
         setFiles((files) => {
             const index = files.findIndex((file) => file.id === id);
+            if (index === -1) {
+                logError(
+                    Error('file not found'),
+                    'update url called for non-existing file'
+                ),
+                    { fileID: id };
+                return;
+            }
             files[index] = updateFile(files[index]);
             return files;
         });
         setIsSourceLoaded(true);
         const index = files.findIndex((file) => file.id === id);
+        if (index === -1) {
+            logError(
+                Error('file not found'),
+                'update url called for non-existing file'
+            ),
+                { fileID: id };
+            return;
+        }
         return updateFile(files[index]);
     };
 
