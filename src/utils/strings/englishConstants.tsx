@@ -713,6 +713,19 @@ const englishConstants = {
         'are you sure that you want to stop all the uploads in progress?',
     STOP_UPLOADS_HEADER: 'stop uploads?',
     YES_STOP_UPLOADS: 'yes, stop uploads',
+    CANVAS_BLOCKED_TITLE: 'unable to generate thumbnail',
+    CANVAS_BLOCKED_MESSAGE: () => (
+        <>
+            <p>
+                it looks like your browser has disabled access to canvas, which
+                is necessary to generate thumbnails for your photos
+            </p>
+            <p>
+                please enable access to your browser's canvas, or check out our
+                desktop app
+            </p>
+        </>
+    ),
 };
 
 export default englishConstants;

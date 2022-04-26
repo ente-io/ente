@@ -49,7 +49,7 @@ export default function MessageDialog({
             {(children || attributes?.content) && (
                 <Modal.Body style={{ borderTop: '1px solid #444' }}>
                     {children || (
-                        <p style={{ fontSize: '1.25rem', marginBottom: 0 }}>
+                        <p style={{ fontSize: '19px', marginBottom: 0 }}>
                             {attributes.content}
                         </p>
                     )}
