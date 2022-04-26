@@ -5,7 +5,7 @@ import { Accordion, Button, Modal, ProgressBar } from 'react-bootstrap';
 import { FileRejection } from 'react-dropzone';
 
 import styled from 'styled-components';
-import { DESKTOP_APP_DOWNLOAD_URL } from 'utils/common';
+import { getOSSpecificDesktopAppDownloadLink } from 'utils/common';
 import constants from 'utils/strings/constants';
 import { ButtonVariant, getVariantColor } from './LinkButton';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
@@ -292,7 +292,7 @@ export default function UploadProgress(props: Props) {
                         fileUploadResult={FileUploadResults.BLOCKED}
                         sectionTitle={constants.BLOCKED_UPLOADS}
                         sectionInfo={constants.ETAGS_BLOCKED(
-                            DESKTOP_APP_DOWNLOAD_URL
+                            getOSSpecificDesktopAppDownloadLink()
                         )}
                     />
                     <ResultSection
