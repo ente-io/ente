@@ -54,7 +54,7 @@ export const CollectionTile = styled.div<{
     cursor: pointer;
     background-image: url(${({ coverImgURL }) => coverImgURL});
     background-size: cover;
-    border: none;
+    border: 1px solid ${({ theme }) => theme.palette.grey.A200};
 `;
 
 export const CollectionTileWrapper = styled.div`
