@@ -5,7 +5,7 @@ import GetDeviceOS, { OS } from './deviceDetection';
 const DESKTOP_APP_GITHUB_DOWNLOAD_URL =
     'https://github.com/ente-io/bhari-frame/releases/latest';
 
-const APP_DOWNLOAD_ENTE_URL = 'https://ente.io/download';
+const APP_DOWNLOAD_ENTE_URL_PREFIX = 'https://ente.io/download';
 
 export function checkConnectivity() {
     if (navigator.onLine) {
@@ -28,9 +28,9 @@ export function getOSSpecificDesktopAppDownloadLink() {
     const os = GetDeviceOS();
     let url = '';
     if (os === OS.WINDOWS) {
-        url = `${APP_DOWNLOAD_ENTE_URL}/exe`;
+        url = `${APP_DOWNLOAD_ENTE_URL_PREFIX}/exe`;
     } else if (os === OS.MAC) {
-        url = `${APP_DOWNLOAD_ENTE_URL}/dmg`;
+        url = `${APP_DOWNLOAD_ENTE_URL_PREFIX}/dmg`;
     } else {
         url = DESKTOP_APP_GITHUB_DOWNLOAD_URL;
     }
