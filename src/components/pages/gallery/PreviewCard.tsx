@@ -11,6 +11,7 @@ import PublicCollectionDownloadManager from 'services/publicCollectionDownloadMa
 import LivePhotoIndicatorOverlay from 'components/icons/LivePhotoIndicatorOverlay';
 import { isLivePhoto } from 'utils/file';
 import { DeduplicateContext } from 'pages/deduplicate';
+import { logError } from 'utils/sentry';
 
 interface IProps {
     file: EnteFile;
@@ -232,6 +233,7 @@ export default function PreviewCard(props: IProps) {
                         file.h = newFile.h;
                     }
                 } catch (e) {
+                    logError(e, 'preview card useEffect failed');
                     // no-op
                 }
             };

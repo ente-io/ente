@@ -518,10 +518,14 @@ const PhotoFrame = ({
                     instance.invalidateCurrItems();
                     instance.updateSize(true);
                 } catch (e) {
+                    logError(
+                        e,
+                        'updating photoswipe after msrc url update failed'
+                    );
                     // ignore
                 }
             } catch (e) {
-                // no-op
+                logError(e, 'getSlideData failed get msrc url failed');
             }
         }
         if (!fetching[item.id]) {
@@ -572,9 +576,14 @@ const PhotoFrame = ({
                     instance.invalidateCurrItems();
                     instance.updateSize(true);
                 } catch (e) {
+                    logError(
+                        e,
+                        'updating photoswipe after src url update failed'
+                    );
                     // ignore
                 }
             } catch (e) {
+                logError(e, 'getSlideData failed get src url failed');
                 // no-op
             } finally {
                 fetching[item.id] = false;
