@@ -2,7 +2,12 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
 import constants from 'utils/strings/constants';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import {
+    getData,
+    LS_KEYS,
+    removeData,
+    setData,
+} from 'utils/storage/localStorage';
 import { getToken } from 'utils/common/key';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { Button } from 'react-bootstrap';
@@ -80,7 +85,11 @@ export default function Sidebar(props: Props) {
                 email: userDetails.email,
             });
             setData(LS_KEYS.SUBSCRIPTION, userDetails.subscription);
-            setData(LS_KEYS.FAMILY_DATA, userDetails.familyData);
+            if (typeof userDetails.familyData === 'undefined') {
+                removeData(LS_KEYS.FAMILY_DATA);
+            } else {
+                setData(LS_KEYS.FAMILY_DATA, userDetails.familyData);
+            }
         };
         main();
     }, [isOpen]);
