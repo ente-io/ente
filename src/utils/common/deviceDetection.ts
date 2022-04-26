@@ -3,6 +3,9 @@ export enum OS {
     ANDROID = 'android',
     IOS = 'ios',
     UNKNOWN = 'unknown',
+    WINDOWS = 'windows',
+    MAC = 'mac',
+    LINUX = 'linux',
 }
 
 declare global {
@@ -30,8 +33,20 @@ const GetDeviceOS = () => {
     }
 
     // iOS detection from: http://stackoverflow.com/a/9039885/177710
-    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+    if (/(iPad|iPhone|iPod)/g.test(userAgent) && !window.MSStream) {
         return OS.IOS;
+    }
+
+    // credit: https://github.com/MikeKovarik/platform-detect/blob/master/os.mjs
+    if (userAgent.includes('Windows')) {
+        return OS.WINDOWS;
+    }
+    if (userAgent.includes('Macintosh')) {
+        return OS.MAC;
+    }
+    // Linux must be last
+    if (userAgent.includes('Linux')) {
+        return OS.LINUX;
     }
 
     return OS.UNKNOWN;

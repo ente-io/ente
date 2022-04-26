@@ -24,6 +24,8 @@ import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import UploadTypeChoiceModal from './UploadTypeChoiceModal';
 import Router from 'next/router';
+import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
+import { downloadApp } from 'utils/common';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -47,6 +49,7 @@ interface Props {
     setElectronFiles: (files: ElectronFile[]) => void;
     showUploadTypeChoiceModal: boolean;
     setShowUploadTypeChoiceModal: (open: boolean) => void;
+    SetDialogMessage: SetDialogMessage;
 }
 
 enum UPLOAD_STRATEGY {
@@ -121,32 +124,48 @@ export default function Upload(props: Props) {
 
     useEffect(() => {
         if (
-            !props.uploadInProgress &&
-            (props.electronFiles?.length > 0 ||
-                props.droppedFiles?.length > 0 ||
-                appContext.sharedFiles?.length > 0)
+            props.electronFiles?.length > 0 ||
+            props.droppedFiles?.length > 0 ||
+            appContext.sharedFiles?.length > 0
         ) {
-            props.setLoading(true);
-            if (props.droppedFiles?.length > 0) {
-                // File selection by drag and drop or selection of file.
-                toUploadFiles.current = props.droppedFiles;
-                props.clearDroppedFiles();
-            } else if (appContext.sharedFiles?.length > 0) {
-                toUploadFiles.current = appContext.sharedFiles;
-                appContext.resetSharedFiles();
-            } else if (props.electronFiles?.length > 0) {
-                // File selection from desktop app
-                toUploadFiles.current = props.electronFiles;
-                props.setElectronFiles([]);
-            }
-            const analysisResult = analyseUploadFiles();
-            setAnalysisResult(analysisResult);
+            if (props.uploadInProgress) {
+                // no-op
+                // a upload is already in progress
+            } else if (isCanvasBlocked()) {
+                props.setDialogMessage({
+                    title: constants.CANVAS_BLOCKED_TITLE,
+                    staticBackdrop: true,
+                    content: constants.CANVAS_BLOCKED_MESSAGE(),
+                    close: { text: constants.CLOSE },
+                    proceed: {
+                        text: constants.DOWNLOAD_APP,
+                        action: downloadApp,
+                        variant: 'success',
+                    },
+                });
+            } else {
+                props.setLoading(true);
+                if (props.droppedFiles?.length > 0) {
+                    // File selection by drag and drop or selection of file.
+                    toUploadFiles.current = props.droppedFiles;
+                    props.clearDroppedFiles();
+                } else if (appContext.sharedFiles?.length > 0) {
+                    toUploadFiles.current = appContext.sharedFiles;
+                    appContext.resetSharedFiles();
+                } else if (props.electronFiles?.length > 0) {
+                    // File selection from desktop app
+                    toUploadFiles.current = props.electronFiles;
+                    props.setElectronFiles([]);
+                }
+                const analysisResult = analyseUploadFiles();
+                setAnalysisResult(analysisResult);
 
-            handleCollectionCreationAndUpload(
-                analysisResult,
-                props.isFirstUpload
-            );
-            props.setLoading(false);
+                handleCollectionCreationAndUpload(
+                    analysisResult,
+                    props.isFirstUpload
+                );
+                props.setLoading(false);
+            }
         }
     }, [props.droppedFiles, appContext.sharedFiles, props.electronFiles]);
 
