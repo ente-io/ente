@@ -68,9 +68,7 @@ class SupportSectionWidget extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            await sendLogs(context, "report bug", "bug@ente.io", postShare: () {
-              showToast("thanks for reporting a bug!");
-            });
+            await sendLogs(context, "report bug", "bug@ente.io");
           },
           child: SettingsTextItem(
               text: "Report bug 🐞", icon: Icons.navigate_next),

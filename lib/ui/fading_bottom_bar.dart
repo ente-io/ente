@@ -33,6 +33,7 @@ class FadingBottomBar extends StatefulWidget {
 
 class FadingBottomBarState extends State<FadingBottomBar> {
   bool _shouldHide = false;
+  final GlobalKey shareButtonKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -131,11 +132,12 @@ class FadingBottomBarState extends State<FadingBottomBar> {
           child: Padding(
             padding: const EdgeInsets.only(top: 12, bottom: 12),
             child: IconButton(
+              key: shareButtonKey,
               icon: Icon(Platform.isAndroid
                   ? Icons.share_outlined
                   : CupertinoIcons.share),
               onPressed: () {
-                share(context, [widget.file]);
+                share(context, [widget.file], shareButtonKey: shareButtonKey);
               },
             ),
           ),

@@ -121,6 +121,24 @@ class UserService {
     }
   }
 
+  Future<UserDetails> getUserDetailsV2({bool memberCount = true}) async {
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() +
+            "/users/details/v2?memoryCount=$memberCount",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      return UserDetails.fromMap(response.data);
+    } on DioError catch (e) {
+      _logger.info(e);
+      rethrow;
+    }
+  }
+
   Future<Sessions> getActiveSessions() async {
     try {
       final response = await _dio.get(
@@ -151,6 +169,20 @@ class UserService {
           });
     } on DioError catch (e) {
       _logger.info(e);
+      rethrow;
+    }
+  }
+
+  Future<void> leaveFamilyPlan() async {
+    try {
+      await _dio.delete(_config.getHttpEndpoint() + "/family/leave",
+          options: Options(
+            headers: {
+              "X-Auth-Token": _config.getToken(),
+            },
+          ));
+    } on DioError catch (e) {
+      _logger.warning('failed to leave family plan', e);
       rethrow;
     }
   }
@@ -669,6 +701,27 @@ class UserService {
     } catch (e, s) {
       _logger.severe(e, s);
       return null;
+    }
+  }
+
+  Future<String> getFamiliesToken() async {
+    try {
+      var response = await _dio.get(
+        _config.getHttpEndpoint() + "/users/families-token",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      if (response != null && response.statusCode == 200) {
+        return response.data["familiesToken"];
+      } else {
+        throw Exception("non 200 ok response");
+      }
+    } catch (e, s) {
+      _logger.severe("failed to fetch families token", e, s);
+      rethrow;
     }
   }
 

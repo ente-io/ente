@@ -10,12 +10,16 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
+import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
+import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import 'package:photos/ui/progress_dialog.dart';
+import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -35,10 +39,11 @@ class SubscriptionPage extends StatefulWidget {
 class _SubscriptionPageState extends State<SubscriptionPage> {
   final _logger = Logger("SubscriptionPage");
   final _billingService = BillingService.instance;
+  final _userService = UserService.instance;
   Subscription _currentSubscription;
   StreamSubscription _purchaseUpdateSubscription;
   ProgressDialog _dialog;
-  Future<int> _usageFuture;
+  UserDetails _userDetails;
   bool _hasActiveSubscription;
   FreePlan _freePlan;
   List<BillingPlan> _plans;
@@ -48,8 +53,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   @override
   void initState() {
     _billingService.setIsOnSubscriptionPage(true);
-    _billingService.fetchSubscription().then((subscription) async {
-      _currentSubscription = subscription;
+    _userService.getUserDetailsV2(memberCount: false).then((userDetails) async {
+      _userDetails = userDetails;
+      _currentSubscription = userDetails.subscription;
       _hasActiveSubscription = _currentSubscription.isValid();
       final billingPlans = await _billingService.getBillingPlans();
       _isActiveStripeSubscriber =
@@ -64,7 +70,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         return productID != null && productID.isNotEmpty;
       }).toList();
       _freePlan = billingPlans.freePlan;
-      _usageFuture = _billingService.fetchUsage();
       _hasLoadedData = true;
       setState(() {});
     });
@@ -151,7 +156,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   Widget _getBody() {
     if (_hasLoadedData) {
-      return _buildPlans();
+      if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
+        return ChildSubscriptionWidget(userDetails: _userDetails);
+      } else {
+        return _buildPlans();
+      }
     }
     return loadWidget;
   }
@@ -160,7 +169,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final widgets = <Widget>[];
     widgets.add(SubscriptionHeaderWidget(
       isOnboarding: widget.isOnboarding,
-      usageFuture: _usageFuture,
+      currentUsage: _userDetails.getFamilyOrPersonalUsage(),
     ));
 
     widgets.addAll([
@@ -204,7 +213,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               }
             },
             child: Container(
-              padding: EdgeInsets.fromLTRB(40, 80, 40, 80),
+              padding: EdgeInsets.fromLTRB(40, 80, 40, 20),
               child: Column(
                 children: [
                   RichText(
@@ -216,6 +225,34 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         color: _isActiveStripeSubscriber
                             ? Colors.white
                             : Colors.blue,
+                        fontFamily: 'Ubuntu',
+                        fontSize: 15,
+                      ),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ]);
+      widgets.addAll([
+        Align(
+          alignment: Alignment.topCenter,
+          child: GestureDetector(
+            onTap: () async {
+              _launchFamilyPortal();
+            },
+            child: Container(
+              padding: EdgeInsets.fromLTRB(40, 0, 40, 80),
+              child: Column(
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      text: "manage family",
+                      style: TextStyle(
+                        color: Colors.blue,
                         fontFamily: 'Ubuntu',
                         fontSize: 15,
                       ),
@@ -305,16 +342,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               if (isActive) {
                 return;
               }
-              await _dialog.show();
-              if (_usageFuture != null) {
-                final usage = await _usageFuture;
-                if (usage > plan.storage) {
-                  await _dialog.hide();
-                  showErrorDialog(
-                      context, "Sorry", "you cannot downgrade to this plan");
-                  return;
-                }
+              if (_userDetails.getFamilyOrPersonalUsage() > plan.storage) {
+                showErrorDialog(
+                    context, "Sorry", "you cannot downgrade to this plan");
+                return;
               }
+              await _dialog.show();
               final ProductDetailsResponse response =
                   await InAppPurchaseConnection.instance
                       .queryProductDetails({productID});
@@ -399,5 +432,23 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _launchFamilyPortal() async {
+    await _dialog.show();
+    try {
+      final String jwtToken = await _userService.getFamiliesToken();
+      final bool familyExist = _userDetails.isPartOfFamily();
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (BuildContext context) {
+          return WebPage("family",
+              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist');
+        },
+      ));
+    } catch (e) {
+      await _dialog.hide();
+      showGenericErrorDialog(context);
+    }
+    await _dialog.hide();
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -107,6 +108,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
   }
 
   Widget _getSharedCollectionsGallery(SharedCollections collections) {
+    Size size = MediaQuery.of(context).size;
+    int albumsCountInOneRow = max(size.width~/220.0, 2);
     return SingleChildScrollView(
       child: Container(
         margin: const EdgeInsets.only(bottom: 50),
@@ -125,7 +128,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                     },
                     itemCount: collections.incoming.length,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
+                      crossAxisCount: albumsCountInOneRow,
                     ),
                   )
                 : _getIncomingCollectionEmptyState(),

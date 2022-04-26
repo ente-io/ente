@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -120,6 +121,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   }
 
   Widget _getCollectionsGalleryWidget(CollectionItems items) {
+    Size size = MediaQuery.of(context).size;
+    int albumsCountInOneRow = max(size.width~/220.0, 2);
     return SingleChildScrollView(
       child: Container(
         margin: const EdgeInsets.only(bottom: 50),
@@ -175,7 +178,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                     itemCount:
                         items.collections.length + 1, // To include the + button
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
+                      crossAxisCount: albumsCountInOneRow,
                       mainAxisSpacing: 12,
                     ),
                   )

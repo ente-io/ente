@@ -1,14 +1,16 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
+import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
+import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/payment_web_page.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
@@ -34,9 +36,10 @@ class StripeSubscriptionPage extends StatefulWidget {
 class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   final _logger = Logger("StripeSubscriptionPage");
   final _billingService = BillingService.instance;
+  final _userService = UserService.instance;
   Subscription _currentSubscription;
   ProgressDialog _dialog;
-  Future<int> _usageFuture;
+  UserDetails _userDetails;
 
   // indicates if user's subscription plan is still active
   bool _hasActiveSubscription;
@@ -54,12 +57,12 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   Future<void> _fetchSub() async {
-    return _billingService.fetchSubscription().then((subscription) async {
-      _currentSubscription = subscription;
+    return _userService.getUserDetailsV2().then((userDetails) async {
+      _userDetails = userDetails;
+      _currentSubscription = userDetails.subscription;
       _showYearlyPlan = _currentSubscription.isYearlyPlan();
       _hasActiveSubscription = _currentSubscription.isValid();
       _isStripeSubscriber = _currentSubscription.paymentProvider == kStripe;
-      _usageFuture = _billingService.fetchUsage();
       return _filterStripeForUI().then((value) {
         _hasLoadedData = true;
         setState(() {});
@@ -118,7 +121,11 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   Widget _getBody() {
     if (_hasLoadedData) {
-      return _buildPlans();
+      if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
+        return ChildSubscriptionWidget(userDetails: _userDetails);
+      } else {
+        return _buildPlans();
+      }
     }
     return loadWidget;
   }
@@ -128,7 +135,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
     widgets.add(SubscriptionHeaderWidget(
       isOnboarding: widget.isOnboarding,
-      usageFuture: _usageFuture,
+      currentUsage: _userDetails.getFamilyOrPersonalUsage(),
     ));
 
     widgets.addAll([
@@ -181,7 +188,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               }
             },
             child: Container(
-              padding: EdgeInsets.fromLTRB(40, 80, 40, 80),
+              padding: EdgeInsets.fromLTRB(40, 80, 40, 20),
               child: Column(
                 children: [
                   RichText(
@@ -203,6 +210,37 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           ),
         ),
       ]);
+
+      if (!widget.isOnboarding) {
+        widgets.addAll([
+          Align(
+            alignment: Alignment.topCenter,
+            child: GestureDetector(
+              onTap: () async {
+                await _launchFamilyPortal();
+              },
+              child: Container(
+                padding: EdgeInsets.fromLTRB(40, 0, 40, 80),
+                child: Column(
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        text: "manage family",
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontFamily: 'Ubuntu',
+                          fontSize: 15,
+                        ),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ]);
+      }
     }
 
     return SingleChildScrollView(
@@ -224,6 +262,24 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           },
         ),
       ).then((value) => onWebPaymentGoBack);
+    } catch (e) {
+      await _dialog.hide();
+      showGenericErrorDialog(context);
+    }
+    await _dialog.hide();
+  }
+
+  Future<void> _launchFamilyPortal() async {
+    await _dialog.show();
+    try {
+      final String jwtToken = await _userService.getFamiliesToken();
+      final bool familyExist = _userDetails.isPartOfFamily();
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (BuildContext context) {
+          return WebPage("family",
+              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist');
+        },
+      )).then((value) => onWebPaymentGoBack);
     } catch (e) {
       await _dialog.hide();
       showGenericErrorDialog(context);
@@ -308,15 +364,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                     "please cancel your existing subscription from ${_currentSubscription.paymentProvider} first");
                 return;
               }
-              await _dialog.show();
-              if (_usageFuture != null) {
-                final usage = await _usageFuture;
-                await _dialog.hide();
-                if (usage > plan.storage) {
-                  showErrorDialog(
-                      context, "Sorry", "you cannot downgrade to this plan");
-                  return;
-                }
+              if (_userDetails.getFamilyOrPersonalUsage() > plan.storage) {
+                showErrorDialog(
+                    context, "Sorry", "you cannot downgrade to this plan");
+                return;
               }
               String stripPurChaseAction = 'buy';
               if (_isStripeSubscriber && _hasActiveSubscription) {
