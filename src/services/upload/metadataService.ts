@@ -58,18 +58,15 @@ export async function extractMetadata(
             )}`
         );
     }
-    if (!extractedMetadata.creationTime) {
-        extractedMetadata.creationTime = extractDateFromFileName(
-            receivedFile.name
-        );
-    }
 
     const metadata: Metadata = {
         title: `${splitFilenameAndExtension(receivedFile.name)[0]}.${
             fileTypeInfo.exactType
         }`,
         creationTime:
-            extractedMetadata.creationTime ?? receivedFile.lastModified * 1000,
+            extractedMetadata.creationTime ??
+            extractDateFromFileName(receivedFile.name) ??
+            receivedFile.lastModified * 1000,
         modificationTime: receivedFile.lastModified * 1000,
         latitude: extractedMetadata.location.latitude,
         longitude: extractedMetadata.location.longitude,
