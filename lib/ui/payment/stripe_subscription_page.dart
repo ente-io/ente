@@ -46,6 +46,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   FreePlan _freePlan;
   List<BillingPlan> _plans = [];
   bool _hasLoadedData = false;
+  bool _isLoading = false;
   bool _isStripeSubscriber = false;
   bool _showYearlyPlan = false;
 
@@ -120,6 +121,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   Widget _getBody() {
+    if (!_isLoading) {
+      _isLoading = true;
+      _fetchSub();
+    }
     if (_hasLoadedData) {
       if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
         return ChildSubscriptionWidget(userDetails: _userDetails);

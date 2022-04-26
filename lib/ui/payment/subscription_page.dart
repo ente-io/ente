@@ -48,33 +48,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   FreePlan _freePlan;
   List<BillingPlan> _plans;
   bool _hasLoadedData = false;
+  bool _isLoading = false;
   bool _isActiveStripeSubscriber;
 
   @override
   void initState() {
     _billingService.setIsOnSubscriptionPage(true);
-    _userService.getUserDetailsV2(memberCount: false).then((userDetails) async {
-      _userDetails = userDetails;
-      _currentSubscription = userDetails.subscription;
-      _hasActiveSubscription = _currentSubscription.isValid();
-      final billingPlans = await _billingService.getBillingPlans();
-      _isActiveStripeSubscriber =
-          _currentSubscription.paymentProvider == kStripe &&
-              _currentSubscription.isValid();
-      _plans = billingPlans.plans.where((plan) {
-        final productID = _isActiveStripeSubscriber
-            ? plan.stripeID
-            : Platform.isAndroid
-                ? plan.androidID
-                : plan.iosID;
-        return productID != null && productID.isNotEmpty;
-      }).toList();
-      _freePlan = billingPlans.freePlan;
-      _hasLoadedData = true;
-      setState(() {});
-    });
     _setupPurchaseUpdateStreamListener();
-    _dialog = createProgressDialog(context, "please wait...");
     super.initState();
   }
 
@@ -145,6 +125,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isLoading) {
+      _isLoading = true;
+      _fetchSubData();
+    }
+    _dialog = createProgressDialog(context, "please wait...");
     final appBar = AppBar(
       title: Text("subscription"),
     );
@@ -152,6 +137,29 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       appBar: appBar,
       body: _getBody(),
     );
+  }
+
+  Future<void> _fetchSubData() async {
+    _userService.getUserDetailsV2(memberCount: false).then((userDetails) async {
+      _userDetails = userDetails;
+      _currentSubscription = userDetails.subscription;
+      _hasActiveSubscription = _currentSubscription.isValid();
+      final billingPlans = await _billingService.getBillingPlans();
+      _isActiveStripeSubscriber =
+          _currentSubscription.paymentProvider == kStripe &&
+              _currentSubscription.isValid();
+      _plans = billingPlans.plans.where((plan) {
+        final productID = _isActiveStripeSubscriber
+            ? plan.stripeID
+            : Platform.isAndroid
+                ? plan.androidID
+                : plan.iosID;
+        return productID != null && productID.isNotEmpty;
+      }).toList();
+      _freePlan = billingPlans.freePlan;
+      _hasLoadedData = true;
+      setState(() {});
+    });
   }
 
   Widget _getBody() {
