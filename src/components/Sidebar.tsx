@@ -225,7 +225,7 @@ export default function Sidebar(props: Props) {
                     ) : (
                         <div style={{ color: '#959595' }}>
                             {constants.FAMILY_PLAN_MANAGE_ADMIN_ONLY(
-                                getFamilyPlanAdmin()?.email
+                                getFamilyPlanAdmin(familyData)?.email
                             )}
                             <Button
                                 variant="outline-success"
@@ -256,7 +256,7 @@ export default function Sidebar(props: Props) {
                     </h5>
                     <div style={{ color: '#959595' }}>
                         {usage ? (
-                            isPartOfFamily() ? (
+                            isPartOfFamily(familyData) ? (
                                 constants.FAMILY_USAGE_INFO(
                                     usage,
                                     convertBytesToHumanReadable(

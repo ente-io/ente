@@ -17,7 +17,7 @@ import {
     TwoFactorRecoveryResponse,
     UserDetails,
 } from 'types/user';
-import { isPartOfFamily } from 'utils/billing';
+import { getFamilyData, isPartOfFamily } from 'utils/billing';
 
 const ENDPOINT = getEndpoint();
 
@@ -275,7 +275,7 @@ export const getUserDetailsV2 = async (): Promise<UserDetails> => {
 export const getFamilyPortalRedirectURL = async () => {
     try {
         const jwtToken = await getFamiliesToken();
-        const isFamilyCreated = isPartOfFamily();
+        const isFamilyCreated = isPartOfFamily(getFamilyData());
         return `${getFamilyPortalURL()}?token=${jwtToken}&isFamilyCreated=${isFamilyCreated}&redirectURL=${
             window.location.origin
         }/gallery`;

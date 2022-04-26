@@ -46,8 +46,7 @@ export function convertBytesToHumanReadable(
     return (bytes / Math.pow(1024, i)).toFixed(precision) + ' ' + sizes[i];
 }
 
-export function hasPaidSubscription(subscription?: Subscription) {
-    subscription = subscription ?? getUserSubscription();
+export function hasPaidSubscription(subscription: Subscription) {
     return (
         subscription &&
         isSubscriptionActive(subscription) &&
@@ -55,20 +54,17 @@ export function hasPaidSubscription(subscription?: Subscription) {
     );
 }
 
-export function isSubscribed(subscription?: Subscription) {
-    subscription = subscription ?? getUserSubscription();
+export function isSubscribed(subscription: Subscription) {
     return (
         hasPaidSubscription(subscription) &&
         !isSubscriptionCancelled(subscription)
     );
 }
-export function isSubscriptionActive(subscription?: Subscription): boolean {
-    subscription = subscription ?? getUserSubscription();
+export function isSubscriptionActive(subscription: Subscription): boolean {
     return subscription && subscription.expiryTime > Date.now() * 1000;
 }
 
-export function isOnFreePlan(subscription?: Subscription) {
-    subscription = subscription ?? getUserSubscription();
+export function isOnFreePlan(subscription: Subscription) {
     return (
         subscription &&
         isSubscriptionActive(subscription) &&
@@ -76,27 +72,24 @@ export function isOnFreePlan(subscription?: Subscription) {
     );
 }
 
-export function isSubscriptionCancelled(subscription?: Subscription) {
-    subscription = subscription ?? getUserSubscription();
+export function isSubscriptionCancelled(subscription: Subscription) {
     return subscription && subscription.attributes.isCancelled;
 }
 
 // isPartOfFamily return true if the current user is part of some family plan
-export function isPartOfFamily(familyData?: FamilyData): boolean {
-    familyData = familyData ?? getFamilyData();
+export function isPartOfFamily(familyData: FamilyData): boolean {
     return Boolean(
         familyData && familyData.members && familyData.members.length > 0
     );
 }
 
-export function isFamilyAdmin(familyData?: FamilyData): boolean {
+export function isFamilyAdmin(familyData: FamilyData): boolean {
     const familyAdmin: FamilyMember = getFamilyPlanAdmin(familyData);
     const user: User = getData(LS_KEYS.USER);
     return familyAdmin.email === user.email;
 }
 
-export function getFamilyPlanAdmin(familyData?: FamilyData): FamilyMember {
-    familyData = familyData ?? getFamilyData();
+export function getFamilyPlanAdmin(familyData: FamilyData): FamilyMember {
     if (isPartOfFamily(familyData)) {
         return familyData.members.find((x) => x.isAdmin);
     } else {
@@ -106,9 +99,8 @@ export function getFamilyPlanAdmin(familyData?: FamilyData): FamilyMember {
     }
 }
 
-export function getStorage(familyData?: FamilyData): number {
+export function getStorage(familyData: FamilyData): number {
     const subscription: Subscription = getUserSubscription();
-    familyData = familyData ?? getFamilyData();
     return isPartOfFamily(familyData)
         ? familyData.storage
         : subscription.storage;
@@ -360,9 +352,6 @@ function handleFailureReason(
 }
 
 export function planForSubscription(subscription: Subscription) {
-    if (!subscription) {
-        return null;
-    }
     return {
         id: subscription.productID,
         storage: subscription.storage,
