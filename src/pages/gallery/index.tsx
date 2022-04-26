@@ -668,6 +668,7 @@ export default function Gallery() {
                     setElectronFiles={setElectronFiles}
                     showUploadTypeChoiceModal={showUploadTypeChoiceModal}
                     setShowUploadTypeChoiceModal={setShowUploadTypeChoiceModal}
+                    SetDialogMessage={setDialogMessage}
                 />
                 <Sidebar
                     collections={collections}
