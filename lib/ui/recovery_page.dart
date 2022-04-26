@@ -113,8 +113,8 @@ class _RecoveryPageState extends State<RecoveryPage> {
                       onTap: () {
                         showErrorDialog(
                           context,
-                          "sorry",
-                          "due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key",
+                          "Sorry",
+                          "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key",
                         );
                       },
                       child: Container(

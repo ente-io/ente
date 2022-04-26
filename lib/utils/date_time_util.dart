@@ -72,6 +72,10 @@ String getFullMonth(DateTime dateTime) {
   return _fullMonths[dateTime.month];
 }
 
+String getAbbreviationOfYear(DateTime dateTime) {
+  return (dateTime.year % 100).toString();
+}
+
 String getTime(DateTime dateTime) {
   final hours = dateTime.hour > 9
       ? dateTime.hour.toString()
@@ -95,13 +99,11 @@ String getFormattedTime(DateTime dateTime) {
 }
 
 String getFormattedDate(DateTime dateTime) {
-  return getDay(dateTime) +
-      ", " +
-      getMonth(dateTime) +
+  return dateTime.day.toString() +
       " " +
-      dateTime.day.toString() +
-      ", " +
-      dateTime.year.toString();
+      getMonth(dateTime) +
+      "'" +
+      getAbbreviationOfYear(dateTime);
 }
 
 String daysLeft(int futureTime) {

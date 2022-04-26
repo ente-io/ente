@@ -140,8 +140,8 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
     } catch (e) {
       Logger("ApkDownloader").severe(e);
       AlertDialog alert = AlertDialog(
-        title: Text("sorry"),
-        content: Text("the download could not be completed"),
+        title: Text("Sorry"),
+        content: Text("The download could not be completed"),
         actions: [
           TextButton(
             child: Text(

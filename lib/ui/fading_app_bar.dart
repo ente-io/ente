@@ -215,7 +215,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           } catch (e, s) {
             _logger.severe(e, s);
             hasError = true;
-            showToast("sorry, could not add this to favorites!");
+            showToast("Sorry, could not add this to favorites!");
           } finally {
             if (shouldBlockUser) {
               await dialog.hide();
@@ -227,7 +227,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           } catch (e, s) {
             _logger.severe(e, s);
             hasError = true;
-            showToast("sorry, could not remove this from favorites!");
+            showToast("Sorry, could not remove this from favorites!");
           }
         }
         return hasError ? oldValue : isLiked;

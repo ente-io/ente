@@ -1,5 +1,4 @@
 import 'package:extended_image/extended_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
@@ -265,7 +264,7 @@ class _DetailPageState extends State<DetailPage> {
         file.ownerID != Configuration.instance.getUserID()) {
       _logger.severe("Attempt to edit unowned file", UnauthorizedEditError(),
           StackTrace.current);
-      showErrorDialog(context, "sorry",
+      showErrorDialog(context, "Sorry",
           "we don't support editing photos and albums that you don't own yet");
       return;
     }
