@@ -86,7 +86,9 @@ class ImportService {
         type: DESKTOP_UPLOAD_TYPE.FILES | DESKTOP_UPLOAD_TYPE.ZIPS,
         filePaths: string[]
     ) {
-        this.ElectronAPIs.setToUploadFiles(type, filePaths);
+        if (this.allElectronAPIsExist) {
+            this.ElectronAPIs.setToUploadFiles(type, filePaths);
+        }
     }
 
     updatePendingUploads(files: FileWithCollection[]) {
@@ -114,9 +116,11 @@ class ImportService {
         }
     }
     cancelRemainingUploads() {
-        this.ElectronAPIs.setToUploadCollection(null);
-        this.ElectronAPIs.setToUploadFiles(DESKTOP_UPLOAD_TYPE.ZIPS, []);
-        this.ElectronAPIs.setToUploadFiles(DESKTOP_UPLOAD_TYPE.FILES, []);
+        if (this.allElectronAPIsExist) {
+            this.ElectronAPIs.setToUploadCollection(null);
+            this.ElectronAPIs.setToUploadFiles(DESKTOP_UPLOAD_TYPE.ZIPS, []);
+            this.ElectronAPIs.setToUploadFiles(DESKTOP_UPLOAD_TYPE.FILES, []);
+        }
     }
 }
 
