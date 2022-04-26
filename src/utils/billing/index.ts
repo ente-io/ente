@@ -84,7 +84,9 @@ export function isSubscriptionCancelled(subscription?: Subscription) {
 // isPartOfFamily return true if the current user is part of some family plan
 export function isPartOfFamily(familyData?: FamilyData): boolean {
     familyData = familyData ?? getFamilyData();
-    return familyData && familyData.members && familyData.members.length > 0;
+    return Boolean(
+        familyData && familyData.members && familyData.members.length > 0
+    );
 }
 
 export function isFamilyAdmin(familyData?: FamilyData): boolean {
