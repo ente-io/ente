@@ -442,7 +442,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       Navigator.of(context).push(MaterialPageRoute(
         builder: (BuildContext context) {
           return WebPage("family",
-              '$kFamilyPlanManagementUrl?token=$jwtToken&familyCreated=$familyExist');
+              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist');
         },
       ));
     } catch (e) {
