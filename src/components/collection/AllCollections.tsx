@@ -47,14 +47,14 @@ FloatingSidebar.propTypes = {
     onClose: PropTypes.func.isRequired,
 };
 
-export const Transition = (direction: 'left' | 'right') =>
+export const Transition = (direction: 'left' | 'right' | 'up') =>
     React.forwardRef(
         (props: { children: React.ReactElement<any, any> }, ref) => {
             return <Slide direction={direction} ref={ref} {...props} />;
         }
     );
 
-const LeftSlideTransition = Transition('left');
+const LeftSlideTransition = Transition('up');
 
 const LargerCollectionTile = styledComponent(CollectionTile)`
     width: 150px;
