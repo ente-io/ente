@@ -1,8 +1,11 @@
 import constants from 'utils/strings/constants';
 import { CustomError } from 'utils/error';
+import GetDeviceOS, { OS } from './deviceDetection';
 
-export const DESKTOP_APP_DOWNLOAD_URL =
+export const DESKTOP_APP_GITHUB_DOWNLOAD_URL =
     'https://github.com/ente-io/bhari-frame/releases/latest';
+
+export const APP_DOWNLOAD_ENTE_URL = 'https://ente.io/download';
 
 export function checkConnectivity() {
     if (navigator.onLine) {
@@ -22,7 +25,16 @@ export async function sleep(time: number) {
 }
 
 export function downloadApp() {
-    const win = window.open(DESKTOP_APP_DOWNLOAD_URL, '_blank');
+    const os = GetDeviceOS();
+    let url = '';
+    if (os === OS.WINDOWS) {
+        url = `${APP_DOWNLOAD_ENTE_URL}/exe`;
+    } else if (os === OS.MAC) {
+        url = `${APP_DOWNLOAD_ENTE_URL}/dmg`;
+    } else {
+        url = DESKTOP_APP_GITHUB_DOWNLOAD_URL;
+    }
+    const win = window.open(url, '_blank');
     win.focus();
 }
 
