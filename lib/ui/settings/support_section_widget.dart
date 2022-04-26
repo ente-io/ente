@@ -9,7 +9,6 @@ import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/email_util.dart';
-import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SupportSectionWidget extends StatelessWidget {

@@ -10,14 +10,13 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/common/dynamicFAB.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/recovery_key_page.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
-
-import 'common/dynamicFAB.dart';
 
 enum PasswordEntryMode {
   set,

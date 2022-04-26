@@ -2,8 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamicFAB.dart';
-import 'package:photos/ui/common/report_bug_popup.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class OTTVerificationPage extends StatefulWidget {
