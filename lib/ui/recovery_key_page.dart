@@ -57,7 +57,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
             )
           : null,
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
+        padding: EdgeInsets.fromLTRB(20, widget.showAppBar ? 40 : 120, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           // mainAxisAlignment: MainAxisAlignment.center,
