@@ -345,18 +345,8 @@ export default function Gallery() {
     ) => {
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
-        let nonEmptyCollections = getNonEmptyCollections(collections, files);
-        nonEmptyCollections = [
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-            ...nonEmptyCollections,
-        ];
-        nonEmptyCollections = nonEmptyCollections.map((c) => ({
-            ...c,
-            id: Math.round(Math.random() * 1000),
-        }));
+        const nonEmptyCollections = getNonEmptyCollections(collections, files);
+
         setCollections(nonEmptyCollections);
         const collectionsAndTheirLatestFile = getCollectionsAndTheirLatestFile(
             nonEmptyCollections,

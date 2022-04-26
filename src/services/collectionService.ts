@@ -820,8 +820,8 @@ export function getCollectionSummaries(
     for (const collection of collections) {
         CollectionSummaries.set(collection.id, {
             collectionName: collection.name,
-            latestFile: files[0], // collectionAndTheirLatestFileMap.get(collection.id), for testing
-            fileCount: files.length, // collectionFilesCount.get(collection.id),
+            latestFile: collectionAndTheirLatestFileMap.get(collection.id),
+            fileCount: collectionFilesCount.get(collection.id),
         });
     }
     return CollectionSummaries;
