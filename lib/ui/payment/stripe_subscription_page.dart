@@ -277,7 +277,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       Navigator.of(context).push(MaterialPageRoute(
         builder: (BuildContext context) {
           return WebPage("family",
-              '$kFamilyPlanManagementUrl?token=$jwtToken&familyCreated=$familyExist');
+              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist');
         },
       )).then((value) => onWebPaymentGoBack);
     } catch (e) {

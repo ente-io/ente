@@ -140,6 +140,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
     try {
       await UserService.instance.leaveFamilyPlan();
       dialog.hide();
+      Navigator.of(context).pop('');
     } catch (e) {
       dialog.hide();
       showGenericErrorDialog(context);
