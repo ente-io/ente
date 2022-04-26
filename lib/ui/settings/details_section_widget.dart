@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -27,13 +26,14 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   void initState() {
     super.initState();
     _fetchUserDetails();
-    _userDetailsChangedEvent = Bus.instance.on<UserDetailsChangedEvent>().listen((event) {
+    _userDetailsChangedEvent =
+        Bus.instance.on<UserDetailsChangedEvent>().listen((event) {
       _fetchUserDetails();
     });
   }
 
   void _fetchUserDetails() {
-    UserService.instance.getUserDetails().then((details) {
+    UserService.instance.getUserDetailsV2(memberCount: true).then((details) {
       setState(() {
         _userDetails = details;
       });
@@ -69,23 +69,31 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         children: [
           GestureDetector(
             onTap: () {
-              showToast(formatBytes(
-                      _userDetails.subscription.storage - _userDetails.usage) +
+              int totalStorage = _userDetails.isPartOfFamily()
+                  ? _userDetails.familyData.storage
+                  : _userDetails.subscription.storage;
+              String usageText = formatBytes(_userDetails.getFreeStorage()) +
                   " / " +
-                  convertBytesToReadableFormat(
-                      _userDetails.subscription.storage) +
-                  " free");
+                  convertBytesToReadableFormat(totalStorage) +
+                  " free";
+              if (_userDetails.isPartOfFamily()) {
+                usageText +=
+                    "\npersonal usage: ${convertBytesToReadableFormat(_userDetails.getPersonalUsage())}\n"
+                    "family usage: ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage() - _userDetails.getPersonalUsage())}";
+              }
+              showToast(usageText);
             },
             child: PieChart(
               dataMap: {
-                "used": _userDetails.usage.toDouble(),
-                "free": max(
-                    _userDetails.subscription.storage.toDouble() -
-                        _userDetails.usage.toDouble(),
-                    0),
+                "used": _userDetails.getPersonalUsage().toDouble(),
+                "family_usage": (_userDetails.getFamilyOrPersonalUsage() -
+                        _userDetails.getPersonalUsage())
+                    .toDouble(),
+                "free": _userDetails.getFreeStorage().toDouble(),
               },
               colorList: const [
                 Colors.redAccent,
+                Colors.blueGrey,
                 Color.fromRGBO(50, 194, 100, 1.0),
               ],
               legendOptions: LegendOptions(
@@ -98,8 +106,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
               chartRadius: 80,
               ringStrokeWidth: 4,
               chartType: ChartType.ring,
-              centerText:
-                  convertBytesToReadableFormat(_userDetails.usage) + "\nused",
+              centerText: convertBytesToReadableFormat(
+                      _userDetails.getPersonalUsage()) +
+                  "\nused",
               centerTextStyle: TextStyle(
                 color: Colors.white,
                 fontSize: 12,

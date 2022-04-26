@@ -14,6 +14,9 @@ const kWebPaymentRedirectUrl = "https://payments.ente.io/frameRedirect";
 const kWebPaymentBaseEndpoint = String.fromEnvironment("web-payment",
     defaultValue: "https://payments.ente.io");
 
+const kFamilyPlanManagementUrl = String.fromEnvironment("web-family",
+    defaultValue: "https://families.ente.io");
+
 class BillingService {
   BillingService._privateConstructor();
 
