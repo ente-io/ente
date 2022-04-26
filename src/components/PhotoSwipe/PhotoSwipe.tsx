@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import Photoswipe from 'photoswipe';
 import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
 import classnames from 'classnames';
+import FavButton from 'components/FavButton';
 import {
     addToFavorites,
     removeFromFavorites,
@@ -49,11 +49,6 @@ import { playVideo, pauseVideo } from 'utils/photoFrame';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
-import SettingIcon from 'components/icons/SettingIcon';
-import FavoriteIcon from 'components/icons/FavoriteIcon';
-import DownloadIcon from 'components/icons/DownloadIcon';
-import InfoIcon from 'components/icons/InfoIcon';
-import OptionIcon from 'components/icons/OptionIcon-2';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -826,25 +821,23 @@ function PhotoSwipe(props: Iprops) {
                         <div className="pswp__item" />
                         <div className="pswp__item" />
                     </div>
-                    <div className="pswp__ui ">
+                    <div className="pswp__ui pswp__ui--hidden">
                         <div className="pswp__top-bar">
                             <div className="pswp__counter" />
+
                             <button
                                 className="pswp__button pswp__button--close"
                                 title={constants.CLOSE}
                             />
-                            <div className="pswp-custom">
-                                <OptionIcon className="pswp-custom" />
-                            </div>
-                            {!props.isSharedCollection && (
-                                <div className="pswp-custom">
-                                    <InfoIcon className="pswp-custom" />
-                                </div>
-                            )}
+
                             {props.enableDownload && (
-                                <div className="pswp-custom">
-                                    <DownloadIcon className="pswp-custom" />
-                                </div>
+                                <button
+                                    className="pswp-custom download-btn"
+                                    title={constants.DOWNLOAD}
+                                    onClick={() =>
+                                        downloadFileHelper(photoSwipe.currItem)
+                                    }
+                                />
                             )}
                             <button
                                 className="pswp__button pswp__button--fs"
@@ -856,14 +849,21 @@ function PhotoSwipe(props: Iprops) {
                             />
                             {!props.isSharedCollection &&
                                 !props.isTrashCollection && (
-                                    <div className="pswp-custom">
-                                        <FavoriteIcon />
-                                    </div>
+                                    <FavButton
+                                        size={44}
+                                        isClick={isFav}
+                                        onClick={() => {
+                                            onFavClick(photoSwipe?.currItem);
+                                        }}
+                                    />
                                 )}
-                            <div className="pswp-custom">
-                                <SettingIcon />
-                            </div>
-
+                            {!props.isSharedCollection && (
+                                <button
+                                    className="pswp-custom info-btn"
+                                    title={constants.INFO}
+                                    onClick={handleOpenInfo}
+                                />
+                            )}
                             <div className="pswp__preloader">
                                 <div className="pswp__preloader__icn">
                                     <div className="pswp__preloader__cut">
