@@ -5,7 +5,7 @@ import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b
 import FFmpegService from 'services/ffmpeg/ffmpegService';
 import { convertBytesToHumanReadable } from 'utils/billing';
 import { isFileHEIC } from 'utils/file';
-import { FileTypeInfo } from 'types/upload';
+import { ElectronFile, FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from '../readerService';
 import HEICConverter from 'services/heicConverter/heicConverterService';
 import { getFileNameSize, logUploadInfo } from 'utils/upload';
@@ -25,7 +25,7 @@ interface Dimension {
 
 export async function generateThumbnail(
     reader: FileReader,
-    file: File,
+    file: File | ElectronFile,
     fileTypeInfo: FileTypeInfo
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
@@ -33,6 +33,9 @@ export async function generateThumbnail(
         let hasStaticThumbnail = false;
         let canvas = document.createElement('canvas');
         let thumbnail: Uint8Array;
+        if (!(file instanceof File)) {
+            file = new File([await file.blob()], file.name);
+        }
         try {
             if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
                 const isHEIC = isFileHEIC(fileTypeInfo.exactType);

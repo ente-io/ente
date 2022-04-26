@@ -1,3 +1,5 @@
+import { ElectronFile } from 'types/upload';
+
 export async function getUint8ArrayView(
     reader: FileReader,
     file: Blob
@@ -37,6 +39,17 @@ export function getFileStream(
     const chunkCount = Math.ceil(file.size / chunkSize);
     return {
         stream,
+        chunkCount,
+    };
+}
+
+export async function getElectronFileStream(
+    file: ElectronFile,
+    chunkSize: number
+) {
+    const chunkCount = Math.ceil(file.size / chunkSize);
+    return {
+        stream: await file.stream(),
         chunkCount,
     };
 }

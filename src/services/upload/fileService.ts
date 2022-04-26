@@ -9,29 +9,34 @@ import {
     FileWithMetadata,
     ParsedMetadataJSONMap,
     DataStream,
+    ElectronFile,
 } from 'types/upload';
 import { splitFilenameAndExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getFileNameSize, logUploadInfo } from 'utils/upload';
 import { encryptFiledata } from './encryptionService';
 import { extractMetadata, getMetadataJSONMapKey } from './metadataService';
-import { getFileStream, getUint8ArrayView } from '../readerService';
+import {
+    getFileStream,
+    getElectronFileStream,
+    getUint8ArrayView,
+} from '../readerService';
 import { generateThumbnail } from './thumbnailService';
 
 const EDITED_FILE_SUFFIX = '-edited';
 
-export function getFileSize(file: File) {
+export function getFileSize(file: File | ElectronFile) {
     return file.size;
 }
 
-export function getFilename(file: File) {
+export function getFilename(file: File | ElectronFile) {
     return file.name;
 }
 
 export async function readFile(
     reader: FileReader,
     fileTypeInfo: FileTypeInfo,
-    rawFile: File
+    rawFile: File | ElectronFile
 ): Promise<FileInMemory> {
     const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
         reader,
@@ -40,7 +45,16 @@ export async function readFile(
     );
     logUploadInfo(`reading file datal${getFileNameSize(rawFile)} `);
     let filedata: Uint8Array | DataStream;
-    if (rawFile.size > MULTIPART_PART_SIZE) {
+    if (!(rawFile instanceof File)) {
+        if (rawFile.size > MULTIPART_PART_SIZE) {
+            filedata = await getElectronFileStream(
+                rawFile,
+                FILE_READER_CHUNK_SIZE
+            );
+        } else {
+            filedata = await rawFile.arrayBuffer();
+        }
+    } else if (rawFile.size > MULTIPART_PART_SIZE) {
         filedata = getFileStream(reader, rawFile, FILE_READER_CHUNK_SIZE);
     } else {
         filedata = await getUint8ArrayView(reader, rawFile);
@@ -57,7 +71,7 @@ export async function readFile(
 
 export async function extractFileMetadata(
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
-    rawFile: File,
+    rawFile: File | ElectronFile,
     collectionID: number,
     fileTypeInfo: FileTypeInfo
 ) {
@@ -121,7 +135,7 @@ export async function encryptFile(
     Get the original file name for edited file to associate it to original file's metadataJSON file 
     as edited file doesn't have their own metadata file
 */
-function getFileOriginalName(file: File) {
+function getFileOriginalName(file: File | ElectronFile) {
     let originalName: string = null;
     const [nameWithoutExtension, extension] = splitFilenameAndExtension(
         file.name

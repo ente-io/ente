@@ -9,7 +9,7 @@ interface Props {
     onHide: () => void;
     uploadToSingleCollection: () => void;
 }
-function ChoiceModal({
+function UploadStrategyChoiceModal({
     uploadToMultipleCollection,
     uploadToSingleCollection,
     ...props
@@ -72,4 +72,4 @@ function ChoiceModal({
         </MessageDialog>
     );
 }
-export default ChoiceModal;
+export default UploadStrategyChoiceModal;

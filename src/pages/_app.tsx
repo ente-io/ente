@@ -501,6 +501,13 @@ const GlobalStyles = createGlobalStyle`
     .form-check-input:hover, .form-check-label :hover{
         cursor:pointer;
     }
+
+    @media (min-width: 450px) {
+        .file-type-choice-modal{
+            width: 25em;
+        }
+    }
+
     .manageLinkHeader:hover{
         color:#bbb;
     }

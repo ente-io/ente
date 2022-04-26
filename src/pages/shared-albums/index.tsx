@@ -286,7 +286,7 @@ export default function PublicCollectionGallery() {
                 setSelected={() => null}
                 selected={{ count: 0, collectionID: null }}
                 isFirstLoad={true}
-                openFileUploader={() => null}
+                openUploader={() => null}
                 isInSearchMode={false}
                 search={{}}
                 setSearchStats={() => null}

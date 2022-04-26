@@ -1,8 +1,9 @@
-import { FileWithCollection, Metadata } from 'types/upload';
+import { ElectronFile, FileWithCollection, Metadata } from 'types/upload';
 import { EnteFile } from 'types/file';
 import { convertBytesToHumanReadable } from 'utils/billing';
 import { formatDateTime } from 'utils/file';
 import { getLogs, saveLogLine } from 'utils/storage';
+import { A_SEC_IN_MICROSECONDS } from 'constants/upload';
 
 const TYPE_JSON = 'json';
 const DEDUPE_COLLECTION = new Set(['icloud library', 'icloudlibrary']);
@@ -28,10 +29,18 @@ export function areFilesSame(
     existingFile: Metadata,
     newFile: Metadata
 ): boolean {
+    /*
+     * The maximum difference in the creation/modification times of two similar files is set to 1 second.
+     * This is because while uploading files in the web - browsers and users could have set reduced
+     * precision of file times to prevent timing attacks and fingerprinting.
+     * Context: https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
+     */
     if (
         existingFile.fileType === newFile.fileType &&
-        existingFile.creationTime === newFile.creationTime &&
-        existingFile.modificationTime === newFile.modificationTime &&
+        Math.abs(existingFile.creationTime - newFile.creationTime) <
+            A_SEC_IN_MICROSECONDS &&
+        Math.abs(existingFile.modificationTime - newFile.modificationTime) <
+            A_SEC_IN_MICROSECONDS &&
         existingFile.title === newFile.title
     ) {
         return true;
@@ -74,6 +83,13 @@ export function getUploadLogs() {
         .map((log) => `[${formatDateTime(log.timestamp)}] ${log.logLine}`);
 }
 
-export function getFileNameSize(file: File) {
+export function getFileNameSize(file: File | ElectronFile) {
     return `${file.name}_${convertBytesToHumanReadable(file.size)}`;
+}
+
+export function areFileWithCollectionsSame(
+    firstFile: FileWithCollection,
+    secondFile: FileWithCollection
+): boolean {
+    return firstFile.localID === secondFile.localID;
 }

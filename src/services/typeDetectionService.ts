@@ -1,11 +1,11 @@
 import { FILE_TYPE } from 'constants/file';
+import { ElectronFile, FileTypeInfo } from 'types/upload';
 import { FORMAT_MISSED_BY_FILE_TYPE_LIB } from 'constants/upload';
-import { FileTypeInfo } from 'types/upload';
 import { CustomError } from 'utils/error';
 import { getFileExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getUint8ArrayView } from './readerService';
-import FileType from 'file-type/browser';
+import FileType, { FileTypeResult } from 'file-type';
 
 const TYPE_VIDEO = 'video';
 const TYPE_IMAGE = 'image';
@@ -13,12 +13,20 @@ const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
 
 export async function getFileType(
     reader: FileReader,
-    receivedFile: File
+    receivedFile: File | ElectronFile
 ): Promise<FileTypeInfo> {
     try {
         let fileType: FILE_TYPE;
-        const typeResult = await extractFileType(reader, receivedFile);
-        const mimTypeParts = typeResult.mime?.split('/');
+        let typeResult: FileTypeResult;
+
+        if (receivedFile instanceof File) {
+            typeResult = await extractFileType(reader, receivedFile);
+        } else {
+            typeResult = await extractElectronFileType(receivedFile);
+        }
+
+        const mimTypeParts: string[] = typeResult.mime?.split('/');
+
         if (mimTypeParts?.length !== 2) {
             throw Error(CustomError.TYPE_DETECTION_FAILED);
         }
@@ -51,7 +59,7 @@ export async function getFileType(
         return {
             fileType: FILE_TYPE.OTHERS,
             exactType: fileFormat,
-            mimeType: receivedFile.type,
+            mimeType: receivedFile instanceof File ? receivedFile.type : null,
         };
     }
 }
@@ -59,6 +67,14 @@ export async function getFileType(
 async function extractFileType(reader: FileReader, file: File) {
     const fileChunkBlob = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
     return getFileTypeFromBlob(reader, fileChunkBlob);
+}
+
+async function extractElectronFileType(file: ElectronFile) {
+    const stream = await file.stream();
+    const reader = stream.getReader();
+    const { value } = await reader.read();
+    const fileTypeResult = await FileType.fromBuffer(value);
+    return fileTypeResult;
 }
 
 async function getFileTypeFromBlob(reader: FileReader, fileBlob: Blob) {

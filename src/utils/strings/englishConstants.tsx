@@ -108,6 +108,7 @@ const englishConstants = {
         3: (fileCounter) =>
             `${fileCounter.finished} / ${fileCounter.total} files backed up`,
         4: 'backup complete',
+        5: 'cancelling remaining uploads',
     },
     UPLOADING_FILES: 'file upload',
     FILE_NOT_UPLOADED_LIST: 'the following files were not uploaded',
@@ -691,6 +692,11 @@ const englishConstants = {
     PASSWORD_LOCK: 'password lock',
     LOCK: 'lock',
     DOWNLOAD_UPLOAD_LOGS: 'debug logs',
+    CHOOSE_UPLOAD_TYPE: 'Upload',
+    CANCEL_UPLOADS: 'cancel uploads',
+    UPLOAD_FILES: 'File',
+    UPLOAD_DIRS: 'Folder',
+    UPLOAD_GOOGLE_TAKEOUT: 'Google Takeout',
     DEDUPLICATE_FILES: 'deduplicate files',
     NO_DUPLICATES_FOUND: "you've no duplicate files that can be cleared",
     CLUB_BY_CAPTURE_TIME: 'club by capture time',
@@ -703,6 +709,10 @@ const englishConstants = {
             you believe are duplicates{' '}
         </>
     ),
+    STOP_ALL_UPLOADS_MESSAGE:
+        'are you sure that you want to stop all the uploads in progress?',
+    STOP_UPLOADS_HEADER: 'stop uploads?',
+    YES_STOP_UPLOADS: 'yes, stop uploads',
 };
 
 export default englishConstants;
