@@ -59,17 +59,18 @@ export default function Sidebar(props: Props) {
     const [user, setUser] = useState(null);
     const [subscription, setSubscription] = useState<Subscription>(null);
     const [familyData, setFamilyData] = useState<FamilyData>(null);
-    useEffect(() => {
-        setUser(getData(LS_KEYS.USER));
-        setSubscription(getUserSubscription());
-        setFamilyData(getFamilyData());
-    }, []);
     const [isOpen, setIsOpen] = useState(false);
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
     const [exportModalView, setExportModalView] = useState(false);
     const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
     const galleryContext = useContext(GalleryContext);
+
+    useEffect(() => {
+        setUser(getData(LS_KEYS.USER));
+        setSubscription(getUserSubscription());
+        setFamilyData(getFamilyData());
+    }, []);
 
     useEffect(() => {
         const main = async () => {
@@ -80,6 +81,8 @@ export default function Sidebar(props: Props) {
             setUser({ ...user, email: userDetails.email });
             SetUsage(convertBytesToHumanReadable(userDetails.usage));
             setSubscription(userDetails.subscription);
+            setFamilyData(userDetails.familyData);
+
             setData(LS_KEYS.USER, {
                 ...getData(LS_KEYS.USER),
                 email: userDetails.email,
