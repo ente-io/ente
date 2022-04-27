@@ -26,7 +26,6 @@ import EmptyScreen from './EmptyScreen';
 import { AppContext } from 'pages/_app';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { IsArchived } from 'utils/magicMetadata';
-import { CollectionSummaries } from 'types/collection';
 
 const Container = styled.div`
     display: block;
@@ -62,7 +61,6 @@ interface Props {
     activeCollection: number;
     isSharedCollection?: boolean;
     enableDownload?: boolean;
-    collectionSummaries: CollectionSummaries;
 }
 
 type SourceURL = {

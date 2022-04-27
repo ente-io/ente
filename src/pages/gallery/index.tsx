@@ -109,7 +109,6 @@ import { VISIBILITY_STATE } from 'types/magicMetadata';
 import ToastNotification from 'components/ToastNotification';
 import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
-import CollectionInfo from 'components/photoFrame/CollectionInfo';
 import { Collections } from 'components/pages/gallery/Collections';
 
 export const DeadCenter = styled.div`
@@ -135,6 +134,9 @@ const defaultGalleryContext: GalleryContextType = {
     syncWithRemote: () => null,
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
+    startLoading: () => null,
+    finishLoading: () => null,
+    setDialogMessage: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -581,6 +583,9 @@ export default function Gallery() {
                 syncWithRemote,
                 setNotificationAttributes,
                 setBlockingLoad,
+                startLoading,
+                finishLoading,
+                setDialogMessage,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
@@ -619,23 +624,10 @@ export default function Gallery() {
                 <Collections
                     collections={collections}
                     isInSearchMode={isInSearchMode}
-                    activeCollection={activeCollection}
-                    setActiveCollection={setActiveCollection}
+                    activeCollectionID={activeCollection}
+                    setActiveCollectionID={setActiveCollection}
                     collectionSummaries={collectionSummaries}
-                    showCreateCollectionModal={showCreateCollectionModal()}
-                />
-                <CollectionInfo
-                    collectionSummary={collectionSummaries.get(
-                        activeCollection
-                    )}
-                    syncWithRemote={syncWithRemote}
-                    collections={collections}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    activeCollection={activeCollection}
-                    setDialogMessage={setDialogMessage}
-                    startLoading={startLoading}
-                    finishLoading={finishLoading}
-                    redirectToAll={() => setActiveCollection(ALL_SECTION)}
                 />
                 <CollectionNamer
                     show={collectionNamerView}
@@ -712,7 +704,6 @@ export default function Gallery() {
                         collections
                     )}
                     enableDownload={true}
-                    collectionSummaries={collectionSummaries}
                 />
                 {selected.count > 0 &&
                     selected.collectionID === activeCollection && (

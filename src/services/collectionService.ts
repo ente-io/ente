@@ -4,8 +4,6 @@ import localForage from 'utils/storage/localForage';
 
 import { getActualKey, getToken } from 'utils/common/key';
 import CryptoWorker from 'utils/crypto';
-import { SetDialogMessage } from 'components/MessageDialog';
-import constants from 'utils/strings/constants';
 import { getPublicKey } from './userService';
 import { B64EncryptionResult } from 'utils/crypto';
 import HTTPService from './HTTPService';
@@ -476,12 +474,7 @@ export const removeFromCollection = async (
     }
 };
 
-export const deleteCollection = async (
-    collectionID: number,
-    syncWithRemote: () => Promise<void>,
-    redirectToAll: () => void,
-    setDialogMessage: SetDialogMessage
-) => {
+export const deleteCollection = async (collectionID: number) => {
     try {
         const token = getToken();
 
@@ -491,15 +484,9 @@ export const deleteCollection = async (
             null,
             { 'X-Auth-Token': token }
         );
-        await syncWithRemote();
-        redirectToAll();
     } catch (e) {
         logError(e, 'delete collection failed ');
-        setDialogMessage({
-            title: constants.ERROR,
-            content: constants.DELETE_COLLECTION_FAILED,
-            close: { variant: 'danger' },
-        });
+        throw e;
     }
 };
 

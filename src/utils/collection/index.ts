@@ -12,7 +12,6 @@ import { CustomError, ServerErrorCodes } from 'utils/error';
 import { SelectedState } from 'types/gallery';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { SetDialogMessage } from 'components/MessageDialog';
 import { logError } from 'utils/sentry';
 import constants from 'utils/strings/constants';
 import { Collection, CollectionMagicMetadataProps } from 'types/collection';
@@ -96,10 +95,7 @@ export function isFavoriteCollection(
     }
 }
 
-export async function downloadCollection(
-    collectionID: number,
-    setDialogMessage: SetDialogMessage
-) {
+export async function downloadAllCollectionFiles(collectionID: number) {
     try {
         const allFiles = await getLocalFiles();
         const collectionFiles = allFiles.filter(
@@ -108,11 +104,6 @@ export async function downloadCollection(
         await downloadFiles(collectionFiles);
     } catch (e) {
         logError(e, 'download collection failed ');
-        setDialogMessage({
-            title: constants.ERROR,
-            content: constants.DELETE_COLLECTION_FAILED,
-            close: { variant: 'danger' },
-        });
     }
 }
 
@@ -168,19 +159,13 @@ export const shareExpiryOptions = [
     },
 ];
 
-export const changeCollectionVisibilityHelper = async (
+export const changeCollectionVisibility = async (
     collection: Collection,
-    startLoading: () => void,
-    finishLoading: () => void,
-    setDialogMessage: SetDialogMessage,
-    syncWithRemote: () => Promise<void>
+    visibility: VISIBILITY_STATE
 ) => {
-    startLoading();
     try {
         const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-            visibility: collection.magicMetadata?.data.visibility
-                ? VISIBILITY_STATE.VISIBLE
-                : VISIBILITY_STATE.ARCHIVED,
+            visibility,
         };
 
         const updatedCollection = {
@@ -197,23 +182,9 @@ export const changeCollectionVisibilityHelper = async (
         logError(e, 'change file visibility failed');
         switch (e.status?.toString()) {
             case ServerErrorCodes.FORBIDDEN:
-                setDialogMessage({
-                    title: constants.ERROR,
-                    staticBackdrop: true,
-                    close: { variant: 'danger' },
-                    content: constants.NOT_FILE_OWNER,
-                });
-                return;
+                throw Error(constants.NOT_FILE_OWNER);
         }
-        setDialogMessage({
-            title: constants.ERROR,
-            staticBackdrop: true,
-            close: { variant: 'danger' },
-            content: constants.UNKNOWN_ERROR,
-        });
-    } finally {
-        await syncWithRemote();
-        finishLoading();
+        throw e;
     }
 };
 

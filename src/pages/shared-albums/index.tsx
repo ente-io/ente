@@ -163,7 +163,12 @@ export default function PublicCollectionGallery() {
                 await removePublicFiles(collectionUID);
             }
             collectionSummaries.set(collection.id, {
-                collectionName: collection.name,
+                collectionAttributes: {
+                    name: collection.name,
+                    type: collection.type,
+                    id: collection.id,
+                    updationTime: collection.updationTime,
+                },
                 latestFile: files[0],
                 fileCount: files.length,
             });
@@ -302,7 +307,6 @@ export default function PublicCollectionGallery() {
                 enableDownload={
                     publicCollection?.publicURLs?.[0]?.enableDownload ?? true
                 }
-                collectionSummaries={collectionSummaries}
             />
             <AbuseReportForm
                 show={abuseReportFormView}

@@ -40,7 +40,6 @@ interface Props {
     show: boolean;
     onHide: () => void;
     collection: Collection;
-    syncWithRemote: () => Promise<void>;
 }
 interface formValues {
     email: string;

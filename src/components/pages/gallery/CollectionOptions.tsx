@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
-import { SetDialogMessage } from 'components/MessageDialog';
-import { deleteCollection, renameCollection } from 'services/collectionService';
+import React, { useContext, useState } from 'react';
+import * as CollectionAPI from 'services/collectionService';
 import {
-    changeCollectionVisibilityHelper,
-    downloadCollection,
-    getSelectedCollection,
+    changeCollectionVisibility,
+    downloadAllCollectionFiles,
 } from 'utils/collection';
 import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
-import { sleep } from 'utils/common';
 import { Collection } from 'types/collection';
 import { IsArchived } from 'utils/magicMetadata';
 import { InvertedIconButton } from 'components/Container';
@@ -16,68 +13,123 @@ import OptionIcon from 'components/icons/OptionIcon-2';
 import Paper from '@mui/material/Paper';
 import MenuList from '@mui/material/MenuList';
 import { ListItem, Menu, MenuItem } from '@mui/material';
+import { GalleryContext } from 'pages/gallery';
+import { logError } from 'utils/sentry';
+import { VISIBILITY_STATE } from 'types/magicMetadata';
 
 interface CollectionOptionsProps {
-    syncWithRemote: () => Promise<void>;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
-    collections: Collection[];
-    activeCollection: number;
-    setDialogMessage: SetDialogMessage;
-    startLoading: () => void;
-    finishLoading: () => void;
+    activeCollection: Collection;
     showCollectionShareModal: () => void;
     redirectToAll: () => void;
 }
 
+enum CollectionActions {
+    RENAME,
+    DOWNLOAD,
+    ARCHIVE,
+    UNARCHIVE,
+    DELETE,
+}
+
 const CollectionOptions = (props: CollectionOptionsProps) => {
+    const {
+        activeCollection,
+        redirectToAll,
+        setCollectionNamerAttributes,
+        showCollectionShareModal,
+    } = props;
+    const { startLoading, finishLoading, setDialogMessage, syncWithRemote } =
+        useContext(GalleryContext);
+
     const [optionEl, setOptionEl] = useState(null);
     const handleClose = () => setOptionEl(null);
 
-    const collectionRename = async (
-        selectedCollection: Collection,
-        newName: string
-    ) => {
-        if (selectedCollection.name !== newName) {
-            await renameCollection(selectedCollection, newName);
-            props.syncWithRemote();
+    const handleCollectionAction = (action: CollectionActions) => {
+        let callback;
+        switch (action) {
+            case CollectionActions.RENAME:
+                callback = renameCollection;
+                break;
+            case CollectionActions.DOWNLOAD:
+                callback = downloadCollection;
+                break;
+            case CollectionActions.ARCHIVE:
+                callback = archiveCollection;
+                break;
+            case CollectionActions.UNARCHIVE:
+                callback = unArchiveCollection;
+                break;
+            case CollectionActions.DELETE:
+                callback = deleteCollection;
+                break;
+            default:
+                logError(
+                    Error('invalid collection action '),
+                    'handleCollectionAction failed'
+                );
+                {
+                    action;
+                }
+        }
+        return async (...args) => {
+            startLoading();
+            try {
+                await callback(...args);
+                handleClose();
+            } catch (e) {
+                setDialogMessage({
+                    title: constants.ERROR,
+                    content: constants.UNKNOWN_ERROR,
+                    close: { variant: 'danger' },
+                });
+            }
+
+            syncWithRemote();
+            finishLoading();
+        };
+    };
+
+    const renameCollection = (newName: string) => {
+        if (activeCollection.name !== newName) {
+            CollectionAPI.renameCollection(activeCollection, newName);
         }
     };
+
+    const deleteCollection = async () => {
+        await CollectionAPI.deleteCollection(activeCollection.id);
+        redirectToAll();
+    };
+
+    const archiveCollection = () => {
+        changeCollectionVisibility(activeCollection, VISIBILITY_STATE.ARCHIVED);
+    };
+
+    const unArchiveCollection = () => {
+        changeCollectionVisibility(activeCollection, VISIBILITY_STATE.VISIBLE);
+    };
+
+    const downloadCollection = () => {
+        downloadAllCollectionFiles(activeCollection.id);
+    };
+
     const showRenameCollectionModal = () => {
-        props.setCollectionNamerAttributes({
+        setCollectionNamerAttributes({
             title: constants.RENAME_COLLECTION,
             buttonText: constants.RENAME,
-            autoFilledName: getSelectedCollection(
-                props.activeCollection,
-                props.collections
-            )?.name,
-            callback: (newName) => {
-                props.startLoading();
-                collectionRename(
-                    getSelectedCollection(
-                        props.activeCollection,
-                        props.collections
-                    ),
-                    newName
-                );
-            },
+            autoFilledName: activeCollection.name,
+            callback: handleCollectionAction(CollectionActions.RENAME),
         });
     };
+
     const confirmDeleteCollection = () => {
-        props.setDialogMessage({
+        setDialogMessage({
             title: constants.CONFIRM_DELETE_COLLECTION,
             content: constants.DELETE_COLLECTION_MESSAGE(),
             staticBackdrop: true,
             proceed: {
                 text: constants.DELETE_COLLECTION,
-                action: () => {
-                    props.startLoading();
-                    deleteCollection(
-                        props.activeCollection,
-                        props.syncWithRemote,
-                        props.redirectToAll,
-                        props.setDialogMessage
-                    );
-                },
+                action: handleCollectionAction(CollectionActions.DELETE),
                 variant: 'danger',
             },
             close: {
@@ -86,40 +138,20 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         });
     };
 
-    const archiveCollectionHelper = () => {
-        changeCollectionVisibilityHelper(
-            getSelectedCollection(props.activeCollection, props.collections),
-            props.startLoading,
-            props.finishLoading,
-            props.setDialogMessage,
-            props.syncWithRemote
-        );
-    };
-
     const confirmDownloadCollection = () => {
-        props.setDialogMessage({
+        setDialogMessage({
             title: constants.CONFIRM_DOWNLOAD_COLLECTION,
             content: constants.DOWNLOAD_COLLECTION_MESSAGE(),
             staticBackdrop: true,
             proceed: {
                 text: constants.DOWNLOAD,
-                action: downloadCollectionHelper,
+                action: handleCollectionAction(CollectionActions.DOWNLOAD),
                 variant: 'success',
             },
             close: {
                 text: constants.CANCEL,
             },
         });
-    };
-
-    const downloadCollectionHelper = async () => {
-        props.startLoading();
-        await downloadCollection(
-            props.activeCollection,
-            props.setDialogMessage
-        );
-        await sleep(1000);
-        props.finishLoading();
     };
 
     return (
@@ -155,7 +187,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                             </ListItem>
                         </MenuItem>
                         <MenuItem>
-                            <ListItem onClick={props.showCollectionShareModal}>
+                            <ListItem onClick={showCollectionShareModal}>
                                 {constants.SHARE}
                             </ListItem>
                         </MenuItem>
@@ -165,16 +197,21 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                             </ListItem>
                         </MenuItem>
                         <MenuItem>
-                            <ListItem onClick={archiveCollectionHelper}>
-                                {IsArchived(
-                                    getSelectedCollection(
-                                        props.activeCollection,
-                                        props.collections
-                                    )
-                                )
-                                    ? constants.UNARCHIVE
-                                    : constants.ARCHIVE}
-                            </ListItem>
+                            {IsArchived(activeCollection) ? (
+                                <ListItem
+                                    onClick={handleCollectionAction(
+                                        CollectionActions.UNARCHIVE
+                                    )}>
+                                    {constants.UNARCHIVE}
+                                </ListItem>
+                            ) : (
+                                <ListItem
+                                    onClick={handleCollectionAction(
+                                        CollectionActions.ARCHIVE
+                                    )}>
+                                    {constants.ARCHIVE}
+                                </ListItem>
+                            )}
                         </MenuItem>
                         <MenuItem>
                             <ListItem
