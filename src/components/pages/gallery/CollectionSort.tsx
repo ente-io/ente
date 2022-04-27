@@ -64,15 +64,19 @@ export default function CollectionSort(props: Props) {
         <>
             <IconButton
                 onClick={(event) => setSortByEl(event.currentTarget)}
-                aria-controls={sortByEl ? 'basic-menu' : undefined}
+                aria-controls={sortByEl ? 'collection-sort' : undefined}
                 aria-haspopup="true"
                 aria-expanded={sortByEl ? 'true' : undefined}>
                 <SortIcon />
             </IconButton>
             <Menu
+                id="collection-sort"
                 anchorEl={sortByEl}
                 open={Boolean(sortByEl)}
-                onClose={handleClose}>
+                onClose={handleClose}
+                MenuListProps={{
+                    'aria-labelledby': 'collection-sort',
+                }}>
                 <CollectionSortOptions {...props} close={handleClose} />
             </Menu>
         </>

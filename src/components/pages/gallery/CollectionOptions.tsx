@@ -161,18 +161,18 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     transform: 'rotate(90deg)',
                 }}
                 onClick={(event) => setOptionEl(event.currentTarget)}
-                aria-controls={optionEl ? 'basic-menu' : undefined}
+                aria-controls={optionEl ? 'collection-options' : undefined}
                 aria-haspopup="true"
                 aria-expanded={optionEl ? 'true' : undefined}>
                 <OptionIcon />
             </InvertedIconButton>
             <Menu
-                id="basic-menu"
+                id="collection-options"
                 anchorEl={optionEl}
                 open={Boolean(optionEl)}
                 onClose={handleClose}
                 MenuListProps={{
-                    'aria-labelledby': 'basic-button',
+                    'aria-labelledby': 'collection-options',
                 }}>
                 <Paper sx={{ borderRadius: '10px' }}>
                     <MenuList

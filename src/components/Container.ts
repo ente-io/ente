@@ -78,4 +78,7 @@ export const InvertedIconButton = styled(IconButton)`
     &:hover {
         background-color: ${({ theme }) => theme.palette.grey.A100};
     }
+    &:focus {
+        background-color: ${({ theme }) => theme.palette.primary.main};
+    }
 `;
