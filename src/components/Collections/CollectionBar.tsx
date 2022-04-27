@@ -1,7 +1,7 @@
 import NavigationButton, {
     SCROLL_DIRECTION,
 } from 'components/Collections/NavigationButton';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Collection, CollectionSummaries } from 'types/collection';
 import constants from 'utils/strings/constants';
 import { ALL_SECTION } from 'constants/collection';
@@ -9,12 +9,12 @@ import { Link, Typography } from '@mui/material';
 import {
     Hider,
     CollectionBarWrapper,
-    CollectionWithNavigationContainer,
     ScrollContainer,
     TwoScreenSpacedOptionsWithBodyPadding,
 } from 'components/Collections/styledComponents';
 import CollectionCardWithActiveIndicator from 'components/Collections/CollectionCardWithActiveIndicator';
-import { useWindowSize } from 'hooks/useWindowSize';
+import useComponentScroll from 'hooks/useComponentScroll';
+import useWindowSize from 'hooks/useWindowSize';
 
 interface IProps {
     collections: Collection[];
@@ -35,7 +35,16 @@ export default function CollectionBar(props: IProps) {
     } = props;
 
     const windowSize = useWindowSize();
-    const collectionWrapperRef = useRef<HTMLDivElement>(null);
+    const {
+        componentRef,
+        scrollComponent,
+        hasScrollBar,
+        onFarLeft,
+        onFarRight,
+    } = useComponentScroll({
+        dependencies: [windowSize, collections],
+    });
+
     const collectionChipsRef = props.collections.reduce(
         (refMap, collection) => {
             refMap[collection.id] = React.createRef();
@@ -44,93 +53,66 @@ export default function CollectionBar(props: IProps) {
         {}
     );
 
-    const [scrollObj, setScrollObj] = useState<{
-        scrollLeft?: number;
-        scrollWidth?: number;
-        clientWidth?: number;
-    }>({});
-
-    const updateScrollObj = () => {
-        if (collectionWrapperRef.current) {
-            const { scrollLeft, scrollWidth, clientWidth } =
-                collectionWrapperRef.current;
-            setScrollObj({ scrollLeft, scrollWidth, clientWidth });
-        }
-    };
-
-    useEffect(() => {
-        updateScrollObj();
-    }, [collectionWrapperRef.current, windowSize]);
-
-    useEffect(() => {
-        if (!collectionWrapperRef?.current) {
-            return;
-        }
-        collectionWrapperRef.current.scrollLeft = 0;
-    }, [collections]);
-
     useEffect(() => {
         collectionChipsRef[activeCollection]?.current.scrollIntoView({
             inline: 'center',
         });
     }, [activeCollection]);
 
+    useEffect(() => {
+        if (!componentRef?.current) {
+            return;
+        }
+        componentRef.current.scrollLeft = 0;
+    }, [collections]);
+
     const clickHandler = (collectionID?: number) => () => {
         setActiveCollection(collectionID ?? ALL_SECTION);
-    };
-
-    const scrollCollection = (direction: SCROLL_DIRECTION) => () => {
-        collectionWrapperRef.current.scrollBy(250 * direction, 0);
     };
 
     return (
         <Hider hide={props.isInSearchMode}>
             <TwoScreenSpacedOptionsWithBodyPadding>
                 <Typography>{constants.ALBUMS}</Typography>
-                {scrollObj.scrollWidth > scrollObj.clientWidth && (
+                {hasScrollBar && (
                     <Link component="button" onClick={showAllCollections}>
                         {constants.VIEW_ALL_ALBUMS}
                     </Link>
                 )}
             </TwoScreenSpacedOptionsWithBodyPadding>
             <CollectionBarWrapper>
-                <CollectionWithNavigationContainer>
-                    {scrollObj.scrollLeft > 0 && (
-                        <NavigationButton
-                            scrollDirection={SCROLL_DIRECTION.LEFT}
-                            onClick={scrollCollection(SCROLL_DIRECTION.LEFT)}
-                        />
-                    )}
-                    <ScrollContainer
-                        ref={collectionWrapperRef}
-                        onScroll={updateScrollObj}>
+                {!onFarLeft && (
+                    <NavigationButton
+                        scrollDirection={SCROLL_DIRECTION.LEFT}
+                        onClick={scrollComponent(SCROLL_DIRECTION.LEFT)}
+                    />
+                )}
+                <ScrollContainer ref={componentRef}>
+                    <CollectionCardWithActiveIndicator
+                        latestFile={null}
+                        active={activeCollection === ALL_SECTION}
+                        onClick={clickHandler(ALL_SECTION)}>
+                        {constants.ALL_SECTION_NAME}
+                    </CollectionCardWithActiveIndicator>
+                    {collections.map((item) => (
                         <CollectionCardWithActiveIndicator
-                            latestFile={null}
-                            active={activeCollection === ALL_SECTION}
-                            onClick={clickHandler(ALL_SECTION)}>
-                            {constants.ALL_SECTION_NAME}
+                            key={item.id}
+                            latestFile={
+                                collectionSummaries.get(item.id)?.latestFile
+                            }
+                            ref={collectionChipsRef[item.id]}
+                            active={activeCollection === item.id}
+                            onClick={clickHandler(item.id)}>
+                            {item.name}
                         </CollectionCardWithActiveIndicator>
-                        {collections.map((item) => (
-                            <CollectionCardWithActiveIndicator
-                                key={item.id}
-                                latestFile={
-                                    collectionSummaries.get(item.id)?.latestFile
-                                }
-                                ref={collectionChipsRef[item.id]}
-                                active={activeCollection === item.id}
-                                onClick={clickHandler(item.id)}>
-                                {item.name}
-                            </CollectionCardWithActiveIndicator>
-                        ))}
-                    </ScrollContainer>
-                    {scrollObj.scrollLeft <
-                        scrollObj.scrollWidth - scrollObj.clientWidth && (
-                        <NavigationButton
-                            scrollDirection={SCROLL_DIRECTION.RIGHT}
-                            onClick={scrollCollection(SCROLL_DIRECTION.RIGHT)}
-                        />
-                    )}
-                </CollectionWithNavigationContainer>
+                    ))}
+                </ScrollContainer>
+                {!onFarRight && (
+                    <NavigationButton
+                        scrollDirection={SCROLL_DIRECTION.RIGHT}
+                        onClick={scrollComponent(SCROLL_DIRECTION.RIGHT)}
+                    />
+                )}
             </CollectionBarWrapper>
         </Hider>
     );
