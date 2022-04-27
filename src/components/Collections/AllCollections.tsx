@@ -8,16 +8,11 @@ interface Iprops {
 }
 
 import * as React from 'react';
-import PropTypes from 'prop-types';
-import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import Typography from '@mui/material/Typography';
-import Slide from '@mui/material/Slide';
 import constants from 'utils/strings/constants';
 import { FlexWrapper, TwoScreenSpacedOptions } from 'components/Container';
-import { CollectionTile } from '.';
-import { styled } from '@mui/material/styles';
-import { default as styledComponent } from 'styled-components';
+import { LargerCollectionTile } from './styledComponents';
 import CollectionCard from './CollectionCard';
 import Divider from '@mui/material/Divider';
 import { useState } from 'react';
@@ -25,44 +20,9 @@ import CollectionSort from 'components/pages/gallery/CollectionSort';
 import { COLLECTION_SORT_BY } from 'constants/collection';
 import { DialogTitleWithCloseButton } from 'components/MessageDialog';
 import { sortCollectionSummaries } from 'services/collectionService';
-
-export const FloatingSidebar = styled(Dialog)<{ position: 'left' | 'right' }>(
-    ({ position, theme }) => ({
-        '& .MuiDialogContent-root': {
-            padding: theme.spacing(2),
-        },
-        '& .MuiDialogActions-root': {
-            padding: theme.spacing(1),
-        },
-        '& .MuiPaper-root': {
-            maxWidth: '510px',
-        },
-        '& .MuiDialog-container': {
-            justifyContent: position === 'left' ? 'flex-start' : 'flex-end',
-        },
-    })
-);
-
-FloatingSidebar.propTypes = {
-    children: PropTypes.node,
-    onClose: PropTypes.func.isRequired,
-};
-
-export const Transition = (direction: 'left' | 'right' | 'up') =>
-    React.forwardRef(
-        (props: { children: React.ReactElement<any, any> }, ref) => {
-            return <Slide direction={direction} ref={ref} {...props} />;
-        }
-    );
+import { Transition, FloatingSidebar } from 'components/FloatingSidebar';
 
 const LeftSlideTransition = Transition('up');
-
-const LargerCollectionTile = styledComponent(CollectionTile)`
-    width: 150px;
-    height: 150px;
-    align-items:flex-start;
-    margin:4px;
-`;
 
 export default function AllCollections(props: Iprops) {
     const { collectionSummaries, isOpen, close, setActiveCollection } = props;
@@ -76,7 +36,7 @@ export default function AllCollections(props: Iprops) {
         useState<COLLECTION_SORT_BY>(COLLECTION_SORT_BY.LATEST_FILE);
 
     return (
-        <div>
+        <>
             <FloatingSidebar
                 position="right"
                 TransitionComponent={LeftSlideTransition}
@@ -134,6 +94,6 @@ export default function AllCollections(props: Iprops) {
                     </FlexWrapper>
                 </DialogContent>
             </FloatingSidebar>
-        </div>
+        </>
     );
 }

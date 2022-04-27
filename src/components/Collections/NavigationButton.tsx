@@ -1,6 +1,6 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
-import NavigateNext from './icons/NavigateNext';
+import NavigateNext from '../icons/NavigateNext';
 
 export enum SCROLL_DIRECTION {
     LEFT = -1,

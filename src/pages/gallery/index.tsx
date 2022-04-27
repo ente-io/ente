@@ -57,7 +57,7 @@ import CollectionSelector, {
 } from 'components/pages/gallery/CollectionSelector';
 import CollectionNamer, {
     CollectionNamerAttributes,
-} from 'components/pages/gallery/CollectionNamer';
+} from 'components/Collections/CollectionNamer';
 import AlertBanner from 'components/pages/gallery/AlertBanner';
 import UploadButton from 'components/pages/gallery/UploadButton';
 import PlanSelector from 'components/pages/gallery/PlanSelector';
@@ -109,7 +109,7 @@ import { VISIBILITY_STATE } from 'types/magicMetadata';
 import ToastNotification from 'components/ToastNotification';
 import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
-import { Collections } from 'components/pages/gallery/Collections';
+import Collections from 'components/Collections';
 
 export const DeadCenter = styled.div`
     flex: 1;

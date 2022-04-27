@@ -3,7 +3,7 @@ import { GalleryContext } from 'pages/gallery';
 import { useState, useContext, useEffect } from 'react';
 import downloadManager from 'services/downloadManager';
 import { EnteFile } from 'types/file';
-import { CollectionTile } from '.';
+import { CollectionTile } from './styledComponents';
 
 export default function CollectionCard(props: {
     children?: any;

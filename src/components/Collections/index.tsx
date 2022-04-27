@@ -1,11 +1,11 @@
 import { Collection, CollectionSummaries } from 'types/collection';
-import CollectionBar from './CollectionBar';
+import CollectionBar from 'components/Collections/CollectionBar';
 import React, { useEffect, useRef, useState } from 'react';
-import AllCollections from 'components/collection/AllCollections';
-import CollectionInfo from 'components/photoFrame/CollectionInfo';
+import AllCollections from 'components/Collections/AllCollections';
+import CollectionInfo from 'components/Collections/CollectionInfo';
 import { ALL_SECTION } from 'constants/collection';
-import CollectionShare from 'components/CollectionShare';
-import { SetCollectionNamerAttributes } from './CollectionNamer';
+import CollectionShare from 'components/Collections/CollectionShare';
+import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
 interface Iprops {
     collections: Collection[];
     activeCollectionID?: number;
@@ -15,7 +15,7 @@ interface Iprops {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
 }
 
-export function Collections(props: Iprops) {
+export default function Collections(props: Iprops) {
     const {
         collections,
         isInSearchMode,

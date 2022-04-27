@@ -3,6 +3,10 @@ import { IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
 import styled from 'styled-components';
 
 export const CollectionBarWrapper = styled.div`
+    display: flex;
+    position: relative;
+    overflow: hidden;
+    height: 86px;
     width: 100%;
     margin: 10px auto;
     padding: 0 24px;
@@ -21,13 +25,6 @@ export const TwoScreenSpacedOptionsWithBodyPadding = styled(
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * 4}px) {
         padding: 0 4px;
     }
-`;
-
-export const CollectionWithNavigationContainer = styled.div`
-    overflow: hidden;
-    height: 86px;
-    display: flex;
-    position: relative;
 `;
 
 export const ScrollContainer = styled.div`
@@ -71,4 +68,15 @@ export const ActiveIndicator = styled.div`
 export const Hider = styled.div<{ hide: boolean }>`
     opacity: ${(props) => (props.hide ? '0' : '100')};
     height: ${(props) => (props.hide ? '0' : 'auto')};
+`;
+
+export const LargerCollectionTile = styled(CollectionTile)`
+    width: 150px;
+    height: 150px;
+    align-items: flex-start;
+    margin: 4px;
+`;
+
+export const CollectionTitleWithDashedBorder = styled(CollectionTile)`
+    border: 1px dashed ${({ theme }) => theme.palette.grey.A200};
 `;

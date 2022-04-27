@@ -16,24 +16,24 @@ import {
     updateShareableURL,
 } from 'services/collectionService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import SubmitButton from './SubmitButton';
-import MessageDialog from './MessageDialog';
+import SubmitButton from '../SubmitButton';
+import MessageDialog from '../MessageDialog';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import {
     appendCollectionKeyToShareURL,
     selectIntOptions,
     shareExpiryOptions,
 } from 'utils/collection';
-import { FlexWrapper, Label, Row, Value } from './Container';
-import { CodeBlock } from './CodeBlock';
-import { ButtonVariant, getVariantColor } from './pages/gallery/LinkButton';
+import { FlexWrapper, Label, Row, Value } from '../Container';
+import { CodeBlock } from '../CodeBlock';
+import { ButtonVariant, getVariantColor } from '../pages/gallery/LinkButton';
 import { handleSharingErrors } from 'utils/error';
 import { sleep } from 'utils/common';
-import { SelectStyles } from './Search/styles';
+import { SelectStyles } from '../Search/styles';
 import CryptoWorker from 'utils/crypto';
 import { dateStringWithMMH } from 'utils/time';
 import styled from 'styled-components';
-import SingleInputForm from './SingleInputForm';
+import SingleInputForm from '../SingleInputForm';
 import { AppContext } from 'pages/_app';
 
 interface Props {

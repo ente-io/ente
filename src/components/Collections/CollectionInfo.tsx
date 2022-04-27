@@ -2,9 +2,9 @@ import React from 'react';
 import { Typography } from '@mui/material';
 import constants from 'utils/strings/constants';
 import { Collection, CollectionSummary } from 'types/collection';
-import { TwoScreenSpacedOptionsWithBodyPadding } from 'components/collection';
-import CollectionOptions from 'components/pages/gallery/CollectionOptions';
-import { SetCollectionNamerAttributes } from 'components/pages/gallery/CollectionNamer';
+import { TwoScreenSpacedOptionsWithBodyPadding } from 'components/Collections/styledComponents';
+import CollectionOptions from 'components/Collections/CollectionOptions';
+import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
 
 interface Iprops {
     activeCollection: Collection;

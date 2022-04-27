@@ -1,6 +1,6 @@
 import NavigationButton, {
     SCROLL_DIRECTION,
-} from 'components/NavigationButton';
+} from 'components/Collections/NavigationButton';
 import React, { useEffect, useRef, useState } from 'react';
 import { Collection, CollectionSummaries } from 'types/collection';
 import constants from 'utils/strings/constants';
@@ -12,10 +12,9 @@ import {
     CollectionWithNavigationContainer,
     ScrollContainer,
     TwoScreenSpacedOptionsWithBodyPadding,
-    CollectionTile,
-} from 'components/collection';
-import CollectionCardWithActiveIndicator from 'components/collection/CollectionCardWithActiveIndicator';
-import styled from 'styled-components';
+} from 'components/Collections/styledComponents';
+import CollectionCardWithActiveIndicator from 'components/Collections/CollectionCardWithActiveIndicator';
+import { useWindowSize } from 'hooks/useWindowSize';
 
 interface IProps {
     collections: Collection[];
@@ -26,18 +25,6 @@ interface IProps {
     showAllCollections: () => void;
 }
 
-const CollectionTitleWithDashedBorder = styled(CollectionTile)`
-    border: 1px dashed ${({ theme }) => theme.palette.grey.A200};
-`;
-export const CreateNewCollectionTile = (props) => {
-    return (
-        <CollectionTitleWithDashedBorder {...props}>
-            <div>{constants.NEW} </div>
-            <div>{'+'}</div>
-        </CollectionTitleWithDashedBorder>
-    );
-};
-
 export default function CollectionBar(props: IProps) {
     const {
         activeCollection,
@@ -46,6 +33,8 @@ export default function CollectionBar(props: IProps) {
         collectionSummaries,
         showAllCollections,
     } = props;
+
+    const windowSize = useWindowSize();
     const collectionWrapperRef = useRef<HTMLDivElement>(null);
     const collectionChipsRef = props.collections.reduce(
         (refMap, collection) => {
@@ -71,7 +60,7 @@ export default function CollectionBar(props: IProps) {
 
     useEffect(() => {
         updateScrollObj();
-    }, [collectionWrapperRef.current, props.isInSearchMode, collections]);
+    }, [collectionWrapperRef.current, windowSize]);
 
     useEffect(() => {
         if (!collectionWrapperRef?.current) {
