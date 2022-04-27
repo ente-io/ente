@@ -24,7 +24,6 @@ interface IProps {
     isInSearchMode: boolean;
     collectionSummaries: CollectionSummaries;
     showAllCollections: () => void;
-    showCreateCollectionModal: (collectionName: string) => void;
 }
 
 const CollectionTitleWithDashedBorder = styled(CollectionTile)`
@@ -46,7 +45,6 @@ export default function CollectionBar(props: IProps) {
         setActiveCollection,
         collectionSummaries,
         showAllCollections,
-        showCreateCollectionModal,
     } = props;
     const collectionWrapperRef = useRef<HTMLDivElement>(null);
     const collectionChipsRef = props.collections.reduce(
@@ -135,9 +133,6 @@ export default function CollectionBar(props: IProps) {
                                 {item.name}
                             </CollectionCardWithActiveIndicator>
                         ))}
-                        <CreateNewCollectionTile
-                            onClick={showCreateCollectionModal}
-                        />
                     </ScrollContainer>
                     {scrollObj.scrollLeft <
                         scrollObj.scrollWidth - scrollObj.clientWidth && (
