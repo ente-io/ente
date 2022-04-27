@@ -154,7 +154,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     List<Widget> childrens = [];
     if (!_hasTriedToSave) {
       childrens.add(ElevatedButton(
-        child: Text('Save Later'),
+        child: Text('Do this later'),
         style: Theme.of(context).colorScheme.optionalActionButtonStyle,
         onPressed: () async {
           await _saveKeys();
@@ -165,7 +165,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
 
     childrens.add(GradientButton(
       child: Text(
-        'Save',
+        'Save Key',
         style: gradientButtonTextTheme(),
       ),
       linearGradientColors: const [
