@@ -55,16 +55,21 @@ export const getPaymentToken = async () => {
 };
 
 export const getFamiliesToken = async () => {
-    const token = getToken();
+    try {
+        const token = getToken();
 
-    const resp = await HTTPService.get(
-        `${ENDPOINT}/users/families-token`,
-        null,
-        {
-            'X-Auth-Token': token,
-        }
-    );
-    return resp.data['familiesToken'];
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/users/families-token`,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return resp.data['familiesToken'];
+    } catch (e) {
+        logError(e, 'failed to get family token');
+        throw e;
+    }
 };
 
 export const verifyOtt = (email: string, ott: string) =>
@@ -260,16 +265,21 @@ export const changeEmail = async (email: string, ott: string) => {
 };
 
 export const getUserDetailsV2 = async (): Promise<UserDetails> => {
-    const token = getToken();
+    try {
+        const token = getToken();
 
-    const resp = await HTTPService.get(
-        `${ENDPOINT}/users/details/v2?memoryCount=false`,
-        null,
-        {
-            'X-Auth-Token': token,
-        }
-    );
-    return resp.data;
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/users/details/v2?memoryCount=false`,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return resp.data;
+    } catch (e) {
+        logError(e, 'failed to get user details v2');
+        throw e;
+    }
 };
 
 export const getFamilyPortalRedirectURL = async () => {

@@ -93,8 +93,11 @@ export function getFamilyPlanAdmin(familyData: FamilyData): FamilyMember {
     if (isPartOfFamily(familyData)) {
         return familyData.members.find((x) => x.isAdmin);
     } else {
-        throw Error(
-            'verify user is part of family plan before calling this method'
+        logError(
+            Error(
+                'verify user is part of family plan before calling this method'
+            ),
+            'invalid getFamilyPlanAdmin call'
         );
     }
 }
@@ -247,6 +250,7 @@ export async function manageFamilyMethod(
         const url = await getFamilyPortalRedirectURL();
         window.location.href = url;
     } catch (error) {
+        logError(error, 'failed to redirect to family portal');
         setLoading(false);
         setDialogMessage({
             title: constants.ERROR,

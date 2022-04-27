@@ -147,8 +147,10 @@ class billingService {
         }
     }
 
-    public async leaveFamily(): Promise<boolean> {
-        if (!getToken()) return true;
+    public async leaveFamily() {
+        if (!getToken()) {
+            return;
+        }
         try {
             await HTTPService.delete(`${ENDPOINT}/family/leave`, null, null, {
                 'X-Auth-Token': getToken(),

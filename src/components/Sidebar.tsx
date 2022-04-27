@@ -49,6 +49,7 @@ import { downloadAsFile } from 'utils/file';
 import { getUploadLogs, logUploadInfo } from 'utils/upload';
 import styled from 'styled-components';
 import { FamilyData } from 'types/user';
+import { logError } from 'utils/sentry';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -74,24 +75,28 @@ export default function Sidebar(props: Props) {
 
     useEffect(() => {
         const main = async () => {
-            if (!isOpen) {
-                return;
-            }
-            const userDetails = await getUserDetailsV2();
-            setUser({ ...user, email: userDetails.email });
-            SetUsage(convertBytesToHumanReadable(userDetails.usage));
-            setSubscription(userDetails.subscription);
-            setFamilyData(userDetails.familyData);
+            try {
+                if (!isOpen) {
+                    return;
+                }
+                const userDetails = await getUserDetailsV2();
+                setUser({ ...user, email: userDetails.email });
+                SetUsage(convertBytesToHumanReadable(userDetails.usage));
+                setSubscription(userDetails.subscription);
+                setFamilyData(userDetails.familyData);
 
-            setData(LS_KEYS.USER, {
-                ...getData(LS_KEYS.USER),
-                email: userDetails.email,
-            });
-            setData(LS_KEYS.SUBSCRIPTION, userDetails.subscription);
-            if (typeof userDetails.familyData === 'undefined') {
-                removeData(LS_KEYS.FAMILY_DATA);
-            } else {
-                setData(LS_KEYS.FAMILY_DATA, userDetails.familyData);
+                setData(LS_KEYS.USER, {
+                    ...getData(LS_KEYS.USER),
+                    email: userDetails.email,
+                });
+                setData(LS_KEYS.SUBSCRIPTION, userDetails.subscription);
+                if (typeof userDetails.familyData === 'undefined') {
+                    removeData(LS_KEYS.FAMILY_DATA);
+                } else {
+                    setData(LS_KEYS.FAMILY_DATA, userDetails.familyData);
+                }
+            } catch (e) {
+                logError(e, 'failed to update user details');
             }
         };
         main();
@@ -147,8 +152,17 @@ export default function Sidebar(props: Props) {
     }
 
     async function onLeaveFamilyClick() {
-        await billingService.leaveFamily();
-        setIsOpen(false);
+        try {
+            await billingService.leaveFamily();
+            setIsOpen(false);
+        } catch (e) {
+            props.setDialogMessage({
+                title: constants.ERROR,
+                staticBackdrop: true,
+                close: { variant: 'danger' },
+                content: constants.UNKNOWN_ERROR,
+            });
+        }
     }
 
     const Divider = styled.div`
