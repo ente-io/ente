@@ -1,6 +1,6 @@
 import { getEndpoint, getPaymentsURL } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
-import { setData, LS_KEYS } from 'utils/storage/localStorage';
+import { setData, LS_KEYS, removeData } from 'utils/storage/localStorage';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { getPaymentToken } from './userService';
@@ -155,7 +155,7 @@ class billingService {
             await HTTPService.delete(`${ENDPOINT}/family/leave`, null, null, {
                 'X-Auth-Token': getToken(),
             });
-            setData(LS_KEYS.FAMILY_DATA, null);
+            removeData(LS_KEYS.FAMILY_DATA);
         } catch (e) {
             logError(e, '/family/leave failed');
             throw e;
