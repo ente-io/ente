@@ -24,6 +24,7 @@ import { useState } from 'react';
 import CollectionSort from 'components/pages/gallery/CollectionSort';
 import { COLLECTION_SORT_BY } from 'constants/collection';
 import { DialogTitleWithCloseButton } from 'components/MessageDialog';
+import { sortCollectionSummaries } from 'services/collectionService';
 
 export const FloatingSidebar = styled(Dialog)<{ position: 'left' | 'right' }>(
     ({ position, theme }) => ({
@@ -100,29 +101,36 @@ export default function AllCollections(props: Iprops) {
                 <Divider />
                 <DialogContent>
                     <FlexWrapper>
-                        {[...collectionSummaries.entries()].map(
-                            ([id, collectionSummary]) => (
-                                <CollectionCard
-                                    key={id}
-                                    latestFile={collectionSummary.latestFile}
-                                    onClick={() => onCollectionClick(id)}
-                                    customCollectionTile={LargerCollectionTile}>
-                                    <div>
-                                        <Typography>
-                                            <strong>
-                                                {
-                                                    collectionSummary.collectionName
-                                                }
-                                            </strong>
-                                        </Typography>
-                                        <Typography>
-                                            {collectionSummary.fileCount}{' '}
-                                            {constants.PHOTOS}
-                                        </Typography>
-                                    </div>
-                                </CollectionCard>
-                            )
-                        )}
+                        {sortCollectionSummaries(
+                            [...collectionSummaries.values()],
+                            collectionSortBy
+                        ).map((collectionSummary) => (
+                            <CollectionCard
+                                key={collectionSummary.collectionAttributes.id}
+                                latestFile={collectionSummary.latestFile}
+                                onClick={() =>
+                                    onCollectionClick(
+                                        collectionSummary.collectionAttributes
+                                            .id
+                                    )
+                                }
+                                customCollectionTile={LargerCollectionTile}>
+                                <div>
+                                    <Typography>
+                                        <strong>
+                                            {
+                                                collectionSummary
+                                                    .collectionAttributes.name
+                                            }
+                                        </strong>
+                                    </Typography>
+                                    <Typography>
+                                        {collectionSummary.fileCount}{' '}
+                                        {constants.PHOTOS}
+                                    </Typography>
+                                </div>
+                            </CollectionCard>
+                        ))}
                     </FlexWrapper>
                 </DialogContent>
             </FloatingSidebar>

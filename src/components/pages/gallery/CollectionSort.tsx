@@ -24,7 +24,7 @@ const SortByOptionCreator =
             close();
         };
         return (
-            <MenuItem>
+            <MenuItem onClick={handleClick}>
                 <ListItemIcon
                     sx={{
                         minWidth: '30px',
@@ -32,9 +32,7 @@ const SortByOptionCreator =
                     {activeSortBy === props.sortBy && <TickIcon />}
                 </ListItemIcon>
 
-                <ListItemText onClick={handleClick}>
-                    {props.children}
-                </ListItemText>
+                <ListItemText>{props.children}</ListItemText>
             </MenuItem>
         );
     };
@@ -72,13 +70,9 @@ export default function CollectionSort(props: Props) {
                 <SortIcon />
             </IconButton>
             <Menu
-                id="basic-menu"
                 anchorEl={sortByEl}
                 open={Boolean(sortByEl)}
-                onClose={handleClose}
-                MenuListProps={{
-                    'aria-labelledby': 'basic-button',
-                }}>
+                onClose={handleClose}>
                 <CollectionSortOptions {...props} close={handleClose} />
             </Menu>
         </>

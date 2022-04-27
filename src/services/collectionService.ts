@@ -24,6 +24,7 @@ import {
     PublicURL,
     UpdatePublicURL,
     CollectionSummaries,
+    CollectionSummary,
 } from 'types/collection';
 import { COLLECTION_SORT_BY, CollectionType } from 'constants/collection';
 import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
@@ -157,7 +158,7 @@ export const syncCollections = async () => {
         }
     });
 
-    let collections: Collection[] = [];
+    const collections: Collection[] = [];
     let updationTime = await localForage.getItem<number>(
         COLLECTION_UPDATION_TIME
     );
@@ -168,11 +169,7 @@ export const syncCollections = async () => {
             updationTime = Math.max(updationTime, collection.updationTime);
         }
     }
-    collections = sortCollections(
-        collections,
-        [],
-        COLLECTION_SORT_BY.MODIFICATION_TIME
-    );
+
     await localForage.setItem(COLLECTION_TABLE, collections);
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
     return collections;
@@ -711,7 +708,6 @@ export const getNonEmptyCollections = (
     collections: Collection[],
     files: EnteFile[]
 ) => {
-    return collections; // testing change
     const nonEmptyCollectionsIds = new Set<number>();
     for (const file of files) {
         nonEmptyCollectionsIds.add(file.collectionID);
@@ -721,78 +717,46 @@ export const getNonEmptyCollections = (
     );
 };
 
-export function sortCollections(
-    collections: Collection[],
-    collectionAndTheirLatestFile: CollectionAndItsLatestFile[],
+export function sortCollectionSummaries(
+    collectionSummaries: CollectionSummary[],
     sortBy: COLLECTION_SORT_BY
 ) {
     return moveFavCollectionToFront(
-        collections.sort((collectionA, collectionB) => {
+        collectionSummaries.sort((a, b) => {
             switch (sortBy) {
                 case COLLECTION_SORT_BY.LATEST_FILE:
                     return compareCollectionsLatestFile(
-                        collectionAndTheirLatestFile,
-                        collectionA,
-                        collectionB
+                        a.latestFile,
+                        b.latestFile
                     );
                 case COLLECTION_SORT_BY.MODIFICATION_TIME:
-                    return collectionB.updationTime - collectionA.updationTime;
+                    return (
+                        a.collectionAttributes.updationTime -
+                        b.collectionAttributes.updationTime
+                    );
                 case COLLECTION_SORT_BY.NAME:
-                    return collectionA.name.localeCompare(collectionB.name);
+                    return a.collectionAttributes.name.localeCompare(
+                        b.collectionAttributes.name
+                    );
             }
         })
     );
 }
 
-function compareCollectionsLatestFile(
-    collectionAndTheirLatestFile: CollectionAndItsLatestFile[],
-    collectionA: Collection,
-    collectionB: Collection
-) {
-    if (!collectionAndTheirLatestFile?.length) {
-        return 0;
-    }
-    const CollectionALatestFile = getCollectionLatestFile(
-        collectionAndTheirLatestFile,
-        collectionA
-    );
-    const CollectionBLatestFile = getCollectionLatestFile(
-        collectionAndTheirLatestFile,
-        collectionB
-    );
-    if (!CollectionALatestFile || !CollectionBLatestFile) {
-        return 0;
+function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
+    const sortedFiles = sortFiles([first, second]);
+    if (sortedFiles[0].id !== first.id) {
+        return 1;
     } else {
-        const sortedFiles = sortFiles([
-            CollectionALatestFile,
-            CollectionBLatestFile,
-        ]);
-        if (sortedFiles[0].id !== CollectionALatestFile.id) {
-            return 1;
-        } else {
-            return -1;
-        }
+        return -1;
     }
 }
 
-function getCollectionLatestFile(
-    collectionAndTheirLatestFile: CollectionAndItsLatestFile[],
-    collection: Collection
-) {
-    const collectionAndItsLatestFile = collectionAndTheirLatestFile.filter(
-        (collectionAndItsLatestFile) =>
-            collectionAndItsLatestFile.collection.id === collection.id
-    );
-    if (collectionAndItsLatestFile.length === 1) {
-        return collectionAndItsLatestFile[0].file;
-    }
-}
-
-function moveFavCollectionToFront(collections: Collection[]) {
-    return collections.sort((collectionA, collectionB) =>
-        collectionA.type === CollectionType.favorites
+function moveFavCollectionToFront(collectionSummaries: CollectionSummary[]) {
+    return collectionSummaries.sort((a, b) =>
+        a.collectionAttributes.type === CollectionType.favorites
             ? -1
-            : collectionB.type === CollectionType.favorites
+            : b.collectionAttributes.type === CollectionType.favorites
             ? 1
             : 0
     );
@@ -819,7 +783,12 @@ export function getCollectionSummaries(
 
     for (const collection of collections) {
         CollectionSummaries.set(collection.id, {
-            collectionName: collection.name,
+            collectionAttributes: {
+                id: collection.id,
+                name: collection.name,
+                type: collection.type,
+                updationTime: collection.updationTime,
+            },
             latestFile: collectionAndTheirLatestFileMap.get(collection.id),
             fileCount: collectionFilesCount.get(collection.id),
         });
