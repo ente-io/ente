@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography } from '@mui/material';
 import constants from 'utils/strings/constants';
 import { Collection, CollectionSummary } from 'types/collection';
-import { TwoScreenSpacedOptionsWithBodyPadding } from 'components/Collections/styledComponents';
+import { PaddedSpaceBetweenFlex } from 'components/Collections/styledComponents';
 import CollectionOptions from 'components/Collections/CollectionOptions';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
 
@@ -22,7 +22,7 @@ export default function collectionInfo(props: Iprops) {
     } = props;
 
     return (
-        <TwoScreenSpacedOptionsWithBodyPadding>
+        <PaddedSpaceBetweenFlex>
             <div>
                 <Typography variant="h5">
                     <strong>{collectionAttributes.name}</strong>
@@ -32,6 +32,6 @@ export default function collectionInfo(props: Iprops) {
                 </Typography>
             </div>
             <CollectionOptions {...props} />
-        </TwoScreenSpacedOptionsWithBodyPadding>
+        </PaddedSpaceBetweenFlex>
     );
 }

@@ -11,7 +11,7 @@ import * as React from 'react';
 import DialogContent from '@mui/material/DialogContent';
 import Typography from '@mui/material/Typography';
 import constants from 'utils/strings/constants';
-import { FlexWrapper, TwoScreenSpacedOptions } from 'components/Container';
+import { FlexWrapper, SpaceBetweenFlex } from 'components/Container';
 import { LargerCollectionTile } from './styledComponents';
 import CollectionCard from './CollectionCard';
 import Divider from '@mui/material/Divider';
@@ -46,7 +46,7 @@ export default function AllCollections(props: Iprops) {
                     <Typography variant="h6">
                         <strong>{constants.ALL_ALBUMS}</strong>
                     </Typography>
-                    <TwoScreenSpacedOptions>
+                    <SpaceBetweenFlex>
                         <Typography variant="subtitle1">
                             {`${[...props.collectionSummaries.keys()].length} ${
                                 constants.ALBUMS
@@ -56,7 +56,7 @@ export default function AllCollections(props: Iprops) {
                             activeSortBy={collectionSortBy}
                             setCollectionSortBy={setCollectionSortBy}
                         />
-                    </TwoScreenSpacedOptions>
+                    </SpaceBetweenFlex>
                 </DialogTitleWithCloseButton>
                 <Divider />
                 <DialogContent>

@@ -57,7 +57,7 @@ export const Value = styled.div<{ width?: string }>`
 export const FlexWrapper = styled.div`
     display: flex;
     flex-wrap: wrap;
-    align-item: center;
+    align-items: center;
 `;
 
 export const FreeFlowText = styled.div`
@@ -66,9 +66,7 @@ export const FreeFlowText = styled.div`
     text-align: left;
 `;
 
-export const TwoScreenSpacedOptions = styled.div`
-    display: flex;
-    align-items: center;
+export const SpaceBetweenFlex = styled(FlexWrapper)`
     justify-content: space-between;
 `;
 

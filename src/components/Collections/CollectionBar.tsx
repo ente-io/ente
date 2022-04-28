@@ -10,7 +10,7 @@ import {
     Hider,
     CollectionBarWrapper,
     ScrollContainer,
-    TwoScreenSpacedOptionsWithBodyPadding,
+    PaddedSpaceBetweenFlex,
 } from 'components/Collections/styledComponents';
 import CollectionCardWithActiveIndicator from 'components/Collections/CollectionCardWithActiveIndicator';
 import useComponentScroll from 'hooks/useComponentScroll';
@@ -65,14 +65,14 @@ export default function CollectionBar(props: IProps) {
 
     return (
         <Hider hide={props.isInSearchMode}>
-            <TwoScreenSpacedOptionsWithBodyPadding>
+            <PaddedSpaceBetweenFlex>
                 <Typography>{constants.ALBUMS}</Typography>
                 {hasScrollBar && (
                     <Link component="button" onClick={showAllCollections}>
                         {constants.VIEW_ALL_ALBUMS}
                     </Link>
                 )}
-            </TwoScreenSpacedOptionsWithBodyPadding>
+            </PaddedSpaceBetweenFlex>
             <CollectionBarWrapper>
                 {!onFarLeft && (
                     <NavigationButton
