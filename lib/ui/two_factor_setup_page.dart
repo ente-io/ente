@@ -68,7 +68,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "two-factor setup",
+          "Two-factor setup",
         ),
       ),
       body: _getBody(),
@@ -89,12 +89,12 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
                   TabBar(
                     labelColor: Theme.of(context).buttonColor,
                     unselectedLabelColor: Colors.grey,
-                    tabs: [
+                    tabs: const [
                       Tab(
-                        text: "enter code",
+                        text: "Enter code",
                       ),
                       Tab(
-                        text: "scan code",
+                        text: "Scan code",
                       )
                     ],
                     controller: _tabController,
@@ -125,6 +125,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
   }
 
   Widget _getSecretCode() {
+    Color textColor = Theme.of(context).colorScheme.onSurface;
     return GestureDetector(
       onTap: () async {
         await Clipboard.setData(new ClipboardData(text: widget.secretCode));
@@ -136,7 +137,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
           children: [
             Padding(padding: EdgeInsets.all(12)),
             Text(
-              "copy-paste this code\nto your authenticator app",
+              "Copy-paste this code\nto your authenticator app",
               style: TextStyle(
                 height: 1.4,
                 fontSize: 16,
@@ -154,17 +155,17 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
                     style: TextStyle(
                       fontSize: 15,
                       fontFeatures: [FontFeature.tabularFigures()],
-                      color: Colors.white.withOpacity(0.7),
+                      color: textColor.withOpacity(0.7),
                     ),
                   ),
                 ),
-                color: Colors.white.withOpacity(0.1),
+                color: textColor.withOpacity(0.1),
               ),
             ),
             Padding(padding: EdgeInsets.all(6)),
             Text(
               "tap to copy",
-              style: TextStyle(color: Colors.white.withOpacity(0.5)),
+              style: TextStyle(color: textColor.withOpacity(0.5)),
             )
           ],
         ),
@@ -179,7 +180,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
           children: [
             Padding(padding: EdgeInsets.all(12)),
             Text(
-              "scan this barcode with\nyour authenticator app",
+              "Scan this barcode with\nyour authenticator app",
               style: TextStyle(
                 height: 1.4,
                 fontSize: 16,
@@ -203,7 +204,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
       children: [
         Padding(padding: EdgeInsets.all(12)),
         Text(
-          "enter the 6-digit code from\nyour authenticator app",
+          "Enter the 6-digit code from\nyour authenticator app",
           style: TextStyle(
             height: 1.4,
             fontSize: 16,
