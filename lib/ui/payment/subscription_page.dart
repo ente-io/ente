@@ -131,7 +131,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
     _dialog = createProgressDialog(context, "please wait...");
     final appBar = AppBar(
-      title: Text("subscription"),
+      title: Text("Subscription"),
     );
     return Scaffold(
       appBar: appBar,
@@ -228,13 +228,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     text: TextSpan(
                       text: _isActiveStripeSubscriber
                           ? "visit web.ente.io to manage your subscription"
-                          : "payment details",
+                          : "Payment details",
                       style: TextStyle(
-                        color: _isActiveStripeSubscriber
-                            ? Colors.white
-                            : Colors.blue,
-                        fontFamily: 'Ubuntu',
-                        fontSize: 15,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontFamily: 'Inter-Medium',
+                        fontSize: 14,
+                        decoration: _isActiveStripeSubscriber
+                            ? TextDecoration.none
+                            : TextDecoration.underline,
                       ),
                     ),
                     textAlign: TextAlign.center,
@@ -258,11 +259,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 children: [
                   RichText(
                     text: TextSpan(
-                      text: "manage family",
+                      text: "Manage family",
                       style: TextStyle(
-                        color: Colors.blue,
-                        fontFamily: 'Ubuntu',
-                        fontSize: 15,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontFamily: 'Inter-Medium',
+                        fontSize: 14,
+                        decoration: TextDecoration.underline,
                       ),
                     ),
                     textAlign: TextAlign.center,

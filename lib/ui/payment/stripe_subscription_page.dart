@@ -52,8 +52,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   @override
   void initState() {
-    _fetchSub();
-    _dialog = createProgressDialog(context, "please wait...");
     super.initState();
   }
 
@@ -112,7 +110,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   @override
   Widget build(BuildContext context) {
     final appBar = AppBar(
-      title: Text("subscription"),
+      title: Text("Subscription"),
     );
     return Scaffold(
       appBar: appBar,
@@ -123,6 +121,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Widget _getBody() {
     if (!_isLoading) {
       _isLoading = true;
+      _dialog = createProgressDialog(context, "please wait...");
       _fetchSub();
     }
     if (_hasLoadedData) {
@@ -198,15 +197,17 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 children: [
                   RichText(
                     text: TextSpan(
-                      text: !_isStripeSubscriber
-                          ? "visit ${_currentSubscription.paymentProvider} to manage your subscription"
-                          : "payment details",
-                      style: TextStyle(
-                        color: _isStripeSubscriber ? Colors.blue : Colors.white,
-                        fontFamily: 'Ubuntu',
-                        fontSize: 15,
-                      ),
-                    ),
+                        text: !_isStripeSubscriber
+                            ? "visit ${_currentSubscription.paymentProvider} to manage your subscription"
+                            : "Payment details",
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontFamily: 'Inter-Medium',
+                          fontSize: 14,
+                          decoration: _isStripeSubscriber
+                              ? TextDecoration.underline
+                              : TextDecoration.none,
+                        )),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -230,13 +231,13 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   children: [
                     RichText(
                       text: TextSpan(
-                        text: "manage family",
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontFamily: 'Ubuntu',
-                          fontSize: 15,
-                        ),
-                      ),
+                          text: "Manage family",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontFamily: 'Inter-Medium',
+                            fontSize: 14,
+                            decoration: TextDecoration.underline,
+                          )),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -263,7 +264,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
-            return WebPage("payment details", url);
+            return WebPage("Payment details", url);
           },
         ),
       ).then((value) => onWebPaymentGoBack);
@@ -296,13 +297,15 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     bool isRenewCancelled =
         _currentSubscription.attributes?.isCancelled ?? false;
     String title =
-        isRenewCancelled ? "renew subscription" : "cancel subscription";
+        isRenewCancelled ? "Renew subscription" : "Cancel subscription";
     return TextButton(
       child: Text(
         title,
         style: TextStyle(
-          color: (isRenewCancelled ? Colors.greenAccent : Colors.white)
-              .withOpacity(isRenewCancelled ? 1.0 : 0.4),
+          color: (isRenewCancelled
+                  ? Colors.greenAccent
+                  : Theme.of(context).colorScheme.onSurface)
+              .withOpacity(isRenewCancelled ? 1.0 : 0.2),
         ),
       ),
       onPressed: () async {
@@ -423,7 +426,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         child: Text(
           title,
           style: TextStyle(
-            color: Colors.white.withOpacity(reduceOpacity ? 0.5 : 1.0),
+            color: Theme.of(context)
+                .colorScheme
+                .onSurface
+                .withOpacity(reduceOpacity ? 0.5 : 1.0),
           ),
         ),
       );
