@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { LS_KEYS, setData } from 'utils/storage/localStorage';
 
 import { getUserDetails } from 'services/userService';
@@ -11,13 +11,14 @@ import HelpSection from './HelpSection';
 import ExitSection from './ExitSection';
 import DebugLogs from './DebugLogs';
 import { DrawerSidebar, DividerWithMargin } from './styledComponents';
+import { AppContext } from 'pages/_app';
 
 export default function Sidebar() {
+    const { sidebarView, closeSidebar } = useContext(AppContext);
     const [userDetails, setUserDetails] = useState<UserDetails>(null);
     useEffect(() => {
         setUserDetails(getLocalUserDetails());
     }, []);
-    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         const main = async () => {
@@ -26,17 +27,15 @@ export default function Sidebar() {
             setData(LS_KEYS.USER_DETAILS, userDetails);
         };
         main();
-    }, [isOpen]);
-
-    const closeSidebar = () => setIsOpen(false);
+    }, [sidebarView]);
 
     return (
-        <DrawerSidebar
-            anchor="left"
-            open={true}
-            onClose={() => setIsOpen(false)}>
+        <DrawerSidebar anchor="left" open={sidebarView} onClose={closeSidebar}>
             <div>
-                <InfoSection userDetails={userDetails} />
+                <InfoSection
+                    userDetails={userDetails}
+                    closeSidebar={closeSidebar}
+                />
                 <DividerWithMargin />
                 <NavigationSection closeSidebar={closeSidebar} />
                 <UtilitySection closeSidebar={closeSidebar} />

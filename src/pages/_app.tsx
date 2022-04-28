@@ -26,6 +26,7 @@ import MessageDialog, {
 import { ThemeProvider as MThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'darkThemeOptions';
 import { CssBaseline } from '@mui/material';
+import SidebarToggler from 'components/Navbar/SidebarToggler';
 
 export const LogoImage = styled.img`
     max-height: 28px;
@@ -64,6 +65,8 @@ type AppContextType = {
     finishLoading: () => void;
     closeMessageDialog: () => void;
     setDialogMessage: SetDialogMessage;
+    sidebarView: boolean;
+    closeSidebar: () => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -99,6 +102,7 @@ export default function App({ Component, err }) {
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
+    const [sidebarView, setSidebarView] = useState(false);
 
     useEffect(() => {
         if (
@@ -139,6 +143,9 @@ export default function App({ Component, err }) {
     const setUserOnline = () => setOffline(false);
     const setUserOffline = () => setOffline(true);
     const resetSharedFiles = () => setSharedFiles(null);
+
+    const closeSidebar = () => setSidebarView(false);
+    const openSidebar = () => setSidebarView(true);
 
     useEffect(() => {
         if (process.env.NODE_ENV === 'production') {
@@ -235,6 +242,9 @@ export default function App({ Component, err }) {
                     <CssBaseline />
                     {showNavbar && (
                         <Navbar>
+                            {!isAlbumsDomain && (
+                                <SidebarToggler openSidebar={openSidebar} />
+                            )}
                             <FlexContainer shouldJustifyLeft={isAlbumsDomain}>
                                 <LogoImage
                                     style={{ height: '24px', padding: '3px' }}
@@ -289,6 +299,8 @@ export default function App({ Component, err }) {
                             finishLoading,
                             closeMessageDialog,
                             setDialogMessage,
+                            sidebarView,
+                            closeSidebar,
                         }}>
                         {loading ? (
                             <Container>
