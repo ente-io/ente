@@ -24,9 +24,6 @@ html, body {
     flex-direction: column;
     font-family:Inter, Arial, sans-serif !important;
 }
-:is(h1, h2, h3, h4, h5, h6) {
-    color: #d7d7d7;
-}
 
 #__next {
     flex: 1;
@@ -93,14 +90,6 @@ html, body {
 
 .download-banner > a{
     width: 130px;
-}
-
-:root {
-    --primary: #e26f99,
-};
-
-svg {
-    fill: currentColor;
 }
 
 .pswp__img {

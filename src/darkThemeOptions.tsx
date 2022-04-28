@@ -6,11 +6,20 @@ const darkThemeOptions = createTheme({
         MuiPaper: {
             styleOverrides: { root: { backgroundImage: 'none' } },
         },
+        MuiLink: {
+            styleOverrides: {
+                root: {
+                    color: '#fff',
+                    '&:hover': { color: '#51cd7c' },
+                    textDecorationColor: '#fff',
+                },
+            },
+        },
     },
     palette: {
         mode: 'dark',
         primary: {
-            main: '#fff',
+            main: '#51cd7c',
         },
         text: {
             primary: '#fff',
