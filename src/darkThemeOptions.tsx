@@ -3,9 +3,17 @@ import { createTheme } from '@mui/material/styles';
 declare module '@mui/material/styles' {
     interface Palette {
         accent: Palette['primary'];
+        danger: Palette['primary'];
     }
     interface PaletteOptions {
         accent: PaletteOptions['primary'];
+        danger: PaletteOptions['primary'];
+    }
+}
+
+declare module '@mui/material/Button' {
+    export interface ButtonPropsColorOverrides {
+        danger: true;
     }
 }
 
@@ -19,12 +27,17 @@ const darkThemeOptions = createTheme({
             styleOverrides: {
                 root: {
                     color: '#fff',
-                    '&:hover': { color: '#51cd7c' },
-                    textDecorationColor: '#fff',
+                    textDecoration: 'none',
+                    '&:hover': {
+                        color: '#fff',
+                        textDecoration: 'underline',
+                        textDecorationColor: '#fff',
+                    },
                 },
             },
         },
     },
+
     palette: {
         mode: 'dark',
         primary: {
@@ -38,12 +51,11 @@ const darkThemeOptions = createTheme({
             main: '#43BA6C',
             dark: '#369556',
         },
-        background: { default: '#191919', paper: '#191919' },
-        grey: {
-            A100: '#ccc',
-            A200: '#777',
-            A400: '#4E4E4E',
+
+        danger: {
+            main: '#c93f3f',
         },
+        background: { default: '#191919', paper: '#191919' },
     },
 });
 
