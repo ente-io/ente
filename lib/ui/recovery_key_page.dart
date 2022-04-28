@@ -104,11 +104,11 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                             color: Color.fromRGBO(49, 155, 86, .2),
                           ),
                           borderRadius: BorderRadius.all(
-                            Radius.circular(12),
+                            Radius.circular(2),
                           ),
-                          color: Color.fromRGBO(49, 155, 86, .2),
+                          color:
+                              Theme.of(context).colorScheme.recoveryKeyBoxColor,
                         ),
-                        // color: Color.fromRGBO(49, 155, 86, .2),
                         height: 120,
                         padding: EdgeInsets.all(20),
                         width: double.infinity,
@@ -124,7 +124,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                       child: Padding(
                           child: Text(
                             widget.subText ??
-                                "we don’t store this key, please save this in a safe place",
+                                "We don’t store this key, please save this in a safe place.",
                             style: Theme.of(context).textTheme.bodyText1,
                           ),
                           padding: EdgeInsets.all(20)),
