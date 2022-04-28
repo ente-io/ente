@@ -20,7 +20,10 @@ import CollectionSort from 'components/pages/gallery/CollectionSort';
 import { COLLECTION_SORT_BY } from 'constants/collection';
 import { DialogTitleWithCloseButton } from 'components/MessageDialog';
 import { sortCollectionSummaries } from 'services/collectionService';
-import { Transition, FloatingSidebar } from 'components/FloatingSidebar';
+import {
+    Transition,
+    FloatingDrawer,
+} from 'components/Collections/FloatingDrawer';
 
 const LeftSlideTransition = Transition('up');
 
@@ -37,7 +40,7 @@ export default function AllCollections(props: Iprops) {
 
     return (
         <>
-            <FloatingSidebar
+            <FloatingDrawer
                 position="right"
                 TransitionComponent={LeftSlideTransition}
                 onClose={close}
@@ -94,7 +97,7 @@ export default function AllCollections(props: Iprops) {
                         )}
                     </FlexWrapper>
                 </DialogContent>
-            </FloatingSidebar>
+            </FloatingDrawer>
         </>
     );
 }
