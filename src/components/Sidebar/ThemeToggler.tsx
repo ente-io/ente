@@ -1,8 +1,8 @@
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import React from 'react';
-import { THEMES } from '.';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import { THEMES } from './InfoSection';
 interface Iprops {
     theme: THEMES;
     setTheme: (theme: THEMES) => void;

@@ -30,3 +30,10 @@ export function reverseString(title: string) {
         ?.split(' ')
         .reduce((reversedString, currWord) => `${currWord} ${reversedString}`);
 }
+
+export function initiateEmail(email: string) {
+    const a = document.createElement('a');
+    a.href = 'mailto:' + email;
+    a.rel = 'noreferrer noopener';
+    a.click();
+}
