@@ -57,7 +57,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
             )
           : null,
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
+        padding: EdgeInsets.fromLTRB(20, widget.showAppBar ? 40 : 120, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           // mainAxisAlignment: MainAxisAlignment.center,
@@ -104,11 +104,11 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                             color: Color.fromRGBO(49, 155, 86, .2),
                           ),
                           borderRadius: BorderRadius.all(
-                            Radius.circular(12),
+                            Radius.circular(2),
                           ),
-                          color: Color.fromRGBO(49, 155, 86, .2),
+                          color:
+                              Theme.of(context).colorScheme.recoveryKeyBoxColor,
                         ),
-                        // color: Color.fromRGBO(49, 155, 86, .2),
                         height: 120,
                         padding: EdgeInsets.all(20),
                         width: double.infinity,
@@ -124,7 +124,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                       child: Padding(
                           child: Text(
                             widget.subText ??
-                                "we don’t store this key, please save this in a safe place",
+                                "We don’t store this key, please save this in a safe place.",
                             style: Theme.of(context).textTheme.bodyText1,
                           ),
                           padding: EdgeInsets.all(20)),
@@ -154,7 +154,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     List<Widget> childrens = [];
     if (!_hasTriedToSave) {
       childrens.add(ElevatedButton(
-        child: Text('Save Later'),
+        child: Text('Do this later'),
         style: Theme.of(context).colorScheme.optionalActionButtonStyle,
         onPressed: () async {
           await _saveKeys();
@@ -165,7 +165,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
 
     childrens.add(GradientButton(
       child: Text(
-        'Save',
+        'Save Key',
         style: gradientButtonTextTheme(),
       ),
       linearGradientColors: const [

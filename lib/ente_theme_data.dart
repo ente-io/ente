@@ -25,6 +25,10 @@ extension CustomColorScheme on ColorScheme {
           primary: Color(0xFFF0F0F0),
           elevation: 0)
       .style;
+
+  Color get recoveryKeyBoxColor => brightness == Brightness.light
+      ? Color.fromRGBO(49, 155, 86, 0.2)
+      : Color(0xFF1DB954);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(

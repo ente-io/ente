@@ -78,7 +78,8 @@ class CollectionsService {
         _prefs.getInt(_collectionsSyncTimeKey) ?? 0;
 
     // Might not have synced the collection fully
-    final fetchedCollections = await _fetchCollections(0);
+    final fetchedCollections =
+        await _fetchCollections(lastCollectionUpdationTime);
     final updatedCollections = <Collection>[];
     int maxUpdationTime = lastCollectionUpdationTime;
     final ownerID = _config.getUserID();

@@ -42,12 +42,12 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     if (Platform.isAndroid && kDebugMode) {
       AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
     }
-    _dialog = createProgressDialog(context, "please wait...");
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    _dialog = createProgressDialog(context, "please wait...");
     if (initPaymentUrl == null) {
       return loadWidget;
     }

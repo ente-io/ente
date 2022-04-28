@@ -30,7 +30,7 @@ class _SessionsPageState extends State<SessionsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("active sessions"),
+        title: Text("Active sessions"),
       ),
       body: _getBody(),
     );
@@ -75,7 +75,10 @@ class _SessionsPageState extends State<SessionsPage> {
                       child: Text(
                         session.ip,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.8),
                           fontSize: 14,
                         ),
                       ),
@@ -85,7 +88,10 @@ class _SessionsPageState extends State<SessionsPage> {
                       child: Text(
                         getFormattedTime(lastUsedTime),
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.8),
                           fontSize: 12,
                         ),
                       ),

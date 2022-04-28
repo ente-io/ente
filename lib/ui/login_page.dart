@@ -5,12 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/report_bug_popup.dart';
+import 'package:photos/ui/common/dynamicFAB.dart';
 import 'package:photos/ui/web_page.dart';
-import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/email_util.dart';
-
-import 'common/dynamicFAB.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);

@@ -10,12 +10,16 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
+import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
+import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import 'package:photos/ui/progress_dialog.dart';
+import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -29,47 +33,28 @@ class SubscriptionPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-   State<SubscriptionPage> createState() => _SubscriptionPageState();
+  State<SubscriptionPage> createState() => _SubscriptionPageState();
 }
 
 class _SubscriptionPageState extends State<SubscriptionPage> {
   final _logger = Logger("SubscriptionPage");
   final _billingService = BillingService.instance;
+  final _userService = UserService.instance;
   Subscription _currentSubscription;
   StreamSubscription _purchaseUpdateSubscription;
   ProgressDialog _dialog;
-  Future<int> _usageFuture;
+  UserDetails _userDetails;
   bool _hasActiveSubscription;
   FreePlan _freePlan;
   List<BillingPlan> _plans;
   bool _hasLoadedData = false;
+  bool _isLoading = false;
   bool _isActiveStripeSubscriber;
 
   @override
   void initState() {
     _billingService.setIsOnSubscriptionPage(true);
-    _billingService.fetchSubscription().then((subscription) async {
-      _currentSubscription = subscription;
-      _hasActiveSubscription = _currentSubscription.isValid();
-      final billingPlans = await _billingService.getBillingPlans();
-      _isActiveStripeSubscriber =
-          _currentSubscription.paymentProvider == kStripe &&
-              _currentSubscription.isValid();
-      _plans = billingPlans.plans.where((plan) {
-        final productID = _isActiveStripeSubscriber
-            ? plan.stripeID
-            : Platform.isAndroid
-            ? plan.androidID
-            : plan.iosID;
-        return productID != null && productID.isNotEmpty;
-      }).toList();
-      _freePlan = billingPlans.freePlan;
-      _usageFuture = _billingService.fetchUsage();
-      _hasLoadedData = true;
-      setState(() {});
-    });
     _setupPurchaseUpdateStreamListener();
-    _dialog = createProgressDialog(context, "please wait...");
     super.initState();
   }
 
@@ -140,8 +125,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isLoading) {
+      _isLoading = true;
+      _fetchSubData();
+    }
+    _dialog = createProgressDialog(context, "please wait...");
     final appBar = AppBar(
-      title: Text("subscription"),
+      title: Text("Subscription"),
     );
     return Scaffold(
       appBar: appBar,
@@ -149,9 +139,36 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
+  Future<void> _fetchSubData() async {
+    _userService.getUserDetailsV2(memberCount: false).then((userDetails) async {
+      _userDetails = userDetails;
+      _currentSubscription = userDetails.subscription;
+      _hasActiveSubscription = _currentSubscription.isValid();
+      final billingPlans = await _billingService.getBillingPlans();
+      _isActiveStripeSubscriber =
+          _currentSubscription.paymentProvider == kStripe &&
+              _currentSubscription.isValid();
+      _plans = billingPlans.plans.where((plan) {
+        final productID = _isActiveStripeSubscriber
+            ? plan.stripeID
+            : Platform.isAndroid
+                ? plan.androidID
+                : plan.iosID;
+        return productID != null && productID.isNotEmpty;
+      }).toList();
+      _freePlan = billingPlans.freePlan;
+      _hasLoadedData = true;
+      setState(() {});
+    });
+  }
+
   Widget _getBody() {
     if (_hasLoadedData) {
-      return _buildPlans();
+      if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
+        return ChildSubscriptionWidget(userDetails: _userDetails);
+      } else {
+        return _buildPlans();
+      }
     }
     return loadWidget;
   }
@@ -160,7 +177,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final widgets = <Widget>[];
     widgets.add(SubscriptionHeaderWidget(
       isOnboarding: widget.isOnboarding,
-      usageFuture: _usageFuture,
+      currentUsage: _userDetails.getFamilyOrPersonalUsage(),
     ));
 
     widgets.addAll([
@@ -177,7 +194,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       widgets.add(ValidityWidget(currentSubscription: _currentSubscription));
     }
 
-    if ( _currentSubscription.productID == kFreeProductID) {
+    if (_currentSubscription.productID == kFreeProductID) {
       if (widget.isOnboarding) {
         widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
       }
@@ -204,20 +221,50 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               }
             },
             child: Container(
-              padding: EdgeInsets.fromLTRB(40, 80, 40, 80),
+              padding: EdgeInsets.fromLTRB(40, 80, 40, 20),
               child: Column(
                 children: [
                   RichText(
                     text: TextSpan(
                       text: _isActiveStripeSubscriber
                           ? "visit web.ente.io to manage your subscription"
-                          : "payment details",
+                          : "Payment details",
                       style: TextStyle(
-                        color: _isActiveStripeSubscriber
-                            ? Colors.white
-                            : Colors.blue,
-                        fontFamily: 'Ubuntu',
-                        fontSize: 15,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontFamily: 'Inter-Medium',
+                        fontSize: 14,
+                        decoration: _isActiveStripeSubscriber
+                            ? TextDecoration.none
+                            : TextDecoration.underline,
+                      ),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ]);
+      widgets.addAll([
+        Align(
+          alignment: Alignment.topCenter,
+          child: GestureDetector(
+            onTap: () async {
+              _launchFamilyPortal();
+            },
+            child: Container(
+              padding: EdgeInsets.fromLTRB(40, 0, 40, 80),
+              child: Column(
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      text: "Manage family",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontFamily: 'Inter-Medium',
+                        fontSize: 14,
+                        decoration: TextDecoration.underline,
                       ),
                     ),
                     textAlign: TextAlign.center,
@@ -257,7 +304,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               if (isActive) {
                 return;
               }
-              showErrorDialog(context, "sorry",
+              showErrorDialog(context, "Sorry",
                   "please visit web.ente.io to manage your subscription");
             },
             child: SubscriptionPlanWidget(
@@ -305,19 +352,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               if (isActive) {
                 return;
               }
-              await _dialog.show();
-              if (_usageFuture != null) {
-                final usage = await _usageFuture;
-                if (usage > plan.storage) {
-                  await _dialog.hide();
-                  showErrorDialog(
-                      context, "sorry", "you cannot downgrade to this plan");
-                  return;
-                }
+              if (_userDetails.getFamilyOrPersonalUsage() > plan.storage) {
+                showErrorDialog(
+                    context, "Sorry", "you cannot downgrade to this plan");
+                return;
               }
+              await _dialog.show();
               final ProductDetailsResponse response =
-              await InAppPurchaseConnection.instance
-                  .queryProductDetails({productID});
+                  await InAppPurchaseConnection.instance
+                      .queryProductDetails({productID});
               if (response.notFoundIDs.isNotEmpty) {
                 _logger.severe("Could not find products: " +
                     response.notFoundIDs.toString());
@@ -331,8 +374,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   _currentSubscription.productID != plan.androidID;
               if (isCrossGradingOnAndroid) {
                 final existingProductDetailsResponse =
-                await InAppPurchaseConnection.instance
-                    .queryProductDetails({_currentSubscription.productID});
+                    await InAppPurchaseConnection.instance
+                        .queryProductDetails({_currentSubscription.productID});
                 if (existingProductDetailsResponse.notFoundIDs.isNotEmpty) {
                   _logger.severe("Could not find existing products: " +
                       response.notFoundIDs.toString());
@@ -400,5 +443,22 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       ),
     );
   }
-}
 
+  Future<void> _launchFamilyPortal() async {
+    await _dialog.show();
+    try {
+      final String jwtToken = await _userService.getFamiliesToken();
+      final bool familyExist = _userDetails.isPartOfFamily();
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (BuildContext context) {
+          return WebPage("family",
+              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist');
+        },
+      ));
+    } catch (e) {
+      await _dialog.hide();
+      showGenericErrorDialog(context);
+    }
+    await _dialog.hide();
+  }
+}

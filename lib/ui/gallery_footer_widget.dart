@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/common/gradientButton.dart';
 import 'package:photos/utils/navigation_util.dart';
-import 'package:sqflite/utils/utils.dart';
 
 class GalleryFooterWidget extends StatelessWidget {
   const GalleryFooterWidget({Key key}) : super(key: key);

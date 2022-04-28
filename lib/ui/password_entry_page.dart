@@ -10,14 +10,13 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/common/dynamicFAB.dart';
 import 'package:photos/ui/payment/subscription.dart';
-import 'package:photos/ui/recovery_key_dialog.dart';
+import 'package:photos/ui/recovery_key_page.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
-
-import 'common/dynamicFAB.dart';
 
 enum PasswordEntryMode {
   set,
@@ -683,25 +682,21 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         }
       }
 
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return RecoveryKeyDialog(
+      routeToPage(
+          context,
+          RecoveryKeyPage(
             result.privateKeyAttributes.recoveryKey,
-            "continue",
-            onDone,
+            "Continue",
+            showAppBar: false,
             isDismissible: false,
-          );
-        },
-        barrierColor: Colors.black.withOpacity(0.85),
-        barrierDismissible: false,
-      );
+            onDone: onDone,
+          ));
     } catch (e) {
       _logger.severe(e);
       await dialog.hide();
       if (e is UnsupportedError) {
         showErrorDialog(context, "insecure device",
-            "sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.");
+            "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.");
       } else {
         showGenericErrorDialog(context);
       }
