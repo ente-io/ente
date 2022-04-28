@@ -713,13 +713,13 @@ export function sortCollectionSummaries(
             switch (sortBy) {
                 case COLLECTION_SORT_BY.LATEST_FILE:
                     return compareCollectionsLatestFile(
-                        a.latestFile,
-                        b.latestFile
+                        b.latestFile,
+                        a.latestFile
                     );
                 case COLLECTION_SORT_BY.MODIFICATION_TIME:
                     return (
-                        a.collectionAttributes.updationTime -
-                        b.collectionAttributes.updationTime
+                        b.collectionAttributes.updationTime -
+                        a.collectionAttributes.updationTime
                     );
                 case COLLECTION_SORT_BY.NAME:
                     return a.collectionAttributes.name.localeCompare(
