@@ -7,6 +7,8 @@ import { SetLoading } from 'types/gallery';
 import { getData, LS_KEYS } from '../storage/localStorage';
 import { CustomError } from '../error';
 import { logError } from '../sentry';
+import { getFamilyPortalRedirectURL } from 'services/userService';
+import { FamilyData, FamilyMember, User } from 'types/user';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';
 const PAYMENT_PROVIDER_APPSTORE = 'appstore';
@@ -44,8 +46,7 @@ export function convertBytesToHumanReadable(
     return (bytes / Math.pow(1024, i)).toFixed(precision) + ' ' + sizes[i];
 }
 
-export function hasPaidSubscription(subscription?: Subscription) {
-    subscription = subscription ?? getUserSubscription();
+export function hasPaidSubscription(subscription: Subscription) {
     return (
         subscription &&
         isSubscriptionActive(subscription) &&
@@ -53,20 +54,17 @@ export function hasPaidSubscription(subscription?: Subscription) {
     );
 }
 
-export function isSubscribed(subscription?: Subscription) {
-    subscription = subscription ?? getUserSubscription();
+export function isSubscribed(subscription: Subscription) {
     return (
         hasPaidSubscription(subscription) &&
         !isSubscriptionCancelled(subscription)
     );
 }
-export function isSubscriptionActive(subscription?: Subscription): boolean {
-    subscription = subscription ?? getUserSubscription();
+export function isSubscriptionActive(subscription: Subscription): boolean {
     return subscription && subscription.expiryTime > Date.now() * 1000;
 }
 
-export function isOnFreePlan(subscription?: Subscription) {
-    subscription = subscription ?? getUserSubscription();
+export function isOnFreePlan(subscription: Subscription) {
     return (
         subscription &&
         isSubscriptionActive(subscription) &&
@@ -74,13 +72,49 @@ export function isOnFreePlan(subscription?: Subscription) {
     );
 }
 
-export function isSubscriptionCancelled(subscription?: Subscription) {
-    subscription = subscription ?? getUserSubscription();
+export function isSubscriptionCancelled(subscription: Subscription) {
     return subscription && subscription.attributes.isCancelled;
+}
+
+// isPartOfFamily return true if the current user is part of some family plan
+export function isPartOfFamily(familyData: FamilyData): boolean {
+    return Boolean(
+        familyData && familyData.members && familyData.members.length > 0
+    );
+}
+
+export function isFamilyAdmin(familyData: FamilyData): boolean {
+    const familyAdmin: FamilyMember = getFamilyPlanAdmin(familyData);
+    const user: User = getData(LS_KEYS.USER);
+    return familyAdmin.email === user.email;
+}
+
+export function getFamilyPlanAdmin(familyData: FamilyData): FamilyMember {
+    if (isPartOfFamily(familyData)) {
+        return familyData.members.find((x) => x.isAdmin);
+    } else {
+        logError(
+            Error(
+                'verify user is part of family plan before calling this method'
+            ),
+            'invalid getFamilyPlanAdmin call'
+        );
+    }
+}
+
+export function getStorage(familyData: FamilyData): number {
+    const subscription: Subscription = getUserSubscription();
+    return isPartOfFamily(familyData)
+        ? familyData.storage
+        : subscription.storage;
 }
 
 export function getUserSubscription(): Subscription {
     return getData(LS_KEYS.SUBSCRIPTION);
+}
+
+export function getFamilyData(): FamilyData {
+    return getData(LS_KEYS.FAMILY_DATA);
 }
 
 export function getPlans(): Plan[] {
@@ -207,6 +241,25 @@ export async function updatePaymentMethod(
     }
 }
 
+export async function manageFamilyMethod(
+    setDialogMessage: SetDialogMessage,
+    setLoading: SetLoading
+) {
+    try {
+        setLoading(true);
+        const url = await getFamilyPortalRedirectURL();
+        window.location.href = url;
+    } catch (error) {
+        logError(error, 'failed to redirect to family portal');
+        setLoading(false);
+        setDialogMessage({
+            title: constants.ERROR,
+            content: constants.UNKNOWN_ERROR,
+            close: { variant: 'danger' },
+        });
+    }
+}
+
 export async function checkSubscriptionPurchase(
     setDialogMessage: SetDialogMessage,
     router: NextRouter,
@@ -303,9 +356,6 @@ function handleFailureReason(
 }
 
 export function planForSubscription(subscription: Subscription) {
-    if (!subscription) {
-        return null;
-    }
     return {
         id: subscription.productID,
         storage: subscription.storage,

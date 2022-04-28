@@ -2,7 +2,12 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
 import constants from 'utils/strings/constants';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import {
+    getData,
+    LS_KEYS,
+    removeData,
+    setData,
+} from 'utils/storage/localStorage';
 import { getToken } from 'utils/common/key';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { Button } from 'react-bootstrap';
@@ -13,14 +18,19 @@ import {
     isSubscriptionCancelled,
     isSubscribed,
     convertBytesToHumanReadable,
+    getFamilyData,
+    isPartOfFamily,
+    getStorage,
+    isFamilyAdmin,
+    getFamilyPlanAdmin,
 } from 'utils/billing';
-
+import billingService from 'services/billingService';
 import isElectron from 'is-electron';
 import { Collection } from 'types/collection';
 import { useRouter } from 'next/router';
 import LinkButton from './pages/gallery/LinkButton';
 import { downloadApp } from 'utils/common';
-import { getUserDetails, logoutUser } from 'services/userService';
+import { getUserDetailsV2, logoutUser } from 'services/userService';
 import { LogoImage } from 'pages/_app';
 import { SetDialogMessage } from './MessageDialog';
 import EnteSpinner from './EnteSpinner';
@@ -38,6 +48,8 @@ import { SetLoading } from 'types/gallery';
 import { downloadAsFile } from 'utils/file';
 import { getUploadLogs, logUploadInfo } from 'utils/upload';
 import styled from 'styled-components';
+import { FamilyData } from 'types/user';
+import { logError } from 'utils/sentry';
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
@@ -47,10 +59,7 @@ export default function Sidebar(props: Props) {
     const [usage, SetUsage] = useState<string>(null);
     const [user, setUser] = useState(null);
     const [subscription, setSubscription] = useState<Subscription>(null);
-    useEffect(() => {
-        setUser(getData(LS_KEYS.USER));
-        setSubscription(getUserSubscription());
-    }, []);
+    const [familyData, setFamilyData] = useState<FamilyData>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
@@ -59,19 +68,36 @@ export default function Sidebar(props: Props) {
     const galleryContext = useContext(GalleryContext);
 
     useEffect(() => {
+        setUser(getData(LS_KEYS.USER));
+        setSubscription(getUserSubscription());
+        setFamilyData(getFamilyData());
+    }, []);
+
+    useEffect(() => {
         const main = async () => {
-            if (!isOpen) {
-                return;
+            try {
+                if (!isOpen) {
+                    return;
+                }
+                const userDetails = await getUserDetailsV2();
+                setUser({ ...user, email: userDetails.email });
+                SetUsage(convertBytesToHumanReadable(userDetails.usage));
+                setSubscription(userDetails.subscription);
+                setFamilyData(userDetails.familyData);
+
+                setData(LS_KEYS.USER, {
+                    ...getData(LS_KEYS.USER),
+                    email: userDetails.email,
+                });
+                setData(LS_KEYS.SUBSCRIPTION, userDetails.subscription);
+                if (typeof userDetails.familyData === 'undefined') {
+                    removeData(LS_KEYS.FAMILY_DATA);
+                } else {
+                    setData(LS_KEYS.FAMILY_DATA, userDetails.familyData);
+                }
+            } catch (e) {
+                logError(e, 'failed to update user details');
             }
-            const userDetails = await getUserDetails();
-            setUser({ ...user, email: userDetails.email });
-            SetUsage(convertBytesToHumanReadable(userDetails.usage));
-            setSubscription(userDetails.subscription);
-            setData(LS_KEYS.USER, {
-                ...getData(LS_KEYS.USER),
-                email: userDetails.email,
-            });
-            setData(LS_KEYS.SUBSCRIPTION, userDetails.subscription);
         };
         main();
     }, [isOpen]);
@@ -125,6 +151,20 @@ export default function Sidebar(props: Props) {
         galleryContext.showPlanSelectorModal();
     }
 
+    async function onLeaveFamilyClick() {
+        try {
+            await billingService.leaveFamily();
+            setIsOpen(false);
+        } catch (e) {
+            props.setDialogMessage({
+                title: constants.ERROR,
+                staticBackdrop: true,
+                close: { variant: 'danger' },
+                content: constants.UNKNOWN_ERROR,
+            });
+        }
+    }
+
     const Divider = styled.div`
         height: 1px;
         margin-top: 40px;
@@ -169,34 +209,62 @@ export default function Sidebar(props: Props) {
                             {constants.SUBSCRIPTION_PLAN}
                         </h5>
                     </div>
-                    <div style={{ color: '#959595' }}>
-                        {isSubscriptionActive(subscription) ? (
-                            isOnFreePlan(subscription) ? (
-                                constants.FREE_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime
-                                )
-                            ) : isSubscriptionCancelled(subscription) ? (
-                                constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime
+                    {!isPartOfFamily(familyData) ||
+                    isFamilyAdmin(familyData) ? (
+                        <div style={{ color: '#959595' }}>
+                            {isSubscriptionActive(subscription) ? (
+                                isOnFreePlan(subscription) ? (
+                                    constants.FREE_SUBSCRIPTION_INFO(
+                                        subscription?.expiryTime
+                                    )
+                                ) : isSubscriptionCancelled(subscription) ? (
+                                    constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
+                                        subscription?.expiryTime
+                                    )
+                                ) : (
+                                    constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
+                                        subscription?.expiryTime
+                                    )
                                 )
                             ) : (
-                                constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime
-                                )
-                            )
-                        ) : (
-                            <p>{constants.SUBSCRIPTION_EXPIRED}</p>
-                        )}
-                        <Button
-                            variant="outline-success"
-                            block
-                            size="sm"
-                            onClick={onManageClick}>
-                            {isSubscribed(subscription)
-                                ? constants.MANAGE
-                                : constants.SUBSCRIBE}
-                        </Button>
-                    </div>
+                                <p>{constants.SUBSCRIPTION_EXPIRED}</p>
+                            )}
+                            <Button
+                                variant="outline-success"
+                                block
+                                size="sm"
+                                onClick={onManageClick}>
+                                {isSubscribed(subscription)
+                                    ? constants.MANAGE
+                                    : constants.SUBSCRIBE}
+                            </Button>
+                        </div>
+                    ) : (
+                        <div style={{ color: '#959595' }}>
+                            {constants.FAMILY_PLAN_MANAGE_ADMIN_ONLY(
+                                getFamilyPlanAdmin(familyData)?.email
+                            )}
+                            <Button
+                                variant="outline-success"
+                                block
+                                size="sm"
+                                onClick={() =>
+                                    props.setDialogMessage({
+                                        title: `${constants.LEAVE_FAMILY}`,
+                                        content: constants.LEAVE_FAMILY_CONFIRM,
+                                        staticBackdrop: true,
+                                        proceed: {
+                                            text: constants.LEAVE_FAMILY,
+                                            action: onLeaveFamilyClick,
+                                            variant: 'danger',
+                                        },
+                                        close: { text: constants.CANCEL },
+                                    })
+                                }>
+                                {constants.LEAVE_FAMILY}
+                            </Button>
+                        </div>
+                    )}
                 </div>
                 <div style={{ outline: 'none', marginTop: '30px' }} />
                 <div>
@@ -205,10 +273,19 @@ export default function Sidebar(props: Props) {
                     </h5>
                     <div style={{ color: '#959595' }}>
                         {usage ? (
-                            constants.USAGE_INFO(
-                                usage,
-                                convertBytesToHumanReadable(
-                                    subscription?.storage
+                            isPartOfFamily(familyData) ? (
+                                constants.FAMILY_USAGE_INFO(
+                                    usage,
+                                    convertBytesToHumanReadable(
+                                        getStorage(familyData)
+                                    )
+                                )
+                            ) : (
+                                constants.USAGE_INFO(
+                                    usage,
+                                    convertBytesToHumanReadable(
+                                        subscription?.storage
+                                    )
                                 )
                             )
                         ) : (

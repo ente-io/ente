@@ -252,6 +252,9 @@ const englishConstants = {
     USAGE_DETAILS: 'usage',
     MANAGE: 'manage',
     MANAGEMENT_PORTAL: 'manage payment method',
+    MANAGE_FAMILY_PORTAL: 'manage family',
+    LEAVE_FAMILY: 'leave family',
+    LEAVE_FAMILY_CONFIRM: 'are you sure that you want to leave family?',
     CHOOSE_PLAN: 'choose your subscription plan',
     MANAGE_PLAN: 'manage your subscription',
     CHOOSE_PLAN_BTN: 'choose plan',
@@ -263,6 +266,15 @@ const englishConstants = {
             <p>
                 you are on the <strong>free</strong> plan that expires on{' '}
                 {dateString(expiryTime)}
+            </p>
+        </>
+    ),
+
+    FAMILY_PLAN_MANAGE_ADMIN_ONLY: (adminEmail) => (
+        <>
+            <p>
+                only your family plan admin <strong>{adminEmail}</strong> can
+                change the plan
             </p>
         </>
     ),
@@ -281,6 +293,12 @@ const englishConstants = {
     USAGE_INFO: (usage, quota) => (
         <p>
             you have used {usage} out of your {quota} quota
+        </p>
+    ),
+
+    FAMILY_USAGE_INFO: (usage, quota) => (
+        <p>
+            you have used {usage} out of your family's {quota} quota
         </p>
     ),
 
