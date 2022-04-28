@@ -59,13 +59,6 @@ export default function CollectionBar(props: IProps) {
         });
     }, [activeCollection]);
 
-    useEffect(() => {
-        if (!componentRef?.current) {
-            return;
-        }
-        componentRef.current.scrollLeft = 0;
-    }, [collections]);
-
     const clickHandler = (collectionID?: number) => () => {
         setActiveCollection(collectionID ?? ALL_SECTION);
     };

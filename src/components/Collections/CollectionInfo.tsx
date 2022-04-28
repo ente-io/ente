@@ -14,21 +14,21 @@ interface Iprops {
     redirectToAll: () => void;
 }
 export default function collectionInfo(props: Iprops) {
-    const { collectionSummary } = props;
-    if (!collectionSummary) {
+    if (!props.collectionSummary) {
         return <></>;
     }
+    const {
+        collectionSummary: { collectionAttributes, fileCount },
+    } = props;
 
     return (
         <TwoScreenSpacedOptionsWithBodyPadding>
             <div>
                 <Typography variant="h5">
-                    <strong>
-                        {collectionSummary.collectionAttributes.name}
-                    </strong>
+                    <strong>{collectionAttributes.name}</strong>
                 </Typography>
                 <Typography variant="subtitle1">
-                    {collectionSummary.fileCount} {constants.PHOTOS}
+                    {fileCount} {constants.PHOTOS}
                 </Typography>
             </div>
             <CollectionOptions {...props} />

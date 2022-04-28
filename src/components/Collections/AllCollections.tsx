@@ -64,33 +64,34 @@ export default function AllCollections(props: Iprops) {
                         {sortCollectionSummaries(
                             [...collectionSummaries.values()],
                             collectionSortBy
-                        ).map((collectionSummary) => (
-                            <CollectionCard
-                                key={collectionSummary.collectionAttributes.id}
-                                latestFile={collectionSummary.latestFile}
-                                onClick={() =>
-                                    onCollectionClick(
-                                        collectionSummary.collectionAttributes
-                                            .id
-                                    )
-                                }
-                                customCollectionTile={LargerCollectionTile}>
-                                <div>
-                                    <Typography>
-                                        <strong>
-                                            {
-                                                collectionSummary
-                                                    .collectionAttributes.name
-                                            }
-                                        </strong>
-                                    </Typography>
-                                    <Typography>
-                                        {collectionSummary.fileCount}{' '}
-                                        {constants.PHOTOS}
-                                    </Typography>
-                                </div>
-                            </CollectionCard>
-                        ))}
+                        ).map(
+                            ({
+                                latestFile,
+                                collectionAttributes,
+                                fileCount,
+                            }) => (
+                                <CollectionCard
+                                    key={collectionAttributes.id}
+                                    latestFile={latestFile}
+                                    onClick={() =>
+                                        onCollectionClick(
+                                            collectionAttributes.id
+                                        )
+                                    }
+                                    customCollectionTile={LargerCollectionTile}>
+                                    <div>
+                                        <Typography>
+                                            <strong>
+                                                {collectionAttributes.name}
+                                            </strong>
+                                        </Typography>
+                                        <Typography>
+                                            {fileCount} {constants.PHOTOS}
+                                        </Typography>
+                                    </div>
+                                </CollectionCard>
+                            )
+                        )}
                     </FlexWrapper>
                 </DialogContent>
             </FloatingSidebar>
