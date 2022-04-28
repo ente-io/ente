@@ -298,8 +298,9 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         _selectFile(file);
       },
       child: Container(
-        margin: const EdgeInsets.all(2.0),
+        margin: const EdgeInsets.all(1.5),
         decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(3),
           border: widget.selectedFiles.files.contains(file)
               ? Border.all(
                   width: 4.0,
@@ -307,14 +308,17 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                 )
               : null,
         ),
-        child: Hero(
-          tag: widget.tag + file.tag(),
-          child: ThumbnailWidget(
-            file,
-            diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
-            serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
-            shouldShowLivePhotoOverlay: true,
-            key: Key(widget.tag + file.tag()),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(3),
+          child: Hero(
+            tag: widget.tag + file.tag(),
+            child: ThumbnailWidget(
+              file,
+              diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
+              serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
+              shouldShowLivePhotoOverlay: true,
+              key: Key(widget.tag + file.tag()),
+            ),
           ),
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
@@ -173,7 +174,10 @@ class _GalleryState extends State<Gallery> {
         if (widget.header != null) {
           children.add(widget.header);
         }
-        children.add(Expanded(child: nothingToSeeHere));
+        children.add(Expanded(
+          child: nothingToSeeHere(
+              textColor: Theme.of(context).colorScheme.defaultTextColor),
+        ));
         if (widget.footer != null) {
           children.add(widget.footer);
         }

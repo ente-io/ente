@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file.dart';
@@ -134,7 +135,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 } else {
                   return Padding(
                     padding: EdgeInsets.only(top: 32),
-                    child: nothingToSeeHere,
+                    child: nothingToSeeHere(
+                        textColor:
+                            Theme.of(context).colorScheme.defaultTextColor),
                   );
                 }
               }
