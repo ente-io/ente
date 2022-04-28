@@ -15,6 +15,15 @@ export function dateStringWithMMH(unixTimeInMicroSeconds: number): string {
     });
 }
 
+export function formatDateShort(date: number | Date) {
+    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
+        year: '2-digit',
+        month: 'short',
+        day: 'numeric',
+    });
+    return dateTimeFormat.format(date);
+}
+
 export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDelta): number {
     let currentDate = new Date();
     if (delta?.hours) {
