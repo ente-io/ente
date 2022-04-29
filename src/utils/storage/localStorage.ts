@@ -17,6 +17,7 @@ export enum LS_KEYS {
     FAILED_UPLOADS = 'failedUploads',
     LOGS = 'logs',
     USER_DETAILS = 'userDetails',
+    COLLECTION_SORT_BY = 'collectionSortBy',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {

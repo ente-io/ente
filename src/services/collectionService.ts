@@ -718,12 +718,17 @@ export function sortCollectionSummaries(
     return moveFavCollectionToFront(
         collectionSummaries.sort((a, b) => {
             switch (sortBy) {
-                case COLLECTION_SORT_BY.LATEST_FILE:
+                case COLLECTION_SORT_BY.CREATION_TIME_DESCENDING:
                     return compareCollectionsLatestFile(
                         b.latestFile,
                         a.latestFile
                     );
-                case COLLECTION_SORT_BY.MODIFICATION_TIME:
+                case COLLECTION_SORT_BY.CREATION_TIME_ASCENDING:
+                    return (
+                        -1 *
+                        compareCollectionsLatestFile(b.latestFile, a.latestFile)
+                    );
+                case COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING:
                     return (
                         b.collectionAttributes.updationTime -
                         a.collectionAttributes.updationTime
