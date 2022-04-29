@@ -553,7 +553,7 @@ const englishConstants = {
     TOO_LARGE_INFO:
         'these files were not uploaded as they exceed our maximum file size limit',
     UPLOAD_TO_COLLECTION: 'upload to album',
-    ARCHIVE: 'archive',
+    ARCHIVE: 'Hidden',
     ALL_SECTION_NAME: 'All Photos',
     MOVE_TO_COLLECTION: 'move to album',
     UNARCHIVE: 'un-archive',
@@ -562,7 +562,7 @@ const englishConstants = {
     SORT: 'sort',
     REMOVE: 'remove',
     CONFIRM_REMOVE: 'confirm removal',
-    TRASH: 'trash',
+    TRASH: 'Trash',
     MOVE_TO_TRASH: 'move to trash',
     TRASH_MESSAGE:
         'the selected files will be removed from all albums and moved to trash ',

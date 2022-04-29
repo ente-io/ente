@@ -784,7 +784,7 @@ export function getCollectionSummaries(
                 updationTime: collection.updationTime,
             },
             latestFile: collectionAndTheirLatestFileMap.get(collection.id),
-            fileCount: collectionFilesCount.get(collection.id),
+            fileCount: collectionFilesCount.get(collection.id) ?? 0,
         });
     }
     collectionSummaries.set(
@@ -818,7 +818,7 @@ function getArchivedCollectionSummaries(
             updationTime: 0,
         },
         latestFile: null,
-        fileCount: collectionFilesCount.get(ARCHIVE_SECTION),
+        fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
     };
 }
 
@@ -833,6 +833,6 @@ function getTrashedCollectionSummaries(
             updationTime: 0,
         },
         latestFile: null,
-        fileCount: collectionFilesCount.get(TRASH_SECTION),
+        fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
     };
 }

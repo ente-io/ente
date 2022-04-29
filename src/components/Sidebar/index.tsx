@@ -14,8 +14,12 @@ import { DrawerSidebar, DividerWithMargin } from './styledComponents';
 import { AppContext } from 'pages/_app';
 import SubscriptionDetails from './SubscriptionDetails';
 import HeaderSection from './Header';
+import { CollectionSummaries } from 'types/collection';
 
-export default function Sidebar() {
+interface Iprops {
+    collectionSummaries: CollectionSummaries;
+}
+export default function Sidebar({ collectionSummaries }: Iprops) {
     const { sidebarView, closeSidebar } = useContext(AppContext);
     const [userDetails, setUserDetails] = useState<UserDetails>(null);
     useEffect(() => {
@@ -38,7 +42,10 @@ export default function Sidebar() {
             <InfoSection userDetails={userDetails} />
             <SubscriptionDetails userDetails={userDetails} />
             <DividerWithMargin />
-            <NavigationSection closeSidebar={closeSidebar} />
+            <NavigationSection
+                closeSidebar={closeSidebar}
+                collectionSummaries={collectionSummaries}
+            />
             <UtilitySection closeSidebar={closeSidebar} />
             <DividerWithMargin />
             <HelpSection userDetails={userDetails} />

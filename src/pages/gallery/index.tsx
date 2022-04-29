@@ -676,7 +676,7 @@ export default function Gallery() {
                     showUploadTypeChoiceModal={showUploadTypeChoiceModal}
                     setShowUploadTypeChoiceModal={setShowUploadTypeChoiceModal}
                 />
-                <Sidebar />
+                <Sidebar collectionSummaries={collectionSummaries} />
                 <UploadButton
                     isFirstFetch={isFirstFetch}
                     openUploader={openUploader}

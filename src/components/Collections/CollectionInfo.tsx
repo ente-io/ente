@@ -29,7 +29,7 @@ export default function collectionInfo(props: Iprops) {
                     <strong>{collectionAttributes.name}</strong>
                 </Typography>
                 <Typography variant="subtitle1">
-                    {fileCount ?? 0} {constants.PHOTOS}
+                    {fileCount} {constants.PHOTOS}
                 </Typography>
             </div>
             {collectionAttributes.id !== ARCHIVE_SECTION &&
