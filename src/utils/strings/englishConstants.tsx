@@ -163,7 +163,7 @@ const englishConstants = {
     SAVE_LATER: 'save later',
     SAVE: 'save',
     RECOVERY_KEY_DESCRIPTION:
-        'if you forget your password, the only way you can recover your data is with this key',
+        'if you forget your password, the only way you can recover your data is with this key.',
     RECOVER_KEY_GENERATION_FAILED:
         'recovery code could not be generated, please try again',
     KEY_NOT_STORED_DISCLAIMER:

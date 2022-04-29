@@ -1,14 +1,14 @@
 import styled from 'styled-components';
 import { FreeFlowText, IconButton } from './Container';
-import CopyIcon from './icons/CopyIcon';
 import React, { useState } from 'react';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
-import TickIcon from './icons/TickIcon';
 import EnteSpinner from './EnteSpinner';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DoneIcon from '@mui/icons-material/Done';
 
 const Wrapper = styled.div`
     position: relative;
-    margin: 20px 0;
+    border-radius: 8px;
 `;
 const CopyButtonWrapper = styled(IconButton)`
     position: absolute;
@@ -25,6 +25,8 @@ export const CodeWrapper = styled.div`
     background: #1a1919;
     padding: 37px 40px 20px 20px;
     color: white;
+    background: ${({ theme }) => theme.palette.accent.dark};
+    border-radius: 8px;
     width: 100%;
 `;
 
@@ -72,12 +74,8 @@ export const CodeBlock = (props: Iprops) => {
                     overlay={RenderCopiedMessage}
                     delay={{ show: 200, hide: 800 }}>
                     <CopyButtonWrapper
-                        onClick={copyToClipboardHelper(props.code)}
-                        style={{
-                            background: 'none',
-                            ...(copied ? { color: '#51cd7c' } : {}),
-                        }}>
-                        {copied ? <TickIcon /> : <CopyIcon />}
+                        onClick={copyToClipboardHelper(props.code)}>
+                        {copied ? <DoneIcon /> : <ContentCopyIcon />}
                     </CopyButtonWrapper>
                 </OverlayTrigger>
             )}

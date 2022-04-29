@@ -4,6 +4,7 @@ import { getRecoveryKey } from 'utils/crypto';
 import constants from 'utils/strings/constants';
 import MessageDialog from './MessageDialog';
 import { CodeBlock } from './CodeBlock';
+import { Box, Typography } from '@mui/material';
 const bip39 = require('bip39');
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
@@ -58,8 +59,15 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
                 },
             }}>
             <p>{constants.RECOVERY_KEY_DESCRIPTION}</p>
-            <CodeBlock code={recoveryKey} />
-            <p>{constants.KEY_NOT_STORED_DISCLAIMER}</p>
+            <Box
+                borderRadius={'8px'}
+                border={'1px dashed'}
+                borderColor={'grey.A700'}>
+                <CodeBlock code={recoveryKey} />
+                <Typography m="20px">
+                    {constants.KEY_NOT_STORED_DISCLAIMER}
+                </Typography>
+            </Box>
         </MessageDialog>
     );
 }

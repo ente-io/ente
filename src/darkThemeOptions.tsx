@@ -48,8 +48,8 @@ const darkThemeOptions = createTheme({
             secondary: 'hsla(0, 0%, 100%, 0.5)',
         },
         accent: {
-            main: '#43BA6C',
-            dark: '#369556',
+            main: 'hsla(141, 66%, 50%, 1)',
+            dark: 'hsla(141, 73%, 42%, 1)',
         },
 
         danger: {
