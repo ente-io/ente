@@ -585,9 +585,11 @@ const englishConstants = {
             </p>
         </>
     ),
-    SORT_BY_LATEST_PHOTO: 'recent photo',
-    SORT_BY_MODIFICATION_TIME: 'last updated',
-    SORT_BY_COLLECTION_NAME: 'album name',
+
+    SORT_BY_CREATION_TIME_ASCENDING: 'Oldest',
+    SORT_BY_CREATION_TIME_DESCENDING: 'Newest',
+    SORT_BY_UPDATION_TIME_DESCENDING: 'Last updated',
+    SORT_BY_NAME: 'Name',
     COMPRESS_THUMBNAILS: 'Compress thumbnails',
     THUMBNAIL_REPLACED: 'thumbnails compressed',
     FIX_THUMBNAIL: 'compress',

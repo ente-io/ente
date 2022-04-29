@@ -15,7 +15,6 @@ import { FlexWrapper, SpaceBetweenFlex } from 'components/Container';
 import { LargerCollectionTile } from './styledComponents';
 import CollectionCard from './CollectionCard';
 import Divider from '@mui/material/Divider';
-import { useState } from 'react';
 import CollectionSort from 'components/pages/gallery/CollectionSort';
 import { CollectionType, COLLECTION_SORT_BY } from 'constants/collection';
 import { DialogTitleWithCloseButton } from 'components/MessageDialog';
@@ -24,6 +23,8 @@ import {
     Transition,
     FloatingDrawer,
 } from 'components/Collections/FloatingDrawer';
+import { useLocalState } from 'hooks/useLocalState';
+import { LS_KEYS } from 'utils/storage/localStorage';
 
 const LeftSlideTransition = Transition('up');
 
@@ -36,7 +37,10 @@ export default function AllCollections(props: Iprops) {
     };
 
     const [collectionSortBy, setCollectionSortBy] =
-        useState<COLLECTION_SORT_BY>(COLLECTION_SORT_BY.LATEST_FILE);
+        useLocalState<COLLECTION_SORT_BY>(
+            LS_KEYS.COLLECTION_SORT_BY,
+            COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING
+        );
 
     return (
         <>
