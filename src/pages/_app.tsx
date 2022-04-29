@@ -15,7 +15,7 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
 import Head from 'next/head';
-import { getAlbumSiteHost } from 'constants/pages';
+import { getAlbumSiteHost, PAGES } from 'constants/pages';
 import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 import { logUploadInfo } from 'utils/upload';
 import LoadingBar from 'react-top-loading-bar';
@@ -242,7 +242,7 @@ export default function App({ Component, err }) {
                     <CssBaseline />
                     {showNavbar && (
                         <Navbar>
-                            {!isAlbumsDomain && (
+                            {!loading && router.pathname === PAGES.GALLERY && (
                                 <SidebarToggler openSidebar={openSidebar} />
                             )}
                             <FlexContainer shouldJustifyLeft={isAlbumsDomain}>

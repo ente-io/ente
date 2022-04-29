@@ -22,10 +22,15 @@ export default function UtilitySection({ closeSidebar }) {
     const openTwoFactorModalView = () => setTwoFactorModalView(true);
     const closeTwoFactorModalView = () => setTwoFactorModalView(false);
 
-    const redirectToChangePasswordPage = () =>
+    const redirectToChangePasswordPage = () => {
+        closeSidebar();
         router.push(PAGES.CHANGE_PASSWORD);
+    };
 
-    const redirectToChangeEmailPage = () => router.push(PAGES.CHANGE_EMAIL);
+    const redirectToChangeEmailPage = () => {
+        closeSidebar();
+        router.push(PAGES.CHANGE_EMAIL);
+    };
 
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
 
