@@ -36,7 +36,7 @@ function ChangeEmailPage() {
                     <Card.Body style={{ padding: '40px 30px' }}>
                         <Card.Title style={{ marginBottom: '32px' }}>
                             <LogoImg src="/icon.svg" />
-                            {constants.UPDATE_EMAIL}
+                            {constants.CHANGE_EMAIL}
                         </Card.Title>
                         <Alert
                             variant="success"
