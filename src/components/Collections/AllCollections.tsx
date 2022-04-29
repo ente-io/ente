@@ -17,7 +17,7 @@ import CollectionCard from './CollectionCard';
 import Divider from '@mui/material/Divider';
 import { useState } from 'react';
 import CollectionSort from 'components/pages/gallery/CollectionSort';
-import { COLLECTION_SORT_BY } from 'constants/collection';
+import { CollectionType, COLLECTION_SORT_BY } from 'constants/collection';
 import { DialogTitleWithCloseButton } from 'components/MessageDialog';
 import { sortCollectionSummaries } from 'services/collectionService';
 import {
@@ -65,7 +65,11 @@ export default function AllCollections(props: Iprops) {
                 <DialogContent>
                     <FlexWrapper>
                         {sortCollectionSummaries(
-                            [...collectionSummaries.values()],
+                            [...collectionSummaries.values()].filter(
+                                (x) =>
+                                    x.collectionAttributes.type !==
+                                    CollectionType.system
+                            ),
                             collectionSortBy
                         ).map(
                             ({

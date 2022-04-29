@@ -236,7 +236,7 @@ export default function Gallery() {
             setFiles(sortFiles([...files, ...trashedFile]));
             setCollections(collections);
             setTrash(trash);
-            await setDerivativeState(collections, files);
+            await setDerivativeState(collections, files, trashedFile);
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -306,9 +306,13 @@ export default function Gallery() {
             const collections = await syncCollections();
             setCollections(collections);
             const files = await syncFiles(collections, setFiles);
-            await setDerivativeState(collections, files);
             const trash = await syncTrash(collections, setFiles, files);
             setTrash(trash);
+            await setDerivativeState(
+                collections,
+                files,
+                getTrashedFiles(trash)
+            );
         } catch (e) {
             console.log(e);
             switch (e.message) {
@@ -343,7 +347,8 @@ export default function Gallery() {
 
     const setDerivativeState = async (
         collections: Collection[],
-        files: EnteFile[]
+        files: EnteFile[],
+        trashedFiles: EnteFile[]
     ) => {
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
@@ -357,7 +362,8 @@ export default function Gallery() {
         setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
         const collectionSummaries = getCollectionSummaries(
             nonEmptyCollections,
-            files
+            files,
+            trashedFiles
         );
 
         setCollectionSummaries(collectionSummaries);
@@ -675,11 +681,7 @@ export default function Gallery() {
                     showUploadTypeChoiceModal={showUploadTypeChoiceModal}
                     setShowUploadTypeChoiceModal={setShowUploadTypeChoiceModal}
                 />
-                <Sidebar
-                    collections={collections}
-                    setDialogMessage={setDialogMessage}
-                    setLoading={setBlockingLoad}
-                />
+                <Sidebar />
                 <UploadButton
                     isFirstFetch={isFirstFetch}
                     openUploader={openUploader}

@@ -6,6 +6,7 @@ export enum CollectionType {
     folder = 'folder',
     favorites = 'favorites',
     album = 'album',
+    system = 'system',
 }
 
 export enum COLLECTION_SORT_BY {

@@ -24,7 +24,7 @@ import PublicCollectionDownloadManager from 'services/publicCollectionDownloadMa
 import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
 import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
-import { updateMagicMetadataProps } from 'utils/magicMetadata';
+import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -515,3 +515,7 @@ export const isLivePhoto = (file: EnteFile) =>
 
 export const isImageOrVideo = (fileType: FILE_TYPE) =>
     [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);
+
+export const getArchivedFiles = (files: EnteFile[]) => {
+    return files.filter(IsArchived).map((file) => file.id);
+};

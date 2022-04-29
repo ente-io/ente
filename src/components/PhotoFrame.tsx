@@ -206,7 +206,11 @@ const PhotoFrame = ({
                 ) {
                     return false;
                 }
-                if (activeCollection === ARCHIVE_SECTION && !IsArchived(item)) {
+                if (
+                    activeCollection === ARCHIVE_SECTION &&
+                    !IsArchived(item) &&
+                    !archivedCollections?.has(item.collectionID)
+                ) {
                     return false;
                 }
 
