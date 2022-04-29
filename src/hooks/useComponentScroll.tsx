@@ -24,13 +24,16 @@ export default function useComponentScroll({
 
     useEffect(() => {
         // Add event listener
-        componentRef.current.addEventListener('scroll', updateScrollObj);
+        componentRef.current?.addEventListener('scroll', updateScrollObj);
 
         // Call handler right away so state gets updated with initial window size
         updateScrollObj();
         // Remove event listener on cleanup
         return () =>
-            componentRef.current.removeEventListener('resize', updateScrollObj);
+            componentRef.current?.removeEventListener(
+                'resize',
+                updateScrollObj
+            );
     }, [componentRef.current]);
 
     useEffect(() => {
