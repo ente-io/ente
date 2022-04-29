@@ -25,6 +25,7 @@ import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
 import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
+import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -141,10 +142,19 @@ export function isFileHEIC(mimeType: string) {
 export function sortFilesIntoCollections(files: EnteFile[]) {
     const collectionWiseFiles = new Map<number, EnteFile[]>();
     for (const file of files) {
-        if (!collectionWiseFiles.has(file.collectionID)) {
-            collectionWiseFiles.set(file.collectionID, []);
+        let collectionID: number;
+        if (file.isTrashed) {
+            collectionID = TRASH_SECTION;
+        } else if (IsArchived(file)) {
+            collectionID = ARCHIVE_SECTION;
+        } else {
+            collectionID = file.collectionID;
         }
-        collectionWiseFiles.get(file.collectionID).push(file);
+        if (!collectionWiseFiles.has(collectionID)) {
+            collectionWiseFiles.set(collectionID, []);
+        }
+
+        collectionWiseFiles.get(collectionID).push(file);
     }
     return collectionWiseFiles;
 }

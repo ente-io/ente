@@ -5,6 +5,7 @@ import { Collection, CollectionSummary } from 'types/collection';
 import { PaddedSpaceBetweenFlex } from 'components/Collections/styledComponents';
 import CollectionOptions from 'components/Collections/CollectionOptions';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
+import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 
 interface Iprops {
     activeCollection: Collection;
@@ -28,10 +29,13 @@ export default function collectionInfo(props: Iprops) {
                     <strong>{collectionAttributes.name}</strong>
                 </Typography>
                 <Typography variant="subtitle1">
-                    {fileCount} {constants.PHOTOS}
+                    {fileCount ?? 0} {constants.PHOTOS}
                 </Typography>
             </div>
-            <CollectionOptions {...props} />
+            {collectionAttributes.id !== ARCHIVE_SECTION &&
+                collectionAttributes.id !== TRASH_SECTION && (
+                    <CollectionOptions {...props} />
+                )}
         </PaddedSpaceBetweenFlex>
     );
 }

@@ -103,4 +103,4 @@ export interface CollectionSummary {
 }
 
 export type CollectionSummaries = Map<number, CollectionSummary>;
-export type collectionFilesCount = Map<number, number>;
+export type CollectionFilesCount = Map<number, number>;

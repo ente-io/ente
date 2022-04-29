@@ -10,11 +10,7 @@ import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
-import {
-    getArchivedFiles,
-    sortFiles,
-    sortFilesIntoCollections,
-} from 'utils/file';
+import { sortFiles, sortFilesIntoCollections } from 'utils/file';
 import {
     Collection,
     CollectionAndItsLatestFile,
@@ -27,7 +23,7 @@ import {
     UpdatePublicURL,
     CollectionSummaries,
     CollectionSummary,
-    collectionFilesCount,
+    CollectionFilesCount,
 } from 'types/collection';
 import {
     COLLECTION_SORT_BY,
@@ -37,7 +33,6 @@ import {
 } from 'constants/collection';
 import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { EncryptionResult } from 'types/upload';
-import { getArchivedCollections } from 'utils/collection';
 import constants from 'utils/strings/constants';
 
 const ENDPOINT = getEndpoint();
@@ -763,8 +758,7 @@ function moveFavCollectionToFront(collectionSummaries: CollectionSummary[]) {
 
 export function getCollectionSummaries(
     collections: Collection[],
-    files: EnteFile[],
-    trashedFiles: EnteFile[]
+    files: EnteFile[]
 ): CollectionSummaries {
     const collectionSummaries: CollectionSummaries = new Map();
     const collectionAndTheirLatestFile = getCollectionsAndTheirLatestFile(
@@ -795,16 +789,16 @@ export function getCollectionSummaries(
     }
     collectionSummaries.set(
         ARCHIVE_SECTION,
-        getArchivedCollectionSummaries(collections, files, collectionFilesCount)
+        getArchivedCollectionSummaries(collectionFilesCount)
     );
     collectionSummaries.set(
         TRASH_SECTION,
-        getTrashedCollectionSummaries(trashedFiles)
+        getTrashedCollectionSummaries(collectionFilesCount)
     );
     return collectionSummaries;
 }
 
-function getCollectionsFileCount(files: EnteFile[]) {
+function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
     const collectionWiseFiles = sortFilesIntoCollections(files);
     const collectionFilesCount = new Map<number, number>();
     for (const [id, files] of collectionWiseFiles) {
@@ -814,17 +808,8 @@ function getCollectionsFileCount(files: EnteFile[]) {
 }
 
 function getArchivedCollectionSummaries(
-    collections: Collection[],
-    files: EnteFile[],
-    collectionFilesCount: collectionFilesCount
+    collectionFilesCount: CollectionFilesCount
 ) {
-    const archivedCollections = getArchivedCollections(collections);
-    const archivedFiles = getArchivedFiles(files);
-    const combinedCount =
-        archivedCollections.reduce(
-            (prev, curr) => prev + collectionFilesCount.get(curr),
-            0
-        ) + archivedFiles.length;
     return {
         collectionAttributes: {
             id: ARCHIVE_SECTION,
@@ -833,12 +818,13 @@ function getArchivedCollectionSummaries(
             updationTime: 0,
         },
         latestFile: null,
-        fileCount: combinedCount,
+        fileCount: collectionFilesCount.get(ARCHIVE_SECTION),
     };
 }
 
-function getTrashedCollectionSummaries(files: EnteFile[]) {
-    const trashedFiles = files.filter((file) => file.isTrashed);
+function getTrashedCollectionSummaries(
+    collectionFilesCount: CollectionFilesCount
+) {
     return {
         collectionAttributes: {
             id: TRASH_SECTION,
@@ -847,6 +833,6 @@ function getTrashedCollectionSummaries(files: EnteFile[]) {
             updationTime: 0,
         },
         latestFile: null,
-        fileCount: trashedFiles.length,
+        fileCount: collectionFilesCount.get(TRASH_SECTION),
     };
 }

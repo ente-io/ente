@@ -232,11 +232,11 @@ export default function Gallery() {
             const files = mergeMetadata(await getLocalFiles());
             const collections = await getLocalCollections();
             const trash = await getLocalTrash();
-            const trashedFile = getTrashedFiles(trash);
-            setFiles(sortFiles([...files, ...trashedFile]));
+            files.push(...getTrashedFiles(trash));
+            setFiles(sortFiles(files));
             setCollections(collections);
             setTrash(trash);
-            await setDerivativeState(collections, files, trashedFile);
+            await setDerivativeState(collections, files);
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -308,11 +308,8 @@ export default function Gallery() {
             const files = await syncFiles(collections, setFiles);
             const trash = await syncTrash(collections, setFiles, files);
             setTrash(trash);
-            await setDerivativeState(
-                collections,
-                files,
-                getTrashedFiles(trash)
-            );
+            files.push(...getTrashedFiles(trash));
+            await setDerivativeState(collections, files);
         } catch (e) {
             console.log(e);
             switch (e.message) {
@@ -347,8 +344,7 @@ export default function Gallery() {
 
     const setDerivativeState = async (
         collections: Collection[],
-        files: EnteFile[],
-        trashedFiles: EnteFile[]
+        files: EnteFile[]
     ) => {
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
@@ -362,8 +358,7 @@ export default function Gallery() {
         setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
         const collectionSummaries = getCollectionSummaries(
             nonEmptyCollections,
-            files,
-            trashedFiles
+            files
         );
 
         setCollectionSummaries(collectionSummaries);
