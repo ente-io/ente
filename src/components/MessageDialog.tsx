@@ -4,6 +4,7 @@ import React from 'react';
 import constants from 'utils/strings/constants';
 import CloseIcon from '@mui/icons-material/Close';
 import {
+    Breakpoint,
     Button,
     Dialog,
     DialogActions,
@@ -42,7 +43,7 @@ type Props = React.PropsWithChildren<{
     show: boolean;
     onHide: () => void;
     attributes: MessageAttributes;
-    size?: 'sm' | 'lg' | 'xl';
+    size?: Breakpoint;
 }>;
 
 export const DialogTitleWithCloseButton = (props) => {
@@ -78,7 +79,7 @@ export default function MessageDialog({
     }
 
     return (
-        <Dialog open={props.show} onClose={props.onHide}>
+        <Dialog open={props.show} maxWidth={props.size} onClose={props.onHide}>
             {attributes.title && (
                 <>
                     <DialogTitleWithCloseButton
