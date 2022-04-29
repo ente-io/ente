@@ -27,6 +27,7 @@ import { AppContext } from 'pages/_app';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { IsArchived } from 'utils/magicMetadata';
 import { logError } from 'utils/sentry';
+import { CustomError } from 'utils/error';
 
 const Container = styled.div`
     display: block;
@@ -251,6 +252,14 @@ const PhotoFrame = ({
         }
     }, [open]);
 
+    const getFileIndexFromID = (files: EnteFile[], id: number) => {
+        const index = files.findIndex((file) => file.id === id);
+        if (index === -1) {
+            throw CustomError.FILE_ID_NOT_FOUND;
+        }
+        return index;
+    };
+
     const updateURL = (id: number) => (url: string) => {
         const updateFile = (file: EnteFile) => {
             file = {
@@ -289,27 +298,11 @@ const PhotoFrame = ({
             return file;
         };
         setFiles((files) => {
-            const index = files.findIndex((file) => file.id === id);
-            if (index === -1) {
-                logError(
-                    Error('file not found'),
-                    'update url called for non-existing file'
-                ),
-                    { fileID: id };
-                return;
-            }
+            const index = getFileIndexFromID(files, id);
             files[index] = updateFile(files[index]);
             return files;
         });
-        const index = files.findIndex((file) => file.id === id);
-        if (index === -1) {
-            logError(
-                Error('file not found'),
-                'update url called for non-existing file'
-            ),
-                { fileID: id };
-            return;
-        }
+        const index = getFileIndexFromID(files, id);
         return updateFile(files[index]);
     };
 
@@ -369,28 +362,12 @@ const PhotoFrame = ({
             return file;
         };
         setFiles((files) => {
-            const index = files.findIndex((file) => file.id === id);
-            if (index === -1) {
-                logError(
-                    Error('file not found'),
-                    'update url called for non-existing file'
-                ),
-                    { fileID: id };
-                return;
-            }
+            const index = getFileIndexFromID(files, id);
             files[index] = updateFile(files[index]);
             return files;
         });
         setIsSourceLoaded(true);
-        const index = files.findIndex((file) => file.id === id);
-        if (index === -1) {
-            logError(
-                Error('file not found'),
-                'update url called for non-existing file'
-            ),
-                { fileID: id };
-            return;
-        }
+        const index = getFileIndexFromID(files, id);
         return updateFile(files[index]);
     };
 
