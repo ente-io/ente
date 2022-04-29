@@ -43,14 +43,20 @@ const CollectionSortOptions = (props: OptionProps) => {
     return (
         <Paper sx={{ maxWidth: '100%' }}>
             <MenuList>
-                <SortByOption sortBy={COLLECTION_SORT_BY.LATEST_FILE}>
-                    {constants.SORT_BY_LATEST_PHOTO}
-                </SortByOption>
-                <SortByOption sortBy={COLLECTION_SORT_BY.MODIFICATION_TIME}>
-                    {constants.SORT_BY_MODIFICATION_TIME}
-                </SortByOption>
                 <SortByOption sortBy={COLLECTION_SORT_BY.NAME}>
-                    {constants.SORT_BY_COLLECTION_NAME}
+                    {constants.SORT_BY_NAME}
+                </SortByOption>
+                <SortByOption
+                    sortBy={COLLECTION_SORT_BY.CREATION_TIME_DESCENDING}>
+                    {constants.SORT_BY_CREATION_TIME_DESCENDING}
+                </SortByOption>
+                <SortByOption
+                    sortBy={COLLECTION_SORT_BY.CREATION_TIME_ASCENDING}>
+                    {constants.SORT_BY_CREATION_TIME_ASCENDING}
+                </SortByOption>
+                <SortByOption
+                    sortBy={COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING}>
+                    {constants.SORT_BY_UPDATION_TIME_DESCENDING}
                 </SortByOption>
             </MenuList>
         </Paper>
