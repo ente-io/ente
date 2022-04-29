@@ -67,7 +67,10 @@ export default function SubscriptionDetails({ userDetails }: Iprops) {
                         <LinearProgress
                             sx={{ bgcolor: 'text.secondary' }}
                             variant="determinate"
-                            value={70}
+                            value={
+                                userDetails.usage /
+                                userDetails.subscription.storage
+                            }
                         />
                         <SpaceBetweenFlex style={{ marginTop: '8px' }}>
                             <Typography variant="caption">
