@@ -185,7 +185,9 @@ export default function Sidebar(props: Props) {
                                 )
                             )
                         ) : (
-                            <p>{constants.SUBSCRIPTION_EXPIRED}</p>
+                            <p>
+                                {constants.SUBSCRIPTION_EXPIRED(onManageClick)}
+                            </p>
                         )}
                         <Button
                             variant="outline-success"
