@@ -12,6 +12,8 @@ import ExitSection from './ExitSection';
 import DebugLogs from './DebugLogs';
 import { DrawerSidebar, DividerWithMargin } from './styledComponents';
 import { AppContext } from 'pages/_app';
+import SubscriptionDetails from './SubscriptionDetails';
+import HeaderSection from './Header';
 
 export default function Sidebar() {
     const { sidebarView, closeSidebar } = useContext(AppContext);
@@ -31,21 +33,19 @@ export default function Sidebar() {
 
     return (
         <DrawerSidebar anchor="left" open={sidebarView} onClose={closeSidebar}>
-            <div>
-                <InfoSection
-                    userDetails={userDetails}
-                    closeSidebar={closeSidebar}
-                />
-                <DividerWithMargin />
-                <NavigationSection closeSidebar={closeSidebar} />
-                <UtilitySection closeSidebar={closeSidebar} />
-                <DividerWithMargin />
-                <HelpSection userDetails={userDetails} />
-                <DividerWithMargin />
-                <ExitSection />
-                <DividerWithMargin />
-                <DebugLogs />
-            </div>
+            <HeaderSection closeSidebar={closeSidebar} />
+            <DividerWithMargin />
+            <InfoSection userDetails={userDetails} />
+            <SubscriptionDetails userDetails={userDetails} />
+            <DividerWithMargin />
+            <NavigationSection closeSidebar={closeSidebar} />
+            <UtilitySection closeSidebar={closeSidebar} />
+            <DividerWithMargin />
+            <HelpSection userDetails={userDetails} />
+            <DividerWithMargin />
+            <ExitSection />
+            <DividerWithMargin />
+            <DebugLogs />
         </DrawerSidebar>
     );
 }

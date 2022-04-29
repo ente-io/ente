@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
-import CloseIcon from './icons/CloseIcon';
+import CloseIcon from '@mui/icons-material/Close';
 
 const CloseButtonWrapper = styled.div`
     position: absolute;
