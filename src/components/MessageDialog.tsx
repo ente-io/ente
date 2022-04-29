@@ -1,20 +1,36 @@
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import React from 'react';
-import { Button, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import CloseIcon from '@mui/icons-material/Close';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    Divider,
+} from '@mui/material';
 
+export type ButtonColors =
+    | 'inherit'
+    | 'secondary'
+    | 'primary'
+    | 'success'
+    | 'error'
+    | 'info'
+    | 'warning'
+    | 'danger';
 export interface MessageAttributes {
     title?: string;
     staticBackdrop?: boolean;
     nonClosable?: boolean;
     content?: any;
-    close?: { text?: string; variant?: string; action?: () => void };
+    close?: { text?: string; variant?: ButtonColors; action?: () => void };
     proceed?: {
         text: string;
         action: () => void;
-        variant: string;
+        variant: ButtonColors;
         disabled?: boolean;
     };
 }
@@ -58,80 +74,63 @@ export default function MessageDialog({
     ...props
 }: Props) {
     if (!attributes) {
-        return <Modal />;
+        return <></>;
     }
+
     return (
-        <Modal
-            {...props}
-            onHide={attributes.nonClosable ? () => null : props.onHide}
-            centered
-            backdrop={attributes.staticBackdrop ? 'static' : true}>
-            <Modal.Header
-                style={{ borderBottom: 'none' }}
-                closeButton={!attributes.nonClosable}>
-                {attributes.title && (
-                    <Modal.Title>{attributes.title}</Modal.Title>
-                )}
-            </Modal.Header>
+        <Dialog open={props.show} onClose={props.onHide}>
+            {attributes.title && (
+                <>
+                    <DialogTitleWithCloseButton
+                        onClose={
+                            attributes.nonClosable ? () => null : props.onHide
+                        }>
+                        {attributes.title}
+                    </DialogTitleWithCloseButton>
+                    <Divider />
+                </>
+            )}
             {(children || attributes?.content) && (
-                <Modal.Body style={{ borderTop: '1px solid #444' }}>
+                <DialogContent>
                     {children || (
-                        <p style={{ fontSize: '1.25rem', marginBottom: 0 }}>
+                        <DialogContentText>
                             {attributes.content}
-                        </p>
+                        </DialogContentText>
                     )}
-                </Modal.Body>
+                </DialogContent>
             )}
             {(attributes.close || attributes.proceed) && (
-                <Modal.Footer style={{ borderTop: 'none' }}>
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                        }}>
+                <DialogActions sx={{ m: '10px 10px' }}>
+                    <>
                         {attributes.close && (
                             <Button
-                                variant={`outline-${
-                                    attributes.close?.variant ?? 'secondary'
-                                }`}
+                                fullWidth
+                                variant="outlined"
+                                color={attributes.close?.variant ?? 'secondary'}
                                 onClick={() => {
                                     attributes.close.action &&
                                         attributes.close?.action();
                                     props.onHide();
-                                }}
-                                style={{
-                                    padding: '6px 3em',
-                                    margin: '0 20px',
-                                    marginBottom: '20px',
-                                    flex: 1,
-                                    whiteSpace: 'nowrap',
                                 }}>
                                 {attributes.close?.text ?? constants.OK}
                             </Button>
                         )}
                         {attributes.proceed && (
                             <Button
-                                variant={`outline-${
-                                    attributes.proceed?.variant ?? 'primary'
-                                }`}
+                                fullWidth
+                                variant="outlined"
+                                color={attributes.proceed?.variant ?? 'primary'}
                                 onClick={() => {
                                     attributes.proceed.action();
                                     props.onHide();
-                                }}
-                                style={{
-                                    padding: '6px 3em',
-                                    margin: '0 20px',
-                                    marginBottom: '20px',
-                                    flex: 1,
-                                    whiteSpace: 'nowrap',
                                 }}
                                 disabled={attributes.proceed.disabled}>
                                 {attributes.proceed.text}
                             </Button>
                         )}
-                    </div>
-                </Modal.Footer>
+                    </>
+                </DialogActions>
             )}
-        </Modal>
+        </Dialog>
     );
 }
