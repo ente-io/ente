@@ -46,7 +46,7 @@ export default function UtilitySection({ closeSidebar }) {
     return (
         <>
             <SidebarButton onClick={openRecoveryKeyModal}>
-                {constants.DOWNLOAD_RECOVERY_KEY}
+                {constants.RECOVERY_KEY}
             </SidebarButton>
             <SidebarButton onClick={openTwoFactorModalView}>
                 {constants.TWO_FACTOR}
@@ -55,14 +55,14 @@ export default function UtilitySection({ closeSidebar }) {
                 {constants.CHANGE_PASSWORD}
             </SidebarButton>
             <SidebarButton onClick={redirectToChangeEmailPage}>
-                {constants.UPDATE_EMAIL}
+                {constants.CHANGE_EMAIL}
             </SidebarButton>
             <SidebarButton onClick={redirectToDeduplicatePage}>
                 {constants.DEDUPLICATE_FILES}
             </SidebarButton>
 
             <SidebarButton onClick={openThumbnailCompressModal}>
-                {constants.FIX_LARGE_THUMBNAILS}
+                {constants.COMPRESS_THUMBNAILS}
             </SidebarButton>
 
             <RecoveryKeyModal
