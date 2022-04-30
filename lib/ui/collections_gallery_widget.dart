@@ -127,14 +127,14 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   }
 
   Widget _getCollectionsGalleryWidget(CollectionItems items) {
+    const double horizontalPaddingOfGridRow = 16;
+    const double crossAxisSpacingOfGrid = 5;
     TextStyle trashAndHiddenTextStyle = Theme.of(context).textTheme.subtitle1;
     Size size = MediaQuery.of(context).size;
     int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
     final double sideOfThumbnail = (size.width / 2) -
-        16 -
-        (2.5 *
-            (albumsCountInOneRow -
-                1)); //16 - padding of grid  + 2.5 - half of crossaxis spacing
+        horizontalPaddingOfGridRow -
+        ((crossAxisSpacingOfGrid / 2) * (albumsCountInOneRow - 1));
     return SingleChildScrollView(
       child: Container(
         margin: const EdgeInsets.only(bottom: 50),
@@ -202,9 +202,10 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: albumsCountInOneRow,
                           mainAxisSpacing: 12,
-                          crossAxisSpacing: 5,
-                          childAspectRatio:
-                              sideOfThumbnail / (sideOfThumbnail + 24)),
+                          crossAxisSpacing: crossAxisSpacingOfGrid,
+                          childAspectRatio: sideOfThumbnail /
+                              (sideOfThumbnail +
+                                  24)), //24 is height of album title
                     ),
                   )
                 : nothingToSeeHere(
