@@ -102,34 +102,30 @@ export default function MessageDialog({
             )}
             {(attributes.close || attributes.proceed) && (
                 <DialogActions sx={{ m: '10px 10px' }}>
-                    <>
-                        {attributes.close && (
-                            <Button
-                                fullWidth
-                                variant="outlined"
-                                color={attributes.close?.variant ?? 'secondary'}
-                                onClick={() => {
-                                    attributes.close.action &&
-                                        attributes.close?.action();
-                                    props.onHide();
-                                }}>
-                                {attributes.close?.text ?? constants.OK}
-                            </Button>
-                        )}
-                        {attributes.proceed && (
-                            <Button
-                                fullWidth
-                                variant="outlined"
-                                color={attributes.proceed?.variant ?? 'primary'}
-                                onClick={() => {
-                                    attributes.proceed.action();
-                                    props.onHide();
-                                }}
-                                disabled={attributes.proceed.disabled}>
-                                {attributes.proceed.text}
-                            </Button>
-                        )}
-                    </>
+                    {attributes.close && (
+                        <Button
+                            variant="outlined"
+                            color={attributes.close?.variant ?? 'secondary'}
+                            onClick={() => {
+                                attributes.close.action &&
+                                    attributes.close?.action();
+                                props.onHide();
+                            }}>
+                            {attributes.close?.text ?? constants.OK}
+                        </Button>
+                    )}
+                    {attributes.proceed && (
+                        <Button
+                            variant="outlined"
+                            color={attributes.proceed?.variant ?? 'primary'}
+                            onClick={() => {
+                                attributes.proceed.action();
+                                props.onHide();
+                            }}
+                            disabled={attributes.proceed.disabled}>
+                            {attributes.proceed.text}
+                        </Button>
+                    )}
                 </DialogActions>
             )}
         </Dialog>

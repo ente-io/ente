@@ -43,7 +43,7 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
         <MessageDialog
             show={props.show}
             onHide={onClose}
-            size="lg"
+            size="xs"
             attributes={{
                 title: constants.RECOVERY_KEY,
                 close: {
