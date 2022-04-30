@@ -42,6 +42,7 @@ export enum CustomError {
     NO_METADATA = 'no metadata',
     TOO_LARGE_LIVE_PHOTO_ASSETS = 'too large live photo assets',
     NOT_A_DATE = 'not a date',
+    FILE_ID_NOT_FOUND = 'file with id not found',
 }
 
 function parseUploadErrorCodes(error) {
