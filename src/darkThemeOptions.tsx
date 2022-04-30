@@ -9,6 +9,18 @@ declare module '@mui/material/styles' {
         accent: PaletteOptions['primary'];
         danger: PaletteOptions['primary'];
     }
+
+    interface Theme {
+        sizes: {
+            borderRadius: number;
+        };
+    }
+
+    interface ThemeOptions {
+        sizes?: {
+            borderRadius?: string;
+        };
+    }
 }
 
 declare module '@mui/material/Button' {
@@ -56,6 +68,10 @@ const darkThemeOptions = createTheme({
             main: '#c93f3f',
         },
         background: { default: '#000', paper: '#000' },
+    },
+
+    sizes: {
+        borderRadius: '8px',
     },
 });
 
