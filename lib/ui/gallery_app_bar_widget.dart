@@ -91,11 +91,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             : TextButton(
                 child: Text(
                   _appBarTitle,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.80),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  style: Theme.of(context)
+                      .textTheme
+                      .headline5
+                      .copyWith(fontSize: 16),
                 ),
                 onPressed: () => _renameAlbum(context),
               ),
@@ -158,7 +157,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         Tooltip(
           message: "share",
           child: IconButton(
-            icon: Icon(Icons.person_add),
+            icon: Icon(Icons.adaptive.share),
             onPressed: () {
               _showShareCollectionDialog();
             },
@@ -192,11 +191,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               value: 2,
               child: Row(
                 children: [
-                  Icon(isArchived ? Icons.unarchive : Icons.archive),
+                  Icon(isArchived ? Icons.visibility : Icons.visibility_off),
                   Padding(
                     padding: EdgeInsets.all(8),
                   ),
-                  Text(isArchived ? "unarchive" : "archive"),
+                  Text(isArchived ? "Unhide" : "Hide"),
                 ],
               ),
             ),
@@ -469,7 +468,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   void _shareSelected(BuildContext context) {
-    share(context, widget.selectedFiles.files.toList(), shareButtonKey: shareButtonKey);
+    share(context, widget.selectedFiles.files.toList(),
+        shareButtonKey: shareButtonKey);
   }
 
   void _showRemoveFromCollectionSheet(BuildContext context) {

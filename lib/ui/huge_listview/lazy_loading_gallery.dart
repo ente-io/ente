@@ -26,6 +26,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final String tag;
   final Stream<int> currentIndexStream;
+  final bool smallerTodayFont;
 
   LazyLoadingGallery(
     this.files,
@@ -36,6 +37,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.selectedFiles,
     this.tag,
     this.currentIndexStream, {
+    this.smallerTodayFont,
     Key key,
   }) : super(key: key ?? UniqueKey());
 
@@ -148,7 +150,8 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
         children: [
-          getDayWidget(context, _files[0].creationTime),
+          getDayWidget(
+              context, _files[0].creationTime, widget.smallerTodayFont),
           _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
         ],
       ),
@@ -304,7 +307,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
           border: widget.selectedFiles.files.contains(file)
               ? Border.all(
                   width: 4.0,
-                  color: Theme.of(context).buttonColor,
+                  color: Theme.of(context).buttonColor, //selection
                 )
               : null,
         ),

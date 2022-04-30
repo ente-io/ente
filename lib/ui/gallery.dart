@@ -25,6 +25,7 @@ class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
   final List<File> initialFiles;
   final Stream<FilesUpdatedEvent> reloadEvent;
+  final bool smallerTodayFont;
   final List<Stream<Event>> forceReloadEvents;
   final Set<EventType> removalEventTypes;
   final SelectedFiles selectedFiles;
@@ -42,6 +43,7 @@ class Gallery extends StatefulWidget {
     this.removalEventTypes = const {},
     this.header,
     this.footer,
+    this.smallerTodayFont = false,
     Key key,
   }) : super(key: key);
 
@@ -200,6 +202,7 @@ class _GalleryState extends State<Gallery> {
               .on<GalleryIndexUpdatedEvent>()
               .where((event) => event.tag == widget.tagPrefix)
               .map((event) => event.index),
+          smallerTodayFont: widget.smallerTodayFont,
         );
         if (widget.header != null && index == 0) {
           gallery = Column(children: [widget.header, gallery]);
