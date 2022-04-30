@@ -55,7 +55,7 @@ const darkThemeOptions = createTheme({
         danger: {
             main: '#c93f3f',
         },
-        background: { default: '#191919', paper: '#191919' },
+        background: { default: '#000', paper: '#000' },
     },
 });
 
