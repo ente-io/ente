@@ -151,6 +151,7 @@ const Cont = styled.div<{ disabled: boolean }>`
     overflow: hidden;
     position: relative;
     flex: 1;
+    border-radius: ${({ theme }) => theme.sizes.borderRadius};
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 
     & > img {
