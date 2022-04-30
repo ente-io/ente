@@ -174,12 +174,13 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 MenuListProps={{
                     'aria-labelledby': 'collection-options',
                 }}>
-                <Paper sx={{ borderRadius: '10px' }}>
+                <Paper
+                    sx={{ borderRadius: (theme) => theme.sizes.borderRadius }}>
                     <MenuList
                         sx={{
                             padding: 0,
                             border: 'none',
-                            borderRadius: '8px',
+                            borderRadius: (theme) => theme.sizes.borderRadius,
                         }}>
                         <MenuItem>
                             <ListItem onClick={showRenameCollectionModal}>
