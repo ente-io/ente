@@ -33,7 +33,9 @@ declare module '@mui/material/Button' {
 const darkThemeOptions = createTheme({
     components: {
         MuiPaper: {
-            styleOverrides: { root: { backgroundImage: 'none' } },
+            styleOverrides: {
+                root: { borderRadius: '8px' },
+            },
         },
         MuiLink: {
             styleOverrides: {
