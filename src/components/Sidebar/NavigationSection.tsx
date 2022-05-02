@@ -44,7 +44,7 @@ export default function NavigationSection({
                     {constants.TRASH}
                     <DotSeparator />
                     <Typography color="text.secondary">
-                        {collectionSummaries.get(TRASH_SECTION).fileCount}
+                        {collectionSummaries.get(TRASH_SECTION)?.fileCount}
                     </Typography>
                 </FlexWrapper>
             </SidebarButton>
@@ -57,7 +57,7 @@ export default function NavigationSection({
                     {constants.ARCHIVE}
                     <DotSeparator />
                     <Typography color="text.secondary">
-                        {collectionSummaries.get(ARCHIVE_SECTION).fileCount}
+                        {collectionSummaries.get(ARCHIVE_SECTION)?.fileCount}
                     </Typography>
                 </FlexWrapper>
             </SidebarButton>
