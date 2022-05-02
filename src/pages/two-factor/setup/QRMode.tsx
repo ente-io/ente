@@ -27,7 +27,7 @@ export default function SetupQRMode({
                 </LoadingQRCode>
             ) : (
                 <QRCode
-                    src={`data:image/png;base64,${twoFactorSecret.qrCode}`}
+                    src={`data:image/png;base64,${twoFactorSecret?.qrCode}`}
                 />
             )}
             <LinkButton onClick={changeToManualMode}>

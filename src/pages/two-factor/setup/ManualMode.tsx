@@ -18,7 +18,7 @@ export default function SetupManualMode({
             <Typography>
                 {constants.TWO_FACTOR_MANUAL_CODE_INSTRUCTION}
             </Typography>
-            <CodeBlock code={twoFactorSecret.secretCode} />
+            <CodeBlock code={twoFactorSecret?.secretCode} />
             <LinkButton onClick={changeToQRMode}>
                 {constants.SCAN_QR_CODE}
             </LinkButton>
