@@ -77,7 +77,6 @@ function SetPasswordForm(props: Props) {
                             />
                             <TextField
                                 fullWidth
-                                margin="normal"
                                 type="password"
                                 label={constants.RE_ENTER_PASSPHRASE}
                                 value={values.confirm}
