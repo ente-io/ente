@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/backup_status.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 
@@ -26,7 +25,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
           child: Material(
             type: MaterialType.transparency,
             child: Text(
-              "free up space",
+              "Free up space",
               style: TextStyle(
                 fontSize: 18,
               ),
@@ -98,7 +97,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                 Padding(padding: EdgeInsets.all(10)),
                 Expanded(
                   child: Text(
-                    (count == 1 ? "it" : "they") +
+                    (count == 1 ? "It" : "They") +
                         " can be deleted from this device to free up " +
                         formatBytes(status.size),
                     style: informationTextStyle,
@@ -119,7 +118,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                 Padding(padding: EdgeInsets.all(10)),
                 Expanded(
                   child: Text(
-                    "you can still access " +
+                    "You can still access " +
                         (count == 1 ? "it" : "them") +
                         " on ente as long as you have an active subscription",
                     style: informationTextStyle,
@@ -135,12 +134,11 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
               minHeight: 64,
             ),
             padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
-            child: button(
-              "free up " + formatBytes(status.size),
+            child: ElevatedButton(
+              child: Text("Free up " + formatBytes(status.size)),
               onPressed: () async {
                 await _freeStorage(status);
               },
-              fontSize: 18,
             ),
           ),
         ],
