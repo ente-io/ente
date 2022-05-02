@@ -277,7 +277,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 ? _getBackupFolderSelectionHook()
                 : _getMainGalleryWidget(),
             _deviceFolderGalleryWidget,
-            //_sharedCollectionGallery,
+            _sharedCollectionGallery,
             _settingsPage,
           ],
           onPageChanged: (page) {
@@ -467,26 +467,6 @@ class _HomeWidgetState extends State<HomeWidget> {
                     }
                   },
                 ),
-                // child: button(
-                //   "start backup",
-                //   fontSize: 16,
-                //   lineHeight: 1.5,
-                //   padding: EdgeInsets.only(bottom: 4),
-                //   onPressed: () async {
-                //     if (LocalSyncService.instance
-                //         .hasGrantedLimitedPermissions()) {
-                //       PhotoManager.presentLimited();
-                //     } else {
-                //       routeToPage(
-                //         context,
-                //         BackupFolderSelectionPage(
-                //           shouldSelectAll: true,
-                //           buttonText: "Start backup",
-                //         ),
-                //       );
-                //     }
-                //   },
-                // ),
               ),
             ),
           ),
@@ -504,7 +484,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         child: Container(
           alignment: Alignment.bottomCenter,
           height: 52,
-          width: 180,
+          width: 240,
           child: ClipRect(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
@@ -543,14 +523,16 @@ class _HomeWidgetState extends State<HomeWidget> {
                           1); // To take care of occasional missing events
                     },
                   ),
-                  // GButton(
-                  //   icon: Icons.folder_shared_outlined,
-                  //   iconColor: Colors.black,
-                  //   text: '',
-                  //   onPressed: () {
-                  //     _onTabChange(2); // To take care of occasional missing events
-                  //   },
-                  // ),
+                  GButton(
+                    margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                    icon: Icons.folder_shared,
+                    iconColor: Colors.black,
+                    text: '',
+                    onPressed: () {
+                      _onTabChange(
+                          2); // To take care of occasional missing events
+                    },
+                  ),
                   GButton(
                     margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
                     icon: Icons.person,

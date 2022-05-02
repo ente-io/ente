@@ -26,6 +26,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final String tag;
   final Stream<int> currentIndexStream;
+  final bool smallerTodayFont;
 
   LazyLoadingGallery(
     this.files,
@@ -36,6 +37,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.selectedFiles,
     this.tag,
     this.currentIndexStream, {
+    this.smallerTodayFont,
     Key key,
   }) : super(key: key ?? UniqueKey());
 
@@ -148,7 +150,8 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
         children: [
-          getDayWidget(context, _files[0].creationTime),
+          getDayWidget(
+              context, _files[0].creationTime, widget.smallerTodayFont),
           _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
         ],
       ),
@@ -298,23 +301,27 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         _selectFile(file);
       },
       child: Container(
-        margin: const EdgeInsets.all(2.0),
+        margin: const EdgeInsets.all(1.5),
         decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(3),
           border: widget.selectedFiles.files.contains(file)
               ? Border.all(
                   width: 4.0,
-                  color: Theme.of(context).buttonColor,
+                  color: Theme.of(context).buttonColor, //selection
                 )
               : null,
         ),
-        child: Hero(
-          tag: widget.tag + file.tag(),
-          child: ThumbnailWidget(
-            file,
-            diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
-            serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
-            shouldShowLivePhotoOverlay: true,
-            key: Key(widget.tag + file.tag()),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(3),
+          child: Hero(
+            tag: widget.tag + file.tag(),
+            child: ThumbnailWidget(
+              file,
+              diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
+              serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
+              shouldShowLivePhotoOverlay: true,
+              key: Key(widget.tag + file.tag()),
+            ),
           ),
         ),
       ),

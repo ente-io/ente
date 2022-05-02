@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
@@ -24,6 +25,7 @@ class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
   final List<File> initialFiles;
   final Stream<FilesUpdatedEvent> reloadEvent;
+  final bool smallerTodayFont;
   final List<Stream<Event>> forceReloadEvents;
   final Set<EventType> removalEventTypes;
   final SelectedFiles selectedFiles;
@@ -41,6 +43,7 @@ class Gallery extends StatefulWidget {
     this.removalEventTypes = const {},
     this.header,
     this.footer,
+    this.smallerTodayFont = false,
     Key key,
   }) : super(key: key);
 
@@ -173,7 +176,10 @@ class _GalleryState extends State<Gallery> {
         if (widget.header != null) {
           children.add(widget.header);
         }
-        children.add(Expanded(child: nothingToSeeHere));
+        children.add(Expanded(
+          child: nothingToSeeHere(
+              textColor: Theme.of(context).colorScheme.defaultTextColor),
+        ));
         if (widget.footer != null) {
           children.add(widget.footer);
         }
@@ -196,6 +202,7 @@ class _GalleryState extends State<Gallery> {
               .on<GalleryIndexUpdatedEvent>()
               .where((event) => event.tag == widget.tagPrefix)
               .map((event) => event.index),
+          smallerTodayFont: widget.smallerTodayFont,
         );
         if (widget.header != null && index == 0) {
           gallery = Column(children: [widget.header, gallery]);

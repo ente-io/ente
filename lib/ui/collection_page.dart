@@ -40,6 +40,7 @@ class CollectionPage extends StatelessWidget {
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
+      smallerTodayFont: true,
     );
     return Scaffold(
       appBar: PreferredSize(
