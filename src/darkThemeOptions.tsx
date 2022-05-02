@@ -37,23 +37,11 @@ const darkThemeOptions = createTheme({
                 root: { borderRadius: '8px', backgroundColor: '#040404' },
             },
         },
-        MuiLink: {
-            styleOverrides: {
-                root: {
-                    color: '#fff',
-                    textDecoration: 'none',
-                    '&:hover': {
-                        color: '#fff',
-                        textDecoration: 'underline',
-                        textDecorationColor: '#fff',
-                    },
-                },
-            },
-        },
         MuiButton: {
             styleOverrides: {
                 root: {
                     color: '#fff',
+                    textTransform: 'none',
                 },
             },
         },
