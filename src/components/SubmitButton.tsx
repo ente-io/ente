@@ -15,7 +15,7 @@ const SubmitButton: FC<ButtonProps<'button', Props>> = ({
 }: Props) => {
     return (
         <Button
-            sx={{ mt: 2 }}
+            sx={{ my: 2 }}
             variant="contained"
             color="success"
             type="submit"

@@ -1,30 +1,21 @@
 import { Formik, FormikHelpers } from 'formik';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Button, Col, Form, FormControl } from 'react-bootstrap';
 import * as Yup from 'yup';
 import constants from 'utils/strings/constants';
 import SubmitButton from 'components/SubmitButton';
 import router from 'next/router';
 import { changeEmail, getOTTForEmailChange } from 'services/userService';
-import styled from 'styled-components';
 import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { PAGES } from 'constants/pages';
+import { TextField } from '@mui/material';
+import Container from './Container';
+import LinkButton from './pages/gallery/LinkButton';
 
 interface formValues {
     email: string;
     ott?: string;
 }
-
-const EmailRow = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    border: 1px solid grey;
-    margin-bottom: 19px;
-    align-items: center;
-    text-align: left;
-    color: #fff;
-`;
 
 interface Props {
     showMessage: (value: boolean) => void;
@@ -33,15 +24,8 @@ interface Props {
 function ChangeEmailForm(props: Props) {
     const [loading, setLoading] = useState(false);
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
-    const emailInputElement = useRef(null);
     const ottInputRef = useRef(null);
     const appContext = useContext(AppContext);
-
-    useEffect(() => {
-        setTimeout(() => {
-            emailInputElement.current?.focus();
-        }, 250);
-    }, []);
 
     useEffect(() => {
         if (!ottInputVisible) {
@@ -98,76 +82,53 @@ function ChangeEmailForm(props: Props) {
             validateOnChange={false}
             validateOnBlur={false}
             onSubmit={!ottInputVisible ? requestOTT : requestEmailChange}>
-            {({ values, errors, touched, handleChange, handleSubmit }) => (
-                <Form noValidate onSubmit={handleSubmit}>
-                    {!ottInputVisible ? (
-                        <Form.Group controlId="formBasicEmail">
-                            <Form.Control
-                                ref={emailInputElement}
+            {({ values, errors, handleChange, handleSubmit }) => (
+                <>
+                    <form
+                        noValidate
+                        style={{ width: '100%' }}
+                        onSubmit={handleSubmit}>
+                        <Container>
+                            <TextField
+                                fullWidth
+                                InputProps={{
+                                    readOnly: ottInputVisible,
+                                }}
+                                margin="normal"
                                 type="email"
-                                placeholder={constants.ENTER_EMAIL}
+                                label={constants.ENTER_EMAIL}
                                 value={values.email}
                                 onChange={handleChange('email')}
-                                isInvalid={Boolean(
-                                    touched.email && errors.email
-                                )}
+                                error={Boolean(errors.email)}
+                                helperText={errors.email}
                                 autoFocus
                                 disabled={loading}
                             />
-                            <FormControl.Feedback type="invalid">
-                                {errors.email}
-                            </FormControl.Feedback>
-                        </Form.Group>
-                    ) : (
-                        <>
-                            <EmailRow>
-                                <Col xs="8">{values.email}</Col>
-                                <Col xs="4">
-                                    <Button
-                                        variant="link"
-                                        onClick={() =>
-                                            setShowOttInputVisibility(false)
-                                        }>
-                                        {constants.CHANGE}
-                                    </Button>
-                                </Col>
-                            </EmailRow>
-                            <Form.Group controlId="formBasicEmail">
-                                <Form.Control
-                                    ref={ottInputRef}
+                            {ottInputVisible && (
+                                <TextField
+                                    fullWidth
                                     type="text"
-                                    placeholder={constants.ENTER_OTT}
+                                    label={constants.ENTER_OTT}
                                     value={values.ott}
                                     onChange={handleChange('ott')}
-                                    isInvalid={Boolean(
-                                        touched.ott && errors.ott
-                                    )}
+                                    error={Boolean(errors.ott)}
+                                    helperText={errors.ott}
                                     disabled={loading}
                                 />
-                                <FormControl.Feedback type="invalid">
-                                    {errors.ott}
-                                </FormControl.Feedback>
-                            </Form.Group>
-                        </>
-                    )}
+                            )}
 
-                    <SubmitButton
-                        buttonText={
-                            !ottInputVisible
-                                ? constants.SEND_OTT
-                                : constants.VERIFY
-                        }
-                        loading={loading}
-                    />
-                    <br />
-                    <Button
-                        block
-                        variant="link"
-                        className="text-center"
-                        onClick={router.back}>
-                        {constants.GO_BACK}
-                    </Button>
-                </Form>
+                            <SubmitButton loading={loading}>
+                                {!ottInputVisible
+                                    ? constants.SEND_OTT
+                                    : constants.VERIFY}
+                            </SubmitButton>
+                        </Container>
+                    </form>
+                    <LinkButton
+                        onClick={() => setShowOttInputVisibility(false)}>
+                        {constants.CHANGE_EMAIL}?
+                    </LinkButton>
+                </>
             )}
         </Formik>
     );

@@ -1,43 +1,35 @@
 import Container from 'components/Container';
 import LogoImg from 'components/LogoImg';
 import React, { useEffect, useState } from 'react';
-import { Alert, Card } from 'react-bootstrap';
+import { Alert } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import router from 'next/router';
-import { getToken } from 'utils/common/key';
-import EnteSpinner from 'components/EnteSpinner';
 import ChangeEmailForm from 'components/ChangeEmail';
-import EnteCard from 'components/EnteCard';
 import { PAGES } from 'constants/pages';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { Box, Card, CardContent } from '@mui/material';
 
 function ChangeEmailPage() {
-    const [email, setEmail] = useState('');
-    const [waiting, setWaiting] = useState(true);
+    const [email, setEmail] = useState(null);
     const [showMessage, setShowMessage] = useState(false);
     const [showBigDialog, setShowBigDialog] = useState(false);
 
     useEffect(() => {
-        const token = getToken();
-        if (!token) {
+        const user = getData(LS_KEYS.USER);
+        if (!user?.token) {
             router.push(PAGES.ROOT);
-            return;
         }
-        setWaiting(false);
     }, []);
 
     return (
         <Container>
-            {waiting ? (
-                <EnteSpinner>
-                    <span className="sr-only">Loading...</span>
-                </EnteSpinner>
-            ) : (
-                <EnteCard size={showBigDialog ? 'md' : 'sm'}>
-                    <Card.Body style={{ padding: '40px 30px' }}>
-                        <Card.Title style={{ marginBottom: '32px' }}>
+            <Card sx={{ minWidth: showBigDialog ? '460px' : '320px' }}>
+                <CardContent>
+                    <Container disableGutters sx={{ py: 2 }}>
+                        <Box mb={2}>
                             <LogoImg src="/icon.svg" />
                             {constants.CHANGE_EMAIL}
-                        </Card.Title>
+                        </Box>
                         <Alert
                             variant="success"
                             show={showMessage}
@@ -54,9 +46,9 @@ function ChangeEmailPage() {
                             }}
                             setEmail={setEmail}
                         />
-                    </Card.Body>
-                </EnteCard>
-            )}
+                    </Container>
+                </CardContent>
+            </Card>
         </Container>
     );
 }
