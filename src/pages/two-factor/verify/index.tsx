@@ -1,6 +1,6 @@
 import Container from 'components/Container';
 import LogoImg from 'components/LogoImg';
-import VerifyTwoFactor from 'components/VerifyTwoFactor';
+import VerifyTwoFactor from 'components/TwoFactor/VerifyForm';
 import router from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
