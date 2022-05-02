@@ -9,10 +9,10 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import isElectron from 'is-electron';
 import { downloadApp, initiateEmail } from 'utils/common';
-import { GalleryContext } from 'pages/gallery';
+import { AppContext } from 'pages/_app';
 
 export default function HelpSection({ userDetails }) {
-    const { setDialogMessage } = useContext(GalleryContext);
+    const { setDialogMessage } = useContext(AppContext);
 
     const [exportModalView, setExportModalView] = useState(false);
 
