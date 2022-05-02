@@ -7,10 +7,8 @@ import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/settings/usage_details_widget.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:pie_chart/pie_chart.dart';
 
 class DetailsSectionWidget extends StatefulWidget {
   DetailsSectionWidget({Key key}) : super(key: key);
@@ -55,106 +53,137 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
     );
   }
 
-  Widget getContainer() {
-    return UsageDetailsWidget(_userDetails);
-  }
-
-  Container getOldContainer() {
+  Container getContainer() {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.withBlue(210).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(10),
-      ),
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-      margin: EdgeInsets.fromLTRB(12, 8, 12, 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          GestureDetector(
-            onTap: () {
-              int totalStorage = _userDetails.isPartOfFamily()
-                  ? _userDetails.familyData.storage
-                  : _userDetails.subscription.storage;
-              String usageText = formatBytes(_userDetails.getFreeStorage()) +
-                  " / " +
-                  convertBytesToReadableFormat(totalStorage) +
-                  " free";
-              if (_userDetails.isPartOfFamily()) {
-                usageText +=
-                    "\npersonal usage: ${convertBytesToReadableFormat(_userDetails.getPersonalUsage())}\n"
-                    "family usage: ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage() - _userDetails.getPersonalUsage())}";
-              }
-              showToast(usageText);
-            },
-            child: PieChart(
-              dataMap: {
-                "used": _userDetails.getPersonalUsage().toDouble(),
-                "family_usage": (_userDetails.getFamilyOrPersonalUsage() -
-                        _userDetails.getPersonalUsage())
-                    .toDouble(),
-                "free": _userDetails.getFreeStorage().toDouble(),
+      height: 104,
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(8.0),
+        image: DecorationImage(
+          image: AssetImage("assets/card_background.png"),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 36, horizontal: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Storage",
+              style: Theme.of(context)
+                  .textTheme
+                  .subtitle1
+                  .copyWith(color: Colors.white.withOpacity(0.7)),
+            ),
+            Padding(padding: EdgeInsets.symmetric(vertical: 2)),
+            Text(
+              "${convertBytesToReadableFormat(_userDetails.usage)} of ${convertBytesToReadableFormat(_userDetails.getTotalStorage())} used",
+              style: Theme.of(context)
+                  .textTheme
+                  .headline6
+                  .copyWith(color: Colors.white, fontSize: 20),
+            ),
+            Padding(padding: EdgeInsets.symmetric(vertical: 18)),
+            Stack(
+              children: <Widget>[
+                Container(
+                  color: Colors.white.withOpacity(0.2),
+                  width: MediaQuery.of(context).size.width,
+                  height: 4,
+                ),
+                Container(
+                  color: Colors.white.withOpacity(0.75),
+                  width: MediaQuery.of(context).size.width *
+                      ((_userDetails.getFamilyOrPersonalUsage()) /
+                          _userDetails.getTotalStorage()),
+                  height: 4,
+                ),
+                Container(
+                  color: Colors.white,
+                  width: MediaQuery.of(context).size.width *
+                      (_userDetails.usage / _userDetails.getTotalStorage()),
+                  height: 4,
+                ),
+              ],
+            ),
+            Padding(padding: EdgeInsets.symmetric(vertical: 6)),
+            GestureDetector(
+              onTap: () {
+                int totalStorage = _userDetails.isPartOfFamily()
+                    ? _userDetails.familyData.storage
+                    : _userDetails.subscription.storage;
+                String usageText = formatBytes(_userDetails.getFreeStorage()) +
+                    " / " +
+                    convertBytesToReadableFormat(totalStorage) +
+                    " free";
+                if (_userDetails.isPartOfFamily()) {
+                  usageText +=
+                      "\npersonal usage: ${convertBytesToReadableFormat(_userDetails.getPersonalUsage())}\n"
+                      "family usage: ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage() - _userDetails.getPersonalUsage())}";
+                }
+                showToast(usageText);
               },
-              colorList: const [
-                Colors.redAccent,
-                Colors.blueGrey,
-                Color.fromRGBO(50, 194, 100, 1.0),
-              ],
-              legendOptions: LegendOptions(
-                showLegends: false,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _userDetails.isPartOfFamily()
+                      ? Row(
+                          children: [
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Padding(padding: EdgeInsets.only(right: 4)),
+                            Text(
+                              "You",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyText1
+                                  .copyWith(color: Colors.white),
+                            ),
+                            Padding(padding: EdgeInsets.only(right: 12)),
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withOpacity(0.75),
+                              ),
+                            ),
+                            Padding(padding: EdgeInsets.only(right: 4)),
+                            Text(
+                              "Family",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyText1
+                                  .copyWith(color: Colors.white),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          "${convertBytesToReadableFormat(_userDetails.getFreeStorage())} available",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyText1
+                              .copyWith(color: Colors.white)),
+                  Text(
+                    "${_userDetails.fileCount.toString()} Memories",
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyText1
+                        .copyWith(color: Colors.white),
+                  )
+                ],
               ),
-              chartValuesOptions: ChartValuesOptions(
-                showChartValues: false,
-                showChartValueBackground: false,
-              ),
-              chartRadius: 80,
-              ringStrokeWidth: 4,
-              chartType: ChartType.ring,
-              centerText: convertBytesToReadableFormat(
-                      _userDetails.getPersonalUsage()) +
-                  "\nused",
-              centerTextStyle: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-              ),
-              initialAngleInDegree: 270,
-            ),
-          ),
-          Padding(padding: EdgeInsets.all(4)),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _userDetails.email,
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Padding(padding: EdgeInsets.all(6)),
-                Text(
-                  _userDetails.fileCount.toString() + " memories preserved",
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 14,
-                  ),
-                ),
-                Padding(padding: EdgeInsets.all(3)),
-                Text(
-                  _userDetails.sharedCollectionsCount.toString() +
-                      " albums shared",
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+            )
+          ],
+        ),
       ),
     );
   }

@@ -42,8 +42,12 @@ class UserDetails {
     return max(
         isPartOfFamily()
             ? (familyData.storage - familyData.getTotalUsage())
-            : (subscription.storage - usage),
+            : (subscription.storage - (usage)),
         0);
+  }
+
+  int getTotalStorage() {
+    return isPartOfFamily() ? familyData.storage : subscription.storage;
   }
 
   int getPersonalUsage() {
