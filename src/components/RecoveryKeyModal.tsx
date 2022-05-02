@@ -60,7 +60,7 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
             }}>
             <p>{constants.RECOVERY_KEY_DESCRIPTION}</p>
             <Box
-                borderRadius={(theme) => theme.sizes.borderRadius}
+                borderRadius={(theme) => theme.shape.borderRadius}
                 border={'1px dashed'}
                 borderColor={'grey.A700'}>
                 <CodeBlock code={recoveryKey} />

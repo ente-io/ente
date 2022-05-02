@@ -10,17 +10,17 @@ declare module '@mui/material/styles' {
         danger: PaletteOptions['primary'];
     }
 
-    interface Theme {
-        sizes: {
-            borderRadius: number;
-        };
-    }
+    // interface Theme {
+    //     sizes: {
+    //         borderRadius: number;
+    //     };
+    // }
 
-    interface ThemeOptions {
-        sizes?: {
-            borderRadius?: string;
-        };
-    }
+    // interface ThemeOptions {
+    //     sizes?: {
+    //         borderRadius?: string;
+    //     };
+    // }
 }
 
 declare module '@mui/material/Button' {
@@ -34,7 +34,7 @@ const darkThemeOptions = createTheme({
     components: {
         MuiPaper: {
             styleOverrides: {
-                root: { borderRadius: '8px' },
+                root: { borderRadius: '8px', backgroundColor: '#040404' },
             },
         },
         MuiLink: {
@@ -47,6 +47,13 @@ const darkThemeOptions = createTheme({
                         textDecoration: 'underline',
                         textDecorationColor: '#fff',
                     },
+                },
+            },
+        },
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    color: '#fff',
                 },
             },
         },
@@ -72,7 +79,7 @@ const darkThemeOptions = createTheme({
         background: { default: '#000', paper: '#000' },
     },
 
-    sizes: {
+    shape: {
         borderRadius: '8px',
     },
 });
