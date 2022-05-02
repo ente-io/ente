@@ -318,7 +318,7 @@ function PlanSelector(props: Props) {
                         <>
                             {isSubscriptionCancelled(subscription) ? (
                                 <LinkButton
-                                    variant="success"
+                                    color={'success'}
                                     onClick={() =>
                                         props.setDialogMessage({
                                             title: constants.CONFIRM_ACTIVATE_SUBSCRIPTION,
@@ -346,7 +346,7 @@ function PlanSelector(props: Props) {
                                 </LinkButton>
                             ) : (
                                 <LinkButton
-                                    variant="danger"
+                                    color="danger"
                                     onClick={() =>
                                         props.setDialogMessage({
                                             title: constants.CONFIRM_CANCEL_SUBSCRIPTION,
@@ -372,7 +372,7 @@ function PlanSelector(props: Props) {
                                 </LinkButton>
                             )}
                             <LinkButton
-                                variant="primary"
+                                color="primary"
                                 onClick={updatePaymentMethod.bind(
                                     null,
                                     props.setDialogMessage,
@@ -384,7 +384,7 @@ function PlanSelector(props: Props) {
                         </>
                     ) : (
                         <LinkButton
-                            variant="primary"
+                            color="primary"
                             onClick={props.closeModal}
                             style={{
                                 color: 'rgb(121, 121, 121)',

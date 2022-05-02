@@ -1,5 +1,6 @@
 import { Link, LinkProps } from '@mui/material';
 import React, { FC } from 'react';
+import { ButtonProps } from 'react-bootstrap';
 
 export enum ButtonVariant {
     success = 'success',
@@ -28,9 +29,15 @@ export function getVariantColor(variant: string) {
     }
 }
 
-const LinkButton: FC<LinkProps<'button'>> = ({ children, ...props }) => {
+const LinkButton: FC<LinkProps<'button', { color?: ButtonProps['color'] }>> = ({
+    children,
+    ...props
+}) => {
     return (
-        <Link component="button" {...props}>
+        <Link
+            component="button"
+            {...props}
+            sx={{ color: props.color && `${props.color}.main` }}>
             {children}
         </Link>
     );
