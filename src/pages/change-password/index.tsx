@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
@@ -9,16 +9,21 @@ import CryptoWorker, {
 } from 'utils/crypto';
 import { getActualKey } from 'utils/common/key';
 import { setKeys } from 'services/userService';
-import SetPasswordForm from 'components/SetPasswordForm';
-import { AppContext } from 'pages/_app';
+import SetPasswordForm, {
+    SetPasswordFormValues,
+} from 'components/SetPasswordForm';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
 import { KEK, UpdatedKey } from 'types/user';
+import { FormikHelpers } from 'formik';
+import Container from 'components/Container';
+import { CardContent, Box, Card } from '@mui/material';
+import LogoImg from 'components/LogoImg';
+import LinkButton from 'components/pages/gallery/LinkButton';
 
-export default function Generate() {
+export default function ChangePassword() {
     const [token, setToken] = useState<string>();
     const router = useRouter();
-    const appContext = useContext(AppContext);
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
@@ -27,10 +32,12 @@ export default function Generate() {
         } else {
             setToken(user.token);
         }
-        appContext.showNavBar(true);
     }, []);
 
-    const onSubmit = async (passphrase, setFieldError) => {
+    const onSubmit = async (
+        passphrase: string,
+        setFieldError: FormikHelpers<SetPasswordFormValues>['setFieldError']
+    ) => {
         const cryptoWorker = await new CryptoWorker();
         const key: string = await getActualKey();
         const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
@@ -64,19 +71,36 @@ export default function Generate() {
         await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
         redirectToGallery();
     };
+
     const redirectToGallery = () => {
         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
         router.push(PAGES.GALLERY);
     };
+
     return (
-        <SetPasswordForm
-            callback={onSubmit}
-            buttonText={constants.CHANGE_PASSWORD}
-            back={
-                getData(LS_KEYS.SHOW_BACK_BUTTON)?.value
-                    ? redirectToGallery
-                    : null
-            }
-        />
+        <Container>
+            <Card sx={{ maxWidth: '520px' }}>
+                <CardContent>
+                    <Container disableGutters sx={{ pt: 3 }}>
+                        <Box mb={4}>
+                            <LogoImg src="/icon.svg" />
+                            {constants.CHANGE_PASSWORD}
+                        </Box>
+                        <SetPasswordForm
+                            callback={onSubmit}
+                            buttonText={constants.CHANGE_PASSWORD}
+                            back={
+                                getData(LS_KEYS.SHOW_BACK_BUTTON)?.value
+                                    ? redirectToGallery
+                                    : null
+                            }
+                        />
+                        <LinkButton sx={{ mt: 2 }} onClick={router.back}>
+                            {constants.GO_BACK}
+                        </LinkButton>
+                    </Container>
+                </CardContent>
+            </Card>
+        </Container>
     );
 }

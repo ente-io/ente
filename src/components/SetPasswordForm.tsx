@@ -1,27 +1,29 @@
 import React, { useState } from 'react';
 import Container from 'components/Container';
-import Card from 'react-bootstrap/Card';
-import Form from 'react-bootstrap/Form';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
-import Button from 'react-bootstrap/Button';
 import SubmitButton from './SubmitButton';
+import { TextField, Typography } from '@mui/material';
 
 interface Props {
-    callback: (passphrase: any, setFieldError: any) => Promise<void>;
+    callback: (
+        passphrase: string,
+        setFieldError: FormikHelpers<SetPasswordFormValues>['setFieldError']
+    ) => Promise<void>;
     buttonText: string;
     back: () => void;
 }
-interface formValues {
+export interface SetPasswordFormValues {
     passphrase: string;
     confirm: string;
 }
 function SetPasswordForm(props: Props) {
     const [loading, setLoading] = useState(false);
+
     const onSubmit = async (
-        values: formValues,
-        { setFieldError }: FormikHelpers<formValues>
+        values: SetPasswordFormValues,
+        { setFieldError }: FormikHelpers<SetPasswordFormValues>
     ) => {
         setLoading(true);
         try {
@@ -37,88 +39,61 @@ function SetPasswordForm(props: Props) {
             setLoading(false);
         }
     };
+
     return (
-        <Container>
-            <Card style={{ maxWidth: '540px', padding: '20px' }}>
-                <Card.Body>
-                    <div
-                        className="text-center"
-                        style={{ marginBottom: '40px' }}>
-                        <p>{constants.ENTER_ENC_PASSPHRASE}</p>
-                        {constants.PASSPHRASE_DISCLAIMER()}
-                    </div>
-                    <Formik<formValues>
-                        initialValues={{ passphrase: '', confirm: '' }}
-                        validationSchema={Yup.object().shape({
-                            passphrase: Yup.string().required(
-                                constants.REQUIRED
-                            ),
-                            confirm: Yup.string().required(constants.REQUIRED),
-                        })}
-                        validateOnChange={false}
-                        validateOnBlur={false}
-                        onSubmit={onSubmit}>
-                        {({
-                            values,
-                            touched,
-                            errors,
-                            handleChange,
-                            handleSubmit,
-                        }) => (
-                            <Form noValidate onSubmit={handleSubmit}>
-                                <Form.Group>
-                                    <Form.Control
-                                        type="password"
-                                        placeholder={constants.PASSPHRASE_HINT}
-                                        value={values.passphrase}
-                                        onChange={handleChange('passphrase')}
-                                        isInvalid={Boolean(
-                                            touched.passphrase &&
-                                                errors.passphrase
-                                        )}
-                                        autoFocus
-                                        disabled={loading}
-                                    />
-                                    <Form.Control.Feedback type="invalid">
-                                        {errors.passphrase}
-                                    </Form.Control.Feedback>
-                                </Form.Group>
-                                <Form.Group>
-                                    <Form.Control
-                                        type="password"
-                                        placeholder={
-                                            constants.RE_ENTER_PASSPHRASE
-                                        }
-                                        value={values.confirm}
-                                        onChange={handleChange('confirm')}
-                                        isInvalid={Boolean(
-                                            touched.confirm && errors.confirm
-                                        )}
-                                        disabled={loading}
-                                    />
-                                    <Form.Control.Feedback type="invalid">
-                                        {errors.confirm}
-                                    </Form.Control.Feedback>
-                                </Form.Group>
-                                <SubmitButton
-                                    buttonText={props.buttonText}
-                                    loading={loading}
-                                />
-                            </Form>
-                        )}
-                    </Formik>
-                    {props.back && (
-                        <div
-                            className="text-center"
-                            style={{ marginTop: '20px' }}>
-                            <Button variant="link" onClick={props.back}>
-                                {constants.GO_BACK}
-                            </Button>
-                        </div>
-                    )}
-                </Card.Body>
-            </Card>
-        </Container>
+        <Formik<SetPasswordFormValues>
+            initialValues={{ passphrase: '', confirm: '' }}
+            validationSchema={Yup.object().shape({
+                passphrase: Yup.string().required(constants.REQUIRED),
+                confirm: Yup.string().required(constants.REQUIRED),
+            })}
+            validateOnChange={false}
+            validateOnBlur={false}
+            onSubmit={onSubmit}>
+            {({ values, errors, handleChange, handleSubmit }) => (
+                <form
+                    style={{ width: '100%' }}
+                    noValidate
+                    onSubmit={handleSubmit}>
+                    <Container disableGutters>
+                        <Typography mb={2}>
+                            {constants.ENTER_ENC_PASSPHRASE}
+                        </Typography>
+                        <Typography mb={2}>
+                            {constants.PASSPHRASE_DISCLAIMER()}
+                        </Typography>
+                        <Container>
+                            <TextField
+                                margin="normal"
+                                fullWidth
+                                type="password"
+                                label={constants.PASSPHRASE_HINT}
+                                value={values.passphrase}
+                                onChange={handleChange('passphrase')}
+                                error={Boolean(errors.passphrase)}
+                                helperText={errors.passphrase}
+                                autoFocus
+                                disabled={loading}
+                            />
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                type="password"
+                                label={constants.RE_ENTER_PASSPHRASE}
+                                value={values.confirm}
+                                onChange={handleChange('confirm')}
+                                disabled={loading}
+                                error={Boolean(errors.confirm)}
+                                helperText={errors.confirm}
+                            />
+                            <SubmitButton loading={loading}>
+                                {props.buttonText}
+                            </SubmitButton>
+                        </Container>
+                    </Container>
+                </form>
+            )}
+        </Formik>
     );
 }
 export default SetPasswordForm;
