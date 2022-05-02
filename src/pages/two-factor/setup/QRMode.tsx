@@ -2,7 +2,10 @@ import React from 'react';
 import EnteSpinner from 'components/EnteSpinner';
 import { TwoFactorSecret } from 'types/user';
 import constants from 'utils/strings/constants';
-import { LoadingQRCode, QRCode } from '../styledComponents';
+import {
+    LoadingQRCode,
+    QRCode,
+} from '../../../components/TwoFactor/styledComponents';
 import { Typography } from '@mui/material';
 import LinkButton from 'components/pages/gallery/LinkButton';
 
