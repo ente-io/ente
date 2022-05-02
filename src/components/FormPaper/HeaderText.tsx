@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { Typography, TypographyProps } from '@mui/material';
 
-const CardTitle: FC<TypographyProps> = (props) => {
+const FormPaperHeaderText: FC<TypographyProps> = ({ sx, ...props }) => {
     return (
         <Typography
             sx={{
@@ -9,6 +9,7 @@ const CardTitle: FC<TypographyProps> = (props) => {
                 fontWeight: '600',
                 textAlign: 'left',
                 mb: 8,
+                ...sx,
             }}
             {...props}>
             {props.children}
@@ -16,4 +17,4 @@ const CardTitle: FC<TypographyProps> = (props) => {
     );
 };
 
-export default CardTitle;
+export default FormPaperHeaderText;
