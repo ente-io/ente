@@ -720,6 +720,8 @@ const englishConstants = {
     PHOTOS: 'Photos',
     ENTE: 'ente',
     ENDS: 'Ends',
+    ENTER_TWO_FACTOR_OTP:
+        ' enter the 6-digit code from your authenticator app.',
 };
 
 export default englishConstants;

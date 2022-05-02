@@ -1,5 +1,5 @@
-import React from 'react';
-import styled from 'styled-components';
+import { Link, LinkProps } from '@mui/material';
+import React, { FC } from 'react';
 
 export enum ButtonVariant {
     success = 'success',
@@ -28,24 +28,12 @@ export function getVariantColor(variant: string) {
     }
 }
 
-const CustomH5 = styled.h5<{ color: string }>`
-    color: ${(props) => props.color};
-    cursor: pointer;
-    margin-bottom: 0;
-    &:hover {
-        text-decoration: underline;
-    }
-`;
-
-export default function LinkButton(props: LinkButtonProps) {
+const LinkButton: FC<LinkProps<'button'>> = ({ children, ...props }) => {
     return (
-        <CustomH5
-            color={getVariantColor(props.variant)}
-            style={{
-                ...props.style,
-            }}
-            onClick={props?.onClick ?? (() => null)}>
-            {props.children}
-        </CustomH5>
+        <Link component="button" {...props}>
+            {children}
+        </Link>
     );
-}
+};
+
+export default LinkButton;

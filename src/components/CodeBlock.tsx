@@ -8,7 +8,8 @@ import DoneIcon from '@mui/icons-material/Done';
 
 const Wrapper = styled.div`
     position: relative;
-    border-radius: 8px;
+    margin: ${({ theme }) => theme.spacing(2)};
+    border-radius: ${({ theme }) => theme.shape.borderRadius};
 `;
 const CopyButtonWrapper = styled(IconButton)`
     position: absolute;
@@ -26,7 +27,7 @@ export const CodeWrapper = styled.div`
     padding: 37px 40px 20px 20px;
     color: white;
     background: ${({ theme }) => theme.palette.accent.dark};
-    border-radius: 8px;
+    border-radius: ${({ theme }) => theme.shape.borderRadius};
     width: 100%;
 `;
 
@@ -75,7 +76,11 @@ export const CodeBlock = (props: Iprops) => {
                     delay={{ show: 200, hide: 800 }}>
                     <CopyButtonWrapper
                         onClick={copyToClipboardHelper(props.code)}>
-                        {copied ? <DoneIcon /> : <ContentCopyIcon />}
+                        {copied ? (
+                            <DoneIcon fontSize="small" />
+                        ) : (
+                            <ContentCopyIcon fontSize="small" />
+                        )}
                     </CopyButtonWrapper>
                 </OverlayTrigger>
             )}
