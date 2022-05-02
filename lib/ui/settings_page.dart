@@ -28,7 +28,7 @@ class SettingsPage extends StatelessWidget {
     final String email = Configuration.instance.getEmail();
     final List<Widget> contents = [];
     contents.add(Container(
-        padding: EdgeInsets.symmetric(horizontal: 10),
+        padding: EdgeInsets.symmetric(horizontal: 2),
         child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -43,7 +43,7 @@ class SettingsPage extends StatelessWidget {
               ThemeSwitchWidget()
             ])));
     final sectionDivider = Divider(
-      height: 10,
+      height: 20,
       color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
     );
     if (hasLoggedIn) {
@@ -77,7 +77,7 @@ class SettingsPage extends StatelessWidget {
     }
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20),
         child: Column(
           children: contents,
         ),
