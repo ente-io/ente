@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
-import Container from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SignUp from 'components/SignUp';
 import { PAGES } from 'constants/pages';
-import Card from '@mui/material/Card';
-import { CardContent } from '@mui/material';
+import FormPaper from 'components/Form/FormPaper';
+import FormContainer from 'components/Form/FormContainer';
 
 export default function SignUpPage() {
     const router = useRouter();
@@ -30,16 +29,14 @@ export default function SignUpPage() {
     };
 
     return (
-        <Container style={{ alignItems: 'flex-end' }}>
+        <FormContainer>
             {loading ? (
                 <EnteSpinner />
             ) : (
-                <Card sx={{ maxWidth: '360px' }}>
-                    <CardContent sx={{ py: 4, px: 2 }}>
-                        <SignUp login={login} />
-                    </CardContent>
-                </Card>
+                <FormPaper>
+                    <SignUp login={login} />
+                </FormPaper>
             )}
-        </Container>
+        </FormContainer>
     );
 }

@@ -23,8 +23,9 @@ import {
     FormGroup,
     TextField,
 } from '@mui/material';
-import CardTitle from './Card/Title';
+import FormPaperHeaderText from './Form/FormPaper/HeaderText';
 import LinkButton from './pages/gallery/LinkButton';
+import FormPaperFooter from './Form/FormPaper/Footer';
 
 interface FormValues {
     email: string;
@@ -92,7 +93,7 @@ export default function SignUp(props: SignUpProps) {
 
     return (
         <>
-            <CardTitle> {constants.SIGN_UP}</CardTitle>
+            <FormPaperHeaderText> {constants.SIGN_UP}</FormPaperHeaderText>
             <Formik<FormValues>
                 initialValues={{
                     email: '',
@@ -115,86 +116,81 @@ export default function SignUp(props: SignUpProps) {
                     handleChange,
                     handleSubmit,
                 }): JSX.Element => (
-                    <>
-                        <form noValidate onSubmit={handleSubmit}>
-                            <Container disableGutters sx={{ mb: 1 }}>
-                                <TextField
-                                    variant="filled"
-                                    fullWidth
-                                    margin="dense"
-                                    type="email"
-                                    label={constants.ENTER_EMAIL}
-                                    value={values.email}
-                                    onChange={handleChange('email')}
-                                    error={Boolean(errors.email)}
-                                    helperText={errors.email}
-                                    autoFocus
-                                    disabled={loading}
-                                />
-
-                                <TextField
-                                    fullWidth
-                                    variant="filled"
-                                    margin="dense"
-                                    type="password"
-                                    label={constants.PASSPHRASE_HINT}
-                                    value={values.passphrase}
-                                    onChange={handleChange('passphrase')}
-                                    error={Boolean(errors.passphrase)}
-                                    helperText={errors.passphrase}
-                                    disabled={loading}
-                                />
-
-                                <TextField
-                                    fullWidth
-                                    variant="filled"
-                                    margin="dense"
-                                    type="password"
-                                    label={constants.CONFIRM_PASSPHRASE}
-                                    value={values.confirm}
-                                    onChange={handleChange('confirm')}
-                                    error={Boolean(errors.confirm)}
-                                    helperText={errors.confirm}
-                                    disabled={loading}
-                                />
-                                <FormGroup>
-                                    <FormControlLabel
-                                        sx={{
-                                            color: 'text.secondary',
-                                            mt: 2,
-                                        }}
-                                        control={
-                                            <Checkbox
-                                                disabled={loading}
-                                                checked={acceptTerms}
-                                                onChange={(e) =>
-                                                    setAcceptTerms(
-                                                        e.target.checked
-                                                    )
-                                                }
-                                                color="success"
-                                            />
-                                        }
-                                        label={constants.TERMS_AND_CONDITIONS()}
-                                    />
-                                </FormGroup>
-                            </Container>
-                            <SubmitButton
-                                buttonText={constants.CREATE_ACCOUNT}
-                                loading={loading}
-                                disabled={!acceptTerms}
+                    <form noValidate onSubmit={handleSubmit}>
+                        <Container disableGutters sx={{ mb: 1 }}>
+                            <TextField
+                                variant="filled"
+                                fullWidth
+                                margin="dense"
+                                type="email"
+                                label={constants.ENTER_EMAIL}
+                                value={values.email}
+                                onChange={handleChange('email')}
+                                error={Boolean(errors.email)}
+                                helperText={errors.email}
+                                autoFocus
+                                disabled={loading}
                             />
-                        </form>
-                        <Divider />
-                        <LinkButton
-                            onClick={props.login}
-                            color={'text.secondary'}
-                            sx={{ mt: 3 }}>
-                            {constants.ACCOUNT_EXISTS}
-                        </LinkButton>
-                    </>
+
+                            <TextField
+                                fullWidth
+                                variant="filled"
+                                margin="dense"
+                                type="password"
+                                label={constants.PASSPHRASE_HINT}
+                                value={values.passphrase}
+                                onChange={handleChange('passphrase')}
+                                error={Boolean(errors.passphrase)}
+                                helperText={errors.passphrase}
+                                disabled={loading}
+                            />
+
+                            <TextField
+                                fullWidth
+                                variant="filled"
+                                margin="dense"
+                                type="password"
+                                label={constants.CONFIRM_PASSPHRASE}
+                                value={values.confirm}
+                                onChange={handleChange('confirm')}
+                                error={Boolean(errors.confirm)}
+                                helperText={errors.confirm}
+                                disabled={loading}
+                            />
+                            <FormGroup>
+                                <FormControlLabel
+                                    sx={{
+                                        color: 'text.secondary',
+                                        mt: 2,
+                                    }}
+                                    control={
+                                        <Checkbox
+                                            disabled={loading}
+                                            checked={acceptTerms}
+                                            onChange={(e) =>
+                                                setAcceptTerms(e.target.checked)
+                                            }
+                                            color="success"
+                                        />
+                                    }
+                                    label={constants.TERMS_AND_CONDITIONS()}
+                                />
+                            </FormGroup>
+                        </Container>
+                        <SubmitButton
+                            buttonText={constants.CREATE_ACCOUNT}
+                            loading={loading}
+                            disabled={!acceptTerms}
+                        />
+                    </form>
                 )}
             </Formik>
+            <Divider />
+            <FormPaperFooter>
+                <LinkButton onClick={props.login} color={'text.secondary'}>
+                    {constants.ACCOUNT_EXISTS}
+                </LinkButton>
+            </FormPaperFooter>
         </>
     );
 }
