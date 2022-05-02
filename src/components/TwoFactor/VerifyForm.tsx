@@ -54,36 +54,31 @@ export default function VerifyTwoFactor(props: Props) {
                     noValidate
                     onSubmit={handleSubmit}
                     style={{ width: '100%' }}>
-                    <Container>
-                        <Typography mb={2}>
-                            {constants.ENTER_TWO_FACTOR_OTP}
-                        </Typography>
-                        <Box my={2}>
-                            <OtpInput
-                                ref={otpInputRef}
-                                shouldAutoFocus
-                                value={values.otp}
-                                onChange={onChange(
-                                    handleChange('otp'),
-                                    submitForm
-                                )}
-                                numInputs={6}
-                                separator={'-'}
-                                isInputNum
-                                className={'otp-input'}
-                            />
-                            {errors.otp && (
-                                <InvalidInputMessage>
-                                    {constants.INCORRECT_CODE}
-                                </InvalidInputMessage>
-                            )}
-                        </Box>
-                        <SubmitButton
-                            buttonText={props.buttonText}
-                            loading={waiting}
-                            disabled={values.otp.length < 6}
+                    <Typography mb={2} color="text.secondary">
+                        {constants.ENTER_TWO_FACTOR_OTP}
+                    </Typography>
+                    <Box sx={{ my: 2 }}>
+                        <OtpInput
+                            ref={otpInputRef}
+                            shouldAutoFocus
+                            value={values.otp}
+                            onChange={onChange(handleChange('otp'), submitForm)}
+                            numInputs={6}
+                            separator={'-'}
+                            isInputNum
+                            className={'otp-input'}
                         />
-                    </Container>
+                        {errors.otp && (
+                            <InvalidInputMessage>
+                                {constants.INCORRECT_CODE}
+                            </InvalidInputMessage>
+                        )}
+                    </Box>
+                    <SubmitButton
+                        buttonText={props.buttonText}
+                        loading={waiting}
+                        disabled={values.otp.length < 6}
+                    />
                 </form>
             )}
         </Formik>

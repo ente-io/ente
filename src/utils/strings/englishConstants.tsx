@@ -472,7 +472,7 @@ const englishConstants = {
     BACK: 'back',
     ENABLE_TWO_FACTOR: 'enable two-factor',
     ENABLE: 'enable',
-    LOST_DEVICE: 'lost two-factor device?',
+    LOST_DEVICE: 'Lost two-factor device',
     INCORRECT_CODE: 'incorrect code',
     RECOVER_TWO_FACTOR: 'recover two-factor',
     TWO_FACTOR_INFO:
