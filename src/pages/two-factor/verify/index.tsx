@@ -9,6 +9,7 @@ import { PAGES } from 'constants/pages';
 import { User } from 'types/user';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
+import LinkButton from 'components/pages/gallery/LinkButton';
 
 export default function Home() {
     const [sessionID, setSessionID] = useState('');
@@ -61,9 +62,11 @@ export default function Home() {
                     </Card.Title>
                     <VerifyTwoFactor
                         onSubmit={onSubmit}
-                        back={router.back}
                         buttonText={constants.VERIFY}
                     />
+                    <LinkButton onClick={router.back}>
+                        {constants.GO_BACK}
+                    </LinkButton>
                     <div
                         style={{
                             display: 'flex',
