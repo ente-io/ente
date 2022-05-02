@@ -3,13 +3,13 @@ import React, { FC } from 'react';
 
 interface Props {
     loading: boolean;
-    children: any;
+    buttonText: string;
     inline?: any;
     disabled?: boolean;
 }
 const SubmitButton: FC<ButtonProps<'button', Props>> = ({
     loading,
-    children,
+    buttonText,
     inline,
     disabled,
 }: Props) => {
@@ -21,7 +21,7 @@ const SubmitButton: FC<ButtonProps<'button', Props>> = ({
             type="submit"
             fullWidth={!inline}
             disabled={loading || disabled}>
-            {loading ? <CircularProgress size={25} /> : children}
+            {loading ? <CircularProgress size={25} /> : buttonText}
         </Button>
     );
 };

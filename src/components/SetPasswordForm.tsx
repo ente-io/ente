@@ -85,9 +85,10 @@ function SetPasswordForm(props: Props) {
                                 error={Boolean(errors.confirm)}
                                 helperText={errors.confirm}
                             />
-                            <SubmitButton loading={loading}>
-                                {props.buttonText}
-                            </SubmitButton>
+                            <SubmitButton
+                                loading={loading}
+                                buttonText={props.buttonText}
+                            />
                         </Container>
                     </Container>
                 </form>

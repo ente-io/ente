@@ -116,12 +116,14 @@ function ChangeEmailForm(props: Props) {
                                     disabled={loading}
                                 />
                             )}
-
-                            <SubmitButton loading={loading}>
-                                {!ottInputVisible
-                                    ? constants.SEND_OTT
-                                    : constants.VERIFY}
-                            </SubmitButton>
+                            <SubmitButton
+                                loading={loading}
+                                buttonText={
+                                    !ottInputVisible
+                                        ? constants.SEND_OTT
+                                        : constants.VERIFY
+                                }
+                            />
                         </Container>
                     </form>
                     <LinkButton
