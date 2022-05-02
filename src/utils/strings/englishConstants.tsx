@@ -1,3 +1,4 @@
+import Link from '@mui/material/Link';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -49,7 +50,7 @@ const englishConstants = {
         'reliably replicated to a fallout shelter, designed to outlive',
     COMPANY_NAME: 'ente',
     LOGIN: 'log in',
-    SIGN_UP: 'sign up',
+    SIGN_UP: 'Signup',
     NAME: 'name',
     ENTER_NAME: 'your name',
     EMAIL: 'email',
@@ -89,8 +90,7 @@ const englishConstants = {
         </p>
     ),
     PASSPHRASE_HINT: 'password',
-    RE_ENTER_PASSPHRASE: 'password again',
-    CONFIRM_PASSPHRASE: 'confirm your password',
+    CONFIRM_PASSPHRASE: 'confirm password',
     PASSPHRASE_MATCH_ERROR: "passwords don't match",
     CONSOLE_WARNING_STOP: 'STOP!',
     CONSOLE_WARNING_DESC:
@@ -389,16 +389,19 @@ const englishConstants = {
         <span>try searching for New York, April 14, Christmas...</span>
     ),
     TERMS_AND_CONDITIONS: () => (
-        <p>
+        <>
             I agree to the{' '}
-            <a href="https://ente.io/terms" target="_blank" rel="noreferrer">
+            <Link href="https://ente.io/terms" target="_blank" rel="noreferrer">
                 terms
-            </a>{' '}
+            </Link>{' '}
             and{' '}
-            <a href="https://ente.io/privacy" target="_blank" rel="noreferrer">
+            <Link
+                href="https://ente.io/privacy"
+                target="_blank"
+                rel="noreferrer">
                 privacy policy
-            </a>{' '}
-        </p>
+            </Link>{' '}
+        </>
     ),
     CONFIRM_PASSWORD_NOT_SAVED: () => (
         <p>
@@ -722,6 +725,7 @@ const englishConstants = {
     ENDS: 'Ends',
     ENTER_TWO_FACTOR_OTP:
         ' enter the 6-digit code from your authenticator app.',
+    CREATE_ACCOUNT: 'Create Account',
 };
 
 export default englishConstants;

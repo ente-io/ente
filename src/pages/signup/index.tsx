@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/router';
-import Card from 'react-bootstrap/Card';
 import { AppContext } from 'pages/_app';
 import Container from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SignUp from 'components/SignUp';
 import { PAGES } from 'constants/pages';
+import Card from '@mui/material/Card';
+import { CardContent } from '@mui/material';
 
 export default function SignUpPage() {
     const router = useRouter();
@@ -29,14 +30,14 @@ export default function SignUpPage() {
     };
 
     return (
-        <Container>
+        <Container style={{ alignItems: 'flex-end' }}>
             {loading ? (
                 <EnteSpinner />
             ) : (
-                <Card style={{ minWidth: '320px' }} className="text-center">
-                    <Card.Body style={{ padding: '40px 30px' }}>
+                <Card sx={{ maxWidth: '360px' }}>
+                    <CardContent sx={{ py: 4, px: 2 }}>
                         <SignUp login={login} />
-                    </Card.Body>
+                    </CardContent>
                 </Card>
             )}
         </Container>

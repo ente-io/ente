@@ -233,12 +233,8 @@ html, body {
     background-color: #44774d;
 }
 
-a {
-    color: #fff;
-}
-a:hover {
-    color: #51cd7c;
-}
+
+
 .btn-link {
     color: #fff;
 }
@@ -469,9 +465,7 @@ div.otp-input input:not(:placeholder-shown) , div.otp-input input:focus{
 .react-datepicker__day--disabled:hover {
     background-color: #202020;
 }
-.ente-form-group{
-    margin:0;
-}
+
 .form-check-input:hover, .form-check-label :hover{
     cursor:pointer;
 }

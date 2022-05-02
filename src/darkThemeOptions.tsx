@@ -34,7 +34,20 @@ const darkThemeOptions = createTheme({
     components: {
         MuiPaper: {
             styleOverrides: {
-                root: { borderRadius: '8px', backgroundColor: '#040404' },
+                root: { borderRadius: '8px', backgroundColor: '#0f0f0f' },
+            },
+        },
+        MuiLink: {
+            defaultProps: {
+                color: 'inherit',
+            },
+            styleOverrides: {
+                root: {
+                    textDecorationColor: 'inherit',
+                    '&:hover': {
+                        color: 'hsla(141, 66%, 50%, 1)',
+                    },
+                },
             },
         },
         MuiButton: {
