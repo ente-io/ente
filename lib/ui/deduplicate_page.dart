@@ -91,7 +91,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           child: Material(
             type: MaterialType.transparency,
             child: Text(
-              "deduplicate files",
+              "Deduplicate Files",
               style: TextStyle(
                 fontSize: 18,
               ),
@@ -162,22 +162,16 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       child: Column(
         children: [
           Text(
-            "the following files were clubbed based on their sizes" +
+            "Following files were clubbed based on their sizes" +
                 (_shouldClubByCaptureTime ? " and capture times" : ""),
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              height: 1.2,
-            ),
+            style: Theme.of(context).textTheme.bodyText1.copyWith(fontSize: 14),
           ),
           Padding(
             padding: EdgeInsets.all(4),
           ),
           Text(
-            "please review and delete the items you believe are duplicates",
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              height: 1.2,
-            ),
+            "Please review and delete the items you believe are duplicates.",
+            style: Theme.of(context).textTheme.bodyText1.copyWith(fontSize: 14),
           ),
           Padding(
             padding: EdgeInsets.all(12),
@@ -220,13 +214,13 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       String text = key.toString();
       switch (key) {
         case SortKey.count:
-          text = "count";
+          text = "Count";
           break;
         case SortKey.size:
-          text = "total size";
+          text = "Total size";
           break;
         case SortKey.time:
-          text = "time";
+          text = "Time";
           break;
       }
       return Text(
