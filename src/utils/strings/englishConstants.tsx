@@ -1,3 +1,4 @@
+import { Typography } from '@mui/material';
 import Link from '@mui/material/Link';
 import React from 'react';
 import styled from 'styled-components';
@@ -61,13 +62,19 @@ const englishConstants = {
     REQUIRED: 'required',
     VERIFY_EMAIL: 'verify email',
     EMAIL_SENT: ({ email }) => (
-        <p>
-            we have sent a mail to <b>{email}</b>
-        </p>
+        <span>
+            Verification code sent to you on{' '}
+            <Typography
+                component={'span'}
+                fontSize="inherit"
+                color="text.secondary">
+                {email}
+            </Typography>
+        </span>
     ),
     CHECK_INBOX: 'please check your inbox (and spam) to complete verification',
     ENTER_OTT: 'verification code',
-    RESEND_MAIL: 'resend?',
+    RESEND_MAIL: 'Resend code',
     VERIFY: 'verify',
     UNKNOWN_ERROR: 'something went wrong, please try again',
     INVALID_CODE: 'invalid verification code',

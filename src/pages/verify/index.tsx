@@ -1,7 +1,4 @@
 import React, { useState, useEffect, useContext } from 'react';
-import Container from 'components/Container';
-import Card from 'react-bootstrap/Card';
-import Form from 'react-bootstrap/Form';
 import constants from 'utils/strings/constants';
 import { LS_KEYS, getData, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
@@ -18,9 +15,14 @@ import { setIsFirstLogin } from 'utils/storage';
 import SubmitButton from 'components/SubmitButton';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import { AppContext } from 'pages/_app';
-import LogoImg from 'components/LogoImg';
 import { PAGES } from 'constants/pages';
 import { KeyAttributes, EmailVerificationResponse, User } from 'types/user';
+import { Divider, TextField, Typography } from '@mui/material';
+import FormPaperHeaderText from 'components/Form/FormPaper/HeaderText';
+import FormPaper from 'components/Form/FormPaper';
+import FormPaperFooter from 'components/Form/FormPaper/Footer';
+import LinkButton from 'components/pages/gallery/LinkButton';
+import FormContainer from 'components/Form/FormContainer';
 
 interface formValues {
     ott: string;
@@ -129,77 +131,58 @@ export default function Verify() {
     }
 
     return (
-        <Container>
-            <Card style={{ minWidth: '300px' }} className="text-center">
-                <Card.Body style={{ padding: '40px 30px' }}>
-                    <Card.Title style={{ marginBottom: '32px' }}>
-                        <LogoImg src="/icon.svg" />
-                        {constants.VERIFY_EMAIL}
-                    </Card.Title>
+        <FormContainer>
+            <FormPaper>
+                <FormPaperHeaderText>
                     {constants.EMAIL_SENT({ email })}
+                </FormPaperHeaderText>
+                <Typography color={'text.secondary'} mb={2}>
                     {constants.CHECK_INBOX}
-                    <br />
-                    <br />
-                    <Formik<formValues>
-                        initialValues={{ ott: '' }}
-                        validationSchema={Yup.object().shape({
-                            ott: Yup.string().required(constants.REQUIRED),
-                        })}
-                        validateOnChange={false}
-                        validateOnBlur={false}
-                        onSubmit={onSubmit}>
-                        {({
-                            values,
-                            touched,
-                            errors,
-                            handleChange,
-                            handleSubmit,
-                        }) => (
-                            <Form noValidate onSubmit={handleSubmit}>
-                                <Form.Group>
-                                    <Form.Control
-                                        className="text-center"
-                                        type="text"
-                                        value={values.ott}
-                                        onChange={handleChange('ott')}
-                                        isInvalid={Boolean(
-                                            touched.ott && errors.ott
-                                        )}
-                                        placeholder={constants.ENTER_OTT}
-                                        disabled={loading}
-                                        autoFocus
-                                    />
-                                    <Form.Control.Feedback type="invalid">
-                                        {errors.ott}
-                                    </Form.Control.Feedback>
-                                </Form.Group>
-                                <SubmitButton
-                                    buttonText={constants.VERIFY}
-                                    loading={loading}
-                                />
-                                <div style={{ marginTop: '24px' }}>
-                                    {resend === 0 && (
-                                        <a href="#" onClick={resendEmail}>
-                                            {constants.RESEND_MAIL}
-                                        </a>
-                                    )}
-                                    {resend === 1 && (
-                                        <span>{constants.SENDING}</span>
-                                    )}
-                                    {resend === 2 && (
-                                        <span>{constants.SENT}</span>
-                                    )}
-                                    <div style={{ marginTop: '8px' }}>
-                                        <a href="#" onClick={logoutUser}>
-                                            {constants.CHANGE_EMAIL}
-                                        </a>
-                                    </div>
-                                </div>
-                            </Form>
-                        )}
-                    </Formik>
-                </Card.Body>
-            </Card>
-        </Container>
+                </Typography>
+                <Formik<formValues>
+                    initialValues={{ ott: '' }}
+                    validationSchema={Yup.object().shape({
+                        ott: Yup.string().required(constants.REQUIRED),
+                    })}
+                    validateOnChange={false}
+                    validateOnBlur={false}
+                    onSubmit={onSubmit}>
+                    {({ values, errors, handleChange, handleSubmit }) => (
+                        <form noValidate onSubmit={handleSubmit}>
+                            <TextField
+                                variant="filled"
+                                fullWidth
+                                type="text"
+                                value={values.ott}
+                                onChange={handleChange('ott')}
+                                error={Boolean(errors.ott)}
+                                helperText={errors.ott}
+                                label={constants.ENTER_OTT}
+                                disabled={loading}
+                                autoFocus
+                            />
+
+                            <SubmitButton
+                                buttonText={constants.VERIFY}
+                                loading={loading}
+                            />
+                        </form>
+                    )}
+                </Formik>
+                <Divider />
+                <FormPaperFooter style={{ justifyContent: 'space-between' }}>
+                    {resend === 0 && (
+                        <LinkButton onClick={resendEmail}>
+                            {constants.RESEND_MAIL}
+                        </LinkButton>
+                    )}
+                    {resend === 1 && <span>{constants.SENDING}</span>}
+                    {resend === 2 && <span>{constants.SENT}</span>}
+                    <LinkButton onClick={logoutUser}>
+                        {constants.CHANGE_EMAIL}
+                    </LinkButton>
+                </FormPaperFooter>
+            </FormPaper>
+        </FormContainer>
     );
 }
