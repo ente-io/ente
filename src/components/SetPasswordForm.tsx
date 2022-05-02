@@ -78,7 +78,7 @@ function SetPasswordForm(props: Props) {
                             <TextField
                                 fullWidth
                                 type="password"
-                                label={constants.RE_ENTER_PASSPHRASE}
+                                label={constants.CONFIRM_PASSPHRASE}
                                 value={values.confirm}
                                 onChange={handleChange('confirm')}
                                 disabled={loading}
