@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 import { Collection, CollectionSummaries } from 'types/collection';
 import constants from 'utils/strings/constants';
 import { ALL_SECTION } from 'constants/collection';
-import { Link, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import {
     Hider,
     CollectionBarWrapper,
@@ -15,6 +15,7 @@ import {
 import CollectionCardWithActiveIndicator from 'components/Collections/CollectionCardWithActiveIndicator';
 import useComponentScroll from 'hooks/useComponentScroll';
 import useWindowSize from 'hooks/useWindowSize';
+import LinkButton from 'components/pages/gallery/LinkButton';
 
 interface IProps {
     collections: Collection[];
@@ -68,9 +69,9 @@ export default function CollectionBar(props: IProps) {
             <PaddedSpaceBetweenFlex>
                 <Typography>{constants.ALBUMS}</Typography>
                 {hasScrollBar && (
-                    <Link component="button" onClick={showAllCollections}>
+                    <LinkButton onClick={showAllCollections}>
                         {constants.VIEW_ALL_ALBUMS}
-                    </Link>
+                    </LinkButton>
                 )}
             </PaddedSpaceBetweenFlex>
             <CollectionBarWrapper>

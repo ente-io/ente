@@ -1,20 +1,12 @@
 import React from 'react';
-import { Button } from '@mui/material';
+import { Button, ButtonProps } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 interface IProps {
     children: any;
     bgDark?: boolean;
     hideArrow?: boolean;
     onClick: () => void;
-    color?:
-        | 'inherit'
-        | 'danger'
-        | 'primary'
-        | 'secondary'
-        | 'success'
-        | 'error'
-        | 'info'
-        | 'warning';
+    color?: ButtonProps['color'];
 }
 export default function SidebarButton({
     children,
@@ -34,7 +26,6 @@ export default function SidebarButton({
                 bgcolor: bgDark && 'grey.800',
                 padding: '10px',
                 borderRadius: '8px',
-                textTransform: 'none',
                 fontSize: '18px',
             }}>
             {children}
