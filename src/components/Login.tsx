@@ -1,17 +1,16 @@
-import Card from 'react-bootstrap/Card';
-import Form from 'react-bootstrap/Form';
-import FormControl from 'react-bootstrap/FormControl';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import * as Yup from 'yup';
 import { getOtt } from 'services/userService';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import SubmitButton from 'components/SubmitButton';
-import Button from 'react-bootstrap/Button';
-import LogoImg from './LogoImg';
 import { PAGES } from 'constants/pages';
+import FormPaperHeaderText from './Form/FormPaper/HeaderText';
+import { Divider, TextField } from '@mui/material';
+import FormPaperFooter from './Form/FormPaper/Footer';
+import LinkButton from './pages/gallery/LinkButton';
 
 interface formValues {
     email: string;
@@ -52,19 +51,10 @@ export default function Login(props: LoginProps) {
         }
         setWaiting(false);
     };
-    const inputElement = useRef(null);
-    useEffect(() => {
-        setTimeout(() => {
-            inputElement.current?.focus();
-        }, 250);
-    }, []);
 
     return (
         <>
-            <Card.Title style={{ marginBottom: '32px' }}>
-                <LogoImg src="/icon.svg" />
-                {constants.LOGIN}
-            </Card.Title>
+            <FormPaperHeaderText>{constants.LOGIN}</FormPaperHeaderText>
             <Formik<formValues>
                 initialValues={{ email: '' }}
                 validationSchema={Yup.object().shape({
@@ -75,40 +65,33 @@ export default function Login(props: LoginProps) {
                 validateOnChange={false}
                 validateOnBlur={false}
                 onSubmit={loginUser}>
-                {({ values, errors, touched, handleChange, handleSubmit }) => (
-                    <Form noValidate onSubmit={handleSubmit}>
-                        <Form.Group controlId="formBasicEmail">
-                            <Form.Control
-                                ref={inputElement}
-                                type="email"
-                                placeholder={constants.ENTER_EMAIL}
-                                value={values.email}
-                                onChange={handleChange('email')}
-                                isInvalid={Boolean(
-                                    touched.email && errors.email
-                                )}
-                                autoFocus
-                                disabled={loading}
-                            />
-                            <FormControl.Feedback type="invalid">
-                                {errors.email}
-                            </FormControl.Feedback>
-                        </Form.Group>
+                {({ values, errors, handleChange, handleSubmit }) => (
+                    <form noValidate onSubmit={handleSubmit}>
+                        <TextField
+                            fullWidth
+                            type="email"
+                            label={constants.ENTER_EMAIL}
+                            value={values.email}
+                            onChange={handleChange('email')}
+                            error={Boolean(errors.email)}
+                            helperText={errors.email}
+                            autoFocus
+                            disabled={loading}
+                        />
+
                         <SubmitButton
                             buttonText={constants.LOGIN}
                             loading={waiting}
                         />
-                        <br />
-                        <Button
-                            block
-                            variant="link"
-                            className="text-center"
-                            onClick={props.signUp}>
-                            {constants.NO_ACCOUNT}
-                        </Button>
-                    </Form>
+                    </form>
                 )}
             </Formik>
+            <Divider />
+            <FormPaperFooter>
+                <LinkButton onClick={props.signUp}>
+                    {constants.NO_ACCOUNT}
+                </LinkButton>
+            </FormPaperFooter>
         </>
     );
 }

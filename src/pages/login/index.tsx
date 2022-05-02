@@ -5,8 +5,9 @@ import { AppContext } from 'pages/_app';
 import Login from 'components/Login';
 import Container from 'components/Container';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import Card from 'react-bootstrap/Card';
 import { PAGES } from 'constants/pages';
+import FormContainer from 'components/Form/FormContainer';
+import FormPaper from 'components/Form/FormPaper';
 
 export default function Home() {
     const router = useRouter();
@@ -28,19 +29,17 @@ export default function Home() {
         router.push(PAGES.SIGNUP);
     };
 
-    return (
+    return loading ? (
         <Container>
-            {loading ? (
-                <EnteSpinner>
-                    <span className="sr-only">Loading...</span>
-                </EnteSpinner>
-            ) : (
-                <Card style={{ minWidth: '320px' }} className="text-center">
-                    <Card.Body style={{ padding: '40px 30px' }}>
-                        <Login signUp={register} />
-                    </Card.Body>
-                </Card>
-            )}
+            <EnteSpinner>
+                <span className="sr-only">Loading...</span>
+            </EnteSpinner>
         </Container>
+    ) : (
+        <FormContainer>
+            <FormPaper sx={{ minWidth: '320px' }}>
+                <Login signUp={register} />
+            </FormPaper>
+        </FormContainer>
     );
 }
