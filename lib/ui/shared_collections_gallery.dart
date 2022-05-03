@@ -7,6 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
@@ -15,6 +16,7 @@ import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/collection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
+import 'package:photos/ui/common/gradientButton.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
@@ -109,14 +111,14 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
 
   Widget _getSharedCollectionsGallery(SharedCollections collections) {
     Size size = MediaQuery.of(context).size;
-    int albumsCountInOneRow = max(size.width~/220.0, 2);
+    int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
     return SingleChildScrollView(
       child: Container(
         margin: const EdgeInsets.only(bottom: 50),
         child: Column(
           children: [
             Padding(padding: EdgeInsets.all(6)),
-            SectionTitle("incoming"),
+            SectionTitle("Incoming"),
             Padding(padding: EdgeInsets.all(16)),
             collections.incoming.isNotEmpty
                 ? GridView.builder(
@@ -135,7 +137,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             Padding(padding: EdgeInsets.all(16)),
             Divider(height: 0),
             Padding(padding: EdgeInsets.all(14)),
-            SectionTitle("outgoing"),
+            SectionTitle("Outgoing"),
             Padding(padding: EdgeInsets.all(16)),
             collections.outgoing.isNotEmpty
                 ? Padding(
@@ -164,49 +166,35 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
       child: Column(
         children: [
           Text(
-            "no one is sharing with you",
+            "No one is sharing with you",
             style: TextStyle(
                 color:
                     Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
           ),
           Container(
-            padding: EdgeInsets.fromLTRB(28, 20, 28, 46),
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
-                side: BorderSide(
-                  width: 2,
-                  color: Theme.of(context).buttonColor.withOpacity(0.5),
-                ),
-              ),
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 72),
+            child: GradientButton(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
+                //mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.outgoing_mail,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.7),
+                    color: Colors.white,
                   ),
-                  Padding(padding: EdgeInsets.all(6)),
+                  Padding(padding: EdgeInsets.all(2)),
                   Text(
-                    "invite",
-                    style: TextStyle(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.8),
-                    ),
+                    "Invite",
+                    style: gradientButtonTextTheme(),
                   ),
                 ],
               ),
-              onPressed: () async {
+              linearGradientColors: const [
+                Color(0xFF2CD267),
+                Color(0xFF1DB954),
+              ],
+              onTap: () async {
                 shareText("Check out https://ente.io");
               },
             ),
@@ -222,24 +210,14 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
       child: Column(
         children: [
           Text(
-            "you aren't sharing anything",
+            "You aren't sharing anything",
             style: TextStyle(
                 color:
                     Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
           ),
           Container(
-            padding: EdgeInsets.fromLTRB(28, 20, 28, 46),
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
-                side: BorderSide(
-                  width: 2,
-                  color: Theme.of(context).buttonColor.withOpacity(0.5),
-                ),
-              ),
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 72),
+            child: GradientButton(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -247,24 +225,20 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 children: [
                   Icon(
                     Icons.person_add,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.7),
+                    color: Colors.white,
                   ),
-                  Padding(padding: EdgeInsets.all(6)),
+                  Padding(padding: EdgeInsets.all(2)),
                   Text(
-                    "share",
-                    style: TextStyle(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.8),
-                    ),
+                    "Share",
+                    style: gradientButtonTextTheme(),
                   ),
                 ],
               ),
-              onPressed: () async {
+              linearGradientColors: const [
+                Color(0xFF2CD267),
+                Color(0xFF1DB954),
+              ],
+              onTap: () async {
                 await showToast("select an album on ente to share",
                     toastLength: Toast.LENGTH_LONG);
                 Bus.instance.fire(
