@@ -17,7 +17,6 @@ import CollectionCard from './CollectionCard';
 import Divider from '@mui/material/Divider';
 import CollectionSort from 'components/pages/gallery/CollectionSort';
 import { CollectionType, COLLECTION_SORT_BY } from 'constants/collection';
-import { DialogTitleWithCloseButton } from 'components/MessageDialog';
 import { sortCollectionSummaries } from 'services/collectionService';
 import {
     Transition,
@@ -25,6 +24,7 @@ import {
 } from 'components/Collections/FloatingDrawer';
 import { useLocalState } from 'hooks/useLocalState';
 import { LS_KEYS } from 'utils/storage/localStorage';
+import DialogTitleWithCloseButton from 'components/MessageDialog/TitleWithCloseButton';
 
 const LeftSlideTransition = Transition('up');
 

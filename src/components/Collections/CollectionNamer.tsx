@@ -4,7 +4,7 @@ import constants from 'utils/strings/constants';
 import SubmitButton from 'components/SubmitButton';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { DialogTitleWithCloseButton } from 'components/MessageDialog';
+import DialogTitleWithCloseButton from 'components/MessageDialog/TitleWithCloseButton';
 
 export interface CollectionNamerAttributes {
     callback: (name) => void;
