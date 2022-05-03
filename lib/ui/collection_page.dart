@@ -47,7 +47,7 @@ class CollectionPage extends StatelessWidget {
         preferredSize: Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarType,
-          c.collection.name,
+          c.collection.name, //title
           _selectedFiles,
           collection: c.collection,
         ),

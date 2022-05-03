@@ -304,24 +304,33 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         margin: const EdgeInsets.all(1.5),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(3),
-          border: widget.selectedFiles.files.contains(file)
-              ? Border.all(
-                  width: 4.0,
-                  color: Theme.of(context).buttonColor, //selection
-                )
-              : null,
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(3),
-          child: Hero(
-            tag: widget.tag + file.tag(),
-            child: ThumbnailWidget(
-              file,
-              diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
-              serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
-              shouldShowLivePhotoOverlay: true,
-              key: Key(widget.tag + file.tag()),
-            ),
+          child: Stack(
+            children: [
+              Hero(
+                tag: widget.tag + file.tag(),
+                child: ThumbnailWidget(
+                  file,
+                  diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
+                  serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
+                  shouldShowLivePhotoOverlay: true,
+                  key: Key(widget.tag + file.tag()),
+                ),
+              ),
+              Visibility(
+                visible: widget.selectedFiles.files.contains(file),
+                child: Positioned(
+                  left: 4,
+                  bottom: 4,
+                  child: Icon(
+                    Icons.check_circle_rounded,
+                    size: 20,
+                  ),
+                ),
+              )
+            ],
           ),
         ),
       ),
