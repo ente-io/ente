@@ -181,6 +181,11 @@ TextTheme _buildTextTheme(Color textColor) {
           fontFamily: 'Inter-Medium',
           fontSize: 16,
           fontWeight: FontWeight.w500),
+      subtitle2: TextStyle(
+          color: textColor,
+          fontFamily: 'Inter-Medium',
+          fontSize: 14,
+          fontWeight: FontWeight.w500),
       bodyText1: TextStyle(
           fontFamily: 'Inter-Medium',
           color: textColor,

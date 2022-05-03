@@ -129,7 +129,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   Widget _getCollectionsGalleryWidget(CollectionItems items) {
     const double horizontalPaddingOfGridRow = 16;
     const double crossAxisSpacingOfGrid = 5;
-    TextStyle trashAndHiddenTextStyle = Theme.of(context).textTheme.subtitle1;
+    final TextStyle trashAndHiddenTextStyle =
+        Theme.of(context).textTheme.subtitle1;
     Size size = MediaQuery.of(context).size;
     int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
     final double sideOfThumbnail = (size.width / 2) -
@@ -175,8 +176,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       ),
                     ),
                   ),
-            Padding(padding: EdgeInsets.all(4)),
-            Divider(),
+            const Padding(padding: EdgeInsets.all(4)),
+            const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -210,9 +211,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                   )
                 : nothingToSeeHere(
                     textColor: Theme.of(context).colorScheme.defaultTextColor),
-            SizedBox(height: 20),
-            Divider(),
-            Padding(padding: EdgeInsets.all(8)),
+            const SizedBox(height: 20),
+            const Divider(),
+            const Padding(padding: EdgeInsets.all(8)),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(

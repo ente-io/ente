@@ -54,7 +54,7 @@ class ArchivePage extends StatelessWidget {
         preferredSize: Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarType,
-          "archive",
+          "Hidden",
           _selectedFiles,
         ),
       ),

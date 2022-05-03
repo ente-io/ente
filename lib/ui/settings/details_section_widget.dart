@@ -79,11 +79,11 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
             ),
             Padding(padding: EdgeInsets.symmetric(vertical: 2)),
             Text(
-              "${convertBytesToReadableFormat(_userDetails.usage)} of ${convertBytesToReadableFormat(_userDetails.getTotalStorage())} used",
+              "${convertBytesToReadableFormat(_userDetails.getFreeStorage())} of ${convertBytesToReadableFormat(_userDetails.getTotalStorage())} free",
               style: Theme.of(context)
                   .textTheme
-                  .headline6
-                  .copyWith(color: Colors.white, fontSize: 20),
+                  .headline5
+                  .copyWith(color: Colors.white),
             ),
             Padding(padding: EdgeInsets.symmetric(vertical: 18)),
             Stack(
@@ -167,17 +167,18 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                           ],
                         )
                       : Text(
-                          "${convertBytesToReadableFormat(_userDetails.getFreeStorage())} available",
+                          "${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())} used",
                           style: Theme.of(context)
                               .textTheme
-                              .bodyText1
-                              .copyWith(color: Colors.white)),
+                              .headline5
+                              .copyWith(color: Colors.white.withOpacity(0.7), fontSize: 14),
+                  ),
                   Text(
                     "${_userDetails.fileCount.toString()} Memories",
                     style: Theme.of(context)
                         .textTheme
-                        .bodyText1
-                        .copyWith(color: Colors.white),
+                        .headline5
+                        .copyWith(color: Colors.white, fontSize: 14),
                   )
                 ],
               ),

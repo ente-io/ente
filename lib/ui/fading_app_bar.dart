@@ -53,6 +53,7 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    Color barColor = Theme.of(context).colorScheme.onSurface;
     return CustomAppBar(
       AnimatedOpacity(
         child: Container(
@@ -61,8 +62,8 @@ class FadingAppBarState extends State<FadingAppBar> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.64),
-                Colors.black.withOpacity(0.5),
+                barColor.withOpacity(0.64),
+                barColor.withOpacity(0.5),
                 Colors.transparent,
               ],
               stops: const [0, 0.2, 1],
@@ -179,7 +180,6 @@ class FadingAppBarState extends State<FadingAppBar> {
         ),
       ),
       actions: shouldShowActions ? actions : [],
-      backgroundColor: Color(0x00000000),
       elevation: 0,
     );
   }
@@ -235,7 +235,9 @@ class FadingAppBarState extends State<FadingAppBar> {
       likeBuilder: (isLiked) {
         return Icon(
           Icons.favorite_border,
-          color: isLiked ? Colors.pinkAccent : Colors.white,
+          color: isLiked
+              ? Colors.pinkAccent
+              : Theme.of(context).colorScheme.onSurface,
           size: 24,
         );
       },

@@ -41,10 +41,13 @@ class ThumbnailWidget extends StatefulWidget {
   _ThumbnailWidgetState createState() => _ThumbnailWidgetState();
 }
 
-Widget getFileInfoContainer(File file) {
+Widget getFileInfoContainer(BuildContext context, File file) {
   if (file is TrashFile) {
     return Container(
-      child: Text(daysLeft(file.deleteBy)),
+      child: Text(
+        daysLeft(file.deleteBy),
+        style: TextStyle(color: Colors.white),
+      ),
       alignment: Alignment.bottomCenter,
       padding: EdgeInsets.fromLTRB(0, 0, 0, 5),
     );
@@ -196,7 +199,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       ),
       widget.shouldShowSyncStatus && widget.file.uploadedFileID == null
           ? kUnsyncedIconOverlay
-          : getFileInfoContainer(widget.file),
+          : getFileInfoContainer(context, widget.file),
     ];
     if (widget.shouldShowArchiveStatus) {
       viewChildrens.add(kArchiveIconOverlay);

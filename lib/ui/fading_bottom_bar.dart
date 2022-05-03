@@ -154,8 +154,8 @@ class FadingBottomBarState extends State<FadingBottomBar> {
               end: Alignment.bottomCenter,
               colors: [
                 Colors.transparent,
-                Colors.black.withOpacity(0.5),
-                Colors.black.withOpacity(0.64),
+                Theme.of(context).colorScheme.onPrimary.withOpacity(0.12),
+                Theme.of(context).colorScheme.onPrimary.withOpacity(0.2),
               ],
               stops: const [0, 0.8, 1],
             ),
