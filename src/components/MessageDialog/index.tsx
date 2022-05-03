@@ -3,6 +3,7 @@ import constants from 'utils/strings/constants';
 import {
     Breakpoint,
     Button,
+    ButtonProps,
     DialogActions,
     DialogContent,
     DialogContentText,
@@ -10,26 +11,20 @@ import {
 } from '@mui/material';
 import MessageDialogBase from './MessageDialogBase';
 
-export type ButtonColors =
-    | 'inherit'
-    | 'secondary'
-    | 'primary'
-    | 'success'
-    | 'error'
-    | 'info'
-    | 'warning'
-    | 'danger';
-
 export interface MessageAttributes {
     title?: string;
     staticBackdrop?: boolean;
     nonClosable?: boolean;
     content?: any;
-    close?: { text?: string; variant?: ButtonColors; action?: () => void };
+    close?: {
+        text?: string;
+        variant?: ButtonProps['color'];
+        action?: () => void;
+    };
     proceed?: {
         text: string;
         action: () => void;
-        variant: ButtonColors;
+        variant: ButtonProps['color'];
         disabled?: boolean;
     };
 }
