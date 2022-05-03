@@ -403,7 +403,7 @@ class _SharingDialogState extends State<SharingDialog> {
       actions: [
         TextButton(
           child: Text(
-            "subscribe",
+            "Subscribe",
             style: TextStyle(
               color: Theme.of(context).buttonColor,
             ),
