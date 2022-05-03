@@ -34,7 +34,7 @@ const darkThemeOptions = createTheme({
     components: {
         MuiPaper: {
             styleOverrides: {
-                root: { borderRadius: '8px', backgroundColor: '#0f0f0f' },
+                root: { backgroundColor: '#0f0f0f' },
             },
         },
         MuiLink: {
@@ -55,6 +55,7 @@ const darkThemeOptions = createTheme({
                 root: {
                     color: '#fff',
                     textTransform: 'none',
+                    borderRadius: '8px',
                 },
             },
         },
@@ -81,7 +82,7 @@ const darkThemeOptions = createTheme({
     },
 
     shape: {
-        borderRadius: '8px',
+        borderRadius: '12px',
     },
 });
 
