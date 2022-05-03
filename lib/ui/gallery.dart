@@ -25,13 +25,14 @@ class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
   final List<File> initialFiles;
   final Stream<FilesUpdatedEvent> reloadEvent;
-  final bool smallerTodayFont;
   final List<Stream<Event>> forceReloadEvents;
   final Set<EventType> removalEventTypes;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
   final Widget header;
   final Widget footer;
+  final bool smallerTodayFont;
+  final String albumName;
 
   Gallery({
     @required this.asyncLoader,
@@ -44,6 +45,7 @@ class Gallery extends StatefulWidget {
     this.header,
     this.footer,
     this.smallerTodayFont = false,
+    this.albumName = '',
     Key key,
   }) : super(key: key);
 
