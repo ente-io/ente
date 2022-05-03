@@ -158,21 +158,15 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   Padding _getHeader() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 12, 20, 12),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            "Following files were clubbed based on their sizes" +
-                (_shouldClubByCaptureTime ? " and capture times" : ""),
-            style: Theme.of(context).textTheme.bodyText1.copyWith(fontSize: 14),
-          ),
-          Padding(
-            padding: EdgeInsets.all(4),
-          ),
-          Text(
-            "Please review and delete the items you believe are duplicates.",
-            style: Theme.of(context).textTheme.bodyText1.copyWith(fontSize: 14),
-          ),
+              "Following files were clubbed based on their sizes" +
+                  ((_shouldClubByCaptureTime ? " and capture times." : ".") +
+                      ", please review and delete the items you believe are duplicates."),
+              style: Theme.of(context).textTheme.subtitle2),
           Padding(
             padding: EdgeInsets.all(12),
           ),
@@ -186,7 +180,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   Widget _getClubbingConfig() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 4),
+      padding: EdgeInsets.fromLTRB(12, 0, 12, 4),
       child: CheckboxListTile(
         value: _shouldClubByCaptureTime,
         onChanged: (value) {
@@ -194,7 +188,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           _resetEntriesAndSelection();
           setState(() {});
         },
-        title: Text("club by capture time"),
+        title: Text("Club by capture time"),
       ),
     );
   }
@@ -225,11 +219,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       }
       return Text(
         text,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 13,
-          color: Colors.white.withOpacity(0.6),
-        ),
+        style: Theme.of(context).textTheme.subtitle1.copyWith(
+            fontSize: 14,
+            color: Theme.of(context).iconTheme.color.withOpacity(0.7)),
       );
     }
 
@@ -330,6 +322,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   Widget _getGridView(DuplicateFiles duplicates, int itemIndex) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 4, 4),
@@ -338,9 +331,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 " files, " +
                 formatBytes(duplicates.size) +
                 " each",
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-            ),
+            style: Theme.of(context).textTheme.subtitle2,
           ),
         ),
         GridView.builder(
