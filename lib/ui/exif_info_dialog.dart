@@ -19,7 +19,10 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
   Widget build(BuildContext context) {
     final scrollController = ScrollController();
     return AlertDialog(
-      title: Text(widget.file.title),
+      title: Text(
+        widget.file.title,
+        style: Theme.of(context).textTheme.headline5,
+      ),
       content: Scrollbar(
         controller: scrollController,
         isAlwaysShown: true,
@@ -32,9 +35,7 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
         TextButton(
           child: Text(
             "close",
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-            ),
+            style: Theme.of(context).textTheme.bodyText1,
           ),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
@@ -62,7 +63,7 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
             color: Colors.white.withOpacity(0.05),
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(4),
                 child: Text(
                   data,
                   style: TextStyle(
@@ -71,7 +72,10 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
                       FontFeature.tabularFigures(),
                     ],
                     height: 1.4,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.7),
                   ),
                 ),
               ),

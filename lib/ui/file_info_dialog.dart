@@ -50,37 +50,27 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     var items = <Widget>[
       Row(
         children: [
-          Icon(
-            Icons.calendar_today_outlined,
-            color: infoColor
-          ),
+          Icon(Icons.calendar_today_outlined, color: infoColor),
           Padding(padding: EdgeInsets.all(4)),
           Text(
             getFormattedTime(
               DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
             ),
-            style: TextStyle(
-              color: infoColor
-            ),
+            style: TextStyle(color: infoColor),
           ),
         ],
       ),
       Padding(padding: EdgeInsets.all(6)),
       Row(
         children: [
-          Icon(
-            Icons.folder_outlined,
-            color: infoColor
-          ),
+          Icon(Icons.folder_outlined, color: infoColor),
           Padding(padding: EdgeInsets.all(4)),
           Text(
             file.deviceFolder ??
                 CollectionsService.instance
                     .getCollectionByID(file.collectionID)
                     .name,
-            style: TextStyle(
-              color: infoColor
-            ),
+            style: TextStyle(color: infoColor),
           ),
         ],
       ),
@@ -90,10 +80,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       [
         Row(
           children: [
-            Icon(
-              Icons.sd_storage_outlined,
-              color: infoColor
-            ),
+            Icon(Icons.sd_storage_outlined, color: infoColor),
             Padding(padding: EdgeInsets.all(4)),
             _getFileSize(),
           ],
@@ -106,10 +93,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         [
           Row(
             children: [
-              Icon(
-                Icons.timer_outlined,
-                color: infoColor
-              ),
+              Icon(Icons.timer_outlined, color: infoColor),
               Padding(padding: EdgeInsets.all(4)),
               FutureBuilder(
                 future: file.getAsset(),
@@ -117,9 +101,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                   if (snapshot.hasData) {
                     return Text(
                       snapshot.data.videoDuration.toString().split(".")[0],
-                      style: TextStyle(
-                        color: infoColor
-                      ),
+                      style: TextStyle(color: infoColor),
                     );
                   } else {
                     return Center(
@@ -147,17 +129,12 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         [
           Row(
             children: [
-              Icon(
-                Icons.cloud_upload_outlined,
-                color: infoColor
-              ),
+              Icon(Icons.cloud_upload_outlined, color: infoColor),
               Padding(padding: EdgeInsets.all(4)),
               Text(
                 getFormattedTime(
                     DateTime.fromMicrosecondsSinceEpoch(file.updationTime)),
-                style: TextStyle(
-                  color: infoColor
-                ),
+                style: TextStyle(color: infoColor),
               ),
             ],
           ),
@@ -187,13 +164,11 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             Flexible(
               child: Text(
                 file.getDisplayName(),
+                style: Theme.of(context).textTheme.headline5,
               ),
             ),
             Padding(padding: EdgeInsets.all(8)),
-            Icon(
-              Icons.edit,
-              color: infoColor
-            ),
+            Icon(Icons.edit, color: infoColor),
           ],
         ),
         onTap: () async {
@@ -232,10 +207,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 ),
                 Padding(padding: EdgeInsets.all(4)),
                 Text(
-                  "exif",
-                  style: TextStyle(
-                    color: infoColor
-                  ),
+                  "EXIF",
+                  style: TextStyle(color: infoColor),
                 ),
               ],
             ),
@@ -256,16 +229,11 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Icon(
-                  Icons.feed_outlined,
-                  color: infoColor
-                ),
+                Icon(Icons.feed_outlined, color: infoColor),
                 Padding(padding: EdgeInsets.all(4)),
                 Text(
-                  "view exif",
-                  style: TextStyle(
-                    color: infoColor
-                  ),
+                  "view raw EXIF",
+                  style: TextStyle(color: infoColor),
                 ),
               ],
             ),
@@ -337,18 +305,13 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       children.addAll([
         Row(
           children: [
-            Icon(
-              Icons.photo_size_select_actual_outlined,
-              color: infoColor
-            ),
+            Icon(Icons.photo_size_select_actual_outlined, color: infoColor),
             Padding(padding: EdgeInsets.all(4)),
             Text(
               exif["EXIF ExifImageWidth"].toString() +
                   " x " +
                   exif["EXIF ExifImageLength"].toString(),
-              style: TextStyle(
-                color: infoColor
-              ),
+              style: TextStyle(color: infoColor),
             ),
           ],
         ),
@@ -359,18 +322,13 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       children.addAll([
         Row(
           children: [
-            Icon(
-              Icons.photo_size_select_actual_outlined,
-              color: infoColor
-            ),
+            Icon(Icons.photo_size_select_actual_outlined, color: infoColor),
             Padding(padding: EdgeInsets.all(4)),
             Text(
               exif["Image ImageWidth"].toString() +
                   " x " +
                   exif["Image ImageLength"].toString(),
-              style: TextStyle(
-                color: infoColor
-              ),
+              style: TextStyle(color: infoColor),
             ),
           ],
         ),
@@ -382,19 +340,14 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         [
           Row(
             children: [
-              Icon(
-                Icons.camera_outlined,
-                color: infoColor
-              ),
+              Icon(Icons.camera_outlined, color: infoColor),
               Padding(padding: EdgeInsets.all(4)),
               Flexible(
                 child: Text(
                   exif["Image Make"].toString() +
                       " " +
                       exif["Image Model"].toString(),
-                  style: TextStyle(
-                    color: infoColor
-                  ),
+                  style: TextStyle(color: infoColor),
                   overflow: TextOverflow.clip,
                 ),
               ),
@@ -408,16 +361,11 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       children.addAll([
         Row(
           children: [
-            Icon(
-              CupertinoIcons.f_cursive,
-              color: infoColor
-            ),
+            Icon(CupertinoIcons.f_cursive, color: infoColor),
             Padding(padding: EdgeInsets.all(4)),
             Text(
               fNumber.toString(),
-              style: TextStyle(
-                color: infoColor
-              ),
+              style: TextStyle(color: infoColor),
             ),
           ],
         ),
@@ -428,15 +376,10 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       children.addAll([
         Row(
           children: [
-            Icon(
-              Icons.center_focus_strong_outlined,
-              color: infoColor
-            ),
+            Icon(Icons.center_focus_strong_outlined, color: infoColor),
             Padding(padding: EdgeInsets.all(4)),
             Text(focalLength.toString() + " mm",
-                style: TextStyle(
-                  color: infoColor
-                )),
+                style: TextStyle(color: infoColor)),
           ],
         ),
         Padding(padding: EdgeInsets.all(6)),
@@ -446,16 +389,11 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       children.addAll([
         Row(
           children: [
-            Icon(
-              Icons.shutter_speed,
-              color: infoColor
-            ),
+            Icon(Icons.shutter_speed, color: infoColor),
             Padding(padding: EdgeInsets.all(4)),
             Text(
               exif["EXIF ExposureTime"].toString(),
-              style: TextStyle(
-                color: infoColor
-              ),
+              style: TextStyle(color: infoColor),
             ),
           ],
         ),
@@ -474,9 +412,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         if (snapshot.hasData) {
           return Text(
             (snapshot.data / (1024 * 1024)).toStringAsFixed(2) + " MB",
-            style: TextStyle(
-              color: infoColor
-            ),
+            style: TextStyle(color: infoColor),
           );
         } else {
           return Center(
