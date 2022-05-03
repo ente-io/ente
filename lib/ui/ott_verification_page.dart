@@ -111,18 +111,20 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
                           child: RichText(
-                              text: TextSpan(
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .subtitle1
-                                      .copyWith(fontSize: 12),
-                                  children: [
+                            text: TextSpan(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .subtitle1
+                                  .copyWith(fontSize: 12),
+                              children: [
                                 TextSpan(text: "We've sent a mail to "),
                                 TextSpan(
                                     text: widget.email,
                                     style: TextStyle(
                                         color: Theme.of(context).buttonColor))
-                              ])),
+                              ],
+                            ),
+                          ),
                         ),
                         Text(
                           'Please check your inbox (and spam) to complete verification',
