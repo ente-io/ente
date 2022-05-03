@@ -123,7 +123,8 @@ class _DetailPageState extends State<DetailPage> {
           ],
         ),
       ),
-      backgroundColor: Colors.black,
+
+      // backgroundColor: Theme.of(context).colorScheme.onPrimary,
     );
   }
 
@@ -148,6 +149,7 @@ class _DetailPageState extends State<DetailPage> {
               _toggleFullScreen();
             });
           },
+          backgroundDecoration: BoxDecoration(color: Colors.transparent),
         );
         _preloadFiles(index);
         return GestureDetector(
