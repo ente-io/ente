@@ -299,6 +299,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       }
       planWidgets.add(
         Material(
+          color: Colors.transparent,
           child: InkWell(
             onTap: () async {
               if (isActive) {

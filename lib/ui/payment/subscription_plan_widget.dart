@@ -26,7 +26,7 @@ class SubscriptionPlanWidget extends StatelessWidget {
     Color textColor = isActive ? Colors.white : Colors.black;
     return Container(
       width: double.infinity,
-      // color: Colors.red,
+      color: Colors.transparent,
       padding: EdgeInsets.symmetric(horizontal: isActive ? 8 : 16, vertical: 4),
       child: Container(
         decoration: BoxDecoration(
