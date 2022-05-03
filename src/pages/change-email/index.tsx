@@ -8,6 +8,7 @@ import ChangeEmailForm from 'components/ChangeEmail';
 import { PAGES } from 'constants/pages';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { Box, Card, CardContent } from '@mui/material';
+import LinkButton from 'components/pages/gallery/LinkButton';
 
 function ChangeEmailPage() {
     const [email, setEmail] = useState(null);
@@ -20,6 +21,8 @@ function ChangeEmailPage() {
             router.push(PAGES.ROOT);
         }
     }, []);
+
+    const goToGallery = () => router.push(PAGES.GALLERY);
 
     return (
         <Container>
@@ -46,6 +49,9 @@ function ChangeEmailPage() {
                             }}
                             setEmail={setEmail}
                         />
+                        <LinkButton onClick={goToGallery}>
+                            {constants.GO_BACK}
+                        </LinkButton>
                     </Container>
                 </CardContent>
             </Card>
