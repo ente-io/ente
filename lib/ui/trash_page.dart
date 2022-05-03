@@ -49,7 +49,7 @@ class TrashPage extends StatelessWidget {
         preferredSize: Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarType,
-          "trash",
+          "Trash",
           _selectedFiles,
         ),
       ),
@@ -65,11 +65,8 @@ class TrashPage extends StatelessWidget {
           return Padding(
             padding: EdgeInsets.all(16),
             child: Text(
-              'items show the number the days remaining before permanent deletion',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white.withOpacity(0.6),
-              ),
+              'Items show the number the days remaining before permanent deletion',
+              style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16),
             ),
           );
         } else {
