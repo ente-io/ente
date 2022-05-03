@@ -66,6 +66,9 @@ const darkThemeOptions = createTheme({
         primary: {
             main: '#fff',
         },
+        secondary: {
+            main: 'hsla(0, 0%, 100%, 0.2)',
+        },
         text: {
             primary: 'hsla(0, 0%, 100%, 1)',
             secondary: 'hsla(0, 0%, 100%, 0.5)',
