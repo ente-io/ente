@@ -45,24 +45,12 @@ class CollectionPage extends StatelessWidget {
     );
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(108),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GalleryAppBarWidget(
-              appBarType,
-              c.collection.name,
-              _selectedFiles,
-              collection: c.collection,
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 0, 0),
-              child: Text(
-                c.collection.name,
-                style: Theme.of(context).textTheme.headline5,
-              ),
-            ),
-          ],
+        preferredSize: Size.fromHeight(50.0),
+        child: GalleryAppBarWidget(
+          appBarType,
+          c.collection.name, //title
+          _selectedFiles,
+          collection: c.collection,
         ),
       ),
       body: gallery,
