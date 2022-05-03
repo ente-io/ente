@@ -3,12 +3,12 @@ import constants from 'utils/strings/constants';
 import {
     Breakpoint,
     Button,
-    Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
 } from '@mui/material';
+import MessageDialogBase from './MessageDialogBase';
 
 export type ButtonColors =
     | 'inherit'
@@ -54,10 +54,9 @@ export default function MessageDialog({
     }
 
     return (
-        <Dialog
+        <MessageDialogBase
             open={props.show}
             maxWidth={props.size}
-            PaperProps={{ sx: { py: 4, px: 3 } }}
             onClose={!attributes.nonClosable && props.onHide}>
             {attributes.title && (
                 <DialogTitle
@@ -70,7 +69,7 @@ export default function MessageDialog({
                 </DialogTitle>
             )}
             {(children || attributes?.content) && (
-                <DialogContent sx={{ p: 0, pb: 8 }}>
+                <DialogContent>
                     {children || (
                         <DialogContentText>
                             {attributes.content}
@@ -79,7 +78,7 @@ export default function MessageDialog({
                 </DialogContent>
             )}
             {(attributes.close || attributes.proceed) && (
-                <DialogActions sx={{ p: 0 }}>
+                <DialogActions>
                     <>
                         {attributes.close && (
                             <Button
@@ -108,6 +107,6 @@ export default function MessageDialog({
                     </>
                 </DialogActions>
             )}
-        </Dialog>
+        </MessageDialogBase>
     );
 }

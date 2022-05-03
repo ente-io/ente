@@ -308,7 +308,6 @@ export default function Gallery() {
             files.push(...getTrashedFiles(trash));
             await setDerivativeState(collections, files);
         } catch (e) {
-            console.log(e);
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
                     setBannerMessage(constants.SESSION_EXPIRED_MESSAGE);

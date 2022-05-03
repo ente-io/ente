@@ -6,7 +6,7 @@ const DialogTitleWithCloseButton = (props) => {
     const { children, onClose, ...other } = props;
 
     return (
-        <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
+        <DialogTitle {...other}>
             {children}
             {onClose ? (
                 <IconButton
