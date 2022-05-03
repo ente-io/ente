@@ -81,7 +81,7 @@ const englishConstants = {
     EXPIRED_CODE: 'your verification code has expired',
     SENDING: 'sending...',
     SENT: 'sent!',
-    PASSWORD: 'password',
+    PASSWORD: 'Password',
     LINK_PASSWORD: 'enter password to unlock the album',
     ENTER_PASSPHRASE: 'enter your password',
     RETURN_PASSPHRASE_HINT: 'password',
@@ -165,7 +165,7 @@ const englishConstants = {
     PASSWORD_GENERATION_FAILED:
         "your browser was unable to generate a strong key that meets ente's encryption standards, please try using the mobile app or another browser",
     CHANGE_PASSWORD: 'Change password',
-    GO_BACK: 'go back',
+    GO_BACK: 'Go back',
     RECOVERY_KEY: 'Recovery key',
     SAVE_LATER: 'save later',
     SAVE: 'save',
@@ -176,7 +176,7 @@ const englishConstants = {
     KEY_NOT_STORED_DISCLAIMER:
         "we don't store this key, so please save this in a safe place",
     RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
-    FORGOT_PASSWORD: 'forgot password?',
+    FORGOT_PASSWORD: 'Forgot password',
     RECOVER_ACCOUNT: 'recover account',
     RETURN_RECOVERY_KEY_HINT: 'recovery key',
     RECOVER: 'recover',

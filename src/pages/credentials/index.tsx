@@ -13,12 +13,14 @@ import CryptoWorker, {
 import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
 import SingleInputForm from 'components/SingleInputForm';
-import Container from 'components/Container';
-import { Button, Card } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
-import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
 import { KeyAttributes } from 'types/user';
+import FormContainer from 'components/Form/FormContainer';
+import FormPaper from 'components/Form/FormPaper';
+import FormPaperHeaderText from 'components/Form/FormPaper/HeaderText';
+import FormPaperFooter from 'components/Form/FormPaper/Footer';
+import LinkButton from 'components/pages/gallery/LinkButton';
 
 export default function Credentials() {
     const router = useRouter();
@@ -92,39 +94,27 @@ export default function Credentials() {
         }
     };
 
+    const redirectToRecoverPage = () => router.push(PAGES.RECOVER);
+
     return (
-        <>
-            <Container>
-                <Card style={{ minWidth: '320px' }} className="text-center">
-                    <Card.Body style={{ padding: '40px 30px' }}>
-                        <Card.Title style={{ marginBottom: '32px' }}>
-                            <LogoImg src="/icon.svg" />
-                            {constants.PASSWORD}
-                        </Card.Title>
-                        <SingleInputForm
-                            callback={verifyPassphrase}
-                            placeholder={constants.RETURN_PASSPHRASE_HINT}
-                            buttonText={constants.VERIFY_PASSPHRASE}
-                            fieldType="password"
-                        />
-                        <div
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                marginTop: '12px',
-                            }}>
-                            <Button
-                                variant="link"
-                                onClick={() => router.push(PAGES.RECOVER)}>
-                                {constants.FORGOT_PASSWORD}
-                            </Button>
-                            <Button variant="link" onClick={logoutUser}>
-                                {constants.GO_BACK}
-                            </Button>
-                        </div>
-                    </Card.Body>
-                </Card>
-            </Container>
-        </>
+        <FormContainer>
+            <FormPaper style={{ minWidth: '320px' }}>
+                <FormPaperHeaderText> {constants.PASSWORD}</FormPaperHeaderText>
+                <SingleInputForm
+                    callback={verifyPassphrase}
+                    placeholder={constants.RETURN_PASSPHRASE_HINT}
+                    buttonText={constants.VERIFY_PASSPHRASE}
+                    fieldType="password"
+                />
+                <FormPaperFooter style={{ justifyContent: 'space-between' }}>
+                    <LinkButton onClick={redirectToRecoverPage}>
+                        {constants.FORGOT_PASSWORD}
+                    </LinkButton>
+                    <LinkButton onClick={logoutUser}>
+                        {constants.GO_BACK}
+                    </LinkButton>
+                </FormPaperFooter>
+            </FormPaper>
+        </FormContainer>
     );
 }

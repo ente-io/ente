@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import constants from 'utils/strings/constants';
-import { Form } from 'react-bootstrap';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
-import styled from 'styled-components';
-import Visibility from './icons/Visibility';
-import VisibilityOff from './icons/VisibilityOff';
+import TextField from '@mui/material/TextField';
+import ShowHidePassword from './Form/ShowHidePassword';
 
 interface formValues {
     passphrase: string;
@@ -17,22 +15,6 @@ interface Props {
     placeholder: string;
     buttonText: string;
 }
-
-const Group = styled.div`
-    position: relative;
-`;
-
-const Button = styled.button`
-    background: transparent;
-    border: none;
-    width: 46px;
-    height: 34px;
-    position: absolute;
-    top: 1px;
-    right: 1px;
-    border-radius: 5px;
-    align-items: center;
-`;
 
 export default function SingleInputForm(props: Props) {
     const [loading, SetLoading] = useState(false);
@@ -46,6 +28,17 @@ export default function SingleInputForm(props: Props) {
         await props.callback(values.passphrase, setFieldError);
         SetLoading(false);
     };
+
+    const handleClickShowPassword = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const handleMouseDownPassword = (
+        event: React.MouseEvent<HTMLButtonElement>
+    ) => {
+        event.preventDefault();
+    };
+
     return (
         <Formik<formValues>
             initialValues={{ passphrase: '' }}
@@ -55,46 +48,40 @@ export default function SingleInputForm(props: Props) {
             })}
             validateOnChange={false}
             validateOnBlur={false}>
-            {({ values, touched, errors, handleChange, handleSubmit }) => (
-                <Form noValidate onSubmit={handleSubmit}>
-                    <Form.Group>
-                        <Group>
-                            <Form.Control
-                                type={showPassword ? 'text' : props.fieldType}
-                                placeholder={props.placeholder}
-                                value={values.passphrase}
-                                onChange={handleChange('passphrase')}
-                                isInvalid={Boolean(
-                                    touched.passphrase && errors.passphrase
-                                )}
-                                disabled={loading}
-                                autoFocus
-                            />
-                            {props.fieldType === 'password' && (
-                                <Button
-                                    type="button"
-                                    onClick={() =>
-                                        setShowPassword(!showPassword)
-                                    }>
-                                    {showPassword ? (
-                                        <VisibilityOff />
-                                    ) : (
-                                        <Visibility />
-                                    )}
-                                </Button>
-                            )}
-                            <Form.Control.Feedback type="invalid">
-                                {errors.passphrase}
-                            </Form.Control.Feedback>
-                        </Group>
-                    </Form.Group>
+            {({ values, errors, handleChange, handleSubmit }) => (
+                <form noValidate onSubmit={handleSubmit}>
+                    <TextField
+                        fullWidth
+                        type={showPassword ? 'text' : props.fieldType}
+                        label={props.placeholder}
+                        value={values.passphrase}
+                        onChange={handleChange('passphrase')}
+                        error={Boolean(errors.passphrase)}
+                        helperText={errors.passphrase}
+                        disabled={loading}
+                        autoFocus
+                        InputProps={{
+                            endAdornment: props.fieldType === 'password' && (
+                                <ShowHidePassword
+                                    showPassword={showPassword}
+                                    handleClickShowPassword={
+                                        handleClickShowPassword
+                                    }
+                                    handleMouseDownPassword={
+                                        handleMouseDownPassword
+                                    }
+                                />
+                            ),
+                        }}
+                    />
+
                     <SubmitButton
                         buttonText={props.buttonText}
                         loading={loading}
                     />
 
                     <br />
-                </Form>
+                </form>
             )}
         </Formik>
     );
