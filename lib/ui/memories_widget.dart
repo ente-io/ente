@@ -284,15 +284,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         ),
         backgroundColor: Color(0x00000000),
         elevation: 0,
-        actions: [
-          IconButton(
-            key: shareButtonKey,
-            icon: Icon(Icons.share),
-            onPressed: () {
-              share(context, [file], shareButtonKey: shareButtonKey);
-            },
-          ),
-        ],
       ),
       extendBodyBehindAppBar: true,
       body: Container(
