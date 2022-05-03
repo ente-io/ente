@@ -126,10 +126,12 @@ function ChangeEmailForm(props: Props) {
                             />
                         </Container>
                     </form>
-                    <LinkButton
-                        onClick={() => setShowOttInputVisibility(false)}>
-                        {constants.CHANGE_EMAIL}?
-                    </LinkButton>
+                    {ottInputVisible && (
+                        <LinkButton
+                            onClick={() => setShowOttInputVisibility(false)}>
+                            {constants.CHANGE_EMAIL}?
+                        </LinkButton>
+                    )}
                 </>
             )}
         </Formik>
