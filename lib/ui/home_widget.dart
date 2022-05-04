@@ -306,9 +306,11 @@ class _HomeWidgetState extends State<HomeWidget> {
           ),
         ),
         Align(
-          alignment: Alignment.bottomCenter,
-          child: _buildBottomNavigationBar(),
-        ),
+            alignment: Alignment.bottomCenter,
+            child: HomeBottomNavigationBar(
+              _selectedFiles,
+              selectedTabIndex: _selectedTabIndex,
+            )),
       ],
     );
   }
@@ -475,91 +477,6 @@ class _HomeWidgetState extends State<HomeWidget> {
       ],
     );
   }
-
-  Widget _buildBottomNavigationBar() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(36),
-        child: Container(
-          alignment: Alignment.bottomCenter,
-          height: 52,
-          width: 240,
-          child: ClipRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-              child: GNav(
-                curve: Curves.easeOutExpo,
-                backgroundColor: Theme.of(context).bottomAppBarColor,
-                mainAxisAlignment: MainAxisAlignment.center,
-                rippleColor: Colors.white.withOpacity(0.2),
-                hoverColor: Colors.white.withOpacity(0.2),
-                activeColor: Colors.black,
-                iconSize: 24,
-                padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-                duration: Duration(milliseconds: 200),
-                gap: 0,
-                tabBorderRadius: 24,
-                tabBackgroundColor: Colors.white,
-                haptic: false,
-                tabs: [
-                  GButton(
-                    margin: EdgeInsets.fromLTRB(6, 6, 0, 6),
-                    icon: Icons.home,
-                    iconColor: Colors.black,
-                    text: '',
-                    onPressed: () {
-                      _onTabChange(
-                          0); // To take care of occasional missing events
-                    },
-                  ),
-                  GButton(
-                    margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
-                    icon: Icons.photo_library,
-                    iconColor: Colors.black,
-                    text: '',
-                    onPressed: () {
-                      _onTabChange(
-                          1); // To take care of occasional missing events
-                    },
-                  ),
-                  GButton(
-                    margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
-                    icon: Icons.folder_shared,
-                    iconColor: Colors.black,
-                    text: '',
-                    onPressed: () {
-                      _onTabChange(
-                          2); // To take care of occasional missing events
-                    },
-                  ),
-                  GButton(
-                    margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
-                    icon: Icons.person,
-                    iconColor: Colors.black,
-                    text: '',
-                    onPressed: () {
-                      _onTabChange(
-                          3); // To take care of occasional missing events
-                    },
-                  )
-                ],
-                selectedIndex: _selectedTabIndex,
-                onTabChange: _onTabChange,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _onTabChange(int index) {
-    Bus.instance.fire(TabChangedEvent(
-      index,
-      TabChangedEventSource.tab_bar,
-    ));
-  }
 }
 
 class HomePageAppBar extends StatefulWidget {
@@ -597,6 +514,121 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
       return IgnorePointer(child: appBar);
     } else {
       return appBar;
+    }
+  }
+}
+
+class HomeBottomNavigationBar extends StatefulWidget {
+  const HomeBottomNavigationBar(
+    this.selectedFiles, {
+    this.selectedTabIndex,
+    Key key,
+  }) : super(key: key);
+
+  final SelectedFiles selectedFiles;
+  final int selectedTabIndex;
+
+  @override
+  _HomeBottomNavigationBarState createState() =>
+      _HomeBottomNavigationBarState();
+}
+
+class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
+  @override
+  void initState() {
+    super.initState();
+    widget.selectedFiles.addListener(() {
+      setState(() {});
+    });
+  }
+
+  void _onTabChange(int index) {
+    Bus.instance.fire(TabChangedEvent(
+      index,
+      TabChangedEventSource.tab_bar,
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.selectedFiles.files.isNotEmpty) {
+      return const SizedBox.shrink();
+    } else {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(36),
+          child: Container(
+            alignment: Alignment.bottomCenter,
+            height: 52,
+            width: 240,
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                child: GNav(
+                  curve: Curves.easeOutExpo,
+                  backgroundColor: Theme.of(context).bottomAppBarColor,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  rippleColor: Colors.white.withOpacity(0.2),
+                  hoverColor: Colors.white.withOpacity(0.2),
+                  activeColor: Colors.black,
+                  iconSize: 24,
+                  padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  duration: Duration(milliseconds: 200),
+                  gap: 0,
+                  tabBorderRadius: 24,
+                  tabBackgroundColor: Colors.white,
+                  haptic: false,
+                  tabs: [
+                    GButton(
+                      margin: EdgeInsets.fromLTRB(6, 6, 0, 6),
+                      icon: Icons.home,
+                      iconColor: Colors.black,
+                      text: '',
+                      onPressed: () {
+                        _onTabChange(
+                            0); // To take care of occasional missing events
+                      },
+                    ),
+                    GButton(
+                      margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                      icon: Icons.photo_library,
+                      iconColor: Colors.black,
+                      text: '',
+                      onPressed: () {
+                        _onTabChange(
+                            1); // To take care of occasional missing events
+                      },
+                    ),
+                    GButton(
+                      margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                      icon: Icons.folder_shared,
+                      iconColor: Colors.black,
+                      text: '',
+                      onPressed: () {
+                        _onTabChange(
+                            2); // To take care of occasional missing events
+                      },
+                    ),
+                    GButton(
+                      margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
+                      icon: Icons.person,
+                      iconColor: Colors.black,
+                      text: '',
+                      onPressed: () {
+                        _onTabChange(
+                            3); // To take care of occasional missing events
+                      },
+                    )
+                  ],
+                  selectedIndex: widget.selectedTabIndex,
+                  onTabChange: _onTabChange,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
     }
   }
 }
