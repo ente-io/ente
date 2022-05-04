@@ -80,41 +80,40 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.selectedFiles.files.isEmpty) {
-      return AppBar(
-        backgroundColor: widget.type == GalleryAppBarType.homepage
-            ? Color(0x00000000)
-            : null,
-        elevation: 0,
-        title: widget.type == GalleryAppBarType.homepage
-            ? Container()
-            : TextButton(
-                child: Text(
-                  _appBarTitle,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headline5
-                      .copyWith(fontSize: 16),
-                ),
-                onPressed: () => _renameAlbum(context),
-              ),
-        actions: _getDefaultActions(context),
-      );
-    }
-
+    // if (widget.selectedFiles.files.isEmpty) {
     return AppBar(
-      leading: Tooltip(
-        message: "clear selection",
-        child: IconButton(
-          icon: Icon(Platform.isAndroid ? Icons.clear : CupertinoIcons.clear),
-          onPressed: () {
-            _clearSelectedFiles();
-          },
-        ),
-      ),
-      title: Text(widget.selectedFiles.files.length.toString()),
-      actions: _getActions(context),
+      backgroundColor:
+          widget.type == GalleryAppBarType.homepage ? Color(0x00000000) : null,
+      elevation: 0,
+      title: widget.type == GalleryAppBarType.homepage
+          ? const SizedBox.shrink()
+          : TextButton(
+              child: Text(
+                _appBarTitle,
+                style: Theme.of(context)
+                    .textTheme
+                    .headline5
+                    .copyWith(fontSize: 16),
+              ),
+              onPressed: () => _renameAlbum(context),
+            ),
+      actions: _getDefaultActions(context),
     );
+    // }
+
+    // return AppBar(
+    //   leading: Tooltip(
+    //     message: "clear selection",
+    //     child: IconButton(
+    //       icon: Icon(Platform.isAndroid ? Icons.clear : CupertinoIcons.clear),
+    //       onPressed: () {
+    //         _clearSelectedFiles();
+    //       },
+    //     ),
+    //   ),
+    //   title: Text(widget.selectedFiles.files.length.toString()),
+    //   actions: _getActions(context),
+    // );
   }
 
   Future<dynamic> _renameAlbum(BuildContext context) async {

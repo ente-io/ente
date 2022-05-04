@@ -29,6 +29,13 @@ extension CustomColorScheme on ColorScheme {
   Color get recoveryKeyBoxColor => brightness == Brightness.light
       ? Color.fromRGBO(49, 155, 86, 0.2)
       : Color(0xFF1DB954);
+
+  Color get frostyBlurBackdropFilterColor =>
+      brightness == Brightness.light ? Colors.black : Colors.white;
+
+  Color get cancelSelectedButtonColor => brightness == Brightness.light
+      ? Color.fromARGB(255, 225, 225, 225)
+      : Color.fromARGB(255, 30, 30, 30);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(

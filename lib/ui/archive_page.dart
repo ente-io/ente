@@ -8,15 +8,18 @@ import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
+import 'package:photos/ui/gallery_overlay_widget.dart';
 
 class ArchivePage extends StatelessWidget {
   final String tagPrefix;
   final GalleryAppBarType appBarType;
+  final GalleryOverlayType overlayType;
   final _selectedFiles = SelectedFiles();
 
   ArchivePage(
       {this.tagPrefix = "archived_page",
       this.appBarType = GalleryAppBarType.archive,
+      this.overlayType = GalleryOverlayType.archive,
       Key key})
       : super(key: key);
 
@@ -58,7 +61,17 @@ class ArchivePage extends StatelessWidget {
           _selectedFiles,
         ),
       ),
-      body: gallery,
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          gallery,
+          GalleryOverflowWidget(
+            overlayType,
+            "Hidden",
+            _selectedFiles,
+          )
+        ],
+      ),
     );
   }
 }

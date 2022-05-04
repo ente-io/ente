@@ -8,15 +8,18 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
+import 'package:photos/ui/gallery_overlay_widget.dart';
 
 class TrashPage extends StatelessWidget {
   final String tagPrefix;
   final GalleryAppBarType appBarType;
+  final GalleryOverlayType overlayType;
   final _selectedFiles = SelectedFiles();
 
   TrashPage({
     this.tagPrefix = "trash_page",
     this.appBarType = GalleryAppBarType.trash,
+    this.overlayType = GalleryOverlayType.trash,
     Key key,
   }) : super(key: key);
 
@@ -53,7 +56,17 @@ class TrashPage extends StatelessWidget {
           _selectedFiles,
         ),
       ),
-      body: gallery,
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          gallery,
+          GalleryOverflowWidget(
+            overlayType,
+            "Trash",
+            _selectedFiles,
+          )
+        ],
+      ),
     );
   }
 

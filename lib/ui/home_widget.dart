@@ -40,6 +40,7 @@ import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/gallery_footer_widget.dart';
+import 'package:photos/ui/gallery_overlay_widget.dart';
 import 'package:photos/ui/grant_permissions_widget.dart';
 import 'package:photos/ui/landing_page_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
@@ -311,6 +312,11 @@ class _HomeWidgetState extends State<HomeWidget> {
               _selectedFiles,
               selectedTabIndex: _selectedTabIndex,
             )),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: GalleryOverflowWidget(
+              GalleryOverlayType.homepage, null, _selectedFiles),
+        )
       ],
     );
   }

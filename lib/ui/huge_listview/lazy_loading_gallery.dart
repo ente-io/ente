@@ -327,6 +327,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                   child: Icon(
                     Icons.check_circle_rounded,
                     size: 20,
+                    color: Colors.white, //same for both themes
                   ),
                 ),
               )
