@@ -9,18 +9,6 @@ declare module '@mui/material/styles' {
         accent: PaletteOptions['primary'];
         danger: PaletteOptions['primary'];
     }
-
-    // interface Theme {
-    //     sizes: {
-    //         borderRadius: number;
-    //     };
-    // }
-
-    // interface ThemeOptions {
-    //     sizes?: {
-    //         borderRadius?: string;
-    //     };
-    // }
 }
 
 declare module '@mui/material/Button' {
@@ -35,6 +23,11 @@ const darkThemeOptions = createTheme({
         MuiPaper: {
             styleOverrides: {
                 root: { backgroundColor: '#0f0f0f' },
+            },
+        },
+        MuiList: {
+            styleOverrides: {
+                root: { padding: 0 },
             },
         },
         MuiLink: {
@@ -85,7 +78,7 @@ const darkThemeOptions = createTheme({
     },
 
     shape: {
-        borderRadius: '12px',
+        borderRadius: 12,
     },
 });
 

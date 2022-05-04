@@ -3,9 +3,10 @@ import {
     Box,
     CircularProgress,
     LinearProgress,
+    Paper,
     Typography,
 } from '@mui/material';
-import { FlexWrapper, SpaceBetweenFlex } from 'components/Container';
+import Container, { SpaceBetweenFlex } from 'components/Container';
 import { UserDetails } from 'types/user';
 import constants from 'utils/strings/constants';
 import { formatDateShort } from 'utils/time';
@@ -14,22 +15,13 @@ import { convertBytesToHumanReadable } from 'utils/billing';
 interface Iprops {
     userDetails: UserDetails;
 }
+
 export default function SubscriptionDetails({ userDetails }: Iprops) {
     return (
-        <Box
-            display="flex"
-            flexDirection={'column'}
-            height={160}
-            bgcolor="accent.main"
-            borderRadius={(theme) => theme.shape.borderRadius}
-            position={'relative'}>
+        <Paper component={Box} bgcolor="accent.main" position={'relative'}>
             {userDetails ? (
                 <>
-                    <Box
-                        display="flex"
-                        flexDirection={'column'}
-                        padding="16px"
-                        height="96px">
+                    <Box padding={2}>
                         <SpaceBetweenFlex>
                             <Typography variant="subtitle2">
                                 Current Plan
@@ -57,13 +49,12 @@ export default function SubscriptionDetails({ userDetails }: Iprops) {
                         component={'img'}
                         src="/images/locker.png"
                     />
-                    <Box
+                    <Paper
+                        component={Box}
                         position={'relative'}
-                        zIndex="100"
-                        height="64px"
-                        borderRadius={(theme) => theme.shape.borderRadius}
+                        zIndex="2"
                         bgcolor="accent.dark"
-                        padding="16px">
+                        padding={2}>
                         <LinearProgress
                             sx={{ bgcolor: 'text.secondary' }}
                             variant="determinate"
@@ -86,13 +77,13 @@ export default function SubscriptionDetails({ userDetails }: Iprops) {
                                 {`${userDetails.fileCount} Photos`}
                             </Typography>
                         </SpaceBetweenFlex>
-                    </Box>
+                    </Paper>
                 </>
             ) : (
-                <FlexWrapper style={{ flex: '1', justifyContent: 'center' }}>
+                <Container>
                     <CircularProgress />
-                </FlexWrapper>
+                </Container>
             )}
-        </Box>
+        </Paper>
     );
 }
