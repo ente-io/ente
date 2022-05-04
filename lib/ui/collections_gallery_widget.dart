@@ -129,8 +129,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   Widget _getCollectionsGalleryWidget(CollectionItems items) {
     const double horizontalPaddingOfGridRow = 16;
     const double crossAxisSpacingOfGrid = 5;
-    final TextStyle trashAndHiddenTextStyle =
-        Theme.of(context).textTheme.subtitle1;
+    final TextStyle trashAndHiddenTextStyle = Theme.of(context)
+        .textTheme
+        .subtitle1
+        .copyWith(
+            color:
+                Theme.of(context).textTheme.subtitle1.color.withOpacity(0.5));
     Size size = MediaQuery.of(context).size;
     int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
     final double sideOfThumbnail = (size.width / 2) -
@@ -248,10 +252,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                 Padding(padding: EdgeInsets.all(6)),
                                 RichText(
                                     text: TextSpan(
-                                        style: trashAndHiddenTextStyle.copyWith(
-                                          color: trashAndHiddenTextStyle.color
-                                              .withOpacity(0.5),
-                                        ),
+                                        style: trashAndHiddenTextStyle,
                                         children: [
                                       TextSpan(
                                           text: "Trash",
@@ -311,10 +312,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                 Padding(padding: EdgeInsets.all(6)),
                                 RichText(
                                     text: TextSpan(
-                                        style: trashAndHiddenTextStyle.copyWith(
-                                          color: trashAndHiddenTextStyle.color
-                                              .withOpacity(0.5),
-                                        ),
+                                        style: trashAndHiddenTextStyle,
                                         children: [
                                       TextSpan(
                                           text: "Hidden",
