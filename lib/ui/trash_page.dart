@@ -5,7 +5,6 @@ import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/models/trash_file.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 
@@ -58,10 +57,10 @@ class TrashPage extends StatelessWidget {
   }
 
   Widget _headerWidget() {
-    return FutureBuilder<TrashFile>(
-      future: TrashDB.instance.getRecentlyTrashedFile(),
+    return FutureBuilder<int>(
+      future: TrashDB.instance.count(),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
+        if (snapshot.hasData && snapshot.data > 0) {
           return Padding(
             padding: EdgeInsets.all(16),
             child: Text(
