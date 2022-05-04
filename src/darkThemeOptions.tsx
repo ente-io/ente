@@ -46,9 +46,11 @@ const darkThemeOptions = createTheme({
         MuiButton: {
             styleOverrides: {
                 root: {
+                    fontSize: '18px',
                     color: '#fff',
                     textTransform: 'none',
                     borderRadius: '8px',
+                    padding: '8px 34px',
                 },
             },
         },

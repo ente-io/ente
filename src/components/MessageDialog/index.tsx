@@ -52,17 +52,9 @@ export default function MessageDialog({
         <MessageDialogBase
             open={props.show}
             maxWidth={props.size}
+            fullWidth
             onClose={!attributes.nonClosable && props.onHide}>
-            {attributes.title && (
-                <DialogTitle
-                    sx={{
-                        p: 0,
-                        pb: 2,
-                        fontSize: (theme) => theme.typography.h5,
-                    }}>
-                    {attributes.title}
-                </DialogTitle>
-            )}
+            {attributes.title && <DialogTitle>{attributes.title}</DialogTitle>}
             {(children || attributes?.content) && (
                 <DialogContent>
                     {children || (
