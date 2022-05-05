@@ -856,6 +856,20 @@ class FilesDB {
     );
   }
 
+  Future<int> collectionFileCount(int collectionID) async {
+    final db = await instance.database;
+    var count = Sqflite.firstIntValue(await db.rawQuery(
+        'SELECT COUNT(*) FROM $table where $columnCollectionID = $collectionID'));
+    return count;
+  }
+
+  Future<int> fileCountWithVisibility(int visibility) async {
+    final db = await instance.database;
+    var count = Sqflite.firstIntValue(await db.rawQuery(
+        'SELECT COUNT(*) FROM $table where $columnMMdVisibility = $visibility'));
+    return count;
+  }
+
   Future<int> deleteCollection(int collectionID) async {
     final db = await instance.database;
     return db.delete(

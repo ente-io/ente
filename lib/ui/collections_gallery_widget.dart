@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/trash_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
@@ -16,6 +17,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/device_folder.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/archive_page.dart';
 import 'package:photos/ui/collection_page.dart';
@@ -44,23 +46,27 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
   AlbumSortKey sortKey;
+  String _loadReason = "init";
 
   @override
   void initState() {
     _localFilesSubscription =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _logger.info("Files updated");
+      _loadReason = (LocalPhotosUpdatedEvent).toString();
       setState(() {});
     });
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
+      _loadReason = (CollectionUpdatedEvent).toString();
       setState(() {});
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
+      _loadReason = (UserLoggedOutEvent).toString();
       setState(() {});
     });
     _backupFoldersUpdatedEvent =
         Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) {
+      _loadReason = (BackupFoldersUpdatedEvent).toString();
       setState(() {});
     });
     sortKey = LocalSettings.instance.albumSortKey();
@@ -70,7 +76,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    _logger.info("Building ");
+    _logger.info("Building, trigger: $_loadReason");
     return FutureBuilder<CollectionItems>(
       future: _getCollections(),
       builder: (context, snapshot) {
@@ -170,8 +176,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                 shrinkWrap: true,
                                 scrollDirection: Axis.horizontal,
                                 padding: EdgeInsets.fromLTRB(6, 0, 6, 0),
-                                physics:
-                                    ScrollPhysics(), // to disable GridView's scrolling
+                                physics: ScrollPhysics(),
+                                // to disable GridView's scrolling
                                 itemBuilder: (context, index) {
                                   return DeviceFolderIcon(items.folders[index]);
                                 },
@@ -196,14 +202,14 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: GridView.builder(
                       shrinkWrap: true,
-                      physics:
-                          ScrollPhysics(), // to disable GridView's scrolling
+                      physics: ScrollPhysics(),
+                      // to disable GridView's scrolling
                       itemBuilder: (context, index) {
                         return _buildCollection(
                             context, items.collections, index);
                       },
-                      itemCount: items.collections.length +
-                          1, // To include the + button
+                      itemCount: items.collections.length + 1,
+                      // To include the + button
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: albumsCountInOneRow,
                           mainAxisSpacing: 12,
@@ -235,7 +241,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                             Theme.of(context).iconTheme.color.withOpacity(0.24),
                       ),
                     ),
-                    child: Container(
+                    child: SizedBox(
                       height: 48,
                       width: double.infinity,
                       child: Padding(
@@ -250,20 +256,39 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                   color: Theme.of(context).iconTheme.color,
                                 ),
                                 Padding(padding: EdgeInsets.all(6)),
-                                RichText(
-                                    text: TextSpan(
-                                        style: trashAndHiddenTextStyle,
-                                        children: [
-                                      TextSpan(
-                                          text: "Trash",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .subtitle1),
-                                      TextSpan(text: "  \u2022  "),
-                                      TextSpan(
-                                          text:
-                                              "23"), //need to query in db and bring this value
-                                    ])),
+                                FutureBuilder<int>(
+                                  future: TrashDB.instance.count(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData && snapshot.data > 0) {
+                                      return RichText(
+                                          text: TextSpan(
+                                              style: trashAndHiddenTextStyle,
+                                              children: [
+                                            TextSpan(
+                                                text: "Trash",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .subtitle1),
+                                            TextSpan(text: "  \u2022  "),
+                                            TextSpan(
+                                                text: snapshot.data.toString()),
+                                            //need to query in db and bring this value
+                                          ]));
+                                    } else {
+                                      return RichText(
+                                          text: TextSpan(
+                                              style: trashAndHiddenTextStyle,
+                                              children: [
+                                            TextSpan(
+                                                text: "Trash",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .subtitle1),
+                                            //need to query in db and bring this value
+                                          ]));
+                                    }
+                                  },
+                                ),
                               ],
                             ),
                             Icon(
@@ -310,20 +335,41 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                   color: Theme.of(context).iconTheme.color,
                                 ),
                                 Padding(padding: EdgeInsets.all(6)),
-                                RichText(
-                                    text: TextSpan(
-                                        style: trashAndHiddenTextStyle,
-                                        children: [
-                                      TextSpan(
-                                          text: "Hidden",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .subtitle1),
-                                      TextSpan(text: "  \u2022  "),
-                                      TextSpan(
-                                          text:
-                                              "12"), //need to query in db and bring this value
-                                    ])),
+                                FutureBuilder<int>(
+                                  future: FilesDB.instance
+                                      .fileCountWithVisibility(
+                                          kVisibilityArchive),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData && snapshot.data > 0) {
+                                      return RichText(
+                                          text: TextSpan(
+                                              style: trashAndHiddenTextStyle,
+                                              children: [
+                                            TextSpan(
+                                                text: "Hidden",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .subtitle1),
+                                            TextSpan(text: "  \u2022  "),
+                                            TextSpan(
+                                                text: snapshot.data.toString()),
+                                            //need to query in db and bring this value
+                                          ]));
+                                    } else {
+                                      return RichText(
+                                          text: TextSpan(
+                                              style: trashAndHiddenTextStyle,
+                                              children: [
+                                            TextSpan(
+                                                text: "Hidden",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .subtitle1),
+                                            //need to query in db and bring this value
+                                          ]));
+                                    }
+                                  },
+                                ),
                               ],
                             ),
                             Icon(
@@ -613,10 +659,24 @@ class CollectionItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Text(
-                '  \u2022  ' + '23', //need to query in db and bring this value
-                style: albumTitleTextStyle.copyWith(
-                    color: albumTitleTextStyle.color.withOpacity(0.5)),
+              FutureBuilder<int>(
+                future: FilesDB.instance.collectionFileCount(c.collection.id),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data > 0) {
+                    return RichText(
+                        text: TextSpan(
+                            style: albumTitleTextStyle.copyWith(
+                                color:
+                                    albumTitleTextStyle.color.withOpacity(0.5)),
+                            children: [
+                          TextSpan(text: "  \u2022  "),
+                          TextSpan(text: snapshot.data.toString()),
+                          //need to query in db and bring this value
+                        ]));
+                  } else {
+                    return Container();
+                  }
+                },
               ),
             ],
           ),
