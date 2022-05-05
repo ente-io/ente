@@ -18,7 +18,7 @@ class TrashDiffFetcher {
   Future<Diff> getTrashFilesDiff(int sinceTime) async {
     try {
       final response = await _dio.get(
-        Configuration.instance.getHttpEndpoint() + "/trash/diff",
+        Configuration.instance.getHttpEndpoint() + "/trash/v2/diff",
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         queryParameters: {
@@ -27,13 +27,17 @@ class TrashDiffFetcher {
       );
       int latestUpdatedAtTime = 0;
       final trashedFiles = <TrashFile>[];
-      final deletedFiles = <TrashFile>[];
+      final deletedFilesUploadID = <int>[];
       final restoredFiles = <TrashFile>[];
       if (response != null) {
         final diff = response.data["diff"] as List;
         final bool hasMore = response.data["hasMore"] as bool;
         final startTime = DateTime.now();
         for (final item in diff) {
+          if (item["isDeleted"]) {
+            deletedFilesUploadID.add(item["file"]["id"]);
+            continue;
+          }
           final trash = TrashFile();
           trash.createdAt = item['createdAt'];
           trash.updateAt = item['updatedAt'];
@@ -77,10 +81,6 @@ class TrashDiffFetcher {
             trash.pubMagicMetadata =
                 PubMagicMetadata.fromEncodedJson(trash.pubMmdEncodedJson);
           }
-          if (item["isDeleted"]) {
-            deletedFiles.add(trash);
-            continue;
-          }
           if (item['isRestored']) {
             restoredFiles.add(trash);
             continue;
@@ -97,10 +97,10 @@ class TrashDiffFetcher {
                         startTime.microsecondsSinceEpoch))
                 .inMilliseconds
                 .toString());
-        return Diff(trashedFiles, restoredFiles, deletedFiles, hasMore,
+        return Diff(trashedFiles, restoredFiles, deletedFilesUploadID, hasMore,
             latestUpdatedAtTime);
       } else {
-        return Diff(<TrashFile>[], <TrashFile>[], <TrashFile>[], false, 0);
+        return Diff(<TrashFile>[], <TrashFile>[], <int>[], false, 0);
       }
     } catch (e, s) {
       _logger.severe(e, s);
@@ -112,10 +112,10 @@ class TrashDiffFetcher {
 class Diff {
   final List<TrashFile> trashedFiles;
   final List<TrashFile> restoredFiles;
-  final List<TrashFile> deletedFiles;
+  final List<int> deletedFilesUploadID;
   final bool hasMore;
   final int lastSyncedTimeStamp;
 
-  Diff(this.trashedFiles, this.restoredFiles, this.deletedFiles, this.hasMore,
-      this.lastSyncedTimeStamp);
+  Diff(this.trashedFiles, this.restoredFiles, this.deletedFilesUploadID,
+      this.hasMore, this.lastSyncedTimeStamp);
 }
