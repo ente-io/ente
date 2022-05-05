@@ -68,7 +68,6 @@ class CollectionPage extends StatelessWidget {
           BottomShadowWidget(),
           GalleryOverlayWidget(
             overlayType,
-            c.collection.name,
             _selectedFiles,
             collection: c.collection,
           )

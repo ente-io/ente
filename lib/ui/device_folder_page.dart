@@ -53,7 +53,6 @@ class DeviceFolderPage extends StatelessWidget {
           gallery,
           GalleryOverlayWidget(
             GalleryOverlayType.local_folder,
-            folder.name,
             _selectedFiles,
           )
         ],

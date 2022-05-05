@@ -35,14 +35,12 @@ enum GalleryOverlayType {
 
 class GalleryOverlayWidget extends StatefulWidget {
   final GalleryOverlayType type;
-  final String title;
   final SelectedFiles selectedFiles;
   final String path;
   final Collection collection;
 
   GalleryOverlayWidget(
     this.type,
-    this.title,
     this.selectedFiles, {
     this.path,
     this.collection,
@@ -56,7 +54,6 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
   final _logger = Logger("GalleryOverlay");
   StreamSubscription _userAuthEventSubscription;
   Function() _selectedFilesListener;
-  String _appBarTitle;
   final GlobalKey shareButtonKey = GlobalKey();
   @override
   void initState() {
@@ -68,7 +65,6 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
         Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
-    _appBarTitle = widget.title;
     super.initState();
   }
 

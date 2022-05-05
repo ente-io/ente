@@ -67,7 +67,6 @@ class ArchivePage extends StatelessWidget {
           gallery,
           GalleryOverlayWidget(
             overlayType,
-            "Hidden",
             _selectedFiles,
           )
         ],

@@ -62,7 +62,6 @@ class TrashPage extends StatelessWidget {
           gallery,
           GalleryOverlayWidget(
             overlayType,
-            "Trash",
             _selectedFiles,
           )
         ],

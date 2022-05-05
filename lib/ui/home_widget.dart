@@ -302,8 +302,8 @@ class _HomeWidgetState extends State<HomeWidget> {
             ])),
         Align(
           alignment: Alignment.bottomCenter,
-          child: GalleryOverlayWidget(
-              GalleryOverlayType.homepage, null, _selectedFiles),
+          child:
+              GalleryOverlayWidget(GalleryOverlayType.homepage, _selectedFiles),
         )
       ],
     );
