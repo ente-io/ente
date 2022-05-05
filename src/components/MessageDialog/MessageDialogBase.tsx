@@ -24,8 +24,9 @@ const StyledMessageDialog = styled(Dialog)(({ theme }) => ({
         },
     },
 
-    '& .MuiDialogContentText-root': {
+    '& .MuiDialogContent-root > *': {
         fontSize: '18px',
+        color: theme.palette.text.secondary,
     },
     '& .MuiDialogActions-root': {
         padding: 0,

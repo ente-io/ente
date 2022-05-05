@@ -58,9 +58,11 @@ export default function MessageDialog({
             {attributes.title && <DialogTitle>{attributes.title}</DialogTitle>}
             {(children || attributes?.content) && (
                 <DialogContent>
-                    <DialogContentText>
-                        {children ?? attributes.content}
-                    </DialogContentText>
+                    {children || (
+                        <DialogContentText>
+                            {attributes.content}
+                        </DialogContentText>
+                    )}
                 </DialogContent>
             )}
             {(attributes.close || attributes.proceed) && (
