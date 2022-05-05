@@ -138,7 +138,7 @@ const englishConstants = {
     ACCOUNT_EXISTS: 'Already have an account',
     ALBUM_NAME: 'album name',
     CREATE: 'create',
-    DOWNLOAD: 'download',
+    DOWNLOAD: 'Download',
     TOGGLE_FULLSCREEN: 'toggle fullscreen',
     ZOOM_IN_OUT: 'zoom in/out',
     PREVIOUS: 'previous (arrow left)',
@@ -197,7 +197,7 @@ const englishConstants = {
     SUPPORT: 'Support',
     CONFIRM: 'confirm',
     SKIP: 'skip',
-    CANCEL: 'cancel',
+    CANCEL: 'Cancel',
     LOGOUT: 'Logout',
     DELETE_ACCOUNT: 'Delete Account',
     DELETE_ACCOUNT_MESSAGE: () => (
@@ -384,8 +384,8 @@ const englishConstants = {
     CONFIRM_DOWNLOAD_COLLECTION: 'download album',
     DOWNLOAD_COLLECTION_MESSAGE: () => (
         <>
-            <p>are you sure you want to download the complete album?</p>
-            <p>all files will be queued for download sequentially</p>
+            <div>are you sure you want to download the complete album?</div>
+            <div>all files will be queued for download sequentially</div>
         </>
     ),
     ARCHIVED_ALBUM: 'archived album',
