@@ -34,6 +34,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/app_update_dialog.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
+import 'package:photos/ui/common/bottomShadow.dart';
 import 'package:photos/ui/common/gradientButton.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/extents_page_view.dart';
@@ -254,7 +255,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getBody() {
-    print(_selectedFiles.files.length);
     if (!Configuration.instance.hasConfiguredAccount()) {
       return LandingPageWidget();
     }
@@ -291,15 +291,15 @@ class _HomeWidgetState extends State<HomeWidget> {
           physics: NeverScrollableScrollPhysics(),
           controller: _pageController,
         ),
+        Align(alignment: Alignment.bottomCenter, child: BottomShadowWidget()),
         Align(
             alignment: Alignment.bottomCenter,
-            child: BottomShadowWidget(_selectedFiles)),
-        Align(
-            alignment: Alignment.bottomCenter,
-            child: HomeBottomNavigationBar(
-              _selectedFiles,
-              selectedTabIndex: _selectedTabIndex,
-            )),
+            child: Stack(children: [
+              HomeBottomNavigationBar(
+                _selectedFiles,
+                selectedTabIndex: _selectedTabIndex,
+              ),
+            ])),
         Align(
           alignment: Alignment.bottomCenter,
           child: GalleryOverlayWidget(
@@ -508,46 +508,6 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
       return IgnorePointer(child: appBar);
     } else {
       return appBar;
-    }
-  }
-}
-
-class BottomShadowWidget extends StatefulWidget {
-  const BottomShadowWidget(this.selectedFiles, {Key key}) : super(key: key);
-
-  final SelectedFiles selectedFiles;
-
-  @override
-  State<BottomShadowWidget> createState() => _BottomShadowWidgetState();
-}
-
-class _BottomShadowWidgetState extends State<BottomShadowWidget> {
-  @override
-  void initState() {
-    super.initState();
-    widget.selectedFiles.addListener(() {
-      setState(() {});
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.selectedFiles.files.isEmpty) {
-      return Container(
-        height: 8,
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).backgroundColor,
-              spreadRadius: 42,
-              blurRadius: 42, // changes position of shadow
-            ),
-          ],
-        ),
-      );
-    } else {
-      return const SizedBox.shrink();
     }
   }
 }

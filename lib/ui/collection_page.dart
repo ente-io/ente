@@ -8,6 +8,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/ui/common/bottomShadow.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/gallery_overlay_widget.dart';
@@ -28,6 +29,7 @@ class CollectionPage extends StatelessWidget {
 
   @override
   Widget build(Object context) {
+    print('yoooo');
     final initialFiles = c.thumbnail != null ? [c.thumbnail] : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
@@ -63,6 +65,7 @@ class CollectionPage extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         children: [
           gallery,
+          BottomShadowWidget(),
           GalleryOverlayWidget(
             overlayType,
             c.collection.name,

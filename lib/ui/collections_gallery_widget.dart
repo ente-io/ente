@@ -431,11 +431,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         child: Container(
           margin: EdgeInsets.fromLTRB(30, 30, 30, 54),
           decoration: BoxDecoration(
-            // gradient: LinearGradient(
-            //     colors: [Colors.white12, Colors.transparent],
-            //     begin: Alignment.topCenter,
-            //     end: Alignment.bottomCenter,
-            //     stops: [0, 0.1]),
             color: Theme.of(context).backgroundColor,
             boxShadow: [
               BoxShadow(
@@ -444,9 +439,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                   offset: Offset(0, 0),
                   color: Theme.of(context).iconTheme.color.withOpacity(0.3))
             ],
-            // border: Border.all(
-            //   color: Theme.of(context).iconTheme.color.withOpacity(0.1),
-            // ),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Icon(
