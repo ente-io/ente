@@ -1,7 +1,9 @@
-import { Dialog } from '@mui/material';
+import { Dialog, DialogProps } from '@mui/material';
+import { FC } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
-const MessageDialogBase = styled(Dialog)(({ theme }) => ({
+const StyledMessageDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiPaper-root': {
         padding: '32px 32px 32px 28px',
         margin: '16px',
@@ -39,5 +41,28 @@ const MessageDialogBase = styled(Dialog)(({ theme }) => ({
         marginLeft: theme.spacing(2),
     },
 }));
+
+interface MessageDialogBaseProps extends DialogProps {
+    staticBackDrop?: boolean;
+}
+
+const MessageDialogBase: FC<MessageDialogBaseProps> = ({
+    children,
+    staticBackDrop,
+    ...props
+}) => {
+    const handleClose: DialogProps['onClose'] = (_, reason) => {
+        if (staticBackDrop && reason === 'backdropClick') {
+            // no-op
+        } else {
+            props.onClose;
+        }
+    };
+    return (
+        <StyledMessageDialog onClose={handleClose} {...props}>
+            {children}
+        </StyledMessageDialog>
+    );
+};
 
 export default MessageDialogBase;

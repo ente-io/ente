@@ -53,15 +53,14 @@ export default function MessageDialog({
             open={props.show}
             maxWidth={props.size}
             fullWidth
-            onClose={!attributes.nonClosable && props.onHide}>
+            staticBackDrop={attributes.staticBackdrop}
+            onClose={attributes.nonClosable ? props.onHide : () => null}>
             {attributes.title && <DialogTitle>{attributes.title}</DialogTitle>}
             {(children || attributes?.content) && (
                 <DialogContent>
-                    {children || (
-                        <DialogContentText>
-                            {attributes.content}
-                        </DialogContentText>
-                    )}
+                    <DialogContentText>
+                        {children ?? attributes.content}
+                    </DialogContentText>
                 </DialogContent>
             )}
             {(attributes.close || attributes.proceed) && (
