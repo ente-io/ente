@@ -63,10 +63,11 @@ class CollectionPage extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         children: [
           gallery,
-          GalleryOverflowWidget(
+          GalleryOverlayWidget(
             overlayType,
             c.collection.name,
             _selectedFiles,
+            collection: c.collection,
           )
         ],
       ),

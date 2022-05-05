@@ -287,137 +287,137 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             )));
   }
 
-  List<Widget> _getActions(BuildContext context) {
-    List<Widget> actions = <Widget>[];
-    if (widget.type == GalleryAppBarType.trash) {
-      _addTrashAction(actions);
-      return actions;
-    }
-    // skip add button for incoming collection till this feature is implemented
-    if (Configuration.instance.hasConfiguredAccount() &&
-        widget.type != GalleryAppBarType.shared_collection) {
-      String msg = "add";
-      IconData iconData =
-          Platform.isAndroid ? Icons.add_outlined : CupertinoIcons.add;
-      // show upload icon instead of add for files selected in local gallery
-      if (widget.type == GalleryAppBarType.local_folder) {
-        msg = "upload";
-        iconData = Platform.isAndroid
-            ? Icons.cloud_upload
-            : CupertinoIcons.cloud_upload;
-      }
-      actions.add(
-        Tooltip(
-          message: msg,
-          child: IconButton(
-            icon: Icon(iconData),
-            onPressed: () {
-              _createAlbum();
-            },
-          ),
-        ),
-      );
-    }
-    if (Configuration.instance.hasConfiguredAccount() &&
-        widget.type == GalleryAppBarType.owned_collection &&
-        widget.collection.type != CollectionType.favorites) {
-      actions.add(
-        Tooltip(
-          message: "move",
-          child: IconButton(
-            icon: Icon(Platform.isAndroid
-                ? Icons.arrow_forward
-                : CupertinoIcons.arrow_right),
-            onPressed: () {
-              _moveFiles();
-            },
-          ),
-        ),
-      );
-    }
-    actions.add(
-      Tooltip(
-        message: "share",
-        child: IconButton(
-          key: shareButtonKey,
-          icon: Icon(
-              Platform.isAndroid ? Icons.share_outlined : CupertinoIcons.share),
-          onPressed: () {
-            _shareSelected(context);
-          },
-        ),
-      ),
-    );
-    if (widget.type == GalleryAppBarType.homepage ||
-        widget.type == GalleryAppBarType.archive ||
-        widget.type == GalleryAppBarType.local_folder) {
-      actions.add(
-        Tooltip(
-          message: "delete",
-          child: IconButton(
-            icon: Icon(Platform.isAndroid
-                ? Icons.delete_outline
-                : CupertinoIcons.delete),
-            onPressed: () {
-              _showDeleteSheet(context);
-            },
-          ),
-        ),
-      );
-    } else if (widget.type == GalleryAppBarType.owned_collection) {
-      if (widget.collection.type == CollectionType.folder) {
-        actions.add(
-          Tooltip(
-            message: "delete",
-            child: IconButton(
-              icon: Icon(Platform.isAndroid
-                  ? Icons.delete_outline
-                  : CupertinoIcons.delete),
-              onPressed: () {
-                _showDeleteSheet(context);
-              },
-            ),
-          ),
-        );
-      } else {
-        actions.add(
-          Tooltip(
-            message: "remove",
-            child: IconButton(
-              icon: Icon(Icons.remove_circle_outline_rounded),
-              onPressed: () {
-                _showRemoveFromCollectionSheet(context);
-              },
-            ),
-          ),
-        );
-      }
-    }
+  // List<Widget> _getActions(BuildContext context) {
+  //   List<Widget> actions = <Widget>[];
+  //   if (widget.type == GalleryAppBarType.trash) {
+  //     _addTrashAction(actions);
+  //     return actions;
+  //   }
+  //   // skip add button for incoming collection till this feature is implemented
+  //   if (Configuration.instance.hasConfiguredAccount() &&
+  //       widget.type != GalleryAppBarType.shared_collection) {
+  //     String msg = "add";
+  //     IconData iconData =
+  //         Platform.isAndroid ? Icons.add_outlined : CupertinoIcons.add;
+  //     // show upload icon instead of add for files selected in local gallery
+  //     if (widget.type == GalleryAppBarType.local_folder) {
+  //       msg = "upload";
+  //       iconData = Platform.isAndroid
+  //           ? Icons.cloud_upload
+  //           : CupertinoIcons.cloud_upload;
+  //     }
+  //     actions.add(
+  //       Tooltip(
+  //         message: msg,
+  //         child: IconButton(
+  //           icon: Icon(iconData),
+  //           onPressed: () {
+  //             _createAlbum();
+  //           },
+  //         ),
+  //       ),
+  //     );
+  //   }
+  //   if (Configuration.instance.hasConfiguredAccount() &&
+  //       widget.type == GalleryAppBarType.owned_collection &&
+  //       widget.collection.type != CollectionType.favorites) {
+  //     actions.add(
+  //       Tooltip(
+  //         message: "move",
+  //         child: IconButton(
+  //           icon: Icon(Platform.isAndroid
+  //               ? Icons.arrow_forward
+  //               : CupertinoIcons.arrow_right),
+  //           onPressed: () {
+  //             _moveFiles();
+  //           },
+  //         ),
+  //       ),
+  //     );
+  //   }
+  //   actions.add(
+  //     Tooltip(
+  //       message: "share",
+  //       child: IconButton(
+  //         key: shareButtonKey,
+  //         icon: Icon(
+  //             Platform.isAndroid ? Icons.share_outlined : CupertinoIcons.share),
+  //         onPressed: () {
+  //           _shareSelected(context);
+  //         },
+  //       ),
+  //     ),
+  //   );
+  //   if (widget.type == GalleryAppBarType.homepage ||
+  //       widget.type == GalleryAppBarType.archive ||
+  //       widget.type == GalleryAppBarType.local_folder) {
+  //     actions.add(
+  //       Tooltip(
+  //         message: "delete",
+  //         child: IconButton(
+  //           icon: Icon(Platform.isAndroid
+  //               ? Icons.delete_outline
+  //               : CupertinoIcons.delete),
+  //           onPressed: () {
+  //             _showDeleteSheet(context);
+  //           },
+  //         ),
+  //       ),
+  //     );
+  //   } else if (widget.type == GalleryAppBarType.owned_collection) {
+  //     if (widget.collection.type == CollectionType.folder) {
+  //       actions.add(
+  //         Tooltip(
+  //           message: "delete",
+  //           child: IconButton(
+  //             icon: Icon(Platform.isAndroid
+  //                 ? Icons.delete_outline
+  //                 : CupertinoIcons.delete),
+  //             onPressed: () {
+  //               _showDeleteSheet(context);
+  //             },
+  //           ),
+  //         ),
+  //       );
+  //     } else {
+  //       actions.add(
+  //         Tooltip(
+  //           message: "remove",
+  //           child: IconButton(
+  //             icon: Icon(Icons.remove_circle_outline_rounded),
+  //             onPressed: () {
+  //               _showRemoveFromCollectionSheet(context);
+  //             },
+  //           ),
+  //         ),
+  //       );
+  //     }
+  //   }
 
-    if (widget.type == GalleryAppBarType.homepage ||
-        widget.type == GalleryAppBarType.archive) {
-      bool showArchive = widget.type == GalleryAppBarType.homepage;
-      actions.add(Tooltip(
-        message: showArchive ? "archive" : "unarchive",
-        child: IconButton(
-          icon: Icon(
-            Platform.isAndroid
-                ? (showArchive
-                    ? Icons.archive_outlined
-                    : Icons.unarchive_outlined)
-                : (showArchive
-                    ? CupertinoIcons.archivebox
-                    : CupertinoIcons.archivebox_fill),
-          ),
-          onPressed: () {
-            _handleVisibilityChangeRequest(
-                context, showArchive ? kVisibilityArchive : kVisibilityVisible);
-          },
-        ),
-      ));
-    }
-    return actions;
-  }
+  //   if (widget.type == GalleryAppBarType.homepage ||
+  //       widget.type == GalleryAppBarType.archive) {
+  //     bool showArchive = widget.type == GalleryAppBarType.homepage;
+  //     actions.add(Tooltip(
+  //       message: showArchive ? "archive" : "unarchive",
+  //       child: IconButton(
+  //         icon: Icon(
+  //           Platform.isAndroid
+  //               ? (showArchive
+  //                   ? Icons.archive_outlined
+  //                   : Icons.unarchive_outlined)
+  //               : (showArchive
+  //                   ? CupertinoIcons.archivebox
+  //                   : CupertinoIcons.archivebox_fill),
+  //         ),
+  //         onPressed: () {
+  //           _handleVisibilityChangeRequest(
+  //               context, showArchive ? kVisibilityArchive : kVisibilityVisible);
+  //         },
+  //       ),
+  //     ));
+  //   }
+  //   return actions;
+  // }
 
   void _addTrashAction(List<Widget> actions) {
     actions.add(Tooltip(

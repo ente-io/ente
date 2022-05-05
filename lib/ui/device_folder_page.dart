@@ -51,7 +51,7 @@ class DeviceFolderPage extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         children: [
           gallery,
-          GalleryOverflowWidget(
+          GalleryOverlayWidget(
             GalleryOverlayType.local_folder,
             folder.name,
             _selectedFiles,

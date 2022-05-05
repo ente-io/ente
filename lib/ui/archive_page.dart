@@ -65,7 +65,7 @@ class ArchivePage extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         children: [
           gallery,
-          GalleryOverflowWidget(
+          GalleryOverlayWidget(
             overlayType,
             "Hidden",
             _selectedFiles,

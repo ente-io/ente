@@ -254,6 +254,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getBody() {
+    print(_selectedFiles.files.length);
     if (!Configuration.instance.hasConfiguredAccount()) {
       return LandingPageWidget();
     }
@@ -291,21 +292,8 @@ class _HomeWidgetState extends State<HomeWidget> {
           controller: _pageController,
         ),
         Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            height: 8,
-            decoration: BoxDecoration(
-              color: Colors.transparent,
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).backgroundColor,
-                  spreadRadius: 42,
-                  blurRadius: 42, // changes position of shadow
-                ),
-              ],
-            ),
-          ),
-        ),
+            alignment: Alignment.bottomCenter,
+            child: BottomShadowWidget(_selectedFiles)),
         Align(
             alignment: Alignment.bottomCenter,
             child: HomeBottomNavigationBar(
@@ -314,7 +302,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             )),
         Align(
           alignment: Alignment.bottomCenter,
-          child: GalleryOverflowWidget(
+          child: GalleryOverlayWidget(
               GalleryOverlayType.homepage, null, _selectedFiles),
         )
       ],
@@ -520,6 +508,46 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
       return IgnorePointer(child: appBar);
     } else {
       return appBar;
+    }
+  }
+}
+
+class BottomShadowWidget extends StatefulWidget {
+  const BottomShadowWidget(this.selectedFiles, {Key key}) : super(key: key);
+
+  final SelectedFiles selectedFiles;
+
+  @override
+  State<BottomShadowWidget> createState() => _BottomShadowWidgetState();
+}
+
+class _BottomShadowWidgetState extends State<BottomShadowWidget> {
+  @override
+  void initState() {
+    super.initState();
+    widget.selectedFiles.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.selectedFiles.files.isEmpty) {
+      return Container(
+        height: 8,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).backgroundColor,
+              spreadRadius: 42,
+              blurRadius: 42, // changes position of shadow
+            ),
+          ],
+        ),
+      );
+    } else {
+      return const SizedBox.shrink();
     }
   }
 }

@@ -60,7 +60,7 @@ class TrashPage extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         children: [
           gallery,
-          GalleryOverflowWidget(
+          GalleryOverlayWidget(
             overlayType,
             "Trash",
             _selectedFiles,
