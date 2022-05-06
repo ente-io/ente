@@ -49,5 +49,5 @@ export const getFamilyPortalURL = () => {
     if (process.env.NEXT_PUBLIC_ENTE_FAMILY_PORTAL_ENDPOINT !== undefined) {
         return process.env.NEXT_PUBLIC_ENTE_FAMILY_PORTAL_ENDPOINT;
     }
-    return `https://families.ente.io`;
+    return `https://family.ente.io`;
 };
