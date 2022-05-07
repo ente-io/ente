@@ -382,17 +382,6 @@ function PlanSelector(props: Props) {
                                 style={{ marginTop: '20px' }}>
                                 {constants.MANAGEMENT_PORTAL}
                             </LinkButton>
-
-                            <LinkButton
-                                variant="primary"
-                                onClick={manageFamilyMethod.bind(
-                                    null,
-                                    props.setDialogMessage,
-                                    props.setLoading
-                                )}
-                                style={{ marginTop: '20px' }}>
-                                {constants.MANAGE_FAMILY_PORTAL}
-                            </LinkButton>
                         </>
                     ) : (
                         <LinkButton
@@ -405,6 +394,18 @@ function PlanSelector(props: Props) {
                             {isOnFreePlan(subscription)
                                 ? constants.SKIP
                                 : constants.CLOSE}
+                        </LinkButton>
+                    )}
+                    {hasPaidSubscription(subscription) && (
+                        <LinkButton
+                            variant="primary"
+                            onClick={manageFamilyMethod.bind(
+                                null,
+                                props.setDialogMessage,
+                                props.setLoading
+                            )}
+                            style={{ marginTop: '20px' }}>
+                            {constants.MANAGE_FAMILY_PORTAL}
                         </LinkButton>
                     )}
                 </DeadCenter>
