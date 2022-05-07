@@ -19,10 +19,10 @@ import {
     isSubscribed,
     convertBytesToHumanReadable,
     getFamilyData,
-    isPartOfFamily,
     getStorage,
     isFamilyAdmin,
     getFamilyPlanAdmin,
+    hasNonAdminFamilyMembers,
 } from 'utils/billing';
 import billingService from 'services/billingService';
 import isElectron from 'is-electron';
@@ -209,7 +209,7 @@ export default function Sidebar(props: Props) {
                             {constants.SUBSCRIPTION_PLAN}
                         </h5>
                     </div>
-                    {!isPartOfFamily(familyData) ||
+                    {!hasNonAdminFamilyMembers(familyData) ||
                     isFamilyAdmin(familyData) ? (
                         <div style={{ color: '#959595' }}>
                             {isSubscriptionActive(subscription) ? (
@@ -277,7 +277,7 @@ export default function Sidebar(props: Props) {
                     </h5>
                     <div style={{ color: '#959595' }}>
                         {usage ? (
-                            isPartOfFamily(familyData) ? (
+                            hasNonAdminFamilyMembers(familyData) ? (
                                 constants.FAMILY_USAGE_INFO(
                                     usage,
                                     convertBytesToHumanReadable(
