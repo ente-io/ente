@@ -315,74 +315,77 @@ function PlanSelector(props: Props) {
                     {plans && PlanIcons}
                 </div>
                 <DeadCenter style={{ marginBottom: '30px' }}>
-                    {hasStripeSubscription(subscription) ? (
+                    {hasPaidSubscription(subscription) ? (
                         <>
-                            {isSubscriptionCancelled(subscription) ? (
-                                <LinkButton
-                                    variant="success"
-                                    onClick={() =>
-                                        props.setDialogMessage({
-                                            title: constants.CONFIRM_ACTIVATE_SUBSCRIPTION,
-                                            content:
-                                                constants.ACTIVATE_SUBSCRIPTION_MESSAGE(
-                                                    subscription.expiryTime
-                                                ),
-                                            staticBackdrop: true,
-                                            proceed: {
-                                                text: constants.ACTIVATE_SUBSCRIPTION,
-                                                action: activateSubscription.bind(
-                                                    null,
-                                                    props.setDialogMessage,
-                                                    props.closeModal,
-                                                    props.setLoading
-                                                ),
-                                                variant: 'success',
-                                            },
-                                            close: {
-                                                text: constants.CANCEL,
-                                            },
-                                        })
-                                    }>
-                                    {constants.ACTIVATE_SUBSCRIPTION}
-                                </LinkButton>
-                            ) : (
-                                <LinkButton
-                                    variant="danger"
-                                    onClick={() =>
-                                        props.setDialogMessage({
-                                            title: constants.CONFIRM_CANCEL_SUBSCRIPTION,
-                                            content:
-                                                constants.CANCEL_SUBSCRIPTION_MESSAGE(),
-                                            staticBackdrop: true,
-                                            proceed: {
-                                                text: constants.CANCEL_SUBSCRIPTION,
-                                                action: cancelSubscription.bind(
-                                                    null,
-                                                    props.setDialogMessage,
-                                                    props.closeModal,
-                                                    props.setLoading
-                                                ),
-                                                variant: 'danger',
-                                            },
-                                            close: {
-                                                text: constants.CANCEL,
-                                            },
-                                        })
-                                    }>
-                                    {constants.CANCEL_SUBSCRIPTION}
-                                </LinkButton>
+                            {hasStripeSubscription(subscription) && (
+                                <>
+                                    {isSubscriptionCancelled(subscription) ? (
+                                        <LinkButton
+                                            variant="success"
+                                            onClick={() =>
+                                                props.setDialogMessage({
+                                                    title: constants.CONFIRM_ACTIVATE_SUBSCRIPTION,
+                                                    content:
+                                                        constants.ACTIVATE_SUBSCRIPTION_MESSAGE(
+                                                            subscription.expiryTime
+                                                        ),
+                                                    staticBackdrop: true,
+                                                    proceed: {
+                                                        text: constants.ACTIVATE_SUBSCRIPTION,
+                                                        action: activateSubscription.bind(
+                                                            null,
+                                                            props.setDialogMessage,
+                                                            props.closeModal,
+                                                            props.setLoading
+                                                        ),
+                                                        variant: 'success',
+                                                    },
+                                                    close: {
+                                                        text: constants.CANCEL,
+                                                    },
+                                                })
+                                            }>
+                                            {constants.ACTIVATE_SUBSCRIPTION}
+                                        </LinkButton>
+                                    ) : (
+                                        <LinkButton
+                                            variant="danger"
+                                            onClick={() =>
+                                                props.setDialogMessage({
+                                                    title: constants.CONFIRM_CANCEL_SUBSCRIPTION,
+                                                    content:
+                                                        constants.CANCEL_SUBSCRIPTION_MESSAGE(),
+                                                    staticBackdrop: true,
+                                                    proceed: {
+                                                        text: constants.CANCEL_SUBSCRIPTION,
+                                                        action: cancelSubscription.bind(
+                                                            null,
+                                                            props.setDialogMessage,
+                                                            props.closeModal,
+                                                            props.setLoading
+                                                        ),
+                                                        variant: 'danger',
+                                                    },
+                                                    close: {
+                                                        text: constants.CANCEL,
+                                                    },
+                                                })
+                                            }>
+                                            {constants.CANCEL_SUBSCRIPTION}
+                                        </LinkButton>
+                                    )}
+                                    <LinkButton
+                                        variant="primary"
+                                        onClick={updatePaymentMethod.bind(
+                                            null,
+                                            props.setDialogMessage,
+                                            props.setLoading
+                                        )}
+                                        style={{ marginTop: '20px' }}>
+                                        {constants.MANAGEMENT_PORTAL}
+                                    </LinkButton>
+                                </>
                             )}
-                            <LinkButton
-                                variant="primary"
-                                onClick={updatePaymentMethod.bind(
-                                    null,
-                                    props.setDialogMessage,
-                                    props.setLoading
-                                )}
-                                style={{ marginTop: '20px' }}>
-                                {constants.MANAGEMENT_PORTAL}
-                            </LinkButton>
-
                             <LinkButton
                                 variant="primary"
                                 onClick={manageFamilyMethod.bind(
