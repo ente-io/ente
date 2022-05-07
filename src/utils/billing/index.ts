@@ -83,6 +83,11 @@ export function isPartOfFamily(familyData: FamilyData): boolean {
     );
 }
 
+// hasNonAdminFamilyMembers return true if the admin user has members in his family
+export function hasNonAdminFamilyMembers(familyData: FamilyData): boolean {
+    return Boolean(isPartOfFamily(familyData) && familyData.members.length > 1);
+}
+
 export function isFamilyAdmin(familyData: FamilyData): boolean {
     const familyAdmin: FamilyMember = getFamilyPlanAdmin(familyData);
     const user: User = getData(LS_KEYS.USER);
