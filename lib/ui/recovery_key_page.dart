@@ -53,7 +53,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     return Scaffold(
       appBar: widget.showAppBar
           ? AppBar(
-              title: Text(""),
+              title: Text(widget.title ?? "Recovery Key"),
             )
           : null,
       body: Padding(
@@ -64,9 +64,11 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
 
           mainAxisSize: MainAxisSize.max,
           children: [
-            Text(widget.title ?? "Recovery Key",
-                style: Theme.of(context).textTheme.headline4),
-            Padding(padding: EdgeInsets.all(12)),
+            widget.showAppBar
+                ? Container()
+                : Text(widget.title ?? "Recovery Key",
+                    style: Theme.of(context).textTheme.headline4),
+            Padding(padding: EdgeInsets.all(widget.showAppBar ? 0 : 12)),
             Text(
               widget.text ??
                   "If you forget your password, the only way you can recover your data is with this key.",

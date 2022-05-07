@@ -109,6 +109,13 @@ class TrashDB {
     return _getTrashFromRow(rows[0]);
   }
 
+  Future<int> count() async {
+    final db = await instance.database;
+    var count = Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) FROM $tableName'));
+    return count;
+  }
+
   Future<void> insertMultiple(List<TrashFile> trashFiles) async {
     final startTime = DateTime.now();
     final db = await instance.database;

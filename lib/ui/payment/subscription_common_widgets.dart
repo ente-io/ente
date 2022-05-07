@@ -35,11 +35,26 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
       );
     } else {
       return SizedBox(
-        height: 50,
+        height: 72,
         width: double.infinity,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text("Current usage is " + formatBytes(widget.currentUsage)),
+          padding: const EdgeInsets.all(24.0),
+          child: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                    text: "Current usage is ",
+                    style: Theme.of(context).textTheme.subtitle1),
+                TextSpan(
+                  text: formatBytes(widget.currentUsage),
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle1
+                      .copyWith(fontWeight: FontWeight.bold),
+                )
+              ],
+            ),
+          ),
         ),
       );
     }
