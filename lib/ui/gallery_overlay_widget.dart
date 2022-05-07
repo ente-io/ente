@@ -4,7 +4,6 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
@@ -38,8 +37,72 @@ class GalleryOverlayWidget extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final String path;
   final Collection collection;
+  const GalleryOverlayWidget(this.type, this.selectedFiles,
+      {this.path, this.collection, Key key})
+      : super(key: key);
 
-  GalleryOverlayWidget(
+  @override
+  State<GalleryOverlayWidget> createState() => _GalleryOverlayWidgetState();
+}
+
+class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget>
+    with SingleTickerProviderStateMixin {
+  StreamSubscription _userAuthEventSubscription;
+  Function() _selectedFilesListener;
+  final GlobalKey shareButtonKey = GlobalKey();
+
+  @override
+  void initState() {
+    _selectedFilesListener = () {
+      setState(() {});
+    };
+    widget.selectedFiles.addListener(_selectedFilesListener);
+    _userAuthEventSubscription =
+        Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
+      setState(() {});
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _userAuthEventSubscription.cancel();
+    widget.selectedFiles.removeListener(_selectedFilesListener);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      height: filesAreSelected ? 108 : 0,
+      child: AnimatedOpacity(
+        duration: Duration(milliseconds: 75),
+        opacity: filesAreSelected ? 1.0 : 0.0,
+        curve: Curves.easeIn,
+        child: IgnorePointer(
+          ignoring: !filesAreSelected,
+          child: OverlayWidget(
+            widget.type,
+            widget.selectedFiles,
+            path: widget.path,
+            collection: widget.collection,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class OverlayWidget extends StatefulWidget {
+  final GalleryOverlayType type;
+  final SelectedFiles selectedFiles;
+  final String path;
+  final Collection collection;
+
+  const OverlayWidget(
     this.type,
     this.selectedFiles, {
     this.path,
@@ -47,10 +110,10 @@ class GalleryOverlayWidget extends StatefulWidget {
   });
 
   @override
-  _GalleryOverlayWidgetState createState() => _GalleryOverlayWidgetState();
+  _OverlayWidgetState createState() => _OverlayWidgetState();
 }
 
-class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
+class _OverlayWidgetState extends State<OverlayWidget> {
   final _logger = Logger("GalleryOverlay");
   StreamSubscription _userAuthEventSubscription;
   Function() _selectedFilesListener;
@@ -77,74 +140,83 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.selectedFiles.files.isNotEmpty) {
-      return Container(
-        height: 108,
-        color: Colors.transparent,
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
-                  child: Container(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .frostyBlurBackdropFilterColor
-                        .withOpacity(0.6),
-                    height: 46,
-                    width: double.infinity,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(13, 13, 0, 13),
-                          child: Text(
-                            widget.selectedFiles.files.length.toString() +
-                                ' selected',
-                            style:
-                                Theme.of(context).textTheme.subtitle2.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .inverseTextColor,
-                                    ),
-                          ),
+    return Container(
+      color: Colors.transparent,
+      child: ListView(
+        //ListView for animation to work without render overflow
+        physics: const NeverScrollableScrollPhysics(),
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
+                child: Container(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .frostyBlurBackdropFilterColor
+                      .withOpacity(0.5),
+                  width: double.infinity,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(13, 13, 0, 13),
+                        child: Text(
+                          widget.selectedFiles.files.length.toString() +
+                              ' selected',
+                          style: Theme.of(context).textTheme.subtitle2.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black //same for both themes
+                              ),
                         ),
-                        Row(
-                          children: _getActions(context),
-                        )
-                      ],
-                    ),
+                      ),
+                      Row(
+                        children: _getActions(context),
+                      )
+                    ],
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            InkWell(
-              child: Container(
-                height: 32,
-                width: 86,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  color:
-                      Theme.of(context).colorScheme.cancelSelectedButtonColor,
-                ),
-                child: Center(
-                  child: Text('Cancel',
-                      style: Theme.of(context).textTheme.subtitle2),
+          ),
+          const Padding(padding: EdgeInsets.symmetric(vertical: 8)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: InkWell(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      //height: 32,
+                      width: 86,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .cancelSelectedButtonColor
+                          .withOpacity(0.5),
+                      child: Center(
+                        child: Text('Cancel',
+                            style: Theme.of(context)
+                                .textTheme
+                                .subtitle2
+                                .copyWith(
+                                  color: Colors.white, //same for both themes
+                                )),
+                      ),
+                    ),
+                  ),
+                  onTap: _clearSelectedFiles,
                 ),
               ),
-              onTap: _clearSelectedFiles,
-            ),
-          ],
-        ),
-      );
-    } else {
-      return const SizedBox.shrink();
-    }
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   void _clearSelectedFiles() {
@@ -196,7 +268,7 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
         Tooltip(
           message: msg,
           child: IconButton(
-            color: Theme.of(context).colorScheme.inverseIconColor,
+            color: Colors.black, //same for both themes
             icon: Icon(iconData),
             onPressed: () {
               _createAlbum();
@@ -212,7 +284,7 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
         Tooltip(
           message: "move",
           child: IconButton(
-            color: Theme.of(context).colorScheme.inverseIconColor,
+            color: Colors.black, //same for both themes
             icon: Icon(Platform.isAndroid
                 ? Icons.arrow_forward
                 : CupertinoIcons.arrow_right),
@@ -227,7 +299,7 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
       Tooltip(
         message: "share",
         child: IconButton(
-          color: Theme.of(context).colorScheme.inverseIconColor,
+          color: Colors.black, //same for both themes
           key: shareButtonKey,
           icon: Icon(Platform.isAndroid ? Icons.share : CupertinoIcons.share),
           onPressed: () {
@@ -243,7 +315,7 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
         Tooltip(
           message: "delete",
           child: IconButton(
-            color: Theme.of(context).colorScheme.inverseIconColor,
+            color: Colors.black, //same for both themes
             icon:
                 Icon(Platform.isAndroid ? Icons.delete : CupertinoIcons.delete),
             onPressed: () {
@@ -258,7 +330,7 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
           Tooltip(
             message: "delete",
             child: IconButton(
-              color: Theme.of(context).colorScheme.inverseIconColor,
+              color: Colors.black, //same for both themes
               icon: Icon(
                 Platform.isAndroid ? Icons.delete : CupertinoIcons.delete,
               ),
@@ -273,7 +345,7 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
           Tooltip(
             message: "remove",
             child: IconButton(
-              color: Theme.of(context).colorScheme.inverseIconColor,
+              color: Colors.black, //same for both themes
               icon: Icon(
                 Icons.remove_circle_rounded,
               ),
@@ -292,9 +364,9 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
       actions.add(Tooltip(
         message: showArchive ? "archive" : "unarchive",
         child: IconButton(
+          color: Colors.black, //same for both themes
           icon: Icon(
             showArchive ? Icons.visibility_off : Icons.visibility,
-            color: Theme.of(context).colorScheme.inverseIconColor,
           ),
           onPressed: () {
             _handleVisibilityChangeRequest(
@@ -310,6 +382,7 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
     actions.add(Tooltip(
       message: "restore",
       child: IconButton(
+        color: Colors.black, //same for both themes
         icon: Icon(
           Icons.restore,
           color: Theme.of(context).colorScheme.inverseIconColor,
@@ -331,7 +404,7 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
       Tooltip(
         message: "delete permanently",
         child: IconButton(
-          color: Theme.of(context).colorScheme.inverseIconColor,
+          color: Colors.black, //same for both themes
           icon: Icon(
             Icons.delete_forever,
           ),

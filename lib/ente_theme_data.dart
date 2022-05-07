@@ -37,11 +37,13 @@ extension CustomColorScheme on ColorScheme {
       : Color(0xFF1DB954);
 
   Color get frostyBlurBackdropFilterColor =>
-      brightness == Brightness.light ? Colors.black : Colors.white;
+      Colors.white; //same for both themes
+  // brightness == Brightness.light ? Colors.black : Colors.white;
 
-  Color get cancelSelectedButtonColor => brightness == Brightness.light
-      ? Color.fromARGB(255, 225, 225, 225)
-      : Color.fromARGB(255, 30, 30, 30);
+  Color get cancelSelectedButtonColor => Colors.black; //same for both themes
+  // brightness == Brightness.light
+  //     ? Color.fromARGB(255, 225, 225, 225)
+  //     : Color.fromARGB(255, 30, 30, 30);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(

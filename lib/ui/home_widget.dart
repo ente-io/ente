@@ -2,10 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -293,13 +291,22 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
         Align(alignment: Alignment.bottomCenter, child: BottomShadowWidget()),
         Align(
-            alignment: Alignment.bottomCenter,
-            child: Stack(children: [
-              HomeBottomNavigationBar(
-                _selectedFiles,
-                selectedTabIndex: _selectedTabIndex,
+          alignment: Alignment.bottomCenter,
+          child: Stack(
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  HomeBottomNavigationBar(
+                    _selectedFiles,
+                    selectedTabIndex: _selectedTabIndex,
+                  ),
+                  const SizedBox(height: 8),
+                ],
               ),
-            ])),
+            ],
+          ),
+        ),
         Align(
           alignment: Alignment.bottomCenter,
           child:
@@ -545,85 +552,103 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.selectedFiles.files.isNotEmpty) {
-      return const SizedBox.shrink();
-    } else {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(36),
-          child: Container(
-            alignment: Alignment.bottomCenter,
-            height: 52,
-            width: 240,
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                child: GNav(
-                  curve: Curves.easeOutExpo,
-                  backgroundColor: Theme.of(context).bottomAppBarColor,
+    bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      height: filesAreSelected ? 0 : 52,
+      child: AnimatedOpacity(
+        duration: Duration(milliseconds: 75),
+        opacity: filesAreSelected ? 0.0 : 1.0,
+        curve: Curves.easeIn,
+        child: IgnorePointer(
+          ignoring: filesAreSelected,
+          child: ListView(
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  rippleColor: Colors.white.withOpacity(0.2),
-                  hoverColor: Colors.white.withOpacity(0.2),
-                  activeColor: Colors.black,
-                  iconSize: 24,
-                  padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  duration: Duration(milliseconds: 200),
-                  gap: 0,
-                  tabBorderRadius: 24,
-                  tabBackgroundColor: Colors.white,
-                  haptic: false,
-                  tabs: [
-                    GButton(
-                      margin: EdgeInsets.fromLTRB(6, 6, 0, 6),
-                      icon: Icons.home,
-                      iconColor: Colors.black,
-                      text: '',
-                      onPressed: () {
-                        _onTabChange(
-                            0); // To take care of occasional missing events
-                      },
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(36),
+                      child: Container(
+                        alignment: Alignment.bottomCenter,
+                        height: 52,
+                        width: 240,
+                        child: ClipRect(
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                            child: GNav(
+                              curve: Curves.easeOutExpo,
+                              // backgroundColor: Colors.white.withOpacity(0.6),
+                              backgroundColor:
+                                  Theme.of(context).bottomAppBarColor,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              rippleColor: Colors.white.withOpacity(0.2),
+                              hoverColor: Colors.white.withOpacity(0.2),
+                              activeColor: Colors.black,
+                              iconSize: 24,
+                              padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                              duration: Duration(milliseconds: 200),
+                              gap: 0,
+                              tabBorderRadius: 24,
+                              tabBackgroundColor: Colors.white,
+                              haptic: false,
+                              tabs: [
+                                GButton(
+                                  margin: EdgeInsets.fromLTRB(6, 6, 0, 6),
+                                  icon: Icons.home,
+                                  iconColor: Colors.black,
+                                  text: '',
+                                  onPressed: () {
+                                    _onTabChange(
+                                        0); // To take care of occasional missing events
+                                  },
+                                ),
+                                GButton(
+                                  margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                  icon: Icons.photo_library,
+                                  iconColor: Colors.black,
+                                  text: '',
+                                  onPressed: () {
+                                    _onTabChange(
+                                        1); // To take care of occasional missing events
+                                  },
+                                ),
+                                GButton(
+                                  margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                  icon: Icons.folder_shared,
+                                  iconColor: Colors.black,
+                                  text: '',
+                                  onPressed: () {
+                                    _onTabChange(
+                                        2); // To take care of occasional missing events
+                                  },
+                                ),
+                                GButton(
+                                  margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
+                                  icon: Icons.person,
+                                  iconColor: Colors.black,
+                                  text: '',
+                                  onPressed: () {
+                                    _onTabChange(
+                                        3); // To take care of occasional missing events
+                                  },
+                                )
+                              ],
+                              selectedIndex: widget.selectedTabIndex,
+                              onTabChange: _onTabChange,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                    GButton(
-                      margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
-                      icon: Icons.photo_library,
-                      iconColor: Colors.black,
-                      text: '',
-                      onPressed: () {
-                        _onTabChange(
-                            1); // To take care of occasional missing events
-                      },
-                    ),
-                    GButton(
-                      margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
-                      icon: Icons.folder_shared,
-                      iconColor: Colors.black,
-                      text: '',
-                      onPressed: () {
-                        _onTabChange(
-                            2); // To take care of occasional missing events
-                      },
-                    ),
-                    GButton(
-                      margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
-                      icon: Icons.person,
-                      iconColor: Colors.black,
-                      text: '',
-                      onPressed: () {
-                        _onTabChange(
-                            3); // To take care of occasional missing events
-                      },
-                    )
                   ],
-                  selectedIndex: widget.selectedTabIndex,
-                  onTabChange: _onTabChange,
                 ),
-              ),
-            ),
-          ),
+              ]),
         ),
-      );
-    }
+      ),
+    );
   }
 }
 
