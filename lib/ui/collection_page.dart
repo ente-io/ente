@@ -4,6 +4,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/collection_items.dart';
+import 'package:photos/models/galleryType.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common/bottomShadow.dart';
 import 'package:photos/ui/gallery.dart';
@@ -13,20 +14,19 @@ import 'package:photos/ui/gallery_overlay_widget.dart';
 class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
-  final GalleryAppBarType appBarType;
-  final GalleryOverlayType overlayType;
+  final GalleryType appBarType;
+  final GalleryType overlayType;
   final _selectedFiles = SelectedFiles();
 
   CollectionPage(this.c,
       {this.tagPrefix = "collection",
-      this.appBarType = GalleryAppBarType.owned_collection,
-      this.overlayType = GalleryOverlayType.owned_collection,
+      this.appBarType = GalleryType.owned_collection,
+      this.overlayType = GalleryType.owned_collection,
       Key key})
       : super(key: key);
 
   @override
   Widget build(Object context) {
-    print('yoooo');
     final initialFiles = c.thumbnail != null ? [c.thumbnail] : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {

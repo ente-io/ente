@@ -23,6 +23,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/file_load_result.dart';
+import 'package:photos/models/galleryType.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
@@ -309,8 +310,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
         Align(
           alignment: Alignment.bottomCenter,
-          child:
-              GalleryOverlayWidget(GalleryOverlayType.homepage, _selectedFiles),
+          child: GalleryOverlayWidget(GalleryType.homepage, _selectedFiles),
         )
       ],
     );
@@ -506,7 +506,7 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
     final appBar = SizedBox(
       height: 60,
       child: GalleryAppBarWidget(
-        GalleryAppBarType.homepage,
+        GalleryType.homepage,
         null,
         widget.selectedFiles,
       ),

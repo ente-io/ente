@@ -1,9 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/models/galleryType.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/gallery.dart';
@@ -12,14 +12,14 @@ import 'package:photos/ui/gallery_overlay_widget.dart';
 
 class ArchivePage extends StatelessWidget {
   final String tagPrefix;
-  final GalleryAppBarType appBarType;
-  final GalleryOverlayType overlayType;
+  final GalleryType appBarType;
+  final GalleryType overlayType;
   final _selectedFiles = SelectedFiles();
 
   ArchivePage(
       {this.tagPrefix = "archived_page",
-      this.appBarType = GalleryAppBarType.archive,
-      this.overlayType = GalleryOverlayType.archive,
+      this.appBarType = GalleryType.archive,
+      this.overlayType = GalleryType.archive,
       Key key})
       : super(key: key);
 

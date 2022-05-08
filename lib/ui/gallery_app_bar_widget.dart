@@ -6,6 +6,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/models/galleryType.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
@@ -15,19 +16,8 @@ import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
 
-enum GalleryAppBarType {
-  homepage,
-  archive,
-  trash,
-  local_folder,
-  // indicator for gallery view of collections shared with the user
-  shared_collection,
-  owned_collection,
-  search_results
-}
-
 class GalleryAppBarWidget extends StatefulWidget {
-  final GalleryAppBarType type;
+  final GalleryType type;
   final String title;
   final SelectedFiles selectedFiles;
   final String path;
@@ -77,9 +67,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     // if (widget.selectedFiles.files.isEmpty) {
     return AppBar(
       backgroundColor:
-          widget.type == GalleryAppBarType.homepage ? Color(0x00000000) : null,
+          widget.type == GalleryType.homepage ? Color(0x00000000) : null,
       elevation: 0,
-      title: widget.type == GalleryAppBarType.homepage
+      title: widget.type == GalleryType.homepage
           ? const SizedBox.shrink()
           : TextButton(
               child: Text(
@@ -96,7 +86,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<dynamic> _renameAlbum(BuildContext context) async {
-    if (widget.type != GalleryAppBarType.owned_collection) {
+    if (widget.type != GalleryType.owned_collection) {
       return;
     }
     final result = await showDialog<String>(
@@ -129,8 +119,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   List<Widget> _getDefaultActions(BuildContext context) {
     List<Widget> actions = <Widget>[];
     if (Configuration.instance.hasConfiguredAccount() &&
-        (widget.type == GalleryAppBarType.local_folder ||
-            widget.type == GalleryAppBarType.owned_collection)) {
+        (widget.type == GalleryType.local_folder ||
+            widget.type == GalleryType.owned_collection)) {
       actions.add(
         Tooltip(
           message: "share",
@@ -143,7 +133,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
-    if (widget.type == GalleryAppBarType.owned_collection) {
+    if (widget.type == GalleryType.owned_collection) {
       actions.add(PopupMenuButton(
         itemBuilder: (context) {
           final List<PopupMenuItem> items = [];
@@ -195,7 +185,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
       ));
     }
-    if (widget.type == GalleryAppBarType.trash) {
+    if (widget.type == GalleryType.trash) {
       actions.add(
         Tooltip(
           message: "empty trash",
@@ -217,7 +207,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     await dialog.show();
     try {
       if (collection == null) {
-        if (widget.type == GalleryAppBarType.local_folder) {
+        if (widget.type == GalleryType.local_folder) {
           collection =
               await CollectionsService.instance.getOrCreateForPath(widget.path);
         } else {

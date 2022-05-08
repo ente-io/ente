@@ -893,15 +893,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.13.0"
-  pie_chart:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: b4711f50a9e6143f44274184e5a088274fb0e5ce
-      url: "https://github.com/apgapg/pie_chart.git"
-    source: git
-    version: "5.0.0"
   pinput:
     dependency: "direct main"
     description:

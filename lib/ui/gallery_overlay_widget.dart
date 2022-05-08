@@ -11,6 +11,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/models/galleryType.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
@@ -21,19 +22,8 @@ import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
-enum GalleryOverlayType {
-  homepage,
-  archive,
-  trash,
-  local_folder,
-  // indicator for gallery view of collections shared with the user
-  shared_collection,
-  owned_collection,
-  search_results
-}
-
 class GalleryOverlayWidget extends StatefulWidget {
-  final GalleryOverlayType type;
+  final GalleryType type;
   final SelectedFiles selectedFiles;
   final String path;
   final Collection collection;
@@ -97,7 +87,7 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget>
 }
 
 class OverlayWidget extends StatefulWidget {
-  final GalleryOverlayType type;
+  final GalleryType type;
   final SelectedFiles selectedFiles;
   final String path;
   final Collection collection;
@@ -248,17 +238,17 @@ class _OverlayWidgetState extends State<OverlayWidget> {
 
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = <Widget>[];
-    if (widget.type == GalleryOverlayType.trash) {
+    if (widget.type == GalleryType.trash) {
       _addTrashAction(actions);
       return actions;
     }
     // skip add button for incoming collection till this feature is implemented
     if (Configuration.instance.hasConfiguredAccount() &&
-        widget.type != GalleryOverlayType.shared_collection) {
+        widget.type != GalleryType.shared_collection) {
       String msg = "add";
       IconData iconData = Platform.isAndroid ? Icons.add : CupertinoIcons.add;
       // show upload icon instead of add for files selected in local gallery
-      if (widget.type == GalleryOverlayType.local_folder) {
+      if (widget.type == GalleryType.local_folder) {
         msg = "upload";
         iconData = Platform.isAndroid
             ? Icons.cloud_upload
@@ -278,7 +268,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       );
     }
     if (Configuration.instance.hasConfiguredAccount() &&
-        widget.type == GalleryOverlayType.owned_collection &&
+        widget.type == GalleryType.owned_collection &&
         widget.collection.type != CollectionType.favorites) {
       actions.add(
         Tooltip(
@@ -308,9 +298,9 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         ),
       ),
     );
-    if (widget.type == GalleryOverlayType.homepage ||
-        widget.type == GalleryOverlayType.archive ||
-        widget.type == GalleryOverlayType.local_folder) {
+    if (widget.type == GalleryType.homepage ||
+        widget.type == GalleryType.archive ||
+        widget.type == GalleryType.local_folder) {
       actions.add(
         Tooltip(
           message: "delete",
@@ -324,7 +314,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           ),
         ),
       );
-    } else if (widget.type == GalleryOverlayType.owned_collection) {
+    } else if (widget.type == GalleryType.owned_collection) {
       if (widget.collection.type == CollectionType.folder) {
         actions.add(
           Tooltip(
@@ -358,9 +348,9 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       }
     }
 
-    if (widget.type == GalleryOverlayType.homepage ||
-        widget.type == GalleryOverlayType.archive) {
-      bool showArchive = widget.type == GalleryOverlayType.homepage;
+    if (widget.type == GalleryType.homepage ||
+        widget.type == GalleryType.archive) {
+      bool showArchive = widget.type == GalleryType.homepage;
       actions.add(Tooltip(
         message: showArchive ? "archive" : "unarchive",
         child: IconButton(

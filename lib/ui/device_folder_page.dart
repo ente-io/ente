@@ -6,6 +6,7 @@ import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/device_folder.dart';
+import 'package:photos/models/galleryType.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
@@ -41,7 +42,7 @@ class DeviceFolderPage extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
-          GalleryAppBarType.local_folder,
+          GalleryType.local_folder,
           folder.name,
           _selectedFiles,
           path: folder.thumbnail.deviceFolder,
@@ -52,7 +53,7 @@ class DeviceFolderPage extends StatelessWidget {
         children: [
           gallery,
           GalleryOverlayWidget(
-            GalleryOverlayType.local_folder,
+            GalleryType.local_folder,
             _selectedFiles,
           )
         ],

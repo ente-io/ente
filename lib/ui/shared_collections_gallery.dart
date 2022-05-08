@@ -13,11 +13,11 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection_items.dart';
+import 'package:photos/models/galleryType.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/collection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common/gradientButton.dart';
-import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -355,7 +355,7 @@ class OutgoingCollectionItem extends StatelessWidget {
       onTap: () {
         final page = CollectionPage(
           c,
-          appBarType: GalleryAppBarType.owned_collection,
+          appBarType: GalleryType.owned_collection,
           tagPrefix: "outgoing_collection",
         );
         routeToPage(context, page);
@@ -431,7 +431,7 @@ class IncomingCollectionItem extends StatelessWidget {
         routeToPage(
             context,
             CollectionPage(c,
-                appBarType: GalleryAppBarType.shared_collection,
+                appBarType: GalleryType.shared_collection,
                 tagPrefix: "shared_collection"));
       },
     );
