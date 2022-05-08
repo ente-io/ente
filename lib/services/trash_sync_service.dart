@@ -39,9 +39,9 @@ class TrashSyncService {
       _logger.fine("inserting ${diff.trashedFiles.length} items in trash");
       await _trashDB.insertMultiple(diff.trashedFiles);
     }
-    if (diff.deletedFilesUploadID.isNotEmpty) {
-      _logger.fine("discard ${diff.deletedFilesUploadID.length} deleted items");
-      await _trashDB.delete(diff.deletedFilesUploadID);
+    if (diff.deletedUploadIDs.isNotEmpty) {
+      _logger.fine("discard ${diff.deletedUploadIDs.length} deleted items");
+      await _trashDB.delete(diff.deletedUploadIDs);
     }
     if (diff.restoredFiles.isNotEmpty) {
       _logger.fine("discard ${diff.restoredFiles.length} restored items");

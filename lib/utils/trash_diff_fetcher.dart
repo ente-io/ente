@@ -27,7 +27,7 @@ class TrashDiffFetcher {
       );
       int latestUpdatedAtTime = 0;
       final trashedFiles = <TrashFile>[];
-      final deletedFilesUploadID = <int>[];
+      final deletedUploadIDs = <int>[];
       final restoredFiles = <TrashFile>[];
       if (response != null) {
         final diff = response.data["diff"] as List;
@@ -35,7 +35,7 @@ class TrashDiffFetcher {
         final startTime = DateTime.now();
         for (final item in diff) {
           if (item["isDeleted"]) {
-            deletedFilesUploadID.add(item["file"]["id"]);
+            deletedUploadIDs.add(item["file"]["id"]);
             continue;
           }
           final trash = TrashFile();
@@ -97,7 +97,7 @@ class TrashDiffFetcher {
                         startTime.microsecondsSinceEpoch))
                 .inMilliseconds
                 .toString());
-        return Diff(trashedFiles, restoredFiles, deletedFilesUploadID, hasMore,
+        return Diff(trashedFiles, restoredFiles, deletedUploadIDs, hasMore,
             latestUpdatedAtTime);
       } else {
         return Diff(<TrashFile>[], <TrashFile>[], <int>[], false, 0);
@@ -112,10 +112,10 @@ class TrashDiffFetcher {
 class Diff {
   final List<TrashFile> trashedFiles;
   final List<TrashFile> restoredFiles;
-  final List<int> deletedFilesUploadID;
+  final List<int> deletedUploadIDs;
   final bool hasMore;
   final int lastSyncedTimeStamp;
 
-  Diff(this.trashedFiles, this.restoredFiles, this.deletedFilesUploadID,
+  Diff(this.trashedFiles, this.restoredFiles, this.deletedUploadIDs,
       this.hasMore, this.lastSyncedTimeStamp);
 }
