@@ -22,8 +22,11 @@ class _WebPageState extends State<WebPage> {
         title: Text(widget.title),
         actions: [_hasLoadedPage ? Container() : loadWidget],
       ),
+      backgroundColor: Colors.transparent,
       body: InAppWebView(
         initialUrlRequest: URLRequest(url: Uri.parse(widget.url)),
+        initialOptions: InAppWebViewGroupOptions(
+            crossPlatform: InAppWebViewOptions(transparentBackground: true)),
         onLoadStop: (c, url) {
           setState(() {
             _hasLoadedPage = true;
