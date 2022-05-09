@@ -9,3 +9,5 @@ ente lets you share your albums and folders with your loved ones, end-to-end enc
 ente has an open architecture and source code that has been peer-reviewed trusted.
 
 ente is available on android, ios and the web.
+
+ente requests for various permissions which you can review here: https://github.com/ente-io/frame/blob/f-droid/android/permissions.md
