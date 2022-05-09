@@ -22,7 +22,7 @@ class _WebPageState extends State<WebPage> {
         title: Text(widget.title),
         actions: [_hasLoadedPage ? Container() : loadWidget],
       ),
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.black,
       body: InAppWebView(
         initialUrlRequest: URLRequest(url: Uri.parse(widget.url)),
         initialOptions: InAppWebViewGroupOptions(
