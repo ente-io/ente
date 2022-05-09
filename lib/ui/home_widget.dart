@@ -2,10 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -25,6 +23,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/file_load_result.dart';
+import 'package:photos/models/galleryType.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
@@ -34,12 +33,14 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/app_update_dialog.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
+import 'package:photos/ui/common/bottomShadow.dart';
 import 'package:photos/ui/common/gradientButton.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/gallery_footer_widget.dart';
+import 'package:photos/ui/gallery_overlay_widget.dart';
 import 'package:photos/ui/grant_permissions_widget.dart';
 import 'package:photos/ui/landing_page_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
@@ -289,26 +290,28 @@ class _HomeWidgetState extends State<HomeWidget> {
           physics: NeverScrollableScrollPhysics(),
           controller: _pageController,
         ),
+        Align(alignment: Alignment.bottomCenter, child: BottomShadowWidget()),
         Align(
           alignment: Alignment.bottomCenter,
-          child: Container(
-            height: 8,
-            decoration: BoxDecoration(
-              color: Colors.transparent,
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).backgroundColor,
-                  spreadRadius: 42,
-                  blurRadius: 42, // changes position of shadow
-                ),
-              ],
-            ),
+          child: Stack(
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  HomeBottomNavigationBar(
+                    _selectedFiles,
+                    selectedTabIndex: _selectedTabIndex,
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ],
           ),
         ),
         Align(
           alignment: Alignment.bottomCenter,
-          child: _buildBottomNavigationBar(),
-        ),
+          child: GalleryOverlayWidget(GalleryType.homepage, _selectedFiles),
+        )
       ],
     );
   }
@@ -475,91 +478,6 @@ class _HomeWidgetState extends State<HomeWidget> {
       ],
     );
   }
-
-  Widget _buildBottomNavigationBar() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(36),
-        child: Container(
-          alignment: Alignment.bottomCenter,
-          height: 52,
-          width: 240,
-          child: ClipRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-              child: GNav(
-                curve: Curves.easeOutExpo,
-                backgroundColor: Theme.of(context).bottomAppBarColor,
-                mainAxisAlignment: MainAxisAlignment.center,
-                rippleColor: Colors.white.withOpacity(0.2),
-                hoverColor: Colors.white.withOpacity(0.2),
-                activeColor: Colors.black,
-                iconSize: 24,
-                padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-                duration: Duration(milliseconds: 200),
-                gap: 0,
-                tabBorderRadius: 24,
-                tabBackgroundColor: Colors.white,
-                haptic: false,
-                tabs: [
-                  GButton(
-                    margin: EdgeInsets.fromLTRB(6, 6, 0, 6),
-                    icon: Icons.home,
-                    iconColor: Colors.black,
-                    text: '',
-                    onPressed: () {
-                      _onTabChange(
-                          0); // To take care of occasional missing events
-                    },
-                  ),
-                  GButton(
-                    margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
-                    icon: Icons.photo_library,
-                    iconColor: Colors.black,
-                    text: '',
-                    onPressed: () {
-                      _onTabChange(
-                          1); // To take care of occasional missing events
-                    },
-                  ),
-                  GButton(
-                    margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
-                    icon: Icons.folder_shared,
-                    iconColor: Colors.black,
-                    text: '',
-                    onPressed: () {
-                      _onTabChange(
-                          2); // To take care of occasional missing events
-                    },
-                  ),
-                  GButton(
-                    margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
-                    icon: Icons.person,
-                    iconColor: Colors.black,
-                    text: '',
-                    onPressed: () {
-                      _onTabChange(
-                          3); // To take care of occasional missing events
-                    },
-                  )
-                ],
-                selectedIndex: _selectedTabIndex,
-                onTabChange: _onTabChange,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _onTabChange(int index) {
-    Bus.instance.fire(TabChangedEvent(
-      index,
-      TabChangedEventSource.tab_bar,
-    ));
-  }
 }
 
 class HomePageAppBar extends StatefulWidget {
@@ -588,7 +506,7 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
     final appBar = SizedBox(
       height: 60,
       child: GalleryAppBarWidget(
-        GalleryAppBarType.homepage,
+        GalleryType.homepage,
         null,
         widget.selectedFiles,
       ),
@@ -598,6 +516,139 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
     } else {
       return appBar;
     }
+  }
+}
+
+class HomeBottomNavigationBar extends StatefulWidget {
+  const HomeBottomNavigationBar(
+    this.selectedFiles, {
+    this.selectedTabIndex,
+    Key key,
+  }) : super(key: key);
+
+  final SelectedFiles selectedFiles;
+  final int selectedTabIndex;
+
+  @override
+  _HomeBottomNavigationBarState createState() =>
+      _HomeBottomNavigationBarState();
+}
+
+class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
+  @override
+  void initState() {
+    super.initState();
+    widget.selectedFiles.addListener(() {
+      setState(() {});
+    });
+  }
+
+  void _onTabChange(int index) {
+    Bus.instance.fire(TabChangedEvent(
+      index,
+      TabChangedEventSource.tab_bar,
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      height: filesAreSelected ? 0 : 52,
+      child: AnimatedOpacity(
+        duration: Duration(milliseconds: 75),
+        opacity: filesAreSelected ? 0.0 : 1.0,
+        curve: Curves.easeIn,
+        child: IgnorePointer(
+          ignoring: filesAreSelected,
+          child: ListView(
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(36),
+                      child: Container(
+                        alignment: Alignment.bottomCenter,
+                        height: 52,
+                        width: 240,
+                        child: ClipRect(
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                            child: GNav(
+                              curve: Curves.easeOutExpo,
+                              // backgroundColor: Colors.white.withOpacity(0.6),
+                              backgroundColor:
+                                  Theme.of(context).bottomAppBarColor,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              rippleColor: Colors.white.withOpacity(0.2),
+                              hoverColor: Colors.white.withOpacity(0.2),
+                              activeColor: Colors.black,
+                              iconSize: 24,
+                              padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                              duration: Duration(milliseconds: 200),
+                              gap: 0,
+                              tabBorderRadius: 24,
+                              tabBackgroundColor: Colors.white,
+                              haptic: false,
+                              tabs: [
+                                GButton(
+                                  margin: EdgeInsets.fromLTRB(6, 6, 0, 6),
+                                  icon: Icons.home,
+                                  iconColor: Colors.black,
+                                  text: '',
+                                  onPressed: () {
+                                    _onTabChange(
+                                        0); // To take care of occasional missing events
+                                  },
+                                ),
+                                GButton(
+                                  margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                  icon: Icons.photo_library,
+                                  iconColor: Colors.black,
+                                  text: '',
+                                  onPressed: () {
+                                    _onTabChange(
+                                        1); // To take care of occasional missing events
+                                  },
+                                ),
+                                GButton(
+                                  margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                  icon: Icons.folder_shared,
+                                  iconColor: Colors.black,
+                                  text: '',
+                                  onPressed: () {
+                                    _onTabChange(
+                                        2); // To take care of occasional missing events
+                                  },
+                                ),
+                                GButton(
+                                  margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
+                                  icon: Icons.person,
+                                  iconColor: Colors.black,
+                                  text: '',
+                                  onPressed: () {
+                                    _onTabChange(
+                                        3); // To take care of occasional missing events
+                                  },
+                                )
+                              ],
+                              selectedIndex: widget.selectedTabIndex,
+                              onTabChange: _onTabChange,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ]),
+        ),
+      ),
+    );
   }
 }
 

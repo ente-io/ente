@@ -6,6 +6,12 @@ extension CustomColorScheme on ColorScheme {
   Color get defaultTextColor =>
       brightness == Brightness.light ? Colors.black : Colors.white;
 
+  Color get inverseTextColor =>
+      brightness == Brightness.light ? Colors.white : Colors.black;
+
+  Color get inverseIconColor =>
+      brightness == Brightness.light ? Colors.white : Colors.black;
+
   Color get boxSelectColor => brightness == Brightness.light
       ? Color.fromRGBO(67, 186, 108, 1)
       : Color.fromRGBO(16, 32, 32, 1);
@@ -29,6 +35,15 @@ extension CustomColorScheme on ColorScheme {
   Color get recoveryKeyBoxColor => brightness == Brightness.light
       ? Color.fromRGBO(49, 155, 86, 0.2)
       : Color(0xFF1DB954);
+
+  Color get frostyBlurBackdropFilterColor =>
+      Colors.white; //same for both themes
+  // brightness == Brightness.light ? Colors.black : Colors.white;
+
+  Color get cancelSelectedButtonColor => Colors.black; //same for both themes
+  // brightness == Brightness.light
+  //     ? Color.fromARGB(255, 225, 225, 225)
+  //     : Color.fromARGB(255, 30, 30, 30);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(
