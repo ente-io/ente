@@ -25,6 +25,7 @@ import {
 import { useLocalState } from 'hooks/useLocalState';
 import { LS_KEYS } from 'utils/storage/localStorage';
 import DialogTitleWithCloseButton from 'components/MessageDialog/TitleWithCloseButton';
+import { DialogTitle } from '@mui/material';
 
 const LeftSlideTransition = Transition('up');
 
@@ -49,10 +50,12 @@ export default function AllCollections(props: Iprops) {
                 TransitionComponent={LeftSlideTransition}
                 onClose={close}
                 open={isOpen}>
-                <DialogTitleWithCloseButton onClose={close}>
+                <DialogTitleWithCloseButton onClose={close} sx={{ pb: 0 }}>
                     <Typography variant="h6">
                         <strong>{constants.ALL_ALBUMS}</strong>
                     </Typography>
+                </DialogTitleWithCloseButton>
+                <DialogTitle sx={{ pt: 0 }}>
                     <SpaceBetweenFlex>
                         <Typography variant="subtitle1">
                             {`${[...props.collectionSummaries.keys()].length} ${
@@ -64,7 +67,7 @@ export default function AllCollections(props: Iprops) {
                             setCollectionSortBy={setCollectionSortBy}
                         />
                     </SpaceBetweenFlex>
-                </DialogTitleWithCloseButton>
+                </DialogTitle>
                 <Divider />
                 <DialogContent>
                     <FlexWrapper>
