@@ -17,11 +17,12 @@ import CollectionCard from './CollectionCard';
 import Divider from '@mui/material/Divider';
 import CollectionSort from 'components/pages/gallery/CollectionSort';
 import { COLLECTION_SORT_BY } from 'constants/collection';
-import { DialogTitleWithCloseButton } from 'components/MessageDialog';
 import { sortCollectionSummaries } from 'services/collectionService';
 import { Transition, FloatingSidebar } from 'components/FloatingSidebar';
 import { useLocalState } from 'hooks/useLocalState';
 import { LS_KEYS } from 'utils/storage/localStorage';
+import DialogTitleWithCloseButton from 'components/MessageDialog/TitleWithCloseButton';
+import { DialogTitle } from '@mui/material';
 
 const LeftSlideTransition = Transition('up');
 
@@ -46,10 +47,12 @@ export default function AllCollections(props: Iprops) {
                 TransitionComponent={LeftSlideTransition}
                 onClose={close}
                 open={isOpen}>
-                <DialogTitleWithCloseButton onClose={close}>
+                <DialogTitleWithCloseButton onClose={close} sx={{ pb: 0 }}>
                     <Typography variant="h6">
                         <strong>{constants.ALL_ALBUMS}</strong>
                     </Typography>
+                </DialogTitleWithCloseButton>
+                <DialogTitle sx={{ pt: 0 }}>
                     <TwoScreenSpacedOptions>
                         <Typography variant="subtitle1">
                             {`${[...props.collectionSummaries.keys()].length} ${
@@ -61,7 +64,7 @@ export default function AllCollections(props: Iprops) {
                             setCollectionSortBy={setCollectionSortBy}
                         />
                     </TwoScreenSpacedOptions>
-                </DialogTitleWithCloseButton>
+                </DialogTitle>
                 <Divider />
                 <DialogContent>
                     <FlexWrapper>
