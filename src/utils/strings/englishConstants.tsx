@@ -109,12 +109,13 @@ const englishConstants = {
     NO: 'no',
     NOTHING_HERE: 'nothing to see here yet 👀',
     UPLOAD: 'Upload',
+    FILE_UPLOAD: 'File Upload',
     UPLOAD_STAGE_MESSAGE: {
-        0: 'preparing to upload',
-        1: 'reading google metadata files',
-        2: 'reading file metadata',
+        0: 'Preparing to upload',
+        1: 'Reading google metadata files',
+        2: 'Reading file metadata',
         3: (fileCounter) =>
-            `${fileCounter.finished} / ${fileCounter.total} files backed up`,
+            `${fileCounter.finished} of ${fileCounter.total} uploaded`,
         4: 'backup complete',
         5: 'cancelling remaining uploads',
     },

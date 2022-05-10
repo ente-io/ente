@@ -1,7 +1,7 @@
 import ExpandLess from 'components/icons/ExpandLess';
 import ExpandMore from 'components/icons/ExpandMore';
 import React, { useContext, useState } from 'react';
-import { Accordion, Button, Modal, ProgressBar } from 'react-bootstrap';
+import { Accordion, Button, Modal } from 'react-bootstrap';
 import { FileRejection } from 'react-dropzone';
 
 import styled from 'styled-components';
@@ -11,6 +11,20 @@ import { ButtonVariant, getVariantColor } from './LinkButton';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import FileList from 'components/FileList';
 import { AppContext } from 'pages/_app';
+import {
+    Box,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    LinearProgress,
+    Typography,
+} from '@mui/material';
+import { FlexWrapper, SpaceBetweenFlex } from 'components/Container';
+import Close from '@mui/icons-material/Close';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+
 interface Props {
     fileCounter;
     uploadStage;
@@ -200,63 +214,82 @@ export default function UploadProgress(props: Props) {
         sectionInfo = constants.LIVE_PHOTOS_DETECTED();
     }
 
-    function handleHideModal(): () => void {
-        return props.uploadStage !== UPLOAD_STAGES.FINISH
-            ? () => {
-                  appContext.setDialogMessage({
-                      title: constants.STOP_UPLOADS_HEADER,
-                      content: constants.STOP_ALL_UPLOADS_MESSAGE,
-                      proceed: {
-                          text: constants.YES_STOP_UPLOADS,
-                          variant: 'danger',
-                          action: props.cancelUploads,
-                      },
-                      close: {
-                          text: constants.NO,
-                          variant: 'secondary',
-                          action: () => {},
-                      },
-                  });
-              }
-            : props.closeModal;
+    function handleHideModal() {
+        if (props.uploadStage !== UPLOAD_STAGES.FINISH) {
+            appContext.setDialogMessage({
+                title: constants.STOP_UPLOADS_HEADER,
+                content: constants.STOP_ALL_UPLOADS_MESSAGE,
+                proceed: {
+                    text: constants.YES_STOP_UPLOADS,
+                    variant: 'danger',
+                    action: props.cancelUploads,
+                },
+                close: {
+                    text: constants.NO,
+                    variant: 'secondary',
+                    action: () => {},
+                },
+            });
+        } else {
+            props.closeModal();
+        }
     }
-
     return (
         <>
-            <Modal
-                show={props.show}
-                onHide={handleHideModal()}
-                aria-labelledby="contained-modal-title-vcenter"
-                centered
-                backdrop={fileProgressStatuses?.length !== 0 ? 'static' : true}>
-                <Modal.Header
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        textAlign: 'center',
-                        borderBottom: 'none',
-                        paddingTop: '30px',
-                        paddingBottom: '0px',
-                    }}
-                    closeButton={true}>
-                    <h4 style={{ width: '100%' }}>
-                        {props.uploadStage === UPLOAD_STAGES.UPLOADING
-                            ? constants.UPLOAD[props.uploadStage](
-                                  props.fileCounter
-                              )
-                            : constants.UPLOAD[props.uploadStage]}
-                    </h4>
-                </Modal.Header>
-                <Modal.Body>
+            <Dialog
+                maxWidth="xs"
+                fullWidth
+                open={props.show}
+                onClose={handleHideModal}>
+                <DialogTitle>
+                    <SpaceBetweenFlex>
+                        <Box>
+                            <Typography variant="h5">
+                                {constants.FILE_UPLOAD}
+                            </Typography>
+                            <Typography variant="subtitle1">
+                                {props.uploadStage === UPLOAD_STAGES.UPLOADING
+                                    ? constants.UPLOAD_STAGE_MESSAGE[
+                                          props.uploadStage
+                                      ](props.fileCounter)
+                                    : constants.UPLOAD_STAGE_MESSAGE[
+                                          props.uploadStage
+                                      ]}
+                            </Typography>
+                        </Box>
+                        <Box>
+                            <FlexWrapper>
+                                <IconButton>
+                                    <OpenInFullIcon
+                                        sx={{
+                                            padding: '4px',
+                                            transform: 'rotate(90deg)',
+                                        }}
+                                    />
+                                </IconButton>
+                                <IconButton>
+                                    <ExpandMoreIcon />
+                                </IconButton>
+                                <IconButton>
+                                    <Close />
+                                </IconButton>
+                            </FlexWrapper>
+                        </Box>
+                    </SpaceBetweenFlex>
+                </DialogTitle>
+                <DialogContent>
                     {(props.uploadStage ===
                         UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES ||
                         props.uploadStage ===
                             UPLOAD_STAGES.EXTRACTING_METADATA ||
                         props.uploadStage === UPLOAD_STAGES.UPLOADING) && (
-                        <ProgressBar
-                            now={props.now}
-                            animated
-                            variant="upload-progress-bar"
+                        <LinearProgress
+                            sx={{
+                                height: '2px',
+                            }}
+                            color="negative"
+                            variant="determinate"
+                            value={props.now}
                         />
                     )}
                     {props.uploadStage === UPLOAD_STAGES.UPLOADING && (
@@ -331,7 +364,7 @@ export default function UploadProgress(props: Props) {
                         sectionTitle={constants.TOO_LARGE_UPLOADS}
                         sectionInfo={constants.TOO_LARGE_INFO}
                     />
-                </Modal.Body>
+                </DialogContent>
                 {props.uploadStage === UPLOAD_STAGES.FINISH && (
                     <Modal.Footer style={{ border: 'none' }}>
                         {props.uploadStage === UPLOAD_STAGES.FINISH &&
@@ -355,7 +388,7 @@ export default function UploadProgress(props: Props) {
                             ))}
                     </Modal.Footer>
                 )}
-            </Modal>
+            </Dialog>
         </>
     );
 }

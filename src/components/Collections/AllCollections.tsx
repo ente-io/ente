@@ -70,7 +70,7 @@ export default function AllCollections(props: Iprops) {
                 </DialogTitle>
                 <Divider />
                 <DialogContent>
-                    <FlexWrapper>
+                    <FlexWrapper style={{ flexWrap: 'wrap' }}>
                         {sortCollectionSummaries(
                             [...collectionSummaries.values()].filter(
                                 (x) =>

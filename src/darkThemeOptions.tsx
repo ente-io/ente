@@ -4,16 +4,27 @@ declare module '@mui/material/styles' {
     interface Palette {
         accent: Palette['primary'];
         danger: Palette['primary'];
+        negative: Palette['primary'];
     }
     interface PaletteOptions {
-        accent: PaletteOptions['primary'];
-        danger: PaletteOptions['primary'];
+        accent?: PaletteOptions['primary'];
+        danger?: PaletteOptions['primary'];
+        negative?: PaletteOptions['primary'];
     }
 }
 
 declare module '@mui/material/Button' {
     export interface ButtonPropsColorOverrides {
         danger: true;
+        negative: true;
+        accent: true;
+    }
+}
+declare module '@mui/material/LinearProgress' {
+    export interface LinearProgressPropsColorOverrides {
+        danger: true;
+        negative: true;
+        accent: true;
     }
 }
 
@@ -61,6 +72,9 @@ const darkThemeOptions = createTheme({
         mode: 'dark',
         primary: {
             main: 'hsla(0, 0%, 11%, 1)',
+        },
+        negative: {
+            main: '#fff',
         },
         secondary: {
             main: 'hsla(0, 0%, 100%, 0.2)',
