@@ -108,7 +108,8 @@ const englishConstants = {
     CLOSE: 'close',
     NO: 'no',
     NOTHING_HERE: 'nothing to see here yet 👀',
-    UPLOAD: {
+    UPLOAD: 'Upload',
+    UPLOAD_STAGE_MESSAGE: {
         0: 'preparing to upload',
         1: 'reading google metadata files',
         2: 'reading file metadata',

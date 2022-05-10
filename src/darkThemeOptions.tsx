@@ -60,7 +60,7 @@ const darkThemeOptions = createTheme({
     palette: {
         mode: 'dark',
         primary: {
-            main: '#fff',
+            main: 'hsla(0, 0%, 11%, 1)',
         },
         secondary: {
             main: 'hsla(0, 0%, 100%, 0.2)',
