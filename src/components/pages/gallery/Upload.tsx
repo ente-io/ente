@@ -446,6 +446,9 @@ export default function Upload(props: Props) {
                 uploadFolders={() =>
                     handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FOLDERS)
                 }
+                uploadGoogleTakeoutZips={() =>
+                    handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FOLDERS)
+                }
             />
             <UploadProgress
                 now={percentComplete}
