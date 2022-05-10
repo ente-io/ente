@@ -231,7 +231,9 @@ class LocalSyncService {
       updatedFiles.removeWhere((file) => editedFileIDs.contains(file.localID));
       updatedFiles
           .removeWhere((file) => downloadedFileIDs.contains(file.localID));
-      _logger.info(updatedFiles.length.toString() + " files were updated.");
+      if (updatedFiles.isNotEmpty) {
+        _logger.info(updatedFiles.length.toString() + " local files were updated.");
+      }
       for (final file in updatedFiles) {
         await _db.updateUploadedFile(
           file.localID,
