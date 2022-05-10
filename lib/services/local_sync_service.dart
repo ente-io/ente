@@ -232,7 +232,7 @@ class LocalSyncService {
       updatedFiles
           .removeWhere((file) => downloadedFileIDs.contains(file.localID));
       if (updatedFiles.isNotEmpty) {
-        _logger.info(updatedFiles.length.toString() + " files were updated.");
+        _logger.info(updatedFiles.length.toString() + " local files were updated.");
       }
       for (final file in updatedFiles) {
         await _db.updateUploadedFile(
