@@ -556,8 +556,8 @@ class FileUploader {
       }
     };
     try {
-      final response = await _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/files",
+      final response = await _dio.put(
+        Configuration.instance.getHttpEndpoint() + "/files/update",
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         data: request,

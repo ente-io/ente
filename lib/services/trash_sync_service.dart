@@ -40,10 +40,9 @@ class TrashSyncService {
       _logger.fine("inserting ${diff.trashedFiles.length} items in trash");
       await _trashDB.insertMultiple(diff.trashedFiles);
     }
-    if (diff.deletedFiles.isNotEmpty) {
-      _logger.fine("discard ${diff.deletedFiles.length} deleted items");
-      await _trashDB
-          .delete(diff.deletedFiles.map((e) => e.uploadedFileID).toList());
+    if (diff.deletedUploadIDs.isNotEmpty) {
+      _logger.fine("discard ${diff.deletedUploadIDs.length} deleted items");
+      await _trashDB.delete(diff.deletedUploadIDs);
     }
     if (diff.restoredFiles.isNotEmpty) {
       _logger.fine("discard ${diff.restoredFiles.length} restored items");
@@ -67,12 +66,6 @@ class TrashSyncService {
   Future<void> _updateIgnoredFiles(Diff diff) async {
     final ignoredFiles = <IgnoredFile>[];
     for (TrashFile t in diff.trashedFiles) {
-      final file = IgnoredFile.fromTrashItem(t);
-      if (file != null) {
-        ignoredFiles.add(file);
-      }
-    }
-    for (TrashFile t in diff.deletedFiles) {
       final file = IgnoredFile.fromTrashItem(t);
       if (file != null) {
         ignoredFiles.add(file);
