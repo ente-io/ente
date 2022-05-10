@@ -47,10 +47,11 @@ const darkThemeOptions = createTheme({
             styleOverrides: {
                 root: {
                     fontSize: '18px',
+                    lineHeight: '21.78px',
+                    padding: '16px',
                     color: '#fff',
                     textTransform: 'none',
                     borderRadius: '8px',
-                    padding: '8px 34px',
                 },
             },
         },

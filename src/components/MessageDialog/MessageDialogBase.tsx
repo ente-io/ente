@@ -36,9 +36,6 @@ const StyledMessageDialog = styled(Dialog)(({ theme }) => ({
         },
     },
     '& .MuiDialogActions-root .MuiButton-root': {
-        fontSize: '18px',
-        lineHeight: '21.78px',
-        padding: theme.spacing(2),
         marginLeft: theme.spacing(2),
     },
 }));
