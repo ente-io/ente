@@ -27,7 +27,7 @@ function UploadTypeRow({ uploadFunc, Icon, uploadName }) {
     );
 }
 
-export default function UploadTypeChoiceModal({
+export default function UploadTypeSelector({
     onHide,
     show,
     uploadFiles,
