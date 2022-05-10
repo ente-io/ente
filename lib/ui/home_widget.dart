@@ -294,6 +294,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         Align(
           alignment: Alignment.bottomCenter,
           child: SafeArea(
+            minimum: EdgeInsets.only(bottom: 8),
             child: HomeBottomNavigationBar(
               _selectedFiles,
               selectedTabIndex: _selectedTabIndex,
