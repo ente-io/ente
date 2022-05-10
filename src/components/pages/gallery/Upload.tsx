@@ -42,8 +42,8 @@ interface Props {
     isFirstUpload: boolean;
     electronFiles: ElectronFile[];
     setElectronFiles: (files: ElectronFile[]) => void;
-    showUploadTypeChoiceModal: boolean;
-    setShowUploadTypeChoiceModal: (open: boolean) => void;
+    uploadTypeSelectorView: boolean;
+    setUploadTypeSelectorView: (open: boolean) => void;
 }
 
 enum UPLOAD_STRATEGY {
@@ -408,7 +408,7 @@ export default function Upload(props: Props) {
             files = await ImportService.showUploadDirsDialog();
         }
         props.setElectronFiles(files);
-        props.setShowUploadTypeChoiceModal(false);
+        props.setUploadTypeSelectorView(false);
     };
 
     const cancelUploads = async () => {
@@ -438,8 +438,8 @@ export default function Upload(props: Props) {
                 }
             />
             <UploadTypeSelector
-                show={props.showUploadTypeChoiceModal}
-                onHide={() => props.setShowUploadTypeChoiceModal(false)}
+                show={props.uploadTypeSelectorView}
+                onHide={() => props.setUploadTypeSelectorView(false)}
                 uploadFiles={() =>
                     handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FILES)
                 }

@@ -208,8 +208,7 @@ export default function Gallery() {
     const clearNotificationAttributes = () => setNotificationAttributes(null);
 
     const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
-    const [showUploadTypeChoiceModal, setShowUploadTypeChoiceModal] =
-        useState(false);
+    const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -565,7 +564,7 @@ export default function Gallery() {
 
     const openUploader = () => {
         if (importService.checkAllElectronAPIsExists()) {
-            setShowUploadTypeChoiceModal(true);
+            setUploadTypeSelectorView(true);
         } else {
             openFileUploader();
         }
@@ -666,8 +665,8 @@ export default function Gallery() {
                     isFirstUpload={collectionsAndTheirLatestFile?.length === 0}
                     electronFiles={electronFiles}
                     setElectronFiles={setElectronFiles}
-                    showUploadTypeChoiceModal={showUploadTypeChoiceModal}
-                    setShowUploadTypeChoiceModal={setShowUploadTypeChoiceModal}
+                    uploadTypeSelectorView={uploadTypeSelectorView}
+                    setUploadTypeSelectorView={setUploadTypeSelectorView}
                 />
                 <Sidebar collectionSummaries={collectionSummaries} />
                 <UploadButton
