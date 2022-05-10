@@ -57,7 +57,8 @@ class TrashSyncService {
     }
     if (diff.hasMore) {
       return await syncTrash();
-    } else if (diff.trashedFiles.isNotEmpty || diff.deletedFiles.isNotEmpty) {
+    } else if (diff.trashedFiles.isNotEmpty ||
+        diff.deletedUploadIDs.isNotEmpty) {
       _logger.fine('refresh gallery');
       Bus.instance.fire(CollectionUpdatedEvent(0, <File>[]));
     }
