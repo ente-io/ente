@@ -293,19 +293,11 @@ class _HomeWidgetState extends State<HomeWidget> {
         Align(alignment: Alignment.bottomCenter, child: BottomShadowWidget()),
         Align(
           alignment: Alignment.bottomCenter,
-          child: Stack(
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  HomeBottomNavigationBar(
-                    _selectedFiles,
-                    selectedTabIndex: _selectedTabIndex,
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ),
-            ],
+          child: SafeArea(
+            child: HomeBottomNavigationBar(
+              _selectedFiles,
+              selectedTabIndex: _selectedTabIndex,
+            ),
           ),
         ),
         Align(
