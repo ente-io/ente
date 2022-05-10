@@ -90,7 +90,7 @@ dependencies:
   receive_sharing_intent: ^1.4.5
   scrollable_positioned_list: ^0.2.2
   sentry: ^5.0.0
-  share_plus: ^2.2.0
+  share_plus: ^4.0.4
   shared_preferences: ^2.0.5
   sqflite: ^2.0.0+3
   sqflite_migration: ^0.3.0
