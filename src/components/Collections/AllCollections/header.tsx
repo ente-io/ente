@@ -16,12 +16,9 @@ export default function AllCollectionsHeader({
             <TwoScreenSpacedOptions>
                 <Typography
                     css={`
-                        font-family: Inter;
                         font-size: 24px;
                         font-weight: 600;
                         line-height: 36px;
-                        letter-spacing: 0em;
-                        text-align: left;
                     `}>
                     {constants.ALL_ALBUMS}
                 </Typography>
@@ -32,12 +29,9 @@ export default function AllCollectionsHeader({
             <TwoScreenSpacedOptions>
                 <Typography
                     css={`
-                        font-family: Inter;
                         font-size: 24px;
                         font-weight: 600;
                         line-height: 36px;
-                        letter-spacing: 0em;
-                        text-align: left;
                     `}
                     color={'text.secondary'}>
                     {`${collectionCount} ${constants.ALBUMS}`}

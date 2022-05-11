@@ -17,12 +17,9 @@ export default function AllCollectionCard({
             <div>
                 <Typography
                     css={`
-                        font-family: Inter;
                         font-size: 14px;
                         font-weight: 600;
                         line-height: 20px;
-                        letter-spacing: 0em;
-                        text-align: left;
                     `}>
                     {collectionAttributes.name}
                 </Typography>
@@ -31,8 +28,6 @@ export default function AllCollectionCard({
                         font-size: 14px;
                         font-weight: 400;
                         line-height: 20px;
-                        letter-spacing: -0.15399999916553497px;
-                        text-align: left;
                     `}>
                     {fileCount} {constants.PHOTOS}
                 </Typography>
