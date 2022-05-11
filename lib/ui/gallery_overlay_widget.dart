@@ -35,8 +35,7 @@ class GalleryOverlayWidget extends StatefulWidget {
   State<GalleryOverlayWidget> createState() => _GalleryOverlayWidgetState();
 }
 
-class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget>
-    with SingleTickerProviderStateMixin {
+class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
   StreamSubscription _userAuthEventSubscription;
   Function() _selectedFilesListener;
   final GlobalKey shareButtonKey = GlobalKey();
