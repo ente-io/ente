@@ -1,7 +1,7 @@
 import React from 'react';
 import { DialogTitle, IconButton, Typography } from '@mui/material';
 import { TwoScreenSpacedOptions } from 'components/Container';
-import CollectionSort from 'components/pages/gallery/CollectionSort';
+import CollectionSort from 'components/Collections/AllCollections/CollectionSort';
 import constants from 'utils/strings/constants';
 import Close from '@mui/icons-material/Close';
 
