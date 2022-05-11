@@ -12,7 +12,6 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/rename_dialog.dart';
 import 'package:photos/ui/share_collection_widget.dart';
-import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
 
@@ -184,19 +183,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           }
         },
       ));
-    }
-    if (widget.type == GalleryType.trash) {
-      actions.add(
-        Tooltip(
-          message: "empty trash",
-          child: IconButton(
-            icon: Icon(Icons.delete_forever),
-            onPressed: () async {
-              await emptyTrash(context);
-            },
-          ),
-        ),
-      );
     }
     return actions;
   }
