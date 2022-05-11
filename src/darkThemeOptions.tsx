@@ -14,13 +14,12 @@ const darkThemeOptions = createTheme({
         },
         text: {
             primary: '#fff',
-            secondary: '#777',
+            secondary: '#808080',
         },
-        background: { default: '#191919', paper: '#191919' },
+        background: { default: '#191919', paper: '#303030' },
         grey: {
             A100: '#ccc',
-            A200: '#777',
-            A400: '#4E4E4E',
+            A200: 'rgba(256, 256, 256, 0.24)',
         },
     },
 });
