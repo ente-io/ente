@@ -1,7 +1,7 @@
 import React from 'react';
 import { DialogContent } from '@mui/material';
 import { FlexWrapper } from 'components/Container';
-import AllCollectionCard from './card';
+import AllCollectionCard from './CollectionCard';
 
 export default function AllCollectionContent({
     sortedCollectionSummaries,

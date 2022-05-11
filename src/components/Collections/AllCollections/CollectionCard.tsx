@@ -2,7 +2,6 @@ import { Typography } from '@mui/material';
 import constants from 'utils/strings/constants';
 import React from 'react';
 import CollectionCard from '../CollectionCard';
-import { LargerCollectionTile } from '../styledComponents';
 
 export default function AllCollectionCard({
     onCollectionClick,
@@ -12,9 +11,9 @@ export default function AllCollectionCard({
 }) {
     return (
         <CollectionCard
+            large
             latestFile={latestFile}
-            onClick={() => onCollectionClick(collectionAttributes.id)}
-            customCollectionTile={LargerCollectionTile}>
+            onClick={() => onCollectionClick(collectionAttributes.id)}>
             <div>
                 <Typography
                     css={`

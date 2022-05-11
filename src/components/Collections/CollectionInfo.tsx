@@ -24,10 +24,13 @@ export default function collectionInfo(props: Iprops) {
     return (
         <TwoScreenSpacedOptionsWithBodyPadding>
             <div>
-                <Typography variant="h5">
-                    <strong>{collectionAttributes.name}</strong>
+                <Typography
+                    fontSize={'24px'}
+                    lineHeight="36px"
+                    fontWeight="600">
+                    {collectionAttributes.name}
                 </Typography>
-                <Typography variant="subtitle1">
+                <Typography fontSize={'14px'} lineHeight="20px">
                     {fileCount} {constants.PHOTOS}
                 </Typography>
             </div>

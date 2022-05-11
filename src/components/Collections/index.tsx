@@ -25,7 +25,7 @@ export default function Collections(props: Iprops) {
         setCollectionNamerAttributes,
     } = props;
 
-    const [allCollectionView, setAllCollectionView] = useState(false);
+    const [allCollectionView, setAllCollectionView] = useState(true);
     const [collectionShareModalView, setCollectionShareModalView] =
         useState(false);
     const collectionsMap = useRef<Map<number, Collection>>(new Map());
