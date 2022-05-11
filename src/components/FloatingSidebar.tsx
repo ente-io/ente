@@ -2,22 +2,20 @@ import { Dialog, Slide, styled } from '@mui/material';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export const FloatingSidebar = styled(Dialog)<{ position: 'left' | 'right' }>(
-    ({ position, theme }) => ({
-        '& .MuiDialogContent-root': {
-            padding: theme.spacing(2),
-        },
-        '& .MuiDialogActions-root': {
-            padding: theme.spacing(1),
-        },
-        '& .MuiPaper-root': {
-            maxWidth: '510px',
-        },
-        '& .MuiDialog-container': {
-            justifyContent: position === 'left' ? 'flex-start' : 'flex-end',
-        },
-    })
-);
+export const FloatingSidebar = styled(Dialog)(({ theme }) => ({
+    '& .MuiDialog-container': {
+        justifyContent: 'flex-end',
+    },
+    '& .MuiPaper-root': {
+        maxWidth: '498px',
+    },
+    '& .MuiDialogTitle-root': {
+        padding: theme.spacing(3, 2),
+    },
+    '& .MuiDialogContent-root': {
+        padding: theme.spacing(2),
+    },
+}));
 
 FloatingSidebar.propTypes = {
     children: PropTypes.node,
