@@ -56,8 +56,7 @@ export const Value = styled.div<{ width?: string }>`
 
 export const FlexWrapper = styled.div`
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    align-item: center;
 `;
 
 export const FreeFlowText = styled.div`

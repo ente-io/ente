@@ -36,6 +36,9 @@ const darkThemeOptions = createTheme({
                 },
             },
         },
+        MuiMenu: {
+            styleOverrides: { paper: { margin: '10px' } },
+        },
     },
 
     palette: {
@@ -44,8 +47,8 @@ const darkThemeOptions = createTheme({
             main: '#fff',
         },
         text: {
-            primary: 'hsla(0, 0%, 100%, 1)',
-            secondary: 'hsla(0, 0%, 100%, 0.5)',
+            primary: '#fff',
+            secondary: '#808080',
         },
         accent: {
             main: '#43BA6C',
@@ -55,7 +58,15 @@ const darkThemeOptions = createTheme({
         danger: {
             main: '#c93f3f',
         },
-        background: { default: '#191919', paper: '#191919' },
+        background: { default: '#000000', paper: '#1b1b1b' },
+        grey: {
+            A100: '#ccc',
+            A200: 'rgba(256, 256, 256, 0.24)',
+        },
+        divider: 'rgba(255, 255, 255, 0.24)',
+    },
+    shape: {
+        borderRadius: 8,
     },
 });
 

@@ -27,6 +27,8 @@ import { ThemeProvider as MThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'darkThemeOptions';
 import { CssBaseline } from '@mui/material';
 import SidebarToggler from 'components/Navbar/SidebarToggler';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as types from 'styled-components/cssprop';
 
 export const LogoImage = styled.img`
     max-height: 28px;

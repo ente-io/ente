@@ -25,10 +25,19 @@ export default function collectionInfo(props: Iprops) {
     return (
         <PaddedSpaceBetweenFlex>
             <div>
-                <Typography variant="h5">
-                    <strong>{collectionAttributes.name}</strong>
+                <Typography
+                    css={`
+                        font-size: 24px;
+                        font-weight: 600;
+                        line-height: 36px;
+                    `}>
+                    {collectionAttributes.name}
                 </Typography>
-                <Typography variant="subtitle1">
+                <Typography
+                    css={`
+                        font-size: 14px;
+                        line-height: 20px;
+                    `}>
                     {fileCount} {constants.PHOTOS}
                 </Typography>
             </div>
