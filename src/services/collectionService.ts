@@ -4,15 +4,13 @@ import localForage from 'utils/storage/localForage';
 
 import { getActualKey, getToken } from 'utils/common/key';
 import CryptoWorker from 'utils/crypto';
-import { SetDialogMessage } from 'components/MessageDialog';
-import constants from 'utils/strings/constants';
 import { getPublicKey } from './userService';
 import { B64EncryptionResult } from 'utils/crypto';
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
-import { sortFiles } from 'utils/file';
+import { sortFiles, sortFilesIntoCollections } from 'utils/file';
 import {
     Collection,
     CollectionAndItsLatestFile,
@@ -23,6 +21,8 @@ import {
     CreatePublicAccessTokenRequest,
     PublicURL,
     UpdatePublicURL,
+    CollectionSummaries,
+    CollectionSummary,
 } from 'types/collection';
 import { COLLECTION_SORT_BY, CollectionType } from 'constants/collection';
 import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
@@ -156,7 +156,7 @@ export const syncCollections = async () => {
         }
     });
 
-    let collections: Collection[] = [];
+    const collections: Collection[] = [];
     let updationTime = await localForage.getItem<number>(
         COLLECTION_UPDATION_TIME
     );
@@ -167,11 +167,7 @@ export const syncCollections = async () => {
             updationTime = Math.max(updationTime, collection.updationTime);
         }
     }
-    collections = sortCollections(
-        collections,
-        [],
-        COLLECTION_SORT_BY.MODIFICATION_TIME
-    );
+
     await localForage.setItem(COLLECTION_TABLE, collections);
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
     return collections;
@@ -478,12 +474,7 @@ export const removeFromCollection = async (
     }
 };
 
-export const deleteCollection = async (
-    collectionID: number,
-    syncWithRemote: () => Promise<void>,
-    redirectToAll: () => void,
-    setDialogMessage: SetDialogMessage
-) => {
+export const deleteCollection = async (collectionID: number) => {
     try {
         const token = getToken();
 
@@ -493,15 +484,9 @@ export const deleteCollection = async (
             null,
             { 'X-Auth-Token': token }
         );
-        await syncWithRemote();
-        redirectToAll();
     } catch (e) {
         logError(e, 'delete collection failed ');
-        setDialogMessage({
-            title: constants.ERROR,
-            content: constants.DELETE_COLLECTION_FAILED,
-            close: { variant: 'danger' },
-        });
+        throw e;
     }
 };
 
@@ -719,79 +704,95 @@ export const getNonEmptyCollections = (
     );
 };
 
-export function sortCollections(
-    collections: Collection[],
-    collectionAndTheirLatestFile: CollectionAndItsLatestFile[],
+export function sortCollectionSummaries(
+    collectionSummaries: CollectionSummary[],
     sortBy: COLLECTION_SORT_BY
 ) {
     return moveFavCollectionToFront(
-        collections.sort((collectionA, collectionB) => {
+        collectionSummaries.sort((a, b) => {
             switch (sortBy) {
-                case COLLECTION_SORT_BY.LATEST_FILE:
+                case COLLECTION_SORT_BY.CREATION_TIME_DESCENDING:
                     return compareCollectionsLatestFile(
-                        collectionAndTheirLatestFile,
-                        collectionA,
-                        collectionB
+                        b.latestFile,
+                        a.latestFile
                     );
-                case COLLECTION_SORT_BY.MODIFICATION_TIME:
-                    return collectionB.updationTime - collectionA.updationTime;
+                case COLLECTION_SORT_BY.CREATION_TIME_ASCENDING:
+                    return (
+                        -1 *
+                        compareCollectionsLatestFile(b.latestFile, a.latestFile)
+                    );
+                case COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING:
+                    return (
+                        b.collectionAttributes.updationTime -
+                        a.collectionAttributes.updationTime
+                    );
                 case COLLECTION_SORT_BY.NAME:
-                    return collectionA.name.localeCompare(collectionB.name);
+                    return a.collectionAttributes.name.localeCompare(
+                        b.collectionAttributes.name
+                    );
             }
         })
     );
 }
 
-function compareCollectionsLatestFile(
-    collectionAndTheirLatestFile: CollectionAndItsLatestFile[],
-    collectionA: Collection,
-    collectionB: Collection
-) {
-    if (!collectionAndTheirLatestFile?.length) {
-        return 0;
-    }
-    const CollectionALatestFile = getCollectionLatestFile(
-        collectionAndTheirLatestFile,
-        collectionA
-    );
-    const CollectionBLatestFile = getCollectionLatestFile(
-        collectionAndTheirLatestFile,
-        collectionB
-    );
-    if (!CollectionALatestFile || !CollectionBLatestFile) {
-        return 0;
+function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
+    const sortedFiles = sortFiles([first, second]);
+    if (sortedFiles[0].id !== first.id) {
+        return 1;
     } else {
-        const sortedFiles = sortFiles([
-            CollectionALatestFile,
-            CollectionBLatestFile,
-        ]);
-        if (sortedFiles[0].id !== CollectionALatestFile.id) {
-            return 1;
-        } else {
-            return -1;
-        }
+        return -1;
     }
 }
 
-function getCollectionLatestFile(
-    collectionAndTheirLatestFile: CollectionAndItsLatestFile[],
-    collection: Collection
-) {
-    const collectionAndItsLatestFile = collectionAndTheirLatestFile.filter(
-        (collectionAndItsLatestFile) =>
-            collectionAndItsLatestFile.collection.id === collection.id
-    );
-    if (collectionAndItsLatestFile.length === 1) {
-        return collectionAndItsLatestFile[0].file;
-    }
-}
-
-function moveFavCollectionToFront(collections: Collection[]) {
-    return collections.sort((collectionA, collectionB) =>
-        collectionA.type === CollectionType.favorites
+function moveFavCollectionToFront(collectionSummaries: CollectionSummary[]) {
+    return collectionSummaries.sort((a, b) =>
+        a.collectionAttributes.type === CollectionType.favorites
             ? -1
-            : collectionB.type === CollectionType.favorites
+            : b.collectionAttributes.type === CollectionType.favorites
             ? 1
             : 0
     );
+}
+
+export function getCollectionSummaries(
+    collections: Collection[],
+    files: EnteFile[]
+): CollectionSummaries {
+    const CollectionSummaries: CollectionSummaries = new Map();
+    const collectionAndTheirLatestFile = getCollectionsAndTheirLatestFile(
+        collections,
+        files
+    );
+    const collectionAndTheirLatestFileMap = new Map();
+    for (const collectionAndItsLatestFile of collectionAndTheirLatestFile) {
+        collectionAndTheirLatestFileMap.set(
+            collectionAndItsLatestFile.collection.id,
+            collectionAndItsLatestFile.file
+        );
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const collectionFilesCount = getCollectionsFileCount(files);
+
+    for (const collection of collections) {
+        CollectionSummaries.set(collection.id, {
+            collectionAttributes: {
+                id: collection.id,
+                name: collection.name,
+                type: collection.type,
+                updationTime: collection.updationTime,
+            },
+            latestFile: collectionAndTheirLatestFileMap.get(collection.id),
+            fileCount: collectionFilesCount.get(collection.id),
+        });
+    }
+    return CollectionSummaries;
+}
+
+function getCollectionsFileCount(files: EnteFile[]) {
+    const collectionWiseFiles = sortFilesIntoCollections(files);
+    const collectionFilesCount = new Map<number, number>();
+    for (const [id, files] of collectionWiseFiles) {
+        collectionFilesCount.set(id, files.length);
+    }
+    return collectionFilesCount;
 }

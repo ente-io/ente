@@ -6,7 +6,7 @@ import { SetDialogMessage } from 'components/MessageDialog';
 import UploadProgress from './UploadProgress';
 
 import UploadStrategyChoiceModal from './UploadStrategyChoiceModal';
-import { SetCollectionNamerAttributes } from './CollectionNamer';
+import { SetCollectionNamerAttributes } from '../../Collections/CollectionNamer';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';

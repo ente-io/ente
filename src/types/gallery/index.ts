@@ -1,3 +1,4 @@
+import { SetDialogMessage } from 'components/MessageDialog';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { DateValue, Bbox } from 'types/search';
@@ -30,6 +31,9 @@ export type GalleryContextType = {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setNotificationAttributes: (attributes: NotificationAttributes) => void;
     setBlockingLoad: (value: boolean) => void;
+    startLoading: () => void;
+    finishLoading: () => void;
+    setDialogMessage: SetDialogMessage;
 };
 
 export interface NotificationAttributes {

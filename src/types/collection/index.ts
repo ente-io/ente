@@ -91,3 +91,15 @@ export interface CollectionMagicMetadata
     extends Omit<MagicMetadataCore, 'data'> {
     data: CollectionMagicMetadataProps;
 }
+export interface CollectionSummary {
+    collectionAttributes: {
+        id: number;
+        name: string;
+        type: CollectionType;
+        updationTime: number;
+    };
+    latestFile: EnteFile;
+    fileCount: number;
+}
+
+export type CollectionSummaries = Map<number, CollectionSummary>;

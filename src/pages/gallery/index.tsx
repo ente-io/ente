@@ -22,6 +22,7 @@ import {
     getLocalCollections,
     getNonEmptyCollections,
     createCollection,
+    getCollectionSummaries,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import billingService from 'services/billingService';
@@ -48,7 +49,6 @@ import {
     getSelectedFiles,
     mergeMetadata,
     sortFiles,
-    sortFilesIntoCollections,
 } from 'utils/file';
 import SearchBar from 'components/Search';
 import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions/GalleryOptions';
@@ -57,7 +57,7 @@ import CollectionSelector, {
 } from 'components/pages/gallery/CollectionSelector';
 import CollectionNamer, {
     CollectionNamerAttributes,
-} from 'components/pages/gallery/CollectionNamer';
+} from 'components/Collections/CollectionNamer';
 import AlertBanner from 'components/pages/gallery/AlertBanner';
 import UploadButton from 'components/pages/gallery/UploadButton';
 import PlanSelector from 'components/pages/gallery/PlanSelector';
@@ -93,7 +93,11 @@ import DeleteBtn from 'components/DeleteBtn';
 import FixCreationTime, {
     FixCreationTimeAttributes,
 } from 'components/FixCreationTime';
-import { Collection, CollectionAndItsLatestFile } from 'types/collection';
+import {
+    Collection,
+    CollectionAndItsLatestFile,
+    CollectionSummaries,
+} from 'types/collection';
 import { EnteFile } from 'types/file';
 import {
     GalleryContextType,
@@ -101,11 +105,11 @@ import {
     Search,
     NotificationAttributes,
 } from 'types/gallery';
-import Collections from 'components/pages/gallery/Collections';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import ToastNotification from 'components/ToastNotification';
 import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
+import Collections from 'components/Collections';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -130,6 +134,9 @@ const defaultGalleryContext: GalleryContextType = {
     syncWithRemote: () => null,
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
+    startLoading: () => null,
+    finishLoading: () => null,
+    setDialogMessage: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -185,8 +192,8 @@ export default function Gallery() {
     const [deleted, setDeleted] = useState<number[]>([]);
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
         useContext(AppContext);
-    const [collectionFilesCount, setCollectionFilesCount] =
-        useState<Map<number, number>>();
+    const [collectionSummaries, setCollectionSummaries] =
+        useState<CollectionSummaries>(new Map());
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
     const [trash, setTrash] = useState<Trash>([]);
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
@@ -303,6 +310,7 @@ export default function Gallery() {
             const trash = await syncTrash(collections, setFiles, files);
             setTrash(trash);
         } catch (e) {
+            console.log(e);
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
                     setBannerMessage(constants.SESSION_EXPIRED_MESSAGE);
@@ -340,20 +348,21 @@ export default function Gallery() {
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
+
         setCollections(nonEmptyCollections);
         const collectionsAndTheirLatestFile = getCollectionsAndTheirLatestFile(
             nonEmptyCollections,
             files
         );
         setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
-        const collectionWiseFiles = sortFilesIntoCollections(files);
-        const collectionFilesCount = new Map<number, number>();
-        for (const [id, files] of collectionWiseFiles) {
-            collectionFilesCount.set(id, files.length);
-        }
-        setCollectionFilesCount(collectionFilesCount);
+        const collectionSummaries = getCollectionSummaries(
+            nonEmptyCollections,
+            files
+        );
 
-        const archivedCollections = getArchivedCollections(collections);
+        setCollectionSummaries(collectionSummaries);
+
+        const archivedCollections = getArchivedCollections(nonEmptyCollections);
         setArchivedCollections(new Set(archivedCollections));
     };
 
@@ -427,24 +436,28 @@ export default function Gallery() {
         }
     };
 
-    const showCreateCollectionModal = (ops: COLLECTION_OPS_TYPE) => {
+    const showCreateCollectionModal = (ops?: COLLECTION_OPS_TYPE) => {
         const callback = async (collectionName: string) => {
             try {
+                startLoading();
                 const collection = await createCollection(
                     collectionName,
                     CollectionType.album,
                     collections
                 );
-
-                await collectionOpsHelper(ops)(collection);
+                if (ops) {
+                    await collectionOpsHelper(ops)(collection);
+                }
             } catch (e) {
-                logError(e, 'create and collection ops failed');
+                logError(e, 'create and collection ops failed', { ops });
                 setDialogMessage({
                     title: constants.ERROR,
                     staticBackdrop: true,
                     close: { variant: 'danger' },
                     content: constants.UNKNOWN_ERROR,
                 });
+            } finally {
+                finishLoading();
             }
         };
         return () =>
@@ -570,6 +583,9 @@ export default function Gallery() {
                 syncWithRemote,
                 setNotificationAttributes,
                 setBlockingLoad,
+                startLoading,
+                finishLoading,
+                setDialogMessage,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
@@ -607,16 +623,11 @@ export default function Gallery() {
                 />
                 <Collections
                     collections={collections}
-                    collectionAndTheirLatestFile={collectionsAndTheirLatestFile}
                     isInSearchMode={isInSearchMode}
-                    activeCollection={activeCollection}
-                    setActiveCollection={setActiveCollection}
-                    syncWithRemote={syncWithRemote}
-                    setDialogMessage={setDialogMessage}
+                    activeCollectionID={activeCollection}
+                    setActiveCollectionID={setActiveCollection}
+                    collectionSummaries={collectionSummaries}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    startLoading={startLoading}
-                    finishLoading={finishLoading}
-                    collectionFilesCount={collectionFilesCount}
                 />
                 <CollectionNamer
                     show={collectionNamerView}

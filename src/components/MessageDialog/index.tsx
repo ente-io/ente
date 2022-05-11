@@ -25,6 +25,7 @@ type Props = React.PropsWithChildren<{
     attributes: MessageAttributes;
     size?: 'sm' | 'lg' | 'xl';
 }>;
+
 export default function MessageDialog({
     attributes,
     children,
