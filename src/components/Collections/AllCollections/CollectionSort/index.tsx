@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { COLLECTION_SORT_BY } from 'constants/collection';
 import Menu from '@mui/material/Menu';
-import { IconButton } from '@mui/material';
+import { IconButton, styled } from '@mui/material';
 import SortIcon from '@mui/icons-material/Sort';
 import CollectionSortOptions from './options';
 
@@ -9,6 +9,12 @@ export interface CollectionSortProps {
     setCollectionSortBy: (sortBy: COLLECTION_SORT_BY) => void;
     activeSortBy: COLLECTION_SORT_BY;
 }
+
+const StyledMenu = styled(Menu)`
+    & .MuiPaper-root {
+        box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.16);
+    }
+`;
 
 export default function CollectionSort(props: CollectionSortProps) {
     const [sortByEl, setSortByEl] = useState(null);
@@ -22,7 +28,7 @@ export default function CollectionSort(props: CollectionSortProps) {
                 aria-expanded={sortByEl ? 'true' : undefined}>
                 <SortIcon />
             </IconButton>
-            <Menu
+            <StyledMenu
                 id="collection-sort"
                 anchorEl={sortByEl}
                 open={Boolean(sortByEl)}
@@ -32,7 +38,7 @@ export default function CollectionSort(props: CollectionSortProps) {
                     'aria-labelledby': 'collection-sort',
                 }}>
                 <CollectionSortOptions {...props} close={handleClose} />
-            </Menu>
+            </StyledMenu>
         </>
     );
 }
