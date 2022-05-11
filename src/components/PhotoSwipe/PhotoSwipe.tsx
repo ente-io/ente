@@ -38,7 +38,7 @@ import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
 import { logError } from 'utils/sentry';
 
 import CloseIcon from 'components/icons/CloseIcon';
-import TickIcon from 'components/icons/TickIcon';
+import TickIcon from '@mui/icons-material/Done';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';

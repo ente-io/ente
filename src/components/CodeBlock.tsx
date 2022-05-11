@@ -3,7 +3,7 @@ import { FreeFlowText, IconButton } from './Container';
 import CopyIcon from './icons/CopyIcon';
 import React, { useState } from 'react';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
-import TickIcon from './icons/TickIcon';
+import TickIcon from '@mui/icons-material/Done';
 import EnteSpinner from './EnteSpinner';
 
 const Wrapper = styled.div`
