@@ -15,16 +15,19 @@ export default function useComponentScroll({
     }>({});
 
     const updateScrollObj = () => {
-        if (componentRef.current) {
-            const { scrollLeft, scrollWidth, clientWidth } =
-                componentRef.current;
-            setScrollObj({ scrollLeft, scrollWidth, clientWidth });
+        if (!componentRef.current) {
+            return;
         }
+        const { scrollLeft, scrollWidth, clientWidth } = componentRef.current;
+        setScrollObj({ scrollLeft, scrollWidth, clientWidth });
     };
 
     useEffect(() => {
+        if (!componentRef.current) {
+            return;
+        }
         // Add event listener
-        componentRef.current.addEventListener('scroll', updateScrollObj);
+        componentRef.current?.addEventListener('scroll', updateScrollObj);
 
         // Call handler right away so state gets updated with initial window size
         updateScrollObj();
