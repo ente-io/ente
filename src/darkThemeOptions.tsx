@@ -21,6 +21,10 @@ const darkThemeOptions = createTheme({
             A100: '#ccc',
             A200: 'rgba(256, 256, 256, 0.24)',
         },
+        divider: 'rgba(255, 255, 255, 0.24)',
+    },
+    shape: {
+        borderRadius: 8,
     },
 });
 
