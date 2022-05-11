@@ -6,6 +6,9 @@ const darkThemeOptions = createTheme({
         MuiPaper: {
             styleOverrides: { root: { backgroundImage: 'none' } },
         },
+        MuiMenu: {
+            styleOverrides: { paper: { margin: '10px' } },
+        },
     },
     palette: {
         mode: 'dark',
