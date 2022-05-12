@@ -55,8 +55,9 @@ export const Value = styled.div<{ width?: string }>`
 `;
 
 export const FlexWrapper = styled.div`
+    width: 100%;
     display: flex;
-    align-item: center;
+    align-items: center;
 `;
 
 export const FreeFlowText = styled.div`
@@ -67,6 +68,10 @@ export const FreeFlowText = styled.div`
 
 export const SpaceBetweenFlex = styled(FlexWrapper)`
     justify-content: space-between;
+`;
+
+export const CenteredFlex = styled(FlexWrapper)`
+    justify-content: center;
 `;
 
 export const InvertedIconButton = styled(IconButton)`
