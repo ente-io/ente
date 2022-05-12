@@ -1,19 +1,32 @@
-import { createTheme } from '@mui/material/styles';
+import {
+    createTheme,
+    PaletteColor,
+    PaletteColorOptions,
+} from '@mui/material/styles';
 
 declare module '@mui/material/styles' {
     interface Palette {
-        accent: Palette['primary'];
-        danger: Palette['primary'];
+        accent: PaletteColor;
+        danger: PaletteColor;
+        negative: PaletteColor;
     }
     interface PaletteOptions {
-        accent: PaletteOptions['primary'];
-        danger: PaletteOptions['primary'];
+        accent?: PaletteColorOptions;
+        danger?: PaletteColorOptions;
+        negative?: PaletteColorOptions;
     }
 }
 
 declare module '@mui/material/Button' {
     export interface ButtonPropsColorOverrides {
+        accent: true;
         danger: true;
+    }
+}
+
+declare module '@mui/material/ToggleButtonGroup' {
+    export interface ToggleButtonGroupPropsColorOverrides {
+        negative: true;
     }
 }
 
@@ -39,11 +52,26 @@ const darkThemeOptions = createTheme({
         MuiMenu: {
             styleOverrides: { paper: { margin: '10px' } },
         },
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    fontSize: '18px',
+                    lineHeight: '21.78px',
+                    padding: '16px',
+                    color: '#fff',
+                    textTransform: 'none',
+                    borderRadius: '8px',
+                },
+            },
+        },
     },
 
     palette: {
         mode: 'dark',
         primary: {
+            main: 'hsla(0, 0%, 11%, 1)',
+        },
+        negative: {
             main: '#fff',
         },
         text: {
