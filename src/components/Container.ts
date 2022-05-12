@@ -56,7 +56,6 @@ export const Value = styled.div<{ width?: string }>`
 `;
 
 export const FlexWrapper = styled(Box)`
-    width: 100%;
     display: flex;
     align-items: center;
 `;
@@ -73,6 +72,10 @@ export const SpaceBetweenFlex = styled(FlexWrapper)`
 
 export const CenteredFlex = styled(FlexWrapper)`
     justify-content: center;
+`;
+
+export const FluidContainer = styled(FlexWrapper)`
+    flex: 1;
 `;
 
 export const InvertedIconButton = styled(IconButton)`
