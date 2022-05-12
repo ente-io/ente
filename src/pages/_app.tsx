@@ -23,7 +23,7 @@ import MessageDialog, {
 } from 'components/MessageDialog';
 import {
     getFamilyPortalRedirectURL,
-    getRoadMapURL,
+    getRoadmapRedirectURL,
 } from 'services/userService';
 
 const GlobalStyles = createGlobalStyle`
@@ -568,7 +568,7 @@ export interface FlashMessage {
 export const AppContext = createContext<AppContextType>(null);
 
 const redirectMap = {
-    roadmap: () => getRoadMapURL(),
+    roadmap: () => getRoadmapRedirectURL(),
     families: () => getFamilyPortalRedirectURL(),
 };
 

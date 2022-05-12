@@ -72,7 +72,7 @@ export const getFamiliesToken = async () => {
     }
 };
 
-export const getRoadMapURL = async () => {
+export const getRoadmapRedirectURL = async () => {
     try {
         const token = getToken();
 
