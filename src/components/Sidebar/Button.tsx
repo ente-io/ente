@@ -1,44 +1,28 @@
-import React from 'react';
-import { Button } from '@mui/material';
+import React, { FC } from 'react';
+import { Button, ButtonProps } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import { FluidContainer } from 'components/Container';
 interface IProps {
-    children: any;
-    bgDark?: boolean;
     hideArrow?: boolean;
-    onClick: () => void;
-    color?:
-        | 'inherit'
-        | 'danger'
-        | 'primary'
-        | 'secondary'
-        | 'success'
-        | 'error'
-        | 'info'
-        | 'warning';
+    smallerArrow?: boolean;
 }
-export default function SidebarButton({
+const SidebarButton: FC<ButtonProps<'button', IProps>> = ({
     children,
-    bgDark,
     hideArrow,
+    smallerArrow,
+    sx,
     ...props
-}: IProps) {
+}) => {
     return (
-        <Button
-            {...props}
-            variant="text"
-            sx={{
-                width: '100%',
-                marginBottom: '16px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                bgcolor: bgDark && 'grey.800',
-                padding: '10px',
-                borderRadius: '8px',
-                textTransform: 'none',
-                fontSize: '18px',
-            }}>
-            {children}
-            {!hideArrow && <NavigateNextIcon />}
+        <Button variant="text" fullWidth sx={{ mb: 1, ...sx }} {...props}>
+            <FluidContainer>{children}</FluidContainer>
+            {!hideArrow && (
+                <NavigateNextIcon
+                    fontSize={smallerArrow ? 'small' : 'medium'}
+                />
+            )}
         </Button>
     );
-}
+};
+
+export default SidebarButton;
