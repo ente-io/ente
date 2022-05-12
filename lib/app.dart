@@ -22,8 +22,9 @@ final lightThemeData = ThemeData(
   primaryColor: Colors.deepOrangeAccent,
   iconTheme: IconThemeData(color: Colors.black),
   primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
-  colorScheme: ColorScheme.light(primary: Colors.black),
-  accentColor: Color.fromRGBO(45, 194, 98, 0.2),
+  colorScheme: ColorScheme.light(
+      primary: Colors.black, secondary: Color.fromARGB(255, 163, 163, 163)),
+  accentColor: Color.fromRGBO(0, 0, 0, 0.6),
   buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
     bgDisabled: Colors.grey.shade500,
@@ -93,8 +94,8 @@ final darkThemeData = ThemeData(
   hintColor: Colors.grey,
   bottomAppBarColor: Color.fromRGBO(196, 196, 196, 0.5),
 
-  colorScheme: ColorScheme.dark(),
-  accentColor: Color.fromRGBO(45, 194, 98, 0.2),
+  colorScheme: ColorScheme.dark(secondary: Color.fromARGB(255, 92, 92, 92)),
+  accentColor: Color.fromRGBO(255, 255, 255, 0.6),
   buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
   buttonTheme: ButtonThemeData().copyWith(
     buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
