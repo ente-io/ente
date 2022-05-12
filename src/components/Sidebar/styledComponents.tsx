@@ -25,6 +25,6 @@ export const DotSeparator = styled(CircleIcon)`
     left: 86px;
     top: 18px;
     border-radius: 0px;
-    margin: 0 ${({ theme }) => theme.spacing(2)};
+    margin: 0 ${({ theme }) => theme.spacing(1)};
     color: ${({ theme }) => theme.palette.text.secondary};
 `;
