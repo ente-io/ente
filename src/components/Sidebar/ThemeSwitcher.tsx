@@ -9,12 +9,14 @@ interface Iprops {
 }
 export default function ThemeSwitcher({ theme, setTheme }: Iprops) {
     const handleChange = (event, theme: THEMES) => {
-        setTheme(theme);
+        if (theme !== null) {
+            setTheme(theme);
+        }
     };
 
     return (
         <ToggleButtonGroup
-            color="primary"
+            color="negative"
             size="small"
             value={theme}
             exclusive
