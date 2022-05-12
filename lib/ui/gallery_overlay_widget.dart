@@ -64,11 +64,11 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
   Widget build(BuildContext context) {
     bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
     return AnimatedContainer(
-      duration: Duration(milliseconds: 200),
+      duration: Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       height: filesAreSelected ? 108 : 0,
       child: AnimatedOpacity(
-        duration: Duration(milliseconds: 75),
+        duration: Duration(milliseconds: 100),
         opacity: filesAreSelected ? 1.0 : 0.0,
         curve: Curves.easeIn,
         child: IgnorePointer(
