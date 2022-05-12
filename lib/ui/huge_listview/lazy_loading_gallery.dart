@@ -329,8 +329,8 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
               Visibility(
                 visible: widget.selectedFiles.files.contains(file),
                 child: Positioned(
-                  left: 4,
-                  bottom: 4,
+                  right: 4,
+                  top: 4,
                   child: Icon(
                     Icons.check_circle_rounded,
                     size: 20,

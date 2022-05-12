@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
@@ -85,7 +87,9 @@ class _TrashPageState extends State<TrashPage> {
         alignment: Alignment.bottomCenter,
         children: [
           gallery,
-          BottomShadowWidget(),
+          BottomShadowWidget(
+            offsetDy: 20,
+          ),
           AnimatedContainer(
             duration: Duration(milliseconds: 300),
             curve: Curves.easeInOut,
@@ -97,7 +101,7 @@ class _TrashPageState extends State<TrashPage> {
               child: IgnorePointer(
                 ignoring: filesAreSelected,
                 child: SafeArea(
-                    minimum: EdgeInsets.only(bottom: 12),
+                    minimum: EdgeInsets.only(bottom: 6),
                     child: BottomButtonsWidget()),
               ),
             ),
@@ -131,128 +135,60 @@ class _TrashPageState extends State<TrashPage> {
   }
 }
 
-// class TrashPage extends StatelessWidget {
-// final String tagPrefix;
-// final GalleryType appBarType;
-// final GalleryType overlayType;
-// final _selectedFiles = SelectedFiles();
-
-//   TrashPage({
-//     this.tagPrefix = "trash_page",
-//     this.appBarType = GalleryType.trash,
-//     this.overlayType = GalleryType.trash,
-//     Key key,
-//   }) : super(key: key);
-
-//   @override
-//   Widget build(Object context) {
-//     final gallery = Gallery(
-//       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-//         return TrashDB.instance.getTrashedFiles(
-//             creationStartTime, creationEndTime,
-//             limit: limit, asc: asc);
-//       },
-//       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
-//             (event) =>
-//                 event.updatedFiles.firstWhere(
-//                     (element) => element.uploadedFileID != null,
-//                     orElse: () => null) !=
-//                 null,
-//           ),
-//       forceReloadEvents: [
-//         Bus.instance.on<ForceReloadTrashPageEvent>(),
-//       ],
-//       tagPrefix: tagPrefix,
-//       selectedFiles: _selectedFiles,
-//       header: _headerWidget(),
-//       initialFiles: null,
-//     );
-
-//     return Scaffold(
-//       appBar: PreferredSize(
-//         preferredSize: Size.fromHeight(50.0),
-//         child: GalleryAppBarWidget(
-//           appBarType,
-//           "Trash",
-//           _selectedFiles,
-//         ),
-//       ),
-//       body: Stack(
-//         alignment: Alignment.bottomCenter,
-//         children: [
-//           gallery,
-//           BottomShadowWidget(),
-//           BottomButtonsWidget(),
-//           GalleryOverlayWidget(
-//             overlayType,
-//             _selectedFiles,
-//           )
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _headerWidget() {
-//     return FutureBuilder<int>(
-//       future: TrashDB.instance.count(),
-//       builder: (context, snapshot) {
-//         if (snapshot.hasData && snapshot.data > 0) {
-//           return Padding(
-//             padding: EdgeInsets.all(16),
-//             child: Text(
-//               'Items show the number the days remaining before permanent deletion',
-//               style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16),
-//             ),
-//           );
-//         } else {
-//           return Container();
-//         }
-//       },
-//     );
-//   }
-// }
-
 class BottomButtonsWidget extends StatelessWidget {
   const BottomButtonsWidget({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        InkWell(
-          child: Container(
-            height: 40,
-            decoration: BoxDecoration(
-                color: Color.fromRGBO(255, 101, 101, 0.2),
-                borderRadius: BorderRadius.circular(24)),
-            padding: EdgeInsets.symmetric(horizontal: 24),
-            child: Center(
-              child: Text(
-                'Delete All',
-                style: Theme.of(context).textTheme.subtitle2.copyWith(
-                      color: Color.fromRGBO(255, 101, 101, 1),
-                    ),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: InkWell(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Color.fromRGBO(255, 101, 101, 0.2),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: Center(
+                  child: Text(
+                    'Delete All',
+                    style: Theme.of(context).textTheme.subtitle2.copyWith(
+                          color: Color.fromRGBO(255, 101, 101, 1),
+                        ),
+                  ),
+                ),
               ),
             ),
+            onTap: () async {
+              await emptyTrash(context);
+            },
           ),
-          onTap: () async {
-            await emptyTrash(context);
-          },
         ),
         const SizedBox(width: 16),
-        Container(
-          height: 40,
-          decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .defaultTextColor
-                  .withOpacity(0.2),
-              borderRadius: BorderRadius.circular(24)),
-          padding: EdgeInsets.symmetric(horizontal: 24),
-          child: Center(
-            child: Text('Restore All',
-                style: Theme.of(context).textTheme.subtitle2),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              height: 40,
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .defaultTextColor
+                    .withOpacity(0.2),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Center(
+                child: Text('Restore All',
+                    style: Theme.of(context).textTheme.subtitle2),
+              ),
+            ),
           ),
         )
       ],
