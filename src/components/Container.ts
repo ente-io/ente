@@ -1,3 +1,4 @@
+import { Box } from '@mui/material';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -54,7 +55,7 @@ export const Value = styled.div<{ width?: string }>`
     color: #ddd;
 `;
 
-export const FlexWrapper = styled.div`
+export const FlexWrapper = styled(Box)`
     width: 100%;
     display: flex;
     align-items: center;
