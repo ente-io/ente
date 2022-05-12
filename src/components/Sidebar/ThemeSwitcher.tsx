@@ -16,7 +16,6 @@ export default function ThemeSwitcher({ theme, setTheme }: Iprops) {
 
     return (
         <ToggleButtonGroup
-            color="negative"
             size="small"
             value={theme}
             exclusive
