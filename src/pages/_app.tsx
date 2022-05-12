@@ -24,7 +24,7 @@ import MessageDialog, {
     SetDialogMessage,
 } from 'components/MessageDialog';
 import { ThemeProvider as MThemeProvider } from '@mui/material/styles';
-import darkThemeOptions from 'darkThemeOptions';
+import darkThemeOptions from 'themes/darkThemeOptions';
 import { CssBaseline } from '@mui/material';
 import SidebarToggler from 'components/Navbar/SidebarToggler';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
