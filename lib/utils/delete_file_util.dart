@@ -5,7 +5,6 @@ import 'dart:math';
 
 import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
@@ -36,6 +35,7 @@ Future<void> deleteFilesFromEverywhere(
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
+  bool hasLocalOnlyFiles = false;
   for (final file in files) {
     if (file.localID != null) {
       if (!(await _localFileExist(file))) {
@@ -46,6 +46,16 @@ Future<void> deleteFilesFromEverywhere(
       } else {
         localAssetIDs.add(file.localID);
       }
+    }
+    if (file.uploadedFileID == null) {
+      hasLocalOnlyFiles = true;
+    }
+  }
+  if (hasLocalOnlyFiles && Platform.isAndroid) {
+    final shouldProceed = await shouldProceedWithDeletion(context);
+    if (!shouldProceed) {
+      await dialog.hide();
+      return;
     }
   }
   Set<String> deletedIDs = <String>{};
@@ -108,7 +118,11 @@ Future<void> deleteFilesFromEverywhere(
   if (deletedFiles.isNotEmpty) {
     Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles,
         type: EventType.deletedFromEverywhere));
-    showShortToast("moved to trash");
+    if (hasLocalOnlyFiles && Platform.isAndroid) {
+      showShortToast("files deleted");
+    } else {
+      showShortToast("moved to trash");
+    }
   }
   await dialog.hide();
   if (uploadedFilesToBeTrashed.isNotEmpty) {
@@ -151,8 +165,8 @@ Future<void> deleteFilesFromRemoteOnly(
       type: EventType.deletedFromRemote,
     ));
   }
-  Bus.instance.fire(
-      LocalPhotosUpdatedEvent(files, type: EventType.deletedFromRemote));
+  Bus.instance
+      .fire(LocalPhotosUpdatedEvent(files, type: EventType.deletedFromRemote));
   SyncService.instance.sync();
   await dialog.hide();
   RemoteSyncService.instance.sync(silently: true);
@@ -166,6 +180,7 @@ Future<void> deleteFilesOnDeviceOnly(
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
+  bool hasLocalOnlyFiles = false;
   for (final file in files) {
     if (file.localID != null) {
       if (!(await _localFileExist(file))) {
@@ -176,6 +191,16 @@ Future<void> deleteFilesOnDeviceOnly(
       } else {
         localAssetIDs.add(file.localID);
       }
+    }
+    if (file.uploadedFileID == null) {
+      hasLocalOnlyFiles = true;
+    }
+  }
+  if (hasLocalOnlyFiles && Platform.isAndroid) {
+    final shouldProceed = await shouldProceedWithDeletion(context);
+    if (!shouldProceed) {
+      await dialog.hide();
+      return;
     }
   }
   Set<String> deletedIDs = <String>{};
@@ -216,8 +241,8 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
     await TrashSyncService.instance.deleteFromTrash(files);
     showToast("successfully deleted");
     await dialog.hide();
-    Bus.instance.fire(
-        FilesUpdatedEvent(files, type: EventType.deletedFromEverywhere));
+    Bus.instance
+        .fire(FilesUpdatedEvent(files, type: EventType.deletedFromEverywhere));
     return true;
   } catch (e, s) {
     _logger.info("failed to delete from trash", e, s);
@@ -389,4 +414,16 @@ Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
     _logger.severe("Unexpected error while deleting share media files", e, s);
     return Future.value(actuallyDeletedIDs);
   }
+}
+
+Future<bool> shouldProceedWithDeletion(BuildContext context) async {
+  final choice = await showChoiceDialog(
+    context,
+    "are you sure?",
+    "some of the files you are trying to delete are only available on your device and cannot be recovered if deleted",
+    firstAction: "cancel",
+    secondAction: "delete",
+    secondActionColor: Colors.red,
+  );
+  return choice == DialogUserChoice.secondChoice;
 }
