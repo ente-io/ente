@@ -44,12 +44,22 @@ class ThumbnailWidget extends StatefulWidget {
 Widget getFileInfoContainer(BuildContext context, File file) {
   if (file is TrashFile) {
     return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [Colors.black.withOpacity(0.33), Colors.transparent],
+        ),
+      ),
       child: Text(
         daysLeft(file.deleteBy),
-        style: TextStyle(color: Colors.white),
+        style: Theme.of(context)
+            .textTheme
+            .subtitle2
+            .copyWith(color: Colors.white), //same for both themes
       ),
       alignment: Alignment.bottomCenter,
-      padding: EdgeInsets.fromLTRB(0, 0, 0, 5),
+      padding: EdgeInsets.only(bottom: 5),
     );
   }
   return emptyContainer;
