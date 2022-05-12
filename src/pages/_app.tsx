@@ -9,7 +9,6 @@ import 'photoswipe/dist/photoswipe.css';
 import EnteSpinner from 'components/EnteSpinner';
 import { logError } from '../utils/sentry';
 // import { Workbox } from 'workbox-window';
-import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
@@ -22,7 +21,10 @@ import MessageDialog, {
     MessageAttributes,
     SetDialogMessage,
 } from 'components/MessageDialog';
-import { getFamilyPortalRedirectURL } from 'services/userService';
+import {
+    getFamilyPortalRedirectURL,
+    getRoadmapRedirectURL,
+} from 'services/userService';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -566,9 +568,8 @@ export interface FlashMessage {
 export const AppContext = createContext<AppContextType>(null);
 
 const redirectMap = {
-    roadmap: async (token: string) =>
-        `${getEndpoint()}/users/roadmap?token=${encodeURIComponent(token)}`,
-    families: async () => getFamilyPortalRedirectURL(),
+    roadmap: () => getRoadmapRedirectURL(),
+    families: () => getFamilyPortalRedirectURL(),
 };
 
 export default function App({ Component, err }) {
