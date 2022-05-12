@@ -28,10 +28,12 @@ Future<List<File>> getDeviceFiles(
 }
 
 Future<List<LocalAsset>> getAllLocalAssets() async {
-  final filterOptionGroup = FilterOptionGroup(
-      imageOption: FilterOption(sizeConstraint: ignoreSizeConstraint),
-      videoOption: FilterOption(sizeConstraint: ignoreSizeConstraint),
-      createTimeCond: DateTimeCond.def().copyWith(ignore: true));
+  final filterOptionGroup = FilterOptionGroup();
+  filterOptionGroup.setOption(
+      AssetType.image, FilterOption(sizeConstraint: ignoreSizeConstraint));
+  filterOptionGroup.setOption(
+      AssetType.video, FilterOption(sizeConstraint: ignoreSizeConstraint));
+  filterOptionGroup.createTimeCond = DateTimeCond.def().copyWith(ignore: true);
   final assetPaths = await PhotoManager.getAssetPathList(
     hasAll: true,
     type: RequestType.common,
@@ -39,7 +41,8 @@ Future<List<LocalAsset>> getAllLocalAssets() async {
   );
   final List<LocalAsset> assets = [];
   for (final assetPath in assetPaths) {
-    for (final asset in await assetPath.assetList) {
+    for (final asset
+        in await assetPath.getAssetListPaged(page: 0, size: 10000)) {
       assets.add(LocalAsset(asset.id, assetPath.name));
     }
   }
@@ -131,7 +134,7 @@ Future<List<File>> _computeFiles(AssetPathEntity pathEntity, int fromTime,
     List<File> files, Computer computer) async {
   final args = Map<String, dynamic>();
   args["pathEntity"] = pathEntity;
-  args["assetList"] = await pathEntity.assetList;
+  args["assetList"] = await pathEntity.getAssetListPaged(page: 0, size: 10000);
   args["fromTime"] = fromTime;
   args["files"] = files;
   return await computer.compute(_getFiles, param: args);

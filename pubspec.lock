@@ -838,12 +838,10 @@ packages:
   photo_manager:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "474fe1df8504307f98a8390032693203f2f47997"
-      url: "https://github.com/ente-io/flutter_photo_manager.git"
-    source: git
-    version: "1.3.6"
+      name: photo_manager
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.8"
   photo_view:
     dependency: "direct main"
     description:

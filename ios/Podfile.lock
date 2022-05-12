@@ -139,7 +139,7 @@ PODS:
     - Flutter
   - "permission_handler (5.1.0+2)":
     - Flutter
-  - photo_manager (1.0.0):
+  - photo_manager (2.0.0):
     - Flutter
     - FlutterMacOS
   - PromisesObjC (2.0.0)
@@ -370,7 +370,7 @@ SPEC CHECKSUMS:
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   permission_handler: ccb20a9fad0ee9b1314a52b70b76b473c5f8dab0
-  photo_manager: 84fa94fbeb82e607333ea9a13c43b58e0903a463
+  photo_manager: 4f6810b7dfc4feb03b461ac1a70dacf91fba7604
   PromisesObjC: 68159ce6952d93e17b2dfe273b8c40907db5ba58
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   receive_sharing_intent: c0d87310754e74c0f9542947e7cbdf3a0335a3b1
@@ -392,4 +392,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 58fb802948678e2071d210cfc8aab09d85c8341b
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.11.2
