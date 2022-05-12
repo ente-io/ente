@@ -63,7 +63,11 @@ const darkThemeOptions = createTheme({
     palette: {
         mode: 'dark',
         primary: {
-            main: '#fff',
+            main: '#f0f0f0',
+        },
+        secondary: {
+            main: 'rgba(256, 256, 256, 0.12)',
+            contrastText: '#fff',
         },
         text: {
             primary: '#fff',
