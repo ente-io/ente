@@ -8,12 +8,10 @@ declare module '@mui/material/styles' {
     interface Palette {
         accent: PaletteColor;
         danger: PaletteColor;
-        negative: PaletteColor;
     }
     interface PaletteOptions {
         accent?: PaletteColorOptions;
         danger?: PaletteColorOptions;
-        negative?: PaletteColorOptions;
     }
 }
 
@@ -39,12 +37,9 @@ const darkThemeOptions = createTheme({
         MuiLink: {
             styleOverrides: {
                 root: {
-                    color: '#fff',
                     textDecoration: 'none',
                     '&:hover': {
-                        color: '#fff',
                         textDecoration: 'underline',
-                        textDecorationColor: '#fff',
                     },
                 },
             },
@@ -58,7 +53,6 @@ const darkThemeOptions = createTheme({
                     fontSize: '18px',
                     lineHeight: '21.78px',
                     padding: '16px',
-                    color: '#fff',
                     textTransform: 'none',
                     borderRadius: '8px',
                 },
@@ -69,9 +63,6 @@ const darkThemeOptions = createTheme({
     palette: {
         mode: 'dark',
         primary: {
-            main: 'hsla(0, 0%, 11%, 1)',
-        },
-        negative: {
             main: '#fff',
         },
         text: {
