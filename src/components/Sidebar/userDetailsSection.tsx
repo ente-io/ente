@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { SpaceBetweenFlex } from 'components/Container';
-import InfoSection from './InfoSection';
 import { PaddedDivider } from './styledComponents';
 import SubscriptionDetails from './SubscriptionDetails';
 import { getUserDetails } from 'services/userService';
@@ -9,6 +8,7 @@ import { LS_KEYS } from 'utils/storage/localStorage';
 import { useLocalState } from 'hooks/useLocalState';
 import { THEMES } from 'types/theme';
 import ThemeSwitcher from './ThemeSwitcher';
+import Typography from '@mui/material/Typography';
 
 export default function UserDetailsSection({ sidebarView }) {
     const [userDetails, setUserDetails] = useLocalState<UserDetails>(
@@ -29,8 +29,8 @@ export default function UserDetailsSection({ sidebarView }) {
 
     return (
         <>
-            <SpaceBetweenFlex>
-                <InfoSection userDetails={userDetails} />
+            <SpaceBetweenFlex px={1}>
+                <Typography>{userDetails?.email}</Typography>
                 <ThemeSwitcher theme={theme} setTheme={setTheme} />
             </SpaceBetweenFlex>
             <PaddedDivider invisible />

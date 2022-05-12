@@ -5,7 +5,7 @@ import CircleIcon from '@mui/icons-material/Circle';
 export const DrawerSidebar = MuiStyled(Drawer)(({ theme }) => ({
     '& .MuiPaper-root': {
         width: '320px',
-        padding: theme.spacing(2),
+        padding: theme.spacing(2, 1, 4, 1),
     },
 }));
 
