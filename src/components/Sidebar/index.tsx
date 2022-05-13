@@ -20,9 +20,9 @@ export default function Sidebar({ collectionSummaries }: Iprops) {
     return (
         <DrawerSidebar open={sidebarView} onClose={closeSidebar}>
             <HeaderSection closeSidebar={closeSidebar} />
-            <PaddedDivider />
+            <PaddedDivider spaced />
             <UserDetailsSection sidebarView={sidebarView} />
-            <PaddedDivider invisible dense />
+            <PaddedDivider invisible />
             <NavigationSection
                 closeSidebar={closeSidebar}
                 collectionSummaries={collectionSummaries}

@@ -17,11 +17,12 @@ const SidebarButton: FC<ButtonProps<'button', IProps>> = ({
         <Button
             variant="text"
             fullWidth
-            sx={{ mb: 1, px: 1, py: '10px', ...sx }}
+            sx={{ my: 0.5, px: 1, py: '10px', ...sx }}
             css={`
                 font-size: 16px;
                 font-weight: 600;
                 line-height: 24px;
+                letter-spacing: 0em;
             `}
             {...props}>
             <FluidContainer>{children}</FluidContainer>

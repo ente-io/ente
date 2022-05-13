@@ -13,9 +13,9 @@ DrawerSidebar.defaultProps = { anchor: 'left' };
 
 export const PaddedDivider = MuiStyled(Divider)<{
     invisible?: boolean;
-    dense?: boolean;
-}>(({ theme, invisible, dense }) => ({
-    margin: theme.spacing(dense ? 1 : 2, 0),
+    spaced?: boolean;
+}>(({ theme, invisible, spaced }) => ({
+    margin: theme.spacing(spaced ? 2 : 1, 0),
     opacity: invisible ? 0 : 1,
 }));
 
