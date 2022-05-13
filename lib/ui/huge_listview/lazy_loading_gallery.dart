@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -311,12 +312,18 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
             children: [
               Hero(
                 tag: widget.tag + file.tag(),
-                child: ThumbnailWidget(
-                  file,
-                  diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
-                  serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
-                  shouldShowLivePhotoOverlay: true,
-                  key: Key(widget.tag + file.tag()),
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(
+                          widget.selectedFiles.files.contains(file) ? 0.4 : 0),
+                      BlendMode.darken),
+                  child: ThumbnailWidget(
+                    file,
+                    diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
+                    serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
+                    shouldShowLivePhotoOverlay: true,
+                    key: Key(widget.tag + file.tag()),
+                  ),
                 ),
               ),
               Visibility(
