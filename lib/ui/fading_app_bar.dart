@@ -60,8 +60,8 @@ class FadingAppBarState extends State<FadingAppBar> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.64),
-                Colors.black.withOpacity(0.5),
+                Colors.black.withOpacity(0.72),
+                Colors.black.withOpacity(0.6),
                 Colors.transparent,
               ],
               stops: const [0, 0.2, 1],
@@ -72,7 +72,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         opacity: _shouldHide ? 0 : 1,
         duration: Duration(milliseconds: 150),
       ),
-      height: 100,
+      height: 64,
     );
   }
 

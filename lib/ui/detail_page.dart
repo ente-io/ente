@@ -151,7 +151,7 @@ class _DetailPageState extends State<DetailPage> {
               _toggleFullScreen();
             });
           },
-          backgroundDecoration: BoxDecoration(color: Colors.transparent),
+          backgroundDecoration: BoxDecoration(color: Colors.black),
         );
         _preloadFiles(index);
         return GestureDetector(
@@ -188,6 +188,7 @@ class _DetailPageState extends State<DetailPage> {
     }
     Future.delayed(Duration.zero, () {
       SystemChrome.setEnabledSystemUIOverlays(
+        //to hide status bar?
         _shouldHideAppBar ? [] : SystemUiOverlay.values,
       );
     });

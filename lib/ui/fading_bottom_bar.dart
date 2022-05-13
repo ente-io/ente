@@ -9,7 +9,6 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
-import 'package:photos/ui/common/bottomShadow.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/file_info_dialog.dart';
 import 'package:photos/utils/delete_file_util.dart';
@@ -38,13 +37,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(alignment: Alignment.bottomCenter, children: [
-      BottomShadowWidget(
-        shadowColor: Colors.black54,
-        offsetDy: 16,
-      ),
-      _getBottomBar()
-    ]);
+    return _getBottomBar();
   }
 
   void hide() {
@@ -168,8 +161,8 @@ class FadingBottomBarState extends State<FadingBottomBar> {
               end: Alignment.bottomCenter,
               colors: [
                 Colors.transparent,
-                Theme.of(context).colorScheme.onPrimary.withOpacity(0.12),
-                Theme.of(context).colorScheme.onPrimary.withOpacity(0.2),
+                Colors.black.withOpacity(0.6),
+                Colors.black.withOpacity(0.72),
               ],
               stops: const [0, 0.8, 1],
             ),
