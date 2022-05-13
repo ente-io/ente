@@ -157,6 +157,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Widget _buildFlipButton() {
+    TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2;
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -170,16 +172,15 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               padding: const EdgeInsets.only(bottom: 2),
               child: Icon(
                 Icons.flip,
-                color: Colors.white.withOpacity(0.8),
+                color: Theme.of(context).iconTheme.color.withOpacity(0.8),
                 size: 20,
               ),
             ),
             Padding(padding: EdgeInsets.all(2)),
             Text(
               "flip",
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.6),
-                fontSize: 12,
+              style: subtitle2.copyWith(
+                color: subtitle2.color.withOpacity(0.8),
               ),
               textAlign: TextAlign.center,
             ),
@@ -190,6 +191,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Widget _buildRotateLeftButton() {
+    TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2;
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -199,13 +202,15 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         width: 80,
         child: Column(
           children: [
-            Icon(Icons.rotate_left, color: Colors.white.withOpacity(0.8)),
+            Icon(
+              Icons.rotate_left,
+              color: Theme.of(context).iconTheme.color.withOpacity(0.8),
+            ),
             Padding(padding: EdgeInsets.all(2)),
             Text(
               "rotate left",
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.6),
-                fontSize: 12,
+              style: subtitle2.copyWith(
+                color: subtitle2.color.withOpacity(0.8),
               ),
               textAlign: TextAlign.center,
             ),
@@ -216,6 +221,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Widget _buildRotateRightButton() {
+    TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2;
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -225,13 +232,15 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         width: 80,
         child: Column(
           children: [
-            Icon(Icons.rotate_right, color: Colors.white.withOpacity(0.8)),
+            Icon(
+              Icons.rotate_right,
+              color: Theme.of(context).iconTheme.color.withOpacity(0.8),
+            ),
             Padding(padding: EdgeInsets.all(2)),
             Text(
               "rotate right",
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.6),
-                fontSize: 12,
+              style: subtitle2.copyWith(
+                color: subtitle2.color.withOpacity(0.8),
               ),
               textAlign: TextAlign.center,
             ),
@@ -242,6 +251,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Widget _buildSaveButton() {
+    TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2;
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -251,13 +262,15 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         width: 80,
         child: Column(
           children: [
-            Icon(Icons.save_alt_outlined, color: Colors.white.withOpacity(0.8)),
+            Icon(
+              Icons.save_alt_outlined,
+              color: Theme.of(context).iconTheme.color.withOpacity(0.8),
+            ),
             Padding(padding: EdgeInsets.all(2)),
             Text(
               "save copy",
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.6),
-                fontSize: 12,
+              style: subtitle2.copyWith(
+                color: subtitle2.color.withOpacity(0.8),
               ),
               textAlign: TextAlign.center,
             ),
@@ -379,6 +392,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Widget _buildSat() {
+    TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2;
+
     return Container(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Row(
@@ -387,9 +402,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             width: 40,
             child: Text(
               "color",
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 14,
+              style: subtitle2.copyWith(
+                color: subtitle2.color.withOpacity(0.8),
               ),
             ),
           ),
@@ -424,6 +438,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Widget _buildBrightness() {
+    TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2;
+
     return Container(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Row(
@@ -432,9 +448,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             width: 40,
             child: Text(
               "light",
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 14,
+              style: subtitle2.copyWith(
+                color: subtitle2.color.withOpacity(0.8),
               ),
             ),
           ),
