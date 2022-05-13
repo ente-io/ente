@@ -1,8 +1,5 @@
-import DialogTitle from '@mui/material/DialogTitle';
-import IconButton from '@mui/material/IconButton';
 import React from 'react';
 import constants from 'utils/strings/constants';
-import CloseIcon from '@mui/icons-material/Close';
 import {
     Breakpoint,
     Button,
@@ -12,6 +9,7 @@ import {
     DialogContentText,
     Divider,
 } from '@mui/material';
+import DialogTitleWithCloseButton from './TitleWithCloseButton';
 
 export type ButtonColors =
     | 'inherit'
@@ -45,29 +43,6 @@ type Props = React.PropsWithChildren<{
     attributes: MessageAttributes;
     size?: Breakpoint;
 }>;
-
-export const DialogTitleWithCloseButton = (props) => {
-    const { children, onClose, ...other } = props;
-
-    return (
-        <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
-            {children}
-            {onClose ? (
-                <IconButton
-                    aria-label="close"
-                    onClick={onClose}
-                    sx={{
-                        position: 'absolute',
-                        right: 8,
-                        top: 8,
-                        color: (theme) => theme.palette.grey[400],
-                    }}>
-                    <CloseIcon />
-                </IconButton>
-            ) : null}
-        </DialogTitle>
-    );
-};
 
 export default function MessageDialog({
     attributes,
