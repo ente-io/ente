@@ -14,7 +14,16 @@ const SidebarButton: FC<ButtonProps<'button', IProps>> = ({
     ...props
 }) => {
     return (
-        <Button variant="text" fullWidth sx={{ mb: 1, ...sx }} {...props}>
+        <Button
+            variant="text"
+            fullWidth
+            sx={{ mb: 1, px: 1, py: '10px', ...sx }}
+            css={`
+                font-size: 16px;
+                font-weight: 600;
+                line-height: 24px;
+            `}
+            {...props}>
             <FluidContainer>{children}</FluidContainer>
             {!hideArrow && (
                 <NavigateNextIcon
