@@ -647,13 +647,13 @@ export default function App({ Component, err }) {
         };
 
         const query = new URLSearchParams(window.location.search);
-        const redirect = query.get('redirect');
-        if (redirect && redirectMap[redirect]) {
+        const redirectName = query.get('redirect');
+        if (redirectName && redirectMap[redirectName]) {
             const user = getData(LS_KEYS.USER);
             if (user?.token) {
-                redirectTo(redirect, user.token);
+                redirectTo(redirectName, user.token);
             } else {
-                setRedirectName(redirect);
+                setRedirectName(redirectName);
             }
         }
 
@@ -662,10 +662,14 @@ export default function App({ Component, err }) {
                 setLoading(true);
             }
 
-            if (redirectName) {
+            if (redirectName && redirectMap[redirectName]) {
                 const user = getData(LS_KEYS.USER);
                 if (user?.token) {
                     redirectTo(redirectName, user.token);
+
+                    // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710
+                    // eslint-disable-next-line no-throw-literal
+                    throw 'Aborting route change, redirection in process....';
                 }
             }
         });
