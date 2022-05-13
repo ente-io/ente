@@ -105,7 +105,7 @@ const darkThemeOptions = createTheme({
             A200: 'rgba(256, 256, 256, 0.24)',
             A400: '#434343',
         },
-        divider: 'rgba(255, 255, 255, 0.24)',
+        divider: 'rgba(256, 256, 256, 0.12)',
     },
     shape: {
         borderRadius: 8,
