@@ -18,7 +18,6 @@ const Wrapper = styled.button<{ direction: SCROLL_DIRECTION }>`
 
     border-radius: 50%;
     background-color: ${({ theme }) => theme.palette.background.paper};
-
     color: ${({ theme }) => theme.palette.text.primary};
 
     ${(props) =>
@@ -41,10 +40,6 @@ const Wrapper = styled.button<{ direction: SCROLL_DIRECTION }>`
         border-radius: 50%;
         height: 30px;
         width: 30px;
-    }
-
-    &:hover {
-        color: #fff;
     }
 `;
 
