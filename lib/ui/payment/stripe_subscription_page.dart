@@ -216,37 +216,37 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           ),
         ),
       ]);
+    }
 
-      if (!widget.isOnboarding) {
-        widgets.addAll([
-          Align(
-            alignment: Alignment.topCenter,
-            child: GestureDetector(
-              onTap: () async {
-                await _launchFamilyPortal();
-              },
-              child: Container(
-                padding: EdgeInsets.fromLTRB(40, 0, 40, 80),
-                child: Column(
-                  children: [
-                    RichText(
-                      text: TextSpan(
-                          text: "Manage family",
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            fontFamily: 'Inter-Medium',
-                            fontSize: 14,
-                            decoration: TextDecoration.underline,
-                          )),
-                      textAlign: TextAlign.center,
+    if (!widget.isOnboarding) {
+      widgets.addAll([
+        Align(
+          alignment: Alignment.topCenter,
+          child: GestureDetector(
+            onTap: () async {
+              await _launchFamilyPortal();
+            },
+            child: Container(
+              padding: EdgeInsets.fromLTRB(40, 0, 40, 80),
+              child: Column(
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      text: "manage family",
+                      style: TextStyle(
+                        color: Colors.blue,
+                        fontFamily: 'Ubuntu',
+                        fontSize: 15,
+                      ),
                     ),
-                  ],
-                ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ),
-        ]);
-      }
+        ),
+      ]);
     }
 
     return SingleChildScrollView(
@@ -276,6 +276,13 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   Future<void> _launchFamilyPortal() async {
+    if (_userDetails.subscription.productID == kFreeProductID) {
+      await showErrorDialog(
+          context,
+          "Now you can share your storage plan with your family members!",
+          "Customers on paid plans can add up to 5 family members without paying extra. Each member gets their own private space.");
+      return;
+    }
     await _dialog.show();
     try {
       final String jwtToken = await _userService.getFamiliesToken();
