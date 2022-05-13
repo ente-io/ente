@@ -161,10 +161,10 @@ const englishConstants = {
     CHANGE_PASSWORD: 'Change password',
     GO_BACK: 'go back',
     RECOVERY_KEY: 'Recovery key',
-    SAVE_LATER: 'save later',
-    SAVE: 'save',
+    SAVE_LATER: 'Do this later',
+    SAVE: 'Save Key',
     RECOVERY_KEY_DESCRIPTION:
-        'if you forget your password, the only way you can recover your data is with this key',
+        'If you forget your password, the only way you can recover your data is with this key.',
     RECOVER_KEY_GENERATION_FAILED:
         'recovery code could not be generated, please try again',
     KEY_NOT_STORED_DISCLAIMER:
@@ -720,6 +720,7 @@ const englishConstants = {
     ALL_ALBUMS: 'All Albums',
     PHOTOS: 'Photos',
     ENDS: 'Ends',
+    COPIED: 'copied',
 };
 
 export default englishConstants;

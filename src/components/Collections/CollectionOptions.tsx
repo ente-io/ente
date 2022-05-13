@@ -175,12 +175,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     disablePadding: true,
                     'aria-labelledby': 'collection-options',
                 }}>
-                <Paper sx={{ borderRadius: '10px' }}>
+                <Paper>
                     <MenuList
                         sx={{
                             padding: 0,
                             border: 'none',
-                            borderRadius: '8px',
                         }}>
                         <MenuItem>
                             <ListItem onClick={showRenameCollectionModal}>

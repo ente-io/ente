@@ -11,7 +11,7 @@ import {
 } from 'utils/crypto';
 import SetPasswordForm from 'components/SetPasswordForm';
 import { justSignedUp, setJustSignedUp } from 'utils/storage';
-import RecoveryKeyModal from 'components/RecoveryKeyModal';
+import RecoveryKey from 'components/RecoveryKey';
 import { PAGES } from 'constants/pages';
 import Container from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
@@ -84,7 +84,7 @@ export default function Generate() {
                     </EnteSpinner>
                 </Container>
             ) : recoverModalView ? (
-                <RecoveryKeyModal
+                <RecoveryKey
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);

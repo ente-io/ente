@@ -21,7 +21,6 @@ export default function SubscriptionDetails({ userDetails }: Iprops) {
             flexDirection={'column'}
             height={160}
             bgcolor="accent.main"
-            borderRadius={'8px'}
             position={'relative'}>
             {userDetails ? (
                 <>
@@ -61,7 +60,6 @@ export default function SubscriptionDetails({ userDetails }: Iprops) {
                         position={'relative'}
                         zIndex="100"
                         height="64px"
-                        borderRadius={'0 0 8px 8px'}
                         bgcolor="accent.dark"
                         padding="16px">
                         <LinearProgress

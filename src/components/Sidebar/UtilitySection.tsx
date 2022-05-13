@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import SidebarButton from './Button';
 import constants from 'utils/strings/constants';
 import FixLargeThumbnails from 'components/FixLargeThumbnail';
-import RecoveryKeyModal from 'components/RecoveryKeyModal';
+import RecoveryKey from 'components/RecoveryKey';
 import TwoFactorModal from 'components/TwoFactorModal';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
@@ -65,7 +65,7 @@ export default function UtilitySection({ closeSidebar }) {
                 {constants.COMPRESS_THUMBNAILS}
             </SidebarButton>
 
-            <RecoveryKeyModal
+            <RecoveryKey
                 show={recoverModalView}
                 onHide={closeRecoveryKeyModal}
                 somethingWentWrong={somethingWentWrong}
