@@ -32,6 +32,7 @@ const Trigger = styled.span`
 `;
 
 const englishConstants = {
+    ENTE: 'ente',
     HERO_HEADER: () => (
         <div>
             with <Logo src="/icon.svg" />
@@ -718,7 +719,6 @@ const englishConstants = {
     VIEW_ALL_ALBUMS: 'View all Albums',
     ALL_ALBUMS: 'All Albums',
     PHOTOS: 'Photos',
-    ENTE: 'ente',
     ENDS: 'Ends',
 };
 
