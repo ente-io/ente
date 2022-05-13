@@ -33,7 +33,7 @@ export default function UserDetailsSection({ sidebarView }) {
                 <Typography>{userDetails?.email}</Typography>
                 <ThemeSwitcher theme={theme} setTheme={setTheme} />
             </SpaceBetweenFlex>
-            <PaddedDivider invisible dense />
+            <PaddedDivider invisible />
             <SubscriptionDetails userDetails={userDetails} />
         </>
     );
