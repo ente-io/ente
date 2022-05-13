@@ -4,7 +4,7 @@ import NavigationSection from './NavigationSection';
 import UtilitySection from './UtilitySection';
 import HelpSection from './HelpSection';
 import ExitSection from './ExitSection';
-import DebugLogs from './DebugLogs';
+// import DebugLogs from './DebugLogs';
 import { DrawerSidebar, PaddedDivider } from './styledComponents';
 import { AppContext } from 'pages/_app';
 import HeaderSection from './Header';
@@ -32,8 +32,8 @@ export default function Sidebar({ collectionSummaries }: Iprops) {
             <HelpSection />
             <PaddedDivider />
             <ExitSection />
-            <PaddedDivider />
-            <DebugLogs />
+            {/* <PaddedDivider />
+            <DebugLogs /> */}
         </DrawerSidebar>
     );
 }
