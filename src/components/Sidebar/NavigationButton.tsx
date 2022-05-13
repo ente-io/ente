@@ -20,10 +20,11 @@ const NavigationButton: FC<ButtonProps<'button', IProps>> = ({
             smallerArrow
             variant="contained"
             color="secondary"
-            sx={{ px: '12px', py: '10px' }}
+            sx={{ px: '12px' }}
             css={`
                 font-size: 14px;
                 line-height: 20px;
+                font-weight: 500;
             `}
             {...props}>
             <Box mr={'12px'}>{icon}</Box>
