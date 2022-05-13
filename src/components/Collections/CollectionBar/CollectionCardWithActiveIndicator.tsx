@@ -1,7 +1,7 @@
 import React from 'react';
 import { EnteFile } from 'types/file';
-import { CollectionTileWrapper, ActiveIndicator } from './styledComponents';
-import CollectionCard from './CollectionCard';
+import { CollectionTileWrapper, ActiveIndicator } from '../styledComponents';
+import CollectionCard from '../CollectionCard';
 
 const CollectionCardWithActiveIndicator = React.forwardRef(
     (

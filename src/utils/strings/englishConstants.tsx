@@ -32,6 +32,7 @@ const Trigger = styled.span`
 `;
 
 const englishConstants = {
+    ENTE: 'ente',
     HERO_HEADER: () => (
         <div>
             with <Logo src="/icon.svg" />
@@ -160,10 +161,10 @@ const englishConstants = {
     CHANGE_PASSWORD: 'Change password',
     GO_BACK: 'go back',
     RECOVERY_KEY: 'Recovery key',
-    SAVE_LATER: 'save later',
-    SAVE: 'save',
+    SAVE_LATER: 'Do this later',
+    SAVE: 'Save Key',
     RECOVERY_KEY_DESCRIPTION:
-        'if you forget your password, the only way you can recover your data is with this key.',
+        'If you forget your password, the only way you can recover your data is with this key.',
     RECOVER_KEY_GENERATION_FAILED:
         'recovery code could not be generated, please try again',
     KEY_NOT_STORED_DISCLAIMER:
@@ -718,10 +719,10 @@ const englishConstants = {
     VIEW_ALL_ALBUMS: 'View all Albums',
     ALL_ALBUMS: 'All Albums',
     PHOTOS: 'Photos',
-    ENTE: 'ente',
     ENDS: 'Ends',
     ENTER_TWO_FACTOR_OTP:
         ' enter the 6-digit code from your authenticator app.',
+    COPIED: 'copied',
 };
 
 export default englishConstants;

@@ -10,11 +10,15 @@ import { getToken } from 'utils/common/key';
 import isElectron from 'is-electron';
 import { downloadApp, initiateEmail } from 'utils/common';
 import { AppContext } from 'pages/_app';
+import { useLocalState } from 'hooks/useLocalState';
+import { LS_KEYS } from 'utils/storage/localStorage';
+import { UserDetails } from 'types/user';
 
-export default function HelpSection({ userDetails }) {
-    const { setDialogMessage } = useContext(AppContext);
-
+export default function HelpSection() {
+    const [userDetails] = useLocalState<UserDetails>(LS_KEYS.USER_DETAILS);
     const [exportModalView, setExportModalView] = useState(false);
+
+    const { setDialogMessage } = useContext(AppContext);
 
     function openFeedbackURL() {
         const feedbackURL: string = `${getEndpoint()}/users/feedback?token=${encodeURIComponent(

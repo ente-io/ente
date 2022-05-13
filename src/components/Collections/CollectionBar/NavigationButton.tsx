@@ -1,6 +1,6 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
-import NavigateNext from '../icons/NavigateNext';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 export enum SCROLL_DIRECTION {
     LEFT = -1,
@@ -8,15 +8,18 @@ export enum SCROLL_DIRECTION {
 }
 
 const Wrapper = styled.button<{ direction: SCROLL_DIRECTION }>`
+    position: absolute;
     top: 7px;
     height: 50px;
     width: 50px;
+    border: none;
+    padding: 0;
+    margin: 0;
 
     border-radius: 50%;
     background-color: ${({ theme }) => theme.palette.background.paper};
-    border: none;
     color: ${({ theme }) => theme.palette.text.primary};
-    position: absolute;
+
     ${(props) =>
         props.direction === SCROLL_DIRECTION.LEFT
             ? css`
@@ -38,15 +41,11 @@ const Wrapper = styled.button<{ direction: SCROLL_DIRECTION }>`
         height: 30px;
         width: 30px;
     }
-
-    &:hover {
-        color: #fff;
-    }
 `;
 
 const NavigationButton = ({ scrollDirection, ...rest }) => (
     <Wrapper direction={scrollDirection} {...rest}>
-        <NavigateNext />
+        <NavigateNextIcon />
     </Wrapper>
 );
 export default NavigationButton;
