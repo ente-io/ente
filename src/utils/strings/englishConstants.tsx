@@ -720,6 +720,7 @@ const englishConstants = {
     ALL_ALBUMS: 'All Albums',
     PHOTOS: 'Photos',
     ENDS: 'Ends',
+    COPIED: 'copied',
 };
 
 export default englishConstants;
