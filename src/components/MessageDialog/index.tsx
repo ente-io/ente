@@ -3,33 +3,30 @@ import constants from 'utils/strings/constants';
 import {
     Breakpoint,
     Button,
+    ButtonProps,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
+    DialogProps,
     Divider,
 } from '@mui/material';
 import DialogTitleWithCloseButton from './TitleWithCloseButton';
 
-export type ButtonColors =
-    | 'inherit'
-    | 'secondary'
-    | 'primary'
-    | 'success'
-    | 'error'
-    | 'info'
-    | 'warning'
-    | 'danger';
 export interface MessageAttributes {
     title?: string;
     staticBackdrop?: boolean;
     nonClosable?: boolean;
     content?: any;
-    close?: { text?: string; variant?: ButtonColors; action?: () => void };
+    close?: {
+        text?: string;
+        variant?: ButtonProps['color'];
+        action?: () => void;
+    };
     proceed?: {
         text: string;
         action: () => void;
-        variant: ButtonColors;
+        variant: ButtonProps['color'];
         disabled?: boolean;
     };
 }
@@ -53,14 +50,22 @@ export default function MessageDialog({
         return <></>;
     }
 
+    const handleClose: DialogProps['onClose'] = (_, reason) => {
+        if (attributes?.nonClosable) {
+            // no-op
+        } else if (attributes?.staticBackdrop && reason === 'backdropClick') {
+            // no-op
+        } else {
+            props.onHide();
+        }
+    };
+
     return (
-        <Dialog open={props.show} maxWidth={props.size} onClose={props.onHide}>
+        <Dialog open={props.show} maxWidth={props.size} onClose={handleClose}>
             {attributes.title && (
                 <>
                     <DialogTitleWithCloseButton
-                        onClose={
-                            attributes.nonClosable ? () => null : props.onHide
-                        }>
+                        onClose={!attributes?.nonClosable && handleClose}>
                         {attributes.title}
                     </DialogTitleWithCloseButton>
                     <Divider />
@@ -76,12 +81,10 @@ export default function MessageDialog({
                 </DialogContent>
             )}
             {(attributes.close || attributes.proceed) && (
-                <DialogActions sx={{ m: '10px 10px' }}>
+                <DialogActions>
                     <>
                         {attributes.close && (
                             <Button
-                                fullWidth
-                                variant="outlined"
                                 color={attributes.close?.variant ?? 'secondary'}
                                 onClick={() => {
                                     attributes.close.action &&
@@ -93,8 +96,6 @@ export default function MessageDialog({
                         )}
                         {attributes.proceed && (
                             <Button
-                                fullWidth
-                                variant="outlined"
                                 color={attributes.proceed?.variant ?? 'primary'}
                                 onClick={() => {
                                     attributes.proceed.action();

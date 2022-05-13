@@ -48,6 +48,9 @@ const darkThemeOptions = createTheme({
             styleOverrides: { paper: { margin: '10px' } },
         },
         MuiButton: {
+            defaultProps: {
+                variant: 'contained',
+            },
             styleOverrides: {
                 root: {
                     fontSize: '18px',
