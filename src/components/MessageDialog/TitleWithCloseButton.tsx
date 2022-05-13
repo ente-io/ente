@@ -1,14 +1,14 @@
 import React from 'react';
 import { DialogTitle, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { TwoScreenSpacedOptions } from 'components/Container';
+import { SpaceBetweenFlex } from 'components/Container';
 
 const DialogTitleWithCloseButton = (props) => {
     const { children, onClose, ...other } = props;
 
     return (
         <DialogTitle {...other}>
-            <TwoScreenSpacedOptions>
+            <SpaceBetweenFlex>
                 {children}
                 {onClose && (
                     <IconButton
@@ -18,7 +18,7 @@ const DialogTitleWithCloseButton = (props) => {
                         <CloseIcon />
                     </IconButton>
                 )}
-            </TwoScreenSpacedOptions>
+            </SpaceBetweenFlex>
         </DialogTitle>
     );
 };
