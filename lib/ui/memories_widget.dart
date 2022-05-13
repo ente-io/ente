@@ -19,7 +19,7 @@ class MemoriesWidget extends StatelessWidget {
       future: MemoriesService.instance.getMemories(),
       builder: (context, snapshot) {
         if (snapshot.hasError || !snapshot.hasData || snapshot.data.isEmpty) {
-          return Container();
+          return const SizedBox.shrink();
         } else {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

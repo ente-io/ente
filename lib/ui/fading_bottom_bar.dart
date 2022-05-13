@@ -9,6 +9,7 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
+import 'package:photos/ui/common/bottomShadow.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/file_info_dialog.dart';
 import 'package:photos/utils/delete_file_util.dart';
@@ -37,7 +38,13 @@ class FadingBottomBarState extends State<FadingBottomBar> {
 
   @override
   Widget build(BuildContext context) {
-    return _getBottomBar();
+    return Stack(alignment: Alignment.bottomCenter, children: [
+      BottomShadowWidget(
+        shadowColor: Colors.black54,
+        offsetDy: 16,
+      ),
+      _getBottomBar()
+    ]);
   }
 
   void hide() {
@@ -67,7 +74,9 @@ class FadingBottomBarState extends State<FadingBottomBar> {
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(
             icon: Icon(
-                Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info),
+              Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
+              color: Colors.white,
+            ),
             onPressed: () {
               _displayInfo(widget.file);
             },
@@ -87,7 +96,10 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             child: Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 12),
               child: IconButton(
-                icon: Icon(Icons.tune_outlined),
+                icon: Icon(
+                  Icons.tune_outlined,
+                  color: Colors.white,
+                ),
                 onPressed: () {
                   widget.onEditRequested(widget.file);
                 },
@@ -106,13 +118,12 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             child: Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 12),
               child: IconButton(
-                icon: Icon(Platform.isAndroid
-                    ? (isArchived
-                        ? Icons.unarchive_outlined
-                        : Icons.archive_outlined)
-                    : (isArchived
-                        ? CupertinoIcons.archivebox_fill
-                        : CupertinoIcons.archivebox)),
+                icon: Icon(
+                  isArchived
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: Colors.white,
+                ),
                 onPressed: () async {
                   await changeVisibility(
                     context,
@@ -133,9 +144,12 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             padding: const EdgeInsets.only(top: 12, bottom: 12),
             child: IconButton(
               key: shareButtonKey,
-              icon: Icon(Platform.isAndroid
-                  ? Icons.share_outlined
-                  : CupertinoIcons.share),
+              icon: Icon(
+                Platform.isAndroid
+                    ? Icons.share_outlined
+                    : CupertinoIcons.share,
+                color: Colors.white,
+              ),
               onPressed: () {
                 share(context, [widget.file], shareButtonKey: shareButtonKey);
               },

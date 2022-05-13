@@ -100,31 +100,33 @@ class _DetailPageState extends State<DetailPage> {
         " files .");
     _appBarKey = GlobalKey<FadingAppBarState>();
     _bottomBarKey = GlobalKey<FadingBottomBarState>();
-    return Scaffold(
-      appBar: FadingAppBar(
-        _files[_selectedIndex],
-        _onFileDeleted,
-        Configuration.instance.getUserID(),
-        100,
-        widget.config.mode == DetailPageMode.full,
-        key: _appBarKey,
-      ),
-      extendBodyBehindAppBar: true,
-      body: Center(
-        child: Stack(
-          children: [
-            _buildPageView(),
-            FadingBottomBar(
-              _files[_selectedIndex],
-              _onEditFileRequested,
-              widget.config.mode == DetailPageMode.minimalistic,
-              key: _bottomBarKey,
-            ),
-          ],
+    return SafeArea(
+      child: Scaffold(
+        appBar: FadingAppBar(
+          _files[_selectedIndex],
+          _onFileDeleted,
+          Configuration.instance.getUserID(),
+          100,
+          widget.config.mode == DetailPageMode.full,
+          key: _appBarKey,
         ),
-      ),
+        extendBodyBehindAppBar: true,
+        body: Center(
+          child: Stack(
+            children: [
+              _buildPageView(),
+              FadingBottomBar(
+                _files[_selectedIndex],
+                _onEditFileRequested,
+                widget.config.mode == DetailPageMode.minimalistic,
+                key: _bottomBarKey,
+              ),
+            ],
+          ),
+        ),
 
-      // backgroundColor: Theme.of(context).colorScheme.onPrimary,
+        // backgroundColor: Theme.of(context).colorScheme.onPrimary,
+      ),
     );
   }
 

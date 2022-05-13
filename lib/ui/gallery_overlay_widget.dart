@@ -374,7 +374,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         color: Colors.black, //same for both themes
         icon: Icon(
           Icons.restore,
-          color: Theme.of(context).colorScheme.inverseIconColor,
         ),
         onPressed: () {
           Navigator.push(
