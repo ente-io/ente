@@ -8,7 +8,6 @@ import DoneIcon from '@mui/icons-material/Done';
 
 const Wrapper = styled.div`
     position: relative;
-    border-radius: 8px;
 `;
 const CopyButtonWrapper = styled(IconButton)`
     position: absolute;
@@ -26,7 +25,6 @@ export const CodeWrapper = styled.div`
     padding: 37px 40px 20px 20px;
     color: white;
     background: ${({ theme }) => theme.palette.accent.dark};
-    border-radius: 8px;
     width: 100%;
 `;
 
