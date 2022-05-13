@@ -1,8 +1,11 @@
 import React, { useMemo } from 'react';
 import Divider from '@mui/material/Divider';
-import { COLLECTION_SORT_BY } from 'constants/collection';
+import { CollectionType, COLLECTION_SORT_BY } from 'constants/collection';
 import { sortCollectionSummaries } from 'services/collectionService';
-import { Transition, FloatingSidebar } from 'components/FloatingSidebar';
+import {
+    Transition,
+    FloatingDrawer,
+} from 'components/Collections/FloatingDrawer';
 import { useLocalState } from 'hooks/useLocalState';
 import { LS_KEYS } from 'utils/storage/localStorage';
 import AllCollectionsHeader from './header';
@@ -30,7 +33,9 @@ export default function AllCollections(props: Iprops) {
     const sortedCollectionSummaries = useMemo(
         () =>
             sortCollectionSummaries(
-                [...collectionSummaries.values()],
+                [...collectionSummaries.values()].filter(
+                    (x) => x.collectionAttributes.type !== CollectionType.system
+                ),
                 collectionSortBy
             ),
         [collectionSortBy, collectionSummaries]
@@ -42,7 +47,7 @@ export default function AllCollections(props: Iprops) {
     };
 
     return (
-        <FloatingSidebar
+        <FloatingDrawer
             TransitionComponent={LeftSlideTransition}
             onClose={close}
             open={isOpen}>
@@ -57,6 +62,6 @@ export default function AllCollections(props: Iprops) {
                 sortedCollectionSummaries={sortedCollectionSummaries}
                 onCollectionClick={onCollectionClick}
             />
-        </FloatingSidebar>
+        </FloatingDrawer>
     );
 }

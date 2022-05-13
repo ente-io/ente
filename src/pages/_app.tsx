@@ -15,7 +15,7 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
 import Head from 'next/head';
-import { getAlbumSiteHost } from 'constants/pages';
+import { getAlbumSiteHost, PAGES } from 'constants/pages';
 import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 import { logUploadInfo } from 'utils/upload';
 import LoadingBar from 'react-top-loading-bar';
@@ -24,8 +24,9 @@ import MessageDialog, {
     SetDialogMessage,
 } from 'components/MessageDialog';
 import { ThemeProvider as MThemeProvider } from '@mui/material/styles';
-import darkThemeOptions from 'darkThemeOptions';
+import darkThemeOptions from 'themes/darkThemeOptions';
 import { CssBaseline } from '@mui/material';
+import SidebarToggler from 'components/Navbar/SidebarToggler';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as types from 'styled-components/cssprop';
 
@@ -66,6 +67,8 @@ type AppContextType = {
     finishLoading: () => void;
     closeMessageDialog: () => void;
     setDialogMessage: SetDialogMessage;
+    sidebarView: boolean;
+    closeSidebar: () => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -101,6 +104,7 @@ export default function App({ Component, err }) {
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
+    const [sidebarView, setSidebarView] = useState(false);
 
     useEffect(() => {
         if (
@@ -141,6 +145,9 @@ export default function App({ Component, err }) {
     const setUserOnline = () => setOffline(false);
     const setUserOffline = () => setOffline(true);
     const resetSharedFiles = () => setSharedFiles(null);
+
+    const closeSidebar = () => setSidebarView(false);
+    const openSidebar = () => setSidebarView(true);
 
     useEffect(() => {
         if (process.env.NODE_ENV === 'production') {
@@ -237,6 +244,9 @@ export default function App({ Component, err }) {
                     <CssBaseline />
                     {showNavbar && (
                         <Navbar>
+                            {!loading && router.pathname === PAGES.GALLERY && (
+                                <SidebarToggler openSidebar={openSidebar} />
+                            )}
                             <FlexContainer shouldJustifyLeft={isAlbumsDomain}>
                                 <LogoImage
                                     style={{ height: '24px', padding: '3px' }}
@@ -291,6 +301,8 @@ export default function App({ Component, err }) {
                             finishLoading,
                             closeMessageDialog,
                             setDialogMessage,
+                            sidebarView,
+                            closeSidebar,
                         }}>
                         {loading ? (
                             <Container>

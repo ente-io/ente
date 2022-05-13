@@ -44,7 +44,7 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
             onHide={onClose}
             size="lg"
             attributes={{
-                title: constants.DOWNLOAD_RECOVERY_KEY,
+                title: constants.RECOVERY_KEY,
                 close: {
                     text: constants.SAVE_LATER,
                     variant: 'danger',

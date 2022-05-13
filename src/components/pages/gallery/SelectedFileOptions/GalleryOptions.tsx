@@ -2,7 +2,7 @@ import { SetDialogMessage } from 'components/MessageDialog';
 import React, { useEffect, useState } from 'react';
 import { SetCollectionSelectorAttributes } from '../CollectionSelector';
 import DeleteIcon from 'components/icons/DeleteIcon';
-import CloseIcon from 'components/icons/CloseIcon';
+import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from 'components/icons/AddIcon';
 import { IconButton } from 'components/Container';
 import constants from 'utils/strings/constants';

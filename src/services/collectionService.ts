@@ -23,10 +23,17 @@ import {
     UpdatePublicURL,
     CollectionSummaries,
     CollectionSummary,
+    CollectionFilesCount,
 } from 'types/collection';
-import { COLLECTION_SORT_BY, CollectionType } from 'constants/collection';
+import {
+    COLLECTION_SORT_BY,
+    CollectionType,
+    ARCHIVE_SECTION,
+    TRASH_SECTION,
+} from 'constants/collection';
 import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { EncryptionResult } from 'types/upload';
+import constants from 'utils/strings/constants';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -758,7 +765,7 @@ export function getCollectionSummaries(
     collections: Collection[],
     files: EnteFile[]
 ): CollectionSummaries {
-    const CollectionSummaries: CollectionSummaries = new Map();
+    const collectionSummaries: CollectionSummaries = new Map();
     const collectionAndTheirLatestFile = getCollectionsAndTheirLatestFile(
         collections,
         files
@@ -774,7 +781,7 @@ export function getCollectionSummaries(
     const collectionFilesCount = getCollectionsFileCount(files);
 
     for (const collection of collections) {
-        CollectionSummaries.set(collection.id, {
+        collectionSummaries.set(collection.id, {
             collectionAttributes: {
                 id: collection.id,
                 name: collection.name,
@@ -782,17 +789,55 @@ export function getCollectionSummaries(
                 updationTime: collection.updationTime,
             },
             latestFile: collectionAndTheirLatestFileMap.get(collection.id),
-            fileCount: collectionFilesCount.get(collection.id),
+            fileCount: collectionFilesCount.get(collection.id) ?? 0,
         });
     }
-    return CollectionSummaries;
+    collectionSummaries.set(
+        ARCHIVE_SECTION,
+        getArchivedCollectionSummaries(collectionFilesCount)
+    );
+    collectionSummaries.set(
+        TRASH_SECTION,
+        getTrashedCollectionSummaries(collectionFilesCount)
+    );
+    return collectionSummaries;
 }
 
-function getCollectionsFileCount(files: EnteFile[]) {
+function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
     const collectionWiseFiles = sortFilesIntoCollections(files);
     const collectionFilesCount = new Map<number, number>();
     for (const [id, files] of collectionWiseFiles) {
         collectionFilesCount.set(id, files.length);
     }
     return collectionFilesCount;
+}
+
+function getArchivedCollectionSummaries(
+    collectionFilesCount: CollectionFilesCount
+) {
+    return {
+        collectionAttributes: {
+            id: ARCHIVE_SECTION,
+            name: constants.ARCHIVE,
+            type: CollectionType.system,
+            updationTime: 0,
+        },
+        latestFile: null,
+        fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
+    };
+}
+
+function getTrashedCollectionSummaries(
+    collectionFilesCount: CollectionFilesCount
+) {
+    return {
+        collectionAttributes: {
+            id: TRASH_SECTION,
+            name: constants.TRASH,
+            type: CollectionType.system,
+            updationTime: 0,
+        },
+        latestFile: null,
+        fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
+    };
 }

@@ -33,7 +33,10 @@ export default function useComponentScroll({
         updateScrollObj();
         // Remove event listener on cleanup
         return () =>
-            componentRef.current.removeEventListener('resize', updateScrollObj);
+            componentRef.current?.removeEventListener(
+                'resize',
+                updateScrollObj
+            );
     }, [componentRef.current]);
 
     useEffect(() => {

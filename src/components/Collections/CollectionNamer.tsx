@@ -10,7 +10,7 @@ import constants from 'utils/strings/constants';
 import SubmitButton from 'components/SubmitButton';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { TwoScreenSpacedOptions } from 'components/Container';
+import { SpaceBetweenFlex } from 'components/Container';
 import Close from '@mui/icons-material/Close';
 
 export interface CollectionNamerAttributes {
@@ -45,12 +45,12 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
     return (
         <Dialog open={props.show} onClose={props.onHide} maxWidth="xs">
             <DialogTitle>
-                <TwoScreenSpacedOptions>
+                <SpaceBetweenFlex>
                     {attributes?.title}
                     <IconButton onClick={props.onHide}>
                         <Close />
                     </IconButton>
-                </TwoScreenSpacedOptions>
+                </SpaceBetweenFlex>
             </DialogTitle>
             <DialogContent>
                 <Formik<formValues>

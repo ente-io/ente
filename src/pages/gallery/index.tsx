@@ -232,8 +232,8 @@ export default function Gallery() {
             const files = mergeMetadata(await getLocalFiles());
             const collections = await getLocalCollections();
             const trash = await getLocalTrash();
-            const trashedFile = getTrashedFiles(trash);
-            setFiles(sortFiles([...files, ...trashedFile]));
+            files.push(...getTrashedFiles(trash));
+            setFiles(sortFiles(files));
             setCollections(collections);
             setTrash(trash);
             await setDerivativeState(collections, files);
@@ -306,9 +306,10 @@ export default function Gallery() {
             const collections = await syncCollections();
             setCollections(collections);
             const files = await syncFiles(collections, setFiles);
-            await setDerivativeState(collections, files);
             const trash = await syncTrash(collections, setFiles, files);
             setTrash(trash);
+            files.push(...getTrashedFiles(trash));
+            await setDerivativeState(collections, files);
         } catch (e) {
             console.log(e);
             switch (e.message) {
@@ -675,11 +676,7 @@ export default function Gallery() {
                     showUploadTypeChoiceModal={showUploadTypeChoiceModal}
                     setShowUploadTypeChoiceModal={setShowUploadTypeChoiceModal}
                 />
-                <Sidebar
-                    collections={collections}
-                    setDialogMessage={setDialogMessage}
-                    setLoading={setBlockingLoad}
-                />
+                <Sidebar collectionSummaries={collectionSummaries} />
                 <UploadButton
                     isFirstFetch={isFirstFetch}
                     openUploader={openUploader}

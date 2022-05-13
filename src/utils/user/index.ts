@@ -1,3 +1,4 @@
+import { UserDetails } from 'types/user';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 
 export function makeID(length) {
@@ -20,4 +21,8 @@ export function getUserAnonymizedID() {
         setData(LS_KEYS.AnonymizeUserID, { id: anonymizeUserID });
     }
     return anonymizeUserID;
+}
+
+export function getLocalUserDetails(): UserDetails {
+    return getData(LS_KEYS.USER_DETAILS);
 }

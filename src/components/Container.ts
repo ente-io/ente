@@ -1,3 +1,4 @@
+import { Box } from '@mui/material';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -54,9 +55,9 @@ export const Value = styled.div<{ width?: string }>`
     color: #ddd;
 `;
 
-export const FlexWrapper = styled.div`
+export const FlexWrapper = styled(Box)`
     display: flex;
-    align-item: center;
+    align-items: center;
 `;
 
 export const FreeFlowText = styled.div`
@@ -65,10 +66,16 @@ export const FreeFlowText = styled.div`
     text-align: left;
 `;
 
-export const TwoScreenSpacedOptions = styled.div`
-    display: flex;
-    align-items: center;
+export const SpaceBetweenFlex = styled(FlexWrapper)`
     justify-content: space-between;
+`;
+
+export const CenteredFlex = styled(FlexWrapper)`
+    justify-content: center;
+`;
+
+export const FluidContainer = styled(FlexWrapper)`
+    flex: 1;
 `;
 
 export const InvertedIconButton = styled(IconButton)`

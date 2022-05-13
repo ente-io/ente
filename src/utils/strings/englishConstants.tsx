@@ -32,6 +32,7 @@ const Trigger = styled.span`
 `;
 
 const englishConstants = {
+    ENTE: 'ente',
     HERO_HEADER: () => (
         <div>
             with <Logo src="/icon.svg" />
@@ -157,9 +158,9 @@ const englishConstants = {
     SYNC_FAILED: 'failed to sync with server, please refresh this page',
     PASSWORD_GENERATION_FAILED:
         "your browser was unable to generate a strong key that meets ente's encryption standards, please try using the mobile app or another browser",
-    CHANGE_PASSWORD: 'change password',
+    CHANGE_PASSWORD: 'Change password',
     GO_BACK: 'go back',
-    DOWNLOAD_RECOVERY_KEY: 'recovery key',
+    RECOVERY_KEY: 'Recovery key',
     SAVE_LATER: 'save later',
     SAVE: 'save',
     RECOVERY_KEY_DESCRIPTION:
@@ -186,13 +187,13 @@ const englishConstants = {
         </>
     ),
     CONTACT_SUPPORT: 'contact support',
-    REQUEST_FEATURE: 'request feature',
-    SUPPORT: 'support',
+    REQUEST_FEATURE: 'Request Feature',
+    SUPPORT: 'Support',
     CONFIRM: 'confirm',
     SKIP: 'skip',
     CANCEL: 'cancel',
-    LOGOUT: 'logout',
-    DELETE_ACCOUNT: 'delete account',
+    LOGOUT: 'Logout',
+    DELETE_ACCOUNT: 'Delete Account',
     DELETE_ACCOUNT_MESSAGE: () => (
         <>
             <p>
@@ -207,7 +208,7 @@ const englishConstants = {
     ),
     LOGOUT_MESSAGE: 'sure you want to logout?',
     CHANGE: 'change',
-    CHANGE_EMAIL: 'change email?',
+    CHANGE_EMAIL: 'Change email',
     OK: 'ok',
     SUCCESS: 'success',
     ERROR: 'error',
@@ -242,7 +243,7 @@ const englishConstants = {
         </>
     ),
     DOWNLOAD_APP: 'download desktop app',
-    EXPORT: 'export data',
+    EXPORT: 'Export Data',
 
     // ========================
     // Subscription
@@ -450,7 +451,7 @@ const englishConstants = {
         count === 1
             ? `1 file received. uploading in a jiffy`
             : `${count} files received. uploading in a jiffy`,
-    TWO_FACTOR: 'two-factor',
+    TWO_FACTOR: 'Two-factor',
     TWO_FACTOR_AUTHENTICATION: 'two-factor authentication',
     TWO_FACTOR_QR_INSTRUCTION:
         'scan the QR code below with your favorite authenticator app',
@@ -501,7 +502,6 @@ const englishConstants = {
     LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE:
         'your browser or an addon is blocking ente from saving data into local storage. please try loading this page after switching your browsing mode.',
     RETRY: 'retry',
-    UPDATE_EMAIL: 'change email',
     SEND_OTT: 'send otp',
     EMAIl_ALREADY_OWNED: 'email already taken',
     EMAIL_UDPATE_SUCCESSFUL: 'your email has been udpated successfully',
@@ -553,7 +553,7 @@ const englishConstants = {
     TOO_LARGE_INFO:
         'these files were not uploaded as they exceed our maximum file size limit',
     UPLOAD_TO_COLLECTION: 'upload to album',
-    ARCHIVE: 'archive',
+    ARCHIVE: 'Hidden',
     ALL_SECTION_NAME: 'All Photos',
     MOVE_TO_COLLECTION: 'move to album',
     UNARCHIVE: 'un-archive',
@@ -562,7 +562,7 @@ const englishConstants = {
     SORT: 'sort',
     REMOVE: 'remove',
     CONFIRM_REMOVE: 'confirm removal',
-    TRASH: 'trash',
+    TRASH: 'Trash',
     MOVE_TO_TRASH: 'move to trash',
     TRASH_MESSAGE:
         'the selected files will be removed from all albums and moved to trash ',
@@ -591,7 +591,7 @@ const englishConstants = {
     SORT_BY_CREATION_TIME_DESCENDING: 'Newest',
     SORT_BY_UPDATION_TIME_DESCENDING: 'Last updated',
     SORT_BY_NAME: 'Name',
-    FIX_LARGE_THUMBNAILS: 'compress thumbnails',
+    COMPRESS_THUMBNAILS: 'Compress thumbnails',
     THUMBNAIL_REPLACED: 'thumbnails compressed',
     FIX_THUMBNAIL: 'compress',
     FIX_THUMBNAIL_LATER: 'compress later',
@@ -698,7 +698,7 @@ const englishConstants = {
     UPLOAD_FILES: 'File Upload',
     UPLOAD_DIRS: 'Folder Upload',
     CANCEL_UPLOADS: 'cancel uploads',
-    DEDUPLICATE_FILES: 'deduplicate files',
+    DEDUPLICATE_FILES: 'Deduplicate files',
     NO_DUPLICATES_FOUND: "you've no duplicate files that can be cleared",
     CLUB_BY_CAPTURE_TIME: 'club by capture time',
     FILES: 'files',
@@ -719,7 +719,7 @@ const englishConstants = {
     VIEW_ALL_ALBUMS: 'View all Albums',
     ALL_ALBUMS: 'All Albums',
     PHOTOS: 'Photos',
-    ENTE: 'ente',
+    ENDS: 'Ends',
 };
 
 export default englishConstants;

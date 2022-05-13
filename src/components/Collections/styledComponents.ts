@@ -1,4 +1,4 @@
-import { TwoScreenSpacedOptions } from 'components/Container';
+import { SpaceBetweenFlex } from 'components/Container';
 import { IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
 import styled from 'styled-components';
 
@@ -16,9 +16,7 @@ export const CollectionBarWrapper = styled.div`
     border-bottom: 1px solid ${({ theme }) => theme.palette.grey.A200};
 `;
 
-export const TwoScreenSpacedOptionsWithBodyPadding = styled(
-    TwoScreenSpacedOptions
-)`
+export const PaddedSpaceBetweenFlex = styled(SpaceBetweenFlex)`
     margin-bottom: 8px;
     margin-top: 16px;
     padding: 0 24px;

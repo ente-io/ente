@@ -16,7 +16,7 @@ import constants from 'utils/strings/constants';
 import LocationIcon from '../icons/LocationIcon';
 import DateIcon from '../icons/DateIcon';
 import SearchIcon from '../icons/SearchIcon';
-import CloseIcon from '../icons/CloseIcon';
+import CloseIcon from '@mui/icons-material/Close';
 import { Collection } from 'types/collection';
 import CollectionIcon from '../icons/CollectionIcon';
 

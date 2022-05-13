@@ -1,6 +1,6 @@
 import React from 'react';
 import { DialogTitle, IconButton, Typography } from '@mui/material';
-import { TwoScreenSpacedOptions } from 'components/Container';
+import { SpaceBetweenFlex } from 'components/Container';
 import CollectionSort from 'components/Collections/AllCollections/CollectionSort';
 import constants from 'utils/strings/constants';
 import Close from '@mui/icons-material/Close';
@@ -13,7 +13,7 @@ export default function AllCollectionsHeader({
 }) {
     return (
         <DialogTitle>
-            <TwoScreenSpacedOptions>
+            <SpaceBetweenFlex>
                 <Typography
                     css={`
                         font-size: 24px;
@@ -25,8 +25,8 @@ export default function AllCollectionsHeader({
                 <IconButton onClick={onClose}>
                     <Close />
                 </IconButton>
-            </TwoScreenSpacedOptions>
-            <TwoScreenSpacedOptions>
+            </SpaceBetweenFlex>
+            <SpaceBetweenFlex>
                 <Typography
                     css={`
                         font-size: 24px;
@@ -40,7 +40,7 @@ export default function AllCollectionsHeader({
                     activeSortBy={collectionSortBy}
                     setCollectionSortBy={setCollectionSortBy}
                 />
-            </TwoScreenSpacedOptions>
+            </SpaceBetweenFlex>
         </DialogTitle>
     );
 }

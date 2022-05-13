@@ -2,7 +2,7 @@ import { Dialog, Slide, styled } from '@mui/material';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export const FloatingSidebar = styled(Dialog)(({ theme }) => ({
+export const FloatingDrawer = styled(Dialog)(({ theme }) => ({
     '& .MuiDialog-container': {
         justifyContent: 'flex-end',
     },
@@ -17,7 +17,7 @@ export const FloatingSidebar = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-FloatingSidebar.propTypes = {
+FloatingDrawer.propTypes = {
     children: PropTypes.node,
     onClose: PropTypes.func.isRequired,
 };
