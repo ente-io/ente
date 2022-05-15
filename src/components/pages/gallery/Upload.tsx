@@ -113,7 +113,7 @@ export default function Upload(props: Props) {
             props.setFiles
         );
 
-        if (isElectron()) {
+        if (isElectron() && ImportService.checkAllElectronAPIsExists()) {
             ImportService.getPendingUploads().then(
                 ({ files: electronFiles, collectionName, type }) => {
                     resumeDesktopUpload(type, electronFiles, collectionName);
