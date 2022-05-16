@@ -33,10 +33,10 @@ export async function generateThumbnail(
         let hasStaticThumbnail = false;
         let canvas = document.createElement('canvas');
         let thumbnail: Uint8Array;
-        if (!(file instanceof File)) {
-            file = new File([await file.blob()], file.name);
-        }
         try {
+            if (!(file instanceof File)) {
+                file = new File([await file.blob()], file.name);
+            }
             if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
                 const isHEIC = isFileHEIC(fileTypeInfo.exactType);
                 canvas = await generateImageThumbnail(file, isHEIC);
