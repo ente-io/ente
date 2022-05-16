@@ -363,7 +363,7 @@ class UploadManager {
                 `failed to do post file upload action -> ${e.message}
                 ${(e as Error).stack}`
             );
-            // shallow errors as we don't want to break complete upload
+            throw e;
         }
     }
 
