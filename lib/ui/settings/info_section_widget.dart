@@ -32,12 +32,12 @@ class InfoSectionWidget extends StatelessWidget {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
-                  return WebPage("Faq", "https://ente.io/faq");
+                  return WebPage("FAQ", "https://ente.io/faq");
                 },
               ),
             );
           },
-          child: SettingsTextItem(text: "Faq", icon: Icons.navigate_next),
+          child: SettingsTextItem(text: "FAQ", icon: Icons.navigate_next),
         ),
         SectionOptionDivider,
         GestureDetector(
