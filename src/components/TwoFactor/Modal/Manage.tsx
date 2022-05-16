@@ -57,7 +57,7 @@ export default function TwoFactorModalManageSection(props: Iprops) {
             content: constants.UPDATE_TWO_FACTOR_MESSAGE,
             close: { text: constants.CANCEL },
             proceed: {
-                variant: 'success',
+                variant: 'accent',
                 text: constants.UPDATE,
                 action: reconfigureTwoFactor,
             },
@@ -78,12 +78,11 @@ export default function TwoFactorModalManageSection(props: Iprops) {
                 justifyContent="center"
                 textAlign={'center'}>
                 <Grid item sm={9} xs={12}>
-                    {constants.UPDATE_TWO_FACTOR_HINT}
+                    {constants.UPDATE_TWO_FACTOR_LABEL}
                 </Grid>
                 <Grid item sm={3} xs={12}>
                     <Button
-                        variant="contained"
-                        color={'success'}
+                        color={'accent'}
                         onClick={warnTwoFactorReconfigure}
                         style={{ width: '100%' }}>
                         {constants.RECONFIGURE}
@@ -97,12 +96,11 @@ export default function TwoFactorModalManageSection(props: Iprops) {
                 justifyContent="center"
                 textAlign={'center'}>
                 <Grid item sm={9} xs={12}>
-                    {constants.DISABLE_TWO_FACTOR_HINT}{' '}
+                    {constants.DISABLE_TWO_FACTOR_LABEL}{' '}
                 </Grid>
 
                 <Grid item sm={3} xs={12}>
                     <Button
-                        variant="contained"
                         color={'danger'}
                         onClick={warnTwoFactorDisable}
                         style={{ width: '100%' }}>

@@ -452,7 +452,7 @@ const englishConstants = {
             ? `1 file received. uploading in a jiffy`
             : `${count} files received. uploading in a jiffy`,
     TWO_FACTOR: 'Two-factor',
-    TWO_FACTOR_AUTHENTICATION: 'two-factor authentication',
+    TWO_FACTOR_AUTHENTICATION: 'Two-factor authentication',
     TWO_FACTOR_QR_INSTRUCTION:
         'scan the QR code below with your favorite authenticator app',
     ENTER_CODE_MANUALLY: 'enter the code manually',
@@ -461,21 +461,21 @@ const englishConstants = {
     SCAN_QR_CODE: 'scan QR code instead',
     CONTINUE: 'continue',
     BACK: 'back',
-    ENABLE_TWO_FACTOR: 'enable two-factor',
+    ENABLE_TWO_FACTOR: 'Enable two-factor',
     ENABLE: 'enable',
     LOST_DEVICE: 'lost two-factor device?',
     INCORRECT_CODE: 'incorrect code',
     RECOVER_TWO_FACTOR: 'recover two-factor',
     TWO_FACTOR_INFO:
-        'add an additional layer of security by requiring more than your email and password to log in to your account',
-    DISABLE_TWO_FACTOR_HINT: 'disable two-factor authentication',
-    UPDATE_TWO_FACTOR_HINT: 'update your authenticator device',
-    DISABLE: 'disable',
-    RECONFIGURE: 'reconfigure',
+        'Add an additional layer of security by requiring more than your email and password to log in to your account',
+    DISABLE_TWO_FACTOR_LABEL: 'Disable two-factor authentication',
+    UPDATE_TWO_FACTOR_LABEL: 'Update your authenticator device',
+    DISABLE: 'Disable',
+    RECONFIGURE: 'Reconfigure',
     UPDATE_TWO_FACTOR: 'update two-factor',
     UPDATE_TWO_FACTOR_MESSAGE:
         'continuing forward will void any previously configured authenticators',
-    UPDATE: 'update',
+    UPDATE: 'Update',
     DISABLE_TWO_FACTOR: 'disable two-factor',
     DISABLE_TWO_FACTOR_MESSAGE:
         'are you sure you want to disable your two-factor authentication',

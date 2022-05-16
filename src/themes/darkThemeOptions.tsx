@@ -56,6 +56,11 @@ const darkThemeOptions = createTheme({
                     textTransform: 'none',
                     borderRadius: '8px',
                 },
+                sizeLarge: {
+                    fontSize: '18px',
+                    lineHeight: '21.78px',
+                    padding: '16px',
+                },
             },
         },
         MuiDialog: {

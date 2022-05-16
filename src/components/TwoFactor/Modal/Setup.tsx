@@ -7,13 +7,13 @@ import Container from 'components/Container';
 import { Button, Typography } from '@mui/material';
 
 interface Iprops {
-    closeSidebar: () => void;
+    close: () => void;
 }
 
-export default function TwoFactorModalSetupSection({ closeSidebar }: Iprops) {
+export default function TwoFactorModalSetupSection({ close }: Iprops) {
     const router = useRouter();
     const redirectToTwoFactorSetup = () => {
-        closeSidebar();
+        close();
         router.push(PAGES.TWO_FACTOR_SETUP);
     };
 
@@ -23,7 +23,8 @@ export default function TwoFactorModalSetupSection({ closeSidebar }: Iprops) {
             <Typography mb={2}>{constants.TWO_FACTOR_INFO}</Typography>
             <Button
                 variant="contained"
-                color="success"
+                color="accent"
+                size="large"
                 onClick={redirectToTwoFactorSetup}>
                 {constants.ENABLE_TWO_FACTOR}
             </Button>
