@@ -355,7 +355,7 @@ class UploadManager {
             }
         } catch (e) {
             logError(e, 'failed to do post file upload action');
-            // ignore as we don't want to break complete upload
+            // shallow errors as we don't want to break complete upload
         }
     }
 
