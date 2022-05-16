@@ -58,8 +58,8 @@ class UserDetails {
     return UserDetails(
       map['email'] as String,
       map['usage'] as int,
-      map['fileCount'] as int,
-      map['sharedCollectionsCount'] as int,
+      map['fileCount'] as int ?? 0,
+      map['sharedCollectionsCount'] as int ?? 0,
       Subscription.fromMap(map['subscription']),
       FamilyData.fromMap(map['familyData']),
     );
