@@ -80,6 +80,12 @@ class UploadManager {
         );
     }
 
+    async retryFailedFiles() {
+        await this.queueFilesForUpload(this.failedFiles, [
+            ...this.collections.values(),
+        ]);
+    }
+
     public async queueFilesForUpload(
         fileWithCollectionToBeUploaded: FileWithCollection[],
         collections: Collection[]
@@ -313,52 +319,50 @@ class UploadManager {
                 fileUploadResult
             );
             UploadService.reducePendingUploadCount();
-            try {
-                if (fileUploadResult === FileUploadResults.UPLOADED) {
-                    this.existingFiles.push(file);
-                    this.existingFiles = sortFiles(this.existingFiles);
-                    await setLocalFiles(this.existingFiles);
-                    this.setFiles(preservePhotoswipeProps(this.existingFiles));
-                    if (
-                        !this.existingFilesCollectionWise.has(file.collectionID)
-                    ) {
-                        this.existingFilesCollectionWise.set(
-                            file.collectionID,
-                            []
-                        );
-                    }
-                    this.existingFilesCollectionWise
-                        .get(file.collectionID)
-                        .push(file);
-                }
-                if (
-                    fileUploadResult === FileUploadResults.FAILED ||
-                    fileUploadResult === FileUploadResults.BLOCKED
-                ) {
-                    this.failedFiles.push(fileWithCollection);
-                }
-
-                if (isElectron()) {
-                    this.remainingFiles = this.remainingFiles.filter(
-                        (file) =>
-                            !areFileWithCollectionsSame(
-                                file,
-                                fileWithCollection
-                            )
-                    );
-                    ImportService.updatePendingUploads(this.remainingFiles);
-                }
-            } catch (e) {
-                logError(e, 'failed to do post file upload action');
-                // ignore as we don't want to break complete upload
-            }
+            await this.postUploadTask(
+                fileUploadResult,
+                file,
+                fileWithCollection
+            );
         }
     }
 
-    async retryFailedFiles() {
-        await this.queueFilesForUpload(this.failedFiles, [
-            ...this.collections.values(),
-        ]);
+    async postUploadTask(
+        fileUploadResult: FileUploadResults,
+        file: EnteFile,
+        fileWithCollection: FileWithCollection
+    ) {
+        try {
+            if (fileUploadResult === FileUploadResults.UPLOADED) {
+                this.existingFiles.push(file);
+                this.existingFiles = sortFiles(this.existingFiles);
+                await setLocalFiles(this.existingFiles);
+                this.setFiles(preservePhotoswipeProps(this.existingFiles));
+                if (!this.existingFilesCollectionWise.has(file.collectionID)) {
+                    this.existingFilesCollectionWise.set(file.collectionID, []);
+                }
+                this.existingFilesCollectionWise
+                    .get(file.collectionID)
+                    .push(file);
+            }
+            if (
+                fileUploadResult === FileUploadResults.FAILED ||
+                fileUploadResult === FileUploadResults.BLOCKED
+            ) {
+                this.failedFiles.push(fileWithCollection);
+            }
+
+            if (isElectron()) {
+                this.remainingFiles = this.remainingFiles.filter(
+                    (file) =>
+                        !areFileWithCollectionsSame(file, fileWithCollection)
+                );
+                ImportService.updatePendingUploads(this.remainingFiles);
+            }
+        } catch (e) {
+            logError(e, 'failed to do post file upload action');
+            // ignore as we don't want to break complete upload
+        }
     }
 }
 
