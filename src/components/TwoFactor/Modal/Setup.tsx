@@ -20,7 +20,7 @@ export default function TwoFactorModalSetupSection({ close }: Iprops) {
     return (
         <Container disableGutters sx={{ mb: 2 }}>
             <LockIcon sx={{ fontSize: (theme) => theme.spacing(5), mb: 2 }} />
-            <Typography mb={2}>{constants.TWO_FACTOR_INFO}</Typography>
+            <Typography mb={4}>{constants.TWO_FACTOR_INFO}</Typography>
             <Button
                 variant="contained"
                 color="accent"
