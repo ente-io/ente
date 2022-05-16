@@ -184,7 +184,7 @@ class UploadManager {
                 } catch (e) {
                     logError(e, 'parsing failed for a file');
                     logUploadInfo(
-                        `successfully parsed metadata json file ${getFileNameSize(
+                        `failed to parse metadata json file ${getFileNameSize(
                             file
                         )} error: ${e.message}`
                     );
