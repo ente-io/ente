@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC } from 'react';
 import constants from 'utils/strings/constants';
 import {
     Breakpoint,
@@ -34,20 +34,22 @@ export interface MessageAttributes {
 export type SetDialogMessage = React.Dispatch<
     React.SetStateAction<MessageAttributes>
 >;
-type Props = React.PropsWithChildren<{
-    show: boolean;
-    onHide: () => void;
-    attributes: MessageAttributes;
-    size?: Breakpoint;
-}>;
+type Props = React.PropsWithChildren<
+    Omit<DialogProps, 'open' | 'onClose' | 'maxSize'> & {
+        show: boolean;
+        onHide: () => void;
+        attributes: MessageAttributes;
+        size?: Breakpoint;
+    }
+>;
 
-export default function MessageDialog({
+const MessageDialog: FC<Props> = ({
     attributes,
     children,
     ...props
-}: Props) {
+}: Props) => {
     if (!attributes) {
-        return <></>;
+        return <Dialog open={false} />;
     }
 
     const handleClose: DialogProps['onClose'] = (_, reason) => {
@@ -61,7 +63,11 @@ export default function MessageDialog({
     };
 
     return (
-        <Dialog open={props.show} maxWidth={props.size} onClose={handleClose}>
+        <Dialog
+            open={props.show}
+            maxWidth={props.size}
+            onClose={handleClose}
+            {...props}>
             {attributes.title && (
                 <>
                     <DialogTitleWithCloseButton
@@ -110,4 +116,6 @@ export default function MessageDialog({
             )}
         </Dialog>
     );
-}
+};
+
+export default MessageDialog;
