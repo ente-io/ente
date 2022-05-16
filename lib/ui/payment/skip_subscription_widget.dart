@@ -23,10 +23,10 @@ class SkipSubscriptionWidget extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(0, 30, 0, 30),
       padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
       child: button(
-        "continue on free plan",
+        "Continue on free plan",
         fontSize: 16,
         onPressed: () async {
-          showToast("thank you for signing up!");
+          showToast("Thank you for signing up!");
           Bus.instance.fire(SubscriptionPurchasedEvent());
           Navigator.of(context).popUntil((route) => route.isFirst);
           BillingService.instance
