@@ -34,7 +34,7 @@ final lightThemeData = ThemeData(
   ),
   elevatedButtonTheme: buildElevatedButtonThemeData(
       onPrimary: Colors.white, primary: Colors.black),
-  toggleableActiveColor: Colors.red[400],
+  toggleableActiveColor: Colors.green[400],
   scaffoldBackgroundColor: Colors.white,
   bottomAppBarColor: Color.fromRGBO(196, 196, 196, 0.5),
   backgroundColor: Colors.white,

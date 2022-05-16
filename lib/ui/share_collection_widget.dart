@@ -14,7 +14,6 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/manage_links_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
@@ -75,8 +74,8 @@ class _SharingDialogState extends State<SharingDialog> {
         SizedBox(
           width: 240,
           height: 50,
-          child: button(
-            "add",
+          child: OutlinedButton(
+            child: Text("Add"),
             onPressed: () {
               _addEmailToCollection(_email?.trim() ?? '');
             },
@@ -96,7 +95,7 @@ class _SharingDialogState extends State<SharingDialog> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("public link"),
+              Text("Public link"),
               Switch(
                 value: hasUrl,
                 onChanged: (enable) async {
@@ -104,17 +103,17 @@ class _SharingDialogState extends State<SharingDialog> {
                   if (!enable) {
                     final choice = await showChoiceDialog(
                         context,
-                        'disable link',
-                        'are you sure that you want to disable the album link?',
-                        firstAction: 'yes, disable',
-                        secondAction: 'no',
+                        'Disable link',
+                        'Are you sure that you want to disable the album link?',
+                        firstAction: 'Yes, disable',
+                        secondAction: 'No',
                         actionType: ActionType.critical);
                     if (choice != DialogUserChoice.firstChoice) {
                       return;
                     }
                   }
                   final dialog = createProgressDialog(context,
-                      enable ? "creating link..." : "disabling link...");
+                      enable ? "Creating link..." : "Disabling link...");
                   try {
                     await dialog.show();
                     enable
@@ -149,7 +148,7 @@ class _SharingDialogState extends State<SharingDialog> {
     }
 
     return AlertDialog(
-      title: Text("sharing"),
+      title: Text("Sharing"),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
@@ -229,7 +228,7 @@ class _SharingDialogState extends State<SharingDialog> {
           GestureDetector(
             onTap: () async {
               await Clipboard.setData(ClipboardData(text: url));
-              showToast("link copied to clipboard");
+              showToast("Link copied to clipboard");
             },
             child: Container(
               padding: EdgeInsets.all(16),
@@ -242,7 +241,10 @@ class _SharingDialogState extends State<SharingDialog> {
                       style: TextStyle(
                         fontSize: 16,
                         fontFeatures: const [FontFeature.tabularFigures()],
-                        color: Colors.white.withOpacity(0.68),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.68),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -254,7 +256,7 @@ class _SharingDialogState extends State<SharingDialog> {
                   ),
                 ],
               ),
-              color: Colors.white.withOpacity(0.02),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.02),
             ),
           ),
           Padding(padding: EdgeInsets.all(2)),
@@ -272,7 +274,7 @@ class _SharingDialogState extends State<SharingDialog> {
                     padding: EdgeInsets.all(4),
                   ),
                   Text(
-                    "share link",
+                    "Share link",
                     style: TextStyle(
                       color: Theme.of(context).buttonColor,
                     ),
@@ -288,9 +290,9 @@ class _SharingDialogState extends State<SharingDialog> {
           TextButton(
             child: Center(
               child: Text(
-                "manage link",
+                "Manage link",
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: Theme.of(context).primaryColorLight,
                   decoration: TextDecoration.underline,
                 ),
               ),
@@ -420,9 +422,9 @@ class _SharingDialogState extends State<SharingDialog> {
         ),
         TextButton(
           child: Text(
-            "ok",
+            "Ok",
             style: TextStyle(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           onPressed: () {
@@ -468,13 +470,13 @@ class EmailItemWidget extends StatelessWidget {
           icon: Icon(Icons.delete_forever),
           color: Colors.redAccent,
           onPressed: () async {
-            final dialog = createProgressDialog(context, "please wait...");
+            final dialog = createProgressDialog(context, "Please wait...");
             await dialog.show();
             try {
               await CollectionsService.instance.unshare(collection.id, email);
               collection.sharees.removeWhere((user) => user.email == email);
               await dialog.hide();
-              showToast("stopped sharing with " + email + ".");
+              showToast("Stopped sharing with " + email + ".");
               Navigator.of(context).pop();
             } catch (e, s) {
               Logger("EmailItemWidget").severe(e, s);
