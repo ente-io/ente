@@ -298,8 +298,8 @@ class UploadManager {
 
     private async uploadNextFileInQueue(worker: any, reader: FileReader) {
         while (this.filesToBeUploaded.length > 0) {
+            const fileWithCollection = this.filesToBeUploaded.pop();
             try {
-                const fileWithCollection = this.filesToBeUploaded.pop();
                 const { collectionID } = fileWithCollection;
                 const existingFilesInCollection =
                     this.existingFilesCollectionWise.get(collectionID) ?? [];
@@ -367,6 +367,11 @@ class UploadManager {
             } catch (e) {
                 logError(e, 'failed to upload file');
                 handleUploadError(e);
+                this.failedFiles.push(fileWithCollection);
+                UIService.moveFileToResultList(
+                    fileWithCollection.localID,
+                    FileUploadResults.FAILED
+                );
             }
         }
     }
