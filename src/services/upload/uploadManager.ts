@@ -16,7 +16,7 @@ import {
 import uploader from './uploader';
 import UIService from './uiService';
 import UploadService from './uploadService';
-import { CustomError, handleUploadError } from 'utils/error';
+import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import {
@@ -296,19 +296,24 @@ class UploadManager {
     private async uploadNextFileInQueue(worker: any, reader: FileReader) {
         while (this.filesToBeUploaded.length > 0) {
             const fileWithCollection = this.filesToBeUploaded.pop();
-            try {
-                const { collectionID } = fileWithCollection;
-                const existingFilesInCollection =
-                    this.existingFilesCollectionWise.get(collectionID) ?? [];
-                const collection = this.collections.get(collectionID);
+            const { collectionID } = fileWithCollection;
+            const existingFilesInCollection =
+                this.existingFilesCollectionWise.get(collectionID) ?? [];
+            const collection = this.collections.get(collectionID);
 
-                const { fileUploadResult, file } = await uploader(
-                    worker,
-                    reader,
-                    existingFilesInCollection,
-                    this.existingFiles,
-                    { ...fileWithCollection, collection }
-                );
+            const { fileUploadResult, file } = await uploader(
+                worker,
+                reader,
+                existingFilesInCollection,
+                this.existingFiles,
+                { ...fileWithCollection, collection }
+            );
+            UIService.moveFileToResultList(
+                fileWithCollection.localID,
+                fileUploadResult
+            );
+            UploadService.reducePendingUploadCount();
+            try {
                 if (fileUploadResult === FileUploadResults.UPLOADED) {
                     this.existingFiles.push(file);
                     this.existingFiles = sortFiles(this.existingFiles);
@@ -343,20 +348,9 @@ class UploadManager {
                     );
                     ImportService.updatePendingUploads(this.remainingFiles);
                 }
-
-                UIService.moveFileToResultList(
-                    fileWithCollection.localID,
-                    fileUploadResult
-                );
-                UploadService.reducePendingUploadCount();
             } catch (e) {
-                logError(e, 'failed to upload file');
-                handleUploadError(e);
-                this.failedFiles.push(fileWithCollection);
-                UIService.moveFileToResultList(
-                    fileWithCollection.localID,
-                    FileUploadResults.FAILED
-                );
+                logError(e, 'failed to do post file upload action');
+                // ignore as we don't want to break complete upload
             }
         }
     }
