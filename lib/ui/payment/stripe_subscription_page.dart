@@ -289,7 +289,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       final bool familyExist = _userDetails.isPartOfFamily();
       Navigator.of(context).push(MaterialPageRoute(
         builder: (BuildContext context) {
-          return WebPage("family",
+          return WebPage("Family",
               '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist');
         },
       )).then((value) => onWebPaymentGoBack);
