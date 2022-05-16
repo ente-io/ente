@@ -225,7 +225,7 @@ class UserService {
       );
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
-        showToast("email verification successful!");
+        showShortToast("Email verification successful!");
         Widget page;
         final String twoFASessionID = response.data["twoFactorSessionID"];
         if (twoFASessionID != null && twoFASessionID.isNotEmpty) {
@@ -255,7 +255,7 @@ class UserService {
       await dialog.hide();
       if (e.response != null && e.response.statusCode == 410) {
         await showErrorDialog(
-            context, "oops", "your verification code has expired");
+            context, "Oops", "Your verification code has expired");
         Navigator.of(context).pop();
       } else {
         showErrorDialog(context, "Incorrect code",
@@ -264,7 +264,7 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showErrorDialog(context, "oops", "verification failed, please try again");
+      showErrorDialog(context, "Oops", "Verification failed, please try again");
     }
   }
 
