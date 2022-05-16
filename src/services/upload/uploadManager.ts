@@ -80,12 +80,6 @@ class UploadManager {
         );
     }
 
-    async retryFailedFiles() {
-        await this.queueFilesForUpload(this.failedFiles, [
-            ...this.collections.values(),
-        ]);
-    }
-
     public async queueFilesForUpload(
         fileWithCollectionToBeUploaded: FileWithCollection[],
         collections: Collection[]
@@ -363,6 +357,12 @@ class UploadManager {
             logError(e, 'failed to do post file upload action');
             // ignore as we don't want to break complete upload
         }
+    }
+
+    async retryFailedFiles() {
+        await this.queueFilesForUpload(this.failedFiles, [
+            ...this.collections.values(),
+        ]);
     }
 }
 
