@@ -139,6 +139,10 @@ class UploadManager {
             UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
         } catch (e) {
             logError(e, 'uploading failed with error');
+            logUploadInfo(
+                `uploading failed with error -> ${e.message}
+                ${(e as Error).stack}`
+            );
             throw e;
         } finally {
             for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
@@ -355,6 +359,10 @@ class UploadManager {
             }
         } catch (e) {
             logError(e, 'failed to do post file upload action');
+            logUploadInfo(
+                `failed to do post file upload action -> ${e.message}
+                ${(e as Error).stack}`
+            );
             // shallow errors as we don't want to break complete upload
         }
     }
