@@ -35,9 +35,6 @@ import {
 import { ComlinkWorker } from 'utils/comlink';
 import { FILE_TYPE } from 'constants/file';
 import uiService from './uiService';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import { dedupe } from 'utils/export';
-import { convertBytesToHumanReadable } from 'utils/billing';
 import { logUploadInfo } from 'utils/upload';
 import isElectron from 'is-electron';
 import ImportService from 'services/importService';
@@ -311,6 +308,25 @@ class UploadManager {
                 this.existingFiles,
                 { ...fileWithCollection, collection }
             );
+            UIService.moveFileToResultList(
+                fileWithCollection.localID,
+                fileUploadResult
+            );
+            UploadService.reducePendingUploadCount();
+            await this.postUploadTask(
+                fileUploadResult,
+                file,
+                fileWithCollection
+            );
+        }
+    }
+
+    async postUploadTask(
+        fileUploadResult: FileUploadResults,
+        file: EnteFile,
+        fileWithCollection: FileWithCollection
+    ) {
+        try {
             if (fileUploadResult === FileUploadResults.UPLOADED) {
                 this.existingFiles.push(file);
                 this.existingFiles = sortFiles(this.existingFiles);
@@ -323,22 +339,10 @@ class UploadManager {
                     .get(file.collectionID)
                     .push(file);
             }
-            if (fileUploadResult === FileUploadResults.FAILED) {
-                this.failedFiles.push(fileWithCollection);
-                setData(LS_KEYS.FAILED_UPLOADS, {
-                    files: dedupe([
-                        ...(getData(LS_KEYS.FAILED_UPLOADS)?.files ?? []),
-                        ...this.failedFiles.map(
-                            (file) =>
-                                `${
-                                    file.file.name
-                                }_${convertBytesToHumanReadable(
-                                    file.file.size
-                                )}`
-                        ),
-                    ]),
-                });
-            } else if (fileUploadResult === FileUploadResults.BLOCKED) {
+            if (
+                fileUploadResult === FileUploadResults.FAILED ||
+                fileUploadResult === FileUploadResults.BLOCKED
+            ) {
                 this.failedFiles.push(fileWithCollection);
             }
 
@@ -349,12 +353,9 @@ class UploadManager {
                 );
                 ImportService.updatePendingUploads(this.remainingFiles);
             }
-
-            UIService.moveFileToResultList(
-                fileWithCollection.localID,
-                fileUploadResult
-            );
-            UploadService.reducePendingUploadCount();
+        } catch (e) {
+            logError(e, 'failed to do post file upload action');
+            throw e;
         }
     }
 
