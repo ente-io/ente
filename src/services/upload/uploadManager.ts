@@ -16,7 +16,7 @@ import {
 import uploader from './uploader';
 import UIService from './uiService';
 import UploadService from './uploadService';
-import { CustomError } from 'utils/error';
+import { CustomError, handleUploadError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import {
@@ -298,63 +298,76 @@ class UploadManager {
 
     private async uploadNextFileInQueue(worker: any, reader: FileReader) {
         while (this.filesToBeUploaded.length > 0) {
-            const fileWithCollection = this.filesToBeUploaded.pop();
-            const { collectionID } = fileWithCollection;
-            const existingFilesInCollection =
-                this.existingFilesCollectionWise.get(collectionID) ?? [];
-            const collection = this.collections.get(collectionID);
+            try {
+                const fileWithCollection = this.filesToBeUploaded.pop();
+                const { collectionID } = fileWithCollection;
+                const existingFilesInCollection =
+                    this.existingFilesCollectionWise.get(collectionID) ?? [];
+                const collection = this.collections.get(collectionID);
 
-            const { fileUploadResult, file } = await uploader(
-                worker,
-                reader,
-                existingFilesInCollection,
-                this.existingFiles,
-                { ...fileWithCollection, collection }
-            );
-            if (fileUploadResult === FileUploadResults.UPLOADED) {
-                this.existingFiles.push(file);
-                this.existingFiles = sortFiles(this.existingFiles);
-                await setLocalFiles(this.existingFiles);
-                this.setFiles(preservePhotoswipeProps(this.existingFiles));
-                if (!this.existingFilesCollectionWise.has(file.collectionID)) {
-                    this.existingFilesCollectionWise.set(file.collectionID, []);
-                }
-                this.existingFilesCollectionWise
-                    .get(file.collectionID)
-                    .push(file);
-            }
-            if (fileUploadResult === FileUploadResults.FAILED) {
-                this.failedFiles.push(fileWithCollection);
-                setData(LS_KEYS.FAILED_UPLOADS, {
-                    files: dedupe([
-                        ...(getData(LS_KEYS.FAILED_UPLOADS)?.files ?? []),
-                        ...this.failedFiles.map(
-                            (file) =>
-                                `${
-                                    file.file.name
-                                }_${convertBytesToHumanReadable(
-                                    file.file.size
-                                )}`
-                        ),
-                    ]),
-                });
-            } else if (fileUploadResult === FileUploadResults.BLOCKED) {
-                this.failedFiles.push(fileWithCollection);
-            }
-
-            if (isElectron()) {
-                this.remainingFiles = this.remainingFiles.filter(
-                    (file) =>
-                        !areFileWithCollectionsSame(file, fileWithCollection)
+                const { fileUploadResult, file } = await uploader(
+                    worker,
+                    reader,
+                    existingFilesInCollection,
+                    this.existingFiles,
+                    { ...fileWithCollection, collection }
                 );
-                ImportService.updatePendingUploads(this.remainingFiles);
-            }
+                if (fileUploadResult === FileUploadResults.UPLOADED) {
+                    this.existingFiles.push(file);
+                    this.existingFiles = sortFiles(this.existingFiles);
+                    await setLocalFiles(this.existingFiles);
+                    this.setFiles(preservePhotoswipeProps(this.existingFiles));
+                    if (
+                        !this.existingFilesCollectionWise.has(file.collectionID)
+                    ) {
+                        this.existingFilesCollectionWise.set(
+                            file.collectionID,
+                            []
+                        );
+                    }
+                    this.existingFilesCollectionWise
+                        .get(file.collectionID)
+                        .push(file);
+                }
+                if (fileUploadResult === FileUploadResults.FAILED) {
+                    this.failedFiles.push(fileWithCollection);
+                    setData(LS_KEYS.FAILED_UPLOADS, {
+                        files: dedupe([
+                            ...(getData(LS_KEYS.FAILED_UPLOADS)?.files ?? []),
+                            ...this.failedFiles.map(
+                                (file) =>
+                                    `${
+                                        file.file.name
+                                    }_${convertBytesToHumanReadable(
+                                        file.file.size
+                                    )}`
+                            ),
+                        ]),
+                    });
+                } else if (fileUploadResult === FileUploadResults.BLOCKED) {
+                    this.failedFiles.push(fileWithCollection);
+                }
 
-            UIService.moveFileToResultList(
-                fileWithCollection.localID,
-                fileUploadResult
-            );
-            UploadService.reducePendingUploadCount();
+                if (isElectron()) {
+                    this.remainingFiles = this.remainingFiles.filter(
+                        (file) =>
+                            !areFileWithCollectionsSame(
+                                file,
+                                fileWithCollection
+                            )
+                    );
+                    ImportService.updatePendingUploads(this.remainingFiles);
+                }
+
+                UIService.moveFileToResultList(
+                    fileWithCollection.localID,
+                    fileUploadResult
+                );
+                UploadService.reducePendingUploadCount();
+            } catch (e) {
+                logError(e, 'failed to upload file');
+                handleUploadError(e);
+            }
         }
     }
 
