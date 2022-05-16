@@ -19,6 +19,10 @@ class _WebPageState extends State<WebPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color.fromRGBO(10, 20, 20,
+            1.0), // force dark theme for appBar till website/family plans add supports for light theme
+        foregroundColor: Colors.white,
+        iconTheme: IconThemeData(color: Colors.white),
         title: Text(widget.title),
         actions: [_hasLoadedPage ? Container() : loadWidget],
       ),
