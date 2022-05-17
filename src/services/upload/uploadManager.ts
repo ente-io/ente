@@ -305,18 +305,18 @@ class UploadManager {
 
     private async uploadNextFileInQueue(worker: any, reader: FileReader) {
         while (this.filesToBeUploaded.length > 0) {
-            const fileWithCollection = this.filesToBeUploaded.pop();
+            let fileWithCollection = this.filesToBeUploaded.pop();
             const { collectionID } = fileWithCollection;
             const existingFilesInCollection =
                 this.existingFilesCollectionWise.get(collectionID) ?? [];
             const collection = this.collections.get(collectionID);
-
+            fileWithCollection = { ...fileWithCollection, collection };
             const { fileUploadResult, uploadedFile } = await uploader(
                 worker,
                 reader,
                 existingFilesInCollection,
                 this.existingFiles,
-                { ...fileWithCollection, collection }
+                fileWithCollection
             );
             UIService.moveFileToResultList(
                 fileWithCollection.localID,
