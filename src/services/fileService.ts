@@ -28,7 +28,12 @@ export const getLocalFiles = async () => {
 };
 
 export const setLocalFiles = async (files: EnteFile[]) => {
-    await localForage.setItem(FILES_TABLE, files);
+    try {
+        await localForage.setItem(FILES_TABLE, files);
+    } catch (e) {
+        logError(e, 'failed to save files to indexedDB');
+        throw e;
+    }
 };
 
 const getCollectionLastSyncTime = async (collection: Collection) =>
