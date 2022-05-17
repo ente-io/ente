@@ -17,7 +17,6 @@ import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
 import {
     Checkbox,
-    Container,
     Divider,
     FormControlLabel,
     FormGroup,
@@ -26,6 +25,7 @@ import {
 import FormPaperHeaderText from './Form/FormPaper/HeaderText';
 import LinkButton from './pages/gallery/LinkButton';
 import FormPaperFooter from './Form/FormPaper/Footer';
+import VerticallyCentered from './Container';
 
 interface FormValues {
     email: string;
@@ -117,7 +117,7 @@ export default function SignUp(props: SignUpProps) {
                     handleSubmit,
                 }): JSX.Element => (
                     <form noValidate onSubmit={handleSubmit}>
-                        <Container disableGutters sx={{ mb: 1 }}>
+                        <VerticallyCentered sx={{ mb: 1 }}>
                             <TextField
                                 variant="filled"
                                 fullWidth
@@ -176,7 +176,7 @@ export default function SignUp(props: SignUpProps) {
                                     label={constants.TERMS_AND_CONDITIONS()}
                                 />
                             </FormGroup>
-                        </Container>
+                        </VerticallyCentered>
                         <SubmitButton
                             buttonText={constants.CREATE_ACCOUNT}
                             loading={loading}
