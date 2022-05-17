@@ -6,7 +6,7 @@ import {
     fileAlreadyInCollection,
     shouldDedupeAcrossCollection,
 } from 'utils/upload';
-import UploadHttpClient from './uploadHttpClient';
+import UploadHttpClient from './uploadHttpClientV2';
 import UIService from './uiService';
 import UploadService from './uploadService';
 import { FILE_TYPE } from 'constants/file';

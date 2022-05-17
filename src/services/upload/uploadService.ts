@@ -1,6 +1,6 @@
 import { Collection } from 'types/collection';
 import { logError } from 'utils/sentry';
-import UploadHttpClient from './uploadHttpClient';
+import UploadHttpClient from './uploadHttpClientV2';
 import { extractFileMetadata, getFilename } from './fileService';
 import { getFileType } from '../typeDetectionService';
 import { handleUploadError } from 'utils/error';

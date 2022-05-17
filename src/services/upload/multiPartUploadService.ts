@@ -3,7 +3,7 @@ import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
 } from 'constants/upload';
 import UIService from './uiService';
-import UploadHttpClient from './uploadHttpClient';
+import UploadHttpClient from './uploadHttpClientV2';
 import * as convert from 'xml-js';
 import { CustomError } from 'utils/error';
 import { DataStream, MultipartUploadURLs } from 'types/upload';

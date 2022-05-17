@@ -6,7 +6,7 @@ import { logError } from 'utils/sentry';
 import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from 'services/HTTPService';
 import CryptoWorker from 'utils/crypto';
-import uploadHttpClient from 'services/upload/uploadHttpClient';
+import uploadHttpClient from 'services/upload/uploadHttpClientV2';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
 import { getFileType } from 'services/typeDetectionService';
 import { getLocalTrash, getTrashedFiles } from './trashService';
