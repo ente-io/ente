@@ -3,7 +3,7 @@ import { downloadAsFile } from 'utils/file';
 import { getRecoveryKey } from 'utils/crypto';
 import constants from 'utils/strings/constants';
 import MessageDialog from '../MessageDialog';
-import { CodeBlock } from '../CodeBlock';
+import CodeBlock from '../CodeBlock';
 import { ButtonProps, Typography } from '@mui/material';
 import * as bip39 from 'bip39';
 import { DashedBorderWrapper } from './styledComponents';
