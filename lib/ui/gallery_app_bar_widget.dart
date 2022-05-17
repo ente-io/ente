@@ -146,7 +146,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                     Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    Text("rename"),
+                    Text("Rename"),
                   ],
                 ),
               ),

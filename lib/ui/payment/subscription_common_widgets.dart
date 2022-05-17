@@ -27,10 +27,12 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
         child: Text(
           "ente preserves your memories, so they're always available to you, even if you lose your device",
-          style: TextStyle(
+          style: Theme.of(context).textTheme.caption
+          /*style: TextStyle(
             color: Colors.white54,
             height: 1.2,
-          ),
+          )*/
+          ,
         ),
       );
     } else {
@@ -75,7 +77,7 @@ class ValidityWidget extends StatelessWidget {
         DateTime.fromMicrosecondsSinceEpoch(currentSubscription.expiryTime));
     var message = "Renews on $endDate";
     if (currentSubscription.productID == kFreeProductID) {
-      message = "free plan valid till $endDate";
+      message = "Free plan valid till $endDate";
     } else if (currentSubscription.attributes?.isCancelled ?? false) {
       message = "Your subscription will be cancelled on $endDate";
     }
@@ -110,7 +112,7 @@ class SubFaqWidget extends StatelessWidget {
           padding: EdgeInsets.all(40),
           child: RichText(
             text: TextSpan(
-              text: "questions?",
+              text: "Questions?",
               style: TextStyle(
                 color: Colors.blue,
                 fontFamily: 'Ubuntu',

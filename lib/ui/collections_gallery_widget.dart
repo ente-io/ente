@@ -120,9 +120,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         } else if (sortKey == AlbumSortKey.newestPhoto) {
           return second.thumbnail.creationTime
               .compareTo(first.thumbnail.creationTime);
-        } else if (sortKey == AlbumSortKey.oldestPhoto) {
-          return first.thumbnail.creationTime
-              .compareTo(second.thumbnail.creationTime);
         } else {
           return second.collection.updationTime
               .compareTo(first.collection.updationTime);
@@ -406,9 +403,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
           break;
         case AlbumSortKey.newestPhoto:
           text = "Newest";
-          break;
-        case AlbumSortKey.oldestPhoto:
-          text = "Oldest";
           break;
         case AlbumSortKey.lastUpdated:
           text = "Last updated";

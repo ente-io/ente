@@ -30,7 +30,7 @@ Future<dynamic> showErrorDialog(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     title: Text(
       title,
-      style: Theme.of(context).textTheme.headline4,
+      style: Theme.of(context).textTheme.headline6,
     ),
     content: Text(content),
     actions: [

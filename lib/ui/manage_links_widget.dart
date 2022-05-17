@@ -48,12 +48,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
         title: Text(
-          "manage link",
-          style: TextStyle(
-            fontSize: 18,
-          ),
+          "Manage link",
         ),
       ),
       body: SingleChildScrollView(

@@ -20,6 +20,7 @@ final lightThemeData = ThemeData(
   brightness: Brightness.light,
   hintColor: Colors.grey,
   primaryColor: Colors.deepOrangeAccent,
+  primaryColorLight: Colors.black54,
   iconTheme: IconThemeData(color: Colors.black),
   primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
   colorScheme: ColorScheme.light(
@@ -34,7 +35,7 @@ final lightThemeData = ThemeData(
   ),
   elevatedButtonTheme: buildElevatedButtonThemeData(
       onPrimary: Colors.white, primary: Colors.black),
-  toggleableActiveColor: Colors.red[400],
+  toggleableActiveColor: Colors.green[400],
   scaffoldBackgroundColor: Colors.white,
   bottomAppBarColor: Color.fromRGBO(196, 196, 196, 0.5),
   backgroundColor: Colors.white,
@@ -89,6 +90,7 @@ final lightThemeData = ThemeData(
 final darkThemeData = ThemeData(
   fontFamily: 'Inter',
   brightness: Brightness.dark,
+  primaryColorLight: Colors.white70,
   iconTheme: IconThemeData(color: Colors.white),
   primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
   hintColor: Colors.grey,

@@ -85,7 +85,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
               //dash patterns, 10 is dash width, 6 is space width
               child: SizedBox(
                 //inner container
-                height: 200, //height of inner container
+                height: 120, //height of inner container
                 width:
                     double.infinity, //width to 100% match to parent container.
                 // ignore: prefer_const_literals_to_create_immutables
@@ -120,20 +120,20 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 80,
-                      width: double.infinity,
-                      child: Padding(
-                          child: Text(
-                            widget.subText ??
-                                "We don’t store this key, please save this in a safe place.",
-                            style: Theme.of(context).textTheme.bodyText1,
-                          ),
-                          padding: EdgeInsets.all(20)),
-                    ),
                   ],
                 ),
               ),
+            ),
+            SizedBox(
+              height: 80,
+              width: double.infinity,
+              child: Padding(
+                  child: Text(
+                    widget.subText ??
+                        "We don’t store this key, please save this in a safe place.",
+                    style: Theme.of(context).textTheme.bodyText1,
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 20)),
             ),
             Expanded(
               child: Container(

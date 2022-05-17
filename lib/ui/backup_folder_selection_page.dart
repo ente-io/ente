@@ -61,6 +61,11 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: widget.shouldSelectAll
+          ? null
+          : AppBar(
+              title: Text(""),
+            ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -69,7 +74,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           ),
           SafeArea(
             child: Container(
-              padding: EdgeInsets.all(24),
+              padding: EdgeInsets.fromLTRB(24, 12, 24, 8),
               child: Text(
                 'Select folders for backup',
                 textAlign: TextAlign.left,

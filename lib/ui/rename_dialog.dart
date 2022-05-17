@@ -25,7 +25,7 @@ class _RenameDialogState extends State<RenameDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("enter a new name"),
+      title: Text("Enter a new name"),
       content: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -68,7 +68,7 @@ class _RenameDialogState extends State<RenameDialog> {
           child: Text(
             "rename",
             style: TextStyle(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           onPressed: () {
