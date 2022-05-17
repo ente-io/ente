@@ -34,12 +34,14 @@ export interface MessageAttributes {
 export type SetDialogMessage = React.Dispatch<
     React.SetStateAction<MessageAttributes>
 >;
-type Props = React.PropsWithChildren<{
-    show: boolean;
-    onHide: () => void;
-    attributes: MessageAttributes;
-    size?: Breakpoint;
-}>;
+type Props = React.PropsWithChildren<
+    Omit<DialogProps, 'open' | 'onClose' | 'maxSize'> & {
+        show: boolean;
+        onHide: () => void;
+        attributes: MessageAttributes;
+        size?: Breakpoint;
+    }
+>;
 
 export default function MessageDialog({
     attributes,
@@ -47,7 +49,7 @@ export default function MessageDialog({
     ...props
 }: Props) {
     if (!attributes) {
-        return <></>;
+        return <Dialog open={false} />;
     }
 
     const handleClose: DialogProps['onClose'] = (_, reason) => {
@@ -61,7 +63,11 @@ export default function MessageDialog({
     };
 
     return (
-        <Dialog open={props.show} maxWidth={props.size} onClose={handleClose}>
+        <Dialog
+            open={props.show}
+            maxWidth={props.size}
+            onClose={handleClose}
+            {...props}>
             {attributes.title && (
                 <>
                     <DialogTitleWithCloseButton

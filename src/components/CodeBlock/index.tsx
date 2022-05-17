@@ -3,14 +3,18 @@ import React, { useState } from 'react';
 import EnteSpinner from '../EnteSpinner';
 import { Wrapper, CodeWrapper } from './styledComponents';
 import CopyButton from './CopyButton';
+import { BoxProps } from '@mui/material';
 
 type Iprops = React.PropsWithChildren<{
     code: string;
     wordBreak?: 'normal' | 'break-all' | 'keep-all' | 'break-word';
 }>;
 
-// comment
-export const CodeBlock = (props: Iprops) => {
+export default function CodeBlock({
+    code,
+    wordBreak,
+    ...props
+}: BoxProps<'div', Iprops>) {
     const [copied, setCopied] = useState<boolean>(false);
 
     const copyToClipboardHelper = (text: string) => () => {
@@ -19,7 +23,7 @@ export const CodeBlock = (props: Iprops) => {
         setTimeout(() => setCopied(false), 1000);
     };
 
-    if (!props.code) {
+    if (!code) {
         return (
             <Wrapper>
                 <EnteSpinner />
@@ -27,17 +31,17 @@ export const CodeBlock = (props: Iprops) => {
         );
     }
     return (
-        <Wrapper>
+        <Wrapper {...props}>
             <CodeWrapper>
-                <FreeFlowText style={{ wordBreak: props.wordBreak }}>
-                    {props.code}
+                <FreeFlowText style={{ wordBreak: wordBreak }}>
+                    {code}
                 </FreeFlowText>
             </CodeWrapper>
             <CopyButton
-                code={props.code}
+                code={code}
                 copied={copied}
                 copyToClipboardHelper={copyToClipboardHelper}
             />
         </Wrapper>
     );
-};
+}

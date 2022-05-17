@@ -53,11 +53,13 @@ const darkThemeOptions = createTheme({
             },
             styleOverrides: {
                 root: {
+                    textTransform: 'none',
+                    borderRadius: '8px',
+                },
+                sizeLarge: {
                     fontSize: '18px',
                     lineHeight: '21.78px',
                     padding: '16px',
-                    textTransform: 'none',
-                    borderRadius: '8px',
                 },
             },
         },
@@ -71,6 +73,9 @@ const darkThemeOptions = createTheme({
                 root: {
                     '& .MuiDialogActions-root button': {
                         marginLeft: '16px',
+                        fontSize: '18px',
+                        lineHeight: '21.78px',
+                        padding: '16px',
                     },
                 },
             },

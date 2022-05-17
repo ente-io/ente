@@ -233,12 +233,7 @@ html, body {
     background-color: #44774d;
 }
 
-a {
-    color: #fff;
-}
-a:hover {
-    color: #51cd7c;
-}
+
 .btn-link {
     color: #fff;
 }

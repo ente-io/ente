@@ -3,14 +3,14 @@ import SidebarButton from './Button';
 import constants from 'utils/strings/constants';
 import FixLargeThumbnails from 'components/FixLargeThumbnail';
 import RecoveryKey from 'components/RecoveryKey';
-import TwoFactorModal from 'components/TwoFactorModal';
+import TwoFactorModal from 'components/TwoFactor/Modal';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
-import { GalleryContext } from 'pages/gallery';
+import { AppContext } from 'pages/_app';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
-    const { setDialogMessage, startLoading } = useContext(GalleryContext);
+    const { setDialogMessage, startLoading } = useContext(AppContext);
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);

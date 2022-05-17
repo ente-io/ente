@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/router';
 import Card from 'react-bootstrap/Card';
 import { AppContext } from 'pages/_app';
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SignUp from 'components/SignUp';
@@ -29,7 +29,7 @@ export default function SignUpPage() {
     };
 
     return (
-        <Container>
+        <VerticallyCenteredContainer>
             {loading ? (
                 <EnteSpinner />
             ) : (
@@ -39,6 +39,6 @@ export default function SignUpPage() {
                     </Card.Body>
                 </Card>
             )}
-        </Container>
+        </VerticallyCenteredContainer>
     );
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import constants from 'utils/strings/constants';
@@ -38,7 +38,7 @@ function SetPasswordForm(props: Props) {
         }
     };
     return (
-        <Container>
+        <VerticallyCenteredContainer>
             <Card style={{ maxWidth: '540px', padding: '20px' }}>
                 <Card.Body>
                     <div
@@ -118,7 +118,7 @@ function SetPasswordForm(props: Props) {
                     )}
                 </Card.Body>
             </Card>
-        </Container>
+        </VerticallyCenteredContainer>
     );
 }
 export default SetPasswordForm;
