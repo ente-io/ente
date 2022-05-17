@@ -37,15 +37,6 @@ export async function extractMetadata(
 ) {
     let extractedMetadata: ParsedExtractedMetadata = NULL_EXTRACTED_METADATA;
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
-        if (!(receivedFile instanceof File)) {
-            receivedFile = new File(
-                [await receivedFile.blob()],
-                receivedFile.name,
-                {
-                    lastModified: receivedFile.lastModified,
-                }
-            );
-        }
         extractedMetadata = await getExifData(receivedFile, fileTypeInfo);
     } else if (fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
         logUploadInfo(

@@ -43,7 +43,7 @@ export async function readFile(
         rawFile,
         fileTypeInfo
     );
-    logUploadInfo(`reading file datal${getFileNameSize(rawFile)} `);
+    logUploadInfo(`reading file data ${getFileNameSize(rawFile)} `);
     let filedata: Uint8Array | DataStream;
     if (!(rawFile instanceof File)) {
         if (rawFile.size > MULTIPART_PART_SIZE) {
