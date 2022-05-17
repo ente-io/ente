@@ -95,7 +95,7 @@ final darkThemeData = ThemeData(
   hintColor: Colors.grey,
   bottomAppBarColor: Color.fromRGBO(196, 196, 196, 0.5),
 
-  colorScheme: ColorScheme.dark(),
+  colorScheme: ColorScheme.dark(primary: Colors.white),
   accentColor: Color.fromRGBO(45, 194, 98, 0.2),
   buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
   buttonTheme: ButtonThemeData().copyWith(
