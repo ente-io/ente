@@ -13,7 +13,7 @@ import CryptoWorker, {
 import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
 import SingleInputForm from 'components/SingleInputForm';
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import { Button, Card } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
@@ -94,7 +94,7 @@ export default function Credentials() {
 
     return (
         <>
-            <Container>
+            <VerticallyCenteredContainer>
                 <Card style={{ minWidth: '320px' }} className="text-center">
                     <Card.Body style={{ padding: '40px 30px' }}>
                         <Card.Title style={{ marginBottom: '32px' }}>
@@ -124,7 +124,7 @@ export default function Credentials() {
                         </div>
                     </Card.Body>
                 </Card>
-            </Container>
+            </VerticallyCenteredContainer>
         </>
     );
 }

@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import EnteSpinner from 'components/EnteSpinner';
 import { AppContext } from 'pages/_app';
 import Login from 'components/Login';
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import Card from 'react-bootstrap/Card';
 import { PAGES } from 'constants/pages';
@@ -29,7 +29,7 @@ export default function Home() {
     };
 
     return (
-        <Container>
+        <VerticallyCenteredContainer>
             {loading ? (
                 <EnteSpinner>
                     <span className="sr-only">Loading...</span>
@@ -41,6 +41,6 @@ export default function Home() {
                     </Card.Body>
                 </Card>
             )}
-        </Container>
+        </VerticallyCenteredContainer>
     );
 }

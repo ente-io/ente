@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { default as MuiStyled } from '@mui/styled-engine';
 import { Container as MuiContainer } from '@mui/material';
 
-const Container = MuiStyled(MuiContainer)`
+const VerticallyCenteredContainer = MuiStyled(MuiContainer)`
     flex: 1;
     display: flex;
     align-items: center;
@@ -13,7 +13,7 @@ const Container = MuiStyled(MuiContainer)`
     overflow: auto;
 `;
 
-export default Container;
+export default VerticallyCenteredContainer;
 
 export const DisclaimerContainer = styled.div`
     margin: 16px 0;

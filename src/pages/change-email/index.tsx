@@ -1,4 +1,4 @@
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import LogoImg from 'components/LogoImg';
 import React, { useEffect, useState } from 'react';
 import { Alert, Card } from 'react-bootstrap';
@@ -26,7 +26,7 @@ function ChangeEmailPage() {
     }, []);
 
     return (
-        <Container>
+        <VerticallyCenteredContainer>
             {waiting ? (
                 <EnteSpinner>
                     <span className="sr-only">Loading...</span>
@@ -57,7 +57,7 @@ function ChangeEmailPage() {
                     </Card.Body>
                 </EnteCard>
             )}
-        </Container>
+        </VerticallyCenteredContainer>
     );
 }
 

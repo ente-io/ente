@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import constants from 'utils/strings/constants';
@@ -129,7 +129,7 @@ export default function Verify() {
     }
 
     return (
-        <Container>
+        <VerticallyCenteredContainer>
             <Card style={{ minWidth: '300px' }} className="text-center">
                 <Card.Body style={{ padding: '40px 30px' }}>
                     <Card.Title style={{ marginBottom: '32px' }}>
@@ -200,6 +200,6 @@ export default function Verify() {
                     </Formik>
                 </Card.Body>
             </Card>
-        </Container>
+        </VerticallyCenteredContainer>
     );
 }

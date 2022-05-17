@@ -1,4 +1,4 @@
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import LogoImg from 'components/LogoImg';
 import VerifyTwoFactor from 'components/TwoFactor/VerifyForm';
 import router from 'next/router';
@@ -53,7 +53,7 @@ export default function Home() {
         }
     };
     return (
-        <Container>
+        <VerticallyCenteredContainer>
             <Card style={{ minWidth: '300px' }} className="text-center">
                 <Card.Body style={{ padding: '40px 30px', minHeight: '400px' }}>
                     <Card.Title style={{ marginBottom: '32px' }}>
@@ -86,6 +86,6 @@ export default function Home() {
                     </div>
                 </Card.Body>
             </Card>
-        </Container>
+        </VerticallyCenteredContainer>
     );
 }

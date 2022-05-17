@@ -1,4 +1,4 @@
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import styled from 'styled-components';
 
 export const QRCode = styled.img(
@@ -9,7 +9,7 @@ export const QRCode = styled.img(
 `
 );
 
-export const LoadingQRCode = styled(Container)(
+export const LoadingQRCode = styled(VerticallyCenteredContainer)(
     ({ theme }) => `
     width:200px;
     aspect-ratio:1;
