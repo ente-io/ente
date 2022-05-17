@@ -775,13 +775,8 @@ class CollectionsService {
             Sodium.base642bin(collection.nameDecryptionNonce));
         name = utf8.decode(result);
       } catch (e, s) {
-        if (!collection.isDeleted) {
-          _logger.severe(
-              "Error while decrypting collection name: " +
-                  collection.id.toString(),
-              e,
-              s);
-        }
+        _logger.severe(
+            "failed to decrypt collection name: ${collection.id}", e, s);
         name = "Unknown Album";
       }
       return collection.copyWith(name: name);
