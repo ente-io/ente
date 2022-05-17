@@ -4,7 +4,7 @@ import styled from 'styled-components';
 export const QRCode = styled.img`
     height: 200px;
     width: 200px;
-    margin: 1rem;
+    margin: ${({ theme }) => theme.spacing(2)};
 `;
 
 export const LoadingQRCode = styled(Container)(({ theme }) => ({
