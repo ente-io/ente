@@ -4,6 +4,7 @@ import { convertBytesToHumanReadable } from 'utils/billing';
 import { formatDateTime } from 'utils/file';
 import { getLogs, saveLogLine } from 'utils/storage';
 import { A_SEC_IN_MICROSECONDS } from 'constants/upload';
+import { cryptoGenericHash } from 'utils/crypto/libsodium';
 
 const TYPE_JSON = 'json';
 const DEDUPE_COLLECTION = new Set(['icloud library', 'icloudlibrary']);
@@ -92,4 +93,11 @@ export function areFileWithCollectionsSame(
     secondFile: FileWithCollection
 ): boolean {
     return firstFile.localID === secondFile.localID;
+}
+
+export async function getFileHash(file: File | ElectronFile) {
+    const hash = await cryptoGenericHash(
+        new Uint8Array(await file.arrayBuffer())
+    );
+    return hash;
 }

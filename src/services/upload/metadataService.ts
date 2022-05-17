@@ -12,7 +12,7 @@ import {
 import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
 import { splitFilenameAndExtension } from 'utils/file';
 import { getVideoMetadata } from './videoMetadataService';
-import { getFileNameSize } from 'utils/upload';
+import { getFileHash, getFileNameSize } from 'utils/upload';
 import { logUploadInfo } from 'utils/upload';
 import {
     parseDateFromFusedDateString,
@@ -59,6 +59,8 @@ export async function extractMetadata(
         );
     }
 
+    const fileHash = await getFileHash(receivedFile);
+
     const metadata: Metadata = {
         title: `${splitFilenameAndExtension(receivedFile.name)[0]}.${
             fileTypeInfo.exactType
@@ -71,6 +73,7 @@ export async function extractMetadata(
         latitude: extractedMetadata.location.latitude,
         longitude: extractedMetadata.location.longitude,
         fileType: fileTypeInfo.fileType,
+        hash: fileHash,
     };
     return metadata;
 }
