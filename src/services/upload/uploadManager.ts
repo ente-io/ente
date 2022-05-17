@@ -31,6 +31,7 @@ import {
     UPLOAD_STAGES,
     FileUploadResults,
     MAX_FILE_SIZE_SUPPORTED,
+    MAX_NODE_SUPPORTED_FILE_SIZE_SUPPORTED,
 } from 'constants/upload';
 import { ComlinkWorker } from 'utils/comlink';
 import { FILE_TYPE } from 'constants/file';
@@ -204,7 +205,12 @@ class UploadManager {
             for (const { file, localID, collectionID } of mediaFiles) {
                 try {
                     const { fileTypeInfo, metadata } = await (async () => {
-                        if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
+                        if (
+                            file.size >= MAX_FILE_SIZE_SUPPORTED ||
+                            (isElectron() &&
+                                file.size >=
+                                    MAX_NODE_SUPPORTED_FILE_SIZE_SUPPORTED)
+                        ) {
                             logUploadInfo(
                                 `${getFileNameSize(
                                     file

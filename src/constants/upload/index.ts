@@ -42,6 +42,8 @@ export enum FileUploadResults {
 
 export const MAX_FILE_SIZE_SUPPORTED = 5 * 1024 * 1024 * 1024; // 5 GB
 
+export const MAX_NODE_SUPPORTED_FILE_SIZE_SUPPORTED = 2 * 1024 * 1024 * 1024; // 2 GB
+
 export const LIVE_PHOTO_ASSET_SIZE_LIMIT = 20 * 1024 * 1024; // 20MB
 
 export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
