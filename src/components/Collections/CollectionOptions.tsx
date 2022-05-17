@@ -16,6 +16,7 @@ import { ListItem, Menu, MenuItem } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { logError } from 'utils/sentry';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
+import { AppContext } from 'pages/_app';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -39,8 +40,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setCollectionNamerAttributes,
         showCollectionShareModal,
     } = props;
-    const { startLoading, finishLoading, setDialogMessage, syncWithRemote } =
-        useContext(GalleryContext);
+    const { startLoading, finishLoading, setDialogMessage } =
+        useContext(AppContext);
+    const { syncWithRemote } = useContext(GalleryContext);
 
     const [optionEl, setOptionEl] = useState(null);
     const handleClose = () => setOptionEl(null);
@@ -175,12 +177,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     disablePadding: true,
                     'aria-labelledby': 'collection-options',
                 }}>
-                <Paper sx={{ borderRadius: '10px' }}>
+                <Paper>
                     <MenuList
                         sx={{
                             padding: 0,
                             border: 'none',
-                            borderRadius: '8px',
                         }}>
                         <MenuItem>
                             <ListItem onClick={showRenameCollectionModal}>

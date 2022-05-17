@@ -3,7 +3,7 @@ import styled, { ThemeProvider as SThemeProvider } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
 import { useRouter } from 'next/router';
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 import 'styles/global.css';
@@ -305,11 +305,11 @@ export default function App({ Component, err }) {
                             closeSidebar,
                         }}>
                         {loading ? (
-                            <Container>
+                            <VerticallyCenteredContainer>
                                 <EnteSpinner>
                                     <span className="sr-only">Loading...</span>
                                 </EnteSpinner>
-                            </Container>
+                            </VerticallyCenteredContainer>
                         ) : (
                             <Component err={err} setLoading={setLoading} />
                         )}

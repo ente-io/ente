@@ -2,11 +2,11 @@ import React, { useContext } from 'react';
 import SidebarButton from './Button';
 import constants from 'utils/strings/constants';
 import { initiateEmail } from 'utils/common';
-import { GalleryContext } from 'pages/gallery';
 import { logoutUser } from 'services/userService';
+import { AppContext } from 'pages/_app';
 
 export default function ExitSection() {
-    const { setDialogMessage } = useContext(GalleryContext);
+    const { setDialogMessage } = useContext(AppContext);
 
     const confirmLogout = () => {
         setDialogMessage({

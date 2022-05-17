@@ -1,4 +1,4 @@
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import React, { useContext, useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { AppContext } from './_app';
@@ -11,12 +11,12 @@ export default function NotFound() {
         setLoading(false);
     }, []);
     return (
-        <Container>
+        <VerticallyCenteredContainer>
             {loading ? (
                 <span className="sr-only">Loading...</span>
             ) : (
                 constants.NOT_FOUND
             )}
-        </Container>
+        </VerticallyCenteredContainer>
     );
 }

@@ -14,7 +14,7 @@ import CryptoWorker, {
 } from 'utils/crypto';
 import SingleInputForm from 'components/SingleInputForm';
 import MessageDialog from 'components/MessageDialog';
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import { Card, Button } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
@@ -80,7 +80,7 @@ export default function Recover() {
 
     return (
         <>
-            <Container>
+            <VerticallyCenteredContainer>
                 <Card style={{ minWidth: '320px' }} className="text-center">
                     <Card.Body style={{ padding: '40px 30px' }}>
                         <Card.Title style={{ marginBottom: '32px' }}>
@@ -110,7 +110,7 @@ export default function Recover() {
                         </div>
                     </Card.Body>
                 </Card>
-            </Container>
+            </VerticallyCenteredContainer>
             <MessageDialog
                 size="lg"
                 show={messageDialogView}

@@ -1,6 +1,6 @@
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import LogoImg from 'components/LogoImg';
-import VerifyTwoFactor from 'components/VerifyTwoFactor';
+import VerifyTwoFactor from 'components/TwoFactor/VerifyForm';
 import router from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
@@ -9,6 +9,7 @@ import { PAGES } from 'constants/pages';
 import { User } from 'types/user';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
+import LinkButton from 'components/pages/gallery/LinkButton';
 
 export default function Home() {
     const [sessionID, setSessionID] = useState('');
@@ -52,7 +53,7 @@ export default function Home() {
         }
     };
     return (
-        <Container>
+        <VerticallyCenteredContainer>
             <Card style={{ minWidth: '300px' }} className="text-center">
                 <Card.Body style={{ padding: '40px 30px', minHeight: '400px' }}>
                     <Card.Title style={{ marginBottom: '32px' }}>
@@ -61,9 +62,11 @@ export default function Home() {
                     </Card.Title>
                     <VerifyTwoFactor
                         onSubmit={onSubmit}
-                        back={router.back}
                         buttonText={constants.VERIFY}
                     />
+                    <LinkButton onClick={router.back}>
+                        {constants.GO_BACK}
+                    </LinkButton>
                     <div
                         style={{
                             display: 'flex',
@@ -83,6 +86,6 @@ export default function Home() {
                     </div>
                 </Card.Body>
             </Card>
-        </Container>
+        </VerticallyCenteredContainer>
     );
 }

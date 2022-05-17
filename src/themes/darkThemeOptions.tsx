@@ -48,13 +48,35 @@ const darkThemeOptions = createTheme({
             styleOverrides: { paper: { margin: '10px' } },
         },
         MuiButton: {
+            defaultProps: {
+                variant: 'contained',
+            },
             styleOverrides: {
                 root: {
+                    textTransform: 'none',
+                    borderRadius: '8px',
+                },
+                sizeLarge: {
                     fontSize: '18px',
                     lineHeight: '21.78px',
                     padding: '16px',
-                    textTransform: 'none',
-                    borderRadius: '8px',
+                },
+            },
+        },
+        MuiDialog: {
+            styleOverrides: {
+                paper: {
+                    '& .MuiDialogActions-root': {
+                        padding: '32px 24px',
+                    },
+                },
+                root: {
+                    '& .MuiDialogActions-root button': {
+                        marginLeft: '16px',
+                        fontSize: '18px',
+                        lineHeight: '21.78px',
+                        padding: '16px',
+                    },
                 },
             },
         },
@@ -74,8 +96,9 @@ const darkThemeOptions = createTheme({
             secondary: '#808080',
         },
         accent: {
-            main: '#43BA6C',
-            dark: '#369556',
+            main: '#1dba54',
+            dark: '#248546',
+            light: '#2cd366',
         },
 
         danger: {
@@ -85,8 +108,9 @@ const darkThemeOptions = createTheme({
         grey: {
             A100: '#ccc',
             A200: 'rgba(256, 256, 256, 0.24)',
+            A400: '#434343',
         },
-        divider: 'rgba(255, 255, 255, 0.24)',
+        divider: 'rgba(256, 256, 256, 0.12)',
     },
     shape: {
         borderRadius: 8,
