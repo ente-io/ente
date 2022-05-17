@@ -335,7 +335,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                 FutureBuilder<int>(
                                   future: FilesDB.instance
                                       .fileCountWithVisibility(
-                                          kVisibilityArchive),
+                                          kVisibilityArchive,
+                                          Configuration.instance.getUserID()),
                                   builder: (context, snapshot) {
                                     if (snapshot.hasData && snapshot.data > 0) {
                                       return RichText(
