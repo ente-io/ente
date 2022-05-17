@@ -1,11 +1,11 @@
-import React from 'react';
-import { Paper, PaperProps } from '@mui/material';
-import { FC } from 'react';
+import { Paper, styled } from '@mui/material';
 
-const FormPaper: FC<PaperProps> = ({ sx, children, ...props }) => (
-    <Paper sx={{ maxWidth: '360px', py: 4, px: 2, ...sx }} {...props}>
-        {children}
-    </Paper>
-);
-
+const FormPaper = styled(Paper)(({ theme }) => ({
+    padding: theme.spacing(4, 2),
+    maxWidth: '360px',
+    marginRight: theme.spacing(10),
+    [theme.breakpoints.down('md')]: {
+        marginRight: theme.spacing(5),
+    },
+}));
 export default FormPaper;
