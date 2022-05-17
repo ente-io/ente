@@ -61,6 +61,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(8.0),
         image: DecorationImage(
+          fit: BoxFit.fill,
           image: AssetImage("assets/card_background.png"),
         ),
       ),
@@ -168,11 +169,10 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                         )
                       : Text(
                           "${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())} used",
-                          style: Theme.of(context)
-                              .textTheme
-                              .headline5
-                              .copyWith(color: Colors.white.withOpacity(0.7), fontSize: 14),
-                  ),
+                          style: Theme.of(context).textTheme.headline5.copyWith(
+                              color: Colors.white.withOpacity(0.7),
+                              fontSize: 14),
+                        ),
                   Text(
                     "${_userDetails.fileCount.toString()} Memories",
                     style: Theme.of(context)
