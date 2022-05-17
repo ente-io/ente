@@ -61,7 +61,7 @@ Future<dynamic> showErrorDialog(
 }
 
 Future<dynamic> showGenericErrorDialog(BuildContext context) {
-  return showErrorDialog(context, "something went wrong", "please try again.");
+  return showErrorDialog(context, "Something went wrong", "Please try again.");
 }
 
 Future<T> showConfettiDialog<T>({

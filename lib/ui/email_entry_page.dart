@@ -557,7 +557,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (BuildContext context) {
-                              return WebPage("terms", "https://ente.io/terms");
+                              return WebPage("Terms", "https://ente.io/terms");
                             },
                           ),
                         );
@@ -575,7 +575,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           MaterialPageRoute(
                             builder: (BuildContext context) {
                               return WebPage(
-                                  "privacy", "https://ente.io/privacy");
+                                  "Privacy", "https://ente.io/privacy");
                             },
                           ),
                         );
@@ -709,7 +709,7 @@ class PricingWidget extends StatelessWidget {
         if (snapshot.hasData) {
           return _buildPlans(context, snapshot.data);
         } else if (snapshot.hasError) {
-          return Text("Oops, something went wrong.");
+          return Text("Oops, Something went wrong.");
         }
         return loadWidget;
       },
