@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import CryptoWorker, { B64EncryptionResult } from 'utils/crypto';
 import SingleInputForm from 'components/SingleInputForm';
 import MessageDialog from 'components/MessageDialog';
-import VerticallyCenteredContainer from 'components/Container';
+import VerticallyCentered from 'components/Container';
 import { Card, Button } from 'react-bootstrap';
 import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
@@ -82,7 +82,7 @@ export default function Recover() {
 
     return (
         <>
-            <VerticallyCenteredContainer>
+            <VerticallyCentered>
                 <Card style={{ minWidth: '320px' }} className="text-center">
                     <Card.Body style={{ padding: '40px 30px' }}>
                         <Card.Title style={{ marginBottom: '32px' }}>
@@ -112,7 +112,7 @@ export default function Recover() {
                         </div>
                     </Card.Body>
                 </Card>
-            </VerticallyCenteredContainer>
+            </VerticallyCentered>
             <MessageDialog
                 size="lg"
                 show={messageDialogView}

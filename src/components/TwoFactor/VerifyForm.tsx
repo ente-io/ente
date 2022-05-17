@@ -4,7 +4,7 @@ import React, { FC, useRef, useState } from 'react';
 import OtpInput from 'react-otp-input';
 import constants from 'utils/strings/constants';
 import SubmitButton from 'components/SubmitButton';
-import VerticallyCenteredContainer from 'components/Container';
+import VerticallyCentered from 'components/Container';
 import { Box, Typography, TypographyProps } from '@mui/material';
 import InvalidInputMessage from './InvalidInputMessage';
 
@@ -54,7 +54,7 @@ export default function VerifyTwoFactor(props: Props) {
                     noValidate
                     onSubmit={handleSubmit}
                     style={{ width: '100%' }}>
-                    <VerticallyCenteredContainer>
+                    <VerticallyCentered>
                         <Typography mb={2}>
                             {constants.ENTER_TWO_FACTOR_OTP}
                         </Typography>
@@ -83,7 +83,7 @@ export default function VerifyTwoFactor(props: Props) {
                             loading={waiting}
                             disabled={values.otp.length < 6}
                         />
-                    </VerticallyCenteredContainer>
+                    </VerticallyCentered>
                 </form>
             )}
         </Formik>
