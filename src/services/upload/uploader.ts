@@ -13,7 +13,7 @@ import { FILE_TYPE } from 'constants/file';
 import {
     FileUploadResults,
     MAX_FILE_SIZE_SUPPORTED,
-    MAX_NODE_SUPPORTED_FILE_SIZE_SUPPORTED,
+    MAX_NODE_SUPPORTED_FILE_SIZE,
 } from 'constants/upload';
 import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
 import { logUploadInfo } from 'utils/upload';
@@ -46,7 +46,7 @@ export default async function uploader(
         const fileSize = UploadService.getAssetSize(uploadAsset);
         if (
             fileSize >= MAX_FILE_SIZE_SUPPORTED ||
-            (isElectron() && fileSize >= MAX_NODE_SUPPORTED_FILE_SIZE_SUPPORTED)
+            (isElectron() && fileSize >= MAX_NODE_SUPPORTED_FILE_SIZE)
         ) {
             return { fileUploadResult: FileUploadResults.TOO_LARGE };
         }
