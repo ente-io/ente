@@ -6,7 +6,7 @@ import {
     fileAlreadyInCollection,
     shouldDedupeAcrossCollection,
 } from 'utils/upload';
-import UploadHttpClient from './uploadHttpClientV2';
+import UploadHttpClientV2 from './uploadHttpClientV2';
 import UIService from './uiService';
 import UploadService from './uploadService';
 import { FILE_TYPE } from 'constants/file';
@@ -102,7 +102,7 @@ export default async function uploader(
         );
         logUploadInfo(`uploadFile ${fileNameSize}`);
 
-        const uploadedFile = await UploadHttpClient.uploadFile(uploadFile);
+        const uploadedFile = await UploadHttpClientV2.uploadFile(uploadFile);
         const decryptedFile = await decryptFile(uploadedFile, collection.key);
 
         UIService.increaseFileUploaded();

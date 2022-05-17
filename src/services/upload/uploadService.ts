@@ -1,6 +1,6 @@
 import { Collection } from 'types/collection';
 import { logError } from 'utils/sentry';
-import UploadHttpClient from './uploadHttpClientV2';
+import UploadHttpClientV2 from './uploadHttpClientV2';
 import { extractFileMetadata, getFilename } from './fileService';
 import { getFileType } from '../typeDetectionService';
 import { handleUploadError } from 'utils/error';
@@ -142,14 +142,14 @@ class UploadService {
                     file.localID
                 );
                 const fileUploadURL = await this.getUploadURL();
-                fileObjectKey = await UploadHttpClient.putFile(
+                fileObjectKey = await UploadHttpClientV2.putFile(
                     fileUploadURL,
                     file.file.encryptedData,
                     progressTracker
                 );
             }
             const thumbnailUploadURL = await this.getUploadURL();
-            const thumbnailObjectKey = await UploadHttpClient.putFile(
+            const thumbnailObjectKey = await UploadHttpClientV2.putFile(
                 thumbnailUploadURL,
                 file.thumbnail.encryptedData as Uint8Array,
                 null
@@ -206,7 +206,7 @@ class UploadService {
     }
 
     private async fetchUploadURLs() {
-        await UploadHttpClient.fetchUploadURLs(
+        await UploadHttpClientV2.fetchUploadURLs(
             this.pendingUploadCount,
             this.uploadURLs
         );

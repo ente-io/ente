@@ -11,7 +11,7 @@ const ENDPOINT = getEndpoint();
 const UPLOAD_ENDPOINT = getUploadEndpoint();
 const MAX_URL_REQUESTS = 50;
 
-class UploadHttpClient {
+class UploadHttpClientV2 {
     private uploadURLFetchInProgress = null;
 
     async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
@@ -159,4 +159,4 @@ class UploadHttpClient {
     }
 }
 
-export default new UploadHttpClient();
+export default new UploadHttpClientV2();
