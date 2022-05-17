@@ -364,7 +364,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         ),
       );
     } catch (e, s) {
-      showToast("oops, could not save edits");
+      showToast("Oops, could not save edits");
       _logger.severe(e, s);
     }
     await dialog.hide();

@@ -16,7 +16,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("enter your email address"),
+      title: Text("Enter your email address"),
       content: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -46,7 +46,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
       actions: [
         TextButton(
           child: Text(
-            "cancel",
+            "Cancel",
             style: TextStyle(
               color: Colors.redAccent,
             ),
@@ -57,15 +57,15 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
         ),
         TextButton(
           child: Text(
-            "verify",
+            "Verify",
             style: TextStyle(
               color: Colors.green,
             ),
           ),
           onPressed: () {
             if (!isValidEmail(_email)) {
-              showErrorDialog(context, "invalid email address",
-                  "please enter a valid email address.");
+              showErrorDialog(context, "Invalid email address",
+                  "Please enter a valid email address.");
               return;
             }
             UserService.instance.getOtt(context, _email, isChangeEmail: true);

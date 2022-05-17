@@ -124,19 +124,19 @@ class _HomeWidgetState extends State<HomeWidget> {
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       AlertDialog alert = AlertDialog(
-        title: Text("session expired"),
-        content: Text("please login again"),
+        title: Text("Session expired"),
+        content: Text("Please login again"),
         actions: [
           TextButton(
             child: Text(
-              "ok",
+              "Ok",
               style: TextStyle(
                 color: Theme.of(context).buttonColor,
               ),
             ),
             onPressed: () async {
               Navigator.of(context, rootNavigator: true).pop('dialog');
-              final dialog = createProgressDialog(context, "logging out...");
+              final dialog = createProgressDialog(context, "Logging out...");
               await dialog.show();
               await Configuration.instance.logout();
               await dialog.hide();

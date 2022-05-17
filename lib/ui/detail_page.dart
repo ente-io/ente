@@ -267,10 +267,10 @@ class _DetailPageState extends State<DetailPage> {
       _logger.severe("Attempt to edit unowned file", UnauthorizedEditError(),
           StackTrace.current);
       showErrorDialog(context, "Sorry",
-          "we don't support editing photos and albums that you don't own yet");
+          "We don't support editing photos and albums that you don't own yet");
       return;
     }
-    final dialog = createProgressDialog(context, "please wait...");
+    final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     final imageProvider =
         ExtendedFileImageProvider(await getFile(file), cacheRawData: true);

@@ -108,7 +108,7 @@ class _SessionsPageState extends State<SessionsPage> {
   }
 
   Future<void> _terminateSession(Session session) async {
-    final dialog = createProgressDialog(context, "please wait...");
+    final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
       await UserService.instance.terminateSession(session.token);
@@ -118,7 +118,7 @@ class _SessionsPageState extends State<SessionsPage> {
       await dialog.hide();
       _logger.severe('failed to terminate', e, s);
       showErrorDialog(
-          context, 'oops', "something went wrong, please try again");
+          context, 'Oops', "Something went wrong, please try again");
     }
   }
 

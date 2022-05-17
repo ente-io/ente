@@ -62,7 +62,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     List<Widget> children = [];
     children.add(
       Tooltip(
-        message: "info",
+        message: "Info",
         child: Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(
@@ -83,7 +83,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
           widget.file.fileType == FileType.livePhoto) {
         children.add(
           Tooltip(
-            message: "edit",
+            message: "Edit",
             child: Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 12),
               child: IconButton(
@@ -102,7 +102,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             widget.file.magicMetadata.visibility == kVisibilityArchive;
         children.add(
           Tooltip(
-            message: isArchived ? "unarchive" : "archive",
+            message: isArchived ? "Unhide" : "Hide",
             child: Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 12),
               child: IconButton(
@@ -128,7 +128,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
       }
       children.add(
         Tooltip(
-          message: "share",
+          message: "Share",
           child: Padding(
             padding: const EdgeInsets.only(top: 12, bottom: 12),
             child: IconButton(
@@ -174,7 +174,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
   void _addTrashOptions(List<Widget> children) {
     children.add(
       Tooltip(
-        message: "restore",
+        message: "Restore",
         child: Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(
@@ -199,7 +199,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
 
     children.add(
       Tooltip(
-        message: "delete",
+        message: "Delete",
         child: Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(

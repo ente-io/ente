@@ -6,7 +6,7 @@ Widget nothingToSeeHere({Color textColor}) {
     child: Padding(
       padding: const EdgeInsets.all(8.0),
       child: Text(
-        "nothing to see here! 👀",
+        "Nothing to see here! 👀",
         style: TextStyle(
           fontFamily: "Inter",
           color: textColor.withOpacity(0.35),

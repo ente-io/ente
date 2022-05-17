@@ -203,7 +203,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   Future<void> _showShareCollectionDialog() async {
     var collection = widget.collection;
-    final dialog = createProgressDialog(context, "please wait...");
+    final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
       if (collection == null) {

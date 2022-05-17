@@ -352,7 +352,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         widget.type == GalleryType.archive) {
       bool showArchive = widget.type == GalleryType.homepage;
       actions.add(Tooltip(
-        message: showArchive ? "archive" : "unarchive",
+        message: showArchive ? "Hide" : "Unhide",
         child: IconButton(
           color: Colors.black, //same for both themes
           icon: Icon(
@@ -370,7 +370,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
 
   void _addTrashAction(List<Widget> actions) {
     actions.add(Tooltip(
-      message: "restore",
+      message: "Restore",
       child: IconButton(
         color: Colors.black, //same for both themes
         icon: Icon(

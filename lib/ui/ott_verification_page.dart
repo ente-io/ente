@@ -186,7 +186,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                       UserService.instance.getOtt(context, widget.email,
                           isCreateAccountScreen: widget.isCreateAccountScreen);
                     },
-                    child: Text("resend email",
+                    child: Text("Resend email",
                         style: Theme.of(context).textTheme.subtitle1.copyWith(
                             fontSize: 14,
                             decoration: TextDecoration

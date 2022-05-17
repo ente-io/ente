@@ -121,7 +121,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Widget _getBody() {
     if (!_isLoading) {
       _isLoading = true;
-      _dialog = createProgressDialog(context, "please wait...");
+      _dialog = createProgressDialog(context, "Please wait...");
       _fetchSub();
     }
     if (_hasLoadedData) {
