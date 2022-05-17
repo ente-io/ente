@@ -1,8 +1,8 @@
 import React, { useContext, useState } from 'react';
 import SidebarButton from './Button';
 import constants from 'utils/strings/constants';
-import FixLargeThumbnails from 'components/FixLargeThumbnail';
-import RecoveryKeyModal from 'components/RecoveryKeyModal';
+// import FixLargeThumbnails from 'components/FixLargeThumbnail';
+import RecoveryKey from 'components/RecoveryKey';
 import TwoFactorModal from 'components/TwoFactor/Modal';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
@@ -14,7 +14,7 @@ export default function UtilitySection({ closeSidebar }) {
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
-    const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
+    // const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
 
     const openRecoveryKeyModal = () => setRecoveryModalView(true);
     const closeRecoveryKeyModal = () => setRecoveryModalView(false);
@@ -34,7 +34,7 @@ export default function UtilitySection({ closeSidebar }) {
 
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
 
-    const openThumbnailCompressModal = () => setFixLargeThumbsView(true);
+    // const openThumbnailCompressModal = () => setFixLargeThumbsView(true);
 
     const somethingWentWrong = () =>
         setDialogMessage({
@@ -61,11 +61,11 @@ export default function UtilitySection({ closeSidebar }) {
                 {constants.DEDUPLICATE_FILES}
             </SidebarButton>
 
-            <SidebarButton onClick={openThumbnailCompressModal}>
+            {/* <SidebarButton onClick={openThumbnailCompressModal}>
                 {constants.COMPRESS_THUMBNAILS}
-            </SidebarButton>
+            </SidebarButton> */}
 
-            <RecoveryKeyModal
+            <RecoveryKey
                 show={recoverModalView}
                 onHide={closeRecoveryKeyModal}
                 somethingWentWrong={somethingWentWrong}
@@ -78,11 +78,11 @@ export default function UtilitySection({ closeSidebar }) {
                 setLoading={startLoading}
             />
 
-            <FixLargeThumbnails
+            {/* <FixLargeThumbnails
                 isOpen={fixLargeThumbsView}
                 hide={() => setFixLargeThumbsView(false)}
                 show={() => setFixLargeThumbsView(true)}
-            />
+            /> */}
         </>
     );
 }

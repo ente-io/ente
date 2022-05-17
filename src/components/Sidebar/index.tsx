@@ -1,58 +1,39 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { LS_KEYS, setData } from 'utils/storage/localStorage';
+import React, { useContext } from 'react';
 
-import { getUserDetails } from 'services/userService';
-import { UserDetails } from 'types/user';
-import { getLocalUserDetails } from 'utils/user';
-import InfoSection from './InfoSection';
 import NavigationSection from './NavigationSection';
 import UtilitySection from './UtilitySection';
 import HelpSection from './HelpSection';
 import ExitSection from './ExitSection';
-import DebugLogs from './DebugLogs';
-import { DrawerSidebar, DividerWithMargin } from './styledComponents';
+// import DebugLogs from './DebugLogs';
+import { DrawerSidebar, PaddedDivider } from './styledComponents';
 import { AppContext } from 'pages/_app';
-import SubscriptionDetails from './SubscriptionDetails';
 import HeaderSection from './Header';
 import { CollectionSummaries } from 'types/collection';
+import UserDetailsSection from './userDetailsSection';
 
 interface Iprops {
     collectionSummaries: CollectionSummaries;
 }
 export default function Sidebar({ collectionSummaries }: Iprops) {
     const { sidebarView, closeSidebar } = useContext(AppContext);
-    const [userDetails, setUserDetails] = useState<UserDetails>(null);
-    useEffect(() => {
-        setUserDetails(getLocalUserDetails());
-    }, []);
-
-    useEffect(() => {
-        const main = async () => {
-            const userDetails = await getUserDetails();
-            setUserDetails(userDetails);
-            setData(LS_KEYS.USER_DETAILS, userDetails);
-        };
-        main();
-    }, [sidebarView]);
 
     return (
-        <DrawerSidebar anchor="left" open={sidebarView} onClose={closeSidebar}>
+        <DrawerSidebar open={sidebarView} onClose={closeSidebar}>
             <HeaderSection closeSidebar={closeSidebar} />
-            <DividerWithMargin />
-            <InfoSection userDetails={userDetails} />
-            <SubscriptionDetails userDetails={userDetails} />
-            <DividerWithMargin />
+            <PaddedDivider spaced />
+            <UserDetailsSection sidebarView={sidebarView} />
+            <PaddedDivider invisible />
             <NavigationSection
                 closeSidebar={closeSidebar}
                 collectionSummaries={collectionSummaries}
             />
             <UtilitySection closeSidebar={closeSidebar} />
-            <DividerWithMargin />
-            <HelpSection userDetails={userDetails} />
-            <DividerWithMargin />
+            <PaddedDivider />
+            <HelpSection />
+            <PaddedDivider />
             <ExitSection />
-            <DividerWithMargin />
-            <DebugLogs />
+            {/* <PaddedDivider />
+            <DebugLogs /> */}
         </DrawerSidebar>
     );
 }

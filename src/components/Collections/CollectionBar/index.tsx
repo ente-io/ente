@@ -1,6 +1,6 @@
 import NavigationButton, {
     SCROLL_DIRECTION,
-} from 'components/Collections/NavigationButton';
+} from 'components/Collections/CollectionBar/NavigationButton';
 import React, { useEffect } from 'react';
 import { Collection, CollectionSummaries } from 'types/collection';
 import constants from 'utils/strings/constants';
@@ -12,7 +12,7 @@ import {
     ScrollContainer,
     PaddedSpaceBetweenFlex,
 } from 'components/Collections/styledComponents';
-import CollectionCardWithActiveIndicator from 'components/Collections/CollectionCardWithActiveIndicator';
+import CollectionCardWithActiveIndicator from 'components/Collections/CollectionBar/CollectionCardWithActiveIndicator';
 import useComponentScroll from 'hooks/useComponentScroll';
 import useWindowSize from 'hooks/useWindowSize';
 import LinkButton from 'components/pages/gallery/LinkButton';

@@ -34,6 +34,7 @@ const Trigger = styled.span`
 `;
 
 const englishConstants = {
+    ENTE: 'ente',
     HERO_HEADER: () => (
         <div>
             with <Logo src="/icon.svg" />
@@ -167,10 +168,10 @@ const englishConstants = {
     CHANGE_PASSWORD: 'Change password',
     GO_BACK: 'Go back',
     RECOVERY_KEY: 'Recovery key',
-    SAVE_LATER: 'save later',
-    SAVE: 'save',
+    SAVE_LATER: 'Do this later',
+    SAVE: 'Save Key',
     RECOVERY_KEY_DESCRIPTION:
-        'if you forget your password, the only way you can recover your data is with this key.',
+        'If you forget your password, the only way you can recover your data is with this key.',
     RECOVER_KEY_GENERATION_FAILED:
         'recovery code could not be generated, please try again',
     KEY_NOT_STORED_DISCLAIMER:
@@ -461,7 +462,7 @@ const englishConstants = {
             ? `1 file received. uploading in a jiffy`
             : `${count} files received. uploading in a jiffy`,
     TWO_FACTOR: 'Two-factor',
-    TWO_FACTOR_AUTHENTICATION: 'two-factor authentication',
+    TWO_FACTOR_AUTHENTICATION: 'Two-factor authentication',
     TWO_FACTOR_QR_INSTRUCTION:
         'scan the QR code below with your favorite authenticator app',
     ENTER_CODE_MANUALLY: 'enter the code manually',
@@ -470,24 +471,24 @@ const englishConstants = {
     SCAN_QR_CODE: 'scan QR code instead',
     CONTINUE: 'continue',
     BACK: 'back',
-    ENABLE_TWO_FACTOR: 'enable two-factor',
+    ENABLE_TWO_FACTOR: 'Enable two-factor',
     ENABLE: 'enable',
     LOST_DEVICE: 'Lost two-factor device',
     INCORRECT_CODE: 'incorrect code',
     RECOVER_TWO_FACTOR: 'recover two-factor',
     TWO_FACTOR_INFO:
-        'add an additional layer of security by requiring more than your email and password to log in to your account',
-    DISABLE_TWO_FACTOR_HINT: 'disable two-factor authentication',
-    UPDATE_TWO_FACTOR_HINT: 'update your authenticator device',
-    DISABLE: 'disable',
-    RECONFIGURE: 'reconfigure',
-    UPDATE_TWO_FACTOR: 'update two-factor',
+        'Add an additional layer of security by requiring more than your email and password to log in to your account',
+    DISABLE_TWO_FACTOR_LABEL: 'Disable two-factor authentication',
+    UPDATE_TWO_FACTOR_LABEL: 'Update your authenticator device',
+    DISABLE: 'Disable',
+    RECONFIGURE: 'Reconfigure',
+    UPDATE_TWO_FACTOR: 'Update two-factor',
     UPDATE_TWO_FACTOR_MESSAGE:
-        'continuing forward will void any previously configured authenticators',
-    UPDATE: 'update',
-    DISABLE_TWO_FACTOR: 'disable two-factor',
+        'Continuing forward will void any previously configured authenticators',
+    UPDATE: 'Update',
+    DISABLE_TWO_FACTOR: 'Disable two-factor',
     DISABLE_TWO_FACTOR_MESSAGE:
-        'are you sure you want to disable your two-factor authentication',
+        'Are you sure you want to disable your two-factor authentication',
     TWO_FACTOR_SETUP_FAILED: 'failed to setup two factor, please try again',
     TWO_FACTOR_SETUP_SUCCESS:
         'two factor authentication successfully configured',
@@ -728,11 +729,11 @@ const englishConstants = {
     VIEW_ALL_ALBUMS: 'View all Albums',
     ALL_ALBUMS: 'All Albums',
     PHOTOS: 'Photos',
-    ENTE: 'ente',
     ENDS: 'Ends',
     ENTER_TWO_FACTOR_OTP:
         ' enter the 6-digit code from your authenticator app.',
     CREATE_ACCOUNT: 'Create Account',
+    COPIED: 'copied',
 };
 
 export default englishConstants;

@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import EnteSpinner from 'components/EnteSpinner';
 import { AppContext } from 'pages/_app';
 import Login from 'components/Login';
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { PAGES } from 'constants/pages';
 import FormContainer from 'components/Form/FormContainer';
@@ -30,11 +30,11 @@ export default function Home() {
     };
 
     return loading ? (
-        <Container>
+        <VerticallyCenteredContainer>
             <EnteSpinner>
                 <span className="sr-only">Loading...</span>
             </EnteSpinner>
-        </Container>
+        </VerticallyCenteredContainer>
     ) : (
         <FormContainer>
             <FormPaper sx={{ minWidth: '320px' }}>

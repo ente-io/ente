@@ -1,4 +1,4 @@
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import { SetupMode } from 'pages/two-factor/setup';
 import SetupManualMode from 'pages/two-factor/setup/ManualMode';
 import SetupQRMode from 'pages/two-factor/setup/QRMode';
@@ -16,7 +16,7 @@ export function TwoFactorSetup({ twoFactorSecret }: Iprops) {
     const changeToQRMode = () => setSetupMode(SetupMode.QR_CODE);
 
     return (
-        <Container sx={{ mb: 3 }}>
+        <VerticallyCenteredContainer sx={{ mb: 3 }}>
             {setupMode === SetupMode.QR_CODE ? (
                 <SetupQRMode
                     twoFactorSecret={twoFactorSecret}
@@ -28,6 +28,6 @@ export function TwoFactorSetup({ twoFactorSecret }: Iprops) {
                     changeToQRMode={changeToQRMode}
                 />
             )}
-        </Container>
+        </VerticallyCenteredContainer>
     );
 }

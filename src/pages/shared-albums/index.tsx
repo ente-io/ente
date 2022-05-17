@@ -23,7 +23,7 @@ import {
     PublicCollectionGalleryContext,
 } from 'utils/publicCollectionGallery';
 import { CustomError, parseSharingErrorCodes } from 'utils/error';
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import constants from 'utils/strings/constants';
 import EnteSpinner from 'components/EnteSpinner';
 import CryptoWorker from 'utils/crypto';
@@ -34,11 +34,11 @@ import { Card } from 'react-bootstrap';
 import { logError } from 'utils/sentry';
 
 const Loader = () => (
-    <Container>
+    <VerticallyCenteredContainer>
         <EnteSpinner>
             <span className="sr-only">Loading...</span>
         </EnteSpinner>
-    </Container>
+    </VerticallyCenteredContainer>
 );
 const bs58 = require('bs58');
 export default function PublicCollectionGallery() {
@@ -253,11 +253,15 @@ export default function PublicCollectionGallery() {
         }
     } else {
         if (errorMessage) {
-            return <Container>{errorMessage}</Container>;
+            return (
+                <VerticallyCenteredContainer>
+                    {errorMessage}
+                </VerticallyCenteredContainer>
+            );
         }
         if (isPasswordProtected && !passwordJWTToken.current) {
             return (
-                <Container>
+                <VerticallyCenteredContainer>
                     <Card style={{ maxWidth: '332px' }} className="text-center">
                         <Card.Body style={{ padding: '40px 30px' }}>
                             <Card.Subtitle style={{ marginBottom: '2rem' }}>
@@ -272,11 +276,15 @@ export default function PublicCollectionGallery() {
                             />
                         </Card.Body>
                     </Card>
-                </Container>
+                </VerticallyCenteredContainer>
             );
         }
         if (!publicFiles) {
-            return <Container>{constants.NOT_FOUND}</Container>;
+            return (
+                <VerticallyCenteredContainer>
+                    {constants.NOT_FOUND}
+                </VerticallyCenteredContainer>
+            );
         }
     }
 

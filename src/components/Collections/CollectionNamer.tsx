@@ -1,10 +1,17 @@
 import React from 'react';
-import { Dialog, DialogContent, TextField } from '@mui/material';
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    TextField,
+} from '@mui/material';
 import constants from 'utils/strings/constants';
 import SubmitButton from 'components/SubmitButton';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { DialogTitleWithCloseButton } from 'components/MessageDialog';
+import { SpaceBetweenFlex } from 'components/Container';
+import Close from '@mui/icons-material/Close';
 
 export interface CollectionNamerAttributes {
     callback: (name) => void;
@@ -37,9 +44,14 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
 
     return (
         <Dialog open={props.show} onClose={props.onHide} maxWidth="xs">
-            <DialogTitleWithCloseButton onClose={props.onHide}>
-                {attributes?.title}
-            </DialogTitleWithCloseButton>
+            <DialogTitle>
+                <SpaceBetweenFlex>
+                    {attributes?.title}
+                    <IconButton onClick={props.onHide}>
+                        <Close />
+                    </IconButton>
+                </SpaceBetweenFlex>
+            </DialogTitle>
             <DialogContent>
                 <Formik<formValues>
                     initialValues={{

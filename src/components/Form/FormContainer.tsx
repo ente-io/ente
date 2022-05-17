@@ -1,14 +1,14 @@
 import React from 'react';
 import { ContainerProps } from '@mui/material';
 import { FC } from 'react';
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 
 const FormContainer: FC<ContainerProps> = ({ style, children, ...props }) => (
-    <Container
+    <VerticallyCenteredContainer
         style={{ alignItems: 'flex-end', textAlign: 'left', ...style }}
         {...props}>
         {children}
-    </Container>
+    </VerticallyCenteredContainer>
 );
 
 export default FormContainer;

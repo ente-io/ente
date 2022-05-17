@@ -44,6 +44,7 @@ function TwoFactorModal(props: Props) {
     return (
         <MessageDialog
             size="xs"
+            fullWidth
             show={props.show}
             onHide={props.onHide}
             attributes={{
@@ -54,9 +55,7 @@ function TwoFactorModal(props: Props) {
                 {isTwoFactorEnabled ? (
                     <TwoFactorModalManageSection close={close} />
                 ) : (
-                    <TwoFactorModalSetupSection
-                        closeSidebar={props.closeSidebar}
-                    />
+                    <TwoFactorModalSetupSection close={close} />
                 )}
             </>
         </MessageDialog>

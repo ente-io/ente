@@ -25,7 +25,7 @@ import {
     shareExpiryOptions,
 } from 'utils/collection';
 import { FlexWrapper, Label, Row, Value } from '../Container';
-import { CodeBlock } from '../CodeBlock';
+import CodeBlock from '../CodeBlock';
 import { ButtonVariant, getVariantColor } from '../pages/gallery/LinkButton';
 import { handleSharingErrors } from 'utils/error';
 import { sleep } from 'utils/common';

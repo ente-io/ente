@@ -1,4 +1,4 @@
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import LogoImg from 'components/LogoImg';
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-bootstrap';
@@ -25,10 +25,10 @@ function ChangeEmailPage() {
     const goToGallery = () => router.push(PAGES.GALLERY);
 
     return (
-        <Container>
+        <VerticallyCenteredContainer>
             <Card sx={{ minWidth: showBigDialog ? '460px' : '320px' }}>
                 <CardContent>
-                    <Container disableGutters sx={{ py: 2 }}>
+                    <VerticallyCenteredContainer disableGutters sx={{ py: 2 }}>
                         <Box mb={2}>
                             <LogoImg src="/icon.svg" />
                             {constants.CHANGE_EMAIL}
@@ -52,10 +52,10 @@ function ChangeEmailPage() {
                         <LinkButton onClick={goToGallery}>
                             {constants.GO_BACK}
                         </LinkButton>
-                    </Container>
+                    </VerticallyCenteredContainer>
                 </CardContent>
             </Card>
-        </Container>
+        </VerticallyCenteredContainer>
     );
 }
 

@@ -1,8 +1,9 @@
+import { Box } from '@mui/material';
 import styled from 'styled-components';
 import { default as MuiStyled } from '@mui/styled-engine';
 import { Container as MuiContainer } from '@mui/material';
 
-const Container = MuiStyled(MuiContainer)`
+const VerticallyCenteredContainer = MuiStyled(MuiContainer)`
     flex: 1;
     display: flex;
     align-items: center;
@@ -12,7 +13,7 @@ const Container = MuiStyled(MuiContainer)`
     overflow: auto;
 `;
 
-export default Container;
+export default VerticallyCenteredContainer;
 
 export const DisclaimerContainer = styled.div`
     margin: 16px 0;
@@ -56,9 +57,8 @@ export const Value = styled.div<{ width?: string }>`
     color: #ddd;
 `;
 
-export const FlexWrapper = styled.div`
+export const FlexWrapper = styled(Box)`
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
 `;
 
@@ -70,6 +70,14 @@ export const FreeFlowText = styled.div`
 
 export const SpaceBetweenFlex = styled(FlexWrapper)`
     justify-content: space-between;
+`;
+
+export const CenteredFlex = styled(FlexWrapper)`
+    justify-content: center;
+`;
+
+export const FluidContainer = styled(FlexWrapper)`
+    flex: 1;
 `;
 
 export const InvertedIconButton = styled(IconButton)`

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Container from 'components/Container';
+import VerticallyCenteredContainer from 'components/Container';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
@@ -55,14 +55,14 @@ function SetPasswordForm(props: Props) {
                     style={{ width: '100%' }}
                     noValidate
                     onSubmit={handleSubmit}>
-                    <Container disableGutters>
+                    <VerticallyCenteredContainer disableGutters>
                         <Typography mb={2}>
                             {constants.ENTER_ENC_PASSPHRASE}
                         </Typography>
                         <Typography mb={2}>
                             {constants.PASSPHRASE_DISCLAIMER()}
                         </Typography>
-                        <Container>
+                        <VerticallyCenteredContainer>
                             <TextField
                                 margin="normal"
                                 fullWidth
@@ -89,8 +89,8 @@ function SetPasswordForm(props: Props) {
                                 loading={loading}
                                 buttonText={props.buttonText}
                             />
-                        </Container>
-                    </Container>
+                        </VerticallyCenteredContainer>
+                    </VerticallyCenteredContainer>
                 </form>
             )}
         </Formik>
