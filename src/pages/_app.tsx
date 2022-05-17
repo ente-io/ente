@@ -283,7 +283,8 @@ export default function App({ Component, err }) {
                     <LoadingBar color="#51cd7c" ref={loadingBar} />
 
                     <MessageDialog
-                        size="lg"
+                        fullWidth
+                        size="sm"
                         show={messageDialogView}
                         onHide={closeMessageDialog}
                         attributes={dialogMessage}
