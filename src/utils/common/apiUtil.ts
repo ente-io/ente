@@ -56,5 +56,5 @@ export const getUploadEndpoint = () => {
     if (process.env.NEXT_PUBLIC_ENTE_UPLOAD_ENDPOINT !== undefined) {
         return process.env.NEXT_PUBLIC_ENTE_UPLOAD_ENDPOINT;
     }
-    return `http://localhost:8787`;
+    return `https://uploads.ente.workers.dev`;
 };
