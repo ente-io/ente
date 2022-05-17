@@ -1,9 +1,8 @@
 import { Box } from '@mui/material';
 import styled from 'styled-components';
 import { default as MuiStyled } from '@mui/styled-engine';
-import { Container as MuiContainer } from '@mui/material';
 
-const VerticallyCenteredContainer = MuiStyled(MuiContainer)`
+const VerticallyCenteredContainer = MuiStyled(Box)`
     flex: 1;
     display: flex;
     align-items: center;
