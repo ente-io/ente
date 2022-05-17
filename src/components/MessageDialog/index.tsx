@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React from 'react';
 import constants from 'utils/strings/constants';
 import {
     Breakpoint,
@@ -43,11 +43,11 @@ type Props = React.PropsWithChildren<
     }
 >;
 
-const MessageDialog: FC<Props> = ({
+export default function MessageDialog({
     attributes,
     children,
     ...props
-}: Props) => {
+}: Props) {
     if (!attributes) {
         return <Dialog open={false} />;
     }
@@ -116,6 +116,4 @@ const MessageDialog: FC<Props> = ({
             )}
         </Dialog>
     );
-};
-
-export default MessageDialog;
+}
