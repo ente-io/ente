@@ -472,13 +472,13 @@ const englishConstants = {
     UPDATE_TWO_FACTOR_LABEL: 'Update your authenticator device',
     DISABLE: 'Disable',
     RECONFIGURE: 'Reconfigure',
-    UPDATE_TWO_FACTOR: 'update two-factor',
+    UPDATE_TWO_FACTOR: 'Update two-factor',
     UPDATE_TWO_FACTOR_MESSAGE:
-        'continuing forward will void any previously configured authenticators',
+        'Continuing forward will void any previously configured authenticators',
     UPDATE: 'Update',
-    DISABLE_TWO_FACTOR: 'disable two-factor',
+    DISABLE_TWO_FACTOR: 'Disable two-factor',
     DISABLE_TWO_FACTOR_MESSAGE:
-        'are you sure you want to disable your two-factor authentication',
+        'Are you sure you want to disable your two-factor authentication',
     TWO_FACTOR_SETUP_FAILED: 'failed to setup two factor, please try again',
     TWO_FACTOR_SETUP_SUCCESS:
         'two factor authentication successfully configured',
