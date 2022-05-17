@@ -22,12 +22,6 @@ declare module '@mui/material/Button' {
     }
 }
 
-declare module '@mui/material/ToggleButtonGroup' {
-    export interface ToggleButtonGroupPropsColorOverrides {
-        negative: true;
-    }
-}
-
 // Create a theme instance.
 const darkThemeOptions = createTheme({
     components: {
@@ -40,6 +34,7 @@ const darkThemeOptions = createTheme({
                     textDecoration: 'none',
                     '&:hover': {
                         textDecoration: 'underline',
+                        color: '#1dba54',
                     },
                 },
             },
