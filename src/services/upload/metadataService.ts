@@ -12,13 +12,14 @@ import {
 import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
 import { splitFilenameAndExtension } from 'utils/file';
 import { getVideoMetadata } from './videoMetadataService';
-import { getFileHash, getFileNameSize } from 'utils/upload';
+import { getFileNameSize } from 'utils/upload';
 import { logUploadInfo } from 'utils/upload';
 import {
     parseDateFromFusedDateString,
     getUnixTimeInMicroSeconds,
     tryToParseDateTime,
 } from 'utils/time';
+import { getFileHash } from 'utils/crypto';
 
 interface ParsedMetadataJSONWithTitle {
     title: string;
