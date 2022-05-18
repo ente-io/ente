@@ -4,6 +4,7 @@ import { convertBytesToHumanReadable } from 'utils/billing';
 import { formatDateTime } from 'utils/file';
 import { getLogs, saveLogLine } from 'utils/storage';
 import { A_SEC_IN_MICROSECONDS } from 'constants/upload';
+import { FILE_TYPE } from 'constants/file';
 
 const TYPE_JSON = 'json';
 const DEDUPE_COLLECTION = new Set(['icloud library', 'icloudlibrary']);
@@ -18,6 +19,28 @@ export function fileAlreadyInCollection(
         }
     }
     return false;
+}
+
+export function findSameFileInOtherCollection(
+    existingFiles: EnteFile[],
+    newFileMetadata: Metadata,
+    collectionID: number
+) {
+    if (!fileHashExists(newFileMetadata)) {
+        return null;
+    }
+
+    for (const existingFile of existingFiles) {
+        if (
+            existingFile.collectionID !== collectionID &&
+            fileHashExists(existingFile.metadata) &&
+            areFilesWithFileHashSame(existingFile.metadata, newFileMetadata) &&
+            existingFile.metadata.title === newFileMetadata.title
+        ) {
+            return existingFile;
+        }
+    }
+    return null;
 }
 
 export function shouldDedupeAcrossCollection(collectionName: string): boolean {
@@ -35,6 +58,10 @@ export function areFilesSame(
      * precision of file times to prevent timing attacks and fingerprinting.
      * Context: https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
      */
+    if (fileHashExists(existingFile) && fileHashExists(newFile)) {
+        return areFilesWithFileHashSame(existingFile, newFile);
+    }
+
     if (
         existingFile.fileType === newFile.fileType &&
         Math.abs(existingFile.creationTime - newFile.creationTime) <
@@ -46,6 +73,33 @@ export function areFilesSame(
         return true;
     } else {
         return false;
+    }
+}
+
+export function fileHashExists(file: Metadata) {
+    if (file.hash || (file.imageHash && file.videoHash)) {
+        return true;
+    }
+    return false;
+}
+
+export function areFilesWithFileHashSame(
+    existingFile: Metadata,
+    newFile: Metadata
+): boolean {
+    if (existingFile.fileType !== newFile.fileType) {
+        return false;
+    }
+    if (
+        existingFile.fileType === FILE_TYPE.IMAGE ||
+        existingFile.fileType === FILE_TYPE.VIDEO
+    ) {
+        return existingFile.hash === newFile.hash;
+    } else {
+        return (
+            existingFile.imageHash === newFile.imageHash &&
+            existingFile.videoHash === newFile.videoHash
+        );
     }
 }
 
