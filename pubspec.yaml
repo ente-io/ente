@@ -58,7 +58,7 @@ dependencies:
   flutter_typeahead: ^4.0.0
   fk_user_agent: ^2.0.1
   flutter_windowmanager: ^0.2.0
-  fluttercontactpicker: ^4.4.0
+  fluttercontactpicker: ^4.7.0
   fluttertoast: ^8.0.6
   google_nav_bar: ^5.0.5
   image: ^3.0.2
