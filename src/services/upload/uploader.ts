@@ -14,7 +14,6 @@ import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
 import { logUploadInfo } from 'utils/upload';
 import { convertBytesToHumanReadable } from 'utils/billing';
 import { sleep } from 'utils/common';
-import isElectron from 'is-electron';
 
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
