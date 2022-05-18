@@ -17,7 +17,7 @@ environment:
   sdk: ">=2.10.0 <3.0.0"
 
 dependencies:
-  alice: ^0.2.4
+  alice: ^0.2.5
   animate_do: ^2.0.0
   archive: ^3.1.2
   background_fetch: ^1.0.1
@@ -36,7 +36,7 @@ dependencies:
   event_bus: ^2.0.0
   exif: ^3.0.0
   expansion_tile_card: ^2.0.0
-  extended_image: ^6.0.1
+  extended_image: ^6.2.1
   fast_base58: ^0.2.1
   firebase_core: ^1.10.0
   firebase_messaging: ^11.1.0
@@ -54,7 +54,7 @@ dependencies:
   flutter_password_strength: ^0.1.6
   flutter_secure_storage: ^4.2.0
   flutter_sodium: ^0.2.0
-  flutter_typeahead: ^3.2.0
+  flutter_typeahead: ^4.0.0
   fk_user_agent: ^2.0.1
   flutter_windowmanager: ^0.2.0
   fluttercontactpicker: ^4.4.0
@@ -69,6 +69,7 @@ dependencies:
   loading_animations: ^2.1.0
   local_auth: ^1.1.5
   logging: ^1.0.1
+  lottie: ^1.2.2
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
@@ -86,11 +87,12 @@ dependencies:
   quiver: ^3.0.1
   receive_sharing_intent: ^1.4.5
   scrollable_positioned_list: ^0.2.2
-  sentry: ^5.0.0
+  sentry: ^6.5.1
   share_plus: ^4.0.4
   shared_preferences: ^2.0.5
   sqflite: ^2.0.0+3
   sqflite_migration: ^0.3.0
+  step_progress_indicator: ^1.0.2
   super_logging:
     path: thirdparty/super_logging
   syncfusion_flutter_core: ^19.2.49
@@ -107,7 +109,7 @@ dependencies:
 
 dependency_overrides:
   provider: ^6.0.1 # for chewie 1.2.2 https://github.com/brianegan/chewie/issues/530
-  flutter_local_notifications: ^8.1.1
+  flutter_local_notifications: ^8.2.0
 
 dev_dependencies:
   flutter_launcher_icons: "0.9.0"
