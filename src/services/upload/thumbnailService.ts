@@ -9,7 +9,6 @@ import { ElectronFile, FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from '../readerService';
 import HEICConverter from 'services/heicConverter/heicConverterService';
 import { getFileNameSize, logUploadInfo } from 'utils/upload';
-import { MAX_NODE_SUPPORTED_FILE_SIZE } from 'constants/upload';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
@@ -36,9 +35,6 @@ export async function generateThumbnail(
         let thumbnail: Uint8Array;
         try {
             if (!(file instanceof File)) {
-                if (file.size > MAX_NODE_SUPPORTED_FILE_SIZE) {
-                    throw Error(CustomError.FILE_TOO_LARGE);
-                }
                 file = new File([await file.blob()], file.name);
             }
             if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
