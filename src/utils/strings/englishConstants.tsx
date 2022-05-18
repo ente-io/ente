@@ -572,7 +572,7 @@ const englishConstants = {
     TOO_LARGE_INFO:
         'these files were not uploaded as they exceed our maximum file size limit',
     THUMBNAIL_GENERATION_FAILED_INFO:
-        'these files were uploaded, but unfortunately we could not generate the thumbnail for them.',
+        'these files were uploaded, but unfortunately we could not generate the thumbnails for them.',
     UPLOAD_TO_COLLECTION: 'upload to album',
     ARCHIVE: 'archive',
     ALL: 'all',
