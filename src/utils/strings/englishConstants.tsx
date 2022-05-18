@@ -572,7 +572,7 @@ const englishConstants = {
     TOO_LARGE_INFO:
         'these files were not uploaded as they exceed our maximum file size limit',
     THUMBNAIL_GENERATION_FAILED_INFO:
-        'Your video was uploaded, but unfortunately we could not generate the thumbnail and metadata for the file. You can re-upload the file using the ente website or our mobile apps if you wish to fix the thumbnail and the metadata',
+        'these files were uploaded, but unfortunately we could not generate the thumbnail for them.',
     UPLOAD_TO_COLLECTION: 'upload to album',
     ARCHIVE: 'archive',
     ALL: 'all',
