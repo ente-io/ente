@@ -34,7 +34,7 @@ class NotificationService {
         AndroidNotificationDetails(
       'io.ente.photos',
       'ente',
-      'ente alerts',
+      channelDescription: 'ente alerts',
       importance: Importance.max,
       priority: Priority.high,
       showWhen: false,
