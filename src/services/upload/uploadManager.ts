@@ -28,11 +28,7 @@ import {
     ParsedMetadataJSONMap,
     ProgressUpdater,
 } from 'types/upload';
-import {
-    UPLOAD_STAGES,
-    FileUploadResults,
-    MAX_FILE_SIZE_SUPPORTED,
-} from 'constants/upload';
+import { UPLOAD_STAGES, FileUploadResults } from 'constants/upload';
 import { ComlinkWorker } from 'utils/comlink';
 import { FILE_TYPE } from 'constants/file';
 import uiService from './uiService';
@@ -205,15 +201,6 @@ class UploadManager {
             for (const { file, localID, collectionID } of mediaFiles) {
                 try {
                     const { fileTypeInfo, metadata } = await (async () => {
-                        if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
-                            logUploadInfo(
-                                `${getFileNameSize(
-                                    file
-                                )} rejected  because of large size`
-                            );
-
-                            return { fileTypeInfo: null, metadata: null };
-                        }
                         const fileTypeInfo = await UploadService.getFileType(
                             reader,
                             file
