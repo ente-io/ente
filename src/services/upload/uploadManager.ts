@@ -334,7 +334,11 @@ class UploadManager {
         try {
             logUploadInfo(`uploadedFile ${JSON.stringify(uploadedFile)}`);
 
-            if (fileUploadResult === FileUploadResults.UPLOADED) {
+            if (
+                fileUploadResult === FileUploadResults.UPLOADED ||
+                fileUploadResult ===
+                    FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL
+            ) {
                 const decryptedFile = await decryptFile(
                     uploadedFile,
                     fileWithCollection.collection.key

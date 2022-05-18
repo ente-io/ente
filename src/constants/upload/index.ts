@@ -38,6 +38,7 @@ export enum FileUploadResults {
     TOO_LARGE,
     LARGER_THAN_AVAILABLE_STORAGE,
     UPLOADED,
+    UPLOADED_WITH_STATIC_THUMBNAIL,
 }
 
 export const MAX_FILE_SIZE_SUPPORTED = 4 * 1024 * 1024 * 1024; // 4 GB
