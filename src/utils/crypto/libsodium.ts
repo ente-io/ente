@@ -252,7 +252,7 @@ export async function hash(input: string) {
     );
 }
 
-export async function cryptoGenericHash(data: Uint8Array) {
+export async function cryptoGenericHash(stream: ReadableStream) {
     await sodium.ready;
 
     const state = sodium.crypto_generichash_init(
@@ -260,15 +260,17 @@ export async function cryptoGenericHash(data: Uint8Array) {
         sodium.crypto_generichash_BYTES_MAX
     );
 
-    let bytesRead = 0;
-    while (bytesRead < data.length) {
-        const chunkSize = Math.min(
-            ENCRYPTION_CHUNK_SIZE,
-            data.length - bytesRead
-        );
-        const buffer = data.slice(bytesRead, bytesRead + chunkSize);
+    const reader = stream.getReader();
+
+    let isDone = false;
+    while (!isDone) {
+        const { done, value: chunk } = await reader.read();
+        if (done) {
+            isDone = true;
+            break;
+        }
+        const buffer = Uint8Array.from(chunk);
         sodium.crypto_generichash_update(state, buffer);
-        bytesRead += chunkSize;
     }
 
     const hash = sodium.crypto_generichash_final(

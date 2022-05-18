@@ -200,8 +200,7 @@ export async function encryptWithRecoveryKey(key: string) {
 export default CryptoWorker;
 
 export async function getFileHash(file: File | ElectronFile) {
-    const hash = await cryptoGenericHash(
-        new Uint8Array(await file.arrayBuffer())
-    );
+    const stream = await file.stream();
+    const hash = await cryptoGenericHash(stream);
     return hash;
 }
