@@ -557,6 +557,7 @@ const englishConstants = {
     RETRY_FAILED: 'retry failed uploads',
     FAILED_UPLOADS: 'failed uploads ',
     SKIPPED_FILES: 'ignored uploads',
+    THUMBNAIL_GENERATION_FAILED_UPLOADS: 'thumbnail generation failed',
     UNSUPPORTED_FILES: 'unsupported files',
     SUCCESSFUL_UPLOADS: 'successful uploads',
     SKIPPED_INFO:
@@ -570,6 +571,8 @@ const englishConstants = {
         'these files were not uploaded as they exceed the maximum size limit for your storage plan',
     TOO_LARGE_INFO:
         'these files were not uploaded as they exceed our maximum file size limit',
+    THUMBNAIL_GENERATION_FAILED_INFO:
+        'Your video was uploaded, but unfortunately we could not generate the thumbnail and metadata for the file. You can re-upload the file using the ente website or our mobile apps if you wish to fix the thumbnail and the metadata',
     UPLOAD_TO_COLLECTION: 'upload to album',
     ARCHIVE: 'archive',
     ALL: 'all',
