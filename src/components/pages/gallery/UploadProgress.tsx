@@ -191,7 +191,7 @@ export default function UploadProgress(props: Props) {
             }
             if (
                 progress !== FileUploadResults.UPLOADED &&
-                progress !== FileUploadResults.UPLOADED_WITH_BLACK_THUMBNAIL
+                progress !== FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL
             ) {
                 filesNotUploaded = true;
             }
@@ -285,7 +285,7 @@ export default function UploadProgress(props: Props) {
                         filenames={props.filenames}
                         fileUploadResultMap={fileUploadResultMap}
                         fileUploadResult={
-                            FileUploadResults.UPLOADED_WITH_BLACK_THUMBNAIL
+                            FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL
                         }
                         sectionTitle={
                             constants.THUMBNAIL_GENERATION_FAILED_UPLOADS

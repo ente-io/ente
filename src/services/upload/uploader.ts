@@ -104,7 +104,7 @@ export default async function uploader(
 
         return {
             fileUploadResult: metadata.hasStaticThumbnail
-                ? FileUploadResults.UPLOADED_WITH_BLACK_THUMBNAIL
+                ? FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL
                 : FileUploadResults.UPLOADED,
             uploadedFile: uploadedFile,
         };

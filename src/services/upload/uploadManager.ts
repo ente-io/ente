@@ -324,7 +324,7 @@ class UploadManager {
             if (
                 fileUploadResult === FileUploadResults.UPLOADED ||
                 fileUploadResult ===
-                    FileUploadResults.UPLOADED_WITH_BLACK_THUMBNAIL
+                    FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL
             ) {
                 const decryptedFile = await decryptFile(
                     uploadedFile,
