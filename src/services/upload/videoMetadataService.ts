@@ -1,6 +1,10 @@
-import { NULL_EXTRACTED_METADATA } from 'constants/upload';
+import {
+    MAX_NODE_SUPPORTED_FILE_SIZE,
+    NULL_EXTRACTED_METADATA,
+} from 'constants/upload';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
 import { ElectronFile } from 'types/upload';
+import { CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import { logUploadInfo } from 'utils/upload';
 
@@ -8,6 +12,9 @@ export async function getVideoMetadata(file: File | ElectronFile) {
     let videoMetadata = NULL_EXTRACTED_METADATA;
     try {
         if (!(file instanceof File)) {
+            if (file.size > MAX_NODE_SUPPORTED_FILE_SIZE) {
+                throw Error(CustomError.FILE_TOO_LARGE);
+            }
             logUploadInfo('get file blob for video metadata extraction');
             file = new File([await file.blob()], file.name, {
                 lastModified: file.lastModified,

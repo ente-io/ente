@@ -9,7 +9,11 @@ import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
 import UploadService from './uploadService';
 import { FILE_TYPE } from 'constants/file';
-import { FileUploadResults } from 'constants/upload';
+import {
+    FileUploadResults,
+    MAX_FILE_SIZE_SUPPORTED,
+    MAX_NODE_SUPPORTED_FILE_SIZE,
+} from 'constants/upload';
 import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
 import { logUploadInfo } from 'utils/upload';
 import { convertBytesToHumanReadable } from 'utils/billing';
@@ -37,6 +41,13 @@ export default async function uploader(
     const { fileTypeInfo, metadata } =
         UploadService.getFileMetadataAndFileTypeInfo(localID);
     try {
+        const fileSize = UploadService.getAssetSize(uploadAsset);
+        if (
+            fileSize >= MAX_FILE_SIZE_SUPPORTED ||
+            (isElectron() && fileSize >= MAX_NODE_SUPPORTED_FILE_SIZE)
+        ) {
+            return { fileUploadResult: FileUploadResults.TOO_LARGE };
+        }
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
