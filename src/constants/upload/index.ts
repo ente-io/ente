@@ -35,7 +35,6 @@ export enum FileUploadResults {
     ALREADY_UPLOADED,
     UNSUPPORTED,
     BLOCKED,
-    TOO_LARGE,
     LARGER_THAN_AVAILABLE_STORAGE,
     UPLOADED,
 }

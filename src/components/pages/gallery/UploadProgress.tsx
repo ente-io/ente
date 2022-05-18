@@ -328,13 +328,6 @@ export default function UploadProgress(props: Props) {
                         sectionTitle={constants.UNSUPPORTED_FILES}
                         sectionInfo={constants.UNSUPPORTED_INFO}
                     />
-                    <ResultSection
-                        filenames={props.filenames}
-                        fileUploadResultMap={fileUploadResultMap}
-                        fileUploadResult={FileUploadResults.TOO_LARGE}
-                        sectionTitle={constants.TOO_LARGE_UPLOADS}
-                        sectionInfo={constants.TOO_LARGE_INFO}
-                    />
                 </Modal.Body>
                 {props.uploadStage === UPLOAD_STAGES.FINISH && (
                     <Modal.Footer style={{ border: 'none' }}>
