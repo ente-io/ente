@@ -37,6 +37,7 @@ export enum FileUploadResults {
     BLOCKED,
     LARGER_THAN_AVAILABLE_STORAGE,
     UPLOADED,
+    UPLOADED_WITH_BLACK_THUMBNAIL,
 }
 
 export const LIVE_PHOTO_ASSET_SIZE_LIMIT = 20 * 1024 * 1024; // 20MB

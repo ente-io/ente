@@ -103,7 +103,9 @@ export default async function uploader(
         logUploadInfo(`${fileNameSize} successfully uploaded`);
 
         return {
-            fileUploadResult: FileUploadResults.UPLOADED,
+            fileUploadResult: metadata.hasStaticThumbnail
+                ? FileUploadResults.UPLOADED_WITH_BLACK_THUMBNAIL
+                : FileUploadResults.UPLOADED,
             uploadedFile: uploadedFile,
         };
     } catch (e) {
