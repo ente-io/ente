@@ -306,13 +306,14 @@ class UploadManager {
                 this.existingFilesCollectionWise.get(collectionID) ?? [];
             const collection = this.collections.get(collectionID);
             fileWithCollection = { ...fileWithCollection, collection };
-            const { fileUploadResult, uploadedFile } = await uploader(
-                worker,
-                reader,
-                existingFilesInCollection,
-                this.existingFiles,
-                fileWithCollection
-            );
+            const { fileUploadResult, uploadedFile, skipDecryption } =
+                await uploader(
+                    worker,
+                    reader,
+                    existingFilesInCollection,
+                    this.existingFiles,
+                    fileWithCollection
+                );
             UIService.moveFileToResultList(
                 fileWithCollection.localID,
                 fileUploadResult
@@ -321,6 +322,7 @@ class UploadManager {
             await this.postUploadTask(
                 fileUploadResult,
                 uploadedFile,
+                skipDecryption,
                 fileWithCollection
             );
         }
@@ -329,15 +331,17 @@ class UploadManager {
     async postUploadTask(
         fileUploadResult: FileUploadResults,
         uploadedFile: EnteFile,
+        skipDecryption: boolean,
         fileWithCollection: FileWithCollection
     ) {
         try {
             logUploadInfo(`uploadedFile ${JSON.stringify(uploadedFile)}`);
 
             if (
-                fileUploadResult === FileUploadResults.UPLOADED ||
-                fileUploadResult ===
-                    FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL
+                (fileUploadResult === FileUploadResults.UPLOADED ||
+                    fileUploadResult ===
+                        FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL) &&
+                !skipDecryption
             ) {
                 const decryptedFile = await decryptFile(
                     uploadedFile,

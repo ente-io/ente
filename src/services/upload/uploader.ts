@@ -20,6 +20,7 @@ import { addToCollection } from 'services/collectionService';
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
     uploadedFile?: EnteFile;
+    skipDecryption?: boolean;
 }
 export default async function uploader(
     worker: any,
@@ -70,7 +71,8 @@ export default async function uploader(
             await addToCollection(collection, [resultFile]);
             return {
                 fileUploadResult: FileUploadResults.UPLOADED,
-                file: resultFile,
+                uploadedFile: resultFile,
+                skipDecryption: true,
             };
         }
 
