@@ -2,7 +2,7 @@ import { EnteFile } from 'types/file';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
-import { areFilesWithFileHashSame, fileHashExists } from 'utils/upload';
+import { areFilesWithFileHashSame, hasFileHash } from 'utils/upload';
 import HTTPService from './HTTPService';
 
 const ENDPOINT = getEndpoint();
@@ -121,7 +121,7 @@ export function clubDuplicatesBySameFileHashes(dupes: DuplicateFiles[]) {
         let files: EnteFile[] = [];
 
         const filteredFiles = dupe.files.filter((file) => {
-            return fileHashExists(file.metadata);
+            return hasFileHash(file.metadata);
         });
 
         if (filteredFiles.length <= 1) {
