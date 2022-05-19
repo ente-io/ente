@@ -3,6 +3,7 @@ import { handleUploadError, CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import {
     fileAlreadyInCollection,
+    findSameFileInOtherCollection,
     shouldDedupeAcrossCollection,
 } from 'utils/upload';
 import UploadHttpClient from './uploadHttpClient';
@@ -14,10 +15,12 @@ import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
 import { logUploadInfo } from 'utils/upload';
 import { convertBytesToHumanReadable } from 'utils/billing';
 import { sleep } from 'utils/common';
+import { addToCollection } from 'services/collectionService';
 
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
     uploadedFile?: EnteFile;
+    skipDecryption?: boolean;
 }
 export default async function uploader(
     worker: any,
@@ -51,6 +54,25 @@ export default async function uploader(
         if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
             logUploadInfo(`skipped upload for  ${fileNameSize}`);
             return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
+        }
+
+        const sameFileInOtherCollection = findSameFileInOtherCollection(
+            existingFiles,
+            metadata
+        );
+
+        if (sameFileInOtherCollection) {
+            logUploadInfo(
+                `same file in other collection found for  ${fileNameSize}`
+            );
+            const resultFile = Object.assign({}, sameFileInOtherCollection);
+            resultFile.collectionID = collection.id;
+            await addToCollection(collection, [resultFile]);
+            return {
+                fileUploadResult: FileUploadResults.UPLOADED,
+                uploadedFile: resultFile,
+                skipDecryption: true,
+            };
         }
 
         // iOS exports via album doesn't export files without collection and if user exports all photos, album info is not preserved.
