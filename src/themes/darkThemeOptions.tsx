@@ -13,6 +13,14 @@ declare module '@mui/material/styles' {
         accent?: PaletteColorOptions;
         danger?: PaletteColorOptions;
     }
+
+    interface TypographyVariants {
+        title: React.CSSProperties;
+    }
+
+    interface TypographyVariantsOptions {
+        title?: React.CSSProperties;
+    }
 }
 
 declare module '@mui/material/Button' {
@@ -24,6 +32,12 @@ declare module '@mui/material/Button' {
 declare module '@mui/material/Checkbox' {
     export interface CheckboxPropsColorOverrides {
         accent: true;
+    }
+}
+
+declare module '@mui/material/Typography' {
+    interface TypographyPropsVariantOverrides {
+        title: true;
     }
 }
 
@@ -77,11 +91,9 @@ const darkThemeOptions = createTheme({
         MuiDialog: {
             styleOverrides: {
                 paper: {
-                    '& .MuiDialogActions-root': {
+                    '& .MuiDialogActions-root, & .MuiDialogTitle-root': {
                         padding: '32px 24px',
                     },
-                },
-                root: {
                     '& .MuiDialogActions-root button': {
                         marginLeft: '16px',
                         fontSize: '18px',
@@ -130,6 +142,11 @@ const darkThemeOptions = createTheme({
         body2: {
             fontSize: '14px',
             lineHeight: '20px',
+        },
+        title: {
+            fontSize: '32px',
+            lineHeight: '40px',
+            fontWeight: 600,
         },
     },
 });
