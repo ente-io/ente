@@ -58,8 +58,7 @@ export default async function uploader(
 
         const sameFileInOtherCollection = findSameFileInOtherCollection(
             existingFiles,
-            metadata,
-            collection.id
+            metadata
         );
 
         if (sameFileInOtherCollection) {

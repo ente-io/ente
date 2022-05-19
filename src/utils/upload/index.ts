@@ -23,19 +23,16 @@ export function fileAlreadyInCollection(
 
 export function findSameFileInOtherCollection(
     existingFiles: EnteFile[],
-    newFileMetadata: Metadata,
-    collectionID: number
+    newFileMetadata: Metadata
 ) {
-    if (!fileHashExists(newFileMetadata)) {
+    if (!hasFileHash(newFileMetadata)) {
         return null;
     }
 
     for (const existingFile of existingFiles) {
         if (
-            existingFile.collectionID !== collectionID &&
-            fileHashExists(existingFile.metadata) &&
-            areFilesWithFileHashSame(existingFile.metadata, newFileMetadata) &&
-            existingFile.metadata.title === newFileMetadata.title
+            hasFileHash(existingFile.metadata) &&
+            areFilesWithFileHashSame(existingFile.metadata, newFileMetadata)
         ) {
             return existingFile;
         }
@@ -52,54 +49,51 @@ export function areFilesSame(
     existingFile: Metadata,
     newFile: Metadata
 ): boolean {
-    /*
-     * The maximum difference in the creation/modification times of two similar files is set to 1 second.
-     * This is because while uploading files in the web - browsers and users could have set reduced
-     * precision of file times to prevent timing attacks and fingerprinting.
-     * Context: https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
-     */
-    if (fileHashExists(existingFile) && fileHashExists(newFile)) {
+    if (hasFileHash(existingFile) && hasFileHash(newFile)) {
         return areFilesWithFileHashSame(existingFile, newFile);
-    }
-
-    if (
-        existingFile.fileType === newFile.fileType &&
-        Math.abs(existingFile.creationTime - newFile.creationTime) <
-            A_SEC_IN_MICROSECONDS &&
-        Math.abs(existingFile.modificationTime - newFile.modificationTime) <
-            A_SEC_IN_MICROSECONDS &&
-        existingFile.title === newFile.title
-    ) {
-        return true;
     } else {
-        return false;
+        /*
+         * The maximum difference in the creation/modification times of two similar files is set to 1 second.
+         * This is because while uploading files in the web - browsers and users could have set reduced
+         * precision of file times to prevent timing attacks and fingerprinting.
+         * Context: https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
+         */
+        if (
+            existingFile.fileType === newFile.fileType &&
+            Math.abs(existingFile.creationTime - newFile.creationTime) <
+                A_SEC_IN_MICROSECONDS &&
+            Math.abs(existingFile.modificationTime - newFile.modificationTime) <
+                A_SEC_IN_MICROSECONDS &&
+            existingFile.title === newFile.title
+        ) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
-export function fileHashExists(file: Metadata) {
-    if (file.hash || (file.imageHash && file.videoHash)) {
-        return true;
-    }
-    return false;
+export function hasFileHash(file: Metadata) {
+    return file.hash || (file.imageHash && file.videoHash);
 }
 
 export function areFilesWithFileHashSame(
     existingFile: Metadata,
     newFile: Metadata
 ): boolean {
-    if (existingFile.fileType !== newFile.fileType) {
+    if (
+        existingFile.fileType !== newFile.fileType ||
+        existingFile.title !== newFile.title
+    ) {
         return false;
     }
-    if (
-        existingFile.fileType === FILE_TYPE.IMAGE ||
-        existingFile.fileType === FILE_TYPE.VIDEO
-    ) {
-        return existingFile.hash === newFile.hash;
-    } else {
+    if (existingFile.fileType === FILE_TYPE.LIVE_PHOTO) {
         return (
             existingFile.imageHash === newFile.imageHash &&
             existingFile.videoHash === newFile.videoHash
         );
+    } else {
+        return existingFile.hash === newFile.hash;
     }
 }
 
