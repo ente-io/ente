@@ -5,9 +5,22 @@ export async function getUint8ArrayView(
     file: Blob
 ): Promise<Uint8Array> {
     return await new Promise((resolve, reject) => {
-        reader.onabort = () => reject(Error('file reading was aborted'));
+        reader.onabort = () =>
+            reject(
+                Error(
+                    `file reading was aborted, file size= ${convertBytesToHumanReadable(
+                        file.size
+                    )}`
+                )
+            );
         reader.onerror = () =>
-            reject(Error('file reading has failed - ' + reader.error));
+            reject(
+                Error(
+                    `file reading has failed, file size= ${convertBytesToHumanReadable(
+                        file.size
+                    )} , reason= ${reader.error}`
+                )
+            );
         reader.onload = () => {
             // Do whatever you want with the file contents
             const result =
@@ -68,4 +81,22 @@ async function* fileChunkReaderMaker(
         offset += chunkSize;
     }
     return null;
+}
+
+// Temporary fix for window not defined caused on importing from utils/billing
+// because this file is accessed inside worker and util/billing imports constants
+// which has reference to  window object, which cause error inside worker
+//  TODO: update worker to not read file themselves but rather have filedata passed to them
+
+export function convertBytesToHumanReadable(
+    bytes: number,
+    precision = 2
+): string {
+    if (bytes === 0) {
+        return '0 MB';
+    }
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    return (bytes / Math.pow(1024, i)).toFixed(precision) + ' ' + sizes[i];
 }
