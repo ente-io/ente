@@ -16,7 +16,6 @@ const SubmitButton: FC<ButtonProps<'button', Props>> = ({
     return (
         <Button
             size="large"
-            sx={{ my: 4, p: '12.25px', fontSize: '18px' }}
             variant="contained"
             color="accent"
             type="submit"

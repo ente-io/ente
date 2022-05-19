@@ -33,7 +33,7 @@ export default function SignUpPage() {
             {loading ? (
                 <EnteSpinner />
             ) : (
-                <FormPaper sx={{ minWidth: '360px' }}>
+                <FormPaper>
                     <SignUp login={login} />
                 </FormPaper>
             )}

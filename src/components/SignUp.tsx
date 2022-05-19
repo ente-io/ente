@@ -161,10 +161,12 @@ export default function SignUp(props: SignUpProps) {
                                 <FormControlLabel
                                     sx={{
                                         color: 'text.secondary',
+                                        ml: -1,
                                         mt: 2,
                                     }}
                                     control={
                                         <Checkbox
+                                            size="small"
                                             disabled={loading}
                                             checked={acceptTerms}
                                             onChange={(e) =>

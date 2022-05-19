@@ -33,6 +33,13 @@ const darkThemeOptions = createTheme({
         MuiPaper: {
             styleOverrides: { root: { backgroundImage: 'none' } },
         },
+        MuiCssBaseline: {
+            styleOverrides: {
+                body: {
+                    letterSpacing: '0em',
+                },
+            },
+        },
         MuiLink: {
             defaultProps: {
                 underline: 'always',
