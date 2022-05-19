@@ -56,5 +56,5 @@ export const getUploadEndpoint = () => {
     if (process.env.NEXT_PUBLIC_ENTE_UPLOAD_ENDPOINT !== undefined) {
         return process.env.NEXT_PUBLIC_ENTE_UPLOAD_ENDPOINT;
     }
-    return `https://uploads.ente.workers.dev`;
+    return `https://uploader.ente.io`;
 };
