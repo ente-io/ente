@@ -157,7 +157,7 @@ export default function SignUp(props: SignUpProps) {
                                 helperText={errors.confirm}
                                 disabled={loading}
                             />
-                            <FormGroup>
+                            <FormGroup sx={{ width: '100%' }}>
                                 <FormControlLabel
                                     sx={{
                                         color: 'text.secondary',
@@ -170,7 +170,7 @@ export default function SignUp(props: SignUpProps) {
                                             onChange={(e) =>
                                                 setAcceptTerms(e.target.checked)
                                             }
-                                            color="success"
+                                            color="accent"
                                         />
                                     }
                                     label={constants.TERMS_AND_CONDITIONS()}
@@ -187,7 +187,7 @@ export default function SignUp(props: SignUpProps) {
             </Formik>
             <Divider />
             <FormPaperFooter>
-                <LinkButton onClick={props.login} color={'text.secondary'}>
+                <LinkButton onClick={props.login}>
                     {constants.ACCOUNT_EXISTS}
                 </LinkButton>
             </FormPaperFooter>
