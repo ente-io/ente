@@ -126,6 +126,12 @@ const darkThemeOptions = createTheme({
     shape: {
         borderRadius: 8,
     },
+    typography: {
+        body2: {
+            fontSize: '14px',
+            lineHeight: '20px',
+        },
+    },
 });
 
 export default darkThemeOptions;

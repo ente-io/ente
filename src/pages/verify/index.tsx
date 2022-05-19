@@ -133,10 +133,10 @@ export default function Verify() {
     return (
         <FormContainer>
             <FormPaper>
-                <FormPaperHeaderText>
+                <FormPaperHeaderText sx={{ mb: 14 }}>
                     {constants.EMAIL_SENT({ email })}
                 </FormPaperHeaderText>
-                <Typography color={'text.secondary'} mb={2}>
+                <Typography color={'text.secondary'} mb={2} variant="body2">
                     {constants.CHECK_INBOX}
                 </Typography>
                 <Formik<formValues>
@@ -163,6 +163,7 @@ export default function Verify() {
                             />
 
                             <SubmitButton
+                                sx={{ mt: 2, mb: 4 }}
                                 buttonText={constants.VERIFY}
                                 loading={loading}
                             />

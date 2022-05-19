@@ -180,6 +180,7 @@ export default function SignUp(props: SignUpProps) {
                             </FormGroup>
                         </VerticallyCentered>
                         <SubmitButton
+                            sx={{ my: 4 }}
                             buttonText={constants.CREATE_ACCOUNT}
                             loading={loading}
                             disabled={!acceptTerms}

@@ -7,8 +7,5 @@ const FormPaper = styled(Paper)(({ theme }) => ({
     [theme.breakpoints.down('md')]: {
         marginRight: theme.spacing(5),
     },
-    '.MuiButton-root': {
-        margin: '32px 0',
-    },
 }));
 export default FormPaper;

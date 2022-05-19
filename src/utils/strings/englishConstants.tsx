@@ -397,12 +397,7 @@ const englishConstants = {
         <span>try searching for New York, April 14, Christmas...</span>
     ),
     TERMS_AND_CONDITIONS: () => (
-        <Typography
-            css={`
-                font-size: 14px;
-                font-weight: 500;
-                line-height: 20px;
-            `}>
+        <Typography variant="body2">
             I agree to the{' '}
             <Link href="https://ente.io/terms" target="_blank" rel="noreferrer">
                 terms
