@@ -1,5 +1,5 @@
 import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
-import { Location } from 'types/upload';
+import { ElectronFile, Location } from 'types/upload';
 import exifr from 'exifr';
 import piexif from 'piexifjs';
 import { FileTypeInfo } from 'types/upload';
@@ -28,11 +28,20 @@ interface Exif {
 }
 
 export async function getExifData(
-    receivedFile: File,
+    receivedFile: File | ElectronFile,
     fileTypeInfo: FileTypeInfo
 ): Promise<ParsedExtractedMetadata> {
     let parsedEXIFData = NULL_EXTRACTED_METADATA;
     try {
+        if (!(receivedFile instanceof File)) {
+            receivedFile = new File(
+                [await receivedFile.blob()],
+                receivedFile.name,
+                {
+                    lastModified: receivedFile.lastModified,
+                }
+            );
+        }
         const exifData = await getRawExif(receivedFile, fileTypeInfo);
         if (!exifData) {
             return parsedEXIFData;

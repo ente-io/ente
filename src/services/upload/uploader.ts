@@ -1,6 +1,5 @@
 import { EnteFile } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
-import { decryptFile } from 'utils/file';
 import { logError } from 'utils/sentry';
 import {
     fileAlreadyInCollection,
@@ -18,7 +17,7 @@ import { sleep } from 'utils/common';
 
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
-    file?: EnteFile;
+    uploadedFile?: EnteFile;
 }
 export default async function uploader(
     worker: any,
@@ -103,14 +102,15 @@ export default async function uploader(
         logUploadInfo(`uploadFile ${fileNameSize}`);
 
         const uploadedFile = await UploadHttpClient.uploadFile(uploadFile);
-        const decryptedFile = await decryptFile(uploadedFile, collection.key);
 
         UIService.increaseFileUploaded();
         logUploadInfo(`${fileNameSize} successfully uploaded`);
 
         return {
-            fileUploadResult: FileUploadResults.UPLOADED,
-            file: decryptedFile,
+            fileUploadResult: metadata.hasStaticThumbnail
+                ? FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL
+                : FileUploadResults.UPLOADED,
+            uploadedFile: uploadedFile,
         };
     } catch (e) {
         logUploadInfo(
