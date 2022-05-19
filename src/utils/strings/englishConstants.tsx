@@ -721,13 +721,19 @@ const englishConstants = {
     DEDUPLICATE_FILES: 'deduplicate files',
     NO_DUPLICATES_FOUND: "you've no duplicate files that can be cleared",
     CLUB_BY_CAPTURE_TIME: 'club by capture time',
+    CLUB_BY_FILE_HASH: 'club by file hashes',
     FILES: 'files',
     EACH: 'each',
-    DEDUPLICATION_LOGIC_MESSAGE: (captureTime: boolean) => (
+    DEDUPLICATION_LOGIC_MESSAGE: (
+        captureTime: boolean,
+        fileHashes: boolean
+    ) => (
         <>
             the following files were clubbed based on their sizes
-            {captureTime && ` and capture time`}, please review and delete items
-            you believe are duplicates{' '}
+            {captureTime && !fileHashes && ' and capture time'}
+            {fileHashes && !captureTime && ' and file hashes'}
+            {fileHashes && captureTime && ', capture time and file hashes'},
+            please review and delete items you believe are duplicates{' '}
         </>
     ),
     STOP_ALL_UPLOADS_MESSAGE:
