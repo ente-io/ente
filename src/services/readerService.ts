@@ -83,6 +83,10 @@ async function* fileChunkReaderMaker(
     return null;
 }
 
+// copied here as this file is accessed inside worker can util/billing has a imports constants
+// which has reference to  window object, which cause error inside worker
+// Temporary fix TODO: update worker to not read file themselves but rather have filedata passed to them
+
 export function convertBytesToHumanReadable(
     bytes: number,
     precision = 2
