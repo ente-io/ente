@@ -1,11 +1,11 @@
 import React from 'react';
-import { ContainerProps } from '@mui/material';
 import { FC } from 'react';
 import VerticallyCentered from 'components/Container';
+import { BoxProps } from '@mui/system';
 
-const FormContainer: FC<ContainerProps> = ({ style, children, ...props }) => (
+const FormContainer: FC<BoxProps> = ({ children, ...props }) => (
     <VerticallyCentered
-        style={{ alignItems: 'flex-end', textAlign: 'left', ...style }}
+        sx={{ '&&': { alignItems: 'flex-end', textAlign: 'left' } }}
         {...props}>
         {children}
     </VerticallyCentered>
