@@ -80,6 +80,7 @@ export default function Login(props: LoginProps) {
                         />
 
                         <SubmitButton
+                            sx={{ mb: 4 }}
                             buttonText={constants.LOGIN}
                             loading={waiting}
                         />

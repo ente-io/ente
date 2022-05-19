@@ -163,7 +163,7 @@ export default function Verify() {
                             />
 
                             <SubmitButton
-                                sx={{ mt: 2, mb: 4 }}
+                                sx={{ mb: 4 }}
                                 buttonText={constants.VERIFY}
                                 loading={loading}
                             />

@@ -12,8 +12,9 @@ const SubmitButton: FC<ButtonProps<'button', Props>> = ({
     buttonText,
     inline,
     disabled,
+    sx,
     ...props
-}: Props) => {
+}) => {
     return (
         <Button
             size="large"
@@ -22,6 +23,7 @@ const SubmitButton: FC<ButtonProps<'button', Props>> = ({
             type="submit"
             fullWidth={!inline}
             disabled={loading || disabled}
+            sx={{ my: 2, ...sx }}
             {...props}>
             {loading ? <CircularProgress size={25} /> : buttonText}
         </Button>
