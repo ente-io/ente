@@ -9,7 +9,6 @@ import {
     DialogContent,
     DialogContentText,
     DialogProps,
-    Divider,
 } from '@mui/material';
 import DialogTitleWithCloseButton from './TitleWithCloseButton';
 
@@ -74,7 +73,6 @@ export default function MessageDialog({
                         onClose={!attributes?.nonClosable && handleClose}>
                         {attributes.title}
                     </DialogTitleWithCloseButton>
-                    <Divider />
                 </>
             )}
             {(children || attributes?.content) && (

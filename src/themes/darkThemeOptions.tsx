@@ -91,8 +91,11 @@ const darkThemeOptions = createTheme({
         MuiDialog: {
             styleOverrides: {
                 paper: {
-                    '& .MuiDialogActions-root, & .MuiDialogTitle-root': {
+                    '& .MuiDialogActions-root': {
                         padding: '32px 24px',
+                    },
+                    '& .MuiDialogTitle-root': {
+                        padding: '32px 24px 16px 24px',
                     },
                     '& .MuiDialogActions-root button': {
                         marginLeft: '16px',
