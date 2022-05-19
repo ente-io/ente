@@ -17,7 +17,7 @@ dependencies:
   intl: ^0.17.0
   path: ^1.6.4
   path_provider: ^2.0.1
-  sentry_flutter: ^5.1.0
+  sentry_flutter: ^6.5.1
 
 dev_dependencies:
   flutter_test:

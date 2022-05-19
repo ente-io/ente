@@ -95,9 +95,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     sourceFile = io.File(livePhotoPath);
   }
 
-  thumbnailData = await asset.thumbDataWithSize(
-    kThumbnailLargeSize,
-    kThumbnailLargeSize,
+  thumbnailData = await asset.thumbnailDataWithSize(
+    ThumbnailSize(kThumbnailLargeSize, kThumbnailLargeSize),
     quality: kThumbnailQuality,
   );
   if (thumbnailData == null) {
