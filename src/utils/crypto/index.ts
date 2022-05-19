@@ -7,6 +7,8 @@ import { getActualKey, getToken } from 'utils/common/key';
 import { setRecoveryKey } from 'services/userService';
 import { logError } from 'utils/sentry';
 import { ComlinkWorker } from 'utils/comlink';
+import { ElectronFile } from 'types/upload';
+import { cryptoGenericHash } from './libsodium';
 
 export interface B64EncryptionResult {
     encryptedData: string;
@@ -196,3 +198,9 @@ export async function encryptWithRecoveryKey(key: string) {
     return encryptedKey;
 }
 export default CryptoWorker;
+
+export async function getFileHash(file: File | ElectronFile) {
+    const stream = await file.stream();
+    const hash = await cryptoGenericHash(stream);
+    return hash;
+}

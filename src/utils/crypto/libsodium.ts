@@ -252,6 +252,36 @@ export async function hash(input: string) {
     );
 }
 
+export async function cryptoGenericHash(stream: ReadableStream) {
+    await sodium.ready;
+
+    const state = sodium.crypto_generichash_init(
+        null,
+        sodium.crypto_generichash_BYTES_MAX
+    );
+
+    const reader = stream.getReader();
+
+    let isDone = false;
+    while (!isDone) {
+        const { done, value: chunk } = await reader.read();
+        if (done) {
+            isDone = true;
+            break;
+        }
+        const buffer = Uint8Array.from(chunk);
+        sodium.crypto_generichash_update(state, buffer);
+    }
+
+    const hash = sodium.crypto_generichash_final(
+        state,
+        sodium.crypto_generichash_BYTES_MAX
+    );
+    const hashString = sodium.to_base64(hash, sodium.base64_variants.ORIGINAL);
+
+    return hashString;
+}
+
 export async function deriveKey(
     passphrase: string,
     salt: string,

@@ -25,6 +25,9 @@ export interface Metadata {
     longitude: number;
     fileType: FILE_TYPE;
     hasStaticThumbnail?: boolean;
+    hash?: string;
+    imageHash?: string;
+    videoHash?: string;
 }
 
 export interface Location {

@@ -47,11 +47,17 @@ export function getLivePhotoFileType(
     };
 }
 
-export function getLivePhotoMetadata(imageMetadata: Metadata) {
+export function getLivePhotoMetadata(
+    imageMetadata: Metadata,
+    videoMetadata: Metadata
+) {
     return {
         ...imageMetadata,
         title: getLivePhotoName(imageMetadata.title),
         fileType: FILE_TYPE.LIVE_PHOTO,
+        imageHash: imageMetadata.hash,
+        videoHash: videoMetadata.hash,
+        hash: undefined,
     };
 }
 
@@ -181,7 +187,8 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                 videoAsset.fileTypeInfo
             );
             const livePhotoMetadata: Metadata = getLivePhotoMetadata(
-                imageAsset.metadata
+                imageAsset.metadata,
+                videoAsset.metadata
             );
             uploadService.setFileMetadataAndFileTypeInfo(livePhotoLocalID, {
                 fileTypeInfo: { ...livePhotoFileTypeInfo },

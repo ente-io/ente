@@ -19,6 +19,7 @@ import {
     getUnixTimeInMicroSeconds,
     tryToParseDateTime,
 } from 'utils/time';
+import { getFileHash } from 'utils/crypto';
 
 interface ParsedMetadataJSONWithTitle {
     title: string;
@@ -50,6 +51,8 @@ export async function extractMetadata(
         );
     }
 
+    const fileHash = await getFileHash(receivedFile);
+
     const metadata: Metadata = {
         title: `${splitFilenameAndExtension(receivedFile.name)[0]}.${
             fileTypeInfo.exactType
@@ -62,6 +65,7 @@ export async function extractMetadata(
         latitude: extractedMetadata.location.latitude,
         longitude: extractedMetadata.location.longitude,
         fileType: fileTypeInfo.fileType,
+        hash: fileHash,
     };
     return metadata;
 }
