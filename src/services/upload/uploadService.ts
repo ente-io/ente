@@ -144,14 +144,14 @@ class UploadService {
                     file.localID
                 );
                 const fileUploadURL = await this.getUploadURL();
-                fileObjectKey = await UploadHttpClient.putFile(
+                fileObjectKey = await UploadHttpClient.putFileV2(
                     fileUploadURL,
                     file.file.encryptedData,
                     progressTracker
                 );
             }
             const thumbnailUploadURL = await this.getUploadURL();
-            const thumbnailObjectKey = await UploadHttpClient.putFile(
+            const thumbnailObjectKey = await UploadHttpClient.putFileV2(
                 thumbnailUploadURL,
                 file.thumbnail.encryptedData as Uint8Array,
                 null

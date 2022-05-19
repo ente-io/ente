@@ -111,7 +111,7 @@ export async function uploadThumbnail(
     const { file: encryptedThumbnail }: EncryptionResult =
         await worker.encryptThumbnail(updatedThumbnail, fileKey);
 
-    const thumbnailObjectKey = await uploadHttpClient.putFile(
+    const thumbnailObjectKey = await uploadHttpClient.putFileV2(
         uploadURL,
         encryptedThumbnail.encryptedData as Uint8Array,
         () => {}

@@ -57,7 +57,7 @@ export async function uploadStreamInParts(
             index
         );
 
-        const eTag = await UploadHttpClient.putFilePart(
+        const eTag = await UploadHttpClient.putFilePartV2(
             fileUploadURL,
             uploadChunk,
             progressTracker
@@ -103,5 +103,5 @@ async function completeMultipartUpload(
         { CompleteMultipartUpload: { Part: partEtags } },
         options
     );
-    await UploadHttpClient.completeMultipartUpload(completeURL, body);
+    await UploadHttpClient.completeMultipartUploadV2(completeURL, body);
 }
