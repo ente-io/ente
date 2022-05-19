@@ -21,6 +21,11 @@ declare module '@mui/material/Button' {
         danger: true;
     }
 }
+declare module '@mui/material/Checkbox' {
+    export interface CheckboxPropsColorOverrides {
+        accent: true;
+    }
+}
 
 // Create a theme instance.
 const darkThemeOptions = createTheme({
@@ -29,9 +34,13 @@ const darkThemeOptions = createTheme({
             styleOverrides: { root: { backgroundImage: 'none' } },
         },
         MuiLink: {
+            defaultProps: {
+                underline: 'always',
+            },
             styleOverrides: {
                 root: {
-                    textDecoration: 'none',
+                    color: 'inherit',
+                    textDecorationColor: 'inherit',
                     '&:hover': {
                         textDecoration: 'underline',
                         color: '#1dba54',
