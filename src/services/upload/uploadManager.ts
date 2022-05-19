@@ -233,7 +233,8 @@ class UploadManager {
                             (await UploadService.extractFileMetadata(
                                 file,
                                 collectionID,
-                                fileTypeInfo
+                                fileTypeInfo,
+                                reader
                             )) || null;
                         return { fileTypeInfo, metadata };
                     })();
