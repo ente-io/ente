@@ -34,7 +34,8 @@ const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
 
 export async function extractMetadata(
     receivedFile: File | ElectronFile,
-    fileTypeInfo: FileTypeInfo
+    fileTypeInfo: FileTypeInfo,
+    reader: FileReader
 ) {
     let extractedMetadata: ParsedExtractedMetadata = NULL_EXTRACTED_METADATA;
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
@@ -51,7 +52,7 @@ export async function extractMetadata(
         );
     }
 
-    const fileHash = await getFileHash(receivedFile);
+    const fileHash = await getFileHash(receivedFile, reader);
 
     const metadata: Metadata = {
         title: `${splitFilenameAndExtension(receivedFile.name)[0]}.${

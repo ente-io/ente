@@ -73,7 +73,8 @@ export async function extractFileMetadata(
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     rawFile: File | ElectronFile,
     collectionID: number,
-    fileTypeInfo: FileTypeInfo
+    fileTypeInfo: FileTypeInfo,
+    reader: FileReader
 ) {
     const originalName = getFileOriginalName(rawFile);
     const googleMetadata =
@@ -82,7 +83,8 @@ export async function extractFileMetadata(
         ) ?? {};
     const extractedMetadata: Metadata = await extractMetadata(
         rawFile,
-        fileTypeInfo
+        fileTypeInfo,
+        reader
     );
 
     for (const [key, value] of Object.entries(googleMetadata)) {

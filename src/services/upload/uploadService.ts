@@ -93,13 +93,15 @@ class UploadService {
     async extractFileMetadata(
         file: File | ElectronFile,
         collectionID: number,
-        fileTypeInfo: FileTypeInfo
+        fileTypeInfo: FileTypeInfo,
+        reader: FileReader
     ): Promise<Metadata> {
         return extractFileMetadata(
             this.parsedMetadataJSONMap,
             file,
             collectionID,
-            fileTypeInfo
+            fileTypeInfo,
+            reader
         );
     }
 
