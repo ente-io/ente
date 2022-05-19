@@ -1,5 +1,5 @@
 import HTTPService from 'services/HTTPService';
-import { getEndpoint } from 'utils/common/apiUtil';
+import { getEndpoint, getUploadEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
 import { EnteFile } from 'types/file';
@@ -8,6 +8,8 @@ import { UploadFile, UploadURL, MultipartUploadURLs } from 'types/upload';
 import { retryHTTPCall } from 'utils/upload/uploadRetrier';
 
 const ENDPOINT = getEndpoint();
+const UPLOAD_ENDPOINT = getUploadEndpoint();
+
 const MAX_URL_REQUESTS = 50;
 
 class UploadHttpClient {
@@ -106,6 +108,30 @@ class UploadHttpClient {
         }
     }
 
+    async putFileV2(
+        fileUploadURL: UploadURL,
+        file: Uint8Array,
+        progressTracker
+    ): Promise<string> {
+        try {
+            await retryHTTPCall(() =>
+                HTTPService.put(
+                    `${UPLOAD_ENDPOINT}/file-upload`,
+                    file,
+                    null,
+                    {
+                        'UPLOAD-URL': fileUploadURL.url,
+                    },
+                    progressTracker
+                )
+            );
+            return fileUploadURL.objectKey;
+        } catch (e) {
+            logError(e, 'putFile to dataStore failed ');
+            throw e;
+        }
+    }
+
     async putFilePart(
         partUploadURL: string,
         filePart: Uint8Array,
@@ -134,12 +160,61 @@ class UploadHttpClient {
         }
     }
 
+    async putFilePartV2(
+        partUploadURL: string,
+        filePart: Uint8Array,
+        progressTracker
+    ) {
+        try {
+            const response = await retryHTTPCall(async () => {
+                const resp = await HTTPService.put(
+                    `${UPLOAD_ENDPOINT}/multipart-upload`,
+                    filePart,
+                    null,
+                    {
+                        'UPLOAD-URL': partUploadURL,
+                    },
+                    progressTracker
+                );
+                if (!resp?.data?.etag) {
+                    const err = Error(CustomError.ETAG_MISSING);
+                    logError(err, 'putFile in parts failed');
+                    throw err;
+                }
+                return resp;
+            });
+            return response.data.etag as string;
+        } catch (e) {
+            logError(e, 'put filePart failed');
+            throw e;
+        }
+    }
+
     async completeMultipartUpload(completeURL: string, reqBody: any) {
         try {
             await retryHTTPCall(() =>
                 HTTPService.post(completeURL, reqBody, null, {
                     'content-type': 'text/xml',
                 })
+            );
+        } catch (e) {
+            logError(e, 'put file in parts failed');
+            throw e;
+        }
+    }
+
+    async completeMultipartUploadV2(completeURL: string, reqBody: any) {
+        try {
+            await retryHTTPCall(() =>
+                HTTPService.post(
+                    `${UPLOAD_ENDPOINT}/multipart-complete`,
+                    reqBody,
+                    null,
+                    {
+                        'content-type': 'text/xml',
+                        'UPLOAD-URL': completeURL,
+                    }
+                )
             );
         } catch (e) {
             logError(e, 'put file in parts failed');

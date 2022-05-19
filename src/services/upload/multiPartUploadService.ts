@@ -3,7 +3,7 @@ import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
 } from 'constants/upload';
 import UIService from './uiService';
-import UploadHttpClientV2 from './uploadHttpClientV2';
+import UploadHttpClient from './uploadHttpClient';
 import * as convert from 'xml-js';
 import { CustomError } from 'utils/error';
 import { DataStream, MultipartUploadURLs } from 'types/upload';
@@ -24,8 +24,9 @@ export async function uploadStreamUsingMultipart(
     dataStream: DataStream
 ) {
     const uploadPartCount = calculatePartCount(dataStream.chunkCount);
-    const multipartUploadURLs =
-        await UploadHttpClientV2.fetchMultipartUploadURLs(uploadPartCount);
+    const multipartUploadURLs = await UploadHttpClient.fetchMultipartUploadURLs(
+        uploadPartCount
+    );
     const fileObjectKey = await uploadStreamInParts(
         multipartUploadURLs,
         dataStream.stream,
@@ -56,7 +57,7 @@ export async function uploadStreamInParts(
             index
         );
 
-        const eTag = await UploadHttpClientV2.putFilePart(
+        const eTag = await UploadHttpClient.putFilePartV2(
             fileUploadURL,
             uploadChunk,
             progressTracker
@@ -102,5 +103,5 @@ async function completeMultipartUpload(
         { CompleteMultipartUpload: { Part: partEtags } },
         options
     );
-    await UploadHttpClientV2.completeMultipartUpload(completeURL, body);
+    await UploadHttpClient.completeMultipartUploadV2(completeURL, body);
 }

@@ -6,7 +6,7 @@ import { logError } from 'utils/sentry';
 import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from 'services/HTTPService';
 import CryptoWorker from 'utils/crypto';
-import uploadHttpClientV2 from 'services/upload/uploadHttpClientV2';
+import uploadHttpClient from 'services/upload/uploadHttpClient';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
 import { getFileType } from 'services/typeDetectionService';
 import { getLocalTrash, getTrashedFiles } from './trashService';
@@ -59,7 +59,7 @@ export async function replaceThumbnail(
         }
         setProgressTracker({ current: 0, total: largeThumbnailFiles.length });
         const uploadURLs: UploadURL[] = [];
-        await uploadHttpClientV2.fetchUploadURLs(
+        await uploadHttpClient.fetchUploadURLs(
             largeThumbnailFiles.length,
             uploadURLs
         );
@@ -111,7 +111,7 @@ export async function uploadThumbnail(
     const { file: encryptedThumbnail }: EncryptionResult =
         await worker.encryptThumbnail(updatedThumbnail, fileKey);
 
-    const thumbnailObjectKey = await uploadHttpClientV2.putFile(
+    const thumbnailObjectKey = await uploadHttpClient.putFileV2(
         uploadURL,
         encryptedThumbnail.encryptedData as Uint8Array,
         () => {}
