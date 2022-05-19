@@ -1,13 +1,27 @@
 import { ElectronFile } from 'types/upload';
+import { convertBytesToHumanReadable } from 'utils/billing';
 
 export async function getUint8ArrayView(
     reader: FileReader,
     file: Blob
 ): Promise<Uint8Array> {
     return await new Promise((resolve, reject) => {
-        reader.onabort = () => reject(Error('file reading was aborted'));
+        reader.onabort = () =>
+            reject(
+                Error(
+                    `file reading was aborted, file size= ${convertBytesToHumanReadable(
+                        file.size
+                    )}`
+                )
+            );
         reader.onerror = () =>
-            reject(Error('file reading has failed - ' + reader.error));
+            reject(
+                Error(
+                    `file reading has failed, file size= ${convertBytesToHumanReadable(
+                        file.size
+                    )} , reason= ${reader.error}`
+                )
+            );
         reader.onload = () => {
             // Do whatever you want with the file contents
             const result =
