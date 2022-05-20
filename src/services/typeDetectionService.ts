@@ -48,7 +48,7 @@ export async function getFileType(
     } catch (e) {
         const fileFormat = getFileExtension(receivedFile.name);
         const formatMissedByTypeDetection = FORMAT_MISSED_BY_FILE_TYPE_LIB.find(
-            (a) => a.exactType === fileFormat
+            (a) => a.exactType === fileFormat.toLocaleLowerCase()
         );
         if (formatMissedByTypeDetection) {
             return formatMissedByTypeDetection;
