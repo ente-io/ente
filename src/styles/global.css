@@ -29,18 +29,13 @@
   }
   
 html, body {
-    
     height: 100%;
     flex: 1;
     display: flex;
-    flex-direction: column;
-    font-family:'Inter', sans-serif;
-    letter-spacing: -0.011em;
+    flex-direction: column; 
 }
 
-strong {
-    font-weight: 900;
-}
+
 
 #__next {
     flex: 1;
@@ -482,9 +477,7 @@ div.otp-input input:not(:placeholder-shown) , div.otp-input input:focus{
 .react-datepicker__day--disabled:hover {
     background-color: #202020;
 }
-.ente-form-group{
-    margin:0;
-}
+
 .form-check-input:hover, .form-check-label :hover{
     cursor:pointer;
 }

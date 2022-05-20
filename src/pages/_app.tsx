@@ -3,7 +3,7 @@ import styled, { ThemeProvider as SThemeProvider } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
 import { useRouter } from 'next/router';
-import VerticallyCenteredContainer from 'components/Container';
+import VerticallyCentered from 'components/Container';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 import 'styles/global.css';
@@ -283,7 +283,8 @@ export default function App({ Component, err }) {
                     <LoadingBar color="#51cd7c" ref={loadingBar} />
 
                     <MessageDialog
-                        size="lg"
+                        fullWidth
+                        size="sm"
                         show={messageDialogView}
                         onHide={closeMessageDialog}
                         attributes={dialogMessage}
@@ -305,11 +306,11 @@ export default function App({ Component, err }) {
                             closeSidebar,
                         }}>
                         {loading ? (
-                            <VerticallyCenteredContainer>
+                            <VerticallyCentered>
                                 <EnteSpinner>
                                     <span className="sr-only">Loading...</span>
                                 </EnteSpinner>
-                            </VerticallyCenteredContainer>
+                            </VerticallyCentered>
                         ) : (
                             <Component err={err} setLoading={setLoading} />
                         )}

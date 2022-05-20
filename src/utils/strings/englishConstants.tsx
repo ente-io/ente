@@ -1,3 +1,5 @@
+import { Typography } from '@mui/material';
+import Link from '@mui/material/Link';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -49,8 +51,8 @@ const englishConstants = {
     HERO_SLIDE_3:
         'reliably replicated to a fallout shelter, designed to outlive',
     COMPANY_NAME: 'ente',
-    LOGIN: 'log in',
-    SIGN_UP: 'sign up',
+    LOGIN: 'Login',
+    SIGN_UP: 'Signup',
     NAME: 'name',
     ENTER_NAME: 'your name',
     EMAIL: 'email',
@@ -61,37 +63,43 @@ const englishConstants = {
     REQUIRED: 'required',
     VERIFY_EMAIL: 'verify email',
     EMAIL_SENT: ({ email }) => (
-        <p>
-            we have sent a mail to <b>{email}</b>
-        </p>
+        <span>
+            Verification code sent to you on{' '}
+            <Typography
+                component={'span'}
+                fontSize="inherit"
+                color="text.secondary">
+                {email}
+            </Typography>
+        </span>
     ),
     CHECK_INBOX: 'please check your inbox (and spam) to complete verification',
     ENTER_OTT: 'verification code',
-    RESEND_MAIL: 'resend?',
+    RESEND_MAIL: 'Resend code',
     VERIFY: 'verify',
     UNKNOWN_ERROR: 'something went wrong, please try again',
     INVALID_CODE: 'invalid verification code',
     EXPIRED_CODE: 'your verification code has expired',
     SENDING: 'sending...',
     SENT: 'sent!',
-    PASSWORD: 'password',
+    PASSWORD: 'Password',
     LINK_PASSWORD: 'enter password to unlock the album',
     ENTER_PASSPHRASE: 'enter your password',
     RETURN_PASSPHRASE_HINT: 'password',
-    SET_PASSPHRASE: 'set password',
+    SET_PASSPHRASE: 'Set password',
     VERIFY_PASSPHRASE: 'sign in',
     INCORRECT_PASSPHRASE: 'incorrect password',
     ENTER_ENC_PASSPHRASE:
         'please enter a password that we can use to encrypt your data',
     PASSPHRASE_DISCLAIMER: () => (
-        <p>
-            we don't store your password, so if you forget,
-            <strong> we will not be able to help you</strong> recover your data.
-        </p>
+        <>
+            We don't store your password, so if you forget it,{' '}
+            <strong>we will not be able to help you </strong>
+            recover your data without a recovery key.
+        </>
     ),
     PASSPHRASE_HINT: 'password',
-    RE_ENTER_PASSPHRASE: 'password again',
-    CONFIRM_PASSPHRASE: 'confirm your password',
+    CONFIRM_PASSPHRASE: 'confirm password',
     PASSPHRASE_MATCH_ERROR: "passwords don't match",
     CONSOLE_WARNING_STOP: 'STOP!',
     CONSOLE_WARNING_DESC:
@@ -128,8 +136,8 @@ const englishConstants = {
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
     USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
     UPLOAD_BUTTON_TEXT: 'upload',
-    NO_ACCOUNT: "don't have an account?",
-    ACCOUNT_EXISTS: 'already have an account?',
+    NO_ACCOUNT: "Don't have an account",
+    ACCOUNT_EXISTS: 'Already have an account',
     ALBUM_NAME: 'album name',
     CREATE: 'create',
     DOWNLOAD: 'download',
@@ -159,7 +167,7 @@ const englishConstants = {
     PASSWORD_GENERATION_FAILED:
         "your browser was unable to generate a strong key that meets ente's encryption standards, please try using the mobile app or another browser",
     CHANGE_PASSWORD: 'Change password',
-    GO_BACK: 'go back',
+    GO_BACK: 'Go back',
     RECOVERY_KEY: 'Recovery key',
     SAVE_LATER: 'Do this later',
     SAVE: 'Save Key',
@@ -170,11 +178,11 @@ const englishConstants = {
     KEY_NOT_STORED_DISCLAIMER:
         "we don't store this key, so please save this in a safe place",
     RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
-    FORGOT_PASSWORD: 'forgot password?',
+    FORGOT_PASSWORD: 'Forgot password',
     RECOVER_ACCOUNT: 'recover account',
-    RETURN_RECOVERY_KEY_HINT: 'recovery key',
+    RECOVERY_KEY_HINT: 'recovery key',
     RECOVER: 'recover',
-    NO_RECOVERY_KEY: 'no recovery key?',
+    NO_RECOVERY_KEY: 'No recovery key?',
     INCORRECT_RECOVERY_KEY: 'incorrect recovery key',
     SORRY: 'sorry',
     NO_RECOVERY_KEY_MESSAGE:
@@ -390,16 +398,19 @@ const englishConstants = {
         <span>try searching for New York, April 14, Christmas...</span>
     ),
     TERMS_AND_CONDITIONS: () => (
-        <p>
+        <Typography variant="body2">
             I agree to the{' '}
-            <a href="https://ente.io/terms" target="_blank" rel="noreferrer">
+            <Link href="https://ente.io/terms" target="_blank" rel="noreferrer">
                 terms
-            </a>{' '}
+            </Link>{' '}
             and{' '}
-            <a href="https://ente.io/privacy" target="_blank" rel="noreferrer">
+            <Link
+                href="https://ente.io/privacy"
+                target="_blank"
+                rel="noreferrer">
                 privacy policy
-            </a>{' '}
-        </p>
+            </Link>{' '}
+        </Typography>
     ),
     CONFIRM_PASSWORD_NOT_SAVED: () => (
         <p>
@@ -463,9 +474,9 @@ const englishConstants = {
     BACK: 'back',
     ENABLE_TWO_FACTOR: 'Enable two-factor',
     ENABLE: 'enable',
-    LOST_DEVICE: 'lost two-factor device?',
+    LOST_DEVICE: 'Lost two-factor device',
     INCORRECT_CODE: 'incorrect code',
-    RECOVER_TWO_FACTOR: 'recover two-factor',
+    RECOVER_TWO_FACTOR: 'Recover two-factor',
     TWO_FACTOR_INFO:
         'Add an additional layer of security by requiring more than your email and password to log in to your account',
     DISABLE_TWO_FACTOR_LABEL: 'Disable two-factor authentication',
@@ -722,6 +733,7 @@ const englishConstants = {
     ENDS: 'Ends',
     ENTER_TWO_FACTOR_OTP:
         ' enter the 6-digit code from your authenticator app.',
+    CREATE_ACCOUNT: 'Create account',
     COPIED: 'copied',
 };
 

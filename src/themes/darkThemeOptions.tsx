@@ -13,6 +13,14 @@ declare module '@mui/material/styles' {
         accent?: PaletteColorOptions;
         danger?: PaletteColorOptions;
     }
+
+    interface TypographyVariants {
+        title: React.CSSProperties;
+    }
+
+    interface TypographyVariantsOptions {
+        title?: React.CSSProperties;
+    }
 }
 
 declare module '@mui/material/Button' {
@@ -21,10 +29,15 @@ declare module '@mui/material/Button' {
         danger: true;
     }
 }
+declare module '@mui/material/Checkbox' {
+    export interface CheckboxPropsColorOverrides {
+        accent: true;
+    }
+}
 
-declare module '@mui/material/ToggleButtonGroup' {
-    export interface ToggleButtonGroupPropsColorOverrides {
-        negative: true;
+declare module '@mui/material/Typography' {
+    interface TypographyPropsVariantOverrides {
+        title: true;
     }
 }
 
@@ -34,12 +47,26 @@ const darkThemeOptions = createTheme({
         MuiPaper: {
             styleOverrides: { root: { backgroundImage: 'none' } },
         },
+        MuiCssBaseline: {
+            styleOverrides: {
+                body: {
+                    fontFamily: ['Inter', 'sans-serif'].join(','),
+                    letterSpacing: '-0.011em',
+                },
+                strong: { fontWeight: 900 },
+            },
+        },
         MuiLink: {
+            defaultProps: {
+                underline: 'always',
+            },
             styleOverrides: {
                 root: {
-                    textDecoration: 'none',
+                    color: 'inherit',
+                    textDecorationColor: 'inherit',
                     '&:hover': {
                         textDecoration: 'underline',
+                        color: '#1dba54',
                     },
                 },
             },
@@ -69,8 +96,6 @@ const darkThemeOptions = createTheme({
                     '& .MuiDialogActions-root': {
                         padding: '32px 24px',
                     },
-                },
-                root: {
                     '& .MuiDialogActions-root button': {
                         marginLeft: '16px',
                         fontSize: '18px',
@@ -78,6 +103,21 @@ const darkThemeOptions = createTheme({
                         padding: '16px',
                     },
                 },
+            },
+        },
+        MuiFilledInput: {
+            styleOverrides: {
+                input: {
+                    '&:autofill': {
+                        boxShadow: '#c7fd4f',
+                    },
+                },
+            },
+        },
+        MuiTextField: {
+            defaultProps: {
+                variant: 'filled',
+                margin: 'dense',
             },
         },
     },
@@ -116,6 +156,16 @@ const darkThemeOptions = createTheme({
         borderRadius: 8,
     },
     typography: {
+        body2: {
+            fontSize: '14px',
+            lineHeight: '20px',
+        },
+        title: {
+            fontSize: '32px',
+            lineHeight: '40px',
+            fontWeight: 600,
+            display: 'block',
+        },
         fontFamily: ['Inter', 'sans-serif'].join(','),
     },
 });

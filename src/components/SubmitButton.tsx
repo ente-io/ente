@@ -1,5 +1,5 @@
-import React from 'react';
-import { Button, Spinner } from 'react-bootstrap';
+import { Button, ButtonProps, CircularProgress } from '@mui/material';
+import React, { FC } from 'react';
 
 interface Props {
     loading: boolean;
@@ -7,29 +7,27 @@ interface Props {
     inline?: any;
     disabled?: boolean;
 }
-const SubmitButton = ({ loading, buttonText, inline, disabled }: Props) => (
-    <Button
-        className="submitButton"
-        variant="outline-success"
-        type="submit"
-        block={!inline}
-        disabled={loading || disabled}
-        style={{ padding: '6px 1em' }}>
-        {loading ? (
-            <Spinner
-                as="span"
-                animation="border"
-                style={{
-                    width: '22px',
-                    height: '22px',
-                    borderWidth: '0.20em',
-                    color: '#51cd7c',
-                }}
-            />
-        ) : (
-            buttonText
-        )}
-    </Button>
-);
+const SubmitButton: FC<ButtonProps<'button', Props>> = ({
+    loading,
+    buttonText,
+    inline,
+    disabled,
+    sx,
+    ...props
+}) => {
+    return (
+        <Button
+            size="large"
+            variant="contained"
+            color="accent"
+            type="submit"
+            fullWidth={!inline}
+            disabled={loading || disabled}
+            sx={{ my: 4, ...sx }}
+            {...props}>
+            {loading ? <CircularProgress size={25} /> : buttonText}
+        </Button>
+    );
+};
 
 export default SubmitButton;

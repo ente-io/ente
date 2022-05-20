@@ -111,6 +111,7 @@ export const InSelectRangeOverLay = styled.div<{ active: boolean }>`
 `;
 
 export const FileAndCollectionNameOverlay = styled.div`
+    width: 100%;
     bottom: 0;
     left: 0;
     max-height: 40%;
@@ -140,6 +141,7 @@ export const SelectedOverlay = styled.div<{ selected: boolean }>`
     height: 100%;
     width: 100%;
     ${(props) => props.selected && 'border: 5px solid #51cd7c;'}
+    border-radius: ${({ theme }) => theme.shape.borderRadius};
 `;
 
 const Cont = styled.div<{ disabled: boolean }>`

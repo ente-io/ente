@@ -3,10 +3,11 @@ import { useRouter } from 'next/router';
 import EnteSpinner from 'components/EnteSpinner';
 import { AppContext } from 'pages/_app';
 import Login from 'components/Login';
-import VerticallyCenteredContainer from 'components/Container';
+import VerticallyCentered from 'components/Container';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import Card from 'react-bootstrap/Card';
 import { PAGES } from 'constants/pages';
+import FormContainer from 'components/Form/FormContainer';
+import FormPaper from 'components/Form/FormPaper';
 
 export default function Home() {
     const router = useRouter();
@@ -28,19 +29,17 @@ export default function Home() {
         router.push(PAGES.SIGNUP);
     };
 
-    return (
-        <VerticallyCenteredContainer>
-            {loading ? (
-                <EnteSpinner>
-                    <span className="sr-only">Loading...</span>
-                </EnteSpinner>
-            ) : (
-                <Card style={{ minWidth: '320px' }} className="text-center">
-                    <Card.Body style={{ padding: '40px 30px' }}>
-                        <Login signUp={register} />
-                    </Card.Body>
-                </Card>
-            )}
-        </VerticallyCenteredContainer>
+    return loading ? (
+        <VerticallyCentered>
+            <EnteSpinner>
+                <span className="sr-only">Loading...</span>
+            </EnteSpinner>
+        </VerticallyCentered>
+    ) : (
+        <FormContainer>
+            <FormPaper>
+                <Login signUp={register} />
+            </FormPaper>
+        </FormContainer>
     );
 }

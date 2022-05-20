@@ -13,11 +13,14 @@ import SetPasswordForm from 'components/SetPasswordForm';
 import { justSignedUp, setJustSignedUp } from 'utils/storage';
 import RecoveryKey from 'components/RecoveryKey';
 import { PAGES } from 'constants/pages';
-import VerticallyCenteredContainer from 'components/Container';
+import VerticallyCentered from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes, User } from 'types/user';
+import FormContainer from 'components/Form/FormContainer';
+import FormPaper from 'components/Form/FormPaper';
+import FormTitle from 'components/Form/FormPaper/Title';
 
 export default function Generate() {
     const [token, setToken] = useState<string>();
@@ -78,11 +81,11 @@ export default function Generate() {
     return (
         <>
             {loading ? (
-                <VerticallyCenteredContainer>
+                <VerticallyCentered>
                     <EnteSpinner>
                         <span className="sr-only">Loading...</span>
                     </EnteSpinner>
-                </VerticallyCenteredContainer>
+                </VerticallyCentered>
             ) : recoverModalView ? (
                 <RecoveryKey
                     show={recoverModalView}
@@ -93,11 +96,16 @@ export default function Generate() {
                     somethingWentWrong={() => null}
                 />
             ) : (
-                <SetPasswordForm
-                    callback={onSubmit}
-                    buttonText={constants.SET_PASSPHRASE}
-                    back={logoutUser}
-                />
+                <FormContainer>
+                    <FormPaper>
+                        <FormTitle>{constants.SET_PASSPHRASE}</FormTitle>
+                        <SetPasswordForm
+                            callback={onSubmit}
+                            buttonText={constants.SET_PASSPHRASE}
+                            back={logoutUser}
+                        />
+                    </FormPaper>
+                </FormContainer>
             )}
         </>
     );

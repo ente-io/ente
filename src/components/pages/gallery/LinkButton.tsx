@@ -37,8 +37,14 @@ const LinkButton: FC<LinkProps<'button', { color?: ButtonProps['color'] }>> = ({
     return (
         <Link
             component="button"
-            {...props}
-            sx={{ color: props.color && `${props.color}.main`, ...sx }}>
+            sx={{
+                color:
+                    props.color && typeof props.color === 'object'
+                        ? `${props.color}.main`
+                        : props.color,
+                ...sx,
+            }}
+            {...props}>
             {children}
         </Link>
     );

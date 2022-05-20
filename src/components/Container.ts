@@ -1,9 +1,8 @@
 import { Box } from '@mui/material';
 import styled from 'styled-components';
 import { default as MuiStyled } from '@mui/styled-engine';
-import { Container as MuiContainer } from '@mui/material';
 
-const VerticallyCenteredContainer = MuiStyled(MuiContainer)`
+const VerticallyCentered = MuiStyled(Box)`
     flex: 1;
     display: flex;
     align-items: center;
@@ -13,7 +12,7 @@ const VerticallyCenteredContainer = MuiStyled(MuiContainer)`
     overflow: auto;
 `;
 
-export default VerticallyCenteredContainer;
+export default VerticallyCentered;
 
 export const DisclaimerContainer = styled.div`
     margin: 16px 0;
