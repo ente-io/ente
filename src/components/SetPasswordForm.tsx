@@ -86,6 +86,7 @@ function SetPasswordForm(props: Props) {
                     </Typography>
 
                     <SubmitButton
+                        sx={{ mb: 2 }}
                         loading={loading}
                         buttonText={props.buttonText}
                     />

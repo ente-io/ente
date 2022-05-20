@@ -76,11 +76,10 @@ export default function SingleInputForm(props: Props) {
                     />
 
                     <SubmitButton
+                        sx={{ mt: 2 }}
                         buttonText={props.buttonText}
                         loading={loading}
                     />
-
-                    <br />
                 </form>
             )}
         </Formik>
