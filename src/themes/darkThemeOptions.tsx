@@ -115,6 +115,9 @@ const darkThemeOptions = createTheme({
     shape: {
         borderRadius: 8,
     },
+    typography: {
+        fontFamily: ['Inter', 'sans-serif'].join(','),
+    },
 });
 
 export default darkThemeOptions;
