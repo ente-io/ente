@@ -9,7 +9,7 @@ import constants from 'utils/strings/constants';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
-import FormPaperHeaderText from 'components/Form/FormPaper/HeaderText';
+import FormTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import { Divider } from '@mui/material';
 
@@ -58,9 +58,7 @@ export default function Home() {
     return (
         <FormContainer>
             <FormPaper sx={{ maxWidth: '400px' }}>
-                <FormPaperHeaderText>
-                    {constants.TWO_FACTOR}
-                </FormPaperHeaderText>
+                <FormTitle>{constants.TWO_FACTOR}</FormTitle>
                 <VerifyTwoFactor
                     onSubmit={onSubmit}
                     buttonText={constants.VERIFY}
