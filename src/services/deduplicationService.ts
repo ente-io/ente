@@ -130,18 +130,18 @@ export function clubDuplicatesBySameFileHashes(dupes: DuplicateFiles[]) {
             continue;
         }
 
-        const dupesSortedByFileHash = filteredFiles.map((file) => {
-            return {
-                file,
-                hash:
-                    file.metadata.hash ??
-                    `${file.metadata.imageHash}_${file.metadata.videoHash}`,
-            };
-        });
-
-        dupesSortedByFileHash.sort((firstFile, secondFile) => {
-            return firstFile.hash.localeCompare(secondFile.hash);
-        });
+        const dupesSortedByFileHash = filteredFiles
+            .map((file) => {
+                return {
+                    file,
+                    hash:
+                        file.metadata.hash ??
+                        `${file.metadata.imageHash}_${file.metadata.videoHash}`,
+                };
+            })
+            .sort((firstFile, secondFile) => {
+                return firstFile.hash.localeCompare(secondFile.hash);
+            });
 
         files.push(dupesSortedByFileHash[0].file);
         for (let i = 1; i < dupesSortedByFileHash.length; i++) {
