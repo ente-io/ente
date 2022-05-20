@@ -29,18 +29,13 @@
   }
   
 html, body {
-    
     height: 100%;
     flex: 1;
     display: flex;
-    flex-direction: column;
-    font-family:'Inter', sans-serif;
-    letter-spacing: -0.011em;
+    flex-direction: column; 
 }
 
-strong {
-    font-weight: 900;
-}
+
 
 #__next {
     flex: 1;

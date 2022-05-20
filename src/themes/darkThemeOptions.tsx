@@ -50,8 +50,10 @@ const darkThemeOptions = createTheme({
         MuiCssBaseline: {
             styleOverrides: {
                 body: {
-                    letterSpacing: '0em',
+                    fontFamily: ['Inter', 'sans-serif'].join(','),
+                    letterSpacing: '-0.011em',
                 },
+                strong: { fontWeight: 900 },
             },
         },
         MuiLink: {
