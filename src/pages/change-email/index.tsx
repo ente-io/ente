@@ -1,5 +1,4 @@
-import VerticallyCentered, { CenteredFlex } from 'components/Container';
-import LogoImg from 'components/LogoImg';
+import VerticallyCentered from 'components/Container';
 import React, { useEffect } from 'react';
 import constants from 'utils/strings/constants';
 import router from 'next/router';
@@ -7,6 +6,7 @@ import ChangeEmailForm from 'components/ChangeEmail';
 import { PAGES } from 'constants/pages';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import FormPaper from 'components/Form/FormPaper';
+import FormPaperTitle from 'components/Form/FormPaper/Title';
 
 function ChangeEmailPage() {
     useEffect(() => {
@@ -19,10 +19,7 @@ function ChangeEmailPage() {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <CenteredFlex mb={8}>
-                    <LogoImg src="/icon.svg" />
-                    {constants.CHANGE_EMAIL}
-                </CenteredFlex>
+                <FormPaperTitle>{constants.CHANGE_EMAIL}</FormPaperTitle>
                 <ChangeEmailForm />
             </FormPaper>
         </VerticallyCentered>

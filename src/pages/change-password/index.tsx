@@ -15,13 +15,12 @@ import SetPasswordForm, {
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
 import { KEK, UpdatedKey } from 'types/user';
-import { CenteredFlex } from 'components/Container';
-import LogoImg from 'components/LogoImg';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import VerticallyCentered from 'components/Container';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import { Divider } from '@mui/material';
+import FormPaperTitle from 'components/Form/FormPaper/Title';
 
 export default function ChangePassword() {
     const [token, setToken] = useState<string>();
@@ -82,10 +81,7 @@ export default function ChangePassword() {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <CenteredFlex mb={4}>
-                    <LogoImg src="/icon.svg" />
-                    {constants.CHANGE_PASSWORD}
-                </CenteredFlex>
+                <FormPaperTitle>{constants.CHANGE_PASSWORD}</FormPaperTitle>
                 <SetPasswordForm
                     callback={onSubmit}
                     buttonText={constants.CHANGE_PASSWORD}
