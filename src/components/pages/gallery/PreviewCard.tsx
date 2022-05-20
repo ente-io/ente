@@ -225,12 +225,14 @@ export default function PreviewCard(props: IProps) {
                     if (isMounted.current) {
                         setImgSrc(url);
                         thumbs.set(file.id, url);
-                        const newFile = updateURL(url);
-                        file.msrc = newFile.msrc;
-                        file.html = newFile.html;
-                        file.src = newFile.src;
-                        file.w = newFile.w;
-                        file.h = newFile.h;
+                        if (updateURL) {
+                            const newFile = updateURL(url);
+                            file.msrc = newFile.msrc;
+                            file.html = newFile.html;
+                            file.src = newFile.src;
+                            file.w = newFile.w;
+                            file.h = newFile.h;
+                        }
                     }
                 } catch (e) {
                     logError(e, 'preview card useEffect failed');
