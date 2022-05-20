@@ -1,8 +1,10 @@
+import { FILE_TYPE } from 'constants/file';
 import { EnteFile } from 'types/file';
+import { Metadata } from 'types/upload';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
-import { areFilesWithFileHashSame, hasFileHash } from 'utils/upload';
+import { hasFileHash } from 'utils/upload';
 import HTTPService from './HTTPService';
 
 const ENDPOINT = getEndpoint();
@@ -144,7 +146,7 @@ export function clubDuplicatesBySameFileHashes(dupes: DuplicateFiles[]) {
         files.push(dupesSortedByFileHash[0].file);
         for (let i = 1; i < dupesSortedByFileHash.length; i++) {
             if (
-                areFilesWithFileHashSame(
+                areFileHashesSame(
                     dupesSortedByFileHash[i - 1].file.metadata,
                     dupesSortedByFileHash[i].file.metadata
                 )
@@ -208,4 +210,15 @@ async function sortDuplicateFiles(
             ] ?? OtherCollectionNameRanking;
         return secondFileRanking - firstFileRanking;
     });
+}
+
+function areFileHashesSame(firstFile: Metadata, secondFile: Metadata) {
+    if (firstFile.fileType === FILE_TYPE.LIVE_PHOTO) {
+        return (
+            firstFile.imageHash === secondFile.imageHash &&
+            firstFile.videoHash === secondFile.videoHash
+        );
+    } else {
+        return firstFile.hash === secondFile.hash;
+    }
 }
