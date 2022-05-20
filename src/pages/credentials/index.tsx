@@ -12,7 +12,9 @@ import CryptoWorker, {
 } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
-import SingleInputForm from 'components/SingleInputForm';
+import SingleInputForm, {
+    SingleInputFormProps,
+} from 'components/SingleInputForm';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes } from 'types/user';
@@ -49,7 +51,10 @@ export default function Credentials() {
         appContext.showNavBar(false);
     }, []);
 
-    const verifyPassphrase = async (passphrase, setFieldError) => {
+    const verifyPassphrase: SingleInputFormProps['callback'] = async (
+        passphrase,
+        setFieldError
+    ) => {
         try {
             const cryptoWorker = await new CryptoWorker();
             let kek: string = null;
@@ -85,13 +90,10 @@ export default function Credentials() {
                 router.push(redirectURL ?? PAGES.GALLERY);
             } catch (e) {
                 logError(e, 'user entered a wrong password');
-                setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
+                setFieldError(constants.INCORRECT_PASSPHRASE);
             }
         } catch (e) {
-            setFieldError(
-                'passphrase',
-                `${constants.UNKNOWN_ERROR} ${e.message}`
-            );
+            setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
         }
     };
 
