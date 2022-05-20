@@ -89,17 +89,13 @@ function ChangeEmailForm() {
                         onClose={() => setShowMessage(false)}>
                         {constants.EMAIL_SENT({ email })}
                     </Alert>
-                    <form
-                        noValidate
-                        style={{ width: '100%' }}
-                        onSubmit={handleSubmit}>
+                    <form noValidate onSubmit={handleSubmit}>
                         <Container>
                             <TextField
                                 fullWidth
                                 InputProps={{
                                     readOnly: ottInputVisible,
                                 }}
-                                margin="normal"
                                 type="email"
                                 label={constants.ENTER_EMAIL}
                                 value={values.email}

@@ -1,4 +1,4 @@
-import VerticallyCentered from 'components/Container';
+import VerticallyCentered, { CenteredFlex } from 'components/Container';
 import LogoImg from 'components/LogoImg';
 import React, { useEffect } from 'react';
 import constants from 'utils/strings/constants';
@@ -6,7 +6,6 @@ import router from 'next/router';
 import ChangeEmailForm from 'components/ChangeEmail';
 import { PAGES } from 'constants/pages';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { Box } from '@mui/material';
 import FormPaper from 'components/Form/FormPaper';
 
 function ChangeEmailPage() {
@@ -20,10 +19,11 @@ function ChangeEmailPage() {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <Box mb={2}>
+                <CenteredFlex mb={8}>
                     <LogoImg src="/icon.svg" />
                     {constants.CHANGE_EMAIL}
-                </Box>
+                </CenteredFlex>
+
                 <ChangeEmailForm />
             </FormPaper>
         </VerticallyCentered>

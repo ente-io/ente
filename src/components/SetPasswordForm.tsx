@@ -68,7 +68,6 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                     <TextField
                         fullWidth
                         variant="filled"
-                        margin="dense"
                         type="password"
                         label={constants.PASSPHRASE_HINT}
                         value={values.passphrase}
@@ -81,7 +80,6 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                     <TextField
                         fullWidth
                         variant="filled"
-                        margin="dense"
                         type="password"
                         label={constants.CONFIRM_PASSPHRASE}
                         value={values.confirm}

@@ -119,9 +119,7 @@ export default function SignUp(props: SignUpProps) {
                     <form noValidate onSubmit={handleSubmit}>
                         <VerticallyCentered sx={{ mb: 1 }}>
                             <TextField
-                                variant="filled"
                                 fullWidth
-                                margin="dense"
                                 type="email"
                                 label={constants.ENTER_EMAIL}
                                 value={values.email}
@@ -134,8 +132,6 @@ export default function SignUp(props: SignUpProps) {
 
                             <TextField
                                 fullWidth
-                                variant="filled"
-                                margin="dense"
                                 type="password"
                                 label={constants.PASSPHRASE_HINT}
                                 value={values.passphrase}
@@ -147,8 +143,6 @@ export default function SignUp(props: SignUpProps) {
 
                             <TextField
                                 fullWidth
-                                variant="filled"
-                                margin="dense"
                                 type="password"
                                 label={constants.CONFIRM_PASSPHRASE}
                                 value={values.confirm}

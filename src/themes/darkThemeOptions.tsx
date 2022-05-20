@@ -114,6 +114,12 @@ const darkThemeOptions = createTheme({
                 },
             },
         },
+        MuiTextField: {
+            defaultProps: {
+                variant: 'filled',
+                margin: 'dense',
+            },
+        },
     },
 
     palette: {
