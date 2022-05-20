@@ -103,6 +103,15 @@ const darkThemeOptions = createTheme({
                 },
             },
         },
+        MuiFilledInput: {
+            styleOverrides: {
+                input: {
+                    '&:autofill': {
+                        boxShadow: '#c7fd4f',
+                    },
+                },
+            },
+        },
     },
 
     palette: {
