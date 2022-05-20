@@ -1,5 +1,5 @@
 import { Formik, FormikHelpers } from 'formik';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import * as Yup from 'yup';
 import constants from 'utils/strings/constants';
 import SubmitButton from 'components/SubmitButton';
@@ -8,30 +8,24 @@ import { changeEmail, getOTTForEmailChange } from 'services/userService';
 import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { PAGES } from 'constants/pages';
-import { TextField } from '@mui/material';
+import { Divider, TextField } from '@mui/material';
 import Container from './Container';
 import LinkButton from './pages/gallery/LinkButton';
+import { Alert } from 'react-bootstrap';
+import FormPaperFooter from './Form/FormPaper/Footer';
 
 interface formValues {
     email: string;
     ott?: string;
 }
 
-interface Props {
-    showMessage: (value: boolean) => void;
-    setEmail: (email: string) => void;
-}
-function ChangeEmailForm(props: Props) {
+function ChangeEmailForm() {
     const [loading, setLoading] = useState(false);
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
     const ottInputRef = useRef(null);
     const appContext = useContext(AppContext);
-
-    useEffect(() => {
-        if (!ottInputVisible) {
-            props.showMessage(false);
-        }
-    }, [ottInputVisible]);
+    const [email, setEmail] = useState(null);
+    const [showMessage, setShowMessage] = useState(false);
 
     const requestOTT = async (
         { email }: formValues,
@@ -40,9 +34,9 @@ function ChangeEmailForm(props: Props) {
         try {
             setLoading(true);
             await getOTTForEmailChange(email);
-            props.setEmail(email);
+            setEmail(email);
             setShowOttInputVisibility(true);
-            props.showMessage(true);
+            setShowMessage(true);
             setTimeout(() => {
                 ottInputRef.current?.focus();
             }, 250);
@@ -71,6 +65,8 @@ function ChangeEmailForm(props: Props) {
         setLoading(false);
     };
 
+    const goToGallery = () => router.push(PAGES.GALLERY);
+
     return (
         <Formik<formValues>
             initialValues={{ email: '' }}
@@ -84,6 +80,15 @@ function ChangeEmailForm(props: Props) {
             onSubmit={!ottInputVisible ? requestOTT : requestEmailChange}>
             {({ values, errors, handleChange, handleSubmit }) => (
                 <>
+                    <Alert
+                        variant="success"
+                        show={showMessage}
+                        style={{ paddingBottom: 0 }}
+                        transition
+                        dismissible
+                        onClose={() => setShowMessage(false)}>
+                        {constants.EMAIL_SENT({ email })}
+                    </Alert>
                     <form
                         noValidate
                         style={{ width: '100%' }}
@@ -117,6 +122,7 @@ function ChangeEmailForm(props: Props) {
                                 />
                             )}
                             <SubmitButton
+                                sx={{ mt: 2 }}
                                 loading={loading}
                                 buttonText={
                                     !ottInputVisible
@@ -126,12 +132,23 @@ function ChangeEmailForm(props: Props) {
                             />
                         </Container>
                     </form>
-                    {ottInputVisible && (
-                        <LinkButton
-                            onClick={() => setShowOttInputVisibility(false)}>
-                            {constants.CHANGE_EMAIL}?
+                    <Divider />
+                    <FormPaperFooter
+                        style={{
+                            justifyContent: ottInputVisible && 'space-between',
+                        }}>
+                        {ottInputVisible && (
+                            <LinkButton
+                                onClick={() =>
+                                    setShowOttInputVisibility(false)
+                                }>
+                                {constants.CHANGE_EMAIL}?
+                            </LinkButton>
+                        )}
+                        <LinkButton onClick={goToGallery}>
+                            {constants.GO_BACK}
                         </LinkButton>
-                    )}
+                    </FormPaperFooter>
                 </>
             )}
         </Formik>
