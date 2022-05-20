@@ -9,7 +9,7 @@ import ShowHidePassword from './Form/ShowHidePassword';
 interface formValues {
     inputValue: string;
 }
-export interface SingeInputFormProps {
+export interface SingleInputFormProps {
     callback: (
         inputValue: string,
         setFieldError: (errorMessage: string) => void
@@ -19,7 +19,7 @@ export interface SingeInputFormProps {
     buttonText: string;
 }
 
-export default function SingleInputForm(props: SingeInputFormProps) {
+export default function SingleInputForm(props: SingleInputFormProps) {
     const [loading, SetLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 

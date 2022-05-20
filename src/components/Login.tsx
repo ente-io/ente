@@ -8,7 +8,7 @@ import FormPaperTitle from './Form/FormPaper/Title';
 import { Divider } from '@mui/material';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import LinkButton from './pages/gallery/LinkButton';
-import SingleInputForm, { SingeInputFormProps } from './SingleInputForm';
+import SingleInputForm, { SingleInputFormProps } from './SingleInputForm';
 
 interface LoginProps {
     signUp: () => void;
@@ -28,7 +28,7 @@ export default function Login(props: LoginProps) {
         main();
     }, []);
 
-    const loginUser: SingeInputFormProps['callback'] = async (
+    const loginUser: SingleInputFormProps['callback'] = async (
         email,
         setFieldError
     ) => {
