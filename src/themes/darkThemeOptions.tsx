@@ -157,6 +157,7 @@ const darkThemeOptions = createTheme({
             lineHeight: '40px',
             fontWeight: 600,
         },
+        fontFamily: ['Inter', 'sans-serif'].join(','),
     },
 });
 
