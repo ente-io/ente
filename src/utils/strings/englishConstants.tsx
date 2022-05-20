@@ -86,16 +86,17 @@ const englishConstants = {
     LINK_PASSWORD: 'enter password to unlock the album',
     ENTER_PASSPHRASE: 'enter your password',
     RETURN_PASSPHRASE_HINT: 'password',
-    SET_PASSPHRASE: 'set password',
+    SET_PASSPHRASE: 'Set password',
     VERIFY_PASSPHRASE: 'sign in',
     INCORRECT_PASSPHRASE: 'incorrect password',
     ENTER_ENC_PASSPHRASE:
         'please enter a password that we can use to encrypt your data',
     PASSPHRASE_DISCLAIMER: () => (
-        <p>
-            we don't store your password, so if you forget,
-            <strong> we will not be able to help you</strong> recover your data.
-        </p>
+        <>
+            We don't store your password, so if you forget it,{' '}
+            <strong>we will not be able to help you </strong>
+            recover your data without a recovery key.
+        </>
     ),
     PASSPHRASE_HINT: 'password',
     CONFIRM_PASSPHRASE: 'confirm password',

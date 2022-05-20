@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import VerticallyCentered from 'components/Container';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
@@ -55,42 +54,41 @@ function SetPasswordForm(props: Props) {
                     style={{ width: '100%' }}
                     noValidate
                     onSubmit={handleSubmit}>
-                    <VerticallyCentered disableGutters>
-                        <Typography mb={2}>
-                            {constants.ENTER_ENC_PASSPHRASE}
-                        </Typography>
-                        <Typography mb={2}>
-                            {constants.PASSPHRASE_DISCLAIMER()}
-                        </Typography>
-                        <VerticallyCentered>
-                            <TextField
-                                margin="normal"
-                                fullWidth
-                                type="password"
-                                label={constants.PASSPHRASE_HINT}
-                                value={values.passphrase}
-                                onChange={handleChange('passphrase')}
-                                error={Boolean(errors.passphrase)}
-                                helperText={errors.passphrase}
-                                autoFocus
-                                disabled={loading}
-                            />
-                            <TextField
-                                fullWidth
-                                type="password"
-                                label={constants.CONFIRM_PASSPHRASE}
-                                value={values.confirm}
-                                onChange={handleChange('confirm')}
-                                disabled={loading}
-                                error={Boolean(errors.confirm)}
-                                helperText={errors.confirm}
-                            />
-                            <SubmitButton
-                                loading={loading}
-                                buttonText={props.buttonText}
-                            />
-                        </VerticallyCentered>
-                    </VerticallyCentered>
+                    <Typography mb={2} color="text.secondary">
+                        {constants.ENTER_ENC_PASSPHRASE}
+                    </Typography>
+
+                    <TextField
+                        fullWidth
+                        type="password"
+                        label={constants.PASSPHRASE_HINT}
+                        value={values.passphrase}
+                        onChange={handleChange('passphrase')}
+                        error={Boolean(errors.passphrase)}
+                        helperText={errors.passphrase}
+                        autoFocus
+                        disabled={loading}
+                    />
+                    <TextField
+                        margin="dense"
+                        fullWidth
+                        type="password"
+                        label={constants.CONFIRM_PASSPHRASE}
+                        value={values.confirm}
+                        onChange={handleChange('confirm')}
+                        disabled={loading}
+                        error={Boolean(errors.confirm)}
+                        helperText={errors.confirm}
+                    />
+
+                    <Typography my={2} variant="body2">
+                        {constants.PASSPHRASE_DISCLAIMER()}
+                    </Typography>
+
+                    <SubmitButton
+                        loading={loading}
+                        buttonText={props.buttonText}
+                    />
                 </form>
             )}
         </Formik>

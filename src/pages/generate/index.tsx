@@ -18,6 +18,9 @@ import EnteSpinner from 'components/EnteSpinner';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes, User } from 'types/user';
+import FormContainer from 'components/Form/FormContainer';
+import FormPaper from 'components/Form/FormPaper';
+import FormPaperHeaderText from 'components/Form/FormPaper/HeaderText';
 
 export default function Generate() {
     const [token, setToken] = useState<string>();
@@ -93,11 +96,18 @@ export default function Generate() {
                     somethingWentWrong={() => null}
                 />
             ) : (
-                <SetPasswordForm
-                    callback={onSubmit}
-                    buttonText={constants.SET_PASSPHRASE}
-                    back={logoutUser}
-                />
+                <FormContainer>
+                    <FormPaper>
+                        <FormPaperHeaderText>
+                            {constants.SET_PASSPHRASE}
+                        </FormPaperHeaderText>
+                        <SetPasswordForm
+                            callback={onSubmit}
+                            buttonText={constants.SET_PASSPHRASE}
+                            back={logoutUser}
+                        />
+                    </FormPaper>
+                </FormContainer>
             )}
         </>
     );
