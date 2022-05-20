@@ -23,7 +23,6 @@ import FormPaper from 'components/Form/FormPaper';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import LinkButton from 'components/pages/gallery/LinkButton';
-import Divider from '@mui/material/Divider';
 
 export default function Credentials() {
     const router = useRouter();
@@ -109,7 +108,7 @@ export default function Credentials() {
                     buttonText={constants.VERIFY_PASSPHRASE}
                     fieldType="password"
                 />
-                <Divider />
+
                 <FormPaperFooter style={{ justifyContent: 'space-between' }}>
                     <LinkButton onClick={redirectToRecoverPage}>
                         {constants.FORGOT_PASSWORD}

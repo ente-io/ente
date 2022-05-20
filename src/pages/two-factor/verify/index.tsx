@@ -11,7 +11,6 @@ import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
 import FormTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
-import { Divider } from '@mui/material';
 
 export default function Home() {
     const [sessionID, setSessionID] = useState('');
@@ -63,7 +62,7 @@ export default function Home() {
                     onSubmit={onSubmit}
                     buttonText={constants.VERIFY}
                 />
-                <Divider />
+
                 <FormPaperFooter>
                     <LinkButton
                         onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}>

@@ -5,7 +5,6 @@ import { getOtt } from 'services/userService';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import { PAGES } from 'constants/pages';
 import FormPaperTitle from './Form/FormPaper/Title';
-import { Divider } from '@mui/material';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import LinkButton from './pages/gallery/LinkButton';
 import SingleInputForm, { SingleInputFormProps } from './SingleInputForm';
@@ -50,7 +49,7 @@ export default function Login(props: LoginProps) {
                 placeholder={constants.ENTER_EMAIL}
                 buttonText={constants.LOGIN}
             />
-            <Divider />
+
             <FormPaperFooter>
                 <LinkButton onClick={props.signUp}>
                     {constants.NO_ACCOUNT}

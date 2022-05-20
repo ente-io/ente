@@ -8,7 +8,7 @@ import { changeEmail, getOTTForEmailChange } from 'services/userService';
 import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { PAGES } from 'constants/pages';
-import { Divider, TextField } from '@mui/material';
+import { TextField } from '@mui/material';
 import Container from './Container';
 import LinkButton from './pages/gallery/LinkButton';
 import { Alert } from 'react-bootstrap';
@@ -131,7 +131,7 @@ function ChangeEmailForm() {
                             />
                         </Container>
                     </form>
-                    <Divider />
+
                     <FormPaperFooter
                         style={{
                             justifyContent: ottInputVisible && 'space-between',

@@ -17,7 +17,6 @@ import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
 import {
     Checkbox,
-    Divider,
     FormControlLabel,
     FormGroup,
     TextField,
@@ -182,7 +181,7 @@ export default function SignUp(props: SignUpProps) {
                     </form>
                 )}
             </Formik>
-            <Divider />
+
             <FormPaperFooter>
                 <LinkButton onClick={props.login}>
                     {constants.ACCOUNT_EXISTS}

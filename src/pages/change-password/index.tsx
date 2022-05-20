@@ -19,7 +19,6 @@ import LinkButton from 'components/pages/gallery/LinkButton';
 import VerticallyCentered from 'components/Container';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
-import { Divider } from '@mui/material';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 
 export default function ChangePassword() {
@@ -91,7 +90,7 @@ export default function ChangePassword() {
                             : null
                     }
                 />
-                <Divider />
+
                 <FormPaperFooter>
                     <LinkButton onClick={router.back}>
                         {constants.GO_BACK}

@@ -14,7 +14,7 @@ import { clearKeys } from 'utils/storage/sessionStorage';
 import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import { KeyAttributes, EmailVerificationResponse, User } from 'types/user';
-import { Divider, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
@@ -138,7 +138,7 @@ export default function Verify() {
                     buttonText={constants.VERIFY}
                     callback={onSubmit}
                 />
-                <Divider />
+
                 <FormPaperFooter style={{ justifyContent: 'space-between' }}>
                     {resend === 0 && (
                         <LinkButton onClick={resendEmail}>
