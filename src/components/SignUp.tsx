@@ -17,12 +17,11 @@ import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
 import {
     Checkbox,
-    Divider,
     FormControlLabel,
     FormGroup,
     TextField,
 } from '@mui/material';
-import FormPaperHeaderText from './Form/FormPaper/HeaderText';
+import FormPaperTitle from './Form/FormPaper/Title';
 import LinkButton from './pages/gallery/LinkButton';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import VerticallyCentered from './Container';
@@ -93,7 +92,7 @@ export default function SignUp(props: SignUpProps) {
 
     return (
         <>
-            <FormPaperHeaderText> {constants.SIGN_UP}</FormPaperHeaderText>
+            <FormPaperTitle> {constants.SIGN_UP}</FormPaperTitle>
             <Formik<FormValues>
                 initialValues={{
                     email: '',
@@ -119,9 +118,7 @@ export default function SignUp(props: SignUpProps) {
                     <form noValidate onSubmit={handleSubmit}>
                         <VerticallyCentered sx={{ mb: 1 }}>
                             <TextField
-                                variant="filled"
                                 fullWidth
-                                margin="dense"
                                 type="email"
                                 label={constants.ENTER_EMAIL}
                                 value={values.email}
@@ -134,8 +131,6 @@ export default function SignUp(props: SignUpProps) {
 
                             <TextField
                                 fullWidth
-                                variant="filled"
-                                margin="dense"
                                 type="password"
                                 label={constants.PASSPHRASE_HINT}
                                 value={values.passphrase}
@@ -147,8 +142,6 @@ export default function SignUp(props: SignUpProps) {
 
                             <TextField
                                 fullWidth
-                                variant="filled"
-                                margin="dense"
                                 type="password"
                                 label={constants.CONFIRM_PASSPHRASE}
                                 value={values.confirm}
@@ -188,7 +181,7 @@ export default function SignUp(props: SignUpProps) {
                     </form>
                 )}
             </Formik>
-            <Divider />
+
             <FormPaperFooter>
                 <LinkButton onClick={props.login}>
                     {constants.ACCOUNT_EXISTS}

@@ -18,7 +18,7 @@ export default function TwoFactorModalSetupSection({ close }: Iprops) {
     };
 
     return (
-        <VerticallyCentered disableGutters sx={{ mb: 2 }}>
+        <VerticallyCentered sx={{ mb: 2 }}>
             <LockIcon sx={{ fontSize: (theme) => theme.spacing(5), mb: 2 }} />
             <Typography mb={4}>{constants.TWO_FACTOR_INFO}</Typography>
             <Button

@@ -1,14 +1,12 @@
-import React from 'react';
-import { FC } from 'react';
+import { styled } from '@mui/material/styles';
 import VerticallyCentered from 'components/Container';
-import { BoxProps } from '@mui/system';
 
-const FormContainer: FC<BoxProps> = ({ children, ...props }) => (
-    <VerticallyCentered
-        sx={{ '&&': { alignItems: 'flex-end', textAlign: 'left' } }}
-        {...props}>
-        {children}
-    </VerticallyCentered>
-);
+const FormContainer = styled(VerticallyCentered)(({ theme }) => ({
+    alignItems: 'flex-end',
+    paddingRight: theme.spacing(10),
+    [theme.breakpoints.down('md')]: {
+        paddingRight: theme.spacing(5),
+    },
+}));
 
 export default FormContainer;

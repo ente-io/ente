@@ -1,20 +1,13 @@
 import constants from 'utils/strings/constants';
-import { Formik, FormikHelpers } from 'formik';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import * as Yup from 'yup';
 import { getOtt } from 'services/userService';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
-import SubmitButton from 'components/SubmitButton';
 import { PAGES } from 'constants/pages';
-import FormPaperHeaderText from './Form/FormPaper/HeaderText';
-import { Divider, TextField } from '@mui/material';
+import FormPaperTitle from './Form/FormPaper/Title';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import LinkButton from './pages/gallery/LinkButton';
-
-interface formValues {
-    email: string;
-}
+import SingleInputForm, { SingleInputFormProps } from './SingleInputForm';
 
 interface LoginProps {
     signUp: () => void;
@@ -22,8 +15,6 @@ interface LoginProps {
 
 export default function Login(props: LoginProps) {
     const router = useRouter();
-    const [waiting, setWaiting] = useState(false);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const main = async () => {
@@ -32,62 +23,33 @@ export default function Login(props: LoginProps) {
             if (user?.email) {
                 await router.push(PAGES.VERIFY);
             }
-            setLoading(false);
         };
         main();
     }, []);
 
-    const loginUser = async (
-        { email }: formValues,
-        { setFieldError }: FormikHelpers<formValues>
+    const loginUser: SingleInputFormProps['callback'] = async (
+        email,
+        setFieldError
     ) => {
         try {
-            setWaiting(true);
             await getOtt(email);
             setData(LS_KEYS.USER, { email });
             router.push(PAGES.VERIFY);
         } catch (e) {
-            setFieldError('email', `${constants.UNKNOWN_ERROR} ${e.message}`);
+            setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
         }
-        setWaiting(false);
     };
 
     return (
         <>
-            <FormPaperHeaderText>{constants.LOGIN}</FormPaperHeaderText>
-            <Formik<formValues>
-                initialValues={{ email: '' }}
-                validationSchema={Yup.object().shape({
-                    email: Yup.string()
-                        .email(constants.EMAIL_ERROR)
-                        .required(constants.REQUIRED),
-                })}
-                validateOnChange={false}
-                validateOnBlur={false}
-                onSubmit={loginUser}>
-                {({ values, errors, handleChange, handleSubmit }) => (
-                    <form noValidate onSubmit={handleSubmit}>
-                        <TextField
-                            fullWidth
-                            type="email"
-                            label={constants.ENTER_EMAIL}
-                            value={values.email}
-                            onChange={handleChange('email')}
-                            error={Boolean(errors.email)}
-                            helperText={errors.email}
-                            autoFocus
-                            disabled={loading}
-                        />
+            <FormPaperTitle>{constants.LOGIN}</FormPaperTitle>
+            <SingleInputForm
+                callback={loginUser}
+                fieldType="email"
+                placeholder={constants.ENTER_EMAIL}
+                buttonText={constants.LOGIN}
+            />
 
-                        <SubmitButton
-                            sx={{ mb: 4 }}
-                            buttonText={constants.LOGIN}
-                            loading={waiting}
-                        />
-                    </form>
-                )}
-            </Formik>
-            <Divider />
             <FormPaperFooter>
                 <LinkButton onClick={props.signUp}>
                     {constants.NO_ACCOUNT}

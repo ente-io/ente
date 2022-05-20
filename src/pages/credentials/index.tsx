@@ -12,13 +12,15 @@ import CryptoWorker, {
 } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
-import SingleInputForm from 'components/SingleInputForm';
+import SingleInputForm, {
+    SingleInputFormProps,
+} from 'components/SingleInputForm';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes } from 'types/user';
 import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
-import FormPaperHeaderText from 'components/Form/FormPaper/HeaderText';
+import FormPaperTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import LinkButton from 'components/pages/gallery/LinkButton';
 
@@ -48,7 +50,10 @@ export default function Credentials() {
         appContext.showNavBar(false);
     }, []);
 
-    const verifyPassphrase = async (passphrase, setFieldError) => {
+    const verifyPassphrase: SingleInputFormProps['callback'] = async (
+        passphrase,
+        setFieldError
+    ) => {
         try {
             const cryptoWorker = await new CryptoWorker();
             let kek: string = null;
@@ -84,13 +89,10 @@ export default function Credentials() {
                 router.push(redirectURL ?? PAGES.GALLERY);
             } catch (e) {
                 logError(e, 'user entered a wrong password');
-                setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
+                setFieldError(constants.INCORRECT_PASSPHRASE);
             }
         } catch (e) {
-            setFieldError(
-                'passphrase',
-                `${constants.UNKNOWN_ERROR} ${e.message}`
-            );
+            setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
         }
     };
 
@@ -99,19 +101,20 @@ export default function Credentials() {
     return (
         <FormContainer>
             <FormPaper style={{ minWidth: '320px' }}>
-                <FormPaperHeaderText> {constants.PASSWORD}</FormPaperHeaderText>
+                <FormPaperTitle>{constants.PASSWORD}</FormPaperTitle>
                 <SingleInputForm
                     callback={verifyPassphrase}
                     placeholder={constants.RETURN_PASSPHRASE_HINT}
                     buttonText={constants.VERIFY_PASSPHRASE}
                     fieldType="password"
                 />
+
                 <FormPaperFooter style={{ justifyContent: 'space-between' }}>
                     <LinkButton onClick={redirectToRecoverPage}>
                         {constants.FORGOT_PASSWORD}
                     </LinkButton>
                     <LinkButton onClick={logoutUser}>
-                        {constants.GO_BACK}
+                        {constants.CHANGE_EMAIL}
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>

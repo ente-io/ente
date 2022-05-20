@@ -37,7 +37,7 @@ export default function Home() {
         </VerticallyCentered>
     ) : (
         <FormContainer>
-            <FormPaper sx={{ minWidth: '320px' }}>
+            <FormPaper>
                 <Login signUp={register} />
             </FormPaper>
         </FormContainer>

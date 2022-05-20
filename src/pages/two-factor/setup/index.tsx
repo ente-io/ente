@@ -65,7 +65,7 @@ export default function SetupTwoFactor() {
         <VerticallyCentered>
             <Card>
                 <CardContent>
-                    <VerticallyCentered disableGutters sx={{ p: 3 }}>
+                    <VerticallyCentered sx={{ p: 3 }}>
                         <Box mb={4}>
                             <LogoImg src="/icon.svg" />
                             {constants.TWO_FACTOR}

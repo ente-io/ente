@@ -86,16 +86,17 @@ const englishConstants = {
     LINK_PASSWORD: 'enter password to unlock the album',
     ENTER_PASSPHRASE: 'enter your password',
     RETURN_PASSPHRASE_HINT: 'password',
-    SET_PASSPHRASE: 'set password',
+    SET_PASSPHRASE: 'Set password',
     VERIFY_PASSPHRASE: 'sign in',
     INCORRECT_PASSPHRASE: 'incorrect password',
     ENTER_ENC_PASSPHRASE:
         'please enter a password that we can use to encrypt your data',
     PASSPHRASE_DISCLAIMER: () => (
-        <p>
-            we don't store your password, so if you forget,
-            <strong> we will not be able to help you</strong> recover your data.
-        </p>
+        <>
+            We don't store your password, so if you forget it,{' '}
+            <strong>we will not be able to help you </strong>
+            recover your data without a recovery key.
+        </>
     ),
     PASSPHRASE_HINT: 'password',
     CONFIRM_PASSPHRASE: 'confirm password',
@@ -179,9 +180,9 @@ const englishConstants = {
     RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
     FORGOT_PASSWORD: 'Forgot password',
     RECOVER_ACCOUNT: 'recover account',
-    RETURN_RECOVERY_KEY_HINT: 'recovery key',
+    RECOVERY_KEY_HINT: 'recovery key',
     RECOVER: 'recover',
-    NO_RECOVERY_KEY: 'no recovery key?',
+    NO_RECOVERY_KEY: 'No recovery key?',
     INCORRECT_RECOVERY_KEY: 'incorrect recovery key',
     SORRY: 'sorry',
     NO_RECOVERY_KEY_MESSAGE:
@@ -475,7 +476,7 @@ const englishConstants = {
     ENABLE: 'enable',
     LOST_DEVICE: 'Lost two-factor device',
     INCORRECT_CODE: 'incorrect code',
-    RECOVER_TWO_FACTOR: 'recover two-factor',
+    RECOVER_TWO_FACTOR: 'Recover two-factor',
     TWO_FACTOR_INFO:
         'Add an additional layer of security by requiring more than your email and password to log in to your account',
     DISABLE_TWO_FACTOR_LABEL: 'Disable two-factor authentication',

@@ -50,8 +50,10 @@ const darkThemeOptions = createTheme({
         MuiCssBaseline: {
             styleOverrides: {
                 body: {
-                    letterSpacing: '0em',
+                    fontFamily: ['Inter', 'sans-serif'].join(','),
+                    letterSpacing: '-0.011em',
                 },
+                strong: { fontWeight: 900 },
             },
         },
         MuiLink: {
@@ -106,6 +108,21 @@ const darkThemeOptions = createTheme({
                 },
             },
         },
+        MuiFilledInput: {
+            styleOverrides: {
+                input: {
+                    '&:autofill': {
+                        boxShadow: '#c7fd4f',
+                    },
+                },
+            },
+        },
+        MuiTextField: {
+            defaultProps: {
+                variant: 'filled',
+                margin: 'dense',
+            },
+        },
     },
 
     palette: {
@@ -150,7 +167,9 @@ const darkThemeOptions = createTheme({
             fontSize: '32px',
             lineHeight: '40px',
             fontWeight: 600,
+            display: 'block',
         },
+        fontFamily: ['Inter', 'sans-serif'].join(','),
     },
 });
 
