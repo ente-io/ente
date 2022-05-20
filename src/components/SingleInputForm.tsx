@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
@@ -7,16 +7,19 @@ import TextField from '@mui/material/TextField';
 import ShowHidePassword from './Form/ShowHidePassword';
 
 interface formValues {
-    passphrase: string;
+    inputValue: string;
 }
-interface Props {
-    callback: (passphrase: string, setFieldError) => void;
-    fieldType: string;
+export interface SingeInputFormProps {
+    callback: (
+        inputValue: string,
+        setFieldError: (errorMessage: string) => void
+    ) => Promise<void>;
+    fieldType: 'text' | 'email' | 'password';
     placeholder: string;
     buttonText: string;
 }
 
-export default function SingleInputForm(props: Props) {
+export default function SingleInputForm(props: SingeInputFormProps) {
     const [loading, SetLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
@@ -25,7 +28,9 @@ export default function SingleInputForm(props: Props) {
         { setFieldError }: FormikHelpers<formValues>
     ) => {
         SetLoading(true);
-        await props.callback(values.passphrase, setFieldError);
+        await props.callback(values.inputValue, (message) =>
+            setFieldError('inputValue', message)
+        );
         SetLoading(false);
     };
 
@@ -39,25 +44,43 @@ export default function SingleInputForm(props: Props) {
         event.preventDefault();
     };
 
+    const validationSchema = useMemo(() => {
+        switch (props.fieldType) {
+            case 'text':
+                return Yup.object().shape({
+                    inputValue: Yup.string().required(constants.REQUIRED),
+                });
+            case 'password':
+                return Yup.object().shape({
+                    inputValue: Yup.string().required(constants.REQUIRED),
+                });
+            case 'email':
+                return Yup.object().shape({
+                    inputValue: Yup.string()
+                        .email(constants.EMAIL_ERROR)
+                        .required(constants.REQUIRED),
+                });
+        }
+    }, [props.fieldType]);
+
     return (
         <Formik<formValues>
-            initialValues={{ passphrase: '' }}
+            initialValues={{ inputValue: '' }}
             onSubmit={submitForm}
-            validationSchema={Yup.object().shape({
-                passphrase: Yup.string().required(constants.REQUIRED),
-            })}
+            validationSchema={validationSchema}
             validateOnChange={false}
             validateOnBlur={false}>
             {({ values, errors, handleChange, handleSubmit }) => (
                 <form noValidate onSubmit={handleSubmit}>
                     <TextField
+                        variant="filled"
                         fullWidth
                         type={showPassword ? 'text' : props.fieldType}
                         label={props.placeholder}
-                        value={values.passphrase}
-                        onChange={handleChange('passphrase')}
-                        error={Boolean(errors.passphrase)}
-                        helperText={errors.passphrase}
+                        value={values.inputValue}
+                        onChange={handleChange('inputValue')}
+                        error={Boolean(errors.inputValue)}
+                        helperText={errors.inputValue}
                         disabled={loading}
                         autoFocus
                         InputProps={{
