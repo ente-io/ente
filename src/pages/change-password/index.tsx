@@ -10,16 +10,18 @@ import CryptoWorker, {
 import { getActualKey } from 'utils/common/key';
 import { setKeys } from 'services/userService';
 import SetPasswordForm, {
-    SetPasswordFormValues,
+    SetPasswordFormProps,
 } from 'components/SetPasswordForm';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
 import { KEK, UpdatedKey } from 'types/user';
-import { FormikHelpers } from 'formik';
-import Container from 'components/Container';
-import { CardContent, Box, Card } from '@mui/material';
+import { CenteredFlex } from 'components/Container';
 import LogoImg from 'components/LogoImg';
 import LinkButton from 'components/pages/gallery/LinkButton';
+import VerticallyCentered from 'components/Container';
+import FormPaper from 'components/Form/FormPaper';
+import FormPaperFooter from 'components/Form/FormPaper/Footer';
+import { Divider } from '@mui/material';
 
 export default function ChangePassword() {
     const [token, setToken] = useState<string>();
@@ -34,9 +36,9 @@ export default function ChangePassword() {
         }
     }, []);
 
-    const onSubmit = async (
-        passphrase: string,
-        setFieldError: FormikHelpers<SetPasswordFormValues>['setFieldError']
+    const onSubmit: SetPasswordFormProps['callback'] = async (
+        passphrase,
+        setFieldError
     ) => {
         const cryptoWorker = await new CryptoWorker();
         const key: string = await getActualKey();
@@ -78,29 +80,28 @@ export default function ChangePassword() {
     };
 
     return (
-        <Container>
-            <Card sx={{ maxWidth: '520px' }}>
-                <CardContent>
-                    <Container disableGutters sx={{ pt: 3 }}>
-                        <Box mb={4}>
-                            <LogoImg src="/icon.svg" />
-                            {constants.CHANGE_PASSWORD}
-                        </Box>
-                        <SetPasswordForm
-                            callback={onSubmit}
-                            buttonText={constants.CHANGE_PASSWORD}
-                            back={
-                                getData(LS_KEYS.SHOW_BACK_BUTTON)?.value
-                                    ? redirectToGallery
-                                    : null
-                            }
-                        />
-                        <LinkButton sx={{ mt: 2 }} onClick={router.back}>
-                            {constants.GO_BACK}
-                        </LinkButton>
-                    </Container>
-                </CardContent>
-            </Card>
-        </Container>
+        <VerticallyCentered>
+            <FormPaper>
+                <CenteredFlex mb={4}>
+                    <LogoImg src="/icon.svg" />
+                    {constants.CHANGE_PASSWORD}
+                </CenteredFlex>
+                <SetPasswordForm
+                    callback={onSubmit}
+                    buttonText={constants.CHANGE_PASSWORD}
+                    back={
+                        getData(LS_KEYS.SHOW_BACK_BUTTON)?.value
+                            ? redirectToGallery
+                            : null
+                    }
+                />
+                <Divider />
+                <FormPaperFooter>
+                    <LinkButton onClick={router.back}>
+                        {constants.GO_BACK}
+                    </LinkButton>
+                </FormPaperFooter>
+            </FormPaper>
+        </VerticallyCentered>
     );
 }

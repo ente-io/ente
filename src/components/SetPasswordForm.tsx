@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import constants from 'utils/strings/constants';
-import { Formik, FormikHelpers } from 'formik';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
 import { TextField, Typography } from '@mui/material';
 
-interface Props {
+export interface SetPasswordFormProps {
     callback: (
         passphrase: string,
-        setFieldError: FormikHelpers<SetPasswordFormValues>['setFieldError']
+        setFieldError: (
+            field: keyof SetPasswordFormValues,
+            message: string
+        ) => void
     ) => Promise<void>;
     buttonText: string;
     back: () => void;
@@ -17,12 +20,19 @@ export interface SetPasswordFormValues {
     passphrase: string;
     confirm: string;
 }
-function SetPasswordForm(props: Props) {
+function SetPasswordForm(props: SetPasswordFormProps) {
     const [loading, setLoading] = useState(false);
 
     const onSubmit = async (
         values: SetPasswordFormValues,
-        { setFieldError }: FormikHelpers<SetPasswordFormValues>
+        {
+            setFieldError,
+        }: {
+            setFieldError: (
+                field: keyof SetPasswordFormValues,
+                message: string
+            ) => void;
+        }
     ) => {
         setLoading(true);
         try {
@@ -50,16 +60,15 @@ function SetPasswordForm(props: Props) {
             validateOnBlur={false}
             onSubmit={onSubmit}>
             {({ values, errors, handleChange, handleSubmit }) => (
-                <form
-                    style={{ width: '100%' }}
-                    noValidate
-                    onSubmit={handleSubmit}>
-                    <Typography mb={2} color="text.secondary">
+                <form noValidate onSubmit={handleSubmit}>
+                    <Typography mb={2} color="text.secondary" variant="body2">
                         {constants.ENTER_ENC_PASSPHRASE}
                     </Typography>
 
                     <TextField
                         fullWidth
+                        variant="filled"
+                        margin="dense"
                         type="password"
                         label={constants.PASSPHRASE_HINT}
                         value={values.passphrase}
@@ -70,8 +79,9 @@ function SetPasswordForm(props: Props) {
                         disabled={loading}
                     />
                     <TextField
-                        margin="dense"
                         fullWidth
+                        variant="filled"
+                        margin="dense"
                         type="password"
                         label={constants.CONFIRM_PASSPHRASE}
                         value={values.confirm}
@@ -86,7 +96,6 @@ function SetPasswordForm(props: Props) {
                     </Typography>
 
                     <SubmitButton
-                        sx={{ mb: 2 }}
                         loading={loading}
                         buttonText={props.buttonText}
                     />
