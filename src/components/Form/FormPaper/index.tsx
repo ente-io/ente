@@ -7,5 +7,6 @@ const FormPaper = styled(Paper)(({ theme }) => ({
     [theme.breakpoints.down('md')]: {
         marginRight: theme.spacing(5),
     },
+    textAlign: 'left',
 }));
 export default FormPaper;
