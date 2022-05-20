@@ -90,7 +90,7 @@ export default function Recover() {
                         <SingleInputForm
                             callback={recover}
                             fieldType="text"
-                            placeholder={constants.RETURN_RECOVERY_KEY_HINT}
+                            placeholder={constants.RECOVERY_KEY_HINT}
                             buttonText={constants.RECOVER}
                         />
                         <div
