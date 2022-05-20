@@ -99,7 +99,9 @@ export default function Credentials() {
     return (
         <FormContainer>
             <FormPaper style={{ minWidth: '320px' }}>
-                <FormPaperHeaderText> {constants.PASSWORD}</FormPaperHeaderText>
+                <FormPaperHeaderText sx={{ mb: 4 }}>
+                    {constants.PASSWORD}
+                </FormPaperHeaderText>
                 <SingleInputForm
                     callback={verifyPassphrase}
                     placeholder={constants.RETURN_PASSPHRASE_HINT}
