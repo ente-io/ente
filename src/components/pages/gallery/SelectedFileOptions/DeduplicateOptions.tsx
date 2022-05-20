@@ -17,6 +17,12 @@ const VerticalLine = styled.div`
     background: #303030;
 `;
 
+const CheckboxText = styled.div`
+    margin-left: 0.5em;
+    font-size: 16px;
+    margin-right: 0.8em;
+`;
+
 interface IProps {
     deleteFileHelper: () => void;
     setDialogMessage: SetDialogMessage;
@@ -55,7 +61,27 @@ export default function DeduplicateOptions({
                     {count} {constants.SELECTED}
                 </div>
             </SelectionContainer>
-
+            <input
+                type="checkbox"
+                style={{
+                    width: '1em',
+                    height: '1em',
+                }}
+                value={
+                    deduplicateContext.clubSameFileHashesOnly ? 'true' : 'false'
+                }
+                onChange={() => {
+                    deduplicateContext.setClubSameFileHashesOnly(
+                        !deduplicateContext.clubSameFileHashesOnly
+                    );
+                }}></input>
+            <CheckboxText>{constants.CLUB_BY_FILE_HASH}</CheckboxText>
+            <div
+                style={{
+                    marginRight: '14px',
+                }}>
+                <VerticalLine />
+            </div>
             <input
                 type="checkbox"
                 style={{
@@ -70,14 +96,7 @@ export default function DeduplicateOptions({
                         !deduplicateContext.clubSameTimeFilesOnly
                     );
                 }}></input>
-            <div
-                style={{
-                    marginLeft: '0.5em',
-                    fontSize: '16px',
-                    marginRight: '0.8em',
-                }}>
-                {constants.CLUB_BY_CAPTURE_TIME}
-            </div>
+            <CheckboxText>{constants.CLUB_BY_CAPTURE_TIME}</CheckboxText>
             <div>
                 <VerticalLine />
             </div>
