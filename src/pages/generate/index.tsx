@@ -20,7 +20,7 @@ import { logError } from 'utils/sentry';
 import { KeyAttributes, User } from 'types/user';
 import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
-import FormPaperHeaderText from 'components/Form/FormPaper/HeaderText';
+import FormTitle from 'components/Form/FormPaper/Title';
 
 export default function Generate() {
     const [token, setToken] = useState<string>();
@@ -98,9 +98,7 @@ export default function Generate() {
             ) : (
                 <FormContainer>
                     <FormPaper>
-                        <FormPaperHeaderText>
-                            {constants.SET_PASSPHRASE}
-                        </FormPaperHeaderText>
+                        <FormTitle>{constants.SET_PASSPHRASE}</FormTitle>
                         <SetPasswordForm
                             callback={onSubmit}
                             buttonText={constants.SET_PASSPHRASE}

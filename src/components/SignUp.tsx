@@ -22,7 +22,7 @@ import {
     FormGroup,
     TextField,
 } from '@mui/material';
-import FormPaperHeaderText from './Form/FormPaper/HeaderText';
+import FormPaperTitle from './Form/FormPaper/Title';
 import LinkButton from './pages/gallery/LinkButton';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import VerticallyCentered from './Container';
@@ -93,7 +93,7 @@ export default function SignUp(props: SignUpProps) {
 
     return (
         <>
-            <FormPaperHeaderText> {constants.SIGN_UP}</FormPaperHeaderText>
+            <FormPaperTitle> {constants.SIGN_UP}</FormPaperTitle>
             <Formik<FormValues>
                 initialValues={{
                     email: '',

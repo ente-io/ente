@@ -18,7 +18,7 @@ import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import { KeyAttributes, EmailVerificationResponse, User } from 'types/user';
 import { Divider, TextField, Typography } from '@mui/material';
-import FormPaperHeaderText from 'components/Form/FormPaper/HeaderText';
+import FormPaperTitle from 'components/Form/FormPaper/Title';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import LinkButton from 'components/pages/gallery/LinkButton';
@@ -133,9 +133,9 @@ export default function Verify() {
     return (
         <FormContainer>
             <FormPaper>
-                <FormPaperHeaderText sx={{ mb: 14 }}>
+                <FormPaperTitle sx={{ mb: 14 }}>
                     {constants.EMAIL_SENT({ email })}
-                </FormPaperHeaderText>
+                </FormPaperTitle>
                 <Typography color={'text.secondary'} mb={2} variant="body2">
                     {constants.CHECK_INBOX}
                 </Typography>

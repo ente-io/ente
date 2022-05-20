@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { Typography, TypographyProps } from '@mui/material';
 
-const FormPaperHeaderText: FC<TypographyProps> = ({ sx, ...props }) => {
+const FormPaperTitle: FC<TypographyProps> = ({ sx, ...props }) => {
     return (
         <Typography variant="title" sx={{ mb: 8, ...sx }} {...props}>
             {props.children}
@@ -9,4 +9,4 @@ const FormPaperHeaderText: FC<TypographyProps> = ({ sx, ...props }) => {
     );
 };
 
-export default FormPaperHeaderText;
+export default FormPaperTitle;

@@ -18,7 +18,7 @@ import { logError } from 'utils/sentry';
 import { KeyAttributes } from 'types/user';
 import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
-import FormPaperHeaderText from 'components/Form/FormPaper/HeaderText';
+import FormPaperTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import LinkButton from 'components/pages/gallery/LinkButton';
 
@@ -99,9 +99,9 @@ export default function Credentials() {
     return (
         <FormContainer>
             <FormPaper style={{ minWidth: '320px' }}>
-                <FormPaperHeaderText sx={{ mb: 4 }}>
+                <FormPaperTitle sx={{ mb: 4 }}>
                     {constants.PASSWORD}
-                </FormPaperHeaderText>
+                </FormPaperTitle>
                 <SingleInputForm
                     callback={verifyPassphrase}
                     placeholder={constants.RETURN_PASSPHRASE_HINT}

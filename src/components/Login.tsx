@@ -7,7 +7,7 @@ import { getOtt } from 'services/userService';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import SubmitButton from 'components/SubmitButton';
 import { PAGES } from 'constants/pages';
-import FormPaperHeaderText from './Form/FormPaper/HeaderText';
+import FormPaperTitle from './Form/FormPaper/Title';
 import { Divider, TextField } from '@mui/material';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import LinkButton from './pages/gallery/LinkButton';
@@ -54,7 +54,7 @@ export default function Login(props: LoginProps) {
 
     return (
         <>
-            <FormPaperHeaderText>{constants.LOGIN}</FormPaperHeaderText>
+            <FormPaperTitle>{constants.LOGIN}</FormPaperTitle>
             <Formik<formValues>
                 initialValues={{ email: '' }}
                 validationSchema={Yup.object().shape({
