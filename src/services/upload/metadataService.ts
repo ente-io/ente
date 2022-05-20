@@ -10,7 +10,6 @@ import {
     ElectronFile,
 } from 'types/upload';
 import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
-import { splitFilenameAndExtension } from 'utils/file';
 import { getVideoMetadata } from './videoMetadataService';
 import { getFileNameSize } from 'utils/upload';
 import { logUploadInfo } from 'utils/upload';
@@ -55,9 +54,7 @@ export async function extractMetadata(
     const fileHash = await getFileHash(receivedFile, reader);
 
     const metadata: Metadata = {
-        title: `${splitFilenameAndExtension(receivedFile.name)[0]}.${
-            fileTypeInfo.exactType
-        }`,
+        title: receivedFile.name,
         creationTime:
             extractedMetadata.creationTime ??
             extractDateFromFileName(receivedFile.name) ??
