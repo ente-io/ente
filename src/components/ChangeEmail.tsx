@@ -74,7 +74,9 @@ function ChangeEmailForm() {
                 email: Yup.string()
                     .email(constants.EMAIL_ERROR)
                     .required(constants.REQUIRED),
-                ott: Yup.string().required(constants.REQUIRED),
+                ott:
+                    ottInputVisible &&
+                    Yup.string().required(constants.REQUIRED),
             })}
             validateOnChange={false}
             validateOnBlur={false}

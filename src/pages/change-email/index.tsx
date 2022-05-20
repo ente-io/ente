@@ -23,7 +23,6 @@ function ChangeEmailPage() {
                     <LogoImg src="/icon.svg" />
                     {constants.CHANGE_EMAIL}
                 </CenteredFlex>
-
                 <ChangeEmailForm />
             </FormPaper>
         </VerticallyCentered>
