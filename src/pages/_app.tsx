@@ -25,6 +25,7 @@ import {
     getFamilyPortalRedirectURL,
     getRoadmapRedirectURL,
 } from 'services/userService';
+import { CustomError } from 'utils/error';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -567,10 +568,10 @@ export interface FlashMessage {
 }
 export const AppContext = createContext<AppContextType>(null);
 
-const redirectMap = {
-    roadmap: () => getRoadmapRedirectURL(),
-    families: () => getFamilyPortalRedirectURL(),
-};
+const redirectMap = new Map([
+    ['roadmap', getRoadmapRedirectURL],
+    ['families', getFamilyPortalRedirectURL],
+]);
 
 export default function App({ Component, err }) {
     const router = useRouter();
@@ -641,17 +642,27 @@ export default function App({ Component, err }) {
             );
         }
 
-        const redirectTo = async (redirect, token) => {
-            const url = await redirectMap[redirect](token);
-            window.location.href = url;
+        const redirectTo = async (redirect) => {
+            if (
+                redirectMap.has(redirect) &&
+                typeof redirectMap.get(redirect) === 'function'
+            ) {
+                const redirectAction = redirectMap.get(redirect);
+                const url = await redirectAction();
+                window.location.href = url;
+            } else {
+                logError(CustomError.BAD_REQUEST, 'invalid redirection', {
+                    redirect,
+                });
+            }
         };
 
         const query = new URLSearchParams(window.location.search);
         const redirectName = query.get('redirect');
-        if (redirectName && redirectMap[redirectName]) {
+        if (redirectName) {
             const user = getData(LS_KEYS.USER);
             if (user?.token) {
-                redirectTo(redirectName, user.token);
+                redirectTo(redirectName);
             } else {
                 setRedirectName(redirectName);
             }
@@ -662,10 +673,10 @@ export default function App({ Component, err }) {
                 setLoading(true);
             }
 
-            if (redirectName && redirectMap[redirectName]) {
+            if (redirectName) {
                 const user = getData(LS_KEYS.USER);
                 if (user?.token) {
-                    redirectTo(redirectName, user.token);
+                    redirectTo(redirectName);
 
                     // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710
                     // eslint-disable-next-line no-throw-literal
