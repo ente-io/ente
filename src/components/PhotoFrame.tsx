@@ -493,7 +493,9 @@ const PhotoFrame = ({
 
                 try {
                     instance.invalidateCurrItems();
-                    instance.updateSize(true);
+                    if (instance._isOpen) {
+                        instance.updateSize(true);
+                    }
                 } catch (e) {
                     logError(
                         e,
@@ -551,7 +553,9 @@ const PhotoFrame = ({
                 item.h = newFile.h;
                 try {
                     instance.invalidateCurrItems();
-                    instance.updateSize(true);
+                    if (instance._isOpen) {
+                        instance.updateSize(true);
+                    }
                 } catch (e) {
                     logError(
                         e,
