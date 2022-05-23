@@ -724,16 +724,11 @@ const englishConstants = {
     CLUB_BY_FILE_HASH: 'club by file hashes',
     FILES: 'files',
     EACH: 'each',
-    DEDUPLICATION_LOGIC_MESSAGE: (
-        captureTime: boolean,
-        fileHashes: boolean
-    ) => (
+    DEDUPLICATION_LOGIC_MESSAGE: (captureTime: boolean) => (
         <>
             the following files were clubbed based on their sizes
-            {captureTime && !fileHashes && ' and capture time'}
-            {fileHashes && !captureTime && ' and file hashes'}
-            {fileHashes && captureTime && ', capture time and file hashes'},
-            please review and delete items you believe are duplicates{' '}
+            {captureTime && ' and capture time'}, please review and delete items
+            you believe are duplicates{' '}
         </>
     ),
     STOP_ALL_UPLOADS_MESSAGE:

@@ -58,10 +58,12 @@ export async function getDuplicateFiles(
             );
 
             if (duplicateFiles.length > 1) {
-                result.push({
-                    files: duplicateFiles,
-                    size: dupe.size,
-                });
+                result.push(
+                    ...getDupesGroupedBySameFileHashes(
+                        duplicateFiles,
+                        dupe.size
+                    )
+                );
             }
         }
 
@@ -71,52 +73,33 @@ export async function getDuplicateFiles(
     }
 }
 
-export function clubDuplicatesByTime(dupes: DuplicateFiles[]) {
-    const result: DuplicateFiles[] = [];
-    for (const dupe of dupes) {
-        let files: EnteFile[] = [];
-        const creationTimeCounter = new Map<number, number>();
+function getDupesGroupedBySameFileHashes(files: EnteFile[], size: number) {
+    const clubbedDupesByFileHash = clubDuplicatesBySameFileHashes([
+        { files, size },
+    ]);
 
-        let mostFreqCreationTime = 0;
-        let mostFreqCreationTimeCount = 0;
+    const clubbedFileIDs = new Set<number>();
+    for (const dupe of clubbedDupesByFileHash) {
         for (const file of dupe.files) {
-            const creationTime = file.metadata.creationTime;
-            if (creationTimeCounter.has(creationTime)) {
-                creationTimeCounter.set(
-                    creationTime,
-                    creationTimeCounter.get(creationTime) + 1
-                );
-            } else {
-                creationTimeCounter.set(creationTime, 1);
-            }
-            if (
-                creationTimeCounter.get(creationTime) >
-                mostFreqCreationTimeCount
-            ) {
-                mostFreqCreationTime = creationTime;
-                mostFreqCreationTimeCount =
-                    creationTimeCounter.get(creationTime);
-            }
-
-            files.push(file);
-        }
-
-        files = files.filter((file) => {
-            return file.metadata.creationTime === mostFreqCreationTime;
-        });
-
-        if (files.length > 1) {
-            result.push({
-                files,
-                size: dupe.size,
-            });
+            clubbedFileIDs.add(file.id);
         }
     }
 
-    return result;
+    files = files.filter((file) => {
+        return !clubbedFileIDs.has(file.id);
+    });
+
+    if (files.length > 1) {
+        clubbedDupesByFileHash.push({
+            files: [...files],
+            size,
+        });
+    }
+
+    return clubbedDupesByFileHash;
 }
 
-export function clubDuplicatesBySameFileHashes(dupes: DuplicateFiles[]) {
+function clubDuplicatesBySameFileHashes(dupes: DuplicateFiles[]) {
     const result: DuplicateFiles[] = [];
 
     for (const dupe of dupes) {
@@ -162,6 +145,51 @@ export function clubDuplicatesBySameFileHashes(dupes: DuplicateFiles[]) {
                 files = [dupesSortedByFileHash[i].file];
             }
         }
+
+        if (files.length > 1) {
+            result.push({
+                files,
+                size: dupe.size,
+            });
+        }
+    }
+
+    return result;
+}
+
+export function clubDuplicatesByTime(dupes: DuplicateFiles[]) {
+    const result: DuplicateFiles[] = [];
+    for (const dupe of dupes) {
+        let files: EnteFile[] = [];
+        const creationTimeCounter = new Map<number, number>();
+
+        let mostFreqCreationTime = 0;
+        let mostFreqCreationTimeCount = 0;
+        for (const file of dupe.files) {
+            const creationTime = file.metadata.creationTime;
+            if (creationTimeCounter.has(creationTime)) {
+                creationTimeCounter.set(
+                    creationTime,
+                    creationTimeCounter.get(creationTime) + 1
+                );
+            } else {
+                creationTimeCounter.set(creationTime, 1);
+            }
+            if (
+                creationTimeCounter.get(creationTime) >
+                mostFreqCreationTimeCount
+            ) {
+                mostFreqCreationTime = creationTime;
+                mostFreqCreationTimeCount =
+                    creationTimeCounter.get(creationTime);
+            }
+
+            files.push(file);
+        }
+
+        files = files.filter((file) => {
+            return file.metadata.creationTime === mostFreqCreationTime;
+        });
 
         if (files.length > 1) {
             result.push({
