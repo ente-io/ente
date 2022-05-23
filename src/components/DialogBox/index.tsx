@@ -9,8 +9,8 @@ import {
     DialogContent,
     DialogProps,
 } from '@mui/material';
-import DialogTitleWithCloseButton from './TitleWithCloseButton';
-import MessageText from './MessageText';
+import DialogTitleWithCloseButton from './titleWithCloseButton';
+import MessageText from './messageText';
 import DialogBoxBase from './base';
 
 export interface DialogBoxAttributes {
