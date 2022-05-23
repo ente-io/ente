@@ -7,10 +7,10 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogContentText,
     DialogProps,
 } from '@mui/material';
 import DialogTitleWithCloseButton from './TitleWithCloseButton';
+import MessageText from './MessageText';
 
 export interface MessageAttributes {
     title?: string;
@@ -78,9 +78,7 @@ export default function MessageDialog({
             {(children || attributes?.content) && (
                 <DialogContent>
                     {children || (
-                        <DialogContentText>
-                            {attributes.content}
-                        </DialogContentText>
+                        <MessageText>{attributes.content}</MessageText>
                     )}
                 </DialogContent>
             )}
