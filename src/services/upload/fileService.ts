@@ -34,12 +34,10 @@ export function getFilename(file: File | ElectronFile) {
 }
 
 export async function readFile(
-    reader: FileReader,
     fileTypeInfo: FileTypeInfo,
     rawFile: File | ElectronFile
 ): Promise<FileInMemory> {
     const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-        reader,
         rawFile,
         fileTypeInfo
     );
@@ -55,9 +53,9 @@ export async function readFile(
             filedata = await rawFile.arrayBuffer();
         }
     } else if (rawFile.size > MULTIPART_PART_SIZE) {
-        filedata = getFileStream(reader, rawFile, FILE_READER_CHUNK_SIZE);
+        filedata = getFileStream(rawFile, FILE_READER_CHUNK_SIZE);
     } else {
-        filedata = await getUint8ArrayView(reader, rawFile);
+        filedata = await getUint8ArrayView(rawFile);
     }
 
     logUploadInfo(`read file data successfully ${getFileNameSize(rawFile)} `);
@@ -73,8 +71,7 @@ export async function extractFileMetadata(
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     rawFile: File | ElectronFile,
     collectionID: number,
-    fileTypeInfo: FileTypeInfo,
-    reader: FileReader
+    fileTypeInfo: FileTypeInfo
 ) {
     const originalName = getFileOriginalName(rawFile);
     const googleMetadata =
@@ -83,8 +80,7 @@ export async function extractFileMetadata(
         ) ?? {};
     const extractedMetadata: Metadata = await extractMetadata(
         rawFile,
-        fileTypeInfo,
-        reader
+        fileTypeInfo
     );
 
     for (const [key, value] of Object.entries(googleMetadata)) {

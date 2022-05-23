@@ -77,7 +77,6 @@ export async function downloadFile(
     }
 
     const fileType = await getFileType(
-        fileReader,
         new File([fileBlob], file.metadata.title)
     );
     if (
@@ -98,12 +97,12 @@ export async function downloadFile(
         const originalName = fileNameWithoutExtension(file.metadata.title);
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
         const image = new File([motionPhoto.image], motionPhoto.imageNameTitle);
-        const imageType = await getFileType(fileReader, image);
+        const imageType = await getFileType(image);
         tempImageURL = URL.createObjectURL(
             new Blob([motionPhoto.image], { type: imageType.mimeType })
         );
         const video = new File([motionPhoto.video], motionPhoto.videoNameTitle);
-        const videoType = await getFileType(fileReader, video);
+        const videoType = await getFileType(video);
         tempVideoURL = URL.createObjectURL(
             new Blob([motionPhoto.video], { type: videoType.mimeType })
         );
@@ -338,9 +337,8 @@ export async function convertForPreview(
     fileBlob: Blob
 ): Promise<Blob[]> {
     const convertIfHEIC = async (fileName: string, fileBlob: Blob) => {
-        const reader = new FileReader();
         const mimeType = (
-            await getFileType(reader, new File([fileBlob], file.metadata.title))
+            await getFileType(new File([fileBlob], file.metadata.title))
         ).exactType;
         if (isFileHEIC(mimeType)) {
             fileBlob = await HEICConverter.convert(fileBlob);

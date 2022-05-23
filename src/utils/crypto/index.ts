@@ -201,13 +201,10 @@ export async function encryptWithRecoveryKey(key: string) {
 }
 export default CryptoWorker;
 
-export async function getFileHash(
-    file: File | ElectronFile,
-    reader: FileReader
-) {
+export async function getFileHash(file: File | ElectronFile) {
     let filedata: DataStream;
     if (file instanceof File) {
-        filedata = getFileStream(reader, file, FILE_READER_CHUNK_SIZE);
+        filedata = getFileStream(file, FILE_READER_CHUNK_SIZE);
     } else {
         filedata = await getElectronFileStream(file, FILE_READER_CHUNK_SIZE);
     }

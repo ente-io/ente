@@ -1,44 +1,11 @@
 import { ElectronFile } from 'types/upload';
 
-export async function getUint8ArrayView(
-    reader: FileReader,
-    file: Blob
-): Promise<Uint8Array> {
-    return await new Promise((resolve, reject) => {
-        reader.onabort = () =>
-            reject(
-                Error(
-                    `file reading was aborted, file size= ${convertBytesToHumanReadable(
-                        file.size
-                    )}`
-                )
-            );
-        reader.onerror = () =>
-            reject(
-                Error(
-                    `file reading has failed, file size= ${convertBytesToHumanReadable(
-                        file.size
-                    )} , reason= ${reader.error}`
-                )
-            );
-        reader.onload = () => {
-            // Do whatever you want with the file contents
-            const result =
-                typeof reader.result === 'string'
-                    ? new TextEncoder().encode(reader.result)
-                    : new Uint8Array(reader.result);
-            resolve(result);
-        };
-        reader.readAsArrayBuffer(file);
-    });
+export async function getUint8ArrayView(file: Blob): Promise<Uint8Array> {
+    return new Uint8Array(await file.arrayBuffer());
 }
 
-export function getFileStream(
-    reader: FileReader,
-    file: File,
-    chunkSize: number
-) {
-    const fileChunkReader = fileChunkReaderMaker(reader, file, chunkSize);
+export function getFileStream(file: File, chunkSize: number) {
+    const fileChunkReader = fileChunkReaderMaker(file, chunkSize);
 
     const stream = new ReadableStream<Uint8Array>({
         async pull(controller: ReadableStreamDefaultController) {
@@ -68,15 +35,11 @@ export async function getElectronFileStream(
     };
 }
 
-async function* fileChunkReaderMaker(
-    reader: FileReader,
-    file: File,
-    chunkSize: number
-) {
+async function* fileChunkReaderMaker(file: File, chunkSize: number) {
     let offset = 0;
     while (offset < file.size) {
         const blob = file.slice(offset, chunkSize + offset);
-        const fileChunk = await getUint8ArrayView(reader, blob);
+        const fileChunk = await getUint8ArrayView(blob);
         yield fileChunk;
         offset += chunkSize;
     }

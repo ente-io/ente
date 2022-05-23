@@ -201,7 +201,6 @@ class UploadManager {
         try {
             logUploadInfo(`extractMetadataFromFiles executed`);
             UIService.reset(mediaFiles.length);
-            const reader = new FileReader();
             for (const { file, localID, collectionID } of mediaFiles) {
                 try {
                     const { fileTypeInfo, metadata } = await (async () => {
@@ -215,7 +214,6 @@ class UploadManager {
                             return { fileTypeInfo: null, metadata: null };
                         }
                         const fileTypeInfo = await UploadService.getFileType(
-                            reader,
                             file
                         );
                         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
@@ -233,8 +231,7 @@ class UploadManager {
                             (await UploadService.extractFileMetadata(
                                 file,
                                 collectionID,
-                                fileTypeInfo,
-                                reader
+                                fileTypeInfo
                             )) || null;
                         return { fileTypeInfo, metadata };
                     })();
@@ -291,15 +288,14 @@ class UploadManager {
             this.cryptoWorkers[i] = cryptoWorker;
             uploadProcesses.push(
                 this.uploadNextFileInQueue(
-                    await new this.cryptoWorkers[i].comlink(),
-                    new FileReader()
+                    await new this.cryptoWorkers[i].comlink()
                 )
             );
         }
         await Promise.all(uploadProcesses);
     }
 
-    private async uploadNextFileInQueue(worker: any, reader: FileReader) {
+    private async uploadNextFileInQueue(worker: any) {
         while (this.filesToBeUploaded.length > 0) {
             let fileWithCollection = this.filesToBeUploaded.pop();
             const { collectionID } = fileWithCollection;
@@ -310,7 +306,6 @@ class UploadManager {
             const { fileUploadResult, uploadedFile, skipDecryption } =
                 await uploader(
                     worker,
-                    reader,
                     existingFilesInCollection,
                     this.existingFiles,
                     fileWithCollection

@@ -24,7 +24,6 @@ interface UploadResponse {
 }
 export default async function uploader(
     worker: any,
-    reader: FileReader,
     existingFilesInCollection: EnteFile[],
     existingFiles: EnteFile[],
     fileWithCollection: FileWithCollection
@@ -87,11 +86,7 @@ export default async function uploader(
         }
         logUploadInfo(`reading asset ${fileNameSize}`);
 
-        const file = await UploadService.readAsset(
-            reader,
-            fileTypeInfo,
-            uploadAsset
-        );
+        const file = await UploadService.readAsset(fileTypeInfo, uploadAsset);
 
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
