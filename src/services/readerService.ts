@@ -1,7 +1,9 @@
 import { ElectronFile } from 'types/upload';
 import { logError } from 'utils/sentry';
 
-export async function getUint8ArrayView(file: Blob): Promise<Uint8Array> {
+export async function getUint8ArrayView(
+    file: Blob | ElectronFile
+): Promise<Uint8Array> {
     try {
         return new Uint8Array(await file.arrayBuffer());
     } catch (e) {
