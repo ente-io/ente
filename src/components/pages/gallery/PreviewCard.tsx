@@ -115,6 +115,7 @@ export const FileAndCollectionNameOverlay = styled.div`
     bottom: 0;
     left: 0;
     max-height: 40%;
+    width: 100%;
     background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 2));
     & > p {
         max-width: calc(${IMAGE_CONTAINER_MAX_WIDTH}px - 10px);
