@@ -8,6 +8,7 @@ import { DeduplicateContext } from 'pages/deduplicate';
 import LeftArrow from 'components/icons/LeftArrow';
 import { SetDialogMessage } from 'components/MessageDialog';
 import { IconWithMessage } from 'components/IconWithMessage';
+import CloseIcon from 'components/icons/CloseIcon';
 
 const VerticalLine = styled.div`
     position: absolute;
@@ -28,6 +29,7 @@ interface IProps {
     setDialogMessage: SetDialogMessage;
     close: () => void;
     count: number;
+    clearSelection: () => void;
 }
 
 export default function DeduplicateOptions({
@@ -35,6 +37,7 @@ export default function DeduplicateOptions({
     deleteFileHelper,
     close,
     count,
+    clearSelection,
 }: IProps) {
     const deduplicateContext = useContext(DeduplicateContext);
 
@@ -54,9 +57,15 @@ export default function DeduplicateOptions({
     return (
         <SelectionBar>
             <SelectionContainer>
-                <IconButton onClick={close}>
-                    <LeftArrow />
-                </IconButton>
+                {count ? (
+                    <IconButton onClick={clearSelection}>
+                        <CloseIcon />
+                    </IconButton>
+                ) : (
+                    <IconButton onClick={close}>
+                        <LeftArrow />
+                    </IconButton>
+                )}
                 <div>
                     {count} {constants.SELECTED}
                 </div>
