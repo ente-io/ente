@@ -20,7 +20,6 @@ import {
     hasPaypalSubscription,
 } from 'utils/billing';
 import { reverseString } from 'utils/common';
-import { SetDialogBoxAttributes } from 'components/DialogBox';
 import ArrowEast from 'components/icons/ArrowEast';
 import LinkButton from './LinkButton';
 import { DeadCenter, GalleryContext } from 'pages/gallery';
@@ -79,7 +78,7 @@ export const PlanIcon = styled.div<{ currentlySubscribed: boolean }>`
 interface Props {
     modalView: boolean;
     closeModal: any;
-    setDialogMessage: SetDialogBoxAttributes;
+
     setLoading: SetLoading;
 }
 enum PLAN_PERIOD {
@@ -128,7 +127,7 @@ function PlanSelector(props: Props) {
             } catch (e) {
                 logError(e, 'plan selector modal open failed');
                 props.closeModal();
-                props.setDialogMessage({
+                appContext.setDialogMessage({
                     title: constants.OPEN_PLAN_SELECTOR_MODAL_FAILED,
                     content: constants.UNKNOWN_ERROR,
                     close: { text: 'close', variant: 'danger' },
@@ -150,7 +149,7 @@ function PlanSelector(props: Props) {
             hasMobileSubscription(subscription) &&
             !isSubscriptionCancelled(subscription)
         ) {
-            props.setDialogMessage({
+            appContext.setDialogMessage({
                 title: constants.ERROR,
                 content: constants.CANCEL_SUBSCRIPTION_ON_MOBILE,
                 close: { variant: 'danger' },
@@ -159,13 +158,13 @@ function PlanSelector(props: Props) {
             hasPaypalSubscription(subscription) &&
             !isSubscriptionCancelled(subscription)
         ) {
-            props.setDialogMessage({
+            appContext.setDialogMessage({
                 title: constants.MANAGE_PLAN,
                 content: constants.PAYPAL_MANAGE_NOT_SUPPORTED_MESSAGE(),
                 close: { variant: 'danger' },
             });
         } else if (hasStripeSubscription(subscription)) {
-            props.setDialogMessage({
+            appContext.setDialogMessage({
                 title: `${constants.CONFIRM} ${reverseString(
                     constants.UPDATE_SUBSCRIPTION
                 )}`,
@@ -176,7 +175,7 @@ function PlanSelector(props: Props) {
                     action: updateSubscription.bind(
                         null,
                         plan,
-                        props.setDialogMessage,
+                        appContext.setDialogMessage,
                         props.setLoading,
                         props.closeModal
                     ),
@@ -190,7 +189,7 @@ function PlanSelector(props: Props) {
                 await billingService.buySubscription(plan.stripeID);
             } catch (e) {
                 props.setLoading(false);
-                props.setDialogMessage({
+                appContext.setDialogMessage({
                     title: constants.ERROR,
                     content: constants.SUBSCRIPTION_PURCHASE_FAILED,
                     close: { variant: 'danger' },
@@ -320,7 +319,7 @@ function PlanSelector(props: Props) {
                                 <LinkButton
                                     color={'success'}
                                     onClick={() =>
-                                        props.setDialogMessage({
+                                        appContext.setDialogMessage({
                                             title: constants.CONFIRM_ACTIVATE_SUBSCRIPTION,
                                             content:
                                                 constants.ACTIVATE_SUBSCRIPTION_MESSAGE(
@@ -331,7 +330,7 @@ function PlanSelector(props: Props) {
                                                 text: constants.ACTIVATE_SUBSCRIPTION,
                                                 action: activateSubscription.bind(
                                                     null,
-                                                    props.setDialogMessage,
+                                                    appContext.setDialogMessage,
                                                     props.closeModal,
                                                     props.setLoading
                                                 ),
@@ -348,7 +347,7 @@ function PlanSelector(props: Props) {
                                 <LinkButton
                                     color="danger"
                                     onClick={() =>
-                                        props.setDialogMessage({
+                                        appContext.setDialogMessage({
                                             title: constants.CONFIRM_CANCEL_SUBSCRIPTION,
                                             content:
                                                 constants.CANCEL_SUBSCRIPTION_MESSAGE(),
@@ -357,7 +356,7 @@ function PlanSelector(props: Props) {
                                                 text: constants.CANCEL_SUBSCRIPTION,
                                                 action: cancelSubscription.bind(
                                                     null,
-                                                    props.setDialogMessage,
+                                                    appContext.setDialogMessage,
                                                     props.closeModal,
                                                     props.setLoading
                                                 ),
@@ -375,7 +374,7 @@ function PlanSelector(props: Props) {
                                 color="primary"
                                 onClick={updatePaymentMethod.bind(
                                     null,
-                                    props.setDialogMessage,
+                                    appContext.setDialogMessage,
                                     props.setLoading
                                 )}
                                 style={{ marginTop: '20px' }}>

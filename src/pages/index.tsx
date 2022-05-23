@@ -10,7 +10,6 @@ import EnteSpinner from 'components/EnteSpinner';
 import SignUp from 'components/SignUp';
 import constants from 'utils/strings/constants';
 import localForage from 'utils/storage/localForage';
-import IncognitoWarning from 'components/IncognitoWarning';
 import { logError } from 'utils/sentry';
 import { getAlbumSiteHost, PAGES } from 'constants/pages';
 
@@ -102,7 +101,7 @@ export default function LandingPage() {
     const appContext = useContext(AppContext);
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
-    const [blockUsage, setBlockUsage] = useState(false);
+
     useEffect(() => {
         appContext.showNavBar(false);
         const currentURL = new URL(window.location.href);
@@ -143,7 +142,12 @@ export default function LandingPage() {
             await localForage.ready();
         } catch (e) {
             logError(e, 'usage in incognito mode tried');
-            setBlockUsage(true);
+            appContext.setDialogMessage({
+                title: constants.LOCAL_STORAGE_NOT_ACCESSIBLE,
+                staticBackdrop: true,
+                nonClosable: true,
+                content: constants.LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE,
+            });
         } finally {
             setLoading(false);
         }
@@ -216,7 +220,6 @@ export default function LandingPage() {
                             )}
                         </SideBox>
                     </DesktopBox>
-                    {blockUsage && <IncognitoWarning />}
                 </>
             )}
         </Container>

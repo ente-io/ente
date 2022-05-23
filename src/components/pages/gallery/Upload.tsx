@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { syncCollections, createAlbum } from 'services/collectionService';
 import constants from 'utils/strings/constants';
-import { SetDialogBoxAttributes } from 'components/DialogBox';
 import UploadProgress from './UploadProgress';
 
 import UploadStrategyChoiceModal from './UploadStrategyChoiceModal';
@@ -34,7 +33,6 @@ interface Props {
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setLoading: SetLoading;
-    setDialogMessage: SetDialogBoxAttributes;
     setUploadInProgress: any;
     showCollectionSelector: () => void;
     fileRejections: FileRejection[];
@@ -279,7 +277,7 @@ export default function Upload(props: Props) {
             } catch (e) {
                 setProgressView(false);
                 logError(e, 'Failed to create album');
-                props.setDialogMessage({
+                appContext.setDialogMessage({
                     title: constants.ERROR,
                     staticBackdrop: true,
                     close: { variant: 'danger' },
