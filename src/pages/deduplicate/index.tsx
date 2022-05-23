@@ -6,7 +6,6 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
     getDuplicateFiles,
     clubDuplicatesByTime,
-    clubDuplicatesBySameFileHashes,
 } from 'services/deduplicationService';
 import { syncFiles, trashFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
@@ -44,7 +43,6 @@ export default function Deduplicate() {
     } = useContext(AppContext);
     const [duplicateFiles, setDuplicateFiles] = useState<EnteFile[]>(null);
     const [clubSameTimeFilesOnly, setClubSameTimeFilesOnly] = useState(false);
-    const [clubSameFileHashesOnly, setClubSameFileHashesOnly] = useState(false);
     const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
     const [collectionNameMap, setCollectionNameMap] = useState(
         new Map<number, string>()
@@ -69,7 +67,7 @@ export default function Deduplicate() {
 
     useEffect(() => {
         syncWithRemote();
-    }, [clubSameTimeFilesOnly, clubSameFileHashesOnly]);
+    }, [clubSameTimeFilesOnly]);
 
     const syncWithRemote = async () => {
         startLoading();
@@ -84,10 +82,6 @@ export default function Deduplicate() {
 
         if (clubSameTimeFilesOnly) {
             duplicates = clubDuplicatesByTime(duplicates);
-        }
-
-        if (clubSameFileHashesOnly) {
-            duplicates = clubDuplicatesBySameFileHashes(duplicates);
         }
 
         const currFileSizeMap = new Map<number, number>();
@@ -161,16 +155,13 @@ export default function Deduplicate() {
                 collectionNameMap,
                 clubSameTimeFilesOnly,
                 setClubSameTimeFilesOnly,
-                clubSameFileHashesOnly,
-                setClubSameFileHashesOnly,
                 fileSizeMap,
                 isOnDeduplicatePage: true,
             }}>
             {duplicateFiles.length > 0 && (
                 <Info>
                     {constants.DEDUPLICATION_LOGIC_MESSAGE(
-                        clubSameTimeFilesOnly,
-                        clubSameFileHashesOnly
+                        clubSameTimeFilesOnly
                     )}
                 </Info>
             )}

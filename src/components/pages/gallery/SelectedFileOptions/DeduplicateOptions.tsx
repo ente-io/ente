@@ -77,27 +77,6 @@ export default function DeduplicateOptions({
                     height: '1em',
                 }}
                 value={
-                    deduplicateContext.clubSameFileHashesOnly ? 'true' : 'false'
-                }
-                onChange={() => {
-                    deduplicateContext.setClubSameFileHashesOnly(
-                        !deduplicateContext.clubSameFileHashesOnly
-                    );
-                }}></input>
-            <CheckboxText>{constants.CLUB_BY_FILE_HASH}</CheckboxText>
-            <div
-                style={{
-                    marginRight: '14px',
-                }}>
-                <VerticalLine />
-            </div>
-            <input
-                type="checkbox"
-                style={{
-                    width: '1em',
-                    height: '1em',
-                }}
-                value={
                     deduplicateContext.clubSameTimeFilesOnly ? 'true' : 'false'
                 }
                 onChange={() => {
