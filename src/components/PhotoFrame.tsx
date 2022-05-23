@@ -63,6 +63,7 @@ interface Props {
     activeCollection: number;
     isSharedCollection?: boolean;
     enableDownload?: boolean;
+    isDeduplicating?: boolean;
 }
 
 type SourceURL = {
@@ -87,6 +88,7 @@ const PhotoFrame = ({
     activeCollection,
     isSharedCollection,
     enableDownload,
+    isDeduplicating,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -202,6 +204,7 @@ const PhotoFrame = ({
                     return false;
                 }
                 if (
+                    !isDeduplicating &&
                     activeCollection === ALL_SECTION &&
                     (IsArchived(item) ||
                         archivedCollections?.has(item.collectionID))
