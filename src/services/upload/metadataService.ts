@@ -33,8 +33,7 @@ const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
 
 export async function extractMetadata(
     receivedFile: File | ElectronFile,
-    fileTypeInfo: FileTypeInfo,
-    reader: FileReader
+    fileTypeInfo: FileTypeInfo
 ) {
     let extractedMetadata: ParsedExtractedMetadata = NULL_EXTRACTED_METADATA;
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
@@ -51,7 +50,7 @@ export async function extractMetadata(
         );
     }
 
-    const fileHash = await getFileHash(receivedFile, reader);
+    const fileHash = await getFileHash(receivedFile);
 
     const metadata: Metadata = {
         title: receivedFile.name,
@@ -74,10 +73,7 @@ export const getMetadataJSONMapKey = (
     title: string
 ) => `${collectionID}-${title}`;
 
-export async function parseMetadataJSON(
-    reader: FileReader,
-    receivedFile: File | ElectronFile
-) {
+export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
     try {
         if (!(receivedFile instanceof File)) {
             receivedFile = new File(
@@ -85,18 +81,7 @@ export async function parseMetadataJSON(
                 receivedFile.name
             );
         }
-        const metadataJSON: object = await new Promise((resolve, reject) => {
-            reader.onabort = () => reject(Error('file reading was aborted'));
-            reader.onerror = () => reject(Error('file reading has failed'));
-            reader.onload = () => {
-                const result =
-                    typeof reader.result !== 'string'
-                        ? new TextDecoder().decode(reader.result)
-                        : reader.result;
-                resolve(JSON.parse(result));
-            };
-            reader.readAsText(receivedFile as File);
-        });
+        const metadataJSON: object = JSON.parse(await receivedFile.text());
 
         const parsedMetadataJSON: ParsedMetadataJSON =
             NULL_PARSED_METADATA_JSON;
