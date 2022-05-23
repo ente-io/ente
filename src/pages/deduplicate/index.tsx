@@ -146,6 +146,10 @@ export default function Deduplicate() {
         }
     };
 
+    const clearSelection = function () {
+        setSelected({ count: 0, collectionID: 0 });
+    };
+
     if (!duplicateFiles) {
         return <></>;
     }
@@ -177,12 +181,14 @@ export default function Deduplicate() {
                 setSelected={setSelected}
                 selected={selected}
                 activeCollection={ALL_SECTION}
+                isDeduplicating
             />
             <DeduplicateOptions
                 setDialogMessage={setDialogMessage}
                 deleteFileHelper={deleteFileHelper}
                 count={selected.count}
                 close={closeDeduplication}
+                clearSelection={clearSelection}
             />
         </DeduplicateContext.Provider>
     );

@@ -4,7 +4,6 @@ import { parseFFmpegExtractedMetadata } from 'utils/ffmpeg';
 
 class FFmpegClient {
     private ffmpeg: FFmpeg;
-    private fileReader: FileReader;
     private ready: Promise<void> = null;
     constructor() {
         this.ffmpeg = createFFmpeg({
@@ -19,9 +18,6 @@ class FFmpegClient {
         if (!this.ffmpeg.isLoaded()) {
             await this.ffmpeg.load();
         }
-        if (!this.fileReader) {
-            this.fileReader = new FileReader();
-        }
     }
 
     async generateThumbnail(file: File) {
@@ -31,7 +27,7 @@ class FFmpegClient {
         this.ffmpeg.FS(
             'writeFile',
             inputFileName,
-            await getUint8ArrayView(this.fileReader, file)
+            await getUint8ArrayView(file)
         );
         let seekTime = 1.0;
         let thumb = null;
@@ -66,7 +62,7 @@ class FFmpegClient {
         this.ffmpeg.FS(
             'writeFile',
             inputFileName,
-            await getUint8ArrayView(this.fileReader, file)
+            await getUint8ArrayView(file)
         );
         let metadata = null;
 

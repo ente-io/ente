@@ -72,12 +72,10 @@ export function getLivePhotoName(imageTitle: string) {
 }
 
 export async function readLivePhoto(
-    reader: FileReader,
     fileTypeInfo: FileTypeInfo,
     livePhotoAssets: LivePhotoAssets
 ) {
     const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-        reader,
         livePhotoAssets.image,
         {
             exactType: fileTypeInfo.imageType,
@@ -85,15 +83,9 @@ export async function readLivePhoto(
         }
     );
 
-    const image =
-        livePhotoAssets.image instanceof File
-            ? await getUint8ArrayView(reader, livePhotoAssets.image)
-            : await livePhotoAssets.image.arrayBuffer();
+    const image = await getUint8ArrayView(livePhotoAssets.image);
 
-    const video =
-        livePhotoAssets.video instanceof File
-            ? await getUint8ArrayView(reader, livePhotoAssets.video)
-            : await livePhotoAssets.video.arrayBuffer();
+    const video = await getUint8ArrayView(livePhotoAssets.video);
 
     return {
         filedata: await encodeMotionPhoto({

@@ -76,32 +76,29 @@ class UploadService {
             : getFilename(file);
     }
 
-    async getFileType(reader: FileReader, file: File | ElectronFile) {
-        return getFileType(reader, file);
+    async getFileType(file: File | ElectronFile) {
+        return getFileType(file);
     }
 
     async readAsset(
-        reader: FileReader,
         fileTypeInfo: FileTypeInfo,
         { isLivePhoto, file, livePhotoAssets }: UploadAsset
     ) {
         return isLivePhoto
-            ? await readLivePhoto(reader, fileTypeInfo, livePhotoAssets)
-            : await readFile(reader, fileTypeInfo, file);
+            ? await readLivePhoto(fileTypeInfo, livePhotoAssets)
+            : await readFile(fileTypeInfo, file);
     }
 
     async extractFileMetadata(
         file: File | ElectronFile,
         collectionID: number,
-        fileTypeInfo: FileTypeInfo,
-        reader: FileReader
+        fileTypeInfo: FileTypeInfo
     ): Promise<Metadata> {
         return extractFileMetadata(
             this.parsedMetadataJSONMap,
             file,
             collectionID,
-            fileTypeInfo,
-            reader
+            fileTypeInfo
         );
     }
 

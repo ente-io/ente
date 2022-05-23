@@ -18,7 +18,7 @@ export default function LeftArrow(props) {
 }
 
 LeftArrow.defaultProps = {
-    height: 28,
-    width: 28,
+    height: 24,
+    width: 24,
     viewBox: '0 0 16 16',
 };
