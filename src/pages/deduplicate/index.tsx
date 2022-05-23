@@ -177,6 +177,7 @@ export default function Deduplicate() {
                 setSelected={setSelected}
                 selected={selected}
                 activeCollection={ALL_SECTION}
+                isDeduplicating
             />
             <DeduplicateOptions
                 setDialogMessage={setDialogMessage}
