@@ -5,7 +5,9 @@ export async function getUint8ArrayView(file: Blob): Promise<Uint8Array> {
     try {
         return new Uint8Array(await file.arrayBuffer());
     } catch (e) {
-        logError(e, 'reading file blob failed', { fileSize: file.size });
+        logError(e, 'reading file blob failed', {
+            fileSize: convertBytesToHumanReadable(file.size),
+        });
         throw e;
     }
 }
@@ -57,10 +59,7 @@ async function* fileChunkReaderMaker(file: File, chunkSize: number) {
 // which has reference to  window object, which cause error inside worker
 //  TODO: update worker to not read file themselves but rather have filedata passed to them
 
-export function convertBytesToHumanReadable(
-    bytes: number,
-    precision = 2
-): string {
+function convertBytesToHumanReadable(bytes: number, precision = 2): string {
     if (bytes === 0) {
         return '0 MB';
     }
