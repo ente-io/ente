@@ -22,6 +22,7 @@ import {
     getUint8ArrayView,
 } from '../readerService';
 import { generateThumbnail } from './thumbnailService';
+import { convertBytesToHumanReadable } from 'utils/billing';
 
 const EDITED_FILE_SUFFIX = '-edited';
 
@@ -37,34 +38,43 @@ export async function readFile(
     fileTypeInfo: FileTypeInfo,
     rawFile: File | ElectronFile
 ): Promise<FileInMemory> {
-    const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-        rawFile,
-        fileTypeInfo
-    );
-    logUploadInfo(`reading file data ${getFileNameSize(rawFile)} `);
-    let filedata: Uint8Array | DataStream;
-    if (!(rawFile instanceof File)) {
-        if (rawFile.size > MULTIPART_PART_SIZE) {
-            filedata = await getElectronFileStream(
-                rawFile,
-                FILE_READER_CHUNK_SIZE
-            );
+    try {
+        const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
+            rawFile,
+            fileTypeInfo
+        );
+        logUploadInfo(`reading file data ${getFileNameSize(rawFile)} `);
+        let filedata: Uint8Array | DataStream;
+        if (!(rawFile instanceof File)) {
+            if (rawFile.size > MULTIPART_PART_SIZE) {
+                filedata = await getElectronFileStream(
+                    rawFile,
+                    FILE_READER_CHUNK_SIZE
+                );
+            } else {
+                filedata = await rawFile.arrayBuffer();
+            }
+        } else if (rawFile.size > MULTIPART_PART_SIZE) {
+            filedata = getFileStream(rawFile, FILE_READER_CHUNK_SIZE);
         } else {
-            filedata = await rawFile.arrayBuffer();
+            filedata = await getUint8ArrayView(rawFile);
         }
-    } else if (rawFile.size > MULTIPART_PART_SIZE) {
-        filedata = getFileStream(rawFile, FILE_READER_CHUNK_SIZE);
-    } else {
-        filedata = await getUint8ArrayView(rawFile);
+
+        logUploadInfo(
+            `read file data successfully ${getFileNameSize(rawFile)} `
+        );
+
+        return {
+            filedata,
+            thumbnail,
+            hasStaticThumbnail,
+        };
+    } catch (e) {
+        logError(e, 'failed to read file', {
+            fileSize: convertBytesToHumanReadable(rawFile.size),
+        });
+        throw e;
     }
-
-    logUploadInfo(`read file data successfully ${getFileNameSize(rawFile)} `);
-
-    return {
-        filedata,
-        thumbnail,
-        hasStaticThumbnail,
-    };
 }
 
 export async function extractFileMetadata(

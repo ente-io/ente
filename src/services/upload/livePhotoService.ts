@@ -8,6 +8,7 @@ import {
     LivePhotoAssets,
     Metadata,
 } from 'types/upload';
+import { convertBytesToHumanReadable } from 'utils/billing';
 import { CustomError } from 'utils/error';
 import { isImageOrVideo, splitFilenameAndExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -75,34 +76,42 @@ export async function readLivePhoto(
     fileTypeInfo: FileTypeInfo,
     livePhotoAssets: LivePhotoAssets
 ) {
-    const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-        livePhotoAssets.image,
-        {
-            exactType: fileTypeInfo.imageType,
-            fileType: FILE_TYPE.IMAGE,
-        }
-    );
+    try {
+        const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
+            livePhotoAssets.image,
+            {
+                exactType: fileTypeInfo.imageType,
+                fileType: FILE_TYPE.IMAGE,
+            }
+        );
 
-    const image =
-        livePhotoAssets.image instanceof File
-            ? await getUint8ArrayView(livePhotoAssets.image)
-            : await livePhotoAssets.image.arrayBuffer();
+        const image =
+            livePhotoAssets.image instanceof File
+                ? await getUint8ArrayView(livePhotoAssets.image)
+                : await livePhotoAssets.image.arrayBuffer();
 
-    const video =
-        livePhotoAssets.video instanceof File
-            ? await getUint8ArrayView(livePhotoAssets.video)
-            : await livePhotoAssets.video.arrayBuffer();
+        const video =
+            livePhotoAssets.video instanceof File
+                ? await getUint8ArrayView(livePhotoAssets.video)
+                : await livePhotoAssets.video.arrayBuffer();
 
-    return {
-        filedata: await encodeMotionPhoto({
-            image,
-            video,
-            imageNameTitle: livePhotoAssets.image.name,
-            videoNameTitle: livePhotoAssets.video.name,
-        }),
-        thumbnail,
-        hasStaticThumbnail,
-    };
+        return {
+            filedata: await encodeMotionPhoto({
+                image,
+                video,
+                imageNameTitle: livePhotoAssets.image.name,
+                videoNameTitle: livePhotoAssets.video.name,
+            }),
+            thumbnail,
+            hasStaticThumbnail,
+        };
+    } catch (e) {
+        logError(e, 'failed to read live photo assets', {
+            imageSize: convertBytesToHumanReadable(livePhotoAssets.image.size),
+            videoSize: convertBytesToHumanReadable(livePhotoAssets.video.size),
+        });
+        throw e;
+    }
 }
 
 export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
