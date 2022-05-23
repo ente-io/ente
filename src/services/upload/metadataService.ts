@@ -73,10 +73,7 @@ export const getMetadataJSONMapKey = (
     title: string
 ) => `${collectionID}-${title}`;
 
-export async function parseMetadataJSON(
-    reader: FileReader,
-    receivedFile: File | ElectronFile
-) {
+export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
     try {
         if (!(receivedFile instanceof File)) {
             receivedFile = new File(
@@ -84,18 +81,7 @@ export async function parseMetadataJSON(
                 receivedFile.name
             );
         }
-        const metadataJSON: object = await new Promise((resolve, reject) => {
-            reader.onabort = () => reject(Error('file reading was aborted'));
-            reader.onerror = () => reject(Error('file reading has failed'));
-            reader.onload = () => {
-                const result =
-                    typeof reader.result !== 'string'
-                        ? new TextDecoder().decode(reader.result)
-                        : reader.result;
-                resolve(JSON.parse(result));
-            };
-            reader.readAsText(receivedFile as File);
-        });
+        const metadataJSON: object = JSON.parse(await receivedFile.text());
 
         const parsedMetadataJSON: ParsedMetadataJSON =
             NULL_PARSED_METADATA_JSON;

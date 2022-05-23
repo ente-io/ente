@@ -157,7 +157,7 @@ class UploadManager {
             logUploadInfo(`parseMetadataJSONFiles function executed `);
 
             UIService.reset(metadataFiles.length);
-            const reader = new FileReader();
+
             for (const { file, collectionID } of metadataFiles) {
                 try {
                     logUploadInfo(
@@ -165,7 +165,6 @@ class UploadManager {
                     );
 
                     const parsedMetadataJSONWithTitle = await parseMetadataJSON(
-                        reader,
                         file
                     );
                     if (parsedMetadataJSONWithTitle) {
