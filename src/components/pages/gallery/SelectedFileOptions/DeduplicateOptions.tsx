@@ -6,7 +6,7 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { DeduplicateContext } from 'pages/deduplicate';
 import LeftArrow from 'components/icons/LeftArrow';
-import { SetDialogMessage } from 'components/MessageDialog';
+import { SetDialogBoxAttributes } from 'components/DialogBox';
 import { IconWithMessage } from 'components/IconWithMessage';
 
 const VerticalLine = styled.div`
@@ -19,7 +19,7 @@ const VerticalLine = styled.div`
 
 interface IProps {
     deleteFileHelper: () => void;
-    setDialogMessage: SetDialogMessage;
+    setDialogMessage: SetDialogBoxAttributes;
     close: () => void;
     count: number;
 }

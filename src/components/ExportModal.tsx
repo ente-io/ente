@@ -17,7 +17,7 @@ import ExportInit from './ExportInit';
 import ExportInProgress from './ExportInProgress';
 import FolderIcon from './icons/FolderIcon';
 import InProgressIcon from './icons/InProgressIcon';
-import MessageDialog from './MessageDialog';
+import DialogBox from './DialogBox';
 import { ExportStage, ExportType } from 'constants/export';
 
 const FolderIconWrapper = styled.div`
@@ -312,7 +312,7 @@ export default function ExportModal(props: Props) {
     };
 
     return (
-        <MessageDialog
+        <DialogBox
             show={props.show}
             onHide={props.onHide}
             attributes={{
@@ -359,6 +359,6 @@ export default function ExportModal(props: Props) {
                 </Row>
             </div>
             <ExportDynamicState />
-        </MessageDialog>
+        </DialogBox>
     );
 }

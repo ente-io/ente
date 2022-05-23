@@ -11,8 +11,9 @@ import {
 } from '@mui/material';
 import DialogTitleWithCloseButton from './TitleWithCloseButton';
 import MessageText from './MessageText';
+import DialogBoxBase from './base';
 
-export interface MessageAttributes {
+export interface DialogBoxAttributes {
     title?: string;
     staticBackdrop?: boolean;
     nonClosable?: boolean;
@@ -21,6 +22,7 @@ export interface MessageAttributes {
         text?: string;
         variant?: ButtonProps['color'];
         action?: () => void;
+        titleCloseButton?: boolean;
     };
     proceed?: {
         text: string;
@@ -30,23 +32,19 @@ export interface MessageAttributes {
     };
 }
 
-export type SetDialogMessage = React.Dispatch<
-    React.SetStateAction<MessageAttributes>
+export type SetDialogBoxAttributes = React.Dispatch<
+    React.SetStateAction<DialogBoxAttributes>
 >;
 type Props = React.PropsWithChildren<
     Omit<DialogProps, 'open' | 'onClose' | 'maxSize'> & {
         show: boolean;
         onHide: () => void;
-        attributes: MessageAttributes;
+        attributes: DialogBoxAttributes;
         size?: Breakpoint;
     }
 >;
 
-export default function MessageDialog({
-    attributes,
-    children,
-    ...props
-}: Props) {
+export default function DialogBox({ attributes, children, ...props }: Props) {
     if (!attributes) {
         return <Dialog open={false} />;
     }
@@ -62,18 +60,20 @@ export default function MessageDialog({
     };
 
     return (
-        <Dialog
+        <DialogBoxBase
             open={props.show}
             maxWidth={props.size}
             onClose={handleClose}
             {...props}>
             {attributes.title && (
-                <>
-                    <DialogTitleWithCloseButton
-                        onClose={!attributes?.nonClosable && handleClose}>
-                        {attributes.title}
-                    </DialogTitleWithCloseButton>
-                </>
+                <DialogTitleWithCloseButton
+                    onClose={
+                        !attributes?.nonClosable &&
+                        attributes?.close?.titleCloseButton &&
+                        handleClose
+                    }>
+                    {attributes.title}
+                </DialogTitleWithCloseButton>
             )}
             {(children || attributes?.content) && (
                 <DialogContent>
@@ -110,6 +110,6 @@ export default function MessageDialog({
                     </>
                 </DialogActions>
             )}
-        </Dialog>
+        </DialogBoxBase>
     );
 }

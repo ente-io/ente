@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { downloadAsFile } from 'utils/file';
 import { getRecoveryKey } from 'utils/crypto';
 import constants from 'utils/strings/constants';
-import MessageDialog from '../MessageDialog';
+import DialogBox from '../DialogBox';
 import CodeBlock from '../CodeBlock';
 import { ButtonProps, Typography } from '@mui/material';
 import * as bip39 from 'bip39';
@@ -56,7 +56,7 @@ function RecoveryKey({ somethingWentWrong, ...props }: Props) {
     };
 
     return (
-        <MessageDialog
+        <DialogBox
             show={props.show}
             onHide={props.onHide}
             size="sm"
@@ -68,7 +68,7 @@ function RecoveryKey({ somethingWentWrong, ...props }: Props) {
                     {constants.KEY_NOT_STORED_DISCLAIMER}
                 </Typography>
             </DashedBorderWrapper>
-        </MessageDialog>
+        </DialogBox>
     );
 }
 export default RecoveryKey;

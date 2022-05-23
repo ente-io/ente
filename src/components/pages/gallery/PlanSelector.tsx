@@ -20,7 +20,7 @@ import {
     hasPaypalSubscription,
 } from 'utils/billing';
 import { reverseString } from 'utils/common';
-import { SetDialogMessage } from 'components/MessageDialog';
+import { SetDialogBoxAttributes } from 'components/DialogBox';
 import ArrowEast from 'components/icons/ArrowEast';
 import LinkButton from './LinkButton';
 import { DeadCenter, GalleryContext } from 'pages/gallery';
@@ -79,7 +79,7 @@ export const PlanIcon = styled.div<{ currentlySubscribed: boolean }>`
 interface Props {
     modalView: boolean;
     closeModal: any;
-    setDialogMessage: SetDialogMessage;
+    setDialogMessage: SetDialogBoxAttributes;
     setLoading: SetLoading;
 }
 enum PLAN_PERIOD {

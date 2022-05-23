@@ -17,7 +17,7 @@ import {
 } from 'services/collectionService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SubmitButton from '../SubmitButton';
-import MessageDialog from '../MessageDialog';
+import DialogBox from '../DialogBox';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import {
     appendCollectionKeyToShareURL,
@@ -351,7 +351,7 @@ function CollectionShare(props: Props) {
     }
 
     return (
-        <MessageDialog
+        <DialogBox
             show={props.show}
             onHide={props.onHide}
             attributes={{
@@ -573,7 +573,7 @@ function CollectionShare(props: Props) {
                                     </OptionValue>
                                 </OptionRow>
                             </section>
-                            <MessageDialog
+                            <DialogBox
                                 show={configurePassword}
                                 onHide={() => setConfigurePassword(false)}
                                 size="sm"
@@ -588,7 +588,7 @@ function CollectionShare(props: Props) {
                                     buttonText={constants.LOCK}
                                     fieldType="password"
                                 />
-                            </MessageDialog>
+                            </DialogBox>
                         </details>
                     </>
                 ) : (
@@ -601,7 +601,7 @@ function CollectionShare(props: Props) {
                     />
                 )}
             </DeadCenter>
-        </MessageDialog>
+        </DialogBox>
     );
 }
 export default CollectionShare;

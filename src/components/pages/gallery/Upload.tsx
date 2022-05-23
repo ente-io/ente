@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { syncCollections, createAlbum } from 'services/collectionService';
 import constants from 'utils/strings/constants';
-import { SetDialogMessage } from 'components/MessageDialog';
+import { SetDialogBoxAttributes } from 'components/DialogBox';
 import UploadProgress from './UploadProgress';
 
 import UploadStrategyChoiceModal from './UploadStrategyChoiceModal';
@@ -34,7 +34,7 @@ interface Props {
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setLoading: SetLoading;
-    setDialogMessage: SetDialogMessage;
+    setDialogMessage: SetDialogBoxAttributes;
     setUploadInProgress: any;
     showCollectionSelector: () => void;
     fileRejections: FileRejection[];

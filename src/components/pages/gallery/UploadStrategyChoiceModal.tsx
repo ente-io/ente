@@ -1,4 +1,4 @@
-import MessageDialog from 'components/MessageDialog';
+import DialogBox from 'components/DialogBox';
 import React from 'react';
 import { Button } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
@@ -15,7 +15,7 @@ function UploadStrategyChoiceModal({
     ...props
 }: Props) {
     return (
-        <MessageDialog
+        <DialogBox
             {...props}
             attributes={{ title: constants.MULTI_FOLDER_UPLOAD }}>
             <p
@@ -69,7 +69,7 @@ function UploadStrategyChoiceModal({
                     {constants.UPLOAD_STRATEGY_COLLECTION_PER_FOLDER}
                 </Button>
             </div>
-        </MessageDialog>
+        </DialogBox>
     );
 }
 export default UploadStrategyChoiceModal;

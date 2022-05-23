@@ -90,27 +90,7 @@ const darkThemeOptions = createTheme({
                 },
             },
         },
-        MuiDialog: {
-            styleOverrides: {
-                paper: {
-                    '& .MuiDialogActions-root': {
-                        padding: '32px 24px',
-                    },
-                    '& .MuiDialogTitle-root': {
-                        padding: '32px 24px 16px 24px',
-                    },
-                    '& .MuiDialogContent-root': {
-                        padding: '0px 24px 16px 24px',
-                    },
-                    '& .MuiDialogActions-root button': {
-                        marginLeft: '16px',
-                        fontSize: '18px',
-                        lineHeight: '21.78px',
-                        padding: '16px',
-                    },
-                },
-            },
-        },
+
         MuiFilledInput: {
             styleOverrides: {
                 input: {

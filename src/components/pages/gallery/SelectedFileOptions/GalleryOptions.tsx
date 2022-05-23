@@ -1,4 +1,4 @@
-import { SetDialogMessage } from 'components/MessageDialog';
+import { SetDialogBoxAttributes } from 'components/DialogBox';
 import React, { useEffect, useState } from 'react';
 import { SetCollectionSelectorAttributes } from '../CollectionSelector';
 import DeleteIcon from 'components/icons/DeleteIcon';
@@ -31,7 +31,7 @@ interface Props {
     moveToCollectionHelper: (collection: Collection) => void;
     restoreToCollectionHelper: (collection: Collection) => void;
     showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
-    setDialogMessage: SetDialogMessage;
+    setDialogMessage: SetDialogBoxAttributes;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     deleteFileHelper: (permanent?: boolean) => void;
     removeFromCollectionHelper: () => void;

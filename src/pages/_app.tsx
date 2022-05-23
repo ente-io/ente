@@ -19,10 +19,10 @@ import { getAlbumSiteHost, PAGES } from 'constants/pages';
 import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 import { logUploadInfo } from 'utils/upload';
 import LoadingBar from 'react-top-loading-bar';
-import MessageDialog, {
-    MessageAttributes,
-    SetDialogMessage,
-} from 'components/MessageDialog';
+import DialogBox, {
+    DialogBoxAttributes,
+    SetDialogBoxAttributes,
+} from 'components/DialogBox';
 import { ThemeProvider as MThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'themes/darkThemeOptions';
 import { CssBaseline } from '@mui/material';
@@ -66,7 +66,7 @@ type AppContextType = {
     startLoading: () => void;
     finishLoading: () => void;
     closeMessageDialog: () => void;
-    setDialogMessage: SetDialogMessage;
+    setDialogMessage: SetDialogBoxAttributes;
     sidebarView: boolean;
     closeSidebar: () => void;
 };
@@ -102,7 +102,7 @@ export default function App({ Component, err }) {
     const [isAlbumsDomain, setIsAlbumsDomain] = useState(false);
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
-    const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
+    const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [sidebarView, setSidebarView] = useState(false);
 
@@ -282,7 +282,7 @@ export default function App({ Component, err }) {
                     )}
                     <LoadingBar color="#51cd7c" ref={loadingBar} />
 
-                    <MessageDialog
+                    <DialogBox
                         fullWidth
                         size="sm"
                         show={messageDialogView}
