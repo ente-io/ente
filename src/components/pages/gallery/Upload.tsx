@@ -22,7 +22,7 @@ import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import { ElectronFile, FileWithCollection } from 'types/upload';
-import UploadTypeSelector from './UploadTypeSelector';
+import UploadTypeSelector from '../../UploadTypeSelector';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
