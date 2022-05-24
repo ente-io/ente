@@ -71,10 +71,15 @@ class SettingsPage extends StatelessWidget {
         DangerSectionWidget(),
       ]);
     }
-    contents.add(AppVersionWidget());
+
     if (kDebugMode && hasLoggedIn) {
-      contents.add(DebugSectionWidget());
+      contents.addAll([sectionDivider, DebugSectionWidget()]);
     }
+    contents.add(AppVersionWidget());
+    contents.add(Padding(
+      padding: EdgeInsets.only(bottom: 60),
+    ));
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20),

@@ -125,17 +125,17 @@ class ChildSubscriptionWidget extends StatelessWidget {
   Future<void> _leaveFamilyPlan(BuildContext context) async {
     final choice = await showChoiceDialog(
       context,
-      'leave family',
-      'are you sure that you want to leave the family plan?',
-      firstAction: 'no',
-      secondAction: 'yes',
+      'Leave family',
+      'Are you sure that you want to leave the family plan?',
+      firstAction: 'No',
+      secondAction: 'Yes',
       firstActionColor: Theme.of(context).buttonColor,
       secondActionColor: Colors.white,
     );
     if (choice != DialogUserChoice.secondChoice) {
       return;
     }
-    final dialog = createProgressDialog(context, "please wait...");
+    final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
       await UserService.instance.leaveFamilyPlan();

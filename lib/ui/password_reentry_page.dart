@@ -60,7 +60,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           isFormValid: _passwordController.text.isNotEmpty,
           buttonText: 'Log in',
           onPressedFunction: () async {
-            final dialog = createProgressDialog(context, "please wait...");
+            final dialog = createProgressDialog(context, "Please wait...");
             await dialog.show();
             try {
               await Configuration.instance.decryptAndSaveSecrets(
@@ -173,7 +173,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                       behavior: HitTestBehavior.opaque,
                       onTap: () async {
                         final dialog =
-                            createProgressDialog(context, "please wait...");
+                            createProgressDialog(context, "Please wait...");
                         await dialog.show();
                         await Configuration.instance.logout();
                         await dialog.hide();
@@ -182,7 +182,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                       },
                       child: Container(
                         child: Center(
-                          child: Text("change email",
+                          child: Text("Change email",
                               style: Theme.of(context)
                                   .textTheme
                                   .subtitle1
@@ -208,7 +208,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         //     onPressed: _passwordController.text.isNotEmpty
         //         ? () async {
         //             final dialog =
-        //                 createProgressDialog(context, "please wait...");
+        //                 createProgressDialog(context, "Please wait...");
         //             await dialog.show();
         //             try {
         //               await Configuration.instance.decryptAndSaveSecrets(

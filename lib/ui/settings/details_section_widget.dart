@@ -61,6 +61,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(8.0),
         image: DecorationImage(
+          fit: BoxFit.fill,
           image: AssetImage("assets/card_background.png"),
         ),
       ),

@@ -29,7 +29,7 @@ class BillingQuestionsWidget extends StatelessWidget {
           faqs.add(Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              "faqs",
+              "FAQs",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

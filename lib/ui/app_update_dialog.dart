@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:open_file/open_file.dart';
 import 'package:photos/core/configuration.dart';
@@ -38,7 +37,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
           ),
         ),
         Padding(padding: EdgeInsets.all(8)),
-        Text("changelog",
+        Text("Changelog",
             style: TextStyle(
               fontSize: 18,
             )),
@@ -53,7 +52,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
           height: 64,
           padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
           child: button(
-            "update",
+            "Update",
             fontSize: 16,
             onPressed: () async {
               Navigator.pop(context);
@@ -75,8 +74,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
       onWillPop: () async => !shouldForceUpdate,
       child: AlertDialog(
         title: Text(shouldForceUpdate
-            ? "critical update available"
-            : "update available"),
+            ? "Critical update available"
+            : "Update available"),
         content: content,
       ),
     );

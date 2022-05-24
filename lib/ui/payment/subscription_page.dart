@@ -129,7 +129,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       _isLoading = true;
       _fetchSubData();
     }
-    _dialog = createProgressDialog(context, "please wait...");
+    _dialog = createProgressDialog(context, "Please wait...");
     final appBar = AppBar(
       title: Text("Subscription"),
     );
