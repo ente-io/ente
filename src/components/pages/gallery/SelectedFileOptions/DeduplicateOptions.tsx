@@ -6,8 +6,8 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { DeduplicateContext } from 'pages/deduplicate';
 import LeftArrow from 'components/icons/LeftArrow';
-import { SetDialogMessage } from 'components/MessageDialog';
 import { IconWithMessage } from 'components/IconWithMessage';
+import { AppContext } from 'pages/_app';
 
 const VerticalLine = styled.div`
     position: absolute;
@@ -19,18 +19,17 @@ const VerticalLine = styled.div`
 
 interface IProps {
     deleteFileHelper: () => void;
-    setDialogMessage: SetDialogMessage;
     close: () => void;
     count: number;
 }
 
 export default function DeduplicateOptions({
-    setDialogMessage,
     deleteFileHelper,
     close,
     count,
 }: IProps) {
     const deduplicateContext = useContext(DeduplicateContext);
+    const { setDialogMessage } = useContext(AppContext);
 
     const trashHandler = () =>
         setDialogMessage({

@@ -1,6 +1,6 @@
 import React from 'react';
 import constants from 'utils/strings/englishConstants';
-import { CollectionTitleWithDashedBorder } from './styledComponents';
+import { CollectionTitleWithDashedBorder } from '../styledComponents';
 
 export const CreateNewCollectionTile = (props) => {
     return (

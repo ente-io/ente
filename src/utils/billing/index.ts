@@ -2,11 +2,11 @@ import constants from 'utils/strings/constants';
 import billingService from 'services/billingService';
 import { Plan, Subscription } from 'types/billing';
 import { NextRouter } from 'next/router';
-import { SetDialogMessage } from 'components/MessageDialog';
 import { SetLoading } from 'types/gallery';
 import { getData, LS_KEYS } from '../storage/localStorage';
 import { CustomError } from '../error';
 import { logError } from '../sentry';
+import { SetDialogBoxAttributes } from 'types/dialogBox';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';
 const PAYMENT_PROVIDER_APPSTORE = 'appstore';
@@ -121,7 +121,7 @@ export function hasPaypalSubscription(subscription: Subscription) {
 
 export async function updateSubscription(
     plan: Plan,
-    setDialogMessage: SetDialogMessage,
+    setDialogMessage: SetDialogBoxAttributes,
     setLoading: SetLoading,
     closePlanSelectorModal: () => null
 ) {
@@ -141,7 +141,7 @@ export async function updateSubscription(
 }
 
 export async function cancelSubscription(
-    setDialogMessage: SetDialogMessage,
+    setDialogMessage: SetDialogBoxAttributes,
     closePlanSelectorModal: () => null,
     setLoading: SetLoading
 ) {
@@ -166,7 +166,7 @@ export async function cancelSubscription(
 }
 
 export async function activateSubscription(
-    setDialogMessage: SetDialogMessage,
+    setDialogMessage: SetDialogBoxAttributes,
     closePlanSelectorModal: () => null,
     setLoading: SetLoading
 ) {
@@ -191,7 +191,7 @@ export async function activateSubscription(
 }
 
 export async function updatePaymentMethod(
-    setDialogMessage: SetDialogMessage,
+    setDialogMessage: SetDialogBoxAttributes,
     setLoading: SetLoading
 ) {
     try {
@@ -208,7 +208,7 @@ export async function updatePaymentMethod(
 }
 
 export async function checkSubscriptionPurchase(
-    setDialogMessage: SetDialogMessage,
+    setDialogMessage: SetDialogBoxAttributes,
     router: NextRouter,
     setLoading: SetLoading
 ) {
@@ -243,7 +243,7 @@ export async function checkSubscriptionPurchase(
 
 function handleFailureReason(
     reason: string,
-    setDialogMessage: SetDialogMessage,
+    setDialogMessage: SetDialogBoxAttributes,
     setLoading: SetLoading
 ): void {
     logError(Error(reason), 'subscription purchase failed');

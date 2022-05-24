@@ -3,7 +3,7 @@ import styled, { ThemeProvider as SThemeProvider } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
 import { useRouter } from 'next/router';
-import Container from 'components/Container';
+import VerticallyCentered from 'components/Container';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 import 'styles/global.css';
@@ -19,14 +19,14 @@ import { getAlbumSiteHost, PAGES } from 'constants/pages';
 import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 import { logUploadInfo } from 'utils/upload';
 import LoadingBar from 'react-top-loading-bar';
-import MessageDialog, {
-    MessageAttributes,
-    SetDialogMessage,
-} from 'components/MessageDialog';
+import DialogBox from 'components/DialogBox';
 import { ThemeProvider as MThemeProvider } from '@mui/material/styles';
-import darkThemeOptions from 'darkThemeOptions';
+import darkThemeOptions from 'themes/darkThemeOptions';
 import { CssBaseline } from '@mui/material';
 import SidebarToggler from 'components/Navbar/SidebarToggler';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as types from 'styled-components/cssprop';
+import { SetDialogBoxAttributes, DialogBoxAttributes } from 'types/dialogBox';
 
 export const LogoImage = styled.img`
     max-height: 28px;
@@ -64,7 +64,7 @@ type AppContextType = {
     startLoading: () => void;
     finishLoading: () => void;
     closeMessageDialog: () => void;
-    setDialogMessage: SetDialogMessage;
+    setDialogMessage: SetDialogBoxAttributes;
     sidebarView: boolean;
     closeSidebar: () => void;
 };
@@ -100,7 +100,7 @@ export default function App({ Component, err }) {
     const [isAlbumsDomain, setIsAlbumsDomain] = useState(false);
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
-    const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
+    const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [sidebarView, setSidebarView] = useState(false);
 
@@ -280,10 +280,9 @@ export default function App({ Component, err }) {
                     )}
                     <LoadingBar color="#51cd7c" ref={loadingBar} />
 
-                    <MessageDialog
-                        size="sm"
-                        show={messageDialogView}
-                        onHide={closeMessageDialog}
+                    <DialogBox
+                        open={messageDialogView}
+                        onClose={closeMessageDialog}
                         attributes={dialogMessage}
                     />
 
@@ -303,11 +302,11 @@ export default function App({ Component, err }) {
                             closeSidebar,
                         }}>
                         {loading ? (
-                            <Container>
+                            <VerticallyCentered>
                                 <EnteSpinner>
                                     <span className="sr-only">Loading...</span>
                                 </EnteSpinner>
-                            </Container>
+                            </VerticallyCentered>
                         ) : (
                             <Component err={err} setLoading={setLoading} />
                         )}

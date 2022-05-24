@@ -300,7 +300,6 @@ export default function UploadProgress(props: Props) {
                             height: '2px',
                             backgroundColor: 'transparent',
                         }}
-                        color="negative"
                         variant="determinate"
                         value={props.now}
                     />

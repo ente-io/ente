@@ -4,7 +4,7 @@ import React, { FC, useRef, useState } from 'react';
 import OtpInput from 'react-otp-input';
 import constants from 'utils/strings/constants';
 import SubmitButton from 'components/SubmitButton';
-import Container from 'components/Container';
+import VerticallyCentered, { CenteredFlex } from 'components/Container';
 import { Box, Typography, TypographyProps } from '@mui/material';
 import InvalidInputMessage from './InvalidInputMessage';
 
@@ -54,10 +54,10 @@ export default function VerifyTwoFactor(props: Props) {
                     noValidate
                     onSubmit={handleSubmit}
                     style={{ width: '100%' }}>
-                    <Typography mb={2} color="text.secondary">
+                    <Typography mb={2} variant="body2" color="text.secondary">
                         {constants.ENTER_TWO_FACTOR_OTP}
                     </Typography>
-                    <Box sx={{ my: 2 }}>
+                    <Box my={2}>
                         <OtpInput
                             ref={otpInputRef}
                             shouldAutoFocus
@@ -69,9 +69,11 @@ export default function VerifyTwoFactor(props: Props) {
                             className={'otp-input'}
                         />
                         {errors.otp && (
-                            <InvalidInputMessage>
-                                {constants.INCORRECT_CODE}
-                            </InvalidInputMessage>
+                            <CenteredFlex sx={{ mt: 1 }}>
+                                <InvalidInputMessage>
+                                    {constants.INCORRECT_CODE}
+                                </InvalidInputMessage>
+                            </CenteredFlex>
                         )}
                     </Box>
                     <SubmitButton

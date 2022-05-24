@@ -13,7 +13,7 @@ export const CollectionBarWrapper = styled.div`
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * 4}px) {
         padding: 0 4px;
     }
-    border-bottom: 1px solid ${({ theme }) => theme.palette.grey.A400};
+    border-bottom: 1px solid ${({ theme }) => theme.palette.grey.A200};
 `;
 
 export const PaddedSpaceBetweenFlex = styled(SpaceBetweenFlex)`
@@ -37,7 +37,6 @@ export const ScrollContainer = styled.div`
 export const CollectionTile = styled.div<{
     coverImgURL?: string;
 }>`
-    flex-shrink: 0;
     display: flex;
     width: 80px;
     height: 64px;
@@ -50,10 +49,12 @@ export const CollectionTile = styled.div<{
     background-image: url(${({ coverImgURL }) => coverImgURL});
     background-size: cover;
     border: 1px solid ${({ theme }) => theme.palette.grey.A200};
+    font-size: 14px;
+    line-height: 20px;
 `;
 
 export const CollectionTileWrapper = styled.div`
-    margin-right: 6px;
+    margin-right: 4px;
 `;
 
 export const ActiveIndicator = styled.div`
@@ -72,7 +73,7 @@ export const LargerCollectionTile = styled(CollectionTile)`
     width: 150px;
     height: 150px;
     align-items: flex-start;
-    margin: 4px;
+    margin: 2px;
 `;
 
 export const CollectionTitleWithDashedBorder = styled(CollectionTile)`

@@ -17,15 +17,14 @@ import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
 import {
     Checkbox,
-    Container,
-    Divider,
     FormControlLabel,
     FormGroup,
     TextField,
 } from '@mui/material';
-import FormPaperHeaderText from './Form/FormPaper/HeaderText';
+import FormPaperTitle from './Form/FormPaper/Title';
 import LinkButton from './pages/gallery/LinkButton';
 import FormPaperFooter from './Form/FormPaper/Footer';
+import VerticallyCentered from './Container';
 
 interface FormValues {
     email: string;
@@ -93,7 +92,7 @@ export default function SignUp(props: SignUpProps) {
 
     return (
         <>
-            <FormPaperHeaderText> {constants.SIGN_UP}</FormPaperHeaderText>
+            <FormPaperTitle> {constants.SIGN_UP}</FormPaperTitle>
             <Formik<FormValues>
                 initialValues={{
                     email: '',
@@ -117,11 +116,9 @@ export default function SignUp(props: SignUpProps) {
                     handleSubmit,
                 }): JSX.Element => (
                     <form noValidate onSubmit={handleSubmit}>
-                        <Container disableGutters sx={{ mb: 1 }}>
+                        <VerticallyCentered sx={{ mb: 1 }}>
                             <TextField
-                                variant="filled"
                                 fullWidth
-                                margin="dense"
                                 type="email"
                                 label={constants.ENTER_EMAIL}
                                 value={values.email}
@@ -134,8 +131,6 @@ export default function SignUp(props: SignUpProps) {
 
                             <TextField
                                 fullWidth
-                                variant="filled"
-                                margin="dense"
                                 type="password"
                                 label={constants.PASSPHRASE_HINT}
                                 value={values.passphrase}
@@ -147,8 +142,6 @@ export default function SignUp(props: SignUpProps) {
 
                             <TextField
                                 fullWidth
-                                variant="filled"
-                                margin="dense"
                                 type="password"
                                 label={constants.CONFIRM_PASSPHRASE}
                                 value={values.confirm}
@@ -157,27 +150,30 @@ export default function SignUp(props: SignUpProps) {
                                 helperText={errors.confirm}
                                 disabled={loading}
                             />
-                            <FormGroup>
+                            <FormGroup sx={{ width: '100%' }}>
                                 <FormControlLabel
                                     sx={{
                                         color: 'text.secondary',
+                                        ml: -1,
                                         mt: 2,
                                     }}
                                     control={
                                         <Checkbox
+                                            size="small"
                                             disabled={loading}
                                             checked={acceptTerms}
                                             onChange={(e) =>
                                                 setAcceptTerms(e.target.checked)
                                             }
-                                            color="success"
+                                            color="accent"
                                         />
                                     }
                                     label={constants.TERMS_AND_CONDITIONS()}
                                 />
                             </FormGroup>
-                        </Container>
+                        </VerticallyCentered>
                         <SubmitButton
+                            sx={{ my: 4 }}
                             buttonText={constants.CREATE_ACCOUNT}
                             loading={loading}
                             disabled={!acceptTerms}
@@ -185,9 +181,9 @@ export default function SignUp(props: SignUpProps) {
                     </form>
                 )}
             </Formik>
-            <Divider />
+
             <FormPaperFooter>
-                <LinkButton onClick={props.login} color={'text.secondary'}>
+                <LinkButton onClick={props.login}>
                     {constants.ACCOUNT_EXISTS}
                 </LinkButton>
             </FormPaperFooter>

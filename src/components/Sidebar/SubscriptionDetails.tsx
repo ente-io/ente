@@ -18,7 +18,12 @@ interface Iprops {
 
 export default function SubscriptionDetails({ userDetails }: Iprops) {
     return (
-        <Paper component={Box} bgcolor="accent.main" position={'relative'}>
+        <Box
+            display="flex"
+            flexDirection={'column'}
+            height={160}
+            bgcolor="accent.main"
+            position={'relative'}>
             {userDetails ? (
                 <>
                     <Box padding={2}>
@@ -52,7 +57,8 @@ export default function SubscriptionDetails({ userDetails }: Iprops) {
                     <Paper
                         component={Box}
                         position={'relative'}
-                        zIndex="2"
+                        zIndex="100"
+                        height="64px"
                         bgcolor="accent.dark"
                         padding={2}>
                         <LinearProgress
@@ -84,6 +90,6 @@ export default function SubscriptionDetails({ userDetails }: Iprops) {
                     <CircularProgress />
                 </Container>
             )}
-        </Paper>
+        </Box>
     );
 }

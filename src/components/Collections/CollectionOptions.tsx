@@ -174,6 +174,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 open={Boolean(optionEl)}
                 onClose={handleClose}
                 MenuListProps={{
+                    disablePadding: true,
                     'aria-labelledby': 'collection-options',
                 }}>
                 <Paper>

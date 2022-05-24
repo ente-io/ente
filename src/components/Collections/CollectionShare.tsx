@@ -17,7 +17,7 @@ import {
 } from 'services/collectionService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SubmitButton from '../SubmitButton';
-import MessageDialog from '../MessageDialog';
+import DialogBox from '../DialogBox';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import {
     appendCollectionKeyToShareURL,
@@ -25,7 +25,7 @@ import {
     shareExpiryOptions,
 } from 'utils/collection';
 import { FlexWrapper, Label, Row, Value } from '../Container';
-import { CodeBlock } from '../CodeBlock';
+import CodeBlock from '../CodeBlock';
 import { ButtonVariant, getVariantColor } from '../pages/gallery/LinkButton';
 import { handleSharingErrors } from 'utils/error';
 import { sleep } from 'utils/common';
@@ -351,9 +351,9 @@ function CollectionShare(props: Props) {
     }
 
     return (
-        <MessageDialog
-            show={props.show}
-            onHide={props.onHide}
+        <DialogBox
+            open={props.show}
+            onClose={props.onHide}
             attributes={{
                 title: constants.SHARE_COLLECTION,
                 staticBackdrop: true,
@@ -573,9 +573,9 @@ function CollectionShare(props: Props) {
                                     </OptionValue>
                                 </OptionRow>
                             </section>
-                            <MessageDialog
-                                show={configurePassword}
-                                onHide={() => setConfigurePassword(false)}
+                            <DialogBox
+                                open={configurePassword}
+                                onClose={() => setConfigurePassword(false)}
                                 size="sm"
                                 attributes={{
                                     title: constants.PASSWORD_LOCK,
@@ -588,7 +588,7 @@ function CollectionShare(props: Props) {
                                     buttonText={constants.LOCK}
                                     fieldType="password"
                                 />
-                            </MessageDialog>
+                            </DialogBox>
                         </details>
                     </>
                 ) : (
@@ -601,7 +601,7 @@ function CollectionShare(props: Props) {
                     />
                 )}
             </DeadCenter>
-        </MessageDialog>
+        </DialogBox>
     );
 }
 export default CollectionShare;

@@ -2,7 +2,7 @@ import LogoImg from 'components/LogoImg';
 import React, { useContext, useEffect, useState } from 'react';
 import { enableTwoFactor, setupTwoFactor } from 'services/userService';
 import constants from 'utils/strings/constants';
-import Container from 'components/Container';
+import VerticallyCentered from 'components/Container';
 import { useRouter } from 'next/router';
 import VerifyTwoFactor from 'components/TwoFactor/VerifyForm';
 import { encryptWithRecoveryKey } from 'utils/crypto';
@@ -62,10 +62,10 @@ export default function SetupTwoFactor() {
     };
 
     return (
-        <Container>
+        <VerticallyCentered>
             <Card>
                 <CardContent>
-                    <Container disableGutters sx={{ p: 3 }}>
+                    <VerticallyCentered sx={{ p: 3 }}>
                         <Box mb={4}>
                             <LogoImg src="/icon.svg" />
                             {constants.TWO_FACTOR}
@@ -78,9 +78,9 @@ export default function SetupTwoFactor() {
                         <LinkButton sx={{ mt: 2 }} onClick={router.back}>
                             {constants.GO_BACK}
                         </LinkButton>
-                    </Container>
+                    </VerticallyCentered>
                 </CardContent>
             </Card>
-        </Container>
+        </VerticallyCentered>
     );
 }

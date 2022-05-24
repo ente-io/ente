@@ -2,6 +2,7 @@ import { Typography, IconButton } from '@mui/material';
 import React from 'react';
 import constants from 'utils/strings/constants';
 import CloseIcon from '@mui/icons-material/Close';
+import { SpaceBetweenFlex } from 'components/Container';
 
 interface IProps {
     closeSidebar: () => void;
@@ -9,21 +10,18 @@ interface IProps {
 
 export default function HeaderSection({ closeSidebar }: IProps) {
     return (
-        <>
-            <Typography variant="h6">
-                <strong>{constants.ENTE}</strong>
+        <SpaceBetweenFlex>
+            <Typography
+                css={`
+                    font-size: 18px;
+                    font-weight: 600;
+                    line-height: 24px;
+                `}>
+                {constants.ENTE}
             </Typography>
-            <IconButton
-                aria-label="close"
-                onClick={closeSidebar}
-                sx={{
-                    position: 'absolute',
-                    right: 16,
-                    top: 16,
-                    color: (theme) => theme.palette.grey[400],
-                }}>
-                <CloseIcon />
+            <IconButton aria-label="close" onClick={closeSidebar}>
+                <CloseIcon fontSize="small" />
             </IconButton>
-        </>
+        </SpaceBetweenFlex>
     );
 }
