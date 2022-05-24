@@ -18,6 +18,7 @@ type IProps = React.PropsWithChildren<
         onClose: () => void;
         attributes: DialogBoxAttributes;
         size?: Breakpoint;
+        titleCloseButton?: boolean;
     }
 >;
 
@@ -46,7 +47,7 @@ export default function DialogBox({ attributes, children, ...props }: IProps) {
                 <DialogTitleWithCloseButton
                     onClose={
                         !attributes?.nonClosable &&
-                        attributes?.close?.titleCloseButton &&
+                        props.titleCloseButton &&
                         handleClose
                     }>
                     {attributes.title}
