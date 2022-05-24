@@ -73,7 +73,6 @@ export default function UtilitySection({ closeSidebar }) {
             <TwoFactorModal
                 show={twoFactorModalView}
                 onHide={closeTwoFactorModalView}
-                setDialogMessage={setDialogMessage}
                 closeSidebar={closeSidebar}
                 setLoading={startLoading}
             />

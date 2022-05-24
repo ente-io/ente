@@ -1,4 +1,4 @@
-import MessageDialog from 'components/MessageDialog';
+import DialogBox from 'components/DialogBox';
 import SubmitButton from 'components/SubmitButton';
 import { REPORT_REASON } from 'constants/publicCollection';
 import { Formik, FormikHelpers } from 'formik';
@@ -98,10 +98,10 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
     };
 
     return (
-        <MessageDialog
-            show={show}
+        <DialogBox
+            open={show}
             size="lg"
-            onHide={close}
+            onClose={close}
             attributes={{
                 title: constants.ABUSE_REPORT,
                 staticBackdrop: true,
@@ -557,6 +557,6 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
                     )}
                 </Formik>
             </Wrapper>
-        </MessageDialog>
+        </DialogBox>
     );
 }

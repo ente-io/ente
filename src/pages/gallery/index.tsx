@@ -598,7 +598,6 @@ export default function Gallery() {
                 <PlanSelector
                     modalView={planModalView}
                     closeModal={() => setPlanModalView(false)}
-                    setDialogMessage={setDialogMessage}
                     setLoading={setBlockingLoad}
                 />
                 <AlertBanner bannerMessage={bannerMessage} />
@@ -660,7 +659,6 @@ export default function Gallery() {
                     )}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    setDialogMessage={setDialogMessage}
                     setUploadInProgress={setUploadInProgress}
                     fileRejections={fileRejections}
                     setFiles={setFiles}
@@ -721,7 +719,6 @@ export default function Gallery() {
                             showCreateCollectionModal={
                                 showCreateCollectionModal
                             }
-                            setDialogMessage={setDialogMessage}
                             setCollectionSelectorAttributes={
                                 setCollectionSelectorAttributes
                             }

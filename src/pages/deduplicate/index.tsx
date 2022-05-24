@@ -168,7 +168,6 @@ export default function Deduplicate() {
                 activeCollection={ALL_SECTION}
             />
             <DeduplicateOptions
-                setDialogMessage={setDialogMessage}
                 deleteFileHelper={deleteFileHelper}
                 count={selected.count}
                 close={closeDeduplication}

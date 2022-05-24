@@ -1,5 +1,4 @@
-import { SetDialogMessage } from 'components/MessageDialog';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { SetCollectionSelectorAttributes } from '../CollectionSelector';
 import DeleteIcon from 'components/icons/DeleteIcon';
 import CloseIcon from '@mui/icons-material/Close';
@@ -25,13 +24,13 @@ import DownloadIcon from 'components/icons/DownloadIcon';
 import { User } from 'types/user';
 import { IconWithMessage } from 'components/IconWithMessage';
 import { SelectionBar, SelectionContainer } from '.';
+import { AppContext } from 'pages/_app';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
     moveToCollectionHelper: (collection: Collection) => void;
     restoreToCollectionHelper: (collection: Collection) => void;
     showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
-    setDialogMessage: SetDialogMessage;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     deleteFileHelper: (permanent?: boolean) => void;
     removeFromCollectionHelper: () => void;
@@ -52,7 +51,6 @@ const SelectedFileOptions = ({
     showCreateCollectionModal,
     removeFromCollectionHelper,
     fixTimeHelper,
-    setDialogMessage,
     setCollectionSelectorAttributes,
     deleteFileHelper,
     downloadHelper,
@@ -63,8 +61,8 @@ const SelectedFileOptions = ({
     activeCollection,
     isFavoriteCollection,
 }: Props) => {
+    const { setDialogMessage } = useContext(AppContext);
     const [showFixCreationTime, setShowFixCreationTime] = useState(false);
-
     useEffect(() => {
         const user: User = getData(LS_KEYS.USER);
         const showFixCreationTime =

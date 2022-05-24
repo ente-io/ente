@@ -1,5 +1,5 @@
 import constants from 'utils/strings/constants';
-import MessageDialog from '../MessageDialog';
+import DialogBox from '../DialogBox';
 import React, { useContext, useEffect, useState } from 'react';
 import { updateCreationTimeWithExif } from 'services/updateCreationTimeWithExif';
 import { GalleryContext } from 'pages/gallery';
@@ -93,9 +93,9 @@ export default function FixCreationTime(props: Props) {
     };
 
     return (
-        <MessageDialog
-            show={props.isOpen}
-            onHide={props.hide}
+        <DialogBox
+            open={props.isOpen}
+            onClose={props.hide}
             attributes={{
                 title:
                     fixState === FIX_STATE.RUNNING
@@ -147,6 +147,6 @@ export default function FixCreationTime(props: Props) {
                     )}
                 </Formik>
             </div>
-        </MessageDialog>
+        </DialogBox>
     );
 }

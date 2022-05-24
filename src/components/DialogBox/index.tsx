@@ -3,51 +3,25 @@ import constants from 'utils/strings/constants';
 import {
     Breakpoint,
     Button,
-    ButtonProps,
     Dialog,
     DialogActions,
     DialogContent,
-    DialogContentText,
     DialogProps,
-    Divider,
 } from '@mui/material';
-import DialogTitleWithCloseButton from './TitleWithCloseButton';
+import DialogTitleWithCloseButton from './titleWithCloseButton';
+import MessageText from './messageText';
+import DialogBoxBase from './base';
+import { DialogBoxAttributes } from 'types/dialogBox';
 
-export interface MessageAttributes {
-    title?: string;
-    staticBackdrop?: boolean;
-    nonClosable?: boolean;
-    content?: any;
-    close?: {
-        text?: string;
-        variant?: ButtonProps['color'];
-        action?: () => void;
-    };
-    proceed?: {
-        text: string;
-        action: () => void;
-        variant: ButtonProps['color'];
-        disabled?: boolean;
-    };
-}
-
-export type SetDialogMessage = React.Dispatch<
-    React.SetStateAction<MessageAttributes>
->;
-type Props = React.PropsWithChildren<
-    Omit<DialogProps, 'open' | 'onClose' | 'maxSize'> & {
-        show: boolean;
-        onHide: () => void;
-        attributes: MessageAttributes;
+type IProps = React.PropsWithChildren<
+    Omit<DialogProps, 'onClose' | 'maxSize'> & {
+        onClose: () => void;
+        attributes: DialogBoxAttributes;
         size?: Breakpoint;
     }
 >;
 
-export default function MessageDialog({
-    attributes,
-    children,
-    ...props
-}: Props) {
+export default function DialogBox({ attributes, children, ...props }: IProps) {
     if (!attributes) {
         return <Dialog open={false} />;
     }
@@ -58,31 +32,30 @@ export default function MessageDialog({
         } else if (attributes?.staticBackdrop && reason === 'backdropClick') {
             // no-op
         } else {
-            props.onHide();
+            props.onClose();
         }
     };
 
     return (
-        <Dialog
-            open={props.show}
+        <DialogBoxBase
+            open={props.open}
             maxWidth={props.size}
             onClose={handleClose}
             {...props}>
             {attributes.title && (
-                <>
-                    <DialogTitleWithCloseButton
-                        onClose={!attributes?.nonClosable && handleClose}>
-                        {attributes.title}
-                    </DialogTitleWithCloseButton>
-                    <Divider />
-                </>
+                <DialogTitleWithCloseButton
+                    onClose={
+                        !attributes?.nonClosable &&
+                        attributes?.close?.titleCloseButton &&
+                        handleClose
+                    }>
+                    {attributes.title}
+                </DialogTitleWithCloseButton>
             )}
             {(children || attributes?.content) && (
                 <DialogContent>
                     {children || (
-                        <DialogContentText>
-                            {attributes.content}
-                        </DialogContentText>
+                        <MessageText>{attributes.content}</MessageText>
                     )}
                 </DialogContent>
             )}
@@ -95,17 +68,17 @@ export default function MessageDialog({
                                 onClick={() => {
                                     attributes.close.action &&
                                         attributes.close?.action();
-                                    props.onHide();
+                                    props.onClose();
                                 }}>
                                 {attributes.close?.text ?? constants.OK}
                             </Button>
                         )}
                         {attributes.proceed && (
                             <Button
-                                color={attributes.proceed?.variant ?? 'primary'}
+                                color={attributes.proceed?.variant}
                                 onClick={() => {
                                     attributes.proceed.action();
-                                    props.onHide();
+                                    props.onClose();
                                 }}
                                 disabled={attributes.proceed.disabled}>
                                 {attributes.proceed.text}
@@ -114,6 +87,6 @@ export default function MessageDialog({
                     </>
                 </DialogActions>
             )}
-        </Dialog>
+        </DialogBoxBase>
     );
 }

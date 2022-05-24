@@ -3,14 +3,13 @@ import { getTwoFactorStatus } from 'services/userService';
 import { SetLoading } from 'types/gallery';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
-import MessageDialog, { SetDialogMessage } from '../../MessageDialog';
+import DialogBox from '../../DialogBox';
 import TwoFactorModalSetupSection from './Setup';
 import TwoFactorModalManageSection from './Manage';
 
 interface Props {
     show: boolean;
     onHide: () => void;
-    setDialogMessage: SetDialogMessage;
     setLoading: SetLoading;
     closeSidebar: () => void;
 }
@@ -42,11 +41,11 @@ function TwoFactorModal(props: Props) {
     };
 
     return (
-        <MessageDialog
+        <DialogBox
             size="xs"
             fullWidth
-            show={props.show}
-            onHide={props.onHide}
+            open={props.show}
+            onClose={props.onHide}
             attributes={{
                 title: constants.TWO_FACTOR_AUTHENTICATION,
                 staticBackdrop: true,
@@ -58,7 +57,7 @@ function TwoFactorModal(props: Props) {
                     <TwoFactorModalSetupSection close={close} />
                 )}
             </>
-        </MessageDialog>
+        </DialogBox>
     );
 }
 export default TwoFactorModal;

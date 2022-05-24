@@ -1,12 +1,12 @@
-import MessageDialog from 'components/MessageDialog';
+import DialogBox from 'components/DialogBox';
 import React from 'react';
 import { Button } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 
 interface Props {
     uploadToMultipleCollection: () => void;
-    show: boolean;
-    onHide: () => void;
+    open: boolean;
+    onClose: () => void;
     uploadToSingleCollection: () => void;
 }
 function UploadStrategyChoiceModal({
@@ -15,7 +15,7 @@ function UploadStrategyChoiceModal({
     ...props
 }: Props) {
     return (
-        <MessageDialog
+        <DialogBox
             {...props}
             attributes={{ title: constants.MULTI_FOLDER_UPLOAD }}>
             <p
@@ -37,7 +37,7 @@ function UploadStrategyChoiceModal({
                 <Button
                     variant="outline-success"
                     onClick={() => {
-                        props.onHide();
+                        props.onClose();
                         uploadToSingleCollection();
                     }}
                     style={{
@@ -58,7 +58,7 @@ function UploadStrategyChoiceModal({
                 <Button
                     variant="outline-success"
                     onClick={() => {
-                        props.onHide();
+                        props.onClose();
                         uploadToMultipleCollection();
                     }}
                     style={{
@@ -69,7 +69,7 @@ function UploadStrategyChoiceModal({
                     {constants.UPLOAD_STRATEGY_COLLECTION_PER_FOLDER}
                 </Button>
             </div>
-        </MessageDialog>
+        </DialogBox>
     );
 }
 export default UploadStrategyChoiceModal;

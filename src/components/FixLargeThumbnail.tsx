@@ -1,5 +1,5 @@
 import constants from 'utils/strings/constants';
-import MessageDialog from './MessageDialog';
+import DialogBox from './DialogBox';
 import React, { useEffect, useState } from 'react';
 import { ProgressBar, Button } from 'react-bootstrap';
 import { ComfySpan } from './ExportInProgress';
@@ -136,9 +136,9 @@ export default function FixLargeThumbnails(props: Props) {
         setData(LS_KEYS.THUMBNAIL_FIX_STATE, { state: fixState });
     };
     return (
-        <MessageDialog
-            show={props.isOpen}
-            onHide={props.hide}
+        <DialogBox
+            open={props.isOpen}
+            onClose={props.hide}
             attributes={{
                 title: constants.COMPRESS_THUMBNAILS,
                 staticBackdrop: true,
@@ -224,6 +224,6 @@ export default function FixLargeThumbnails(props: Props) {
                     )}
                 </div>
             </div>
-        </MessageDialog>
+        </DialogBox>
     );
 }

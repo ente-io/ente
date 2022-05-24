@@ -1,5 +1,5 @@
 import React from 'react';
-import { DialogTitle, IconButton } from '@mui/material';
+import { DialogTitle, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { SpaceBetweenFlex } from 'components/Container';
 
@@ -9,7 +9,7 @@ const DialogTitleWithCloseButton = (props) => {
     return (
         <DialogTitle {...other}>
             <SpaceBetweenFlex>
-                {children}
+                <Typography variant="title">{children}</Typography>
                 {onClose && (
                     <IconButton
                         aria-label="close"
