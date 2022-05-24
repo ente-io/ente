@@ -19,16 +19,14 @@ import { getAlbumSiteHost, PAGES } from 'constants/pages';
 import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 import { logUploadInfo } from 'utils/upload';
 import LoadingBar from 'react-top-loading-bar';
-import DialogBox, {
-    DialogBoxAttributes,
-    SetDialogBoxAttributes,
-} from 'components/DialogBox';
+import DialogBox from 'components/DialogBox';
 import { ThemeProvider as MThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'themes/darkThemeOptions';
 import { CssBaseline } from '@mui/material';
 import SidebarToggler from 'components/Navbar/SidebarToggler';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as types from 'styled-components/cssprop';
+import { SetDialogBoxAttributes, DialogBoxAttributes } from 'types/dialogBox';
 
 export const LogoImage = styled.img`
     max-height: 28px;

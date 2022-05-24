@@ -3,7 +3,6 @@ import constants from 'utils/strings/constants';
 import {
     Breakpoint,
     Button,
-    ButtonProps,
     Dialog,
     DialogActions,
     DialogContent,
@@ -12,29 +11,7 @@ import {
 import DialogTitleWithCloseButton from './titleWithCloseButton';
 import MessageText from './messageText';
 import DialogBoxBase from './base';
-
-export interface DialogBoxAttributes {
-    title?: string;
-    staticBackdrop?: boolean;
-    nonClosable?: boolean;
-    content?: any;
-    close?: {
-        text?: string;
-        variant?: ButtonProps['color'];
-        action?: () => void;
-        titleCloseButton?: boolean;
-    };
-    proceed?: {
-        text: string;
-        action: () => void;
-        variant: ButtonProps['color'];
-        disabled?: boolean;
-    };
-}
-
-export type SetDialogBoxAttributes = React.Dispatch<
-    React.SetStateAction<DialogBoxAttributes>
->;
+import { DialogBoxAttributes } from 'types/dialogBox';
 
 type IProps = React.PropsWithChildren<
     Omit<DialogProps, 'onClose' | 'maxSize'> & {
@@ -98,7 +75,7 @@ export default function DialogBox({ attributes, children, ...props }: IProps) {
                         )}
                         {attributes.proceed && (
                             <Button
-                                color={attributes.proceed?.variant ?? 'primary'}
+                                color={attributes.proceed?.variant}
                                 onClick={() => {
                                     attributes.proceed.action();
                                     props.onClose();

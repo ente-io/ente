@@ -2,11 +2,11 @@ import constants from 'utils/strings/constants';
 import billingService from 'services/billingService';
 import { Plan, Subscription } from 'types/billing';
 import { NextRouter } from 'next/router';
-import { SetDialogBoxAttributes } from 'components/DialogBox';
 import { SetLoading } from 'types/gallery';
 import { getData, LS_KEYS } from '../storage/localStorage';
 import { CustomError } from '../error';
 import { logError } from '../sentry';
+import { SetDialogBoxAttributes } from 'types/dialogBox';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';
 const PAYMENT_PROVIDER_APPSTORE = 'appstore';
