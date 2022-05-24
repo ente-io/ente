@@ -422,8 +422,8 @@ export default function Upload(props: Props) {
     return (
         <>
             <UploadStrategyChoiceModal
-                show={choiceModalView}
-                onHide={() => setChoiceModalView(false)}
+                open={choiceModalView}
+                onClose={() => setChoiceModalView(false)}
                 uploadToSingleCollection={() =>
                     uploadToSingleNewCollection(
                         analysisResult.suggestedCollectionName

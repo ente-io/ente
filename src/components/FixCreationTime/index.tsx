@@ -94,8 +94,8 @@ export default function FixCreationTime(props: Props) {
 
     return (
         <DialogBox
-            show={props.isOpen}
-            onHide={props.hide}
+            open={props.isOpen}
+            onClose={props.hide}
             attributes={{
                 title:
                     fixState === FIX_STATE.RUNNING

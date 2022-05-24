@@ -57,8 +57,8 @@ function RecoveryKey({ somethingWentWrong, ...props }: Props) {
 
     return (
         <DialogBox
-            show={props.show}
-            onHide={props.onHide}
+            open={props.show}
+            onClose={props.onHide}
             size="sm"
             attributes={recoveryKeyDialogAttributes}>
             <Typography mb={3}>{constants.RECOVERY_KEY_DESCRIPTION}</Typography>

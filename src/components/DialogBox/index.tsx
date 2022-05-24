@@ -35,16 +35,16 @@ export interface DialogBoxAttributes {
 export type SetDialogBoxAttributes = React.Dispatch<
     React.SetStateAction<DialogBoxAttributes>
 >;
-type Props = React.PropsWithChildren<
-    Omit<DialogProps, 'open' | 'onClose' | 'maxSize'> & {
-        show: boolean;
-        onHide: () => void;
+
+type IProps = React.PropsWithChildren<
+    Omit<DialogProps, 'onClose' | 'maxSize'> & {
+        onClose: () => void;
         attributes: DialogBoxAttributes;
         size?: Breakpoint;
     }
 >;
 
-export default function DialogBox({ attributes, children, ...props }: Props) {
+export default function DialogBox({ attributes, children, ...props }: IProps) {
     if (!attributes) {
         return <Dialog open={false} />;
     }
@@ -55,13 +55,13 @@ export default function DialogBox({ attributes, children, ...props }: Props) {
         } else if (attributes?.staticBackdrop && reason === 'backdropClick') {
             // no-op
         } else {
-            props.onHide();
+            props.onClose();
         }
     };
 
     return (
         <DialogBoxBase
-            open={props.show}
+            open={props.open}
             maxWidth={props.size}
             onClose={handleClose}
             {...props}>
@@ -91,7 +91,7 @@ export default function DialogBox({ attributes, children, ...props }: Props) {
                                 onClick={() => {
                                     attributes.close.action &&
                                         attributes.close?.action();
-                                    props.onHide();
+                                    props.onClose();
                                 }}>
                                 {attributes.close?.text ?? constants.OK}
                             </Button>
@@ -101,7 +101,7 @@ export default function DialogBox({ attributes, children, ...props }: Props) {
                                 color={attributes.proceed?.variant ?? 'primary'}
                                 onClick={() => {
                                     attributes.proceed.action();
-                                    props.onHide();
+                                    props.onClose();
                                 }}
                                 disabled={attributes.proceed.disabled}>
                                 {attributes.proceed.text}

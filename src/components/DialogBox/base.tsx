@@ -18,4 +18,9 @@ const DialogBoxBase = styled(Dialog)(({ theme }) => ({
     },
 }));
 
+DialogBoxBase.defaultProps = {
+    fullWidth: true,
+    maxWidth: 'sm',
+};
+
 export default DialogBoxBase;

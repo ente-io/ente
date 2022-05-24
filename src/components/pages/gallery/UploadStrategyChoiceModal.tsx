@@ -5,8 +5,8 @@ import constants from 'utils/strings/constants';
 
 interface Props {
     uploadToMultipleCollection: () => void;
-    show: boolean;
-    onHide: () => void;
+    open: boolean;
+    onClose: () => void;
     uploadToSingleCollection: () => void;
 }
 function UploadStrategyChoiceModal({
@@ -37,7 +37,7 @@ function UploadStrategyChoiceModal({
                 <Button
                     variant="outline-success"
                     onClick={() => {
-                        props.onHide();
+                        props.onClose();
                         uploadToSingleCollection();
                     }}
                     style={{
@@ -58,7 +58,7 @@ function UploadStrategyChoiceModal({
                 <Button
                     variant="outline-success"
                     onClick={() => {
-                        props.onHide();
+                        props.onClose();
                         uploadToMultipleCollection();
                     }}
                     style={{

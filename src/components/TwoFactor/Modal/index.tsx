@@ -44,8 +44,8 @@ function TwoFactorModal(props: Props) {
         <DialogBox
             size="xs"
             fullWidth
-            show={props.show}
-            onHide={props.onHide}
+            open={props.show}
+            onClose={props.onHide}
             attributes={{
                 title: constants.TWO_FACTOR_AUTHENTICATION,
                 staticBackdrop: true,

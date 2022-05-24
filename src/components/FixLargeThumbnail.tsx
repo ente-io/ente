@@ -137,8 +137,8 @@ export default function FixLargeThumbnails(props: Props) {
     };
     return (
         <DialogBox
-            show={props.isOpen}
-            onHide={props.hide}
+            open={props.isOpen}
+            onClose={props.hide}
             attributes={{
                 title: constants.COMPRESS_THUMBNAILS,
                 staticBackdrop: true,

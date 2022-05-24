@@ -352,8 +352,8 @@ function CollectionShare(props: Props) {
 
     return (
         <DialogBox
-            show={props.show}
-            onHide={props.onHide}
+            open={props.show}
+            onClose={props.onHide}
             attributes={{
                 title: constants.SHARE_COLLECTION,
                 staticBackdrop: true,
@@ -574,8 +574,8 @@ function CollectionShare(props: Props) {
                                 </OptionRow>
                             </section>
                             <DialogBox
-                                show={configurePassword}
-                                onHide={() => setConfigurePassword(false)}
+                                open={configurePassword}
+                                onClose={() => setConfigurePassword(false)}
                                 size="sm"
                                 attributes={{
                                     title: constants.PASSWORD_LOCK,

@@ -313,8 +313,8 @@ export default function ExportModal(props: Props) {
 
     return (
         <DialogBox
-            show={props.show}
-            onHide={props.onHide}
+            open={props.show}
+            onClose={props.onHide}
             attributes={{
                 title: constants.EXPORT_DATA,
             }}>

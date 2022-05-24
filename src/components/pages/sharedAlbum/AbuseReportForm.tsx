@@ -99,9 +99,9 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
 
     return (
         <DialogBox
-            show={show}
+            open={show}
             size="lg"
-            onHide={close}
+            onClose={close}
             attributes={{
                 title: constants.ABUSE_REPORT,
                 staticBackdrop: true,

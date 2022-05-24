@@ -285,8 +285,8 @@ export default function App({ Component, err }) {
                     <DialogBox
                         fullWidth
                         size="sm"
-                        show={messageDialogView}
-                        onHide={closeMessageDialog}
+                        open={messageDialogView}
+                        onClose={closeMessageDialog}
                         attributes={dialogMessage}
                     />
 
