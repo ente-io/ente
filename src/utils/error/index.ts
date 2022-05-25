@@ -108,6 +108,7 @@ export function errorWithContext(originalError: Error, context: string) {
         originalError.stack;
     return errorWithContext;
 }
+
 export const parseSharingErrorCodes = (error) => {
     let parsedMessage = null;
     if (error?.status) {

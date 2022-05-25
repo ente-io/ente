@@ -1,5 +1,4 @@
 import * as Sentry from '@sentry/nextjs';
-import { errorWithContext } from 'utils/error';
 import { getUserAnonymizedID } from 'utils/user';
 
 export const logError = (
@@ -22,3 +21,13 @@ export const logError = (
         },
     });
 };
+
+// copy of errorWithContext to prevent importing error util
+function errorWithContext(originalError: Error, context: string) {
+    const errorWithContext = new Error(context);
+    errorWithContext.stack =
+        errorWithContext.stack.split('\n').slice(2, 4).join('\n') +
+        '\n' +
+        originalError.stack;
+    return errorWithContext;
+}
