@@ -39,6 +39,7 @@ import uiService from './uiService';
 import { logUploadInfo } from 'utils/upload';
 import isElectron from 'is-electron';
 import ImportService from 'services/importService';
+import watchService from 'services/watchService';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -399,6 +400,18 @@ class UploadManager {
                         !areFileWithCollectionsSame(file, fileWithCollection)
                 );
                 ImportService.updatePendingUploads(this.remainingFiles);
+
+                if (
+                    fileUploadResult === FileUploadResults.UPLOADED ||
+                    fileUploadResult ===
+                        FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL ||
+                    fileUploadResult === FileUploadResults.ALREADY_UPLOADED
+                ) {
+                    await watchService.fileUploadDone(
+                        fileWithCollection,
+                        uploadedFile
+                    );
+                }
             }
         } catch (e) {
             logError(e, 'failed to do post file upload action');

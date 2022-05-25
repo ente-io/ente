@@ -25,6 +25,7 @@ import UploadTypeSelector from '../../UploadTypeSelector';
 import Router from 'next/router';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp } from 'utils/common';
+import watchService from 'services/watchService';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -116,6 +117,12 @@ export default function Upload(props: Props) {
                     resumeDesktopUpload(type, electronFiles, collectionName);
                 }
             );
+            watchService.setElectronFiles = props.setElectronFiles;
+            watchService.setCollectionName = (collectionName: string) => {
+                isPendingDesktopUpload.current = true;
+                pendingDesktopUploadCollectionName.current = collectionName;
+            };
+            watchService.init();
         }
     }, []);
 
@@ -346,6 +353,10 @@ export default function Upload(props: Props) {
                 );
             }
             await uploadManager.queueFilesForUpload(
+                filesWithCollectionToUpload,
+                collections
+            );
+            await watchService.allUploadsDone(
                 filesWithCollectionToUpload,
                 collections
             );
