@@ -20,6 +20,17 @@ export interface KeysStoreType {
     };
 }
 
+export interface WatchStoreType {
+    mappings: {
+        collectionName: string;
+        folderPath: string;
+        files: {
+            path: string;
+            ID: number;
+        }[];
+    }[];
+}
+
 export enum FILE_PATH_TYPE {
     FILES = 'files',
     ZIPS = 'zips',
