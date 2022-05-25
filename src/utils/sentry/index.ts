@@ -22,7 +22,8 @@ export const logError = (
     });
 };
 
-export function errorWithContext(originalError: Error, context: string) {
+// copy of errorWithContext to prevent importing error util
+function errorWithContext(originalError: Error, context: string) {
     const errorWithContext = new Error(context);
     errorWithContext.stack =
         errorWithContext.stack.split('\n').slice(2, 4).join('\n') +
