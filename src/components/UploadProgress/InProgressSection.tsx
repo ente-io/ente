@@ -1,9 +1,13 @@
 import React from 'react';
 import FileList from 'components/FileList';
-import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SectionInfo, InProgressItemContainer } from './styledComponents';
 import { FileProgresses } from '.';
+import {
+    UploadProgressSection,
+    UploadProgressSectionContent,
+    UploadProgressSectionTitle,
+} from './section';
 
 export interface InProgressProps {
     filenames: Map<number, string>;
@@ -15,11 +19,11 @@ export const InProgressSection = (props: InProgressProps) => {
     const fileList = props.fileProgressStatuses ?? [];
 
     return (
-        <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <UploadProgressSection>
+            <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
                 {props.sectionTitle}
-            </AccordionSummary>
-            <AccordionDetails>
+            </UploadProgressSectionTitle>
+            <UploadProgressSectionContent>
                 {props.sectionInfo && (
                     <SectionInfo>{props.sectionInfo}</SectionInfo>
                 )}
@@ -32,7 +36,7 @@ export const InProgressSection = (props: InProgressProps) => {
                         </InProgressItemContainer>
                     ))}
                 />
-            </AccordionDetails>
-        </Accordion>
+            </UploadProgressSectionContent>
+        </UploadProgressSection>
     );
 };

@@ -1,14 +1,14 @@
 import React from 'react';
 import FileList from 'components/FileList';
-import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
-    Typography,
-} from '@mui/material';
+import { Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SectionInfo, ResultItemContainer } from './styledComponents';
 import { FileUploadResults } from 'constants/upload';
+import {
+    UploadProgressSection,
+    UploadProgressSectionContent,
+    UploadProgressSectionTitle,
+} from './section';
 
 export interface ResultSectionProps {
     filenames: Map<number, string>;
@@ -23,11 +23,11 @@ export const ResultSection = (props: ResultSectionProps) => {
         return <></>;
     }
     return (
-        <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <UploadProgressSection>
+            <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
                 <Typography> {props.sectionTitle}</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
+            </UploadProgressSectionTitle>
+            <UploadProgressSectionContent>
                 {props.sectionInfo && (
                     <SectionInfo>{props.sectionInfo}</SectionInfo>
                 )}
@@ -38,7 +38,7 @@ export const ResultSection = (props: ResultSectionProps) => {
                         </ResultItemContainer>
                     ))}
                 />
-            </AccordionDetails>
-        </Accordion>
+            </UploadProgressSectionContent>
+        </UploadProgressSection>
     );
 };

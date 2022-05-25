@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from '@mui/material';
+import { DialogContent } from '@mui/material';
 import constants from 'utils/strings/constants';
 import { UPLOAD_STAGES, FileUploadResults } from 'constants/upload';
 import React from 'react';
@@ -8,6 +8,7 @@ import { InProgressSection } from './inProgressSection';
 import { ResultSection } from './resultSection';
 import { NotUploadSectionHeader } from './styledComponents';
 import { DESKTOP_APP_DOWNLOAD_URL } from 'utils/common';
+import DialogBoxBase from 'components/DialogBox/base';
 export function UploadProgressDialog({
     handleHideModal,
     setExpanded,
@@ -19,9 +20,8 @@ export function UploadProgressDialog({
     ...props
 }) {
     return (
-        <Dialog
+        <DialogBoxBase
             maxWidth="xs"
-            fullWidth
             open={props.show}
             onClose={handleHideModal}>
             <UploadProgressHeader
@@ -34,7 +34,7 @@ export function UploadProgressDialog({
             />
             <DialogContent
                 sx={{
-                    px: 0,
+                    '&&&': { px: 0 },
                 }}>
                 {props.uploadStage === UPLOAD_STAGES.UPLOADING && (
                     <InProgressSection
@@ -108,14 +108,15 @@ export function UploadProgressDialog({
                 />
             </DialogContent>
 
-            {props.uploadStage === UPLOAD_STAGES.FINISH && (
-                <UploadProgressFooter
-                    uploadStage={props.uploadStage}
-                    retryFailed={props.retryFailed}
-                    closeModal={props.cancelUploads}
-                    fileUploadResultMap={fileUploadResultMap}
-                />
-            )}
-        </Dialog>
+            {props.uploadStage === UPLOAD_STAGES.FINISH ||
+                (true && (
+                    <UploadProgressFooter
+                        uploadStage={props.uploadStage}
+                        retryFailed={props.retryFailed}
+                        closeModal={props.cancelUploads}
+                        fileUploadResultMap={fileUploadResultMap}
+                    />
+                ))}
+        </DialogBoxBase>
     );
 }
