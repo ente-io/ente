@@ -32,82 +32,83 @@ export function UploadProgressDialog({
                 fileCounter={props.fileCounter}
                 now={props.now}
             />
-            <DialogContent
-                sx={{
-                    '&&&': { px: 0 },
-                }}>
-                {props.uploadStage === UPLOAD_STAGES.UPLOADING && (
-                    <InProgressSection
+            {(props.uploadStage === UPLOAD_STAGES.UPLOADING ||
+                props.uploadStage === UPLOAD_STAGES.FINISH) && (
+                <DialogContent>
+                    {props.uploadStage === UPLOAD_STAGES.UPLOADING && (
+                        <InProgressSection
+                            filenames={props.filenames}
+                            fileProgressStatuses={fileProgressStatuses}
+                            sectionTitle={constants.INPROGRESS_UPLOADS}
+                            sectionInfo={sectionInfo}
+                        />
+                    )}
+
+                    <ResultSection
                         filenames={props.filenames}
-                        fileProgressStatuses={fileProgressStatuses}
-                        sectionTitle={constants.INPROGRESS_UPLOADS}
-                        sectionInfo={sectionInfo}
+                        fileUploadResultMap={fileUploadResultMap}
+                        fileUploadResult={FileUploadResults.UPLOADED}
+                        sectionTitle={constants.SUCCESSFUL_UPLOADS}
                     />
-                )}
 
-                <ResultSection
-                    filenames={props.filenames}
-                    fileUploadResultMap={fileUploadResultMap}
-                    fileUploadResult={FileUploadResults.UPLOADED}
-                    sectionTitle={constants.SUCCESSFUL_UPLOADS}
-                />
+                    {props.uploadStage === UPLOAD_STAGES.FINISH &&
+                        filesNotUploaded && (
+                            <NotUploadSectionHeader>
+                                {constants.FILE_NOT_UPLOADED_LIST}
+                            </NotUploadSectionHeader>
+                        )}
 
-                {props.uploadStage === UPLOAD_STAGES.FINISH &&
-                    filesNotUploaded && (
-                        <NotUploadSectionHeader>
-                            {constants.FILE_NOT_UPLOADED_LIST}
-                        </NotUploadSectionHeader>
-                    )}
-
-                <ResultSection
-                    filenames={props.filenames}
-                    fileUploadResultMap={fileUploadResultMap}
-                    fileUploadResult={FileUploadResults.BLOCKED}
-                    sectionTitle={constants.BLOCKED_UPLOADS}
-                    sectionInfo={constants.ETAGS_BLOCKED(
-                        DESKTOP_APP_DOWNLOAD_URL
-                    )}
-                />
-                <ResultSection
-                    filenames={props.filenames}
-                    fileUploadResultMap={fileUploadResultMap}
-                    fileUploadResult={FileUploadResults.FAILED}
-                    sectionTitle={constants.FAILED_UPLOADS}
-                />
-                <ResultSection
-                    filenames={props.filenames}
-                    fileUploadResultMap={fileUploadResultMap}
-                    fileUploadResult={FileUploadResults.ALREADY_UPLOADED}
-                    sectionTitle={constants.SKIPPED_FILES}
-                    sectionInfo={constants.SKIPPED_INFO}
-                />
-                <ResultSection
-                    filenames={props.filenames}
-                    fileUploadResultMap={fileUploadResultMap}
-                    fileUploadResult={
-                        FileUploadResults.LARGER_THAN_AVAILABLE_STORAGE
-                    }
-                    sectionTitle={
-                        constants.LARGER_THAN_AVAILABLE_STORAGE_UPLOADS
-                    }
-                    sectionInfo={constants.LARGER_THAN_AVAILABLE_STORAGE_INFO}
-                />
-                <ResultSection
-                    filenames={props.filenames}
-                    fileUploadResultMap={fileUploadResultMap}
-                    fileUploadResult={FileUploadResults.UNSUPPORTED}
-                    sectionTitle={constants.UNSUPPORTED_FILES}
-                    sectionInfo={constants.UNSUPPORTED_INFO}
-                />
-                <ResultSection
-                    filenames={props.filenames}
-                    fileUploadResultMap={fileUploadResultMap}
-                    fileUploadResult={FileUploadResults.TOO_LARGE}
-                    sectionTitle={constants.TOO_LARGE_UPLOADS}
-                    sectionInfo={constants.TOO_LARGE_INFO}
-                />
-            </DialogContent>
-
+                    <ResultSection
+                        filenames={props.filenames}
+                        fileUploadResultMap={fileUploadResultMap}
+                        fileUploadResult={FileUploadResults.BLOCKED}
+                        sectionTitle={constants.BLOCKED_UPLOADS}
+                        sectionInfo={constants.ETAGS_BLOCKED(
+                            DESKTOP_APP_DOWNLOAD_URL
+                        )}
+                    />
+                    <ResultSection
+                        filenames={props.filenames}
+                        fileUploadResultMap={fileUploadResultMap}
+                        fileUploadResult={FileUploadResults.FAILED}
+                        sectionTitle={constants.FAILED_UPLOADS}
+                    />
+                    <ResultSection
+                        filenames={props.filenames}
+                        fileUploadResultMap={fileUploadResultMap}
+                        fileUploadResult={FileUploadResults.ALREADY_UPLOADED}
+                        sectionTitle={constants.SKIPPED_FILES}
+                        sectionInfo={constants.SKIPPED_INFO}
+                    />
+                    <ResultSection
+                        filenames={props.filenames}
+                        fileUploadResultMap={fileUploadResultMap}
+                        fileUploadResult={
+                            FileUploadResults.LARGER_THAN_AVAILABLE_STORAGE
+                        }
+                        sectionTitle={
+                            constants.LARGER_THAN_AVAILABLE_STORAGE_UPLOADS
+                        }
+                        sectionInfo={
+                            constants.LARGER_THAN_AVAILABLE_STORAGE_INFO
+                        }
+                    />
+                    <ResultSection
+                        filenames={props.filenames}
+                        fileUploadResultMap={fileUploadResultMap}
+                        fileUploadResult={FileUploadResults.UNSUPPORTED}
+                        sectionTitle={constants.UNSUPPORTED_FILES}
+                        sectionInfo={constants.UNSUPPORTED_INFO}
+                    />
+                    <ResultSection
+                        filenames={props.filenames}
+                        fileUploadResultMap={fileUploadResultMap}
+                        fileUploadResult={FileUploadResults.TOO_LARGE}
+                        sectionTitle={constants.TOO_LARGE_UPLOADS}
+                        sectionInfo={constants.TOO_LARGE_INFO}
+                    />
+                </DialogContent>
+            )}
             {props.uploadStage === UPLOAD_STAGES.FINISH && (
                 <UploadProgressFooter
                     uploadStage={props.uploadStage}
