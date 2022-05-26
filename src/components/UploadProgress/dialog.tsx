@@ -108,15 +108,14 @@ export function UploadProgressDialog({
                 />
             </DialogContent>
 
-            {props.uploadStage === UPLOAD_STAGES.FINISH ||
-                (true && (
-                    <UploadProgressFooter
-                        uploadStage={props.uploadStage}
-                        retryFailed={props.retryFailed}
-                        closeModal={props.cancelUploads}
-                        fileUploadResultMap={fileUploadResultMap}
-                    />
-                ))}
+            {props.uploadStage === UPLOAD_STAGES.FINISH && (
+                <UploadProgressFooter
+                    uploadStage={props.uploadStage}
+                    retryFailed={props.retryFailed}
+                    closeModal={props.cancelUploads}
+                    fileUploadResultMap={fileUploadResultMap}
+                />
+            )}
         </DialogBoxBase>
     );
 }

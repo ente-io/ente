@@ -777,7 +777,6 @@ export function getCollectionSummaries(
             collectionAndItsLatestFile.file
         );
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const collectionFilesCount = getCollectionsFileCount(files);
 
     for (const collection of collections) {

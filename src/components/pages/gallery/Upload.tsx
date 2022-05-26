@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { syncCollections, createAlbum } from 'services/collectionService';
@@ -450,33 +449,16 @@ export default function Upload(props: Props) {
                 }
             />
             <UploadProgress
-                now={40}
-                filenames={
-                    new Map([
-                        [1, 'a'],
-                        [2, 'b'],
-                        [3, 'c'],
-                        [4, 'd'],
-                        [5, 'e'],
-                        [6, 'f'],
-                    ])
-                }
-                fileCounter={{ success: 14, issues: 32 }}
-                uploadStage={UPLOAD_STAGES.UPLOADING}
-                fileProgress={new Map([[1, 10]])}
+                now={percentComplete}
+                filenames={filenames}
+                fileCounter={fileCounter}
+                uploadStage={uploadStage}
+                fileProgress={fileProgress}
                 hasLivePhotos={hasLivePhotos}
                 show={progressView}
                 closeModal={() => setProgressView(false)}
                 retryFailed={retryFailed}
-                uploadResult={
-                    new Map([
-                        [1, 0],
-                        [2, 1],
-                        [3, 2],
-                        [4, 3],
-                        [5, 4],
-                    ])
-                }
+                uploadResult={uploadResult}
                 cancelUploads={cancelUploads}
             />
         </>
