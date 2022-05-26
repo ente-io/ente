@@ -11,6 +11,7 @@ import { LS_KEYS } from 'utils/storage/localStorage';
 import AllCollectionsHeader from './header';
 import { CollectionSummaries } from 'types/collection';
 import AllCollectionContent from './content';
+import { AllCollectionTile } from '../styledComponents';
 
 interface Iprops {
     isOpen: boolean;
@@ -59,6 +60,7 @@ export default function AllCollections(props: Iprops) {
             />
             <Divider />
             <AllCollectionContent
+                collectionTile={AllCollectionTile}
                 collectionSummaries={sortedCollectionSummaries}
                 onCollectionClick={onCollectionClick}
             />
