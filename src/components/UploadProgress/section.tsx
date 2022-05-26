@@ -8,9 +8,9 @@ import { Typography, TypographyProps } from '@mui/material';
 export const UploadProgressSection = styled((props: AccordionProps) => (
     <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(({ theme }) => ({
-    border: `1px solid ${theme.palette.divider}`,
-    '&:not(:last-child)': {
-        borderBottom: 0,
+    borderTop: `1px solid ${theme.palette.divider}`,
+    '&:last-child': {
+        borderBottom: `1px solid ${theme.palette.divider}`,
     },
     '&:before': {
         display: 'none',
