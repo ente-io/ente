@@ -3,15 +3,19 @@ import { GalleryContext } from 'pages/gallery';
 import { useState, useContext, useEffect } from 'react';
 import downloadManager from 'services/downloadManager';
 import { EnteFile } from 'types/file';
-import { CollectionTile, LargerCollectionTile } from './styledComponents';
 
 export default function CollectionCard(props: {
     children?: any;
-    latestFile: EnteFile;
+    latestFile?: EnteFile;
     onClick: () => void;
-    large?: boolean;
+    collectionTile: any;
 }) {
-    const { latestFile: file, onClick, children, large } = props;
+    const {
+        latestFile: file,
+        onClick,
+        children,
+        collectionTile: CustomCollectionTile,
+    } = props;
 
     const [coverImageURL, setCoverImageURL] = useState(null);
     const galleryContext = useContext(GalleryContext);
@@ -28,10 +32,10 @@ export default function CollectionCard(props: {
         };
         main();
     }, [file]);
-    const UsedCollectionTile = large ? LargerCollectionTile : CollectionTile;
+
     return (
-        <UsedCollectionTile coverImgURL={coverImageURL} onClick={onClick}>
+        <CustomCollectionTile coverImgURL={coverImageURL} onClick={onClick}>
             {children}
-        </UsedCollectionTile>
+        </CustomCollectionTile>
     );
 }
