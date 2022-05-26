@@ -7,10 +7,12 @@ import { CollectionSummary } from 'types/collection';
 interface Iprops {
     collectionSummaries: CollectionSummary[];
     onCollectionClick: (id?: number) => void;
+    collectionTile: any;
 }
 export default function AllCollectionContent({
     collectionSummaries,
     onCollectionClick,
+    collectionTile,
 }: Iprops) {
     return (
         <DialogContent>
@@ -18,17 +20,14 @@ export default function AllCollectionContent({
                 style={{
                     flexWrap: 'wrap',
                 }}>
-                {collectionSummaries.map(
-                    ({ latestFile, collectionAttributes, fileCount }) => (
-                        <AllCollectionCard
-                            onCollectionClick={onCollectionClick}
-                            collectionAttributes={collectionAttributes}
-                            key={collectionAttributes.id}
-                            latestFile={latestFile}
-                            fileCount={fileCount}
-                        />
-                    )
-                )}
+                {collectionSummaries.map((collectionSummary) => (
+                    <AllCollectionCard
+                        collectionTile={collectionTile}
+                        onCollectionClick={onCollectionClick}
+                        collectionSummary={collectionSummary}
+                        key={collectionSummary.collectionAttributes.id}
+                    />
+                ))}
             </FlexWrapper>
         </DialogContent>
     );
