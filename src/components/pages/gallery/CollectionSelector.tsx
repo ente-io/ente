@@ -74,7 +74,10 @@ function CollectionSelector({
     };
 
     return (
-        <DialogBoxBase {...props} maxWidth="md">
+        <DialogBoxBase
+            {...props}
+            maxWidth="md"
+            PaperProps={{ sx: { maxWidth: '848px' } }}>
             <DialogTitleWithCloseButton onClose={() => props.onClose(true)}>
                 {attributes.title}
             </DialogTitleWithCloseButton>
