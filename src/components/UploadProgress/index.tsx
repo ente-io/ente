@@ -53,7 +53,7 @@ export default function UploadProgress(props: Props) {
         }
     }
     if (props.hasLivePhotos) {
-        sectionInfo = constants.LIVE_PHOTOS_DETECTED();
+        sectionInfo = constants.LIVE_PHOTOS_DETECTED;
     }
 
     function handleHideModal() {
