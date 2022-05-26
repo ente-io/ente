@@ -1,23 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Modal } from 'react-bootstrap';
-import styled from 'styled-components';
 import AddCollectionButton from './AddCollectionButton';
-import PreviewCard from './PreviewCard';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { User } from 'types/user';
-import { Collection, CollectionAndItsLatestFile } from 'types/collection';
+import {
+    Collection,
+    CollectionSummaries,
+    CollectionSummary,
+} from 'types/collection';
 import { CollectionType } from 'constants/collection';
-
-export const CollectionIcon = styled.div`
-    width: 200px;
-    margin: 10px;
-    height: 240px;
-    padding: 4px;
-    color: black;
-    border-width: 4px;
-    border-radius: 34px;
-    outline: none;
-`;
+import DialogBoxBase from 'components/DialogBox/base';
+import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
+import { DialogContent } from '@mui/material';
+import { FlexWrapper } from 'components/Container';
+import { CollectionSelectorTile } from 'components/Collections/styledComponents';
+import AllCollectionCard from 'components/Collections/AllCollections/CollectionCard';
 
 export interface CollectionSelectorAttributes {
     callback: (collection: Collection) => void;
@@ -29,83 +25,80 @@ export type SetCollectionSelectorAttributes = React.Dispatch<
     React.SetStateAction<CollectionSelectorAttributes>
 >;
 
-const CollectionCard = styled(Card)`
-    display: flex;
-    flex-direction: column;
-    height: 221px;
-`;
-
 interface Props {
-    show: boolean;
-    onHide: (closeBtnClick?: boolean) => void;
-    collectionsAndTheirLatestFile: CollectionAndItsLatestFile[];
+    open: boolean;
+    onClose: (closeBtnClick?: boolean) => void;
     attributes: CollectionSelectorAttributes;
+    collections: Collection[];
+    collectionSummaries: CollectionSummaries;
 }
 function CollectionSelector({
     attributes,
-    collectionsAndTheirLatestFile,
+    collectionSummaries,
+    collections,
     ...props
 }: Props) {
     const [collectionToShow, setCollectionToShow] = useState<
-        CollectionAndItsLatestFile[]
+        CollectionSummary[]
     >([]);
     useEffect(() => {
-        if (!attributes || !props.show) {
+        if (!attributes || !props.open) {
             return;
         }
         const user: User = getData(LS_KEYS.USER);
-        const personalCollectionsOtherThanFrom =
-            collectionsAndTheirLatestFile?.filter(
-                (item) =>
-                    item.collection.id !== attributes.fromCollection &&
-                    item.collection.owner.id === user?.id &&
-                    item.collection.type !== CollectionType.favorites
-            );
+        const personalCollectionsOtherThanFrom = [
+            ...collectionSummaries.values(),
+        ]?.filter(
+            ({ collectionAttributes }) =>
+                collectionAttributes.id !== attributes.fromCollection &&
+                collectionAttributes.ownerID === user?.id &&
+                collectionAttributes.type !== CollectionType.favorites &&
+                collectionAttributes.type !== CollectionType.system
+        );
         if (personalCollectionsOtherThanFrom.length === 0) {
-            props.onHide();
+            props.onClose();
             attributes.showNextModal();
         } else {
             setCollectionToShow(personalCollectionsOtherThanFrom);
         }
-    }, [props.show]);
+    }, [props.open]);
 
     if (!attributes) {
-        return <Modal />;
+        return <></>;
     }
-    const CollectionIcons: JSX.Element[] = collectionToShow?.map((item) => (
-        <CollectionIcon
-            key={item.collection.id}
-            onClick={() => {
-                attributes.callback(item.collection);
-                props.onHide();
-            }}>
-            <CollectionCard>
-                <PreviewCard file={item.file} forcedEnable />
-                <Card.Text className="text-center">
-                    {item.collection.name}
-                </Card.Text>
-            </CollectionCard>
-        </CollectionIcon>
-    ));
+
+    const handleCollectionClick = (collectionID: number) => {
+        const collection = collections.find((c) => c.id === collectionID);
+        attributes.callback(collection);
+        props.onClose();
+    };
 
     return (
-        <Modal
-            {...props}
-            size="xl"
-            centered
-            contentClassName="plan-selector-modal-content">
-            <Modal.Header closeButton onHide={() => props.onHide(true)}>
-                <Modal.Title>{attributes.title}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body
-                style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
+        <DialogBoxBase {...props} maxWidth="md">
+            <DialogTitleWithCloseButton onClose={() => props.onClose(true)}>
+                {attributes.title}
+            </DialogTitleWithCloseButton>
+            <DialogContent
+                sx={{
+                    '&&&': {
+                        px: 0,
+                    },
                 }}>
-                <AddCollectionButton showNextModal={attributes.showNextModal} />
-                {CollectionIcons}
-            </Modal.Body>
-        </Modal>
+                <FlexWrapper style={{ flexWrap: 'wrap' }}>
+                    <AddCollectionButton
+                        showNextModal={attributes.showNextModal}
+                    />
+                    {collectionToShow.map((collectionSummary) => (
+                        <AllCollectionCard
+                            collectionTile={CollectionSelectorTile}
+                            onCollectionClick={handleCollectionClick}
+                            collectionSummary={collectionSummary}
+                            key={collectionSummary.collectionAttributes.id}
+                        />
+                    ))}
+                </FlexWrapper>
+            </DialogContent>
+        </DialogBoxBase>
     );
 }
 

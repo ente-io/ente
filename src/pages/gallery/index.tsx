@@ -627,12 +627,11 @@ export default function Gallery() {
                     attributes={collectionNamerAttributes}
                 />
                 <CollectionSelector
-                    show={collectionSelectorView}
-                    onHide={closeCollectionSelector}
-                    collectionsAndTheirLatestFile={
-                        collectionsAndTheirLatestFile
-                    }
+                    open={collectionSelectorView}
+                    onClose={closeCollectionSelector}
+                    collectionSummaries={collectionSummaries}
                     attributes={collectionSelectorAttributes}
+                    collections={collections}
                 />
                 <FixCreationTime
                     isOpen={fixCreationTimeView}
