@@ -18,7 +18,7 @@ const IconButtonWithBG = styled(IconButton)(({ theme }) => ({
     backgroundColor: theme.palette.secondary.main,
 }));
 
-const UploadProgressTitleText = (expanded) => (
+const UploadProgressTitleText = ({ expanded }) => (
     <Typography
         {...(expanded ? { variant: 'title' } : {})}
         css={

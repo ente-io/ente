@@ -19,7 +19,11 @@ export function UploadProgressHeader({
                 handleHideModal={handleHideModal}
                 fileCounter={fileCounter}
             />
-            <UploadProgressBar now={now} uploadStage={uploadStage} />
+            <UploadProgressBar
+                now={now}
+                uploadStage={uploadStage}
+                expanded={expanded}
+            />
         </>
     );
 }
