@@ -33,10 +33,9 @@ import { AppContext } from 'pages/_app';
 const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
     top: 0;
-    z-index: 1000;
+    z-index: 99;
     display: ${({ isOpen }) => (isOpen ? 'flex' : 'none')};
     width: 100%;
-    background: #111;
     @media (min-width: 625px) {
         display: flex;
         width: calc(100vw - 140px);

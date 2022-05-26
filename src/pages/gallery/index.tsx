@@ -208,8 +208,7 @@ export default function Gallery() {
     const clearNotificationAttributes = () => setNotificationAttributes(null);
 
     const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
-    const [showUploadTypeChoiceModal, setShowUploadTypeChoiceModal] =
-        useState(false);
+    const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -308,7 +307,6 @@ export default function Gallery() {
             files.push(...getTrashedFiles(trash));
             await setDerivativeState(collections, files);
         } catch (e) {
-            console.log(e);
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
                     setBannerMessage(constants.SESSION_EXPIRED_MESSAGE);
@@ -566,7 +564,7 @@ export default function Gallery() {
 
     const openUploader = () => {
         if (importService.checkAllElectronAPIsExists()) {
-            setShowUploadTypeChoiceModal(true);
+            setUploadTypeSelectorView(true);
         } else {
             openFileUploader();
         }
@@ -629,12 +627,11 @@ export default function Gallery() {
                     attributes={collectionNamerAttributes}
                 />
                 <CollectionSelector
-                    show={collectionSelectorView}
-                    onHide={closeCollectionSelector}
-                    collectionsAndTheirLatestFile={
-                        collectionsAndTheirLatestFile
-                    }
+                    open={collectionSelectorView}
+                    onClose={closeCollectionSelector}
+                    collectionSummaries={collectionSummaries}
                     attributes={collectionSelectorAttributes}
+                    collections={collections}
                 />
                 <FixCreationTime
                     isOpen={fixCreationTimeView}
@@ -665,8 +662,8 @@ export default function Gallery() {
                     isFirstUpload={collectionsAndTheirLatestFile?.length === 0}
                     electronFiles={electronFiles}
                     setElectronFiles={setElectronFiles}
-                    showUploadTypeChoiceModal={showUploadTypeChoiceModal}
-                    setShowUploadTypeChoiceModal={setShowUploadTypeChoiceModal}
+                    uploadTypeSelectorView={uploadTypeSelectorView}
+                    setUploadTypeSelectorView={setUploadTypeSelectorView}
                 />
                 <Sidebar collectionSummaries={collectionSummaries} />
                 <UploadButton

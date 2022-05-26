@@ -1,6 +1,10 @@
 import React from 'react';
 import { EnteFile } from 'types/file';
-import { CollectionTileWrapper, ActiveIndicator } from '../styledComponents';
+import {
+    CollectionTileWrapper,
+    ActiveIndicator,
+    CollectionTile,
+} from '../styledComponents';
 import CollectionCard from '../CollectionCard';
 
 const CollectionCardWithActiveIndicator = React.forwardRef(
@@ -17,7 +21,7 @@ const CollectionCardWithActiveIndicator = React.forwardRef(
 
         return (
             <CollectionTileWrapper ref={ref}>
-                <CollectionCard {...others} />
+                <CollectionCard collectionTile={CollectionTile} {...others} />
                 {active && <ActiveIndicator />}
             </CollectionTileWrapper>
         );

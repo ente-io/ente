@@ -777,7 +777,6 @@ export function getCollectionSummaries(
             collectionAndItsLatestFile.file
         );
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const collectionFilesCount = getCollectionsFileCount(files);
 
     for (const collection of collections) {
@@ -787,6 +786,7 @@ export function getCollectionSummaries(
                 name: collection.name,
                 type: collection.type,
                 updationTime: collection.updationTime,
+                ownerID: collection.owner.id,
             },
             latestFile: collectionAndTheirLatestFileMap.get(collection.id),
             fileCount: collectionFilesCount.get(collection.id) ?? 0,
@@ -821,10 +821,11 @@ function getArchivedCollectionSummaries(
             name: constants.ARCHIVE,
             type: CollectionType.system,
             updationTime: 0,
+            ownerID: 0,
         },
         latestFile: null,
         fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
-    };
+    } as CollectionSummary;
 }
 
 function getTrashedCollectionSummaries(
@@ -836,6 +837,7 @@ function getTrashedCollectionSummaries(
             name: constants.TRASH,
             type: CollectionType.system,
             updationTime: 0,
+            ownerID: 0,
         },
         latestFile: null,
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,

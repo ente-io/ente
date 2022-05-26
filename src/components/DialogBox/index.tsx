@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import DialogTitleWithCloseButton from './titleWithCloseButton';
 import MessageText from './messageText';
-import DialogBoxBase from './base';
+import DialogBoxBase, { dialogCloseHandler } from './base';
 import { DialogBoxAttributes } from 'types/dialogBox';
 
 type IProps = React.PropsWithChildren<
@@ -18,6 +18,7 @@ type IProps = React.PropsWithChildren<
         onClose: () => void;
         attributes: DialogBoxAttributes;
         size?: Breakpoint;
+        titleCloseButton?: boolean;
     }
 >;
 
@@ -26,15 +27,11 @@ export default function DialogBox({ attributes, children, ...props }: IProps) {
         return <Dialog open={false} />;
     }
 
-    const handleClose: DialogProps['onClose'] = (_, reason) => {
-        if (attributes?.nonClosable) {
-            // no-op
-        } else if (attributes?.staticBackdrop && reason === 'backdropClick') {
-            // no-op
-        } else {
-            props.onClose();
-        }
-    };
+    const handleClose = dialogCloseHandler({
+        staticBackdrop: attributes.staticBackdrop,
+        nonClosable: attributes.nonClosable,
+        onClose: props.onClose,
+    });
 
     return (
         <DialogBoxBase
@@ -44,11 +41,7 @@ export default function DialogBox({ attributes, children, ...props }: IProps) {
             {...props}>
             {attributes.title && (
                 <DialogTitleWithCloseButton
-                    onClose={
-                        !attributes?.nonClosable &&
-                        attributes?.close?.titleCloseButton &&
-                        handleClose
-                    }>
+                    onClose={props.titleCloseButton && handleClose}>
                     {attributes.title}
                 </DialogTitleWithCloseButton>
             )}

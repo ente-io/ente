@@ -72,8 +72,15 @@ const darkThemeOptions = createTheme({
             },
         },
         MuiMenu: {
-            styleOverrides: { paper: { margin: '10px' } },
+            styleOverrides: {
+                paper: { margin: '10px' },
+                list: {
+                    padding: 0,
+                    border: 'none',
+                },
+            },
         },
+
         MuiButton: {
             defaultProps: {
                 variant: 'contained',
@@ -104,6 +111,13 @@ const darkThemeOptions = createTheme({
             defaultProps: {
                 variant: 'filled',
                 margin: 'dense',
+            },
+        },
+        MuiTooltip: {
+            styleOverrides: {
+                tooltipPlacementBottom: {
+                    marginTop: '0px !important',
+                },
             },
         },
     },

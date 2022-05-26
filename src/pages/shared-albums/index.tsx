@@ -168,6 +168,7 @@ export default function PublicCollectionGallery() {
                     type: collection.type,
                     id: collection.id,
                     updationTime: collection.updationTime,
+                    ownerID: collection.owner.id,
                 },
                 latestFile: files[0],
                 fileCount: files.length,

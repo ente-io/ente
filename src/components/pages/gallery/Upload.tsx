@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { syncCollections, createAlbum } from 'services/collectionService';
 import constants from 'utils/strings/constants';
-import UploadProgress from './UploadProgress';
+import UploadProgress from '../../UploadProgress';
 
 import UploadStrategyChoiceModal from './UploadStrategyChoiceModal';
 import { SetCollectionNamerAttributes } from '../../Collections/CollectionNamer';
@@ -21,7 +21,7 @@ import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import { ElectronFile, FileWithCollection } from 'types/upload';
-import UploadTypeChoiceModal from './UploadTypeChoiceModal';
+import UploadTypeSelector from '../../UploadTypeSelector';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -40,8 +40,8 @@ interface Props {
     isFirstUpload: boolean;
     electronFiles: ElectronFile[];
     setElectronFiles: (files: ElectronFile[]) => void;
-    showUploadTypeChoiceModal: boolean;
-    setShowUploadTypeChoiceModal: (open: boolean) => void;
+    uploadTypeSelectorView: boolean;
+    setUploadTypeSelectorView: (open: boolean) => void;
 }
 
 enum UPLOAD_STRATEGY {
@@ -65,7 +65,7 @@ export default function Upload(props: Props) {
         UPLOAD_STAGES.START
     );
     const [filenames, setFilenames] = useState(new Map<number, string>());
-    const [fileCounter, setFileCounter] = useState({ finished: 0, total: 0 });
+    const [fileCounter, setFileCounter] = useState({ success: 0, issues: 0 });
     const [fileProgress, setFileProgress] = useState(new Map<number, number>());
     const [uploadResult, setUploadResult] = useState(
         new Map<number, FileUploadResults>()
@@ -147,7 +147,7 @@ export default function Upload(props: Props) {
 
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
-        setFileCounter({ finished: 0, total: 0 });
+        setFileCounter({ success: 0, issues: 0 });
         setFileProgress(new Map<number, number>());
         setUploadResult(new Map<number, number>());
         setPercentComplete(0);
@@ -406,7 +406,7 @@ export default function Upload(props: Props) {
             files = await ImportService.showUploadDirsDialog();
         }
         props.setElectronFiles(files);
-        props.setShowUploadTypeChoiceModal(false);
+        props.setUploadTypeSelectorView(false);
     };
 
     const cancelUploads = async () => {
@@ -435,13 +435,16 @@ export default function Upload(props: Props) {
                     )
                 }
             />
-            <UploadTypeChoiceModal
-                show={props.showUploadTypeChoiceModal}
-                onHide={() => props.setShowUploadTypeChoiceModal(false)}
+            <UploadTypeSelector
+                show={props.uploadTypeSelectorView}
+                onHide={() => props.setUploadTypeSelectorView(false)}
                 uploadFiles={() =>
                     handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FILES)
                 }
                 uploadFolders={() =>
+                    handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FOLDERS)
+                }
+                uploadGoogleTakeoutZips={() =>
                     handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FOLDERS)
                 }
             />
@@ -455,7 +458,6 @@ export default function Upload(props: Props) {
                 show={progressView}
                 closeModal={() => setProgressView(false)}
                 retryFailed={retryFailed}
-                fileRejections={props.fileRejections}
                 uploadResult={uploadResult}
                 cancelUploads={cancelUploads}
             />

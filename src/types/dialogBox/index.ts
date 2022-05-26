@@ -9,7 +9,6 @@ export interface DialogBoxAttributes {
         text?: string;
         variant?: ButtonProps['color'];
         action?: () => void;
-        titleCloseButton?: boolean;
     };
     proceed?: {
         text: string;

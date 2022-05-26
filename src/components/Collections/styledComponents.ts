@@ -38,6 +38,7 @@ export const CollectionTile = styled.div<{
     coverImgURL?: string;
 }>`
     display: flex;
+    position: relative;
     width: 80px;
     height: 64px;
     border-radius: 4px;
@@ -69,7 +70,7 @@ export const Hider = styled.div<{ hide: boolean }>`
     height: ${(props) => (props.hide ? '0' : 'auto')};
 `;
 
-export const LargerCollectionTile = styled(CollectionTile)`
+export const AllCollectionTile = styled(CollectionTile)`
     width: 150px;
     height: 150px;
     align-items: flex-start;
@@ -78,4 +79,10 @@ export const LargerCollectionTile = styled(CollectionTile)`
 
 export const CollectionTitleWithDashedBorder = styled(CollectionTile)`
     border: 1px dashed ${({ theme }) => theme.palette.grey.A200};
+`;
+
+export const CollectionSelectorTile = styled(AllCollectionTile)`
+    height: 192px;
+    width: 192px;
+    margin: 10px;
 `;

@@ -1,5 +1,6 @@
-import { Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Link from '@mui/material/Link';
+import { DotSeparator } from 'components/Sidebar/styledComponents';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -110,12 +111,21 @@ const englishConstants = {
     CLOSE: 'close',
     NO: 'no',
     NOTHING_HERE: 'nothing to see here yet 👀',
-    UPLOAD: {
-        0: 'preparing to upload',
-        1: 'reading google metadata files',
-        2: 'reading file metadata',
-        3: (fileCounter) =>
-            `${fileCounter.finished} / ${fileCounter.total} files backed up`,
+    UPLOAD: 'Upload',
+    FILE_UPLOAD: 'File Upload',
+    UPLOAD_STAGE_MESSAGE: {
+        0: 'Preparing to upload',
+        1: 'Reading google metadata files',
+        2: 'Reading file metadata',
+        3: (fileCounter) => (
+            <Typography>
+                <Box component={'span'} fontWeight={600}>
+                    {fileCounter.issues} issues
+                </Box>
+                <DotSeparator />
+                {fileCounter.success} uploaded
+            </Typography>
+        ),
         4: 'backup complete',
         5: 'cancelling remaining uploads',
     },
@@ -140,7 +150,7 @@ const englishConstants = {
     ACCOUNT_EXISTS: 'Already have an account',
     ALBUM_NAME: 'album name',
     CREATE: 'create',
-    DOWNLOAD: 'download',
+    DOWNLOAD: 'Download',
     TOGGLE_FULLSCREEN: 'toggle fullscreen',
     ZOOM_IN_OUT: 'zoom in/out',
     PREVIOUS: 'previous (arrow left)',
@@ -199,7 +209,7 @@ const englishConstants = {
     SUPPORT: 'Support',
     CONFIRM: 'confirm',
     SKIP: 'skip',
-    CANCEL: 'cancel',
+    CANCEL: 'Cancel',
     LOGOUT: 'Logout',
     DELETE_ACCOUNT: 'Delete Account',
     DELETE_ACCOUNT_MESSAGE: () => (
@@ -386,8 +396,8 @@ const englishConstants = {
     CONFIRM_DOWNLOAD_COLLECTION: 'download album',
     DOWNLOAD_COLLECTION_MESSAGE: () => (
         <>
-            <p>are you sure you want to download the complete album?</p>
-            <p>all files will be queued for download sequentially</p>
+            <div>are you sure you want to download the complete album?</div>
+            <div>all files will be queued for download sequentially</div>
         </>
     ),
     ARCHIVED_ALBUM: 'archived album',
@@ -519,14 +529,12 @@ const englishConstants = {
     UPLOAD_FAILED: 'upload failed',
     ETAGS_BLOCKED: (url: string) => (
         <>
-            <p>
-                {' '}
-                we were unable to upload the following files because of your
+            <Box mb={1}>
+                We were unable to upload the following files because of your
                 browser configuration.
-            </p>
-            <p>
-                {' '}
-                please disable any addons that might be preventing ente from
+            </Box>
+            <Box>
+                Please disable any addons that might be preventing ente from
                 using <code>eTags</code> to upload large files, or use our{' '}
                 <a
                     href={url}
@@ -536,16 +544,12 @@ const englishConstants = {
                     desktop app
                 </a>{' '}
                 for a more reliable import experience.
-            </p>
+            </Box>
         </>
     ),
 
-    LIVE_PHOTOS_DETECTED: () => (
-        <p>
-            the photo and video files from your Live Photos have been merged
-            into a single ELP file
-        </p>
-    ),
+    LIVE_PHOTOS_DETECTED:
+        'the photo and video files from your Live Photos have been merged into a single ELP file',
 
     RETRY_FAILED: 'retry failed uploads',
     FAILED_UPLOADS: 'failed uploads ',
@@ -708,6 +712,7 @@ const englishConstants = {
     CHOOSE_UPLOAD_TYPE: 'Upload',
     UPLOAD_FILES: 'File Upload',
     UPLOAD_DIRS: 'Folder Upload',
+    UPLOAD_GOOGLE_TAKEOUT: 'Google Takeout',
     CANCEL_UPLOADS: 'cancel uploads',
     DEDUPLICATE_FILES: 'Deduplicate files',
     NO_DUPLICATES_FOUND: "you've no duplicate files that can be cleared",

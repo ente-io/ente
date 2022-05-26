@@ -141,7 +141,7 @@ export const SelectedOverlay = styled.div<{ selected: boolean }>`
     height: 100%;
     width: 100%;
     ${(props) => props.selected && 'border: 5px solid #51cd7c;'}
-    border-radius: ${({ theme }) => theme.shape.borderRadius};
+    border-radius: ${({ theme }) => theme.shape.borderRadius}px;
 `;
 
 const Cont = styled.div<{ disabled: boolean }>`

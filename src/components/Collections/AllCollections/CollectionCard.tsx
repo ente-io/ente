@@ -2,18 +2,26 @@ import { Typography } from '@mui/material';
 import constants from 'utils/strings/constants';
 import React from 'react';
 import CollectionCard from '../CollectionCard';
+import { CollectionSummary } from 'types/collection';
+
+interface Iprops {
+    collectionTile: any;
+    collectionSummary: CollectionSummary;
+    onCollectionClick: (collectionID: number) => void;
+}
 
 export default function AllCollectionCard({
+    collectionTile,
     onCollectionClick,
-    collectionAttributes,
-    latestFile,
-    fileCount,
-}) {
+    collectionSummary,
+}: Iprops) {
     return (
         <CollectionCard
-            large
-            latestFile={latestFile}
-            onClick={() => onCollectionClick(collectionAttributes.id)}>
+            collectionTile={collectionTile}
+            latestFile={collectionSummary.latestFile}
+            onClick={() =>
+                onCollectionClick(collectionSummary.collectionAttributes.id)
+            }>
             <div>
                 <Typography
                     css={`
@@ -21,7 +29,7 @@ export default function AllCollectionCard({
                         font-weight: 600;
                         line-height: 20px;
                     `}>
-                    {collectionAttributes.name}
+                    {collectionSummary.collectionAttributes.name}
                 </Typography>
                 <Typography
                     css={`
@@ -29,7 +37,7 @@ export default function AllCollectionCard({
                         font-weight: 400;
                         line-height: 20px;
                     `}>
-                    {fileCount} {constants.PHOTOS}
+                    {collectionSummary.fileCount} {constants.PHOTOS}
                 </Typography>
             </div>
         </CollectionCard>
