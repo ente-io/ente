@@ -1,4 +1,4 @@
-import { Dialog, styled } from '@mui/material';
+import { Dialog, DialogProps, styled } from '@mui/material';
 
 const DialogBoxBase = styled(Dialog)(({ theme }) => ({
     '& .MuiDialog-paper': {
@@ -27,5 +27,27 @@ DialogBoxBase.defaultProps = {
     fullWidth: true,
     maxWidth: 'sm',
 };
+
+export const dialogCloseHandler =
+    ({
+        staticBackdrop,
+        nonClosable,
+        onClose,
+    }: {
+        staticBackdrop?: boolean;
+        nonClosable?: boolean;
+        onClose?: () => void;
+    }): DialogProps['onClose'] =>
+    (_, reason) => {
+        if (nonClosable) {
+            // no-op
+        } else if (staticBackdrop && reason === 'backdropClick') {
+            // no-op
+        } else {
+            if (onClose && typeof onClose === 'function') {
+                onClose();
+            }
+        }
+    };
 
 export default DialogBoxBase;

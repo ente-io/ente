@@ -48,7 +48,7 @@ function UploadProgressSubtitleText(props) {
 export function UploadProgressTitle({
     setExpanded,
     expanded,
-    handleHideModal,
+    handleClose,
     ...props
 }) {
     const toggleExpanded = () => setExpanded((expanded) => !expanded);
@@ -65,7 +65,7 @@ export function UploadProgressTitle({
                         <IconButtonWithBG onClick={toggleExpanded}>
                             {expanded ? <MinimizeIcon /> : <MaximizeIcon />}
                         </IconButtonWithBG>
-                        <IconButtonWithBG onClick={handleHideModal}>
+                        <IconButtonWithBG onClick={handleClose}>
                             <Close />
                         </IconButtonWithBG>
                     </Stack>

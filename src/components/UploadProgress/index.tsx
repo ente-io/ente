@@ -5,6 +5,7 @@ import React, { useContext, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import { AppContext } from 'pages/_app';
+import { dialogCloseHandler } from 'components/DialogBox/base';
 
 interface Props {
     fileCounter;
@@ -56,7 +57,7 @@ export default function UploadProgress(props: Props) {
         sectionInfo = constants.LIVE_PHOTOS_DETECTED;
     }
 
-    function handleHideModal() {
+    function confirmCancelUpload() {
         if (props.uploadStage !== UPLOAD_STAGES.FINISH) {
             appContext.setDialogMessage({
                 title: constants.STOP_UPLOADS_HEADER,
@@ -76,11 +77,17 @@ export default function UploadProgress(props: Props) {
             props.closeModal();
         }
     }
+
+    const handleClose = dialogCloseHandler({
+        staticBackdrop: true,
+        onClose: confirmCancelUpload,
+    });
+
     return (
         <>
             {expanded ? (
                 <UploadProgressDialog
-                    handleHideModal={handleHideModal}
+                    handleClose={handleClose}
                     setExpanded={setExpanded}
                     expanded={expanded}
                     fileProgressStatuses={fileProgressStatuses}
@@ -93,7 +100,7 @@ export default function UploadProgress(props: Props) {
                 <MinimizedUploadProgress
                     setExpanded={setExpanded}
                     expanded={expanded}
-                    handleHideModal={handleHideModal}
+                    handleClose={handleClose}
                     {...props}
                 />
             )}

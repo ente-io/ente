@@ -10,7 +10,7 @@ import { NotUploadSectionHeader } from './styledComponents';
 import { DESKTOP_APP_DOWNLOAD_URL } from 'utils/common';
 import DialogBoxBase from 'components/DialogBox/base';
 export function UploadProgressDialog({
-    handleHideModal,
+    handleClose,
     setExpanded,
     expanded,
     fileProgressStatuses,
@@ -20,15 +20,12 @@ export function UploadProgressDialog({
     ...props
 }) {
     return (
-        <DialogBoxBase
-            maxWidth="xs"
-            open={props.show}
-            onClose={handleHideModal}>
+        <DialogBoxBase maxWidth="xs" open={props.show} onClose={handleClose}>
             <UploadProgressHeader
                 uploadStage={props.uploadStage}
                 setExpanded={setExpanded}
                 expanded={expanded}
-                handleHideModal={handleHideModal}
+                handleClose={handleClose}
                 fileCounter={props.fileCounter}
                 now={props.now}
             />

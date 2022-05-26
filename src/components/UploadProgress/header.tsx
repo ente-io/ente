@@ -6,7 +6,7 @@ export function UploadProgressHeader({
     uploadStage,
     setExpanded,
     expanded,
-    handleHideModal,
+    handleClose,
     fileCounter,
     now,
 }) {
@@ -16,7 +16,7 @@ export function UploadProgressHeader({
                 uploadStage={uploadStage}
                 setExpanded={setExpanded}
                 expanded={expanded}
-                handleHideModal={handleHideModal}
+                handleClose={handleClose}
                 fileCounter={fileCounter}
             />
             <UploadProgressBar now={now} uploadStage={uploadStage} />
