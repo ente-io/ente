@@ -59,7 +59,7 @@ export default function AllCollections(props: Iprops) {
             />
             <Divider />
             <AllCollectionContent
-                sortedCollectionSummaries={sortedCollectionSummaries}
+                collectionSummaries={sortedCollectionSummaries}
                 onCollectionClick={onCollectionClick}
             />
         </FloatingDrawer>

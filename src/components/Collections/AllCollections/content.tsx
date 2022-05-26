@@ -2,18 +2,23 @@ import React from 'react';
 import { DialogContent } from '@mui/material';
 import { FlexWrapper } from 'components/Container';
 import AllCollectionCard from './CollectionCard';
+import { CollectionSummary } from 'types/collection';
 
+interface Iprops {
+    collectionSummaries: CollectionSummary[];
+    onCollectionClick: (id?: number) => void;
+}
 export default function AllCollectionContent({
-    sortedCollectionSummaries,
+    collectionSummaries,
     onCollectionClick,
-}) {
+}: Iprops) {
     return (
         <DialogContent>
             <FlexWrapper
                 style={{
                     flexWrap: 'wrap',
                 }}>
-                {sortedCollectionSummaries.map(
+                {collectionSummaries.map(
                     ({ latestFile, collectionAttributes, fileCount }) => (
                         <AllCollectionCard
                             onCollectionClick={onCollectionClick}
