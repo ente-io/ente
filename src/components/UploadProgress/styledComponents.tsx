@@ -1,33 +1,13 @@
-import {
-    getVariantColor,
-    ButtonVariant,
-} from 'components/pages/gallery/LinkButton';
 import styled from 'styled-components';
 
-export const SectionTitle = styled.div`
-    display: flex;
-    justify-content: space-between;
-    color: #eee;
-    font-size: 20px;
-    cursor: pointer;
-`;
-
-export const Section = styled.div`
-    margin: 20px 0;
-    padding: 0 20px;
-`;
-
-export const SectionContent = styled.div`
-    padding-right: 35px;
-`;
-
-export const NotUploadSectionHeader = styled.div`
-    margin-top: 30px;
+export const NotUploadSectionHeader = styled.div(
+    ({ theme }) => `
     text-align: center;
-    color: ${getVariantColor(ButtonVariant.warning)};
-    border-bottom: 1px solid ${getVariantColor(ButtonVariant.warning)};
-    margin: 0 20px;
-`;
+    color: ${theme.palette.danger.main};
+    border-bottom: 1px solid ${theme.palette.danger.main};
+    margin:${theme.spacing(3, 2, 1)}
+`
+);
 
 export const InProgressItemContainer = styled.div`
     display: inline-block;
@@ -37,7 +17,7 @@ export const InProgressItemContainer = styled.div`
     & > span:first-of-type {
         position: relative;
         top: 5px;
-        max-width: 287px;
+        max-width: 340px;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
@@ -51,7 +31,7 @@ export const ResultItemContainer = styled.div`
     position: relative;
     top: 5px;
     display: inline-block;
-    max-width: 334px;
+    max-width: 394px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
