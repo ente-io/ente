@@ -66,7 +66,7 @@ export default function Upload(props: Props) {
         UPLOAD_STAGES.START
     );
     const [filenames, setFilenames] = useState(new Map<number, string>());
-    const [fileCounter, setFileCounter] = useState({ finished: 0, total: 0 });
+    const [fileCounter, setFileCounter] = useState({ success: 0, issues: 0 });
     const [fileProgress, setFileProgress] = useState(new Map<number, number>());
     const [uploadResult, setUploadResult] = useState(
         new Map<number, FileUploadResults>()
@@ -148,7 +148,7 @@ export default function Upload(props: Props) {
 
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
-        setFileCounter({ finished: 0, total: 0 });
+        setFileCounter({ success: 0, issues: 0 });
         setFileProgress(new Map<number, number>());
         setUploadResult(new Map<number, number>());
         setPercentComplete(0);
@@ -461,7 +461,7 @@ export default function Upload(props: Props) {
                         [6, 'f'],
                     ])
                 }
-                fileCounter={{ finished: 14, total: 32 }}
+                fileCounter={{ success: 14, issues: 32 }}
                 uploadStage={UPLOAD_STAGES.UPLOADING}
                 fileProgress={new Map([[1, 10]])}
                 hasLivePhotos={hasLivePhotos}

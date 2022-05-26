@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import Link from '@mui/material/Link';
+import { DotSeparator } from 'components/Sidebar/styledComponents';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -116,8 +117,15 @@ const englishConstants = {
         0: 'Preparing to upload',
         1: 'Reading google metadata files',
         2: 'Reading file metadata',
-        3: (fileCounter) =>
-            `${fileCounter.finished} of ${fileCounter.total} uploaded`,
+        3: (fileCounter) => (
+            <Typography>
+                <Box component={'span'} fontWeight={600}>
+                    {fileCounter.issues} issues
+                </Box>
+                <DotSeparator />
+                {fileCounter.success} uploaded
+            </Typography>
+        ),
         4: 'backup complete',
         5: 'cancelling remaining uploads',
     },
