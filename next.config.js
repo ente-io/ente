@@ -60,11 +60,10 @@ module.exports = (phase) =>
                         return config;
                     },
                 })
-            ),
-            {
-                release: GIT_SHA,
-                dryRun:
-                    phase === PHASE_DEVELOPMENT_SERVER || !IS_SENTRY_ENABLED,
-            }
-        )
+            )
+        ),
+        {
+            release: GIT_SHA,
+            dryRun: phase === PHASE_DEVELOPMENT_SERVER || !IS_SENTRY_ENABLED,
+        }
     );
