@@ -60,7 +60,7 @@ interface AnalysisResult {
 }
 
 export default function Upload(props: Props) {
-    const [progressView, setProgressView] = useState(true);
+    const [progressView, setProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
         UPLOAD_STAGES.START
     );

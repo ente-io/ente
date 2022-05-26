@@ -34,7 +34,7 @@ export function UploadProgressDialog({
             />
             {(props.uploadStage === UPLOAD_STAGES.UPLOADING ||
                 props.uploadStage === UPLOAD_STAGES.FINISH) && (
-                <DialogContent>
+                <DialogContent sx={{ '&&&': { px: 0 } }}>
                     {props.uploadStage === UPLOAD_STAGES.UPLOADING && (
                         <InProgressSection
                             filenames={props.filenames}

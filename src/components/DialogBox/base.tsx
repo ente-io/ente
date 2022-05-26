@@ -16,7 +16,7 @@ const DialogBoxBase = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogActions-root button': {
         fontSize: '18px',
         lineHeight: '21.78px',
-        paddingTop: theme.spacing(2),
+        padding: theme.spacing(2),
     },
     '& .MuiDialogActions-root button:not(:first-child)': {
         marginLeft: theme.spacing(2),
