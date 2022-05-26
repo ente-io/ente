@@ -96,6 +96,7 @@ export interface CollectionSummary {
         id: number;
         name: string;
         type: CollectionType;
+        ownerID: number;
         updationTime: number;
     };
     latestFile: EnteFile;
