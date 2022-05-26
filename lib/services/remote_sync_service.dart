@@ -467,10 +467,10 @@ class RemoteSyncService {
     });
     // move updated files towards the end
     file.sort((first, second) {
-      if (first.updationTime == null && second.updationTime == null) {
+      if (first.updationTime == second.updationTime) {
         return 0;
       }
-      if (first.updationTime == null) {
+      if (first.updationTime == -1) {
         return 1;
       } else {
         return -1;
