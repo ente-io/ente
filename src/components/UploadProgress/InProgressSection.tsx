@@ -1,9 +1,10 @@
 import React from 'react';
 import FileList from 'components/FileList';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { SectionInfo, InProgressItemContainer } from './styledComponents';
+import { InProgressItemContainer } from './styledComponents';
 import { FileProgresses } from '.';
 import {
+    SectionInfo,
     UploadProgressSection,
     UploadProgressSectionContent,
     UploadProgressSectionTitle,
@@ -19,7 +20,7 @@ export const InProgressSection = (props: InProgressProps) => {
     const fileList = props.fileProgressStatuses ?? [];
 
     return (
-        <UploadProgressSection>
+        <UploadProgressSection defaultExpanded>
             <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
                 {props.sectionTitle}
             </UploadProgressSectionTitle>

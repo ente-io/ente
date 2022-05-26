@@ -2,9 +2,10 @@ import React from 'react';
 import FileList from 'components/FileList';
 import { Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { SectionInfo, ResultItemContainer } from './styledComponents';
+import { ResultItemContainer } from './styledComponents';
 import { FileUploadResults } from 'constants/upload';
 import {
+    SectionInfo,
     UploadProgressSection,
     UploadProgressSectionContent,
     UploadProgressSectionTitle,

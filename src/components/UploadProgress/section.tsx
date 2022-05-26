@@ -1,11 +1,9 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
-import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
-import MuiAccordionSummary, {
-    AccordionSummaryProps,
-} from '@mui/material/AccordionSummary';
+import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
+import { Typography, TypographyProps } from '@mui/material';
 
 export const UploadProgressSection = styled((props: AccordionProps) => (
     <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -19,32 +17,21 @@ export const UploadProgressSection = styled((props: AccordionProps) => (
     },
 }));
 
-export const UploadProgressSectionTitle = styled(
-    (props: AccordionSummaryProps) => (
-        <MuiAccordionSummary
-            expandIcon={
-                <ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem' }} />
-            }
-            {...props}
-        />
-    )
-)(({ theme }) => ({
-    backgroundColor:
-        theme.palette.mode === 'dark'
-            ? 'rgba(255, 255, 255, .05)'
-            : 'rgba(0, 0, 0, .03)',
-    flexDirection: 'row-reverse',
-    '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
-        transform: 'rotate(90deg)',
-    },
-    '& .MuiAccordionSummary-content': {
-        marginLeft: theme.spacing(1),
-    },
+export const UploadProgressSectionTitle = styled(MuiAccordionSummary)(() => ({
+    backgroundColor: 'rgba(255, 255, 255, .05)',
 }));
 
 export const UploadProgressSectionContent = styled(MuiAccordionDetails)(
     ({ theme }) => ({
         padding: theme.spacing(2),
-        borderTop: '1px solid rgba(0, 0, 0, .125)',
     })
+);
+
+export const SectionInfo = (props: TypographyProps) => (
+    <Typography
+        color={'text.secondary'}
+        variant="body2"
+        {...props}
+        sx={{ mb: 1 }}
+    />
 );

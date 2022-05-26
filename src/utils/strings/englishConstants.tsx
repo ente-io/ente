@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Link from '@mui/material/Link';
 import React from 'react';
 import styled from 'styled-components';
@@ -521,14 +521,12 @@ const englishConstants = {
     UPLOAD_FAILED: 'upload failed',
     ETAGS_BLOCKED: (url: string) => (
         <>
-            <p>
-                {' '}
-                we were unable to upload the following files because of your
+            <Box mb={1}>
+                We were unable to upload the following files because of your
                 browser configuration.
-            </p>
-            <p>
-                {' '}
-                please disable any addons that might be preventing ente from
+            </Box>
+            <Box>
+                Please disable any addons that might be preventing ente from
                 using <code>eTags</code> to upload large files, or use our{' '}
                 <a
                     href={url}
@@ -538,16 +536,12 @@ const englishConstants = {
                     desktop app
                 </a>{' '}
                 for a more reliable import experience.
-            </p>
+            </Box>
         </>
     ),
 
-    LIVE_PHOTOS_DETECTED: () => (
-        <p>
-            the photo and video files from your Live Photos have been merged
-            into a single ELP file
-        </p>
-    ),
+    LIVE_PHOTOS_DETECTED:
+        'the photo and video files from your Live Photos have been merged into a single ELP file',
 
     RETRY_FAILED: 'retry failed uploads',
     FAILED_UPLOADS: 'failed uploads ',

@@ -113,6 +113,13 @@ const darkThemeOptions = createTheme({
                 margin: 'dense',
             },
         },
+        MuiTooltip: {
+            styleOverrides: {
+                tooltipPlacementBottom: {
+                    marginTop: '0px !important',
+                },
+            },
+        },
     },
 
     palette: {

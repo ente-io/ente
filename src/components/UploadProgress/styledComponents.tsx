@@ -16,10 +16,6 @@ export const Section = styled.div`
     margin: 20px 0;
     padding: 0 20px;
 `;
-export const SectionInfo = styled.div`
-    margin: 4px 0;
-    padding-left: 15px;
-`;
 
 export const SectionContent = styled.div`
     padding-right: 35px;
