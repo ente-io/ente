@@ -18,13 +18,13 @@ final _logger = Logger('MagicUtil');
 Future<void> changeVisibility(
     BuildContext context, List<File> files, int newVisibility) async {
   final dialog = createProgressDialog(context,
-      newVisibility == kVisibilityArchive ? "archiving..." : "unarchiving...");
+      newVisibility == kVisibilityArchive ? "Hiding..." : "Unhiding...");
   await dialog.show();
   try {
     await FileMagicService.instance.changeVisibility(files, newVisibility);
     showShortToast(newVisibility == kVisibilityArchive
-        ? "successfully archived"
-        : "successfully unarchived");
+        ? "Successfully hidden"
+        : "Successfully unhidden");
 
     await dialog.hide();
   } catch (e, s) {
@@ -37,7 +37,7 @@ Future<void> changeVisibility(
 Future<void> changeCollectionVisibility(
     BuildContext context, Collection collection, int newVisibility) async {
   final dialog = createProgressDialog(context,
-      newVisibility == kVisibilityArchive ? "archiving..." : "unarchiving...");
+      newVisibility == kVisibilityArchive ? "Hiding..." : "Unhiding...");
   await dialog.show();
   try {
     Map<String, dynamic> update = {kMagicKeyVisibility: newVisibility};
@@ -45,8 +45,8 @@ Future<void> changeCollectionVisibility(
     // Force reload home gallery to pull in the now unarchived files
     Bus.instance.fire(ForceReloadHomeGalleryEvent());
     showShortToast(newVisibility == kVisibilityArchive
-        ? "successfully archived"
-        : "successfully unarchived");
+        ? "Successfully hidden"
+        : "Successfully unhidden");
 
     await dialog.hide();
   } catch (e, s) {

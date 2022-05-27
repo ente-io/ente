@@ -47,7 +47,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
 
   @override
   Widget build(BuildContext context) {
-    _dialog = createProgressDialog(context, "please wait...");
+    _dialog = createProgressDialog(context, "Please wait...");
     if (initPaymentUrl == null) {
       return loadWidget;
     }
@@ -55,7 +55,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
         onWillPop: () async => _buildPageExitWidget(context),
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('subscription'),
+            title: const Text('Subscription'),
           ),
           body: Column(
             children: <Widget>[

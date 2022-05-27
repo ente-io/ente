@@ -24,13 +24,13 @@ String _actionName(CollectionActionType type, bool plural) {
   String text = "";
   switch (type) {
     case CollectionActionType.addFiles:
-      text = "add file";
+      text = "Add file";
       break;
     case CollectionActionType.moveFiles:
-      text = "move file";
+      text = "Move file";
       break;
     case CollectionActionType.restoreFiles:
-      text = "restore file";
+      text = "Restore file";
       break;
   }
   return text + titleSuffix;
@@ -77,9 +77,16 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                 child: Padding(
                   padding: const EdgeInsets.only(
                       top: 30, bottom: 12, left: 40, right: 40),
-                  child: OutlineButton.icon(
-                    padding: EdgeInsets.all(20),
-                    icon: Icon(Icons.create_new_folder_outlined),
+                  child: OutlinedButton.icon(
+                    style: ButtonStyle(
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                        EdgeInsets.all(20),
+                      ),
+                    ),
+                    icon: Icon(
+                      Icons.create_new_folder_outlined,
+                      color: Theme.of(context).buttonColor,
+                    ),
                     label: Text(
                       "to a new album",
                       style: Theme.of(context).textTheme.bodyText1,
@@ -280,7 +287,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       return true;
     } on AssertionError catch (e, s) {
       await dialog.hide();
-      showErrorDialog(context, "oops", e.message);
+      showErrorDialog(context, "Oops", e.message);
       return false;
     } catch (e, s) {
       _logger.severe("Could not move to album", e, s);
@@ -291,7 +298,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   Future<bool> _restoreFilesToCollection(int toCollectionID) async {
-    final dialog = createProgressDialog(context, "restoring files...");
+    final dialog = createProgressDialog(context, "Restoring files...");
     await dialog.show();
     try {
       await CollectionsService.instance
@@ -302,7 +309,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       return true;
     } on AssertionError catch (e, s) {
       await dialog.hide();
-      showErrorDialog(context, "oops", e.message);
+      showErrorDialog(context, "Oops", e.message);
       return false;
     } catch (e, s) {
       _logger.severe("Could not move to album", e, s);

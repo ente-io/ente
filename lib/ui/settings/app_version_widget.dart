@@ -50,7 +50,7 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
             return Padding(
               padding: const EdgeInsets.all(20),
               child: Text(
-                "app version: " + snapshot.data,
+                "Version: " + snapshot.data,
                 style: Theme.of(context).textTheme.caption,
               ),
             );

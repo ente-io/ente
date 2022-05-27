@@ -11,6 +11,7 @@ import 'package:logging/logging.dart';
 import 'package:motionphoto/motionphoto.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/cache/image_cache.dart';
+import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -134,8 +135,7 @@ Future<io.File> getFileFromServer(
   return fileDownloadsInProgress[downloadID];
 }
 
-Future<bool> isFileCached(ente.File file,
-    {bool liveVideo = false}) async {
+Future<bool> isFileCached(ente.File file, {bool liveVideo = false}) async {
   final cacheManager = (file.fileType == FileType.video || liveVideo)
       ? VideoCacheManager.instance
       : DefaultCacheManager();
@@ -160,7 +160,7 @@ Future<io.File> _getLivePhotoFromServer(ente.File file,
       return null;
     }
     return needLiveVideo ? livePhoto.video : livePhoto.image;
-  } catch (e,s) {
+  } catch (e, s) {
     _logger.warning("live photo get failed", e, s);
     livePhotoDownloadsTracker.remove(downloadID);
     return null;
@@ -226,8 +226,7 @@ Future<_LivePhoto> _downloadLivePhoto(ente.File file,
     }
     return _LivePhoto(imageFileCache, videoFileCache);
   }).catchError((e) {
-    _logger.warning(
-        "failed to download live photos : ${file.tag()}", e);
+    _logger.warning("failed to download live photos : ${file.tag()}", e);
     throw e;
   });
 }
@@ -298,6 +297,7 @@ Future<void> clearCache(ente.File file) async {
   if (cachedThumbnail.existsSync()) {
     await cachedThumbnail.delete();
   }
+  ThumbnailLruCache.clearCache(file);
 }
 
 class _LivePhoto {

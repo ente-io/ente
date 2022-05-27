@@ -11,14 +11,15 @@ description: ente photos application
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.5.21+301
+version: 0.5.25+305
 
 environment:
   sdk: ">=2.10.0 <3.0.0"
 
 dependencies:
-  alice: ^0.2.4
   adaptive_theme: ^2.3.0
+  alice:
+    git: "https://github.com/jhomlala/alice.git"
   animate_do: ^2.0.0
   archive: ^3.1.2
   background_fetch: ^1.0.1
@@ -39,7 +40,7 @@ dependencies:
   exif: ^3.0.0
   expandable: ^5.0.1
   expansion_tile_card: ^2.0.0
-  extended_image: ^6.0.1
+  extended_image: ^6.2.1
   fast_base58: ^0.2.1
   firebase_core: ^1.10.0
   firebase_messaging: ^11.1.0
@@ -53,14 +54,14 @@ dependencies:
   flutter_email_sender: 5.0.2
   flutter_image_compress: ^1.1.0
   flutter_inappwebview: ^5.3.2
-  flutter_local_notifications: ^5.0.0+4
+  flutter_local_notifications: ^9.5.3+1
   flutter_password_strength: ^0.1.6
   flutter_secure_storage: ^4.2.0
   flutter_sodium: ^0.2.0
-  flutter_typeahead: ^3.2.0
+  flutter_typeahead: ^4.0.0
   fk_user_agent: ^2.0.1
   flutter_windowmanager: ^0.2.0
-  fluttercontactpicker: ^4.4.0
+  fluttercontactpicker: ^4.7.0
   fluttertoast: ^8.0.6
   google_nav_bar: ^5.0.5
   image: ^3.0.2
@@ -81,15 +82,14 @@ dependencies:
   page_transition: ^2.0.2
   path_provider: ^2.0.1
   pedantic: ^1.9.2
-  photo_manager:
-    git: "https://github.com/ente-io/flutter_photo_manager.git"
+  photo_manager: ^2.0.8
   photo_view: ^0.13.0
   pinput: ^1.2.2
   provider: ^6.0.0
   quiver: ^3.0.1
   receive_sharing_intent: ^1.4.5
   scrollable_positioned_list: ^0.2.2
-  sentry: ^5.0.0
+  sentry: ^6.5.1
   share_plus: ^4.0.4
   shared_preferences: ^2.0.5
   sqflite: ^2.0.0+3
@@ -111,7 +111,6 @@ dependencies:
 
 dependency_overrides:
   provider: ^6.0.1 # for chewie 1.2.2 https://github.com/brianegan/chewie/issues/530
-  flutter_local_notifications: ^8.1.1
 
 dev_dependencies:
   flutter_launcher_icons: "0.9.0"

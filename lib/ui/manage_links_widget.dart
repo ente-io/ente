@@ -413,12 +413,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
 
   Future<void> _updateUrlSettings(
       BuildContext context, Map<String, dynamic> prop) async {
-    final dialog = createProgressDialog(context, "please wait...");
+    final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
       await CollectionsService.instance.updateShareUrl(widget.collection, prop);
       await dialog.hide();
-      showToast("album updated");
+      showToast("Album updated");
     } catch (e) {
       await dialog.hide();
       await showGenericErrorDialog(context);

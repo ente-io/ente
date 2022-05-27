@@ -79,7 +79,7 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
             } catch (e, s) {
               await dialog.hide();
               Logger("SetWallpaperDialog").severe(e, s);
-              showToast("something went wrong");
+              showToast("Something went wrong");
               return;
             }
           },

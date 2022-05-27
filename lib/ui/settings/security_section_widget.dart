@@ -26,7 +26,7 @@ class SecuritySectionWidget extends StatefulWidget {
 
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   static const kAuthToViewSessions =
-      "please authenticate to view your active sessions";
+      "Please authenticate to view your active sessions";
 
   final _config = Configuration.instance;
 
@@ -70,7 +70,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Two-factor", style: Theme.of(context).textTheme.subtitle1,),
+                Text(
+                  "Two-factor",
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
                 FutureBuilder(
                   future: UserService.instance.fetchTwoFactorStatus(),
                   builder: (_, snapshot) {
@@ -117,7 +120,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Lockscreen", style: Theme.of(context).textTheme.subtitle1,),
+            Text(
+              "Lockscreen",
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
             Switch.adaptive(
               value: _config.shouldShowLockScreen(),
               onChanged: (value) async {
@@ -147,7 +153,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Hide from recents", style: Theme.of(context).textTheme.subtitle1),
+                Text("Hide from recents",
+                    style: Theme.of(context).textTheme.subtitle1),
                 Switch.adaptive(
                   value: _config.shouldHideFromRecents(),
                   onChanged: (value) async {

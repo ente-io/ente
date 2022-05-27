@@ -776,10 +776,7 @@ class CollectionsService {
         name = utf8.decode(result);
       } catch (e, s) {
         _logger.severe(
-            "Error while decrypting collection name: " +
-                collection.id.toString(),
-            e,
-            s);
+            "failed to decrypt collection name: ${collection.id}", e, s);
         name = "Unknown Album";
       }
       return collection.copyWith(name: name);

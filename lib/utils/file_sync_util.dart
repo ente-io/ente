@@ -7,6 +7,7 @@ import 'package:photos/models/file.dart';
 
 final _logger = Logger("FileSyncUtil");
 final ignoreSizeConstraint = SizeConstraint(ignoreSize: true);
+final assetFetchPageSize = 2000;
 Future<List<File>> getDeviceFiles(
     int fromTime, int toTime, Computer computer) async {
   final pathEntities = await _getGalleryList(fromTime, toTime);
@@ -28,10 +29,12 @@ Future<List<File>> getDeviceFiles(
 }
 
 Future<List<LocalAsset>> getAllLocalAssets() async {
-  final filterOptionGroup = FilterOptionGroup(
-      imageOption: FilterOption(sizeConstraint: ignoreSizeConstraint),
-      videoOption: FilterOption(sizeConstraint: ignoreSizeConstraint),
-      createTimeCond: DateTimeCond.def().copyWith(ignore: true));
+  final filterOptionGroup = FilterOptionGroup();
+  filterOptionGroup.setOption(
+      AssetType.image, FilterOption(sizeConstraint: ignoreSizeConstraint));
+  filterOptionGroup.setOption(
+      AssetType.video, FilterOption(sizeConstraint: ignoreSizeConstraint));
+  filterOptionGroup.createTimeCond = DateTimeCond.def().copyWith(ignore: true);
   final assetPaths = await PhotoManager.getAssetPathList(
     hasAll: true,
     type: RequestType.common,
@@ -39,7 +42,7 @@ Future<List<LocalAsset>> getAllLocalAssets() async {
   );
   final List<LocalAsset> assets = [];
   for (final assetPath in assetPaths) {
-    for (final asset in await assetPath.assetList) {
+    for (final asset in await _getAllAssetLists(assetPath)) {
       assets.add(LocalAsset(asset.id, assetPath.name));
     }
   }
@@ -131,10 +134,23 @@ Future<List<File>> _computeFiles(AssetPathEntity pathEntity, int fromTime,
     List<File> files, Computer computer) async {
   final args = Map<String, dynamic>();
   args["pathEntity"] = pathEntity;
-  args["assetList"] = await pathEntity.assetList;
+  args["assetList"] = await _getAllAssetLists(pathEntity);
   args["fromTime"] = fromTime;
   args["files"] = files;
   return await computer.compute(_getFiles, param: args);
+}
+
+Future<List<AssetEntity>> _getAllAssetLists(AssetPathEntity pathEntity) async {
+  List<AssetEntity> result = [];
+  int currentPage = 0;
+  List<AssetEntity> currentPageResult = [];
+  do {
+    currentPageResult = await pathEntity.getAssetListPaged(
+        page: currentPage, size: assetFetchPageSize);
+    result.addAll(currentPageResult);
+    currentPage = currentPage + 1;
+  } while (currentPageResult.length >= assetFetchPageSize);
+  return result;
 }
 
 Future<List<File>> _getFiles(Map<String, dynamic> args) async {

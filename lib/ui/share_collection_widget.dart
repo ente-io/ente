@@ -58,9 +58,10 @@ class _SharingDialogState extends State<SharingDialog> {
     if (!_showEntryField) {
       children.add(SizedBox(
         width: 220,
-        child: OutlineButton(
+        child: OutlinedButton(
           child: Icon(
             Icons.add,
+            color: Theme.of(context).buttonColor,
           ),
           onPressed: () {
             setState(() {
@@ -314,19 +315,19 @@ class _SharingDialogState extends State<SharingDialog> {
     String publicKey,
   }) async {
     if (!isValidEmail(email)) {
-      showErrorDialog(context, "invalid email address",
-          "please enter a valid email address.");
+      showErrorDialog(context, "Invalid email address",
+          "Please enter a valid email address.");
       return;
     } else if (email == Configuration.instance.getEmail()) {
-      showErrorDialog(context, "oops", "you cannot share with yourself");
+      showErrorDialog(context, "Oops", "You cannot share with yourself");
       return;
     } else if (widget.collection.sharees.any((user) => user.email == email)) {
       showErrorDialog(
-          context, "oops", "you're already sharing this with " + email);
+          context, "Oops", "You're already sharing this with " + email);
       return;
     }
     if (publicKey == null) {
-      final dialog = createProgressDialog(context, "searching for user...");
+      final dialog = createProgressDialog(context, "Searching for user...");
       await dialog.show();
 
       publicKey = await UserService.instance.getPublicKey(email);
@@ -335,9 +336,9 @@ class _SharingDialogState extends State<SharingDialog> {
     if (publicKey == null) {
       Navigator.of(context, rootNavigator: true).pop('dialog');
       final dialog = AlertDialog(
-        title: Text("invite to ente?"),
+        title: Text("Invite to ente?"),
         content: Text(
-          "looks like " +
+          "Looks like " +
               email +
               " hasn't signed up for ente yet. would you like to invite them?",
           style: TextStyle(
@@ -347,7 +348,7 @@ class _SharingDialogState extends State<SharingDialog> {
         actions: [
           TextButton(
             child: Text(
-              "invite",
+              "Invite",
               style: TextStyle(
                 color: Theme.of(context).buttonColor,
               ),
@@ -366,7 +367,7 @@ class _SharingDialogState extends State<SharingDialog> {
         },
       );
     } else {
-      final dialog = createProgressDialog(context, "sharing...");
+      final dialog = createProgressDialog(context, "Sharing...");
       await dialog.show();
       final collection = widget.collection;
       try {
@@ -380,7 +381,7 @@ class _SharingDialogState extends State<SharingDialog> {
         await CollectionsService.instance
             .share(widget.collection.id, email, publicKey);
         await dialog.hide();
-        showToast("shared successfully!");
+        showShortToast("Shared successfully!");
         setState(() {
           _sharees.add(User(email: email));
           _showEntryField = false;
