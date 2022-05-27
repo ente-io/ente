@@ -82,7 +82,7 @@ class File {
       }
     }
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
-    file.fileSubType = asset.subTypes;
+    file.fileSubType = asset.subtype;
     file.metadataVersion = kCurrentMetadataVersion;
     return file;
   }
@@ -94,9 +94,9 @@ class File {
         type = FileType.image;
         // PHAssetMediaSubtype.photoLive.rawValue is 8
         // This hack should go away once photos_manager support livePhotos
-        if (asset.subTypes != null &&
-            asset.subTypes > -1 &&
-            (asset.subTypes & 8) != 0) {
+        if (asset.subtype != null &&
+            asset.subtype > -1 &&
+            (asset.subtype & 8) != 0) {
           type = FileType.livePhoto;
         }
         break;
@@ -142,7 +142,7 @@ class File {
     final asset = await getAsset();
     // asset can be null for files shared to app
     if (asset != null) {
-      fileSubType = asset.subTypes;
+      fileSubType = asset.subtype;
       if (fileType == FileType.video) {
         duration = asset.duration;
       }

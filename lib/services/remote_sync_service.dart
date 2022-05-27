@@ -465,5 +465,16 @@ class RemoteSyncService {
         return -1;
       }
     });
+    // move updated files towards the end
+    file.sort((first, second) {
+      if (first.updationTime == second.updationTime) {
+        return 0;
+      }
+      if (first.updationTime == -1) {
+        return 1;
+      } else {
+        return -1;
+      }
+    });
   }
 }
