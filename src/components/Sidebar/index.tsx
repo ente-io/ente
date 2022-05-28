@@ -6,16 +6,16 @@ import HelpSection from './HelpSection';
 import ExitSection from './ExitSection';
 // import DebugLogs from './DebugLogs';
 import { DrawerSidebar, PaddedDivider } from './styledComponents';
-import { AppContext } from 'pages/_app';
 import HeaderSection from './Header';
 import { CollectionSummaries } from 'types/collection';
 import UserDetailsSection from './userDetailsSection';
+import { GalleryContext } from 'pages/gallery';
 
 interface Iprops {
     collectionSummaries: CollectionSummaries;
 }
 export default function Sidebar({ collectionSummaries }: Iprops) {
-    const { sidebarView, closeSidebar } = useContext(AppContext);
+    const { sidebarView, closeSidebar } = useContext(GalleryContext);
 
     return (
         <DrawerSidebar open={sidebarView} onClose={closeSidebar}>

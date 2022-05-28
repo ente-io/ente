@@ -5,6 +5,7 @@ import { LogoImage } from 'pages/_app';
 import UploadButton from './UploadButton';
 import { getNonTrashedUniqueUserFiles } from 'utils/file';
 import SearchBar from 'components/Search';
+import { FluidContainer } from 'components/Container';
 
 export function GalleryNavbar({
     openSidebar,
@@ -21,12 +22,15 @@ export function GalleryNavbar({
     return (
         <NavbarBase>
             <SidebarToggler openSidebar={openSidebar} />
+
             {isFirstFetch ? (
-                <LogoImage
-                    style={{ height: '24px', padding: '3px' }}
-                    alt="logo"
-                    src="/icon.svg"
-                />
+                <FluidContainer style={{ justifyContent: 'center' }}>
+                    <LogoImage
+                        style={{ height: '24px', padding: '3px' }}
+                        alt="logo"
+                        src="/icon.svg"
+                    />
+                </FluidContainer>
             ) : (
                 <SearchBar
                     isOpen={isInSearchMode}
