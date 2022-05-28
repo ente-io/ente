@@ -7,11 +7,13 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/core/error-reporting/tunneled_transport.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 typedef FutureOrVoidCallback = FutureOr<void> Function();
@@ -74,6 +76,8 @@ class LogConfig {
   /// If this is [null], Sentry logger is completely disabled (default).
   String sentryDsn;
 
+  String tunnel;
+
   /// A built-in retry mechanism for sending errors to sentry.
   ///
   /// This parameter defines the time to wait for, before retrying.
@@ -118,6 +122,7 @@ class LogConfig {
 
   LogConfig({
     this.sentryDsn,
+    this.tunnel,
     this.sentryRetryDelay = const Duration(seconds: 30),
     this.logDirPath,
     this.maxLogFiles = 10,
@@ -175,6 +180,11 @@ class SuperLogging {
       await SentryFlutter.init(
         (options) {
           options.dsn = config.sentryDsn;
+          options.httpClient = http.Client();
+          if (config.tunnel != null) {
+            options.transport =
+                TunneledTransport(Uri.parse(config.tunnel), options);
+          }
         },
         appRunner: () => config.body(),
       );

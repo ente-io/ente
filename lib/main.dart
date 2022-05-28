@@ -159,6 +159,7 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
     logDirPath: (await getTemporaryDirectory()).path + "/logs",
     maxLogFiles: 5,
     sentryDsn: kDebugMode ? kSentryDebugDSN : kSentryDSN,
+    tunnel: kSentryTunnel,
     enableInDebugMode: true,
     prefix: prefix,
   ));
