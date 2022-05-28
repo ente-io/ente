@@ -10,7 +10,7 @@ export type SelectedState = {
 export type SetFiles = React.Dispatch<React.SetStateAction<EnteFile[]>>;
 export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
-export type setSearchStats = React.Dispatch<React.SetStateAction<SearchStats>>;
+export type SetSearchStats = React.Dispatch<React.SetStateAction<SearchStats>>;
 
 export type Search = {
     date?: DateValue;

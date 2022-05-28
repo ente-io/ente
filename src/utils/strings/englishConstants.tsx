@@ -436,11 +436,11 @@ const englishConstants = {
         </p>
     ),
     SEARCH_STATS: ({ resultCount, timeTaken }) => (
-        <span>
+        <div>
             found <span style={{ color: '#51cd7c' }}>{resultCount}</span>{' '}
             memories ( <span style={{ color: '#51cd7c' }}> {timeTaken}</span>{' '}
             seconds )
-        </span>
+        </div>
     ),
     NOT_FILE_OWNER: 'you cannot delete files in a shared album',
     ADD_TO_COLLECTION: 'add to album',

@@ -17,7 +17,7 @@ import {
 import { isSharedFile } from 'utils/file';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
-import { SetFiles, SelectedState, Search, setSearchStats } from 'types/gallery';
+import { SetFiles, SelectedState, Search, SetSearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
@@ -56,7 +56,7 @@ interface Props {
     openUploader?;
     isInSearchMode?: boolean;
     search?: Search;
-    setSearchStats?: setSearchStats;
+    setSearchStats?: SetSearchStats;
     deleted?: number[];
     activeCollection: number;
     isSharedCollection?: boolean;

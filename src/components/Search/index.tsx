@@ -55,14 +55,6 @@ const SearchButton = styled.div<{ isOpen: boolean }>`
     }
 `;
 
-const SearchStatsContainer = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #979797;
-    margin-bottom: 8px;
-`;
-
 const SearchInput = styled.div`
     width: 100%;
     display: flex;
@@ -268,11 +260,6 @@ export default function SearchBar(props: Props) {
     );
     return (
         <>
-            {props.searchStats && (
-                <SearchStatsContainer>
-                    {constants.SEARCH_STATS(props.searchStats)}
-                </SearchStatsContainer>
-            )}
             <Wrapper isDisabled={props.isFirstFetch} isOpen={props.isOpen}>
                 <SearchInput>
                     <div

@@ -102,6 +102,7 @@ import {
     SelectedState,
     Search,
     NotificationAttributes,
+    SearchStats,
 } from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import ToastNotification from 'components/ToastNotification';
@@ -109,6 +110,7 @@ import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
+import SearchStatsContainer from 'components/Search/SearchStatsContainer';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -184,7 +186,7 @@ export default function Gallery() {
     });
 
     const [isInSearchMode, setIsInSearchMode] = useState(false);
-    const [searchStats, setSearchStats] = useState(null);
+    const [searchStats, setSearchStats] = useState<SearchStats>(null);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
     const [deleted, setDeleted] = useState<number[]>([]);
@@ -611,6 +613,24 @@ export default function Gallery() {
                     attributes={notificationAttributes}
                     clearAttributes={clearNotificationAttributes}
                 />
+                <CollectionNamer
+                    show={collectionNamerView}
+                    onHide={setCollectionNamerView.bind(null, false)}
+                    attributes={collectionNamerAttributes}
+                />
+                <CollectionSelector
+                    open={collectionSelectorView}
+                    onClose={closeCollectionSelector}
+                    collectionSummaries={collectionSummaries}
+                    attributes={collectionSelectorAttributes}
+                    collections={collections}
+                />
+                <FixCreationTime
+                    isOpen={fixCreationTimeView}
+                    hide={() => setFixCreationTimeView(false)}
+                    show={() => setFixCreationTimeView(true)}
+                    attributes={fixCreationTimeAttributes}
+                />
                 <GalleryNavbar
                     openSidebar={openSidebar}
                     isFirstFetch={isFirstFetch}
@@ -632,24 +652,12 @@ export default function Gallery() {
                     collectionSummaries={collectionSummaries}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                 />
-                <CollectionNamer
-                    show={collectionNamerView}
-                    onHide={setCollectionNamerView.bind(null, false)}
-                    attributes={collectionNamerAttributes}
-                />
-                <CollectionSelector
-                    open={collectionSelectorView}
-                    onClose={closeCollectionSelector}
-                    collectionSummaries={collectionSummaries}
-                    attributes={collectionSelectorAttributes}
-                    collections={collections}
-                />
-                <FixCreationTime
-                    isOpen={fixCreationTimeView}
-                    hide={() => setFixCreationTimeView(false)}
-                    show={() => setFixCreationTimeView(true)}
-                    attributes={fixCreationTimeAttributes}
-                />
+                {searchStats && (
+                    <SearchStatsContainer>
+                        {constants.SEARCH_STATS(searchStats)}
+                    </SearchStatsContainer>
+                )}
+
                 <Upload
                     syncWithRemote={syncWithRemote}
                     setBannerMessage={setBannerMessage}
