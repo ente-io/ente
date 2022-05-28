@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useRef, useState } from 'react';
 import styled, { ThemeProvider as SThemeProvider } from 'styled-components';
-import Navbar from 'components/Navbar/base';
+import AppNavbar from 'components/Navbar/app';
 import constants from 'utils/strings/constants';
 import { useRouter } from 'next/router';
 import VerticallyCentered from 'components/Container';
@@ -15,30 +15,19 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
 import Head from 'next/head';
-import { getAlbumSiteHost, PAGES } from 'constants/pages';
-import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
 import { logUploadInfo } from 'utils/upload';
 import LoadingBar from 'react-top-loading-bar';
 import DialogBox from 'components/DialogBox';
 import { ThemeProvider as MThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'themes/darkThemeOptions';
 import { CssBaseline } from '@mui/material';
-import SidebarToggler from 'components/Navbar/SidebarToggler';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import * as types from 'styled-components/cssprop';
+import * as types from 'styled-components/cssprop'; // need to css prop on styled component
 import { SetDialogBoxAttributes, DialogBoxAttributes } from 'types/dialogBox';
 
 export const LogoImage = styled.img`
     max-height: 28px;
     margin-right: 5px;
-`;
-
-const FlexContainer = styled.div<{ shouldJustifyLeft?: boolean }>`
-    flex: 1;
-    text-align: center;
-    @media (max-width: 760px) {
-        text-align: ${(props) => (props.shouldJustifyLeft ? 'left' : 'center')};
-    }
 `;
 
 export const MessageContainer = styled.div`
@@ -65,8 +54,6 @@ type AppContextType = {
     finishLoading: () => void;
     closeMessageDialog: () => void;
     setDialogMessage: SetDialogBoxAttributes;
-    sidebarView: boolean;
-    closeSidebar: () => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -97,12 +84,10 @@ export default function App({ Component, err }) {
     const [redirectName, setRedirectName] = useState<string>(null);
     const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
     const [redirectURL, setRedirectURL] = useState(null);
-    const [isAlbumsDomain, setIsAlbumsDomain] = useState(false);
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
-    const [sidebarView, setSidebarView] = useState(false);
 
     useEffect(() => {
         if (
@@ -143,9 +128,6 @@ export default function App({ Component, err }) {
     const setUserOnline = () => setOffline(false);
     const setUserOffline = () => setOffline(true);
     const resetSharedFiles = () => setSharedFiles(null);
-
-    const closeSidebar = () => setSidebarView(false);
-    const openSidebar = () => setSidebarView(true);
 
     useEffect(() => {
         if (process.env.NODE_ENV === 'production') {
@@ -202,10 +184,6 @@ export default function App({ Component, err }) {
         logUploadInfo(
             `latest commit id :${process.env.NEXT_PUBLIC_LATEST_COMMIT_HASH}`
         );
-        const currentURL = new URL(window.location.href);
-        if (currentURL.host === getAlbumSiteHost()) {
-            setIsAlbumsDomain(true);
-        }
     }, []);
 
     useEffect(() => setMessageDialogView(true), [dialogMessage]);
@@ -240,21 +218,7 @@ export default function App({ Component, err }) {
             <MThemeProvider theme={darkThemeOptions}>
                 <SThemeProvider theme={darkThemeOptions}>
                     <CssBaseline />
-                    {showNavbar && (
-                        <Navbar>
-                            {!loading && router.pathname === PAGES.GALLERY && (
-                                <SidebarToggler openSidebar={openSidebar} />
-                            )}
-                            <FlexContainer shouldJustifyLeft={isAlbumsDomain}>
-                                <LogoImage
-                                    style={{ height: '24px', padding: '3px' }}
-                                    alt="logo"
-                                    src="/icon.svg"
-                                />
-                            </FlexContainer>
-                            {isAlbumsDomain && <GoToEnte />}
-                        </Navbar>
-                    )}
+                    {showNavbar && <AppNavbar />}
                     <MessageContainer>
                         {offline && constants.OFFLINE_MSG}
                     </MessageContainer>
@@ -298,8 +262,6 @@ export default function App({ Component, err }) {
                             finishLoading,
                             closeMessageDialog,
                             setDialogMessage,
-                            sidebarView,
-                            closeSidebar,
                         }}>
                         {loading ? (
                             <VerticallyCentered>
