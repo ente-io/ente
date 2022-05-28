@@ -217,6 +217,7 @@ export default function Gallery() {
     const openSidebar = () => setSidebarView(true);
 
     useEffect(() => {
+        appContext.showNavBar(false);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
             appContext.setRedirectURL(router.asPath);
