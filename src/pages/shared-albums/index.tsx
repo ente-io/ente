@@ -32,6 +32,7 @@ import { useRouter } from 'next/router';
 import SingleInputForm from 'components/SingleInputForm';
 import { Card } from 'react-bootstrap';
 import { logError } from 'utils/sentry';
+import SharedAlbumNavbar from 'components/pages/sharedAlbum/Navbar';
 
 const Loader = () => (
     <VerticallyCentered>
@@ -62,7 +63,6 @@ export default function PublicCollectionGallery() {
         useState<CollectionSummaries>(new Map());
 
     useEffect(() => {
-        appContext.showNavBar(true);
         const currentURL = new URL(window.location.href);
         if (currentURL.pathname !== PAGES.ROOT) {
             router.replace(
@@ -292,6 +292,7 @@ export default function PublicCollectionGallery() {
                 accessedThroughSharedURL: true,
                 openReportForm,
             }}>
+            <SharedAlbumNavbar />
             <PhotoFrame
                 files={publicFiles}
                 setFiles={setPublicFiles}

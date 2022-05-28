@@ -50,8 +50,7 @@ import {
     mergeMetadata,
     sortFiles,
 } from 'utils/file';
-import SearchBar from 'components/Search';
-import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions/GalleryOptions';
+import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
 import CollectionSelector, {
     CollectionSelectorAttributes,
 } from 'components/pages/gallery/CollectionSelector';
@@ -59,7 +58,6 @@ import CollectionNamer, {
     CollectionNamerAttributes,
 } from 'components/Collections/CollectionNamer';
 import AlertBanner from 'components/pages/gallery/AlertBanner';
-import UploadButton from 'components/pages/gallery/UploadButton';
 import PlanSelector from 'components/pages/gallery/PlanSelector';
 import Upload from 'components/pages/gallery/Upload';
 import {
@@ -110,6 +108,7 @@ import ToastNotification from 'components/ToastNotification';
 import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
 import Collections from 'components/Collections';
+import { GalleryNavbar } from 'components/pages/gallery/Navbar';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -134,6 +133,8 @@ const defaultGalleryContext: GalleryContextType = {
     syncWithRemote: () => null,
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
+    sidebarView: false,
+    closeSidebar: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -210,6 +211,11 @@ export default function Gallery() {
     const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
 
+    const [sidebarView, setSidebarView] = useState(false);
+
+    const closeSidebar = () => setSidebarView(false);
+    const openSidebar = () => setSidebarView(true);
+
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
@@ -239,7 +245,6 @@ export default function Gallery() {
             setIsFirstFetch(false);
         };
         main();
-        appContext.showNavBar(true);
     }, []);
 
     useEffect(
@@ -579,6 +584,8 @@ export default function Gallery() {
                 syncWithRemote,
                 setNotificationAttributes,
                 setBlockingLoad,
+                closeSidebar,
+                sidebarView,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
@@ -603,16 +610,19 @@ export default function Gallery() {
                     attributes={notificationAttributes}
                     clearAttributes={clearNotificationAttributes}
                 />
-                <SearchBar
-                    isOpen={isInSearchMode}
-                    setOpen={setIsInSearchMode}
+                <GalleryNavbar
+                    openSidebar={openSidebar}
                     isFirstFetch={isFirstFetch}
+                    openUploader={openUploader}
+                    isInSearchMode={isInSearchMode}
+                    setIsInSearchMode={setIsInSearchMode}
                     collections={collections}
                     files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}
-                    setSearch={updateSearch}
+                    updateSearch={updateSearch}
                     searchStats={searchStats}
                 />
+
                 <Collections
                     collections={collections}
                     isInSearchMode={isInSearchMode}
@@ -666,10 +676,7 @@ export default function Gallery() {
                     setUploadTypeSelectorView={setUploadTypeSelectorView}
                 />
                 <Sidebar collectionSummaries={collectionSummaries} />
-                <UploadButton
-                    isFirstFetch={isFirstFetch}
-                    openUploader={openUploader}
-                />
+
                 <PhotoFrame
                     files={files}
                     setFiles={setFiles}

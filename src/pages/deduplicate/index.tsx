@@ -18,7 +18,7 @@ import {
     DefaultDeduplicateContext,
 } from 'types/deduplicate';
 import Router from 'next/router';
-import DeduplicateOptions from 'components/pages/gallery/SelectedFileOptions/DeduplicateOptions';
+import DeduplicateOptions from 'components/pages/dedupe/SelectedFileOptions';
 import { PAGES } from 'constants/pages';
 import router from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
