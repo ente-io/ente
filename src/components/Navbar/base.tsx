@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 
-const Navbar = styled.div`
+const NavbarBase = styled.div`
+    width: 100%;
     padding: 0 20px;
     font-size: 20px;
     line-height: 2rem;
@@ -15,4 +16,4 @@ const Navbar = styled.div`
     z-index: 1;
 `;
 
-export default Navbar;
+export default NavbarBase;

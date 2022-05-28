@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useRef, useState } from 'react';
 import styled, { ThemeProvider as SThemeProvider } from 'styled-components';
-import Navbar from 'components/Navbar';
+import Navbar from 'components/Navbar/base';
 import constants from 'utils/strings/constants';
 import { useRouter } from 'next/router';
 import VerticallyCentered from 'components/Container';
