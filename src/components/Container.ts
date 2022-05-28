@@ -58,6 +58,7 @@ export const Value = styled.div<{ width?: string }>`
 
 export const FlexWrapper = styled(Box)`
     display: flex;
+    width: 100%;
     align-items: center;
 `;
 

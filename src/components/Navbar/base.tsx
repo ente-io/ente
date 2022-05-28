@@ -2,7 +2,6 @@ import { FlexWrapper } from 'components/Container';
 import styled from 'styled-components';
 
 const NavbarBase = styled(FlexWrapper)`
-    width: 100%;
     padding: 0 20px;
     background-color: #111;
     min-height: 64px;

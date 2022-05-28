@@ -6,7 +6,6 @@ import {
 import styled from 'styled-components';
 
 export const SearchBarWrapper = styled(CenteredFlex)`
-    width: 100%;
     @media (max-width: 624px) {
         display: none;
     }
@@ -25,7 +24,6 @@ export const SearchButtonWrapper = styled(FluidContainer)`
 `;
 
 export const SearchInputWrapper = styled(FlexWrapper)`
-    width: 100%;
     max-width: 484px;
     margin: auto;
 `;
