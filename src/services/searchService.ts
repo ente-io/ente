@@ -12,12 +12,95 @@ import {
     Suggestion,
     SuggestionType,
 } from 'types/search';
+import { FILE_TYPE } from 'constants/file';
+import { getFormattedDate, isInsideBox } from 'utils/search';
 
 const ENDPOINT = getEndpoint();
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
-export function parseHumanDate(humanDate: string): DateValue[] {
+export const getAutoCompleteSuggestions =
+    (files: EnteFile[], collections: Collection[]) =>
+    async (searchPhrase: string) => {
+        searchPhrase = searchPhrase.trim().toLowerCase();
+        if (!searchPhrase?.length) {
+            return [];
+        }
+        const options = [
+            ...getHolidaySuggestion(searchPhrase),
+            ...getYearSuggestion(searchPhrase),
+        ];
+
+        const searchedDates = parseHumanDate(searchPhrase);
+
+        options.push(
+            ...searchedDates.map((searchedDate) => ({
+                type: SuggestionType.DATE,
+                value: searchedDate,
+                label: getFormattedDate(searchedDate),
+            }))
+        );
+
+        const collectionResults = searchCollection(searchPhrase, collections);
+        options.push(
+            ...collectionResults.map(
+                (searchResult) =>
+                    ({
+                        type: SuggestionType.COLLECTION,
+                        value: searchResult.id,
+                        label: searchResult.name,
+                    } as Suggestion)
+            )
+        );
+        const fileResults = searchFiles(searchPhrase, files);
+        options.push(
+            ...fileResults.map((file) => ({
+                type:
+                    file.type === FILE_TYPE.IMAGE
+                        ? SuggestionType.IMAGE
+                        : SuggestionType.VIDEO,
+                value: file.index,
+                label: file.title,
+            }))
+        );
+
+        const locationResults = await searchLocation(searchPhrase);
+
+        const locationResultsHasFiles: boolean[] = new Array(
+            locationResults.length
+        ).fill(false);
+        files.map((file) => {
+            for (const [index, location] of locationResults.entries()) {
+                if (
+                    isInsideBox(
+                        {
+                            latitude: file.metadata.latitude,
+                            longitude: file.metadata.longitude,
+                        },
+                        location.bbox
+                    )
+                ) {
+                    locationResultsHasFiles[index] = true;
+                }
+            }
+        });
+        const filteredLocationWithFiles = locationResults.filter(
+            (_, index) => locationResultsHasFiles[index]
+        );
+        options.push(
+            ...filteredLocationWithFiles.map(
+                (searchResult) =>
+                    ({
+                        type: SuggestionType.LOCATION,
+                        value: searchResult.bbox,
+                        label: searchResult.place,
+                    } as Suggestion)
+            )
+        );
+        return options;
+    };
+
+function parseHumanDate(humanDate: string): DateValue[] {
     const date = chrono.parseDate(humanDate);
     const date1 = chrono.parseDate(`${humanDate} 1`);
     if (date !== null) {
@@ -42,7 +125,7 @@ export function parseHumanDate(humanDate: string): DateValue[] {
     return [];
 }
 
-export async function searchLocation(
+async function searchLocation(
     searchPhrase: string
 ): Promise<LocationSearchResponse[]> {
     try {
@@ -63,7 +146,7 @@ export async function searchLocation(
     return [];
 }
 
-export function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
+function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
     return [
         {
             label: 'Christmas',
@@ -90,7 +173,7 @@ export function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
     );
 }
 
-export function getYearSuggestion(searchPhrase: string): Suggestion[] {
+function getYearSuggestion(searchPhrase: string): Suggestion[] {
     if (searchPhrase.length === 4) {
         try {
             const year = parseInt(searchPhrase);
@@ -110,7 +193,7 @@ export function getYearSuggestion(searchPhrase: string): Suggestion[] {
     return [];
 }
 
-export function searchCollection(
+function searchCollection(
     searchPhrase: string,
     collections: Collection[]
 ): Collection[] {
@@ -119,7 +202,7 @@ export function searchCollection(
     );
 }
 
-export function searchFiles(searchPhrase: string, files: EnteFile[]) {
+function searchFiles(searchPhrase: string, files: EnteFile[]) {
     return files
         .map((file, idx) => ({
             title: file.metadata.title,

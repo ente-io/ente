@@ -1,4 +1,8 @@
 export const SelectStyles = {
+    container: (style) => ({
+        ...style,
+        flex: 1,
+    }),
     control: (style, { isFocused }) => ({
         ...style,
         backgroundColor: '#282828',

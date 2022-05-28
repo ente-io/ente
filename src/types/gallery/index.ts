@@ -11,6 +11,7 @@ export type SetFiles = React.Dispatch<React.SetStateAction<EnteFile[]>>;
 export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
 export type SetSearchStats = React.Dispatch<React.SetStateAction<SearchStats>>;
+export type SetSearch = React.Dispatch<React.SetStateAction<Search>>;
 
 export type Search = {
     date?: DateValue;
