@@ -34,14 +34,15 @@ class TrashDiffFetcher {
         final bool hasMore = response.data["hasMore"] as bool;
         final startTime = DateTime.now();
         for (final item in diff) {
-          if (item["isDeleted"]) {
-            deletedUploadIDs.add(item["file"]["id"]);
-            continue;
-          }
           final trash = TrashFile();
           trash.createdAt = item['createdAt'];
           trash.updateAt = item['updatedAt'];
           latestUpdatedAtTime = max(latestUpdatedAtTime, trash.updateAt);
+          if (item["isDeleted"]) {
+            deletedUploadIDs.add(item["file"]["id"]);
+            continue;
+          }
+
           trash.deleteBy = item['deleteBy'];
           trash.uploadedFileID = item["file"]["id"];
           trash.collectionID = item["file"]["collectionID"];
