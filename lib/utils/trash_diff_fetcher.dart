@@ -33,9 +33,8 @@ class TrashDiffFetcher {
         final diff = response.data["diff"] as List;
         final bool hasMore = response.data["hasMore"] as bool;
         final startTime = DateTime.now();
-        final trash = TrashFile();
-
         for (final item in diff) {
+          final trash = TrashFile();
           trash.createdAt = item['createdAt'];
           trash.updateAt = item['updatedAt'];
           latestUpdatedAtTime = max(latestUpdatedAtTime, trash.updateAt);
