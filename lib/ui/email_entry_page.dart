@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:password_strength/password_strength.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
@@ -24,34 +25,29 @@ class EmailEntryPage extends StatefulWidget {
 }
 
 class _EmailEntryPageState extends State<EmailEntryPage> {
-  static const kPasswordStrengthThreshold = 0.4;
+  static const kMildPasswordStrengthThreshold = 0.4;
+  static const kStrongPasswordStrengthThreshold = 0.7;
 
   final _config = Configuration.instance;
   final _passwordController1 = TextEditingController();
   final _passwordController2 = TextEditingController();
+  final Color _validFieldValueColor = Color.fromRGBO(45, 194, 98, 0.2);
 
   String _email;
-  String _password = null;
-  String _passwordInInputBox = '';
+  String _password;
+  double _passwordStrength = 0.0;
   bool _emailIsValid = false;
   bool _hasAgreedToTOS = true;
   bool _hasAgreedToE2E = false;
   bool _password1Visible = false;
   bool _password2Visible = false;
   bool _passwordsMatch = false;
+
   final _password1FocusNode = FocusNode();
   final _password2FocusNode = FocusNode();
   bool _password1InFocus = false;
   bool _password2InFocus = false;
   bool _passwordIsValid = false;
-
-  bool _capitalLetterIsPresent = false;
-  bool _lenghtIsValid = false; //variables for checking password strength
-  bool _specialCharIsPresent = false;
-
-  Color _cnfPasswordInputFieldColor = null;
-  Color _emailInputFieldColor = null; //is this okay?
-  Color _passwordInputFieldColor = null;
 
   @override
   void initState() {
@@ -123,6 +119,15 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   }
 
   Widget _getBody() {
+    var passwordStrengthText = 'Weak';
+    var passwordStrengthColor = Colors.redAccent;
+    if (_passwordStrength > kStrongPasswordStrengthThreshold) {
+      passwordStrengthText = 'Strong';
+      passwordStrengthColor = Colors.greenAccent;
+    } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
+      passwordStrengthText = 'Moderate';
+      passwordStrengthColor = Colors.orangeAccent;
+    }
     return Column(
       children: [
         Expanded(
@@ -139,9 +144,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: TextFormField(
                     style: Theme.of(context).textTheme.subtitle1,
-                    autofillHints: [AutofillHints.email],
+                    autofillHints: const [AutofillHints.email],
                     decoration: InputDecoration(
-                      fillColor: _emailInputFieldColor,
+                      fillColor: _emailIsValid ? _validFieldValueColor : null,
                       filled: true,
                       hintText: 'email',
                       contentPadding:
@@ -162,16 +167,12 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           : null,
                     ),
                     onChanged: (value) {
-                      setState(() {
-                        _email = value.trim();
-                        _emailIsValid = EmailValidator.validate(_email);
-                        if (_emailIsValid) {
-                          _emailInputFieldColor =
-                              Color.fromRGBO(45, 194, 98, 0.2);
-                        } else {
-                          _emailInputFieldColor = null;
-                        }
-                      });
+                      _email = value.trim();
+                      if (_emailIsValid != EmailValidator.validate(_email)) {
+                        setState(() {
+                          _emailIsValid = EmailValidator.validate(_email);
+                        });
+                      }
                     },
                     autocorrect: false,
                     keyboardType: TextInputType.emailAddress,
@@ -187,9 +188,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     controller: _passwordController1,
                     obscureText: !_password1Visible,
                     enableSuggestions: true,
-                    autofillHints: [AutofillHints.newPassword],
+                    autofillHints: const [AutofillHints.newPassword],
                     decoration: InputDecoration(
-                      fillColor: _passwordInputFieldColor,
+                      fillColor:
+                          _passwordIsValid ? _validFieldValueColor : null,
                       filled: true,
                       hintText: "password",
                       contentPadding:
@@ -225,16 +227,15 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     ),
                     focusNode: _password1FocusNode,
                     onChanged: (password) {
-                      setState(() {
-                        _passwordInInputBox = password;
-                        validatePassword(password);
-                        if (_passwordIsValid) {
-                          _passwordInputFieldColor =
-                              Color.fromRGBO(45, 194, 98, 0.2);
-                        } else {
-                          _passwordInputFieldColor = null;
-                        }
-                      });
+                      if (password != _password) {
+                        setState(() {
+                          _password = password;
+                          _passwordStrength =
+                              estimatePasswordStrength(password);
+                          _passwordIsValid = _passwordStrength >=
+                              kMildPasswordStrengthThreshold;
+                        });
+                      }
                     },
                     onEditingComplete: () {
                       _password1FocusNode.unfocus();
@@ -252,11 +253,12 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         keyboardType: TextInputType.visiblePassword,
                         controller: _passwordController2,
                         obscureText: !_password2Visible,
-                        autofillHints: [AutofillHints.newPassword],
+                        autofillHints: const [AutofillHints.newPassword],
                         onEditingComplete: () =>
                             TextInput.finishAutofillContext(),
                         decoration: InputDecoration(
-                          fillColor: _cnfPasswordInputFieldColor,
+                          fillColor:
+                              _passwordsMatch ? _validFieldValueColor : null,
                           filled: true,
                           hintText: "confirm password",
                           contentPadding: EdgeInsets.symmetric(
@@ -294,14 +296,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         onChanged: (cnfPassword) {
                           setState(() {
                             if (_password != null || _password != '') {
-                              if (_password == cnfPassword) {
-                                _cnfPasswordInputFieldColor =
-                                    Color.fromRGBO(45, 194, 98, 0.2);
-                                _passwordsMatch = true;
-                              } else {
-                                _cnfPasswordInputFieldColor = null;
-                                _passwordsMatch = false;
-                              }
+                              _passwordsMatch = _password == cnfPassword;
                             }
                           });
                         },
@@ -317,11 +312,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       ),
                     ),
                     Visibility(
-                      visible: (!_passwordIsValid &&
-                          (_passwordInInputBox != '') &&
-                          _password1InFocus),
+                      visible: ((_password != '') && _password1InFocus),
                       child: Positioned(
-                          bottom: -48,
+                          bottom: 20,
                           child: Row(
                             children: [
                               SizedBox(
@@ -355,92 +348,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                         children: [
                                           Padding(
                                             padding: const EdgeInsets.fromLTRB(
-                                                4.0, 8, 4.0, 4.0),
-                                            child: Row(
-                                              children: [
-                                                Padding(
-                                                    padding: const EdgeInsets
-                                                        .fromLTRB(10, 0, 8, 0),
-                                                    child: _lenghtIsValid
-                                                        ? Icon(
-                                                            Icons.check,
-                                                            color:
-                                                                CupertinoColors
-                                                                    .systemGrey2,
-                                                          )
-                                                        : Icon(
-                                                            Icons.check,
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .dialogTheme
-                                                                .backgroundColor,
-                                                          )),
-                                                Text(
-                                                    'Must be minimum 9 characters long',
-                                                    style: _lenghtIsValid
-                                                        ? TextStyle(
-                                                            decoration:
-                                                                TextDecoration
-                                                                    .lineThrough,
-                                                            color:
-                                                                CupertinoColors
-                                                                    .systemGrey)
-                                                        : TextStyle(
-                                                            color:
-                                                                Color.fromARGB(
-                                                                    255,
-                                                                    241,
-                                                                    118,
-                                                                    109)))
-                                              ],
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(4.0),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      10, 0, 8, 0),
-                                              child: Row(
-                                                children: [
-                                                  Container(
-                                                      child:
-                                                          _specialCharIsPresent
-                                                              ? Icon(
-                                                                  Icons.check,
-                                                                  color: CupertinoColors
-                                                                      .systemGrey2,
-                                                                )
-                                                              : Icon(
-                                                                  Icons.check,
-                                                                  color: Theme.of(
-                                                                          context)
-                                                                      .dialogTheme
-                                                                      .backgroundColor,
-                                                                )),
-                                                  Text(
-                                                      '  Must have special characters',
-                                                      style: _specialCharIsPresent
-                                                          ? TextStyle(
-                                                              decoration:
-                                                                  TextDecoration
-                                                                      .lineThrough,
-                                                              color:
-                                                                  CupertinoColors
-                                                                      .systemGrey)
-                                                          : TextStyle(
-                                                              color: Color
-                                                                  .fromARGB(
-                                                                      255,
-                                                                      241,
-                                                                      118,
-                                                                      109)))
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.fromLTRB(
                                                 4, 4, 4, 8),
                                             child: Padding(
                                               padding:
@@ -448,38 +355,28 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                                       10, 0, 8, 0),
                                               child: Row(
                                                 children: [
-                                                  Container(
-                                                      child:
-                                                          _capitalLetterIsPresent
-                                                              ? Icon(
-                                                                  Icons.check,
-                                                                  color: CupertinoColors
-                                                                      .systemGrey2,
-                                                                )
-                                                              : Icon(
-                                                                  Icons.check,
-                                                                  color: Theme.of(
-                                                                          context)
-                                                                      .dialogTheme
-                                                                      .backgroundColor,
-                                                                )),
+                                                  // Container(
+                                                  //   child:
+                                                  //       _capitalLetterIsPresent
+                                                  //           ? Icon(
+                                                  //               Icons.check,
+                                                  //               color: CupertinoColors
+                                                  //                   .systemGrey2,
+                                                  //             )
+                                                  //           : Icon(
+                                                  //               Icons.check,
+                                                  //               color: Theme.of(
+                                                  //                       context)
+                                                  //                   .dialogTheme
+                                                  //                   .backgroundColor,
+                                                  //             ),
+                                                  // ),
                                                   Text(
-                                                      '  Must have a capital letter',
-                                                      style: _capitalLetterIsPresent
-                                                          ? TextStyle(
-                                                              decoration:
-                                                                  TextDecoration
-                                                                      .lineThrough,
-                                                              color:
-                                                                  CupertinoColors
-                                                                      .systemGrey)
-                                                          : TextStyle(
-                                                              color: Color
-                                                                  .fromARGB(
-                                                                      255,
-                                                                      241,
-                                                                      118,
-                                                                      109)))
+                                                    'Password Strength: $passwordStrengthText',
+                                                    style: TextStyle(
+                                                        color:
+                                                            passwordStrengthColor),
+                                                  )
                                                 ],
                                               ),
                                             ),
@@ -668,31 +565,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         _passwordsMatch &&
         _hasAgreedToTOS &&
         _hasAgreedToE2E;
-  }
-
-  void validatePassword(String password) {
-    var len = password.length;
-    _lenghtIsValid = true;
-    _specialCharIsPresent = true;
-    _capitalLetterIsPresent = true;
-    _passwordIsValid = true;
-    if (len < 9) {
-      _passwordIsValid = false;
-      _lenghtIsValid = false;
-    }
-    if (!RegExp(r"[!@#$%^&*()_+\-=\[\]{};':\\|,.<>\/?]+").hasMatch(password)) {
-      _specialCharIsPresent = false;
-      _passwordIsValid = false;
-    }
-    if (!RegExp(r"(.*[A-Z].*)").hasMatch(password)) {
-      _capitalLetterIsPresent = false;
-      _passwordIsValid = false;
-    }
-    if (_passwordIsValid) {
-      _password = password;
-    } else {
-      _password = null;
-    }
   }
 }
 
