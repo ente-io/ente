@@ -101,6 +101,7 @@ class _DetailPageState extends State<DetailPage> {
     _appBarKey = GlobalKey<FadingAppBarState>();
     _bottomBarKey = GlobalKey<FadingBottomBarState>();
     return SafeArea(
+      bottom: false,
       child: Scaffold(
         appBar: FadingAppBar(
           _files[_selectedIndex],
