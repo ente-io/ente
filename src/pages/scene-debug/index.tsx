@@ -9,8 +9,8 @@ function SceneDebug() {
     };
 
     const handleSubmission = async () => {
-        const model = await sceneDetectionService.init();
-        await sceneDetectionService.run(selectedFile, model);
+        await sceneDetectionService.init();
+        await sceneDetectionService.run(selectedFile);
     };
 
     useEffect(() => {
