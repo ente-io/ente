@@ -40,10 +40,9 @@ extension CustomColorScheme on ColorScheme {
       Colors.white; //same for both themes
   // brightness == Brightness.light ? Colors.black : Colors.white;
 
-  Color get cancelSelectedButtonColor => Colors.black; //same for both themes
-  // brightness == Brightness.light
-  //     ? Color.fromARGB(255, 225, 225, 225)
-  //     : Color.fromARGB(255, 30, 30, 30);
+  Color get cancelSelectedButtonColor => brightness == Brightness.light
+      ? Color.fromRGBO(0, 0, 0, 0.35)
+      : Color.fromRGBO(16, 16, 16, 0.5);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(
