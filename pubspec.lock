@@ -1003,16 +1003,16 @@ packages:
   sentry:
     dependency: "direct main"
     description:
-      name: sentry
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "thirdparty/sentry-dart/dart"
+      relative: true
+    source: path
     version: "6.5.1"
   sentry_flutter:
     dependency: "direct main"
     description:
-      name: sentry_flutter
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "thirdparty/sentry-dart/flutter"
+      relative: true
+    source: path
     version: "6.5.1"
   share:
     dependency: transitive

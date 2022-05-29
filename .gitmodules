@@ -5,3 +5,8 @@
 [submodule "thirdparty/plugins"]
 	path = thirdparty/plugins
 	url = https://github.com/ente-io/plugins.git
+
+[submodule "thirdparty/sentry-dart"]
+	path = thirdparty/sentry-dart
+	url = https://github.com/ente-io/sentry-dart.git
+
