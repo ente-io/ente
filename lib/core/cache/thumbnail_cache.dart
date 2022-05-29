@@ -24,4 +24,11 @@ class ThumbnailLruCache {
             (size != null ? size.toString() : kThumbnailLargeSize.toString()),
         imageData);
   }
+
+  static void clearCache(File file) {
+    _map.remove(
+        file.generatedID.toString() + "_" + kThumbnailLargeSize.toString());
+    _map.remove(
+        file.generatedID.toString() + "_" + kThumbnailSmallSize.toString());
+  }
 }

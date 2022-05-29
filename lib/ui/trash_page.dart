@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/trash_db.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
 import 'package:photos/models/galleryType.dart';
@@ -169,27 +168,6 @@ class BottomButtonsWidget extends StatelessWidget {
             },
           ),
         ),
-        const SizedBox(width: 16),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .defaultTextColor
-                    .withOpacity(0.2),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: Center(
-                child: Text('Restore All',
-                    style: Theme.of(context).textTheme.subtitle2),
-              ),
-            ),
-          ),
-        )
       ],
     );
   }

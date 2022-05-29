@@ -26,12 +26,15 @@ This repository contains the code for our mobile apps, built with a lot of ‚ù§Ô∏
 
 ### Android
 
-This repository's GitHub releases contains APKs, built straight from source. The latest build is available @ [ente.io/apk](https://ente.io/apk). These builds keep themselves updated, without relying on third party stores.
+This [repository's GitHub releases](https://github.com/ente-io/frame/releases) contains APKs, built straight from source. The latest build is available @ [ente.io/apk](https://ente.io/apk). These builds keep themselves updated, without relying on third party stores.
 
-You can alternatively install the build from PlayStore.
+You can alternatively install the build from PlayStore or F-Droid.
 
 <a href="https://play.google.com/store/apps/details?id=io.ente.photos">
-  <img width="197" alt="Download on Google Play" src="https://user-images.githubusercontent.com/1161789/154795146-e7590d31-7636-4eee-b404-e2dc05fa25b7.png">
+  <img width="197" alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png">
+</a>
+<a href="https://f-droid.org/packages/io.ente.photos.fdroid/">
+  <img width="197" alt="Get it on F-Droid" src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png">
 </a>
 
 

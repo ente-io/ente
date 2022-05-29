@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -82,7 +83,9 @@ Future<Uint8List> getThumbnailFromLocal(File file,
       if (asset == null || !(await asset.exists)) {
         return null;
       }
-      return asset.thumbDataWithSize(size, size, quality: quality).then((data) {
+      return asset
+          .thumbnailDataWithSize(ThumbnailSize(size, size), quality: quality)
+          .then((data) {
         ThumbnailLruCache.put(file, data, size);
         return data;
       });

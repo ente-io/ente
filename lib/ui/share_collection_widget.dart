@@ -58,9 +58,10 @@ class _SharingDialogState extends State<SharingDialog> {
     if (!_showEntryField) {
       children.add(SizedBox(
         width: 220,
-        child: OutlineButton(
+        child: OutlinedButton(
           child: Icon(
             Icons.add,
+            color: Theme.of(context).buttonColor,
           ),
           onPressed: () {
             setState(() {

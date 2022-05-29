@@ -77,9 +77,16 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                 child: Padding(
                   padding: const EdgeInsets.only(
                       top: 30, bottom: 12, left: 40, right: 40),
-                  child: OutlineButton.icon(
-                    padding: EdgeInsets.all(20),
-                    icon: Icon(Icons.create_new_folder_outlined),
+                  child: OutlinedButton.icon(
+                    style: ButtonStyle(
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                        EdgeInsets.all(20),
+                      ),
+                    ),
+                    icon: Icon(
+                      Icons.create_new_folder_outlined,
+                      color: Theme.of(context).buttonColor,
+                    ),
                     label: Text(
                       "to a new album",
                       style: Theme.of(context).textTheme.bodyText1,
