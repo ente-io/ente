@@ -57,7 +57,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             AppLock.of(context).setEnabled(false);
-            String reason = "please authenticate to view your recovery key";
+            String reason = "Please authenticate to view your recovery key";
             final result = await requestAuthentication(reason);
             AppLock.of(context)
                 .setEnabled(Configuration.instance.shouldShowLockScreen());
@@ -86,7 +86,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             AppLock.of(context).setEnabled(false);
-            String reason = "please authenticate to change your email";
+            String reason = "Please authenticate to change your email";
             final result = await requestAuthentication(reason);
             AppLock.of(context)
                 .setEnabled(Configuration.instance.shouldShowLockScreen());
@@ -111,7 +111,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             AppLock.of(context).setEnabled(false);
-            String reason = "please authenticate to change your password";
+            String reason = "Please authenticate to change your password";
             final result = await requestAuthentication(reason);
             AppLock.of(context)
                 .setEnabled(Configuration.instance.shouldShowLockScreen());
