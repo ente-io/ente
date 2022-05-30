@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
@@ -21,6 +23,7 @@ class DetailsSectionWidget extends StatefulWidget {
 class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   UserDetails _userDetails;
   StreamSubscription<UserDetailsChangedEvent> _userDetailsChangedEvent;
+  StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
 
   @override
   void initState() {
@@ -30,19 +33,28 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         Bus.instance.on<UserDetailsChangedEvent>().listen((event) {
       _fetchUserDetails();
     });
+    _tabChangedEventSubscription =
+        Bus.instance.on<TabChangedEvent>().listen((event) {
+      if (event.selectedIndex == 3) {
+        _fetchUserDetails();
+      }
+    });
   }
 
   void _fetchUserDetails() {
     UserService.instance.getUserDetailsV2(memoryCount: true).then((details) {
-      setState(() {
-        _userDetails = details;
-      });
+      if (mounted) {
+        setState(() {
+          _userDetails = details;
+        });
+      }
     });
   }
 
   @override
   void dispose() {
     _userDetailsChangedEvent.cancel();
+    _tabChangedEventSubscription.cancel();
     super.dispose();
   }
 
