@@ -11,6 +11,7 @@ import 'package:photos/ui/settings/info_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
+import 'package:photos/ui/settings/theme_switch_widget.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key key}) : super(key: key);
@@ -39,7 +40,7 @@ class SettingsPage extends StatelessWidget {
                     .subtitle1
                     .copyWith(overflow: TextOverflow.ellipsis),
               ),
-              // ThemeSwitchWidget()
+              kDebugMode ? ThemeSwitchWidget() : const SizedBox.shrink(),
             ])));
     final sectionDivider = Divider(
       height: 20,

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
@@ -231,52 +229,49 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     _configureBackgroundFetch();
   }
 
-  Widget debugBuild(BuildContext context) {
-    return MaterialApp(
-      title: "ente",
-      themeMode: ThemeMode.system,
-      theme: lightThemeData,
-      darkTheme: darkThemeData,
-      home: EnteApp._homeWidget,
-      debugShowCheckedModeBanner: false,
-      navigatorKey: Network.instance.getAlice().getNavigatorKey(),
-      builder: EasyLoading.init(),
-      supportedLocales: L10n.all,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (kDebugMode && Platform.isIOS) {
-      return debugBuild(context);
+    if (kDebugMode) {
+      return AdaptiveTheme(
+          light: lightThemeData,
+          dark: darkThemeData,
+          initial: AdaptiveThemeMode.system,
+          builder: (lightTheme, dartTheme) => MaterialApp(
+                title: "ente",
+                themeMode: ThemeMode.system,
+                theme: lightTheme,
+                darkTheme: dartTheme,
+                home: EnteApp._homeWidget,
+                debugShowCheckedModeBanner: false,
+                navigatorKey: Network.instance.getAlice().getNavigatorKey(),
+                builder: EasyLoading.init(),
+                supportedLocales: L10n.all,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                ],
+              ));
+    } else {
+      return MaterialApp(
+        title: "ente",
+        themeMode: ThemeMode.system,
+        theme: lightThemeData,
+        darkTheme: darkThemeData,
+        home: EnteApp._homeWidget,
+        debugShowCheckedModeBanner: false,
+        navigatorKey: Network.instance.getAlice().getNavigatorKey(),
+        builder: EasyLoading.init(),
+        supportedLocales: L10n.all,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+      );
     }
-    return AdaptiveTheme(
-        light: lightThemeData,
-        dark: darkThemeData,
-        initial: AdaptiveThemeMode.dark,
-        builder: (lightTheme, dartTheme) => MaterialApp(
-              title: "ente",
-              themeMode: ThemeMode.system,
-              theme: lightTheme,
-              darkTheme: dartTheme,
-              home: EnteApp._homeWidget,
-              debugShowCheckedModeBanner: false,
-              navigatorKey: Network.instance.getAlice().getNavigatorKey(),
-              builder: EasyLoading.init(),
-              supportedLocales: L10n.all,
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-              ],
-            ));
   }
 
   @override

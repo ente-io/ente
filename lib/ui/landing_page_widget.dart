@@ -139,18 +139,6 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         onTap: _navigateToSignUpPage,
       ),
     );
-    // return Container(
-    //   width: double.infinity,
-    //   padding: EdgeInsets.symmetric(horizontal: 24),
-    // child: ElevatedButton(
-    //   style: Theme.of(context).colorScheme.primaryActionButtonStyle,
-    //   child: Hero(
-    //     tag: "sign_up",
-    //     child: Text("New to ente"),
-    //   ),
-    //   onPressed: _navigateToSignUpPage,
-    // ),
-    //);
   }
 
   Widget _getFeatureSlider() {
