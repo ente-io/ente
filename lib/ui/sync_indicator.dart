@@ -125,7 +125,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
                   color: Theme.of(context).buttonColor,
                 ),
                 Padding(padding: EdgeInsets.all(4)),
-                Text("your subscription has expired"),
+                Text("Your subscription has expired"),
               ],
             ),
             Padding(padding: EdgeInsets.all(6)),
@@ -133,7 +133,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
               width: double.infinity,
               height: 64,
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-              child: button("subscribe", onPressed: () {
+              child: button("Subscribe", onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (BuildContext context) {
@@ -161,7 +161,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
                   color: Theme.of(context).buttonColor,
                 ),
                 Padding(padding: EdgeInsets.all(4)),
-                Text("storage limit exceeded"),
+                Text("Storage limit exceeded"),
               ],
             ),
             Padding(padding: EdgeInsets.all(6)),
@@ -169,7 +169,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
               width: double.infinity,
               height: 64,
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-              child: button("upgrade", onPressed: () {
+              child: button("Upgrade", onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (BuildContext context) {
@@ -193,7 +193,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
             ),
             Padding(padding: EdgeInsets.all(4)),
             Text(
-              "we could not backup your data\nwe will retry later",
+              "We could not backup your data\nwe will retry later",
               style: TextStyle(height: 1.4),
               textAlign: TextAlign.center,
             ),
@@ -211,7 +211,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
                   ),
                 ),
                 child: Text(
-                  "raise ticket",
+                  "Raise ticket",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -244,31 +244,31 @@ class _SyncIndicatorState extends State<SyncIndicator> {
   String _getRefreshingText() {
     if (_event.status == SyncStatus.started_first_gallery_import ||
         _event.status == SyncStatus.completed_first_gallery_import) {
-      return "loading gallery...";
+      return "Loading gallery...";
     }
     if (_event.status == SyncStatus.applying_remote_diff) {
-      return "syncing...";
+      return "Syncing...";
     }
     if (_event.status == SyncStatus.preparing_for_upload) {
-      return "encrypting backup...";
+      return "Encrypting backup...";
     }
     if (_event.status == SyncStatus.in_progress) {
       return _event.completed.toString() +
           "/" +
           _event.total.toString() +
-          " memories preserved";
+          " Memories preserved";
     }
     if (_event.status == SyncStatus.paused) {
       return _event.reason;
     }
     if (_event.status == SyncStatus.completed_backup) {
       if (_event.wasStopped) {
-        return "sync stopped";
+        return "Sync stopped";
       } else {
-        return "all memories preserved";
+        return "All memories preserved";
       }
     }
     // _event.status == SyncStatus.error
-    return _event.reason ?? "upload failed";
+    return _event.reason ?? "Upload failed";
   }
 }
