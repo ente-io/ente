@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
@@ -10,6 +11,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/ui/collection_page.dart';
+import 'package:photos/ui/common/gradientButton.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -50,7 +52,7 @@ class CreateCollectionPage extends StatefulWidget {
 }
 
 class _CreateCollectionPageState extends State<CreateCollectionPage> {
-  final _logger = Logger("CreateCollectionPage");
+  final _logger = Logger((_CreateCollectionPageState).toString());
   String _albumName;
 
   @override
@@ -77,21 +79,28 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                 child: Padding(
                   padding: const EdgeInsets.only(
                       top: 30, bottom: 12, left: 40, right: 40),
-                  child: OutlinedButton.icon(
-                    style: ButtonStyle(
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                        EdgeInsets.all(20),
-                      ),
+                  child: GradientButton(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      //mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.create_new_folder_outlined,
+                          color: Colors.white,
+                        ),
+                        Padding(padding: EdgeInsets.all(6)),
+                        Text(
+                          "To a new album",
+                          style: gradientButtonTextTheme(),
+                        ),
+                      ],
                     ),
-                    icon: Icon(
-                      Icons.create_new_folder_outlined,
-                      color: Theme.of(context).buttonColor,
-                    ),
-                    label: Text(
-                      "to a new album",
-                      style: Theme.of(context).textTheme.bodyText1,
-                    ),
-                    onPressed: () {
+                    linearGradientColors: const [
+                      Color(0xFF2CD267),
+                      Color(0xFF1DB954),
+                    ],
+                    onTap: () async {
                       _showNameAlbumDialog();
                     },
                   ),
@@ -104,10 +113,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "to an existing album",
+                "To an existing album",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColorLight.withOpacity(0.8),
+                  // color: Theme.of(context).primaryColorLight.withOpacity(0.8),
                 ),
               ),
             ),
