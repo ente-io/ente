@@ -1,10 +1,9 @@
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import 'package:password_strength/password_strength.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/account_configured_event.dart';
@@ -35,14 +34,17 @@ class PasswordEntryPage extends StatefulWidget {
 }
 
 class _PasswordEntryPageState extends State<PasswordEntryPage> {
-  static const kPasswordStrengthThreshold = 0.4;
+  static const kMildPasswordStrengthThreshold = 0.4;
+  static const kStrongPasswordStrengthThreshold = 0.7;
 
-  final _logger = Logger("PasswordEntry");
+  final _logger = Logger((_PasswordEntryPageState).toString());
   final _passwordController1 = TextEditingController(),
       _passwordController2 = TextEditingController();
+  final Color _validFieldValueColor = Color.fromRGBO(45, 194, 98, 0.2);
   String _volatilePassword;
   String _password;
   String _passwordInInputBox = '';
+  double _passwordStrength = 0.0;
   bool _password1Visible = false;
   bool _password2Visible = false;
   final _password1FocusNode = FocusNode();
@@ -50,14 +52,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   bool _password1InFocus = false;
   bool _password2InFocus = false;
 
-  Color _cnfPasswordInputFieldColor = null;
-  Color _passwordInputFieldColor = null;
   bool _passwordsMatch = false;
-  bool _passwordIsValid = false;
-
-  bool _capitalLetterIsPresent = false;
-  bool _lenghtIsValid = false; //variables for checking password strength
-  bool _specialCharIsPresent = false;
+  bool _isPasswordValid = false;
 
   @override
   void initState() {
@@ -102,7 +98,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     return Scaffold(
       appBar: AppBar(
         leading: widget.mode == PasswordEntryMode.reset
-            ? new Container()
+            ? Container()
             : IconButton(
                 icon: Icon(Icons.arrow_back),
                 color: Theme.of(context).iconTheme.color,
@@ -129,9 +125,17 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   }
 
   Widget _getBody(String buttonTextAndHeading) {
-    print((!_passwordIsValid &&
-        (_passwordInInputBox != '') &&
-        _password1InFocus));
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom != 0;
+    final email = Configuration.instance.getEmail();
+    var passwordStrengthText = 'Weak';
+    var passwordStrengthColor = Colors.redAccent;
+    if (_passwordStrength > kStrongPasswordStrengthThreshold) {
+      passwordStrengthText = 'Strong';
+      passwordStrengthColor = Colors.greenAccent;
+    } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
+      passwordStrengthText = 'Moderate';
+      passwordStrengthColor = Colors.orangeAccent;
+    }
     if (_volatilePassword != null) {
       return Container();
     }
@@ -181,43 +185,30 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                         ),
                       ])),
                 ),
-                // Text("we don't store this password, so if you forget, "),
-                // Text.rich(
-                //   TextSpan(
-                //       text: "we cannot decrypt your data",
-                //       style: TextStyle(
-                //         decoration: TextDecoration.underline,
-                //         fontWeight: FontWeight.bold,
-                //       )),
-                //   style: TextStyle(
-                //     height: 1.3,
-                //   ),
-                //   textAlign: TextAlign.start,
-                // ),
                 Padding(padding: EdgeInsets.all(12)),
-                // hidden textForm for suggesting auto-fill service for saving
-                // password
-                // SizedBox(
-                //   width: 0,
-                //   height: 0,
-                //   child: TextFormField(
-                //     autofillHints: [
-                //       AutofillHints.email,
-                //     ],
-                //     autocorrect: false,
-                //     keyboardType: TextInputType.emailAddress,
-                //     initialValue: email,
-                //     textInputAction: TextInputAction.next,
-                //   ),
-                // ),
+                Visibility(
+                  // hidden textForm for suggesting auto-fill service for saving
+                  // password
+                  visible: false,
+                  child: TextFormField(
+                    autofillHints: const [
+                      AutofillHints.email,
+                    ],
+                    autocorrect: false,
+                    keyboardType: TextInputType.emailAddress,
+                    initialValue: email,
+                    textInputAction: TextInputAction.next,
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: TextFormField(
-                    autofillHints: [AutofillHints.newPassword],
+                    autofillHints: const [AutofillHints.newPassword],
                     decoration: InputDecoration(
-                      fillColor: _passwordInputFieldColor,
+                      fillColor:
+                          _isPasswordValid ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: "password",
+                      hintText: "Password",
                       contentPadding: EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                           borderSide: BorderSide.none,
@@ -237,7 +228,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                 });
                               },
                             )
-                          : _passwordIsValid
+                          : _isPasswordValid
                               ? Icon(
                                   Icons.check,
                                   color: Theme.of(context)
@@ -256,13 +247,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     onChanged: (password) {
                       setState(() {
                         _passwordInInputBox = password;
-                        validatePassword(password);
-                        if (_passwordIsValid) {
-                          _passwordInputFieldColor =
-                              Color.fromRGBO(45, 194, 98, 0.2);
-                        } else {
-                          _passwordInputFieldColor = null;
-                        }
+                        _passwordStrength = estimatePasswordStrength(password);
+                        _isPasswordValid =
+                            _passwordStrength >= kMildPasswordStrengthThreshold;
                       });
                     },
                     textInputAction: TextInputAction.next,
@@ -278,13 +265,14 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                         keyboardType: TextInputType.visiblePassword,
                         controller: _passwordController2,
                         obscureText: !_password2Visible,
-                        autofillHints: [AutofillHints.newPassword],
+                        autofillHints: const [AutofillHints.newPassword],
                         onEditingComplete: () =>
                             TextInput.finishAutofillContext(),
                         decoration: InputDecoration(
-                          fillColor: _cnfPasswordInputFieldColor,
+                          fillColor:
+                              _passwordsMatch ? _validFieldValueColor : null,
                           filled: true,
-                          hintText: "confirm password",
+                          hintText: "Confirm password",
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 20, vertical: 20),
                           suffixIcon: _password2InFocus
@@ -320,34 +308,17 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                         onChanged: (cnfPassword) {
                           setState(() {
                             if (_password != null || _password != '') {
-                              if (_password == cnfPassword) {
-                                _cnfPasswordInputFieldColor =
-                                    Color.fromRGBO(45, 194, 98, 0.2);
-                                _passwordsMatch = true;
-                              } else {
-                                _cnfPasswordInputFieldColor = null;
-                                _passwordsMatch = false;
-                              }
+                              _passwordsMatch = _password == cnfPassword;
                             }
                           });
                         },
                       ),
                     ),
-                    Positioned(
-                      bottom: -120,
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: Divider(
-                        thickness: 1,
-                      ),
-                    ),
                     Visibility(
-                      visible: (!_passwordIsValid &&
-                          (_passwordInInputBox != '') &&
-                          _password1InFocus),
+                      visible:
+                          ((_passwordInInputBox != '') && _password1InFocus),
                       child: Positioned(
-                          bottom: -37,
+                          bottom: 24,
                           child: Row(
                             children: [
                               SizedBox(
@@ -381,133 +352,21 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                         children: [
                                           Padding(
                                             padding: const EdgeInsets.fromLTRB(
-                                                4.0, 8, 4.0, 4.0),
+                                                4.0, 4, 4.0, 4.0),
                                             child: Row(
                                               children: [
                                                 Padding(
-                                                    padding: const EdgeInsets
-                                                        .fromLTRB(10, 0, 8, 0),
-                                                    child: _lenghtIsValid
-                                                        ? Icon(
-                                                            Icons.check,
-                                                            color:
-                                                                CupertinoColors
-                                                                    .systemGrey2,
-                                                          )
-                                                        : Icon(
-                                                            Icons.check,
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .dialogTheme
-                                                                .backgroundColor,
-                                                          )),
-                                                Text(
-                                                    'Must be minimum 9 characters long',
-                                                    style: _lenghtIsValid
-                                                        ? TextStyle(
-                                                            decoration:
-                                                                TextDecoration
-                                                                    .lineThrough,
-                                                            color:
-                                                                CupertinoColors
-                                                                    .systemGrey)
-                                                        : TextStyle(
-                                                            color:
-                                                                Color.fromARGB(
-                                                                    255,
-                                                                    241,
-                                                                    118,
-                                                                    109)))
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 10,
+                                                            vertical: 5),
+                                                    child: Text(
+                                                      'Password Strength: $passwordStrengthText',
+                                                      style: TextStyle(
+                                                          color:
+                                                              passwordStrengthColor),
+                                                    )),
                                               ],
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(4.0),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      10, 0, 8, 0),
-                                              child: Row(
-                                                children: [
-                                                  Container(
-                                                      child:
-                                                          _specialCharIsPresent
-                                                              ? Icon(
-                                                                  Icons.check,
-                                                                  color: CupertinoColors
-                                                                      .systemGrey2,
-                                                                )
-                                                              : Icon(
-                                                                  Icons.check,
-                                                                  color: Theme.of(
-                                                                          context)
-                                                                      .dialogTheme
-                                                                      .backgroundColor,
-                                                                )),
-                                                  Text(
-                                                      '  Must have special characters',
-                                                      style: _specialCharIsPresent
-                                                          ? TextStyle(
-                                                              decoration:
-                                                                  TextDecoration
-                                                                      .lineThrough,
-                                                              color:
-                                                                  CupertinoColors
-                                                                      .systemGrey)
-                                                          : TextStyle(
-                                                              color: Color
-                                                                  .fromARGB(
-                                                                      255,
-                                                                      241,
-                                                                      118,
-                                                                      109)))
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                4, 4, 4, 8),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      10, 0, 8, 0),
-                                              child: Row(
-                                                children: [
-                                                  Container(
-                                                      child:
-                                                          _capitalLetterIsPresent
-                                                              ? Icon(
-                                                                  Icons.check,
-                                                                  color: CupertinoColors
-                                                                      .systemGrey2,
-                                                                )
-                                                              : Icon(
-                                                                  Icons.check,
-                                                                  color: Theme.of(
-                                                                          context)
-                                                                      .dialogTheme
-                                                                      .backgroundColor,
-                                                                )),
-                                                  Text(
-                                                      '  Must have a capital letter',
-                                                      style: _capitalLetterIsPresent
-                                                          ? TextStyle(
-                                                              decoration:
-                                                                  TextDecoration
-                                                                      .lineThrough,
-                                                              color:
-                                                                  CupertinoColors
-                                                                      .systemGrey)
-                                                          : TextStyle(
-                                                              color: Color
-                                                                  .fromARGB(
-                                                                      255,
-                                                                      241,
-                                                                      118,
-                                                                      109)))
-                                                ],
-                                              ),
                                             ),
                                           ),
                                         ]),
@@ -523,53 +382,6 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                   ],
                   clipBehavior: Clip.none,
                 ),
-
-                // Padding(padding: EdgeInsets.all(8)),
-                // Padding(
-                //   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                //   child: TextFormField(
-                //     autofillHints: [AutofillHints.newPassword],
-                //     decoration: InputDecoration(
-                //       filled: true,
-                //       hintText: "confirm password",
-                //       contentPadding: EdgeInsets.all(20),
-                //       border: UnderlineInputBorder(
-                //           borderSide: BorderSide.none,
-                //           borderRadius: BorderRadius.circular(6)),
-                //       suffixIcon: _password2InFocus
-                //           ? IconButton(
-                //               icon: Icon(
-                //                 _password2Visible
-                //                     ? Icons.visibility
-                //                     : Icons.visibility_off,
-                //                 color: Theme.of(context).iconTheme.color,
-                //                 size: 20,
-                //               ),
-                //               onPressed: () {
-                //                 setState(() {
-                //                   _password2Visible = !_password2Visible;
-                //                 });
-                //               },
-                //             )
-                //           : null,
-                //     ),
-                //     obscureText: !_password2Visible,
-                //     controller: _passwordController2,
-                //     autofocus: false,
-                //     autocorrect: false,
-                //     keyboardType: TextInputType.visiblePassword,
-                //     onChanged: (_) {
-                //       setState(() {});
-                //     },
-                //     focusNode: _password2FocusNode,
-                //   ),
-                // ),
-                // Padding(
-                //   padding: const EdgeInsets.symmetric(vertical: 18),
-                //   child: Divider(
-                //     thickness: 1,
-                //   ),
-                // ),
                 SizedBox(
                   height: 50,
                 ),
@@ -580,7 +392,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       MaterialPageRoute(
                         builder: (BuildContext context) {
                           return WebPage(
-                              "how it works", "https://ente.io/architecture");
+                              "How it works", "https://ente.io/architecture");
                         },
                       ),
                     );
@@ -589,7 +401,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     padding: EdgeInsets.symmetric(horizontal: 20),
                     child: RichText(
                       text: TextSpan(
-                          text: "how it works",
+                          text: "How it works",
                           style: Theme.of(context).textTheme.subtitle1.copyWith(
                               fontSize: 14,
                               decoration: TextDecoration.underline)),
@@ -597,37 +409,12 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                   ),
                 ),
                 Padding(padding: EdgeInsets.all(20)),
-                // Container(
-                //   width: double.infinity,
-                //   height: 64,
-                //   padding: EdgeInsets.fromLTRB(40, 0, 40, 0),
-                //   child: ElevatedButton(
-                //     child: Text(buttonTextAndHeading),
-                //     onPressed: _passwordController1.text.isNotEmpty &&
-                //             _passwordController2.text.isNotEmpty
-                //         ? _onButtonPress
-                //         : null,
-                //   ),
-                // ),
               ],
             ),
           ),
         ),
       ],
     );
-  }
-
-  void _onButtonPress() {
-    if (_passwordController1.text != _passwordController2.text) {
-      showErrorDialog(
-          context, "uhm...", "the passwords you entered don't match");
-    } else {
-      if (widget.mode == PasswordEntryMode.set) {
-        _showRecoveryCodeDialog(_passwordController1.text);
-      } else {
-        _updatePassword();
-      }
-    }
   }
 
   void _updatePassword() async {
@@ -654,7 +441,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   Future<void> _showRecoveryCodeDialog(String password) async {
     final dialog =
-        createProgressDialog(context, "generating encryption keys...");
+        createProgressDialog(context, "Generating encryption keys...");
     await dialog.show();
     try {
       final result = await Configuration.instance.generateKey(password);
@@ -695,36 +482,11 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       _logger.severe(e);
       await dialog.hide();
       if (e is UnsupportedError) {
-        showErrorDialog(context, "insecure device",
+        showErrorDialog(context, "Insecure device",
             "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.");
       } else {
         showGenericErrorDialog(context);
       }
-    }
-  }
-
-  void validatePassword(String password) {
-    var len = password.length;
-    _lenghtIsValid = true;
-    _specialCharIsPresent = true;
-    _capitalLetterIsPresent = true;
-    _passwordIsValid = true;
-    if (len < 9) {
-      _passwordIsValid = false;
-      _lenghtIsValid = false;
-    }
-    if (!RegExp(r"[!@#$%^&*()_+\-=\[\]{};':\\|,.<>\/?]+").hasMatch(password)) {
-      _specialCharIsPresent = false;
-      _passwordIsValid = false;
-    }
-    if (!RegExp(r"(.*[A-Z].*)").hasMatch(password)) {
-      _capitalLetterIsPresent = false;
-      _passwordIsValid = false;
-    }
-    if (_passwordIsValid) {
-      _password = password;
-    } else {
-      _password = null;
     }
   }
 }
