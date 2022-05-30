@@ -119,11 +119,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   List<Widget> _getDefaultActions(BuildContext context) {
     List<Widget> actions = <Widget>[];
     if (Configuration.instance.hasConfiguredAccount() &&
+        widget.selectedFiles.files.isEmpty &&
         (widget.type == GalleryType.local_folder ||
             widget.type == GalleryType.owned_collection)) {
       actions.add(
         Tooltip(
-          message: "share",
+          message: "Share",
           child: IconButton(
             icon: Icon(Icons.adaptive.share),
             onPressed: () {
