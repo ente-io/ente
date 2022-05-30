@@ -114,6 +114,9 @@ class UploadManager {
 
                 UIService.setUploadStage(UPLOAD_STAGES.START);
                 logUploadInfo(`clusterLivePhotoFiles called`);
+
+                // filter out files whose metadata detection failed or those that have been skipped because the files are too large,
+                // as they will be rejected during upload and are not valid upload files which we need to clustering
                 const rejectedFileLocalIDs = new Set(
                     [...this.metadataAndFileTypeInfoMap.entries()].map(
                         ([localID, metadataAndFileTypeInfo]) => {
