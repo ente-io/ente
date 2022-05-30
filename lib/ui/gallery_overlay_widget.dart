@@ -64,21 +64,25 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
   @override
   Widget build(BuildContext context) {
     bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      height: filesAreSelected ? 108 : 0,
-      child: AnimatedOpacity(
-        duration: Duration(milliseconds: 100),
-        opacity: filesAreSelected ? 1.0 : 0.0,
-        curve: Curves.easeIn,
-        child: IgnorePointer(
-          ignoring: !filesAreSelected,
-          child: OverlayWidget(
-            widget.type,
-            widget.selectedFiles,
-            path: widget.path,
-            collection: widget.collection,
+    final bottomPadding = Platform.isAndroid ? 0.0 : 12.0;
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomPadding),
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        height: filesAreSelected ? 108 : 0,
+        child: AnimatedOpacity(
+          duration: Duration(milliseconds: 100),
+          opacity: filesAreSelected ? 1.0 : 0.0,
+          curve: Curves.easeIn,
+          child: IgnorePointer(
+            ignoring: !filesAreSelected,
+            child: OverlayWidget(
+              widget.type,
+              widget.selectedFiles,
+              path: widget.path,
+              collection: widget.collection,
+            ),
           ),
         ),
       ),
@@ -256,11 +260,11 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     // skip add button for incoming collection till this feature is implemented
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.type != GalleryType.shared_collection) {
-      String msg = "add";
+      String msg = "Add";
       IconData iconData = Platform.isAndroid ? Icons.add : CupertinoIcons.add;
       // show upload icon instead of add for files selected in local gallery
       if (widget.type == GalleryType.local_folder) {
-        msg = "upload";
+        msg = "Upload";
         iconData = Platform.isAndroid
             ? Icons.cloud_upload
             : CupertinoIcons.cloud_upload;

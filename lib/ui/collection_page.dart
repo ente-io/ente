@@ -67,7 +67,7 @@ class CollectionPage extends StatelessWidget {
             overlayType,
             _selectedFiles,
             collection: c.collection,
-          )
+          ),
         ],
       ),
     );
