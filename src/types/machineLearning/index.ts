@@ -255,6 +255,7 @@ export interface ObjectDetectionConfig {
 
 export interface SceneDetectionConfig {
     method: SceneDetectionMethod;
+    minScore: number;
 }
 
 export interface TextDetectionConfig {
@@ -393,7 +394,10 @@ export interface ObjectDetectionService {
 export interface SceneDetectionService {
     method: Versioned<SceneDetectionMethod>;
     // init(): Promise<void>;
-    detectScenes(image: ImageBitmap): Promise<ObjectDetection[]>;
+    detectScenes(
+        image: ImageBitmap,
+        minScore: number
+    ): Promise<ObjectDetection[]>;
 }
 
 export interface TextDetectionService {

@@ -56,7 +56,8 @@ class ObjectService {
             );
         objectDetections.push(
             ...(await syncContext.sceneDetectionService.detectScenes(
-                imageBitmap
+                imageBitmap,
+                syncContext.config.sceneDetection.minScore
             ))
         );
         // console.log('3 TF Memory stats: ', tf.memory());

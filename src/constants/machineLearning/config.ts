@@ -54,6 +54,7 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     },
     sceneDetection: {
         method: 'Image-Scene',
+        minScore: 0.1,
     },
     // tsne: {
     //     samples: 200,

@@ -10,7 +10,13 @@ function SceneDebug() {
 
     const handleSubmission = async () => {
         for (const file of selectedFiles) {
-            await sceneDetectionService.detectByFile(file);
+            console.log(
+                `scene detection for file ${file.name}`,
+                await sceneDetectionService.detectScenes(
+                    await createImageBitmap(file),
+                    0.1
+                )
+            );
         }
         console.log('done with scene detection');
     };
