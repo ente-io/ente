@@ -394,10 +394,12 @@ export default function Sidebar(props: Props) {
                     onClick={openFeedbackURL}>
                     {constants.REQUEST_FEATURE}
                 </LinkButton>
-                <LinkButton
-                    style={{ marginTop: '30px' }}
-                    onClick={() => initiateEmail('contact@ente.io')}>
-                    {constants.SUPPORT}
+                <LinkButton style={{ marginTop: '30px' }} onClick={() => null}>
+                    <a
+                        style={{ color: 'inherit' }}
+                        href="mailto:contact@ente.io">
+                        {constants.SUPPORT}
+                    </a>
                 </LinkButton>
                 <>
                     <ExportModal
