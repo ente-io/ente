@@ -5,7 +5,6 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/sync_service.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/email_util.dart';
 
@@ -133,15 +132,17 @@ class _SyncIndicatorState extends State<SyncIndicator> {
               width: double.infinity,
               height: 64,
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-              child: button("Subscribe", onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) {
-                      return getSubscriptionPage();
-                    },
-                  ),
-                );
-              }),
+              child: OutlinedButton(
+                  child: Text("Subscribe"),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return getSubscriptionPage();
+                        },
+                      ),
+                    );
+                  }),
             ),
             Padding(padding: EdgeInsets.all(8)),
           ],
@@ -169,15 +170,17 @@ class _SyncIndicatorState extends State<SyncIndicator> {
               width: double.infinity,
               height: 64,
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-              child: button("Upgrade", onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) {
-                      return getSubscriptionPage();
-                    },
-                  ),
-                );
-              }),
+              child: OutlinedButton(
+                  child: Text("Upgrade"),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return getSubscriptionPage();
+                        },
+                      ),
+                    );
+                  }),
             ),
             Padding(padding: EdgeInsets.all(8)),
           ],

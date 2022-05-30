@@ -4,7 +4,6 @@ import 'package:open_file/open_file.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/services/update_service.dart';
-import 'package:photos/ui/common_elements.dart';
 
 class AppUpdateDialog extends StatefulWidget {
   final LatestVersionInfo latestVersionInfo;
@@ -51,9 +50,17 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
           width: double.infinity,
           height: 64,
           padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
-          child: button(
-            "Update",
-            fontSize: 16,
+          child: OutlinedButton(
+            child: Text(
+              "Update",
+            ),
+            style: Theme.of(context).outlinedButtonTheme.style.copyWith(
+              textStyle: MaterialStateProperty.resolveWith<TextStyle>(
+                (Set<MaterialState> states) {
+                  return Theme.of(context).textTheme.subtitle1;
+                },
+              ),
+            ),
             onPressed: () async {
               Navigator.pop(context);
               showDialog(
@@ -111,7 +118,7 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
       onWillPop: () async => false,
       child: AlertDialog(
         title: Text(
-          "downloading...",
+          "Downloading...",
           style: TextStyle(
             fontSize: 16,
           ),
