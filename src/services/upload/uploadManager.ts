@@ -114,11 +114,39 @@ class UploadManager {
 
                 UIService.setUploadStage(UPLOAD_STAGES.START);
                 logUploadInfo(`clusterLivePhotoFiles called`);
+
+                // filter out files whose metadata detection failed or those that have been skipped because the files are too large,
+                // as they will be rejected during upload and are not valid upload files which we need to clustering
+                const rejectedFileLocalIDs = new Set(
+                    [...this.metadataAndFileTypeInfoMap.entries()].map(
+                        ([localID, metadataAndFileTypeInfo]) => {
+                            if (
+                                !metadataAndFileTypeInfo.metadata ||
+                                !metadataAndFileTypeInfo.fileTypeInfo
+                            ) {
+                                return localID;
+                            }
+                        }
+                    )
+                );
+                const rejectedFiles = [];
+                const filesWithMetadata = [];
+                mediaFiles.forEach((m) => {
+                    if (rejectedFileLocalIDs.has(m.localID)) {
+                        rejectedFiles.push(m);
+                    } else {
+                        filesWithMetadata.push(m);
+                    }
+                });
+
                 const analysedMediaFiles =
-                    UploadService.clusterLivePhotoFiles(mediaFiles);
+                    UploadService.clusterLivePhotoFiles(filesWithMetadata);
+
+                const allFiles = [...rejectedFiles, ...analysedMediaFiles];
+
                 uiService.setFilenames(
                     new Map<number, string>(
-                        analysedMediaFiles.map((mediaFile) => [
+                        allFiles.map((mediaFile) => [
                             mediaFile.localID,
                             UploadService.getAssetName(mediaFile),
                         ])
@@ -126,15 +154,13 @@ class UploadManager {
                 );
 
                 UIService.setHasLivePhoto(
-                    mediaFiles.length !== analysedMediaFiles.length
+                    mediaFiles.length !== allFiles.length
                 );
                 logUploadInfo(
-                    `got live photos: ${
-                        mediaFiles.length !== analysedMediaFiles.length
-                    }`
+                    `got live photos: ${mediaFiles.length !== allFiles.length}`
                 );
 
-                await this.uploadMediaFiles(analysedMediaFiles);
+                await this.uploadMediaFiles(allFiles);
             }
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
             UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
@@ -256,7 +282,7 @@ class UploadManager {
             }
         } catch (e) {
             logError(e, 'error extracting metadata');
-            // silently ignore the error
+            throw e;
         }
     }
 

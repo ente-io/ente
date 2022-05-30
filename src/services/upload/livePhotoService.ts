@@ -100,102 +100,119 @@ export async function readLivePhoto(
 }
 
 export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
-    const analysedMediaFiles: FileWithCollection[] = [];
-    mediaFiles
-        .sort((firstMediaFile, secondMediaFile) =>
-            splitFilenameAndExtension(
-                firstMediaFile.file.name
-            )[0].localeCompare(
-                splitFilenameAndExtension(secondMediaFile.file.name)[0]
+    try {
+        const analysedMediaFiles: FileWithCollection[] = [];
+        mediaFiles
+            .sort((firstMediaFile, secondMediaFile) =>
+                splitFilenameAndExtension(
+                    firstMediaFile.file.name
+                )[0].localeCompare(
+                    splitFilenameAndExtension(secondMediaFile.file.name)[0]
+                )
             )
-        )
-        .sort(
-            (firstMediaFile, secondMediaFile) =>
-                firstMediaFile.collectionID - secondMediaFile.collectionID
-        );
-    let index = 0;
-    while (index < mediaFiles.length - 1) {
-        const firstMediaFile = mediaFiles[index];
-        const secondMediaFile = mediaFiles[index + 1];
-        const { fileTypeInfo: firstFileTypeInfo, metadata: firstFileMetadata } =
-            UploadService.getFileMetadataAndFileTypeInfo(
+            .sort(
+                (firstMediaFile, secondMediaFile) =>
+                    firstMediaFile.collectionID - secondMediaFile.collectionID
+            );
+        let index = 0;
+        while (index < mediaFiles.length - 1) {
+            const firstMediaFile = mediaFiles[index];
+            const secondMediaFile = mediaFiles[index + 1];
+            const {
+                fileTypeInfo: firstFileTypeInfo,
+                metadata: firstFileMetadata,
+            } = UploadService.getFileMetadataAndFileTypeInfo(
                 firstMediaFile.localID
             );
-        const {
-            fileTypeInfo: secondFileFileInfo,
-            metadata: secondFileMetadata,
-        } = UploadService.getFileMetadataAndFileTypeInfo(
-            secondMediaFile.localID
-        );
-        const firstFileIdentifier: LivePhotoIdentifier = {
-            collectionID: firstMediaFile.collectionID,
-            fileType: firstFileTypeInfo.fileType,
-            name: firstMediaFile.file.name,
-            size: firstMediaFile.file.size,
-        };
-        const secondFileIdentifier: LivePhotoIdentifier = {
-            collectionID: secondMediaFile.collectionID,
-            fileType: secondFileFileInfo.fileType,
-            name: secondMediaFile.file.name,
-            size: secondMediaFile.file.size,
-        };
-        const firstAsset = {
-            file: firstMediaFile.file,
-            metadata: firstFileMetadata,
-            fileTypeInfo: firstFileTypeInfo,
-        };
-        const secondAsset = {
-            file: secondMediaFile.file,
-            metadata: secondFileMetadata,
-            fileTypeInfo: secondFileFileInfo,
-        };
-        if (
-            areFilesLivePhotoAssets(firstFileIdentifier, secondFileIdentifier)
-        ) {
-            let imageAsset: Asset;
-            let videoAsset: Asset;
-            if (
-                firstFileTypeInfo.fileType === FILE_TYPE.IMAGE &&
-                secondFileFileInfo.fileType === FILE_TYPE.VIDEO
-            ) {
-                imageAsset = firstAsset;
-                videoAsset = secondAsset;
-            } else {
-                videoAsset = firstAsset;
-                imageAsset = secondAsset;
-            }
-            const livePhotoLocalID = firstMediaFile.localID;
-            analysedMediaFiles.push({
-                localID: livePhotoLocalID,
+            const {
+                fileTypeInfo: secondFileFileInfo,
+                metadata: secondFileMetadata,
+            } = UploadService.getFileMetadataAndFileTypeInfo(
+                secondMediaFile.localID
+            );
+            const firstFileIdentifier: LivePhotoIdentifier = {
                 collectionID: firstMediaFile.collectionID,
-                isLivePhoto: true,
-                livePhotoAssets: {
-                    image: imageAsset.file,
-                    video: videoAsset.file,
-                },
-            });
-            const livePhotoFileTypeInfo: FileTypeInfo = getLivePhotoFileType(
-                imageAsset.fileTypeInfo,
-                videoAsset.fileTypeInfo
-            );
-            const livePhotoMetadata: Metadata = getLivePhotoMetadata(
-                imageAsset.metadata,
-                videoAsset.metadata
-            );
-            uploadService.setFileMetadataAndFileTypeInfo(livePhotoLocalID, {
-                fileTypeInfo: { ...livePhotoFileTypeInfo },
-                metadata: { ...livePhotoMetadata },
-            });
-            index += 2;
-        } else {
-            analysedMediaFiles.push({ ...firstMediaFile, isLivePhoto: false });
-            index += 1;
+                fileType: firstFileTypeInfo.fileType,
+                name: firstMediaFile.file.name,
+                size: firstMediaFile.file.size,
+            };
+            const secondFileIdentifier: LivePhotoIdentifier = {
+                collectionID: secondMediaFile.collectionID,
+                fileType: secondFileFileInfo.fileType,
+                name: secondMediaFile.file.name,
+                size: secondMediaFile.file.size,
+            };
+            const firstAsset = {
+                file: firstMediaFile.file,
+                metadata: firstFileMetadata,
+                fileTypeInfo: firstFileTypeInfo,
+            };
+            const secondAsset = {
+                file: secondMediaFile.file,
+                metadata: secondFileMetadata,
+                fileTypeInfo: secondFileFileInfo,
+            };
+            if (
+                areFilesLivePhotoAssets(
+                    firstFileIdentifier,
+                    secondFileIdentifier
+                )
+            ) {
+                let imageAsset: Asset;
+                let videoAsset: Asset;
+                if (
+                    firstFileTypeInfo.fileType === FILE_TYPE.IMAGE &&
+                    secondFileFileInfo.fileType === FILE_TYPE.VIDEO
+                ) {
+                    imageAsset = firstAsset;
+                    videoAsset = secondAsset;
+                } else {
+                    videoAsset = firstAsset;
+                    imageAsset = secondAsset;
+                }
+                const livePhotoLocalID = firstMediaFile.localID;
+                analysedMediaFiles.push({
+                    localID: livePhotoLocalID,
+                    collectionID: firstMediaFile.collectionID,
+                    isLivePhoto: true,
+                    livePhotoAssets: {
+                        image: imageAsset.file,
+                        video: videoAsset.file,
+                    },
+                });
+                const livePhotoFileTypeInfo: FileTypeInfo =
+                    getLivePhotoFileType(
+                        imageAsset.fileTypeInfo,
+                        videoAsset.fileTypeInfo
+                    );
+                const livePhotoMetadata: Metadata = getLivePhotoMetadata(
+                    imageAsset.metadata,
+                    videoAsset.metadata
+                );
+                uploadService.setFileMetadataAndFileTypeInfo(livePhotoLocalID, {
+                    fileTypeInfo: { ...livePhotoFileTypeInfo },
+                    metadata: { ...livePhotoMetadata },
+                });
+                index += 2;
+            } else {
+                analysedMediaFiles.push({
+                    ...firstMediaFile,
+                    isLivePhoto: false,
+                });
+                index += 1;
+            }
         }
+        if (index === mediaFiles.length - 1) {
+            analysedMediaFiles.push({
+                ...mediaFiles[index],
+                isLivePhoto: false,
+            });
+        }
+        return analysedMediaFiles;
+    } catch (e) {
+        logError(e, 'failed to cluster live photo');
+        throw e;
     }
-    if (index === mediaFiles.length - 1) {
-        analysedMediaFiles.push({ ...mediaFiles[index], isLivePhoto: false });
-    }
-    return analysedMediaFiles;
 }
 
 function areFilesLivePhotoAssets(
