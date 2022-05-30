@@ -7,6 +7,7 @@ import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -47,9 +48,21 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 196,
-      child: _userDetails == null ? loadWidget : getContainer(),
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () async {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return getSubscriptionPage();
+            },
+          ),
+        );
+      },
+      child: SizedBox(
+        height: 196,
+        child: _userDetails == null ? loadWidget : getContainer(),
+      ),
     );
   }
 
