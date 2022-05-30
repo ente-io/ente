@@ -181,9 +181,9 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         ),
         onTap: () async {
           if (await _runCollectionAction(item.collection.id)) {
-            showToast(widget.actionType == CollectionActionType.addFiles
-                ? "added successfully to " + item.collection.name
-                : "moved successfully to " + item.collection.name);
+            showShortToast(widget.actionType == CollectionActionType.addFiles
+                ? "Added successfully to " + item.collection.name
+                : "Moved successfully to " + item.collection.name);
             _navigateToCollection(item.collection);
           }
         },
@@ -211,7 +211,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   void _showNameAlbumDialog() async {
     AlertDialog alert = AlertDialog(
-      title: Text("album title"),
+      title: Text("Album title"),
       content: TextFormField(
         decoration: InputDecoration(
           hintText: "Christmas 2020 / Dinner at Alice's",
@@ -240,9 +240,9 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             if (collection != null) {
               if (await _runCollectionAction(collection.id)) {
                 if (widget.actionType == CollectionActionType.restoreFiles) {
-                  showToast('restored files to album ' + _albumName);
+                  showShortToast('Restored files to album ' + _albumName);
                 } else {
-                  showToast("album '" + _albumName + "' created.");
+                  showShortToast("Album '" + _albumName + "' created.");
                 }
                 _navigateToCollection(collection);
               }
