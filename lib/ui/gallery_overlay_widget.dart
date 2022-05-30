@@ -15,6 +15,7 @@ import 'package:photos/models/galleryType.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/common/onlyOuterShadow.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -35,8 +36,7 @@ class GalleryOverlayWidget extends StatefulWidget {
   State<GalleryOverlayWidget> createState() => _GalleryOverlayWidgetState();
 }
 
-class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget>
-    with SingleTickerProviderStateMixin {
+class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
   StreamSubscription _userAuthEventSubscription;
   Function() _selectedFilesListener;
   final GlobalKey shareButtonKey = GlobalKey();
@@ -65,11 +65,11 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget>
   Widget build(BuildContext context) {
     bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
     return AnimatedContainer(
-      duration: Duration(milliseconds: 200),
+      duration: Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       height: filesAreSelected ? 108 : 0,
       child: AnimatedOpacity(
-        duration: Duration(milliseconds: 75),
+        duration: Duration(milliseconds: 100),
         opacity: filesAreSelected ? 1.0 : 0.0,
         curve: Curves.easeIn,
         child: IgnorePointer(
@@ -133,39 +133,51 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     return Container(
       color: Colors.transparent,
       child: ListView(
-        //ListView for animation to work without render overflow
+        //ListView is for animation to work without render overflow
         physics: const NeverScrollableScrollPhysics(),
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
-                child: Container(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .frostyBlurBackdropFilterColor
-                      .withOpacity(0.5),
-                  width: double.infinity,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(13, 13, 0, 13),
-                        child: Text(
-                          widget.selectedFiles.files.length.toString() +
-                              ' selected',
-                          style: Theme.of(context).textTheme.subtitle2.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black //same for both themes
-                              ),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Container(
+              decoration: BoxDecoration(boxShadow: [
+                onlyOuterShadow(
+                  blurRadius: 12,
+                  blurStyle: BlurStyle.outer,
+                  color: Color.fromRGBO(0, 0, 0, 0.16),
+                ),
+              ], borderRadius: BorderRadius.circular(8)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
+                  child: Container(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .frostyBlurBackdropFilterColor
+                        .withOpacity(0.5),
+                    width: double.infinity,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(13, 13, 0, 13),
+                          child: Text(
+                            widget.selectedFiles.files.length.toString() +
+                                ' selected',
+                            style: Theme.of(context)
+                                .textTheme
+                                .subtitle2
+                                .copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black //same for both themes
+                                    ),
+                          ),
                         ),
-                      ),
-                      Row(
-                        children: _getActions(context),
-                      )
-                    ],
+                        Row(
+                          children: _getActions(context),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -186,8 +198,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                       width: 86,
                       color: Theme.of(context)
                           .colorScheme
-                          .cancelSelectedButtonColor
-                          .withOpacity(0.5),
+                          .cancelSelectedButtonColor,
                       child: Center(
                         child: Text('Cancel',
                             style: Theme.of(context)
@@ -375,7 +386,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         color: Colors.black, //same for both themes
         icon: Icon(
           Icons.restore,
-          color: Theme.of(context).colorScheme.inverseIconColor,
         ),
         onPressed: () {
           Navigator.push(

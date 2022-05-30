@@ -304,7 +304,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         Align(
           alignment: Alignment.bottomCenter,
           child: GalleryOverlayWidget(GalleryType.homepage, _selectedFiles),
-        )
+        ),
       ],
     );
   }
@@ -547,11 +547,11 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   Widget build(BuildContext context) {
     bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
     return AnimatedContainer(
-      duration: Duration(milliseconds: 200),
+      duration: Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       height: filesAreSelected ? 0 : 52,
       child: AnimatedOpacity(
-        duration: Duration(milliseconds: 75),
+        duration: Duration(milliseconds: 100),
         opacity: filesAreSelected ? 0.0 : 1.0,
         curve: Curves.easeIn,
         child: IgnorePointer(

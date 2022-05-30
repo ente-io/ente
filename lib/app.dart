@@ -23,8 +23,9 @@ final lightThemeData = ThemeData(
   primaryColorLight: Colors.black54,
   iconTheme: IconThemeData(color: Colors.black),
   primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
-  colorScheme: ColorScheme.light(primary: Colors.black),
-  accentColor: Color.fromRGBO(45, 194, 98, 0.2),
+  colorScheme: ColorScheme.light(
+      primary: Colors.black, secondary: Color.fromARGB(255, 163, 163, 163)),
+  accentColor: Color.fromRGBO(0, 0, 0, 0.6),
   buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
     bgDisabled: Colors.grey.shade500,

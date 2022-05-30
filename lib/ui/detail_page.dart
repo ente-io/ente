@@ -100,31 +100,34 @@ class _DetailPageState extends State<DetailPage> {
         " files .");
     _appBarKey = GlobalKey<FadingAppBarState>();
     _bottomBarKey = GlobalKey<FadingBottomBarState>();
-    return Scaffold(
-      appBar: FadingAppBar(
-        _files[_selectedIndex],
-        _onFileDeleted,
-        Configuration.instance.getUserID(),
-        100,
-        widget.config.mode == DetailPageMode.full,
-        key: _appBarKey,
-      ),
-      extendBodyBehindAppBar: true,
-      body: Center(
-        child: Stack(
-          children: [
-            _buildPageView(),
-            FadingBottomBar(
-              _files[_selectedIndex],
-              _onEditFileRequested,
-              widget.config.mode == DetailPageMode.minimalistic,
-              key: _bottomBarKey,
-            ),
-          ],
+    return SafeArea(
+      bottom: false,
+      child: Scaffold(
+        appBar: FadingAppBar(
+          _files[_selectedIndex],
+          _onFileDeleted,
+          Configuration.instance.getUserID(),
+          100,
+          widget.config.mode == DetailPageMode.full,
+          key: _appBarKey,
         ),
-      ),
+        extendBodyBehindAppBar: true,
+        body: Center(
+          child: Stack(
+            children: [
+              _buildPageView(),
+              FadingBottomBar(
+                _files[_selectedIndex],
+                _onEditFileRequested,
+                widget.config.mode == DetailPageMode.minimalistic,
+                key: _bottomBarKey,
+              ),
+            ],
+          ),
+        ),
 
-      // backgroundColor: Theme.of(context).colorScheme.onPrimary,
+        // backgroundColor: Theme.of(context).colorScheme.onPrimary,
+      ),
     );
   }
 
@@ -149,7 +152,7 @@ class _DetailPageState extends State<DetailPage> {
               _toggleFullScreen();
             });
           },
-          backgroundDecoration: BoxDecoration(color: Colors.transparent),
+          backgroundDecoration: BoxDecoration(color: Colors.black),
         );
         _preloadFiles(index);
         return GestureDetector(
@@ -186,6 +189,7 @@ class _DetailPageState extends State<DetailPage> {
     }
     Future.delayed(Duration.zero, () {
       SystemChrome.setEnabledSystemUIOverlays(
+        //to hide status bar?
         _shouldHideAppBar ? [] : SystemUiOverlay.values,
       );
     });

@@ -62,7 +62,7 @@ Widget button(
   );
 }
 
-final emptyContainer = Container();
+final emptyContainer = const SizedBox.shrink();
 
 Animatable<Color> passwordStrengthColors = TweenSequence<Color>(
   [

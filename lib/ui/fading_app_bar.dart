@@ -17,7 +17,6 @@ import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/custom_app_bar.dart';
 import 'package:photos/ui/progress_dialog.dart';
-import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -53,7 +52,6 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    Color barColor = Theme.of(context).colorScheme.onSurface;
     return CustomAppBar(
       AnimatedOpacity(
         child: Container(
@@ -62,8 +60,8 @@ class FadingAppBarState extends State<FadingAppBar> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                barColor.withOpacity(0.64),
-                barColor.withOpacity(0.5),
+                Colors.black.withOpacity(0.72),
+                Colors.black.withOpacity(0.6),
                 Colors.transparent,
               ],
               stops: const [0, 0.2, 1],
@@ -74,7 +72,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         opacity: _shouldHide ? 0 : 1,
         duration: Duration(milliseconds: 150),
       ),
-      height: 100,
+      height: 64,
     );
   }
 
@@ -109,9 +107,12 @@ class FadingAppBarState extends State<FadingAppBar> {
               value: 1,
               child: Row(
                 children: [
-                  Icon(Platform.isAndroid
-                      ? Icons.download
-                      : CupertinoIcons.cloud_download),
+                  Icon(
+                    Platform.isAndroid
+                        ? Icons.download
+                        : CupertinoIcons.cloud_download,
+                    color: Theme.of(context).iconTheme.color,
+                  ),
                   Padding(
                     padding: EdgeInsets.all(8),
                   ),
@@ -130,9 +131,12 @@ class FadingAppBarState extends State<FadingAppBar> {
                 value: 2,
                 child: Row(
                   children: [
-                    Icon(Platform.isAndroid
-                        ? Icons.access_time_rounded
-                        : CupertinoIcons.time),
+                    Icon(
+                      Platform.isAndroid
+                          ? Icons.access_time_rounded
+                          : CupertinoIcons.time,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
                     Padding(
                       padding: EdgeInsets.all(8),
                     ),
@@ -148,9 +152,12 @@ class FadingAppBarState extends State<FadingAppBar> {
               value: 3,
               child: Row(
                 children: [
-                  Icon(Platform.isAndroid
-                      ? Icons.delete_outline
-                      : CupertinoIcons.delete),
+                  Icon(
+                    Platform.isAndroid
+                        ? Icons.delete_outline
+                        : CupertinoIcons.delete,
+                    color: Theme.of(context).iconTheme.color,
+                  ),
                   Padding(
                     padding: EdgeInsets.all(8),
                   ),
@@ -173,14 +180,10 @@ class FadingAppBarState extends State<FadingAppBar> {
       },
     ));
     return AppBar(
-      title: Text(
-        getDayTitle(widget.file.creationTime),
-        style: TextStyle(
-          fontSize: 14,
-        ),
-      ),
+      iconTheme: IconThemeData(color: Colors.white), //same for both themes
       actions: shouldShowActions ? actions : [],
       elevation: 0,
+      backgroundColor: Color(0x00000000),
     );
   }
 
@@ -235,9 +238,8 @@ class FadingAppBarState extends State<FadingAppBar> {
       likeBuilder: (isLiked) {
         return Icon(
           Icons.favorite_border,
-          color: isLiked
-              ? Colors.pinkAccent
-              : Theme.of(context).colorScheme.onSurface,
+          color:
+              isLiked ? Colors.pinkAccent : Colors.white, //same for both themes
           size: 24,
         );
       },
