@@ -547,6 +547,12 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     });
   }
 
+  @override
+  void dispose() {
+    _tabChangedEventSubscription.cancel();
+    super.dispose();
+  }
+
   void _onTabChange(int index) {
     Bus.instance.fire(TabChangedEvent(
       index,

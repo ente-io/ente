@@ -15,7 +15,7 @@ ExpandableThemeData getExpandableTheme(BuildContext context) {
     iconPadding: EdgeInsets.all(4),
     iconColor: Theme.of(context).colorScheme.onSurface,
     iconSize: 20.0,
-    iconRotationAngle: 3.14 / 2,
+    iconRotationAngle: -3.14 / 2,
     hasIcon: true,
   );
 }
