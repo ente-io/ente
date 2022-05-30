@@ -157,7 +157,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 style: Theme.of(context).textTheme.subtitle1,
                 decoration: InputDecoration(
                   filled: true,
-                  hintText: 'tap to enter code',
+                  hintText: 'Tap to enter code',
                   contentPadding: EdgeInsets.all(15),
                   border: UnderlineInputBorder(
                       borderSide: BorderSide.none,

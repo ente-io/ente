@@ -96,9 +96,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                 child: TextFormField(
-                  autofillHints: [AutofillHints.password],
+                  autofillHints: const [AutofillHints.password],
                   decoration: InputDecoration(
-                    hintText: "enter your password",
+                    hintText: "Enter your password",
                     filled: true,
                     contentPadding: EdgeInsets.all(20),
                     border: UnderlineInputBorder(

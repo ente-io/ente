@@ -419,14 +419,14 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   void _updatePassword() async {
     final dialog =
-        createProgressDialog(context, "generating encryption keys...");
+        createProgressDialog(context, "Generating encryption keys...");
     await dialog.show();
     try {
       final keyAttributes = await Configuration.instance
           .updatePassword(_passwordController1.text);
       await UserService.instance.updateKeyAttributes(keyAttributes);
       await dialog.hide();
-      showToast("password changed successfully");
+      showShortToast("Password changed successfully");
       Navigator.of(context).pop();
       if (widget.mode == PasswordEntryMode.reset) {
         Bus.instance.fire(SubscriptionPurchasedEvent());

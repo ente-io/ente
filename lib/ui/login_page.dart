@@ -79,11 +79,11 @@ class _LoginPageState extends State<LoginPage> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                 child: TextFormField(
-                  autofillHints: [AutofillHints.email],
+                  autofillHints: const [AutofillHints.email],
                   decoration: InputDecoration(
                     fillColor: _emailInputFieldColor,
                     filled: true,
-                    hintText: 'email',
+                    hintText: 'Email',
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                     border: UnderlineInputBorder(

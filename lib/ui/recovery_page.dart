@@ -79,7 +79,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                   child: TextFormField(
                     decoration: InputDecoration(
                       filled: true,
-                      hintText: "enter your recovery key",
+                      hintText: "Enter your recovery key",
                       contentPadding: EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                           borderSide: BorderSide.none,

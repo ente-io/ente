@@ -24,7 +24,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
           children: [
             TextFormField(
               decoration: InputDecoration(
-                hintText: 'email',
+                hintText: 'Email',
                 hintStyle: TextStyle(
                   color: Colors.white30,
                 ),

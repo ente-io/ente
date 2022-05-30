@@ -391,10 +391,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 // confirm if user wants to change plan or not
                 var result = await showChoiceDialog(
                     context,
-                    "confirm plan change",
-                    "are you sure you want to change your plan?",
-                    firstAction: "no",
-                    secondAction: 'yes');
+                    "Confirm plan change",
+                    "Are you sure you want to change your plan?",
+                    firstAction: "No",
+                    secondAction: 'Yes');
                 if (result != DialogUserChoice.secondChoice) {
                   return;
                 }
