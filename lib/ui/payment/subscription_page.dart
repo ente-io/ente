@@ -140,7 +140,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Future<void> _fetchSubData() async {
-    _userService.getUserDetailsV2(memberCount: false).then((userDetails) async {
+    _userService.getUserDetailsV2(memoryCount: false).then((userDetails) async {
       _userDetails = userDetails;
       _currentSubscription = userDetails.subscription;
       _hasActiveSubscription = _currentSubscription.isValid();

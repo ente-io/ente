@@ -33,7 +33,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   }
 
   void _fetchUserDetails() {
-    UserService.instance.getUserDetailsV2(memberCount: true).then((details) {
+    UserService.instance.getUserDetailsV2(memoryCount: true).then((details) {
       setState(() {
         _userDetails = details;
       });

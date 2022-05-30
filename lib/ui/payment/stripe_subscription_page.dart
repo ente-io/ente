@@ -56,7 +56,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   Future<void> _fetchSub() async {
-    return _userService.getUserDetailsV2().then((userDetails) async {
+    return _userService
+        .getUserDetailsV2(memoryCount: false)
+        .then((userDetails) async {
       _userDetails = userDetails;
       _currentSubscription = userDetails.subscription;
       _showYearlyPlan = _currentSubscription.isYearlyPlan();

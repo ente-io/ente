@@ -121,11 +121,14 @@ class UserService {
     }
   }
 
-  Future<UserDetails> getUserDetailsV2({bool memberCount = true}) async {
+  Future<UserDetails> getUserDetailsV2({bool memoryCount = true}) async {
     try {
       final response = await _dio.get(
         _config.getHttpEndpoint() +
-            "/users/details/v2?memoryCount=$memberCount",
+            "/users/details/v2?memoryCount=$memoryCount",
+        queryParameters: {
+          "memoryCount": memoryCount,
+        },
         options: Options(
           headers: {
             "X-Auth-Token": _config.getToken(),
