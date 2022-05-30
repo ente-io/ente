@@ -11,9 +11,9 @@ Future<DialogUserChoice> showChoiceDialog<T>(
   BuildContext context,
   String title,
   String content, {
-  String firstAction = 'ok',
+  String firstAction = 'Ok',
   Color firstActionColor,
-  String secondAction = 'cancel',
+  String secondAction = 'Cancel',
   Color secondActionColor,
   ActionType actionType = ActionType.confirm,
 }) {
