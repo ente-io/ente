@@ -233,26 +233,27 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     if (kDebugMode) {
       return AdaptiveTheme(
-          light: lightThemeData,
-          dark: darkThemeData,
-          initial: AdaptiveThemeMode.system,
-          builder: (lightTheme, dartTheme) => MaterialApp(
-                title: "ente",
-                themeMode: ThemeMode.system,
-                theme: lightTheme,
-                darkTheme: dartTheme,
-                home: EnteApp._homeWidget,
-                debugShowCheckedModeBanner: false,
-                navigatorKey: Network.instance.getAlice().getNavigatorKey(),
-                builder: EasyLoading.init(),
-                supportedLocales: L10n.all,
-                localizationsDelegates: const [
-                  AppLocalizations.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                ],
-              ));
+        light: lightThemeData,
+        dark: darkThemeData,
+        initial: AdaptiveThemeMode.system,
+        builder: (lightTheme, dartTheme) => MaterialApp(
+          title: "ente",
+          themeMode: ThemeMode.system,
+          theme: lightTheme,
+          darkTheme: dartTheme,
+          home: EnteApp._homeWidget,
+          debugShowCheckedModeBanner: false,
+          navigatorKey: Network.instance.getAlice().getNavigatorKey(),
+          builder: EasyLoading.init(),
+          supportedLocales: L10n.all,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+        ),
+      );
     } else {
       return MaterialApp(
         title: "ente",
