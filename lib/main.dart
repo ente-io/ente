@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/app.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -32,7 +33,6 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:super_logging/super_logging.dart';
 
 final _logger = Logger("main");
 
@@ -162,6 +162,7 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
     logDirPath: (await getTemporaryDirectory()).path + "/logs",
     maxLogFiles: 5,
     sentryDsn: kDebugMode ? kSentryDebugDSN : kSentryDSN,
+    tunnel: kSentryTunnel,
     enableInDebugMode: true,
     prefix: prefix,
   ));
