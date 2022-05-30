@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/lifecycle_event_handler.dart';
 import 'package:photos/ui/recovery_key_page.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -37,7 +36,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
 
   @override
   void initState() {
-    _tabController = new TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _imageProvider = Image.memory(
       Sodium.base642bin(widget.qrCode),
       height: 180,
@@ -82,7 +81,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
+            SizedBox(
               height: 360,
               child: Column(
                 children: [
@@ -128,73 +127,69 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     Color textColor = Theme.of(context).colorScheme.onSurface;
     return GestureDetector(
       onTap: () async {
-        await Clipboard.setData(new ClipboardData(text: widget.secretCode));
+        await Clipboard.setData(ClipboardData(text: widget.secretCode));
         showToast("code copied to clipboard");
       },
-      child: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(padding: EdgeInsets.all(12)),
-            Text(
-              "Copy-paste this code\nto your authenticator app",
-              style: TextStyle(
-                height: 1.4,
-                fontSize: 16,
-              ),
-              textAlign: TextAlign.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(padding: EdgeInsets.all(12)),
+          Text(
+            "Copy-paste this code\nto your authenticator app",
+            style: TextStyle(
+              height: 1.4,
+              fontSize: 16,
             ),
-            Padding(padding: EdgeInsets.all(16)),
-            Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              child: Container(
-                padding: EdgeInsets.all(16),
-                child: Center(
-                  child: Text(
-                    widget.secretCode,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontFeatures: [FontFeature.tabularFigures()],
-                      color: textColor.withOpacity(0.7),
-                    ),
+            textAlign: TextAlign.center,
+          ),
+          Padding(padding: EdgeInsets.all(16)),
+          Padding(
+            padding: const EdgeInsets.only(left: 10, right: 10),
+            child: Container(
+              padding: EdgeInsets.all(16),
+              child: Center(
+                child: Text(
+                  widget.secretCode,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                    color: textColor.withOpacity(0.7),
                   ),
                 ),
-                color: textColor.withOpacity(0.1),
               ),
+              color: textColor.withOpacity(0.1),
             ),
-            Padding(padding: EdgeInsets.all(6)),
-            Text(
-              "tap to copy",
-              style: TextStyle(color: textColor.withOpacity(0.5)),
-            )
-          ],
-        ),
+          ),
+          Padding(padding: EdgeInsets.all(6)),
+          Text(
+            "tap to copy",
+            style: TextStyle(color: textColor.withOpacity(0.5)),
+          )
+        ],
       ),
     );
   }
 
   Widget _getBarCode() {
-    return Container(
-      child: Center(
-        child: Column(
-          children: [
-            Padding(padding: EdgeInsets.all(12)),
-            Text(
-              "Scan this barcode with\nyour authenticator app",
-              style: TextStyle(
-                height: 1.4,
-                fontSize: 16,
-              ),
-              textAlign: TextAlign.center,
+    return Center(
+      child: Column(
+        children: [
+          Padding(padding: EdgeInsets.all(12)),
+          Text(
+            "Scan this barcode with\nyour authenticator app",
+            style: TextStyle(
+              height: 1.4,
+              fontSize: 16,
             ),
-            Padding(padding: EdgeInsets.all(12)),
-            Image(
-              image: _imageProvider,
-              height: 180,
-              width: 180,
-            ),
-          ],
-        ),
+            textAlign: TextAlign.center,
+          ),
+          Padding(padding: EdgeInsets.all(12)),
+          Image(
+            image: _imageProvider,
+            height: 180,
+            width: 180,
+          ),
+        ],
       ),
     );
   }
@@ -243,19 +238,13 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
           ),
         ),
         Padding(padding: EdgeInsets.all(24)),
-        Container(
-          width: 180,
-          height: 50,
-          child: button(
-            "confirm",
-            fontSize: 18,
-            padding: EdgeInsets.all(0),
-            onPressed: _code.length == 6
-                ? () async {
-                    _enableTwoFactor(_code);
-                  }
-                : null,
-          ),
+        OutlinedButton(
+          child: Text("Confirm"),
+          onPressed: _code.length == 6
+              ? () async {
+                  _enableTwoFactor(_code);
+                }
+              : null,
         ),
         Padding(padding: EdgeInsets.only(bottom: 24)),
       ],
