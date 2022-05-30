@@ -20,29 +20,29 @@ class SceneDetectionService {
 
     async run(file: File) {
         const bmp = await createImageBitmap(file);
-        tf.ready().then(async () => {
-            const currTime = new Date().getTime();
 
-            const output = tf.tidy(() => {
-                let tensor = tf.browser.fromPixels(bmp);
+        await tf.ready();
 
-                tensor = tf.image.resizeBilinear(tensor, [224, 224]);
-                tensor = tf.expandDims(tensor);
-                tensor = tf.cast(tensor, 'float32');
+        const currTime = new Date().getTime();
+        const output = tf.tidy(() => {
+            let tensor = tf.browser.fromPixels(bmp);
 
-                const output = this.model.predict(tensor, {
-                    verbose: true,
-                });
+            tensor = tf.image.resizeBilinear(tensor, [224, 224]);
+            tensor = tf.expandDims(tensor);
+            tensor = tf.cast(tensor, 'float32');
 
-                return output;
+            const output = this.model.predict(tensor, {
+                verbose: true,
             });
 
-            console.log('done in', new Date().getTime() - currTime, 'ms');
-
-            const data = await (output as tf.Tensor).data();
-            const scenes = this.getScenes(data as Float32Array);
-            console.log('scenes', scenes);
+            return output;
         });
+
+        console.log('done in', new Date().getTime() - currTime, 'ms');
+
+        const data = await (output as tf.Tensor).data();
+        const scenes = this.getScenes(data as Float32Array);
+        console.log('scenes', scenes);
     }
 
     getScenes(outputData: Float32Array) {
