@@ -27,7 +27,7 @@ class SettingsPage extends StatelessWidget {
     final String email = Configuration.instance.getEmail();
     final List<Widget> contents = [];
     contents.add(Container(
-        padding: EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+        padding: EdgeInsets.symmetric(horizontal: 2, vertical: 6),
         child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
