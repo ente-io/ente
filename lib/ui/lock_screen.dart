@@ -29,7 +29,7 @@ class _LockScreenState extends State<LockScreen> {
           height: 64,
           padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
           child: OutlinedButton(
-            child: Text("unlock"),
+            child: Text("Unlock"),
             onPressed: () async {
               _showLockScreen();
             },
