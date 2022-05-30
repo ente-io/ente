@@ -126,7 +126,7 @@ class _SessionsPageState extends State<SessionsPage> {
     _sessions = await UserService.instance
         .getActiveSessions()
         .onError((error, stackTrace) {
-      showToast("failed to fetch active sessions");
+      showToast("Failed to fetch active sessions");
       throw error;
     });
     _sessions.sessions.sort((first, second) {
@@ -141,14 +141,14 @@ class _SessionsPageState extends State<SessionsPage> {
     Widget text;
     if (isLoggingOutFromThisDevice) {
       text = Text(
-        "this will log you out of this device!",
+        "This will log you out of this device!",
       );
     } else {
       text = SingleChildScrollView(
         child: Column(
           children: [
             Text(
-              "this will log you out of the following device:",
+              "This will log you out of the following device:",
             ),
             Padding(padding: EdgeInsets.all(8)),
             Text(
@@ -163,12 +163,12 @@ class _SessionsPageState extends State<SessionsPage> {
       );
     }
     AlertDialog alert = AlertDialog(
-      title: Text("terminate session?"),
+      title: Text("Terminate session?"),
       content: text,
       actions: [
         TextButton(
           child: Text(
-            "terminate",
+            "Terminate",
             style: TextStyle(
               color: Colors.red,
             ),
@@ -184,7 +184,7 @@ class _SessionsPageState extends State<SessionsPage> {
         ),
         TextButton(
           child: Text(
-            "cancel",
+            "Cancel",
             style: TextStyle(
               color: isLoggingOutFromThisDevice
                   ? Theme.of(context).buttonColor
@@ -209,7 +209,7 @@ class _SessionsPageState extends State<SessionsPage> {
   Widget _getUAWidget(Session session) {
     if (session.token == Configuration.instance.getToken()) {
       return Text(
-        "this device",
+        "This device",
         style: TextStyle(
           fontWeight: FontWeight.bold,
           color: Theme.of(context).buttonColor,
