@@ -83,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
                   decoration: InputDecoration(
                     fillColor: _emailInputFieldColor,
                     filled: true,
-                    hintText: 'email',
+                    hintText: 'Email',
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                     border: UnderlineInputBorder(

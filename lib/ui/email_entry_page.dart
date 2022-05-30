@@ -105,7 +105,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         floatingActionButton: DynamicFAB(
           isKeypadOpen: isKeypadOpen,
           isFormValid: _isFormValid(),
-          buttonText: 'Create Account',
+          buttonText: 'Create account',
           onPressedFunction: () {
             _config.setVolatilePassword(_passwordController1.text);
             _config.setEmail(_email);
@@ -148,7 +148,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     decoration: InputDecoration(
                       fillColor: _emailIsValid ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: 'email',
+                      hintText: 'Email',
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       border: UnderlineInputBorder(
@@ -193,7 +193,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       fillColor:
                           _passwordIsValid ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: "password",
+                      hintText: "Password",
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       suffixIcon: _password1InFocus
@@ -260,7 +260,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           fillColor:
                               _passwordsMatch ? _validFieldValueColor : null,
                           filled: true,
-                          hintText: "confirm password",
+                          hintText: "Confirm password",
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 16, vertical: 14),
                           suffixIcon: _password2InFocus
@@ -372,7 +372,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                                   //             ),
                                                   // ),
                                                   Text(
-                                                    'Password Strength: $passwordStrengthText',
+                                                    'Password strength: $passwordStrengthText',
                                                     style: TextStyle(
                                                         color:
                                                             passwordStrengthColor),

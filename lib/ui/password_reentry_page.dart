@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -98,7 +97,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                 child: TextFormField(
                   autofillHints: [AutofillHints.password],
                   decoration: InputDecoration(
-                    hintText: "enter your password",
+                    hintText: "Enter your password",
                     filled: true,
                     contentPadding: EdgeInsets.all(20),
                     border: UnderlineInputBorder(
@@ -159,7 +158,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                       },
                       child: Container(
                         child: Center(
-                          child: Text("forgot password",
+                          child: Text("Forgot password",
                               style: Theme.of(context)
                                   .textTheme
                                   .subtitle1
@@ -198,37 +197,6 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             ],
           ),
         ),
-        // Padding(padding: EdgeInsets.all(12)),
-        // Container(
-        //   padding: const EdgeInsets.symmetric(horizontal: 60),
-        //   width: double.infinity,
-        //   height: 64,
-        //   child: OutlinedButton(
-        //     child: Text("log in"),
-        //     onPressed: _passwordController.text.isNotEmpty
-        //         ? () async {
-        //             final dialog =
-        //                 createProgressDialog(context, "Please wait...");
-        //             await dialog.show();
-        //             try {
-        //               await Configuration.instance.decryptAndSaveSecrets(
-        //                   _passwordController.text,
-        //                   Configuration.instance.getKeyAttributes());
-        //             } catch (e) {
-        //               Logger("PRP").warning(e);
-        //               await dialog.hide();
-        //               showErrorDialog(
-        //                   context, "incorrect password", "please try again");
-        //               return;
-        //             }
-        //             await dialog.hide();
-        //             Bus.instance.fire(SubscriptionPurchasedEvent());
-        //             Navigator.of(context).popUntil((route) => route.isFirst);
-        //           }
-        //         : null,
-        //   ),
-        // ),
-        // Padding(padding: EdgeInsets.all(30)),
       ],
     );
   }

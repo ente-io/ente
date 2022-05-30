@@ -35,7 +35,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
               TextSpan(
                 children: const <TextSpan>[
                   TextSpan(
-                    text: "with ",
+                    text: "With ",
                     style: TextStyle(
                       fontSize: 16,
                     ),
@@ -105,7 +105,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                   style:
                       Theme.of(context).colorScheme.optionalActionButtonStyle,
                   child: Text(
-                    "Existing User",
+                    "Existing user",
                   ),
                   onPressed: _navigateToSignInPage,
                 ),
@@ -139,18 +139,6 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         onTap: _navigateToSignUpPage,
       ),
     );
-    // return Container(
-    //   width: double.infinity,
-    //   padding: EdgeInsets.symmetric(horizontal: 24),
-    // child: ElevatedButton(
-    //   style: Theme.of(context).colorScheme.primaryActionButtonStyle,
-    //   child: Hero(
-    //     tag: "sign_up",
-    //     child: Text("New to ente"),
-    //   ),
-    //   onPressed: _navigateToSignUpPage,
-    // ),
-    //);
   }
 
   Widget _getFeatureSlider() {
@@ -160,15 +148,15 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         children: const [
           FeatureItemWidget(
               "assets/protected.png",
-              "protected",
-              "end-to-end encrypted with your password,",
+              "Protected",
+              "End-to-end encrypted with your password,",
               "visible only to you"),
-          FeatureItemWidget("assets/synced.png", "synced",
-              "available across all your devices,", "web, android and ios"),
+          FeatureItemWidget("assets/synced.png", "Synced",
+              "Available across all your devices,", "web, android and ios"),
           FeatureItemWidget(
               "assets/preserved.png",
-              "preserved",
-              "reliably replicated to a fallout shelter,",
+              "Preserved",
+              "Reliably replicated to a fallout shelter,",
               "designed to outlive"),
         ],
         onPageChanged: (index) {
