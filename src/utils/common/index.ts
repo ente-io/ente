@@ -22,7 +22,7 @@ export function runningInChrome(includeMobile: boolean) {
     try {
         const userAgentData = navigator['userAgentData'];
         const chromeBrand = userAgentData?.brands?.filter(
-            (b) => b.brand === 'Google Chrome'
+            (b) => b.brand === 'Google Chrome' || b.brand === 'Chromium'
         )?.[0];
         return chromeBrand && (includeMobile || userAgentData.mobile === false);
     } catch (error) {
