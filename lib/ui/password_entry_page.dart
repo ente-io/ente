@@ -121,6 +121,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
             }
           }),
       floatingActionButtonLocation: fabLocation(),
+      floatingActionButtonAnimator: NoScalingAnimation(),
     );
   }
 

@@ -100,22 +100,22 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       ),
     );
     return Scaffold(
-        appBar: appBar,
-        body: _getBody(),
-        floatingActionButton: DynamicFAB(
-          isKeypadOpen: isKeypadOpen,
-          isFormValid: _isFormValid(),
-          buttonText: 'Create account',
-          onPressedFunction: () {
-            _config.setVolatilePassword(_passwordController1.text);
-            _config.setEmail(_email);
-            UserService.instance
-                .getOtt(context, _email, isCreateAccountScreen: true);
-          },
-        ),
-        floatingActionButtonLocation: fabLocation()
-        // resizeToAvoidBottomInset: false,
-        );
+      appBar: appBar,
+      body: _getBody(),
+      floatingActionButton: DynamicFAB(
+        isKeypadOpen: isKeypadOpen,
+        isFormValid: _isFormValid(),
+        buttonText: 'Create account',
+        onPressedFunction: () {
+          _config.setVolatilePassword(_passwordController1.text);
+          _config.setEmail(_email);
+          UserService.instance
+              .getOtt(context, _email, isCreateAccountScreen: true);
+        },
+      ),
+      floatingActionButtonLocation: fabLocation(),
+      floatingActionButtonAnimator: NoScalingAnimation(),
+    );
   }
 
   Widget _getBody() {
@@ -355,22 +355,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                                       10, 0, 8, 0),
                                               child: Row(
                                                 children: [
-                                                  // Container(
-                                                  //   child:
-                                                  //       _capitalLetterIsPresent
-                                                  //           ? Icon(
-                                                  //               Icons.check,
-                                                  //               color: CupertinoColors
-                                                  //                   .systemGrey2,
-                                                  //             )
-                                                  //           : Icon(
-                                                  //               Icons.check,
-                                                  //               color: Theme.of(
-                                                  //                       context)
-                                                  //                   .dialogTheme
-                                                  //                   .backgroundColor,
-                                                  //             ),
-                                                  // ),
                                                   Text(
                                                     'Password strength: $passwordStrengthText',
                                                     style: TextStyle(
@@ -550,15 +534,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       ),
     );
   }
-
-  // bool _isFormValid() {
-  //   return _email != null &&
-  //       _email.isNotEmpty &&
-  //       _passwordController1.text.isNotEmpty &&
-  //       _passwordController2.text.isNotEmpty &&
-  //       _hasAgreedToTOS &&
-  //       _hasAgreedToE2E;
-  // }
 
   bool _isFormValid() {
     return _emailIsValid &&

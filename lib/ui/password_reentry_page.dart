@@ -43,41 +43,42 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     }
 
     return Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            color: Theme.of(context).iconTheme.color,
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ),
-        body: _getBody(),
-        floatingActionButton: DynamicFAB(
-          isKeypadOpen: isKeypadOpen,
-          isFormValid: _passwordController.text.isNotEmpty,
-          buttonText: 'Log in',
-          onPressedFunction: () async {
-            final dialog = createProgressDialog(context, "Please wait...");
-            await dialog.show();
-            try {
-              await Configuration.instance.decryptAndSaveSecrets(
-                  _passwordController.text,
-                  Configuration.instance.getKeyAttributes());
-            } catch (e) {
-              Logger("PRP").warning(e);
-              await dialog.hide();
-              showErrorDialog(
-                  context, "incorrect password", "please try again");
-              return;
-            }
-            await dialog.hide();
-            Bus.instance.fire(SubscriptionPurchasedEvent());
-            Navigator.of(context).popUntil((route) => route.isFirst);
+      appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          color: Theme.of(context).iconTheme.color,
+          onPressed: () {
+            Navigator.of(context).pop();
           },
         ),
-        floatingActionButtonLocation: fabLocation());
+      ),
+      body: _getBody(),
+      floatingActionButton: DynamicFAB(
+        isKeypadOpen: isKeypadOpen,
+        isFormValid: _passwordController.text.isNotEmpty,
+        buttonText: 'Log in',
+        onPressedFunction: () async {
+          final dialog = createProgressDialog(context, "Please wait...");
+          await dialog.show();
+          try {
+            await Configuration.instance.decryptAndSaveSecrets(
+                _passwordController.text,
+                Configuration.instance.getKeyAttributes());
+          } catch (e) {
+            Logger("PRP").warning(e);
+            await dialog.hide();
+            showErrorDialog(context, "Incorrect password", "Please try again");
+            return;
+          }
+          await dialog.hide();
+          Bus.instance.fire(SubscriptionPurchasedEvent());
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        },
+      ),
+      floatingActionButtonLocation: fabLocation(),
+      floatingActionButtonAnimator: NoScalingAnimation(),
+    );
   }
 
   Widget _getBody() {

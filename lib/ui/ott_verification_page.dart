@@ -77,6 +77,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
         },
       ),
       floatingActionButtonLocation: fabLocation(),
+      floatingActionButtonAnimator: NoScalingAnimation(),
     );
   }
 

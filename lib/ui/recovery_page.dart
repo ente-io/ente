@@ -63,6 +63,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
             }
           }),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonAnimator: NoScalingAnimation(),
       body: Column(
         children: [
           Expanded(
