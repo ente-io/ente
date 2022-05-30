@@ -10,8 +10,8 @@ Widget SectionOptionDivider = Padding(
 
 ExpandableThemeData getExpandableTheme(BuildContext context) {
   return ExpandableThemeData(
-    expandIcon: CupertinoIcons.plus,
-    collapseIcon: CupertinoIcons.minus,
+    expandIcon: CupertinoIcons.chevron_down,
+    collapseIcon: CupertinoIcons.chevron_up,
     iconPadding: EdgeInsets.all(4),
     iconColor: Theme.of(context).colorScheme.onSurface,
     iconSize: 20.0,
