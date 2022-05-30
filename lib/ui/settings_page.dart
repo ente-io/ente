@@ -11,7 +11,6 @@ import 'package:photos/ui/settings/info_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
-import 'package:photos/ui/settings/theme_switch_widget.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key key}) : super(key: key);
@@ -28,7 +27,7 @@ class SettingsPage extends StatelessWidget {
     final String email = Configuration.instance.getEmail();
     final List<Widget> contents = [];
     contents.add(Container(
-        padding: EdgeInsets.symmetric(horizontal: 2),
+        padding: EdgeInsets.symmetric(horizontal: 2, vertical: 2),
         child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -40,7 +39,7 @@ class SettingsPage extends StatelessWidget {
                     .subtitle1
                     .copyWith(overflow: TextOverflow.ellipsis),
               ),
-              ThemeSwitchWidget()
+              // ThemeSwitchWidget()
             ])));
     final sectionDivider = Divider(
       height: 20,
