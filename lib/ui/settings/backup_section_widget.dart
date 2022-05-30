@@ -97,13 +97,13 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            final dialog = createProgressDialog(context, "calculating...");
+            final dialog = createProgressDialog(context, "Calculating...");
             await dialog.show();
             final status = await SyncService.instance.getBackupStatus();
             await dialog.hide();
             if (status.localIDs.isEmpty) {
-              showErrorDialog(context, "✨ all clear",
-                  "you've no files on this device that can be deleted");
+              showErrorDialog(context, "✨ All clear",
+                  "You've no files on this device that can be deleted");
             } else {
               bool result = await routeToPage(context, FreeSpacePage(status));
               if (result == true) {
@@ -120,7 +120,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            final dialog = createProgressDialog(context, "calculating...");
+            final dialog = createProgressDialog(context, "Calculating...");
             await dialog.show();
             List<DuplicateFiles> duplicates;
             try {
@@ -134,8 +134,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
 
             await dialog.hide();
             if (duplicates.isEmpty) {
-              showErrorDialog(context, "✨ no duplicates",
-                  "you've no duplicate files that can be cleared");
+              showErrorDialog(context, "✨ No duplicates",
+                  "You've no duplicate files that can be cleared");
             } else {
               DeduplicationResult result =
                   await routeToPage(context, DeduplicatePage(duplicates));
@@ -155,13 +155,13 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
 
   void _showSpaceFreedDialog(BackupStatus status) {
     AlertDialog alert = AlertDialog(
-      title: Text("success"),
+      title: Text("Success"),
       content: Text(
-          "you have successfully freed up " + formatBytes(status.size) + "!"),
+          "You have successfully freed up " + formatBytes(status.size) + "!"),
       actions: [
         TextButton(
           child: Text(
-            "rate us",
+            "Rate us",
             style: TextStyle(
               color: Theme.of(context).buttonColor,
             ),
@@ -179,7 +179,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         ),
         TextButton(
           child: Text(
-            "ok",
+            "Ok",
             style: TextStyle(
               color: Colors.white,
             ),
@@ -187,7 +187,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           onPressed: () {
             if (Platform.isIOS) {
               showToast(
-                  "also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space");
+                  "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space");
             }
             Navigator.of(context, rootNavigator: true).pop('dialog');
           },
@@ -210,8 +210,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         " duplicate file" +
         (result.count == 1 ? "" : "s");
     AlertDialog alert = AlertDialog(
-      title: Text("✨ success"),
-      content: Text("you have cleaned up " +
+      title: Text("✨ Success"),
+      content: Text("You have cleaned up " +
           countText +
           ", saving " +
           formatBytes(result.size) +
@@ -219,7 +219,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       actions: [
         TextButton(
           child: Text(
-            "rate us",
+            "Rate us",
             style: TextStyle(
               color: Theme.of(context).buttonColor,
             ),
@@ -237,13 +237,13 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         ),
         TextButton(
           child: Text(
-            "ok",
+            "Ok",
             style: TextStyle(
               color: Colors.white,
             ),
           ),
           onPressed: () {
-            showToast("also empty your \"Trash\" to claim the freed up space");
+            showToast("Also empty your \"Trash\" to claim the freed up space");
             Navigator.of(context, rootNavigator: true).pop('dialog');
           },
         ),

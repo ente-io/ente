@@ -51,7 +51,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
   Future<void> _onDeleteAccountTapped() async {
     AlertDialog alert = AlertDialog(
       title: Text(
-        "delete account",
+        "Delete account",
         style: TextStyle(
           color: Colors.red,
         ),
@@ -60,7 +60,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
         text: TextSpan(
           children: [
             TextSpan(
-              text: "please send an email to ",
+              text: "Please send an email to ",
             ),
             TextSpan(
               text: "account-deletion@ente.io",
@@ -70,7 +70,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
             ),
             TextSpan(
               text:
-                  " from your registered email address.\n\nyour request will be processed within 72 hours.",
+                  " from your registered email address.\n\nYour request will be processed within 72 hours.",
             ),
           ],
           style: TextStyle(
@@ -84,7 +84,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
       actions: [
         TextButton(
           child: Text(
-            "send email",
+            "Send email",
             style: TextStyle(
               color: Colors.red,
             ),
@@ -104,7 +104,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
         ),
         TextButton(
           child: Text(
-            "ok",
+            "Ok",
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
             ),
@@ -127,16 +127,16 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
   Future<void> _onLogoutTapped() async {
     AlertDialog alert = AlertDialog(
       title: Text(
-        "logout",
+        "Logout",
         style: TextStyle(
           color: Colors.red,
         ),
       ),
-      content: Text("are you sure you want to logout?"),
+      content: Text("Are you sure you want to logout?"),
       actions: [
         TextButton(
           child: Text(
-            "yes, logout",
+            "Yes, logout",
             style: TextStyle(
               color: Colors.red,
             ),
@@ -148,7 +148,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
         ),
         TextButton(
           child: Text(
-            "no",
+            "No",
             style: TextStyle(
               color: Theme.of(context).buttonColor,
             ),
