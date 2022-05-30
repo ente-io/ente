@@ -69,6 +69,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   final _logger = Logger("HomeWidgetState");
   final _selectedFiles = SelectedFiles();
+
   // final _settingsButton = SettingsButton();
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
@@ -100,12 +101,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
-      if (event.source != TabChangedEventSource.tab_bar) {
-        setState(() {
-          _selectedTabIndex = event.selectedIndex;
-        });
-      }
       if (event.source != TabChangedEventSource.page_view) {
+        _selectedTabIndex = event.selectedIndex;
         _pageController.animateToPage(
           event.selectedIndex,
           duration: Duration(milliseconds: 150),
@@ -528,11 +525,25 @@ class HomeBottomNavigationBar extends StatefulWidget {
 }
 
 class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
+  StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
+  final _logger = Logger((_HomeBottomNavigationBarState).toString());
+  int currentTabIndex;
+
   @override
   void initState() {
     super.initState();
+    currentTabIndex = widget.selectedTabIndex;
     widget.selectedFiles.addListener(() {
       setState(() {});
+    });
+    _tabChangedEventSubscription =
+        Bus.instance.on<TabChangedEvent>().listen((event) {
+      if (event.source != TabChangedEventSource.tab_bar) {
+        _logger.fine('index changed ');
+        setState(() {
+          currentTabIndex = event.selectedIndex;
+        });
+      }
     });
   }
 
@@ -629,7 +640,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                   },
                                 )
                               ],
-                              selectedIndex: widget.selectedTabIndex,
+                              selectedIndex: currentTabIndex,
                               onTabChange: _onTabChange,
                             ),
                           ),
