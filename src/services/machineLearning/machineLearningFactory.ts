@@ -19,6 +19,8 @@ import {
     ObjectDetectionMethod,
     TextDetectionMethod,
     TextDetectionService,
+    SceneDetectionService,
+    SceneDetectionMethod,
 } from 'types/machineLearning';
 import { CONCURRENCY } from 'utils/common/concurrency';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
@@ -31,6 +33,7 @@ import mobileFaceNetEmbeddingService from './mobileFaceNetEmbeddingService';
 import dbscanClusteringService from './dbscanClusteringService';
 import ssdMobileNetV2Service from './ssdMobileNetV2Service';
 import tesseractService from './tesseractService';
+import imageSceneService from './imageSceneService';
 
 export class MLFactory {
     public static getFaceDetectionService(
@@ -51,6 +54,16 @@ export class MLFactory {
         }
 
         throw Error('Unknown object detection method: ' + method);
+    }
+
+    public static getSceneDetectionService(
+        method: SceneDetectionMethod
+    ): SceneDetectionService {
+        if (method === 'Image-Scene') {
+            return imageSceneService;
+        }
+
+        throw Error('Unknown scene detection method: ' + method);
     }
 
     public static getTextDetectionService(
@@ -124,6 +137,7 @@ export class LocalMLSyncContext implements MLSyncContext {
     public faceEmbeddingService: FaceEmbeddingService;
     public faceClusteringService: ClusteringService;
     public objectDetectionService: ObjectDetectionService;
+    public sceneDetectionService: SceneDetectionService;
     public textDetectionService: TextDetectionService;
 
     public localFilesMap: Map<number, EnteFile>;
@@ -174,6 +188,10 @@ export class LocalMLSyncContext implements MLSyncContext {
         this.objectDetectionService = MLFactory.getObjectDetectionService(
             this.config.objectDetection.method
         );
+        this.sceneDetectionService = MLFactory.getSceneDetectionService(
+            this.config.sceneDetection.method
+        );
+
         this.textDetectionService = MLFactory.getTextDetectionService(
             this.config.textDetection.method
         );

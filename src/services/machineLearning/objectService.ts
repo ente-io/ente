@@ -24,17 +24,25 @@ class ObjectService {
                 oldMlFile?.objectDetectionMethod,
                 syncContext.objectDetectionService.method
             ) &&
+            !isDifferentOrOld(
+                oldMlFile?.sceneDetectionMethod,
+                syncContext.sceneDetectionService.method
+            ) &&
             oldMlFile?.imageSource === syncContext.config.imageSource
         ) {
             newMlFile.things = oldMlFile?.things;
             newMlFile.imageSource = oldMlFile.imageSource;
             newMlFile.imageDimensions = oldMlFile.imageDimensions;
             newMlFile.objectDetectionMethod = oldMlFile.objectDetectionMethod;
+            newMlFile.sceneDetectionMethod = oldMlFile.sceneDetectionMethod;
             return;
         }
 
         newMlFile.objectDetectionMethod =
             syncContext.objectDetectionService.method;
+        newMlFile.sceneDetectionMethod =
+            syncContext.sceneDetectionService.method;
+
         fileContext.newDetection = true;
         const imageBitmap = await ReaderService.getImageBitmap(
             syncContext,
@@ -46,6 +54,11 @@ class ObjectService {
                 syncContext.config.objectDetection.maxNumBoxes,
                 syncContext.config.objectDetection.minScore
             );
+        objectDetections.push(
+            ...(await syncContext.sceneDetectionService.detectScenes(
+                imageBitmap
+            ))
+        );
         // console.log('3 TF Memory stats: ', tf.memory());
         // TODO: reenable faces filtering based on width
         const detectedObjects = objectDetections?.map((detection) => {

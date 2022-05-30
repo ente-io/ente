@@ -95,6 +95,8 @@ export declare type FaceDetectionMethod = 'BlazeFace' | 'FaceApiSSD';
 
 export declare type ObjectDetectionMethod = 'SSDMobileNetV2';
 
+export declare type SceneDetectionMethod = 'Image-Scene';
+
 export declare type TextDetectionMethod = 'Tesseract';
 
 export declare type FaceCropMethod = 'ArcFace';
@@ -233,6 +235,7 @@ export interface MlFileData {
     faceAlignmentMethod?: Versioned<FaceAlignmentMethod>;
     faceEmbeddingMethod?: Versioned<FaceEmbeddingMethod>;
     objectDetectionMethod?: Versioned<ObjectDetectionMethod>;
+    sceneDetectionMethod?: Versioned<SceneDetectionMethod>;
     textDetectionMethod?: Versioned<TextDetectionMethod>;
     mlVersion: number;
     errorCount: number;
@@ -248,6 +251,10 @@ export interface ObjectDetectionConfig {
     method: ObjectDetectionMethod;
     maxNumBoxes: number;
     minScore: number;
+}
+
+export interface SceneDetectionConfig {
+    method: SceneDetectionMethod;
 }
 
 export interface TextDetectionConfig {
@@ -299,6 +306,7 @@ export interface MLSyncConfig extends Config {
     faceEmbedding: FaceEmbeddingConfig;
     faceClustering: FaceClusteringConfig;
     objectDetection: ObjectDetectionConfig;
+    sceneDetection: SceneDetectionConfig;
     textDetection: TextDetectionConfig;
     tsne?: TSNEConfig;
     mlVersion: number;
@@ -319,6 +327,7 @@ export interface MLSyncContext {
     faceEmbeddingService: FaceEmbeddingService;
     faceClusteringService: ClusteringService;
     objectDetectionService?: ObjectDetectionService;
+    sceneDetectionService?: SceneDetectionService;
     textDetectionService?: TextDetectionService;
 
     localFilesMap: Map<number, EnteFile>;
@@ -379,6 +388,12 @@ export interface ObjectDetectionService {
         minScore: number
     ): Promise<ObjectDetection[]>;
     dispose(): Promise<void>;
+}
+
+export interface SceneDetectionService {
+    method: Versioned<SceneDetectionMethod>;
+    // init(): Promise<void>;
+    detectScenes(image: ImageBitmap): Promise<ObjectDetection[]>;
 }
 
 export interface TextDetectionService {

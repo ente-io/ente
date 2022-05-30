@@ -1,30 +1,40 @@
 import React, { useEffect, useState } from 'react';
-import sceneDetectionService from 'services/machineLearning/sceneDetectionService';
+import sceneDetectionService from 'services/machineLearning/imageSceneService';
 
 function SceneDebug() {
-    const [selectedFile, setSelectedFile] = useState<File>(null);
+    const [selectedFiles, setSelectedFiles] = useState<File[]>(null);
 
     const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSelectedFile(event.target.files[0]);
+        setSelectedFiles([...event.target.files]);
     };
 
     const handleSubmission = async () => {
-        await sceneDetectionService.init();
-        await sceneDetectionService.run(selectedFile);
+        for (const file of selectedFiles) {
+            await sceneDetectionService.detectByFile(file);
+        }
+        console.log('done with scene detection');
     };
 
     useEffect(() => {
-        console.log(selectedFile);
-    }, [selectedFile]);
+        console.log('loaded', selectedFiles);
+    }, [selectedFiles]);
 
     return (
         <div>
-            <input type="file" name="file" onChange={changeHandler} />
+            <input
+                type="file"
+                name="file"
+                multiple={true}
+                onChange={changeHandler}
+            />
             <div>
                 <button onClick={handleSubmission}>Submit</button>
             </div>
-            {selectedFile && (
-                <img src={URL.createObjectURL(selectedFile)} width={'400px'} />
+            {selectedFiles?.length > 0 && (
+                <img
+                    src={URL.createObjectURL(selectedFiles[0])}
+                    width={'400px'}
+                />
             )}
         </div>
     );

@@ -52,6 +52,9 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
         method: 'Tesseract',
         minAccuracy: 75,
     },
+    sceneDetection: {
+        method: 'Image-Scene',
+    },
     // tsne: {
     //     samples: 200,
     //     dim: 2,
