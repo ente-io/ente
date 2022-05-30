@@ -18,6 +18,7 @@ import {
     UserDetails,
 } from 'types/user';
 import { getFamilyData, isPartOfFamily } from 'utils/billing';
+import { ServerErrorCodes } from 'utils/error';
 
 const ENDPOINT = getEndpoint();
 
@@ -161,7 +162,12 @@ export const isTokenValid = async () => {
         }
         return true;
     } catch (e) {
-        return false;
+        logError(e, 'session-validity api call failed');
+        if (e.status?.toString() === ServerErrorCodes.SESSION_EXPIRED) {
+            return false;
+        } else {
+            return true;
+        }
     }
 };
 
