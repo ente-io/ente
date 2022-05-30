@@ -29,7 +29,7 @@ final _logger = Logger("DeleteFileUtil");
 
 Future<void> deleteFilesFromEverywhere(
     BuildContext context, List<File> files) async {
-  final dialog = createProgressDialog(context, "deleting...");
+  final dialog = createProgressDialog(context, "Deleting...");
   await dialog.show();
   _logger.info("Trying to delete files " + files.toString());
   final List<String> localAssetIDs = [];
@@ -119,9 +119,9 @@ Future<void> deleteFilesFromEverywhere(
     Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles,
         type: EventType.deletedFromEverywhere));
     if (hasLocalOnlyFiles && Platform.isAndroid) {
-      showShortToast("files deleted");
+      showShortToast("Files deleted");
     } else {
-      showShortToast("moved to trash");
+      showShortToast("Moved to trash");
     }
   }
   await dialog.hide();
@@ -134,10 +134,10 @@ Future<void> deleteFilesFromRemoteOnly(
     BuildContext context, List<File> files) async {
   files.removeWhere((element) => element.uploadedFileID == null);
   if (files.isEmpty) {
-    showToast("selected files are not on ente");
+    showToast("Selected files are not on ente");
     return;
   }
-  final dialog = createProgressDialog(context, "deleting...");
+  final dialog = createProgressDialog(context, "Deleting...");
   await dialog.show();
   _logger.info("Trying to delete files " +
       files.map((f) => f.uploadedFileID).toString());
@@ -174,7 +174,7 @@ Future<void> deleteFilesFromRemoteOnly(
 
 Future<void> deleteFilesOnDeviceOnly(
     BuildContext context, List<File> files) async {
-  final dialog = createProgressDialog(context, "deleting...");
+  final dialog = createProgressDialog(context, "Deleting...");
   await dialog.show();
   _logger.info("Trying to delete files " + files.toString());
   final List<String> localAssetIDs = [];
@@ -230,16 +230,16 @@ Future<void> deleteFilesOnDeviceOnly(
 
 Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
   final result = await showChoiceDialog(
-      context, "delete permanently?", "this action cannot be undone",
-      firstAction: "delete", actionType: ActionType.critical);
+      context, "Delete permanently?", "This action cannot be undone",
+      firstAction: "Delete", actionType: ActionType.critical);
   if (result != DialogUserChoice.firstChoice) {
     return false;
   }
-  final dialog = createProgressDialog(context, "permanently deleting...");
+  final dialog = createProgressDialog(context, "Permanently deleting...");
   await dialog.show();
   try {
     await TrashSyncService.instance.deleteFromTrash(files);
-    showToast("successfully deleted");
+    showShortToast("Successfully deleted");
     await dialog.hide();
     Bus.instance
         .fire(FilesUpdatedEvent(files, type: EventType.deletedFromEverywhere));
@@ -253,17 +253,17 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
 }
 
 Future<bool> emptyTrash(BuildContext context) async {
-  final result = await showChoiceDialog(context, "empty trash?",
-      "these files will be permanently removed from your ente account",
-      firstAction: "empty", actionType: ActionType.critical);
+  final result = await showChoiceDialog(context, "Empty trash?",
+      "These files will be permanently removed from your ente account",
+      firstAction: "Empty", actionType: ActionType.critical);
   if (result != DialogUserChoice.firstChoice) {
     return false;
   }
-  final dialog = createProgressDialog(context, "please wait...");
+  final dialog = createProgressDialog(context, "Please wait...");
   await dialog.show();
   try {
     await TrashSyncService.instance.emptyTrash();
-    showToast("trash emptied");
+    showShortToast("Trash emptied");
     await dialog.hide();
     return true;
   } catch (e, s) {
@@ -316,7 +316,7 @@ Future<List<String>> _deleteLocalFilesInOneShot(
     BuildContext context, List<String> localIDs) async {
   final List<String> deletedIDs = [];
   final dialog = createProgressDialog(context,
-      "deleting " + localIDs.length.toString() + " backed up files...");
+      "Deleting " + localIDs.length.toString() + " backed up files...");
   await dialog.show();
   try {
     deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(localIDs));
@@ -331,7 +331,7 @@ Future<List<String>> _deleteLocalFilesInBatches(
     BuildContext context, List<String> localIDs) async {
   final dialogKey = GlobalKey<LinearProgressDialogState>();
   final dialog = LinearProgressDialog(
-    "deleting " + localIDs.length.toString() + " backed up files...",
+    "Deleting " + localIDs.length.toString() + " backed up files...",
     key: dialogKey,
   );
   showDialog(
@@ -419,10 +419,10 @@ Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
 Future<bool> shouldProceedWithDeletion(BuildContext context) async {
   final choice = await showChoiceDialog(
     context,
-    "are you sure?",
-    "some of the files you are trying to delete are only available on your device and cannot be recovered if deleted",
-    firstAction: "cancel",
-    secondAction: "delete",
+    "Are you sure?",
+    "Some of the files you are trying to delete are only available on your device and cannot be recovered if deleted",
+    firstAction: "Cancel",
+    secondAction: "Delete",
     secondActionColor: Colors.red,
   );
   return choice == DialogUserChoice.secondChoice;
