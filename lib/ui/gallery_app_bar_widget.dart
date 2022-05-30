@@ -68,6 +68,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       backgroundColor:
           widget.type == GalleryType.homepage ? Color(0x00000000) : null,
       elevation: 0,
+      centerTitle: false,
       title: widget.type == GalleryType.homepage
           ? const SizedBox.shrink()
           : TextButton(
