@@ -17,7 +17,7 @@ export const logError = (
             ...(info && {
                 info: info,
             }),
-            rootCause: { message: error?.message },
+            rootCause: { message: error?.message, completeError: error },
         },
     });
 };
