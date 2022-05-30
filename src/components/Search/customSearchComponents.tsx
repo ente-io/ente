@@ -7,6 +7,9 @@ import VideoIcon from 'components/icons/VideoIcon';
 import { components } from 'react-select';
 import { SuggestionType } from 'types/search';
 import SearchIcon from '@mui/icons-material/Search';
+import { Box, Divider, Stack, Typography } from '@mui/material';
+import { FreeFlowText, SpaceBetweenFlex } from 'components/Container';
+import { PreviewResultImages } from './styledComponents';
 
 const { Option, Control } = components;
 
@@ -47,10 +50,31 @@ export const ControlWithIcon = (props) => (
 );
 
 const LabelWithIcon = (props: { type: SuggestionType; label: string }) => (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
-        <span style={{ paddingRight: '10px', paddingBottom: '4px' }}>
-            {getIconByType(props.type)}
-        </span>
-        <span>{props.label}</span>
-    </div>
+    <>
+        <Box className="main" px={2} py={1}>
+            <Typography
+                css={`
+                    font-size: 12px;
+                    line-height: 16px;
+                `}
+                mb={1}>
+                Location
+            </Typography>
+            <SpaceBetweenFlex>
+                <Box mr={1}>
+                    <FreeFlowText>
+                        <Typography>{props.label}</Typography>
+                    </FreeFlowText>
+                    <Typography color="text.secondary"> 22 Photos</Typography>
+                </Box>
+
+                <Stack direction={'row'} spacing={1}>
+                    <PreviewResultImages src="https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500" />
+                    <PreviewResultImages src="https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500" />
+                    <PreviewResultImages src="https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500" />
+                </Stack>
+            </SpaceBetweenFlex>
+        </Box>
+        <Divider sx={{ mx: 2, my: 1 }} />
+    </>
 );

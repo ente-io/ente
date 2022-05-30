@@ -27,3 +27,8 @@ export const SearchInputWrapper = styled(FlexWrapper)`
     max-width: 484px;
     margin: auto;
 `;
+export const PreviewResultImages = styled.img`
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
+`;

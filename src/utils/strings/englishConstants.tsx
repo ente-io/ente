@@ -404,9 +404,7 @@ const englishConstants = {
     DOWNLOAD_COLLECTION_FAILED: 'album downloading failed, please try again',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
 
-    SEARCH_HINT: () => (
-        <span>try searching for New York, April 14, Christmas...</span>
-    ),
+    SEARCH_HINT: () => <span>Search for location, dates, themes</span>,
     TERMS_AND_CONDITIONS: () => (
         <Typography variant="body2">
             I agree to the{' '}

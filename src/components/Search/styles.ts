@@ -6,7 +6,6 @@ export const SelectStyles = {
     control: (style, { isFocused }) => ({
         ...style,
         backgroundColor: '#282828',
-        color: '#d1d1d1',
 
         borderColor: isFocused ? '#51cd7c' : '#444',
         boxShadow: 'none',
@@ -18,16 +17,20 @@ export const SelectStyles = {
     }),
     input: (style) => ({
         ...style,
-        color: '#d2d2d1',
+        color: '#fff',
     }),
     menu: (style) => ({
         ...style,
         marginTop: '1px',
-        backgroundColor: '#282828',
+        backgroundColor: '#1b1b1b',
     }),
     option: (style, { isFocused }) => ({
         ...style,
-        backgroundColor: isFocused && '#343434',
+        padding: 0,
+        backgroundColor: 'transparent',
+        '& .main': {
+            backgroundColor: isFocused && '#343434',
+        },
     }),
     dropdownIndicator: (style) => ({
         ...style,
