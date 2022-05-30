@@ -135,7 +135,7 @@ export default async function uploader(
         );
 
         logError(e, 'file upload failed', {
-            fileFormat: fileTypeInfo.exactType,
+            fileFormat: fileTypeInfo?.exactType,
         });
         const error = handleUploadError(e);
         switch (error.message) {
