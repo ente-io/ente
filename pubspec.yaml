@@ -11,7 +11,7 @@ description: ente photos application
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.5.30+310
+version: 0.5.31+311
 
 environment:
   sdk: ">=2.10.0 <3.0.0"
@@ -51,7 +51,7 @@ dependencies:
   flutter_cache_manager: ^3.3.0
   flutter_datetime_picker: ^1.5.1
   flutter_easyloading: ^3.0.0
-  flutter_email_sender: 5.0.2
+  flutter_email_sender: ^5.1.0
   flutter_image_compress: ^1.1.0
   flutter_inappwebview: ^5.3.2
   flutter_local_notifications: ^9.5.3+1
