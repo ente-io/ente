@@ -1,4 +1,5 @@
-import * as tf from '@tensorflow/tfjs';
+import * as tf from '@tensorflow/tfjs-core';
+import * as tfjsConverter from '@tensorflow/tfjs-converter';
 import {
     ObjectDetection,
     SceneDetectionMethod,
@@ -9,7 +10,7 @@ import sceneMap from 'utils/machineLearning/sceneMap';
 
 class ImageScene implements SceneDetectionService {
     method: Versioned<SceneDetectionMethod>;
-    model: tf.GraphModel;
+    model: tfjsConverter.GraphModel;
 
     public constructor() {
         this.method = {
@@ -23,7 +24,9 @@ class ImageScene implements SceneDetectionService {
             return;
         }
 
-        const model = await tf.loadGraphModel('/models/imagescene/model.json');
+        const model = await tfjsConverter.loadGraphModel(
+            '/models/imagescene/model.json'
+        );
         console.log('loaded image-scene model', model, tf.getBackend());
         this.model = model;
     }

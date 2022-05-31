@@ -19,7 +19,6 @@
     "@sentry/nextjs": "^6.7.1",
     "@stripe/stripe-js": "^1.13.2",
     "@tensorflow-models/coco-ssd": "^2.2.2",
-    "@tensorflow/tfjs": "^3.18.0",
     "@tensorflow/tfjs-backend-cpu": "^3.13.0",
     "@tensorflow/tfjs-backend-webgl": "^3.11.0",
     "@tensorflow/tfjs-converter": "^3.11.0",
