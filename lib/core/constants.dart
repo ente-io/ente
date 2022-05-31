@@ -28,3 +28,5 @@ const kMnemonicKeyWordCount = 24;
 
 // https://stackoverflow.com/a/61162219
 const kDragSensitivity = 8;
+
+const kSupportEmail = 'support@ente.io';
