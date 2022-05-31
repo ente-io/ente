@@ -36,12 +36,12 @@ function SceneDebug() {
             <div>
                 <button onClick={handleSubmission}>Submit</button>
             </div>
-            {selectedFiles?.length > 0 && (
-                <img
-                    src={URL.createObjectURL(selectedFiles[0])}
-                    width={'400px'}
-                />
-            )}
+            {selectedFiles?.map((file, index) => (
+                <div key={index}>
+                    <img src={URL.createObjectURL(file)} width={'400px'} />
+                    File: {file.name}
+                </div>
+            ))}
         </div>
     );
 }

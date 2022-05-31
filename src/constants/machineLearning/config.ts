@@ -48,13 +48,13 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
         maxNumBoxes: 20,
         minScore: 0.2,
     },
-    textDetection: {
-        method: 'Tesseract',
-        minAccuracy: 75,
-    },
     sceneDetection: {
         method: 'Image-Scene',
         minScore: 0.1,
+    },
+    textDetection: {
+        method: 'Tesseract',
+        minAccuracy: 75,
     },
     // tsne: {
     //     samples: 200,
