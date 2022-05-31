@@ -10,3 +10,6 @@
 	path = thirdparty/sentry-dart
 	url = https://github.com/ente-io/sentry-dart.git
 
+[submodule "thirdparty/extended_image"]
+    path = thirdparty/extended_image
+    url = https://github.com/ente-io/extended_image.git

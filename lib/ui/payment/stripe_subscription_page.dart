@@ -451,7 +451,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _planText("monthly", _showYearlyPlan),
+          _planText("Monthly", _showYearlyPlan),
           Switch(
             value: _showYearlyPlan,
             activeColor: Colors.white,
@@ -461,7 +461,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               await _filterStripeForUI();
             },
           ),
-          _planText("yearly", !_showYearlyPlan)
+          _planText("Yearly", !_showYearlyPlan)
         ],
       ),
     );

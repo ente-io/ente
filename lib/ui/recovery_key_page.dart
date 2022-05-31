@@ -167,7 +167,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
 
     childrens.add(GradientButton(
       child: Text(
-        'Save Key',
+        'Save key',
         style: gradientButtonTextTheme(),
       ),
       linearGradientColors: const [

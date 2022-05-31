@@ -40,28 +40,30 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     return Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            color: Theme.of(context).iconTheme.color,
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ),
-        body: _getBody(),
-        floatingActionButton: DynamicFAB(
-          isKeypadOpen: isKeypadOpen,
-          isFormValid: _emailIsValid,
-          buttonText: 'Log in',
-          onPressedFunction: () {
-            _config.setEmail(_email);
-            UserService.instance
-                .getOtt(context, _email, isCreateAccountScreen: false);
+      appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          color: Theme.of(context).iconTheme.color,
+          onPressed: () {
+            Navigator.of(context).pop();
           },
         ),
-        floatingActionButtonLocation: fabLocation());
+      ),
+      body: _getBody(),
+      floatingActionButton: DynamicFAB(
+        isKeypadOpen: isKeypadOpen,
+        isFormValid: _emailIsValid,
+        buttonText: 'Log in',
+        onPressedFunction: () {
+          _config.setEmail(_email);
+          UserService.instance
+              .getOtt(context, _email, isCreateAccountScreen: false);
+        },
+      ),
+      floatingActionButtonLocation: fabLocation(),
+      floatingActionButtonAnimator: NoScalingAnimation(),
+    );
   }
 
   Widget _getBody() {

@@ -28,7 +28,7 @@ class GrantPermissionsWidget extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  'ente needs your permission to access gallery',
+                  'Ente needs your permission to access gallery',
                   style: Theme.of(context)
                       .textTheme
                       .headline4
@@ -42,7 +42,7 @@ class GrantPermissionsWidget extends StatelessWidget {
             padding: EdgeInsets.only(
                 left: 20, right: 20, bottom: Platform.isIOS ? 60 : 32),
             child: OutlinedButton(
-              child: Text("Grant Permission"),
+              child: Text("Grant permission"),
               onPressed: () async {
                 final state = await PhotoManager.requestPermissionExtend();
                 if (state == PermissionState.authorized ||

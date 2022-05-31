@@ -63,6 +63,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
             }
           }),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonAnimator: NoScalingAnimation(),
       body: Column(
         children: [
           Expanded(
@@ -71,7 +72,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  child: Text('Forgot Password',
+                  child: Text('Forgot password',
                       style: Theme.of(context).textTheme.headline4),
                 ),
                 Padding(
@@ -120,7 +121,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                         padding: EdgeInsets.symmetric(horizontal: 20),
                         child: Center(
                           child: Text(
-                            "no recovery key?",
+                            "No recovery key?",
                             style: Theme.of(context)
                                 .textTheme
                                 .subtitle1

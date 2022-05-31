@@ -26,13 +26,8 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
       return Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
         child: Text(
-          "ente preserves your memories, so they're always available to you, even if you lose your device",
-          style: Theme.of(context).textTheme.caption
-          /*style: TextStyle(
-            color: Colors.white54,
-            height: 1.2,
-          )*/
-          ,
+          "Ente preserves your memories, so they're always available to you, even if you lose your device",
+          style: Theme.of(context).textTheme.caption,
         ),
       );
     } else {
