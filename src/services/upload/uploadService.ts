@@ -32,6 +32,7 @@ import {
 import { encryptFile, getFileSize, readFile } from './fileService';
 import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
+import { USE_CF_PROXY } from 'constants/upload';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
@@ -141,18 +142,35 @@ class UploadService {
                     file.localID
                 );
                 const fileUploadURL = await this.getUploadURL();
-                fileObjectKey = await UploadHttpClient.putFileV2(
-                    fileUploadURL,
-                    file.file.encryptedData,
-                    progressTracker
-                );
+                if (USE_CF_PROXY) {
+                    fileObjectKey = await UploadHttpClient.putFileV2(
+                        fileUploadURL,
+                        file.file.encryptedData,
+                        progressTracker
+                    );
+                } else {
+                    fileObjectKey = await UploadHttpClient.putFile(
+                        fileUploadURL,
+                        file.file.encryptedData,
+                        progressTracker
+                    );
+                }
             }
             const thumbnailUploadURL = await this.getUploadURL();
-            const thumbnailObjectKey = await UploadHttpClient.putFileV2(
-                thumbnailUploadURL,
-                file.thumbnail.encryptedData as Uint8Array,
-                null
-            );
+            let thumbnailObjectKey: string = null;
+            if (USE_CF_PROXY) {
+                thumbnailObjectKey = await UploadHttpClient.putFileV2(
+                    thumbnailUploadURL,
+                    file.thumbnail.encryptedData as Uint8Array,
+                    null
+                );
+            } else {
+                thumbnailObjectKey = await UploadHttpClient.putFile(
+                    thumbnailUploadURL,
+                    file.thumbnail.encryptedData as Uint8Array,
+                    null
+                );
+            }
 
             const backupedFile: BackupedFile = {
                 file: {

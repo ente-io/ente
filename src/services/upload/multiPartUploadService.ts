@@ -1,6 +1,7 @@
 import {
     FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    USE_CF_PROXY,
 } from 'constants/upload';
 import UIService from './uiService';
 import UploadHttpClient from './uploadHttpClient';
@@ -56,12 +57,20 @@ export async function uploadStreamInParts(
             percentPerPart,
             index
         );
-
-        const eTag = await UploadHttpClient.putFilePartV2(
-            fileUploadURL,
-            uploadChunk,
-            progressTracker
-        );
+        let eTag = null;
+        if (USE_CF_PROXY) {
+            eTag = await UploadHttpClient.putFilePartV2(
+                fileUploadURL,
+                uploadChunk,
+                progressTracker
+            );
+        } else {
+            eTag = await UploadHttpClient.putFilePart(
+                fileUploadURL,
+                uploadChunk,
+                progressTracker
+            );
+        }
         partEtags.push({ PartNumber: index + 1, ETag: eTag });
     }
     const { done } = await streamReader.read();
@@ -103,5 +112,9 @@ async function completeMultipartUpload(
         { CompleteMultipartUpload: { Part: partEtags } },
         options
     );
-    await UploadHttpClient.completeMultipartUploadV2(completeURL, body);
+    if (USE_CF_PROXY) {
+        await UploadHttpClient.completeMultipartUploadV2(completeURL, body);
+    } else {
+        await UploadHttpClient.completeMultipartUpload(completeURL, body);
+    }
 }
