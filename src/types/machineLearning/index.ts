@@ -327,9 +327,9 @@ export interface MLSyncContext {
     faceAlignmentService: FaceAlignmentService;
     faceEmbeddingService: FaceEmbeddingService;
     faceClusteringService: ClusteringService;
-    objectDetectionService?: ObjectDetectionService;
-    sceneDetectionService?: SceneDetectionService;
-    textDetectionService?: TextDetectionService;
+    objectDetectionService: ObjectDetectionService;
+    sceneDetectionService: SceneDetectionService;
+    textDetectionService: TextDetectionService;
 
     localFilesMap: Map<number, EnteFile>;
     outOfSyncFiles: EnteFile[];
