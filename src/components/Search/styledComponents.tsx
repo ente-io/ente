@@ -3,12 +3,16 @@ import {
     FlexWrapper,
     FluidContainer,
 } from 'components/Container';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const SearchBarWrapper = styled(CenteredFlex)`
-    @media (max-width: 624px) {
-        display: none;
-    }
+export const SearchBarWrapper = styled(CenteredFlex)<{ isOpen: boolean }>`
+    ${(props) =>
+        !props.isOpen &&
+        css`
+            @media (max-width: 624px) {
+                display: none;
+            }
+        `}
 `;
 
 export const SearchButtonWrapper = styled(FluidContainer)`

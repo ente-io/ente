@@ -6,7 +6,6 @@ import { IconButton } from '../Container';
 import { EnteFile } from 'types/file';
 import { SearchBarWrapper, SearchButtonWrapper } from './styledComponents';
 import SearchInput from './input';
-import { SelectionBar } from 'components/Navbar/SelectionBar';
 import { Search } from 'types/search';
 
 interface Props {
@@ -21,19 +20,16 @@ interface Props {
 export default function SearchBar({ isFirstFetch, ...props }: Props) {
     return (
         <>
-            <SearchBarWrapper>
+            <SearchBarWrapper isOpen={props.isOpen}>
                 <SearchInput {...props} />
             </SearchBarWrapper>
-            <SearchButtonWrapper>
-                <IconButton
-                    onClick={() => !isFirstFetch && props.setOpen(true)}>
-                    <SearchIcon />
-                </IconButton>
-            </SearchButtonWrapper>
-            {props.isOpen && (
-                <SelectionBar>
-                    <SearchInput {...props} />
-                </SelectionBar>
+            {!props.isOpen && (
+                <SearchButtonWrapper>
+                    <IconButton
+                        onClick={() => !isFirstFetch && props.setOpen(true)}>
+                        <SearchIcon />
+                    </IconButton>
+                </SearchButtonWrapper>
             )}
         </>
     );

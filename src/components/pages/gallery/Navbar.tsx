@@ -20,7 +20,7 @@ export function GalleryNavbar({
 }) {
     return (
         <NavbarBase>
-            <SidebarToggler openSidebar={openSidebar} />
+            {!isInSearchMode && <SidebarToggler openSidebar={openSidebar} />}
 
             {isFirstFetch ? (
                 <FluidContainer style={{ justifyContent: 'center' }}>
@@ -41,10 +41,12 @@ export function GalleryNavbar({
                     setSearch={updateSearch}
                 />
             )}
-            <UploadButton
-                isFirstFetch={isFirstFetch}
-                openUploader={openUploader}
-            />
+            {!isInSearchMode && (
+                <UploadButton
+                    isFirstFetch={isFirstFetch}
+                    openUploader={openUploader}
+                />
+            )}
         </NavbarBase>
     );
 }

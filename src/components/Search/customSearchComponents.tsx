@@ -11,6 +11,7 @@ import { Box, Divider, Stack, Typography } from '@mui/material';
 import { FreeFlowText, SpaceBetweenFlex } from 'components/Container';
 import CollectionCard from 'components/Collections/CollectionCard';
 import { ResultPreviewTile } from 'components/Collections/styledComponents';
+import { SelectComponents } from 'react-select/src/components';
 
 const { Option, Control } = components;
 
@@ -36,19 +37,20 @@ export const OptionWithIcon = (props) => (
         <LabelWithIcon data={props.data} />
     </Option>
 );
-export const ControlWithIcon = (props) => (
-    <Control {...props}>
-        <span
-            className="icon"
-            style={{
-                paddingLeft: '10px',
-                paddingBottom: '4px',
-            }}>
-            {getIconByType(props.getValue()[0]?.type)}
-        </span>
-        {props.children}
-    </Control>
-);
+export const ControlWithIcon: SelectComponents<SearchOption, false>['Control'] =
+    (props) => (
+        <Control {...props}>
+            <span
+                className="icon"
+                style={{
+                    paddingLeft: '10px',
+                    paddingBottom: '4px',
+                }}>
+                {getIconByType(props.getValue()[0]?.type)}
+            </span>
+            {props.children}
+        </Control>
+    );
 
 const LabelWithIcon = ({ data }: { data: SearchOption }) => (
     <>

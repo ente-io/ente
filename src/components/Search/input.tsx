@@ -93,7 +93,6 @@ export default function SearchInput(props: Iprops) {
                 escapeClearsValue
                 styles={SelectStyles}
                 noOptionsMessage={() => null}
-                menuIsOpen
             />
 
             {props.isOpen && (
