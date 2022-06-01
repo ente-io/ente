@@ -28,6 +28,9 @@ export const SelectStyles = {
         ...style,
         padding: 0,
         backgroundColor: 'transparent',
+        '& :hover': {
+            cursor: 'pointer',
+        },
         '& .main': {
             backgroundColor: isFocused && '#343434',
         },
