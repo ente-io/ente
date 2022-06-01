@@ -1,3 +1,5 @@
+import { EnteFile } from 'types/file';
+
 export type Bbox = [number, number, number, number];
 
 export interface LocationSearchResponse {
@@ -23,4 +25,20 @@ export interface Suggestion {
     type: SuggestionType;
     label: string;
     value: Bbox | DateValue | number;
+}
+
+export type Search = {
+    date?: DateValue;
+    location?: Bbox;
+    collection?: number;
+    file?: number;
+};
+export interface SearchStats {
+    resultCount: number;
+    timeTaken: number;
+}
+
+export interface SearchOption extends Suggestion {
+    fileCount: number;
+    previewFiles: EnteFile[];
 }

@@ -7,13 +7,16 @@ import { EnteFile } from 'types/file';
 
 import { logError } from 'utils/sentry';
 import {
+    Bbox,
     DateValue,
     LocationSearchResponse,
+    Search,
+    SearchOption,
     Suggestion,
     SuggestionType,
 } from 'types/search';
 import { FILE_TYPE } from 'constants/file';
-import { getFormattedDate, isInsideBox } from 'utils/search';
+import { getFormattedDate, isInsideBox, isSameDayAnyYear } from 'utils/search';
 
 const ENDPOINT = getEndpoint();
 
@@ -26,16 +29,35 @@ export const getAutoCompleteSuggestions =
         if (!searchPhrase?.length) {
             return [];
         }
-        const options = [
+        const suggestions = [
             ...getHolidaySuggestion(searchPhrase),
             ...getYearSuggestion(searchPhrase),
             ...getDateSuggestion(searchPhrase),
             ...getCollectionSuggestion(searchPhrase, collections),
             ...getFileSuggestion(searchPhrase, files),
-            ...(await getLocationSuggestions(searchPhrase, files)),
+            ...(await getLocationSuggestions(searchPhrase /* files*/)),
         ];
 
-        return options;
+        console.log(suggestions);
+
+        const previewImageAppendedOptions: SearchOption[] = suggestions
+            .map((suggestion) => ({
+                suggestion,
+                searchQuery: convertSuggestionToSearchQuery(suggestion),
+            }))
+            .map(({ suggestion, searchQuery }) => {
+                const resultFiles = files.filter((file) =>
+                    isSearchedFiles(file, searchQuery)
+                );
+                return {
+                    ...suggestion,
+                    fileCount: resultFiles.length,
+                    previewFiles: resultFiles.slice(0, 3),
+                };
+            })
+            .filter((option) => option.fileCount);
+
+        return previewImageAppendedOptions;
     };
 
 function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
@@ -135,6 +157,7 @@ function getCollectionSuggestion(
 
 function getFileSuggestion(searchPhrase: string, files: EnteFile[]) {
     const fileResults = searchFiles(searchPhrase, files);
+    console.log(fileResults);
     return fileResults.map((file) => ({
         type:
             file.type === FILE_TYPE.IMAGE
@@ -145,31 +168,33 @@ function getFileSuggestion(searchPhrase: string, files: EnteFile[]) {
     }));
 }
 
-async function getLocationSuggestions(searchPhrase: string, files: EnteFile[]) {
+async function getLocationSuggestions(
+    searchPhrase: string /* files: EnteFile[]*/
+) {
     const locationResults = await searchLocation(searchPhrase);
 
-    const locationResultsHasFiles: boolean[] = new Array(
-        locationResults.length
-    ).fill(false);
-    files.map((file) => {
-        for (const [index, location] of locationResults.entries()) {
-            if (
-                isInsideBox(
-                    {
-                        latitude: file.metadata.latitude,
-                        longitude: file.metadata.longitude,
-                    },
-                    location.bbox
-                )
-            ) {
-                locationResultsHasFiles[index] = true;
-            }
-        }
-    });
-    const filteredLocationWithFiles = locationResults.filter(
-        (_, index) => locationResultsHasFiles[index]
-    );
-    return filteredLocationWithFiles.map(
+    // const locationResultsHasFiles: boolean[] = new Array(
+    //     locationResults.length
+    // ).fill(false);
+    // files.map((file) => {
+    //     for (const [index, location] of locationResults.entries()) {
+    //         if (
+    //             isInsideBox(
+    //                 {
+    //                     latitude: file.metadata.latitude,
+    //                     longitude: file.metadata.longitude,
+    //                 },
+    //                 location.bbox
+    //             )
+    //         ) {
+    //             locationResultsHasFiles[index] = true;
+    //         }
+    //     }
+    // });
+    // const filteredLocationWithFiles = locationResults.filter(
+    //     (_, index) => locationResultsHasFiles[index]
+    // );
+    return locationResults.map(
         (searchResult) =>
             ({
                 type: SuggestionType.LOCATION,
@@ -222,4 +247,49 @@ async function searchLocation(
         logError(e, 'location search failed');
     }
     return [];
+}
+
+export function isSearchedFiles(file: EnteFile, search: Search) {
+    if (search?.date) {
+        return isSameDayAnyYear(search.date)(
+            new Date(file.metadata.creationTime / 1000)
+        );
+    }
+    if (search?.location) {
+        return isInsideBox(
+            {
+                latitude: file.metadata.latitude,
+                longitude: file.metadata.longitude,
+            },
+            search.location
+        );
+    }
+    if (search?.file) {
+        return file.id === search.file;
+    }
+    if (search?.collection) {
+        return search.collection === file.collectionID;
+    }
+    return false;
+}
+
+function convertSuggestionToSearchQuery(option: Suggestion): Search {
+    switch (option.type) {
+        case SuggestionType.DATE:
+            return {
+                date: option.value as DateValue,
+            };
+
+        case SuggestionType.LOCATION:
+            return {
+                location: option.value as Bbox,
+            };
+
+        case SuggestionType.COLLECTION:
+            return { collection: option.value as number };
+
+        case SuggestionType.IMAGE:
+        case SuggestionType.VIDEO:
+            return { file: option.value as number };
+    }
 }

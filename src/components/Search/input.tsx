@@ -30,6 +30,16 @@ export default function SearchInput(props: Iprops) {
         setValue(value);
     };
 
+    const [defaultOption, setDefaultOption] = useState<Suggestion[]>(null);
+
+    useEffect(() => {
+        const main = async () => {
+            const d = await getOptions('photo');
+            setDefaultOption(d);
+        };
+        main();
+    }, []);
+
     useEffect(() => search(value), [value]);
 
     const resetSearch = () => {
@@ -72,7 +82,7 @@ export default function SearchInput(props: Iprops) {
                 break;
             case SuggestionType.IMAGE:
             case SuggestionType.VIDEO:
-                props.setSearch({ fileIndex: selectedOption.value as number });
+                props.setSearch({ file: selectedOption.value as number });
                 setValue(null);
                 break;
         }
@@ -92,7 +102,9 @@ export default function SearchInput(props: Iprops) {
                 isClearable
                 escapeClearsValue
                 styles={SelectStyles}
-                noOptionsMessage={() => null}
+                // noOptionsMessage={() => null}
+                defaultOptions={defaultOption}
+                menuIsOpen
             />
 
             {props.isOpen && (

@@ -1,4 +1,3 @@
-import { EnteFile } from 'types/file';
 import { Bbox, DateValue } from 'types/search';
 import { Location } from 'types/upload';
 
@@ -16,31 +15,23 @@ export function isInsideBox({ latitude, longitude }: Location, bbox: Bbox) {
     }
 }
 
-export const isSameDay = (baseDate: DateValue) => (compareDate: Date) => {
-    let same = true;
+export const isSameDayAnyYear =
+    (baseDate: DateValue) => (compareDate: Date) => {
+        let same = true;
 
-    if (baseDate.month || baseDate.month === 0) {
-        same = baseDate.month === compareDate.getMonth();
-    }
-    if (same && baseDate.date) {
-        same = baseDate.date === compareDate.getDate();
-    }
-    if (same && baseDate.year) {
-        same = baseDate.year === compareDate.getFullYear();
-    }
+        if (baseDate.month || baseDate.month === 0) {
+            same = baseDate.month === compareDate.getMonth();
+        }
+        if (same && baseDate.date) {
+            same = baseDate.date === compareDate.getDate();
+        }
+        if (same && baseDate.year) {
+            same = baseDate.year === compareDate.getFullYear();
+        }
 
-    return same;
-};
+        return same;
+    };
 
-export function getFilesWithCreationDay(
-    files: EnteFile[],
-    searchedDate: DateValue
-) {
-    const isSearchedDate = isSameDay(searchedDate);
-    return files.filter((file) =>
-        isSearchedDate(new Date(file.metadata.creationTime / 1000))
-    );
-}
 export function getFormattedDate(date: DateValue) {
     const options = {};
     date.date && (options['day'] = 'numeric');

@@ -7,7 +7,6 @@ import DownloadManager from 'services/downloadManager';
 import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
-import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
 import { formatDateRelative } from 'utils/file';
 import {
     ALL_SECTION,
@@ -17,7 +16,7 @@ import {
 import { isSharedFile } from 'utils/file';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
-import { SetFiles, SelectedState, Search, SetSearchStats } from 'types/gallery';
+import { SetFiles, SelectedState, SetSearchStats } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
@@ -26,6 +25,8 @@ import EmptyScreen from './EmptyScreen';
 import { AppContext } from 'pages/_app';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { IsArchived } from 'utils/magicMetadata';
+import { isSameDayAnyYear, isInsideBox } from 'utils/search';
+import { Search } from 'types/search';
 
 const Container = styled.div`
     display: block;
@@ -99,7 +100,7 @@ const PhotoFrame = ({
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
-    const filteredDataRef = useRef([]);
+    const filteredDataRef = useRef<EnteFile[]>([]);
     const filteredData = filteredDataRef?.current ?? [];
     const router = useRouter();
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
@@ -141,9 +142,9 @@ const PhotoFrame = ({
                 timeTaken: (Date.now() - startTime) / 1000,
             });
         }
-        if (search?.fileIndex || search?.fileIndex === 0) {
+        if (search?.file || search?.file === 0) {
             const filteredDataIdx = filteredData.findIndex(
-                (data) => data.dataIndex === search.fileIndex
+                (data) => data.id === search.file
             );
             if (filteredDataIdx || filteredDataIdx === 0) {
                 onThumbnailClick(filteredDataIdx)();

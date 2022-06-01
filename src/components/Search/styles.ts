@@ -34,6 +34,9 @@ export const SelectStyles = {
         '& .main': {
             backgroundColor: isFocused && '#343434',
         },
+        '&:last-child .MuiDivider-root': {
+            display: 'none',
+        },
     }),
     dropdownIndicator: (style) => ({
         ...style,

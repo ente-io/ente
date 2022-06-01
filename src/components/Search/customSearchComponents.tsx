@@ -5,11 +5,12 @@ import ImageIcon from 'components/icons/ImageIcon';
 import LocationIcon from 'components/icons/LocationIcon';
 import VideoIcon from 'components/icons/VideoIcon';
 import { components } from 'react-select';
-import { SuggestionType } from 'types/search';
+import { SearchOption, SuggestionType } from 'types/search';
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Divider, Stack, Typography } from '@mui/material';
 import { FreeFlowText, SpaceBetweenFlex } from 'components/Container';
-import { PreviewResultImages } from './styledComponents';
+import CollectionCard from 'components/Collections/CollectionCard';
+import { ResultPreviewTile } from 'components/Collections/styledComponents';
 
 const { Option, Control } = components;
 
@@ -32,7 +33,7 @@ const getIconByType = (type: SuggestionType) => {
 
 export const OptionWithIcon = (props) => (
     <Option {...props}>
-        <LabelWithIcon type={props.data.type} label={props.data.label} />
+        <LabelWithIcon data={props.data} />
     </Option>
 );
 export const ControlWithIcon = (props) => (
@@ -49,7 +50,7 @@ export const ControlWithIcon = (props) => (
     </Control>
 );
 
-const LabelWithIcon = (props: { type: SuggestionType; label: string }) => (
+const LabelWithIcon = ({ data }: { data: SearchOption }) => (
     <>
         <Box className="main" px={2} py={1}>
             <Typography
@@ -63,15 +64,22 @@ const LabelWithIcon = (props: { type: SuggestionType; label: string }) => (
             <SpaceBetweenFlex>
                 <Box mr={1}>
                     <FreeFlowText>
-                        <Typography>{props.label}</Typography>
+                        <Typography>{data.label}</Typography>
                     </FreeFlowText>
-                    <Typography color="text.secondary"> 22 Photos</Typography>
+                    <Typography color="text.secondary">
+                        {data.fileCount} Photos
+                    </Typography>
                 </Box>
 
                 <Stack direction={'row'} spacing={1}>
-                    <PreviewResultImages src="https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500" />
-                    <PreviewResultImages src="https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500" />
-                    <PreviewResultImages src="https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500" />
+                    {data.previewFiles.map((file) => (
+                        <CollectionCard
+                            key={file.id}
+                            latestFile={file}
+                            onClick={() => null}
+                            collectionTile={ResultPreviewTile}
+                        />
+                    ))}
                 </Stack>
             </SpaceBetweenFlex>
         </Box>

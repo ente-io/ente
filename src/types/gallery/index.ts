@@ -1,6 +1,6 @@
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { DateValue, Bbox } from 'types/search';
+import { Search, SearchStats } from 'types/search';
 
 export type SelectedState = {
     [k: number]: boolean;
@@ -12,16 +12,6 @@ export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
 export type SetSearchStats = React.Dispatch<React.SetStateAction<SearchStats>>;
 export type SetSearch = React.Dispatch<React.SetStateAction<Search>>;
-
-export type Search = {
-    date?: DateValue;
-    location?: Bbox;
-    fileIndex?: number;
-};
-export interface SearchStats {
-    resultCount: number;
-    timeTaken: number;
-}
 
 export type GalleryContextType = {
     thumbs: Map<number, string>;

@@ -6,7 +6,7 @@ import { EnteFile } from 'types/file';
 
 export default function CollectionCard(props: {
     children?: any;
-    latestFile?: EnteFile;
+    latestFile: EnteFile;
     onClick: () => void;
     collectionTile: any;
 }) {
