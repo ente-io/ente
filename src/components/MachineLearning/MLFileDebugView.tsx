@@ -16,6 +16,7 @@ import { FaceCropsRow, FaceImagesRow, ImageBitmapView } from './ImageViews';
 import ssdMobileNetV2Service from 'services/machineLearning/ssdMobileNetV2Service';
 import { DEFAULT_ML_SYNC_CONFIG } from 'constants/machineLearning/config';
 import tesseractService from 'services/machineLearning/tesseractService';
+import imageSceneService from 'services/machineLearning/imageSceneService';
 
 interface MLFileDebugViewProps {
     file: File;
@@ -101,6 +102,12 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
                 DEFAULT_ML_SYNC_CONFIG.objectDetection.minScore
             );
             console.log('detectedObjects: ', objectDetections);
+
+            const sceneDetections = await imageSceneService.detectScenes(
+                imageBitmap,
+                DEFAULT_ML_SYNC_CONFIG.sceneDetection.minScore
+            );
+            console.log('detectedScenes: ', sceneDetections);
 
             const textDetections = await tesseractService.detectText(
                 imageBitmap,
