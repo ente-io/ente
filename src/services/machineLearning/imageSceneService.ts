@@ -6,6 +6,7 @@ import {
     SceneDetectionService,
     Versioned,
 } from 'types/machineLearning';
+import { SCENE_DETECTION_IMAGE_SIZE } from 'constants/machineLearning/config';
 
 class ImageScene implements SceneDetectionService {
     method: Versioned<SceneDetectionMethod>;
@@ -35,9 +36,11 @@ class ImageScene implements SceneDetectionService {
         this.model = model;
 
         // warmup the model
-        const warmupResult = this.model.predict(tf.zeros([1, 224, 224, 3]));
-        await (warmupResult as tf.Tensor).data();
-        (warmupResult as tf.Tensor).dispose();
+        const warmupResult = this.model.predict(
+            tf.zeros([1, 224, 224, 3])
+        ) as tf.Tensor;
+        await warmupResult.data();
+        warmupResult.dispose();
     }
 
     async detectScenes(image: ImageBitmap, minScore: number) {
@@ -52,18 +55,21 @@ class ImageScene implements SceneDetectionService {
 
             // This model takes fixed-shaped (224x224) inputs
             // https://tfhub.dev/sayannath/lite-model/image-scene/1
-            let resizedTensor = tf.image.resizeBilinear(tensor, [224, 224]);
+            let resizedTensor = tf.image.resizeBilinear(
+                tensor,
+                SCENE_DETECTION_IMAGE_SIZE as [number, number]
+            );
 
             resizedTensor = tf.expandDims(resizedTensor);
             resizedTensor = tf.cast(resizedTensor, 'float32');
 
-            const output = this.model.predict(resizedTensor);
+            const output = this.model.predict(resizedTensor) as tf.Tensor;
 
             return output;
         });
 
-        const data = await (output as tf.Tensor).data();
-        (output as tf.Tensor).dispose();
+        const data = await output.data();
+        output.dispose();
 
         const scenes = this.getScenes(
             data as Float32Array,
