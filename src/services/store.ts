@@ -60,7 +60,7 @@ export const watchStoreSchema: Schema<WatchStoreType> = {
                             path: {
                                 type: 'string',
                             },
-                            ID: {
+                            id: {
                                 type: 'number',
                             },
                         },

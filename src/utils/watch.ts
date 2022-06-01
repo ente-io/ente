@@ -1,26 +1,61 @@
 import * as fs from 'promise-fs';
+import path from 'path';
 import chokidar from 'chokidar';
 import { watchStore } from '../services/store';
 import { logError } from './logging';
 import { BrowserWindow, ipcRenderer } from 'electron';
+import { WatchStoreType } from '../types';
 
-export async function deleteFile(filePath: string) {
-    try {
-        const fileStats = await fs.stat(filePath);
-        if (fileStats.isFile()) {
-            await fs.unlink(filePath);
-        } else {
-            throw new Error(`${filePath} is not a file`);
-        }
-    } catch (e) {
-        logError(e, 'error while deleting file');
+export async function addWatchMapping(
+    collectionName: string,
+    folderPath: string
+) {
+    let watchMappings = getWatchMappings();
+    if (!watchMappings) {
+        watchMappings = [];
     }
+
+    const watchMapping = watchMappings?.find(
+        (mapping) =>
+            mapping.collectionName === collectionName ||
+            mapping.folderPath === folderPath
+    );
+
+    if (watchMapping) {
+        return;
+    }
+
+    watchMappings.push({
+        collectionName,
+        folderPath,
+        files: [],
+    });
+
+    setWatchMappings(watchMappings);
 }
 
-export async function deleteFilesFromDisk(filePaths: string[]) {
-    for (const filePath of filePaths) {
-        await deleteFile(filePath);
+export async function removeWatchMapping(collectionName: string) {
+    const watchMappings = getWatchMappings();
+    const watchMapping = watchMappings.find(
+        (mapping) => mapping.collectionName === collectionName
+    );
+
+    if (!watchMapping) {
+        return;
     }
+
+    watchMappings.splice(watchMappings.indexOf(watchMapping), 1);
+
+    setWatchMappings(watchMappings);
+}
+
+export function getWatchMappings() {
+    const mappings = watchStore.get('mappings');
+    return mappings;
+}
+
+export function setWatchMappings(watchMappings: WatchStoreType['mappings']) {
+    watchStore.set('mappings', watchMappings);
 }
 
 export async function getFilePathsFromDir(dirPath: string) {
@@ -33,17 +68,12 @@ export async function getFilePathsFromDir(dirPath: string) {
     return files;
 }
 
-export function getWatchMappings() {
-    const mappings = watchStore.get('mappings');
-    return mappings;
-}
-
 export async function updateFilesInWatchMapping(
     collectionName: string,
-    files: { path: string; ID: number }[]
+    files: { path: string; id: number }[]
 ) {
     try {
-        const mappings = await getWatchMappings();
+        const mappings = getWatchMappings();
         const mapping = mappings.find(
             (m) => m.collectionName === collectionName
         );
@@ -88,28 +118,25 @@ export function initWatcher(mainWindow: BrowserWindow) {
 }
 
 export function registerWatcherFunctions(
-    add: (path: string) => Promise<void>,
-    remove: (path: string) => Promise<void>
+    obj: any,
+    add: (t: any, path: string) => Promise<void>,
+    remove: (t: any, path: string) => Promise<void>
 ) {
+    console.log({ t: obj, add, remove });
     ipcRenderer.removeAllListeners('watch-add');
     ipcRenderer.removeAllListeners('watch-change');
     ipcRenderer.removeAllListeners('watch-unlink');
-    ipcRenderer.on('watch-add', async (e, path) => {
-        await add(path);
+    ipcRenderer.on('watch-add', async (e, filePath: string) => {
+        filePath = filePath.split(path.sep).join(path.posix.sep);
+        await add(obj, filePath);
     });
-    ipcRenderer.on('watch-change', async (e, path) => {
-        await remove(path);
-        await add(path);
+    ipcRenderer.on('watch-change', async (e, filePath: string) => {
+        filePath = filePath.split(path.sep).join(path.posix.sep);
+        await remove(obj, filePath);
+        await add(obj, filePath);
     });
-    ipcRenderer.on('watch-unlink', async (e, path) => {
-        await remove(path);
+    ipcRenderer.on('watch-unlink', async (e, filePath: string) => {
+        filePath = filePath.split(path.sep).join(path.posix.sep);
+        await remove(obj, filePath);
     });
 }
-
-/*
-    - get all available mappings and files
-    - get available file paths from dir
-    - delete file(s) by file paths from disk
-    - update store with list of files
-    - init chokidar and attach events (all events first get the latest state of indexedDB)
-*/

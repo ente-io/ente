@@ -26,7 +26,7 @@ export interface WatchStoreType {
         folderPath: string;
         files: {
             path: string;
-            ID: number;
+            id: number;
         }[];
     }[];
 }

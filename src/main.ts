@@ -6,6 +6,7 @@ import setupIpcComs from './utils/ipcComms';
 import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 import initSentry from './utils/sentry';
 import { isDev } from './utils/common';
+import { initWatcher } from './utils/watch';
 
 if (isDev) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -74,6 +75,7 @@ if (!gotTheLock) {
         tray.setContextMenu(buildContextMenu(mainWindow));
 
         setupIpcComs(tray, mainWindow);
+        initWatcher(mainWindow);
         if (!isDev) {
             AppUpdater.checkForUpdate(tray, mainWindow);
         }

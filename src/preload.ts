@@ -11,12 +11,14 @@ import {
 import { logError } from './utils/logging';
 import { ElectronFile } from './types';
 import {
-    deleteFilesFromDisk,
     getFilePathsFromDir,
     getWatchMappings,
     updateFilesInWatchMapping,
     initWatcher,
     registerWatcherFunctions,
+    setWatchMappings,
+    addWatchMapping,
+    removeWatchMapping,
 } from './utils/watch';
 
 const { ipcRenderer } = electron;
@@ -180,10 +182,12 @@ windowObject['ElectronAPIs'] = {
     showUploadZipDialog,
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
-    deleteFilesFromDisk,
     getFilePathsFromDir,
     getWatchMappings,
     updateFilesInWatchMapping,
+    setWatchMappings,
     initWatcher,
+    addWatchMapping,
+    removeWatchMapping,
     registerWatcherFunctions,
 };
