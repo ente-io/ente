@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
@@ -21,6 +23,7 @@ final lightThemeData = ThemeData(
   primaryColorLight: Colors.black54,
   iconTheme: IconThemeData(color: Colors.black),
   primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
+  bottomAppBarColor: Color.fromRGBO(196, 196, 196, 0.6),
   colorScheme: ColorScheme.light(
       primary: Colors.black, secondary: Color.fromARGB(255, 163, 163, 163)),
   accentColor: Color.fromRGBO(0, 0, 0, 0.6),
@@ -35,7 +38,6 @@ final lightThemeData = ThemeData(
       onPrimary: Colors.white, primary: Colors.black),
   toggleableActiveColor: Colors.green[400],
   scaffoldBackgroundColor: Colors.white,
-  bottomAppBarColor: Color.fromRGBO(196, 196, 196, 0.5),
   backgroundColor: Colors.white,
   appBarTheme: AppBarTheme().copyWith(
       backgroundColor: Colors.white,
@@ -92,7 +94,7 @@ final darkThemeData = ThemeData(
   iconTheme: IconThemeData(color: Colors.white),
   primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
   hintColor: Colors.grey,
-  bottomAppBarColor: Color.fromRGBO(196, 196, 196, 0.5),
+  bottomAppBarColor: Color.fromRGBO(255, 255, 255, 0.7),
 
   colorScheme: ColorScheme.dark(primary: Colors.white),
   accentColor: Color.fromRGBO(45, 194, 98, 0.2),
@@ -229,50 +231,52 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     _configureBackgroundFetch();
   }
 
+  Widget debugBuild(BuildContext context) {
+    return MaterialApp(
+      title: "ente",
+      themeMode: ThemeMode.system,
+      theme: lightThemeData,
+      darkTheme: darkThemeData,
+      home: EnteApp._homeWidget,
+      debugShowCheckedModeBanner: false,
+      navigatorKey: Network.instance.getAlice().getNavigatorKey(),
+      builder: EasyLoading.init(),
+      supportedLocales: L10n.all,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (kDebugMode) {
-      return AdaptiveTheme(
+    if (kDebugMode && Platform.isIOS) {
+      return debugBuild(context);
+    }
+    return AdaptiveTheme(
         light: lightThemeData,
         dark: darkThemeData,
-        initial: AdaptiveThemeMode.system,
+        initial: AdaptiveThemeMode.dark,
         builder: (lightTheme, dartTheme) => MaterialApp(
-          title: "ente",
-          themeMode: ThemeMode.system,
-          theme: lightTheme,
-          darkTheme: dartTheme,
-          home: EnteApp._homeWidget,
-          debugShowCheckedModeBanner: false,
-          navigatorKey: Network.instance.getAlice().getNavigatorKey(),
-          builder: EasyLoading.init(),
-          supportedLocales: L10n.all,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-        ),
-      );
-    } else {
-      return MaterialApp(
-        title: "ente",
-        themeMode: ThemeMode.system,
-        theme: lightThemeData,
-        darkTheme: darkThemeData,
-        home: EnteApp._homeWidget,
-        debugShowCheckedModeBanner: false,
-        navigatorKey: Network.instance.getAlice().getNavigatorKey(),
-        builder: EasyLoading.init(),
-        supportedLocales: L10n.all,
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-      );
-    }
+              title: "ente",
+              themeMode: ThemeMode.system,
+              theme: lightTheme,
+              darkTheme: dartTheme,
+              home: EnteApp._homeWidget,
+              debugShowCheckedModeBanner: false,
+              navigatorKey: Network.instance.getAlice().getNavigatorKey(),
+              builder: EasyLoading.init(),
+              supportedLocales: L10n.all,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+              ],
+            ));
   }
 
   @override
