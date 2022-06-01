@@ -49,7 +49,7 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
         minScore: 0.2,
     },
     sceneDetection: {
-        method: 'Image-Scene',
+        method: 'ImageScene',
         minScore: 0.1,
     },
     textDetection: {

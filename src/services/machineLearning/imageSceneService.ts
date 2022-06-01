@@ -14,7 +14,7 @@ class ImageScene implements SceneDetectionService {
 
     public constructor() {
         this.method = {
-            value: 'Image-Scene',
+            value: 'ImageScene',
             version: 1,
         };
     }
@@ -27,7 +27,7 @@ class ImageScene implements SceneDetectionService {
         const model = await tfjsConverter.loadGraphModel(
             '/models/imagescene/model.json'
         );
-        console.log('loaded image-scene model', model, tf.getBackend());
+        console.log('loaded ImageScene model', model, tf.getBackend());
         this.model = model;
     }
 

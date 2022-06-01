@@ -59,7 +59,7 @@ export class MLFactory {
     public static getSceneDetectionService(
         method: SceneDetectionMethod
     ): SceneDetectionService {
-        if (method === 'Image-Scene') {
+        if (method === 'ImageScene') {
             return imageSceneService;
         }
 

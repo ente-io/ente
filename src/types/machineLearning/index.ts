@@ -95,7 +95,7 @@ export declare type FaceDetectionMethod = 'BlazeFace' | 'FaceApiSSD';
 
 export declare type ObjectDetectionMethod = 'SSDMobileNetV2';
 
-export declare type SceneDetectionMethod = 'Image-Scene';
+export declare type SceneDetectionMethod = 'ImageScene';
 
 export declare type TextDetectionMethod = 'Tesseract';
 
