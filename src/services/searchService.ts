@@ -29,122 +29,14 @@ export const getAutoCompleteSuggestions =
         const options = [
             ...getHolidaySuggestion(searchPhrase),
             ...getYearSuggestion(searchPhrase),
+            ...getDateSuggestion(searchPhrase),
+            ...getCollectionSuggestion(searchPhrase, collections),
+            ...getFileSuggestion(searchPhrase, files),
+            ...(await getLocationSuggestions(searchPhrase, files)),
         ];
 
-        const searchedDates = parseHumanDate(searchPhrase);
-
-        options.push(
-            ...searchedDates.map((searchedDate) => ({
-                type: SuggestionType.DATE,
-                value: searchedDate,
-                label: getFormattedDate(searchedDate),
-            }))
-        );
-
-        const collectionResults = searchCollection(searchPhrase, collections);
-        options.push(
-            ...collectionResults.map(
-                (searchResult) =>
-                    ({
-                        type: SuggestionType.COLLECTION,
-                        value: searchResult.id,
-                        label: searchResult.name,
-                    } as Suggestion)
-            )
-        );
-        const fileResults = searchFiles(searchPhrase, files);
-        options.push(
-            ...fileResults.map((file) => ({
-                type:
-                    file.type === FILE_TYPE.IMAGE
-                        ? SuggestionType.IMAGE
-                        : SuggestionType.VIDEO,
-                value: file.index,
-                label: file.title,
-            }))
-        );
-
-        const locationResults = await searchLocation(searchPhrase);
-
-        const locationResultsHasFiles: boolean[] = new Array(
-            locationResults.length
-        ).fill(false);
-        files.map((file) => {
-            for (const [index, location] of locationResults.entries()) {
-                if (
-                    isInsideBox(
-                        {
-                            latitude: file.metadata.latitude,
-                            longitude: file.metadata.longitude,
-                        },
-                        location.bbox
-                    )
-                ) {
-                    locationResultsHasFiles[index] = true;
-                }
-            }
-        });
-        const filteredLocationWithFiles = locationResults.filter(
-            (_, index) => locationResultsHasFiles[index]
-        );
-        options.push(
-            ...filteredLocationWithFiles.map(
-                (searchResult) =>
-                    ({
-                        type: SuggestionType.LOCATION,
-                        value: searchResult.bbox,
-                        label: searchResult.place,
-                    } as Suggestion)
-            )
-        );
         return options;
     };
-
-function parseHumanDate(humanDate: string): DateValue[] {
-    const date = chrono.parseDate(humanDate);
-    const date1 = chrono.parseDate(`${humanDate} 1`);
-    if (date !== null) {
-        const dates = [
-            { month: date.getMonth() },
-            { date: date.getDate(), month: date.getMonth() },
-        ];
-        let reverse = false;
-        humanDate.split('').forEach((c) => {
-            if (DIGITS.has(c)) {
-                reverse = true;
-            }
-        });
-        if (reverse) {
-            return dates.reverse();
-        }
-        return dates;
-    }
-    if (date1) {
-        return [{ month: date1.getMonth() }];
-    }
-    return [];
-}
-
-async function searchLocation(
-    searchPhrase: string
-): Promise<LocationSearchResponse[]> {
-    try {
-        const resp = await HTTPService.get(
-            `${ENDPOINT}/search/location`,
-            {
-                query: searchPhrase,
-                limit: 4,
-            },
-            {
-                'X-Auth-Token': getToken(),
-            }
-        );
-        return resp.data.results ?? [];
-    } catch (e) {
-        logError(e, 'location search failed');
-    }
-    return [];
-}
 
 function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
     return [
@@ -213,4 +105,121 @@ function searchFiles(searchPhrase: string, files: EnteFile[]) {
         }))
         .filter(({ title }) => title.toLowerCase().includes(searchPhrase))
         .slice(0, 4);
+}
+
+function getDateSuggestion(searchPhrase: string) {
+    const searchedDates = parseHumanDate(searchPhrase);
+
+    return searchedDates.map((searchedDate) => ({
+        type: SuggestionType.DATE,
+        value: searchedDate,
+        label: getFormattedDate(searchedDate),
+    }));
+}
+
+function getCollectionSuggestion(
+    searchPhrase: string,
+    collections: Collection[]
+) {
+    const collectionResults = searchCollection(searchPhrase, collections);
+
+    return collectionResults.map(
+        (searchResult) =>
+            ({
+                type: SuggestionType.COLLECTION,
+                value: searchResult.id,
+                label: searchResult.name,
+            } as Suggestion)
+    );
+}
+
+function getFileSuggestion(searchPhrase: string, files: EnteFile[]) {
+    const fileResults = searchFiles(searchPhrase, files);
+    return fileResults.map((file) => ({
+        type:
+            file.type === FILE_TYPE.IMAGE
+                ? SuggestionType.IMAGE
+                : SuggestionType.VIDEO,
+        value: file.index,
+        label: file.title,
+    }));
+}
+
+async function getLocationSuggestions(searchPhrase: string, files: EnteFile[]) {
+    const locationResults = await searchLocation(searchPhrase);
+
+    const locationResultsHasFiles: boolean[] = new Array(
+        locationResults.length
+    ).fill(false);
+    files.map((file) => {
+        for (const [index, location] of locationResults.entries()) {
+            if (
+                isInsideBox(
+                    {
+                        latitude: file.metadata.latitude,
+                        longitude: file.metadata.longitude,
+                    },
+                    location.bbox
+                )
+            ) {
+                locationResultsHasFiles[index] = true;
+            }
+        }
+    });
+    const filteredLocationWithFiles = locationResults.filter(
+        (_, index) => locationResultsHasFiles[index]
+    );
+    return filteredLocationWithFiles.map(
+        (searchResult) =>
+            ({
+                type: SuggestionType.LOCATION,
+                value: searchResult.bbox,
+                label: searchResult.place,
+            } as Suggestion)
+    );
+}
+function parseHumanDate(humanDate: string): DateValue[] {
+    const date = chrono.parseDate(humanDate);
+    const date1 = chrono.parseDate(`${humanDate} 1`);
+    if (date !== null) {
+        const dates = [
+            { month: date.getMonth() },
+            { date: date.getDate(), month: date.getMonth() },
+        ];
+        let reverse = false;
+        humanDate.split('').forEach((c) => {
+            if (DIGITS.has(c)) {
+                reverse = true;
+            }
+        });
+        if (reverse) {
+            return dates.reverse();
+        }
+        return dates;
+    }
+    if (date1) {
+        return [{ month: date1.getMonth() }];
+    }
+    return [];
+}
+
+async function searchLocation(
+    searchPhrase: string
+): Promise<LocationSearchResponse[]> {
+    try {
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/search/location`,
+            {
+                query: searchPhrase,
+                limit: 4,
+            },
+            {
+                'X-Auth-Token': getToken(),
+            }
+        );
+        return resp.data.results ?? [];
+    } catch (e) {
+        logError(e, 'location search failed');
+    }
+    return [];
 }
