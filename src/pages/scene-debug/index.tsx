@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import '@tensorflow/tfjs-backend-webgl';
 import sceneDetectionService from 'services/machineLearning/imageSceneService';
 
 function SceneDebug() {
