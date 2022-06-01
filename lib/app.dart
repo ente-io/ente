@@ -21,6 +21,7 @@ final lightThemeData = ThemeData(
   primaryColorLight: Colors.black54,
   iconTheme: IconThemeData(color: Colors.black),
   primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
+  bottomAppBarColor: Color.fromRGBO(196, 196, 196, 0.6),
   colorScheme: ColorScheme.light(
       primary: Colors.black, secondary: Color.fromARGB(255, 163, 163, 163)),
   accentColor: Color.fromRGBO(0, 0, 0, 0.6),
@@ -35,7 +36,6 @@ final lightThemeData = ThemeData(
       onPrimary: Colors.white, primary: Colors.black),
   toggleableActiveColor: Colors.green[400],
   scaffoldBackgroundColor: Colors.white,
-  bottomAppBarColor: Color.fromRGBO(196, 196, 196, 0.5),
   backgroundColor: Colors.white,
   appBarTheme: AppBarTheme().copyWith(
       backgroundColor: Colors.white,
@@ -92,7 +92,7 @@ final darkThemeData = ThemeData(
   iconTheme: IconThemeData(color: Colors.white),
   primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
   hintColor: Colors.grey,
-  bottomAppBarColor: Color.fromRGBO(196, 196, 196, 0.5),
+  bottomAppBarColor: Color.fromRGBO(255, 255, 255, 0.7),
 
   colorScheme: ColorScheme.dark(primary: Colors.white),
   accentColor: Color.fromRGBO(45, 194, 98, 0.2),
