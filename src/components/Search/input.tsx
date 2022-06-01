@@ -30,16 +30,6 @@ export default function SearchInput(props: Iprops) {
         setValue(value);
     };
 
-    const [defaultOption, setDefaultOption] = useState<Suggestion[]>(null);
-
-    useEffect(() => {
-        const main = async () => {
-            const d = await getOptions('photo');
-            setDefaultOption(d);
-        };
-        main();
-    }, []);
-
     useEffect(() => search(value), [value]);
 
     const resetSearch = () => {
@@ -102,8 +92,7 @@ export default function SearchInput(props: Iprops) {
                 isClearable
                 escapeClearsValue
                 styles={SelectStyles}
-                // noOptionsMessage={() => null}
-                defaultOptions={defaultOption}
+                noOptionsMessage={() => null}
                 menuIsOpen
             />
 
