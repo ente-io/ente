@@ -4,10 +4,10 @@ import { Collection } from 'types/collection';
 
 import { IconButton } from '../Container';
 import { EnteFile } from 'types/file';
-import { Search } from 'types/gallery';
 import { SearchBarWrapper, SearchButtonWrapper } from './styledComponents';
 import SearchInput from './input';
 import { SelectionBar } from 'components/Navbar/SelectionBar';
+import { Search } from 'types/search';
 
 interface Props {
     isOpen: boolean;

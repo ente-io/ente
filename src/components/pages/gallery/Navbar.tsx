@@ -17,7 +17,6 @@ export function GalleryNavbar({
     files,
     setActiveCollection,
     updateSearch,
-    searchStats,
 }) {
     return (
         <NavbarBase>
@@ -40,7 +39,6 @@ export function GalleryNavbar({
                     files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}
                     setSearch={updateSearch}
-                    searchStats={searchStats}
                 />
             )}
             <UploadButton

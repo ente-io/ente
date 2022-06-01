@@ -100,9 +100,7 @@ import { EnteFile } from 'types/file';
 import {
     GalleryContextType,
     SelectedState,
-    Search,
     NotificationAttributes,
-    SearchStats,
 } from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import ToastNotification from 'components/ToastNotification';
@@ -111,6 +109,7 @@ import importService from 'services/importService';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
 import SearchStatsContainer from 'components/Search/SearchStatsContainer';
+import { SearchStats, Search } from 'types/search';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -167,11 +166,7 @@ export default function Gallery() {
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
-    const [search, setSearch] = useState<Search>({
-        date: null,
-        location: null,
-        fileIndex: null,
-    });
+    const [search, setSearch] = useState<Search>(null);
     const [uploadInProgress, setUploadInProgress] = useState(false);
     const {
         getRootProps,
@@ -641,7 +636,6 @@ export default function Gallery() {
                     files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}
                     updateSearch={updateSearch}
-                    searchStats={searchStats}
                 />
 
                 <Collections
