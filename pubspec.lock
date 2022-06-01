@@ -427,7 +427,7 @@ packages:
       name: flutter_email_sender
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.2"
+    version: "5.1.0"
   flutter_image_compress:
     dependency: "direct main"
     description:
