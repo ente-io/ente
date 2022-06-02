@@ -50,9 +50,16 @@ export default async function uploader(
             throw Error(CustomError.NO_METADATA);
         }
 
-        if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
+        const sameFileInSameCollection = fileAlreadyInCollection(
+            existingFilesInCollection,
+            metadata
+        );
+        if (sameFileInSameCollection) {
             logUploadInfo(`skipped upload for  ${fileNameSize}`);
-            return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
+            return {
+                fileUploadResult: FileUploadResults.ALREADY_UPLOADED,
+                uploadedFile: sameFileInSameCollection,
+            };
         }
 
         const sameFileInOtherCollection = findSameFileInOtherCollection(
@@ -82,7 +89,10 @@ export default async function uploader(
             fileAlreadyInCollection(existingFiles, metadata)
         ) {
             logUploadInfo(`deduped upload for  ${fileNameSize}`);
-            return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
+            return {
+                fileUploadResult: FileUploadResults.ALREADY_UPLOADED,
+                uploadedFile: fileAlreadyInCollection(existingFiles, metadata),
+            };
         }
         logUploadInfo(`reading asset ${fileNameSize}`);
 

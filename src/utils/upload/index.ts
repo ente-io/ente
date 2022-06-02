@@ -12,13 +12,13 @@ const DEDUPE_COLLECTION = new Set(['icloud library', 'icloudlibrary']);
 export function fileAlreadyInCollection(
     existingFilesInCollection: EnteFile[],
     newFileMetadata: Metadata
-): boolean {
+): EnteFile {
     for (const existingFile of existingFilesInCollection) {
         if (areFilesSame(existingFile.metadata, newFileMetadata)) {
-            return true;
+            return existingFile;
         }
     }
-    return false;
+    return null;
 }
 
 export function findSameFileInOtherCollection(
