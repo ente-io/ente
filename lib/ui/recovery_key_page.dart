@@ -1,6 +1,4 @@
 import 'dart:io' as io;
-import 'dart:ui';
-
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +9,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/common/gradientButton.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class RecoveryKeyPage extends StatefulWidget {
   final bool showAppBar;
@@ -21,6 +20,7 @@ class RecoveryKeyPage extends StatefulWidget {
   final String title;
   final String text;
   final String subText;
+  final bool showProgressBar;
 
   const RecoveryKeyPage(this.recoveryKey, this.doneText,
       {Key key,
@@ -29,7 +29,8 @@ class RecoveryKeyPage extends StatefulWidget {
       this.isDismissible,
       this.title,
       this.text,
-      this.subText})
+      this.subText,
+      this.showProgressBar = false})
       : super(key: key);
 
   @override
@@ -40,7 +41,6 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
   bool _hasTriedToSave = false;
   final _recoveryKeyFile = io.File(
       Configuration.instance.getTempDirectory() + "ente-recovery-key.txt");
-  final _recoveryKey = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -51,22 +51,42 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     }
 
     return Scaffold(
-      appBar: widget.showAppBar
+      appBar: widget.showProgressBar
           ? AppBar(
-              title: Text(widget.title ?? "Recovery Key"),
+              elevation: 0,
+              title: Hero(
+                tag: "recovery_key",
+                child: StepProgressIndicator(
+                  totalSteps: 4,
+                  currentStep: 3,
+                  selectedColor: Theme.of(context).buttonColor,
+                  roundedEdges: Radius.circular(10),
+                  unselectedColor: Theme.of(context).bottomAppBarColor,
+                ),
+              ),
             )
-          : null,
+          : widget.showAppBar
+              ? AppBar(
+                  title: Text(widget.title ?? "Recovery key"),
+                )
+              : null,
       body: Padding(
-        padding: EdgeInsets.fromLTRB(20, widget.showAppBar ? 40 : 120, 20, 20),
+        padding: EdgeInsets.fromLTRB(
+            20,
+            widget.showAppBar
+                ? 40
+                : widget.showProgressBar
+                    ? 32
+                    : 120,
+            20,
+            20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          // mainAxisAlignment: MainAxisAlignment.center,
-
           mainAxisSize: MainAxisSize.max,
           children: [
             widget.showAppBar
-                ? Container()
-                : Text(widget.title ?? "Recovery Key",
+                ? const SizedBox.shrink()
+                : Text(widget.title ?? "Recovery key",
                     style: Theme.of(context).textTheme.headline4),
             Padding(padding: EdgeInsets.all(widget.showAppBar ? 0 : 12)),
             Text(

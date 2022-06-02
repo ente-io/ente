@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
@@ -478,6 +476,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
             showAppBar: false,
             isDismissible: false,
             onDone: onDone,
+            showProgressBar: true,
           ));
     } catch (e) {
       _logger.severe(e);
