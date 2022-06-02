@@ -35,7 +35,7 @@ export const getAutoCompleteSuggestions =
             ...getDateSuggestion(searchPhrase),
             ...getCollectionSuggestion(searchPhrase, collections),
             ...getFileSuggestion(searchPhrase, files),
-            ...(await getLocationSuggestions(searchPhrase /* files*/)),
+            ...(await getLocationSuggestions(searchPhrase)),
         ];
 
         const previewImageAppendedOptions: SearchOption[] = suggestions
@@ -166,32 +166,9 @@ function getFileSuggestion(
     }));
 }
 
-async function getLocationSuggestions(
-    searchPhrase: string /* files: EnteFile[]*/
-) {
+async function getLocationSuggestions(searchPhrase: string) {
     const locationResults = await searchLocation(searchPhrase);
 
-    // const locationResultsHasFiles: boolean[] = new Array(
-    //     locationResults.length
-    // ).fill(false);
-    // files.map((file) => {
-    //     for (const [index, location] of locationResults.entries()) {
-    //         if (
-    //             isInsideBox(
-    //                 {
-    //                     latitude: file.metadata.latitude,
-    //                     longitude: file.metadata.longitude,
-    //                 },
-    //                 location.bbox
-    //             )
-    //         ) {
-    //             locationResultsHasFiles[index] = true;
-    //         }
-    //     }
-    // });
-    // const filteredLocationWithFiles = locationResults.filter(
-    //     (_, index) => locationResultsHasFiles[index]
-    // );
     return locationResults.map(
         (searchResult) =>
             ({
