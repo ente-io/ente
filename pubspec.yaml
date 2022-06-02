@@ -129,10 +129,10 @@ flutter_icons:
   image_path_ios: "assets/ios_icon.png"
 
 flutter_native_splash:
-  color: "#000000"
-  image: assets/ios_icon.png
-  android_gravity: center
-  ios_content_mode: center
+  color: "#ffffff"
+  color_dark: "#000000"
+  image: assets/ente-light.png
+  image_dark: assets/ente-dark.png
   android_fullscreen: true
 
 # For information on the generic Dart part of this file, see the
