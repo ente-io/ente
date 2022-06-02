@@ -420,7 +420,7 @@ const englishConstants = {
         }
     },
     PHOTO_COUNT: (count: number) =>
-        `${count === 1 ? `1 Photo` : `${count} Photo`}`,
+        `${count === 1 ? `1 Photo` : `${count} Photos`}`,
     TERMS_AND_CONDITIONS: () => (
         <Typography variant="body2">
             I agree to the{' '}
