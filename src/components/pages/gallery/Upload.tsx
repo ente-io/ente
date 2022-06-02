@@ -122,6 +122,7 @@ export default function Upload(props: Props) {
                 isPendingDesktopUpload.current = true;
                 pendingDesktopUploadCollectionName.current = collectionName;
             };
+            watchService.syncWithRemote = props.syncWithRemote;
             watchService.init();
         }
     }, []);

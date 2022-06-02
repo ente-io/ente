@@ -27,6 +27,7 @@ class WatchService {
     pathToIDMap = new Map<string, number>();
     setElectronFiles: (files: ElectronFile[]) => void;
     setCollectionName: (collectionName: string) => void;
+    syncWithRemote: () => void;
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
@@ -89,6 +90,17 @@ class WatchService {
 
             this.ElectronAPIs.setWatchMappings(mappings);
             this.setWatchFunctions();
+            this.syncWithRemote();
+        }
+    }
+
+    setWatchFunctions() {
+        if (this.allElectronAPIsExist) {
+            this.ElectronAPIs.registerWatcherFunctions(
+                this,
+                diskFileAddedCallback,
+                diskFileRemovedCallback
+            );
         }
     }
 
@@ -208,7 +220,8 @@ class WatchService {
 
                 console.log('new mappings', mappings);
 
-                await this.ElectronAPIs.setWatchMappings(mappings);
+                this.ElectronAPIs.setWatchMappings(mappings);
+                this.syncWithRemote();
 
                 console.log(
                     'now mappings',
@@ -219,16 +232,6 @@ class WatchService {
             this.uploadQueue.shift();
             this.isUploadRunning = false;
             this.runNextUpload();
-        }
-    }
-
-    setWatchFunctions() {
-        if (this.allElectronAPIsExist) {
-            this.ElectronAPIs.registerWatcherFunctions(
-                this,
-                diskFileAddedCallback,
-                diskFileRemovedCallback
-            );
         }
     }
 
@@ -273,20 +276,23 @@ class WatchService {
     }
 }
 
-async function diskFileAddedCallback(w: WatchService, filePath: string) {
-    console.log('diskFileAddedCallback', w, filePath);
-    const collectionName = await w.getCollectionName(filePath);
+async function diskFileAddedCallback(instance: WatchService, filePath: string) {
+    console.log('diskFileAddedCallback', instance, filePath);
+    const collectionName = await instance.getCollectionName(filePath);
 
     const event: UploadQueueType = {
         collectionName,
         paths: [filePath],
     };
-    w.uploadQueue.push(event);
-    w.runNextUpload();
+    instance.uploadQueue.push(event);
+    instance.runNextUpload();
 }
 
-async function diskFileRemovedCallback(w: WatchService, filePath: string) {
-    const collectionName = await w.getCollectionName(filePath);
+async function diskFileRemovedCallback(
+    instance: WatchService,
+    filePath: string
+) {
+    const collectionName = await instance.getCollectionName(filePath);
 
     console.log('collection', collectionName);
 
@@ -294,7 +300,7 @@ async function diskFileRemovedCallback(w: WatchService, filePath: string) {
         return;
     }
 
-    const mappings: Mapping[] = await w.ElectronAPIs.getWatchMappings();
+    let mappings: Mapping[] = await instance.ElectronAPIs.getWatchMappings();
 
     const mapping = mappings.find(
         (mapping) => mapping.collectionName === collectionName
@@ -308,12 +314,14 @@ async function diskFileRemovedCallback(w: WatchService, filePath: string) {
         return;
     }
 
-    await w.trashByIDs([file], collectionName);
+    await instance.trashByIDs([file], collectionName);
 
+    mappings = await instance.ElectronAPIs.getWatchMappings();
     mapping.files = mapping.files.filter((file) => file.path !== filePath);
-    await w.ElectronAPIs.setWatchMappings(mappings);
+    instance.ElectronAPIs.setWatchMappings(mappings);
+    instance.syncWithRemote();
 
-    console.log('after trash', w.ElectronAPIs.getWatchMappings());
+    console.log('after trash', instance.ElectronAPIs.getWatchMappings());
 }
 
 export default new WatchService();
