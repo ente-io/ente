@@ -38,7 +38,7 @@ export default function collectionInfo(props: Iprops) {
                         font-size: 14px;
                         line-height: 20px;
                     `}>
-                    {fileCount} {constants.PHOTOS}
+                    {constants.PHOTO_COUNT(fileCount)}
                 </Typography>
             </div>
             {collectionAttributes.id !== ARCHIVE_SECTION &&

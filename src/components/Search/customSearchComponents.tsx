@@ -12,6 +12,7 @@ import { FreeFlowText, SpaceBetweenFlex } from 'components/Container';
 import CollectionCard from 'components/Collections/CollectionCard';
 import { ResultPreviewTile } from 'components/Collections/styledComponents';
 import { SelectComponents } from 'react-select/src/components';
+import constants from 'utils/strings/constants';
 
 const { Option, Control } = components;
 
@@ -61,7 +62,7 @@ const LabelWithIcon = ({ data }: { data: SearchOption }) => (
                     line-height: 16px;
                 `}
                 mb={1}>
-                Location
+                {constants.SEARCH_TYPE(data.type)}
             </Typography>
             <SpaceBetweenFlex>
                 <Box mr={1}>
@@ -69,7 +70,7 @@ const LabelWithIcon = ({ data }: { data: SearchOption }) => (
                         <Typography>{data.label}</Typography>
                     </FreeFlowText>
                     <Typography color="text.secondary">
-                        {data.fileCount} Photos
+                        {constants.PHOTO_COUNT(data.fileCount)}
                     </Typography>
                 </Box>
 
