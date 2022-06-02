@@ -23,7 +23,8 @@ export default function AddCollectionButton({
     return (
         <CollectionCard
             collectionTile={CollectionSelectorTile}
-            onClick={() => showNextModal()}>
+            onClick={() => showNextModal()}
+            latestFile={null}>
             <Typography
                 css={`
                     font-size: 14px;

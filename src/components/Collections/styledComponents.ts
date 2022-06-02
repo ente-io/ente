@@ -86,3 +86,9 @@ export const CollectionSelectorTile = styled(AllCollectionTile)`
     width: 192px;
     margin: 10px;
 `;
+
+export const ResultPreviewTile = styled(AllCollectionTile)`
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
+`;

@@ -5,14 +5,9 @@ import { Button } from '@mui/material';
 import constants from 'utils/strings/constants';
 
 const Wrapper = styled.div<{ isDisabled: boolean }>`
-    position: fixed;
     display: flex;
     align-items: center;
     justify-content: center;
-    top: 0;
-    z-index: 100;
-    min-height: 64px;
-    right: 32px;
     transition: opacity 1s ease;
     cursor: pointer;
     opacity: ${(props) => (props.isDisabled ? 0 : 1)};

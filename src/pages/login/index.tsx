@@ -22,7 +22,7 @@ export default function Home() {
             router.push(PAGES.VERIFY);
         }
         setLoading(false);
-        appContext.showNavBar(false);
+        appContext.showNavBar(true);
     }, []);
 
     const register = () => {

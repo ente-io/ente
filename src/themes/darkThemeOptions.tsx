@@ -156,6 +156,10 @@ const darkThemeOptions = createTheme({
         borderRadius: 8,
     },
     typography: {
+        body1: {
+            fontSize: '16px',
+            lineHeight: '24px',
+        },
         body2: {
             fontSize: '14px',
             lineHeight: '20px',

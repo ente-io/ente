@@ -50,8 +50,7 @@ import {
     mergeMetadata,
     sortFiles,
 } from 'utils/file';
-import SearchBar from 'components/Search';
-import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions/GalleryOptions';
+import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
 import CollectionSelector, {
     CollectionSelectorAttributes,
 } from 'components/pages/gallery/CollectionSelector';
@@ -59,7 +58,6 @@ import CollectionNamer, {
     CollectionNamerAttributes,
 } from 'components/Collections/CollectionNamer';
 import AlertBanner from 'components/pages/gallery/AlertBanner';
-import UploadButton from 'components/pages/gallery/UploadButton';
 import PlanSelector from 'components/pages/gallery/PlanSelector';
 import Upload from 'components/pages/gallery/Upload';
 import {
@@ -102,7 +100,6 @@ import { EnteFile } from 'types/file';
 import {
     GalleryContextType,
     SelectedState,
-    Search,
     NotificationAttributes,
 } from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
@@ -110,6 +107,9 @@ import ToastNotification from 'components/ToastNotification';
 import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
 import Collections from 'components/Collections';
+import { GalleryNavbar } from 'components/pages/gallery/Navbar';
+import SearchStatsContainer from 'components/Search/SearchStatsContainer';
+import { SearchStats, Search } from 'types/search';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -134,6 +134,8 @@ const defaultGalleryContext: GalleryContextType = {
     syncWithRemote: () => null,
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
+    sidebarView: false,
+    closeSidebar: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -164,11 +166,7 @@ export default function Gallery() {
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
-    const [search, setSearch] = useState<Search>({
-        date: null,
-        location: null,
-        fileIndex: null,
-    });
+    const [search, setSearch] = useState<Search>(null);
     const [uploadInProgress, setUploadInProgress] = useState(false);
     const {
         getRootProps,
@@ -183,7 +181,7 @@ export default function Gallery() {
     });
 
     const [isInSearchMode, setIsInSearchMode] = useState(false);
-    const [searchStats, setSearchStats] = useState(null);
+    const [searchStats, setSearchStats] = useState<SearchStats>(null);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
     const [deleted, setDeleted] = useState<number[]>([]);
@@ -210,7 +208,13 @@ export default function Gallery() {
     const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
 
+    const [sidebarView, setSidebarView] = useState(false);
+
+    const closeSidebar = () => setSidebarView(false);
+    const openSidebar = () => setSidebarView(true);
+
     useEffect(() => {
+        appContext.showNavBar(false);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
             appContext.setRedirectURL(router.asPath);
@@ -239,7 +243,6 @@ export default function Gallery() {
             setIsFirstFetch(false);
         };
         main();
-        appContext.showNavBar(true);
     }, []);
 
     useEffect(
@@ -579,6 +582,8 @@ export default function Gallery() {
                 syncWithRemote,
                 setNotificationAttributes,
                 setBlockingLoad,
+                closeSidebar,
+                sidebarView,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
@@ -603,24 +608,6 @@ export default function Gallery() {
                     attributes={notificationAttributes}
                     clearAttributes={clearNotificationAttributes}
                 />
-                <SearchBar
-                    isOpen={isInSearchMode}
-                    setOpen={setIsInSearchMode}
-                    isFirstFetch={isFirstFetch}
-                    collections={collections}
-                    files={getNonTrashedUniqueUserFiles(files)}
-                    setActiveCollection={setActiveCollection}
-                    setSearch={updateSearch}
-                    searchStats={searchStats}
-                />
-                <Collections
-                    collections={collections}
-                    isInSearchMode={isInSearchMode}
-                    activeCollectionID={activeCollection}
-                    setActiveCollectionID={setActiveCollection}
-                    collectionSummaries={collectionSummaries}
-                    setCollectionNamerAttributes={setCollectionNamerAttributes}
-                />
                 <CollectionNamer
                     show={collectionNamerView}
                     onHide={setCollectionNamerView.bind(null, false)}
@@ -639,6 +626,32 @@ export default function Gallery() {
                     show={() => setFixCreationTimeView(true)}
                     attributes={fixCreationTimeAttributes}
                 />
+                <GalleryNavbar
+                    openSidebar={openSidebar}
+                    isFirstFetch={isFirstFetch}
+                    openUploader={openUploader}
+                    isInSearchMode={isInSearchMode}
+                    setIsInSearchMode={setIsInSearchMode}
+                    collections={collections}
+                    files={getNonTrashedUniqueUserFiles(files)}
+                    setActiveCollection={setActiveCollection}
+                    updateSearch={updateSearch}
+                />
+
+                <Collections
+                    collections={collections}
+                    isInSearchMode={isInSearchMode}
+                    activeCollectionID={activeCollection}
+                    setActiveCollectionID={setActiveCollection}
+                    collectionSummaries={collectionSummaries}
+                    setCollectionNamerAttributes={setCollectionNamerAttributes}
+                />
+                {searchStats && (
+                    <SearchStatsContainer>
+                        {constants.SEARCH_STATS(searchStats)}
+                    </SearchStatsContainer>
+                )}
+
                 <Upload
                     syncWithRemote={syncWithRemote}
                     setBannerMessage={setBannerMessage}
@@ -666,10 +679,7 @@ export default function Gallery() {
                     setUploadTypeSelectorView={setUploadTypeSelectorView}
                 />
                 <Sidebar collectionSummaries={collectionSummaries} />
-                <UploadButton
-                    isFirstFetch={isFirstFetch}
-                    openUploader={openUploader}
-                />
+
                 <PhotoFrame
                     files={files}
                     setFiles={setFiles}

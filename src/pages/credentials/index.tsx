@@ -47,7 +47,7 @@ export default function Credentials() {
         } else {
             setKeyAttributes(keyAttributes);
         }
-        appContext.showNavBar(false);
+        appContext.showNavBar(true);
     }, []);
 
     const verifyPassphrase: SingleInputFormProps['callback'] = async (

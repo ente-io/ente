@@ -51,7 +51,7 @@ export default function Verify() {
             }
         };
         main();
-        appContext.showNavBar(false);
+        appContext.showNavBar(true);
     }, []);
 
     const onSubmit: SingleInputFormProps['callback'] = async (

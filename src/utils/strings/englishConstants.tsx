@@ -3,6 +3,7 @@ import Link from '@mui/material/Link';
 import { DotSeparator } from 'components/Sidebar/styledComponents';
 import React from 'react';
 import styled from 'styled-components';
+import { SuggestionType } from 'types/search';
 
 /**
  * Global English constants.
@@ -404,9 +405,22 @@ const englishConstants = {
     DOWNLOAD_COLLECTION_FAILED: 'album downloading failed, please try again',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
 
-    SEARCH_HINT: () => (
-        <span>try searching for New York, April 14, Christmas...</span>
-    ),
+    SEARCH_HINT: () => <span>Search for location, dates, themes</span>,
+    SEARCH_TYPE: (type: SuggestionType) => {
+        switch (type) {
+            case SuggestionType.COLLECTION:
+                return 'Album';
+            case SuggestionType.LOCATION:
+                return 'Location';
+            case SuggestionType.DATE:
+                return 'Date';
+            case SuggestionType.IMAGE:
+            case SuggestionType.VIDEO:
+                return 'File';
+        }
+    },
+    PHOTO_COUNT: (count: number) =>
+        `${count === 1 ? `1 Photo` : `${count} Photos`}`,
     TERMS_AND_CONDITIONS: () => (
         <Typography variant="body2">
             I agree to the{' '}
@@ -436,11 +450,11 @@ const englishConstants = {
         </p>
     ),
     SEARCH_STATS: ({ resultCount, timeTaken }) => (
-        <span>
+        <div>
             found <span style={{ color: '#51cd7c' }}>{resultCount}</span>{' '}
             memories ( <span style={{ color: '#51cd7c' }}> {timeTaken}</span>{' '}
             seconds )
-        </span>
+        </div>
     ),
     NOT_FILE_OWNER: 'you cannot delete files in a shared album',
     ADD_TO_COLLECTION: 'add to album',
@@ -734,7 +748,6 @@ const englishConstants = {
     NEW: 'New',
     VIEW_ALL_ALBUMS: 'View all Albums',
     ALL_ALBUMS: 'All Albums',
-    PHOTOS: 'Photos',
     ENDS: 'Ends',
     ENTER_TWO_FACTOR_OTP:
         ' enter the 6-digit code from your authenticator app.',

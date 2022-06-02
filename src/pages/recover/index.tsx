@@ -49,7 +49,7 @@ export default function Recover() {
         } else {
             setKeyAttributes(keyAttributes);
         }
-        appContext.showNavBar(false);
+        appContext.showNavBar(true);
     }, []);
 
     const recover = async (recoveryKey: string, setFieldError) => {

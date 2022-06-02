@@ -37,7 +37,7 @@ export default function AllCollectionCard({
                         font-weight: 400;
                         line-height: 20px;
                     `}>
-                    {collectionSummary.fileCount} {constants.PHOTOS}
+                    {constants.PHOTO_COUNT(collectionSummary.fileCount)}
                 </Typography>
             </div>
         </CollectionCard>

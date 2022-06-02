@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { SetCollectionSelectorAttributes } from '../CollectionSelector';
+import { SetCollectionSelectorAttributes } from './CollectionSelector';
 import DeleteIcon from 'components/icons/DeleteIcon';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from 'components/icons/AddIcon';
-import { IconButton } from 'components/Container';
+import { FluidContainer, IconButton } from 'components/Container';
 import constants from 'utils/strings/constants';
 import Archive from 'components/icons/Archive';
 import MoveIcon from 'components/icons/MoveIcon';
@@ -23,7 +23,7 @@ import { FIX_CREATION_TIME_VISIBLE_TO_USER_IDS } from 'constants/user';
 import DownloadIcon from 'components/icons/DownloadIcon';
 import { User } from 'types/user';
 import { IconWithMessage } from 'components/IconWithMessage';
-import { SelectionBar, SelectionContainer } from '.';
+import { SelectionBar } from '../../Navbar/SelectionBar';
 import { AppContext } from 'pages/_app';
 
 interface Props {
@@ -136,14 +136,14 @@ const SelectedFileOptions = ({
 
     return (
         <SelectionBar>
-            <SelectionContainer>
+            <FluidContainer>
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
                 </IconButton>
                 <div>
                     {count} {constants.SELECTED}
                 </div>
-            </SelectionContainer>
+            </FluidContainer>
             {activeCollection === TRASH_SECTION ? (
                 <>
                     <IconWithMessage message={constants.RESTORE}>

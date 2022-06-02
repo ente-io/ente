@@ -1,5 +1,5 @@
-import { IconButton } from 'components/Container';
-import { SelectionBar, SelectionContainer } from '.';
+import { FluidContainer, IconButton } from 'components/Container';
+import { SelectionBar } from '../../Navbar/SelectionBar';
 import constants from 'utils/strings/constants';
 import DeleteIcon from 'components/icons/DeleteIcon';
 import React, { useContext } from 'react';
@@ -46,14 +46,14 @@ export default function DeduplicateOptions({
 
     return (
         <SelectionBar>
-            <SelectionContainer>
+            <FluidContainer>
                 <IconButton onClick={close}>
                     <LeftArrow />
                 </IconButton>
                 <div>
                     {count} {constants.SELECTED}
                 </div>
-            </SelectionContainer>
+            </FluidContainer>
 
             <input
                 type="checkbox"
