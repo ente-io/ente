@@ -38,8 +38,6 @@ export const getAutoCompleteSuggestions =
             ...(await getLocationSuggestions(searchPhrase /* files*/)),
         ];
 
-        console.log(suggestions);
-
         const previewImageAppendedOptions: SearchOption[] = suggestions
             .map((suggestion) => ({
                 suggestion,
@@ -47,7 +45,7 @@ export const getAutoCompleteSuggestions =
             }))
             .map(({ suggestion, searchQuery }) => {
                 const resultFiles = files.filter((file) =>
-                    isSearchedFiles(file, searchQuery)
+                    isSearchedFile(file, searchQuery)
                 );
                 return {
                     ...suggestion,
@@ -118,12 +116,10 @@ function searchCollection(
 
 function searchFiles(searchPhrase: string, files: EnteFile[]) {
     return files
-        .map((file, idx) => ({
+        .map((file) => ({
             title: file.metadata.title,
-            index: idx,
-            type: file.metadata.fileType,
-            ownerID: file.ownerID,
             id: file.id,
+            type: file.metadata.fileType,
         }))
         .filter(({ title }) => title.toLowerCase().includes(searchPhrase))
         .slice(0, 4);
@@ -155,15 +151,17 @@ function getCollectionSuggestion(
     );
 }
 
-function getFileSuggestion(searchPhrase: string, files: EnteFile[]) {
+function getFileSuggestion(
+    searchPhrase: string,
+    files: EnteFile[]
+): Suggestion[] {
     const fileResults = searchFiles(searchPhrase, files);
-    console.log(fileResults);
     return fileResults.map((file) => ({
         type:
             file.type === FILE_TYPE.IMAGE
                 ? SuggestionType.IMAGE
                 : SuggestionType.VIDEO,
-        value: file.index,
+        value: file.id,
         label: file.title,
     }));
 }
@@ -249,7 +247,7 @@ async function searchLocation(
     return [];
 }
 
-export function isSearchedFiles(file: EnteFile, search: Search) {
+export function isSearchedFile(file: EnteFile, search: Search) {
     if (search?.date) {
         return isSameDayAnyYear(search.date)(
             new Date(file.metadata.creationTime / 1000)

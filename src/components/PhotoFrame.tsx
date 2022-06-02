@@ -142,11 +142,11 @@ const PhotoFrame = ({
                 timeTaken: (Date.now() - startTime) / 1000,
             });
         }
-        if (search?.file || search?.file === 0) {
-            const filteredDataIdx = filteredData.findIndex(
-                (data) => data.id === search.file
-            );
-            if (filteredDataIdx || filteredDataIdx === 0) {
+        if (!isNaN(search?.file)) {
+            const filteredDataIdx = filteredData.findIndex((file) => {
+                return file.id === search.file;
+            });
+            if (!isNaN(filteredDataIdx)) {
                 onThumbnailClick(filteredDataIdx)();
             }
         }
