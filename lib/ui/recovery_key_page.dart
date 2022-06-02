@@ -51,11 +51,6 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     }
 
     return Scaffold(
-      // appBar: widget.showAppBar
-      //     ? AppBar(
-      //         title: Text(widget.title ?? "Recovery key"),
-      //       )
-      //     : null,
       appBar: widget.showProgressBar
           ? AppBar(
               elevation: 0,
