@@ -82,8 +82,6 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   }
 
   Widget _getBody() {
-    //return SingleChildScrollView(
-    //child:
     return ListView(
       children: [
         Column(
@@ -94,13 +92,6 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               child: Text('Verify email',
                   style: Theme.of(context).textTheme.headline4),
             ),
-            // Text(
-            //   "We've sent a mail to " + widget.email,
-            //   style: TextStyle(
-            //     color: Theme.of(context).buttonColor,
-            //     fontSize: 18,
-            //   ),
-            // ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Row(
@@ -144,14 +135,6 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 ],
               ),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.all(32),
-            //   child: Text(
-            //     "please check your inbox (and spam) to complete verification.",
-            //     textAlign: TextAlign.center,
-            //     style: TextStyle(fontSize: 12),
-            //   ),
-            // ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 15),
               child: TextFormField(
@@ -183,16 +166,14 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      //Navigator.of(context).pop();
                       UserService.instance.getOtt(context, widget.email,
                           isCreateAccountScreen: widget.isCreateAccountScreen);
                     },
-                    child: Text("Resend email",
-                        style: Theme.of(context).textTheme.subtitle1.copyWith(
-                            fontSize: 14,
-                            decoration: TextDecoration
-                                .underline) //hardcoded //is this okay? //functionality not added
-                        ),
+                    child: Text(
+                      "Resend email",
+                      style: Theme.of(context).textTheme.subtitle1.copyWith(
+                          fontSize: 14, decoration: TextDecoration.underline),
+                    ),
                   )
                 ],
               ),
