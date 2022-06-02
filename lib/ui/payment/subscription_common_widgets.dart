@@ -25,9 +25,25 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
     if (widget.isOnboarding) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        child: Text(
-          "Ente preserves your memories, so they're always available to you, even if you lose your device",
-          style: Theme.of(context).textTheme.caption,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  "Select your plan",
+                  style: Theme.of(context).textTheme.headline4,
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Text(
+              "Ente preserves your memories, so they're always available to you, even if you lose your device ",
+              style: Theme.of(context).textTheme.caption,
+            ),
+          ],
         ),
       );
     } else {

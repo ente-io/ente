@@ -19,6 +19,7 @@ import 'package:photos/ui/progress_dialog.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
+import 'package:step_progress_indicator/step_progress_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StripeSubscriptionPage extends StatefulWidget {
@@ -111,9 +112,26 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final appBar = AppBar(
-      title: Text("Subscription"),
-    );
+    // final appBar = AppBar(
+    //   title: Text("Subscription"),
+    // );
+    final appBar = widget.isOnboarding
+        ? AppBar(
+            elevation: 0,
+            title: Hero(
+                tag: "subscription",
+                child: StepProgressIndicator(
+                  totalSteps: 4,
+                  currentStep: 4,
+                  selectedColor: Theme.of(context).buttonColor,
+                  roundedEdges: Radius.circular(10),
+                  unselectedColor: Theme.of(context).bottomAppBarColor,
+                )),
+          )
+        : AppBar(
+            elevation: 0,
+            title: Text("Subscription"),
+          );
     return Scaffold(
       appBar: appBar,
       body: _getBody(),
