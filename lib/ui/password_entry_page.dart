@@ -478,6 +478,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
             showAppBar: false,
             isDismissible: false,
             onDone: onDone,
+            showProgressBar: true,
           ));
     } catch (e) {
       _logger.severe(e);
