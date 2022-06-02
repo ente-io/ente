@@ -5,7 +5,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { getAutoCompleteSuggestions } from 'services/searchService';
 import { Bbox, DateValue, Suggestion, SuggestionType } from 'types/search';
 import constants from 'utils/strings/constants';
-import { OptionWithIcon, ControlWithIcon } from './customSearchComponents';
+import { ControlWithIcon } from './controlWithIcon';
 import { SearchInputWrapper } from './styledComponents';
 import { SelectStyles } from './styles';
 import AsyncSelect from 'react-select/async';
@@ -13,6 +13,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { SetSearch } from 'types/gallery';
 import { EnteFile } from 'types/file';
 import { Collection } from 'types/collection';
+import { OptionWithInfo } from './optionWithInfo';
 
 interface Iprops {
     isOpen: boolean;
@@ -83,7 +84,7 @@ export default function SearchInput(props: Iprops) {
             <AsyncSelect
                 value={value}
                 components={{
-                    Option: OptionWithIcon,
+                    Option: OptionWithInfo,
                     Control: ControlWithIcon,
                 }}
                 placeholder={constants.SEARCH_HINT()}
