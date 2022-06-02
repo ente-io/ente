@@ -43,6 +43,10 @@ extension CustomColorScheme on ColorScheme {
   Color get cancelSelectedButtonColor => brightness == Brightness.light
       ? Color.fromRGBO(0, 0, 0, 0.35)
       : Color.fromRGBO(16, 16, 16, 0.5);
+
+  Color get bgColorForQuestions => brightness == Brightness.light
+      ? Colors.white
+      : Color.fromRGBO(10, 15, 15, 1.0);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(

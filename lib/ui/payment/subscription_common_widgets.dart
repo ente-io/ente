@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/ui/billing_questions_widget.dart';
 import 'package:photos/utils/data_util.dart';
@@ -111,7 +112,7 @@ class SubFaqWidget extends StatelessWidget {
         behavior: HitTestBehavior.translucent,
         onTap: () {
           showModalBottomSheet<void>(
-            backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
+            backgroundColor: Theme.of(context).colorScheme.bgColorForQuestions,
             barrierColor: Colors.black87,
             context: context,
             builder: (context) {
@@ -126,7 +127,7 @@ class SubFaqWidget extends StatelessWidget {
               text: "Questions?",
               style: TextStyle(
                 color: Colors.blue,
-                fontFamily: 'Ubuntu',
+                fontFamily: 'Inter',
               ),
             ),
           ),

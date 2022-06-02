@@ -112,9 +112,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
-    // final appBar = AppBar(
-    //   title: Text("Subscription"),
-    // );
     final appBar = widget.isOnboarding
         ? AppBar(
             elevation: 0,
