@@ -6,6 +6,7 @@ enum ActionType {
   confirm,
   critical,
 }
+
 // if dialog is dismissed by tapping outside, this will return null
 Future<DialogUserChoice> showChoiceDialog<T>(
   BuildContext context,
@@ -21,7 +22,9 @@ Future<DialogUserChoice> showChoiceDialog<T>(
     title: Text(
       title,
       style: TextStyle(
-        color: actionType == ActionType.critical ? Colors.red : Colors.white,
+        color: actionType == ActionType.critical
+            ? Colors.red
+            : Theme.of(context).colorScheme.primary,
       ),
     ),
     content: Text(
