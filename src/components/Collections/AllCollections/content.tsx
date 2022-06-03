@@ -25,7 +25,7 @@ export default function AllCollectionContent({
                         collectionTile={collectionTile}
                         onCollectionClick={onCollectionClick}
                         collectionSummary={collectionSummary}
-                        key={collectionSummary.collectionAttributes.id}
+                        key={collectionSummary.attributes.id}
                     />
                 ))}
             </FlexWrapper>

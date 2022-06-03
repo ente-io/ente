@@ -73,10 +73,7 @@ export interface collectionAttributes {
     pathDecryptionNonce?: string;
 }
 
-export interface CollectionAndItsLatestFile {
-    collection: Collection;
-    file: EnteFile;
-}
+export type CollectionLatestFile = Map<number, EnteFile>;
 
 export interface RemoveFromCollectionRequest {
     collectionID: number;
@@ -92,16 +89,23 @@ export interface CollectionMagicMetadata
     data: CollectionMagicMetadataProps;
 }
 export interface CollectionSummary {
-    collectionAttributes: {
-        id: number;
-        name: string;
-        type: CollectionType;
-        ownerID: number;
-        updationTime: number;
-    };
-    latestFile: EnteFile;
+    name: string;
+    type: CollectionType;
+    latestFile?: EnteFile;
     fileCount: number;
+    attributes?: {
+        id?: number;
+        ownerID?: number;
+        updationTime?: number;
+    };
 }
 
 export type CollectionSummaries = Map<number, CollectionSummary>;
 export type CollectionFilesCount = Map<number, number>;
+
+export interface CollectionInfo {
+    id: number;
+    name: string;
+    fileCount: number;
+    type: CollectionType;
+}
