@@ -33,10 +33,11 @@ export type Search = {
     collection?: number;
     file?: number;
 };
-export interface SearchStats {
-    resultCount: number;
-    timeTaken: number;
-}
+
+export type SearchResultSummary = {
+    optionName: string;
+    fileCount: number;
+};
 
 export interface SearchOption extends Suggestion {
     fileCount: number;

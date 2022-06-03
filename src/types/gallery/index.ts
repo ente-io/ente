@@ -1,6 +1,6 @@
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { Search, SearchStats } from 'types/search';
+import { Search, SearchResultSummary } from 'types/search';
 
 export type SelectedState = {
     [k: number]: boolean;
@@ -10,7 +10,9 @@ export type SelectedState = {
 export type SetFiles = React.Dispatch<React.SetStateAction<EnteFile[]>>;
 export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
-export type SetSearchStats = React.Dispatch<React.SetStateAction<SearchStats>>;
+export type SetSearchResultSummary = React.Dispatch<
+    React.SetStateAction<SearchResultSummary>
+>;
 export type SetSearch = React.Dispatch<React.SetStateAction<Search>>;
 
 export type GalleryContextType = {

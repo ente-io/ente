@@ -16,7 +16,7 @@ import {
 import { isSharedFile } from 'utils/file';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
-import { SetFiles, SelectedState, SetSearchStats } from 'types/gallery';
+import { SetFiles, SelectedState } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
@@ -57,7 +57,6 @@ interface Props {
     openUploader?;
     isInSearchMode?: boolean;
     search?: Search;
-    setSearchStats?: SetSearchStats;
     deleted?: number[];
     activeCollection: number;
     isSharedCollection?: boolean;
@@ -81,7 +80,6 @@ const PhotoFrame = ({
     openUploader,
     isInSearchMode,
     search,
-    setSearchStats,
     deleted,
     activeCollection,
     isSharedCollection,
@@ -90,7 +88,6 @@ const PhotoFrame = ({
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
-    const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);
     const deduplicateContext = useContext(DeduplicateContext);
@@ -136,12 +133,6 @@ const PhotoFrame = ({
     }, []);
 
     useEffect(() => {
-        if (isInSearchMode) {
-            setSearchStats({
-                resultCount: filteredData.length,
-                timeTaken: (Date.now() - startTime) / 1000,
-            });
-        }
         if (!isNaN(search?.file)) {
             const filteredDataIdx = filteredData.findIndex((file) => {
                 return file.id === search.file;
