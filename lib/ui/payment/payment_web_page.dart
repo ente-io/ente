@@ -156,7 +156,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
             child: Text(
               'no',
               style: TextStyle(
-                color: Colors.white,
+                color: Theme.of(context).buttonColor,
               ),
             ),
             onPressed: () => Navigator.of(context).pop(false),
