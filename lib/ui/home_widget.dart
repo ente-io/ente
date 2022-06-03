@@ -252,8 +252,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget _getBody() {
     if (!Configuration.instance.hasConfiguredAccount()) {
-      // return LandingPageWidget();
-      return LoadingPhotosWidget();
+      return LandingPageWidget();
     }
     if (!LocalSyncService.instance.hasGrantedPermissions()) {
       return GrantPermissionsWidget();
