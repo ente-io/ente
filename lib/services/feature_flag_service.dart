@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/network.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,10 +26,12 @@ class FeatureFlagService {
     try {
       _featureFlags ??=
           FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey));
-      return _featureFlags != null ? _featureFlags.disableCFWorker : false;
+      return _featureFlags != null
+          ? _featureFlags.disableCFWorker
+          : FFDefault.disableCFWorker;
     } catch (e) {
       _logger.severe(e);
-      return false;
+      return FFDefault.disableCFWorker;
     }
   }
 
@@ -36,10 +39,12 @@ class FeatureFlagService {
     try {
       _featureFlags ??=
           FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey));
-      return _featureFlags != null ? _featureFlags.disableUrlSharing : false;
+      return _featureFlags != null
+          ? _featureFlags.disableUrlSharing
+          : FFDefault.disableUrlSharing;
     } catch (e) {
       _logger.severe(e);
-      return false;
+      return FFDefault.disableUrlSharing;
     }
   }
 
@@ -50,10 +55,12 @@ class FeatureFlagService {
     try {
       _featureFlags ??=
           FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey));
-      return _featureFlags != null ? _featureFlags.enableStripe : true;
+      return _featureFlags != null
+          ? _featureFlags.enableStripe
+          : FFDefault.enableStripe;
     } catch (e) {
       _logger.severe(e);
-      return true;
+      return FFDefault.enableStripe;
     }
   }
 
@@ -62,10 +69,10 @@ class FeatureFlagService {
       final response = await Network.instance
           .getDio()
           .get("https://static.ente.io/feature_flags.json");
-      final featureFlags = FeatureFlags.fromMap(response.data);
-      if (featureFlags != null) {
-        _prefs.setString(kBooleanFeatureFlagsKey, featureFlags.toJson());
-        _featureFlags = featureFlags;
+      final flagsResponse = FeatureFlags.fromMap(response.data);
+      if (flagsResponse != null) {
+        _prefs.setString(kBooleanFeatureFlagsKey, flagsResponse.toJson());
+        _featureFlags = flagsResponse;
       }
     } catch (e) {
       _logger.severe("Failed to sync feature flags ", e);
@@ -74,9 +81,9 @@ class FeatureFlagService {
 }
 
 class FeatureFlags {
-  bool disableCFWorker = false; // default to false
-  bool disableUrlSharing = false; // default to false
-  bool enableStripe = true; // default to true
+  bool disableCFWorker = FFDefault.disableCFWorker;
+  bool disableUrlSharing = FFDefault.disableUrlSharing;
+  bool enableStripe = FFDefault.enableStripe;
 
   FeatureFlags(
     this.disableCFWorker,
@@ -84,7 +91,6 @@ class FeatureFlags {
     this.enableStripe,
   );
 
-  @override
   Map<String, dynamic> toMap() {
     return {
       "disableCFWorker": disableCFWorker,
@@ -100,9 +106,9 @@ class FeatureFlags {
 
   factory FeatureFlags.fromMap(Map<String, dynamic> json) {
     return FeatureFlags(
-      json["disableCFWorker"] ?? false,
-      json["disableUrlSharing"] ?? false,
-      json["enableStripe"] ?? true,
+      json["disableCFWorker"] ?? FFDefault.disableCFWorker,
+      json["disableUrlSharing"] ?? FFDefault.disableUrlSharing,
+      json["enableStripe"] ?? FFDefault.enableStripe,
     );
   }
 
