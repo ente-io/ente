@@ -28,9 +28,10 @@ export default function collectionInfoWithOptions({
         <CollectionSectionWrapper>
             <SpaceBetweenFlex>
                 <CollectionInfo name={name} fileCount={fileCount} />
-                {type !== CollectionType.system && (
-                    <CollectionOptions {...props} />
-                )}
+                {type !== CollectionType.system &&
+                    type !== CollectionType.favorites && (
+                        <CollectionOptions {...props} />
+                    )}
             </SpaceBetweenFlex>
         </CollectionSectionWrapper>
     );

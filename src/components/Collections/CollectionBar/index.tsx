@@ -1,8 +1,8 @@
 import ScrollButton from 'components/Collections/CollectionBar/ScrollButton';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Collection, CollectionSummaries } from 'types/collection';
 import constants from 'utils/strings/constants';
-import { ALL_SECTION } from 'constants/collection';
+import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
 import { Typography } from '@mui/material';
 import {
     Hider,
@@ -15,6 +15,7 @@ import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
 import useWindowSize from 'hooks/useWindowSize';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import { SpaceBetweenFlex } from 'components/Container';
+import { sortCollectionSummaries } from 'services/collectionService';
 
 interface IProps {
     collections: Collection[];
@@ -34,7 +35,17 @@ export default function CollectionBar(props: IProps) {
         showAllCollections,
     } = props;
 
+    const sortedCollectionSummary = useMemo(
+        () =>
+            sortCollectionSummaries(
+                [...collectionSummaries.values()],
+                COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING
+            ),
+        [collectionSummaries]
+    );
+
     const windowSize = useWindowSize();
+
     const {
         componentRef,
         scrollComponent,
@@ -90,15 +101,13 @@ export default function CollectionBar(props: IProps) {
                         onClick={clickHandler(ALL_SECTION)}>
                         {constants.ALL_SECTION_NAME}
                     </CollectionCardWithActiveIndicator>
-                    {collections.map((item) => (
+                    {sortedCollectionSummary.map((item) => (
                         <CollectionCardWithActiveIndicator
-                            key={item.id}
-                            latestFile={
-                                collectionSummaries.get(item.id)?.latestFile
-                            }
-                            ref={collectionChipsRef[item.id]}
-                            active={activeCollection === item.id}
-                            onClick={clickHandler(item.id)}>
+                            key={item.attributes.id}
+                            latestFile={item.latestFile}
+                            ref={collectionChipsRef[item.attributes.id]}
+                            active={activeCollection === item.attributes.id}
+                            onClick={clickHandler(item.attributes.id)}>
                             {item.name}
                         </CollectionCardWithActiveIndicator>
                     ))}
