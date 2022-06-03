@@ -3,17 +3,18 @@ import debounce from 'debounce-promise';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useEffect, useState } from 'react';
 import { getAutoCompleteSuggestions } from 'services/searchService';
-import { Bbox, DateValue, Suggestion, SuggestionType } from 'types/search';
+import { Bbox, DateValue, SearchOption, SuggestionType } from 'types/search';
 import constants from 'utils/strings/constants';
 import { ControlWithIcon } from './controlWithIcon';
 import { SearchInputWrapper } from './styledComponents';
 import { SelectStyles } from './styles';
 import AsyncSelect from 'react-select/async';
 import CloseIcon from '@mui/icons-material/Close';
-import { SetSearch } from 'types/gallery';
+import { SetSearch, SetSearchResultInfo } from 'types/gallery';
 import { EnteFile } from 'types/file';
 import { Collection } from 'types/collection';
 import { OptionWithInfo } from './optionWithInfo';
+import { CollectionType } from 'constants/collection';
 
 interface Iprops {
     isOpen: boolean;
@@ -22,12 +23,13 @@ interface Iprops {
     files: EnteFile[];
     collections: Collection[];
     setActiveCollection: (id: number) => void;
+    setSearchResultInfo: SetSearchResultInfo;
 }
 
 export default function SearchInput(props: Iprops) {
-    const [value, setValue] = useState<Suggestion>(null);
+    const [value, setValue] = useState<SearchOption>(null);
     const appContext = useContext(AppContext);
-    const handleChange = (value: Suggestion) => {
+    const handleChange = (value: SearchOption) => {
         setValue(value);
     };
 
@@ -50,7 +52,7 @@ export default function SearchInput(props: Iprops) {
         250
     );
 
-    const search = (selectedOption: Suggestion) => {
+    const search = (selectedOption: SearchOption) => {
         if (!selectedOption) {
             return;
         }
@@ -77,6 +79,11 @@ export default function SearchInput(props: Iprops) {
                 setValue(null);
                 break;
         }
+        props.setSearchResultInfo({
+            name: selectedOption.label,
+            fileCount: selectedOption.fileCount,
+            type: CollectionType.system,
+        });
     };
 
     return (

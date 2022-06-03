@@ -90,7 +90,11 @@ import DeleteBtn from 'components/DeleteBtn';
 import FixCreationTime, {
     FixCreationTimeAttributes,
 } from 'components/FixCreationTime';
-import { Collection, CollectionSummaries } from 'types/collection';
+import {
+    Collection,
+    CollectionSummaries,
+    CollectionSummary,
+} from 'types/collection';
 import { EnteFile } from 'types/file';
 import {
     GalleryContextType,
@@ -103,8 +107,8 @@ import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
-import SearchStatsContainer from 'components/Search/SearchStatsContainer';
-import { SearchStats, Search } from 'types/search';
+import { Search } from 'types/search';
+import SearchResultInfo from 'components/Search/SearchResultInfo';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -175,7 +179,8 @@ export default function Gallery() {
     });
 
     const [isInSearchMode, setIsInSearchMode] = useState(false);
-    const [searchStats, setSearchStats] = useState<SearchStats>(null);
+    const [searchResultInfo, setSearchResultInfo] =
+        useState<CollectionSummary>(null);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
     const [deleted, setDeleted] = useState<number[]>([]);
@@ -497,7 +502,6 @@ export default function Gallery() {
     const updateSearch = (newSearch: Search) => {
         setActiveCollection(ALL_SECTION);
         setSearch(newSearch);
-        setSearchStats(null);
     };
 
     const closeCollectionSelector = (closeBtnClick?: boolean) => {
@@ -626,6 +630,7 @@ export default function Gallery() {
                     files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}
                     updateSearch={updateSearch}
+                    setSearchResultInfo={setSearchResultInfo}
                 />
 
                 <Collections
@@ -636,10 +641,8 @@ export default function Gallery() {
                     collectionSummaries={collectionSummaries}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                 />
-                {searchStats && (
-                    <SearchStatsContainer>
-                        {constants.SEARCH_STATS(searchStats)}
-                    </SearchStatsContainer>
+                {isInSearchMode && (
+                    <SearchResultInfo searchResult={searchResultInfo} />
                 )}
 
                 <Upload
@@ -662,7 +665,7 @@ export default function Gallery() {
                     setUploadInProgress={setUploadInProgress}
                     fileRejections={fileRejections}
                     setFiles={setFiles}
-                    isFirstUpload={collectionSummaries.size === 0}
+                    isFirstUpload={collectionSummaries?.size === 0}
                     electronFiles={electronFiles}
                     setElectronFiles={setElectronFiles}
                     uploadTypeSelectorView={uploadTypeSelectorView}
@@ -682,7 +685,6 @@ export default function Gallery() {
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
                     search={search}
-                    setSearchStats={setSearchStats}
                     deleted={deleted}
                     activeCollection={activeCollection}
                     isSharedCollection={isSharedCollection(

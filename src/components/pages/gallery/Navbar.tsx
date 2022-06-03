@@ -17,6 +17,7 @@ export function GalleryNavbar({
     files,
     setActiveCollection,
     updateSearch,
+    setSearchResultInfo,
 }) {
     return (
         <NavbarBase>
@@ -39,6 +40,7 @@ export function GalleryNavbar({
                     files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}
                     setSearch={updateSearch}
+                    setSearchResultInfo={setSearchResultInfo}
                 />
             )}
             {!isInSearchMode && (
