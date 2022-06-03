@@ -54,6 +54,7 @@ import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { GalleryContext } from 'pages/gallery';
 import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
 import { WordList } from 'components/MachineLearning/WordList';
+import MLServiceFileInfoButton from 'components/MachineLearning/MLServiceFileInfoButton';
 
 const SmallLoadingSpinner = () => (
     <EnteSpinner
@@ -425,6 +426,8 @@ function InfoModal({
     scheduleUpdate,
 }) {
     const appContext = useContext(AppContext);
+    const [updateMLDataIndex, setUpdateMLDataIndex] = useState(0);
+
     return (
         <Modal show={showInfo} onHide={handleCloseInfo}>
             <Modal.Header closeButton>
@@ -475,25 +478,34 @@ function InfoModal({
                         </div>
                         <PhotoPeopleList
                             file={items[photoSwipe?.getCurrentIndex()]}
+                            updateMLDataIndex={updateMLDataIndex}
                         />
                         <div>
                             <Legend>{constants.UNIDENTIFIED_FACES}</Legend>
                         </div>
                         <UnidentifiedFaces
                             file={items[photoSwipe?.getCurrentIndex()]}
+                            updateMLDataIndex={updateMLDataIndex}
                         />
                         <div>
                             <Legend>{constants.OBJECTS}</Legend>
                             <ObjectLabelList
                                 file={items[photoSwipe?.getCurrentIndex()]}
+                                updateMLDataIndex={updateMLDataIndex}
                             />
                         </div>
                         <div>
                             <Legend>{constants.TEXT}</Legend>
                             <WordList
                                 file={items[photoSwipe?.getCurrentIndex()]}
+                                updateMLDataIndex={updateMLDataIndex}
                             />
                         </div>
+                        <MLServiceFileInfoButton
+                            file={items[photoSwipe?.getCurrentIndex()]}
+                            updateMLDataIndex={updateMLDataIndex}
+                            setUpdateMLDataIndex={setUpdateMLDataIndex}
+                        />
                     </>
                 )}
                 {exif && (

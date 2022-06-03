@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { EnteFile } from 'types/file';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 
-export function WordList(props: { file: EnteFile }) {
+export function WordList(props: { file: EnteFile; updateMLDataIndex: number }) {
     const [words, setWords] = useState<string[]>([]);
     useEffect(() => {
         let didCancel = false;
@@ -23,7 +23,7 @@ export function WordList(props: { file: EnteFile }) {
         return () => {
             didCancel = true;
         };
-    }, [props.file]);
+    }, [props.file, props.updateMLDataIndex]);
 
     return (
         <div>

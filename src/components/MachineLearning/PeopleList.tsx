@@ -69,6 +69,7 @@ export function PeopleList(props: PeopleListProps) {
 
 export interface PhotoPeopleListProps extends PeopleListPropsBase {
     file: EnteFile;
+    updateMLDataIndex: number;
 }
 
 export function PhotoPeopleList(props: PhotoPeopleListProps) {
@@ -91,7 +92,7 @@ export function PhotoPeopleList(props: PhotoPeopleListProps) {
         return () => {
             didCancel = true;
         };
-    }, [props.file]);
+    }, [props.file, props.updateMLDataIndex]);
 
     return <PeopleList people={people} onSelect={props.onSelect}></PeopleList>;
 }
@@ -124,7 +125,10 @@ export function AllPeopleList(props: AllPeopleListProps) {
     return <PeopleList people={people} onSelect={props.onSelect}></PeopleList>;
 }
 
-export function UnidentifiedFaces(props: { file: EnteFile }) {
+export function UnidentifiedFaces(props: {
+    file: EnteFile;
+    updateMLDataIndex: number;
+}) {
     const [faces, setFaces] = useState<Array<Face>>([]);
 
     useEffect(() => {
@@ -140,7 +144,7 @@ export function UnidentifiedFaces(props: { file: EnteFile }) {
         return () => {
             didCancel = true;
         };
-    }, [props.file]);
+    }, [props.file, props.updateMLDataIndex]);
 
     return (
         <FaceChipContainer>

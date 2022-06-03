@@ -3,7 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { EnteFile } from 'types/file';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 
-export function ObjectLabelList(props: { file: EnteFile }) {
+export function ObjectLabelList(props: {
+    file: EnteFile;
+    updateMLDataIndex: number;
+}) {
     const [objects, setObjects] = useState<Array<string>>([]);
     useEffect(() => {
         let didCancel = false;
@@ -22,7 +25,7 @@ export function ObjectLabelList(props: { file: EnteFile }) {
         return () => {
             didCancel = true;
         };
-    }, [props.file]);
+    }, [props.file, props.updateMLDataIndex]);
 
     return (
         <div>

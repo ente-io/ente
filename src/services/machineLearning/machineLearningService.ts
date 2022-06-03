@@ -316,7 +316,8 @@ class MachineLearningService {
     public async syncLocalFile(
         token: string,
         enteFile: EnteFile,
-        localFile: globalThis.File
+        localFile?: globalThis.File,
+        textDetectionTimeoutIndex?: number
     ): Promise<MlFileData | Error> {
         const syncContext = await this.getLocalSyncContext(token);
 
@@ -324,7 +325,8 @@ class MachineLearningService {
             const mlFileData = await this.syncFileWithErrorHandler(
                 syncContext,
                 enteFile,
-                localFile
+                localFile,
+                textDetectionTimeoutIndex
             );
 
             if (syncContext.nSyncedFiles >= syncContext.config.batchSize) {
@@ -341,13 +343,15 @@ class MachineLearningService {
     private async syncFileWithErrorHandler(
         syncContext: MLSyncContext,
         enteFile: EnteFile,
-        localFile?: globalThis.File
+        localFile?: globalThis.File,
+        textDetectionTimeoutIndex?: number
     ): Promise<MlFileData> {
         try {
             const mlFileData = await this.syncFile(
                 syncContext,
                 enteFile,
-                localFile
+                localFile,
+                textDetectionTimeoutIndex
             );
             syncContext.nSyncedFaces += mlFileData.faces?.length || 0;
             syncContext.nSyncedFiles += 1;
@@ -379,12 +383,13 @@ class MachineLearningService {
     private async syncFile(
         syncContext: MLSyncContext,
         enteFile: EnteFile,
-        localFile?: globalThis.File
+        localFile?: globalThis.File,
+        textDetectionTimeoutIndex?: number
     ) {
         const fileContext: MLSyncFileContext = { enteFile, localFile };
-        const oldMlFile = (fileContext.oldMlFile = await this.getMLFileData(
-            enteFile.id
-        ));
+        const oldMlFile =
+            (fileContext.oldMlFile = await this.getMLFileData(enteFile.id)) ??
+            this.newMlData(enteFile.id);
         if (
             fileContext.oldMlFile?.mlVersion === syncContext.config.mlVersion
             // TODO: reset mlversion of all files when user changes image source
@@ -425,7 +430,11 @@ class MachineLearningService {
                     syncContext,
                     fileContext
                 ),
-                TextService.syncFileTextDetections(syncContext, fileContext),
+                TextService.syncFileTextDetections(
+                    syncContext,
+                    fileContext,
+                    textDetectionTimeoutIndex
+                ),
             ]);
             newMlFile.errorCount = 0;
             newMlFile.lastErrorMessage = undefined;

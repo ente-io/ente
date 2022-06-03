@@ -11,7 +11,8 @@ import ReaderService from './readerService';
 class TextService {
     async syncFileTextDetections(
         syncContext: MLSyncContext,
-        fileContext: MLSyncFileContext
+        fileContext: MLSyncFileContext,
+        textDetectionTimeoutIndex?: number
     ) {
         console.time(`text detection time taken ${fileContext.enteFile.id}`);
         const { oldMlFile, newMlFile } = fileContext;
@@ -40,7 +41,7 @@ class TextService {
             await syncContext.textDetectionService.detectText(
                 imageBitmap,
                 syncContext.config.textDetection.minAccuracy,
-                oldMlFile?.errorCount ?? 0
+                oldMlFile?.errorCount ?? textDetectionTimeoutIndex ?? 0
             );
         if (textDetections instanceof Error) {
             console.timeEnd(
