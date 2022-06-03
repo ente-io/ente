@@ -37,7 +37,9 @@ export default function CollectionBar(props: IProps) {
     const sortedCollectionSummary = useMemo(
         () =>
             sortCollectionSummaries(
-                [...collectionSummaries.values()],
+                [...collectionSummaries.values()].filter(
+                    (c) => c.fileCount > 0
+                ),
                 COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING
             ),
         [collectionSummaries]
