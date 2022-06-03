@@ -31,7 +31,7 @@ import 'package:photos/utils/toast_util.dart';
 
 class UserService {
   final _dio = Network.instance.getDio();
-  final _logger = Logger("UserAuthenticator");
+  final _logger = Logger((UserService).toString());
   final _config = Configuration.instance;
 
   UserService._privateConstructor();
