@@ -92,12 +92,10 @@ export interface CollectionSummary {
     id: number;
     name: string;
     type: CollectionType;
-    latestFile?: EnteFile;
+    latestFile: EnteFile;
     fileCount: number;
-    attributes?: {
-        ownerID?: number;
-        updationTime?: number;
-    };
+    updationTime: number;
+    isSharedAlbum: boolean;
 }
 
 export type CollectionSummaries = Map<number, CollectionSummary>;
