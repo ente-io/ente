@@ -4,7 +4,6 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class SkipSubscriptionWidget extends StatelessWidget {
   const SkipSubscriptionWidget({
@@ -30,7 +29,6 @@ class SkipSubscriptionWidget extends StatelessWidget {
             },
           ),
         ),
-        // fontSize: 16,
         onPressed: () async {
           Bus.instance.fire(SubscriptionPurchasedEvent());
           Navigator.of(context).popUntil((route) => route.isFirst);

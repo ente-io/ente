@@ -438,7 +438,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: GradientButton(
                   child: Text(
-                    'Start Backup',
+                    'Start backup',
                     style: gradientButtonTextTheme(),
                   ),
                   linearGradientColors: const [
@@ -454,7 +454,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                         context,
                         BackupFolderSelectionPage(
                           shouldSelectAll: true,
-                          buttonText: "Start Backup",
+                          buttonText: "Start backup",
                         ),
                       );
                     }
