@@ -124,7 +124,6 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   }
 
   Widget _getBody(String buttonTextAndHeading) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom != 0;
     final email = Configuration.instance.getEmail();
     var passwordStrengthText = 'Weak';
     var passwordStrengthColor = Colors.redAccent;

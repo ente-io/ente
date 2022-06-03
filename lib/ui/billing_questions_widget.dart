@@ -66,6 +66,8 @@ class FaqWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpansionTileCard(
+      borderRadius: BorderRadius.all(Radius.circular(0)),
+      elevation: 0,
       title: Text(faq.q),
       expandedTextColor: Theme.of(context).buttonColor,
       baseColor: Theme.of(context).cardColor,
