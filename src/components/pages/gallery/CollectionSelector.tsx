@@ -37,13 +37,13 @@ function CollectionSelector({
             ...collectionSummaries.values(),
         ]?.filter(
             ({ type, id, isSharedAlbum }) =>
-                id !== attributes.fromCollection &&
+                id !== attributes?.fromCollection &&
                 !isSharedAlbum &&
                 type !== CollectionType.favorites &&
                 type !== CollectionType.system
         );
         return personalCollectionsOtherThanFrom;
-    }, [collectionSummaries]);
+    }, [collectionSummaries, attributes]);
 
     useEffect(() => {
         if (!attributes || !props.open) {
