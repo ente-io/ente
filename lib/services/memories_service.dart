@@ -26,8 +26,11 @@ class MemoriesService extends ChangeNotifier {
     addListener(() {
       _cachedMemories = null;
     });
-    await _memoriesDB.clearMemoriesSeenBeforeTime(
-        DateTime.now().microsecondsSinceEpoch - (7 * kMicroSecondsInDay));
+    //
+    Future.delayed(const Duration(seconds: 5), () {
+      _memoriesDB.clearMemoriesSeenBeforeTime(
+          DateTime.now().microsecondsSinceEpoch - (7 * kMicroSecondsInDay));
+    });
   }
 
   void clearCache() {
