@@ -329,12 +329,15 @@ class RemoteSyncService {
         localButAddedToNewCollectionOnRemote = 0;
     bool hasAnyCreationTimeChanged = false;
     List<File> toBeInserted = [];
+    int userID = Configuration.instance.getUserID();
     for (File file in diff) {
       final existingFiles = file.deviceFolder == null
           ? null
           : await _db.getMatchingFiles(file.title, file.deviceFolder);
-      if (existingFiles == null || existingFiles.isEmpty) {
-        // File uploaded from a different device.
+      if (existingFiles == null ||
+          existingFiles.isEmpty ||
+          userID != file.ownerID) {
+        // File uploaded from a different device or uploaded by different user
         // Other rare possibilities : The local file is present on
         // device but it's not imported in local db due to missing permission
         // after reinstall (iOS selected file permissions or user revoking
