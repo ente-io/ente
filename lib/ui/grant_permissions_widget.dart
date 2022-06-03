@@ -54,7 +54,7 @@ class GrantPermissionsWidget extends StatelessWidget {
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.only(
-                    left: 20, right: 20, bottom: Platform.isIOS ? 60 : 36),
+                    left: 20, right: 20, bottom: Platform.isIOS ? 24 : 60),
                 child: OutlinedButton(
                   child: Text("Grant permission"),
                   onPressed: () async {

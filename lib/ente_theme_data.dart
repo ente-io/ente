@@ -47,6 +47,8 @@ extension CustomColorScheme on ColorScheme {
   Color get bgColorForQuestions => brightness == Brightness.light
       ? Colors.white
       : Color.fromRGBO(10, 15, 15, 1.0);
+
+  Color get greenText => Color.fromRGBO(40, 190, 92, 1);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(

@@ -74,7 +74,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           ),
           SafeArea(
             child: Container(
-              padding: EdgeInsets.fromLTRB(24, 12, 24, 8),
+              padding: EdgeInsets.fromLTRB(24, 32, 24, 8),
               child: Text(
                 'Select folders for backup',
                 textAlign: TextAlign.left,
@@ -137,6 +137,13 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             tag: "select_folders",
             child: Container(
               width: double.infinity,
+              decoration: BoxDecoration(boxShadow: [
+                BoxShadow(
+                    color: Theme.of(context).backgroundColor,
+                    blurRadius: 24,
+                    offset: Offset(0, -8),
+                    spreadRadius: 4)
+              ]),
               padding: EdgeInsets.only(
                   left: 20, right: 20, bottom: Platform.isIOS ? 60 : 32),
               child: OutlinedButton(
@@ -149,7 +156,6 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                         Bus.instance.fire(BackupFoldersUpdatedEvent());
                         Navigator.of(context).pop();
                       },
-                // padding: EdgeInsets.fromLTRB(12, 20, 12, 20),
               ),
             ),
           ),
@@ -168,7 +174,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       padding: EdgeInsets.symmetric(horizontal: 20),
       child: Scrollbar(
         controller: scrollController,
-        isAlwaysShown: true,
+        thumbVisibility: true,
         child: Padding(
           padding: const EdgeInsets.only(right: 4),
           child: ImplicitlyAnimatedReorderableList<File>(
