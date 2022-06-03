@@ -4,6 +4,7 @@ import { ElectronFile, FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
 import { syncCollections } from './collectionService';
 import { syncFiles, trashFiles } from './fileService';
+import debounce from 'debounce-promise';
 
 interface Mapping {
     collectionName: string;
@@ -28,6 +29,7 @@ class WatchService {
     setElectronFiles: (files: ElectronFile[]) => void;
     setCollectionName: (collectionName: string) => void;
     syncWithRemote: () => void;
+    promise: Promise<void>;
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
@@ -117,6 +119,23 @@ class WatchService {
             return;
         }
 
+        this.isUploadRunning = true;
+
+        const newUploadQueue = [this.uploadQueue[0]];
+        const len = this.uploadQueue.length;
+        for (let i = 1; i < len; i++) {
+            if (
+                this.uploadQueue[i].collectionName ===
+                newUploadQueue[0].collectionName
+            ) {
+                newUploadQueue[0].paths.push(...this.uploadQueue[i].paths);
+            } else {
+                newUploadQueue.push(this.uploadQueue[i]);
+            }
+        }
+        newUploadQueue.push(...this.uploadQueue.slice(len));
+        this.uploadQueue = newUploadQueue;
+
         this.setCollectionName(this.uploadQueue[0].collectionName);
         this.setElectronFiles(
             await Promise.all(
@@ -125,8 +144,6 @@ class WatchService {
                 })
             )
         );
-
-        this.isUploadRunning = true;
     }
 
     async fileUploadDone(
@@ -285,7 +302,8 @@ async function diskFileAddedCallback(instance: WatchService, filePath: string) {
         paths: [filePath],
     };
     instance.uploadQueue.push(event);
-    instance.runNextUpload();
+    // instance.runNextUpload();
+    await debounce(runNextUploadByInstance, 300)(instance);
 }
 
 async function diskFileRemovedCallback(
@@ -323,5 +341,9 @@ async function diskFileRemovedCallback(
 
     console.log('after trash', instance.ElectronAPIs.getWatchMappings());
 }
+
+const runNextUploadByInstance = async (w: WatchService) => {
+    await w.runNextUpload();
+};
 
 export default new WatchService();
