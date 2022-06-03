@@ -73,7 +73,7 @@ export interface collectionAttributes {
     pathDecryptionNonce?: string;
 }
 
-export type CollectionLatestFile = Map<number, EnteFile>;
+export type CollectionLatestFiles = Map<number, EnteFile>;
 
 export interface RemoveFromCollectionRequest {
     collectionID: number;

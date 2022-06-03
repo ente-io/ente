@@ -13,7 +13,7 @@ import { CustomError } from 'utils/error';
 import { sortFiles, sortFilesIntoCollections } from 'utils/file';
 import {
     Collection,
-    CollectionLatestFile,
+    CollectionLatestFiles,
     AddToCollectionRequest,
     MoveToCollectionRequest,
     EncryptedFileKey,
@@ -205,18 +205,23 @@ export const getCollection = async (
     }
 };
 
-export const getCollectionsLatestFile = (
+export const getCollectionLatestFiles = (
     files: EnteFile[]
-): CollectionLatestFile => {
-    const latestFile = new Map<number, EnteFile>();
+): CollectionLatestFiles => {
+    const latestFiles = new Map<number, EnteFile>();
 
     files.forEach((file) => {
-        const collectionID = getFileCollectionID(file);
-        if (!latestFile.has(collectionID)) {
-            latestFile.set(collectionID, file);
+        if (!latestFiles.has(file.collectionID)) {
+            latestFiles.set(file.collectionID, file);
+        }
+        if (!latestFiles.has(ARCHIVE_SECTION) && IsArchived(file)) {
+            latestFiles.set(ARCHIVE_SECTION, file);
+        }
+        if (!latestFiles.has(TRASH_SECTION) && file.isTrashed) {
+            latestFiles.set(TRASH_SECTION, file);
         }
     });
-    return latestFile;
+    return latestFiles;
 };
 
 export const getFavItemIds = async (
@@ -704,18 +709,6 @@ export const getNonEmptyCollections = (
     );
 };
 
-export function getFileCollectionID(file: EnteFile) {
-    let collectionID: number;
-    if (file.isTrashed) {
-        collectionID = TRASH_SECTION;
-    } else if (IsArchived(file)) {
-        collectionID = ARCHIVE_SECTION;
-    } else {
-        collectionID = file.collectionID;
-    }
-    return collectionID;
-}
-
 export function sortCollectionSummaries(
     collectionSummaries: CollectionSummary[],
     sortBy: COLLECTION_SORT_BY
@@ -768,14 +761,14 @@ export function getCollectionSummaries(
     files: EnteFile[]
 ): CollectionSummaries {
     const collectionSummaries: CollectionSummaries = new Map();
-    const collectionsLatestFile = getCollectionsLatestFile(files);
+    const collectionLatestFiles = getCollectionLatestFiles(files);
     const collectionFilesCount = getCollectionsFileCount(files);
 
     for (const collection of collections) {
         collectionSummaries.set(collection.id, {
             name: collection.name,
             type: collection.type,
-            latestFile: collectionsLatestFile.get(collection.id),
+            latestFile: collectionLatestFiles.get(collection.id),
             fileCount: collectionFilesCount.get(collection.id) ?? 0,
             attributes: {
                 updationTime: collection.updationTime,
@@ -788,14 +781,14 @@ export function getCollectionSummaries(
         ARCHIVE_SECTION,
         getArchivedCollectionSummaries(
             collectionFilesCount,
-            collectionsLatestFile
+            collectionLatestFiles
         )
     );
     collectionSummaries.set(
         TRASH_SECTION,
         getTrashedCollectionSummaries(
             collectionFilesCount,
-            collectionsLatestFile
+            collectionLatestFiles
         )
     );
     return collectionSummaries;
@@ -812,7 +805,7 @@ function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
 
 function getArchivedCollectionSummaries(
     collectionFilesCount: CollectionFilesCount,
-    collectionsLatestFile: CollectionLatestFile
+    collectionsLatestFile: CollectionLatestFiles
 ) {
     return {
         name: constants.ARCHIVE,
@@ -825,7 +818,7 @@ function getArchivedCollectionSummaries(
 
 function getTrashedCollectionSummaries(
     collectionFilesCount: CollectionFilesCount,
-    collectionsLatestFile: CollectionLatestFile
+    collectionsLatestFile: CollectionLatestFiles
 ): CollectionSummary {
     return {
         name: constants.TRASH,

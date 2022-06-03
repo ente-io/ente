@@ -25,7 +25,7 @@ import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
 import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
-import { getFileCollectionID } from 'services/collectionService';
+import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -140,14 +140,22 @@ export function isFileHEIC(mimeType: string) {
 }
 
 export function sortFilesIntoCollections(files: EnteFile[]) {
-    const collectionWiseFiles = new Map<number, EnteFile[]>();
+    const collectionWiseFiles = new Map<number, EnteFile[]>([
+        [ARCHIVE_SECTION, []],
+        [TRASH_SECTION, []],
+    ]);
     for (const file of files) {
-        const collectionID = getFileCollectionID(file);
-        if (!collectionWiseFiles.has(collectionID)) {
-            collectionWiseFiles.set(collectionID, []);
+        if (!collectionWiseFiles.has(file.collectionID)) {
+            collectionWiseFiles.set(file.collectionID, []);
         }
 
-        collectionWiseFiles.get(collectionID).push(file);
+        collectionWiseFiles.get(file.collectionID).push(file);
+        if (IsArchived(file)) {
+            collectionWiseFiles.get(ARCHIVE_SECTION).push(file);
+        }
+        if (file.isTrashed) {
+            collectionWiseFiles.get(TRASH_SECTION).push(file);
+        }
     }
     return collectionWiseFiles;
 }
