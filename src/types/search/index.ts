@@ -34,6 +34,11 @@ export type Search = {
     file?: number;
 };
 
+export type SearchResultSummary = {
+    optionName: string;
+    fileCount: number;
+};
+
 export interface SearchOption extends Suggestion {
     fileCount: number;
     previewFiles: EnteFile[];

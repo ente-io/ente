@@ -7,14 +7,14 @@ import { EnteFile } from 'types/file';
 import { SearchBarWrapper, SearchButtonWrapper } from './styledComponents';
 import SearchInput from './input';
 import { Search } from 'types/search';
-import { SetSearchResultInfo } from 'types/gallery';
+import { SetSearchResultSummary } from 'types/gallery';
 
 interface Props {
     isOpen: boolean;
     isFirstFetch: boolean;
     setOpen: (value: boolean) => void;
     setSearch: (search: Search) => void;
-    setSearchResultInfo: SetSearchResultInfo;
+    setSearchResultInfo: SetSearchResultSummary;
     collections: Collection[];
     setActiveCollection: (id: number) => void;
     files: EnteFile[];

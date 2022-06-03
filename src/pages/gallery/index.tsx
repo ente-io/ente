@@ -179,7 +179,7 @@ export default function Gallery() {
     });
 
     const [isInSearchMode, setIsInSearchMode] = useState(false);
-    const [searchResultInfo, setSearchResultInfo] =
+    const [searchResultSummary, setSetSearchResultSummary] =
         useState<CollectionSummary>(null);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
@@ -630,7 +630,7 @@ export default function Gallery() {
                     files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}
                     updateSearch={updateSearch}
-                    setSearchResultInfo={setSearchResultInfo}
+                    setSearchResultInfo={setSetSearchResultSummary}
                 />
 
                 <Collections
@@ -642,7 +642,7 @@ export default function Gallery() {
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                 />
                 {isInSearchMode && (
-                    <SearchResultInfo searchResult={searchResultInfo} />
+                    <SearchResultInfo searchResult={searchResultSummary} />
                 )}
 
                 <Upload

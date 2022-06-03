@@ -10,11 +10,10 @@ import { SearchInputWrapper } from './styledComponents';
 import { SelectStyles } from './styles';
 import AsyncSelect from 'react-select/async';
 import CloseIcon from '@mui/icons-material/Close';
-import { SetSearch, SetSearchResultInfo } from 'types/gallery';
+import { SetSearch, SetSearchResultSummary } from 'types/gallery';
 import { EnteFile } from 'types/file';
 import { Collection } from 'types/collection';
 import { OptionWithInfo } from './optionWithInfo';
-import { CollectionType } from 'constants/collection';
 
 interface Iprops {
     isOpen: boolean;
@@ -23,7 +22,7 @@ interface Iprops {
     files: EnteFile[];
     collections: Collection[];
     setActiveCollection: (id: number) => void;
-    setSearchResultInfo: SetSearchResultInfo;
+    setSearchResultInfo: SetSearchResultSummary;
 }
 
 export default function SearchInput(props: Iprops) {
@@ -80,9 +79,8 @@ export default function SearchInput(props: Iprops) {
                 break;
         }
         props.setSearchResultInfo({
-            name: selectedOption.label,
+            optionName: selectedOption.label,
             fileCount: selectedOption.fileCount,
-            type: CollectionType.system,
         });
     };
 
