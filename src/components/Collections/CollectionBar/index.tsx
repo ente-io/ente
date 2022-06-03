@@ -1,6 +1,4 @@
-import NavigationButton, {
-    SCROLL_DIRECTION,
-} from 'components/Collections/CollectionBar/NavigationButton';
+import ScrollButton from 'components/Collections/CollectionBar/ScrollButton';
 import React, { useEffect } from 'react';
 import { Collection, CollectionSummaries } from 'types/collection';
 import constants from 'utils/strings/constants';
@@ -10,12 +8,13 @@ import {
     Hider,
     CollectionBarWrapper,
     ScrollContainer,
-    PaddedSpaceBetweenFlex,
+    CollectionSectionWrapper,
 } from 'components/Collections/styledComponents';
 import CollectionCardWithActiveIndicator from 'components/Collections/CollectionBar/CollectionCardWithActiveIndicator';
-import useComponentScroll from 'hooks/useComponentScroll';
+import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
 import useWindowSize from 'hooks/useWindowSize';
 import LinkButton from 'components/pages/gallery/LinkButton';
+import { SpaceBetweenFlex } from 'components/Container';
 
 interface IProps {
     collections: Collection[];
@@ -66,17 +65,20 @@ export default function CollectionBar(props: IProps) {
 
     return (
         <Hider hide={props.isInSearchMode}>
-            <PaddedSpaceBetweenFlex>
-                <Typography>{constants.ALBUMS}</Typography>
-                {hasScrollBar && (
-                    <LinkButton onClick={showAllCollections}>
-                        {constants.VIEW_ALL_ALBUMS}
-                    </LinkButton>
-                )}
-            </PaddedSpaceBetweenFlex>
+            <CollectionSectionWrapper>
+                <SpaceBetweenFlex>
+                    <Typography>{constants.ALBUMS}</Typography>
+                    {hasScrollBar && (
+                        <LinkButton onClick={showAllCollections}>
+                            {constants.VIEW_ALL_ALBUMS}
+                        </LinkButton>
+                    )}
+                </SpaceBetweenFlex>
+            </CollectionSectionWrapper>
+
             <CollectionBarWrapper>
                 {!onFarLeft && (
-                    <NavigationButton
+                    <ScrollButton
                         scrollDirection={SCROLL_DIRECTION.LEFT}
                         onClick={scrollComponent(SCROLL_DIRECTION.LEFT)}
                     />
@@ -102,7 +104,7 @@ export default function CollectionBar(props: IProps) {
                     ))}
                 </ScrollContainer>
                 {!onFarRight && (
-                    <NavigationButton
+                    <ScrollButton
                         scrollDirection={SCROLL_DIRECTION.RIGHT}
                         onClick={scrollComponent(SCROLL_DIRECTION.RIGHT)}
                     />

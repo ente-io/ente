@@ -34,7 +34,7 @@ import { Card } from 'react-bootstrap';
 import { logError } from 'utils/sentry';
 import SharedAlbumNavbar from 'components/pages/sharedAlbum/Navbar';
 import { CollectionInfo } from 'components/Collections/CollectionInfo';
-import { PaddedSpaceBetweenFlex } from 'components/Collections/styledComponents';
+import { CollectionSectionWrapper } from 'components/Collections/styledComponents';
 
 const Loader = () => (
     <VerticallyCentered>
@@ -281,12 +281,12 @@ export default function PublicCollectionGallery() {
                 openReportForm,
             }}>
             <SharedAlbumNavbar />
-            <PaddedSpaceBetweenFlex>
+            <CollectionSectionWrapper>
                 <CollectionInfo
                     name={publicCollection.name}
                     fileCount={publicFiles.length}
                 />
-            </PaddedSpaceBetweenFlex>
+            </CollectionSectionWrapper>
             <PhotoFrame
                 files={publicFiles}
                 setFiles={setPublicFiles}
@@ -298,7 +298,6 @@ export default function PublicCollectionGallery() {
                 openUploader={() => null}
                 isInSearchMode={false}
                 search={{}}
-                setSearchStats={() => null}
                 deleted={[]}
                 activeCollection={ALL_SECTION}
                 isSharedCollection

@@ -1,5 +1,9 @@
-import { SCROLL_DIRECTION } from 'components/Collections/CollectionBar/NavigationButton';
 import { useRef, useState, useEffect } from 'react';
+
+export enum SCROLL_DIRECTION {
+    LEFT = -1,
+    RIGHT = +1,
+}
 
 export default function useComponentScroll({
     dependencies,
