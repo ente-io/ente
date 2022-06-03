@@ -8,6 +8,7 @@ import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/common/bottomShadow.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/payment/child_subscription_widget.dart';
@@ -112,26 +113,44 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final appBar = widget.isOnboarding
-        ? AppBar(
-            elevation: 0,
-            title: Hero(
-                tag: "subscription",
-                child: StepProgressIndicator(
-                  totalSteps: 4,
-                  currentStep: 4,
-                  selectedColor: Theme.of(context).buttonColor,
-                  roundedEdges: Radius.circular(10),
-                  unselectedColor: Theme.of(context).bottomAppBarColor,
+    final appBar = PreferredSize(
+      preferredSize: Size(double.infinity, 60),
+      child: Container(
+          decoration: BoxDecoration(boxShadow: [
+            BoxShadow(
+                color: Theme.of(context).backgroundColor,
+                blurRadius: 16,
+                offset: Offset(0, 8))
+          ]),
+          child: widget.isOnboarding
+              ? AppBar(
+                  elevation: 0,
+                  title: Hero(
+                      tag: "subscription",
+                      child: StepProgressIndicator(
+                        totalSteps: 4,
+                        currentStep: 4,
+                        selectedColor: Theme.of(context).buttonColor,
+                        roundedEdges: Radius.circular(10),
+                        unselectedColor: Theme.of(context).bottomAppBarColor,
+                      )),
+                )
+              : AppBar(
+                  elevation: 0,
+                  title: Text("Subscription"),
                 )),
-          )
-        : AppBar(
-            elevation: 0,
-            title: Text("Subscription"),
-          );
+    );
     return Scaffold(
       appBar: appBar,
-      body: _getBody(),
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          _getBody(),
+          BottomShadowWidget(
+            offsetDy: 40,
+          )
+        ],
+      ),
     );
   }
 

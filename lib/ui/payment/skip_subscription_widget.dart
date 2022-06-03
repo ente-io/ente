@@ -19,8 +19,8 @@ class SkipSubscriptionWidget extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: 64,
-      margin: const EdgeInsets.fromLTRB(0, 30, 0, 30),
-      padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
+      margin: const EdgeInsets.fromLTRB(0, 30, 0, 0),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: OutlinedButton(
         child: Text("Continue on free plan"),
         style: Theme.of(context).outlinedButtonTheme.style.copyWith(
