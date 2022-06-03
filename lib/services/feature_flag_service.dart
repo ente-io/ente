@@ -24,7 +24,14 @@ class FeatureFlagService {
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
-    await sync();
+    // Fetch feature flags from network in async manner.
+    // Intention of delay is to give more CPU cycles to other tasks
+    Future.delayed(
+      const Duration(seconds: 5),
+      () {
+        fetchFeatureFlags();
+      },
+    );
   }
 
   FeatureFlags _getFeatureFlags() {
@@ -67,7 +74,7 @@ class FeatureFlagService {
     }
   }
 
-  Future<void> sync() async {
+  Future<void> fetchFeatureFlags() async {
     try {
       final response = await Network.instance
           .getDio()
