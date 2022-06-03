@@ -104,23 +104,6 @@ class UserService {
     }
   }
 
-  Future<UserDetails> getUserDetails() async {
-    try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/details",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
-      return UserDetails.fromMap(response.data["details"]);
-    } on DioError catch (e) {
-      _logger.info(e);
-      rethrow;
-    }
-  }
-
   Future<UserDetails> getUserDetailsV2({bool memoryCount = true}) async {
     try {
       final response = await _dio.get(
