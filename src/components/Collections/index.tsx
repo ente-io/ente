@@ -45,7 +45,6 @@ export default function Collections(props: Iprops) {
     return (
         <>
             <CollectionBar
-                collections={collections}
                 isInSearchMode={isInSearchMode}
                 activeCollection={activeCollectionID}
                 setActiveCollection={setActiveCollectionID}

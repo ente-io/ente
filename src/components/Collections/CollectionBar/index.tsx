@@ -1,6 +1,6 @@
 import ScrollButton from 'components/Collections/CollectionBar/ScrollButton';
 import React, { useEffect, useMemo } from 'react';
-import { Collection, CollectionSummaries } from 'types/collection';
+import { CollectionSummaries } from 'types/collection';
 import constants from 'utils/strings/constants';
 import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
 import { Typography } from '@mui/material';
@@ -18,7 +18,6 @@ import { SpaceBetweenFlex } from 'components/Container';
 import { sortCollectionSummaries } from 'services/collectionService';
 
 interface IProps {
-    collections: Collection[];
     activeCollection?: number;
     setActiveCollection: (id?: number) => void;
     isInSearchMode: boolean;
@@ -29,7 +28,7 @@ interface IProps {
 export default function CollectionBar(props: IProps) {
     const {
         activeCollection,
-        collections,
+
         setActiveCollection,
         collectionSummaries,
         showAllCollections,
@@ -53,12 +52,12 @@ export default function CollectionBar(props: IProps) {
         onFarLeft,
         onFarRight,
     } = useComponentScroll({
-        dependencies: [windowSize, collections],
+        dependencies: [windowSize, collectionSummaries],
     });
 
-    const collectionChipsRef = props.collections.reduce(
-        (refMap, collection) => {
-            refMap[collection.id] = React.createRef();
+    const collectionChipsRef = sortedCollectionSummary.reduce(
+        (refMap, collectionSummary) => {
+            refMap[collectionSummary.attributes.id] = React.createRef();
             return refMap;
         },
         {}
