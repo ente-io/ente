@@ -173,7 +173,7 @@ class UserService {
   }
 
   Future<void> logout(BuildContext context) async {
-    final dialog = createProgressDialog(context, "logging out...");
+    final dialog = createProgressDialog(context, "Logging out...");
     await dialog.show();
     try {
       final response =
@@ -188,7 +188,7 @@ class UserService {
         await dialog.hide();
         Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
-        throw Exception("log out action failed");
+        throw Exception("Log out action failed");
       }
     } catch (e) {
       _logger.severe(e);
