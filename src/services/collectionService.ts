@@ -35,6 +35,7 @@ import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { EncryptionResult } from 'types/upload';
 import constants from 'utils/strings/constants';
 import { IsArchived } from 'utils/magicMetadata';
+import { User } from 'types/user';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -727,9 +728,7 @@ export function sortCollectionSummaries(
                         compareCollectionsLatestFile(b.latestFile, a.latestFile)
                     );
                 case COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING:
-                    return (
-                        b.attributes.updationTime - a.attributes.updationTime
-                    );
+                    return b.updationTime - a.updationTime;
                 case COLLECTION_SORT_BY.NAME:
                     return a.name.localeCompare(b.name);
             }
@@ -763,6 +762,7 @@ export function getCollectionSummaries(
     const collectionSummaries: CollectionSummaries = new Map();
     const collectionLatestFiles = getCollectionLatestFiles(files);
     const collectionFilesCount = getCollectionsFileCount(files);
+    const user: User = getData(LS_KEYS.USER);
 
     for (const collection of collections) {
         collectionSummaries.set(collection.id, {
@@ -771,10 +771,8 @@ export function getCollectionSummaries(
             type: collection.type,
             latestFile: collectionLatestFiles.get(collection.id),
             fileCount: collectionFilesCount.get(collection.id) ?? 0,
-            attributes: {
-                updationTime: collection.updationTime,
-                ownerID: collection.owner.id,
-            },
+            updationTime: collection.updationTime,
+            isSharedAlbum: collection.owner.id !== user.id,
         });
     }
     collectionSummaries.set(
@@ -806,14 +804,16 @@ function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
 function getArchivedCollectionSummaries(
     collectionFilesCount: CollectionFilesCount,
     collectionsLatestFile: CollectionLatestFiles
-) {
+): CollectionSummary {
     return {
-        id: TRASH_SECTION,
+        id: ARCHIVE_SECTION,
         name: constants.ARCHIVE,
         type: CollectionType.system,
         latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
         fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
-    } as CollectionSummary;
+        updationTime: collectionsLatestFile.get(ARCHIVE_SECTION)?.updationTime,
+        isSharedAlbum: false,
+    };
 }
 
 function getTrashedCollectionSummaries(
@@ -826,5 +826,7 @@ function getTrashedCollectionSummaries(
         type: CollectionType.system,
         latestFile: collectionsLatestFile.get(TRASH_SECTION),
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
+        updationTime: collectionsLatestFile.get(TRASH_SECTION)?.updationTime,
+        isSharedAlbum: false,
     };
 }

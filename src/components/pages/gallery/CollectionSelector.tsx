@@ -1,12 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import AddCollectionButton from './AddCollectionButton';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { User } from 'types/user';
-import {
-    Collection,
-    CollectionSummaries,
-    CollectionSummary,
-} from 'types/collection';
+import { Collection, CollectionSummaries } from 'types/collection';
 import { CollectionType } from 'constants/collection';
 import DialogBoxBase from 'components/DialogBox/base';
 import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
@@ -38,30 +32,28 @@ function CollectionSelector({
     collections,
     ...props
 }: Props) {
-    const [collectionToShow, setCollectionToShow] = useState<
-        CollectionSummary[]
-    >([]);
+    const collectionToShow = useMemo(() => {
+        const personalCollectionsOtherThanFrom = [
+            ...collectionSummaries.values(),
+        ]?.filter(
+            ({ type, id, isSharedAlbum }) =>
+                id !== attributes.fromCollection &&
+                !isSharedAlbum &&
+                type !== CollectionType.favorites &&
+                type !== CollectionType.system
+        );
+        return personalCollectionsOtherThanFrom;
+    }, [collectionSummaries]);
+
     useEffect(() => {
         if (!attributes || !props.open) {
             return;
         }
-        const user: User = getData(LS_KEYS.USER);
-        const personalCollectionsOtherThanFrom = [
-            ...collectionSummaries.values(),
-        ]?.filter(
-            ({ type, id, attributes: collectionAttributes }) =>
-                id !== attributes.fromCollection &&
-                collectionAttributes.ownerID === user?.id &&
-                type !== CollectionType.favorites &&
-                type !== CollectionType.system
-        );
-        if (personalCollectionsOtherThanFrom.length === 0) {
+        if (collectionToShow.length === 0) {
             props.onClose();
             attributes.showNextModal();
-        } else {
-            setCollectionToShow(personalCollectionsOtherThanFrom);
         }
-    }, [props.open]);
+    }, [collectionToShow, attributes, props.open]);
 
     if (!attributes) {
         return <></>;
