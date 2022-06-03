@@ -5,6 +5,7 @@ import { watchStore } from '../services/store';
 import { logError } from './logging';
 import { BrowserWindow, ipcRenderer } from 'electron';
 import { WatchStoreType } from '../types';
+import { getFilesFromDir } from './upload';
 
 export async function addWatchMapping(
     collectionName: string,
@@ -58,13 +59,9 @@ export function setWatchMappings(watchMappings: WatchStoreType['mappings']) {
     watchStore.set('mappings', watchMappings);
 }
 
-export async function getFilePathsFromDir(dirPath: string) {
-    const filesAndFolders = await fs.readdir(dirPath);
-    let files = filesAndFolders.filter(
-        async (file) =>
-            await fs.stat(`${dirPath}/${file}`).then((stat) => stat.isFile())
-    );
-    files = await Promise.all(files.map(async (file) => `${dirPath}/${file}`));
+export async function getPosixFilePathsFromDir(dirPath: string) {
+    let files = await getFilesFromDir(dirPath);
+    files = files.map((file) => file.split(path.sep).join(path.posix.sep));
     return files;
 }
 

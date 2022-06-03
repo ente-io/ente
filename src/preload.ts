@@ -11,7 +11,7 @@ import {
 import { logError } from './utils/logging';
 import { ElectronFile } from './types';
 import {
-    getFilePathsFromDir,
+    getPosixFilePathsFromDir,
     getWatchMappings,
     updateFilesInWatchMapping,
     initWatcher,
@@ -157,6 +157,15 @@ const showUploadZipDialog = async () => {
     }
 };
 
+const selectFolder = async () => {
+    try {
+        const folderPath = await ipcRenderer.invoke('select-folder');
+        return folderPath;
+    } catch (e) {
+        logError(e, 'error while selecting folder');
+    }
+};
+
 const windowObject: any = window;
 windowObject['ElectronAPIs'] = {
     exists,
@@ -182,7 +191,8 @@ windowObject['ElectronAPIs'] = {
     showUploadZipDialog,
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
-    getFilePathsFromDir,
+    getPosixFilePathsFromDir,
+    selectFolder,
     getWatchMappings,
     updateFilesInWatchMapping,
     setWatchMappings,
