@@ -7,10 +7,12 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/services/sync_service.dart';
 
 class GrantPermissionsWidget extends StatelessWidget {
+  const GrantPermissionsWidget({Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
+        physics: NeverScrollableScrollPhysics(),
         child: SizedBox(
           height: MediaQuery.of(context).size.height,
           child: Column(
@@ -21,29 +23,38 @@ class GrantPermissionsWidget extends StatelessWidget {
                 children: [
                   Center(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 50),
+                      padding: const EdgeInsets.fromLTRB(0, 140, 0, 50),
                       child: Image.asset(
                         "assets/gallery.png",
-                        height: 250,
+                        height: 220,
                       ),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      'Ente needs your permission to access gallery',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline4
-                          .copyWith(height: 1.4),
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: RichText(
+                        text: TextSpan(
+                            style: Theme.of(context)
+                                .textTheme
+                                .headline5
+                                .copyWith(fontWeight: FontWeight.w700),
+                            children: [
+                          TextSpan(text: 'ente '),
+                          TextSpan(
+                              text: "needs permission to ",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headline5
+                                  .copyWith(fontWeight: FontWeight.w400)),
+                          TextSpan(text: 'preserve your photos')
+                        ])),
                   ),
                 ],
               ),
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.only(
-                    left: 20, right: 20, bottom: Platform.isIOS ? 60 : 32),
+                    left: 20, right: 20, bottom: Platform.isIOS ? 60 : 36),
                 child: OutlinedButton(
                   child: Text("Grant permission"),
                   onPressed: () async {
@@ -90,7 +101,6 @@ class GrantPermissionsWidget extends StatelessWidget {
                       );
                     }
                   },
-                  // padding: EdgeInsets.fromLTRB(12, 20, 12, 20),
                 ),
               ),
             ],

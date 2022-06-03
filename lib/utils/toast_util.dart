@@ -13,13 +13,13 @@ Future<void> showToast(String message,
         toastLength: toastLength,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
-        backgroundColor: Colors.blueGrey[900],
+        backgroundColor: Color.fromRGBO(127, 127, 127, 0.5),
         textColor: Colors.white,
         fontSize: 16.0);
   } else {
     EasyLoading.instance
-      ..backgroundColor = Colors.blueGrey[900]
-      ..indicatorColor = Colors.blueGrey[900]
+      ..backgroundColor = Color.fromRGBO(127, 127, 127, 0.5)
+      ..indicatorColor = Color.fromRGBO(127, 127, 127, 0.5)
       ..textColor = Colors.white
       ..userInteractions = true
       ..loadingStyle = EasyLoadingStyle.custom;

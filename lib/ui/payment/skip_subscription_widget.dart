@@ -32,7 +32,6 @@ class SkipSubscriptionWidget extends StatelessWidget {
         ),
         // fontSize: 16,
         onPressed: () async {
-          showToast("Thank you for signing up!");
           Bus.instance.fire(SubscriptionPurchasedEvent());
           Navigator.of(context).popUntil((route) => route.isFirst);
           BillingService.instance
