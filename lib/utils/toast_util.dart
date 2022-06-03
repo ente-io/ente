@@ -11,7 +11,7 @@ Future<void> showToast(String message,
     return Fluttertoast.showToast(
         msg: message,
         toastLength: toastLength,
-        gravity: ToastGravity.TOP,
+        gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
         backgroundColor: Color.fromRGBO(127, 127, 127, 0.5),
         textColor: Colors.white,
