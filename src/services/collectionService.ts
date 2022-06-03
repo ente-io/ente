@@ -13,7 +13,7 @@ import { CustomError } from 'utils/error';
 import { sortFiles, sortFilesIntoCollections } from 'utils/file';
 import {
     Collection,
-    CollectionAndItsLatestFile,
+    CollectionLatestFiles,
     AddToCollectionRequest,
     MoveToCollectionRequest,
     EncryptedFileKey,
@@ -34,6 +34,7 @@ import {
 import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { EncryptionResult } from 'types/upload';
 import constants from 'utils/strings/constants';
+import { IsArchived } from 'utils/magicMetadata';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -204,26 +205,23 @@ export const getCollection = async (
     }
 };
 
-export const getCollectionsAndTheirLatestFile = (
-    collections: Collection[],
+export const getCollectionLatestFiles = (
     files: EnteFile[]
-): CollectionAndItsLatestFile[] => {
-    const latestFile = new Map<number, EnteFile>();
+): CollectionLatestFiles => {
+    const latestFiles = new Map<number, EnteFile>();
 
     files.forEach((file) => {
-        if (!latestFile.has(file.collectionID)) {
-            latestFile.set(file.collectionID, file);
+        if (!latestFiles.has(file.collectionID)) {
+            latestFiles.set(file.collectionID, file);
+        }
+        if (!latestFiles.has(ARCHIVE_SECTION) && IsArchived(file)) {
+            latestFiles.set(ARCHIVE_SECTION, file);
+        }
+        if (!latestFiles.has(TRASH_SECTION) && file.isTrashed) {
+            latestFiles.set(TRASH_SECTION, file);
         }
     });
-    const collectionsAndTheirLatestFile: CollectionAndItsLatestFile[] = [];
-
-    for (const collection of collections) {
-        collectionsAndTheirLatestFile.push({
-            collection,
-            file: latestFile.get(collection.id),
-        });
-    }
-    return collectionsAndTheirLatestFile;
+    return latestFiles;
 };
 
 export const getFavItemIds = async (
@@ -730,13 +728,10 @@ export function sortCollectionSummaries(
                     );
                 case COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING:
                     return (
-                        b.collectionAttributes.updationTime -
-                        a.collectionAttributes.updationTime
+                        b.attributes.updationTime - a.attributes.updationTime
                     );
                 case COLLECTION_SORT_BY.NAME:
-                    return a.collectionAttributes.name.localeCompare(
-                        b.collectionAttributes.name
-                    );
+                    return a.name.localeCompare(b.name);
             }
         })
     );
@@ -753,9 +748,9 @@ function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
 
 function moveFavCollectionToFront(collectionSummaries: CollectionSummary[]) {
     return collectionSummaries.sort((a, b) =>
-        a.collectionAttributes.type === CollectionType.favorites
+        a.type === CollectionType.favorites
             ? -1
-            : b.collectionAttributes.type === CollectionType.favorites
+            : b.type === CollectionType.favorites
             ? 1
             : 0
     );
@@ -766,39 +761,35 @@ export function getCollectionSummaries(
     files: EnteFile[]
 ): CollectionSummaries {
     const collectionSummaries: CollectionSummaries = new Map();
-    const collectionAndTheirLatestFile = getCollectionsAndTheirLatestFile(
-        collections,
-        files
-    );
-    const collectionAndTheirLatestFileMap = new Map();
-    for (const collectionAndItsLatestFile of collectionAndTheirLatestFile) {
-        collectionAndTheirLatestFileMap.set(
-            collectionAndItsLatestFile.collection.id,
-            collectionAndItsLatestFile.file
-        );
-    }
+    const collectionLatestFiles = getCollectionLatestFiles(files);
     const collectionFilesCount = getCollectionsFileCount(files);
 
     for (const collection of collections) {
         collectionSummaries.set(collection.id, {
-            collectionAttributes: {
-                id: collection.id,
-                name: collection.name,
-                type: collection.type,
+            id: collection.id,
+            name: collection.name,
+            type: collection.type,
+            latestFile: collectionLatestFiles.get(collection.id),
+            fileCount: collectionFilesCount.get(collection.id) ?? 0,
+            attributes: {
                 updationTime: collection.updationTime,
                 ownerID: collection.owner.id,
             },
-            latestFile: collectionAndTheirLatestFileMap.get(collection.id),
-            fileCount: collectionFilesCount.get(collection.id) ?? 0,
         });
     }
     collectionSummaries.set(
         ARCHIVE_SECTION,
-        getArchivedCollectionSummaries(collectionFilesCount)
+        getArchivedCollectionSummaries(
+            collectionFilesCount,
+            collectionLatestFiles
+        )
     );
     collectionSummaries.set(
         TRASH_SECTION,
-        getTrashedCollectionSummaries(collectionFilesCount)
+        getTrashedCollectionSummaries(
+            collectionFilesCount,
+            collectionLatestFiles
+        )
     );
     return collectionSummaries;
 }
@@ -813,33 +804,27 @@ function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
 }
 
 function getArchivedCollectionSummaries(
-    collectionFilesCount: CollectionFilesCount
+    collectionFilesCount: CollectionFilesCount,
+    collectionsLatestFile: CollectionLatestFiles
 ) {
     return {
-        collectionAttributes: {
-            id: ARCHIVE_SECTION,
-            name: constants.ARCHIVE,
-            type: CollectionType.system,
-            updationTime: 0,
-            ownerID: 0,
-        },
-        latestFile: null,
+        id: TRASH_SECTION,
+        name: constants.ARCHIVE,
+        type: CollectionType.system,
+        latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
         fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
     } as CollectionSummary;
 }
 
 function getTrashedCollectionSummaries(
-    collectionFilesCount: CollectionFilesCount
-) {
+    collectionFilesCount: CollectionFilesCount,
+    collectionsLatestFile: CollectionLatestFiles
+): CollectionSummary {
     return {
-        collectionAttributes: {
-            id: TRASH_SECTION,
-            name: constants.TRASH,
-            type: CollectionType.system,
-            updationTime: 0,
-            ownerID: 0,
-        },
-        latestFile: null,
+        id: TRASH_SECTION,
+        name: constants.TRASH,
+        type: CollectionType.system,
+        latestFile: collectionsLatestFile.get(TRASH_SECTION),
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
     };
 }

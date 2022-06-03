@@ -49,11 +49,11 @@ function CollectionSelector({
         const personalCollectionsOtherThanFrom = [
             ...collectionSummaries.values(),
         ]?.filter(
-            ({ collectionAttributes }) =>
-                collectionAttributes.id !== attributes.fromCollection &&
+            ({ type, id, attributes: collectionAttributes }) =>
+                id !== attributes.fromCollection &&
                 collectionAttributes.ownerID === user?.id &&
-                collectionAttributes.type !== CollectionType.favorites &&
-                collectionAttributes.type !== CollectionType.system
+                type !== CollectionType.favorites &&
+                type !== CollectionType.system
         );
         if (personalCollectionsOtherThanFrom.length === 0) {
             props.onClose();
@@ -96,7 +96,7 @@ function CollectionSelector({
                             collectionTile={CollectionSelectorTile}
                             onCollectionClick={handleCollectionClick}
                             collectionSummary={collectionSummary}
-                            key={collectionSummary.collectionAttributes.id}
+                            key={collectionSummary.id}
                         />
                     ))}
                 </FlexWrapper>

@@ -13,7 +13,7 @@ import {
     syncPublicFiles,
     verifyPublicCollectionPassword,
 } from 'services/publicCollectionService';
-import { Collection, CollectionSummaries } from 'types/collection';
+import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
@@ -33,6 +33,8 @@ import SingleInputForm from 'components/SingleInputForm';
 import { Card } from 'react-bootstrap';
 import { logError } from 'utils/sentry';
 import SharedAlbumNavbar from 'components/pages/sharedAlbum/Navbar';
+import { CollectionInfo } from 'components/Collections/CollectionInfo';
+import { CollectionSectionWrapper } from 'components/Collections/styledComponents';
 
 const Loader = () => (
     <VerticallyCentered>
@@ -59,8 +61,6 @@ export default function PublicCollectionGallery() {
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
         useState<boolean>(false);
-    const [collectionSummaries, setCollectionSummaries] =
-        useState<CollectionSummaries>(new Map());
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
@@ -133,7 +133,7 @@ export default function PublicCollectionGallery() {
                 collection?.publicURLs?.[0]?.passwordEnabled;
             setIsPasswordProtected(isPasswordProtected);
             setErrorMessage(null);
-            let files = [];
+
             // remove outdated password, sharer has disabled the password
             if (!isPasswordProtected && passwordJWTToken.current) {
                 passwordJWTToken.current = null;
@@ -144,7 +144,7 @@ export default function PublicCollectionGallery() {
                 (isPasswordProtected && passwordJWTToken.current)
             ) {
                 try {
-                    files = await syncPublicFiles(
+                    await syncPublicFiles(
                         token.current,
                         passwordJWTToken.current,
                         collection,
@@ -162,18 +162,6 @@ export default function PublicCollectionGallery() {
             if (isPasswordProtected && !passwordJWTToken.current) {
                 await removePublicFiles(collectionUID);
             }
-            collectionSummaries.set(collection.id, {
-                collectionAttributes: {
-                    name: collection.name,
-                    type: collection.type,
-                    id: collection.id,
-                    updationTime: collection.updationTime,
-                    ownerID: collection.owner.id,
-                },
-                latestFile: files[0],
-                fileCount: files.length,
-            });
-            setCollectionSummaries(collectionSummaries);
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
             if (
@@ -293,6 +281,12 @@ export default function PublicCollectionGallery() {
                 openReportForm,
             }}>
             <SharedAlbumNavbar />
+            <CollectionSectionWrapper>
+                <CollectionInfo
+                    name={publicCollection.name}
+                    fileCount={publicFiles.length}
+                />
+            </CollectionSectionWrapper>
             <PhotoFrame
                 files={publicFiles}
                 setFiles={setPublicFiles}
@@ -304,7 +298,6 @@ export default function PublicCollectionGallery() {
                 openUploader={() => null}
                 isInSearchMode={false}
                 search={{}}
-                setSearchStats={() => null}
                 deleted={[]}
                 activeCollection={ALL_SECTION}
                 isSharedCollection

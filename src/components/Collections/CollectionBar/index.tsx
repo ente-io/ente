@@ -1,24 +1,23 @@
-import NavigationButton, {
-    SCROLL_DIRECTION,
-} from 'components/Collections/CollectionBar/NavigationButton';
-import React, { useEffect } from 'react';
-import { Collection, CollectionSummaries } from 'types/collection';
+import ScrollButton from 'components/Collections/CollectionBar/ScrollButton';
+import React, { useEffect, useMemo } from 'react';
+import { CollectionSummaries } from 'types/collection';
 import constants from 'utils/strings/constants';
-import { ALL_SECTION } from 'constants/collection';
+import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
 import { Typography } from '@mui/material';
 import {
     Hider,
     CollectionBarWrapper,
     ScrollContainer,
-    PaddedSpaceBetweenFlex,
+    CollectionSectionWrapper,
 } from 'components/Collections/styledComponents';
 import CollectionCardWithActiveIndicator from 'components/Collections/CollectionBar/CollectionCardWithActiveIndicator';
-import useComponentScroll from 'hooks/useComponentScroll';
+import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
 import useWindowSize from 'hooks/useWindowSize';
 import LinkButton from 'components/pages/gallery/LinkButton';
+import { SpaceBetweenFlex } from 'components/Container';
+import { sortCollectionSummaries } from 'services/collectionService';
 
 interface IProps {
-    collections: Collection[];
     activeCollection?: number;
     setActiveCollection: (id?: number) => void;
     isInSearchMode: boolean;
@@ -29,13 +28,23 @@ interface IProps {
 export default function CollectionBar(props: IProps) {
     const {
         activeCollection,
-        collections,
+
         setActiveCollection,
         collectionSummaries,
         showAllCollections,
     } = props;
 
+    const sortedCollectionSummary = useMemo(
+        () =>
+            sortCollectionSummaries(
+                [...collectionSummaries.values()],
+                COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING
+            ),
+        [collectionSummaries]
+    );
+
     const windowSize = useWindowSize();
+
     const {
         componentRef,
         scrollComponent,
@@ -43,12 +52,12 @@ export default function CollectionBar(props: IProps) {
         onFarLeft,
         onFarRight,
     } = useComponentScroll({
-        dependencies: [windowSize, collections],
+        dependencies: [windowSize, collectionSummaries],
     });
 
-    const collectionChipsRef = props.collections.reduce(
-        (refMap, collection) => {
-            refMap[collection.id] = React.createRef();
+    const collectionChipsRef = sortedCollectionSummary.reduce(
+        (refMap, collectionSummary) => {
+            refMap[collectionSummary.id] = React.createRef();
             return refMap;
         },
         {}
@@ -66,17 +75,20 @@ export default function CollectionBar(props: IProps) {
 
     return (
         <Hider hide={props.isInSearchMode}>
-            <PaddedSpaceBetweenFlex>
-                <Typography>{constants.ALBUMS}</Typography>
-                {hasScrollBar && (
-                    <LinkButton onClick={showAllCollections}>
-                        {constants.VIEW_ALL_ALBUMS}
-                    </LinkButton>
-                )}
-            </PaddedSpaceBetweenFlex>
+            <CollectionSectionWrapper>
+                <SpaceBetweenFlex>
+                    <Typography>{constants.ALBUMS}</Typography>
+                    {hasScrollBar && (
+                        <LinkButton onClick={showAllCollections}>
+                            {constants.VIEW_ALL_ALBUMS}
+                        </LinkButton>
+                    )}
+                </SpaceBetweenFlex>
+            </CollectionSectionWrapper>
+
             <CollectionBarWrapper>
                 {!onFarLeft && (
-                    <NavigationButton
+                    <ScrollButton
                         scrollDirection={SCROLL_DIRECTION.LEFT}
                         onClick={scrollComponent(SCROLL_DIRECTION.LEFT)}
                     />
@@ -88,12 +100,10 @@ export default function CollectionBar(props: IProps) {
                         onClick={clickHandler(ALL_SECTION)}>
                         {constants.ALL_SECTION_NAME}
                     </CollectionCardWithActiveIndicator>
-                    {collections.map((item) => (
+                    {sortedCollectionSummary.map((item) => (
                         <CollectionCardWithActiveIndicator
                             key={item.id}
-                            latestFile={
-                                collectionSummaries.get(item.id)?.latestFile
-                            }
+                            latestFile={item.latestFile}
                             ref={collectionChipsRef[item.id]}
                             active={activeCollection === item.id}
                             onClick={clickHandler(item.id)}>
@@ -102,7 +112,7 @@ export default function CollectionBar(props: IProps) {
                     ))}
                 </ScrollContainer>
                 {!onFarRight && (
-                    <NavigationButton
+                    <ScrollButton
                         scrollDirection={SCROLL_DIRECTION.RIGHT}
                         onClick={scrollComponent(SCROLL_DIRECTION.RIGHT)}
                     />

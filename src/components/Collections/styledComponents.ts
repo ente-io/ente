@@ -1,28 +1,19 @@
-import { SpaceBetweenFlex } from 'components/Container';
-import { IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
+import { PaddedContainer } from 'components/Container';
 import styled from 'styled-components';
 
-export const CollectionBarWrapper = styled.div`
+export const CollectionBarWrapper = styled(PaddedContainer)`
     display: flex;
     position: relative;
     overflow: hidden;
     height: 86px;
     width: 100%;
     margin: 10px auto;
-    padding: 0 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * 4}px) {
-        padding: 0 4px;
-    }
     border-bottom: 1px solid ${({ theme }) => theme.palette.grey.A200};
 `;
 
-export const PaddedSpaceBetweenFlex = styled(SpaceBetweenFlex)`
+export const CollectionSectionWrapper = styled(PaddedContainer)`
     margin-bottom: 8px;
     margin-top: 16px;
-    padding: 0 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * 4}px) {
-        padding: 0 4px;
-    }
 `;
 
 export const ScrollContainer = styled.div`
@@ -66,8 +57,7 @@ export const ActiveIndicator = styled.div`
 `;
 
 export const Hider = styled.div<{ hide: boolean }>`
-    opacity: ${(props) => (props.hide ? '0' : '100')};
-    height: ${(props) => (props.hide ? '0' : 'auto')};
+    display: ${(props) => (props.hide ? 'none' : 'block')};
 `;
 
 export const AllCollectionTile = styled(CollectionTile)`

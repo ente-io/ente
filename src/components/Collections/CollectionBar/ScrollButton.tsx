@@ -1,11 +1,7 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-
-export enum SCROLL_DIRECTION {
-    LEFT = -1,
-    RIGHT = +1,
-}
+import { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
 
 const Wrapper = styled.button<{ direction: SCROLL_DIRECTION }>`
     position: absolute;
@@ -43,9 +39,9 @@ const Wrapper = styled.button<{ direction: SCROLL_DIRECTION }>`
     }
 `;
 
-const NavigationButton = ({ scrollDirection, ...rest }) => (
+const ScrollButton = ({ scrollDirection, ...rest }) => (
     <Wrapper direction={scrollDirection} {...rest}>
         <NavigateNextIcon />
     </Wrapper>
 );
-export default NavigationButton;
+export default ScrollButton;

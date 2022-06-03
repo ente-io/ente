@@ -17,7 +17,6 @@ import {
 import styled from 'styled-components';
 import {
     syncCollections,
-    getCollectionsAndTheirLatestFile,
     getFavItemIds,
     getLocalCollections,
     getNonEmptyCollections,
@@ -91,11 +90,7 @@ import DeleteBtn from 'components/DeleteBtn';
 import FixCreationTime, {
     FixCreationTimeAttributes,
 } from 'components/FixCreationTime';
-import {
-    Collection,
-    CollectionAndItsLatestFile,
-    CollectionSummaries,
-} from 'types/collection';
+import { Collection, CollectionSummaries } from 'types/collection';
 import { EnteFile } from 'types/file';
 import {
     GalleryContextType,
@@ -145,8 +140,7 @@ export const GalleryContext = createContext<GalleryContextType>(
 export default function Gallery() {
     const router = useRouter();
     const [collections, setCollections] = useState<Collection[]>([]);
-    const [collectionsAndTheirLatestFile, setCollectionsAndTheirLatestFile] =
-        useState<CollectionAndItsLatestFile[]>([]);
+
     const [files, setFiles] = useState<EnteFile[]>(null);
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
     const [bannerMessage, setBannerMessage] = useState<JSX.Element | string>(
@@ -349,11 +343,7 @@ export default function Gallery() {
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
 
         setCollections(nonEmptyCollections);
-        const collectionsAndTheirLatestFile = getCollectionsAndTheirLatestFile(
-            nonEmptyCollections,
-            files
-        );
-        setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
+
         const collectionSummaries = getCollectionSummaries(
             nonEmptyCollections,
             files
@@ -672,7 +662,7 @@ export default function Gallery() {
                     setUploadInProgress={setUploadInProgress}
                     fileRejections={fileRejections}
                     setFiles={setFiles}
-                    isFirstUpload={collectionsAndTheirLatestFile?.length === 0}
+                    isFirstUpload={collectionSummaries.size === 0}
                     electronFiles={electronFiles}
                     setElectronFiles={setElectronFiles}
                     uploadTypeSelectorView={uploadTypeSelectorView}

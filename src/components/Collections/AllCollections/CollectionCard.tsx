@@ -19,9 +19,7 @@ export default function AllCollectionCard({
         <CollectionCard
             collectionTile={collectionTile}
             latestFile={collectionSummary.latestFile}
-            onClick={() =>
-                onCollectionClick(collectionSummary.collectionAttributes.id)
-            }>
+            onClick={() => onCollectionClick(collectionSummary.id)}>
             <div>
                 <Typography
                     css={`
@@ -29,7 +27,7 @@ export default function AllCollectionCard({
                         font-weight: 600;
                         line-height: 20px;
                     `}>
-                    {collectionSummary.collectionAttributes.name}
+                    {collectionSummary.name}
                 </Typography>
                 <Typography
                     css={`

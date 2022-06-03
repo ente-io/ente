@@ -2,7 +2,7 @@ import { Collection, CollectionSummaries } from 'types/collection';
 import CollectionBar from 'components/Collections/CollectionBar';
 import React, { useEffect, useRef, useState } from 'react';
 import AllCollections from 'components/Collections/AllCollections';
-import CollectionInfo from 'components/Collections/CollectionInfo';
+import CollectionInfoWithOptions from 'components/Collections/CollectionInfoWithOptions';
 import { ALL_SECTION } from 'constants/collection';
 import CollectionShare from 'components/Collections/CollectionShare';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
@@ -45,7 +45,6 @@ export default function Collections(props: Iprops) {
     return (
         <>
             <CollectionBar
-                collections={collections}
                 isInSearchMode={isInSearchMode}
                 activeCollection={activeCollectionID}
                 setActiveCollection={setActiveCollectionID}
@@ -60,7 +59,7 @@ export default function Collections(props: Iprops) {
                 setActiveCollection={setActiveCollectionID}
             />
 
-            <CollectionInfo
+            <CollectionInfoWithOptions
                 collectionSummary={collectionSummaries.get(activeCollectionID)}
                 activeCollection={activeCollection.current}
                 setCollectionNamerAttributes={setCollectionNamerAttributes}

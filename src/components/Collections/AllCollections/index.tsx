@@ -35,7 +35,7 @@ export default function AllCollections(props: Iprops) {
         () =>
             sortCollectionSummaries(
                 [...collectionSummaries.values()].filter(
-                    (x) => x.collectionAttributes.type !== CollectionType.system
+                    (x) => x.type !== CollectionType.system
                 ),
                 collectionSortBy
             ),

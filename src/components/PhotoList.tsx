@@ -17,6 +17,7 @@ import { ENTE_WEBSITE_LINK } from 'constants/urls';
 import { getVariantColor, ButtonVariant } from './pages/gallery/LinkButton';
 import { convertBytesToHumanReadable } from 'utils/billing';
 import { DeduplicateContext } from 'pages/deduplicate';
+import { PaddedContainer } from './Container';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const NO_OF_PAGES = 2;
@@ -65,19 +66,17 @@ const getTemplateColumns = (columns: number, groups?: number[]): string => {
     }
 };
 
-const ListContainer = styled.div<{ columns: number; groups?: number[] }>`
+const ListContainer = styled(PaddedContainer)<{
+    columns: number;
+    groups?: number[];
+}>`
     user-select: none;
     display: grid;
     grid-template-columns: ${({ columns, groups }) =>
         getTemplateColumns(columns, groups)};
     grid-column-gap: ${GAP_BTW_TILES}px;
-    padding: 0 24px;
     width: 100%;
     color: #fff;
-
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * 4}px) {
-        padding: 0 4px;
-    }
 `;
 
 const DateContainer = styled.div<{ span: number }>`
