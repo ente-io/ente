@@ -19,7 +19,7 @@ export default function AllCollectionCard({
         <CollectionCard
             collectionTile={collectionTile}
             latestFile={collectionSummary.latestFile}
-            onClick={() => onCollectionClick(collectionSummary.attributes.id)}>
+            onClick={() => onCollectionClick(collectionSummary.id)}>
             <div>
                 <Typography
                     css={`

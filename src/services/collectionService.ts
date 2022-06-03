@@ -766,6 +766,7 @@ export function getCollectionSummaries(
 
     for (const collection of collections) {
         collectionSummaries.set(collection.id, {
+            id: collection.id,
             name: collection.name,
             type: collection.type,
             latestFile: collectionLatestFiles.get(collection.id),
@@ -773,7 +774,6 @@ export function getCollectionSummaries(
             attributes: {
                 updationTime: collection.updationTime,
                 ownerID: collection.owner.id,
-                id: collection.id,
             },
         });
     }
@@ -808,11 +808,11 @@ function getArchivedCollectionSummaries(
     collectionsLatestFile: CollectionLatestFiles
 ) {
     return {
+        id: TRASH_SECTION,
         name: constants.ARCHIVE,
         type: CollectionType.system,
         latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
         fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
-        attributes: { id: TRASH_SECTION },
     } as CollectionSummary;
 }
 
@@ -821,10 +821,10 @@ function getTrashedCollectionSummaries(
     collectionsLatestFile: CollectionLatestFiles
 ): CollectionSummary {
     return {
+        id: TRASH_SECTION,
         name: constants.TRASH,
         type: CollectionType.system,
         latestFile: collectionsLatestFile.get(TRASH_SECTION),
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
-        attributes: { id: TRASH_SECTION },
     };
 }

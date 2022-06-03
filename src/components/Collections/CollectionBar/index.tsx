@@ -57,7 +57,7 @@ export default function CollectionBar(props: IProps) {
 
     const collectionChipsRef = sortedCollectionSummary.reduce(
         (refMap, collectionSummary) => {
-            refMap[collectionSummary.attributes.id] = React.createRef();
+            refMap[collectionSummary.id] = React.createRef();
             return refMap;
         },
         {}
@@ -102,11 +102,11 @@ export default function CollectionBar(props: IProps) {
                     </CollectionCardWithActiveIndicator>
                     {sortedCollectionSummary.map((item) => (
                         <CollectionCardWithActiveIndicator
-                            key={item.attributes.id}
+                            key={item.id}
                             latestFile={item.latestFile}
-                            ref={collectionChipsRef[item.attributes.id]}
-                            active={activeCollection === item.attributes.id}
-                            onClick={clickHandler(item.attributes.id)}>
+                            ref={collectionChipsRef[item.id]}
+                            active={activeCollection === item.id}
+                            onClick={clickHandler(item.id)}>
                             {item.name}
                         </CollectionCardWithActiveIndicator>
                     ))}

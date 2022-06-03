@@ -49,8 +49,8 @@ function CollectionSelector({
         const personalCollectionsOtherThanFrom = [
             ...collectionSummaries.values(),
         ]?.filter(
-            ({ type, attributes: collectionAttributes }) =>
-                collectionAttributes.id !== attributes.fromCollection &&
+            ({ type, id, attributes: collectionAttributes }) =>
+                id !== attributes.fromCollection &&
                 collectionAttributes.ownerID === user?.id &&
                 type !== CollectionType.favorites &&
                 type !== CollectionType.system
@@ -96,7 +96,7 @@ function CollectionSelector({
                             collectionTile={CollectionSelectorTile}
                             onCollectionClick={handleCollectionClick}
                             collectionSummary={collectionSummary}
-                            key={collectionSummary.attributes.id}
+                            key={collectionSummary.id}
                         />
                     ))}
                 </FlexWrapper>

@@ -89,12 +89,12 @@ export interface CollectionMagicMetadata
     data: CollectionMagicMetadataProps;
 }
 export interface CollectionSummary {
+    id: number;
     name: string;
     type: CollectionType;
     latestFile?: EnteFile;
     fileCount: number;
     attributes?: {
-        id?: number;
         ownerID?: number;
         updationTime?: number;
     };
