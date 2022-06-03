@@ -7,6 +7,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/services/sync_service.dart';
 
 class GrantPermissionsWidget extends StatelessWidget {
+  const GrantPermissionsWidget({Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,7 +101,6 @@ class GrantPermissionsWidget extends StatelessWidget {
                       );
                     }
                   },
-                  // padding: EdgeInsets.fromLTRB(12, 20, 12, 20),
                 ),
               ),
             ],

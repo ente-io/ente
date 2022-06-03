@@ -11,15 +11,16 @@ Future<void> showToast(String message,
     return Fluttertoast.showToast(
         msg: message,
         toastLength: toastLength,
-        gravity: ToastGravity.BOTTOM,
+        gravity: ToastGravity.TOP,
         timeInSecForIosWeb: 1,
-        backgroundColor: Colors.blueGrey[900],
+        // backgroundColor: Colors.blueGrey[900]
+        backgroundColor: Color.fromRGBO(59, 59, 59, 0.23),
         textColor: Colors.white,
         fontSize: 16.0);
   } else {
     EasyLoading.instance
-      ..backgroundColor = Colors.blueGrey[900]
-      ..indicatorColor = Colors.blueGrey[900]
+      ..backgroundColor = Color.fromRGBO(59, 59, 59, 0.23)
+      ..indicatorColor = Color.fromRGBO(59, 59, 59, 0.23)
       ..textColor = Colors.white
       ..userInteractions = true
       ..loadingStyle = EasyLoadingStyle.custom;
