@@ -13,10 +13,6 @@ class FeatureFlagService {
   static final FeatureFlagService instance =
       FeatureFlagService._privateConstructor();
   static const kBooleanFeatureFlagsKey = "feature_flags_key";
-  FeatureFlags defaultFlags = FeatureFlags(
-      disableCFWorker: FFDefault.disableCFWorker,
-      disableUrlSharing: FFDefault.disableUrlSharing,
-      enableStripe: FFDefault.enableStripe);
 
   final _logger = Logger("FeatureFlagService");
   FeatureFlags _featureFlags;
@@ -39,7 +35,7 @@ class FeatureFlagService {
         FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey));
     // if nothing is cached, use defaults as temporary fallback
     if (_featureFlags == null) {
-      return defaultFlags;
+      return FeatureFlags.defaultFlags;
     }
     return _featureFlags;
   }
@@ -91,6 +87,11 @@ class FeatureFlagService {
 }
 
 class FeatureFlags {
+  static FeatureFlags defaultFlags = FeatureFlags(
+      disableCFWorker: FFDefault.disableCFWorker,
+      disableUrlSharing: FFDefault.disableUrlSharing,
+      enableStripe: FFDefault.enableStripe);
+
   final bool disableCFWorker;
   final bool disableUrlSharing;
   final bool enableStripe;
