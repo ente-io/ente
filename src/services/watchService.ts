@@ -105,12 +105,12 @@ class WatchService {
         }
     }
 
-    async addWatchMapping(collectionName: string, folderPath: string) {
-        await this.ElectronAPIs.addWatchMapping(collectionName, folderPath);
+    addWatchMapping(collectionName: string, folderPath: string) {
+        this.ElectronAPIs.addWatchMapping(collectionName, folderPath);
     }
 
-    async removeWatchMapping(collectionName: string) {
-        await this.ElectronAPIs.removeWatchMapping(collectionName);
+    removeWatchMapping(collectionName: string) {
+        this.ElectronAPIs.removeWatchMapping(collectionName);
     }
 
     getWatchMappings(): WatchMapping[] {

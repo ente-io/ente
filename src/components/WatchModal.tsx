@@ -12,7 +12,7 @@ function WatchModal({ watchModalView, setWatchModalView }) {
 
     useEffect(() => {
         if (shouldUpdateMappings) {
-            setMappings(watchService.ElectronAPIs.getWatchMappings());
+            setMappings(watchService.getWatchMappings());
             setShouldUpdateMappings(false);
         }
     }, [shouldUpdateMappings]);
