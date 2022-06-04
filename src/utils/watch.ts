@@ -1,4 +1,3 @@
-import * as fs from 'promise-fs';
 import path from 'path';
 import chokidar from 'chokidar';
 import { watchStore } from '../services/store';
@@ -26,6 +25,10 @@ export async function addWatchMapping(
         return;
     }
 
+    await ipcRenderer.invoke('add-watcher', {
+        dir: folderPath,
+    });
+
     watchMappings.push({
         collectionName,
         folderPath,
@@ -45,6 +48,10 @@ export async function removeWatchMapping(collectionName: string) {
         return;
     }
 
+    await ipcRenderer.invoke('remove-watcher', {
+        dir: watchMapping.folderPath,
+    });
+
     watchMappings.splice(watchMappings.indexOf(watchMapping), 1);
 
     setWatchMappings(watchMappings);
@@ -63,28 +70,6 @@ export async function getPosixFilePathsFromDir(dirPath: string) {
     let files = await getFilesFromDir(dirPath);
     files = files.map((file) => file.split(path.sep).join(path.posix.sep));
     return files;
-}
-
-export async function updateFilesInWatchMapping(
-    collectionName: string,
-    files: { path: string; id: number }[]
-) {
-    try {
-        const mappings = getWatchMappings();
-        const mapping = mappings.find(
-            (m) => m.collectionName === collectionName
-        );
-        if (mapping) {
-            mapping.files = files;
-        } else {
-            throw new Error(
-                `No mapping found for collection ${collectionName}`
-            );
-        }
-        watchStore.set('mappings', mappings);
-    } catch (e) {
-        logError(e, 'error while updating watch mappings');
-    }
 }
 
 export function initWatcher(mainWindow: BrowserWindow) {

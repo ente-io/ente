@@ -74,8 +74,8 @@ if (!gotTheLock) {
         tray.setToolTip('ente');
         tray.setContextMenu(buildContextMenu(mainWindow));
 
-        setupIpcComs(tray, mainWindow);
-        initWatcher(mainWindow);
+        const watcher = initWatcher(mainWindow);
+        setupIpcComs(tray, mainWindow, watcher);
         if (!isDev) {
             AppUpdater.checkForUpdate(tray, mainWindow);
         }

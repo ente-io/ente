@@ -13,13 +13,13 @@ import { ElectronFile } from './types';
 import {
     getPosixFilePathsFromDir,
     getWatchMappings,
-    updateFilesInWatchMapping,
     initWatcher,
     registerWatcherFunctions,
     setWatchMappings,
     addWatchMapping,
     removeWatchMapping,
 } from './utils/watch';
+import path from 'path';
 
 const { ipcRenderer } = electron;
 
@@ -159,7 +159,8 @@ const showUploadZipDialog = async () => {
 
 const selectFolder = async () => {
     try {
-        const folderPath = await ipcRenderer.invoke('select-folder');
+        let folderPath: string = await ipcRenderer.invoke('select-folder');
+        folderPath = folderPath.split(path.sep).join(path.posix.sep);
         return folderPath;
     } catch (e) {
         logError(e, 'error while selecting folder');
@@ -194,7 +195,6 @@ windowObject['ElectronAPIs'] = {
     getPosixFilePathsFromDir,
     selectFolder,
     getWatchMappings,
-    updateFilesInWatchMapping,
     setWatchMappings,
     initWatcher,
     addWatchMapping,

@@ -3,10 +3,12 @@ import { createWindow } from './createWindow';
 import { buildContextMenu } from './menuUtil';
 import { logErrorSentry } from './sentry';
 import { getFilesFromDir } from './upload';
+import chokidar from 'chokidar';
 
 export default function setupIpcComs(
     tray: Tray,
-    mainWindow: BrowserWindow
+    mainWindow: BrowserWindow,
+    watcher: chokidar.FSWatcher
 ): void {
     ipcMain.handle('select-dir', async () => {
         const result = await dialog.showOpenDialog({
@@ -64,7 +66,21 @@ export default function setupIpcComs(
         return files;
     });
 
-    ipcMain.handle('log-error', (_, err, msg, info?) => {
+    ipcMain.handle(
+        'add-watcher',
+        async (_: Electron.IpcMainEvent, args: { dir: string }) => {
+            watcher.add(args.dir);
+        }
+    );
+
+    ipcMain.handle(
+        'remove-watcher',
+        async (_: Electron.IpcMainEvent, args: { dir: string }) => {
+            watcher.unwatch(args.dir);
+        }
+    );
+
+    ipcMain.handle('log-error', (event, err, msg, info?) => {
         logErrorSentry(err, msg, info);
     });
 }
