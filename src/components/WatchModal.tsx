@@ -28,17 +28,20 @@ function WatchModal({ watchModalView, setWatchModalView }) {
         setInputCollectionName(e.target.value);
     };
 
-    const handleAddWatchMapping = () => {
+    const handleAddWatchMapping = async () => {
         if (inputFolderPath.length > 0 && inputCollectionName.length > 0) {
-            watchService.addWatchMapping(inputCollectionName, inputFolderPath);
+            await watchService.addWatchMapping(
+                inputCollectionName,
+                inputFolderPath
+            );
             setInputCollectionName('');
             setInputFolderPath('');
             setShouldUpdateMappings(true);
         }
     };
 
-    const handleRemoveWatchMapping = (mapping: WatchMapping) => {
-        watchService.removeWatchMapping(mapping.collectionName);
+    const handleRemoveWatchMapping = async (mapping: WatchMapping) => {
+        await watchService.removeWatchMapping(mapping.collectionName);
         setShouldUpdateMappings(true);
     };
 

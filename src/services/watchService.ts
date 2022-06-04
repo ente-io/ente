@@ -2,8 +2,8 @@ import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
-import { syncCollections } from './collectionService';
-import { syncFiles, trashFiles } from './fileService';
+import { removeFromCollection, syncCollections } from './collectionService';
+import { syncFiles } from './fileService';
 import debounce from 'debounce-promise';
 
 export interface WatchMapping {
@@ -29,7 +29,6 @@ class WatchService {
     setElectronFiles: (files: ElectronFile[]) => void;
     setCollectionName: (collectionName: string) => void;
     syncWithRemote: () => void;
-    promise: Promise<void>;
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
@@ -105,12 +104,12 @@ class WatchService {
         }
     }
 
-    addWatchMapping(collectionName: string, folderPath: string) {
-        this.ElectronAPIs.addWatchMapping(collectionName, folderPath);
+    async addWatchMapping(collectionName: string, folderPath: string) {
+        await this.ElectronAPIs.addWatchMapping(collectionName, folderPath);
     }
 
-    removeWatchMapping(collectionName: string) {
-        this.ElectronAPIs.removeWatchMapping(collectionName);
+    async removeWatchMapping(collectionName: string) {
+        await this.ElectronAPIs.removeWatchMapping(collectionName);
     }
 
     getWatchMappings(): WatchMapping[] {
@@ -190,6 +189,7 @@ class WatchService {
             }
 
             const uploadedFiles: WatchMapping['files'] = [];
+
             for (const fileWithCollection of filesWithCollection) {
                 if (fileWithCollection.isLivePhoto) {
                     const imagePath = (
@@ -262,10 +262,10 @@ class WatchService {
     ) {
         if (this.allElectronAPIsExist) {
             const collections = await syncCollections();
-            const collectionID = collections.find(
+            const collection = collections.find(
                 (collection) => collection.name === collectionName
-            )?.id;
-            if (!collectionID) {
+            );
+            if (!collection) {
                 return;
             }
             const files = await syncFiles(collections, () => {});
@@ -276,10 +276,12 @@ class WatchService {
             }
 
             const filesToTrash = files.filter((file) => {
-                return idSet.has(file.id) && file.collectionID === collectionID;
+                return (
+                    idSet.has(file.id) && file.collectionID === collection.id
+                );
             });
 
-            await trashFiles(filesToTrash);
+            await removeFromCollection(collection, filesToTrash);
         }
     }
 
@@ -306,15 +308,19 @@ class WatchService {
 }
 
 async function diskFileAddedCallback(instance: WatchService, filePath: string) {
-    console.log('diskFileAddedCallback', instance, filePath);
     const collectionName = await instance.getCollectionName(filePath);
+
+    if (!collectionName) {
+        return;
+    }
+
+    console.log('adding', collectionName, filePath);
 
     const event: UploadQueueType = {
         collectionName,
         paths: [filePath],
     };
     instance.uploadQueue.push(event);
-    // instance.runNextUpload();
     await debounce(runNextUploadByInstance, 300)(instance);
 }
 
@@ -324,34 +330,37 @@ async function diskFileRemovedCallback(
 ) {
     const collectionName = await instance.getCollectionName(filePath);
 
-    console.log('collection', collectionName);
+    console.log('removing', collectionName, filePath);
 
     if (!collectionName) {
         return;
     }
 
-    let mappings = instance.getWatchMappings();
+    const mappings = instance.getWatchMappings();
 
-    const mapping = mappings.find(
+    const mappingIdx = mappings.findIndex(
         (mapping) => mapping.collectionName === collectionName
     );
-    if (!mapping) {
+    if (mappingIdx === -1) {
         return;
     }
 
-    const file = mapping.files.find((file) => file.path === filePath);
+    const file = mappings[mappingIdx].files.find(
+        (file) => file.path === filePath
+    );
     if (!file) {
         return;
     }
 
     await instance.trashByIDs([file], collectionName);
 
-    mappings = instance.getWatchMappings();
-    mapping.files = mapping.files.filter((file) => file.path !== filePath);
+    mappings[mappingIdx].files = mappings[mappingIdx].files.filter(
+        (file) => file.path !== filePath
+    );
     instance.ElectronAPIs.setWatchMappings(mappings);
     instance.syncWithRemote();
 
-    console.log('after trash', instance.ElectronAPIs.getWatchMappings());
+    console.log('after trash', instance.getWatchMappings());
 }
 
 const runNextUploadByInstance = async (w: WatchService) => {
