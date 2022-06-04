@@ -181,6 +181,7 @@ const Cont = styled.div<{ disabled: boolean }>`
     &:hover ${HoverOverlay} {
         opacity: 1;
     }
+    border-radius: ${({ theme }) => theme.shape.borderRadius}px;
 `;
 
 export default function PreviewCard(props: IProps) {
