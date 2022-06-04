@@ -41,20 +41,19 @@ export const IconButton = styled.button`
 export const Row = styled.div`
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: ${({ theme }) => theme.spacing(2)};
     flex: 1;
 `;
 
 export const Label = styled.div<{ width?: string }>`
     width: ${(props) => props.width ?? '70%'};
+    color: ${(props) => props.theme.palette.text.secondary};
 `;
 export const Value = styled.div<{ width?: string }>`
     display: flex;
     justify-content: flex-start;
     align-items: center;
     width: ${(props) => props.width ?? '30%'};
-
-    color: #ddd;
 `;
 
 export const FlexWrapper = styled(Box)`

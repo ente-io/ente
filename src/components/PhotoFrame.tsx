@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import DownloadManager from 'services/downloadManager';
 import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
+import PhotoSwipe from 'components/PhotoSwipe';
 import { formatDateRelative } from 'utils/file';
 import {
     ALL_SECTION,
