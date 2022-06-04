@@ -61,7 +61,8 @@ Future<void> _runInForeground() async {
       builder: (args) => EnteApp(_runBackgroundTask, _killBGTask),
       lockScreen: LockScreen(),
       enabled: Configuration.instance.shouldShowLockScreen(),
-      themeData: darkThemeData,
+      lightTheme: lightThemeData,
+      darkTheme: darkThemeData,
     ));
   });
 }
