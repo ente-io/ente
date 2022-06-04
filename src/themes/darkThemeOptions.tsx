@@ -16,10 +16,12 @@ declare module '@mui/material/styles' {
 
     interface TypographyVariants {
         title: React.CSSProperties;
+        subtitle: React.CSSProperties;
     }
 
     interface TypographyVariantsOptions {
         title?: React.CSSProperties;
+        subtitle?: React.CSSProperties;
     }
 }
 
@@ -38,6 +40,7 @@ declare module '@mui/material/Checkbox' {
 declare module '@mui/material/Typography' {
     interface TypographyPropsVariantOverrides {
         title: true;
+        subtitle: true;
     }
 }
 
@@ -168,6 +171,12 @@ const darkThemeOptions = createTheme({
             fontSize: '32px',
             lineHeight: '40px',
             fontWeight: 600,
+            display: 'block',
+        },
+        subtitle: {
+            fontSize: '24px',
+            fontWeight: 600,
+            lineHeight: '36px',
             display: 'block',
         },
         fontFamily: ['Inter', 'sans-serif'].join(','),

@@ -14,12 +14,7 @@ export default function AllCollectionsHeader({
     return (
         <DialogTitle>
             <SpaceBetweenFlex>
-                <Typography
-                    css={`
-                        font-size: 24px;
-                        font-weight: 600;
-                        line-height: 36px;
-                    `}>
+                <Typography variant="subtitle">
                     {constants.ALL_ALBUMS}
                 </Typography>
                 <IconButton onClick={onClose}>
@@ -27,13 +22,7 @@ export default function AllCollectionsHeader({
                 </IconButton>
             </SpaceBetweenFlex>
             <SpaceBetweenFlex>
-                <Typography
-                    css={`
-                        font-size: 24px;
-                        font-weight: 600;
-                        line-height: 36px;
-                    `}
-                    color={'text.secondary'}>
+                <Typography variant="subtitle" color={'text.secondary'}>
                     {`${collectionCount} ${constants.ALBUMS}`}
                 </Typography>
                 <CollectionSort
