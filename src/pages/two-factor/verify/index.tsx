@@ -17,13 +17,13 @@ export default function Home() {
         const main = async () => {
             router.prefetch(PAGES.CREDENTIALS);
             const user: User = getData(LS_KEYS.USER);
-            if (
+            if (!user?.email || !user.twoFactorSessionID) {
+                router.push(PAGES.ROOT);
+            } else if (
                 !user.isTwoFactorEnabled &&
                 (user.encryptedToken || user.token)
             ) {
                 router.push(PAGES.CREDENTIALS);
-            } else if (!user?.email || !user.twoFactorSessionID) {
-                router.push(PAGES.ROOT);
             } else {
                 setSessionID(user.twoFactorSessionID);
             }
