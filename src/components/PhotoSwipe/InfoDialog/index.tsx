@@ -7,7 +7,7 @@ import { RenderCreationTime } from './RenderCreationTime';
 import { RenderInfoItem } from './RenderInfoItem';
 import DialogBoxBase from 'components/DialogBox/base';
 import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
-import { DialogContent, Typography } from '@mui/material';
+import { DialogContent, Link, Typography } from '@mui/material';
 
 export function InfoModal({
     shouldDisableEdits,
@@ -59,12 +59,12 @@ export function InfoModal({
                     metadata?.longitude > 0 &&
                     RenderInfoItem(
                         constants.LOCATION,
-                        <a
+                        <Link
                             href={`https://www.openstreetmap.org/?mlat=${metadata.latitude}&mlon=${metadata.longitude}#map=15/${metadata.latitude}/${metadata.longitude}`}
                             target="_blank"
                             rel="noopener noreferrer">
                             {constants.SHOW_MAP}
-                        </a>
+                        </Link>
                     )}
                 {exif && (
                     <>
