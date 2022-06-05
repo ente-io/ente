@@ -74,7 +74,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   if (file.fileType == FileType.livePhoto && io.Platform.isIOS) {
     final io.File videoUrl = await Motionphoto.getLivePhotoFile(file.localID);
     if (videoUrl == null || !videoUrl.existsSync()) {
-      String errMsg = "missing livePhoto url for " + file.toString();
+      String errMsg = "missing livePhoto url for  ${file
+          .toString()} with subType ${file.fileSubType};
       _logger.severe(errMsg);
       throw InvalidFileUploadState(errMsg);
     }
