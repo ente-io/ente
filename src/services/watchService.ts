@@ -150,10 +150,7 @@ class WatchService {
         );
     }
 
-    async fileUploadDone(
-        fileWithCollection: FileWithCollection,
-        file: EnteFile
-    ) {
+    async fileUploaded(fileWithCollection: FileWithCollection, file: EnteFile) {
         if (fileWithCollection.isLivePhoto) {
             this.pathToIDMap.set(
                 (fileWithCollection.livePhotoAssets.image as ElectronFile).path,
@@ -171,7 +168,7 @@ class WatchService {
         }
     }
 
-    async allUploadsDone(
+    async allFileUploadsDone(
         filesWithCollection: FileWithCollection[],
         collections: Collection[]
     ) {
@@ -238,8 +235,6 @@ class WatchService {
                         this.uploadQueue[0].collectionName
                 );
                 mapping.files = [...mapping.files, ...uploadedFiles];
-
-                console.log('new mappings', mappings);
 
                 this.ElectronAPIs.setWatchMappings(mappings);
                 this.syncWithRemote();

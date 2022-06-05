@@ -357,7 +357,7 @@ export default function Upload(props: Props) {
                 filesWithCollectionToUpload,
                 collections
             );
-            await watchService.allUploadsDone(
+            await watchService.allFileUploadsDone(
                 filesWithCollectionToUpload,
                 collections
             );
