@@ -231,7 +231,7 @@ class File {
 
   @override
   String toString() {
-    return '''File(generatedID: $generatedID, localID: $localID, 
+    return '''File(generatedID: $generatedID, localID: $localID, title: $title, 
       uploadedFileId: $uploadedFileID, modificationTime: $modificationTime, 
       ownerID: $ownerID, collectionID: $collectionID, updationTime: $updationTime)''';
   }
