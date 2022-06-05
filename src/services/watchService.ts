@@ -15,7 +15,8 @@ export interface WatchMapping {
     }[];
 }
 
-interface UploadQueueType {
+interface EventQueueType {
+    type: 'upload' | 'trash';
     collectionName: string;
     paths: string[];
 }
@@ -23,8 +24,8 @@ interface UploadQueueType {
 class WatchService {
     ElectronAPIs: any;
     allElectronAPIsExist: boolean = false;
-    uploadQueue: UploadQueueType[] = [];
-    isUploadRunning: boolean = false;
+    eventQueue: EventQueueType[] = [];
+    isEventRunning: boolean = false;
     pathToIDMap = new Map<string, number>();
     setElectronFiles: (files: ElectronFile[]) => void;
     setCollectionName: (collectionName: string) => void;
@@ -64,33 +65,27 @@ class WatchService {
                 });
 
                 if (filesToUpload.length > 0) {
-                    const event: UploadQueueType = {
+                    const event: EventQueueType = {
+                        type: 'upload',
                         collectionName: mapping.collectionName,
                         paths: filesToUpload,
                     };
-                    this.uploadQueue.push(event);
+                    this.eventQueue.push(event);
                 }
 
                 if (filesToRemove.length > 0) {
-                    await this.trashByIDs(
-                        filesToRemove,
-                        mapping.collectionName
-                    );
-                    mapping.files = mapping.files.filter(
-                        (file) =>
-                            !filesToRemove.find(
-                                (fileToRemove) =>
-                                    file.path === fileToRemove.path
-                            )
-                    );
+                    const event: EventQueueType = {
+                        type: 'trash',
+                        collectionName: mapping.collectionName,
+                        paths: filesToRemove.map((file) => file.path),
+                    };
+                    this.eventQueue.push(event);
                 }
-
-                this.runNextUpload();
             }
 
-            this.ElectronAPIs.setWatchMappings(mappings);
             this.setWatchFunctions();
             this.syncWithRemote();
+            await this.runNextEvent();
         }
     }
 
@@ -118,32 +113,47 @@ class WatchService {
         }
     }
 
-    async runNextUpload() {
-        if (this.uploadQueue.length === 0 || this.isUploadRunning) {
+    async runNextEvent() {
+        console.log('runNextEvent mappings', this.getWatchMappings());
+
+        if (this.eventQueue.length === 0) {
             return;
         }
 
-        this.isUploadRunning = true;
+        if (this.eventQueue[0].type === 'upload') {
+            this.runNextUpload();
+        } else {
+            this.runNextTrash();
+        }
+    }
 
-        const newUploadQueue = [this.uploadQueue[0]];
-        const len = this.uploadQueue.length;
+    async runNextUpload() {
+        if (this.eventQueue.length === 0 || this.isEventRunning) {
+            return;
+        }
+
+        this.isEventRunning = true;
+
+        const newUploadQueue = [this.eventQueue[0]];
+        const len = this.eventQueue.length;
         for (let i = 1; i < len; i++) {
             if (
-                this.uploadQueue[i].collectionName ===
-                newUploadQueue[0].collectionName
+                this.eventQueue[i].collectionName ===
+                    newUploadQueue[0].collectionName &&
+                this.eventQueue[i].type === newUploadQueue[0].type
             ) {
-                newUploadQueue[0].paths.push(...this.uploadQueue[i].paths);
+                newUploadQueue[0].paths.push(...this.eventQueue[i].paths);
             } else {
-                newUploadQueue.push(this.uploadQueue[i]);
+                newUploadQueue.push(this.eventQueue[i]);
             }
         }
-        newUploadQueue.push(...this.uploadQueue.slice(len));
-        this.uploadQueue = newUploadQueue;
+        newUploadQueue.push(...this.eventQueue.slice(len));
+        this.eventQueue = newUploadQueue;
 
-        this.setCollectionName(this.uploadQueue[0].collectionName);
+        this.setCollectionName(this.eventQueue[0].collectionName);
         this.setElectronFiles(
             await Promise.all(
-                this.uploadQueue[0].paths.map(async (path) => {
+                this.eventQueue[0].paths.map(async (path) => {
                     return await this.ElectronAPIs.getElectronFile(path);
                 })
             )
@@ -178,9 +188,9 @@ class WatchService {
                     collection.id === filesWithCollection[0].collectionID
             );
             if (
-                !this.isUploadRunning ||
-                this.uploadQueue.length === 0 ||
-                this.uploadQueue[0].collectionName !== collection?.name
+                !this.isEventRunning ||
+                this.eventQueue.length === 0 ||
+                this.eventQueue[0].collectionName !== collection?.name
             ) {
                 return;
             }
@@ -225,30 +235,58 @@ class WatchService {
                 }
             }
 
-            console.log('uploadedFiles', uploadedFiles);
-
             if (uploadedFiles.length > 0) {
                 const mappings = this.getWatchMappings();
                 const mapping = mappings.find(
                     (mapping) =>
                         mapping.collectionName ===
-                        this.uploadQueue[0].collectionName
+                        this.eventQueue[0].collectionName
                 );
                 mapping.files = [...mapping.files, ...uploadedFiles];
 
                 this.ElectronAPIs.setWatchMappings(mappings);
                 this.syncWithRemote();
-
-                console.log(
-                    'now mappings',
-                    await this.ElectronAPIs.getWatchMappings()
-                );
             }
 
-            this.uploadQueue.shift();
-            this.isUploadRunning = false;
-            this.runNextUpload();
+            this.eventQueue.shift();
+            this.isEventRunning = false;
+            this.runNextEvent();
         }
+    }
+
+    async runNextTrash() {
+        if (this.eventQueue.length === 0 || this.isEventRunning) {
+            return;
+        }
+
+        this.isEventRunning = true;
+
+        const { collectionName, paths } = this.eventQueue[0];
+        const filePathsToRemove = new Set(paths);
+
+        const mappings = this.getWatchMappings();
+        const mappingIdx = mappings.findIndex(
+            (mapping) => mapping.collectionName === collectionName
+        );
+        if (mappingIdx === -1) {
+            return;
+        }
+
+        const files = mappings[mappingIdx].files.filter((file) =>
+            filePathsToRemove.has(file.path)
+        );
+
+        await this.trashByIDs(files, collectionName);
+
+        mappings[mappingIdx].files = mappings[mappingIdx].files.filter(
+            (file) => !filePathsToRemove.has(file.path)
+        );
+        this.ElectronAPIs.setWatchMappings(mappings);
+        this.syncWithRemote();
+
+        this.eventQueue.shift();
+        this.isEventRunning = false;
+        this.runNextEvent();
     }
 
     async trashByIDs(
@@ -283,8 +321,6 @@ class WatchService {
     async getCollectionName(filePath: string) {
         const mappings = this.getWatchMappings();
 
-        console.log('mappings', mappings, filePath);
-
         const collectionName = mappings.find((mapping) =>
             filePath.startsWith(mapping.folderPath)
         )?.collectionName;
@@ -309,14 +345,15 @@ async function diskFileAddedCallback(instance: WatchService, filePath: string) {
         return;
     }
 
-    console.log('adding', collectionName, filePath);
+    console.log('added (upload) to event queue', collectionName, filePath);
 
-    const event: UploadQueueType = {
+    const event: EventQueueType = {
+        type: 'upload',
         collectionName,
         paths: [filePath],
     };
-    instance.uploadQueue.push(event);
-    await debounce(runNextUploadByInstance, 300)(instance);
+    instance.eventQueue.push(event);
+    await debounce(runNextEventByInstance, 300)(instance);
 }
 
 async function diskFileRemovedCallback(
@@ -325,41 +362,23 @@ async function diskFileRemovedCallback(
 ) {
     const collectionName = await instance.getCollectionName(filePath);
 
-    console.log('removing', collectionName, filePath);
+    console.log('added (trash) to event queue', collectionName, filePath);
 
     if (!collectionName) {
         return;
     }
 
-    const mappings = instance.getWatchMappings();
-
-    const mappingIdx = mappings.findIndex(
-        (mapping) => mapping.collectionName === collectionName
-    );
-    if (mappingIdx === -1) {
-        return;
-    }
-
-    const file = mappings[mappingIdx].files.find(
-        (file) => file.path === filePath
-    );
-    if (!file) {
-        return;
-    }
-
-    await instance.trashByIDs([file], collectionName);
-
-    mappings[mappingIdx].files = mappings[mappingIdx].files.filter(
-        (file) => file.path !== filePath
-    );
-    instance.ElectronAPIs.setWatchMappings(mappings);
-    instance.syncWithRemote();
-
-    console.log('after trash', instance.getWatchMappings());
+    const event: EventQueueType = {
+        type: 'trash',
+        collectionName,
+        paths: [filePath],
+    };
+    instance.eventQueue.push(event);
+    await debounce(runNextEventByInstance, 300)(instance);
 }
 
-const runNextUploadByInstance = async (w: WatchService) => {
-    await w.runNextUpload();
+const runNextEventByInstance = async (w: WatchService) => {
+    await w.runNextEvent();
 };
 
 export default new WatchService();
