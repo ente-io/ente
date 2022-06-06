@@ -7,6 +7,7 @@ import TwoFactorModal from 'components/TwoFactor/Modal';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
+import WatchModal from './WatchModal';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
@@ -14,6 +15,7 @@ export default function UtilitySection({ closeSidebar }) {
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
+    const [watchModalView, setWatchModalView] = useState(false);
     // const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
 
     const openRecoveryKeyModal = () => setRecoveryModalView(true);
@@ -21,6 +23,8 @@ export default function UtilitySection({ closeSidebar }) {
 
     const openTwoFactorModalView = () => setTwoFactorModalView(true);
     const closeTwoFactorModalView = () => setTwoFactorModalView(false);
+
+    const openWatchModalView = () => setWatchModalView(true);
 
     const redirectToChangePasswordPage = () => {
         closeSidebar();
@@ -60,6 +64,9 @@ export default function UtilitySection({ closeSidebar }) {
             <SidebarButton onClick={redirectToDeduplicatePage}>
                 {constants.DEDUPLICATE_FILES}
             </SidebarButton>
+            <SidebarButton onClick={openWatchModalView}>
+                {constants.WATCH_FOLDERS}
+            </SidebarButton>
 
             {/* <SidebarButton onClick={openThumbnailCompressModal}>
                 {constants.COMPRESS_THUMBNAILS}
@@ -75,6 +82,10 @@ export default function UtilitySection({ closeSidebar }) {
                 onHide={closeTwoFactorModalView}
                 closeSidebar={closeSidebar}
                 setLoading={startLoading}
+            />
+            <WatchModal
+                watchModalView={watchModalView}
+                setWatchModalView={setWatchModalView}
             />
 
             {/* <FixLargeThumbnails

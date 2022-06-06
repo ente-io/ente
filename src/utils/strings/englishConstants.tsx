@@ -789,6 +789,7 @@ const englishConstants = {
             </p>
         </>
     ),
+    WATCH_FOLDERS: 'Watch Folders',
 };
 
 export default englishConstants;
