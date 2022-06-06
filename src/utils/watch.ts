@@ -100,25 +100,24 @@ export function initWatcher(mainWindow: BrowserWindow) {
 }
 
 export function registerWatcherFunctions(
-    obj: any,
-    add: (t: any, path: string) => Promise<void>,
-    remove: (t: any, path: string) => Promise<void>
+    WatchServiceInstance: any,
+    add: (WatchServiceInstance: any, path: string) => Promise<void>,
+    remove: (WatchServiceInstance: any, path: string) => Promise<void>
 ) {
-    console.log({ t: obj, add, remove });
     ipcRenderer.removeAllListeners('watch-add');
     ipcRenderer.removeAllListeners('watch-change');
     ipcRenderer.removeAllListeners('watch-unlink');
-    ipcRenderer.on('watch-add', async (e, filePath: string) => {
+    ipcRenderer.on('watch-add', async (_, filePath: string) => {
         filePath = filePath.split(path.sep).join(path.posix.sep);
-        await add(obj, filePath);
+        await add(WatchServiceInstance, filePath);
     });
-    ipcRenderer.on('watch-change', async (e, filePath: string) => {
+    ipcRenderer.on('watch-change', async (_, filePath: string) => {
         filePath = filePath.split(path.sep).join(path.posix.sep);
-        await remove(obj, filePath);
-        await add(obj, filePath);
+        await remove(WatchServiceInstance, filePath);
+        await add(WatchServiceInstance, filePath);
     });
-    ipcRenderer.on('watch-unlink', async (e, filePath: string) => {
+    ipcRenderer.on('watch-unlink', async (_, filePath: string) => {
         filePath = filePath.split(path.sep).join(path.posix.sep);
-        await remove(obj, filePath);
+        await remove(WatchServiceInstance, filePath);
     });
 }
