@@ -39,7 +39,7 @@ Future<void> sendLogs(
           ),
           Padding(padding: EdgeInsets.all(4)),
           Text(
-            "view logs",
+            "View logs",
             style: TextStyle(
               color: Colors.white.withOpacity(0.85),
             ),
@@ -78,7 +78,7 @@ Future<void> sendLogs(
   content.addAll(
     [
       Text(
-        "this will send across logs and metrics that will help us debug your issue better",
+        "This will send across logs and metrics that will help us debug your issue better",
         style: TextStyle(
           height: 1.5,
           fontFamily: 'Ubuntu',
@@ -132,7 +132,7 @@ Future<void> _sendLogs(
 }
 
 Future<String> getZippedLogsFile(BuildContext context) async {
-  final dialog = createProgressDialog(context, "preparing logs...");
+  final dialog = createProgressDialog(context, "Preparing logs...");
   await dialog.show();
   final tempPath = (await getTemporaryDirectory()).path;
   final zipFilePath = tempPath + "/logs.zip";
@@ -148,8 +148,8 @@ Future<String> getZippedLogsFile(BuildContext context) async {
 Future<void> shareLogs(
     BuildContext context, String toEmail, String zipFilePath) async {
   final result = await showChoiceDialog(
-      context, "email logs", "please send the logs to $toEmail",
-      firstAction: "copy email", secondAction: "send");
+      context, "Email logs", "Please send the logs to $toEmail",
+      firstAction: "Copy email", secondAction: "Send");
   if (result != null && result == DialogUserChoice.firstChoice) {
     await Clipboard.setData(ClipboardData(text: toEmail));
   }

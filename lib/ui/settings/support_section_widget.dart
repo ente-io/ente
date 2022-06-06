@@ -38,7 +38,7 @@ class SupportSectionWidget extends StatelessWidget {
               launchUrl(emailLaunchUri);
             } catch (e) {
               Logger("SupportSection").severe(e);
-              showErrorDialog(context, "", "please email us at $kSupportEmail");
+              showErrorDialog(context, "", "Please email us at $kSupportEmail");
             }
           },
           child: SettingsTextItem(text: "Email", icon: Icons.navigate_next),
@@ -67,7 +67,7 @@ class SupportSectionWidget extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            await sendLogs(context, "report bug", "bug@ente.io");
+            await sendLogs(context, "Report bug", "bug@ente.io");
           },
           onDoubleTap: () async {
             final zipFilePath = await getZippedLogsFile(context);
