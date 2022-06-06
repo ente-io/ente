@@ -23,7 +23,7 @@ dependencies:
     git: "https://github.com/jhomlala/alice.git"
   animate_do: ^2.0.0
   archive: ^3.1.2
-  background_fetch: ^1.0.1lib/utils/file_uploader_util.dart
+  background_fetch: ^1.0.1
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
   chewie:
