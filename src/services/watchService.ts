@@ -134,21 +134,7 @@ class WatchService {
 
         this.isEventRunning = true;
 
-        const newUploadQueue = [this.eventQueue[0]];
-        const len = this.eventQueue.length;
-        for (let i = 1; i < len; i++) {
-            if (
-                this.eventQueue[i].collectionName ===
-                    newUploadQueue[0].collectionName &&
-                this.eventQueue[i].type === newUploadQueue[0].type
-            ) {
-                newUploadQueue[0].paths.push(...this.eventQueue[i].paths);
-            } else {
-                newUploadQueue.push(this.eventQueue[i]);
-            }
-        }
-        newUploadQueue.push(...this.eventQueue.slice(len));
-        this.eventQueue = newUploadQueue;
+        this.batchNextEvent();
 
         this.setCollectionName(this.eventQueue[0].collectionName);
         this.setElectronFiles(
@@ -261,6 +247,8 @@ class WatchService {
 
         this.isEventRunning = true;
 
+        this.batchNextEvent();
+
         const { collectionName, paths } = this.eventQueue[0];
         const filePathsToRemove = new Set(paths);
 
@@ -335,6 +323,25 @@ class WatchService {
     async selectFolder(): Promise<string> {
         const folderPath = await this.ElectronAPIs.selectFolder();
         return folderPath;
+    }
+
+    // Batches all the files to be uploaded (or trashed) of same collection as the next event
+    batchNextEvent() {
+        const newEventQueue = [this.eventQueue[0]];
+        const len = this.eventQueue.length;
+        for (let i = 1; i < len; i++) {
+            if (
+                this.eventQueue[i].collectionName ===
+                    newEventQueue[0].collectionName &&
+                this.eventQueue[i].type === newEventQueue[0].type
+            ) {
+                newEventQueue[0].paths.push(...this.eventQueue[i].paths);
+            } else {
+                newEventQueue.push(this.eventQueue[i]);
+            }
+        }
+        newEventQueue.push(...this.eventQueue.slice(len));
+        this.eventQueue = newEventQueue;
     }
 }
 
