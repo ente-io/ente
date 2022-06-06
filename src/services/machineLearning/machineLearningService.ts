@@ -29,7 +29,7 @@ import { MAX_ML_SYNC_ERROR_COUNT } from 'constants/machineLearning/config';
 import FaceService from './faceService';
 import PeopleService from './peopleService';
 import ObjectService from './objectService';
-import TextService from './textService';
+// import TextService from './textService';
 class MachineLearningService {
     private initialized = false;
     // private faceDetectionService: FaceDetectionService;
@@ -384,6 +384,7 @@ class MachineLearningService {
         syncContext: MLSyncContext,
         enteFile: EnteFile,
         localFile?: globalThis.File,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         textDetectionTimeoutIndex?: number
     ) {
         const fileContext: MLSyncFileContext = { enteFile, localFile };
@@ -430,11 +431,11 @@ class MachineLearningService {
                     syncContext,
                     fileContext
                 ),
-                TextService.syncFileTextDetections(
-                    syncContext,
-                    fileContext,
-                    textDetectionTimeoutIndex
-                ),
+                // TextService.syncFileTextDetections(
+                //     syncContext,
+                //     fileContext,
+                //     textDetectionTimeoutIndex
+                // ),
             ]);
             newMlFile.errorCount = 0;
             newMlFile.lastErrorMessage = undefined;
