@@ -57,9 +57,6 @@ final lightThemeData = ThemeData(
           fontSize: 14,
           fontWeight: FontWeight.w500),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-  // textSelectionTheme: TextSelectionThemeData().copyWith(
-  //   cursorColor: Colors.black.withOpacity(0.5),
-  // ),
   inputDecorationTheme: InputDecorationTheme().copyWith(
     focusedBorder: UnderlineInputBorder(
       borderSide: BorderSide(
@@ -126,9 +123,6 @@ final darkThemeData = ThemeData(
           fontSize: 14,
           fontWeight: FontWeight.w500),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-  // textSelectionTheme: TextSelectionThemeData().copyWith(
-  //   cursorColor: Colors.white.withOpacity(0.5),
-  // ),
   inputDecorationTheme: InputDecorationTheme().copyWith(
     focusedBorder: UnderlineInputBorder(
       borderSide: BorderSide(

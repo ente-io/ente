@@ -51,6 +51,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
+        elevation: 0,
         title: Text(
           "Manage link",
         ),
@@ -166,14 +167,16 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           onChanged: (value) async {
                             if (!value) {
                               final choice = await showChoiceDialog(
-                                context,
-                                'Disable downloads',
-                                'Are you sure that you want to disable the download button for files?',
-                                firstAction: 'No',
-                                secondAction: 'Yes',
-                                firstActionColor: Theme.of(context).buttonColor,
-                                secondActionColor: Colors.white,
-                              );
+                                  context,
+                                  'Disable downloads',
+                                  'Are you sure that you want to disable the download button for files?',
+                                  firstAction: 'No',
+                                  secondAction: 'Yes',
+                                  firstActionColor:
+                                      Theme.of(context).colorScheme.greenText,
+                                  secondActionColor: Theme.of(context)
+                                      .colorScheme
+                                      .inverseBackgroundColor);
                               if (choice != DialogUserChoice.secondChoice) {
                                 return;
                               }
