@@ -58,7 +58,7 @@ export async function removeWatchMapping(collectionName: string) {
 }
 
 export function getWatchMappings() {
-    const mappings = watchStore.get('mappings');
+    const mappings = watchStore.get('mappings') ?? [];
     return mappings;
 }
 
