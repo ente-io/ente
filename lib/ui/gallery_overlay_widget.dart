@@ -287,7 +287,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         widget.collection.type != CollectionType.favorites) {
       actions.add(
         Tooltip(
-          message: "move",
+          message: "Move",
           child: IconButton(
             color: Colors.black, //same for both themes
             icon: Icon(Platform.isAndroid
@@ -302,7 +302,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     }
     actions.add(
       Tooltip(
-        message: "share",
+        message: "Share",
         child: IconButton(
           color: Colors.black, //same for both themes
           key: shareButtonKey,
@@ -318,7 +318,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         widget.type == GalleryType.local_folder) {
       actions.add(
         Tooltip(
-          message: "delete",
+          message: "Delete",
           child: IconButton(
             color: Colors.black, //same for both themes
             icon:
@@ -333,7 +333,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       if (widget.collection.type == CollectionType.folder) {
         actions.add(
           Tooltip(
-            message: "delete",
+            message: "Delete",
             child: IconButton(
               color: Colors.black, //same for both themes
               icon: Icon(
@@ -348,7 +348,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       } else {
         actions.add(
           Tooltip(
-            message: "remove",
+            message: "Remove",
             child: IconButton(
               color: Colors.black, //same for both themes
               icon: Icon(
@@ -406,7 +406,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     ));
     actions.add(
       Tooltip(
-        message: "delete permanently",
+        message: "Delete permanently",
         child: IconButton(
           color: Colors.black, //same for both themes
           icon: Icon(
@@ -455,14 +455,14 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     final actions = <Widget>[];
     if (containsUploadedFile && containsLocalFile) {
       actions.add(CupertinoActionSheetAction(
-        child: Text("device"),
+        child: Text("Device"),
         isDestructiveAction: true,
         onPressed: () async {
           Navigator.of(context, rootNavigator: true).pop();
           await deleteFilesOnDeviceOnly(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          showToast("files deleted from device");
+          showToast("Files deleted from device");
         },
       ));
       actions.add(CupertinoActionSheetAction(
@@ -473,11 +473,11 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           await deleteFilesFromRemoteOnly(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          showShortToast("moved to trash");
+          showShortToast("Moved to trash");
         },
       ));
       actions.add(CupertinoActionSheetAction(
-        child: Text("everywhere"),
+        child: Text("Everywhere"),
         isDestructiveAction: true,
         onPressed: () async {
           Navigator.of(context, rootNavigator: true).pop();
@@ -499,14 +499,14 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       ));
     }
     final action = CupertinoActionSheet(
-      title: Text("delete " +
+      title: Text("Delete " +
           count.toString() +
           " file" +
           (count == 1 ? "" : "s") +
           (containsUploadedFile && containsLocalFile ? " from" : "?")),
       actions: actions,
       cancelButton: CupertinoActionSheetAction(
-        child: Text("cancel"),
+        child: Text("Cancel"),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop();
         },
@@ -518,7 +518,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
   void _showRemoveFromCollectionSheet(BuildContext context) {
     final count = widget.selectedFiles.files.length;
     final action = CupertinoActionSheet(
-      title: Text("remove " +
+      title: Text("Remove " +
           count.toString() +
           " file" +
           (count == 1 ? "" : "s") +
@@ -527,11 +527,11 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           "?"),
       actions: <Widget>[
         CupertinoActionSheetAction(
-          child: Text("remove"),
+          child: Text("Remove"),
           isDestructiveAction: true,
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop();
-            final dialog = createProgressDialog(context, "removing files...");
+            final dialog = createProgressDialog(context, "Removing files...");
             await dialog.show();
             try {
               await CollectionsService.instance.removeFromCollection(
@@ -547,7 +547,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         ),
       ],
       cancelButton: CupertinoActionSheetAction(
-        child: Text("cancel"),
+        child: Text("Cancel"),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop();
         },

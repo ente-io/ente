@@ -18,7 +18,7 @@ final _logger = Logger("ShareUtil");
 // share is used to share media/files from ente to other apps
 Future<void> share(BuildContext context, List<File> files,
     {GlobalKey shareButtonKey}) async {
-  final dialog = createProgressDialog(context, "preparing...");
+  final dialog = createProgressDialog(context, "Preparing...");
   await dialog.show();
   final List<Future<String>> pathFutures = [];
   for (File file in files) {

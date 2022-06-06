@@ -232,7 +232,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 Icon(Icons.feed_outlined, color: infoColor),
                 Padding(padding: EdgeInsets.all(4)),
                 Text(
-                  "view raw EXIF",
+                  "View raw EXIF",
                   style: TextStyle(color: infoColor),
                 ),
               ],
@@ -260,7 +260,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 ),
                 Padding(padding: EdgeInsets.all(4)),
                 Text(
-                  "no exif",
+                  "No exif",
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.5),
                   ),
@@ -268,7 +268,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ],
             ),
             onPressed: () {
-              showToast("this image has no exif data");
+              showShortToast("This image has no exif data");
             },
           ),
         );
@@ -277,7 +277,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     actions.add(
       TextButton(
         child: Text(
-          "close",
+          "Close",
           style: TextStyle(
             color: infoColor,
           ),
