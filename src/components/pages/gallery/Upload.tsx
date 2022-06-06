@@ -117,15 +117,19 @@ export default function Upload(props: Props) {
                     resumeDesktopUpload(type, electronFiles, collectionName);
                 }
             );
-            watchService.setElectronFiles = props.setElectronFiles;
-            watchService.setCollectionName = (collectionName: string) => {
-                isPendingDesktopUpload.current = true;
-                pendingDesktopUploadCollectionName.current = collectionName;
-            };
-            watchService.syncWithRemote = props.syncWithRemote;
+            watchService.setWatchServiceFunctions(
+                props.setElectronFiles,
+                setCollectionName,
+                props.syncWithRemote
+            );
             watchService.init();
         }
     }, []);
+
+    const setCollectionName = (collectionName: string) => {
+        isPendingDesktopUpload.current = true;
+        pendingDesktopUploadCollectionName.current = collectionName;
+    };
 
     useEffect(() => {
         if (
@@ -357,10 +361,6 @@ export default function Upload(props: Props) {
                 filesWithCollectionToUpload,
                 collections
             );
-            await watchService.allFileUploadsDone(
-                filesWithCollectionToUpload,
-                collections
-            );
         } catch (err) {
             const message = getUserFacingErrorMessage(
                 err.message,
@@ -372,6 +372,12 @@ export default function Upload(props: Props) {
         } finally {
             props.setUploadInProgress(false);
             props.syncWithRemote();
+            if (isElectron()) {
+                await watchService.allFileUploadsDone(
+                    filesWithCollectionToUpload,
+                    collections
+                );
+            }
         }
     };
     const retryFailed = async () => {

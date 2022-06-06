@@ -36,6 +36,16 @@ class WatchService {
         this.allElectronAPIsExist = !!this.ElectronAPIs?.getWatchMappings;
     }
 
+    setWatchServiceFunctions(
+        setElectronFiles: (files: ElectronFile[]) => void,
+        setCollectionName: (collectionName: string) => void,
+        syncWithRemote: () => void
+    ) {
+        this.setElectronFiles = setElectronFiles;
+        this.setCollectionName = setCollectionName;
+        this.syncWithRemote = syncWithRemote;
+    }
+
     async init() {
         if (this.allElectronAPIsExist) {
             const mappings = this.getWatchMappings();
@@ -100,23 +110,28 @@ class WatchService {
     }
 
     async addWatchMapping(collectionName: string, folderPath: string) {
-        await this.ElectronAPIs.addWatchMapping(collectionName, folderPath);
+        if (this.allElectronAPIsExist) {
+            await this.ElectronAPIs.addWatchMapping(collectionName, folderPath);
+        }
     }
 
     async removeWatchMapping(collectionName: string) {
-        await this.ElectronAPIs.removeWatchMapping(collectionName);
+        if (this.allElectronAPIsExist) {
+            await this.ElectronAPIs.removeWatchMapping(collectionName);
+        }
     }
 
     getWatchMappings(): WatchMapping[] {
         if (this.allElectronAPIsExist) {
             return this.ElectronAPIs.getWatchMappings() ?? [];
         }
+        return [];
     }
 
     async runNextEvent() {
         console.log('runNextEvent mappings', this.getWatchMappings());
 
-        if (this.eventQueue.length === 0) {
+        if (this.eventQueue.length === 0 || this.isEventRunning) {
             return;
         }
 
@@ -127,7 +142,7 @@ class WatchService {
         }
     }
 
-    async runNextUpload() {
+    private async runNextUpload() {
         if (this.eventQueue.length === 0 || this.isEventRunning) {
             return;
         }
@@ -240,7 +255,7 @@ class WatchService {
         }
     }
 
-    async runNextTrash() {
+    private async runNextTrash() {
         if (this.eventQueue.length === 0 || this.isEventRunning) {
             return;
         }
@@ -277,7 +292,7 @@ class WatchService {
         this.runNextEvent();
     }
 
-    async trashByIDs(
+    private async trashByIDs(
         toTrashFiles: WatchMapping['files'],
         collectionName: string
     ) {
@@ -326,7 +341,7 @@ class WatchService {
     }
 
     // Batches all the files to be uploaded (or trashed) of same collection as the next event
-    batchNextEvent() {
+    private batchNextEvent() {
         const newEventQueue = [this.eventQueue[0]];
         const len = this.eventQueue.length;
         for (let i = 1; i < len; i++) {
