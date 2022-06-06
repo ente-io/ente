@@ -63,6 +63,9 @@ export default function Sidebar(props: Props) {
     };
     const disableMlSearch = async () => {
         await appContext.updateMlSearchEnabled(false);
+    };
+
+    const clearMLDB = async () => {
         await mlIDbStorage.clearMLDB();
     };
     useEffect(() => {
@@ -338,6 +341,35 @@ export default function Sidebar(props: Props) {
                     {appContext.mlSearchEnabled
                         ? constants.DISABLE_ML_SEARCH
                         : constants.ENABLE_ML_SEARCH}
+                </LinkButton>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => {
+                        if (!appContext.mlSearchEnabled) {
+                            if (!canEnableMlSearch()) {
+                                props.setDialogMessage({
+                                    title: constants.ENABLE_ML_SEARCH,
+                                    content: constants.ML_SEARCH_NOT_COMPATIBLE,
+                                    close: { text: constants.OK },
+                                });
+                                return;
+                            }
+                            props.setDialogMessage({
+                                title: 'clear mb db',
+                                content: 'clear mb db',
+                                staticBackdrop: true,
+                                proceed: {
+                                    text: 'clear',
+                                    action: clearMLDB,
+                                    variant: 'success',
+                                },
+                                close: { text: constants.CANCEL },
+                            });
+                        } else {
+                            disableMlSearch();
+                        }
+                    }}>
+                    {'clear ML db'}
                 </LinkButton>
                 {appContext.mlSearchEnabled && (
                     <LinkButton
