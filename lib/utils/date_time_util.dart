@@ -166,7 +166,7 @@ bool isLeapYear(DateTime dateTime) {
 Widget getDayWidget(
     BuildContext context, int timestamp, bool smallerTodayFont) {
   return Container(
-    padding: const EdgeInsets.fromLTRB(12, 14, 0, 12),
+    padding: const EdgeInsets.fromLTRB(4, 14, 0, 8),
     alignment: Alignment.centerLeft,
     child: Text(
       getDayTitle(timestamp),
