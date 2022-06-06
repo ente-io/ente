@@ -99,7 +99,7 @@ class _MemoryWidgetState extends State<MemoryWidget> {
         setState(() {});
       },
       child: SizedBox(
-        width: 100,
+        width: 92,
         height: 100,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
