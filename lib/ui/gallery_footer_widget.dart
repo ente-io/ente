@@ -12,7 +12,7 @@ class GalleryFooterWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 80),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
       child: GradientButton(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
