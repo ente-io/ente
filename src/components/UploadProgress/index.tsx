@@ -45,7 +45,10 @@ export default function UploadProgress(props: Props) {
             if (!fileUploadResultMap.has(progress)) {
                 fileUploadResultMap.set(progress, []);
             }
-            if (progress !== FileUploadResults.UPLOADED) {
+            if (
+                progress !== FileUploadResults.UPLOADED &&
+                progress !== FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL
+            ) {
                 filesNotUploaded = true;
             }
             const fileList = fileUploadResultMap.get(progress);

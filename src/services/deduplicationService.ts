@@ -1,7 +1,10 @@
+import { FILE_TYPE } from 'constants/file';
 import { EnteFile } from 'types/file';
+import { Metadata } from 'types/upload';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
+import { hasFileHash } from 'utils/upload';
 import HTTPService from './HTTPService';
 
 const ENDPOINT = getEndpoint();
@@ -55,10 +58,12 @@ export async function getDuplicateFiles(
             );
 
             if (duplicateFiles.length > 1) {
-                result.push({
-                    files: duplicateFiles,
-                    size: dupe.size,
-                });
+                result.push(
+                    ...getDupesGroupedBySameFileHashes(
+                        duplicateFiles,
+                        dupe.size
+                    )
+                );
             }
         }
 
@@ -66,6 +71,90 @@ export async function getDuplicateFiles(
     } catch (e) {
         logError(e, 'failed to get duplicate files');
     }
+}
+
+function getDupesGroupedBySameFileHashes(files: EnteFile[], size: number) {
+    const clubbedDupesByFileHash = clubDuplicatesBySameFileHashes([
+        { files, size },
+    ]);
+
+    const clubbedFileIDs = new Set<number>();
+    for (const dupe of clubbedDupesByFileHash) {
+        for (const file of dupe.files) {
+            clubbedFileIDs.add(file.id);
+        }
+    }
+
+    files = files.filter((file) => {
+        return !clubbedFileIDs.has(file.id);
+    });
+
+    if (files.length > 1) {
+        clubbedDupesByFileHash.push({
+            files: [...files],
+            size,
+        });
+    }
+
+    return clubbedDupesByFileHash;
+}
+
+function clubDuplicatesBySameFileHashes(dupes: DuplicateFiles[]) {
+    const result: DuplicateFiles[] = [];
+
+    for (const dupe of dupes) {
+        let files: EnteFile[] = [];
+
+        const filteredFiles = dupe.files.filter((file) => {
+            return hasFileHash(file.metadata);
+        });
+
+        if (filteredFiles.length <= 1) {
+            continue;
+        }
+
+        const dupesSortedByFileHash = filteredFiles
+            .map((file) => {
+                return {
+                    file,
+                    hash:
+                        file.metadata.hash ??
+                        `${file.metadata.imageHash}_${file.metadata.videoHash}`,
+                };
+            })
+            .sort((firstFile, secondFile) => {
+                return firstFile.hash.localeCompare(secondFile.hash);
+            });
+
+        files.push(dupesSortedByFileHash[0].file);
+        for (let i = 1; i < dupesSortedByFileHash.length; i++) {
+            if (
+                areFileHashesSame(
+                    dupesSortedByFileHash[i - 1].file.metadata,
+                    dupesSortedByFileHash[i].file.metadata
+                )
+            ) {
+                files.push(dupesSortedByFileHash[i].file);
+            } else {
+                if (files.length > 1) {
+                    result.push({
+                        files: [...files],
+                        size: dupe.size,
+                    });
+                }
+                files = [dupesSortedByFileHash[i].file];
+            }
+        }
+
+        if (files.length > 1) {
+            result.push({
+                files,
+                size: dupe.size,
+            });
+        }
+    }
+
+    return result;
 }
 
 export function clubDuplicatesByTime(dupes: DuplicateFiles[]) {
@@ -149,4 +238,15 @@ async function sortDuplicateFiles(
             ] ?? OtherCollectionNameRanking;
         return secondFileRanking - firstFileRanking;
     });
+}
+
+function areFileHashesSame(firstFile: Metadata, secondFile: Metadata) {
+    if (firstFile.fileType === FILE_TYPE.LIVE_PHOTO) {
+        return (
+            firstFile.imageHash === secondFile.imageHash &&
+            firstFile.videoHash === secondFile.videoHash
+        );
+    } else {
+        return firstFile.hash === secondFile.hash;
+    }
 }

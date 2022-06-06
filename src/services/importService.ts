@@ -1,3 +1,4 @@
+import { DESKTOP_UPLOAD_TYPE } from 'components/pages/gallery/Upload';
 import { Collection } from 'types/collection';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
@@ -6,6 +7,12 @@ import { logError } from 'utils/sentry';
 interface PendingUploads {
     files: ElectronFile[];
     collectionName: string;
+    type: DESKTOP_UPLOAD_TYPE;
+}
+
+interface selectZipResult {
+    files: ElectronFile[];
+    zipPaths: string[];
 }
 class ImportService {
     ElectronAPIs: any;
@@ -14,6 +21,14 @@ class ImportService {
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
         this.allElectronAPIsExist = !!this.ElectronAPIs?.getPendingUploads;
+    }
+
+    async getElectronFilesFromGoogleZip(
+        zipPath: string
+    ): Promise<ElectronFile[]> {
+        if (this.allElectronAPIsExist) {
+            return this.ElectronAPIs.getElectronFilesFromGoogleZip(zipPath);
+        }
     }
 
     checkAllElectronAPIsExists = () => this.allElectronAPIsExist;
@@ -30,6 +45,11 @@ class ImportService {
         }
     }
 
+    async showUploadZipDialog(): Promise<selectZipResult> {
+        if (this.allElectronAPIsExist) {
+            return this.ElectronAPIs.showUploadZipDialog();
+        }
+    }
     async getPendingUploads(): Promise<PendingUploads> {
         try {
             if (this.allElectronAPIsExist) {
@@ -39,16 +59,13 @@ class ImportService {
             }
         } catch (e) {
             logError(e, 'failed to getPendingUploads ');
-            return { files: [], collectionName: null };
+            return { files: [], collectionName: null, type: null };
         }
     }
 
-    async setToUploadFiles(
-        files: FileWithCollection[],
-        collections: Collection[]
-    ) {
+    async setToUploadCollection(collections: Collection[]) {
         if (this.allElectronAPIsExist) {
-            let collectionName: string;
+            let collectionName: string = null;
             /* collection being one suggest one of two things
                 1. Either the user has upload to a single existing collection
                 2. Created a new single collection to upload to 
@@ -61,13 +78,19 @@ class ImportService {
             if (collections.length === 1) {
                 collectionName = collections[0].name;
             }
-            const filePaths = files.map(
-                (file) => (file.file as ElectronFile).path
-            );
-            this.ElectronAPIs.setToUploadFiles(filePaths);
             this.ElectronAPIs.setToUploadCollection(collectionName);
         }
     }
+
+    async setToUploadFiles(
+        type: DESKTOP_UPLOAD_TYPE.FILES | DESKTOP_UPLOAD_TYPE.ZIPS,
+        filePaths: string[]
+    ) {
+        if (this.allElectronAPIsExist) {
+            this.ElectronAPIs.setToUploadFiles(type, filePaths);
+        }
+    }
+
     updatePendingUploads(files: FileWithCollection[]) {
         if (this.allElectronAPIsExist) {
             const filePaths = [];
@@ -89,7 +112,14 @@ class ImportService {
                     );
                 }
             }
-            this.ElectronAPIs.setToUploadFiles(filePaths);
+            this.setToUploadFiles(DESKTOP_UPLOAD_TYPE.FILES, filePaths);
+        }
+    }
+    cancelRemainingUploads() {
+        if (this.allElectronAPIsExist) {
+            this.ElectronAPIs.setToUploadCollection(null);
+            this.ElectronAPIs.setToUploadFiles(DESKTOP_UPLOAD_TYPE.ZIPS, []);
+            this.ElectronAPIs.setToUploadFiles(DESKTOP_UPLOAD_TYPE.FILES, []);
         }
     }
 }

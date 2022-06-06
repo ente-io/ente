@@ -4,7 +4,9 @@ import QueueProcessor from 'services/queueProcessor';
 import { ParsedExtractedMetadata } from 'types/upload';
 
 import { FFmpegWorker } from 'utils/comlink';
+import { promiseWithTimeout } from 'utils/common';
 
+const FFMPEG_EXECUTION_WAIT_TIME = 10 * 1000;
 class FFmpegService {
     private ffmpegWorker = null;
     private ffmpegTaskQueue = new QueueProcessor<any>(1);
@@ -18,8 +20,11 @@ class FFmpegService {
             await this.init();
         }
 
-        const response = this.ffmpegTaskQueue.queueUpRequest(
-            async () => await this.ffmpegWorker.generateThumbnail(file)
+        const response = this.ffmpegTaskQueue.queueUpRequest(() =>
+            promiseWithTimeout(
+                this.ffmpegWorker.generateThumbnail(file),
+                FFMPEG_EXECUTION_WAIT_TIME
+            )
         );
         try {
             return await response.promise;
@@ -39,8 +44,11 @@ class FFmpegService {
             await this.init();
         }
 
-        const response = this.ffmpegTaskQueue.queueUpRequest(
-            async () => await this.ffmpegWorker.extractVideoMetadata(file)
+        const response = this.ffmpegTaskQueue.queueUpRequest(() =>
+            promiseWithTimeout(
+                this.ffmpegWorker.extractVideoMetadata(file),
+                FFMPEG_EXECUTION_WAIT_TIME
+            )
         );
         try {
             return await response.promise;

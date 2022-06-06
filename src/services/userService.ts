@@ -1,5 +1,5 @@
 import { PAGES } from 'constants/pages';
-import { getEndpoint } from 'utils/common/apiUtil';
+import { getEndpoint, getFamilyPortalURL } from 'utils/common/apiUtil';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import router from 'next/router';
 import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -17,6 +17,8 @@ import {
     TwoFactorRecoveryResponse,
     UserDetails,
 } from 'types/user';
+import { getFamilyData, isPartOfFamily } from 'utils/billing';
+import { ServerErrorCodes } from 'utils/error';
 
 const ENDPOINT = getEndpoint();
 
@@ -51,6 +53,42 @@ export const getPaymentToken = async () => {
         }
     );
     return resp.data['paymentToken'];
+};
+
+export const getFamiliesToken = async () => {
+    try {
+        const token = getToken();
+
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/users/families-token`,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return resp.data['familiesToken'];
+    } catch (e) {
+        logError(e, 'failed to get family token');
+        throw e;
+    }
+};
+
+export const getRoadmapRedirectURL = async () => {
+    try {
+        const token = getToken();
+
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/users/roadmap/v2`,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return resp.data['url'];
+    } catch (e) {
+        logError(e, 'failed to get roadmap url');
+        throw e;
+    }
 };
 
 export const verifyOtt = (email: string, ott: string) =>
@@ -124,7 +162,12 @@ export const isTokenValid = async () => {
         }
         return true;
     } catch (e) {
-        return false;
+        logError(e, 'session-validity api call failed');
+        if (e.status?.toString() === ServerErrorCodes.SESSION_EXPIRED) {
+            return false;
+        } else {
+            return true;
+        }
     }
 };
 
@@ -245,11 +288,33 @@ export const changeEmail = async (email: string, ott: string) => {
     );
 };
 
-export const getUserDetails = async (): Promise<UserDetails> => {
-    const token = getToken();
+export const getUserDetailsV2 = async (): Promise<UserDetails> => {
+    try {
+        const token = getToken();
 
-    const resp = await HTTPService.get(`${ENDPOINT}/users/details`, null, {
-        'X-Auth-Token': token,
-    });
-    return resp.data['details'];
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/users/details/v2?memoryCount=false`,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return resp.data;
+    } catch (e) {
+        logError(e, 'failed to get user details v2');
+        throw e;
+    }
+};
+
+export const getFamilyPortalRedirectURL = async () => {
+    try {
+        const jwtToken = await getFamiliesToken();
+        const isFamilyCreated = isPartOfFamily(getFamilyData());
+        return `${getFamilyPortalURL()}?token=${jwtToken}&isFamilyCreated=${isFamilyCreated}&redirectURL=${
+            window.location.origin
+        }/gallery`;
+    } catch (e) {
+        logError(e, 'unable to generate to family portal URL');
+        throw e;
+    }
 };

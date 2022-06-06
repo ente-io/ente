@@ -7,7 +7,7 @@ import { UploadProgressHeader } from './header';
 import { InProgressSection } from './inProgressSection';
 import { ResultSection } from './resultSection';
 import { NotUploadSectionHeader } from './styledComponents';
-import { DESKTOP_APP_DOWNLOAD_URL } from 'utils/common';
+import { getOSSpecificDesktopAppDownloadLink } from 'utils/common';
 import DialogBoxBase from 'components/DialogBox/base';
 export function UploadProgressDialog({
     handleClose,
@@ -47,6 +47,17 @@ export function UploadProgressDialog({
                         fileUploadResult={FileUploadResults.UPLOADED}
                         sectionTitle={constants.SUCCESSFUL_UPLOADS}
                     />
+                    <ResultSection
+                        filenames={props.filenames}
+                        fileUploadResultMap={fileUploadResultMap}
+                        fileUploadResult={
+                            FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL
+                        }
+                        sectionTitle={
+                            constants.THUMBNAIL_GENERATION_FAILED_UPLOADS
+                        }
+                        sectionInfo={constants.THUMBNAIL_GENERATION_FAILED_INFO}
+                    />
 
                     {props.uploadStage === UPLOAD_STAGES.FINISH &&
                         filesNotUploaded && (
@@ -61,7 +72,7 @@ export function UploadProgressDialog({
                         fileUploadResult={FileUploadResults.BLOCKED}
                         sectionTitle={constants.BLOCKED_UPLOADS}
                         sectionInfo={constants.ETAGS_BLOCKED(
-                            DESKTOP_APP_DOWNLOAD_URL
+                            getOSSpecificDesktopAppDownloadLink()
                         )}
                     />
                     <ResultSection

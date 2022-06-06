@@ -24,7 +24,6 @@ interface Dimension {
 }
 
 export async function generateThumbnail(
-    reader: FileReader,
     file: File | ElectronFile,
     fileTypeInfo: FileTypeInfo
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
@@ -33,10 +32,10 @@ export async function generateThumbnail(
         let hasStaticThumbnail = false;
         let canvas = document.createElement('canvas');
         let thumbnail: Uint8Array;
-        if (!(file instanceof File)) {
-            file = new File([await file.blob()], file.name);
-        }
         try {
+            if (!(file instanceof File)) {
+                file = new File([await file.blob()], file.name);
+            }
             if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
                 const isHEIC = isFileHEIC(fileTypeInfo.exactType);
                 canvas = await generateImageThumbnail(file, isHEIC);
@@ -72,7 +71,7 @@ export async function generateThumbnail(
                 }
             }
             const thumbnailBlob = await thumbnailCanvasToBlob(canvas);
-            thumbnail = await getUint8ArrayView(reader, thumbnailBlob);
+            thumbnail = await getUint8ArrayView(thumbnailBlob);
             if (thumbnail.length === 0) {
                 throw Error('EMPTY THUMBNAIL');
             }

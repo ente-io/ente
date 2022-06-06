@@ -272,6 +272,9 @@ const englishConstants = {
     USAGE_DETAILS: 'usage',
     MANAGE: 'manage',
     MANAGEMENT_PORTAL: 'manage payment method',
+    MANAGE_FAMILY_PORTAL: 'manage family',
+    LEAVE_FAMILY: 'leave family',
+    LEAVE_FAMILY_CONFIRM: 'are you sure that you want to leave family?',
     CHOOSE_PLAN: 'choose your subscription plan',
     MANAGE_PLAN: 'manage your subscription',
     CHOOSE_PLAN_BTN: 'choose plan',
@@ -283,6 +286,15 @@ const englishConstants = {
             <p>
                 you are on the <strong>free</strong> plan that expires on{' '}
                 {dateString(expiryTime)}
+            </p>
+        </>
+    ),
+
+    FAMILY_PLAN_MANAGE_ADMIN_ONLY: (adminEmail) => (
+        <>
+            <p>
+                only your family plan admin <strong>{adminEmail}</strong> can
+                change the plan
             </p>
         </>
     ),
@@ -301,6 +313,12 @@ const englishConstants = {
     USAGE_INFO: (usage, quota) => (
         <p>
             you have used {usage} out of your {quota} quota
+        </p>
+    ),
+
+    FAMILY_USAGE_INFO: (usage, quota) => (
+        <p>
+            you have used {usage} out of your family's {quota} quota
         </p>
     ),
 
@@ -569,6 +587,7 @@ const englishConstants = {
     RETRY_FAILED: 'retry failed uploads',
     FAILED_UPLOADS: 'failed uploads ',
     SKIPPED_FILES: 'ignored uploads',
+    THUMBNAIL_GENERATION_FAILED_UPLOADS: 'thumbnail generation failed',
     UNSUPPORTED_FILES: 'unsupported files',
     SUCCESSFUL_UPLOADS: 'successful uploads',
     SKIPPED_INFO:
@@ -582,6 +601,8 @@ const englishConstants = {
         'these files were not uploaded as they exceed the maximum size limit for your storage plan',
     TOO_LARGE_INFO:
         'these files were not uploaded as they exceed our maximum file size limit',
+    THUMBNAIL_GENERATION_FAILED_INFO:
+        'these files were uploaded, but unfortunately we could not generate the thumbnails for them.',
     UPLOAD_TO_COLLECTION: 'upload to album',
     ARCHIVE: 'Hidden',
     ALL_SECTION_NAME: 'All Photos',
@@ -732,12 +753,13 @@ const englishConstants = {
     DEDUPLICATE_FILES: 'Deduplicate files',
     NO_DUPLICATES_FOUND: "you've no duplicate files that can be cleared",
     CLUB_BY_CAPTURE_TIME: 'club by capture time',
+    CLUB_BY_FILE_HASH: 'club by file hashes',
     FILES: 'files',
     EACH: 'each',
     DEDUPLICATION_LOGIC_MESSAGE: (captureTime: boolean) => (
         <>
             the following files were clubbed based on their sizes
-            {captureTime && ` and capture time`}, please review and delete items
+            {captureTime && ' and capture time'}, please review and delete items
             you believe are duplicates{' '}
         </>
     ),
@@ -754,6 +776,19 @@ const englishConstants = {
         ' enter the 6-digit code from your authenticator app.',
     CREATE_ACCOUNT: 'Create account',
     COPIED: 'copied',
+    CANVAS_BLOCKED_TITLE: 'unable to generate thumbnail',
+    CANVAS_BLOCKED_MESSAGE: () => (
+        <>
+            <p>
+                it looks like your browser has disabled access to canvas, which
+                is necessary to generate thumbnails for your photos
+            </p>
+            <p>
+                please enable access to your browser's canvas, or check out our
+                desktop app
+            </p>
+        </>
+    ),
 };
 
 export default englishConstants;

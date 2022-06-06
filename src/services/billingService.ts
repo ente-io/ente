@@ -1,6 +1,6 @@
 import { getEndpoint, getPaymentsURL } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
-import { setData, LS_KEYS } from 'utils/storage/localStorage';
+import { setData, LS_KEYS, removeData } from 'utils/storage/localStorage';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { getPaymentToken } from './userService';
@@ -144,6 +144,21 @@ class billingService {
         } catch (err) {
             logError(err, 'Error while verifying subscription');
             throw err;
+        }
+    }
+
+    public async leaveFamily() {
+        if (!getToken()) {
+            return;
+        }
+        try {
+            await HTTPService.delete(`${ENDPOINT}/family/leave`, null, null, {
+                'X-Auth-Token': getToken(),
+            });
+            removeData(LS_KEYS.FAMILY_DATA);
+        } catch (e) {
+            logError(e, '/family/leave failed');
+            throw e;
         }
     }
 

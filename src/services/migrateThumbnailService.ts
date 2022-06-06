@@ -12,6 +12,7 @@ import { getFileType } from 'services/typeDetectionService';
 import { getLocalTrash, getTrashedFiles } from './trashService';
 import { EncryptionResult, UploadURL } from 'types/upload';
 import { fileAttribute } from 'types/file';
+import { USE_CF_PROXY } from 'constants/upload';
 
 const ENDPOINT = getEndpoint();
 const REPLACE_THUMBNAIL_THRESHOLD = 500 * 1024; // 500KB
@@ -44,7 +45,6 @@ export async function replaceThumbnail(
     try {
         const token = getToken();
         const worker = await new CryptoWorker();
-        const reader = new FileReader();
         const files = await getLocalFiles();
         const trash = await getLocalTrash();
         const trashFiles = getTrashedFiles(trash);
@@ -77,9 +77,8 @@ export async function replaceThumbnail(
                     [originalThumbnail],
                     file.metadata.title
                 );
-                const fileTypeInfo = await getFileType(reader, dummyImageFile);
+                const fileTypeInfo = await getFileType(dummyImageFile);
                 const { thumbnail: newThumbnail } = await generateThumbnail(
-                    reader,
                     dummyImageFile,
                     fileTypeInfo
                 );
@@ -110,12 +109,20 @@ export async function uploadThumbnail(
 ): Promise<fileAttribute> {
     const { file: encryptedThumbnail }: EncryptionResult =
         await worker.encryptThumbnail(updatedThumbnail, fileKey);
-
-    const thumbnailObjectKey = await uploadHttpClient.putFile(
-        uploadURL,
-        encryptedThumbnail.encryptedData as Uint8Array,
-        () => {}
-    );
+    let thumbnailObjectKey: string = null;
+    if (USE_CF_PROXY) {
+        thumbnailObjectKey = await uploadHttpClient.putFileV2(
+            uploadURL,
+            encryptedThumbnail.encryptedData as Uint8Array,
+            () => {}
+        );
+    } else {
+        thumbnailObjectKey = await uploadHttpClient.putFile(
+            uploadURL,
+            encryptedThumbnail.encryptedData as Uint8Array,
+            () => {}
+        );
+    }
     return {
         objectKey: thumbnailObjectKey,
         decryptionHeader: encryptedThumbnail.decryptionHeader,

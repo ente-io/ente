@@ -56,7 +56,11 @@ export default function HelpSection() {
                 {constants.REQUEST_FEATURE}
             </SidebarButton>
             <SidebarButton onClick={initToSupportMail}>
-                {constants.SUPPORT}
+                <a
+                    style={{ textDecoration: 'none', color: 'inherit' }}
+                    href="mailto:contact@ente.io">
+                    {constants.SUPPORT}
+                </a>
             </SidebarButton>
             <SidebarButton onClick={exportFiles}>
                 <div style={{ display: 'flex' }}>

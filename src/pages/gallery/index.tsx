@@ -211,6 +211,7 @@ export default function Gallery() {
 
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
+    const [droppedFiles, setDroppedFiles] = useState([]);
 
     useEffect(() => {
         appContext.showNavBar(false);
@@ -257,6 +258,8 @@ export default function Gallery() {
         () => fixCreationTimeAttributes && setFixCreationTimeView(true),
         [fixCreationTimeAttributes]
     );
+
+    useEffect(() => setDroppedFiles(acceptedFiles), [acceptedFiles]);
 
     useEffect(() => {
         if (typeof activeCollection === 'undefined') {
@@ -309,6 +312,7 @@ export default function Gallery() {
             files.push(...getTrashedFiles(trash));
             await setDerivativeState(collections, files);
         } catch (e) {
+            logError(e, 'syncWithRemote failed');
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
                     setBannerMessage(constants.SESSION_EXPIRED_MESSAGE);
@@ -648,7 +652,8 @@ export default function Gallery() {
                 <Upload
                     syncWithRemote={syncWithRemote}
                     setBannerMessage={setBannerMessage}
-                    acceptedFiles={acceptedFiles}
+                    droppedFiles={droppedFiles}
+                    clearDroppedFiles={() => setDroppedFiles([])}
                     showCollectionSelector={setCollectionSelectorView.bind(
                         null,
                         true
@@ -662,6 +667,7 @@ export default function Gallery() {
                     )}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
+                    uploadInProgress={uploadInProgress}
                     setUploadInProgress={setUploadInProgress}
                     fileRejections={fileRejections}
                     setFiles={setFiles}

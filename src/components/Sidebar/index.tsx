@@ -21,7 +21,10 @@ export default function Sidebar({ collectionSummaries }: Iprops) {
         <DrawerSidebar open={sidebarView} onClose={closeSidebar}>
             <HeaderSection closeSidebar={closeSidebar} />
             <PaddedDivider spaced />
-            <UserDetailsSection sidebarView={sidebarView} />
+            <UserDetailsSection
+                sidebarView={sidebarView}
+                closeSidebar={closeSidebar}
+            />
             <PaddedDivider invisible />
             <NavigationSection
                 closeSidebar={closeSidebar}

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { SpaceBetweenFlex } from 'components/Container';
 import { PaddedDivider } from './styledComponents';
 import SubscriptionDetails from './SubscriptionDetails';
-import { getUserDetails } from 'services/userService';
+import { getUserDetailsV2 } from 'services/userService';
 import { UserDetails } from 'types/user';
 import { LS_KEYS } from 'utils/storage/localStorage';
 import { useLocalState } from 'hooks/useLocalState';
@@ -10,7 +10,7 @@ import { THEMES } from 'types/theme';
 import ThemeSwitcher from './ThemeSwitcher';
 import Typography from '@mui/material/Typography';
 
-export default function UserDetailsSection({ sidebarView }) {
+export default function UserDetailsSection({ sidebarView, closeSidebar }) {
     const [userDetails, setUserDetails] = useLocalState<UserDetails>(
         LS_KEYS.USER_DETAILS
     );
@@ -21,7 +21,7 @@ export default function UserDetailsSection({ sidebarView }) {
             return;
         }
         const main = async () => {
-            const userDetails = await getUserDetails();
+            const userDetails = await getUserDetailsV2();
             setUserDetails(userDetails);
         };
         main();
@@ -34,7 +34,10 @@ export default function UserDetailsSection({ sidebarView }) {
                 <ThemeSwitcher theme={theme} setTheme={setTheme} />
             </SpaceBetweenFlex>
             <PaddedDivider invisible />
-            <SubscriptionDetails userDetails={userDetails} />
+            <SubscriptionDetails
+                userDetails={userDetails}
+                closeSidebar={closeSidebar}
+            />
         </>
     );
 }

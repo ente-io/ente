@@ -12,7 +12,6 @@ const TYPE_IMAGE = 'image';
 const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
 
 export async function getFileType(
-    reader: FileReader,
     receivedFile: File | ElectronFile
 ): Promise<FileTypeInfo> {
     try {
@@ -20,7 +19,7 @@ export async function getFileType(
         let typeResult: FileTypeResult;
 
         if (receivedFile instanceof File) {
-            typeResult = await extractFileType(reader, receivedFile);
+            typeResult = await extractFileType(receivedFile);
         } else {
             typeResult = await extractElectronFileType(receivedFile);
         }
@@ -48,7 +47,7 @@ export async function getFileType(
     } catch (e) {
         const fileFormat = getFileExtension(receivedFile.name);
         const formatMissedByTypeDetection = FORMAT_MISSED_BY_FILE_TYPE_LIB.find(
-            (a) => a.exactType === fileFormat
+            (a) => a.exactType === fileFormat.toLocaleLowerCase()
         );
         if (formatMissedByTypeDetection) {
             return formatMissedByTypeDetection;
@@ -64,9 +63,9 @@ export async function getFileType(
     }
 }
 
-async function extractFileType(reader: FileReader, file: File) {
+async function extractFileType(file: File) {
     const fileChunkBlob = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
-    return getFileTypeFromBlob(reader, fileChunkBlob);
+    return getFileTypeFromBlob(fileChunkBlob);
 }
 
 async function extractElectronFileType(file: ElectronFile) {
@@ -77,9 +76,9 @@ async function extractElectronFileType(file: ElectronFile) {
     return fileTypeResult;
 }
 
-async function getFileTypeFromBlob(reader: FileReader, fileBlob: Blob) {
+async function getFileTypeFromBlob(fileBlob: Blob) {
     try {
-        const initialFiledata = await getUint8ArrayView(reader, fileBlob);
+        const initialFiledata = await getUint8ArrayView(fileBlob);
         return await FileType.fromBuffer(initialFiledata);
     } catch (e) {
         throw Error(CustomError.TYPE_DETECTION_FAILED);

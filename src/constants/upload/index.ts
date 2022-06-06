@@ -7,6 +7,7 @@ export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
     { fileType: FILE_TYPE.IMAGE, exactType: 'jpeg', mimeType: 'image/jpeg' },
     { fileType: FILE_TYPE.IMAGE, exactType: 'jpg', mimeType: 'image/jpeg' },
     { fileType: FILE_TYPE.VIDEO, exactType: 'webm', mimeType: 'video/webm' },
+    { fileType: FILE_TYPE.VIDEO, exactType: 'mod', mimeType: 'video/mpeg' },
 ];
 
 // this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
@@ -38,9 +39,10 @@ export enum FileUploadResults {
     TOO_LARGE,
     LARGER_THAN_AVAILABLE_STORAGE,
     UPLOADED,
+    UPLOADED_WITH_STATIC_THUMBNAIL,
 }
 
-export const MAX_FILE_SIZE_SUPPORTED = 5 * 1024 * 1024 * 1024; // 5 GB
+export const MAX_FILE_SIZE_SUPPORTED = 4 * 1024 * 1024 * 1024; // 4 GB
 
 export const LIVE_PHOTO_ASSET_SIZE_LIMIT = 20 * 1024 * 1024; // 20MB
 
@@ -50,3 +52,5 @@ export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
 };
 
 export const A_SEC_IN_MICROSECONDS = 1e6;
+
+export const USE_CF_PROXY = false;

@@ -5,9 +5,10 @@ import DeleteIcon from 'components/icons/DeleteIcon';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { DeduplicateContext } from 'pages/deduplicate';
-import LeftArrow from 'components/icons/LeftArrow';
 import { IconWithMessage } from 'components/IconWithMessage';
 import { AppContext } from 'pages/_app';
+import CloseIcon from '@mui/icons-material/Close';
+import BackButton from '@mui/icons-material/ArrowBackOutlined';
 
 const VerticalLine = styled.div`
     position: absolute;
@@ -17,16 +18,24 @@ const VerticalLine = styled.div`
     background: #303030;
 `;
 
+const CheckboxText = styled.div`
+    margin-left: 0.5em;
+    font-size: 16px;
+    margin-right: 0.8em;
+`;
+
 interface IProps {
     deleteFileHelper: () => void;
     close: () => void;
     count: number;
+    clearSelection: () => void;
 }
 
 export default function DeduplicateOptions({
     deleteFileHelper,
     close,
     count,
+    clearSelection,
 }: IProps) {
     const deduplicateContext = useContext(DeduplicateContext);
     const { setDialogMessage } = useContext(AppContext);
@@ -47,14 +56,19 @@ export default function DeduplicateOptions({
     return (
         <SelectionBar>
             <FluidContainer>
-                <IconButton onClick={close}>
-                    <LeftArrow />
-                </IconButton>
+                {count ? (
+                    <IconButton onClick={clearSelection}>
+                        <CloseIcon />
+                    </IconButton>
+                ) : (
+                    <IconButton onClick={close}>
+                        <BackButton />
+                    </IconButton>
+                )}
                 <div>
                     {count} {constants.SELECTED}
                 </div>
             </FluidContainer>
-
             <input
                 type="checkbox"
                 style={{
@@ -69,14 +83,7 @@ export default function DeduplicateOptions({
                         !deduplicateContext.clubSameTimeFilesOnly
                     );
                 }}></input>
-            <div
-                style={{
-                    marginLeft: '0.5em',
-                    fontSize: '16px',
-                    marginRight: '0.8em',
-                }}>
-                {constants.CLUB_BY_CAPTURE_TIME}
-            </div>
+            <CheckboxText>{constants.CLUB_BY_CAPTURE_TIME}</CheckboxText>
             <div>
                 <VerticalLine />
             </div>

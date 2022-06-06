@@ -5,6 +5,7 @@ import {
     sortFilesIntoCollections,
     sortFiles,
     preservePhotoswipeProps,
+    decryptFile,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
@@ -35,9 +36,6 @@ import {
 import { ComlinkWorker } from 'utils/comlink';
 import { FILE_TYPE } from 'constants/file';
 import uiService from './uiService';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import { dedupe } from 'utils/export';
-import { convertBytesToHumanReadable } from 'utils/billing';
 import { logUploadInfo } from 'utils/upload';
 import isElectron from 'is-electron';
 import ImportService from 'services/importService';
@@ -60,10 +58,8 @@ class UploadManager {
         UIService.init(progressUpdater);
         this.setFiles = setFiles;
     }
-    private uploadCancelled: boolean;
 
     private resetState() {
-        this.uploadCancelled = false;
         this.filesToBeUploaded = [];
         this.remainingFiles = [];
         this.failedFiles = [];
@@ -115,13 +111,42 @@ class UploadManager {
                 UploadService.setMetadataAndFileTypeInfoMap(
                     this.metadataAndFileTypeInfoMap
                 );
+
                 UIService.setUploadStage(UPLOAD_STAGES.START);
                 logUploadInfo(`clusterLivePhotoFiles called`);
+
+                // filter out files whose metadata detection failed or those that have been skipped because the files are too large,
+                // as they will be rejected during upload and are not valid upload files which we need to clustering
+                const rejectedFileLocalIDs = new Set(
+                    [...this.metadataAndFileTypeInfoMap.entries()].map(
+                        ([localID, metadataAndFileTypeInfo]) => {
+                            if (
+                                !metadataAndFileTypeInfo.metadata ||
+                                !metadataAndFileTypeInfo.fileTypeInfo
+                            ) {
+                                return localID;
+                            }
+                        }
+                    )
+                );
+                const rejectedFiles = [];
+                const filesWithMetadata = [];
+                mediaFiles.forEach((m) => {
+                    if (rejectedFileLocalIDs.has(m.localID)) {
+                        rejectedFiles.push(m);
+                    } else {
+                        filesWithMetadata.push(m);
+                    }
+                });
+
                 const analysedMediaFiles =
-                    UploadService.clusterLivePhotoFiles(mediaFiles);
+                    UploadService.clusterLivePhotoFiles(filesWithMetadata);
+
+                const allFiles = [...rejectedFiles, ...analysedMediaFiles];
+
                 uiService.setFilenames(
                     new Map<number, string>(
-                        analysedMediaFiles.map((mediaFile) => [
+                        allFiles.map((mediaFile) => [
                             mediaFile.localID,
                             UploadService.getAssetName(mediaFile),
                         ])
@@ -129,20 +154,22 @@ class UploadManager {
                 );
 
                 UIService.setHasLivePhoto(
-                    mediaFiles.length !== analysedMediaFiles.length
+                    mediaFiles.length !== allFiles.length
                 );
                 logUploadInfo(
-                    `got live photos: ${
-                        mediaFiles.length !== analysedMediaFiles.length
-                    }`
+                    `got live photos: ${mediaFiles.length !== allFiles.length}`
                 );
 
-                await this.uploadMediaFiles(analysedMediaFiles);
+                await this.uploadMediaFiles(allFiles);
             }
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
             UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
         } catch (e) {
             logError(e, 'uploading failed with error');
+            logUploadInfo(
+                `uploading failed with error -> ${e.message}
+                ${(e as Error).stack}`
+            );
             throw e;
         } finally {
             for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
@@ -156,18 +183,14 @@ class UploadManager {
             logUploadInfo(`parseMetadataJSONFiles function executed `);
 
             UIService.reset(metadataFiles.length);
-            const reader = new FileReader();
+
             for (const { file, collectionID } of metadataFiles) {
                 try {
-                    if (this.uploadCancelled) {
-                        break;
-                    }
                     logUploadInfo(
                         `parsing metadata json file ${getFileNameSize(file)}`
                     );
 
                     const parsedMetadataJSONWithTitle = await parseMetadataJSON(
-                        reader,
                         file
                     );
                     if (parsedMetadataJSONWithTitle) {
@@ -187,7 +210,7 @@ class UploadManager {
                 } catch (e) {
                     logError(e, 'parsing failed for a file');
                     logUploadInfo(
-                        `successfully parsed metadata json file ${getFileNameSize(
+                        `failed to parse metadata json file ${getFileNameSize(
                             file
                         )} error: ${e.message}`
                     );
@@ -203,12 +226,8 @@ class UploadManager {
         try {
             logUploadInfo(`extractMetadataFromFiles executed`);
             UIService.reset(mediaFiles.length);
-            const reader = new FileReader();
             for (const { file, localID, collectionID } of mediaFiles) {
                 try {
-                    if (this.uploadCancelled) {
-                        break;
-                    }
                     const { fileTypeInfo, metadata } = await (async () => {
                         if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
                             logUploadInfo(
@@ -220,7 +239,6 @@ class UploadManager {
                             return { fileTypeInfo: null, metadata: null };
                         }
                         const fileTypeInfo = await UploadService.getFileType(
-                            reader,
                             file
                         );
                         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
@@ -264,14 +282,11 @@ class UploadManager {
             }
         } catch (e) {
             logError(e, 'error extracting metadata');
-            // silently ignore the error
+            throw e;
         }
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
-        if (this.uploadCancelled) {
-            return;
-        }
         logUploadInfo(`uploadMediaFiles called`);
         this.filesToBeUploaded.push(...mediaFiles);
 
@@ -298,60 +313,83 @@ class UploadManager {
             this.cryptoWorkers[i] = cryptoWorker;
             uploadProcesses.push(
                 this.uploadNextFileInQueue(
-                    await new this.cryptoWorkers[i].comlink(),
-                    new FileReader()
+                    await new this.cryptoWorkers[i].comlink()
                 )
             );
         }
         await Promise.all(uploadProcesses);
     }
 
-    private async uploadNextFileInQueue(worker: any, reader: FileReader) {
+    private async uploadNextFileInQueue(worker: any) {
         while (this.filesToBeUploaded.length > 0) {
-            if (this.uploadCancelled) {
-                return;
-            }
-            const fileWithCollection = this.filesToBeUploaded.pop();
+            let fileWithCollection = this.filesToBeUploaded.pop();
             const { collectionID } = fileWithCollection;
             const existingFilesInCollection =
                 this.existingFilesCollectionWise.get(collectionID) ?? [];
             const collection = this.collections.get(collectionID);
-
-            const { fileUploadResult, file } = await uploader(
-                worker,
-                reader,
-                existingFilesInCollection,
-                this.existingFiles,
-                { ...fileWithCollection, collection }
+            fileWithCollection = { ...fileWithCollection, collection };
+            const { fileUploadResult, uploadedFile, skipDecryption } =
+                await uploader(
+                    worker,
+                    existingFilesInCollection,
+                    this.existingFiles,
+                    fileWithCollection
+                );
+            UIService.moveFileToResultList(
+                fileWithCollection.localID,
+                fileUploadResult
             );
-            if (fileUploadResult === FileUploadResults.UPLOADED) {
-                this.existingFiles.push(file);
+            UploadService.reducePendingUploadCount();
+            await this.postUploadTask(
+                fileUploadResult,
+                uploadedFile,
+                skipDecryption,
+                fileWithCollection
+            );
+        }
+    }
+
+    async postUploadTask(
+        fileUploadResult: FileUploadResults,
+        uploadedFile: EnteFile,
+        skipDecryption: boolean,
+        fileWithCollection: FileWithCollection
+    ) {
+        try {
+            logUploadInfo(`uploadedFile ${JSON.stringify(uploadedFile)}`);
+
+            if (
+                (fileUploadResult === FileUploadResults.UPLOADED ||
+                    fileUploadResult ===
+                        FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL) &&
+                !skipDecryption
+            ) {
+                const decryptedFile = await decryptFile(
+                    uploadedFile,
+                    fileWithCollection.collection.key
+                );
+                this.existingFiles.push(decryptedFile);
                 this.existingFiles = sortFiles(this.existingFiles);
                 await setLocalFiles(this.existingFiles);
                 this.setFiles(preservePhotoswipeProps(this.existingFiles));
-                if (!this.existingFilesCollectionWise.has(file.collectionID)) {
-                    this.existingFilesCollectionWise.set(file.collectionID, []);
+                if (
+                    !this.existingFilesCollectionWise.has(
+                        decryptedFile.collectionID
+                    )
+                ) {
+                    this.existingFilesCollectionWise.set(
+                        decryptedFile.collectionID,
+                        []
+                    );
                 }
                 this.existingFilesCollectionWise
-                    .get(file.collectionID)
-                    .push(file);
+                    .get(decryptedFile.collectionID)
+                    .push(decryptedFile);
             }
-            if (fileUploadResult === FileUploadResults.FAILED) {
-                this.failedFiles.push(fileWithCollection);
-                setData(LS_KEYS.FAILED_UPLOADS, {
-                    files: dedupe([
-                        ...(getData(LS_KEYS.FAILED_UPLOADS)?.files ?? []),
-                        ...this.failedFiles.map(
-                            (file) =>
-                                `${
-                                    file.file.name
-                                }_${convertBytesToHumanReadable(
-                                    file.file.size
-                                )}`
-                        ),
-                    ]),
-                });
-            } else if (fileUploadResult === FileUploadResults.BLOCKED) {
+            if (
+                fileUploadResult === FileUploadResults.FAILED ||
+                fileUploadResult === FileUploadResults.BLOCKED
+            ) {
                 this.failedFiles.push(fileWithCollection);
             }
 
@@ -362,12 +400,13 @@ class UploadManager {
                 );
                 ImportService.updatePendingUploads(this.remainingFiles);
             }
-
-            UIService.moveFileToResultList(
-                fileWithCollection.localID,
-                fileUploadResult
+        } catch (e) {
+            logError(e, 'failed to do post file upload action');
+            logUploadInfo(
+                `failed to do post file upload action -> ${e.message}
+                ${(e as Error).stack}`
             );
-            UploadService.reducePendingUploadCount();
+            throw e;
         }
     }
 
@@ -375,11 +414,6 @@ class UploadManager {
         await this.queueFilesForUpload(this.failedFiles, [
             ...this.collections.values(),
         ]);
-    }
-
-    cancelRemainingUploads() {
-        this.remainingFiles = [];
-        this.uploadCancelled = true;
     }
 }
 

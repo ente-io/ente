@@ -5,6 +5,15 @@ export interface TimeDelta {
     years?: number;
 }
 
+interface DateComponent<T = number> {
+    year: T;
+    month: T;
+    day: T;
+    hour: T;
+    minute: T;
+    second: T;
+}
+
 export function dateStringWithMMH(unixTimeInMicroSeconds: number): string {
     return new Date(unixTimeInMicroSeconds / 1000).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -75,4 +84,82 @@ function _addYears(date: Date, years: number) {
     const result = new Date(date);
     result.setFullYear(date.getFullYear() + years);
     return result;
+}
+
+/*
+generates data component for date in format YYYYMMDD-HHMMSS
+ */
+export function parseDateFromFusedDateString(dateTime: string) {
+    const dateComponent: DateComponent<string> = {
+        year: dateTime.slice(0, 4),
+        month: dateTime.slice(4, 6),
+        day: dateTime.slice(6, 8),
+        hour: dateTime.slice(9, 11),
+        minute: dateTime.slice(11, 13),
+        second: dateTime.slice(13, 15),
+    };
+    return getDateFromComponents(dateComponent);
+}
+
+/* sample date format = 2018-08-19 12:34:45
+ the date has six symbol separated number values
+ which we would extract and use to form the date
+ */
+export function tryToParseDateTime(dateTime: string): Date {
+    const dateComponent = getDateComponentsFromSymbolJoinedString(dateTime);
+    if (isDateComponentValid(dateComponent)) {
+        return getDateFromComponents(dateComponent);
+    } else if (
+        dateComponent.year?.length === 8 &&
+        dateComponent.month?.length === 6
+    ) {
+        // the filename has size 8 consecutive and then 6 consecutive digits
+        // high possibility that the it is some unhandled date time encoding
+        const possibleDateTime = dateComponent.year + '-' + dateComponent.month;
+        return parseDateFromFusedDateString(possibleDateTime);
+    } else {
+        return null;
+    }
+}
+
+function getDateComponentsFromSymbolJoinedString(
+    dateTime: string
+): DateComponent<string> {
+    const [year, month, day, hour, minute, second] =
+        dateTime.match(/\d+/g) ?? [];
+
+    return { year, month, day, hour, minute, second };
+}
+
+//  has length number of digits in the components
+function isDateComponentValid(dateComponent: DateComponent<string>) {
+    return (
+        dateComponent.year?.length === 4 &&
+        dateComponent.month?.length === 2 &&
+        dateComponent.day?.length === 2
+    );
+}
+
+function parseDateComponentToNumber(
+    dateComponent: DateComponent<string>
+): DateComponent<number> {
+    return {
+        year: parseInt(dateComponent.year),
+        // https://stackoverflow.com/questions/2552483/why-does-the-month-argument-range-from-0-to-11-in-javascripts-date-constructor
+        month: parseInt(dateComponent.month) - 1,
+        day: parseInt(dateComponent.day),
+        hour: parseInt(dateComponent.hour),
+        minute: parseInt(dateComponent.minute),
+        second: parseInt(dateComponent.second),
+    };
+}
+
+function getDateFromComponents(dateComponent: DateComponent<string>) {
+    const { year, month, day, hour, minute, second } =
+        parseDateComponentToNumber(dateComponent);
+    const hasTimeValues = hour && minute && second;
+
+    return hasTimeValues
+        ? new Date(year, month, day, hour, minute, second)
+        : new Date(year, month, day);
 }

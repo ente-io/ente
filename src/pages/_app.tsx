@@ -10,7 +10,6 @@ import 'styles/global.css';
 import EnteSpinner from 'components/EnteSpinner';
 import { logError } from '../utils/sentry';
 // import { Workbox } from 'workbox-window';
-import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
@@ -24,6 +23,11 @@ import { CssBaseline } from '@mui/material';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as types from 'styled-components/cssprop'; // need to css prop on styled component
 import { SetDialogBoxAttributes, DialogBoxAttributes } from 'types/dialogBox';
+import {
+    getFamilyPortalRedirectURL,
+    getRoadmapRedirectURL,
+} from 'services/userService';
+import { CustomError } from 'utils/error';
 
 export const LogoImage = styled.img`
     max-height: 28px;
@@ -68,10 +72,10 @@ export interface FlashMessage {
 }
 export const AppContext = createContext<AppContextType>(null);
 
-const redirectMap = {
-    roadmap: (token: string) =>
-        `${getEndpoint()}/users/roadmap?token=${encodeURIComponent(token)}`,
-};
+const redirectMap = new Map([
+    ['roadmap', getRoadmapRedirectURL],
+    ['families', getFamilyPortalRedirectURL],
+]);
 
 export default function App({ Component, err }) {
     const router = useRouter();
@@ -140,14 +144,30 @@ export default function App({ Component, err }) {
                 'font-size: 20px;'
             );
         }
+
+        const redirectTo = async (redirect) => {
+            if (
+                redirectMap.has(redirect) &&
+                typeof redirectMap.get(redirect) === 'function'
+            ) {
+                const redirectAction = redirectMap.get(redirect);
+                const url = await redirectAction();
+                window.location.href = url;
+            } else {
+                logError(CustomError.BAD_REQUEST, 'invalid redirection', {
+                    redirect,
+                });
+            }
+        };
+
         const query = new URLSearchParams(window.location.search);
-        const redirect = query.get('redirect');
-        if (redirect && redirectMap[redirect]) {
+        const redirectName = query.get('redirect');
+        if (redirectName) {
             const user = getData(LS_KEYS.USER);
             if (user?.token) {
-                window.location.href = redirectMap[redirect](user.token);
+                redirectTo(redirectName);
             } else {
-                setRedirectName(redirect);
+                setRedirectName(redirectName);
             }
         }
 
@@ -159,9 +179,11 @@ export default function App({ Component, err }) {
             if (redirectName) {
                 const user = getData(LS_KEYS.USER);
                 if (user?.token) {
-                    window.location.href = redirectMap[redirectName](
-                        user.token
-                    );
+                    redirectTo(redirectName);
+
+                    // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710
+                    // eslint-disable-next-line no-throw-literal
+                    throw 'Aborting route change, redirection in process....';
                 }
             }
         });

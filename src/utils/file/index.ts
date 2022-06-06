@@ -78,7 +78,6 @@ export async function downloadFile(
     }
 
     const fileType = await getFileType(
-        fileReader,
         new File([fileBlob], file.metadata.title)
     );
     if (
@@ -99,12 +98,12 @@ export async function downloadFile(
         const originalName = fileNameWithoutExtension(file.metadata.title);
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
         const image = new File([motionPhoto.image], motionPhoto.imageNameTitle);
-        const imageType = await getFileType(fileReader, image);
+        const imageType = await getFileType(image);
         tempImageURL = URL.createObjectURL(
             new Blob([motionPhoto.image], { type: imageType.mimeType })
         );
         const video = new File([motionPhoto.video], motionPhoto.videoNameTitle);
-        const videoType = await getFileType(fileReader, video);
+        const videoType = await getFileType(video);
         tempVideoURL = URL.createObjectURL(
             new Blob([motionPhoto.video], { type: videoType.mimeType })
         );
@@ -309,25 +308,25 @@ export const preservePhotoswipeProps =
         return fileWithPreservedProperty;
     };
 
-export function fileNameWithoutExtension(filename) {
+export function fileNameWithoutExtension(filename: string) {
     const lastDotPosition = filename.lastIndexOf('.');
     if (lastDotPosition === -1) return filename;
-    else return filename.substr(0, lastDotPosition);
+    else return filename.slice(0, lastDotPosition);
 }
 
-export function fileExtensionWithDot(filename) {
+export function fileExtensionWithDot(filename: string) {
     const lastDotPosition = filename.lastIndexOf('.');
     if (lastDotPosition === -1) return '';
-    else return filename.substr(lastDotPosition);
+    else return filename.slice(lastDotPosition);
 }
 
-export function splitFilenameAndExtension(filename): [string, string] {
+export function splitFilenameAndExtension(filename: string): [string, string] {
     const lastDotPosition = filename.lastIndexOf('.');
     if (lastDotPosition === -1) return [filename, null];
     else
         return [
-            filename.substr(0, lastDotPosition),
-            filename.substr(lastDotPosition + 1),
+            filename.slice(0, lastDotPosition),
+            filename.slice(lastDotPosition + 1),
         ];
 }
 
@@ -349,9 +348,8 @@ export async function convertForPreview(
     fileBlob: Blob
 ): Promise<Blob[]> {
     const convertIfHEIC = async (fileName: string, fileBlob: Blob) => {
-        const reader = new FileReader();
         const mimeType = (
-            await getFileType(reader, new File([fileBlob], file.metadata.title))
+            await getFileType(new File([fileBlob], file.metadata.title))
         ).exactType;
         if (isFileHEIC(mimeType)) {
             fileBlob = await HEICConverter.convert(fileBlob);

@@ -22,18 +22,23 @@ import { SetLoading, SetFiles } from 'types/gallery';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import UploadTypeSelector from '../../UploadTypeSelector';
+import Router from 'next/router';
+import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
+import { downloadApp } from 'utils/common';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setBannerMessage: (message: string | JSX.Element) => void;
-    acceptedFiles: File[];
+    droppedFiles: File[];
+    clearDroppedFiles: () => void;
     closeCollectionSelector: () => void;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setLoading: SetLoading;
-    setUploadInProgress: any;
+    uploadInProgress: boolean;
+    setUploadInProgress: (value: boolean) => void;
     showCollectionSelector: () => void;
     fileRejections: FileRejection[];
     setFiles: SetFiles;
@@ -49,15 +54,21 @@ enum UPLOAD_STRATEGY {
     COLLECTION_PER_FOLDER,
 }
 
-enum DESKTOP_UPLOAD_TYPE {
-    FILES,
-    FOLDERS,
+export enum DESKTOP_UPLOAD_TYPE {
+    FILES = 'files',
+    FOLDERS = 'folders',
+    ZIPS = 'zips',
 }
 
 interface AnalysisResult {
     suggestedCollectionName: string;
     multipleFolders: boolean;
 }
+
+const NULL_ANALYSIS_RESULT = {
+    suggestedCollectionName: '',
+    multipleFolders: false,
+};
 
 export default function Upload(props: Props) {
     const [progressView, setProgressView] = useState(false);
@@ -74,10 +85,8 @@ export default function Upload(props: Props) {
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
 
     const [choiceModalView, setChoiceModalView] = useState(false);
-    const [analysisResult, setAnalysisResult] = useState<AnalysisResult>({
-        suggestedCollectionName: '',
-        multipleFolders: false,
-    });
+    const [analysisResult, setAnalysisResult] =
+        useState<AnalysisResult>(NULL_ANALYSIS_RESULT);
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
 
@@ -85,6 +94,7 @@ export default function Upload(props: Props) {
     const isPendingDesktopUpload = useRef(false);
     const pendingDesktopUploadCollectionName = useRef<string>('');
     const desktopUploadType = useRef<DESKTOP_UPLOAD_TYPE>(null);
+    const zipPaths = useRef<string[]>(null);
 
     useEffect(() => {
         UploadManager.initUploader(
@@ -100,10 +110,10 @@ export default function Upload(props: Props) {
             props.setFiles
         );
 
-        if (isElectron()) {
+        if (isElectron() && ImportService.checkAllElectronAPIsExists()) {
             ImportService.getPendingUploads().then(
-                ({ files: electronFiles, collectionName }) => {
-                    resumeDesktopUpload(electronFiles, collectionName);
+                ({ files: electronFiles, collectionName, type }) => {
+                    resumeDesktopUpload(type, electronFiles, collectionName);
                 }
             );
         }
@@ -111,39 +121,50 @@ export default function Upload(props: Props) {
 
     useEffect(() => {
         if (
-            props.acceptedFiles?.length > 0 ||
-            appContext.sharedFiles?.length > 0 ||
-            props.electronFiles?.length > 0
+            props.electronFiles?.length > 0 ||
+            props.droppedFiles?.length > 0 ||
+            appContext.sharedFiles?.length > 0
         ) {
-            props.setLoading(true);
-
-            let analysisResult: AnalysisResult;
-            if (
-                props.acceptedFiles?.length > 0 ||
-                props.electronFiles?.length > 0
-            ) {
-                if (props.acceptedFiles?.length > 0) {
+            if (props.uploadInProgress) {
+                // no-op
+                // a upload is already in progress
+            } else if (isCanvasBlocked()) {
+                appContext.setDialogMessage({
+                    title: constants.CANVAS_BLOCKED_TITLE,
+                    staticBackdrop: true,
+                    content: constants.CANVAS_BLOCKED_MESSAGE(),
+                    close: { text: constants.CLOSE },
+                    proceed: {
+                        text: constants.DOWNLOAD_APP,
+                        action: downloadApp,
+                        variant: 'success',
+                    },
+                });
+            } else {
+                props.setLoading(true);
+                if (props.droppedFiles?.length > 0) {
                     // File selection by drag and drop or selection of file.
-                    toUploadFiles.current = props.acceptedFiles;
-                } else {
+                    toUploadFiles.current = props.droppedFiles;
+                    props.clearDroppedFiles();
+                } else if (appContext.sharedFiles?.length > 0) {
+                    toUploadFiles.current = appContext.sharedFiles;
+                    appContext.resetSharedFiles();
+                } else if (props.electronFiles?.length > 0) {
                     // File selection from desktop app
                     toUploadFiles.current = props.electronFiles;
+                    props.setElectronFiles([]);
                 }
+                const analysisResult = analyseUploadFiles();
+                setAnalysisResult(analysisResult);
 
-                analysisResult = analyseUploadFiles();
-                if (analysisResult) {
-                    setAnalysisResult(analysisResult);
-                }
-            } else if (appContext.sharedFiles.length > 0) {
-                toUploadFiles.current = appContext.sharedFiles;
+                handleCollectionCreationAndUpload(
+                    analysisResult,
+                    props.isFirstUpload
+                );
+                props.setLoading(false);
             }
-            handleCollectionCreationAndUpload(
-                analysisResult,
-                props.isFirstUpload
-            );
-            props.setLoading(false);
         }
-    }, [props.acceptedFiles, appContext.sharedFiles, props.electronFiles]);
+    }, [props.droppedFiles, appContext.sharedFiles, props.electronFiles]);
 
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
@@ -156,24 +177,27 @@ export default function Upload(props: Props) {
     };
 
     const resumeDesktopUpload = async (
+        type: DESKTOP_UPLOAD_TYPE,
         electronFiles: ElectronFile[],
         collectionName: string
     ) => {
         if (electronFiles && electronFiles?.length > 0) {
             isPendingDesktopUpload.current = true;
             pendingDesktopUploadCollectionName.current = collectionName;
+            desktopUploadType.current = type;
             props.setElectronFiles(electronFiles);
         }
     };
 
     function analyseUploadFiles(): AnalysisResult {
-        if (toUploadFiles.current.length === 0) {
-            return null;
+        if (
+            isElectron() &&
+            (!desktopUploadType.current ||
+                desktopUploadType.current === DESKTOP_UPLOAD_TYPE.FILES)
+        ) {
+            return NULL_ANALYSIS_RESULT;
         }
-        if (desktopUploadType.current === DESKTOP_UPLOAD_TYPE.FILES) {
-            desktopUploadType.current = null;
-            return { suggestedCollectionName: '', multipleFolders: false };
-        }
+
         const paths: string[] = toUploadFiles.current.map(
             (file) => file['path']
         );
@@ -181,19 +205,24 @@ export default function Upload(props: Props) {
         paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
         const firstPath = paths[0];
         const lastPath = paths[paths.length - 1];
+
         const L = firstPath.length;
         let i = 0;
-        const firstFileFolder = firstPath.substr(0, firstPath.lastIndexOf('/'));
-        const lastFileFolder = lastPath.substr(0, lastPath.lastIndexOf('/'));
+        const firstFileFolder = firstPath.substring(
+            0,
+            firstPath.lastIndexOf('/')
+        );
+        const lastFileFolder = lastPath.substring(0, lastPath.lastIndexOf('/'));
         while (i < L && firstPath.charAt(i) === lastPath.charAt(i)) i++;
         let commonPathPrefix = firstPath.substring(0, i);
+
         if (commonPathPrefix) {
-            commonPathPrefix = commonPathPrefix.substr(
-                1,
-                commonPathPrefix.lastIndexOf('/') - 1
+            commonPathPrefix = commonPathPrefix.substring(
+                0,
+                commonPathPrefix.lastIndexOf('/')
             );
             if (commonPathPrefix) {
-                commonPathPrefix = commonPathPrefix.substr(
+                commonPathPrefix = commonPathPrefix.substring(
                     commonPathPrefix.lastIndexOf('/') + 1
                 );
             }
@@ -208,11 +237,14 @@ export default function Upload(props: Props) {
         for (const file of toUploadFiles.current) {
             const filePath = file['path'] as string;
 
-            let folderPath = filePath.substr(0, filePath.lastIndexOf('/'));
+            let folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
             if (folderPath.endsWith(METADATA_FOLDER_NAME)) {
-                folderPath = folderPath.substr(0, folderPath.lastIndexOf('/'));
+                folderPath = folderPath.substring(
+                    0,
+                    folderPath.lastIndexOf('/')
+                );
             }
-            const folderName = folderPath.substr(
+            const folderName = folderPath.substring(
                 folderPath.lastIndexOf('/') + 1
             );
             if (!collectionWiseFiles.has(folderName)) {
@@ -225,7 +257,6 @@ export default function Upload(props: Props) {
 
     const uploadFilesToExistingCollection = async (collection: Collection) => {
         try {
-            uploadInit();
             const filesWithCollectionToUpload: FileWithCollection[] =
                 toUploadFiles.current.map((file, index) => ({
                     file,
@@ -243,8 +274,6 @@ export default function Upload(props: Props) {
         collectionName?: string
     ) => {
         try {
-            uploadInit();
-
             const filesWithCollectionToUpload: FileWithCollection[] = [];
             const collections: Collection[] = [];
             let collectionWiseFiles = new Map<
@@ -296,13 +325,24 @@ export default function Upload(props: Props) {
         collections: Collection[]
     ) => {
         try {
+            uploadInit();
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
             await props.syncWithRemote(true, true);
-            if (isElectron()) {
+            if (isElectron() && !isPendingDesktopUpload.current) {
+                await ImportService.setToUploadCollection(collections);
+                if (zipPaths.current) {
+                    await ImportService.setToUploadFiles(
+                        DESKTOP_UPLOAD_TYPE.ZIPS,
+                        zipPaths.current
+                    );
+                    zipPaths.current = null;
+                }
                 await ImportService.setToUploadFiles(
-                    filesWithCollectionToUpload,
-                    collections
+                    DESKTOP_UPLOAD_TYPE.FILES,
+                    filesWithCollectionToUpload.map(
+                        ({ file }) => (file as ElectronFile).path
+                    )
                 );
             }
             await uploadManager.queueFilesForUpload(
@@ -318,7 +358,6 @@ export default function Upload(props: Props) {
             setProgressView(false);
             throw err;
         } finally {
-            appContext.resetSharedFiles();
             props.setUploadInProgress(false);
             props.syncWithRemote();
         }
@@ -372,11 +411,19 @@ export default function Upload(props: Props) {
                 uploadToSingleNewCollection(
                     pendingDesktopUploadCollectionName.current
                 );
+                pendingDesktopUploadCollectionName.current = null;
             } else {
                 uploadFilesToNewCollections(
                     UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
                 );
             }
+            return;
+        }
+        if (
+            isElectron() &&
+            desktopUploadType.current === DESKTOP_UPLOAD_TYPE.ZIPS
+        ) {
+            uploadFilesToNewCollections(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
             return;
         }
         if (isFirstUpload && !analysisResult.suggestedCollectionName) {
@@ -402,21 +449,26 @@ export default function Upload(props: Props) {
         desktopUploadType.current = type;
         if (type === DESKTOP_UPLOAD_TYPE.FILES) {
             files = await ImportService.showUploadFilesDialog();
-        } else {
+        } else if (type === DESKTOP_UPLOAD_TYPE.FOLDERS) {
             files = await ImportService.showUploadDirsDialog();
+        } else {
+            const response = await ImportService.showUploadZipDialog();
+            files = response.files;
+            zipPaths.current = response.zipPaths;
         }
-        props.setElectronFiles(files);
-        props.setUploadTypeSelectorView(false);
+        if (files?.length > 0) {
+            props.setElectronFiles(files);
+            props.setUploadTypeSelectorView(false);
+        }
     };
 
     const cancelUploads = async () => {
         setProgressView(false);
-        UploadManager.cancelRemainingUploads();
         if (isElectron()) {
-            ImportService.updatePendingUploads([]);
+            ImportService.cancelRemainingUploads();
         }
         await props.setUploadInProgress(false);
-        await props.syncWithRemote();
+        Router.reload();
     };
 
     return (
@@ -445,7 +497,7 @@ export default function Upload(props: Props) {
                     handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FOLDERS)
                 }
                 uploadGoogleTakeoutZips={() =>
-                    handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FOLDERS)
+                    handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.ZIPS)
                 }
             />
             <UploadProgress

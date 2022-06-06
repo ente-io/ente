@@ -11,6 +11,7 @@ import PublicCollectionDownloadManager from 'services/publicCollectionDownloadMa
 import LivePhotoIndicatorOverlay from 'components/icons/LivePhotoIndicatorOverlay';
 import { isLivePhoto } from 'utils/file';
 import { DeduplicateContext } from 'pages/deduplicate';
+import { logError } from 'utils/sentry';
 
 interface IProps {
     file: EnteFile;
@@ -100,7 +101,7 @@ export const HoverOverlay = styled.div<{ checked: boolean }>`
 `;
 
 export const InSelectRangeOverLay = styled.div<{ active: boolean }>`
-    opacity: ${(props) => (!props.active ? 0 : 1)});
+    opacity: ${(props) => (!props.active ? 0 : 1)};
     left: 0;
     top: 0;
     outline: none;
@@ -115,6 +116,7 @@ export const FileAndCollectionNameOverlay = styled.div`
     bottom: 0;
     left: 0;
     max-height: 40%;
+    width: 100%;
     background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 2));
     & > p {
         max-width: calc(${IMAGE_CONTAINER_MAX_WIDTH}px - 10px);
@@ -227,14 +229,17 @@ export default function PreviewCard(props: IProps) {
                     if (isMounted.current) {
                         setImgSrc(url);
                         thumbs.set(file.id, url);
-                        const newFile = updateURL(url);
-                        file.msrc = newFile.msrc;
-                        file.html = newFile.html;
-                        file.src = newFile.src;
-                        file.w = newFile.w;
-                        file.h = newFile.h;
+                        if (updateURL) {
+                            const newFile = updateURL(url);
+                            file.msrc = newFile.msrc;
+                            file.html = newFile.html;
+                            file.src = newFile.src;
+                            file.w = newFile.w;
+                            file.h = newFile.h;
+                        }
                     }
                 } catch (e) {
+                    logError(e, 'preview card useEffect failed');
                     // no-op
                 }
             };

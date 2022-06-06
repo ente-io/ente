@@ -17,6 +17,7 @@ import { EnteFile, TrashRequest } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { MAX_TRASH_BATCH_SIZE } from 'constants/file';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
+import { logUploadInfo } from 'utils/upload';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -28,7 +29,23 @@ export const getLocalFiles = async () => {
 };
 
 export const setLocalFiles = async (files: EnteFile[]) => {
-    await localForage.setItem(FILES_TABLE, files);
+    try {
+        await localForage.setItem(FILES_TABLE, files);
+    } catch (e1) {
+        try {
+            const storageEstimate = await navigator.storage.estimate();
+            logError(e1, 'failed to save files to indexedDB', {
+                storageEstimate,
+            });
+            logUploadInfo(
+                `storage estimate ${JSON.stringify(storageEstimate)}`
+            );
+        } catch (e2) {
+            logError(e1, 'failed to save files to indexedDB');
+            logError(e2, 'failed to get storage stats');
+        }
+        throw e1;
+    }
 };
 
 const getCollectionLastSyncTime = async (collection: Collection) =>
