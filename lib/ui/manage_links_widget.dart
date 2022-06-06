@@ -370,23 +370,15 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: Text('Cancel',
+                      style: Theme.of(context).textTheme.subtitle2),
                   onPressed: () {
                     Navigator.pop(context, 'cancel');
                   },
                 ),
                 TextButton(
-                  child: Text(
-                    'ok',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
+                  child:
+                      Text('Ok', style: Theme.of(context).textTheme.subtitle2),
                   onPressed: () {
                     if (_textFieldController.text.trim().isEmpty) {
                       return;
