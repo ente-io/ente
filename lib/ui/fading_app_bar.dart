@@ -253,7 +253,11 @@ class FadingAppBarState extends State<FadingAppBar> {
       maxTime: DateTime.now(),
       currentTime: DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
       locale: LocaleType.en,
-      theme: kDatePickerTheme,
+      theme: DatePickerTheme(
+        backgroundColor: Theme.of(context).backgroundColor,
+        itemStyle: Theme.of(context).textTheme.subtitle1,
+        cancelStyle: Theme.of(context).textTheme.subtitle1,
+      ),
     );
     if (dateResult == null) {
       return;
@@ -263,7 +267,11 @@ class FadingAppBarState extends State<FadingAppBar> {
       showTitleActions: true,
       currentTime: dateResult,
       locale: LocaleType.en,
-      theme: kDatePickerTheme,
+      theme: DatePickerTheme(
+        backgroundColor: Theme.of(context).backgroundColor,
+        itemStyle: Theme.of(context).textTheme.subtitle1,
+        cancelStyle: Theme.of(context).textTheme.subtitle1,
+      ),
     );
     if (dateWithTimeResult != null) {
       if (await editTime(context, List.of([widget.file]),
@@ -369,13 +377,3 @@ class FadingAppBarState extends State<FadingAppBar> {
     }
   }
 }
-
-const kDatePickerTheme = DatePickerTheme(
-  backgroundColor: Colors.black,
-  itemStyle: TextStyle(
-    color: Colors.white,
-  ),
-  cancelStyle: TextStyle(
-    color: Colors.white,
-  ),
-);

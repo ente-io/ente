@@ -8,7 +8,6 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
-import 'package:photos/ui/common/widget_theme.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -310,7 +309,11 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       minTime: DateTime.now(),
       currentTime: DateTime.now(),
       locale: LocaleType.en,
-      theme: kDatePickerTheme,
+      theme: DatePickerTheme(
+        backgroundColor: Theme.of(context).backgroundColor,
+        itemStyle: Theme.of(context).textTheme.subtitle1,
+        cancelStyle: Theme.of(context).textTheme.subtitle1,
+      ),
     );
     if (dateResult == null) {
       return null;
@@ -320,7 +323,11 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       showTitleActions: true,
       currentTime: dateResult,
       locale: LocaleType.en,
-      theme: kDatePickerTheme,
+      theme: DatePickerTheme(
+        backgroundColor: Theme.of(context).backgroundColor,
+        itemStyle: Theme.of(context).textTheme.subtitle1,
+        cancelStyle: Theme.of(context).textTheme.subtitle1,
+      ),
     );
     if (dateWithTimeResult == null) {
       return null;
