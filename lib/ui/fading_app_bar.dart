@@ -9,6 +9,7 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
@@ -253,7 +254,7 @@ class FadingAppBarState extends State<FadingAppBar> {
       maxTime: DateTime.now(),
       currentTime: DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
       locale: LocaleType.en,
-      theme: kDatePickerTheme,
+      theme: Theme.of(context).colorScheme.dateTimePickertheme,
     );
     if (dateResult == null) {
       return;
@@ -263,7 +264,7 @@ class FadingAppBarState extends State<FadingAppBar> {
       showTitleActions: true,
       currentTime: dateResult,
       locale: LocaleType.en,
-      theme: kDatePickerTheme,
+      theme: Theme.of(context).colorScheme.dateTimePickertheme,
     );
     if (dateWithTimeResult != null) {
       if (await editTime(context, List.of([widget.file]),
@@ -369,13 +370,3 @@ class FadingAppBarState extends State<FadingAppBar> {
     }
   }
 }
-
-const kDatePickerTheme = DatePickerTheme(
-  backgroundColor: Colors.black,
-  itemStyle: TextStyle(
-    color: Colors.white,
-  ),
-  cancelStyle: TextStyle(
-    color: Colors.white,
-  ),
-);

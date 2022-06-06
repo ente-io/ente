@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
 extension CustomColorScheme on ColorScheme {
   Color get defaultTextColor =>
@@ -11,6 +12,9 @@ extension CustomColorScheme on ColorScheme {
 
   Color get inverseIconColor =>
       brightness == Brightness.light ? Colors.white : Colors.black;
+
+  Color get inverseBackgroundColor =>
+      brightness == Brightness.light ? Colors.black : Colors.white;
 
   Color get boxSelectColor => brightness == Brightness.light
       ? Color.fromRGBO(67, 186, 108, 1)
@@ -38,7 +42,6 @@ extension CustomColorScheme on ColorScheme {
 
   Color get frostyBlurBackdropFilterColor =>
       Colors.white; //same for both themes
-  // brightness == Brightness.light ? Colors.black : Colors.white;
 
   Color get cancelSelectedButtonColor => brightness == Brightness.light
       ? Color.fromRGBO(0, 0, 0, 0.35)
@@ -49,6 +52,20 @@ extension CustomColorScheme on ColorScheme {
       : Color.fromRGBO(10, 15, 15, 1.0);
 
   Color get greenText => Color.fromRGBO(40, 190, 92, 1);
+
+  Color get cupertinoPickerTopColor => brightness == Brightness.light
+      ? Color.fromARGB(255, 238, 238, 238)
+      : Colors.white.withOpacity(0.1);
+
+  DatePickerTheme get dateTimePickertheme => brightness == Brightness.light
+      ? DatePickerTheme(
+          backgroundColor: Colors.white,
+          itemStyle: TextStyle(color: Colors.black),
+          cancelStyle: TextStyle(color: Colors.black))
+      : DatePickerTheme(
+          backgroundColor: Colors.black,
+          itemStyle: TextStyle(color: Colors.white),
+          cancelStyle: TextStyle(color: Colors.white));
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(

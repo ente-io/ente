@@ -4,10 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
-import 'package:photos/ui/common/widget_theme.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -50,6 +50,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
+        elevation: 0,
         title: Text(
           "Manage link",
         ),
@@ -165,14 +166,16 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           onChanged: (value) async {
                             if (!value) {
                               final choice = await showChoiceDialog(
-                                context,
-                                'Disable downloads',
-                                'Are you sure that you want to disable the download button for files?',
-                                firstAction: 'No',
-                                secondAction: 'Yes',
-                                firstActionColor: Theme.of(context).buttonColor,
-                                secondActionColor: Colors.white,
-                              );
+                                  context,
+                                  'Disable downloads',
+                                  'Are you sure that you want to disable the download button for files?',
+                                  firstAction: 'No',
+                                  secondAction: 'Yes',
+                                  firstActionColor:
+                                      Theme.of(context).colorScheme.greenText,
+                                  secondActionColor: Theme.of(context)
+                                      .colorScheme
+                                      .inverseBackgroundColor);
                               if (choice != DialogUserChoice.secondChoice) {
                                 return;
                               }
@@ -200,7 +203,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
 
   Future<void> showPicker() async {
     Widget getOptionText(String text) {
-      return Text(text, style: TextStyle(color: Colors.white));
+      return Text(text, style: Theme.of(context).textTheme.subtitle1);
     }
 
     return showCupertinoModalPopup(
@@ -211,7 +214,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
           children: <Widget>[
             Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.cupertinoPickerTopColor,
                 border: Border(
                   bottom: BorderSide(
                     color: Color(0xff999999),
@@ -223,10 +226,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   CupertinoButton(
-                    child: Text('Cancel',
-                        style: TextStyle(
-                          color: Colors.white,
-                        )),
+                    child: Text(
+                      'Cancel',
+                      style: Theme.of(context).textTheme.subtitle1,
+                    ),
                     onPressed: () {
                       Navigator.of(context).pop('cancel');
                     },
@@ -236,10 +239,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                   ),
                   CupertinoButton(
-                    child: Text('Confirm',
-                        style: TextStyle(
-                          color: Colors.white,
-                        )),
+                    child: Text(
+                      'Confirm',
+                      style: Theme.of(context).textTheme.subtitle1,
+                    ),
                     onPressed: () async {
                       int newValidTill = -1;
                       int expireAfterInMicroseconds = _selectedExpiry.item3;
@@ -276,7 +279,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               height: 220.0,
               color: Color(0xfff7f7f7),
               child: CupertinoPicker(
-                backgroundColor: Colors.black.withOpacity(0.95),
+                backgroundColor:
+                    Theme.of(context).backgroundColor.withOpacity(0.95),
                 children:
                     _expiryOptions.map((e) => getOptionText(e.item2)).toList(),
                 onSelectedItemChanged: (value) {
@@ -305,7 +309,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       minTime: DateTime.now(),
       currentTime: DateTime.now(),
       locale: LocaleType.en,
-      theme: kDatePickerTheme,
+      theme: Theme.of(context).colorScheme.dateTimePickertheme,
     );
     if (dateResult == null) {
       return null;
@@ -315,7 +319,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       showTitleActions: true,
       currentTime: dateResult,
       locale: LocaleType.en,
-      theme: kDatePickerTheme,
+      theme: Theme.of(context).colorScheme.dateTimePickertheme,
     );
     if (dateWithTimeResult == null) {
       return null;
@@ -365,23 +369,15 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: Text('Cancel',
+                      style: Theme.of(context).textTheme.subtitle2),
                   onPressed: () {
                     Navigator.pop(context, 'cancel');
                   },
                 ),
                 TextButton(
-                  child: Text(
-                    'ok',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
+                  child:
+                      Text('Ok', style: Theme.of(context).textTheme.subtitle2),
                   onPressed: () {
                     if (_textFieldController.text.trim().isEmpty) {
                       return;
@@ -454,7 +450,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   Future<void> _showDeviceLimitPicker() async {
     List<Text> options = [];
     for (int i = 50; i > 0; i--) {
-      options.add(Text(i.toString(), style: TextStyle(color: Colors.white)));
+      options.add(
+          Text(i.toString(), style: Theme.of(context).textTheme.subtitle1));
     }
     return showCupertinoModalPopup(
       context: context,
@@ -464,7 +461,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
           children: <Widget>[
             Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.cupertinoPickerTopColor,
                 border: Border(
                   bottom: BorderSide(
                     color: Color(0xff999999),
@@ -476,10 +473,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   CupertinoButton(
-                    child: Text('Cancel',
-                        style: TextStyle(
-                          color: Colors.white,
-                        )),
+                    child: Text(
+                      'Cancel',
+                      style: Theme.of(context).textTheme.subtitle1,
+                    ),
                     onPressed: () {
                       Navigator.of(context).pop('cancel');
                     },
@@ -489,10 +486,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                   ),
                   CupertinoButton(
-                    child: Text('Confirm',
-                        style: TextStyle(
-                          color: Colors.white,
-                        )),
+                    child: Text(
+                      'Confirm',
+                      style: Theme.of(context).textTheme.subtitle1,
+                    ),
                     onPressed: () async {
                       await _updateUrlSettings(context, {
                         'deviceLimit': int.tryParse(
@@ -513,7 +510,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               height: 220.0,
               color: Color(0xfff7f7f7),
               child: CupertinoPicker(
-                backgroundColor: Colors.black.withOpacity(0.95),
+                backgroundColor:
+                    Theme.of(context).backgroundColor.withOpacity(0.95),
                 children: options,
                 onSelectedItemChanged: (value) {
                   _selectedDeviceLimitIndex = value;
