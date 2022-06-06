@@ -115,7 +115,16 @@ Future<void> sendLogs(
 
 Future<void> _sendLogs(
     BuildContext context, String toEmail, String subject, String body) async {
-  String zipFilePath = await getZippedLogsFile(context);
+  final dialog = createProgressDialog(context, "preparing logs...");
+  await dialog.show();
+  final tempPath = (await getTemporaryDirectory()).path;
+  final zipFilePath = tempPath + "/logs.zip";
+  final logsDirectory = Directory(tempPath + "/logs");
+  var encoder = ZipFileEncoder();
+  encoder.create(zipFilePath);
+  encoder.addDirectory(logsDirectory);
+  encoder.close();
+  await dialog.hide();
   final Email email = Email(
     recipients: [toEmail],
     subject: subject,
@@ -127,33 +136,13 @@ Future<void> _sendLogs(
     await FlutterEmailSender.send(email);
   } catch (e, s) {
     _logger.severe('email sender failed', e, s);
-    await shareLogs(context, toEmail, zipFilePath);
+    final result = await showChoiceDialog(
+        context, "email logs", "please send the logs to $toEmail",
+        firstAction: "copy email", secondAction: "send");
+    if (result != null && result == DialogUserChoice.firstChoice) {
+      await Clipboard.setData(ClipboardData(text: toEmail));
+    }
+    final Size size = MediaQuery.of(context).size;
+    await Share.shareFiles([zipFilePath], sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
   }
-}
-
-Future<String> getZippedLogsFile(BuildContext context) async {
-  final dialog = createProgressDialog(context, "preparing logs...");
-  await dialog.show();
-  final tempPath = (await getTemporaryDirectory()).path;
-  final zipFilePath = tempPath + "/logs.zip";
-  final logsDirectory = Directory(tempPath + "/logs");
-  var encoder = ZipFileEncoder();
-  encoder.create(zipFilePath);
-  encoder.addDirectory(logsDirectory);
-  encoder.close();
-  await dialog.hide();
-  return zipFilePath;
-}
-
-Future<void> shareLogs(
-    BuildContext context, String toEmail, String zipFilePath) async {
-  final result = await showChoiceDialog(
-      context, "email logs", "please send the logs to $toEmail",
-      firstAction: "copy email", secondAction: "send");
-  if (result != null && result == DialogUserChoice.firstChoice) {
-    await Clipboard.setData(ClipboardData(text: toEmail));
-  }
-  final Size size = MediaQuery.of(context).size;
-  await Share.shareFiles([zipFilePath],
-      sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
 }
