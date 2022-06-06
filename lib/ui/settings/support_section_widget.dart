@@ -72,7 +72,7 @@ class SupportSectionWidget extends StatelessWidget {
           onDoubleTap: () async {
             final zipFilePath = await getZippedLogsFile(context);
             await shareLogs(context, "bug@ente.io", zipFilePath);
-        },
+          },
           child: SettingsTextItem(
               text: "Report bug 🐞", icon: Icons.navigate_next),
         ),

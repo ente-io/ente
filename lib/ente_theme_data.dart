@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
 extension CustomColorScheme on ColorScheme {
   Color get defaultTextColor =>
@@ -55,6 +56,16 @@ extension CustomColorScheme on ColorScheme {
   Color get cupertinoPickerTopColor => brightness == Brightness.light
       ? Color.fromARGB(255, 238, 238, 238)
       : Colors.white.withOpacity(0.1);
+
+  DatePickerTheme get dateTimePickertheme => brightness == Brightness.light
+      ? DatePickerTheme(
+          backgroundColor: Colors.white,
+          itemStyle: TextStyle(color: Colors.black),
+          cancelStyle: TextStyle(color: Colors.black))
+      : DatePickerTheme(
+          backgroundColor: Colors.black,
+          itemStyle: TextStyle(color: Colors.white),
+          cancelStyle: TextStyle(color: Colors.white));
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(

@@ -309,11 +309,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       minTime: DateTime.now(),
       currentTime: DateTime.now(),
       locale: LocaleType.en,
-      theme: DatePickerTheme(
-        backgroundColor: Theme.of(context).backgroundColor,
-        itemStyle: Theme.of(context).textTheme.subtitle1,
-        cancelStyle: Theme.of(context).textTheme.subtitle1,
-      ),
+      theme: Theme.of(context).colorScheme.dateTimePickertheme,
     );
     if (dateResult == null) {
       return null;
@@ -323,11 +319,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       showTitleActions: true,
       currentTime: dateResult,
       locale: LocaleType.en,
-      theme: DatePickerTheme(
-        backgroundColor: Theme.of(context).backgroundColor,
-        itemStyle: Theme.of(context).textTheme.subtitle1,
-        cancelStyle: Theme.of(context).textTheme.subtitle1,
-      ),
+      theme: Theme.of(context).colorScheme.dateTimePickertheme,
     );
     if (dateWithTimeResult == null) {
       return null;
