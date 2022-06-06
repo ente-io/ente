@@ -46,7 +46,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EnteSpinner from 'components/EnteSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
-import { AppContext } from 'pages/_app';
+// import { AppContext } from 'pages/_app';
 
 import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
 import { sleep } from 'utils/common';
@@ -425,7 +425,7 @@ function InfoModal({
     exif,
     scheduleUpdate,
 }) {
-    const appContext = useContext(AppContext);
+    // const appContext = useContext(AppContext);
     const [updateMLDataIndex, setUpdateMLDataIndex] = useState(0);
 
     return (
@@ -471,43 +471,43 @@ function InfoModal({
                             {constants.SHOW_MAP}
                         </a>
                     )}
-                {appContext.mlSearchEnabled && (
-                    <>
-                        <div>
-                            <Legend>{constants.PEOPLE}</Legend>
-                        </div>
-                        <PhotoPeopleList
+                {/* {appContext.mlSearchEnabled && ( */}
+                <>
+                    <div>
+                        <Legend>{constants.PEOPLE}</Legend>
+                    </div>
+                    <PhotoPeopleList
+                        file={items[photoSwipe?.getCurrentIndex()]}
+                        updateMLDataIndex={updateMLDataIndex}
+                    />
+                    <div>
+                        <Legend>{constants.UNIDENTIFIED_FACES}</Legend>
+                    </div>
+                    <UnidentifiedFaces
+                        file={items[photoSwipe?.getCurrentIndex()]}
+                        updateMLDataIndex={updateMLDataIndex}
+                    />
+                    <div>
+                        <Legend>{constants.OBJECTS}</Legend>
+                        <ObjectLabelList
                             file={items[photoSwipe?.getCurrentIndex()]}
                             updateMLDataIndex={updateMLDataIndex}
                         />
-                        <div>
-                            <Legend>{constants.UNIDENTIFIED_FACES}</Legend>
-                        </div>
-                        <UnidentifiedFaces
+                    </div>
+                    <div>
+                        <Legend>{constants.TEXT}</Legend>
+                        <WordList
                             file={items[photoSwipe?.getCurrentIndex()]}
                             updateMLDataIndex={updateMLDataIndex}
                         />
-                        <div>
-                            <Legend>{constants.OBJECTS}</Legend>
-                            <ObjectLabelList
-                                file={items[photoSwipe?.getCurrentIndex()]}
-                                updateMLDataIndex={updateMLDataIndex}
-                            />
-                        </div>
-                        <div>
-                            <Legend>{constants.TEXT}</Legend>
-                            <WordList
-                                file={items[photoSwipe?.getCurrentIndex()]}
-                                updateMLDataIndex={updateMLDataIndex}
-                            />
-                        </div>
-                        <MLServiceFileInfoButton
-                            file={items[photoSwipe?.getCurrentIndex()]}
-                            updateMLDataIndex={updateMLDataIndex}
-                            setUpdateMLDataIndex={setUpdateMLDataIndex}
-                        />
-                    </>
-                )}
+                    </div>
+                    <MLServiceFileInfoButton
+                        file={items[photoSwipe?.getCurrentIndex()]}
+                        updateMLDataIndex={updateMLDataIndex}
+                        setUpdateMLDataIndex={setUpdateMLDataIndex}
+                    />
+                </>
+                {/* )} */}
                 {exif && (
                     <>
                         <ExifData exif={exif} />
