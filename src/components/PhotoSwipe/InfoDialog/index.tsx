@@ -21,7 +21,12 @@ export function InfoModal({
 }) {
     return (
         <DialogBoxBase
-            sx={{ zIndex: '1501' }}
+            sx={{
+                zIndex: '1501',
+                '& .MuiDialog-container': {
+                    alignItems: 'flex-start',
+                },
+            }}
             open={showInfo}
             onClose={handleCloseInfo}>
             <DialogTitleWithCloseButton onClose={handleCloseInfo}>
