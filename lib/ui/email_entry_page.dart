@@ -314,7 +314,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     Visibility(
                       visible: ((_password != '') && _password1InFocus),
                       child: Positioned(
-                          bottom: 20,
+                          bottom: 25.5,
                           child: Row(
                             children: [
                               SizedBox(
