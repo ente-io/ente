@@ -5,6 +5,7 @@ import { runningInBrowser } from 'utils/common';
 import { removeFromCollection, syncCollections } from './collectionService';
 import { syncFiles } from './fileService';
 import debounce from 'debounce-promise';
+import { logError } from 'utils/sentry';
 
 export interface WatchMapping {
     collectionName: string;
@@ -48,54 +49,58 @@ class WatchService {
 
     async init() {
         if (this.allElectronAPIsExist) {
-            const mappings = this.getWatchMappings();
+            try {
+                const mappings = this.getWatchMappings();
 
-            console.log('mappings', mappings);
+                console.log('mappings', mappings);
 
-            if (!mappings) {
-                return;
-            }
-
-            for (const mapping of mappings) {
-                const filePathsOnDisk: string[] =
-                    await this.ElectronAPIs.getPosixFilePathsFromDir(
-                        mapping.folderPath
-                    );
-
-                const filesToUpload = filePathsOnDisk.filter((filePath) => {
-                    return !mapping.files.find(
-                        (file) => file.path === filePath
-                    );
-                });
-
-                const filesToRemove = mapping.files.filter((file) => {
-                    return !filePathsOnDisk.find(
-                        (filePath) => filePath === file.path
-                    );
-                });
-
-                if (filesToUpload.length > 0) {
-                    const event: EventQueueType = {
-                        type: 'upload',
-                        collectionName: mapping.collectionName,
-                        paths: filesToUpload,
-                    };
-                    this.eventQueue.push(event);
+                if (!mappings) {
+                    return;
                 }
 
-                if (filesToRemove.length > 0) {
-                    const event: EventQueueType = {
-                        type: 'trash',
-                        collectionName: mapping.collectionName,
-                        paths: filesToRemove.map((file) => file.path),
-                    };
-                    this.eventQueue.push(event);
-                }
-            }
+                for (const mapping of mappings) {
+                    const filePathsOnDisk: string[] =
+                        await this.ElectronAPIs.getPosixFilePathsFromDir(
+                            mapping.folderPath
+                        );
 
-            this.setWatchFunctions();
-            this.syncWithRemote();
-            await this.runNextEvent();
+                    const filesToUpload = filePathsOnDisk.filter((filePath) => {
+                        return !mapping.files.find(
+                            (file) => file.path === filePath
+                        );
+                    });
+
+                    const filesToRemove = mapping.files.filter((file) => {
+                        return !filePathsOnDisk.find(
+                            (filePath) => filePath === file.path
+                        );
+                    });
+
+                    if (filesToUpload.length > 0) {
+                        const event: EventQueueType = {
+                            type: 'upload',
+                            collectionName: mapping.collectionName,
+                            paths: filesToUpload,
+                        };
+                        this.eventQueue.push(event);
+                    }
+
+                    if (filesToRemove.length > 0) {
+                        const event: EventQueueType = {
+                            type: 'trash',
+                            collectionName: mapping.collectionName,
+                            paths: filesToRemove.map((file) => file.path),
+                        };
+                        this.eventQueue.push(event);
+                    }
+                }
+
+                this.setWatchFunctions();
+                this.syncWithRemote();
+                await this.runNextEvent();
+            } catch (e) {
+                logError(e, 'error while initializing watch service');
+            }
         }
     }
 
@@ -111,19 +116,35 @@ class WatchService {
 
     async addWatchMapping(collectionName: string, folderPath: string) {
         if (this.allElectronAPIsExist) {
-            await this.ElectronAPIs.addWatchMapping(collectionName, folderPath);
+            try {
+                await this.ElectronAPIs.addWatchMapping(
+                    collectionName,
+                    folderPath
+                );
+            } catch (e) {
+                logError(e, 'error while adding watch mapping');
+            }
         }
     }
 
     async removeWatchMapping(collectionName: string) {
         if (this.allElectronAPIsExist) {
-            await this.ElectronAPIs.removeWatchMapping(collectionName);
+            try {
+                await this.ElectronAPIs.removeWatchMapping(collectionName);
+            } catch (e) {
+                logError(e, 'error while removing watch mapping');
+            }
         }
     }
 
     getWatchMappings(): WatchMapping[] {
         if (this.allElectronAPIsExist) {
-            return this.ElectronAPIs.getWatchMappings() ?? [];
+            try {
+                return this.ElectronAPIs.getWatchMappings() ?? [];
+            } catch (e) {
+                logError(e, 'error while getting watch mappings');
+                return [];
+            }
         }
         return [];
     }
@@ -143,22 +164,26 @@ class WatchService {
     }
 
     private async runNextUpload() {
-        if (this.eventQueue.length === 0 || this.isEventRunning) {
-            return;
+        try {
+            if (this.eventQueue.length === 0 || this.isEventRunning) {
+                return;
+            }
+
+            this.isEventRunning = true;
+
+            this.batchNextEvent();
+
+            this.setCollectionName(this.eventQueue[0].collectionName);
+            this.setElectronFiles(
+                await Promise.all(
+                    this.eventQueue[0].paths.map(async (path) => {
+                        return await this.ElectronAPIs.getElectronFile(path);
+                    })
+                )
+            );
+        } catch (e) {
+            logError(e, 'error while running next upload');
         }
-
-        this.isEventRunning = true;
-
-        this.batchNextEvent();
-
-        this.setCollectionName(this.eventQueue[0].collectionName);
-        this.setElectronFiles(
-            await Promise.all(
-                this.eventQueue[0].paths.map(async (path) => {
-                    return await this.ElectronAPIs.getElectronFile(path);
-                })
-            )
-        );
     }
 
     async fileUploaded(fileWithCollection: FileWithCollection, file: EnteFile) {
@@ -184,119 +209,132 @@ class WatchService {
         collections: Collection[]
     ) {
         if (this.allElectronAPIsExist) {
-            const collection = collections.find(
-                (collection) =>
-                    collection.id === filesWithCollection[0].collectionID
-            );
-            if (
-                !this.isEventRunning ||
-                this.eventQueue.length === 0 ||
-                this.eventQueue[0].collectionName !== collection?.name
-            ) {
-                return;
-            }
+            try {
+                const collection = collections.find(
+                    (collection) =>
+                        collection.id === filesWithCollection[0].collectionID
+                );
+                if (
+                    !this.isEventRunning ||
+                    this.eventQueue.length === 0 ||
+                    this.eventQueue[0].collectionName !== collection?.name
+                ) {
+                    return;
+                }
 
-            const uploadedFiles: WatchMapping['files'] = [];
+                const uploadedFiles: WatchMapping['files'] = [];
 
-            for (const fileWithCollection of filesWithCollection) {
-                if (fileWithCollection.isLivePhoto) {
-                    const imagePath = (
-                        fileWithCollection.livePhotoAssets.image as ElectronFile
-                    ).path;
-                    const videoPath = (
-                        fileWithCollection.livePhotoAssets.video as ElectronFile
-                    ).path;
-                    if (
-                        this.pathToIDMap.has(imagePath) &&
-                        this.pathToIDMap.has(videoPath)
-                    ) {
-                        uploadedFiles.push({
-                            path: imagePath,
-                            id: this.pathToIDMap.get(imagePath),
-                        });
-                        uploadedFiles.push({
-                            path: videoPath,
-                            id: this.pathToIDMap.get(videoPath),
-                        });
+                for (const fileWithCollection of filesWithCollection) {
+                    if (fileWithCollection.isLivePhoto) {
+                        const imagePath = (
+                            fileWithCollection.livePhotoAssets
+                                .image as ElectronFile
+                        ).path;
+                        const videoPath = (
+                            fileWithCollection.livePhotoAssets
+                                .video as ElectronFile
+                        ).path;
 
-                        this.pathToIDMap.delete(imagePath);
-                        this.pathToIDMap.delete(videoPath);
-                    }
-                } else {
-                    const filePath = (fileWithCollection.file as ElectronFile)
-                        .path;
-                    if (this.pathToIDMap.has(filePath)) {
-                        uploadedFiles.push({
-                            path: filePath,
-                            id: this.pathToIDMap.get(filePath),
-                        });
+                        if (
+                            this.pathToIDMap.has(imagePath) &&
+                            this.pathToIDMap.has(videoPath)
+                        ) {
+                            uploadedFiles.push({
+                                path: imagePath,
+                                id: this.pathToIDMap.get(imagePath),
+                            });
+                            uploadedFiles.push({
+                                path: videoPath,
+                                id: this.pathToIDMap.get(videoPath),
+                            });
 
-                        this.pathToIDMap.delete(filePath);
+                            this.pathToIDMap.delete(imagePath);
+                            this.pathToIDMap.delete(videoPath);
+                        }
+                    } else {
+                        const filePath = (
+                            fileWithCollection.file as ElectronFile
+                        ).path;
+
+                        if (this.pathToIDMap.has(filePath)) {
+                            uploadedFiles.push({
+                                path: filePath,
+                                id: this.pathToIDMap.get(filePath),
+                            });
+
+                            this.pathToIDMap.delete(filePath);
+                        }
                     }
                 }
+
+                if (uploadedFiles.length > 0) {
+                    const mappings = this.getWatchMappings();
+                    const mapping = mappings.find(
+                        (mapping) =>
+                            mapping.collectionName ===
+                            this.eventQueue[0].collectionName
+                    );
+                    mapping.files = [...mapping.files, ...uploadedFiles];
+
+                    this.ElectronAPIs.setWatchMappings(mappings);
+                    this.syncWithRemote();
+                }
+
+                this.eventQueue.shift();
+                this.isEventRunning = false;
+                this.runNextEvent();
+            } catch (e) {
+                logError(e, 'error while running all file uploads done');
             }
-
-            if (uploadedFiles.length > 0) {
-                const mappings = this.getWatchMappings();
-                const mapping = mappings.find(
-                    (mapping) =>
-                        mapping.collectionName ===
-                        this.eventQueue[0].collectionName
-                );
-                mapping.files = [...mapping.files, ...uploadedFiles];
-
-                this.ElectronAPIs.setWatchMappings(mappings);
-                this.syncWithRemote();
-            }
-
-            this.eventQueue.shift();
-            this.isEventRunning = false;
-            this.runNextEvent();
         }
     }
 
     private async runNextTrash() {
-        if (this.eventQueue.length === 0 || this.isEventRunning) {
-            return;
+        try {
+            if (this.eventQueue.length === 0 || this.isEventRunning) {
+                return;
+            }
+
+            this.isEventRunning = true;
+
+            this.batchNextEvent();
+
+            const { collectionName, paths } = this.eventQueue[0];
+            const filePathsToRemove = new Set(paths);
+
+            const mappings = this.getWatchMappings();
+            const mappingIdx = mappings.findIndex(
+                (mapping) => mapping.collectionName === collectionName
+            );
+            if (mappingIdx === -1) {
+                return;
+            }
+
+            const files = mappings[mappingIdx].files.filter((file) =>
+                filePathsToRemove.has(file.path)
+            );
+
+            await this.trashByIDs(files, collectionName);
+
+            mappings[mappingIdx].files = mappings[mappingIdx].files.filter(
+                (file) => !filePathsToRemove.has(file.path)
+            );
+            this.ElectronAPIs.setWatchMappings(mappings);
+            this.syncWithRemote();
+
+            this.eventQueue.shift();
+            this.isEventRunning = false;
+            this.runNextEvent();
+        } catch (e) {
+            logError(e, 'error while running next trash');
         }
-
-        this.isEventRunning = true;
-
-        this.batchNextEvent();
-
-        const { collectionName, paths } = this.eventQueue[0];
-        const filePathsToRemove = new Set(paths);
-
-        const mappings = this.getWatchMappings();
-        const mappingIdx = mappings.findIndex(
-            (mapping) => mapping.collectionName === collectionName
-        );
-        if (mappingIdx === -1) {
-            return;
-        }
-
-        const files = mappings[mappingIdx].files.filter((file) =>
-            filePathsToRemove.has(file.path)
-        );
-
-        await this.trashByIDs(files, collectionName);
-
-        mappings[mappingIdx].files = mappings[mappingIdx].files.filter(
-            (file) => !filePathsToRemove.has(file.path)
-        );
-        this.ElectronAPIs.setWatchMappings(mappings);
-        this.syncWithRemote();
-
-        this.eventQueue.shift();
-        this.isEventRunning = false;
-        this.runNextEvent();
     }
 
     private async trashByIDs(
         toTrashFiles: WatchMapping['files'],
         collectionName: string
     ) {
-        if (this.allElectronAPIsExist) {
+        try {
             const collections = await syncCollections();
             const collection = collections.find(
                 (collection) => collection.name === collectionName
@@ -318,29 +356,40 @@ class WatchService {
             });
 
             await removeFromCollection(collection, filesToTrash);
+        } catch (e) {
+            logError(e, 'error while trashing by IDs');
         }
     }
 
     async getCollectionName(filePath: string) {
-        const mappings = this.getWatchMappings();
+        try {
+            const mappings = this.getWatchMappings();
 
-        const collectionName = mappings.find((mapping) =>
-            filePath.startsWith(mapping.folderPath)
-        )?.collectionName;
+            const collectionName = mappings.find((mapping) =>
+                filePath.startsWith(mapping.folderPath)
+            )?.collectionName;
 
-        if (!collectionName) {
-            return null;
+            if (!collectionName) {
+                return null;
+            }
+
+            return collectionName;
+        } catch (e) {
+            logError(e, 'error while getting collection name');
         }
-
-        return collectionName;
     }
 
     async selectFolder(): Promise<string> {
-        const folderPath = await this.ElectronAPIs.selectFolder();
-        return folderPath;
+        try {
+            const folderPath = await this.ElectronAPIs.selectFolder();
+            return folderPath;
+        } catch (e) {
+            logError(e, 'error while selecting folder');
+        }
     }
 
-    // Batches all the files to be uploaded (or trashed) of same collection as the next event
+    // Batches all the files to be uploaded (or trashed) from the
+    // event queue of same collection as the next event
     private batchNextEvent() {
         const newEventQueue = [this.eventQueue[0]];
         const len = this.eventQueue.length;
@@ -361,42 +410,50 @@ class WatchService {
 }
 
 async function diskFileAddedCallback(instance: WatchService, filePath: string) {
-    const collectionName = await instance.getCollectionName(filePath);
+    try {
+        const collectionName = await instance.getCollectionName(filePath);
 
-    if (!collectionName) {
-        return;
+        if (!collectionName) {
+            return;
+        }
+
+        console.log('added (upload) to event queue', collectionName, filePath);
+
+        const event: EventQueueType = {
+            type: 'upload',
+            collectionName,
+            paths: [filePath],
+        };
+        instance.eventQueue.push(event);
+        await debounce(runNextEventByInstance, 300)(instance);
+    } catch (e) {
+        logError(e, 'error while calling diskFileAddedCallback');
     }
-
-    console.log('added (upload) to event queue', collectionName, filePath);
-
-    const event: EventQueueType = {
-        type: 'upload',
-        collectionName,
-        paths: [filePath],
-    };
-    instance.eventQueue.push(event);
-    await debounce(runNextEventByInstance, 300)(instance);
 }
 
 async function diskFileRemovedCallback(
     instance: WatchService,
     filePath: string
 ) {
-    const collectionName = await instance.getCollectionName(filePath);
+    try {
+        const collectionName = await instance.getCollectionName(filePath);
 
-    console.log('added (trash) to event queue', collectionName, filePath);
+        console.log('added (trash) to event queue', collectionName, filePath);
 
-    if (!collectionName) {
-        return;
+        if (!collectionName) {
+            return;
+        }
+
+        const event: EventQueueType = {
+            type: 'trash',
+            collectionName,
+            paths: [filePath],
+        };
+        instance.eventQueue.push(event);
+        await debounce(runNextEventByInstance, 300)(instance);
+    } catch (e) {
+        logError(e, 'error while calling diskFileRemovedCallback');
     }
-
-    const event: EventQueueType = {
-        type: 'trash',
-        collectionName,
-        paths: [filePath],
-    };
-    instance.eventQueue.push(event);
-    await debounce(runNextEventByInstance, 300)(instance);
 }
 
 const runNextEventByInstance = async (w: WatchService) => {
