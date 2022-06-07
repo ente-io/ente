@@ -27,10 +27,12 @@ class WatchService {
     allElectronAPIsExist: boolean = false;
     eventQueue: EventQueueType[] = [];
     isEventRunning: boolean = false;
+    isUploadRunning: boolean = false;
     pathToIDMap = new Map<string, number>();
     setElectronFiles: (files: ElectronFile[]) => void;
     setCollectionName: (collectionName: string) => void;
     syncWithRemote: () => void;
+    showProgressView: () => void;
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
@@ -170,6 +172,7 @@ class WatchService {
             }
 
             this.isEventRunning = true;
+            this.isUploadRunning = true;
 
             this.batchNextEvent();
 
@@ -282,6 +285,7 @@ class WatchService {
 
                 this.eventQueue.shift();
                 this.isEventRunning = false;
+                this.isUploadRunning = false;
                 this.runNextEvent();
             } catch (e) {
                 logError(e, 'error while running all file uploads done');

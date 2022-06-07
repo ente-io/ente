@@ -1,15 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Dialog, IconButton } from '@mui/material';
+import { Button, CircularProgress, Dialog, IconButton } from '@mui/material';
 import watchService, { WatchMapping } from 'services/watchService';
 import { MdDelete } from 'react-icons/md';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Close from '@mui/icons-material/Close';
 import { SpaceBetweenFlex } from 'components/Container';
 
-function WatchModal({ watchModalView, setWatchModalView }) {
+function WatchModal({
+    watchModalView,
+    setWatchModalView,
+}: {
+    watchModalView: boolean;
+    setWatchModalView: (watchModalView: boolean) => void;
+}) {
     const [mappings, setMappings] = useState<WatchMapping[]>([]);
     const [shouldUpdateMappings, setShouldUpdateMappings] = useState(true);
     const [inputFolderPath, setInputFolderPath] = useState('');
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    useEffect(() => {
+        if (watchModalView) {
+            const interval = setInterval(() => {
+                setIsSyncing(watchService.isEventRunning);
+            }, 1000);
+            return () => clearInterval(interval);
+        }
+    }, [watchModalView]);
 
     useEffect(() => {
         if (shouldUpdateMappings) {
@@ -37,6 +53,12 @@ function WatchModal({ watchModalView, setWatchModalView }) {
     const handleRemoveWatchMapping = async (mapping: WatchMapping) => {
         await watchService.removeWatchMapping(mapping.collectionName);
         setShouldUpdateMappings(true);
+    };
+
+    const handleSyncProgressClick = () => {
+        if (watchService.isUploadRunning) {
+            // show progress view
+        }
     };
 
     const handleClose = () => {
@@ -103,17 +125,26 @@ function WatchModal({ watchModalView, setWatchModalView }) {
                         </Button>
                     </div>
                 </div>
-                <div
-                    style={{
+                <SpaceBetweenFlex
+                    sx={{
+                        marginTop: '20px',
                         borderTop: '1px solid #e6e6e6',
                         paddingTop: '12px',
-                        marginTop: '20px',
-                        marginBottom: '8px',
-                        fontSize: '28px',
-                        fontWeight: 'bold',
                     }}>
-                    Current Watch Mappings
-                </div>
+                    <div
+                        style={{
+                            marginBottom: '8px',
+                            fontSize: '28px',
+                            fontWeight: 'bold',
+                        }}>
+                        Current Watch Mappings
+                    </div>
+                    {isSyncing && (
+                        <IconButton onClick={handleSyncProgressClick}>
+                            <CircularProgress size={24} />
+                        </IconButton>
+                    )}
+                </SpaceBetweenFlex>
                 <div
                     style={{
                         marginTop: '12px',
