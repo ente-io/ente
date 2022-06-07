@@ -57,7 +57,7 @@ function WatchModal({
 
     const handleSyncProgressClick = () => {
         if (watchService.isUploadRunning) {
-            // show progress view
+            watchService.showProgressView();
         }
     };
 

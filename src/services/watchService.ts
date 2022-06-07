@@ -42,11 +42,13 @@ class WatchService {
     setWatchServiceFunctions(
         setElectronFiles: (files: ElectronFile[]) => void,
         setCollectionName: (collectionName: string) => void,
-        syncWithRemote: () => void
+        syncWithRemote: () => void,
+        showProgressView: () => void
     ) {
         this.setElectronFiles = setElectronFiles;
         this.setCollectionName = setCollectionName;
         this.syncWithRemote = syncWithRemote;
+        this.showProgressView = showProgressView;
     }
 
     async init() {

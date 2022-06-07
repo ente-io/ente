@@ -120,7 +120,8 @@ export default function Upload(props: Props) {
             watchService.setWatchServiceFunctions(
                 props.setElectronFiles,
                 setCollectionName,
-                props.syncWithRemote
+                props.syncWithRemote,
+                showProgressView
             );
             watchService.init();
         }
@@ -129,6 +130,10 @@ export default function Upload(props: Props) {
     const setCollectionName = (collectionName: string) => {
         isPendingDesktopUpload.current = true;
         pendingDesktopUploadCollectionName.current = collectionName;
+    };
+
+    const showProgressView = () => {
+        setProgressView(true);
     };
 
     useEffect(() => {
@@ -185,7 +190,7 @@ export default function Upload(props: Props) {
         setUploadResult(new Map<number, number>());
         setPercentComplete(0);
         props.closeCollectionSelector();
-        setProgressView(true);
+        !watchService.isUploadRunning && setProgressView(true); // don't show progress view if upload triggered by watch service
     };
 
     const resumeDesktopUpload = async (
