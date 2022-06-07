@@ -88,8 +88,8 @@ extension CustomColorScheme on ColorScheme {
       : Color.fromRGBO(0, 0, 0, 1);
 
   Color get galleryThumbBackgroundColor => brightness == Brightness.light
-      ? Color.fromRGBO(255, 255, 255, 1)
-      : Color.fromRGBO(21, 21, 21, 1);
+      ? Color.fromRGBO(240, 240, 240, 1)
+      : Color.fromRGBO(20, 20, 20, 1);
 
   Color get galleryThumbDrawColor => brightness == Brightness.light
       ? Colors.black.withOpacity(0.8)
