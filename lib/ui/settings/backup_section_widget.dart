@@ -55,7 +55,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         ),
         SectionOptionDivider,
         SizedBox(
-          height: 36,
+          height: 48,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -75,7 +75,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         ),
         SectionOptionDivider,
         SizedBox(
-          height: 36,
+          height: 48,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

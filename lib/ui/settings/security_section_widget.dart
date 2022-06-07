@@ -66,7 +66,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         [
           Padding(padding: EdgeInsets.all(2)),
           SizedBox(
-            height: 36,
+            height: 48,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -116,7 +116,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     children.addAll([
       SectionOptionDivider,
       SizedBox(
-        height: 36,
+        height: 48,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -149,7 +149,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         [
           SectionOptionDivider,
           SizedBox(
-            height: 36,
+            height: 48,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
