@@ -26,7 +26,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom != 0;
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 125;
 
     FloatingActionButtonLocation fabLocation() {
       if (isKeypadOpen) {
