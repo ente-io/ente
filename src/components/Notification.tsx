@@ -2,17 +2,17 @@ import CloseIcon from '@mui/icons-material/Close';
 import {
     Box,
     Button,
+    ButtonProps,
     IconButton,
     Paper,
     Snackbar,
-    SnackbarProps,
     Stack,
     Typography,
 } from '@mui/material';
 import React from 'react';
 import { NotificationAttributes } from 'types/gallery';
 
-import DiscFullIcon from '@mui/icons-material/DiscFull';
+import InfoIcon from '@mui/icons-material/Info';
 
 interface Iprops {
     open: boolean;
@@ -25,18 +25,17 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
         return <></>;
     }
 
-    const handleClose: SnackbarProps['onClose'] = (_, reason) => {
-        if (!reason) {
-            onClose;
-        }
+    const handleClose: ButtonProps['onClick'] = (event) => {
+        onClose();
+        event.stopPropagation();
     };
 
     const handleClick = () => {
         attributes.action?.callback();
+        onClose();
     };
     return (
         <Snackbar
-            onClose={handleClose}
             open={open}
             anchorOrigin={{
                 horizontal: 'right',
@@ -57,7 +56,7 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
                     direction="row"
                     alignItems={'center'}>
                     <Box>
-                        <DiscFullIcon fontSize="large" />
+                        {attributes?.icon ?? <InfoIcon fontSize="large" />}
                     </Box>
                     <Box sx={{ flex: 1 }}>
                         <Typography
@@ -80,7 +79,7 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
                     </Box>
                     <Box>
                         <IconButton
-                            onClick={onClose}
+                            onClick={handleClose}
                             sx={{
                                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
                             }}>
