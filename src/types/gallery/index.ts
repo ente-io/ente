@@ -1,3 +1,4 @@
+import { ButtonProps } from '@mui/material';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { Search, SearchResultSummary } from 'types/search';
@@ -28,6 +29,10 @@ export type GalleryContextType = {
 };
 
 export interface NotificationAttributes {
-    message: string;
-    title: string;
+    variant: ButtonProps['color'];
+    message: JSX.Element | string;
+    action?: {
+        text: string;
+        callback: () => void;
+    };
 }

@@ -102,7 +102,7 @@ import {
     NotificationAttributes,
 } from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
-import ToastNotification from 'components/ToastNotification';
+import Notification from 'components/Notification';
 import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
 import Collections from 'components/Collections';
@@ -147,9 +147,7 @@ export default function Gallery() {
 
     const [files, setFiles] = useState<EnteFile[]>(null);
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
-    const [bannerMessage, setBannerMessage] = useState<JSX.Element | string>(
-        null
-    );
+    const [bannerMessage, setBannerMessage] = useState<JSX.Element | string>();
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
@@ -194,6 +192,10 @@ export default function Gallery() {
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
 
+    const [notificationView, setNotificationView] = useState(false);
+
+    const closeNotification = () => setNotificationView(false);
+
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
 
@@ -201,8 +203,6 @@ export default function Gallery() {
         useState<Set<number>>();
 
     const showPlanSelectorModal = () => setPlanModalView(true);
-
-    const clearNotificationAttributes = () => setNotificationAttributes(null);
 
     const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
@@ -257,6 +257,11 @@ export default function Gallery() {
     useEffect(
         () => fixCreationTimeAttributes && setFixCreationTimeView(true),
         [fixCreationTimeAttributes]
+    );
+
+    useEffect(
+        () => notificationAttributes && setNotificationView(true),
+        [notificationAttributes]
     );
 
     useEffect(() => setDroppedFiles(acceptedFiles), [acceptedFiles]);
@@ -602,9 +607,10 @@ export default function Gallery() {
                     setLoading={setBlockingLoad}
                 />
                 <AlertBanner bannerMessage={bannerMessage} />
-                <ToastNotification
+                <Notification
+                    open={notificationView}
+                    onClose={closeNotification}
                     attributes={notificationAttributes}
-                    clearAttributes={clearNotificationAttributes}
                 />
                 <CollectionNamer
                     show={collectionNamerView}
