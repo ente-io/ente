@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'promise-fs';
 import chokidar from 'chokidar';
 import { watchStore } from '../services/store';
 import { logError } from './logging';
@@ -70,6 +71,15 @@ export async function getPosixFilePathsFromDir(dirPath: string) {
     let files = await getFilesFromDir(dirPath);
     files = files.map((file) => file.split(path.sep).join(path.posix.sep));
     return files;
+}
+
+export async function isFolderExists(dirPath: string) {
+    return await fs
+        .stat(dirPath)
+        .then((stats) => {
+            return stats.isDirectory();
+        })
+        .catch(() => false);
 }
 
 export function initWatcher(mainWindow: BrowserWindow) {
