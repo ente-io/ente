@@ -7,7 +7,7 @@ import TwoFactorModal from 'components/TwoFactor/Modal';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
-import WatchModal from './WatchModal';
+import WatchModal from '../WatchModal';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
