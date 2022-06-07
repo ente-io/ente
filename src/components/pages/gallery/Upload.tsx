@@ -16,15 +16,17 @@ import uploadManager from 'services/upload/uploadManager';
 import ImportService from 'services/importService';
 import isElectron from 'is-electron';
 import { METADATA_FOLDER_NAME } from 'constants/export';
-import { getUserFacingErrorMessage } from 'utils/error';
+import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
-import { SetLoading, SetFiles } from 'types/gallery';
+import { SetLoading, SetFiles, NotificationAttributes } from 'types/gallery';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import UploadTypeSelector from '../../UploadTypeSelector';
 import Router from 'next/router';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp } from 'utils/common';
+import DiscFullIcon from '@mui/icons-material/DiscFull';
+import { logoutUser } from 'services/userService';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -350,11 +352,9 @@ export default function Upload(props: Props) {
                 collections
             );
         } catch (err) {
-            const message = getUserFacingErrorMessage(
-                err.message,
-                galleryContext.showPlanSelectorModal
+            galleryContext.setNotificationAttributes(
+                getErrorNotification(err.message)
             );
-            props.setBannerMessage(message);
             setProgressView(false);
             throw err;
         } finally {
@@ -362,6 +362,7 @@ export default function Upload(props: Props) {
             props.syncWithRemote();
         }
     };
+
     const retryFailed = async () => {
         try {
             props.setUploadInProgress(true);
@@ -369,18 +370,54 @@ export default function Upload(props: Props) {
             await props.syncWithRemote(true, true);
             await uploadManager.retryFailedFiles();
         } catch (err) {
-            const message = getUserFacingErrorMessage(
-                err.message,
-                galleryContext.showPlanSelectorModal
+            galleryContext.setNotificationAttributes(
+                getErrorNotification(err.message)
             );
-            appContext.resetSharedFiles();
-            props.setBannerMessage(message);
             setProgressView(false);
         } finally {
             props.setUploadInProgress(false);
             props.syncWithRemote();
         }
     };
+
+    function getErrorNotification(err: CustomError): NotificationAttributes {
+        switch (err) {
+            case CustomError.SESSION_EXPIRED:
+                return {
+                    variant: 'danger',
+                    message: constants.SESSION_EXPIRED,
+                    action: {
+                        text: constants.LOGIN,
+                        callback: logoutUser,
+                    },
+                };
+            case CustomError.SUBSCRIPTION_EXPIRED:
+                return {
+                    variant: 'danger',
+                    message: constants.SUBSCRIPTION_EXPIRED,
+                    action: {
+                        text: constants.UPGRADE_NOW,
+                        callback: galleryContext.showPlanSelectorModal,
+                    },
+                };
+            case CustomError.STORAGE_QUOTA_EXCEEDED:
+                return {
+                    variant: 'danger',
+                    message: constants.STORAGE_QUOTA_EXCEEDED,
+                    action: {
+                        text: constants.RENEW_NOW,
+                        callback: galleryContext.showPlanSelectorModal,
+                    },
+                    icon: <DiscFullIcon fontSize="large" />,
+                };
+
+            default:
+                return {
+                    variant: 'danger',
+                    message: constants.UNKNOWN_ERROR,
+                };
+        }
+    }
 
     const uploadToSingleNewCollection = (collectionName: string) => {
         if (collectionName) {

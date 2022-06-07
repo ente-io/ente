@@ -27,14 +27,6 @@ const Logo = styled.img`
     margin-top: -3px;
 `;
 
-const Trigger = styled.span`
-    :hover {
-        text-decoration: underline;
-        cursor: pointer;
-    }
-    color: #51cd7c;
-`;
-
 const englishConstants = {
     ENTE: 'ente',
     HERO_HEADER: () => (
@@ -79,7 +71,7 @@ const englishConstants = {
     ENTER_OTT: 'verification code',
     RESEND_MAIL: 'Resend code',
     VERIFY: 'verify',
-    UNKNOWN_ERROR: 'something went wrong, please try again',
+    UNKNOWN_ERROR: 'Something went wrong, please try again',
     INVALID_CODE: 'invalid verification code',
     EXPIRED_CODE: 'your verification code has expired',
     SENDING: 'sending...',
@@ -132,18 +124,8 @@ const englishConstants = {
     },
     UPLOADING_FILES: 'file upload',
     FILE_NOT_UPLOADED_LIST: 'the following files were not uploaded',
-    SUBSCRIPTION_EXPIRED: (action) => (
-        <>
-            your subscription has expired, please a{' '}
-            <Trigger onClick={action}>renew</Trigger>
-        </>
-    ),
-    STORAGE_QUOTA_EXCEEDED: (action) => (
-        <>
-            you have exceeded your storage quota, please{' '}
-            <Trigger onClick={action}>upgrade</Trigger> your plan
-        </>
-    ),
+    SUBSCRIPTION_EXPIRED: 'Subscription expired',
+    STORAGE_QUOTA_EXCEEDED: 'Storage limit exceeded',
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
     USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
     UPLOAD_BUTTON_TEXT: 'upload',
@@ -173,7 +155,7 @@ const englishConstants = {
     UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums',
     SESSION_EXPIRED_MESSAGE:
         'your session has expired, please login again to continue',
-    SESSION_EXPIRED: 'session expired',
+    SESSION_EXPIRED: 'Session expired',
     SYNC_FAILED: 'failed to sync with server, please refresh this page',
     PASSWORD_GENERATION_FAILED:
         "your browser was unable to generate a strong key that meets ente's encryption standards, please try using the mobile app or another browser",
@@ -789,6 +771,8 @@ const englishConstants = {
             </p>
         </>
     ),
+    UPGRADE_NOW: 'Upgrade now',
+    RENEW_NOW: 'Renew now',
 };
 
 export default englishConstants;
