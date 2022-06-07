@@ -1,10 +1,11 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { DropdownStyle } from 'components/Collections/CollectionShare/styles';
 import React from 'react';
 import Select from 'react-select';
 import { shareExpiryOptions } from 'utils/collection';
 import constants from 'utils/strings/constants';
 import { dateStringWithMMH } from 'utils/time';
+import { OptionWithDivider } from '../customSelectComponents';
 
 const linkExpiryStyle = {
     ...DropdownStyle,
@@ -29,12 +30,15 @@ export function ManageLinkExpiry({
     };
     return (
         <Box>
-            {constants.LINK_EXPIRY}
+            <Typography>{constants.LINK_EXPIRY}</Typography>
             <Select
                 menuPosition="fixed"
                 options={shareExpiryOptions}
                 isSearchable={false}
                 value={null}
+                components={{
+                    Option: OptionWithDivider,
+                }}
                 placeholder={
                     publicShareProp?.validTill
                         ? dateStringWithMMH(publicShareProp?.validTill)
