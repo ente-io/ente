@@ -45,7 +45,7 @@ extension CustomColorScheme on ColorScheme {
 
   Color get cancelSelectedButtonColor => brightness == Brightness.light
       ? Color.fromRGBO(0, 0, 0, 0.35)
-      : Color.fromRGBO(16, 16, 16, 0.5);
+      : Color.fromRGBO(48, 48, 48, 0.5);
 
   Color get bgColorForQuestions => brightness == Brightness.light
       ? Colors.white
