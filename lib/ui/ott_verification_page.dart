@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamicFAB.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
@@ -49,14 +50,17 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             ? Hero(
                 tag: "sign_up",
                 child: Material(
-                    type: MaterialType.transparency,
-                    child: StepProgressIndicator(
-                      totalSteps: 4,
-                      currentStep: 2,
-                      selectedColor: Theme.of(context).buttonColor,
-                      roundedEdges: Radius.circular(10),
-                      unselectedColor: Theme.of(context).bottomAppBarColor,
-                    )),
+                  type: MaterialType.transparency,
+                  child: StepProgressIndicator(
+                    totalSteps: 4,
+                    currentStep: 2,
+                    selectedColor: Theme.of(context).buttonColor,
+                    roundedEdges: Radius.circular(10),
+                    unselectedColor: Theme.of(context)
+                        .colorScheme
+                        .stepProgressUnselectedColor,
+                  ),
+                ),
               )
             : null,
       ),
