@@ -1,5 +1,6 @@
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
+import { NotificationAttributes } from 'types/Notification';
 import { Search, SearchResultSummary } from 'types/search';
 
 export type SelectedState = {
@@ -26,8 +27,3 @@ export type GalleryContextType = {
     sidebarView: boolean;
     closeSidebar: () => void;
 };
-
-export interface NotificationAttributes {
-    message: string;
-    title: string;
-}
