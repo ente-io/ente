@@ -594,7 +594,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                               curve: Curves.easeOutExpo,
                               backgroundColor: Theme.of(context)
                                   .colorScheme
-                                  .gNavBackgoundColor,
+                                  .gNavBackgroundColor,
                               mainAxisAlignment: MainAxisAlignment.center,
                               rippleColor: Colors.white.withOpacity(0.1),
                               activeColor: Theme.of(context)

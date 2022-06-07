@@ -71,7 +71,7 @@ extension CustomColorScheme on ColorScheme {
       ? Color.fromRGBO(196, 196, 196, 0.6)
       : Color.fromRGBO(255, 255, 255, 0.7);
 
-  Color get gNavBackgoundColor => brightness == Brightness.light
+  Color get gNavBackgroundColor => brightness == Brightness.light
       ? Color.fromRGBO(196, 196, 196, 0.6)
       : Color.fromRGBO(40, 40, 40, 0.6);
 
