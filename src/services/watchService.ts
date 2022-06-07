@@ -55,13 +55,26 @@ class WatchService {
     async init() {
         if (this.allElectronAPIsExist) {
             try {
-                const mappings = this.getWatchMappings();
+                let mappings = this.getWatchMappings();
 
                 console.log('mappings', mappings);
 
                 if (!mappings) {
                     return;
                 }
+
+                const existingMappings = [];
+                for (const mapping of mappings) {
+                    const mappingExists =
+                        await this.ElectronAPIs.isFolderExists(
+                            mapping.folderPath
+                        );
+                    if (mappingExists) {
+                        existingMappings.push(mapping);
+                    }
+                }
+                this.ElectronAPIs.setWatchMappings(existingMappings);
+                mappings = existingMappings;
 
                 for (const mapping of mappings) {
                     const filePathsOnDisk: string[] =
