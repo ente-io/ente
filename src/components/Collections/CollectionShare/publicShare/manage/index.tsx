@@ -1,6 +1,6 @@
 import { ManageLinkPassword } from './linkPassword';
 import { ManageDeviceLimit } from './deviceLimit';
-import { ManageLinkExpiry } from '../../../../../../ManageLinkExpiry';
+import { ManageLinkExpiry } from './linkExpiry';
 import { PublicLinkChangePassword } from '../changePassword';
 import { Stack } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';

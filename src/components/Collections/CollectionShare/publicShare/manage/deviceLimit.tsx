@@ -1,9 +1,10 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import React from 'react';
 import Select from 'react-select';
 import { getDeviceLimitOptions } from 'utils/collection';
 import constants from 'utils/strings/constants';
 import { DropdownStyle } from '../../styles';
+import { OptionWithDivider } from '../customSelectComponents';
 export function ManageDeviceLimit({
     publicShareProp,
     collection,
@@ -18,10 +19,13 @@ export function ManageDeviceLimit({
 
     return (
         <Box>
-            {constants.LINK_DEVICE_LIMIT}
+            <Typography>{constants.LINK_DEVICE_LIMIT}</Typography>
             <Select
                 menuPosition="fixed"
                 options={getDeviceLimitOptions()}
+                components={{
+                    Option: OptionWithDivider,
+                }}
                 isSearchable={false}
                 value={{
                     label: publicShareProp?.deviceLimit.toString(),

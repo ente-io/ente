@@ -11,7 +11,9 @@ interface IProps {
 const ShareeRow = ({ sharee, collectionUnshare }: IProps) => (
     <SpaceBetweenFlex>
         {sharee.email}
-        <IconButton sx={{ ml: 2 }} onClick={() => collectionUnshare(sharee)}>
+        <IconButton
+            sx={{ ml: 2, color: 'text.secondary' }}
+            onClick={() => collectionUnshare(sharee)}>
             <MoreHorizIcon />
         </IconButton>
     </SpaceBetweenFlex>

@@ -129,6 +129,13 @@ const darkThemeOptions = createTheme({
                 },
             },
         },
+        MuiTypography: {
+            styleOverrides: {
+                body1: {
+                    paddingBottom: '4px',
+                },
+            },
+        },
     },
 
     palette: {
