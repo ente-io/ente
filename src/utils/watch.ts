@@ -79,7 +79,6 @@ export function initWatcher(mainWindow: BrowserWindow) {
     });
 
     const watcher = chokidar.watch(folderPaths, {
-        depth: 1,
         awaitWriteFinish: true,
     });
     watcher
@@ -92,6 +91,9 @@ export function initWatcher(mainWindow: BrowserWindow) {
         .on('unlink', (path) => {
             mainWindow.webContents.send('watch-unlink', path);
         })
+        .on('unlinkDir', (path) => {
+            mainWindow.webContents.send('watch-unlink', path, true);
+        })
         .on('error', (error) => {
             logError(error, 'error while watching files');
         });
@@ -102,7 +104,11 @@ export function initWatcher(mainWindow: BrowserWindow) {
 export function registerWatcherFunctions(
     WatchServiceInstance: any,
     add: (WatchServiceInstance: any, path: string) => Promise<void>,
-    remove: (WatchServiceInstance: any, path: string) => Promise<void>
+    remove: (
+        WatchServiceInstance: any,
+        path: string,
+        isDir?: boolean
+    ) => Promise<void>
 ) {
     ipcRenderer.removeAllListeners('watch-add');
     ipcRenderer.removeAllListeners('watch-change');
@@ -116,8 +122,15 @@ export function registerWatcherFunctions(
         await remove(WatchServiceInstance, filePath);
         await add(WatchServiceInstance, filePath);
     });
-    ipcRenderer.on('watch-unlink', async (_, filePath: string) => {
-        filePath = filePath.split(path.sep).join(path.posix.sep);
-        await remove(WatchServiceInstance, filePath);
-    });
+    ipcRenderer.on(
+        'watch-unlink',
+        async (_, filePath: string, isDir?: boolean) => {
+            filePath = filePath.split(path.sep).join(path.posix.sep);
+            if (isDir) {
+                await remove(WatchServiceInstance, filePath, true);
+            } else {
+                await remove(WatchServiceInstance, filePath);
+            }
+        }
+    );
 }
