@@ -26,6 +26,7 @@ class WatchService {
     ElectronAPIs: any;
     allElectronAPIsExist: boolean = false;
     eventQueue: EventQueueType[] = [];
+    trashingDirQueue: string[] = [];
     isEventRunning: boolean = false;
     isUploadRunning: boolean = false;
     pathToIDMap = new Map<string, number>();
@@ -303,6 +304,14 @@ class WatchService {
 
             this.isEventRunning = true;
 
+            if (this.trashingDirQueue.length !== 0) {
+                this.removeFilesMatchingTrashingDir(this.trashingDirQueue[0]);
+                this.trashingDirQueue.shift();
+                this.isEventRunning = false;
+                this.runNextEvent();
+                return;
+            }
+
             this.batchNextEvent();
 
             const { collectionName, paths } = this.eventQueue[0];
@@ -365,6 +374,12 @@ class WatchService {
         } catch (e) {
             logError(e, 'error while trashing by IDs');
         }
+    }
+
+    removeFilesMatchingTrashingDir(trashingDir: string) {
+        this.eventQueue = this.eventQueue.filter((event) =>
+            event.paths.every((path) => !path.startsWith(trashingDir))
+        );
     }
 
     async getCollectionName(filePath: string) {
@@ -439,7 +454,8 @@ async function diskFileAddedCallback(instance: WatchService, filePath: string) {
 
 async function diskFileRemovedCallback(
     instance: WatchService,
-    filePath: string
+    filePath: string,
+    isDir?: boolean
 ) {
     try {
         const collectionName = await instance.getCollectionName(filePath);
@@ -447,6 +463,14 @@ async function diskFileRemovedCallback(
         console.log('added (trash) to event queue', collectionName, filePath);
 
         if (!collectionName) {
+            return;
+        }
+
+        if (
+            isDir &&
+            hasMappingSameFolderPath(instance, collectionName, filePath)
+        ) {
+            instance.trashingDirQueue.push(filePath);
             return;
         }
 
@@ -464,6 +488,18 @@ async function diskFileRemovedCallback(
 
 const runNextEventByInstance = async (w: WatchService) => {
     await w.runNextEvent();
+};
+
+const hasMappingSameFolderPath = (
+    w: WatchService,
+    collectionName: string,
+    folderPath: string
+) => {
+    const mappings = w.getWatchMappings();
+    const mapping = mappings.find(
+        (mapping) => mapping.collectionName === collectionName
+    );
+    return mapping.folderPath === folderPath;
 };
 
 export default new WatchService();
