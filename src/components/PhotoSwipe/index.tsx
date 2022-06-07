@@ -20,7 +20,6 @@ import { FILE_TYPE } from 'constants/file';
 import { sleep } from 'utils/common';
 import { playVideo, pauseVideo } from 'utils/photoFrame';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
-import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { InfoModal } from './InfoDialog';
 import { defaultLivePhotoDefaultOptions } from 'constants/photoswipe';
@@ -58,7 +57,6 @@ function PhotoSwipe(props: Iprops) {
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
-    const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);
 
     useEffect(() => {
@@ -237,8 +235,6 @@ function PhotoSwipe(props: Iprops) {
             videoTag.pause();
         }
         handleCloseInfo();
-        // BE_AWARE: this will clear any notification set, even if they were not set in/by the photoswipe component
-        galleryContext.setNotificationAttributes(null);
     };
     const isInFav = (file) => {
         const { favItemIds } = props;
