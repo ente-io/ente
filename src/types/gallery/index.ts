@@ -1,7 +1,6 @@
-import { ButtonProps } from '@mui/material';
-import { ReactNode } from 'react';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
+import { NotificationAttributes } from 'types/Notification';
 import { Search, SearchResultSummary } from 'types/search';
 
 export type SelectedState = {
@@ -28,13 +27,3 @@ export type GalleryContextType = {
     sidebarView: boolean;
     closeSidebar: () => void;
 };
-
-export interface NotificationAttributes {
-    icon?: ReactNode;
-    variant: ButtonProps['color'];
-    message: JSX.Element | string;
-    action?: {
-        text: string;
-        callback: () => void;
-    };
-}
