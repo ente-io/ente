@@ -6,3 +6,9 @@ export const ManageSectionLabel = styled.summary(
     margin-bottom:${theme.spacing(1)};
 `
 );
+
+export const ManageSectionOptions = styled.section(
+    ({ theme }) => `
+    margin-bottom:${theme.spacing(4)};
+`
+);

@@ -15,5 +15,6 @@ export const DropdownStyle = {
         ...style,
         ...SelectStyles.control(style, { isFocused }),
         minWidth: '240px',
+        paddingLeft: '8px',
     }),
 };

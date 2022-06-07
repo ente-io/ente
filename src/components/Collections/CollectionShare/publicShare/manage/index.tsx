@@ -10,7 +10,10 @@ import { UpdatePublicURL } from 'types/collection';
 import { sleep } from 'utils/common';
 import { handleSharingErrors } from 'utils/error';
 import constants from 'utils/strings/constants';
-import { ManageSectionLabel } from '../../styledComponents';
+import {
+    ManageSectionLabel,
+    ManageSectionOptions,
+} from '../../styledComponents';
 import { ManageDownloadAccess } from './downloadAcess';
 
 export default function PublicShareManage({
@@ -55,7 +58,7 @@ export default function PublicShareManage({
                 <ManageSectionLabel onClick={scrollToEnd}>
                     {constants.MANAGE_LINK}
                 </ManageSectionLabel>
-                <section>
+                <ManageSectionOptions>
                     <Stack spacing={1}>
                         <ManageLinkExpiry
                             collection={collection}
@@ -87,7 +90,7 @@ export default function PublicShareManage({
                             }
                         />
                     </Stack>
-                </section>
+                </ManageSectionOptions>
             </details>
             <PublicLinkChangePassword
                 open={changePasswordView}
