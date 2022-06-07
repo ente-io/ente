@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal } from 'react-bootstrap';
+import { Button, Dialog, IconButton } from '@mui/material';
 import watchService, { WatchMapping } from 'services/watchService';
 import { MdDelete } from 'react-icons/md';
-import { HiArrowNarrowRight } from 'react-icons/hi';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import Close from '@mui/icons-material/Close';
+import { SpaceBetweenFlex } from 'components/Container';
 
 function WatchModal({ watchModalView, setWatchModalView }) {
     const [mappings, setMappings] = useState<WatchMapping[]>([]);
     const [shouldUpdateMappings, setShouldUpdateMappings] = useState(true);
     const [inputFolderPath, setInputFolderPath] = useState('');
-    const [inputCollectionName, setInputCollectionName] = useState('');
 
     useEffect(() => {
         if (shouldUpdateMappings) {
@@ -22,19 +23,12 @@ function WatchModal({ watchModalView, setWatchModalView }) {
         setInputFolderPath(folderPath);
     };
 
-    const handleCollectionNameChange = (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setInputCollectionName(e.target.value);
-    };
-
     const handleAddWatchMapping = async () => {
-        if (inputFolderPath.length > 0 && inputCollectionName.length > 0) {
+        if (inputFolderPath.length > 0) {
             await watchService.addWatchMapping(
-                inputCollectionName,
+                inputFolderPath.substring(inputFolderPath.lastIndexOf('/') + 1),
                 inputFolderPath
             );
-            setInputCollectionName('');
             setInputFolderPath('');
             setShouldUpdateMappings(true);
         }
@@ -45,37 +39,43 @@ function WatchModal({ watchModalView, setWatchModalView }) {
         setShouldUpdateMappings(true);
     };
 
+    const handleClose = () => {
+        setWatchModalView(false);
+    };
+
     return (
-        <Modal
-            size="lg"
-            aria-labelledby="contained-modal-title-vcenter"
-            centered
-            show={watchModalView}
-            onHide={() => setWatchModalView(false)}>
-            <Modal.Header closeButton>
-                <Modal.Title>Watch Folders</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
+        <Dialog maxWidth="xl" open={watchModalView} onClose={handleClose}>
+            <div
+                style={{
+                    width: '600px',
+                    padding: '20px',
+                    paddingBottom: '28px',
+                }}>
+                <SpaceBetweenFlex>
+                    <div
+                        style={{
+                            marginTop: '20px',
+                            marginBottom: '20px',
+                            fontSize: '32px',
+                            fontWeight: 'bold',
+                        }}>
+                        Watch Folders
+                    </div>
+                    <IconButton onClick={handleClose}>
+                        <Close />
+                    </IconButton>
+                </SpaceBetweenFlex>
                 <div
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
                     }}>
-                    <input
-                        type="text"
-                        placeholder="Collection Name"
-                        value={inputCollectionName}
-                        onChange={handleCollectionNameChange}
-                        style={{
-                            width: '50%',
-                        }}
-                    />
                     <div
                         style={{
                             display: 'flex',
                         }}>
                         <Button
-                            variant="primary"
+                            variant="outlined"
                             style={{
                                 marginRight: '12px',
                                 marginTop: '8px',
@@ -96,7 +96,8 @@ function WatchModal({ watchModalView, setWatchModalView }) {
                             marginTop: '8px',
                         }}>
                         <Button
-                            variant="success"
+                            variant="contained"
+                            color="success"
                             onClick={handleAddWatchMapping}>
                             Add mapping
                         </Button>
@@ -105,7 +106,7 @@ function WatchModal({ watchModalView, setWatchModalView }) {
                 <div
                     style={{
                         borderTop: '1px solid #e6e6e6',
-                        paddingTop: '8px',
+                        paddingTop: '12px',
                         marginTop: '20px',
                         marginBottom: '8px',
                         fontSize: '28px',
@@ -135,9 +136,8 @@ function WatchModal({ watchModalView, setWatchModalView }) {
                                     }}>
                                     {mapping.folderPath}{' '}
                                 </span>
-                                <HiArrowNarrowRight
-                                    size={24}
-                                    style={{
+                                <ArrowForwardIcon
+                                    sx={{
                                         marginLeft: '12px',
                                         marginRight: '16px',
                                     }}
@@ -169,8 +169,8 @@ function WatchModal({ watchModalView, setWatchModalView }) {
                         </div>
                     ))}
                 </div>
-            </Modal.Body>
-        </Modal>
+            </div>
+        </Dialog>
     );
 }
 
