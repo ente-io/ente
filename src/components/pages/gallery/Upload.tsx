@@ -18,7 +18,7 @@ import isElectron from 'is-electron';
 import { METADATA_FOLDER_NAME } from 'constants/export';
 import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
-import { SetLoading, SetFiles, NotificationAttributes } from 'types/gallery';
+import { SetLoading, SetFiles } from 'types/gallery';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import UploadTypeSelector from '../../UploadTypeSelector';
@@ -26,7 +26,7 @@ import Router from 'next/router';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp } from 'utils/common';
 import DiscFullIcon from '@mui/icons-material/DiscFull';
-import { logoutUser } from 'services/userService';
+import { NotificationAttributes } from 'types/Notification';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -49,6 +49,7 @@ interface Props {
     setElectronFiles: (files: ElectronFile[]) => void;
     uploadTypeSelectorView: boolean;
     setUploadTypeSelectorView: (open: boolean) => void;
+    showSessionExpiredMessage: () => void;
 }
 
 enum UPLOAD_STRATEGY {
@@ -352,9 +353,7 @@ export default function Upload(props: Props) {
                 collections
             );
         } catch (err) {
-            galleryContext.setNotificationAttributes(
-                getErrorNotification(err.message)
-            );
+            showUserFacingError(err.message);
             setProgressView(false);
             throw err;
         } finally {
@@ -370,9 +369,8 @@ export default function Upload(props: Props) {
             await props.syncWithRemote(true, true);
             await uploadManager.retryFailedFiles();
         } catch (err) {
-            galleryContext.setNotificationAttributes(
-                getErrorNotification(err.message)
-            );
+            showUserFacingError(err.message);
+
             setProgressView(false);
         } finally {
             props.setUploadInProgress(false);
@@ -380,19 +378,13 @@ export default function Upload(props: Props) {
         }
     };
 
-    function getErrorNotification(err: CustomError): NotificationAttributes {
+    function showUserFacingError(err: CustomError) {
+        let notification: NotificationAttributes;
         switch (err) {
             case CustomError.SESSION_EXPIRED:
-                return {
-                    variant: 'danger',
-                    message: constants.SESSION_EXPIRED,
-                    action: {
-                        text: constants.LOGIN,
-                        callback: logoutUser,
-                    },
-                };
+                return props.showSessionExpiredMessage();
             case CustomError.SUBSCRIPTION_EXPIRED:
-                return {
+                notification = {
                     variant: 'danger',
                     message: constants.SUBSCRIPTION_EXPIRED,
                     action: {
@@ -400,8 +392,9 @@ export default function Upload(props: Props) {
                         callback: galleryContext.showPlanSelectorModal,
                     },
                 };
+                break;
             case CustomError.STORAGE_QUOTA_EXCEEDED:
-                return {
+                notification = {
                     variant: 'danger',
                     message: constants.STORAGE_QUOTA_EXCEEDED,
                     action: {
@@ -410,13 +403,14 @@ export default function Upload(props: Props) {
                     },
                     icon: <DiscFullIcon fontSize="large" />,
                 };
-
+                break;
             default:
-                return {
+                notification = {
                     variant: 'danger',
                     message: constants.UNKNOWN_ERROR,
                 };
         }
+        galleryContext.setNotificationAttributes(notification);
     }
 
     const uploadToSingleNewCollection = (collectionName: string) => {

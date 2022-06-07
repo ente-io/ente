@@ -96,11 +96,7 @@ import {
     CollectionSummary,
 } from 'types/collection';
 import { EnteFile } from 'types/file';
-import {
-    GalleryContextType,
-    SelectedState,
-    NotificationAttributes,
-} from 'types/gallery';
+import { GalleryContextType, SelectedState } from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import Notification from 'components/Notification';
 import { ElectronFile } from 'types/upload';
@@ -109,6 +105,7 @@ import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
 import { Search } from 'types/search';
 import SearchResultInfo from 'components/Search/SearchResultInfo';
+import { NotificationAttributes } from 'types/Notification';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -212,6 +209,19 @@ export default function Gallery() {
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
     const [droppedFiles, setDroppedFiles] = useState([]);
+
+    const showSessionExpiredMessage = () =>
+        setDialogMessage({
+            title: constants.SESSION_EXPIRED,
+            content: constants.SESSION_EXPIRED_MESSAGE,
+            staticBackdrop: true,
+            nonClosable: true,
+            proceed: {
+                text: constants.LOGIN,
+                action: logoutUser,
+                variant: 'success',
+            },
+        });
 
     useEffect(() => {
         appContext.showNavBar(false);
@@ -320,18 +330,7 @@ export default function Gallery() {
             logError(e, 'syncWithRemote failed');
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
-                    setBannerMessage(constants.SESSION_EXPIRED_MESSAGE);
-                    setDialogMessage({
-                        title: constants.SESSION_EXPIRED,
-                        content: constants.SESSION_EXPIRED_MESSAGE,
-                        staticBackdrop: true,
-                        nonClosable: true,
-                        proceed: {
-                            text: constants.LOGIN,
-                            action: logoutUser,
-                            variant: 'success',
-                        },
-                    });
+                    showSessionExpiredMessage();
                     break;
                 case CustomError.KEY_MISSING:
                     clearKeys();
@@ -682,6 +681,7 @@ export default function Gallery() {
                     setElectronFiles={setElectronFiles}
                     uploadTypeSelectorView={uploadTypeSelectorView}
                     setUploadTypeSelectorView={setUploadTypeSelectorView}
+                    showSessionExpiredMessage={showSessionExpiredMessage}
                 />
                 <Sidebar collectionSummaries={collectionSummaries} />
 
