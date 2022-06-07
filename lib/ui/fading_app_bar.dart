@@ -117,7 +117,7 @@ class FadingAppBarState extends State<FadingAppBar> {
                   Padding(
                     padding: EdgeInsets.all(8),
                   ),
-                  Text("download"),
+                  Text("Download"),
                 ],
               ),
             ),
@@ -141,7 +141,7 @@ class FadingAppBarState extends State<FadingAppBar> {
                     Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    Text("edit time"),
+                    Text("Edit time"),
                   ],
                 ),
               ),
@@ -162,7 +162,7 @@ class FadingAppBarState extends State<FadingAppBar> {
                   Padding(
                     padding: EdgeInsets.all(8),
                   ),
-                  Text("delete"),
+                  Text("Delete"),
                 ],
               ),
             ),
@@ -211,7 +211,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           final shouldBlockUser = file.uploadedFileID == null;
           ProgressDialog dialog;
           if (shouldBlockUser) {
-            dialog = createProgressDialog(context, "adding to favorites...");
+            dialog = createProgressDialog(context, "Ddding to favorites...");
             await dialog.show();
           }
           try {
@@ -279,7 +279,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     final List<Widget> actions = [];
     if (file.uploadedFileID == null || file.localID == null) {
       actions.add(CupertinoActionSheetAction(
-        child: Text("everywhere"),
+        child: Text("Everywhere"),
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesFromEverywhere(context, [file]);
@@ -290,11 +290,11 @@ class FadingAppBarState extends State<FadingAppBar> {
     } else {
       // uploaded file which is present locally too
       actions.add(CupertinoActionSheetAction(
-        child: Text("device"),
+        child: Text("Device"),
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesOnDeviceOnly(context, [file]);
-          showToast("file deleted from device");
+          showToast("File deleted from device");
           Navigator.of(context, rootNavigator: true).pop();
           // TODO: Fix behavior when inside a device folder
         },
@@ -305,14 +305,14 @@ class FadingAppBarState extends State<FadingAppBar> {
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesFromRemoteOnly(context, [file]);
-          showShortToast("moved to trash");
+          showShortToast("Moved to trash");
           Navigator.of(context, rootNavigator: true).pop();
           // TODO: Fix behavior when inside a collection
         },
       ));
 
       actions.add(CupertinoActionSheetAction(
-        child: Text("everywhere"),
+        child: Text("Everywhere"),
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesFromEverywhere(context, [file]);
@@ -322,10 +322,10 @@ class FadingAppBarState extends State<FadingAppBar> {
       ));
     }
     final action = CupertinoActionSheet(
-      title: Text("delete file?"),
+      title: Text("Delete file?"),
       actions: actions,
       cancelButton: CupertinoActionSheetAction(
-        child: Text("cancel"),
+        child: Text("Cancel"),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop();
         },
@@ -335,7 +335,7 @@ class FadingAppBarState extends State<FadingAppBar> {
   }
 
   Future<void> _download(File file) async {
-    final dialog = createProgressDialog(context, "downloading...");
+    final dialog = createProgressDialog(context, "Downloading...");
     await dialog.show();
     FileType type = file.fileType;
     // save and track image for livePhoto/image and video for FileType.video
@@ -364,9 +364,9 @@ class FadingAppBarState extends State<FadingAppBar> {
     Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
     await dialog.hide();
     if (file.fileType == FileType.livePhoto) {
-      showToast("photo and video saved to gallery");
+      showToast("Photo and video saved to gallery");
     } else {
-      showToast("file saved to gallery");
+      showToast("File saved to gallery");
     }
   }
 }

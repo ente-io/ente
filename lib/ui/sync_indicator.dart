@@ -225,7 +225,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
                 onPressed: () {
                   sendLogs(
                     context,
-                    "raise ticket",
+                    "Raise ticket",
                     "support@ente.io",
                     subject: "Backup failed",
                   );
