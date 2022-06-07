@@ -30,6 +30,7 @@ class _SessionsPageState extends State<SessionsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         title: Text("Active sessions"),
       ),
       body: _getBody(),

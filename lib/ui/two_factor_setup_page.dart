@@ -66,6 +66,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         title: Text(
           "Two-factor setup",
         ),

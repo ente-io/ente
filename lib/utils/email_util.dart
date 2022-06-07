@@ -4,7 +4,6 @@ import 'package:archive/archive_io.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
@@ -42,7 +41,6 @@ Future<void> sendLogs(
           Text(
             "View logs",
             style: TextStyle(
-                fontFamily: "Inter",
                 color: Theme.of(context)
                     .colorScheme
                     .defaultTextColor
@@ -84,7 +82,6 @@ Future<void> sendLogs(
         "This will send across logs and metrics that will help us debug your issue better",
         style: TextStyle(
           height: 1.5,
-          fontFamily: 'Ubuntu',
           fontSize: 16,
         ),
       ),

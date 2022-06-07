@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/app_lock.dart';
@@ -167,14 +168,14 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: const [
                               Text(
-                                "hiding from the task switcher will prevent you from taking screenshots in this app.",
+                                "Hiding from the task switcher will prevent you from taking screenshots in this app.",
                                 style: TextStyle(
                                   height: 1.5,
                                 ),
                               ),
                               Padding(padding: EdgeInsets.all(8)),
                               Text(
-                                "are you sure?",
+                                "Are you sure?",
                                 style: TextStyle(
                                   height: 1.5,
                                 ),
@@ -184,17 +185,27 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                         ),
                         actions: [
                           TextButton(
-                            child: Text("no",
-                                style: TextStyle(color: Colors.white)),
+                            child: Text(
+                              "No",
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .defaultTextColor),
+                            ),
                             onPressed: () {
                               Navigator.of(context, rootNavigator: true)
                                   .pop('dialog');
                             },
                           ),
                           TextButton(
-                            child: Text("yes",
-                                style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8))),
+                            child: Text(
+                              "Yes",
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .defaultTextColor,
+                              ),
+                            ),
                             onPressed: () async {
                               Navigator.of(context, rootNavigator: true)
                                   .pop('dialog');

@@ -64,6 +64,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       appBar: widget.shouldSelectAll
           ? null
           : AppBar(
+              elevation: 0,
               title: Text(""),
             ),
       body: Column(
