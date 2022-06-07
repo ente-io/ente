@@ -592,9 +592,9 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                             child: GNav(
                               curve: Curves.easeOutExpo,
-                              // backgroundColor: Colors.white.withOpacity(0.6),
-                              backgroundColor:
-                                  Theme.of(context).bottomAppBarColor,
+                              backgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .gNavBackgoundColor,
                               mainAxisAlignment: MainAxisAlignment.center,
                               rippleColor: Colors.white.withOpacity(0.2),
                               hoverColor: Colors.white.withOpacity(0.2),
