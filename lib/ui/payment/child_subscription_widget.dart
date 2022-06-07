@@ -25,8 +25,9 @@ class ChildSubscriptionWidget extends StatelessWidget {
         children: [
           Center(
             child: Text(
-              "you are on a family plan!",
-              style: TextStyle(fontSize: 14, color: Colors.white),
+              "You are on a family plan!",
+              style:
+                  Theme.of(context).textTheme.bodyText1.copyWith(fontSize: 14),
             ),
           ),
           Padding(
@@ -39,7 +40,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: "please contact ",
+                    text: "Please contact ",
                   ),
                   TextSpan(
                     text: familyAdmin,
@@ -49,10 +50,10 @@ class ChildSubscriptionWidget extends StatelessWidget {
                     text: " to manage your family subscription",
                   ),
                 ],
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 14,
-                ),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyText1
+                    .copyWith(fontSize: 14),
               ),
             ),
           ),
@@ -60,7 +61,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8),
           ),
           Image.asset(
-            "assets/family_sharing.jpg",
+            "assets/family sharing.png",
             height: 256,
           ),
           Padding(
@@ -99,7 +100,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
                 text: TextSpan(
                   children: const [
                     TextSpan(
-                      text: "please contact ",
+                      text: "Please contact ",
                     ),
                     TextSpan(
                       text: "support@ente.io",
@@ -109,10 +110,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
                       text: " for help",
                     ),
                   ],
-                  style: TextStyle(
-                    fontFamily: 'Ubuntu-Regular',
-                    fontSize: 12,
-                  ),
+                  style: Theme.of(context).textTheme.overline,
                 ),
               ),
             ),

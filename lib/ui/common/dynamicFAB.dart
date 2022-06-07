@@ -9,16 +9,17 @@ class DynamicFAB extends StatelessWidget {
   final String buttonText;
   final Function onPressedFunction;
 
-  const DynamicFAB(
-      {this.isKeypadOpen,
+  DynamicFAB(
+      {Key key,
+      this.isKeypadOpen,
       this.buttonText,
       this.isFormValid,
-      this.onPressedFunction});
+      this.onPressedFunction})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     if (isKeypadOpen) {
-      //var here
       return Container(
         decoration: BoxDecoration(
           boxShadow: [
@@ -41,7 +42,7 @@ class DynamicFAB extends StatelessWidget {
                 foregroundColor:
                     Theme.of(context).colorScheme.dynamicFABTextColor,
                 child: Transform.rotate(
-                  angle: isFormValid ? 0 : math.pi / 2, //var here
+                  angle: isFormValid ? 0 : math.pi / 2,
                   child: Icon(
                     Icons.chevron_right,
                     size: 36,

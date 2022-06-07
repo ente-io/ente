@@ -66,6 +66,14 @@ extension CustomColorScheme on ColorScheme {
           backgroundColor: Colors.black,
           itemStyle: TextStyle(color: Colors.white),
           cancelStyle: TextStyle(color: Colors.white));
+
+  Color get stepProgressUnselectedColor => brightness == Brightness.light
+      ? Color.fromRGBO(196, 196, 196, 0.6)
+      : Color.fromRGBO(255, 255, 255, 0.7);
+
+  Color get gNavBackgoundColor => brightness == Brightness.light
+      ? Color.fromRGBO(196, 196, 196, 0.6)
+      : Color.fromRGBO(255, 255, 255, 0.7);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(

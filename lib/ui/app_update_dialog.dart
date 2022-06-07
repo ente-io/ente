@@ -49,7 +49,6 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         Container(
           width: double.infinity,
           height: 64,
-          padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
           child: OutlinedButton(
             child: Text(
               "Update",
