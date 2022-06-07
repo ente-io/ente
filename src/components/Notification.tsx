@@ -10,7 +10,7 @@ import {
     Typography,
 } from '@mui/material';
 import React from 'react';
-import { NotificationAttributes } from 'types/gallery';
+import { NotificationAttributes } from 'types/Notification';
 
 import InfoIcon from '@mui/icons-material/Info';
 
