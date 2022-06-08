@@ -129,10 +129,8 @@ const _intSelectOption = (i: number) => {
     return { label: i.toString(), value: i };
 };
 
-export function selectIntOptions(upperLimit: number) {
-    return [...Array(upperLimit).reverse().keys()].map((i) =>
-        _intSelectOption(i + 1)
-    );
+export function getDeviceLimitOptions() {
+    return [2, 5, 10, 25, 50].map((i) => _intSelectOption(i));
 }
 
 export const shareExpiryOptions = [

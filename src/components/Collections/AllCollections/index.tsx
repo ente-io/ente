@@ -4,8 +4,8 @@ import { CollectionType, COLLECTION_SORT_BY } from 'constants/collection';
 import { sortCollectionSummaries } from 'services/collectionService';
 import {
     Transition,
-    FloatingDrawer,
-} from 'components/Collections/FloatingDrawer';
+    AllCollectionContainer,
+} from 'components/Collections/AllCollections/Container';
 import { useLocalState } from 'hooks/useLocalState';
 import { LS_KEYS } from 'utils/storage/localStorage';
 import AllCollectionsHeader from './header';
@@ -48,7 +48,7 @@ export default function AllCollections(props: Iprops) {
     };
 
     return (
-        <FloatingDrawer
+        <AllCollectionContainer
             TransitionComponent={LeftSlideTransition}
             onClose={close}
             open={isOpen}>
@@ -64,6 +64,6 @@ export default function AllCollections(props: Iprops) {
                 collectionSummaries={sortedCollectionSummaries}
                 onCollectionClick={onCollectionClick}
             />
-        </FloatingDrawer>
+        </AllCollectionContainer>
     );
 }

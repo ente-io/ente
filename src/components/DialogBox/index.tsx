@@ -22,7 +22,12 @@ type IProps = React.PropsWithChildren<
     }
 >;
 
-export default function DialogBox({ attributes, children, ...props }: IProps) {
+export default function DialogBox({
+    attributes,
+    children,
+    titleCloseButton,
+    ...props
+}: IProps) {
     if (!attributes) {
         return <Dialog open={false} />;
     }
@@ -41,7 +46,7 @@ export default function DialogBox({ attributes, children, ...props }: IProps) {
             {...props}>
             {attributes.title && (
                 <DialogTitleWithCloseButton
-                    onClose={props.titleCloseButton && handleClose}>
+                    onClose={titleCloseButton && handleClose}>
                     {attributes.title}
                 </DialogTitleWithCloseButton>
             )}

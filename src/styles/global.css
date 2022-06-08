@@ -488,6 +488,3 @@ div.otp-input input:not(:placeholder-shown) , div.otp-input input:focus{
     }
 }
 
-.manageLinkHeader:hover{
-    color:#bbb;
-}

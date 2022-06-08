@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
 import TextField from '@mui/material/TextField';
 import ShowHidePassword from './Form/ShowHidePassword';
+import { FlexWrapper } from './Container';
 
 interface formValues {
     inputValue: string;
@@ -17,6 +18,7 @@ export interface SingleInputFormProps {
     fieldType: 'text' | 'email' | 'password';
     placeholder: string;
     buttonText: string;
+    customSubmitButton?: any;
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
@@ -97,12 +99,19 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                             ),
                         }}
                     />
-
-                    <SubmitButton
-                        sx={{ mt: 2 }}
-                        buttonText={props.buttonText}
-                        loading={loading}
-                    />
+                    <FlexWrapper></FlexWrapper>
+                    {props.customSubmitButton ? (
+                        <props.customSubmitButton
+                            buttonText={props.buttonText}
+                            loading={loading}
+                        />
+                    ) : (
+                        <SubmitButton
+                            sx={{ mt: 2 }}
+                            buttonText={props.buttonText}
+                            loading={loading}
+                        />
+                    )}
                 </form>
             )}
         </Formik>

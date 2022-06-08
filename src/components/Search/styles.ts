@@ -32,7 +32,7 @@ export const SelectStyles = {
             cursor: 'pointer',
         },
         '& .main': {
-            backgroundColor: isFocused && '#343434',
+            backgroundColor: isFocused && '#202020',
         },
         '&:last-child .MuiDivider-root': {
             display: 'none',

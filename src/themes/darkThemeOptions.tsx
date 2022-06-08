@@ -44,6 +44,12 @@ declare module '@mui/material/Typography' {
     }
 }
 
+declare module '@mui/material/Switch' {
+    interface SwitchPropsColorOverrides {
+        accent: true;
+    }
+}
+
 // Create a theme instance.
 const darkThemeOptions = createTheme({
     components: {
@@ -120,6 +126,13 @@ const darkThemeOptions = createTheme({
             styleOverrides: {
                 tooltipPlacementBottom: {
                     marginTop: '0px !important',
+                },
+            },
+        },
+        MuiTypography: {
+            styleOverrides: {
+                body1: {
+                    paddingBottom: '4px',
                 },
             },
         },
