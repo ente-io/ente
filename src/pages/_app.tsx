@@ -58,6 +58,8 @@ type AppContextType = {
     finishLoading: () => void;
     closeMessageDialog: () => void;
     setDialogMessage: SetDialogBoxAttributes;
+    watchServiceIsRunning: boolean;
+    setWatchServiceIsRunning: (isRunning: boolean) => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -92,6 +94,7 @@ export default function App({ Component, err }) {
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
+    const [watchServiceIsRunning, setWatchServiceIsRunning] = useState(false);
 
     useEffect(() => {
         if (
@@ -284,6 +287,8 @@ export default function App({ Component, err }) {
                             finishLoading,
                             closeMessageDialog,
                             setDialogMessage,
+                            watchServiceIsRunning,
+                            setWatchServiceIsRunning,
                         }}>
                         {loading ? (
                             <VerticallyCentered>

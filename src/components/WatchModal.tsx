@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Button, CircularProgress, Dialog, IconButton } from '@mui/material';
-import watchService, { WatchMapping } from 'services/watchService';
+import watchService from 'services/watchService';
 import { MdDelete } from 'react-icons/md';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Close from '@mui/icons-material/Close';
 import { SpaceBetweenFlex } from 'components/Container';
+import { WatchMapping } from 'types/watch';
+import { AppContext } from 'pages/_app';
 
 function WatchModal({
     watchModalView,
@@ -14,25 +16,12 @@ function WatchModal({
     setWatchModalView: (watchModalView: boolean) => void;
 }) {
     const [mappings, setMappings] = useState<WatchMapping[]>([]);
-    const [shouldUpdateMappings, setShouldUpdateMappings] = useState(true);
     const [inputFolderPath, setInputFolderPath] = useState('');
-    const [isSyncing, setIsSyncing] = useState(false);
+    const appContext = React.useContext(AppContext);
 
     useEffect(() => {
-        if (watchModalView) {
-            const interval = setInterval(() => {
-                setIsSyncing(watchService.isEventRunning);
-            }, 1000);
-            return () => clearInterval(interval);
-        }
-    }, [watchModalView]);
-
-    useEffect(() => {
-        if (shouldUpdateMappings) {
-            setMappings(watchService.getWatchMappings());
-            setShouldUpdateMappings(false);
-        }
-    }, [shouldUpdateMappings]);
+        setMappings(watchService.getWatchMappings());
+    }, []);
 
     const handleFolderSelection = async () => {
         const folderPath = await watchService.selectFolder();
@@ -46,17 +35,17 @@ function WatchModal({
                 inputFolderPath
             );
             setInputFolderPath('');
-            setShouldUpdateMappings(true);
+            setMappings(watchService.getWatchMappings());
         }
     };
 
     const handleRemoveWatchMapping = async (mapping: WatchMapping) => {
         await watchService.removeWatchMapping(mapping.collectionName);
-        setShouldUpdateMappings(true);
+        setMappings(watchService.getWatchMappings());
     };
 
     const handleSyncProgressClick = () => {
-        if (watchService.isUploadRunning) {
+        if (watchService.isUploadRunning()) {
             watchService.showProgressView();
         }
     };
@@ -139,7 +128,7 @@ function WatchModal({
                         }}>
                         Current Watch Mappings
                     </div>
-                    {isSyncing && (
+                    {appContext.watchServiceIsRunning && (
                         <IconButton onClick={handleSyncProgressClick}>
                             <CircularProgress size={24} />
                         </IconButton>

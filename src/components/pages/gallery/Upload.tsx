@@ -117,13 +117,13 @@ export default function Upload(props: Props) {
                     resumeDesktopUpload(type, electronFiles, collectionName);
                 }
             );
-            watchService.setWatchServiceFunctions(
+            watchService.init(
                 props.setElectronFiles,
                 setCollectionName,
                 props.syncWithRemote,
-                showProgressView
+                showProgressView,
+                appContext.setWatchServiceIsRunning
             );
-            watchService.init();
         }
     }, []);
 
@@ -190,7 +190,7 @@ export default function Upload(props: Props) {
         setUploadResult(new Map<number, number>());
         setPercentComplete(0);
         props.closeCollectionSelector();
-        !watchService.isUploadRunning && setProgressView(true); // don't show progress view if upload triggered by watch service
+        !watchService.isUploadRunning() && setProgressView(true); // don't show progress view if upload triggered by watch service
     };
 
     const resumeDesktopUpload = async (

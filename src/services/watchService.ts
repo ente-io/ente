@@ -6,55 +6,47 @@ import { removeFromCollection, syncCollections } from './collectionService';
 import { syncFiles } from './fileService';
 import debounce from 'debounce-promise';
 import { logError } from 'utils/sentry';
-
-export interface WatchMapping {
-    collectionName: string;
-    folderPath: string;
-    files: {
-        path: string;
-        id: number;
-    }[];
-}
-
-interface EventQueueType {
-    type: 'upload' | 'trash';
-    collectionName: string;
-    paths: string[];
-}
+import { EventQueueType, WatchMapping } from 'types/watch';
 
 class WatchService {
     ElectronAPIs: any;
     allElectronAPIsExist: boolean = false;
     eventQueue: EventQueueType[] = [];
+    currentEvent: EventQueueType;
     trashingDirQueue: string[] = [];
     isEventRunning: boolean = false;
-    isUploadRunning: boolean = false;
+    uploadRunning: boolean = false;
     pathToIDMap = new Map<string, number>();
     setElectronFiles: (files: ElectronFile[]) => void;
     setCollectionName: (collectionName: string) => void;
     syncWithRemote: () => void;
     showProgressView: () => void;
+    setWatchServiceIsRunning: (isRunning: boolean) => void;
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
         this.allElectronAPIsExist = !!this.ElectronAPIs?.getWatchMappings;
     }
 
-    setWatchServiceFunctions(
+    isUploadRunning() {
+        return this.uploadRunning;
+    }
+
+    async init(
         setElectronFiles: (files: ElectronFile[]) => void,
         setCollectionName: (collectionName: string) => void,
         syncWithRemote: () => void,
-        showProgressView: () => void
+        showProgressView: () => void,
+        setWatchServiceIsRunning: (isRunning: boolean) => void
     ) {
-        this.setElectronFiles = setElectronFiles;
-        this.setCollectionName = setCollectionName;
-        this.syncWithRemote = syncWithRemote;
-        this.showProgressView = showProgressView;
-    }
-
-    async init() {
         if (this.allElectronAPIsExist) {
             try {
+                this.setElectronFiles = setElectronFiles;
+                this.setCollectionName = setCollectionName;
+                this.syncWithRemote = syncWithRemote;
+                this.showProgressView = showProgressView;
+                this.setWatchServiceIsRunning = setWatchServiceIsRunning;
+
                 let mappings = this.getWatchMappings();
 
                 console.log('mappings', mappings);
@@ -63,18 +55,7 @@ class WatchService {
                     return;
                 }
 
-                const existingMappings = [];
-                for (const mapping of mappings) {
-                    const mappingExists =
-                        await this.ElectronAPIs.isFolderExists(
-                            mapping.folderPath
-                        );
-                    if (mappingExists) {
-                        existingMappings.push(mapping);
-                    }
-                }
-                this.ElectronAPIs.setWatchMappings(existingMappings);
-                mappings = existingMappings;
+                mappings = await this.filterOutDeletedMappings(mappings);
 
                 for (const mapping of mappings) {
                     const filePathsOnDisk: string[] =
@@ -114,12 +95,27 @@ class WatchService {
                 }
 
                 this.setWatchFunctions();
-                this.syncWithRemote();
                 await this.runNextEvent();
             } catch (e) {
                 logError(e, 'error while initializing watch service');
             }
         }
+    }
+
+    async filterOutDeletedMappings(
+        mappings: WatchMapping[]
+    ): Promise<WatchMapping[]> {
+        const notDeletedMappings = [];
+        for (const mapping of mappings) {
+            const mappingExists = await this.ElectronAPIs.isFolderExists(
+                mapping.folderPath
+            );
+            if (mappingExists) {
+                notDeletedMappings.push(mapping);
+            }
+        }
+        this.ElectronAPIs.setWatchMappings(notDeletedMappings);
+        return notDeletedMappings;
     }
 
     setWatchFunctions() {
@@ -167,6 +163,11 @@ class WatchService {
         return [];
     }
 
+    setIsEventRunning(isEventRunning: boolean) {
+        this.isEventRunning = isEventRunning;
+        this.setWatchServiceIsRunning(isEventRunning);
+    }
+
     async runNextEvent() {
         console.log('runNextEvent mappings', this.getWatchMappings());
 
@@ -174,28 +175,24 @@ class WatchService {
             return;
         }
 
-        if (this.eventQueue[0].type === 'upload') {
-            this.runNextUpload();
+        this.setIsEventRunning(true);
+        const event = this.clubSameCollectionEvents();
+        this.currentEvent = event;
+        if (event.type === 'upload') {
+            this.processUploadEvent();
         } else {
-            this.runNextTrash();
+            this.processTrashEvent();
         }
     }
 
-    private async runNextUpload() {
+    private async processUploadEvent() {
         try {
-            if (this.eventQueue.length === 0 || this.isEventRunning) {
-                return;
-            }
+            this.uploadRunning = true;
 
-            this.isEventRunning = true;
-            this.isUploadRunning = true;
-
-            this.batchNextEvent();
-
-            this.setCollectionName(this.eventQueue[0].collectionName);
+            this.setCollectionName(this.currentEvent.collectionName);
             this.setElectronFiles(
                 await Promise.all(
-                    this.eventQueue[0].paths.map(async (path) => {
+                    this.currentEvent.paths.map(async (path) => {
                         return await this.ElectronAPIs.getElectronFile(path);
                     })
                 )
@@ -205,7 +202,7 @@ class WatchService {
         }
     }
 
-    async fileUploaded(fileWithCollection: FileWithCollection, file: EnteFile) {
+    async onFileUpload(fileWithCollection: FileWithCollection, file: EnteFile) {
         if (fileWithCollection.isLivePhoto) {
             this.pathToIDMap.set(
                 (fileWithCollection.livePhotoAssets.image as ElectronFile).path,
@@ -235,8 +232,7 @@ class WatchService {
                 );
                 if (
                     !this.isEventRunning ||
-                    this.eventQueue.length === 0 ||
-                    this.eventQueue[0].collectionName !== collection?.name
+                    this.currentEvent.collectionName !== collection?.name
                 ) {
                     return;
                 }
@@ -291,7 +287,7 @@ class WatchService {
                     const mapping = mappings.find(
                         (mapping) =>
                             mapping.collectionName ===
-                            this.eventQueue[0].collectionName
+                            this.currentEvent.collectionName
                     );
                     mapping.files = [...mapping.files, ...uploadedFiles];
 
@@ -299,9 +295,8 @@ class WatchService {
                     this.syncWithRemote();
                 }
 
-                this.eventQueue.shift();
-                this.isEventRunning = false;
-                this.isUploadRunning = false;
+                this.setIsEventRunning(false);
+                this.uploadRunning = false;
                 this.runNextEvent();
             } catch (e) {
                 logError(e, 'error while running all file uploads done');
@@ -309,25 +304,17 @@ class WatchService {
         }
     }
 
-    private async runNextTrash() {
+    private async processTrashEvent() {
         try {
-            if (this.eventQueue.length === 0 || this.isEventRunning) {
-                return;
-            }
-
-            this.isEventRunning = true;
-
             if (this.trashingDirQueue.length !== 0) {
-                this.removeFilesMatchingTrashingDir(this.trashingDirQueue[0]);
+                this.ignoreFileEventsFromTrashedDir(this.trashingDirQueue[0]);
                 this.trashingDirQueue.shift();
-                this.isEventRunning = false;
+                this.setIsEventRunning(false);
                 this.runNextEvent();
                 return;
             }
 
-            this.batchNextEvent();
-
-            const { collectionName, paths } = this.eventQueue[0];
+            const { collectionName, paths } = this.currentEvent;
             const filePathsToRemove = new Set(paths);
 
             const mappings = this.getWatchMappings();
@@ -350,8 +337,7 @@ class WatchService {
             this.ElectronAPIs.setWatchMappings(mappings);
             this.syncWithRemote();
 
-            this.eventQueue.shift();
-            this.isEventRunning = false;
+            this.setIsEventRunning(false);
             this.runNextEvent();
         } catch (e) {
             logError(e, 'error while running next trash');
@@ -389,7 +375,7 @@ class WatchService {
         }
     }
 
-    removeFilesMatchingTrashingDir(trashingDir: string) {
+    ignoreFileEventsFromTrashedDir(trashingDir: string) {
         this.eventQueue = this.eventQueue.filter((event) =>
             event.paths.every((path) => !path.startsWith(trashingDir))
         );
@@ -424,22 +410,17 @@ class WatchService {
 
     // Batches all the files to be uploaded (or trashed) from the
     // event queue of same collection as the next event
-    private batchNextEvent() {
-        const newEventQueue = [this.eventQueue[0]];
-        const len = this.eventQueue.length;
-        for (let i = 1; i < len; i++) {
-            if (
-                this.eventQueue[i].collectionName ===
-                    newEventQueue[0].collectionName &&
-                this.eventQueue[i].type === newEventQueue[0].type
-            ) {
-                newEventQueue[0].paths.push(...this.eventQueue[i].paths);
-            } else {
-                newEventQueue.push(this.eventQueue[i]);
-            }
+    private clubSameCollectionEvents(): EventQueueType {
+        const event = this.eventQueue.shift();
+        while (
+            this.eventQueue.length > 0 &&
+            event.collectionName === this.eventQueue[0].collectionName &&
+            event.type === this.eventQueue[0].type
+        ) {
+            event.paths = [...event.paths, ...this.eventQueue[0].paths];
+            this.eventQueue.shift();
         }
-        newEventQueue.push(...this.eventQueue.slice(len));
-        this.eventQueue = newEventQueue;
+        return event;
     }
 }
 

@@ -407,7 +407,7 @@ class UploadManager {
                         FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL ||
                     fileUploadResult === FileUploadResults.ALREADY_UPLOADED
                 ) {
-                    await watchService.fileUploaded(
+                    await watchService.onFileUpload(
                         fileWithCollection,
                         uploadedFile
                     );
