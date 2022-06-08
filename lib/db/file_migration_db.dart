@@ -5,10 +5,6 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-// Keeps track of localIDs which should be not uploaded to ente without
-// user's intervention.
-// Common use case:
-// when a user deletes a file just from ente on current or different device.
 class FilesMigrationDB {
   static final _databaseName = "ente.files_migration.db";
   static final _databaseVersion = 1;
@@ -83,7 +79,7 @@ class FilesMigrationDB {
         "took ${duration.inMilliseconds} ms.");
   }
 
-  Future<int> deleteByLocaIDs(List<String> localIDs) async {
+  Future<int> deleteByLocalIDs(List<String> localIDs) async {
     String inParam = "";
     for (final localID in localIDs) {
       inParam += "'" + localID + "',";

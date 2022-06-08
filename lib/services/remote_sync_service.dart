@@ -135,7 +135,7 @@ class RemoteSyncService {
       await _markReSyncAsDone();
     }
     if (Platform.isAndroid &&
-        !(await _fileMigrationService.isMigrationComplete())) {
+        _fileMigrationService.isLocationMigrationCompleted()) {
       _fileMigrationService.runMigration();
     }
   }

@@ -11,18 +11,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 class FileMigrationService {
   FilesDB _filesDB;
   FilesMigrationDB _filesMigrationDB;
-  Future<SharedPreferences> _prefs;
+  SharedPreferences _prefs;
   Logger _logger;
   static const isLocationMigrationComplete = "fm_isLocationMigrationComplete";
   static const isLocalImportDone = "fm_IsLocalImportDone";
   Completer<void> _existingMigration;
 
   FileMigrationService._privateConstructor() {
-    assert(Platform.isAndroid, "platform should be Android only");
     _logger = Logger((FileMigrationService).toString());
     _filesDB = FilesDB.instance;
     _filesMigrationDB = FilesMigrationDB.instance;
-    _prefs = SharedPreferences.getInstance();
+  }
+
+  Future<void> init() async {
+    _prefs = await SharedPreferences.getInstance();
   }
 
   static FileMigrationService instance =
@@ -30,13 +32,14 @@ class FileMigrationService {
 
   Future<bool> _markLocationMigrationAsCompleted() async {
     _logger.info('marking migration as completed');
-    var sharedPreferences = await _prefs;
-    return sharedPreferences.setBool(isLocationMigrationComplete, true);
+    return _prefs.setBool(isLocationMigrationComplete, true);
   }
 
-  Future<bool> isMigrationComplete() async {
-    var sharedPreferences = await _prefs;
-    return sharedPreferences.get(isLocationMigrationComplete) ?? false;
+  bool isLocationMigrationCompleted() {
+    if (!Platform.isAndroid) {
+      return true;
+    }
+    return _prefs.get(isLocationMigrationComplete) ?? false;
   }
 
   Future<void> runMigration() async {
@@ -104,11 +107,11 @@ class FileMigrationService {
     }
     _logger.info('Marking ${localIDsWithLocation.length} files for re-upload');
     // await _filesDB.markForReUploadIfLocationMissing(localIDsWithLocation);
-    await _filesMigrationDB.deleteByLocaIDs(localIDsToProcess);
+    await _filesMigrationDB.deleteByLocalIDs(localIDsToProcess);
   }
 
   Future<void> _importLocalFilesForMigration() async {
-    if ((await _prefs).containsKey(isLocalImportDone)) {
+    if (_prefs.containsKey(isLocalImportDone)) {
       return;
     }
     final sTime = DateTime.now().microsecondsSinceEpoch;
@@ -119,6 +122,6 @@ class FileMigrationService {
     final d = Duration(microseconds: eTime - sTime);
     _logger.info(
         'importing completed, total files count ${fileLocalIDs.length} and took ${d.inSeconds.toString()} seconds');
-    (await _prefs).setBool(isLocalImportDone, true);
+    _prefs.setBool(isLocalImportDone, true);
   }
 }
