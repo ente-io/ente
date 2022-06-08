@@ -30,23 +30,21 @@ DialogBoxBase.defaultProps = {
 
 export const dialogCloseHandler =
     ({
-        staticBackdrop,
+        closeOnBackdropClick,
         nonClosable,
         onClose,
     }: {
-        staticBackdrop?: boolean;
+        closeOnBackdropClick?: boolean;
         nonClosable?: boolean;
-        onClose?: () => void;
+        onClose: () => void;
     }): DialogProps['onClose'] =>
     (_, reason) => {
         if (nonClosable) {
             // no-op
-        } else if (staticBackdrop && reason === 'backdropClick') {
+        } else if (!closeOnBackdropClick && reason === 'backdropClick') {
             // no-op
         } else {
-            if (onClose && typeof onClose === 'function') {
-                onClose();
-            }
+            onClose();
         }
     };
 

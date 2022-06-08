@@ -214,7 +214,7 @@ export default function Gallery() {
         setDialogMessage({
             title: constants.SESSION_EXPIRED,
             content: constants.SESSION_EXPIRED_MESSAGE,
-            staticBackdrop: true,
+
             nonClosable: true,
             proceed: {
                 text: constants.LOGIN,
@@ -392,7 +392,7 @@ export default function Gallery() {
                 logError(e, 'collection ops failed', { ops });
                 setDialogMessage({
                     title: constants.ERROR,
-                    staticBackdrop: true,
+
                     close: { variant: 'danger' },
                     content: constants.UNKNOWN_ERROR,
                 });
@@ -420,7 +420,7 @@ export default function Gallery() {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
                         title: constants.ERROR,
-                        staticBackdrop: true,
+
                         close: { variant: 'danger' },
                         content: constants.NOT_FILE_OWNER,
                     });
@@ -428,7 +428,7 @@ export default function Gallery() {
             }
             setDialogMessage({
                 title: constants.ERROR,
-                staticBackdrop: true,
+
                 close: { variant: 'danger' },
                 content: constants.UNKNOWN_ERROR,
             });
@@ -454,7 +454,7 @@ export default function Gallery() {
                 logError(e, 'create and collection ops failed', { ops });
                 setDialogMessage({
                     title: constants.ERROR,
-                    staticBackdrop: true,
+
                     close: { variant: 'danger' },
                     content: constants.UNKNOWN_ERROR,
                 });
@@ -490,14 +490,14 @@ export default function Gallery() {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
                         title: constants.ERROR,
-                        staticBackdrop: true,
+
                         close: { variant: 'danger' },
                         content: constants.NOT_FILE_OWNER,
                     });
             }
             setDialogMessage({
                 title: constants.ERROR,
-                staticBackdrop: true,
+
                 close: { variant: 'danger' },
                 content: constants.UNKNOWN_ERROR,
             });
@@ -523,7 +523,7 @@ export default function Gallery() {
         setDialogMessage({
             title: constants.CONFIRM_EMPTY_TRASH,
             content: constants.EMPTY_TRASH_MESSAGE,
-            staticBackdrop: true,
+
             proceed: {
                 action: emptyTrashHelper,
                 text: constants.EMPTY_TRASH,
@@ -543,7 +543,7 @@ export default function Gallery() {
         } catch (e) {
             setDialogMessage({
                 title: constants.ERROR,
-                staticBackdrop: true,
+
                 close: { variant: 'danger' },
                 content: constants.UNKNOWN_ERROR,
             });

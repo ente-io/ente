@@ -101,7 +101,6 @@ export default function FixCreationTime(props: Props) {
                     fixState === FIX_STATE.RUNNING
                         ? constants.FIX_CREATION_TIME_IN_PROGRESS
                         : constants.FIX_CREATION_TIME,
-                staticBackdrop: true,
                 nonClosable: true,
             }}>
             <div

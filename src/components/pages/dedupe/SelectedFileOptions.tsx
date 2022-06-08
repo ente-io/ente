@@ -44,7 +44,6 @@ export default function DeduplicateOptions({
         setDialogMessage({
             title: constants.CONFIRM_DELETE,
             content: constants.TRASH_MESSAGE,
-            staticBackdrop: true,
             proceed: {
                 action: deleteFileHelper,
                 text: constants.MOVE_TO_TRASH,

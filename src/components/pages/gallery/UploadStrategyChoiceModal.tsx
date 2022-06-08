@@ -18,7 +18,6 @@ function UploadStrategyChoiceModal({
     ...props
 }: Props) {
     const handleClose = dialogCloseHandler({
-        staticBackdrop: true,
         onClose: props.onClose,
     });
 

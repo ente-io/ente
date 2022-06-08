@@ -7,6 +7,7 @@ import CodeBlock from '../CodeBlock';
 import { ButtonProps, Typography } from '@mui/material';
 import * as bip39 from 'bip39';
 import { DashedBorderWrapper } from './styledComponents';
+import { DialogBoxAttributes } from 'types/dialogBox';
 
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
@@ -42,13 +43,12 @@ function RecoveryKey({ somethingWentWrong, ...props }: Props) {
         props.onHide();
     }
 
-    const recoveryKeyDialogAttributes = {
+    const recoveryKeyDialogAttributes: DialogBoxAttributes = {
         title: constants.RECOVERY_KEY,
         close: {
             text: constants.SAVE_LATER,
             variant: 'secondary' as ButtonProps['color'],
         },
-        staticBackdrop: true,
         proceed: {
             text: constants.SAVE,
             action: onSaveClick,

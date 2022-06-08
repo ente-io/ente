@@ -134,7 +134,7 @@ export default function Upload(props: Props) {
             } else if (isCanvasBlocked()) {
                 appContext.setDialogMessage({
                     title: constants.CANVAS_BLOCKED_TITLE,
-                    staticBackdrop: true,
+
                     content: constants.CANVAS_BLOCKED_MESSAGE(),
                     close: { text: constants.CLOSE },
                     proceed: {
@@ -311,7 +311,7 @@ export default function Upload(props: Props) {
                 logError(e, 'Failed to create album');
                 appContext.setDialogMessage({
                     title: constants.ERROR,
-                    staticBackdrop: true,
+
                     close: { variant: 'danger' },
                     content: constants.CREATE_ALBUM_FAILED,
                 });

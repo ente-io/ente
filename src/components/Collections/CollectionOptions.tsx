@@ -128,7 +128,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setDialogMessage({
             title: constants.CONFIRM_DELETE_COLLECTION,
             content: constants.DELETE_COLLECTION_MESSAGE(),
-            staticBackdrop: true,
             proceed: {
                 text: constants.DELETE_COLLECTION,
                 action: handleCollectionAction(CollectionActions.DELETE),
@@ -144,7 +143,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setDialogMessage({
             title: constants.CONFIRM_DOWNLOAD_COLLECTION,
             content: constants.DOWNLOAD_COLLECTION_MESSAGE(),
-            staticBackdrop: true,
             proceed: {
                 text: constants.DOWNLOAD,
                 action: handleCollectionAction(CollectionActions.DOWNLOAD),

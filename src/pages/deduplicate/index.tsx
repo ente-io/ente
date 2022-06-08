@@ -121,14 +121,14 @@ export default function Deduplicate() {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
                         title: constants.ERROR,
-                        staticBackdrop: true,
+
                         close: { variant: 'danger' },
                         content: constants.NOT_FILE_OWNER,
                     });
             }
             setDialogMessage({
                 title: constants.ERROR,
-                staticBackdrop: true,
+
                 close: { variant: 'danger' },
                 content: constants.UNKNOWN_ERROR,
             });

@@ -37,7 +37,7 @@ export default function HelpSection() {
             setDialogMessage({
                 title: constants.DOWNLOAD_APP,
                 content: constants.DOWNLOAD_APP_MESSAGE(),
-                staticBackdrop: true,
+
                 proceed: {
                     text: constants.DOWNLOAD,
                     action: downloadApp,

@@ -104,7 +104,6 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
             onClose={close}
             attributes={{
                 title: constants.ABUSE_REPORT,
-                staticBackdrop: true,
             }}>
             <Wrapper>
                 <h6>{constants.ABUSE_REPORT_DESCRIPTION}</h6>

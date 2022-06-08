@@ -18,7 +18,6 @@ interface Props {
 
 function CollectionShare(props: Props) {
     const handleClose = dialogCloseHandler({
-        staticBackdrop: true,
         onClose: props.onHide,
     });
 

@@ -170,7 +170,6 @@ function PlanSelector(props: Props) {
                     constants.UPDATE_SUBSCRIPTION
                 )}`,
                 content: constants.UPDATE_SUBSCRIPTION_MESSAGE,
-                staticBackdrop: true,
                 proceed: {
                     text: constants.UPDATE_SUBSCRIPTION,
                     action: updateSubscription.bind(
@@ -328,7 +327,7 @@ function PlanSelector(props: Props) {
                                                         constants.ACTIVATE_SUBSCRIPTION_MESSAGE(
                                                             subscription.expiryTime
                                                         ),
-                                                    staticBackdrop: true,
+
                                                     proceed: {
                                                         text: constants.ACTIVATE_SUBSCRIPTION,
                                                         action: activateSubscription.bind(
@@ -354,7 +353,7 @@ function PlanSelector(props: Props) {
                                                     title: constants.CONFIRM_CANCEL_SUBSCRIPTION,
                                                     content:
                                                         constants.CANCEL_SUBSCRIPTION_MESSAGE(),
-                                                    staticBackdrop: true,
+
                                                     proceed: {
                                                         text: constants.CANCEL_SUBSCRIPTION,
                                                         action: cancelSubscription.bind(

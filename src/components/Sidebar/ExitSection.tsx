@@ -12,7 +12,7 @@ export default function ExitSection() {
         setDialogMessage({
             title: `${constants.CONFIRM} ${constants.LOGOUT}`,
             content: constants.LOGOUT_MESSAGE,
-            staticBackdrop: true,
+
             proceed: {
                 text: constants.LOGOUT,
                 action: logoutUser,
@@ -26,7 +26,7 @@ export default function ExitSection() {
         setDialogMessage({
             title: `${constants.DELETE_ACCOUNT}`,
             content: constants.DELETE_ACCOUNT_MESSAGE(),
-            staticBackdrop: true,
+
             proceed: {
                 text: constants.DELETE_ACCOUNT,
                 action: () => {

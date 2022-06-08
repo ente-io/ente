@@ -36,7 +36,7 @@ export default function DialogBox({
     }
 
     const handleClose = dialogCloseHandler({
-        staticBackdrop: attributes.staticBackdrop,
+        closeOnBackdropClick: attributes.closeOnBackdropClick,
         nonClosable: attributes.nonClosable,
         onClose: onClose,
     });
