@@ -420,7 +420,7 @@ const englishConstants = {
         }
     },
     PHOTO_COUNT: (count: number) =>
-        `${count === 1 ? `1 Photo` : `${count} Photos`}`,
+        `${count === 1 ? `1 memory` : `${count} memories`}`,
     TERMS_AND_CONDITIONS: () => (
         <Typography variant="body2">
             I agree to the{' '}
@@ -768,6 +768,8 @@ const englishConstants = {
     ),
     UPGRADE_NOW: 'Upgrade now',
     RENEW_NOW: 'Renew now',
+    STORAGE: 'Storage',
+    USED: 'used',
 };
 
 export default englishConstants;

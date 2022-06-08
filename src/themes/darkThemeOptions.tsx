@@ -185,6 +185,10 @@ const darkThemeOptions = createTheme({
             lineHeight: '36px',
             display: 'block',
         },
+        caption: {
+            fontSize: '12px',
+            lineHeight: '15px',
+        },
         fontFamily: ['Inter', 'sans-serif'].join(','),
     },
 });

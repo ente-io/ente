@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { SpaceBetweenFlex } from 'components/Container';
 import { PaddedDivider } from './styledComponents';
-import SubscriptionDetails from './SubscriptionDetails';
+import SubscriptionDetails from './SubscriptionCard';
 import { getUserDetailsV2 } from 'services/userService';
 import { UserDetails } from 'types/user';
 import { LS_KEYS } from 'utils/storage/localStorage';

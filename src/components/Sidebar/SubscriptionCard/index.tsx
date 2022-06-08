@@ -3,15 +3,14 @@ import {
     Box,
     CircularProgress,
     LinearProgress,
-    Paper,
     Typography,
 } from '@mui/material';
 import Container, { SpaceBetweenFlex } from 'components/Container';
 import { UserDetails } from 'types/user';
 import constants from 'utils/strings/constants';
-import { formatDateShort } from 'utils/time';
 import { convertBytesToHumanReadable } from 'utils/billing';
 
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 interface Iprops {
     userDetails: UserDetails;
     closeSidebar: () => void;
@@ -44,72 +43,57 @@ export default function SubscriptionDetails({ userDetails }: Iprops) {
         <Box
             display="flex"
             flexDirection={'column'}
-            height={160}
-            bgcolor="accent.main"
-            // position={'relative'}
             // onClick={onManageClick}
         >
+            <img
+                style={{ position: 'absolute' }}
+                src="/subscription-card-background.png"
+            />
             {userDetails ? (
-                <>
+                <Box zIndex={1} position={'relative'} height={148}>
                     <Box padding={2}>
-                        <SpaceBetweenFlex>
-                            <Typography variant="subtitle2">
-                                Current Plan
-                            </Typography>
-                            <Typography
-                                variant="subtitle2"
-                                sx={{ color: 'text.secondary' }}>
-                                {`${constants.ENDS} ${formatDateShort(
-                                    userDetails.subscription.expiryTime / 1000
-                                )}`}
-                            </Typography>
-                        </SpaceBetweenFlex>
+                        <Typography variant="body2">
+                            {constants.STORAGE}
+                        </Typography>
+
                         <Typography
-                            sx={{ fontWeight: '700', fontSize: '24px' }}>
-                            {convertBytesToHumanReadable(
+                            fontWeight={'bold'}
+                            sx={{ fontSize: '24px' }}>
+                            {`${convertBytesToHumanReadable(
+                                userDetails.usage,
+                                1
+                            )} of ${convertBytesToHumanReadable(
                                 userDetails.subscription.storage,
                                 0
-                            )}
+                            )}`}
                         </Typography>
                     </Box>
-                    <Box
-                        position={'absolute'}
-                        right="17px"
-                        top="10px"
-                        component={'img'}
-                        src="/images/locker.png"
-                    />
-                    <Paper
-                        component={Box}
-                        position={'relative'}
-                        zIndex="100"
-                        height="64px"
-                        bgcolor="accent.dark"
-                        padding={2}>
+                    <Box height={64} padding={2}>
                         <LinearProgress
-                            sx={{ bgcolor: 'text.secondary' }}
+                            sx={{
+                                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                borderRadius: '4px',
+                            }}
                             variant="determinate"
                             value={
-                                userDetails.usage /
+                                (userDetails.usage * 100) /
                                 userDetails.subscription.storage
                             }
                         />
-                        <SpaceBetweenFlex style={{ marginTop: '8px' }}>
-                            <Typography variant="caption">
-                                {`${convertBytesToHumanReadable(
-                                    userDetails.usage,
-                                    1
-                                )} of ${convertBytesToHumanReadable(
-                                    userDetails.subscription.storage,
-                                    0
-                                )}`}
-                            </Typography>
-                            <Typography variant="caption">
-                                {`${userDetails.fileCount} Photos`}
+                        <SpaceBetweenFlex style={{ marginTop: '12px' }}>
+                            <Typography variant="caption">{`${convertBytesToHumanReadable(
+                                userDetails.usage,
+                                1
+                            )} ${constants.USED}`}</Typography>
+                            <Typography variant="caption" fontWeight={'bold'}>
+                                {constants.PHOTO_COUNT(userDetails.fileCount)}
                             </Typography>
                         </SpaceBetweenFlex>
-                    </Paper>
-                </>
+                    </Box>
+                    <Box position={'absolute'} top={64} right={0}>
+                        <ChevronRightIcon />
+                    </Box>
+                </Box>
             ) : (
                 <Container>
                     <CircularProgress />
