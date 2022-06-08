@@ -103,7 +103,7 @@ class FileMigrationService {
       }
     }
     _logger.info('marking ${localIDsWithLocation.length} files for re-upload');
-    // await _filesDB.markForReUploadIfLocationMissing(localIDsWithLocation);
+    await _filesDB.markForReUploadIfLocationMissing(localIDsWithLocation);
     await _filesMigrationDB.deleteByLocalIDs(localIDsToProcess);
   }
 

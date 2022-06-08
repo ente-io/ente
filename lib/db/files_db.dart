@@ -995,7 +995,7 @@ class FilesDB {
       UPDATE $table
       SET $columnUpdationTime = NULL
       WHERE $columnLocalID IN ($inParam)
-      AND ($columnLatitude IS NULL OR $columnLongitude IS NULL);
+      AND ($columnLatitude IS NULL OR $columnLongitude IS NULL OR $columnLongitude = 0.0 or $columnLongitude = 0.0);
     ''');
   }
 
