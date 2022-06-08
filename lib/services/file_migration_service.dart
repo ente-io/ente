@@ -36,18 +36,15 @@ class FileMigrationService {
   }
 
   bool isLocationMigrationCompleted() {
-    if (!Platform.isAndroid) {
-      return true;
-    }
     return _prefs.get(isLocationMigrationComplete) ?? false;
   }
 
   Future<void> runMigration() async {
     if (_existingMigration != null) {
-      _logger.info("Migration is already in progress, skipping");
+      _logger.info("migration is already in progress, skipping");
       return _existingMigration.future;
     }
-    _logger.info("Start file migration");
+    _logger.info("start migration");
     _existingMigration = Completer<void>();
     try {
       await _runMigrationForFilesWithMissingLocation();
@@ -77,12 +74,12 @@ class FileMigrationService {
     final d = Duration(microseconds: eTime - sTime);
     await _markLocationMigrationAsCompleted();
     _logger.info(
-        'location migration completed in ${d.inSeconds.toString()} seconds');
+        'filesWithMissingLocation migration completed in ${d.inSeconds.toString()} seconds');
   }
 
   Future<void> _checkAndMarkFilesForReUpload(
       List<String> localIDsToProcess) async {
-    _logger.info("Files to process ${localIDsToProcess.length}");
+    _logger.info("files to process ${localIDsToProcess.length}");
     var localIDsWithLocation = <String>[];
     for (var localID in localIDsToProcess) {
       bool hasLocation = false;
@@ -105,7 +102,7 @@ class FileMigrationService {
         localIDsWithLocation.add(localID);
       }
     }
-    _logger.info('Marking ${localIDsWithLocation.length} files for re-upload');
+    _logger.info('marking ${localIDsWithLocation.length} files for re-upload');
     // await _filesDB.markForReUploadIfLocationMissing(localIDsWithLocation);
     await _filesMigrationDB.deleteByLocalIDs(localIDsToProcess);
   }

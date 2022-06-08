@@ -16,6 +16,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/file_migration_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
@@ -131,8 +132,8 @@ class RemoteSyncService {
     if (!_hasReSynced()) {
       await _markReSyncAsDone();
     }
-    if (Platform.isAndroid &&
-        _fileMigrationService.isLocationMigrationCompleted()) {
+    if (FeatureFlagService.instance.enableMissingLocationMigration() &&
+        !_fileMigrationService.isLocationMigrationCompleted()) {
       _fileMigrationService.runMigration();
     }
   }
