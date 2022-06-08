@@ -39,7 +39,7 @@ class FileMigrationService {
     return sharedPreferences.get(isLocationMigrationComplete) ?? false;
   }
 
-  Future<void> Migrate() async {
+  Future<void> runMigration() async {
     if (_existingMigration != null) {
       _logger.info("Migration is already in progress, skipping");
       return _existingMigration.future;
@@ -47,17 +47,7 @@ class FileMigrationService {
     _logger.info("Start file migration");
     _existingMigration = Completer<void>();
     try {
-      _importLocalFilesForMigration();
-      bool hasData = true;
-      while (hasData) {
-        var localIDsToProcess =
-            await _filesMigrationDB.getLocalIDsForPotentialReUpload(limit: 100);
-        if (localIDsToProcess.isEmpty) {
-          hasData = false;
-        }
-        await _checkAndMarkFilesForReUpload(localIDsToProcess);
-      }
-      await _markLocationMigrationAsCompleted();
+      await _runMigrationForFilesWithMissingLocation();
       _existingMigration.complete();
       _existingMigration = null;
     } catch (e, s) {
@@ -65,6 +55,26 @@ class FileMigrationService {
       _existingMigration.complete();
       _existingMigration = null;
     }
+  }
+
+  Future<void> _runMigrationForFilesWithMissingLocation() async {
+    await _importLocalFilesForMigration();
+    bool hasData = true;
+    final sTime = DateTime.now().microsecondsSinceEpoch;
+    while (hasData) {
+      var localIDsToProcess =
+          await _filesMigrationDB.getLocalIDsForPotentialReUpload(limit: 100);
+      if (localIDsToProcess.isEmpty) {
+        hasData = false;
+      } else {
+        await _checkAndMarkFilesForReUpload(localIDsToProcess);
+      }
+    }
+    final eTime = DateTime.now().microsecondsSinceEpoch;
+    final d = Duration(microseconds: eTime - sTime);
+    await _markLocationMigrationAsCompleted();
+    _logger.info(
+        'location migration completed in ${d.inSeconds.toString()} seconds');
   }
 
   Future<void> _checkAndMarkFilesForReUpload(
@@ -79,9 +89,10 @@ class FileMigrationService {
           continue;
         }
         var latLng = await assetEntity.latlngAsync();
-        if (latLng.latitude != null || latLng.longitude != null) {
+        if ((latLng.longitude ?? 0.0) != 0.0 ||
+            (latLng.longitude ?? 0.0) != 0.0) {
           _logger.finest(
-              'found lat long for  ${assetEntity.title} ${assetEntity.relativePath} with id : $localID');
+              'found lat/long ${latLng.longitude}/${latLng.longitude} for  ${assetEntity.title} ${assetEntity.relativePath} with id : $localID');
           hasLocation = true;
         }
       } catch (e, s) {
@@ -100,10 +111,14 @@ class FileMigrationService {
     if ((await _prefs).containsKey(isLocalImportDone)) {
       return;
     }
+    final sTime = DateTime.now().microsecondsSinceEpoch;
     _logger.info('importing files without location info');
     var fileLocalIDs = await _filesDB.getLocalFilesBackedUpWithoutLocation();
     await _filesMigrationDB.insertMultiple(fileLocalIDs);
-    _logger.info('importing completed, total files count $fileLocalIDs');
+    final eTime = DateTime.now().microsecondsSinceEpoch;
+    final d = Duration(microseconds: eTime - sTime);
+    _logger.info(
+        'importing completed, total files count ${fileLocalIDs.length} and took ${d.inSeconds.toString()} seconds');
     (await _prefs).setBool(isLocalImportDone, true);
   }
 }

@@ -90,11 +90,10 @@ class FilesMigrationDB {
     }
     inParam = inParam.substring(0, inParam.length - 1);
     final db = await instance.database;
-    await db.rawUpdate('''
-      UPDATE $tableName
-      SET $columnLocalID = NULL
-      WHERE $columnLocalID IN ($inParam);
-    ''');
+    return await db.delete(
+      tableName,
+      where: '$columnLocalID IN (${localIDs.join(', ')})',
+    );
   }
 
   Future<List<String>> getLocalIDsForPotentialReUpload(

@@ -42,11 +42,6 @@ class RemoteSyncService {
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
 
-  // kFMHasRemoveSyncCompleted is key used to track if initial diff fetch is
-  // complete from remote.FM -> File Migration prefix indicates that it's
-  // only used to perform some migration.
-  static const kFMHasRemoveSyncCompleted = "fm_has_remote_sync_completed";
-
   // 28 Sept, 2021 9:03:20 AM IST
   static const kArchiveFeatureReleaseTime = 1632800000000000;
   static const kHasSyncedEditTime = "has_synced_edit_time";
@@ -139,8 +134,9 @@ class RemoteSyncService {
     if (!_hasReSynced()) {
       await _markReSyncAsDone();
     }
-    if (Platform.isAndroid && !(await _fileMigrationService.isMigrationComplete())) {
-      _fileMigrationService.Migrate();
+    if (Platform.isAndroid &&
+        !(await _fileMigrationService.isMigrationComplete())) {
+      _fileMigrationService.runMigration();
     }
   }
 

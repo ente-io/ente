@@ -972,7 +972,7 @@ class FilesDB {
       distinct: true,
       where:
           '$columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) '
-          'AND ($columnLatitude IS NULL OR $columnLongitude IS NULL)',
+          'AND ($columnLatitude IS NULL OR $columnLongitude IS NULL OR $columnLongitude = 0.0 or $columnLongitude = 0.0)',
     );
     final result = <String>[];
     for (final row in rows) {
