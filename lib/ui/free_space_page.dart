@@ -20,6 +20,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         title: Hero(
           tag: "free_up_space",
           child: Material(

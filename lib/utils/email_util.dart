@@ -4,11 +4,11 @@ import 'package:archive/archive_io.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/log_file_viewer.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -35,19 +35,20 @@ Future<void> sendLogs(
         children: [
           Icon(
             Icons.feed_outlined,
-            color: Colors.white.withOpacity(0.85),
+            color: Theme.of(context).iconTheme.color.withOpacity(0.85),
           ),
           Padding(padding: EdgeInsets.all(4)),
           Text(
             "View logs",
             style: TextStyle(
-              color: Colors.white.withOpacity(0.85),
-            ),
+                color: Theme.of(context)
+                    .colorScheme
+                    .defaultTextColor
+                    .withOpacity(0.85)),
           ),
         ],
       ),
       onPressed: () async {
-        // routeToPage(context, LogFileViewer(SuperLogging.logFile));
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -81,7 +82,6 @@ Future<void> sendLogs(
         "This will send across logs and metrics that will help us debug your issue better",
         style: TextStyle(
           height: 1.5,
-          fontFamily: 'Ubuntu',
           fontSize: 16,
         ),
       ),

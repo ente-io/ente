@@ -68,6 +68,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
             )
           : widget.showAppBar
               ? AppBar(
+                  elevation: 0,
                   title: Text(widget.title ?? "Recovery key"),
                 )
               : null,

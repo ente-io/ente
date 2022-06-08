@@ -86,6 +86,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     _sortDuplicates();
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         title: Hero(
           tag: "deduplicate",
           child: Material(
