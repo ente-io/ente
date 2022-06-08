@@ -3,7 +3,6 @@ import constants from 'utils/strings/constants';
 import {
     Breakpoint,
     Button,
-    Dialog,
     DialogActions,
     DialogContent,
     DialogProps,
@@ -32,7 +31,7 @@ export default function DialogBox({
     ...props
 }: IProps) {
     if (!attributes) {
-        return <Dialog open={false} />;
+        return <></>;
     }
 
     const handleClose = dialogCloseHandler({
