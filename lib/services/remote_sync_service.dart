@@ -31,11 +31,8 @@ class RemoteSyncService {
   final _uploader = FileUploader.instance;
   final _collectionsService = CollectionsService.instance;
   final _diffFetcher = DiffFetcher();
-  // Do not initiate file migration service for non-android platform
-  // This additional condition will help in identifying any redundant
-  // initialization of the service
   final FileMigrationService _fileMigrationService =
-      Platform.isAndroid ? FileMigrationService.instance : null;
+      FileMigrationService.instance;
   int _completedUploads = 0;
   SharedPreferences _prefs;
   Completer<void> _existingSync;
