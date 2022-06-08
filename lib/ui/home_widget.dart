@@ -594,23 +594,31 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                               curve: Curves.easeOutExpo,
                               backgroundColor: Theme.of(context)
                                   .colorScheme
-                                  .gNavBackgoundColor,
+                                  .gNavBackgroundColor,
                               mainAxisAlignment: MainAxisAlignment.center,
-                              rippleColor: Colors.white.withOpacity(0.2),
-                              hoverColor: Colors.white.withOpacity(0.2),
-                              activeColor: Colors.black,
+                              rippleColor: Colors.white.withOpacity(0.1),
+                              activeColor: Theme.of(context)
+                                  .colorScheme
+                                  .gNavBarActiveColor,
                               iconSize: 24,
                               padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
                               duration: Duration(milliseconds: 200),
                               gap: 0,
                               tabBorderRadius: 24,
-                              tabBackgroundColor: Colors.white,
+                              tabBackgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .gNavBarActiveColor,
                               haptic: false,
                               tabs: [
                                 GButton(
                                   margin: EdgeInsets.fromLTRB(6, 6, 0, 6),
                                   icon: Icons.home,
-                                  iconColor: Colors.black,
+                                  iconColor: Theme.of(context)
+                                      .colorScheme
+                                      .gNavIconColor,
+                                  iconActiveColor: Theme.of(context)
+                                      .colorScheme
+                                      .gNavActiveIconColor,
                                   text: '',
                                   onPressed: () {
                                     _onTabChange(
@@ -620,7 +628,12 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 GButton(
                                   margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
                                   icon: Icons.photo_library,
-                                  iconColor: Colors.black,
+                                  iconColor: Theme.of(context)
+                                      .colorScheme
+                                      .gNavIconColor,
+                                  iconActiveColor: Theme.of(context)
+                                      .colorScheme
+                                      .gNavActiveIconColor,
                                   text: '',
                                   onPressed: () {
                                     _onTabChange(
@@ -630,7 +643,12 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 GButton(
                                   margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
                                   icon: Icons.folder_shared,
-                                  iconColor: Colors.black,
+                                  iconColor: Theme.of(context)
+                                      .colorScheme
+                                      .gNavIconColor,
+                                  iconActiveColor: Theme.of(context)
+                                      .colorScheme
+                                      .gNavActiveIconColor,
                                   text: '',
                                   onPressed: () {
                                     _onTabChange(
@@ -640,7 +658,12 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 GButton(
                                   margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
                                   icon: Icons.person,
-                                  iconColor: Colors.black,
+                                  iconColor: Theme.of(context)
+                                      .colorScheme
+                                      .gNavIconColor,
+                                  iconActiveColor: Theme.of(context)
+                                      .colorScheme
+                                      .gNavActiveIconColor,
                                   text: '',
                                   onPressed: () {
                                     _onTabChange(

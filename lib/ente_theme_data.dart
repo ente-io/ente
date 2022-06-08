@@ -71,9 +71,29 @@ extension CustomColorScheme on ColorScheme {
       ? Color.fromRGBO(196, 196, 196, 0.6)
       : Color.fromRGBO(255, 255, 255, 0.7);
 
-  Color get gNavBackgoundColor => brightness == Brightness.light
+  Color get gNavBackgroundColor => brightness == Brightness.light
       ? Color.fromRGBO(196, 196, 196, 0.6)
-      : Color.fromRGBO(255, 255, 255, 0.7);
+      : Color.fromRGBO(40, 40, 40, 0.6);
+
+  Color get gNavBarActiveColor => brightness == Brightness.light
+      ? Color.fromRGBO(255, 255, 255, 0.6)
+      : Color.fromRGBO(255, 255, 255, 0.9);
+
+  Color get gNavIconColor => brightness == Brightness.light
+      ? Color.fromRGBO(0, 0, 0, 0.9)
+      : Color.fromRGBO(255, 255, 255, 1);
+
+  Color get gNavActiveIconColor => brightness == Brightness.light
+      ? Color.fromRGBO(0, 0, 0, 0.9)
+      : Color.fromRGBO(0, 0, 0, 1);
+
+  Color get galleryThumbBackgroundColor => brightness == Brightness.light
+      ? Color.fromRGBO(240, 240, 240, 1)
+      : Color.fromRGBO(20, 20, 20, 1);
+
+  Color get galleryThumbDrawColor => brightness == Brightness.light
+      ? Colors.black.withOpacity(0.8)
+      : Colors.white.withOpacity(0.5);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(

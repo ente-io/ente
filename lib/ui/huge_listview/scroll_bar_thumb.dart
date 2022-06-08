@@ -40,7 +40,7 @@ class ScrollBarThumb extends StatelessWidget {
             child: Text(
               title,
               style: TextStyle(
-                color: Colors.white,
+                color: drawColor,
                 fontWeight: FontWeight.bold,
                 backgroundColor: Colors.transparent,
                 fontSize: 14,

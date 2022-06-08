@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/constants.dart';
@@ -126,9 +125,14 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     ),
   );
 
-  static final Widget loadingWidget = Container(
+  static final Widget lightLoadWidget = Container(
     alignment: Alignment.center,
-    color: Colors.grey[900],
+    color: Color.fromRGBO(240, 240, 240, 1),
+  );
+
+  static final Widget darkLoadWidget = Container(
+    alignment: Alignment.center,
+    color: Color.fromRGBO(20, 20, 20, 1),
   );
 
   bool _hasLoadedThumbnail = false;
@@ -201,7 +205,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       }
     }
     List<Widget> viewChildrens = [
-      loadingWidget,
+      _getLoadingWidget(),
       AnimatedOpacity(
         opacity: content == null ? 0 : 1.0,
         duration: Duration(milliseconds: 200),
@@ -346,5 +350,11 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     _errorLoadingLocalThumbnail = false;
     _errorLoadingRemoteThumbnail = false;
     _imageProvider = null;
+  }
+
+  Widget _getLoadingWidget() {
+    return Theme.of(context).brightness == Brightness.light
+        ? lightLoadWidget
+        : darkLoadWidget;
   }
 }
