@@ -37,15 +37,15 @@ export default function PublicShare({ collection }) {
                 setSharableLinkError={setSharableLinkError}
             />
             {publicShareUrl && (
-                <>
-                    <PublicShareLink publicShareUrl={publicShareUrl} />
-                    <PublicShareManage
-                        publicShareProp={publicShareProp}
-                        collection={collection}
-                        setPublicShareProp={setPublicShareProp}
-                        setSharableLinkError={setSharableLinkError}
-                    />
-                </>
+                <PublicShareLink publicShareUrl={publicShareUrl} />
+            )}
+            {publicShareProp && (
+                <PublicShareManage
+                    publicShareProp={publicShareProp}
+                    collection={collection}
+                    setPublicShareProp={setPublicShareProp}
+                    setSharableLinkError={setSharableLinkError}
+                />
             )}
         </>
     );

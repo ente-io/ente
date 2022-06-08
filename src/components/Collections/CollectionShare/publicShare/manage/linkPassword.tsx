@@ -41,7 +41,7 @@ export function ManageLinkPassword({
         <Box>
             <Typography> {constants.LINK_PASSWORD_LOCK}</Typography>
             <PublicShareSwitch
-                checked={publicShareProp?.passwordEnabled}
+                checked={!!publicShareProp?.passwordEnabled}
                 onChange={handlePasswordChangeSetting}
             />
         </Box>
