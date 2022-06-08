@@ -99,18 +99,19 @@ export default function CollectionBar(props: IProps) {
                     <CollectionCardWithActiveIndicator
                         latestFile={null}
                         active={activeCollection === ALL_SECTION}
-                        onClick={clickHandler(ALL_SECTION)}>
-                        {constants.ALL_SECTION_NAME}
-                    </CollectionCardWithActiveIndicator>
+                        onClick={clickHandler(ALL_SECTION)}
+                        collectionName={constants.ALL_SECTION_NAME}
+                    />
+
                     {sortedCollectionSummary.map((item) => (
                         <CollectionCardWithActiveIndicator
                             key={item.id}
                             latestFile={item.latestFile}
                             ref={collectionChipsRef[item.id]}
                             active={activeCollection === item.id}
-                            onClick={clickHandler(item.id)}>
-                            {item.name}
-                        </CollectionCardWithActiveIndicator>
+                            onClick={clickHandler(item.id)}
+                            collectionName={item.name}
+                        />
                     ))}
                 </ScrollContainer>
                 {!onFarRight && (
