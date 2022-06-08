@@ -7,6 +7,7 @@ import {
     CollectionBarTileText,
 } from '../styledComponents';
 import CollectionCard from '../CollectionCard';
+import TruncateText from 'components/TruncateText';
 
 interface Iprops {
     active: boolean;
@@ -23,7 +24,7 @@ const CollectionCardWithActiveIndicator = React.forwardRef(
             <CollectionTileWrapper ref={ref}>
                 <CollectionCard collectionTile={CollectionBarTile} {...others}>
                     <CollectionBarTileText>
-                        {collectionName}
+                        <TruncateText text={collectionName} />
                     </CollectionBarTileText>
                 </CollectionCard>
                 {active && <ActiveIndicator />}
