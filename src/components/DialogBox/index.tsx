@@ -25,6 +25,9 @@ type IProps = React.PropsWithChildren<
 export default function DialogBox({
     attributes,
     children,
+    open,
+    size,
+    onClose,
     titleCloseButton,
     ...props
 }: IProps) {
@@ -35,13 +38,13 @@ export default function DialogBox({
     const handleClose = dialogCloseHandler({
         staticBackdrop: attributes.staticBackdrop,
         nonClosable: attributes.nonClosable,
-        onClose: props.onClose,
+        onClose: onClose,
     });
 
     return (
         <DialogBoxBase
-            open={props.open}
-            maxWidth={props.size}
+            open={open}
+            maxWidth={size}
             onClose={handleClose}
             {...props}>
             {attributes.title && (
@@ -66,7 +69,7 @@ export default function DialogBox({
                                 onClick={() => {
                                     attributes.close.action &&
                                         attributes.close?.action();
-                                    props.onClose();
+                                    onClose();
                                 }}>
                                 {attributes.close?.text ?? constants.OK}
                             </Button>
@@ -76,7 +79,7 @@ export default function DialogBox({
                                 color={attributes.proceed?.variant}
                                 onClick={() => {
                                     attributes.proceed.action();
-                                    props.onClose();
+                                    onClose();
                                 }}
                                 disabled={attributes.proceed.disabled}>
                                 {attributes.proceed.text}
