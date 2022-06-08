@@ -15,6 +15,7 @@ import 'package:photos/models/galleryType.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/common/bottomShadow.dart';
 import 'package:photos/ui/common/onlyOuterShadow.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/utils/delete_file_util.dart';
@@ -218,6 +219,9 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                 ),
               ),
             ],
+          ),
+          BottomShadowWidget(
+            offsetDy: 40,
           ),
         ],
       ),
