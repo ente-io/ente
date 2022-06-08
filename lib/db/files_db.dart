@@ -964,6 +964,41 @@ class FilesDB {
     return result;
   }
 
+  Future<List<String>> getLocalFilesBackedUpWithoutLocation() async {
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      columns: [columnLocalID],
+      distinct: true,
+      where:
+          '$columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) '
+          'AND ($columnLatitude IS NULL OR $columnLongitude IS NULL)',
+    );
+    final result = <String>[];
+    for (final row in rows) {
+      result.add(row[columnLocalID]);
+    }
+    return result;
+  }
+
+  Future<void> markForReUploadIfLocationMissing(List<String> localIDs) async {
+    if (localIDs.isEmpty) {
+      return;
+    }
+    String inParam = "";
+    for (final localID in localIDs) {
+      inParam += "'" + localID + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    await db.rawUpdate('''
+      UPDATE $table
+      SET $columnUpdationTime = NULL
+      WHERE $columnLocalID IN ($inParam)
+      AND ($columnLatitude IS NULL OR $columnLongitude IS NULL);
+    ''');
+  }
+
   Future<bool> doesFileExistInCollection(
       int uploadedFileID, int collectionID) async {
     final db = await instance.database;

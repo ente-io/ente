@@ -83,9 +83,24 @@ class FilesMigrationDB {
         "took ${duration.inMilliseconds} ms.");
   }
 
-  Future<List<String>> getLocalIDsForReUpload() async {
+  Future<int> deleteByLocaIDs(List<String> localIDs) async {
+    String inParam = "";
+    for (final localID in localIDs) {
+      inParam += "'" + localID + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
     final db = await instance.database;
-    final rows = await db.query(tableName);
+    await db.rawUpdate('''
+      UPDATE $tableName
+      SET $columnLocalID = NULL
+      WHERE $columnLocalID IN ($inParam);
+    ''');
+  }
+
+  Future<List<String>> getLocalIDsForPotentialReUpload(
+      {int limit = 100}) async {
+    final db = await instance.database;
+    final rows = await db.query(tableName, limit: limit);
     final result = <String>[];
     for (final row in rows) {
       result.add(row[columnLocalID]);
