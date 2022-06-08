@@ -1,7 +1,7 @@
 import { ManageLinkPassword } from './linkPassword';
 import { ManageDeviceLimit } from './deviceLimit';
 import { ManageLinkExpiry } from './linkExpiry';
-import { PublicLinkChangePassword } from '../changePassword';
+import { PublicLinkSetPassword } from '../setPassword';
 import { Stack } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import React, { useContext, useState } from 'react';
@@ -92,7 +92,7 @@ export default function PublicShareManage({
                     </Stack>
                 </ManageSectionOptions>
             </details>
-            <PublicLinkChangePassword
+            <PublicLinkSetPassword
                 open={changePasswordView}
                 onClose={closeConfigurePassword}
                 collection={collection}

@@ -3,7 +3,7 @@ import SingleInputForm from 'components/SingleInputForm';
 import React from 'react';
 import CryptoWorker from 'utils/crypto';
 import constants from 'utils/strings/constants';
-export function PublicLinkChangePassword({
+export function PublicLinkSetPassword({
     open,
     onClose,
     collection,
