@@ -306,10 +306,7 @@ class WatchService {
 
     private async processTrashEvent() {
         try {
-            if (this.trashingDirQueue.length !== 0) {
-                this.ignoreFileEventsFromTrashedDir(this.trashingDirQueue[0]);
-                this.trashingDirQueue.shift();
-                this.setIsEventRunning(false);
+            if (this.checkAndRemoveIfFileEventsFromTrashedDir()) {
                 this.runNextEvent();
                 return;
             }
@@ -373,6 +370,16 @@ class WatchService {
         } catch (e) {
             logError(e, 'error while trashing by IDs');
         }
+    }
+
+    checkAndRemoveIfFileEventsFromTrashedDir() {
+        if (this.trashingDirQueue.length !== 0) {
+            this.ignoreFileEventsFromTrashedDir(this.trashingDirQueue[0]);
+            this.trashingDirQueue.shift();
+            this.setIsEventRunning(false);
+            return true;
+        }
+        return false;
     }
 
     ignoreFileEventsFromTrashedDir(trashingDir: string) {

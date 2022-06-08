@@ -9,7 +9,7 @@ import { FILE_TYPE } from 'constants/file';
 const TYPE_JSON = 'json';
 const DEDUPE_COLLECTION = new Set(['icloud library', 'icloudlibrary']);
 
-export function fileAlreadyInCollection(
+export function findSameFileInCollection(
     existingFilesInCollection: EnteFile[],
     newFileMetadata: Metadata
 ): EnteFile {

@@ -2,7 +2,7 @@ import { EnteFile } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import {
-    fileAlreadyInCollection,
+    findSameFileInCollection,
     findSameFileInOtherCollection,
     shouldDedupeAcrossCollection,
 } from 'utils/upload';
@@ -50,7 +50,7 @@ export default async function uploader(
             throw Error(CustomError.NO_METADATA);
         }
 
-        const sameFileInSameCollection = fileAlreadyInCollection(
+        const sameFileInSameCollection = findSameFileInCollection(
             existingFilesInCollection,
             metadata
         );
@@ -84,15 +84,18 @@ export default async function uploader(
         // iOS exports via album doesn't export files without collection and if user exports all photos, album info is not preserved.
         // This change allow users to export by albums, upload to ente. And export all photos -> upload files which are not already uploaded
         // as part of the albums
-        if (
-            shouldDedupeAcrossCollection(fileWithCollection.collection.name) &&
-            fileAlreadyInCollection(existingFiles, metadata)
-        ) {
+        if (shouldDedupeAcrossCollection(fileWithCollection.collection.name)) {
             logUploadInfo(`deduped upload for  ${fileNameSize}`);
-            return {
-                fileUploadResult: FileUploadResults.ALREADY_UPLOADED,
-                uploadedFile: fileAlreadyInCollection(existingFiles, metadata),
-            };
+            const sameFileInOtherCollection = findSameFileInCollection(
+                existingFiles,
+                metadata
+            );
+            if (sameFileInOtherCollection) {
+                return {
+                    fileUploadResult: FileUploadResults.ALREADY_UPLOADED,
+                    uploadedFile: sameFileInOtherCollection,
+                };
+            }
         }
         logUploadInfo(`reading asset ${fileNameSize}`);
 
