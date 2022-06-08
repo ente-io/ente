@@ -14,13 +14,13 @@ export function ManageLinkPassword({
 
     const handlePasswordChangeSetting = async () => {
         if (publicShareProp.passwordEnabled) {
-            await disablePublicUrlPassword();
+            await confirmDisablePublicUrlPassword();
         } else {
             setChangePasswordView(true);
         }
     };
 
-    const disablePublicUrlPassword = async () => {
+    const confirmDisablePublicUrlPassword = async () => {
         appContext.setDialogMessage({
             title: constants.DISABLE_PASSWORD,
             content: constants.DISABLE_PASSWORD_MESSAGE,
@@ -36,6 +36,7 @@ export function ManageLinkPassword({
             },
         });
     };
+
     return (
         <Box>
             <Typography> {constants.LINK_PASSWORD_LOCK}</Typography>
