@@ -66,11 +66,12 @@ class FileMigrationService {
     bool isMigrationRequired = version >= 29;
     if (isMigrationRequired) {
       await _importLocalFilesForMigration();
-      bool hasData = true;
       final sTime = DateTime.now().microsecondsSinceEpoch;
+      bool hasData = true;
+      final int limitInBatch = 100;
       while (hasData) {
-        var localIDsToProcess =
-            await _filesMigrationDB.getLocalIDsForPotentialReUpload(limit: 100);
+        var localIDsToProcess = await _filesMigrationDB
+            .getLocalIDsForPotentialReUpload(limitInBatch);
         if (localIDsToProcess.isEmpty) {
           hasData = false;
         } else {
@@ -84,8 +85,6 @@ class FileMigrationService {
     }
     await _markLocationMigrationAsCompleted();
   }
-
-  Future<bool> isDeviceAndroidVersionAbove10() async {}
 
   Future<void> _checkAndMarkFilesForReUpload(
       List<String> localIDsToProcess) async {

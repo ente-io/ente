@@ -92,8 +92,7 @@ class FilesMigrationDB {
     );
   }
 
-  Future<List<String>> getLocalIDsForPotentialReUpload(
-      {int limit = 100}) async {
+  Future<List<String>> getLocalIDsForPotentialReUpload(int limit) async {
     final db = await instance.database;
     final rows = await db.query(tableName, limit: limit);
     final result = <String>[];
