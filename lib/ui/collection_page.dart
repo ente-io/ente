@@ -45,6 +45,7 @@ class CollectionPage extends StatelessWidget {
       initialFiles: initialFiles,
       smallerTodayFont: true,
       albumName: c.collection.name,
+      footer: const SizedBox(height: 32),
     );
     return Scaffold(
       appBar: PreferredSize(
@@ -56,7 +57,6 @@ class CollectionPage extends StatelessWidget {
           collection: c.collection,
         ),
       ),
-      // body: gallery,
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: [
