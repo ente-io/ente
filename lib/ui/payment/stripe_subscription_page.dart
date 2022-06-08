@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
@@ -132,7 +133,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                         currentStep: 4,
                         selectedColor: Theme.of(context).buttonColor,
                         roundedEdges: Radius.circular(10),
-                        unselectedColor: Theme.of(context).bottomAppBarColor,
+                        unselectedColor: Theme.of(context)
+                            .colorScheme
+                            .stepProgressUnselectedColor,
                       )),
                 )
               : AppBar(

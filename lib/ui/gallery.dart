@@ -218,8 +218,9 @@ class _GalleryState extends State<Gallery> {
         return getMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(
             _collatedFiles[index][0].creationTime));
       },
-      thumbBackgroundColor: Color(0xFF151515),
-      thumbDrawColor: Colors.white.withOpacity(0.5),
+      thumbBackgroundColor:
+          Theme.of(context).colorScheme.galleryThumbBackgroundColor,
+      thumbDrawColor: Theme.of(context).colorScheme.galleryThumbDrawColor,
       firstShown: (int firstIndex) {
         Bus.instance
             .fire(GalleryIndexUpdatedEvent(widget.tagPrefix, firstIndex));

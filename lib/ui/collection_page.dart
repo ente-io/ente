@@ -6,7 +6,6 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/galleryType.dart';
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/ui/common/bottomShadow.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/gallery_overlay_widget.dart';
@@ -46,6 +45,7 @@ class CollectionPage extends StatelessWidget {
       initialFiles: initialFiles,
       smallerTodayFont: true,
       albumName: c.collection.name,
+      footer: const SizedBox(height: 32),
     );
     return Scaffold(
       appBar: PreferredSize(
@@ -57,12 +57,10 @@ class CollectionPage extends StatelessWidget {
           collection: c.collection,
         ),
       ),
-      // body: gallery,
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: [
           gallery,
-          BottomShadowWidget(),
           GalleryOverlayWidget(
             overlayType,
             _selectedFiles,

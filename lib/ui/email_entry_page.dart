@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:password_strength/password_strength.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
@@ -67,7 +68,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom != 0;
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 125;
 
     FloatingActionButtonLocation fabLocation() {
       if (isKeypadOpen) {
@@ -95,7 +96,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               currentStep: 1,
               selectedColor: Theme.of(context).buttonColor,
               roundedEdges: Radius.circular(10),
-              unselectedColor: Theme.of(context).bottomAppBarColor,
+              unselectedColor:
+                  Theme.of(context).colorScheme.stepProgressUnselectedColor,
             )),
       ),
     );

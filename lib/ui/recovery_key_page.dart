@@ -61,12 +61,14 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                   currentStep: 3,
                   selectedColor: Theme.of(context).buttonColor,
                   roundedEdges: Radius.circular(10),
-                  unselectedColor: Theme.of(context).bottomAppBarColor,
+                  unselectedColor:
+                      Theme.of(context).colorScheme.stepProgressUnselectedColor,
                 ),
               ),
             )
           : widget.showAppBar
               ? AppBar(
+                  elevation: 0,
                   title: Text(widget.title ?? "Recovery key"),
                 )
               : null,
