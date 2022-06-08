@@ -38,7 +38,8 @@ export function PublicLinkChangePassword({
         <DialogBox
             open={open}
             onClose={onClose}
-            size="sm"
+            PaperProps={{ sx: { maxWidth: '350px' } }}
+            titleCloseButton
             attributes={{
                 title: constants.PASSWORD_LOCK,
             }}>
