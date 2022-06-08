@@ -58,24 +58,34 @@ class FileMigrationService {
   }
 
   Future<void> _runMigrationForFilesWithMissingLocation() async {
-    await _importLocalFilesForMigration();
-    bool hasData = true;
-    final sTime = DateTime.now().microsecondsSinceEpoch;
-    while (hasData) {
-      var localIDsToProcess =
-          await _filesMigrationDB.getLocalIDsForPotentialReUpload(limit: 100);
-      if (localIDsToProcess.isEmpty) {
-        hasData = false;
-      } else {
-        await _checkAndMarkFilesForReUpload(localIDsToProcess);
-      }
+    if (!Platform.isAndroid) {
+      return;
     }
-    final eTime = DateTime.now().microsecondsSinceEpoch;
-    final d = Duration(microseconds: eTime - sTime);
+    // migration only needs to run if Android API Level is 29 or higher
+    final int version = int.parse(await PhotoManager.systemVersion());
+    bool isMigrationRequired = version >= 29;
+    if (isMigrationRequired) {
+      await _importLocalFilesForMigration();
+      bool hasData = true;
+      final sTime = DateTime.now().microsecondsSinceEpoch;
+      while (hasData) {
+        var localIDsToProcess =
+            await _filesMigrationDB.getLocalIDsForPotentialReUpload(limit: 100);
+        if (localIDsToProcess.isEmpty) {
+          hasData = false;
+        } else {
+          await _checkAndMarkFilesForReUpload(localIDsToProcess);
+        }
+      }
+      final eTime = DateTime.now().microsecondsSinceEpoch;
+      final d = Duration(microseconds: eTime - sTime);
+      _logger.info(
+          'filesWithMissingLocation migration completed in ${d.inSeconds.toString()} seconds');
+    }
     await _markLocationMigrationAsCompleted();
-    _logger.info(
-        'filesWithMissingLocation migration completed in ${d.inSeconds.toString()} seconds');
   }
+
+  Future<bool> isDeviceAndroidVersionAbove10() async {}
 
   Future<void> _checkAndMarkFilesForReUpload(
       List<String> localIDsToProcess) async {
