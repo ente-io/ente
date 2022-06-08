@@ -11,6 +11,8 @@ import { DashedBorderWrapper } from './styledComponents';
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
 
+const RECOVERY_KEY_FILE_NAME = 'ente-recovery-key.txt';
+
 interface Props {
     show: boolean;
     onHide: () => void;
@@ -36,7 +38,7 @@ function RecoveryKey({ somethingWentWrong, ...props }: Props) {
     }, [props.show]);
 
     function onSaveClick() {
-        downloadAsFile(constants.RECOVERY_KEY_FILENAME, recoveryKey);
+        downloadAsFile(RECOVERY_KEY_FILE_NAME, recoveryKey);
         props.onHide();
     }
 
