@@ -37,6 +37,7 @@ class DeviceFolderPage extends StatelessWidget {
           ? _getHeaderWidget()
           : Container(),
       initialFiles: [folder.thumbnail],
+      footer: SizedBox(height: 32),
     );
     return Scaffold(
       appBar: PreferredSize(

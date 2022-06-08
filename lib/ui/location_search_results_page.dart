@@ -39,6 +39,7 @@ class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
         child: Gallery(
           tagPrefix: "location_search",
           selectedFiles: _selectedFiles,
+          footer: SizedBox(height: 32),
         ),
       ),
     );
