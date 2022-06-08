@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/network.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,28 +20,41 @@ class FeatureFlagService {
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
-    await sync();
+    // Fetch feature flags from network in async manner.
+    // Intention of delay is to give more CPU cycles to other tasks
+    Future.delayed(
+      const Duration(seconds: 5),
+      () {
+        fetchFeatureFlags();
+      },
+    );
+  }
+
+  FeatureFlags _getFeatureFlags() {
+    _featureFlags ??=
+        FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey));
+    // if nothing is cached, use defaults as temporary fallback
+    if (_featureFlags == null) {
+      return FeatureFlags.defaultFlags;
+    }
+    return _featureFlags;
   }
 
   bool disableCFWorker() {
     try {
-      _featureFlags ??=
-          FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey));
-      return _featureFlags != null ? _featureFlags.disableCFWorker : false;
+      return _getFeatureFlags().disableCFWorker;
     } catch (e) {
       _logger.severe(e);
-      return false;
+      return FFDefault.disableCFWorker;
     }
   }
 
   bool disableUrlSharing() {
     try {
-      _featureFlags ??=
-          FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey));
-      return _featureFlags != null ? _featureFlags.disableUrlSharing : false;
+      return _getFeatureFlags().disableUrlSharing;
     } catch (e) {
       _logger.severe(e);
-      return false;
+      return FFDefault.disableUrlSharing;
     }
   }
 
@@ -48,24 +63,22 @@ class FeatureFlagService {
       return false;
     }
     try {
-      _featureFlags ??=
-          FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey));
-      return _featureFlags != null ? _featureFlags.enableStripe : true;
+      return _getFeatureFlags().enableStripe;
     } catch (e) {
       _logger.severe(e);
-      return true;
+      return FFDefault.enableStripe;
     }
   }
 
-  Future<void> sync() async {
+  Future<void> fetchFeatureFlags() async {
     try {
       final response = await Network.instance
           .getDio()
           .get("https://static.ente.io/feature_flags.json");
-      final featureFlags = FeatureFlags.fromMap(response.data);
-      if (featureFlags != null) {
-        _prefs.setString(kBooleanFeatureFlagsKey, featureFlags.toJson());
-        _featureFlags = featureFlags;
+      final flagsResponse = FeatureFlags.fromMap(response.data);
+      if (flagsResponse != null) {
+        _prefs.setString(kBooleanFeatureFlagsKey, flagsResponse.toJson());
+        _featureFlags = flagsResponse;
       }
     } catch (e) {
       _logger.severe("Failed to sync feature flags ", e);
@@ -74,17 +87,21 @@ class FeatureFlagService {
 }
 
 class FeatureFlags {
-  bool disableCFWorker = false; // default to false
-  bool disableUrlSharing = false; // default to false
-  bool enableStripe = true; // default to true
+  static FeatureFlags defaultFlags = FeatureFlags(
+      disableCFWorker: FFDefault.disableCFWorker,
+      disableUrlSharing: FFDefault.disableUrlSharing,
+      enableStripe: FFDefault.enableStripe);
 
-  FeatureFlags(
-    this.disableCFWorker,
-    this.disableUrlSharing,
-    this.enableStripe,
-  );
+  final bool disableCFWorker;
+  final bool disableUrlSharing;
+  final bool enableStripe;
 
-  @override
+  FeatureFlags({
+    @required this.disableCFWorker,
+    @required this.disableUrlSharing,
+    @required this.enableStripe,
+  });
+
   Map<String, dynamic> toMap() {
     return {
       "disableCFWorker": disableCFWorker,
@@ -100,9 +117,10 @@ class FeatureFlags {
 
   factory FeatureFlags.fromMap(Map<String, dynamic> json) {
     return FeatureFlags(
-      json["disableCFWorker"] ?? false,
-      json["disableUrlSharing"] ?? false,
-      json["enableStripe"] ?? true,
+      disableCFWorker: json["disableCFWorker"] ?? FFDefault.disableCFWorker,
+      disableUrlSharing:
+          json["disableUrlSharing"] ?? FFDefault.disableUrlSharing,
+      enableStripe: json["enableStripe"] ?? FFDefault.enableStripe,
     );
   }
 
