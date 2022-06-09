@@ -47,19 +47,15 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
           },
         ),
         title: widget.isCreateAccountScreen
-            ? Hero(
-                tag: "sign_up",
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: StepProgressIndicator(
-                    totalSteps: 4,
-                    currentStep: 2,
-                    selectedColor: Theme.of(context).buttonColor,
-                    roundedEdges: Radius.circular(10),
-                    unselectedColor: Theme.of(context)
-                        .colorScheme
-                        .stepProgressUnselectedColor,
-                  ),
+            ? Material(
+                type: MaterialType.transparency,
+                child: StepProgressIndicator(
+                  totalSteps: 4,
+                  currentStep: 2,
+                  selectedColor: Theme.of(context).buttonColor,
+                  roundedEdges: Radius.circular(10),
+                  unselectedColor:
+                      Theme.of(context).colorScheme.stepProgressUnselectedColor,
                 ),
               )
             : null,

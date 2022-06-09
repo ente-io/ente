@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/sessions.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -154,10 +155,7 @@ class _SessionsPageState extends State<SessionsPage> {
             Padding(padding: EdgeInsets.all(8)),
             Text(
               session.ua,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 14,
-              ),
+              style: Theme.of(context).textTheme.caption,
             ),
           ],
         ),
@@ -189,7 +187,7 @@ class _SessionsPageState extends State<SessionsPage> {
             style: TextStyle(
               color: isLoggingOutFromThisDevice
                   ? Theme.of(context).buttonColor
-                  : Colors.white,
+                  : Theme.of(context).colorScheme.defaultTextColor,
             ),
           ),
           onPressed: () {

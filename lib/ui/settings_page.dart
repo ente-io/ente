@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
@@ -40,7 +42,9 @@ class SettingsPage extends StatelessWidget {
                     .subtitle1
                     .copyWith(overflow: TextOverflow.ellipsis),
               ),
-              kDebugMode ? ThemeSwitchWidget() : const SizedBox.shrink(),
+              (kDebugMode && Platform.isAndroid)
+                  ? ThemeSwitchWidget()
+                  : const SizedBox.shrink(),
             ])));
     final sectionDivider = Divider(
       height: 20,

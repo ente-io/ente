@@ -87,19 +87,16 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           Navigator.of(context).pop();
         },
       ),
-      title: Hero(
-        tag: "sign_up",
-        child: Material(
-            type: MaterialType.transparency,
-            child: StepProgressIndicator(
-              totalSteps: 4,
-              currentStep: 1,
-              selectedColor: Theme.of(context).buttonColor,
-              roundedEdges: Radius.circular(10),
-              unselectedColor:
-                  Theme.of(context).colorScheme.stepProgressUnselectedColor,
-            )),
-      ),
+      title: Material(
+          type: MaterialType.transparency,
+          child: StepProgressIndicator(
+            totalSteps: 4,
+            currentStep: 1,
+            selectedColor: Theme.of(context).buttonColor,
+            roundedEdges: Radius.circular(10),
+            unselectedColor:
+                Theme.of(context).colorScheme.stepProgressUnselectedColor,
+          )),
     );
     return Scaffold(
       appBar: appBar,

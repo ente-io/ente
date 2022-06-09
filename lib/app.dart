@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
@@ -221,7 +223,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    if (kDebugMode) {
+    if (kDebugMode && Platform.isAndroid) {
       return AdaptiveTheme(
         light: lightThemeData,
         dark: darkThemeData,
