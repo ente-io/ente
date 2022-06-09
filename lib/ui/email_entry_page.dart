@@ -591,7 +591,7 @@ class PricingWidget extends StatelessWidget {
               children: planWidgets,
             ),
           ),
-          Text("we offer a free trial of " +
+          Text("We offer a free trial of " +
               convertBytesToReadableFormat(freePlan.storage) +
               " for " +
               freePlan.duration.toString() +
