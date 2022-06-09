@@ -4,6 +4,7 @@ import { DotSeparator } from 'components/Sidebar/styledComponents';
 import React from 'react';
 import styled from 'styled-components';
 import { SuggestionType } from 'types/search';
+import { formatNumberWithCommas } from '.';
 
 /**
  * Global English constants.
@@ -420,7 +421,11 @@ const englishConstants = {
         }
     },
     PHOTO_COUNT: (count: number) =>
-        `${count === 1 ? `1 memory` : `${count} memories`}`,
+        `${
+            count === 1
+                ? `1 memory`
+                : `${formatNumberWithCommas(count)} memories`
+        }`,
     TERMS_AND_CONDITIONS: () => (
         <Typography variant="body2">
             I agree to the{' '}
@@ -770,6 +775,8 @@ const englishConstants = {
     RENEW_NOW: 'Renew now',
     STORAGE: 'Storage',
     USED: 'used',
+    YOU: 'You',
+    FAMILY: 'Family',
 };
 
 export default englishConstants;

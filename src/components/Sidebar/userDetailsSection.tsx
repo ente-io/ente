@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { SpaceBetweenFlex } from 'components/Container';
 import { PaddedDivider } from './styledComponents';
-import SubscriptionDetails from './SubscriptionCard';
+import SubscriptionCard from './SubscriptionCard';
 import { getUserDetailsV2 } from 'services/userService';
 import { UserDetails } from 'types/user';
 import { LS_KEYS } from 'utils/storage/localStorage';
@@ -34,7 +34,7 @@ export default function UserDetailsSection({ sidebarView, closeSidebar }) {
                 <ThemeSwitcher theme={theme} setTheme={setTheme} />
             </SpaceBetweenFlex>
             <PaddedDivider invisible />
-            <SubscriptionDetails
+            <SubscriptionCard
                 userDetails={userDetails}
                 closeSidebar={closeSidebar}
             />

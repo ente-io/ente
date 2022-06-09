@@ -140,10 +140,6 @@ const darkThemeOptions = createTheme({
             main: 'rgba(256, 256, 256, 0.12)',
             contrastText: '#fff',
         },
-        text: {
-            primary: '#fff',
-            secondary: '#808080',
-        },
         accent: {
             main: '#1dba54',
             dark: '#248546',
