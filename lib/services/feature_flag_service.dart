@@ -103,19 +103,8 @@ class FeatureFlags {
   static FeatureFlags defaultFlags = FeatureFlags(
       disableCFWorker: FFDefault.disableCFWorker,
       disableUrlSharing: FFDefault.disableUrlSharing,
-      enableStripe: FFDefault.enableStripe);
-<<<<<<< HEAD
-
-  final bool disableCFWorker;
-  final bool disableUrlSharing;
-  final bool enableStripe;
-
-  FeatureFlags({
-    @required this.disableCFWorker,
-    @required this.disableUrlSharing,
-    @required this.enableStripe,
-  });
-=======
+      enableStripe: FFDefault.enableStripe,
+      enableMissingLocationMigration: FFDefault.enableMissingLocationMigration);
 
   final bool disableCFWorker;
   final bool disableUrlSharing;
@@ -127,7 +116,6 @@ class FeatureFlags {
       @required this.disableUrlSharing,
       @required this.enableStripe,
       @required this.enableMissingLocationMigration});
->>>>>>> master
 
   Map<String, dynamic> toMap() {
     return {
@@ -149,11 +137,8 @@ class FeatureFlags {
       disableUrlSharing:
           json["disableUrlSharing"] ?? FFDefault.disableUrlSharing,
       enableStripe: json["enableStripe"] ?? FFDefault.enableStripe,
-<<<<<<< HEAD
-=======
       enableMissingLocationMigration: json["enableMissingLocationMigration"] ??
           FFDefault.enableMissingLocationMigration,
->>>>>>> master
     );
   }
 
