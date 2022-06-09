@@ -1,12 +1,75 @@
+/* eslint-disable */
 import React, { useEffect, useState } from 'react';
-import { Button, CircularProgress, Dialog, IconButton } from '@mui/material';
+import {
+    Button,
+    CircularProgress,
+    Dialog,
+    Icon,
+    IconButton,
+} from '@mui/material';
 import watchService from 'services/watchService';
 import { MdDelete } from 'react-icons/md';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Close from '@mui/icons-material/Close';
-import { SpaceBetweenFlex } from 'components/Container';
+import { CenteredFlex, SpaceBetweenFlex } from 'components/Container';
 import { WatchMapping } from 'types/watch';
 import { AppContext } from 'pages/_app';
+import CheckIcon from '@mui/icons-material/Check';
+import FolderIcon from '@mui/icons-material/Folder';
+import { default as MuiStyled } from '@mui/styled-engine';
+import { Box } from '@mui/system';
+
+const ModalHeading = MuiStyled('h3')({
+    fontSize: '28px',
+    marginBottom: '24px',
+    fontWeight: 'bold',
+});
+
+const FullWidthButton = MuiStyled(Button)({
+    width: '100%',
+    borderRadius: '4px',
+});
+
+const PaddedContainer = MuiStyled(Box)({
+    padding: '24px',
+});
+
+const FixedHeightContainer = MuiStyled(Box)({
+    height: '450px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'space-between',
+});
+
+const VerticallyCentered = MuiStyled(Box)({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+});
+
+const NoFoldersTitleText = MuiStyled('h4')({
+    fontSize: '24px',
+    marginBottom: '16px',
+    fontWeight: 'bold',
+});
+
+const BottomMarginSpacer = MuiStyled(Box)({
+    marginBottom: '10px',
+});
+
+function CheckmarkIcon() {
+    return (
+        <Icon
+            sx={{
+                marginLeft: '4px',
+                marginRight: '4px',
+                color: (theme) => theme.palette.grey.A200,
+            }}>
+            <CheckIcon />
+        </Icon>
+    );
+}
 
 function WatchModal({
     watchModalView,
@@ -55,141 +118,56 @@ function WatchModal({
     };
 
     return (
-        <Dialog maxWidth="xl" open={watchModalView} onClose={handleClose}>
-            <div
-                style={{
-                    width: '600px',
-                    padding: '20px',
-                    paddingBottom: '28px',
-                }}>
-                <SpaceBetweenFlex>
-                    <div
-                        style={{
-                            marginTop: '20px',
-                            marginBottom: '20px',
-                            fontSize: '32px',
-                            fontWeight: 'bold',
-                        }}>
-                        Watch Folders
-                    </div>
-                    <IconButton onClick={handleClose}>
-                        <Close />
-                    </IconButton>
-                </SpaceBetweenFlex>
-                <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                    }}>
-                    <div
-                        style={{
-                            display: 'flex',
-                        }}>
-                        <Button
-                            variant="outlined"
-                            style={{
-                                marginRight: '12px',
-                                marginTop: '8px',
-                            }}
-                            onClick={handleFolderSelection}>
-                            Select Folder
-                        </Button>
-                        <div
-                            style={{
-                                marginTop: 'auto',
+        <Dialog
+            maxWidth="xs"
+            fullWidth={true}
+            open={watchModalView}
+            onClose={handleClose}>
+            <PaddedContainer>
+                <FixedHeightContainer>
+                    <SpaceBetweenFlex>
+                        <ModalHeading>Watched folders</ModalHeading>
+                        <IconButton
+                            onClick={handleClose}
+                            sx={{
                                 marginBottom: 'auto',
                             }}>
-                            {inputFolderPath}
-                        </div>
-                    </div>
-                    <div
-                        style={{
-                            marginTop: '8px',
-                        }}>
-                        <Button
-                            variant="contained"
-                            color="success"
-                            onClick={handleAddWatchMapping}>
-                            Add mapping
-                        </Button>
-                    </div>
-                </div>
-                <SpaceBetweenFlex
-                    sx={{
-                        marginTop: '20px',
-                        borderTop: '1px solid #e6e6e6',
-                        paddingTop: '12px',
-                    }}>
-                    <div
-                        style={{
-                            marginBottom: '8px',
-                            fontSize: '28px',
-                            fontWeight: 'bold',
-                        }}>
-                        Current Watch Mappings
-                    </div>
-                    {appContext.watchServiceIsRunning && (
-                        <IconButton onClick={handleSyncProgressClick}>
-                            <CircularProgress size={24} />
+                            <Close />
                         </IconButton>
-                    )}
-                </SpaceBetweenFlex>
-                <div
-                    style={{
-                        marginTop: '12px',
-                    }}>
-                    {mappings.map((mapping) => (
-                        <div
-                            key={mapping.collectionName}
-                            style={{
-                                display: 'flex',
-                                width: '100%',
-                                marginTop: '4px',
-                                marginBottom: '4px',
+                    </SpaceBetweenFlex>
+
+                    {mappings.length === 0 ? (
+                        <VerticallyCentered
+                            sx={{
+                                height: '100%',
                             }}>
-                            <div>
-                                <span
-                                    style={{
-                                        fontWeight: 'bold',
-                                        fontSize: '18px',
-                                        color: 'green',
-                                    }}>
-                                    {mapping.folderPath}{' '}
-                                </span>
-                                <ArrowForwardIcon
-                                    sx={{
-                                        marginLeft: '12px',
-                                        marginRight: '16px',
-                                    }}
-                                />
-                                <span
-                                    style={{
-                                        fontWeight: 'bold',
-                                        fontSize: '20px',
-                                    }}>
-                                    {mapping.collectionName}
-                                </span>
-                            </div>
-                            <div
+                            <NoFoldersTitleText>
+                                No folders added yet!
+                            </NoFoldersTitleText>
+                            The folders you add here will monitored to
+                            automatically
+                            <BottomMarginSpacer />
+                            <span>
+                                <CheckmarkIcon /> Upload new files to ente
+                            </span>
+                            <span>
+                                <CheckmarkIcon /> Remove deleted files from ente
+                            </span>
+                        </VerticallyCentered>
+                    ) : null}
+
+                    <CenteredFlex>
+                        <FullWidthButton color="accent">
+                            +
+                            <span
                                 style={{
-                                    marginLeft: 'auto',
-                                }}>
-                                <MdDelete
-                                    size={24}
-                                    style={{
-                                        color: 'red',
-                                        cursor: 'pointer',
-                                        marginRight: '6px',
-                                    }}
-                                    onClick={() =>
-                                        handleRemoveWatchMapping(mapping)
-                                    }
-                                />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+                                    marginLeft: '8px',
+                                }}></span>
+                            Add folder
+                        </FullWidthButton>
+                    </CenteredFlex>
+                </FixedHeightContainer>
+            </PaddedContainer>
         </Dialog>
     );
 }
