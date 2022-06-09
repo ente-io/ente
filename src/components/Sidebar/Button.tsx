@@ -1,15 +1,9 @@
 import React, { FC } from 'react';
 import { Button, ButtonProps } from '@mui/material';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { FluidContainer } from 'components/Container';
-interface IProps {
-    hideArrow?: boolean;
-    smallerArrow?: boolean;
-}
-const SidebarButton: FC<ButtonProps<'button', IProps>> = ({
+
+const SidebarButton: FC<ButtonProps<'button'>> = ({
     children,
-    hideArrow,
-    smallerArrow,
     sx,
     ...props
 }) => {
@@ -26,11 +20,6 @@ const SidebarButton: FC<ButtonProps<'button', IProps>> = ({
             `}
             {...props}>
             <FluidContainer>{children}</FluidContainer>
-            {!hideArrow && (
-                <NavigateNextIcon
-                    fontSize={smallerArrow ? 'small' : 'medium'}
-                />
-            )}
         </Button>
     );
 };
