@@ -39,9 +39,11 @@ final lightThemeData = ThemeData(
   scaffoldBackgroundColor: Colors.white,
   backgroundColor: Colors.white,
   appBarTheme: AppBarTheme().copyWith(
-      backgroundColor: Colors.white,
-      foregroundColor: Colors.black,
-      iconTheme: IconThemeData(color: Colors.black)),
+    backgroundColor: Colors.white,
+    foregroundColor: Colors.black,
+    iconTheme: IconThemeData(color: Colors.black),
+    elevation: 0,
+  ),
   //https://api.flutter.dev/flutter/material/TextTheme-class.html
   textTheme: _buildTextTheme(Colors.black),
   primaryTextTheme: TextTheme().copyWith(
@@ -109,6 +111,7 @@ final darkThemeData = ThemeData(
   backgroundColor: Colors.black,
   appBarTheme: AppBarTheme().copyWith(
     color: Color.fromRGBO(10, 20, 20, 1.0),
+    elevation: 0,
   ),
   cardColor: Color.fromRGBO(10, 15, 15, 1.0),
   dialogTheme: DialogTheme().copyWith(
