@@ -422,7 +422,7 @@ class WatchService {
 
     async selectFolder(): Promise<string> {
         try {
-            const folderPath = await this.ElectronAPIs.selectFolder();
+            const folderPath = await this.ElectronAPIs.selectRootDirectory();
             return folderPath;
         } catch (e) {
             logError(e, 'error while selecting folder');
