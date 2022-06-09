@@ -71,7 +71,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         );
       },
       child: SizedBox(
-        height: 196,
+        height: 148,
         child: _userDetails == null ? loadWidget : getContainer(),
       ),
     );
@@ -80,17 +80,18 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   Container getContainer() {
     return Container(
       width: double.infinity,
-      height: 104,
+      height: 148,
       decoration: BoxDecoration(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.only(
+            topRight: Radius.circular(16), bottomLeft: Radius.circular(16)),
         image: DecorationImage(
           fit: BoxFit.fill,
           image: AssetImage("assets/card_background.png"),
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 36, horizontal: 20),
+        padding: EdgeInsets.only(top: 12, bottom: 12, left: 20, right: 0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,28 +111,40 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                   .headline5
                   .copyWith(color: Colors.white),
             ),
-            Padding(padding: EdgeInsets.symmetric(vertical: 18)),
-            Stack(
-              children: <Widget>[
-                Container(
-                  color: Colors.white.withOpacity(0.2),
-                  width: MediaQuery.of(context).size.width,
-                  height: 4,
-                ),
-                Container(
-                  color: Colors.white.withOpacity(0.75),
-                  width: MediaQuery.of(context).size.width *
-                      ((_userDetails.getFamilyOrPersonalUsage()) /
-                          _userDetails.getTotalStorage()),
-                  height: 4,
-                ),
-                Container(
-                  color: Colors.white,
-                  width: MediaQuery.of(context).size.width *
-                      (_userDetails.usage / _userDetails.getTotalStorage()),
-                  height: 4,
-                ),
-              ],
+            // Padding(padding: EdgeInsets.symmetric(vertical: 7)),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Icon(
+                Icons.chevron_right,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+            // Padding(padding: EdgeInsets.symmetric(vertical: 8)),
+            Padding(
+              padding: const EdgeInsets.only(right: 24.0),
+              child: Stack(
+                children: <Widget>[
+                  Container(
+                    color: Colors.white.withOpacity(0.2),
+                    width: MediaQuery.of(context).size.width,
+                    height: 4,
+                  ),
+                  Container(
+                    color: Colors.white.withOpacity(0.75),
+                    width: MediaQuery.of(context).size.width *
+                        ((_userDetails.getFamilyOrPersonalUsage()) /
+                            _userDetails.getTotalStorage()),
+                    height: 4,
+                  ),
+                  Container(
+                    color: Colors.white,
+                    width: MediaQuery.of(context).size.width *
+                        (_userDetails.usage / _userDetails.getTotalStorage()),
+                    height: 4,
+                  ),
+                ],
+              ),
             ),
             Padding(padding: EdgeInsets.symmetric(vertical: 6)),
             GestureDetector(
@@ -197,12 +210,15 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                               color: Colors.white.withOpacity(0.7),
                               fontSize: 14),
                         ),
-                  Text(
-                    "${NumberFormat().format(_userDetails.fileCount)} Memories",
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline5
-                        .copyWith(color: Colors.white, fontSize: 14),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 24.0),
+                    child: Text(
+                      "${NumberFormat().format(_userDetails.fileCount)} Memories",
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline5
+                          .copyWith(color: Colors.white, fontSize: 14),
+                    ),
                   )
                 ],
               ),
