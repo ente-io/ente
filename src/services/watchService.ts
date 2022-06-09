@@ -120,7 +120,7 @@ class WatchService {
     ): Promise<WatchMapping[]> {
         const notDeletedMappings = [];
         for (const mapping of mappings) {
-            const mappingExists = await this.ElectronAPIs.isFolderExists(
+            const mappingExists = await this.ElectronAPIs.doesFolderExists(
                 mapping.folderPath
             );
             if (mappingExists) {
@@ -136,7 +136,8 @@ class WatchService {
             this.ElectronAPIs.registerWatcherFunctions(
                 this,
                 diskFileAddedCallback,
-                diskFileRemovedCallback
+                diskFileRemovedCallback,
+                diskFolderRemovedCallback
             );
         }
     }
@@ -471,8 +472,7 @@ async function diskFileAddedCallback(
 
 async function diskFileRemovedCallback(
     instance: WatchService,
-    filePath: string,
-    isDir?: boolean
+    filePath: string
 ) {
     try {
         const collectionName = await instance.getCollectionName(filePath);
@@ -480,14 +480,6 @@ async function diskFileRemovedCallback(
         console.log('added (trash) to event queue', collectionName, filePath);
 
         if (!collectionName) {
-            return;
-        }
-
-        if (
-            isDir &&
-            hasMappingSameFolderPath(instance, collectionName, filePath)
-        ) {
-            instance.trashingDirQueue.push(filePath);
             return;
         }
 
@@ -500,6 +492,24 @@ async function diskFileRemovedCallback(
         await debounce(runNextEventByInstance, 300)(instance);
     } catch (e) {
         logError(e, 'error while calling diskFileRemovedCallback');
+    }
+}
+
+async function diskFolderRemovedCallback(
+    instance: WatchService,
+    folderPath: string
+) {
+    try {
+        const collectionName = await instance.getCollectionName(folderPath);
+        if (!collectionName) {
+            return;
+        }
+
+        if (hasMappingSameFolderPath(instance, collectionName, folderPath)) {
+            instance.trashingDirQueue.push(folderPath);
+        }
+    } catch (e) {
+        logError(e, 'error while calling diskFolderRemovedCallback');
     }
 }
 
