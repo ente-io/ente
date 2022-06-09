@@ -69,10 +69,6 @@ class FadingAppBarState extends State<FadingAppBar> {
             ),
           ),
           child: _buildAppBar(),
-          // child: _buildAppBar()Padding(_buildAppBar()
-          //   padding: const EdgeInsets.only(top: 0),
-          //   child: SafeArea(child: _buildAppBar()),
-          // ),
         ),
         opacity: _shouldHide ? 0 : 1,
         duration: Duration(milliseconds: 150),
@@ -241,15 +237,11 @@ class FadingAppBarState extends State<FadingAppBar> {
         return hasError ? oldValue : isLiked;
       },
       likeBuilder: (isLiked) {
-        return Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Icon(
-            Icons.favorite_border,
-            color: isLiked
-                ? Colors.pinkAccent
-                : Colors.white, //same for both themes
-            size: 24,
-          ),
+        return Icon(
+          isLiked ? Icons.favorite_rounded : Icons.favorite_border,
+          color:
+              isLiked ? Colors.pinkAccent : Colors.white, //same for both themes
+          size: 24,
         );
       },
     );
