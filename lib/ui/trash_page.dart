@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -154,14 +153,16 @@ class BottomButtonsWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Color.fromRGBO(255, 101, 101, 0.2),
                 ),
-                padding: EdgeInsets.symmetric(
-                    horizontal: 24, vertical: Platform.isIOS ? 24 : 0),
                 child: Center(
-                  child: Text(
-                    'Delete All',
-                    style: Theme.of(context).textTheme.subtitle2.copyWith(
-                          color: Color.fromRGBO(255, 101, 101, 1),
-                        ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 16),
+                    child: Text(
+                      'Delete All',
+                      style: Theme.of(context).textTheme.subtitle2.copyWith(
+                            color: Color.fromRGBO(255, 101, 101, 1),
+                          ),
+                    ),
                   ),
                 ),
               ),
