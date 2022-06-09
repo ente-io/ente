@@ -18,7 +18,7 @@ export default function FileList(props: Iprops) {
             title={props.fileList[index]}
             placement="bottom-start"
             enterDelay={300}
-            enterNextDelay={300}>
+            enterNextDelay={100}>
             <div style={style}>{props.fileList[index]}</div>
         </Tooltip>
     );
