@@ -509,7 +509,11 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         },
       ),
     );
-    showCupertinoModalPopup(context: context, builder: (_) => action);
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => action,
+      barrierColor: Colors.black.withOpacity(0.75),
+    );
   }
 
   void _showRemoveFromCollectionSheet(BuildContext context) {
