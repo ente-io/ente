@@ -24,7 +24,7 @@ class _VideoControlsState extends State<VideoControls> {
   bool _dragging = false;
   bool _displayTapped = false;
 
-  final barHeight = 48.0;
+  final barHeight = 120.0;
   final marginSize = 5.0;
 
   VideoPlayerController controller;
