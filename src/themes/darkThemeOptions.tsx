@@ -71,10 +71,7 @@ const darkThemeOptions = createTheme({
             },
             styleOverrides: {
                 root: {
-                    color: 'inherit',
-                    textDecorationColor: 'inherit',
                     '&:hover': {
-                        textDecoration: 'underline',
                         color: '#1dba54',
                     },
                 },

@@ -206,9 +206,9 @@ const englishConstants = {
         <>
             <p>
                 Please send an email to{' '}
-                <a href="mailto:account-deletion@ente.io">
+                <Link href="mailto:account-deletion@ente.io">
                     account-deletion@ente.io
-                </a>{' '}
+                </Link>{' '}
                 from your registered email address.{' '}
             </p>
             Your request will be processed within 72 hours.
@@ -335,7 +335,7 @@ const englishConstants = {
     UPDATE_SUBSCRIPTION: 'Change plan',
 
     CONFIRM_CANCEL_SUBSCRIPTION: 'cancel subscription',
-    CANCEL_SUBSCRIPTION: 'Unsubscribe',
+    CANCEL_SUBSCRIPTION: 'Cancel subscription',
     CANCEL_SUBSCRIPTION_MESSAGE: () => (
         <>
             <p>

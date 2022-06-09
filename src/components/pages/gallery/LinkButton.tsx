@@ -32,13 +32,16 @@ export function getVariantColor(variant: string) {
 const LinkButton: FC<LinkProps<'button', { color?: ButtonProps['color'] }>> = ({
     children,
     sx,
+    color,
     ...props
 }) => {
     return (
         <Link
             component="button"
             sx={{
-                color: props.color && `${props.color}.main`,
+                '&:hover': {
+                    color: `${color}.main`,
+                },
                 ...sx,
             }}
             {...props}>

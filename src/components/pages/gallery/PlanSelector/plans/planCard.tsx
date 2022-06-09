@@ -1,4 +1,4 @@
-import ArrowEast from 'components/icons/ArrowEast';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import React from 'react';
 import { Button } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
@@ -61,7 +61,7 @@ export function PlanCard({
                 }}
                 disabled={isUserSubscribedPlan(plan, subscription)}>
                 {constants.CHOOSE_PLAN_BTN}
-                <ArrowEast
+                <ArrowForwardIcon
                     style={{
                         marginLeft: '5px',
                     }}

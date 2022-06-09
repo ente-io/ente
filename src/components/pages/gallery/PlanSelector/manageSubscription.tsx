@@ -16,10 +16,7 @@ import LinkButton from '../LinkButton';
 export function ManageSubscription({ subscription, ...props }) {
     const appContext = useContext(AppContext);
     return (
-        <DeadCenter
-            style={{
-                marginBottom: '30px',
-            }}>
+        <DeadCenter>
             {hasPaidSubscription(subscription) ? (
                 <>
                     {hasStripeSubscription(subscription) && (
@@ -78,35 +75,32 @@ export function ManageSubscription({ subscription, ...props }) {
                                 </LinkButton>
                             )}
                             <LinkButton
-                                color="primary"
                                 onClick={updatePaymentMethod.bind(
                                     null,
                                     appContext.setDialogMessage,
                                     props.setLoading
                                 )}
-                                style={{
-                                    marginTop: '20px',
+                                sx={{
+                                    mt: 1,
                                 }}>
                                 {constants.MANAGEMENT_PORTAL}
                             </LinkButton>
                         </>
                     )}
                     <LinkButton
-                        color="primary"
                         onClick={manageFamilyMethod.bind(
                             null,
                             appContext.setDialogMessage,
                             props.setLoading
                         )}
-                        style={{
-                            marginTop: '20px',
+                        sx={{
+                            mt: 1,
                         }}>
                         {constants.MANAGE_FAMILY_PORTAL}
                     </LinkButton>
                 </>
             ) : (
                 <LinkButton
-                    color="primary"
                     onClick={props.closeModal}
                     style={{
                         color: 'rgb(121, 121, 121)',
