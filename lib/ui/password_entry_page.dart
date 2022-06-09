@@ -40,8 +40,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       _passwordController2 = TextEditingController();
   final Color _validFieldValueColor = Color.fromRGBO(45, 194, 98, 0.2);
   String _volatilePassword;
-  String _password;
   String _passwordInInputBox = '';
+  String _passwordInInputConfirmationBox = '';
   double _passwordStrength = 0.0;
   bool _password1Visible = false;
   bool _password2Visible = false;
@@ -248,6 +248,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                         _passwordStrength = estimatePasswordStrength(password);
                         _isPasswordValid =
                             _passwordStrength >= kMildPasswordStrengthThreshold;
+                        _passwordsMatch = _passwordInInputBox ==
+                            _passwordInInputConfirmationBox;
                       });
                     },
                     textInputAction: TextInputAction.next,
@@ -305,8 +307,11 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                         focusNode: _password2FocusNode,
                         onChanged: (cnfPassword) {
                           setState(() {
-                            if (_password != null || _password != '') {
-                              _passwordsMatch = _password == cnfPassword;
+                            _passwordInInputConfirmationBox = cnfPassword;
+                            if (_passwordInInputBox != null ||
+                                _passwordInInputBox != '') {
+                              _passwordsMatch = _passwordInInputBox ==
+                                  _passwordInInputConfirmationBox;
                             }
                           });
                         },
