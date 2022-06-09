@@ -11,7 +11,7 @@ import {
 import { logError } from './utils/logging';
 import { ElectronFile } from './types';
 import {
-    getPosixFilePathsFromDir,
+    getAllFilesFromDir,
     getWatchMappings,
     initWatcher,
     registerWatcherFunctions,
@@ -193,7 +193,7 @@ windowObject['ElectronAPIs'] = {
     showUploadZipDialog,
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
-    getPosixFilePathsFromDir,
+    getAllFilesFromDir,
     selectFolder,
     getWatchMappings,
     setWatchMappings,

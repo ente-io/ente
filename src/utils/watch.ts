@@ -4,8 +4,8 @@ import chokidar from 'chokidar';
 import { watchStore } from '../services/store';
 import { logError } from './logging';
 import { BrowserWindow, ipcRenderer } from 'electron';
-import { WatchStoreType } from '../types';
-import { getFilesFromDir } from './upload';
+import { ElectronFile, WatchStoreType } from '../types';
+import { getElectronFile, getFilesFromDir } from './upload';
 
 export async function addWatchMapping(
     collectionName: string,
@@ -67,10 +67,15 @@ export function setWatchMappings(watchMappings: WatchStoreType['mappings']) {
     watchStore.set('mappings', watchMappings);
 }
 
-export async function getPosixFilePathsFromDir(dirPath: string) {
+export async function getAllFilesFromDir(dirPath: string) {
     let files = await getFilesFromDir(dirPath);
     files = files.map((file) => file.split(path.sep).join(path.posix.sep));
-    return files;
+    const electronFiles = await Promise.all(
+        files.map(async (filePath) => {
+            return await getElectronFile(filePath);
+        })
+    );
+    return electronFiles;
 }
 
 export async function isFolderExists(dirPath: string) {
@@ -113,7 +118,7 @@ export function initWatcher(mainWindow: BrowserWindow) {
 
 export function registerWatcherFunctions(
     WatchServiceInstance: any,
-    add: (WatchServiceInstance: any, path: string) => Promise<void>,
+    add: (WatchServiceInstance: any, file: ElectronFile) => Promise<void>,
     remove: (
         WatchServiceInstance: any,
         path: string,
@@ -125,12 +130,12 @@ export function registerWatcherFunctions(
     ipcRenderer.removeAllListeners('watch-unlink');
     ipcRenderer.on('watch-add', async (_, filePath: string) => {
         filePath = filePath.split(path.sep).join(path.posix.sep);
-        await add(WatchServiceInstance, filePath);
+        await add(WatchServiceInstance, await getElectronFile(filePath));
     });
     ipcRenderer.on('watch-change', async (_, filePath: string) => {
         filePath = filePath.split(path.sep).join(path.posix.sep);
         await remove(WatchServiceInstance, filePath);
-        await add(WatchServiceInstance, filePath);
+        await add(WatchServiceInstance, await getElectronFile(filePath));
     });
     ipcRenderer.on(
         'watch-unlink',
