@@ -178,7 +178,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             ),
             Padding(padding: EdgeInsets.all(2)),
             Text(
-              "flip",
+              "Flip",
               style: subtitle2.copyWith(
                 color: subtitle2.color.withOpacity(0.8),
               ),
@@ -208,7 +208,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             ),
             Padding(padding: EdgeInsets.all(2)),
             Text(
-              "rotate left",
+              "Rotate left",
               style: subtitle2.copyWith(
                 color: subtitle2.color.withOpacity(0.8),
               ),
@@ -238,7 +238,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             ),
             Padding(padding: EdgeInsets.all(2)),
             Text(
-              "rotate right",
+              "Rotate right",
               style: subtitle2.copyWith(
                 color: subtitle2.color.withOpacity(0.8),
               ),
@@ -268,7 +268,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             ),
             Padding(padding: EdgeInsets.all(2)),
             Text(
-              "save copy",
+              "Save copy",
               style: subtitle2.copyWith(
                 color: subtitle2.color.withOpacity(0.8),
               ),
@@ -281,7 +281,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Future<void> _saveEdits() async {
-    final dialog = createProgressDialog(context, "saving...");
+    final dialog = createProgressDialog(context, "Saving...");
     await dialog.show();
     final ExtendedImageEditorState state = editorKey.currentState;
     if (state == null) {
@@ -300,7 +300,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
     if (img == null) {
       _logger.severe("null rawImageData");
-      showToast("something went wrong");
+      showToast("Something went wrong");
       return;
     }
 
@@ -329,7 +329,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
     if (result == null) {
       _logger.severe("null result");
-      showToast("something went wrong");
+      showToast("Something went wrong");
       return;
     }
     try {
@@ -358,7 +358,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       await LocalSyncService.instance.trackEditedFile(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile]));
       SyncService.instance.sync();
-      showToast("edits saved");
+      showToast("Edits saved");
       _logger.info("Original file " + widget.originalFile.toString());
       _logger.info("Saved edits to file " + newFile.toString());
       final existingFiles = widget.detailPageConfig.files;
@@ -447,7 +447,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           SizedBox(
             width: 40,
             child: Text(
-              "light",
+              "Light",
               style: subtitle2.copyWith(
                 color: subtitle2.color.withOpacity(0.8),
               ),
@@ -485,17 +485,17 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   Future<void> _showExitConfirmationDialog() async {
     AlertDialog alert = AlertDialog(
-      title: Text("discard edits?"),
+      title: Text("Discard edits?"),
       actions: [
         TextButton(
-          child: Text("yes", style: TextStyle(color: Colors.red)),
+          child: Text("Yes", style: TextStyle(color: Colors.red)),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             replacePage(context, DetailPage(widget.detailPageConfig));
           },
         ),
         TextButton(
-          child: Text("no", style: TextStyle(color: Colors.white)),
+          child: Text("No", style: TextStyle(color: Colors.white)),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
           },

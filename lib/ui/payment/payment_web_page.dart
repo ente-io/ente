@@ -191,12 +191,12 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-                title: Text('payment failed'),
+                title: Text('Payment failed'),
                 content:
-                    Text("unfortunately your payment failed due to $reason"),
+                    Text("Unfortunately your payment failed due to $reason"),
                 actions: <Widget>[
                   TextButton(
-                      child: Text('ok'),
+                      child: Text('Ok'),
                       onPressed: () {
                         Navigator.of(context).pop('dialog');
                       }),
@@ -215,9 +215,9 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       await _dialog.hide();
       if (response != null) {
         var content = widget.actionType == 'buy'
-            ? 'your purchase was successful'
-            : 'your subscription was updated successfully';
-        await _showExitPageDialog(title: 'thank you', content: content);
+            ? 'Your purchase was successful'
+            : 'Your subscription was updated successfully';
+        await _showExitPageDialog(title: 'Thank you', content: content);
       } else {
         throw Exception("verifySubscription api failed");
       }
@@ -225,8 +225,8 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       _logger.severe(error);
       await _dialog.hide();
       await _showExitPageDialog(
-        title: 'failed to verify payment status',
-        content: 'please wait for sometime before retrying',
+        title: 'Failed to verify payment status',
+        content: 'Please wait for sometime before retrying',
       );
     }
   }
@@ -242,7 +242,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
         actions: <Widget>[
           TextButton(
               child: Text(
-                'ok',
+                'Ok',
                 style: TextStyle(color: Theme.of(context).buttonColor),
               ),
               onPressed: () {
