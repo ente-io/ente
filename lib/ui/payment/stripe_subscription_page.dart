@@ -271,7 +271,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 children: [
                   RichText(
                     text: TextSpan(
-                      text: "manage family",
+                      text: "Manage family",
                       style: TextStyle(
                         color: Colors.blue,
                         fontFamily: 'Ubuntu',

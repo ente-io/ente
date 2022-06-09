@@ -87,9 +87,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(
-          "Deduplicate Files",
-        ),
+        title: Text("Deduplicate Files"),
       ),
       body: _getBody(),
     );

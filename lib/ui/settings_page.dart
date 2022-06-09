@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
@@ -27,25 +29,32 @@ class SettingsPage extends StatelessWidget {
     final hasLoggedIn = Configuration.instance.getToken() != null;
     final String email = Configuration.instance.getEmail();
     final List<Widget> contents = [];
-    contents.add(Container(
+    contents.add(
+      Container(
         padding: EdgeInsets.symmetric(horizontal: 2, vertical: 6),
         child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                email,
-                style: Theme.of(context)
-                    .textTheme
-                    .subtitle1
-                    .copyWith(overflow: TextOverflow.ellipsis),
-              ),
-              kDebugMode ? ThemeSwitchWidget() : const SizedBox.shrink(),
-            ])));
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              email,
+              style: Theme.of(context)
+                  .textTheme
+                  .subtitle1
+                  .copyWith(overflow: TextOverflow.ellipsis),
+            ),
+            (kDebugMode && Platform.isAndroid)
+                ? ThemeSwitchWidget()
+                : const SizedBox.shrink(),
+          ],
+        ),
+      ),
+    );
     final sectionDivider = Divider(
       height: 20,
       color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
     );
+    contents.add(Padding(padding: EdgeInsets.all(4)));
     if (hasLoggedIn) {
       contents.addAll([
         DetailsSectionWidget(),

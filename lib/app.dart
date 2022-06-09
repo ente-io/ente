@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
@@ -51,11 +53,11 @@ final lightThemeData = ThemeData(
   dialogTheme: DialogTheme().copyWith(
       backgroundColor: Color.fromRGBO(250, 250, 250, 1.0), //
       titleTextStyle: TextStyle(
-          color: Colors.black, fontSize: 32, fontWeight: FontWeight.w600),
+          color: Colors.black, fontSize: 24, fontWeight: FontWeight.w600),
       contentTextStyle: TextStyle(
           fontFamily: 'Inter-Medium',
           color: Colors.black,
-          fontSize: 14,
+          fontSize: 16,
           fontWeight: FontWeight.w500),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
   inputDecorationTheme: InputDecorationTheme().copyWith(
@@ -115,11 +117,11 @@ final darkThemeData = ThemeData(
   dialogTheme: DialogTheme().copyWith(
       backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
       titleTextStyle: TextStyle(
-          color: Colors.white, fontSize: 32, fontWeight: FontWeight.w600),
+          color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600),
       contentTextStyle: TextStyle(
           fontFamily: 'Inter-Medium',
           color: Colors.white,
-          fontSize: 14,
+          fontSize: 16,
           fontWeight: FontWeight.w500),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
   inputDecorationTheme: InputDecorationTheme().copyWith(
@@ -224,7 +226,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    if (kDebugMode) {
+    if (kDebugMode && Platform.isAndroid) {
       return AdaptiveTheme(
         light: lightThemeData,
         dark: darkThemeData,

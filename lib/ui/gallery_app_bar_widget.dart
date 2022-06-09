@@ -92,7 +92,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final result = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
-        return RenameDialog(_appBarTitle, 'album');
+        return RenameDialog(_appBarTitle, 'Album');
       },
       barrierColor: Colors.black.withOpacity(0.85),
     );
@@ -101,7 +101,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       return;
     }
 
-    final dialog = createProgressDialog(context, "changing name...");
+    final dialog = createProgressDialog(context, "Changing name...");
     await dialog.show();
     try {
       await CollectionsService.instance.rename(widget.collection, result);

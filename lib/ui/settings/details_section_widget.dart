@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
@@ -197,7 +198,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                               fontSize: 14),
                         ),
                   Text(
-                    "${_userDetails.fileCount.toString()} Memories",
+                    "${NumberFormat().format(_userDetails.fileCount)} Memories",
                     style: Theme.of(context)
                         .textTheme
                         .headline5

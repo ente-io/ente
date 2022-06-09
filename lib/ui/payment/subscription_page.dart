@@ -227,7 +227,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   RichText(
                     text: TextSpan(
                       text: _isActiveStripeSubscriber
-                          ? "visit web.ente.io to manage your subscription"
+                          ? "Visit web.ente.io to manage your subscription"
                           : "Payment details",
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface,
@@ -308,7 +308,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 return;
               }
               showErrorDialog(context, "Sorry",
-                  "please visit web.ente.io to manage your subscription");
+                  "Please visit web.ente.io to manage your subscription");
             },
             child: SubscriptionPlanWidget(
               storage: plan.storage,

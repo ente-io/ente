@@ -91,9 +91,9 @@ class _BackupConfigurationHeaderWidgetState
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           isBackedUp
-              ? Text("backup enabled")
+              ? Text("Backup enabled")
               : Text(
-                  "backup disabled",
+                  "Backup disabled",
                   style: TextStyle(color: Colors.white.withOpacity(0.7)),
                 ),
           Switch(
