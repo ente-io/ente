@@ -104,7 +104,15 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           onTap: () async {
             final dialog = createProgressDialog(context, "calculating...");
             await dialog.show();
-            final status = await SyncService.instance.getBackupStatus();
+            BackupStatus status;
+            try {
+              status = await SyncService.instance.getBackupStatus();
+            } catch (e, s) {
+              await dialog.hide();
+              showGenericErrorDialog(context);
+              return;
+            }
+
             await dialog.hide();
             if (status.localIDs.isEmpty) {
               showErrorDialog(context, "✨ all clear",
