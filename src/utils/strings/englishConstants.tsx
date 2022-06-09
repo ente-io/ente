@@ -272,10 +272,8 @@ const englishConstants = {
 
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
-            <p>
-                You are on the <strong>free</strong> plan that expires on{' '}
-                {dateString(expiryTime)}
-            </p>
+            You are on the <strong>free</strong> plan that expires on{' '}
+            {dateString(expiryTime)}
         </>
     ),
 
@@ -286,15 +284,11 @@ const englishConstants = {
         </>
     ),
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
-        <p>Your subscription will renew on {dateString(expiryTime)}</p>
+        <>Your subscription will renew on {dateString(expiryTime)}</>
     ),
 
     RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
-        <>
-            <p>
-                Your subscription will be cancelled on {dateString(expiryTime)}
-            </p>
-        </>
+        <>Your subscription will be cancelled on {dateString(expiryTime)}</>
     ),
 
     USAGE_INFO: (usage, quota) => (

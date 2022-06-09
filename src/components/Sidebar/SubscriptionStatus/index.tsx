@@ -1,17 +1,37 @@
 import { MemberSubscriptionStatus } from './member';
 import { AdminSubscriptionStatus as AdminSubscriptionStatus } from './admin';
 import { GalleryContext } from 'pages/gallery';
-import React, { useContext } from 'react';
-import { hasNonAdminFamilyMembers, isFamilyAdmin } from 'utils/billing';
+import React, { useContext, useMemo } from 'react';
+import {
+    hasNonAdminFamilyMembers,
+    isFamilyAdmin,
+    isOnFreePlan,
+    isSubscriptionActive,
+    isSubscriptionCancelled,
+} from 'utils/billing';
 import Box from '@mui/material/Box';
+import { UserDetails } from 'types/user';
 
-export default function SubscriptionStatus({ userDetails }) {
+export default function SubscriptionStatus({
+    userDetails,
+}: {
+    userDetails: UserDetails;
+}) {
     const { showPlanSelectorModal } = useContext(GalleryContext);
 
     if (!userDetails) {
         return <></>;
     }
-    return (
+
+    const hasAMessage = useMemo(
+        () =>
+            !isSubscriptionActive(userDetails.subscription) ||
+            isOnFreePlan(userDetails.subscription) ||
+            isSubscriptionCancelled(userDetails.subscription),
+        [userDetails]
+    );
+
+    return hasAMessage ? (
         <Box px={1}>
             {!hasNonAdminFamilyMembers(userDetails.familyData) ||
             isFamilyAdmin(userDetails.familyData) ? (
@@ -23,5 +43,7 @@ export default function SubscriptionStatus({ userDetails }) {
                 <MemberSubscriptionStatus userDetails={userDetails} />
             )}
         </Box>
+    ) : (
+        <></>
     );
 }
