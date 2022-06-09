@@ -64,7 +64,7 @@ class _VideoControlsState extends State<VideoControls> {
                               _latestValue.duration == null ||
                           _latestValue.isBuffering
                       ? const Center(
-                          child: const CircularProgressIndicator(),
+                          child: CircularProgressIndicator(),
                         )
                       : _buildHitArea(),
                 ],
@@ -165,6 +165,7 @@ class _VideoControlsState extends State<VideoControls> {
                   padding: EdgeInsets.all(12.0),
                   child: Icon(
                       _latestValue.isPlaying ? Icons.pause : Icons.play_arrow,
+                      color: Colors.white, // same for both themes
                       size: 64.0),
                 ),
               ),
@@ -183,9 +184,10 @@ class _VideoControlsState extends State<VideoControls> {
     return Container(
       margin: EdgeInsets.only(left: 20.0, right: 16.0),
       child: Text(
-        '${formatDuration(position)}',
+        formatDuration(position),
         style: TextStyle(
           fontSize: 12.0,
+          color: Colors.white,
         ),
       ),
     );
@@ -199,9 +201,10 @@ class _VideoControlsState extends State<VideoControls> {
     return Padding(
       padding: EdgeInsets.only(right: 20.0),
       child: Text(
-        '${formatDuration(duration)}',
+        formatDuration(duration),
         style: TextStyle(
           fontSize: 12.0,
+          color: Colors.white,
         ),
       ),
     );

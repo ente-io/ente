@@ -152,8 +152,11 @@ class _VideoWidgetState extends State<VideoWidget> {
         child: SizedBox.fromSize(
           size: Size.square(30),
           child: _progress == null || _progress == 1
-              ? CupertinoActivityIndicator()
+              ? CupertinoActivityIndicator(
+                  color: Colors.white,
+                )
               : CircularProgressIndicator(
+                  backgroundColor: Colors.black,
                   value: _progress,
                   valueColor: AlwaysStoppedAnimation<Color>(
                     Color.fromRGBO(45, 194, 98, 1.0),
@@ -166,6 +169,7 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   Widget _getThumbnail() {
     return Container(
+      color: Colors.black,
       child: ThumbnailWidget(
         widget.file,
         fit: BoxFit.contain,
@@ -189,9 +193,13 @@ class _VideoWidgetState extends State<VideoWidget> {
       autoPlay: widget.autoPlay,
       autoInitialize: true,
       looping: true,
+      allowMuting: true,
       allowFullScreen: false,
       customControls: VideoControls(),
     );
-    return Chewie(controller: _chewieController);
+    return Container(
+      child: Chewie(controller: _chewieController),
+      color: Colors.black,
+    );
   }
 }
