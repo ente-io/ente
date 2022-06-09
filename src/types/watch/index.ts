@@ -1,3 +1,5 @@
+import { ElectronFile } from 'types/upload';
+
 export interface WatchMapping {
     collectionName: string;
     folderPath: string;
@@ -10,5 +12,6 @@ export interface WatchMapping {
 export interface EventQueueType {
     type: 'upload' | 'trash';
     collectionName: string;
-    paths: string[];
+    paths?: string[];
+    files?: ElectronFile[];
 }

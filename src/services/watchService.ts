@@ -58,40 +58,13 @@ class WatchService {
                 mappings = await this.filterOutDeletedMappings(mappings);
 
                 for (const mapping of mappings) {
-                    const filePathsOnDisk: string[] =
-                        await this.ElectronAPIs.getPosixFilePathsFromDir(
+                    const filesOnDisk: ElectronFile[] =
+                        await this.ElectronAPIs.getAllFilesFromDir(
                             mapping.folderPath
                         );
 
-                    const filesToUpload = filePathsOnDisk.filter((filePath) => {
-                        return !mapping.files.find(
-                            (file) => file.path === filePath
-                        );
-                    });
-
-                    const filesToRemove = mapping.files.filter((file) => {
-                        return !filePathsOnDisk.find(
-                            (filePath) => filePath === file.path
-                        );
-                    });
-
-                    if (filesToUpload.length > 0) {
-                        const event: EventQueueType = {
-                            type: 'upload',
-                            collectionName: mapping.collectionName,
-                            paths: filesToUpload,
-                        };
-                        this.eventQueue.push(event);
-                    }
-
-                    if (filesToRemove.length > 0) {
-                        const event: EventQueueType = {
-                            type: 'trash',
-                            collectionName: mapping.collectionName,
-                            paths: filesToRemove.map((file) => file.path),
-                        };
-                        this.eventQueue.push(event);
-                    }
+                    this.uploadDiffOfFiles(mapping, filesOnDisk);
+                    this.trashDiffOfFiles(mapping, filesOnDisk);
                 }
 
                 this.setWatchFunctions();
@@ -99,6 +72,46 @@ class WatchService {
             } catch (e) {
                 logError(e, 'error while initializing watch service');
             }
+        }
+    }
+
+    private uploadDiffOfFiles(
+        mapping: WatchMapping,
+        filesOnDisk: ElectronFile[]
+    ) {
+        const filesToUpload = filesOnDisk.filter((electronFile) => {
+            return !mapping.files.find(
+                (file) => file.path === electronFile.path
+            );
+        });
+
+        if (filesToUpload.length > 0) {
+            const event: EventQueueType = {
+                type: 'upload',
+                collectionName: mapping.collectionName,
+                files: filesToUpload,
+            };
+            this.eventQueue.push(event);
+        }
+    }
+
+    private trashDiffOfFiles(
+        mapping: WatchMapping,
+        filesOnDisk: ElectronFile[]
+    ) {
+        const filesToRemove = mapping.files.filter((file) => {
+            return !filesOnDisk.find(
+                (electronFile) => electronFile.path === file.path
+            );
+        });
+
+        if (filesToRemove.length > 0) {
+            const event: EventQueueType = {
+                type: 'trash',
+                collectionName: mapping.collectionName,
+                paths: filesToRemove.map((file) => file.path),
+            };
+            this.eventQueue.push(event);
         }
     }
 
@@ -190,19 +203,16 @@ class WatchService {
             this.uploadRunning = true;
 
             this.setCollectionName(this.currentEvent.collectionName);
-            this.setElectronFiles(
-                await Promise.all(
-                    this.currentEvent.paths.map(async (path) => {
-                        return await this.ElectronAPIs.getElectronFile(path);
-                    })
-                )
-            );
+            this.setElectronFiles(this.currentEvent.files);
         } catch (e) {
             logError(e, 'error while running next upload');
         }
     }
 
     async onFileUpload(fileWithCollection: FileWithCollection, file: EnteFile) {
+        if (!this.isUploadRunning) {
+            return;
+        }
         if (fileWithCollection.isLivePhoto) {
             this.pathToIDMap.set(
                 (fileWithCollection.livePhotoAssets.image as ElectronFile).path,
@@ -240,46 +250,7 @@ class WatchService {
                 const uploadedFiles: WatchMapping['files'] = [];
 
                 for (const fileWithCollection of filesWithCollection) {
-                    if (fileWithCollection.isLivePhoto) {
-                        const imagePath = (
-                            fileWithCollection.livePhotoAssets
-                                .image as ElectronFile
-                        ).path;
-                        const videoPath = (
-                            fileWithCollection.livePhotoAssets
-                                .video as ElectronFile
-                        ).path;
-
-                        if (
-                            this.pathToIDMap.has(imagePath) &&
-                            this.pathToIDMap.has(videoPath)
-                        ) {
-                            uploadedFiles.push({
-                                path: imagePath,
-                                id: this.pathToIDMap.get(imagePath),
-                            });
-                            uploadedFiles.push({
-                                path: videoPath,
-                                id: this.pathToIDMap.get(videoPath),
-                            });
-
-                            this.pathToIDMap.delete(imagePath);
-                            this.pathToIDMap.delete(videoPath);
-                        }
-                    } else {
-                        const filePath = (
-                            fileWithCollection.file as ElectronFile
-                        ).path;
-
-                        if (this.pathToIDMap.has(filePath)) {
-                            uploadedFiles.push({
-                                path: filePath,
-                                id: this.pathToIDMap.get(filePath),
-                            });
-
-                            this.pathToIDMap.delete(filePath);
-                        }
-                    }
+                    this.handleUploadedFile(fileWithCollection, uploadedFiles);
                 }
 
                 if (uploadedFiles.length > 0) {
@@ -304,9 +275,51 @@ class WatchService {
         }
     }
 
+    private handleUploadedFile(
+        fileWithCollection: FileWithCollection,
+        uploadedFiles: { path: string; id: number }[]
+    ) {
+        if (fileWithCollection.isLivePhoto) {
+            const imagePath = (
+                fileWithCollection.livePhotoAssets.image as ElectronFile
+            ).path;
+            const videoPath = (
+                fileWithCollection.livePhotoAssets.video as ElectronFile
+            ).path;
+
+            if (
+                this.pathToIDMap.has(imagePath) &&
+                this.pathToIDMap.has(videoPath)
+            ) {
+                uploadedFiles.push({
+                    path: imagePath,
+                    id: this.pathToIDMap.get(imagePath),
+                });
+                uploadedFiles.push({
+                    path: videoPath,
+                    id: this.pathToIDMap.get(videoPath),
+                });
+
+                this.pathToIDMap.delete(imagePath);
+                this.pathToIDMap.delete(videoPath);
+            }
+        } else {
+            const filePath = (fileWithCollection.file as ElectronFile).path;
+
+            if (this.pathToIDMap.has(filePath)) {
+                uploadedFiles.push({
+                    path: filePath,
+                    id: this.pathToIDMap.get(filePath),
+                });
+
+                this.pathToIDMap.delete(filePath);
+            }
+        }
+    }
+
     private async processTrashEvent() {
         try {
-            if (this.checkAndRemoveIfFileEventsFromTrashedDir()) {
+            if (this.checkAndIgnoreIfFileEventsFromTrashedDir()) {
                 this.runNextEvent();
                 return;
             }
@@ -372,7 +385,7 @@ class WatchService {
         }
     }
 
-    checkAndRemoveIfFileEventsFromTrashedDir() {
+    checkAndIgnoreIfFileEventsFromTrashedDir() {
         if (this.trashingDirQueue.length !== 0) {
             this.ignoreFileEventsFromTrashedDir(this.trashingDirQueue[0]);
             this.trashingDirQueue.shift();
@@ -431,20 +444,23 @@ class WatchService {
     }
 }
 
-async function diskFileAddedCallback(instance: WatchService, filePath: string) {
+async function diskFileAddedCallback(
+    instance: WatchService,
+    file: ElectronFile
+) {
     try {
-        const collectionName = await instance.getCollectionName(filePath);
+        const collectionName = await instance.getCollectionName(file.path);
 
         if (!collectionName) {
             return;
         }
 
-        console.log('added (upload) to event queue', collectionName, filePath);
+        console.log('added (upload) to event queue', collectionName, file);
 
         const event: EventQueueType = {
             type: 'upload',
             collectionName,
-            paths: [filePath],
+            files: [file],
         };
         instance.eventQueue.push(event);
         await debounce(runNextEventByInstance, 300)(instance);
