@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -70,6 +71,7 @@ class _TrashPageState extends State<TrashPage> {
       selectedFiles: widget._selectedFiles,
       header: _headerWidget(),
       initialFiles: null,
+      footer: const SizedBox(height: 32),
     );
 
     return Scaffold(
@@ -152,7 +154,8 @@ class BottomButtonsWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Color.fromRGBO(255, 101, 101, 0.2),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 24),
+                padding: EdgeInsets.symmetric(
+                    horizontal: 24, vertical: Platform.isIOS ? 24 : 0),
                 child: Center(
                   child: Text(
                     'Delete All',
