@@ -149,7 +149,7 @@ export default function Gallery() {
         count: 0,
         collectionID: 0,
     });
-    const [planModalView, setPlanModalView] = useState(false);
+    const [planModalView, setPlanModalView] = useState(true);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes>(null);
