@@ -247,142 +247,77 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   ),
                 ),
                 Padding(padding: EdgeInsets.all(4)),
-                Stack(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                      child: TextFormField(
-                        keyboardType: TextInputType.visiblePassword,
-                        controller: _passwordController2,
-                        obscureText: !_password2Visible,
-                        autofillHints: const [AutofillHints.newPassword],
-                        onEditingComplete: () =>
-                            TextInput.finishAutofillContext(),
-                        decoration: InputDecoration(
-                          fillColor:
-                              _passwordsMatch ? _validFieldValueColor : null,
-                          filled: true,
-                          hintText: "Confirm password",
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 14),
-                          suffixIcon: _password2InFocus
-                              ? IconButton(
-                                  icon: Icon(
-                                    _password2Visible
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
-                                    color: Theme.of(context).iconTheme.color,
-                                    size: 20,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _password2Visible = !_password2Visible;
-                                    });
-                                  },
-                                )
-                              : _passwordsMatch
-                                  ? Icon(
-                                      Icons.check,
-                                      color: Theme.of(context)
-                                          .inputDecorationTheme
-                                          .focusedBorder
-                                          .borderSide
-                                          .color,
-                                    )
-                                  : null,
-                          border: UnderlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(6)),
-                        ),
-                        focusNode: _password2FocusNode,
-                        onChanged: (cnfPassword) {
-                          setState(() {
-                            if (_password != null || _password != '') {
-                              _passwordsMatch = _password == cnfPassword;
-                            }
-                          });
-                        },
-                      ),
-                    ),
-                    Positioned(
-                      bottom: -120,
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: Divider(
-                        thickness: 1,
-                      ),
-                    ),
-                    Visibility(
-                      visible: ((_password != '') && _password1InFocus),
-                      child: Positioned(
-                          bottom: 25.5,
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      boxShadow: [
-                                        BoxShadow(
-                                          spreadRadius: 0.5,
-                                          color: Theme.of(context).hintColor,
-                                          offset: Offset(0, -0.325),
-                                        ),
-                                      ],
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.zero,
-                                        topRight: Radius.zero,
-                                        bottomLeft: Radius.circular(5),
-                                        bottomRight: Radius.circular(5),
-                                      ),
-                                      color: Theme.of(context)
-                                          .dialogTheme
-                                          .backgroundColor,
-                                    ),
-                                    width: double.infinity,
-                                    child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                4, 4, 4, 8),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      10, 0, 8, 0),
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    'Password strength: $passwordStrengthText',
-                                                    style: TextStyle(
-                                                        color:
-                                                            passwordStrengthColor),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ]),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 20,
-                              ),
-                            ],
-                          )),
-                    ),
-                  ],
-                  clipBehavior: Clip.none,
-                ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: TextFormField(
+                    keyboardType: TextInputType.visiblePassword,
+                    controller: _passwordController2,
+                    obscureText: !_password2Visible,
+                    autofillHints: const [AutofillHints.newPassword],
+                    onEditingComplete: () => TextInput.finishAutofillContext(),
+                    decoration: InputDecoration(
+                      fillColor: _passwordsMatch ? _validFieldValueColor : null,
+                      filled: true,
+                      hintText: "Confirm password",
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      suffixIcon: _password2InFocus
+                          ? IconButton(
+                              icon: Icon(
+                                _password2Visible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Theme.of(context).iconTheme.color,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _password2Visible = !_password2Visible;
+                                });
+                              },
+                            )
+                          : _passwordsMatch
+                              ? Icon(
+                                  Icons.check,
+                                  color: Theme.of(context)
+                                      .inputDecorationTheme
+                                      .focusedBorder
+                                      .borderSide
+                                      .color,
+                                )
+                              : null,
+                      border: UnderlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(6)),
+                    ),
+                    focusNode: _password2FocusNode,
+                    onChanged: (cnfPassword) {
+                      setState(() {
+                        if (_password != null || _password != '') {
+                          _passwordsMatch = _password == cnfPassword;
+                        }
+                      });
+                    },
+                  ),
                 ),
+                Opacity(
+                  opacity: (_password != '') && _password1InFocus ? 1 : 0,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    child: Text(
+                      'Password strength: $passwordStrengthText',
+                      style: TextStyle(
+                        color: passwordStrengthColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Divider(thickness: 1),
+                const SizedBox(height: 12),
                 _getAgreement(),
                 Padding(padding: EdgeInsets.all(20)),
               ],
