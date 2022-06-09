@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import Link from '@mui/material/Link';
+import LinkButton from 'components/pages/gallery/LinkButton';
 import { DotSeparator } from 'components/Sidebar/styledComponents';
 import React from 'react';
 import styled from 'styled-components';
@@ -126,6 +127,12 @@ const englishConstants = {
     UPLOADING_FILES: 'File upload',
     FILE_NOT_UPLOADED_LIST: 'The following files were not uploaded',
     SUBSCRIPTION_EXPIRED: 'Subscription expired',
+    SUBSCRIPTION_EXPIRED_MESSAGE: (onClick) => (
+        <>
+            Your subscription has expired, please{' '}
+            <LinkButton onClick={onClick}> renew </LinkButton>
+        </>
+    ),
     STORAGE_QUOTA_EXCEEDED: 'Storage limit exceeded',
     INITIAL_LOAD_DELAY_WARNING: 'First load may take some time',
     USER_DOES_NOT_EXIST: 'Sorry, could not find a user with that email',
@@ -274,10 +281,8 @@ const englishConstants = {
 
     FAMILY_PLAN_MANAGE_ADMIN_ONLY: (adminEmail) => (
         <>
-            <p>
-                Only your family plan admin <strong>{adminEmail}</strong> can
-                change the plan
-            </p>
+            Only your family plan admin <strong>{adminEmail}</strong> can change
+            the plan
         </>
     ),
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
@@ -777,6 +782,8 @@ const englishConstants = {
     USED: 'used',
     YOU: 'You',
     FAMILY: 'Family',
+    FREE: 'free',
+    OF: 'of',
 };
 
 export default englishConstants;

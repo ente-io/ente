@@ -3,7 +3,11 @@ import React from 'react';
 import { convertBytesToHumanReadable } from 'utils/billing';
 import constants from 'utils/strings/constants';
 
-export default function StorageSection({ userDetails }) {
+interface Iprops {
+    totalUsage: number;
+    totalStorage: number;
+}
+export default function StorageSection({ totalUsage, totalStorage }: Iprops) {
     return (
         <Box padding={2}>
             <Typography variant="body2" color={'text.secondary'}>
@@ -16,12 +20,12 @@ export default function StorageSection({ userDetails }) {
                     fontSize: '24px',
                 }}>
                 {`${convertBytesToHumanReadable(
-                    userDetails.usage,
+                    totalStorage - totalUsage,
                     1
-                )} of ${convertBytesToHumanReadable(
-                    userDetails.subscription.storage,
+                )} ${constants.OF} ${convertBytesToHumanReadable(
+                    totalStorage,
                     0
-                )}`}
+                )} ${constants.FREE}`}
             </Typography>
         </Box>
     );
