@@ -68,15 +68,16 @@ class FadingAppBarState extends State<FadingAppBar> {
               stops: const [0, 0.2, 1],
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: _buildAppBar(),
-          ),
+          child: _buildAppBar(),
+          // child: _buildAppBar()Padding(_buildAppBar()
+          //   padding: const EdgeInsets.only(top: 0),
+          //   child: SafeArea(child: _buildAppBar()),
+          // ),
         ),
         opacity: _shouldHide ? 0 : 1,
         duration: Duration(milliseconds: 150),
       ),
-      height: 64,
+      height: Platform.isAndroid ? 64 : 80,
     );
   }
 

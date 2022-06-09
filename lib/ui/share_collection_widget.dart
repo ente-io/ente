@@ -14,6 +14,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
+import 'package:photos/ui/common/gradientButton.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/manage_links_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
@@ -56,20 +57,44 @@ class _SharingDialogState extends State<SharingDialog> {
       padding: EdgeInsets.all(8),
     ));
     if (!_showEntryField) {
-      children.add(SizedBox(
-        width: 220,
-        child: OutlinedButton(
-          child: Icon(
-            Icons.add,
-            color: Theme.of(context).buttonColor,
+      children.add(
+        SizedBox(
+          width: 220,
+          child: GradientButton(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: const [
+                Icon(
+                  Icons.add,
+                  color: Colors.white,
+                ),
+              ],
+            ),
+            linearGradientColors: const [
+              Color(0xFF2CD267),
+              Color(0xFF1DB954),
+            ],
+            onTap: () async {
+              setState(() {
+                _showEntryField = true;
+              });
+            },
           ),
-          onPressed: () {
-            setState(() {
-              _showEntryField = true;
-            });
-          },
+          // child: OutlinedButton(
+          //   child: Icon(
+          //     Icons.add,
+          //     color: Colors.pink,
+          //   ),
+          //   onPressed: () {
+          //     setState(() {
+          //       _showEntryField = true;
+          //     });
+          //   },
+          // ),
+          // ),
         ),
-      ));
+      );
     } else {
       children.add(
         SizedBox(
