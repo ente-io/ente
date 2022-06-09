@@ -58,6 +58,19 @@ class FeatureFlagService {
     }
   }
 
+  bool enableMissingLocationMigration() {
+    // only needs to be enabled for android
+    if (!Platform.isAndroid) {
+      return false;
+    }
+    try {
+      return _getFeatureFlags().enableMissingLocationMigration;
+    } catch (e) {
+      _logger.severe(e);
+      return FFDefault.enableMissingLocationMigration;
+    }
+  }
+
   bool enableStripe() {
     if (Platform.isIOS) {
       return false;
@@ -90,23 +103,26 @@ class FeatureFlags {
   static FeatureFlags defaultFlags = FeatureFlags(
       disableCFWorker: FFDefault.disableCFWorker,
       disableUrlSharing: FFDefault.disableUrlSharing,
-      enableStripe: FFDefault.enableStripe);
+      enableStripe: FFDefault.enableStripe,
+      enableMissingLocationMigration: FFDefault.enableMissingLocationMigration);
 
   final bool disableCFWorker;
   final bool disableUrlSharing;
   final bool enableStripe;
+  final bool enableMissingLocationMigration;
 
-  FeatureFlags({
-    @required this.disableCFWorker,
-    @required this.disableUrlSharing,
-    @required this.enableStripe,
-  });
+  FeatureFlags(
+      {@required this.disableCFWorker,
+      @required this.disableUrlSharing,
+      @required this.enableStripe,
+      @required this.enableMissingLocationMigration});
 
   Map<String, dynamic> toMap() {
     return {
       "disableCFWorker": disableCFWorker,
       "disableUrlSharing": disableUrlSharing,
       "enableStripe": enableStripe,
+      "enableMissingLocationMigration": enableMissingLocationMigration,
     };
   }
 
@@ -121,6 +137,8 @@ class FeatureFlags {
       disableUrlSharing:
           json["disableUrlSharing"] ?? FFDefault.disableUrlSharing,
       enableStripe: json["enableStripe"] ?? FFDefault.enableStripe,
+      enableMissingLocationMigration: json["enableMissingLocationMigration"] ??
+          FFDefault.enableMissingLocationMigration,
     );
   }
 
