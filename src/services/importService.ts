@@ -1,5 +1,6 @@
 import { DESKTOP_UPLOAD_TYPE } from 'components/pages/gallery/Upload';
 import { Collection } from 'types/collection';
+import { ElectronAPIsInterface } from 'types/electron';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
@@ -15,7 +16,7 @@ interface selectZipResult {
     zipPaths: string[];
 }
 class ImportService {
-    ElectronAPIs: any;
+    ElectronAPIs: ElectronAPIsInterface;
     private allElectronAPIsExist: boolean = false;
 
     constructor() {
