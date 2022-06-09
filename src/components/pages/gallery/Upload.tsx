@@ -79,7 +79,7 @@ export default function Upload(props: Props) {
         UPLOAD_STAGES.START
     );
     const [filenames, setFilenames] = useState(new Map<number, string>());
-    const [fileCounter, setFileCounter] = useState({ success: 0, issues: 0 });
+    const [fileCounter, setFileCounter] = useState({ finished: 0, total: 0 });
     const [fileProgress, setFileProgress] = useState(new Map<number, number>());
     const [uploadResult, setUploadResult] = useState(
         new Map<number, FileUploadResults>()
@@ -171,7 +171,7 @@ export default function Upload(props: Props) {
 
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
-        setFileCounter({ success: 0, issues: 0 });
+        setFileCounter({ finished: 0, total: 0 });
         setFileProgress(new Map<number, number>());
         setUploadResult(new Map<number, number>());
         setPercentComplete(0);
