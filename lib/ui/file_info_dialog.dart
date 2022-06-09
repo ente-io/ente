@@ -2,6 +2,7 @@ import 'package:exif/exif.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
@@ -256,13 +257,19 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               children: [
                 Icon(
                   Icons.feed_outlined,
-                  color: Colors.white.withOpacity(0.5),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .defaultTextColor
+                      .withOpacity(0.5),
                 ),
                 Padding(padding: EdgeInsets.all(4)),
                 Text(
                   "No exif",
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .defaultTextColor
+                        .withOpacity(0.5),
                   ),
                 ),
               ],
