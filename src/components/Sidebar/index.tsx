@@ -4,7 +4,7 @@ import NavigationSection from './NavigationSection';
 import UtilitySection from './UtilitySection';
 import HelpSection from './HelpSection';
 import ExitSection from './ExitSection';
-// import DebugLogs from './DebugLogs';
+import DebugLogs from './DebugLogs';
 import { DrawerSidebar, PaddedDivider } from './styledComponents';
 import HeaderSection from './Header';
 import { CollectionSummaries } from 'types/collection';
@@ -38,8 +38,8 @@ export default function Sidebar({
             <HelpSection />
             <PaddedDivider />
             <ExitSection />
-            {/* <PaddedDivider />
-            <DebugLogs /> */}
+            <PaddedDivider />
+            <DebugLogs />
         </DrawerSidebar>
     );
 }
