@@ -143,10 +143,10 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('are you sure you want to exit?'),
+        title: Text('Are you sure you want to exit?'),
         actions: <Widget>[
           TextButton(
-            child: Text('yes',
+            child: Text('Yes',
                 style: TextStyle(
                   color: Colors.redAccent,
                 )),
@@ -154,7 +154,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
           ),
           TextButton(
             child: Text(
-              'no',
+              'No',
               style: TextStyle(
                 color: Theme.of(context).buttonColor,
               ),

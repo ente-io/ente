@@ -26,14 +26,14 @@ class ManageSharedLinkWidget extends StatefulWidget {
 class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   // index, title, milliseconds in future post which link should expire (when >0)
   final List<Tuple3<int, String, int>> _expiryOptions = [
-    Tuple3(0, "never", 0),
-    Tuple3(1, "after 1 hour", Duration(hours: 1).inMicroseconds),
-    Tuple3(2, "after 1 day", Duration(days: 1).inMicroseconds),
-    Tuple3(3, "after 1 week", Duration(days: 7).inMicroseconds),
+    Tuple3(0, "Never", 0),
+    Tuple3(1, "After 1 hour", Duration(hours: 1).inMicroseconds),
+    Tuple3(2, "After 1 day", Duration(days: 1).inMicroseconds),
+    Tuple3(3, "After 1 week", Duration(days: 7).inMicroseconds),
     // todo: make this time calculation perfect
-    Tuple3(4, "after 1 month", Duration(days: 30).inMicroseconds),
-    Tuple3(5, "after 1 year", Duration(days: 365).inMicroseconds),
-    Tuple3(6, "custom", -1),
+    Tuple3(4, "After 1 month", Duration(days: 30).inMicroseconds),
+    Tuple3(5, "After 1 year", Duration(days: 365).inMicroseconds),
+    Tuple3(6, "Custom", -1),
   ];
 
   Tuple3<int, String, int> _selectedExpiry;

@@ -55,7 +55,7 @@ class _RenameDialogState extends State<RenameDialog> {
       actions: [
         TextButton(
           child: Text(
-            "cancel",
+            "Cancel",
             style: TextStyle(
               color: Colors.redAccent,
             ),
@@ -66,7 +66,7 @@ class _RenameDialogState extends State<RenameDialog> {
         ),
         TextButton(
           child: Text(
-            "rename",
+            "Rename",
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
             ),
@@ -74,11 +74,11 @@ class _RenameDialogState extends State<RenameDialog> {
           onPressed: () {
             if (_newName.trim().isEmpty) {
               showErrorDialog(
-                  context, "empty name", "${widget.type} name cannot be empty");
+                  context, "Empty name", "${widget.type} name cannot be empty");
               return;
             }
             if (_newName.trim().length > widget.maxLength) {
-              showErrorDialog(context, "name too large",
+              showErrorDialog(context, "Name too large",
                   "${widget.type} name should be less than ${widget.maxLength} characters");
               return;
             }
