@@ -492,7 +492,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       ));
     } else {
       actions.add(CupertinoActionSheetAction(
-        child: Text("delete"),
+        child: Text("Delete"),
         isDestructiveAction: true,
         onPressed: () async {
           Navigator.of(context, rootNavigator: true).pop();
