@@ -15,8 +15,6 @@ import 'package:photos/models/galleryType.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/ui/common/bottomShadow.dart';
-import 'package:photos/ui/common/onlyOuterShadow.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -144,13 +142,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Container(
-              decoration: BoxDecoration(boxShadow: [
-                onlyOuterShadow(
-                  blurRadius: 12,
-                  blurStyle: BlurStyle.outer,
-                  color: Color.fromRGBO(0, 0, 0, 0.16),
-                ),
-              ], borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: BackdropFilter(
@@ -158,8 +150,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                   child: Container(
                     color: Theme.of(context)
                         .colorScheme
-                        .frostyBlurBackdropFilterColor
-                        .withOpacity(0.5),
+                        .frostyBlurBackdropFilterColor,
                     width: double.infinity,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -172,10 +163,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                             style: Theme.of(context)
                                 .textTheme
                                 .subtitle2
-                                .copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black //same for both themes
-                                    ),
+                                .copyWith(fontWeight: FontWeight.w600),
                           ),
                         ),
                         Row(
@@ -194,7 +182,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(24),
-                child: InkWell(
+                child: GestureDetector(
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
                     child: Container(
@@ -205,13 +193,10 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                           .colorScheme
                           .cancelSelectedButtonColor,
                       child: Center(
-                        child: Text('Cancel',
-                            style: Theme.of(context)
-                                .textTheme
-                                .subtitle2
-                                .copyWith(
-                                  color: Colors.white, //same for both themes
-                                )),
+                        child: Text(
+                          'Cancel',
+                          style: Theme.of(context).textTheme.subtitle2,
+                        ),
                       ),
                     ),
                   ),
@@ -219,9 +204,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                 ),
               ),
             ],
-          ),
-          BottomShadowWidget(
-            offsetDy: 40,
           ),
         ],
       ),
@@ -277,7 +259,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         Tooltip(
           message: msg,
           child: IconButton(
-            color: Colors.black, //same for both themes
+            color: Theme.of(context).colorScheme.iconColor,
             icon: Icon(iconData),
             onPressed: () {
               _createAlbum();
@@ -293,7 +275,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         Tooltip(
           message: "Move",
           child: IconButton(
-            color: Colors.black, //same for both themes
+            color: Theme.of(context).colorScheme.iconColor,
             icon: Icon(Platform.isAndroid
                 ? Icons.arrow_forward
                 : CupertinoIcons.arrow_right),
@@ -308,7 +290,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       Tooltip(
         message: "Share",
         child: IconButton(
-          color: Colors.black, //same for both themes
+          color: Theme.of(context).colorScheme.iconColor,
           key: shareButtonKey,
           icon: Icon(Platform.isAndroid ? Icons.share : CupertinoIcons.share),
           onPressed: () {
@@ -324,7 +306,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         Tooltip(
           message: "Delete",
           child: IconButton(
-            color: Colors.black, //same for both themes
+            color: Theme.of(context).colorScheme.iconColor,
             icon:
                 Icon(Platform.isAndroid ? Icons.delete : CupertinoIcons.delete),
             onPressed: () {
@@ -339,7 +321,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           Tooltip(
             message: "Delete",
             child: IconButton(
-              color: Colors.black, //same for both themes
+              color: Theme.of(context).colorScheme.iconColor,
               icon: Icon(
                 Platform.isAndroid ? Icons.delete : CupertinoIcons.delete,
               ),
@@ -354,7 +336,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           Tooltip(
             message: "Remove",
             child: IconButton(
-              color: Colors.black, //same for both themes
+              color: Theme.of(context).colorScheme.iconColor,
               icon: Icon(
                 Icons.remove_circle_rounded,
               ),
@@ -373,7 +355,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       actions.add(Tooltip(
         message: showArchive ? "Hide" : "Unhide",
         child: IconButton(
-          color: Colors.black, //same for both themes
+          color: Theme.of(context).colorScheme.iconColor,
           icon: Icon(
             showArchive ? Icons.visibility_off : Icons.visibility,
           ),
@@ -391,7 +373,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     actions.add(Tooltip(
       message: "Restore",
       child: IconButton(
-        color: Colors.black, //same for both themes
+        color: Theme.of(context).colorScheme.iconColor,
         icon: Icon(
           Icons.restore,
         ),
@@ -412,7 +394,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       Tooltip(
         message: "Delete permanently",
         child: IconButton(
-          color: Colors.black, //same for both themes
+          color: Theme.of(context).colorScheme.iconColor,
           icon: Icon(
             Icons.delete_forever,
           ),
@@ -516,7 +498,11 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         },
       ),
     );
-    showCupertinoModalPopup(context: context, builder: (_) => action);
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => action,
+      barrierColor: Colors.black.withOpacity(0.75),
+    );
   }
 
   void _showRemoveFromCollectionSheet(BuildContext context) {

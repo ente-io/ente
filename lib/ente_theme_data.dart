@@ -40,11 +40,15 @@ extension CustomColorScheme on ColorScheme {
       ? Color.fromRGBO(49, 155, 86, 0.2)
       : Color(0xFF1DB954);
 
-  Color get frostyBlurBackdropFilterColor =>
-      Colors.white; //same for both themes
+  Color get frostyBlurBackdropFilterColor => brightness == Brightness.light
+      ? Colors.white.withOpacity(0.5)
+      : Color.fromRGBO(48, 48, 48, 0.5);
+
+  Color get iconColor =>
+      brightness == Brightness.light ? Colors.black : Colors.white;
 
   Color get cancelSelectedButtonColor => brightness == Brightness.light
-      ? Color.fromRGBO(0, 0, 0, 0.35)
+      ? Color.fromRGBO(238, 238, 238, 1)
       : Color.fromRGBO(48, 48, 48, 0.5);
 
   Color get bgColorForQuestions => brightness == Brightness.light

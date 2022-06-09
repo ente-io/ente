@@ -301,7 +301,7 @@ class OutgoingCollectionItem extends StatelessWidget {
         child: Row(
           children: <Widget>[
             ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
+              borderRadius: BorderRadius.circular(3),
               child: SizedBox(
                 child: Hero(
                     tag: "outgoing_collection" + c.thumbnail.tag(),
@@ -378,7 +378,7 @@ class IncomingCollectionItem extends StatelessWidget {
       child: Column(
         children: <Widget>[
           ClipRRect(
-            borderRadius: BorderRadius.circular(18.0),
+            borderRadius: BorderRadius.circular(4),
             child: Container(
               child: Stack(
                 children: [
