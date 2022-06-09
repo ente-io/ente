@@ -130,8 +130,6 @@ const defaultGalleryContext: GalleryContextType = {
     syncWithRemote: () => null,
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
-    sidebarView: false,
-    closeSidebar: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -204,7 +202,7 @@ export default function Gallery() {
     const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
 
-    const [sidebarView, setSidebarView] = useState(false);
+    const [sidebarView, setSidebarView] = useState(true);
 
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
@@ -584,8 +582,6 @@ export default function Gallery() {
                 syncWithRemote,
                 setNotificationAttributes,
                 setBlockingLoad,
-                closeSidebar,
-                sidebarView,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
@@ -683,7 +679,11 @@ export default function Gallery() {
                     setUploadTypeSelectorView={setUploadTypeSelectorView}
                     showSessionExpiredMessage={showSessionExpiredMessage}
                 />
-                <Sidebar collectionSummaries={collectionSummaries} />
+                <Sidebar
+                    collectionSummaries={collectionSummaries}
+                    sidebarView={sidebarView}
+                    closeSidebar={closeSidebar}
+                />
 
                 <PhotoFrame
                     files={files}
