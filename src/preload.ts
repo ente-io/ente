@@ -158,16 +158,6 @@ const showUploadZipDialog = async () => {
     }
 };
 
-const selectFolder = async () => {
-    try {
-        let folderPath: string = await ipcRenderer.invoke('select-folder');
-        folderPath = folderPath.split(path.sep).join(path.posix.sep);
-        return folderPath;
-    } catch (e) {
-        logError(e, 'error while selecting folder');
-    }
-};
-
 const windowObject: any = window;
 windowObject['ElectronAPIs'] = {
     exists,
@@ -194,7 +184,6 @@ windowObject['ElectronAPIs'] = {
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
     getAllFilesFromDir,
-    selectFolder,
     getWatchMappings,
     setWatchMappings,
     initWatcher,
