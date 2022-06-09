@@ -1,7 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import Link from '@mui/material/Link';
 import LinkButton from 'components/pages/gallery/LinkButton';
-import { DotSeparator } from 'components/Sidebar/styledComponents';
 import React from 'react';
 import styled from 'styled-components';
 import { SuggestionType } from 'types/search';
@@ -112,15 +111,8 @@ const englishConstants = {
         0: 'Preparing to upload',
         1: 'Reading google metadata files',
         2: 'Reading file metadata',
-        3: (fileCounter) => (
-            <Typography>
-                <Box component={'span'} fontWeight={600}>
-                    {fileCounter.issues} issues
-                </Box>
-                <DotSeparator />
-                {fileCounter.success} uploaded
-            </Typography>
-        ),
+        3: (fileCounter) =>
+            `${fileCounter.finished} / ${fileCounter.total} files backed up`,
         4: 'Backup complete',
         5: 'Cancelling remaining uploads',
     },

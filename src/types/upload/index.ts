@@ -60,8 +60,8 @@ export interface ProgressUpdater {
     setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
     setFileCounter: React.Dispatch<
         React.SetStateAction<{
-            success: number;
-            issues: number;
+            finished: number;
+            total: number;
         }>
     >;
     setUploadStage: React.Dispatch<React.SetStateAction<UPLOAD_STAGES>>;
