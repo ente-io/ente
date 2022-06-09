@@ -40,13 +40,10 @@ export default function ExitSection() {
 
     return (
         <>
-            <SidebarButton onClick={confirmLogout} hideArrow color="danger">
+            <SidebarButton onClick={confirmLogout} color="danger">
                 {constants.LOGOUT}
             </SidebarButton>
-            <SidebarButton
-                onClick={showDeleteAccountDirections}
-                hideArrow
-                color="danger">
+            <SidebarButton onClick={showDeleteAccountDirections} color="danger">
                 {constants.DELETE_ACCOUNT}
             </SidebarButton>
         </>

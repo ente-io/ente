@@ -71,10 +71,7 @@ const darkThemeOptions = createTheme({
             },
             styleOverrides: {
                 root: {
-                    color: 'inherit',
-                    textDecorationColor: 'inherit',
                     '&:hover': {
-                        textDecoration: 'underline',
                         color: '#1dba54',
                     },
                 },
@@ -140,10 +137,6 @@ const darkThemeOptions = createTheme({
             main: 'rgba(256, 256, 256, 0.12)',
             contrastText: '#fff',
         },
-        text: {
-            primary: '#fff',
-            secondary: '#808080',
-        },
         accent: {
             main: '#1dba54',
             dark: '#248546',
@@ -184,6 +177,10 @@ const darkThemeOptions = createTheme({
             fontWeight: 600,
             lineHeight: '36px',
             display: 'block',
+        },
+        caption: {
+            fontSize: '12px',
+            lineHeight: '15px',
         },
         fontFamily: ['Inter', 'sans-serif'].join(','),
     },

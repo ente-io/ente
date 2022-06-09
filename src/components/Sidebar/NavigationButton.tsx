@@ -17,7 +17,6 @@ const NavigationButton: FC<ButtonProps<'button', IProps>> = ({
 }) => {
     return (
         <SidebarButton
-            smallerArrow
             variant="contained"
             color="secondary"
             sx={{ px: '12px' }}

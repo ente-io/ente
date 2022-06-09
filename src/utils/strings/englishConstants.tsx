@@ -1,9 +1,11 @@
 import { Box, Typography } from '@mui/material';
 import Link from '@mui/material/Link';
+import LinkButton from 'components/pages/gallery/LinkButton';
 import { DotSeparator } from 'components/Sidebar/styledComponents';
 import React from 'react';
 import styled from 'styled-components';
 import { SuggestionType } from 'types/search';
+import { formatNumberWithCommas } from '.';
 
 /**
  * Global English constants.
@@ -125,6 +127,12 @@ const englishConstants = {
     UPLOADING_FILES: 'File upload',
     FILE_NOT_UPLOADED_LIST: 'The following files were not uploaded',
     SUBSCRIPTION_EXPIRED: 'Subscription expired',
+    SUBSCRIPTION_EXPIRED_MESSAGE: (onClick) => (
+        <>
+            Your subscription has expired, please{' '}
+            <LinkButton onClick={onClick}> renew </LinkButton>
+        </>
+    ),
     STORAGE_QUOTA_EXCEEDED: 'Storage limit exceeded',
     INITIAL_LOAD_DELAY_WARNING: 'First load may take some time',
     USER_DOES_NOT_EXIST: 'Sorry, could not find a user with that email',
@@ -198,9 +206,9 @@ const englishConstants = {
         <>
             <p>
                 Please send an email to{' '}
-                <a href="mailto:account-deletion@ente.io">
+                <Link href="mailto:account-deletion@ente.io">
                     account-deletion@ente.io
-                </a>{' '}
+                </Link>{' '}
                 from your registered email address.{' '}
             </p>
             Your request will be processed within 72 hours.
@@ -264,31 +272,23 @@ const englishConstants = {
 
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
-            <p>
-                You are on the <strong>free</strong> plan that expires on{' '}
-                {dateString(expiryTime)}
-            </p>
+            You are on the <strong>free</strong> plan that expires on{' '}
+            {dateString(expiryTime)}
         </>
     ),
 
     FAMILY_PLAN_MANAGE_ADMIN_ONLY: (adminEmail) => (
         <>
-            <p>
-                Only your family plan admin <strong>{adminEmail}</strong> can
-                change the plan
-            </p>
+            Only your family plan admin <strong>{adminEmail}</strong> can change
+            the plan
         </>
     ),
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
-        <p>Your subscription will renew on {dateString(expiryTime)}</p>
+        <>Your subscription will renew on {dateString(expiryTime)}</>
     ),
 
     RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
-        <>
-            <p>
-                Your subscription will be cancelled on {dateString(expiryTime)}
-            </p>
-        </>
+        <>Your subscription will be cancelled on {dateString(expiryTime)}</>
     ),
 
     USAGE_INFO: (usage, quota) => (
@@ -329,7 +329,7 @@ const englishConstants = {
     UPDATE_SUBSCRIPTION: 'Change plan',
 
     CONFIRM_CANCEL_SUBSCRIPTION: 'cancel subscription',
-    CANCEL_SUBSCRIPTION: 'Unsubscribe',
+    CANCEL_SUBSCRIPTION: 'Cancel subscription',
     CANCEL_SUBSCRIPTION_MESSAGE: () => (
         <>
             <p>
@@ -420,7 +420,11 @@ const englishConstants = {
         }
     },
     PHOTO_COUNT: (count: number) =>
-        `${count === 1 ? `1 Photo` : `${count} Photos`}`,
+        `${
+            count === 1
+                ? `1 memory`
+                : `${formatNumberWithCommas(count)} memories`
+        }`,
     TERMS_AND_CONDITIONS: () => (
         <Typography variant="body2">
             I agree to the{' '}
@@ -768,6 +772,12 @@ const englishConstants = {
     ),
     UPGRADE_NOW: 'Upgrade now',
     RENEW_NOW: 'Renew now',
+    STORAGE: 'Storage',
+    USED: 'used',
+    YOU: 'You',
+    FAMILY: 'Family',
+    FREE: 'free',
+    OF: 'of',
 };
 
 export default englishConstants;
