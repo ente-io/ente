@@ -21,13 +21,13 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
   @override
   Widget build(BuildContext context) {
     final alert = AlertDialog(
-      title: Text("set wallpaper"),
+      title: Text("Set wallpaper"),
       content: Container(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             RadioListTile(
-              title: const Text("homescreen"),
+              title: const Text("Homescreen"),
               value: WallpaperManagerFlutter.HOME_SCREEN,
               groupValue: _lockscreenValue,
               onChanged: (v) {
@@ -37,7 +37,7 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
               },
             ),
             RadioListTile(
-              title: const Text("lockscreen"),
+              title: const Text("Lockscreen"),
               value: WallpaperManagerFlutter.LOCK_SCREEN,
               groupValue: _lockscreenValue,
               onChanged: (v) {
@@ -47,7 +47,7 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
               },
             ),
             RadioListTile(
-              title: const Text("both"),
+              title: const Text("Both"),
               value: WallpaperManagerFlutter.BOTH_SCREENS,
               groupValue: _lockscreenValue,
               onChanged: (v) {
