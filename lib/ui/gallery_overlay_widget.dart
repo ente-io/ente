@@ -15,8 +15,6 @@ import 'package:photos/models/galleryType.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/ui/common/bottomShadow.dart';
-import 'package:photos/ui/common/onlyOuterShadow.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -144,13 +142,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Container(
-              decoration: BoxDecoration(boxShadow: [
-                onlyOuterShadow(
-                  blurRadius: 12,
-                  blurStyle: BlurStyle.outer,
-                  color: Color.fromRGBO(0, 0, 0, 0.16),
-                ),
-              ], borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: BackdropFilter(
@@ -212,9 +204,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                 ),
               ),
             ],
-          ),
-          BottomShadowWidget(
-            offsetDy: 40,
           ),
         ],
       ),
