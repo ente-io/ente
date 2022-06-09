@@ -78,7 +78,7 @@ export async function getAllFilesFromDir(dirPath: string) {
     return electronFiles;
 }
 
-export async function isFolderExists(dirPath: string) {
+export async function doesFolderExists(dirPath: string) {
     return await fs
         .stat(dirPath)
         .then((stats) => {
@@ -118,11 +118,11 @@ export function initWatcher(mainWindow: BrowserWindow) {
 
 export function registerWatcherFunctions(
     WatchServiceInstance: any,
-    add: (WatchServiceInstance: any, file: ElectronFile) => Promise<void>,
-    remove: (
+    addFile: (WatchServiceInstance: any, file: ElectronFile) => Promise<void>,
+    removeFile: (WatchServiceInstance: any, path: string) => Promise<void>,
+    removeFolder: (
         WatchServiceInstance: any,
-        path: string,
-        isDir?: boolean
+        folderPath: string
     ) => Promise<void>
 ) {
     ipcRenderer.removeAllListeners('watch-add');
@@ -130,21 +130,21 @@ export function registerWatcherFunctions(
     ipcRenderer.removeAllListeners('watch-unlink');
     ipcRenderer.on('watch-add', async (_, filePath: string) => {
         filePath = filePath.split(path.sep).join(path.posix.sep);
-        await add(WatchServiceInstance, await getElectronFile(filePath));
+        await addFile(WatchServiceInstance, await getElectronFile(filePath));
     });
     ipcRenderer.on('watch-change', async (_, filePath: string) => {
         filePath = filePath.split(path.sep).join(path.posix.sep);
-        await remove(WatchServiceInstance, filePath);
-        await add(WatchServiceInstance, await getElectronFile(filePath));
+        await removeFile(WatchServiceInstance, filePath);
+        await addFile(WatchServiceInstance, await getElectronFile(filePath));
     });
     ipcRenderer.on(
         'watch-unlink',
         async (_, filePath: string, isDir?: boolean) => {
             filePath = filePath.split(path.sep).join(path.posix.sep);
             if (isDir) {
-                await remove(WatchServiceInstance, filePath, true);
+                await removeFolder(WatchServiceInstance, filePath);
             } else {
-                await remove(WatchServiceInstance, filePath);
+                await removeFile(WatchServiceInstance, filePath);
             }
         }
     );

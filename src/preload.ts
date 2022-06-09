@@ -18,7 +18,7 @@ import {
     setWatchMappings,
     addWatchMapping,
     removeWatchMapping,
-    isFolderExists,
+    doesFolderExists,
 } from './utils/watch';
 import path from 'path';
 
@@ -201,5 +201,5 @@ windowObject['ElectronAPIs'] = {
     addWatchMapping,
     removeWatchMapping,
     registerWatcherFunctions,
-    isFolderExists,
+    doesFolderExists,
 };
