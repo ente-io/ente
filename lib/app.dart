@@ -110,7 +110,7 @@ final darkThemeData = ThemeData(
   scaffoldBackgroundColor: Colors.black,
   backgroundColor: Colors.black,
   appBarTheme: AppBarTheme().copyWith(
-    color: Color.fromRGBO(10, 20, 20, 1.0),
+    color: Colors.black,
     elevation: 0,
   ),
   cardColor: Color.fromRGBO(10, 15, 15, 1.0),

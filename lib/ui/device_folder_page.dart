@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -86,7 +87,7 @@ class _BackupConfigurationHeaderWidgetState
     return Container(
       padding: EdgeInsets.only(left: 20, right: 12, top: 4, bottom: 4),
       margin: EdgeInsets.only(bottom: 12),
-      color: Color.fromRGBO(10, 40, 40, 0.3),
+      color: Theme.of(context).colorScheme.backupEnabledBgColor,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -94,7 +95,11 @@ class _BackupConfigurationHeaderWidgetState
               ? Text("Backup enabled")
               : Text(
                   "Backup disabled",
-                  style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                  style: TextStyle(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .defaultTextColor
+                          .withOpacity(0.7)),
                 ),
           Switch(
             value: isBackedUp,
