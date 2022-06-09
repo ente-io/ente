@@ -1,8 +1,6 @@
 import path from 'path';
 import fs from 'promise-fs';
-import chokidar from 'chokidar';
 import { watchStore } from '../services/store';
-import { logError } from './logging';
 import { BrowserWindow, ipcRenderer } from 'electron';
 import { ElectronFile, WatchStoreType } from '../types';
 import { getElectronFile, getFilesFromDir } from './upload';
@@ -85,35 +83,6 @@ export async function doesFolderExists(dirPath: string) {
             return stats.isDirectory();
         })
         .catch(() => false);
-}
-
-export function initWatcher(mainWindow: BrowserWindow) {
-    const mappings = getWatchMappings();
-    const folderPaths = mappings.map((mapping) => {
-        return mapping.folderPath;
-    });
-
-    const watcher = chokidar.watch(folderPaths, {
-        awaitWriteFinish: true,
-    });
-    watcher
-        .on('add', (path) => {
-            mainWindow.webContents.send('watch-add', path);
-        })
-        .on('change', (path) => {
-            mainWindow.webContents.send('watch-change', path);
-        })
-        .on('unlink', (path) => {
-            mainWindow.webContents.send('watch-unlink', path);
-        })
-        .on('unlinkDir', (path) => {
-            mainWindow.webContents.send('watch-unlink', path, true);
-        })
-        .on('error', (error) => {
-            logError(error, 'error while watching files');
-        });
-
-    return watcher;
 }
 
 export function registerWatcherFunctions(
