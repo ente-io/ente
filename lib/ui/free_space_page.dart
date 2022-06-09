@@ -21,17 +21,8 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Hero(
-          tag: "free_up_space",
-          child: Material(
-            type: MaterialType.transparency,
-            child: Text(
-              "Free up space",
-              style: TextStyle(
-                fontSize: 18,
-              ),
-            ),
-          ),
+        title: Text(
+          "Free up space",
         ),
       ),
       body: _getBody(),
