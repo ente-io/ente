@@ -36,4 +36,5 @@ class FFDefault {
   static const bool enableStripe = true;
   static const bool disableUrlSharing = false;
   static const bool disableCFWorker = false;
+  static const bool enableMissingLocationMigration = false;
 }
