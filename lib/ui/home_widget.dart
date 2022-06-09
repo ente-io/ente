@@ -527,7 +527,7 @@ class HomeBottomNavigationBar extends StatefulWidget {
 class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   final _logger = Logger((_HomeBottomNavigationBarState).toString());
-  int currentTabIndex;
+  int currentTabIndex = 0;
 
   @override
   void initState() {
