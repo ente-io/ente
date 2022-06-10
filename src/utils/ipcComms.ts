@@ -4,6 +4,7 @@ import { buildContextMenu } from './menuUtil';
 import { logErrorSentry } from './sentry';
 import { getFilesFromDir } from './upload';
 import chokidar from 'chokidar';
+import path from 'path';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -14,10 +15,11 @@ export default function setupIpcComs(
         const result = await dialog.showOpenDialog({
             properties: ['openDirectory'],
         });
-        const dir =
+        let dir =
             result.filePaths &&
             result.filePaths.length > 0 &&
             result.filePaths[0];
+        dir = dir.split(path.sep).join(path.posix.sep);
         return dir;
     });
 
