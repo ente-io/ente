@@ -105,7 +105,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         _selectedTabIndex = event.selectedIndex;
         _pageController.animateToPage(
           event.selectedIndex,
-          duration: Duration(milliseconds: 150),
+          duration: Duration(milliseconds: 100),
           curve: Curves.easeIn,
         );
       }
@@ -150,7 +150,11 @@ class _HomeWidgetState extends State<HomeWidget> {
       );
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
-      setState(() {});
+      _logger.info('logged out, selectTab index to 0');
+      _selectedTabIndex = 0;
+      if (mounted) {
+        setState(() {});
+      }
     });
     _permissionGrantedEvent =
         Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
@@ -223,7 +227,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.info("Building home_Widget");
+    _logger.info("Building home_Widget with tab $_selectedTabIndex");
 
     return WillPopScope(
       child: Scaffold(
