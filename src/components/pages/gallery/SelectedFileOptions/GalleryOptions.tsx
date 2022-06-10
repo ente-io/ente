@@ -1,5 +1,5 @@
 import { SetDialogMessage } from 'components/MessageDialog';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { SetCollectionSelectorAttributes } from '../CollectionSelector';
 import DeleteIcon from 'components/icons/DeleteIcon';
 import CloseIcon from 'components/icons/CloseIcon';
@@ -19,10 +19,7 @@ import { Collection } from 'types/collection';
 import RemoveIcon from 'components/icons/RemoveIcon';
 import RestoreIcon from 'components/icons/RestoreIcon';
 import ClockIcon from 'components/icons/ClockIcon';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { FIX_CREATION_TIME_VISIBLE_TO_USER_IDS } from 'constants/user';
 import DownloadIcon from 'components/icons/DownloadIcon';
-import { User } from 'types/user';
 import { IconWithMessage } from 'components/IconWithMessage';
 import { SelectionBar, SelectionContainer } from '.';
 
@@ -63,14 +60,6 @@ const SelectedFileOptions = ({
     activeCollection,
     isFavoriteCollection,
 }: Props) => {
-    const [showFixCreationTime, setShowFixCreationTime] = useState(false);
-
-    useEffect(() => {
-        const user: User = getData(LS_KEYS.USER);
-        const showFixCreationTime =
-            FIX_CREATION_TIME_VISIBLE_TO_USER_IDS.includes(user?.id);
-        setShowFixCreationTime(showFixCreationTime);
-    }, []);
     const addToCollection = () =>
         setCollectionSelectorAttributes({
             callback: addToCollectionHelper,
@@ -161,13 +150,12 @@ const SelectedFileOptions = ({
                 </>
             ) : (
                 <>
-                    {showFixCreationTime && (
-                        <IconWithMessage message={constants.FIX_CREATION_TIME}>
-                            <IconButton onClick={fixTimeHelper}>
-                                <ClockIcon />
-                            </IconButton>
-                        </IconWithMessage>
-                    )}
+                    <IconWithMessage message={constants.FIX_CREATION_TIME}>
+                        <IconButton onClick={fixTimeHelper}>
+                            <ClockIcon />
+                        </IconButton>
+                    </IconWithMessage>
+
                     <IconWithMessage message={constants.DOWNLOAD}>
                         <IconButton onClick={downloadHelper}>
                             <DownloadIcon />
