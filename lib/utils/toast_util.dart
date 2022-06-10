@@ -3,9 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:photos/ente_theme_data.dart';
 
-Future<void> showToast(String message,
-    {toastLength = Toast.LENGTH_LONG}) async {
+Future<void> showToast(
+  BuildContext context,
+  String message, {
+  toastLength = Toast.LENGTH_LONG,
+}) async {
   if (Platform.isAndroid) {
     await Fluttertoast.cancel();
     return Fluttertoast.showToast(
@@ -13,14 +17,14 @@ Future<void> showToast(String message,
         toastLength: toastLength,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
-        backgroundColor: Color.fromRGBO(127, 127, 127, 0.8),
-        textColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.toastBackgroundColor,
+        textColor: Theme.of(context).colorScheme.toastTextColor,
         fontSize: 16.0);
   } else {
     EasyLoading.instance
-      ..backgroundColor = Color.fromRGBO(127, 127, 127, 0.8)
-      ..indicatorColor = Color.fromRGBO(127, 127, 127, 0.8)
-      ..textColor = Colors.white
+      ..backgroundColor = Theme.of(context).colorScheme.toastBackgroundColor
+      ..indicatorColor = Theme.of(context).colorScheme.toastBackgroundColor
+      ..textColor = Theme.of(context).colorScheme.toastTextColor
       ..userInteractions = true
       ..loadingStyle = EasyLoadingStyle.custom;
     return EasyLoading.showToast(
@@ -31,6 +35,6 @@ Future<void> showToast(String message,
   }
 }
 
-Future<void> showShortToast(String message) {
-  return showToast(message, toastLength: Toast.LENGTH_SHORT);
+Future<void> showShortToast(context, String message) {
+  return showToast(context, message, toastLength: Toast.LENGTH_SHORT);
 }

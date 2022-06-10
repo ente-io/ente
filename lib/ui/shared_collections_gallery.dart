@@ -239,7 +239,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 Color(0xFF1DB954),
               ],
               onTap: () async {
-                await showToast("Select an album on ente to share",
+                await showToast(context, "Select an album on ente to share",
                     toastLength: Toast.LENGTH_LONG);
                 Bus.instance.fire(
                     TabChangedEvent(1, TabChangedEventSource.collections_page));

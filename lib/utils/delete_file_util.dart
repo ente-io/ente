@@ -119,9 +119,9 @@ Future<void> deleteFilesFromEverywhere(
     Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles,
         type: EventType.deletedFromEverywhere));
     if (hasLocalOnlyFiles && Platform.isAndroid) {
-      showShortToast("Files deleted");
+      showShortToast(context, "Files deleted");
     } else {
-      showShortToast("Moved to trash");
+      showShortToast(context, "Moved to trash");
     }
   }
   await dialog.hide();
@@ -134,7 +134,7 @@ Future<void> deleteFilesFromRemoteOnly(
     BuildContext context, List<File> files) async {
   files.removeWhere((element) => element.uploadedFileID == null);
   if (files.isEmpty) {
-    showToast("Selected files are not on ente");
+    showToast(context, "Selected files are not on ente");
     return;
   }
   final dialog = createProgressDialog(context, "Deleting...");
@@ -239,7 +239,7 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
   await dialog.show();
   try {
     await TrashSyncService.instance.deleteFromTrash(files);
-    showShortToast("Successfully deleted");
+    showShortToast(context, "Successfully deleted");
     await dialog.hide();
     Bus.instance
         .fire(FilesUpdatedEvent(files, type: EventType.deletedFromEverywhere));
@@ -263,7 +263,7 @@ Future<bool> emptyTrash(BuildContext context) async {
   await dialog.show();
   try {
     await TrashSyncService.instance.emptyTrash();
-    showShortToast("Trash emptied");
+    showShortToast(context, "Trash emptied");
     await dialog.hide();
     return true;
   } catch (e, s) {
@@ -307,7 +307,7 @@ Future<bool> deleteLocalFiles(
     Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
     return true;
   } else {
-    showToast("Could not free up space");
+    showToast(context, "Could not free up space");
     return false;
   }
 }

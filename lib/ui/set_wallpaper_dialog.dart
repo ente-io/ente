@@ -75,11 +75,11 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
               await WallpaperManagerFlutter().setwallpaperfromFile(
                   await getFile(widget.file), _lockscreenValue);
               await dialog.hide();
-              showToast("Wallpaper set successfully");
+              showToast(context, "Wallpaper set successfully");
             } catch (e, s) {
               await dialog.hide();
               Logger("SetWallpaperDialog").severe(e, s);
-              showToast("Something went wrong");
+              showToast(context, "Something went wrong");
               return;
             }
           },

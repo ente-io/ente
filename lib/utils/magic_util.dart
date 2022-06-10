@@ -22,9 +22,11 @@ Future<void> changeVisibility(
   await dialog.show();
   try {
     await FileMagicService.instance.changeVisibility(files, newVisibility);
-    showShortToast(newVisibility == kVisibilityArchive
-        ? "Successfully hidden"
-        : "Successfully unhidden");
+    showShortToast(
+        context,
+        newVisibility == kVisibilityArchive
+            ? "Successfully hidden"
+            : "Successfully unhidden");
 
     await dialog.hide();
   } catch (e, s) {
@@ -44,9 +46,11 @@ Future<void> changeCollectionVisibility(
     await CollectionsService.instance.updateMagicMetadata(collection, update);
     // Force reload home gallery to pull in the now unarchived files
     Bus.instance.fire(ForceReloadHomeGalleryEvent());
-    showShortToast(newVisibility == kVisibilityArchive
-        ? "Successfully hidden"
-        : "Successfully unhidden");
+    showShortToast(
+        context,
+        newVisibility == kVisibilityArchive
+            ? "Successfully hidden"
+            : "Successfully unhidden");
 
     await dialog.hide();
   } catch (e, s) {
@@ -63,7 +67,7 @@ Future<bool> editTime(
         context, files, kPubMagicKeyEditedTime, editedTime);
     return true;
   } catch (e, s) {
-    showToast('something went wrong');
+    showToast(context, 'something went wrong');
     return false;
   }
 }
@@ -92,7 +96,7 @@ Future<bool> editFilename(
         context, List.of([file]), kPubMagicKeyEditedName, result);
     return true;
   } catch (e, s) {
-    showToast('something went wrong');
+    showToast(context, 'something went wrong');
     return false;
   }
 }
@@ -107,7 +111,7 @@ Future<void> _updatePublicMetadata(
   try {
     Map<String, dynamic> update = {key: value};
     await FileMagicService.instance.updatePublicMagicMetadata(files, update);
-    showShortToast('done');
+    showShortToast(context, 'done');
     await dialog.hide();
     if (_shouldReloadGallery(key)) {
       Bus.instance.fire(ForceReloadHomeGalleryEvent());
