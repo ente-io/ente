@@ -218,7 +218,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                   )
                 : nothingToSeeHere(
                     textColor: Theme.of(context).colorScheme.defaultTextColor),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             const Divider(),
             const Padding(padding: EdgeInsets.all(8)),
             Padding(
