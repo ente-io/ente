@@ -15,8 +15,10 @@ const Wrapper = styled.div<{ isDisabled: boolean }>`
 function UploadButton({ isFirstFetch, openUploader }) {
     return (
         <Wrapper onClick={openUploader} isDisabled={isFirstFetch}>
-            <Button variant="contained">
-                <FileUploadOutlinedIcon sx={{ mr: 1 }} />
+            <Button
+                color="secondary"
+                sx={{ borderRadius: '2px' }}
+                startIcon={<FileUploadOutlinedIcon />}>
                 {constants.UPLOAD}
             </Button>
         </Wrapper>
