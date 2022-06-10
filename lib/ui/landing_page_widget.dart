@@ -37,7 +37,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Montserrat',
-                fontSize: 36,
+                fontSize: 42,
               ),
             ),
             Padding(
