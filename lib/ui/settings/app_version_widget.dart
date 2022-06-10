@@ -31,7 +31,7 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
           _consecutiveTaps++;
           if (_consecutiveTaps == kTapThresholdForInspector) {
             final dialog =
-                createProgressDialog(context, "starting network inspector...");
+                createProgressDialog(context, "Starting network inspector...");
             await dialog.show();
             await Future.delayed(
                 Duration(milliseconds: kDummyDelayDurationInMilliseconds));

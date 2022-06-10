@@ -62,14 +62,14 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
       actions: [
         TextButton(
           child: Text(
-            "ok",
+            "Ok",
             style: TextStyle(
               color: Colors.white,
             ),
           ),
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop('dialog');
-            final dialog = createProgressDialog(context, "setting wallpaper");
+            final dialog = createProgressDialog(context, "Setting wallpaper");
             await dialog.show();
             try {
               await WallpaperManagerFlutter().setwallpaperfromFile(

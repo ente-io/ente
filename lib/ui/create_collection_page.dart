@@ -229,7 +229,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       actions: [
         TextButton(
           child: Text(
-            "ok",
+            "Ok",
             style: TextStyle(
               color: Theme.of(context).buttonColor,
             ),
@@ -284,7 +284,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   Future<bool> _moveFilesToCollection(int toCollectionID) async {
-    final dialog = createProgressDialog(context, "moving files to album...");
+    final dialog = createProgressDialog(context, "Moving files to album...");
     await dialog.show();
     try {
       int fromCollectionID = widget.selectedFiles.files?.first?.collectionID;
@@ -329,7 +329,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   Future<bool> _addToCollection(int collectionID) async {
-    final dialog = createProgressDialog(context, "uploading files to album...");
+    final dialog = createProgressDialog(context, "Uploading files to album...");
     await dialog.show();
     try {
       final List<File> files = [];
@@ -365,7 +365,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   Future<Collection> _createAlbum(String albumName) async {
     Collection collection;
-    final dialog = createProgressDialog(context, "creating album...");
+    final dialog = createProgressDialog(context, "Creating album...");
     await dialog.show();
     try {
       collection = await CollectionsService.instance.createAlbum(albumName);

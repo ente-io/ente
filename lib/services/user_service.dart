@@ -72,7 +72,7 @@ class UserService {
       await dialog.hide();
       _logger.info(e);
       if (e.response != null && e.response.statusCode == 403) {
-        showErrorDialog(context, "Oops", "this email is already in use");
+        showErrorDialog(context, "Oops", "This email is already in use");
       } else {
         showGenericErrorDialog(context);
       }
@@ -485,8 +485,8 @@ class UserService {
           Sodium.base642bin(secretDecryptionNonce)));
     } catch (e) {
       await dialog.hide();
-      showErrorDialog(context, "incorrect recovery key",
-          "the recovery key you entered is incorrect");
+      showErrorDialog(context, "Incorrect recovery key",
+          "The recovery key you entered is incorrect");
       return;
     }
     try {
