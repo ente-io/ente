@@ -27,7 +27,7 @@ export default function UserDetailsSection({ sidebarView, closeSidebar }) {
 
     return (
         <Stack spacing={1}>
-            <Typography>
+            <Typography px={1} color="text.secondary">
                 {userDetails ? (
                     userDetails.email
                 ) : (
