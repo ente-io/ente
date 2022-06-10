@@ -80,19 +80,29 @@ export const ResultPreviewTile = styled(AllCollectionTile)`
     border-radius: 4px;
 `;
 
-export const CollectionBarTileText = styled.div`
+export const CollectionTileTextOverlay = styled.div`
     height: 100%;
     width: 100%;
     position: absolute;
+    font-size: 14px;
+    line-height: 20px;
+    padding: 4px 6px;
+`;
+
+export const CollectionBarTileText = styled(CollectionTileTextOverlay)`
     background: linear-gradient(
         180deg,
         rgba(0, 0, 0, 0.1) 0%,
         rgba(0, 0, 0, 0.5) 86.46%
     );
-    font-size: 14px;
-    line-height: 20px;
-    padding: 4px 6px;
     display: flex;
     align-items: flex-end;
-    justify-content: space-between;
+`;
+
+export const AllCollectionTileText = styled(CollectionTileTextOverlay)`
+    background: linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.5) 86.46%
+    );
 `;
