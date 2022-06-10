@@ -193,7 +193,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                 _sortMenu(),
               ],
             ),
-            Padding(padding: EdgeInsets.all(12)),
+            const SizedBox(height: 24),
             Configuration.instance.hasConfiguredAccount()
                 ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -220,7 +220,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                     textColor: Theme.of(context).colorScheme.defaultTextColor),
             const SizedBox(height: 10),
             const Divider(),
-            const Padding(padding: EdgeInsets.all(8)),
+            const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
@@ -658,7 +658,6 @@ class CollectionItem extends StatelessWidget {
                             children: [
                           TextSpan(text: "  \u2022  "),
                           TextSpan(text: snapshot.data.toString()),
-                          //need to query in db and bring this value
                         ]));
                   } else {
                     return Container();
