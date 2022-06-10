@@ -19,7 +19,7 @@ export default function TwoFactorModalManageSection(props: Iprops) {
     const warnTwoFactorDisable = async () => {
         setDialogMessage({
             title: constants.DISABLE_TWO_FACTOR,
-            staticBackdrop: true,
+
             content: constants.DISABLE_TWO_FACTOR_MESSAGE,
             close: { text: constants.CANCEL },
             proceed: {
@@ -53,7 +53,7 @@ export default function TwoFactorModalManageSection(props: Iprops) {
     const warnTwoFactorReconfigure = async () => {
         setDialogMessage({
             title: constants.UPDATE_TWO_FACTOR,
-            staticBackdrop: true,
+
             content: constants.UPDATE_TWO_FACTOR_MESSAGE,
             close: { text: constants.CANCEL },
             proceed: {

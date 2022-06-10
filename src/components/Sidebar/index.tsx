@@ -1,22 +1,25 @@
-import React, { useContext } from 'react';
+import React from 'react';
 
 import NavigationSection from './NavigationSection';
 import UtilitySection from './UtilitySection';
 import HelpSection from './HelpSection';
 import ExitSection from './ExitSection';
-// import DebugLogs from './DebugLogs';
+import DebugLogs from './DebugLogs';
 import { DrawerSidebar, PaddedDivider } from './styledComponents';
 import HeaderSection from './Header';
 import { CollectionSummaries } from 'types/collection';
 import UserDetailsSection from './userDetailsSection';
-import { GalleryContext } from 'pages/gallery';
 
 interface Iprops {
     collectionSummaries: CollectionSummaries;
+    sidebarView: boolean;
+    closeSidebar: () => void;
 }
-export default function Sidebar({ collectionSummaries }: Iprops) {
-    const { sidebarView, closeSidebar } = useContext(GalleryContext);
-
+export default function Sidebar({
+    collectionSummaries,
+    sidebarView,
+    closeSidebar,
+}: Iprops) {
     return (
         <DrawerSidebar open={sidebarView} onClose={closeSidebar}>
             <HeaderSection closeSidebar={closeSidebar} />
@@ -35,8 +38,8 @@ export default function Sidebar({ collectionSummaries }: Iprops) {
             <HelpSection />
             <PaddedDivider />
             <ExitSection />
-            {/* <PaddedDivider />
-            <DebugLogs /> */}
+            <PaddedDivider />
+            <DebugLogs />
         </DrawerSidebar>
     );
 }

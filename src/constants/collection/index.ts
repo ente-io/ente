@@ -6,7 +6,10 @@ export enum CollectionType {
     folder = 'folder',
     favorites = 'favorites',
     album = 'album',
-    system = 'system',
+    archive = 'archive',
+    trash = 'trash',
+    all = 'all',
+    shared = 'shared',
 }
 
 export enum COLLECTION_SORT_BY {
@@ -19,3 +22,20 @@ export enum COLLECTION_SORT_BY {
 export const COLLECTION_SHARE_DEFAULT_VALID_DURATION =
     10 * 24 * 60 * 60 * 1000 * 1000;
 export const COLLECTION_SHARE_DEFAULT_DEVICE_LIMIT = 4;
+
+export const COLLECTION_SORT_ORDER = new Map([
+    [CollectionType.all, 0],
+    [CollectionType.favorites, 1],
+    [CollectionType.album, 2],
+    [CollectionType.folder, 2],
+    [CollectionType.shared, 2],
+    [CollectionType.archive, 3],
+    [CollectionType.trash, 4],
+]);
+
+export const SPECIAL_COLLECTION_TYPES = new Set([
+    CollectionType.all,
+    CollectionType.archive,
+    CollectionType.trash,
+    CollectionType.shared,
+]);

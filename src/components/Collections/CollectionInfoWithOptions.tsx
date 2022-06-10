@@ -4,7 +4,7 @@ import { Collection, CollectionSummary } from 'types/collection';
 import { CollectionSectionWrapper } from 'components/Collections/styledComponents';
 import CollectionOptions from 'components/Collections/CollectionOptions';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
-import { CollectionType } from 'constants/collection';
+import { SPECIAL_COLLECTION_TYPES } from 'constants/collection';
 import { SpaceBetweenFlex } from 'components/Container';
 
 interface Iprops {
@@ -28,10 +28,9 @@ export default function collectionInfoWithOptions({
         <CollectionSectionWrapper>
             <SpaceBetweenFlex>
                 <CollectionInfo name={name} fileCount={fileCount} />
-                {type !== CollectionType.system &&
-                    type !== CollectionType.favorites && (
-                        <CollectionOptions {...props} />
-                    )}
+                {!SPECIAL_COLLECTION_TYPES.has(type) && (
+                    <CollectionOptions {...props} />
+                )}
             </SpaceBetweenFlex>
         </CollectionSectionWrapper>
     );

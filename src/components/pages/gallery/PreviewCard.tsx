@@ -1,7 +1,7 @@
 import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
 import styled from 'styled-components';
-import PlayCircleOutline from 'components/icons/PlayCircleOutline';
+import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
 import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
 import { GalleryContext } from 'pages/gallery';
@@ -305,7 +305,7 @@ export default function PreviewCard(props: IProps) {
                 />
             )}
             {(file?.msrc || imgSrc) && <img src={file?.msrc || imgSrc} />}
-            {file?.metadata.fileType === 1 && <PlayCircleOutline />}
+            {file?.metadata.fileType === 1 && <PlayCircleOutlineOutlinedIcon />}
             <SelectedOverlay selected={selected} />
             <HoverOverlay checked={selected} />
             <InSelectRangeOverLay

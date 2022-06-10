@@ -81,7 +81,6 @@ const SelectedFileOptions = ({
         setDialogMessage({
             title: constants.CONFIRM_DELETE,
             content: constants.TRASH_MESSAGE,
-            staticBackdrop: true,
             proceed: {
                 action: deleteFileHelper,
                 text: constants.MOVE_TO_TRASH,
@@ -94,7 +93,6 @@ const SelectedFileOptions = ({
         setDialogMessage({
             title: constants.CONFIRM_DELETE,
             content: constants.DELETE_MESSAGE,
-            staticBackdrop: true,
             proceed: {
                 action: () => deleteFileHelper(true),
                 text: constants.DELETE,
@@ -116,7 +114,7 @@ const SelectedFileOptions = ({
         setDialogMessage({
             title: constants.CONFIRM_REMOVE,
             content: constants.CONFIRM_REMOVE_MESSAGE(),
-            staticBackdrop: true,
+
             proceed: {
                 action: removeFromCollectionHelper,
                 text: constants.REMOVE,

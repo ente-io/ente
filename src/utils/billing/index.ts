@@ -317,7 +317,7 @@ function handleFailureReason(
             setDialogMessage({
                 title: constants.UPDATE_PAYMENT_METHOD,
                 content: constants.UPDATE_PAYMENT_METHOD_MESSAGE,
-                staticBackdrop: true,
+
                 proceed: {
                     text: constants.UPDATE_PAYMENT_METHOD,
                     variant: 'success',
@@ -336,7 +336,7 @@ function handleFailureReason(
             setDialogMessage({
                 title: constants.UPDATE_PAYMENT_METHOD,
                 content: constants.STRIPE_AUTHENTICATION_FAILED,
-                staticBackdrop: true,
+
                 proceed: {
                     text: constants.UPDATE_PAYMENT_METHOD,
                     variant: 'success',

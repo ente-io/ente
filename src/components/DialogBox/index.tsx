@@ -3,7 +3,6 @@ import constants from 'utils/strings/constants';
 import {
     Breakpoint,
     Button,
-    Dialog,
     DialogActions,
     DialogContent,
     DialogProps,
@@ -22,26 +21,34 @@ type IProps = React.PropsWithChildren<
     }
 >;
 
-export default function DialogBox({ attributes, children, ...props }: IProps) {
+export default function DialogBox({
+    attributes,
+    children,
+    open,
+    size,
+    onClose,
+    titleCloseButton,
+    ...props
+}: IProps) {
     if (!attributes) {
-        return <Dialog open={false} />;
+        return <></>;
     }
 
     const handleClose = dialogCloseHandler({
-        staticBackdrop: attributes.staticBackdrop,
+        closeOnBackdropClick: attributes.closeOnBackdropClick,
         nonClosable: attributes.nonClosable,
-        onClose: props.onClose,
+        onClose: onClose,
     });
 
     return (
         <DialogBoxBase
-            open={props.open}
-            maxWidth={props.size}
+            open={open}
+            maxWidth={size}
             onClose={handleClose}
             {...props}>
             {attributes.title && (
                 <DialogTitleWithCloseButton
-                    onClose={props.titleCloseButton && handleClose}>
+                    onClose={titleCloseButton && handleClose}>
                     {attributes.title}
                 </DialogTitleWithCloseButton>
             )}
@@ -61,7 +68,7 @@ export default function DialogBox({ attributes, children, ...props }: IProps) {
                                 onClick={() => {
                                     attributes.close.action &&
                                         attributes.close?.action();
-                                    props.onClose();
+                                    onClose();
                                 }}>
                                 {attributes.close?.text ?? constants.OK}
                             </Button>
@@ -71,7 +78,7 @@ export default function DialogBox({ attributes, children, ...props }: IProps) {
                                 color={attributes.proceed?.variant}
                                 onClick={() => {
                                     attributes.proceed.action();
-                                    props.onClose();
+                                    onClose();
                                 }}
                                 disabled={attributes.proceed.disabled}>
                                 {attributes.proceed.text}

@@ -48,7 +48,6 @@ function TwoFactorModal(props: Props) {
             onClose={props.onHide}
             attributes={{
                 title: constants.TWO_FACTOR_AUTHENTICATION,
-                staticBackdrop: true,
             }}>
             <>
                 {isTwoFactorEnabled ? (

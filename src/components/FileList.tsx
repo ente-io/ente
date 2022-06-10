@@ -9,10 +9,16 @@ interface Iprops {
 export default function FileList(props: Iprops) {
     const Row = ({ index, style }) => (
         <Tooltip
+            PopperProps={{
+                sx: {
+                    '.MuiTooltip-tooltip.MuiTooltip-tooltip.MuiTooltip-tooltip':
+                        { marginTop: 0 },
+                },
+            }}
             title={props.fileList[index]}
             placement="bottom-start"
             enterDelay={300}
-            enterNextDelay={300}>
+            enterNextDelay={100}>
             <div style={style}>{props.fileList[index]}</div>
         </Tooltip>
     );

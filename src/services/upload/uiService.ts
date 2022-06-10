@@ -70,8 +70,8 @@ class UIService {
             setUploadResult,
         } = this.progressUpdater;
         setFileCounter({
-            success: this.filesUploaded,
-            issues: this.totalFileCount,
+            finished: this.filesUploaded,
+            total: this.totalFileCount,
         });
         let percentComplete =
             this.perFileProgress *

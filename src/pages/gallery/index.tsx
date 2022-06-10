@@ -96,19 +96,16 @@ import {
     CollectionSummary,
 } from 'types/collection';
 import { EnteFile } from 'types/file';
-import {
-    GalleryContextType,
-    SelectedState,
-    NotificationAttributes,
-} from 'types/gallery';
+import { GalleryContextType, SelectedState } from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
-import ToastNotification from 'components/ToastNotification';
+import Notification from 'components/Notification';
 import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
 import { Search } from 'types/search';
 import SearchResultInfo from 'components/Search/SearchResultInfo';
+import { NotificationAttributes } from 'types/Notification';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -133,8 +130,6 @@ const defaultGalleryContext: GalleryContextType = {
     syncWithRemote: () => null,
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
-    sidebarView: false,
-    closeSidebar: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -147,9 +142,7 @@ export default function Gallery() {
 
     const [files, setFiles] = useState<EnteFile[]>(null);
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
-    const [bannerMessage, setBannerMessage] = useState<JSX.Element | string>(
-        null
-    );
+    const [bannerMessage, setBannerMessage] = useState<JSX.Element | string>();
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
@@ -194,6 +187,10 @@ export default function Gallery() {
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
 
+    const [notificationView, setNotificationView] = useState(false);
+
+    const closeNotification = () => setNotificationView(false);
+
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
 
@@ -201,8 +198,6 @@ export default function Gallery() {
         useState<Set<number>>();
 
     const showPlanSelectorModal = () => setPlanModalView(true);
-
-    const clearNotificationAttributes = () => setNotificationAttributes(null);
 
     const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
@@ -212,6 +207,19 @@ export default function Gallery() {
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
     const [droppedFiles, setDroppedFiles] = useState([]);
+
+    const showSessionExpiredMessage = () =>
+        setDialogMessage({
+            title: constants.SESSION_EXPIRED,
+            content: constants.SESSION_EXPIRED_MESSAGE,
+
+            nonClosable: true,
+            proceed: {
+                text: constants.LOGIN,
+                action: logoutUser,
+                variant: 'success',
+            },
+        });
 
     useEffect(() => {
         appContext.showNavBar(false);
@@ -257,6 +265,11 @@ export default function Gallery() {
     useEffect(
         () => fixCreationTimeAttributes && setFixCreationTimeView(true),
         [fixCreationTimeAttributes]
+    );
+
+    useEffect(
+        () => notificationAttributes && setNotificationView(true),
+        [notificationAttributes]
     );
 
     useEffect(() => setDroppedFiles(acceptedFiles), [acceptedFiles]);
@@ -315,18 +328,7 @@ export default function Gallery() {
             logError(e, 'syncWithRemote failed');
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
-                    setBannerMessage(constants.SESSION_EXPIRED_MESSAGE);
-                    setDialogMessage({
-                        title: constants.SESSION_EXPIRED,
-                        content: constants.SESSION_EXPIRED_MESSAGE,
-                        staticBackdrop: true,
-                        nonClosable: true,
-                        proceed: {
-                            text: constants.LOGIN,
-                            action: logoutUser,
-                            variant: 'success',
-                        },
-                    });
+                    showSessionExpiredMessage();
                     break;
                 case CustomError.KEY_MISSING:
                     clearKeys();
@@ -388,7 +390,7 @@ export default function Gallery() {
                 logError(e, 'collection ops failed', { ops });
                 setDialogMessage({
                     title: constants.ERROR,
-                    staticBackdrop: true,
+
                     close: { variant: 'danger' },
                     content: constants.UNKNOWN_ERROR,
                 });
@@ -416,7 +418,7 @@ export default function Gallery() {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
                         title: constants.ERROR,
-                        staticBackdrop: true,
+
                         close: { variant: 'danger' },
                         content: constants.NOT_FILE_OWNER,
                     });
@@ -424,7 +426,7 @@ export default function Gallery() {
             }
             setDialogMessage({
                 title: constants.ERROR,
-                staticBackdrop: true,
+
                 close: { variant: 'danger' },
                 content: constants.UNKNOWN_ERROR,
             });
@@ -450,7 +452,7 @@ export default function Gallery() {
                 logError(e, 'create and collection ops failed', { ops });
                 setDialogMessage({
                     title: constants.ERROR,
-                    staticBackdrop: true,
+
                     close: { variant: 'danger' },
                     content: constants.UNKNOWN_ERROR,
                 });
@@ -486,14 +488,14 @@ export default function Gallery() {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
                         title: constants.ERROR,
-                        staticBackdrop: true,
+
                         close: { variant: 'danger' },
                         content: constants.NOT_FILE_OWNER,
                     });
             }
             setDialogMessage({
                 title: constants.ERROR,
-                staticBackdrop: true,
+
                 close: { variant: 'danger' },
                 content: constants.UNKNOWN_ERROR,
             });
@@ -519,7 +521,7 @@ export default function Gallery() {
         setDialogMessage({
             title: constants.CONFIRM_EMPTY_TRASH,
             content: constants.EMPTY_TRASH_MESSAGE,
-            staticBackdrop: true,
+
             proceed: {
                 action: emptyTrashHelper,
                 text: constants.EMPTY_TRASH,
@@ -539,7 +541,7 @@ export default function Gallery() {
         } catch (e) {
             setDialogMessage({
                 title: constants.ERROR,
-                staticBackdrop: true,
+
                 close: { variant: 'danger' },
                 content: constants.UNKNOWN_ERROR,
             });
@@ -580,8 +582,6 @@ export default function Gallery() {
                 syncWithRemote,
                 setNotificationAttributes,
                 setBlockingLoad,
-                closeSidebar,
-                sidebarView,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
@@ -602,9 +602,10 @@ export default function Gallery() {
                     setLoading={setBlockingLoad}
                 />
                 <AlertBanner bannerMessage={bannerMessage} />
-                <ToastNotification
+                <Notification
+                    open={notificationView}
+                    onClose={closeNotification}
                     attributes={notificationAttributes}
-                    clearAttributes={clearNotificationAttributes}
                 />
                 <CollectionNamer
                     show={collectionNamerView}
@@ -676,8 +677,13 @@ export default function Gallery() {
                     setElectronFiles={setElectronFiles}
                     uploadTypeSelectorView={uploadTypeSelectorView}
                     setUploadTypeSelectorView={setUploadTypeSelectorView}
+                    showSessionExpiredMessage={showSessionExpiredMessage}
                 />
-                <Sidebar collectionSummaries={collectionSummaries} />
+                <Sidebar
+                    collectionSummaries={collectionSummaries}
+                    sidebarView={sidebarView}
+                    closeSidebar={closeSidebar}
+                />
 
                 <PhotoFrame
                     files={files}

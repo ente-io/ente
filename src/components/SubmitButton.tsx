@@ -1,13 +1,13 @@
 import { Button, ButtonProps, CircularProgress } from '@mui/material';
 import React, { FC } from 'react';
 
-interface Props {
+export interface SubmitButtonProps {
     loading: boolean;
     buttonText: string;
     inline?: any;
     disabled?: boolean;
 }
-const SubmitButton: FC<ButtonProps<'button', Props>> = ({
+const SubmitButton: FC<ButtonProps<'button', SubmitButtonProps>> = ({
     loading,
     buttonText,
     inline,

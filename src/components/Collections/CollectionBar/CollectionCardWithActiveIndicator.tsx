@@ -3,25 +3,30 @@ import { EnteFile } from 'types/file';
 import {
     CollectionTileWrapper,
     ActiveIndicator,
-    CollectionTile,
+    CollectionBarTile,
+    CollectionBarTileText,
 } from '../styledComponents';
 import CollectionCard from '../CollectionCard';
+import TruncateText from 'components/TruncateText';
+
+interface Iprops {
+    active: boolean;
+    latestFile: EnteFile;
+    collectionName: string;
+    onClick: () => void;
+}
 
 const CollectionCardWithActiveIndicator = React.forwardRef(
-    (
-        props: {
-            children;
-            active: boolean;
-            latestFile: EnteFile;
-            onClick: () => void;
-        },
-        ref: any
-    ) => {
-        const { active, ...others } = props;
+    (props: Iprops, ref: any) => {
+        const { active, collectionName, ...others } = props;
 
         return (
             <CollectionTileWrapper ref={ref}>
-                <CollectionCard collectionTile={CollectionTile} {...others} />
+                <CollectionCard collectionTile={CollectionBarTile} {...others}>
+                    <CollectionBarTileText>
+                        <TruncateText text={collectionName} />
+                    </CollectionBarTileText>
+                </CollectionCard>
                 {active && <ActiveIndicator />}
             </CollectionTileWrapper>
         );

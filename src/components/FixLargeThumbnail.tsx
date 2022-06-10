@@ -141,7 +141,6 @@ export default function FixLargeThumbnails(props: Props) {
             onClose={props.hide}
             attributes={{
                 title: constants.COMPRESS_THUMBNAILS,
-                staticBackdrop: true,
             }}>
             <div
                 style={{

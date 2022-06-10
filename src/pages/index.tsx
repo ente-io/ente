@@ -144,7 +144,7 @@ export default function LandingPage() {
             logError(e, 'usage in incognito mode tried');
             appContext.setDialogMessage({
                 title: constants.LOCAL_STORAGE_NOT_ACCESSIBLE,
-                staticBackdrop: true,
+
                 nonClosable: true,
                 content: constants.LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE,
             });

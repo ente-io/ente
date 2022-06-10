@@ -30,6 +30,8 @@ import {
     CollectionType,
     ARCHIVE_SECTION,
     TRASH_SECTION,
+    COLLECTION_SORT_ORDER,
+    ALL_SECTION,
 } from 'constants/collection';
 import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { EncryptionResult } from 'types/upload';
@@ -714,8 +716,8 @@ export function sortCollectionSummaries(
     collectionSummaries: CollectionSummary[],
     sortBy: COLLECTION_SORT_BY
 ) {
-    return moveFavCollectionToFront(
-        collectionSummaries.sort((a, b) => {
+    return collectionSummaries
+        .sort((a, b) => {
             switch (sortBy) {
                 case COLLECTION_SORT_BY.CREATION_TIME_DESCENDING:
                     return compareCollectionsLatestFile(
@@ -733,7 +735,11 @@ export function sortCollectionSummaries(
                     return a.name.localeCompare(b.name);
             }
         })
-    );
+        .sort(
+            (a, b) =>
+                COLLECTION_SORT_ORDER.get(a.type) -
+                COLLECTION_SORT_ORDER.get(b.type)
+        );
 }
 
 function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
@@ -743,16 +749,6 @@ function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
     } else {
         return -1;
     }
-}
-
-function moveFavCollectionToFront(collectionSummaries: CollectionSummary[]) {
-    return collectionSummaries.sort((a, b) =>
-        a.type === CollectionType.favorites
-            ? -1
-            : b.type === CollectionType.favorites
-            ? 1
-            : 0
-    );
 }
 
 export function getCollectionSummaries(
@@ -768,13 +764,19 @@ export function getCollectionSummaries(
         collectionSummaries.set(collection.id, {
             id: collection.id,
             name: collection.name,
-            type: collection.type,
             latestFile: collectionLatestFiles.get(collection.id),
             fileCount: collectionFilesCount.get(collection.id) ?? 0,
             updationTime: collection.updationTime,
-            isSharedAlbum: collection.owner.id !== user.id,
+            type:
+                collection.owner.id !== user.id
+                    ? CollectionType.shared
+                    : collection.type,
         });
     }
+    collectionSummaries.set(
+        ALL_SECTION,
+        getAllCollectionSummaries(files.length, files[0])
+    );
     collectionSummaries.set(
         ARCHIVE_SECTION,
         getArchivedCollectionSummaries(
@@ -801,18 +803,31 @@ function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
     return collectionFilesCount;
 }
 
+function getAllCollectionSummaries(
+    allFilesCount: number,
+    latestFile: EnteFile
+): CollectionSummary {
+    return {
+        id: ALL_SECTION,
+        name: constants.ALL_SECTION_NAME,
+        type: CollectionType.all,
+        latestFile: latestFile,
+        fileCount: allFilesCount,
+        updationTime: latestFile?.updationTime,
+    };
+}
+
 function getArchivedCollectionSummaries(
     collectionFilesCount: CollectionFilesCount,
     collectionsLatestFile: CollectionLatestFiles
 ): CollectionSummary {
     return {
         id: ARCHIVE_SECTION,
-        name: constants.ARCHIVE,
-        type: CollectionType.system,
+        name: constants.ARCHIVE_SECTION_NAME,
+        type: CollectionType.archive,
         latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
         fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(ARCHIVE_SECTION)?.updationTime,
-        isSharedAlbum: false,
     };
 }
 
@@ -823,10 +838,9 @@ function getTrashedCollectionSummaries(
     return {
         id: TRASH_SECTION,
         name: constants.TRASH,
-        type: CollectionType.system,
+        type: CollectionType.trash,
         latestFile: collectionsLatestFile.get(TRASH_SECTION),
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(TRASH_SECTION)?.updationTime,
-        isSharedAlbum: false,
     };
 }

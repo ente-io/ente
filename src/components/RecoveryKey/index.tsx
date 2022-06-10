@@ -7,9 +7,12 @@ import CodeBlock from '../CodeBlock';
 import { ButtonProps, Typography } from '@mui/material';
 import * as bip39 from 'bip39';
 import { DashedBorderWrapper } from './styledComponents';
+import { DialogBoxAttributes } from 'types/dialogBox';
 
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
+
+const RECOVERY_KEY_FILE_NAME = 'ente-recovery-key.txt';
 
 interface Props {
     show: boolean;
@@ -36,17 +39,16 @@ function RecoveryKey({ somethingWentWrong, ...props }: Props) {
     }, [props.show]);
 
     function onSaveClick() {
-        downloadAsFile(constants.RECOVERY_KEY_FILENAME, recoveryKey);
+        downloadAsFile(RECOVERY_KEY_FILE_NAME, recoveryKey);
         props.onHide();
     }
 
-    const recoveryKeyDialogAttributes = {
+    const recoveryKeyDialogAttributes: DialogBoxAttributes = {
         title: constants.RECOVERY_KEY,
         close: {
             text: constants.SAVE_LATER,
             variant: 'secondary' as ButtonProps['color'],
         },
-        staticBackdrop: true,
         proceed: {
             text: constants.SAVE,
             action: onSaveClick,

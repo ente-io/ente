@@ -1,5 +1,6 @@
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
+import { NotificationAttributes } from 'types/Notification';
 import { Search, SearchResultSummary } from 'types/search';
 
 export type SelectedState = {
@@ -23,11 +24,4 @@ export type GalleryContextType = {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setNotificationAttributes: (attributes: NotificationAttributes) => void;
     setBlockingLoad: (value: boolean) => void;
-    sidebarView: boolean;
-    closeSidebar: () => void;
 };
-
-export interface NotificationAttributes {
-    message: string;
-    title: string;
-}

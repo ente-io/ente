@@ -25,24 +25,20 @@ export const ScrollContainer = styled.div`
     display: flex;
 `;
 
-export const CollectionTile = styled.div<{
-    coverImgURL?: string;
-}>`
+export const CollectionTile = styled.div`
     display: flex;
     position: relative;
-    width: 80px;
-    height: 64px;
     border-radius: 4px;
-    padding: 4px 6px;
-    align-items: flex-end;
-    justify-content: space-between;
     user-select: none;
     cursor: pointer;
-    background-image: url(${({ coverImgURL }) => coverImgURL});
     background-size: cover;
-    border: 1px solid ${({ theme }) => theme.palette.grey.A200};
-    font-size: 14px;
-    line-height: 20px;
+    & > img {
+        object-fit: cover;
+        max-width: 100%;
+        min-height: 100%;
+        flex: 1;
+        pointer-events: none;
+    }
 `;
 
 export const CollectionTileWrapper = styled.div`
@@ -58,6 +54,11 @@ export const ActiveIndicator = styled.div`
 
 export const Hider = styled.div<{ hide: boolean }>`
     display: ${(props) => (props.hide ? 'none' : 'block')};
+`;
+
+export const CollectionBarTile = styled(CollectionTile)`
+    width: 80px;
+    height: 64px;
 `;
 
 export const AllCollectionTile = styled(CollectionTile)`
@@ -81,4 +82,31 @@ export const ResultPreviewTile = styled(AllCollectionTile)`
     width: 48px;
     height: 48px;
     border-radius: 4px;
+`;
+
+export const CollectionTileTextOverlay = styled.div`
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    font-size: 14px;
+    line-height: 20px;
+    padding: 4px 6px;
+`;
+
+export const CollectionBarTileText = styled(CollectionTileTextOverlay)`
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.5) 86.46%
+    );
+    display: flex;
+    align-items: flex-end;
+`;
+
+export const AllCollectionTileText = styled(CollectionTileTextOverlay)`
+    background: linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.5) 86.46%
+    );
 `;

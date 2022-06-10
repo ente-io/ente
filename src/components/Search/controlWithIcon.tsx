@@ -1,9 +1,9 @@
 import React from 'react';
-import CollectionIcon from 'components/icons/CollectionIcon';
-import DateIcon from 'components/icons/DateIcon';
-import ImageIcon from 'components/icons/ImageIcon';
-import LocationIcon from 'components/icons/LocationIcon';
-import VideoIcon from 'components/icons/VideoIcon';
+import FolderIcon from '@mui/icons-material/Folder';
+import CalendarIcon from '@mui/icons-material/CalendarMonth';
+import ImageIcon from '@mui/icons-material/Image';
+import LocationIcon from '@mui/icons-material/LocationOn';
+import VideoFileIcon from '@mui/icons-material/VideoFile';
 import { components } from 'react-select';
 import { SearchOption, SuggestionType } from 'types/search';
 import SearchIcon from '@mui/icons-material/Search';
@@ -14,15 +14,15 @@ const { Control } = components;
 const getIconByType = (type: SuggestionType) => {
     switch (type) {
         case SuggestionType.DATE:
-            return <DateIcon />;
+            return <CalendarIcon />;
         case SuggestionType.LOCATION:
             return <LocationIcon />;
         case SuggestionType.COLLECTION:
-            return <CollectionIcon />;
+            return <FolderIcon />;
         case SuggestionType.IMAGE:
             return <ImageIcon />;
         case SuggestionType.VIDEO:
-            return <VideoIcon />;
+            return <VideoFileIcon />;
         default:
             return <SearchIcon />;
     }

@@ -82,7 +82,6 @@ export default function UploadProgress(props: Props) {
     }
 
     const handleClose = dialogCloseHandler({
-        staticBackdrop: true,
         onClose: confirmCancelUpload,
     });
 

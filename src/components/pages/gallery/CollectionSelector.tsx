@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import AddCollectionButton from './AddCollectionButton';
 import { Collection, CollectionSummaries } from 'types/collection';
-import { CollectionType } from 'constants/collection';
+import { SPECIAL_COLLECTION_TYPES } from 'constants/collection';
 import DialogBoxBase from 'components/DialogBox/base';
 import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
 import { DialogContent } from '@mui/material';
@@ -36,11 +36,9 @@ function CollectionSelector({
         const personalCollectionsOtherThanFrom = [
             ...collectionSummaries.values(),
         ]?.filter(
-            ({ type, id, isSharedAlbum }) =>
+            ({ type, id }) =>
                 id !== attributes?.fromCollection &&
-                !isSharedAlbum &&
-                type !== CollectionType.favorites &&
-                type !== CollectionType.system
+                !SPECIAL_COLLECTION_TYPES.has(type)
         );
         return personalCollectionsOtherThanFrom;
     }, [collectionSummaries, attributes]);

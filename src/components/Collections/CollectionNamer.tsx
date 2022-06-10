@@ -1,20 +1,12 @@
 import React from 'react';
-import {
-    Dialog,
-    DialogContent,
-    DialogTitle,
-    IconButton,
-    TextField,
-} from '@mui/material';
 import constants from 'utils/strings/constants';
-import SubmitButton from 'components/SubmitButton';
-import { Formik } from 'formik';
-import * as Yup from 'yup';
-import { SpaceBetweenFlex } from 'components/Container';
-import Close from '@mui/icons-material/Close';
+import DialogBox from 'components/DialogBox';
+import SingleInputForm, {
+    SingleInputFormProps,
+} from 'components/SingleInputForm';
 
 export interface CollectionNamerAttributes {
-    callback: (name) => void;
+    callback: (name: string) => void;
     title: string;
     autoFilledName: string;
     buttonText: string;
@@ -29,73 +21,36 @@ interface Props {
     onHide: () => void;
     attributes: CollectionNamerAttributes;
 }
-interface formValues {
-    albumName: string;
-}
 
 export default function CollectionNamer({ attributes, ...props }: Props) {
     if (!attributes) {
         return <></>;
     }
-    const onSubmit = ({ albumName }: formValues) => {
-        attributes.callback(albumName);
-        props.onHide();
+    const onSubmit: SingleInputFormProps['callback'] = async (
+        albumName,
+        setFieldError
+    ) => {
+        try {
+            attributes.callback(albumName);
+            props.onHide();
+        } catch (e) {
+            setFieldError(constants.UNKNOWN_ERROR);
+        }
     };
 
     return (
-        <Dialog open={props.show} onClose={props.onHide} maxWidth="xs">
-            <DialogTitle>
-                <SpaceBetweenFlex>
-                    {attributes?.title}
-                    <IconButton onClick={props.onHide}>
-                        <Close />
-                    </IconButton>
-                </SpaceBetweenFlex>
-            </DialogTitle>
-            <DialogContent>
-                <Formik<formValues>
-                    initialValues={{
-                        albumName: attributes.autoFilledName ?? '',
-                    }}
-                    validationSchema={Yup.object().shape({
-                        albumName: Yup.string().required(constants.REQUIRED),
-                    })}
-                    validateOnChange={false}
-                    validateOnBlur={false}
-                    onSubmit={onSubmit}>
-                    {({
-                        values,
-                        touched,
-                        errors,
-                        handleChange,
-                        handleSubmit,
-                    }) => (
-                        <form noValidate onSubmit={handleSubmit}>
-                            <TextField
-                                margin="normal"
-                                fullWidth
-                                type="text"
-                                label={constants.ENTER_ALBUM_NAME}
-                                value={values.albumName}
-                                onChange={handleChange('albumName')}
-                                autoFocus
-                                required
-                                error={
-                                    touched.albumName &&
-                                    Boolean(errors.albumName)
-                                }
-                                helperText={
-                                    touched.albumName && errors.albumName
-                                }
-                            />
-                            <SubmitButton
-                                buttonText={attributes.buttonText}
-                                loading={false}
-                            />
-                        </form>
-                    )}
-                </Formik>
-            </DialogContent>
-        </Dialog>
+        <DialogBox
+            open={props.show}
+            attributes={{ title: attributes.title }}
+            onClose={props.onHide}
+            titleCloseButton
+            maxWidth="xs">
+            <SingleInputForm
+                callback={onSubmit}
+                fieldType="text"
+                buttonText={attributes.buttonText}
+                placeholder={constants.ENTER_ALBUM_NAME}
+            />
+        </DialogBox>
     );
 }

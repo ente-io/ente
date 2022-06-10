@@ -16,7 +16,7 @@ import uploadManager from 'services/upload/uploadManager';
 import ImportService from 'services/importService';
 import isElectron from 'is-electron';
 import { METADATA_FOLDER_NAME } from 'constants/export';
-import { getUserFacingErrorMessage } from 'utils/error';
+import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
 import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
@@ -26,6 +26,8 @@ import Router from 'next/router';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp } from 'utils/common';
 import watchService from 'services/watchService';
+import DiscFullIcon from '@mui/icons-material/DiscFull';
+import { NotificationAttributes } from 'types/Notification';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -48,6 +50,7 @@ interface Props {
     setElectronFiles: (files: ElectronFile[]) => void;
     uploadTypeSelectorView: boolean;
     setUploadTypeSelectorView: (open: boolean) => void;
+    showSessionExpiredMessage: () => void;
 }
 
 enum UPLOAD_STRATEGY {
@@ -77,7 +80,7 @@ export default function Upload(props: Props) {
         UPLOAD_STAGES.START
     );
     const [filenames, setFilenames] = useState(new Map<number, string>());
-    const [fileCounter, setFileCounter] = useState({ success: 0, issues: 0 });
+    const [fileCounter, setFileCounter] = useState({ finished: 0, total: 0 });
     const [fileProgress, setFileProgress] = useState(new Map<number, number>());
     const [uploadResult, setUploadResult] = useState(
         new Map<number, FileUploadResults>()
@@ -148,7 +151,7 @@ export default function Upload(props: Props) {
             } else if (isCanvasBlocked()) {
                 appContext.setDialogMessage({
                     title: constants.CANVAS_BLOCKED_TITLE,
-                    staticBackdrop: true,
+
                     content: constants.CANVAS_BLOCKED_MESSAGE(),
                     close: { text: constants.CLOSE },
                     proceed: {
@@ -185,7 +188,7 @@ export default function Upload(props: Props) {
 
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
-        setFileCounter({ success: 0, issues: 0 });
+        setFileCounter({ finished: 0, total: 0 });
         setFileProgress(new Map<number, number>());
         setUploadResult(new Map<number, number>());
         setPercentComplete(0);
@@ -325,7 +328,7 @@ export default function Upload(props: Props) {
                 logError(e, 'Failed to create album');
                 appContext.setDialogMessage({
                     title: constants.ERROR,
-                    staticBackdrop: true,
+
                     close: { variant: 'danger' },
                     content: constants.CREATE_ALBUM_FAILED,
                 });
@@ -367,11 +370,7 @@ export default function Upload(props: Props) {
                 collections
             );
         } catch (err) {
-            const message = getUserFacingErrorMessage(
-                err.message,
-                galleryContext.showPlanSelectorModal
-            );
-            props.setBannerMessage(message);
+            showUserFacingError(err.message);
             setProgressView(false);
             throw err;
         } finally {
@@ -385,6 +384,7 @@ export default function Upload(props: Props) {
             }
         }
     };
+
     const retryFailed = async () => {
         try {
             props.setUploadInProgress(true);
@@ -392,18 +392,49 @@ export default function Upload(props: Props) {
             await props.syncWithRemote(true, true);
             await uploadManager.retryFailedFiles();
         } catch (err) {
-            const message = getUserFacingErrorMessage(
-                err.message,
-                galleryContext.showPlanSelectorModal
-            );
-            appContext.resetSharedFiles();
-            props.setBannerMessage(message);
+            showUserFacingError(err.message);
+
             setProgressView(false);
         } finally {
             props.setUploadInProgress(false);
             props.syncWithRemote();
         }
     };
+
+    function showUserFacingError(err: CustomError) {
+        let notification: NotificationAttributes;
+        switch (err) {
+            case CustomError.SESSION_EXPIRED:
+                return props.showSessionExpiredMessage();
+            case CustomError.SUBSCRIPTION_EXPIRED:
+                notification = {
+                    variant: 'danger',
+                    message: constants.SUBSCRIPTION_EXPIRED,
+                    action: {
+                        text: constants.UPGRADE_NOW,
+                        callback: galleryContext.showPlanSelectorModal,
+                    },
+                };
+                break;
+            case CustomError.STORAGE_QUOTA_EXCEEDED:
+                notification = {
+                    variant: 'danger',
+                    message: constants.STORAGE_QUOTA_EXCEEDED,
+                    action: {
+                        text: constants.RENEW_NOW,
+                        callback: galleryContext.showPlanSelectorModal,
+                    },
+                    icon: <DiscFullIcon fontSize="large" />,
+                };
+                break;
+            default:
+                notification = {
+                    variant: 'danger',
+                    message: constants.UNKNOWN_ERROR,
+                };
+        }
+        galleryContext.setNotificationAttributes(notification);
+    }
 
     const uploadToSingleNewCollection = (collectionName: string) => {
         if (collectionName) {

@@ -16,10 +16,12 @@ declare module '@mui/material/styles' {
 
     interface TypographyVariants {
         title: React.CSSProperties;
+        subtitle: React.CSSProperties;
     }
 
     interface TypographyVariantsOptions {
         title?: React.CSSProperties;
+        subtitle?: React.CSSProperties;
     }
 }
 
@@ -38,6 +40,13 @@ declare module '@mui/material/Checkbox' {
 declare module '@mui/material/Typography' {
     interface TypographyPropsVariantOverrides {
         title: true;
+        subtitle: true;
+    }
+}
+
+declare module '@mui/material/Switch' {
+    interface SwitchPropsColorOverrides {
+        accent: true;
     }
 }
 
@@ -62,10 +71,7 @@ const darkThemeOptions = createTheme({
             },
             styleOverrides: {
                 root: {
-                    color: 'inherit',
-                    textDecorationColor: 'inherit',
                     '&:hover': {
-                        textDecoration: 'underline',
                         color: '#1dba54',
                     },
                 },
@@ -113,10 +119,10 @@ const darkThemeOptions = createTheme({
                 margin: 'dense',
             },
         },
-        MuiTooltip: {
+        MuiTypography: {
             styleOverrides: {
-                tooltipPlacementBottom: {
-                    marginTop: '0px !important',
+                body1: {
+                    paddingBottom: '4px',
                 },
             },
         },
@@ -130,10 +136,6 @@ const darkThemeOptions = createTheme({
         secondary: {
             main: 'rgba(256, 256, 256, 0.12)',
             contrastText: '#fff',
-        },
-        text: {
-            primary: '#fff',
-            secondary: '#808080',
         },
         accent: {
             main: '#1dba54',
@@ -170,6 +172,16 @@ const darkThemeOptions = createTheme({
             lineHeight: '40px',
             fontWeight: 600,
             display: 'block',
+        },
+        subtitle: {
+            fontSize: '24px',
+            fontWeight: 600,
+            lineHeight: '36px',
+            display: 'block',
+        },
+        caption: {
+            fontSize: '12px',
+            lineHeight: '15px',
         },
         fontFamily: ['Inter', 'sans-serif'].join(','),
     },

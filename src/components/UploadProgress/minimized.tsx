@@ -4,7 +4,7 @@ import { UploadProgressHeader } from './header';
 export function MinimizedUploadProgress(props) {
     return (
         <Snackbar
-            open={props.open}
+            open={!props.expanded}
             anchorOrigin={{
                 horizontal: 'right',
                 vertical: 'bottom',

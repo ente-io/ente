@@ -12,7 +12,7 @@ export default function ExitSection() {
         setDialogMessage({
             title: `${constants.CONFIRM} ${constants.LOGOUT}`,
             content: constants.LOGOUT_MESSAGE,
-            staticBackdrop: true,
+
             proceed: {
                 text: constants.LOGOUT,
                 action: logoutUser,
@@ -26,7 +26,7 @@ export default function ExitSection() {
         setDialogMessage({
             title: `${constants.DELETE_ACCOUNT}`,
             content: constants.DELETE_ACCOUNT_MESSAGE(),
-            staticBackdrop: true,
+
             proceed: {
                 text: constants.DELETE_ACCOUNT,
                 action: () => {
@@ -40,13 +40,10 @@ export default function ExitSection() {
 
     return (
         <>
-            <SidebarButton onClick={confirmLogout} hideArrow color="danger">
+            <SidebarButton onClick={confirmLogout} color="danger">
                 {constants.LOGOUT}
             </SidebarButton>
-            <SidebarButton
-                onClick={showDeleteAccountDirections}
-                hideArrow
-                color="danger">
+            <SidebarButton onClick={showDeleteAccountDirections} color="danger">
                 {constants.DELETE_ACCOUNT}
             </SidebarButton>
         </>
