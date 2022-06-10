@@ -10,7 +10,6 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/data_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class DetailsSectionWidget extends StatefulWidget {
   DetailsSectionWidget({Key key}) : super(key: key);
@@ -149,82 +148,64 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
               ),
             ),
             Padding(padding: EdgeInsets.symmetric(vertical: 6)),
-            GestureDetector(
-              onTap: () {
-                int totalStorage = _userDetails.isPartOfFamily()
-                    ? _userDetails.familyData.storage
-                    : _userDetails.subscription.storage;
-                String usageText = formatBytes(_userDetails.getFreeStorage()) +
-                    " / " +
-                    convertBytesToReadableFormat(totalStorage) +
-                    " free";
-                if (_userDetails.isPartOfFamily()) {
-                  usageText +=
-                      "\npersonal usage: ${convertBytesToReadableFormat(_userDetails.getPersonalUsage())}\n"
-                      "family usage: ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage() - _userDetails.getPersonalUsage())}";
-                }
-                showToast(usageText);
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _userDetails.isPartOfFamily()
-                      ? Row(
-                          children: [
-                            Container(
-                              width: 10,
-                              height: 10,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _userDetails.isPartOfFamily()
+                    ? Row(
+                        children: [
+                          Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
                             ),
-                            Padding(padding: EdgeInsets.only(right: 4)),
-                            Text(
-                              "You",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyText1
-                                  .copyWith(color: Colors.white),
+                          ),
+                          Padding(padding: EdgeInsets.only(right: 4)),
+                          Text(
+                            "You",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyText1
+                                .copyWith(color: Colors.white),
+                          ),
+                          Padding(padding: EdgeInsets.only(right: 12)),
+                          Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.75),
                             ),
-                            Padding(padding: EdgeInsets.only(right: 12)),
-                            Container(
-                              width: 10,
-                              height: 10,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.75),
-                              ),
-                            ),
-                            Padding(padding: EdgeInsets.only(right: 4)),
-                            Text(
-                              "Family",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyText1
-                                  .copyWith(color: Colors.white),
-                            ),
-                          ],
-                        )
-                      : Text(
-                          "${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())} used",
-                          style: Theme.of(context).textTheme.headline5.copyWith(
-                              color: Colors.white.withOpacity(0.7),
-                              fontSize: 14),
-                        ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 24.0),
-                    child: Text(
-                      "${NumberFormat().format(_userDetails.fileCount)} Memories",
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline5
-                          .copyWith(color: Colors.white, fontSize: 14),
-                    ),
-                  )
-                ],
-              ),
-            )
+                          ),
+                          Padding(padding: EdgeInsets.only(right: 4)),
+                          Text(
+                            "Family",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyText1
+                                .copyWith(color: Colors.white),
+                          ),
+                        ],
+                      )
+                    : Text(
+                        "${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())} used",
+                        style: Theme.of(context).textTheme.headline5.copyWith(
+                            color: Colors.white.withOpacity(0.7), fontSize: 14),
+                      ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 24.0),
+                  child: Text(
+                    "${NumberFormat().format(_userDetails.fileCount)} Memories",
+                    style: Theme.of(context)
+                        .textTheme
+                        .headline5
+                        .copyWith(color: Colors.white, fontSize: 14),
+                  ),
+                )
+              ],
+            ),
           ],
         ),
       ),
