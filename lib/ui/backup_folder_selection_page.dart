@@ -80,17 +80,18 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                 'Select folders for backup',
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontFamily: 'Inter-Bold',
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold),
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontFamily: 'Inter-Bold',
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.only(left: 24, right: 48),
             child: Text(
-              "Selected folders will be end-to-end encrypted and backed up",
+              "Selected folders will be encrypted and backed up",
               style: Theme.of(context).textTheme.caption.copyWith(height: 1.3),
             ),
           ),
@@ -110,10 +111,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                             ? "Unselect all"
                             : "Select all",
                         textAlign: TextAlign.right,
-                        style: Theme.of(context).textTheme.overline.copyWith(
-                            decoration: TextDecoration.underline,
-                            fontSize: 16,
-                            letterSpacing: 1),
+                        style: TextStyle(
+                          decoration: TextDecoration.underline,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),
