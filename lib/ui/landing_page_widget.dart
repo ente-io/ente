@@ -41,14 +41,26 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(24),
+              padding: EdgeInsets.all(28),
             ),
             _getFeatureSlider(),
+            Padding(
+              padding: EdgeInsets.all(12),
+            ),
             DotsIndicator(
               dotsCount: 3,
               position: _featureIndex,
               decorator: DotsDecorator(
-                activeColor: Theme.of(context).buttonColor,
+                activeColor:
+                    Theme.of(context).colorScheme.dotsIndicatorActiveColor,
+                color: Theme.of(context).colorScheme.dotsIndicatorInactiveColor,
+                activeShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(3)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(3)),
+                size: Size(100, 5),
+                activeSize: Size(100, 5),
+                spacing: EdgeInsets.all(3),
               ),
             ),
             Padding(

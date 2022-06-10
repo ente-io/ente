@@ -102,6 +102,14 @@ extension CustomColorScheme on ColorScheme {
   Color get backupEnabledBgColor => brightness == Brightness.light
       ? Color.fromRGBO(230, 230, 230, 0.95)
       : Color.fromRGBO(10, 40, 40, 0.3);
+
+  Color get dotsIndicatorActiveColor => brightness == Brightness.light
+      ? Colors.black.withOpacity(0.5)
+      : Colors.white.withOpacity(0.5);
+
+  Color get dotsIndicatorInactiveColor => brightness == Brightness.light
+      ? Colors.black.withOpacity(0.12)
+      : Colors.white.withOpacity(0.12);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(
