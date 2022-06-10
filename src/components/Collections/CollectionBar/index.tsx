@@ -96,13 +96,6 @@ export default function CollectionBar(props: IProps) {
                     />
                 )}
                 <ScrollContainer ref={componentRef}>
-                    <CollectionCardWithActiveIndicator
-                        latestFile={null}
-                        active={activeCollection === ALL_SECTION}
-                        onClick={clickHandler(ALL_SECTION)}
-                        collectionName={constants.ALL_SECTION_NAME}
-                    />
-
                     {sortedCollectionSummary.map((item) => (
                         <CollectionCardWithActiveIndicator
                             key={item.id}

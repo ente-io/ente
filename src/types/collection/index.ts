@@ -95,7 +95,6 @@ export interface CollectionSummary {
     latestFile: EnteFile;
     fileCount: number;
     updationTime: number;
-    isSharedAlbum: boolean;
 }
 
 export type CollectionSummaries = Map<number, CollectionSummary>;

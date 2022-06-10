@@ -1,6 +1,9 @@
 import React, { useMemo } from 'react';
 import Divider from '@mui/material/Divider';
-import { CollectionType, COLLECTION_SORT_BY } from 'constants/collection';
+import {
+    COLLECTION_SORT_BY,
+    SPECIAL_COLLECTION_TYPES,
+} from 'constants/collection';
 import { sortCollectionSummaries } from 'services/collectionService';
 import {
     Transition,
@@ -35,7 +38,7 @@ export default function AllCollections(props: Iprops) {
         () =>
             sortCollectionSummaries(
                 [...collectionSummaries.values()].filter(
-                    (x) => x.type !== CollectionType.system
+                    (x) => !SPECIAL_COLLECTION_TYPES.has(x.type)
                 ),
                 collectionSortBy
             ),
