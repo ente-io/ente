@@ -429,7 +429,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           .updatePassword(_passwordController1.text);
       await UserService.instance.updateKeyAttributes(keyAttributes);
       await dialog.hide();
-      showShortToast("Password changed successfully");
+      showShortToast(context, "Password changed successfully");
       Navigator.of(context).pop();
       if (widget.mode == PasswordEntryMode.reset) {
         Bus.instance.fire(SubscriptionPurchasedEvent());

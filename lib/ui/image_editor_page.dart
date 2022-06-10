@@ -300,7 +300,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
     if (img == null) {
       _logger.severe("null rawImageData");
-      showToast("Something went wrong");
+      showToast(context, "Something went wrong");
       return;
     }
 
@@ -329,7 +329,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
     if (result == null) {
       _logger.severe("null result");
-      showToast("Something went wrong");
+      showToast(context, "Something went wrong");
       return;
     }
     try {
@@ -358,7 +358,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       await LocalSyncService.instance.trackEditedFile(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile]));
       SyncService.instance.sync();
-      showToast("Edits saved");
+      showToast(context, "Edits saved");
       _logger.info("Original file " + widget.originalFile.toString());
       _logger.info("Saved edits to file " + newFile.toString());
       final existingFiles = widget.detailPageConfig.files;
@@ -377,7 +377,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         ),
       );
     } catch (e, s) {
-      showToast("Oops, could not save edits");
+      showToast(context, "Oops, could not save edits");
       _logger.severe(e, s);
     }
     await dialog.hide();

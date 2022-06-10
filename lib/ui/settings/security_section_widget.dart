@@ -89,7 +89,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                           AppLock.of(context).setEnabled(
                               Configuration.instance.shouldShowLockScreen());
                           if (!result) {
-                            showToast(reason);
+                            showToast(context, reason);
                             return;
                           }
                           if (value) {
@@ -248,7 +248,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           AppLock.of(context)
               .setEnabled(Configuration.instance.shouldShowLockScreen());
           if (!result) {
-            showToast(kAuthToViewSessions);
+            showToast(context, kAuthToViewSessions);
             return;
           }
           Navigator.of(context).push(

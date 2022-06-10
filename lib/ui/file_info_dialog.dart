@@ -275,7 +275,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ],
             ),
             onPressed: () {
-              showShortToast("This image has no exif data");
+              showShortToast(context, "This image has no exif data");
             },
           ),
         );
