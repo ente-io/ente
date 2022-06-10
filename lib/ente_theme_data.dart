@@ -41,7 +41,7 @@ extension CustomColorScheme on ColorScheme {
       : Color(0xFF1DB954);
 
   Color get frostyBlurBackdropFilterColor => brightness == Brightness.light
-      ? Colors.white.withOpacity(0.5)
+      ? Color.fromRGBO(238, 238, 238, 0.5)
       : Color.fromRGBO(48, 48, 48, 0.5);
 
   Color get iconColor =>
