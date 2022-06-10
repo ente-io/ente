@@ -84,12 +84,12 @@ extension CustomColorScheme on ColorScheme {
       : Color.fromRGBO(255, 255, 255, 0.9);
 
   Color get gNavIconColor => brightness == Brightness.light
-      ? Color.fromRGBO(0, 0, 0, 0.9)
-      : Color.fromRGBO(255, 255, 255, 1);
+      ? Color.fromRGBO(0, 0, 0, 0.8)
+      : Color.fromRGBO(255, 255, 255, 0.8);
 
   Color get gNavActiveIconColor => brightness == Brightness.light
-      ? Color.fromRGBO(0, 0, 0, 0.9)
-      : Color.fromRGBO(0, 0, 0, 1);
+      ? Color.fromRGBO(0, 0, 0, 0.8)
+      : Color.fromRGBO(0, 0, 0, 0.8);
 
   Color get galleryThumbBackgroundColor => brightness == Brightness.light
       ? Color.fromRGBO(240, 240, 240, 1)
