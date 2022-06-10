@@ -79,7 +79,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
                     showAppBar: true, onDone: () {}));
           },
           child:
-              SettingsTextItem(text: "Recovery Key", icon: Icons.navigate_next),
+              SettingsTextItem(text: "Recovery key", icon: Icons.navigate_next),
         ),
         SectionOptionDivider,
         GestureDetector(
