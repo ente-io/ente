@@ -10,6 +10,8 @@ class GrantPermissionsWidget extends StatelessWidget {
   const GrantPermissionsWidget({Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    final isLightMode =
+        MediaQuery.of(context).platformBrightness == Brightness.light;
     return Scaffold(
       body: SingleChildScrollView(
         physics: NeverScrollableScrollPhysics(),
@@ -23,10 +25,24 @@ class GrantPermissionsWidget extends StatelessWidget {
                 children: [
                   Center(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 140, 0, 50),
-                      child: Image.asset(
-                        "assets/gallery.png",
-                        height: 220,
+                      padding: const EdgeInsets.fromLTRB(0, 100, 0, 50),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          isLightMode
+                              ? Image.asset(
+                                  'assets/loading_photos_light.png',
+                                  color: Colors.white.withOpacity(0.4),
+                                  colorBlendMode: BlendMode.modulate,
+                                )
+                              : Image.asset('assets/loading_photos_dark.png'),
+                          Center(
+                            child: Image.asset(
+                              "assets/gallery.png",
+                              height: 160,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
