@@ -121,7 +121,7 @@ export function UploadProgressDialog({
                 <UploadProgressFooter
                     uploadStage={props.uploadStage}
                     retryFailed={props.retryFailed}
-                    closeModal={props.cancelUploads}
+                    closeModal={handleClose}
                     fileUploadResultMap={fileUploadResultMap}
                 />
             )}

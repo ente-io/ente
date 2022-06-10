@@ -61,28 +61,32 @@ export default function UploadProgress(props: Props) {
     }
 
     function confirmCancelUpload() {
+        appContext.setDialogMessage({
+            title: constants.STOP_UPLOADS_HEADER,
+            content: constants.STOP_ALL_UPLOADS_MESSAGE,
+            proceed: {
+                text: constants.YES_STOP_UPLOADS,
+                variant: 'danger',
+                action: props.cancelUploads,
+            },
+            close: {
+                text: constants.NO,
+                variant: 'secondary',
+                action: () => {},
+            },
+        });
+    }
+
+    function onClose() {
         if (props.uploadStage !== UPLOAD_STAGES.FINISH) {
-            appContext.setDialogMessage({
-                title: constants.STOP_UPLOADS_HEADER,
-                content: constants.STOP_ALL_UPLOADS_MESSAGE,
-                proceed: {
-                    text: constants.YES_STOP_UPLOADS,
-                    variant: 'danger',
-                    action: props.cancelUploads,
-                },
-                close: {
-                    text: constants.NO,
-                    variant: 'secondary',
-                    action: () => {},
-                },
-            });
+            confirmCancelUpload();
         } else {
             props.closeModal();
         }
     }
 
     const handleClose = dialogCloseHandler({
-        onClose: confirmCancelUpload,
+        onClose: onClose,
     });
 
     return (
