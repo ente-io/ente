@@ -76,7 +76,6 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             height: 1.5,
-            fontFamily: 'Ubuntu',
             fontSize: 16,
           ),
         ),

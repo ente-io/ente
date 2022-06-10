@@ -82,7 +82,6 @@ class ChildSubscriptionWidget extends StatelessWidget {
               child: Text(
                 "leave family",
                 style: TextStyle(
-                  fontFamily: 'Ubuntu-Regular',
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                   color: Color.fromRGBO(255, 52, 52, 1),

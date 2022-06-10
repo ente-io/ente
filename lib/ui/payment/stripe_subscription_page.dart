@@ -274,7 +274,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                       text: "Manage family",
                       style: TextStyle(
                         color: Colors.blue,
-                        fontFamily: 'Ubuntu',
                         fontSize: 15,
                       ),
                     ),
