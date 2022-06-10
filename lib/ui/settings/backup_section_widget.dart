@@ -194,7 +194,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           ),
           onPressed: () {
             if (Platform.isIOS) {
-              showToast(
+              showToast(context,
                   "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space");
             }
             Navigator.of(context, rootNavigator: true).pop('dialog');
@@ -251,7 +251,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             ),
           ),
           onPressed: () {
-            showToast("Also empty your \"Trash\" to claim the freed up space");
+            showToast(context,
+                "Also empty your \"Trash\" to claim the freed up space");
             Navigator.of(context, rootNavigator: true).pop('dialog');
           },
         ),

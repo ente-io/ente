@@ -210,7 +210,7 @@ class UserService {
       );
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
-        showShortToast("Email verification successful!");
+        showShortToast(context, "Email verification successful!");
         Widget page;
         final String twoFASessionID = response.data["twoFactorSessionID"];
         if (twoFASessionID != null && twoFASessionID.isNotEmpty) {
@@ -275,7 +275,7 @@ class UserService {
       );
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
-        showToast("Email changed to " + email);
+        showToast(context, "Email changed to " + email);
         _config.setEmail(email);
         Navigator.of(context).popUntil((route) => route.isFirst);
         Bus.instance.fire(UserDetailsChangedEvent());
@@ -384,7 +384,7 @@ class UserService {
       );
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
-        showToast("Authentication successful!");
+        showToast(context, "Authentication successful!");
         await _saveConfiguration(response);
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
@@ -399,7 +399,7 @@ class UserService {
       await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response.statusCode == 404) {
-        showToast("Session expired");
+        showToast(context, "Session expired");
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -446,7 +446,7 @@ class UserService {
     } on DioError catch (e) {
       _logger.severe(e);
       if (e.response != null && e.response.statusCode == 404) {
-        showToast("Session expired");
+        showToast(context, "Session expired");
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -498,7 +498,7 @@ class UserService {
         },
       );
       if (response != null && response.statusCode == 200) {
-        showShortToast("Two-factor authentication successfully reset");
+        showShortToast(context, "Two-factor authentication successfully reset");
         await _saveConfiguration(response);
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
@@ -512,7 +512,7 @@ class UserService {
     } on DioError catch (e) {
       _logger.severe(e);
       if (e.response != null && e.response.statusCode == 404) {
-        showToast("Session expired");
+        showToast(context, "Session expired");
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -622,7 +622,7 @@ class UserService {
       );
       Bus.instance.fire(TwoFactorStatusChangeEvent(false));
       await dialog.hide();
-      showToast("Two-factor authentication has been disabled");
+      showToast(context, "Two-factor authentication has been disabled");
     } catch (e, s) {
       await dialog.hide();
       _logger.severe(e, s);

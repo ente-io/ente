@@ -129,7 +129,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     return GestureDetector(
       onTap: () async {
         await Clipboard.setData(ClipboardData(text: widget.secretCode));
-        showToast("Code copied to clipboard");
+        showToast(context, "Code copied to clipboard");
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

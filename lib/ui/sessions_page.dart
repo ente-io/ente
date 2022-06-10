@@ -128,7 +128,7 @@ class _SessionsPageState extends State<SessionsPage> {
     _sessions = await UserService.instance
         .getActiveSessions()
         .onError((error, stackTrace) {
-      showToast("Failed to fetch active sessions");
+      showToast(context, "Failed to fetch active sessions");
       throw error;
     });
     _sessions.sessions.sort((first, second) {

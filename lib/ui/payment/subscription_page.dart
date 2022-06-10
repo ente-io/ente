@@ -86,7 +86,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 text = "your plan was successfully downgraded";
               }
             }
-            showToast(text);
+            showToast(context, text);
             _currentSubscription = newSubscription;
             _hasActiveSubscription = _currentSubscription.isValid();
             setState(() {});
