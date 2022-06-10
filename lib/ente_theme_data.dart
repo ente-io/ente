@@ -110,6 +110,13 @@ extension CustomColorScheme on ColorScheme {
   Color get dotsIndicatorInactiveColor => brightness == Brightness.light
       ? Colors.black.withOpacity(0.12)
       : Colors.white.withOpacity(0.12);
+
+  Color get toastTextColor =>
+      brightness == Brightness.light ? Colors.white : Colors.black;
+
+  Color get toastBackgroundColor => brightness == Brightness.light
+      ? Color.fromRGBO(24, 24, 24, 0.95)
+      : Color.fromRGBO(255, 255, 255, 0.95);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(
