@@ -34,7 +34,8 @@ export default function CollectionCard(props: {
     }, [file]);
 
     return (
-        <CustomCollectionTile coverImgURL={coverImageURL} onClick={onClick}>
+        <CustomCollectionTile onClick={onClick}>
+            {coverImageURL && <img src={coverImageURL} />}
             {children}
         </CustomCollectionTile>
     );

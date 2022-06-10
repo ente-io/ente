@@ -25,16 +25,20 @@ export const ScrollContainer = styled.div`
     display: flex;
 `;
 
-export const CollectionTile = styled.div<{
-    coverImgURL?: string;
-}>`
+export const CollectionTile = styled.div`
     display: flex;
     position: relative;
     border-radius: 4px;
     user-select: none;
     cursor: pointer;
-    background-image: url(${({ coverImgURL }) => coverImgURL});
     background-size: cover;
+    & > img {
+        object-fit: cover;
+        max-width: 100%;
+        min-height: 100%;
+        flex: 1;
+        pointer-events: none;
+    }
 `;
 
 export const CollectionTileWrapper = styled.div`
