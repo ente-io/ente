@@ -55,7 +55,7 @@ extension CustomColorScheme on ColorScheme {
       ? Colors.white
       : Color.fromRGBO(10, 15, 15, 1.0);
 
-  Color get greenText => Color.fromRGBO(40, 190, 92, 1);
+  Color get greenText => Color.fromARGB(255, 40, 190, 113);
 
   Color get cupertinoPickerTopColor => brightness == Brightness.light
       ? Color.fromARGB(255, 238, 238, 238)
