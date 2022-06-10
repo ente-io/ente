@@ -35,12 +35,12 @@ class _RecoveryPageState extends State<RecoveryPage> {
           isFormValid: _recoveryKey.text.isNotEmpty,
           buttonText: 'Recover',
           onPressedFunction: () async {
-            final dialog = createProgressDialog(context, "decrypting...");
+            final dialog = createProgressDialog(context, "Decrypting...");
             await dialog.show();
             try {
               await Configuration.instance.recover(_recoveryKey.text.trim());
               await dialog.hide();
-              showToast("recovery successful!");
+              showToast("Recovery successful!");
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (BuildContext context) {

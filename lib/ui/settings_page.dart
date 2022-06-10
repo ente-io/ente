@@ -58,7 +58,7 @@ class SettingsPage extends StatelessWidget {
     if (hasLoggedIn) {
       contents.addAll([
         DetailsSectionWidget(),
-        Padding(padding: EdgeInsets.only(bottom: 16)),
+        Padding(padding: EdgeInsets.only(bottom: 24)),
         BackupSectionWidget(),
         sectionDivider,
         AccountSectionWidget(),

@@ -39,7 +39,7 @@ extension CustomColorScheme on ColorScheme {
       : Color(0xFF1DB954);
 
   Color get frostyBlurBackdropFilterColor => brightness == Brightness.light
-      ? Colors.white.withOpacity(0.5)
+      ? Color.fromRGBO(238, 238, 238, 0.5)
       : Color.fromRGBO(48, 48, 48, 0.5);
 
   Color get iconColor =>
@@ -82,12 +82,12 @@ extension CustomColorScheme on ColorScheme {
       : Color.fromRGBO(255, 255, 255, 0.9);
 
   Color get gNavIconColor => brightness == Brightness.light
-      ? Color.fromRGBO(0, 0, 0, 0.9)
-      : Color.fromRGBO(255, 255, 255, 1);
+      ? Color.fromRGBO(0, 0, 0, 0.8)
+      : Color.fromRGBO(255, 255, 255, 0.8);
 
   Color get gNavActiveIconColor => brightness == Brightness.light
-      ? Color.fromRGBO(0, 0, 0, 0.9)
-      : Color.fromRGBO(0, 0, 0, 1);
+      ? Color.fromRGBO(0, 0, 0, 0.8)
+      : Color.fromRGBO(0, 0, 0, 0.8);
 
   Color get galleryThumbBackgroundColor => brightness == Brightness.light
       ? Color.fromRGBO(240, 240, 240, 1)
