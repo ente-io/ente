@@ -7,6 +7,7 @@ import { useLocalState } from 'hooks/useLocalState';
 import Typography from '@mui/material/Typography';
 import SubscriptionStatus from './SubscriptionStatus';
 import Stack from '@mui/material/Stack';
+import { Skeleton } from '@mui/material';
 
 export default function UserDetailsSection({ sidebarView, closeSidebar }) {
     const [userDetails, setUserDetails] = useLocalState<UserDetails>(
@@ -26,7 +27,14 @@ export default function UserDetailsSection({ sidebarView, closeSidebar }) {
 
     return (
         <Stack spacing={1}>
-            <Typography>{userDetails?.email}</Typography>
+            <Typography>
+                {userDetails ? (
+                    userDetails.email
+                ) : (
+                    <Skeleton animation="wave" />
+                )}
+            </Typography>
+
             <SubscriptionCard
                 userDetails={userDetails}
                 closeSidebar={closeSidebar}

@@ -1,7 +1,7 @@
 import { ClickIndicator } from './clickIndicator';
 import { IndividualUsageSection } from './individualUsageSection';
 import React, { useContext, useMemo } from 'react';
-import { Box } from '@mui/material';
+import { Box, Skeleton } from '@mui/material';
 import { UserDetails } from 'types/user';
 
 import StorageSection from './storageSection';
@@ -17,7 +17,15 @@ export default function SubscriptionCard({ userDetails }: Iprops) {
     const { showPlanSelectorModal } = useContext(GalleryContext);
 
     if (!userDetails) {
-        return <></>;
+        return (
+            <Skeleton
+                animation="wave"
+                variant="rectangular"
+                width={'100%'}
+                height={148}
+                sx={{ borderRadius: '8px' }}
+            />
+        );
     }
 
     const totalUsage = useMemo(() => {
@@ -40,11 +48,7 @@ export default function SubscriptionCard({ userDetails }: Iprops) {
     }, [userDetails]);
 
     return (
-        <Box
-            display="flex"
-            flexDirection={'column'}
-            onClick={showPlanSelectorModal}
-            sx={{ cursor: 'pointer' }}>
+        <Box onClick={showPlanSelectorModal} sx={{ cursor: 'pointer' }}>
             <img
                 style={{ position: 'absolute' }}
                 src="/subscription-card-background.png"
