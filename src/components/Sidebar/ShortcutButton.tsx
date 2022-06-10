@@ -9,7 +9,7 @@ interface IProps {
     label: JSX.Element | string;
     count: number;
 }
-const NavigationButton: FC<ButtonProps<'button', IProps>> = ({
+const ShortcutButton: FC<ButtonProps<'button', IProps>> = ({
     icon,
     label,
     count,
@@ -36,4 +36,4 @@ const NavigationButton: FC<ButtonProps<'button', IProps>> = ({
     );
 };
 
-export default NavigationButton;
+export default ShortcutButton;

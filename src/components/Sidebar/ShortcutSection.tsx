@@ -5,13 +5,13 @@ import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { CollectionSummaries } from 'types/collection';
-import NavigationButton from './NavigationButton';
+import ShortcutButton from './ShortcutButton';
 interface Iprops {
     closeSidebar: () => void;
     collectionSummaries: CollectionSummaries;
 }
 
-export default function NavigationSection({
+export default function ShortcutSection({
     closeSidebar,
     collectionSummaries,
 }: Iprops) {
@@ -29,13 +29,13 @@ export default function NavigationSection({
 
     return (
         <>
-            <NavigationButton
+            <ShortcutButton
                 icon={<DeleteIcon />}
                 label={constants.TRASH}
                 count={collectionSummaries.get(TRASH_SECTION)?.fileCount}
                 onClick={openTrashSection}
             />
-            <NavigationButton
+            <ShortcutButton
                 icon={<VisibilityOffIcon />}
                 label={constants.ARCHIVE}
                 count={collectionSummaries.get(ARCHIVE_SECTION)?.fileCount}
