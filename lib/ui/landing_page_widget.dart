@@ -106,6 +106,9 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                       Theme.of(context).colorScheme.optionalActionButtonStyle,
                   child: Text(
                     "Existing user",
+                    style: TextStyle(
+                      color: Colors.black, // same for both themes
+                    ),
                   ),
                   onPressed: _navigateToSignInPage,
                 ),
