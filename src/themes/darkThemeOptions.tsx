@@ -149,6 +149,7 @@ const darkThemeOptions = createTheme({
             A100: '#ccc',
             A200: 'rgba(256, 256, 256, 0.24)',
             A400: '#434343',
+            500: 'rgba(256, 256, 256, 0.5)',
         },
         divider: 'rgba(256, 256, 256, 0.12)',
     },
