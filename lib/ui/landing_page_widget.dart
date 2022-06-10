@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
@@ -30,55 +32,13 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         child: Column(
           children: [
             Padding(padding: const EdgeInsets.all(12)),
-            Text.rich(
-              TextSpan(
-                children: const <TextSpan>[
-                  TextSpan(
-                    text: "With ",
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                  TextSpan(
-                    text: "ente",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Montserrat',
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
+            Text(
+              "ente",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Montserrat',
+                fontSize: 36,
               ),
-              textAlign: TextAlign.center,
-            ),
-            Padding(
-              padding: EdgeInsets.all(2),
-            ),
-            Text.rich(
-              TextSpan(
-                children: const <TextSpan>[
-                  TextSpan(
-                    text: "your ",
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                  TextSpan(
-                    text: "memories",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  TextSpan(
-                    text: " are",
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              textAlign: TextAlign.center,
             ),
             Padding(
               padding: EdgeInsets.all(24),
@@ -144,19 +104,27 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: 320),
       child: PageView(
-        children: const [
+        children: [
           FeatureItemWidget(
-              "assets/protected.png",
-              "Protected",
-              "End-to-end encrypted with your password,",
-              "visible only to you"),
-          FeatureItemWidget("assets/synced.png", "Synced",
-              "Available across all your devices,", "web, android and ios"),
+            "assets/protected.png",
+            "Private backups",
+            "for your memories",
+            "end-to-end encrypted by default",
+          ),
           FeatureItemWidget(
-              "assets/preserved.png",
-              "Preserved",
-              "Reliably replicated to a fallout shelter,",
-              "designed to outlive"),
+            "assets/preserved.png",
+            "Safely stored",
+            "at a fallout shelter",
+            "designed to outlive",
+          ),
+          FeatureItemWidget(
+            "assets/synced.png",
+            "Available",
+            "everywhere",
+            Platform.isAndroid
+                ? "android, ios, web, desktop"
+                : "ios, android, web, desktop",
+          ),
         ],
         onPageChanged: (index) {
           setState(() {
@@ -221,12 +189,16 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 }
 
 class FeatureItemWidget extends StatelessWidget {
-  final String assetPath, featureTitle, firstLine, secondLine;
+  final String assetPath,
+      featureTitleFirstLine,
+      featureTitleSecondLine,
+      subText;
+
   const FeatureItemWidget(
     this.assetPath,
-    this.featureTitle,
-    this.firstLine,
-    this.secondLine, {
+    this.featureTitleFirstLine,
+    this.featureTitleSecondLine,
+    this.subText, {
     Key key,
   }) : super(key: key);
 
@@ -245,23 +217,21 @@ class FeatureItemWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
-              featureTitle,
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            Padding(padding: EdgeInsets.all(12)),
-            Text(
-              firstLine,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.9),
-              ),
+              featureTitleFirstLine,
+              style: Theme.of(context).textTheme.headline5,
             ),
             Padding(padding: EdgeInsets.all(2)),
             Text(
-              secondLine,
+              featureTitleSecondLine,
+              style: Theme.of(context).textTheme.headline5,
+            ),
+            Padding(padding: EdgeInsets.all(12)),
+            Text(
+              subText,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.9),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                fontSize: 16,
               ),
             ),
           ],
