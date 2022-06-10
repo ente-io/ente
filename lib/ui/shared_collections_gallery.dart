@@ -149,10 +149,10 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 : _getIncomingCollectionEmptyState(),
             const SizedBox(height: 32),
             SectionTitle("Outgoing"),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             collections.outgoing.isNotEmpty
                 ? Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                     child: ListView.builder(
                       shrinkWrap: true,
                       padding: EdgeInsets.only(bottom: 12),
@@ -308,7 +308,7 @@ class OutgoingCollectionItem extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
-        margin: EdgeInsets.fromLTRB(16, 12, 8, 12),
+        margin: EdgeInsets.fromLTRB(16, 12, 16, 12),
         child: Row(
           children: <Widget>[
             ClipRRect(

@@ -690,7 +690,9 @@ class SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(24, 12, 0, 0),
+      // margin: EdgeInsets.fromLTRB(24, 12, 0, 0),
+      margin: EdgeInsets.fromLTRB(
+          (title == "Incoming" || title == "Outgoing") ? 16 : 24, 12, 0, 0),
       child: Column(
         children: [
           Align(
