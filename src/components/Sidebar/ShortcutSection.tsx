@@ -37,7 +37,7 @@ export default function ShortcutSection({
             />
             <ShortcutButton
                 icon={<VisibilityOffIcon />}
-                label={constants.ARCHIVE}
+                label={constants.ARCHIVE_SECTION_NAME}
                 count={collectionSummaries.get(ARCHIVE_SECTION)?.fileCount}
                 onClick={openArchiveSection}
             />
