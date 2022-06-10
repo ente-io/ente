@@ -94,12 +94,13 @@ const darkThemeOptions = createTheme({
             styleOverrides: {
                 root: {
                     textTransform: 'none',
-                    borderRadius: '8px',
+                    padding: '12px 16px',
+                },
+                startIcon: {
+                    marginRight: '12px',
                 },
                 sizeLarge: {
-                    fontSize: '18px',
-                    lineHeight: '21.78px',
-                    padding: '16px',
+                    width: '100%',
                 },
             },
         },
@@ -155,7 +156,7 @@ const darkThemeOptions = createTheme({
         divider: 'rgba(256, 256, 256, 0.12)',
     },
     shape: {
-        borderRadius: 8,
+        borderRadius: 4,
     },
     typography: {
         body1: {
@@ -165,6 +166,11 @@ const darkThemeOptions = createTheme({
         body2: {
             fontSize: '14px',
             lineHeight: '20px',
+        },
+        button: {
+            fontSize: '16px',
+            lineHeight: '19.63px',
+            fontWeight: 600,
         },
         title: {
             fontSize: '32px',
