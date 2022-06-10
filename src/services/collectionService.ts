@@ -807,7 +807,7 @@ function getArchivedCollectionSummaries(
 ): CollectionSummary {
     return {
         id: ARCHIVE_SECTION,
-        name: constants.ARCHIVE,
+        name: constants.ARCHIVED,
         type: CollectionType.system,
         latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
         fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,

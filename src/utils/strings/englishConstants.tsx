@@ -582,6 +582,7 @@ const englishConstants = {
         'These files were uploaded, but unfortunately we could not generate the thumbnails for them.',
     UPLOAD_TO_COLLECTION: 'Upload to album',
     ARCHIVE: 'Hide',
+    ARCHIVED: 'Hidden',
     ALL_SECTION_NAME: 'All Photos',
     MOVE_TO_COLLECTION: 'Move to album',
     UNARCHIVE: 'Unhide',
