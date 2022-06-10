@@ -307,7 +307,7 @@ Future<bool> deleteLocalFiles(
     Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
     return true;
   } else {
-    showToast("could not free up space");
+    showToast("Could not free up space");
     return false;
   }
 }

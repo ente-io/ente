@@ -115,7 +115,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     }
     _isLoadingVideoPlayer = true;
     if (_file.isRemoteFile() && !(await isFileCached(_file, liveVideo: true))) {
-      showToast("downloading...", toastLength: Toast.LENGTH_LONG);
+      showToast("Downloading...", toastLength: Toast.LENGTH_LONG);
     }
 
     var videoFile = await getFile(widget.file, liveVideo: true)
@@ -159,7 +159,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     var _preferences = await SharedPreferences.getInstance();
     int promptTillNow = _preferences.getInt(kLivePhotoToastCounterKey) ?? 0;
     if (promptTillNow < kMaxLivePhotoToastCount) {
-      showToast("press and hold to play video");
+      showToast("Press and hold to play video");
       _preferences.setInt(kLivePhotoToastCounterKey, promptTillNow + 1);
     }
   }

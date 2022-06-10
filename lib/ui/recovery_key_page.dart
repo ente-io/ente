@@ -117,7 +117,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                       onTap: () async {
                         await Clipboard.setData(
                             ClipboardData(text: recoveryKey));
-                        showToast("recovery key copied to clipboard");
+                        showToast("Recovery key copied to clipboard");
                         setState(() {
                           _hasTriedToSave = true;
                         });
