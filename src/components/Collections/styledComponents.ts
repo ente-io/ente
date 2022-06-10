@@ -8,7 +8,7 @@ export const CollectionBarWrapper = styled(PaddedContainer)`
     height: 86px;
     width: 100%;
     margin: 10px auto;
-    border-bottom: 1px solid ${({ theme }) => theme.palette.grey.A200};
+    border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
 `;
 
 export const CollectionSectionWrapper = styled(PaddedContainer)`
