@@ -73,7 +73,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         opacity: _shouldHide ? 0 : 1,
         duration: Duration(milliseconds: 150),
       ),
-      height: Platform.isAndroid ? 64 : 80,
+      height: Platform.isAndroid ? 64 : 96,
     );
   }
 
