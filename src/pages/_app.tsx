@@ -29,11 +29,6 @@ import {
 } from 'services/userService';
 import { CustomError } from 'utils/error';
 
-export const LogoImage = styled.img`
-    max-height: 28px;
-    margin-right: 5px;
-`;
-
 export const MessageContainer = styled.div`
     background-color: #111;
     padding: 0;

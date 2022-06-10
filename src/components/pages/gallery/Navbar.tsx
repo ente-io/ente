@@ -1,11 +1,11 @@
 import React from 'react';
 import NavbarBase from 'components/Navbar/base';
 import SidebarToggler from 'components/Navbar/SidebarToggler';
-import { LogoImage } from 'pages/_app';
 import UploadButton from './UploadButton';
 import { getNonTrashedUniqueUserFiles } from 'utils/file';
 import SearchBar from 'components/Search';
 import { FluidContainer } from 'components/Container';
+import { EnteLogo } from 'components/EnteLogo';
 
 export function GalleryNavbar({
     openSidebar,
@@ -25,11 +25,7 @@ export function GalleryNavbar({
 
             {isFirstFetch ? (
                 <FluidContainer style={{ justifyContent: 'center' }}>
-                    <LogoImage
-                        style={{ height: '24px', padding: '3px' }}
-                        alt="logo"
-                        src="/icon.svg"
-                    />
+                    <EnteLogo />
                 </FluidContainer>
             ) : (
                 <SearchBar
