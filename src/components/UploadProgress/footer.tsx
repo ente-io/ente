@@ -1,25 +1,27 @@
 import { Button, DialogActions } from '@mui/material';
-import { UPLOAD_STAGES, FileUploadResults } from 'constants/upload';
-import React from 'react';
+import { UPLOAD_STAGES, UPLOAD_RESULT } from 'constants/upload';
+import React, { useContext } from 'react';
 import constants from 'utils/strings/constants';
-export function UploadProgressFooter({
-    uploadStage,
-    fileUploadResultMap,
-    retryFailed,
-    closeModal,
-}) {
+import UploadProgressContext from 'contexts/uploadProgress';
+
+export function UploadProgressFooter() {
+    const { uploadStage, finishedUploads, retryFailed, onClose } = useContext(
+        UploadProgressContext
+    );
+
     return (
         <DialogActions>
             {uploadStage === UPLOAD_STAGES.FINISH &&
-                (fileUploadResultMap?.get(FileUploadResults.FAILED)?.length >
-                    0 ||
-                fileUploadResultMap?.get(FileUploadResults.BLOCKED)?.length >
-                    0 ? (
+                (finishedUploads?.get(UPLOAD_RESULT.FAILED)?.length > 0 ||
+                finishedUploads?.get(UPLOAD_RESULT.BLOCKED)?.length > 0 ? (
                     <Button variant="contained" fullWidth onClick={retryFailed}>
                         {constants.RETRY_FAILED}
                     </Button>
                 ) : (
-                    <Button variant="contained" fullWidth onClick={closeModal}>
+                    <Button
+                        variant="contained"
+                        fullWidth
+                        onClick={() => onClose.bind(null)}>
                         {constants.CLOSE}
                     </Button>
                 ))}

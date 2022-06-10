@@ -1,25 +1,28 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import FileList from 'components/FileList';
 import { Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ResultItemContainer } from './styledComponents';
-import { FileUploadResults } from 'constants/upload';
+import { UPLOAD_RESULT } from 'constants/upload';
 import {
     SectionInfo,
     UploadProgressSection,
     UploadProgressSectionContent,
     UploadProgressSectionTitle,
 } from './section';
+import UploadProgressContext from 'contexts/uploadProgress';
 
 export interface ResultSectionProps {
-    filenames: Map<number, string>;
-    fileUploadResultMap: Map<FileUploadResults, number[]>;
-    fileUploadResult: FileUploadResults;
+    uploadResult: UPLOAD_RESULT;
     sectionTitle: any;
     sectionInfo?: any;
 }
 export const ResultSection = (props: ResultSectionProps) => {
-    const fileList = props.fileUploadResultMap?.get(props.fileUploadResult);
+    const { finishedUploads, uploadFileNames } = useContext(
+        UploadProgressContext
+    );
+    const fileList = finishedUploads.get(props.uploadResult);
+
     if (!fileList?.length) {
         return <></>;
     }
@@ -35,7 +38,7 @@ export const ResultSection = (props: ResultSectionProps) => {
                 <FileList
                     fileList={fileList.map((fileID) => (
                         <ResultItemContainer key={fileID}>
-                            {props.filenames.get(fileID)}
+                            {uploadFileNames.get(fileID)}
                         </ResultItemContainer>
                     ))}
                 />

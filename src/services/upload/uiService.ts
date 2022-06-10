@@ -1,16 +1,16 @@
 import {
-    FileUploadResults,
+    UPLOAD_RESULT,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_STAGES,
 } from 'constants/upload';
-import { ProgressUpdater } from 'types/upload';
+import { ProgressUpdater } from 'types/upload/ui';
 
 class UIService {
     private perFileProgress: number;
     private filesUploaded: number;
     private totalFileCount: number;
-    private fileProgress: Map<number, number>;
-    private uploadResult: Map<number, FileUploadResults>;
+    private inProgressUploads: Map<number, number>;
+    private finishedUploads: Map<number, UPLOAD_RESULT>;
     private progressUpdater: ProgressUpdater;
 
     init(progressUpdater: ProgressUpdater) {
@@ -20,8 +20,8 @@ class UIService {
     reset(count: number) {
         this.setTotalFileCount(count);
         this.filesUploaded = 0;
-        this.fileProgress = new Map<number, number>();
-        this.uploadResult = new Map<number, FileUploadResults>();
+        this.inProgressUploads = new Map<number, number>();
+        this.finishedUploads = new Map<number, UPLOAD_RESULT>();
         this.updateProgressBarUI();
     }
 
@@ -31,7 +31,7 @@ class UIService {
     }
 
     setFileProgress(key: number, progress: number) {
-        this.fileProgress.set(key, progress);
+        this.inProgressUploads.set(key, progress);
         this.updateProgressBarUI();
     }
 
@@ -44,7 +44,7 @@ class UIService {
     }
 
     setFilenames(filenames: Map<number, string>) {
-        this.progressUpdater.setFilenames(filenames);
+        this.progressUpdater.setUploadFilenames(filenames);
     }
 
     setHasLivePhoto(hasLivePhoto: boolean) {
@@ -56,18 +56,18 @@ class UIService {
         this.updateProgressBarUI();
     }
 
-    moveFileToResultList(key: number, uploadResult: FileUploadResults) {
-        this.uploadResult.set(key, uploadResult);
-        this.fileProgress.delete(key);
+    moveFileToResultList(key: number, uploadResult: UPLOAD_RESULT) {
+        this.finishedUploads.set(key, uploadResult);
+        this.inProgressUploads.delete(key);
         this.updateProgressBarUI();
     }
 
     updateProgressBarUI() {
         const {
             setPercentComplete,
-            setFileCounter,
-            setFileProgress,
-            setUploadResult,
+            setUploadCounter: setFileCounter,
+            setInProgressUploads,
+            setFinishedUploads,
         } = this.progressUpdater;
         setFileCounter({
             finished: this.filesUploaded,
@@ -75,10 +75,10 @@ class UIService {
         });
         let percentComplete =
             this.perFileProgress *
-            (this.uploadResult.size || this.filesUploaded);
-        if (this.fileProgress) {
+            (this.finishedUploads.size || this.filesUploaded);
+        if (this.inProgressUploads) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            for (const [_, progress] of this.fileProgress) {
+            for (const [_, progress] of this.inProgressUploads) {
                 // filter  negative indicator values during percentComplete calculation
                 if (progress < 0) {
                     continue;
@@ -88,8 +88,8 @@ class UIService {
         }
 
         setPercentComplete(percentComplete);
-        setFileProgress(this.fileProgress);
-        setUploadResult(this.uploadResult);
+        setInProgressUploads(this.inProgressUploads);
+        setFinishedUploads(this.finishedUploads);
     }
 
     trackUploadProgress(
@@ -108,7 +108,7 @@ class UIService {
         return {
             cancel,
             onUploadProgress: (event) => {
-                this.fileProgress.set(
+                this.inProgressUploads.set(
                     fileLocalID,
                     Math.min(
                         Math.round(

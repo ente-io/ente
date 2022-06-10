@@ -1,7 +1,7 @@
 import { DialogContent } from '@mui/material';
 import constants from 'utils/strings/constants';
-import { UPLOAD_STAGES, FileUploadResults } from 'constants/upload';
-import React from 'react';
+import { UPLOAD_STAGES, UPLOAD_RESULT } from 'constants/upload';
+import React, { useContext, useMemo } from 'react';
 import { UploadProgressFooter } from './footer';
 import { UploadProgressHeader } from './header';
 import { InProgressSection } from './inProgressSection';
@@ -9,49 +9,46 @@ import { ResultSection } from './resultSection';
 import { NotUploadSectionHeader } from './styledComponents';
 import { getOSSpecificDesktopAppDownloadLink } from 'utils/common';
 import DialogBoxBase from 'components/DialogBox/base';
-export function UploadProgressDialog({
-    handleClose,
-    setExpanded,
-    expanded,
-    fileProgressStatuses,
-    sectionInfo,
-    fileUploadResultMap,
-    filesNotUploaded,
-    ...props
-}) {
+import UploadProgressContext from 'contexts/uploadProgress';
+
+export function UploadProgressDialog() {
+    const { open, onClose, uploadStage, finishedUploads } = useContext(
+        UploadProgressContext
+    );
+
+    const hasUnUploadedFiles = useMemo(() => {
+        if (
+            finishedUploads.get(UPLOAD_RESULT.ALREADY_UPLOADED).length > 0 ||
+            finishedUploads.get(UPLOAD_RESULT.BLOCKED).length > 0 ||
+            finishedUploads.get(UPLOAD_RESULT.FAILED).length > 0 ||
+            finishedUploads.get(UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE)
+                .length > 0 ||
+            finishedUploads.get(UPLOAD_RESULT.TOO_LARGE).length > 0 ||
+            finishedUploads.get(UPLOAD_RESULT.UNSUPPORTED).length > 0
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }, [finishedUploads]);
+
     return (
-        <DialogBoxBase maxWidth="xs" open={props.show} onClose={handleClose}>
-            <UploadProgressHeader
-                uploadStage={props.uploadStage}
-                setExpanded={setExpanded}
-                expanded={expanded}
-                handleClose={handleClose}
-                fileCounter={props.fileCounter}
-                now={props.now}
-            />
-            {(props.uploadStage === UPLOAD_STAGES.UPLOADING ||
-                props.uploadStage === UPLOAD_STAGES.FINISH) && (
+        <DialogBoxBase maxWidth="xs" open={open} onClose={onClose}>
+            <UploadProgressHeader />
+            {(uploadStage === UPLOAD_STAGES.UPLOADING ||
+                uploadStage === UPLOAD_STAGES.FINISH) && (
                 <DialogContent sx={{ '&&&': { px: 0 } }}>
-                    {props.uploadStage === UPLOAD_STAGES.UPLOADING && (
-                        <InProgressSection
-                            filenames={props.filenames}
-                            fileProgressStatuses={fileProgressStatuses}
-                            sectionTitle={constants.INPROGRESS_UPLOADS}
-                            sectionInfo={sectionInfo}
-                        />
+                    {uploadStage === UPLOAD_STAGES.UPLOADING && (
+                        <InProgressSection />
                     )}
 
                     <ResultSection
-                        filenames={props.filenames}
-                        fileUploadResultMap={fileUploadResultMap}
-                        fileUploadResult={FileUploadResults.UPLOADED}
+                        uploadResult={UPLOAD_RESULT.UPLOADED}
                         sectionTitle={constants.SUCCESSFUL_UPLOADS}
                     />
                     <ResultSection
-                        filenames={props.filenames}
-                        fileUploadResultMap={fileUploadResultMap}
-                        fileUploadResult={
-                            FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL
+                        uploadResult={
+                            UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
                         }
                         sectionTitle={
                             constants.THUMBNAIL_GENERATION_FAILED_UPLOADS
@@ -59,40 +56,32 @@ export function UploadProgressDialog({
                         sectionInfo={constants.THUMBNAIL_GENERATION_FAILED_INFO}
                     />
 
-                    {props.uploadStage === UPLOAD_STAGES.FINISH &&
-                        filesNotUploaded && (
+                    {uploadStage === UPLOAD_STAGES.FINISH &&
+                        hasUnUploadedFiles && (
                             <NotUploadSectionHeader>
                                 {constants.FILE_NOT_UPLOADED_LIST}
                             </NotUploadSectionHeader>
                         )}
 
                     <ResultSection
-                        filenames={props.filenames}
-                        fileUploadResultMap={fileUploadResultMap}
-                        fileUploadResult={FileUploadResults.BLOCKED}
+                        uploadResult={UPLOAD_RESULT.BLOCKED}
                         sectionTitle={constants.BLOCKED_UPLOADS}
                         sectionInfo={constants.ETAGS_BLOCKED(
                             getOSSpecificDesktopAppDownloadLink()
                         )}
                     />
                     <ResultSection
-                        filenames={props.filenames}
-                        fileUploadResultMap={fileUploadResultMap}
-                        fileUploadResult={FileUploadResults.FAILED}
+                        uploadResult={UPLOAD_RESULT.FAILED}
                         sectionTitle={constants.FAILED_UPLOADS}
                     />
                     <ResultSection
-                        filenames={props.filenames}
-                        fileUploadResultMap={fileUploadResultMap}
-                        fileUploadResult={FileUploadResults.ALREADY_UPLOADED}
+                        uploadResult={UPLOAD_RESULT.ALREADY_UPLOADED}
                         sectionTitle={constants.SKIPPED_FILES}
                         sectionInfo={constants.SKIPPED_INFO}
                     />
                     <ResultSection
-                        filenames={props.filenames}
-                        fileUploadResultMap={fileUploadResultMap}
-                        fileUploadResult={
-                            FileUploadResults.LARGER_THAN_AVAILABLE_STORAGE
+                        uploadResult={
+                            UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE
                         }
                         sectionTitle={
                             constants.LARGER_THAN_AVAILABLE_STORAGE_UPLOADS
@@ -102,29 +91,18 @@ export function UploadProgressDialog({
                         }
                     />
                     <ResultSection
-                        filenames={props.filenames}
-                        fileUploadResultMap={fileUploadResultMap}
-                        fileUploadResult={FileUploadResults.UNSUPPORTED}
+                        uploadResult={UPLOAD_RESULT.UNSUPPORTED}
                         sectionTitle={constants.UNSUPPORTED_FILES}
                         sectionInfo={constants.UNSUPPORTED_INFO}
                     />
                     <ResultSection
-                        filenames={props.filenames}
-                        fileUploadResultMap={fileUploadResultMap}
-                        fileUploadResult={FileUploadResults.TOO_LARGE}
+                        uploadResult={UPLOAD_RESULT.TOO_LARGE}
                         sectionTitle={constants.TOO_LARGE_UPLOADS}
                         sectionInfo={constants.TOO_LARGE_INFO}
                     />
                 </DialogContent>
             )}
-            {props.uploadStage === UPLOAD_STAGES.FINISH && (
-                <UploadProgressFooter
-                    uploadStage={props.uploadStage}
-                    retryFailed={props.retryFailed}
-                    closeModal={handleClose}
-                    fileUploadResultMap={fileUploadResultMap}
-                />
-            )}
+            {uploadStage === UPLOAD_STAGES.FINISH && <UploadProgressFooter />}
         </DialogBoxBase>
     );
 }

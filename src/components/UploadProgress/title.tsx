@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Close from '@mui/icons-material/Close';
 import {
     DialogTitle,
@@ -13,6 +13,7 @@ import { UPLOAD_STAGES } from 'constants/upload';
 import constants from 'utils/strings/constants';
 import { MaximizeIcon } from 'components/icons/Maximize';
 import { MinimizeIcon } from 'components/icons/Minimize';
+import UploadProgressContext from 'contexts/uploadProgress';
 
 const IconButtonWithBG = styled(IconButton)(({ theme }) => ({
     backgroundColor: theme.palette.secondary.main,
@@ -33,24 +34,22 @@ line-height: 36px;
     </Typography>
 );
 
-function UploadProgressSubtitleText(props) {
+function UploadProgressSubtitleText() {
+    const { uploadStage, uploadCounter } = useContext(UploadProgressContext);
+
     return (
         <Typography color="text.secondary">
-            {props.uploadStage === UPLOAD_STAGES.UPLOADING
-                ? constants.UPLOAD_STAGE_MESSAGE[props.uploadStage](
-                      props.fileCounter
-                  )
-                : constants.UPLOAD_STAGE_MESSAGE[props.uploadStage]}
+            {uploadStage === UPLOAD_STAGES.UPLOADING
+                ? constants.UPLOAD_STAGE_MESSAGE[uploadStage](uploadCounter)
+                : constants.UPLOAD_STAGE_MESSAGE[uploadStage]}
         </Typography>
     );
 }
 
-export function UploadProgressTitle({
-    setExpanded,
-    expanded,
-    handleClose,
-    ...props
-}) {
+export function UploadProgressTitle() {
+    const { setExpanded, onClose, expanded } = useContext(
+        UploadProgressContext
+    );
     const toggleExpanded = () => setExpanded((expanded) => !expanded);
 
     return (
@@ -58,14 +57,14 @@ export function UploadProgressTitle({
             <SpaceBetweenFlex>
                 <Box>
                     <UploadProgressTitleText expanded={expanded} />
-                    <UploadProgressSubtitleText {...props} />
+                    <UploadProgressSubtitleText />
                 </Box>
                 <Box>
                     <Stack direction={'row'} spacing={1}>
                         <IconButtonWithBG onClick={toggleExpanded}>
                             {expanded ? <MinimizeIcon /> : <MaximizeIcon />}
                         </IconButtonWithBG>
-                        <IconButtonWithBG onClick={handleClose}>
+                        <IconButtonWithBG onClick={onClose.bind(null)}>
                             <Close />
                         </IconButtonWithBG>
                     </Stack>

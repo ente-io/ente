@@ -1,64 +1,71 @@
 import { UploadProgressDialog } from './dialog';
 import { MinimizedUploadProgress } from './minimized';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 
 import constants from 'utils/strings/constants';
-import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
+import { UPLOAD_STAGES } from 'constants/upload';
 import { AppContext } from 'pages/_app';
 import { dialogCloseHandler } from 'components/DialogBox/base';
+import {
+    UploadFileNames,
+    UploadCounter,
+    InProgressUploads,
+    InProgressUpload,
+    FinishedUploads,
+    SegregatedFinishedUploads,
+} from 'types/upload/ui';
+import UploadProgressContext from 'contexts/uploadProgress';
 
 interface Props {
-    fileCounter;
-    uploadStage;
-    now;
-    closeModal;
-    retryFailed;
-    fileProgress: Map<number, number>;
-    filenames: Map<number, string>;
-    show;
-    uploadResult: Map<number, FileUploadResults>;
+    open: boolean;
+    onClose: () => void;
+    uploadCounter: UploadCounter;
+    uploadStage: UPLOAD_STAGES;
+    percentComplete: number;
+    retryFailed: () => void;
+    inProgressUploads: InProgressUploads;
+    uploadFileNames: UploadFileNames;
+    finishedUploads: FinishedUploads;
     hasLivePhotos: boolean;
     cancelUploads: () => void;
 }
-export interface FileProgresses {
-    fileID: number;
-    progress: number;
-}
 
-export default function UploadProgress(props: Props) {
+export default function UploadProgress({
+    open,
+    uploadCounter,
+    uploadStage,
+    percentComplete,
+    retryFailed,
+    uploadFileNames,
+    hasLivePhotos,
+    ...props
+}: Props) {
     const appContext = useContext(AppContext);
     const [expanded, setExpanded] = useState(true);
-    const fileProgressStatuses = [] as FileProgresses[];
-    const fileUploadResultMap = new Map<FileUploadResults, number[]>();
-    let filesNotUploaded = false;
-    let sectionInfo = null;
-    if (props.fileProgress) {
-        for (const [localID, progress] of props.fileProgress) {
-            fileProgressStatuses.push({
-                fileID: localID,
-                progress,
-            });
-        }
-    }
-    if (props.uploadResult) {
-        for (const [localID, progress] of props.uploadResult) {
-            if (!fileUploadResultMap.has(progress)) {
-                fileUploadResultMap.set(progress, []);
-            }
-            if (
-                progress !== FileUploadResults.UPLOADED &&
-                progress !== FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL
-            ) {
-                filesNotUploaded = true;
-            }
-            const fileList = fileUploadResultMap.get(progress);
 
-            fileUploadResultMap.set(progress, [...fileList, localID]);
+    const inProgressUploads = useMemo(
+        () =>
+            [...props.inProgressUploads.entries()].map(
+                ([localFileID, progress]) =>
+                    ({
+                        localFileID,
+                        progress,
+                    } as InProgressUpload)
+            ),
+
+        [props.inProgressUploads]
+    );
+
+    const finishedUploads = useMemo(() => {
+        const finishedUploads = new Map() as SegregatedFinishedUploads;
+        for (const [localID, result] of props.finishedUploads) {
+            if (!finishedUploads.has(result)) {
+                finishedUploads.set(result, []);
+            }
+            finishedUploads.get(result).push(localID);
         }
-    }
-    if (props.hasLivePhotos) {
-        sectionInfo = constants.LIVE_PHOTOS_DETECTED;
-    }
+        return finishedUploads;
+    }, [props.finishedUploads]);
 
     function confirmCancelUpload() {
         appContext.setDialogMessage({
@@ -78,10 +85,10 @@ export default function UploadProgress(props: Props) {
     }
 
     function onClose() {
-        if (props.uploadStage !== UPLOAD_STAGES.FINISH) {
+        if (uploadStage !== UPLOAD_STAGES.FINISH) {
             confirmCancelUpload();
         } else {
-            props.closeModal();
+            props.onClose();
         }
     }
 
@@ -90,26 +97,22 @@ export default function UploadProgress(props: Props) {
     });
 
     return (
-        <>
-            {expanded ? (
-                <UploadProgressDialog
-                    handleClose={handleClose}
-                    setExpanded={setExpanded}
-                    expanded={expanded}
-                    fileProgressStatuses={fileProgressStatuses}
-                    sectionInfo={sectionInfo}
-                    fileUploadResultMap={fileUploadResultMap}
-                    filesNotUploaded={filesNotUploaded}
-                    {...props}
-                />
-            ) : (
-                <MinimizedUploadProgress
-                    setExpanded={setExpanded}
-                    expanded={expanded}
-                    handleClose={handleClose}
-                    {...props}
-                />
-            )}
-        </>
+        <UploadProgressContext.Provider
+            value={{
+                open,
+                onClose: handleClose,
+                uploadCounter,
+                uploadStage,
+                percentComplete,
+                retryFailed,
+                inProgressUploads,
+                uploadFileNames,
+                finishedUploads,
+                hasLivePhotos,
+                expanded,
+                setExpanded,
+            }}>
+            {expanded ? <UploadProgressDialog /> : <MinimizedUploadProgress />}
+        </UploadProgressContext.Provider>
     );
 }

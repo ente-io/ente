@@ -13,7 +13,7 @@ export function MinimizedUploadProgress(props) {
                 sx={{
                     width: '360px',
                 }}>
-                <UploadProgressHeader {...props} />
+                <UploadProgressHeader />
             </Paper>
         </Snackbar>
     );
