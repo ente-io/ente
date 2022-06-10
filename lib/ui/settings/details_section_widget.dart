@@ -71,7 +71,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         );
       },
       child: SizedBox(
-        height: 148,
+        height: 172,
         child: _userDetails == null ? loadWidget : getContainer(),
       ),
     );
@@ -79,19 +79,21 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
 
   Container getContainer() {
     return Container(
-      width: double.infinity,
-      height: 148,
       decoration: BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.only(
-            topRight: Radius.circular(16), bottomLeft: Radius.circular(16)),
+          topRight: Radius.circular(16),
+          bottomLeft: Radius.circular(16),
+          topLeft: Radius.circular(2),
+          bottomRight: Radius.circular(2),
+        ),
         image: DecorationImage(
           fit: BoxFit.fill,
           image: AssetImage("assets/card_background.png"),
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.only(top: 12, bottom: 12, left: 20, right: 0),
+        padding: EdgeInsets.only(top: 24, bottom: 24, left: 20, right: 0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,7 +105,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                   .subtitle1
                   .copyWith(color: Colors.white.withOpacity(0.7)),
             ),
-            Padding(padding: EdgeInsets.symmetric(vertical: 2)),
+            Padding(padding: EdgeInsets.symmetric(vertical: 3)),
             Text(
               "${convertBytesToReadableFormat(_userDetails.getFreeStorage())} of ${convertBytesToReadableFormat(_userDetails.getTotalStorage())} free",
               style: Theme.of(context)
