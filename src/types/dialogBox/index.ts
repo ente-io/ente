@@ -2,7 +2,7 @@ import { ButtonProps } from '@mui/material';
 
 export interface DialogBoxAttributes {
     title?: string;
-    closeOnBackdropClick?: boolean;
+    staticBackdrop?: boolean;
     nonClosable?: boolean;
     content?: any;
     close?: {
