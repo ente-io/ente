@@ -143,7 +143,7 @@ export const SelectedOverlay = styled.div<{ selected: boolean }>`
     height: 100%;
     width: 100%;
     ${(props) => props.selected && 'border: 5px solid #51cd7c;'}
-    border-radius: ${({ theme }) => theme.shape.borderRadius}px;
+    border-radius: 4px;
 `;
 
 const Cont = styled.div<{ disabled: boolean }>`
@@ -183,7 +183,7 @@ const Cont = styled.div<{ disabled: boolean }>`
     &:hover ${HoverOverlay} {
         opacity: 1;
     }
-    border-radius: ${({ theme }) => theme.shape.borderRadius}px;
+    border-radius: 4px;
 `;
 
 export default function PreviewCard(props: IProps) {
