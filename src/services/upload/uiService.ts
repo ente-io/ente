@@ -3,14 +3,20 @@ import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_STAGES,
 } from 'constants/upload';
-import { ProgressUpdater } from 'types/upload/ui';
+import {
+    FinishedUploads,
+    InProgressUpload,
+    InProgressUploads,
+    ProgressUpdater,
+    SegregatedFinishedUploads,
+} from 'types/upload/ui';
 
 class UIService {
     private perFileProgress: number;
     private filesUploaded: number;
     private totalFileCount: number;
-    private inProgressUploads: Map<number, number>;
-    private finishedUploads: Map<number, UPLOAD_RESULT>;
+    private inProgressUploads: InProgressUploads;
+    private finishedUploads: FinishedUploads;
     private progressUpdater: ProgressUpdater;
 
     init(progressUpdater: ProgressUpdater) {
@@ -88,8 +94,12 @@ class UIService {
         }
 
         setPercentComplete(percentComplete);
-        setInProgressUploads(this.inProgressUploads);
-        setFinishedUploads(this.finishedUploads);
+        setInProgressUploads(
+            this.convertInProgressUploadsToList(this.inProgressUploads)
+        );
+        setFinishedUploads(
+            this.segregatedFinishedUploadsToList(this.finishedUploads)
+        );
     }
 
     trackUploadProgress(
@@ -126,6 +136,28 @@ class UIService {
                 }
             },
         };
+    }
+
+    convertInProgressUploadsToList(inProgressUploads) {
+        return [...inProgressUploads.entries()].map(
+            ([localFileID, progress]) =>
+                ({
+                    localFileID,
+                    progress,
+                } as InProgressUpload)
+        );
+    }
+
+    segregatedFinishedUploadsToList(finishedUploads: FinishedUploads) {
+        const segregatedFinishedUploads =
+            new Map() as SegregatedFinishedUploads;
+        for (const [localID, result] of finishedUploads) {
+            if (!segregatedFinishedUploads.has(result)) {
+                segregatedFinishedUploads.set(result, []);
+            }
+            segregatedFinishedUploads.get(result).push(localID);
+        }
+        return segregatedFinishedUploads;
     }
 }
 

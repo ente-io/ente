@@ -1,6 +1,6 @@
 import { UploadProgressDialog } from './dialog';
 import { MinimizedUploadProgress } from './minimized';
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useContext, useState } from 'react';
 
 import constants from 'utils/strings/constants';
 import { UPLOAD_STAGES } from 'constants/upload';
@@ -9,10 +9,8 @@ import { dialogCloseHandler } from 'components/DialogBox/base';
 import {
     UploadFileNames,
     UploadCounter,
-    InProgressUploads,
-    InProgressUpload,
-    FinishedUploads,
     SegregatedFinishedUploads,
+    InProgressUpload,
 } from 'types/upload/ui';
 import UploadProgressContext from 'contexts/uploadProgress';
 
@@ -23,9 +21,9 @@ interface Props {
     uploadStage: UPLOAD_STAGES;
     percentComplete: number;
     retryFailed: () => void;
-    inProgressUploads: InProgressUploads;
+    inProgressUploads: InProgressUpload[];
     uploadFileNames: UploadFileNames;
-    finishedUploads: FinishedUploads;
+    finishedUploads: SegregatedFinishedUploads;
     hasLivePhotos: boolean;
     cancelUploads: () => void;
 }
@@ -38,36 +36,12 @@ export default function UploadProgress({
     retryFailed,
     uploadFileNames,
     hasLivePhotos,
+    inProgressUploads,
+    finishedUploads,
     ...props
 }: Props) {
     const appContext = useContext(AppContext);
     const [expanded, setExpanded] = useState(true);
-
-    const inProgressUploads = useMemo(
-        () =>
-            [...props.inProgressUploads.entries()].map(
-                ([localFileID, progress]) =>
-                    ({
-                        localFileID,
-                        progress,
-                    } as InProgressUpload)
-            ),
-
-        [props.inProgressUploads]
-    );
-
-    const finishedUploads = useMemo(() => {
-        const finishedUploads = new Map() as SegregatedFinishedUploads;
-        for (const [localID, result] of props.finishedUploads) {
-            if (!finishedUploads.has(result)) {
-                finishedUploads.set(result, []);
-            }
-            finishedUploads.get(result).push(localID);
-        }
-        return finishedUploads;
-    }, [props.finishedUploads]);
-
-    console.log(finishedUploads);
 
     function confirmCancelUpload() {
         appContext.setDialogMessage({

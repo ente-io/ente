@@ -28,9 +28,9 @@ import DiscFullIcon from '@mui/icons-material/DiscFull';
 import { NotificationAttributes } from 'types/Notification';
 import {
     UploadFileNames,
-    InProgressUploads,
     UploadCounter,
-    FinishedUploads,
+    SegregatedFinishedUploads,
+    InProgressUpload,
 } from 'types/upload/ui';
 import { UPLOAD_STAGES } from 'constants/upload';
 
@@ -87,11 +87,11 @@ export default function Upload(props: Props) {
         finished: 0,
         total: 0,
     });
-    const [inProgressUploads, setInProgressUploads] =
-        useState<InProgressUploads>(new Map());
-    const [finishedUploads, setFinishedUploads] = useState<FinishedUploads>(
-        new Map()
-    );
+    const [inProgressUploads, setInProgressUploads] = useState<
+        InProgressUpload[]
+    >([]);
+    const [finishedUploads, setFinishedUploads] =
+        useState<SegregatedFinishedUploads>(new Map());
     const [percentComplete, setPercentComplete] = useState(0);
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
 
@@ -180,7 +180,7 @@ export default function Upload(props: Props) {
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
         setUploadCounter({ finished: 0, total: 0 });
-        setInProgressUploads(new Map());
+        setInProgressUploads([]);
         setFinishedUploads(new Map());
         setPercentComplete(0);
         props.closeCollectionSelector();

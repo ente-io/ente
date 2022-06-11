@@ -1,7 +1,7 @@
 import { DialogContent } from '@mui/material';
 import constants from 'utils/strings/constants';
 import { UPLOAD_STAGES, UPLOAD_RESULT } from 'constants/upload';
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { UploadProgressFooter } from './footer';
 import { UploadProgressHeader } from './header';
 import { InProgressSection } from './inProgressSection';
@@ -16,19 +16,22 @@ export function UploadProgressDialog() {
         UploadProgressContext
     );
 
-    const hasUnUploadedFiles = useMemo(() => {
-        if (
-            finishedUploads.get(UPLOAD_RESULT.ALREADY_UPLOADED)?.length > 0 ||
-            finishedUploads.get(UPLOAD_RESULT.BLOCKED)?.length > 0 ||
-            finishedUploads.get(UPLOAD_RESULT.FAILED)?.length > 0 ||
-            finishedUploads.get(UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE)
-                ?.length > 0 ||
-            finishedUploads.get(UPLOAD_RESULT.TOO_LARGE)?.length > 0 ||
-            finishedUploads.get(UPLOAD_RESULT.UNSUPPORTED)?.length > 0
-        ) {
-            return true;
-        } else {
-            return false;
+    const [hasUnUploadedFiles, setHasUnUploadedFiles] = useState(false);
+
+    useEffect(() => {
+        if (!hasUnUploadedFiles) {
+            if (
+                finishedUploads.get(UPLOAD_RESULT.ALREADY_UPLOADED)?.length >
+                    0 ||
+                finishedUploads.get(UPLOAD_RESULT.BLOCKED)?.length > 0 ||
+                finishedUploads.get(UPLOAD_RESULT.FAILED)?.length > 0 ||
+                finishedUploads.get(UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE)
+                    ?.length > 0 ||
+                finishedUploads.get(UPLOAD_RESULT.TOO_LARGE)?.length > 0 ||
+                finishedUploads.get(UPLOAD_RESULT.UNSUPPORTED)?.length > 0
+            ) {
+                setHasUnUploadedFiles(true);
+            }
         }
     }, [finishedUploads]);
 

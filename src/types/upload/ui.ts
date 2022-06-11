@@ -32,9 +32,11 @@ export interface ProgressUpdater {
     setUploadCounter: React.Dispatch<React.SetStateAction<UploadCounter>>;
     setUploadStage: React.Dispatch<React.SetStateAction<UPLOAD_STAGES>>;
     setInProgressUploads: React.Dispatch<
-        React.SetStateAction<InProgressUploads>
+        React.SetStateAction<InProgressUpload[]>
     >;
-    setFinishedUploads: React.Dispatch<React.SetStateAction<FinishedUploads>>;
+    setFinishedUploads: React.Dispatch<
+        React.SetStateAction<SegregatedFinishedUploads>
+    >;
     setUploadFilenames: React.Dispatch<React.SetStateAction<UploadFileNames>>;
     setHasLivePhotos: React.Dispatch<React.SetStateAction<boolean>>;
 }
