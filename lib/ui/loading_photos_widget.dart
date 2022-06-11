@@ -89,23 +89,33 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Stack(alignment: Alignment.center, children: [
-                isLightMode
-                    ? Image.asset(
-                        'assets/loading_photos_light.png',
-                        color: Colors.white.withOpacity(0.5),
-                        colorBlendMode: BlendMode.modulate,
-                      )
-                    : Image.asset(
-                        'assets/loading_photos_light.png',
-                        color: Colors.white.withOpacity(0.25),
-                        colorBlendMode: BlendMode.modulate,
-                      ),
-                Lottie.asset(
-                  'assets/loadingGalleryLottie.json',
-                  height: 400,
-                )
-              ]),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  isLightMode
+                      ? Image.asset(
+                          'assets/loading_photos_light.png',
+                          color: Colors.white.withOpacity(0.5),
+                          colorBlendMode: BlendMode.modulate,
+                        )
+                      : Image.asset(
+                          'assets/loading_photos_light.png',
+                          color: Colors.white.withOpacity(0.25),
+                          colorBlendMode: BlendMode.modulate,
+                        ),
+                  Lottie.asset(
+                    'assets/loadingGalleryLottie.json',
+                    height: 400,
+                  )
+                ],
+              ),
+              Text(
+                "Loading your photos...",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.subTextColor,
+                ),
+              ),
+              Padding(padding: EdgeInsets.all(36)),
               Column(
                 children: [
                   Row(
