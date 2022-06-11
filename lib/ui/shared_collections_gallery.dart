@@ -7,6 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -110,52 +111,60 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
   }
 
   Widget _getSharedCollectionsGallery(SharedCollections collections) {
+    const double horizontalPaddingOfGridRow = 16;
+    const double crossAxisSpacingOfGrid = 5;
     Size size = MediaQuery.of(context).size;
     int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
+    final double sideOfThumbnail = (size.width / 2) -
+        horizontalPaddingOfGridRow -
+        ((crossAxisSpacingOfGrid / 2) * (albumsCountInOneRow - 1));
     return SingleChildScrollView(
       child: Container(
         margin: const EdgeInsets.only(bottom: 50),
         child: Column(
           children: [
-            Padding(padding: EdgeInsets.all(6)),
+            const SizedBox(height: 12),
             SectionTitle("Incoming"),
-            Padding(padding: EdgeInsets.all(16)),
+            const SizedBox(height: 24),
             collections.incoming.isNotEmpty
-                ? GridView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return IncomingCollectionItem(
-                        collections.incoming[index],
-                      );
-                    },
-                    itemCount: collections.incoming.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: albumsCountInOneRow,
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        return IncomingCollectionItem(
+                          collections.incoming[index],
+                        );
+                      },
+                      itemCount: collections.incoming.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: albumsCountInOneRow,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: crossAxisSpacingOfGrid,
+                        childAspectRatio:
+                            sideOfThumbnail / (sideOfThumbnail + 24),
+                      ), //24 is height of album title
                     ),
                   )
                 : _getIncomingCollectionEmptyState(),
-            Padding(padding: EdgeInsets.all(16)),
-            Divider(height: 0),
-            Padding(padding: EdgeInsets.all(14)),
+            const SizedBox(height: 32),
             SectionTitle("Outgoing"),
-            Padding(padding: EdgeInsets.all(16)),
+            const SizedBox(height: 12),
             collections.outgoing.isNotEmpty
-                ? Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.only(bottom: 12),
-                      physics: NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        return OutgoingCollectionItem(
-                          collections.outgoing[index],
-                        );
-                      },
-                      itemCount: collections.outgoing.length,
-                    ),
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.only(bottom: 12),
+                    physics: NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      return OutgoingCollectionItem(
+                        collections.outgoing[index],
+                      );
+                    },
+                    itemCount: collections.outgoing.length,
                   )
                 : _getOutgoingCollectionEmptyState(),
+            const SizedBox(height: 32),
           ],
         ),
       ),
@@ -179,7 +188,6 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                //mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.outgoing_mail,
@@ -305,7 +313,7 @@ class OutgoingCollectionItem extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
-        margin: EdgeInsets.fromLTRB(16, 12, 8, 12),
+        margin: EdgeInsets.fromLTRB(16, 12, 16, 12),
         child: Row(
           children: <Widget>[
             ClipRRect(
@@ -383,12 +391,17 @@ class IncomingCollectionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TextStyle albumTitleTextStyle =
+        Theme.of(context).textTheme.subtitle1.copyWith(fontSize: 14);
+    final double sideOfThumbnail =
+        (MediaQuery.of(context).size.width / 2) - 18.5;
     return GestureDetector(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
-            child: Container(
+            child: SizedBox(
               child: Stack(
                 children: [
                   Hero(
@@ -418,22 +431,40 @@ class IncomingCollectionItem extends StatelessWidget {
                   ),
                 ],
               ),
-              height: 160,
-              width: 160,
+              height: sideOfThumbnail,
+              width: sideOfThumbnail,
             ),
           ),
-          Padding(padding: EdgeInsets.all(2)),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-              child: Text(
-                c.collection.name,
-                style: TextStyle(
-                  fontSize: 16,
+          SizedBox(height: 4),
+          Row(
+            children: [
+              Container(
+                constraints: BoxConstraints(maxWidth: sideOfThumbnail - 40),
+                child: Text(
+                  c.collection.name,
+                  style: albumTitleTextStyle,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
-            ),
+              FutureBuilder<int>(
+                future: FilesDB.instance.collectionFileCount(c.collection.id),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data > 0) {
+                    return RichText(
+                        text: TextSpan(
+                            style: albumTitleTextStyle.copyWith(
+                                color:
+                                    albumTitleTextStyle.color.withOpacity(0.5)),
+                            children: [
+                          TextSpan(text: "  \u2022  "),
+                          TextSpan(text: snapshot.data.toString()),
+                        ]));
+                  } else {
+                    return Container();
+                  }
+                },
+              ),
+            ],
           ),
         ],
       ),

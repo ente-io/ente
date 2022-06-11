@@ -240,7 +240,7 @@ class FadingAppBarState extends State<FadingAppBar> {
       },
       likeBuilder: (isLiked) {
         return Icon(
-          isLiked ? Icons.favorite_rounded : Icons.favorite_border,
+          isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
           color:
               isLiked ? Colors.pinkAccent : Colors.white, //same for both themes
           size: 24,

@@ -150,9 +150,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         margin: const EdgeInsets.only(bottom: 50),
         child: Column(
           children: [
-            Padding(padding: EdgeInsets.all(6)),
+            const SizedBox(height: 12),
             SectionTitle("On device"),
-            Padding(padding: EdgeInsets.all(8)),
+            const SizedBox(height: 24),
             items.folders.isEmpty
                 ? Padding(
                     padding: const EdgeInsets.all(22),
@@ -196,7 +196,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                 _sortMenu(),
               ],
             ),
-            Padding(padding: EdgeInsets.all(12)),
+            const SizedBox(height: 24),
             Configuration.instance.hasConfiguredAccount()
                 ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -227,7 +227,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                   ),
             const SizedBox(height: 10),
             const Divider(),
-            const Padding(padding: EdgeInsets.all(8)),
+            const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
@@ -618,7 +618,7 @@ class DeviceFolderIcon extends StatelessWidget {
                   style: Theme.of(context)
                       .textTheme
                       .subtitle1
-                      .copyWith(fontSize: 12, fontFamily: "Inter"),
+                      .copyWith(fontSize: 12),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -643,10 +643,8 @@ class CollectionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle albumTitleTextStyle = Theme.of(context)
-        .textTheme
-        .subtitle1
-        .copyWith(fontSize: 14, fontFamily: "Inter");
+    TextStyle albumTitleTextStyle =
+        Theme.of(context).textTheme.subtitle1.copyWith(fontSize: 14);
     final double sideOfThumbnail =
         (MediaQuery.of(context).size.width / 2) - 18.5;
     return GestureDetector(
@@ -693,7 +691,6 @@ class CollectionItem extends StatelessWidget {
                         children: [
                           TextSpan(text: "  \u2022  "),
                           TextSpan(text: snapshot.data.toString()),
-                          //need to query in db and bring this value
                         ],
                       ),
                     );
@@ -728,7 +725,7 @@ class SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(24, 12, 0, 0),
+      margin: EdgeInsets.fromLTRB(16, 12, 0, 0),
       child: Column(
         children: [
           Align(
