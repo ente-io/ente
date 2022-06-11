@@ -63,8 +63,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           await dialog.show();
           try {
             await Configuration.instance.decryptAndSaveSecrets(
-                _passwordController.text,
-                Configuration.instance.getKeyAttributes(),);
+              _passwordController.text,
+              Configuration.instance.getKeyAttributes(),
+            );
           } catch (e) {
             Logger("PRP").warning(e);
             await dialog.hide();
@@ -90,8 +91,10 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
               Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                child: Text('Welcome back!',
-                    style: Theme.of(context).textTheme.headline4,),
+                child: Text(
+                  'Welcome back!',
+                  style: Theme.of(context).textTheme.headline4,
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
@@ -102,8 +105,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                     filled: true,
                     contentPadding: EdgeInsets.all(20),
                     border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6),),
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     suffixIcon: _passwordInFocus
                         ? IconButton(
                             icon: Icon(
@@ -159,13 +163,14 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                       },
                       child: Container(
                         child: Center(
-                          child: Text("Forgot password",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .subtitle1
-                                  .copyWith(
+                          child: Text(
+                            "Forgot password",
+                            style:
+                                Theme.of(context).textTheme.subtitle1.copyWith(
                                       fontSize: 14,
-                                      decoration: TextDecoration.underline,),),
+                                      decoration: TextDecoration.underline,
+                                    ),
+                          ),
                         ),
                       ),
                     ),
@@ -182,13 +187,14 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                       },
                       child: Container(
                         child: Center(
-                          child: Text("Change email",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .subtitle1
-                                  .copyWith(
+                          child: Text(
+                            "Change email",
+                            style:
+                                Theme.of(context).textTheme.subtitle1.copyWith(
                                       fontSize: 14,
-                                      decoration: TextDecoration.underline,),),
+                                      decoration: TextDecoration.underline,
+                                    ),
+                          ),
                         ),
                       ),
                     ),

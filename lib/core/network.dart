@@ -17,11 +17,16 @@ class Network {
     _alice = Alice(darkTheme: true, showNotification: kDebugMode);
     await FkUserAgent.init();
     final packageInfo = await PackageInfo.fromPlatform();
-    _dio = Dio(BaseOptions(connectTimeout: kConnectTimeout, headers: {
-      HttpHeaders.userAgentHeader: FkUserAgent.userAgent,
-      'X-Client-Version': packageInfo.version,
-      'X-Client-Package': packageInfo.packageName,
-    },),);
+    _dio = Dio(
+      BaseOptions(
+        connectTimeout: kConnectTimeout,
+        headers: {
+          HttpHeaders.userAgentHeader: FkUserAgent.userAgent,
+          'X-Client-Version': packageInfo.version,
+          'X-Client-Package': packageInfo.packageName,
+        },
+      ),
+    );
     _dio.interceptors.add(RequestIdInterceptor());
     _dio.interceptors.add(_alice.getDioInterceptor());
   }

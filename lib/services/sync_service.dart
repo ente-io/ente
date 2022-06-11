@@ -91,18 +91,28 @@ class SyncService {
     } on WiFiUnavailableError {
       _logger.warning("Not uploading over mobile data");
       Bus.instance.fire(
-          SyncStatusUpdate(SyncStatus.paused, reason: "waiting for WiFi..."),);
+        SyncStatusUpdate(SyncStatus.paused, reason: "waiting for WiFi..."),
+      );
     } on SyncStopRequestedError {
       _syncStopRequested = false;
       Bus.instance.fire(
-          SyncStatusUpdate(SyncStatus.completed_backup, wasStopped: true),);
+        SyncStatusUpdate(SyncStatus.completed_backup, wasStopped: true),
+      );
     } on NoActiveSubscriptionError {
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
-          error: NoActiveSubscriptionError(),),);
+      Bus.instance.fire(
+        SyncStatusUpdate(
+          SyncStatus.error,
+          error: NoActiveSubscriptionError(),
+        ),
+      );
     } on StorageLimitExceededError {
       _showStorageLimitExceededNotification();
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
-          error: StorageLimitExceededError(),),);
+      Bus.instance.fire(
+        SyncStatusUpdate(
+          SyncStatus.error,
+          error: StorageLimitExceededError(),
+        ),
+      );
     } on UnauthorizedError {
       _logger.info("Logging user out");
       Bus.instance.fire(TriggerLogoutEvent());
@@ -112,8 +122,12 @@ class SyncService {
             e.type == DioErrorType.sendTimeout ||
             e.type == DioErrorType.receiveTimeout ||
             e.type == DioErrorType.other) {
-          Bus.instance.fire(SyncStatusUpdate(SyncStatus.paused,
-              reason: "waiting for network...",),);
+          Bus.instance.fire(
+            SyncStatusUpdate(
+              SyncStatus.paused,
+              reason: "waiting for network...",
+            ),
+          );
           _logger.severe("unable to connect", e, StackTrace.current);
           return false;
         }
@@ -155,15 +169,21 @@ class SyncService {
   }
 
   void onFoldersSet(Set<String> paths) {
-    _uploader.removeFromQueueWhere((file) {
-      return !paths.contains(file.deviceFolder);
-    }, UserCancelledUploadError(),);
+    _uploader.removeFromQueueWhere(
+      (file) {
+        return !paths.contains(file.deviceFolder);
+      },
+      UserCancelledUploadError(),
+    );
   }
 
   void onVideoBackupPaused() {
-    _uploader.removeFromQueueWhere((file) {
-      return file.fileType == FileType.video;
-    }, UserCancelledUploadError(),);
+    _uploader.removeFromQueueWhere(
+      (file) {
+        return file.fileType == FileType.video;
+      },
+      UserCancelledUploadError(),
+    );
   }
 
   Future<void> deleteFilesOnServer(List<int> fileIDs) async {
@@ -224,7 +244,9 @@ class SyncService {
     if ((now - lastNotificationShownTime) > kMicroSecondsInDay) {
       await _prefs.setInt(kLastStorageLimitExceededNotificationPushTime, now);
       NotificationService.instance.showNotification(
-          "storage limit exceeded", "sorry, we had to pause your backups",);
+        "storage limit exceeded",
+        "sorry, we had to pause your backups",
+      );
     }
   }
 }

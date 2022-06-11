@@ -58,8 +58,11 @@ Future<Uint8List> getThumbnailFromServer(File file) async {
   }
 }
 
-Future<Uint8List> getThumbnailFromLocal(File file,
-    {int size = kThumbnailSmallSize, int quality = kThumbnailQuality,}) async {
+Future<Uint8List> getThumbnailFromLocal(
+  File file, {
+  int size = kThumbnailSmallSize,
+  int quality = kThumbnailQuality,
+}) async {
   final lruCachedThumbnail = ThumbnailLruCache.get(file, size);
   if (lruCachedThumbnail != null) {
     return lruCachedThumbnail;
@@ -110,7 +113,10 @@ void _downloadItem(FileDownloadItem item) async {
     await _downloadAndDecryptThumbnail(item);
   } catch (e, s) {
     _logger.severe(
-        "Failed to download thumbnail " + item.file.toString(), e, s,);
+      "Failed to download thumbnail " + item.file.toString(),
+      e,
+      s,
+    );
     item.completer.completeError(e);
   }
   _queue.removeWhere((element) => element == item.file.uploadedFileID);
@@ -159,8 +165,9 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
     try {
       item.completer.complete(data);
     } catch (e) {
-      _logger.severe("Error while completing request for " +
-          file.uploadedFileID.toString(),);
+      _logger.severe(
+        "Error while completing request for " + file.uploadedFileID.toString(),
+      );
     }
   }
 }
@@ -169,5 +176,6 @@ io.File getCachedThumbnail(File file) {
   final thumbnailCacheDirectory =
       Configuration.instance.getThumbnailCacheDirectory();
   return io.File(
-      thumbnailCacheDirectory + "/" + file.uploadedFileID.toString(),);
+    thumbnailCacheDirectory + "/" + file.uploadedFileID.toString(),
+  );
 }

@@ -26,35 +26,37 @@ class _LockScreenState extends State<LockScreen> {
     return Scaffold(
       body: Center(
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Image.asset(MediaQuery.of(context).platformBrightness ==
-                          Brightness.light
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Image.asset(
+                  MediaQuery.of(context).platformBrightness == Brightness.light
                       ? 'assets/loading_photos_light.png'
-                      : 'assets/loading_photos_dark.png',),
-                  SizedBox(
-                    width: 172,
-                    child: GradientButton(
-                      child: Text(
-                        'Unlock',
-                        style: gradientButtonTextTheme(),
-                      ),
-                      linearGradientColors: const [
-                        Color(0xFF2CD267),
-                        Color(0xFF1DB954),
-                      ],
-                      onTap: () async {
-                        _showLockScreen();
-                      },
+                      : 'assets/loading_photos_dark.png',
+                ),
+                SizedBox(
+                  width: 172,
+                  child: GradientButton(
+                    child: Text(
+                      'Unlock',
+                      style: gradientButtonTextTheme(),
                     ),
+                    linearGradientColors: const [
+                      Color(0xFF2CD267),
+                      Color(0xFF1DB954),
+                    ],
+                    onTap: () async {
+                      _showLockScreen();
+                    },
                   ),
-                ],
-              ),
-            ],),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -63,7 +65,8 @@ class _LockScreenState extends State<LockScreen> {
     _logger.info("Showing lockscreen");
     try {
       final result = await requestAuthentication(
-          "Please authenticate to view your memories",);
+        "Please authenticate to view your memories",
+      );
       if (result) {
         AppLock.of(context).didUnlock();
       }

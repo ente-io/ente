@@ -41,10 +41,11 @@ Future<void> sendLogs(
           Text(
             "View logs",
             style: TextStyle(
-                color: Theme.of(context)
-                    .colorScheme
-                    .defaultTextColor
-                    .withOpacity(0.85),),
+              color: Theme.of(context)
+                  .colorScheme
+                  .defaultTextColor
+                  .withOpacity(0.85),
+            ),
           ),
         ],
       ),
@@ -114,7 +115,11 @@ Future<void> sendLogs(
 }
 
 Future<void> _sendLogs(
-    BuildContext context, String toEmail, String subject, String body,) async {
+  BuildContext context,
+  String toEmail,
+  String subject,
+  String body,
+) async {
   String zipFilePath = await getZippedLogsFile(context);
   final Email email = Email(
     recipients: [toEmail],
@@ -146,14 +151,23 @@ Future<String> getZippedLogsFile(BuildContext context) async {
 }
 
 Future<void> shareLogs(
-    BuildContext context, String toEmail, String zipFilePath,) async {
+  BuildContext context,
+  String toEmail,
+  String zipFilePath,
+) async {
   final result = await showChoiceDialog(
-      context, "Email logs", "Please send the logs to $toEmail",
-      firstAction: "Copy email", secondAction: "Send",);
+    context,
+    "Email logs",
+    "Please send the logs to $toEmail",
+    firstAction: "Copy email",
+    secondAction: "Send",
+  );
   if (result != null && result == DialogUserChoice.firstChoice) {
     await Clipboard.setData(ClipboardData(text: toEmail));
   }
   final Size size = MediaQuery.of(context).size;
-  await Share.shareFiles([zipFilePath],
-      sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),);
+  await Share.shareFiles(
+    [zipFilePath],
+    sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+  );
 }

@@ -25,10 +25,12 @@ class IgnoredFilesService {
 
   Future<void> cacheAndInsert(List<IgnoredFile> ignoredFiles) async {
     final existingIDs = await ignoredIDs;
-    existingIDs.addAll(ignoredFiles
-        .map((e) => _idForIgnoredFile(e))
-        .where((id) => id != null)
-        .toSet(),);
+    existingIDs.addAll(
+      ignoredFiles
+          .map((e) => _idForIgnoredFile(e))
+          .where((id) => id != null)
+          .toSet(),
+    );
     return _db.insertMultiple(ignoredFiles);
   }
 
@@ -56,7 +58,10 @@ class IgnoredFilesService {
 
   String _idForIgnoredFile(IgnoredFile ignoredFile) {
     return _getIgnoreID(
-        ignoredFile.localID, ignoredFile.deviceFolder, ignoredFile.title,);
+      ignoredFile.localID,
+      ignoredFile.deviceFolder,
+      ignoredFile.title,
+    );
   }
 
   // _computeIgnoreID will return null if don't have sufficient information

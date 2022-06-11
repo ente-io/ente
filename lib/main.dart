@@ -58,13 +58,15 @@ Future<void> _runInForeground() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
     _scheduleFGSync('appStart in FG');
-    runApp(AppLock(
-      builder: (args) => EnteApp(_runBackgroundTask, _killBGTask),
-      lockScreen: LockScreen(),
-      enabled: Configuration.instance.shouldShowLockScreen(),
-      lightTheme: lightThemeData,
-      darkTheme: darkThemeData,
-    ),);
+    runApp(
+      AppLock(
+        builder: (args) => EnteApp(_runBackgroundTask, _killBGTask),
+        lockScreen: LockScreen(),
+        enabled: Configuration.instance.shouldShowLockScreen(),
+        lightTheme: lightThemeData,
+        darkTheme: darkThemeData,
+      ),
+    );
   });
 }
 
@@ -74,10 +76,13 @@ Future<void> _runBackgroundTask(String taskId) async {
     await _sync('bgTaskActiveProcess');
     BackgroundFetch.finish(taskId);
   } else {
-    _runWithLogs(() async {
-      _logger.info("run background task");
-      _runInBackground(taskId);
-    }, prefix: "[bg]",);
+    _runWithLogs(
+      () async {
+        _logger.info("run background task");
+        _runInBackground(taskId);
+      },
+      prefix: "[bg]",
+    );
   }
 }
 
@@ -139,7 +144,8 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   if (Platform.isIOS) {
     PushService.instance.init().then((_) {
       FirebaseMessaging.onBackgroundMessage(
-          _firebaseMessagingBackgroundHandler,);
+        _firebaseMessagingBackgroundHandler,
+      );
     });
   }
   FeatureFlagService.instance.init();
@@ -160,22 +166,25 @@ Future<void> _sync(String caller) async {
 }
 
 Future _runWithLogs(Function() function, {String prefix = ""}) async {
-  await SuperLogging.main(LogConfig(
-    body: function,
-    logDirPath: (await getTemporaryDirectory()).path + "/logs",
-    maxLogFiles: 5,
-    sentryDsn: kDebugMode ? kSentryDebugDSN : kSentryDSN,
-    tunnel: kSentryTunnel,
-    enableInDebugMode: true,
-    prefix: prefix,
-  ),);
+  await SuperLogging.main(
+    LogConfig(
+      body: function,
+      logDirPath: (await getTemporaryDirectory()).path + "/logs",
+      maxLogFiles: 5,
+      sentryDsn: kDebugMode ? kSentryDebugDSN : kSentryDSN,
+      tunnel: kSentryTunnel,
+      enableInDebugMode: true,
+      prefix: prefix,
+    ),
+  );
 }
 
 Future<void> _scheduleHeartBeat(bool isBackground) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setInt(
-      isBackground ? kLastBGTaskHeartBeatTime : kLastFGTaskHeartBeatTime,
-      DateTime.now().microsecondsSinceEpoch,);
+    isBackground ? kLastBGTaskHeartBeatTime : kLastFGTaskHeartBeatTime,
+    DateTime.now().microsecondsSinceEpoch,
+  );
   Future.delayed(kHeartBeatFrequency, () async {
     _scheduleHeartBeat(isBackground);
   });
@@ -209,7 +218,9 @@ Future<bool> _isRunningInForeground() async {
 
 Future<void> _killBGTask([String taskId]) async {
   await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
-      ProcessType.background.toString(), DateTime.now().microsecondsSinceEpoch,);
+    ProcessType.background.toString(),
+    DateTime.now().microsecondsSinceEpoch,
+  );
   final prefs = await SharedPreferences.getInstance();
   prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
@@ -222,22 +233,26 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   bool isInForeground = AppLifecycleService.instance.isForeground;
   if (_isProcessRunning) {
     _logger.info(
-        "Background push received when app is alive and runningInFS: $isRunningInFG inForeground: $isInForeground",);
+      "Background push received when app is alive and runningInFS: $isRunningInFG inForeground: $isInForeground",
+    );
     if (PushService.shouldSync(message)) {
       await _sync('firebaseBgSyncActiveProcess');
     }
   } else {
     // App is dead
-    _runWithLogs(() async {
-      _logger.info("Background push received");
-      if (Platform.isIOS) {
-        _scheduleSuicide(kBGPushTimeout); // To prevent OS from punishing us
-      }
-      await _init(true, via: 'firebasePush');
-      if (PushService.shouldSync(message)) {
-        await _sync('firebaseBgSyncNoActiveProcess');
-      }
-    }, prefix: "[fbg]",);
+    _runWithLogs(
+      () async {
+        _logger.info("Background push received");
+        if (Platform.isIOS) {
+          _scheduleSuicide(kBGPushTimeout); // To prevent OS from punishing us
+        }
+        await _init(true, via: 'firebasePush');
+        if (PushService.shouldSync(message)) {
+          await _sync('firebaseBgSyncNoActiveProcess');
+        }
+      },
+      prefix: "[fbg]",
+    );
   }
 }
 

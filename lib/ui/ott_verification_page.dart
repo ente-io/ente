@@ -69,7 +69,10 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
         onPressedFunction: () {
           if (widget.isChangeEmail) {
             UserService.instance.changeEmail(
-                context, widget.email, _verificationCodeController.text,);
+              context,
+              widget.email,
+              _verificationCodeController.text,
+            );
           } else {
             UserService.instance
                 .verifyEmail(context, _verificationCodeController.text);
@@ -89,8 +92,10 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 30, 20, 15),
-              child: Text('Verify email',
-                  style: Theme.of(context).textTheme.headline4,),
+              child: Text(
+                'Verify email',
+                style: Theme.of(context).textTheme.headline4,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -111,9 +116,11 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                               children: [
                                 TextSpan(text: "We've sent a mail to "),
                                 TextSpan(
-                                    text: widget.email,
-                                    style: TextStyle(
-                                        color: Theme.of(context).buttonColor,),)
+                                  text: widget.email,
+                                  style: TextStyle(
+                                    color: Theme.of(context).buttonColor,
+                                  ),
+                                )
                               ],
                             ),
                           ),
@@ -144,8 +151,9 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                   hintText: 'Tap to enter code',
                   contentPadding: EdgeInsets.all(15),
                   border: UnderlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(6),),
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
                 ),
                 controller: _verificationCodeController,
                 autofocus: false,
@@ -166,13 +174,18 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      UserService.instance.getOtt(context, widget.email,
-                          isCreateAccountScreen: widget.isCreateAccountScreen,);
+                      UserService.instance.getOtt(
+                        context,
+                        widget.email,
+                        isCreateAccountScreen: widget.isCreateAccountScreen,
+                      );
                     },
                     child: Text(
                       "Resend email",
                       style: Theme.of(context).textTheme.subtitle1.copyWith(
-                          fontSize: 14, decoration: TextDecoration.underline,),
+                            fontSize: 14,
+                            decoration: TextDecoration.underline,
+                          ),
                     ),
                   )
                 ],

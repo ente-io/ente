@@ -18,19 +18,23 @@ class FilteredImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColorFiltered(
-      colorFilter:
-          ColorFilter.matrix(ColorFilterGenerator.brightnessAdjustMatrix(
-        value: brightness ?? 1,
-      ),),
+      colorFilter: ColorFilter.matrix(
+        ColorFilterGenerator.brightnessAdjustMatrix(
+          value: brightness ?? 1,
+        ),
+      ),
       child: ColorFiltered(
-        colorFilter:
-            ColorFilter.matrix(ColorFilterGenerator.saturationAdjustMatrix(
-          value: saturation ?? 1,
-        ),),
+        colorFilter: ColorFilter.matrix(
+          ColorFilterGenerator.saturationAdjustMatrix(
+            value: saturation ?? 1,
+          ),
+        ),
         child: ColorFiltered(
-          colorFilter: ColorFilter.matrix(ColorFilterGenerator.hueAdjustMatrix(
-            value: hue ?? 0,
-          ),),
+          colorFilter: ColorFilter.matrix(
+            ColorFilterGenerator.hueAdjustMatrix(
+              value: hue ?? 0,
+            ),
+          ),
           child: child,
         ),
       ),

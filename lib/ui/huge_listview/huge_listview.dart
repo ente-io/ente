@@ -5,9 +5,13 @@ import 'package:photos/ui/huge_listview/draggable_scrollbar.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 typedef HugeListViewItemBuilder<T> = Widget Function(
-    BuildContext context, int index,);
+  BuildContext context,
+  int index,
+);
 typedef HugeListViewErrorBuilder = Widget Function(
-    BuildContext context, dynamic error,);
+  BuildContext context,
+  dynamic error,
+);
 
 class HugeListView<T> extends StatefulWidget {
   /// A [ScrollablePositionedList] controller for jumping or scrolling to an item.
@@ -61,11 +65,11 @@ class HugeListView<T> extends StatefulWidget {
     this.emptyResultBuilder,
     this.errorBuilder,
     this.firstShown,
-    this.thumbBackgroundColor = Colors.red,// Colors.white,
+    this.thumbBackgroundColor = Colors.red, // Colors.white,
     this.thumbDrawColor = Colors.yellow, //Colors.grey,
     this.thumbHeight = 48.0,
     this.isDraggableScrollbarEnabled = true,
-  })  : super(key: key);
+  }) : super(key: key);
 
   @override
   HugeListViewState<T> createState() => HugeListViewState<T>();

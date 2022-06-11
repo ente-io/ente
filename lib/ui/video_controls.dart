@@ -164,9 +164,10 @@ class _VideoControlsState extends State<VideoControls> {
                 child: Padding(
                   padding: EdgeInsets.all(12.0),
                   child: Icon(
-                      _latestValue.isPlaying ? Icons.pause : Icons.play_arrow,
-                      color: Colors.white, // same for both themes
-                      size: 64.0,),
+                    _latestValue.isPlaying ? Icons.pause : Icons.play_arrow,
+                    color: Colors.white, // same for both themes
+                    size: 64.0,
+                  ),
                 ),
               ),
             ),
@@ -300,10 +301,11 @@ class _VideoControlsState extends State<VideoControls> {
           },
           colors: chewieController.materialProgressColors ??
               ChewieProgressColors(
-                  playedColor: Theme.of(context).buttonColor,
-                  handleColor: Colors.white,
-                  bufferedColor: Colors.white,
-                  backgroundColor: Theme.of(context).disabledColor,),
+                playedColor: Theme.of(context).buttonColor,
+                handleColor: Colors.white,
+                bufferedColor: Colors.white,
+                backgroundColor: Theme.of(context).disabledColor,
+              ),
         ),
       ),
     );

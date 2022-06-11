@@ -74,12 +74,18 @@ class _RenameDialogState extends State<RenameDialog> {
           onPressed: () {
             if (_newName.trim().isEmpty) {
               showErrorDialog(
-                  context, "Empty name", "${widget.type} name cannot be empty",);
+                context,
+                "Empty name",
+                "${widget.type} name cannot be empty",
+              );
               return;
             }
             if (_newName.trim().length > widget.maxLength) {
-              showErrorDialog(context, "Name too large",
-                  "${widget.type} name should be less than ${widget.maxLength} characters",);
+              showErrorDialog(
+                context,
+                "Name too large",
+                "${widget.type} name should be less than ${widget.maxLength} characters",
+              );
               return;
             }
             Navigator.of(context).pop(_newName.trim());

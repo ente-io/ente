@@ -1,7 +1,6 @@
 import 'package:photos/models/file.dart';
 
 class TrashFile extends File {
-
   // time when file was put in the trash for first time
   int createdAt;
 

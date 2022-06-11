@@ -10,20 +10,23 @@ class onlyOuterShadow extends BoxShadow {
     double spreadRadius = 0.0,
     this.blurStyle = BlurStyle.normal,
   }) : super(
-            color: color,
-            offset: offset,
-            blurRadius: blurRadius,
-            spreadRadius: spreadRadius,);
+          color: color,
+          offset: offset,
+          blurRadius: blurRadius,
+          spreadRadius: spreadRadius,
+        );
 
   @override
   Paint toPaint() {
     final Paint result = Paint()
       ..color = color
       ..maskFilter = MaskFilter.blur(this.blurStyle, blurSigma);
-    assert(() {
-      if (debugDisableShadows) result.maskFilter = null;
-      return true;
-    }(),);
+    assert(
+      () {
+        if (debugDisableShadows) result.maskFilter = null;
+        return true;
+      }(),
+    );
     return result;
   }
 }

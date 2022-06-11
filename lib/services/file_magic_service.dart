@@ -44,7 +44,9 @@ class FileMagicService {
   }
 
   Future<void> updatePublicMagicMetadata(
-      List<File> files, Map<String, dynamic> newMetadataUpdate,) async {
+    List<File> files,
+    Map<String, dynamic> newMetadataUpdate,
+  ) async {
     final params = <String, dynamic>{};
     params['metadataList'] = [];
     final int ownerID = Configuration.instance.getUserID();
@@ -52,7 +54,8 @@ class FileMagicService {
       for (final file in files) {
         if (file.uploadedFileID == null) {
           throw AssertionError(
-              "operation is only supported on backed up files",);
+            "operation is only supported on backed up files",
+          );
         } else if (file.ownerID != ownerID) {
           throw AssertionError("cannot modify memories not owned by you");
         }
@@ -70,15 +73,20 @@ class FileMagicService {
 
         final fileKey = decryptFileKey(file);
         final encryptedMMd = await CryptoUtil.encryptChaCha(
-            utf8.encode(jsonEncode(jsonToUpdate)), fileKey,);
-        params['metadataList'].add(UpdateMagicMetadataRequest(
+          utf8.encode(jsonEncode(jsonToUpdate)),
+          fileKey,
+        );
+        params['metadataList'].add(
+          UpdateMagicMetadataRequest(
             id: file.uploadedFileID,
             magicMetadata: MetadataRequest(
               version: file.pubMmdVersion,
               count: jsonToUpdate.length,
               data: Sodium.bin2base64(encryptedMMd.encryptedData),
               header: Sodium.bin2base64(encryptedMMd.header),
-            ),),);
+            ),
+          ),
+        );
         file.pubMmdVersion = file.pubMmdVersion + 1;
       }
 
@@ -87,7 +95,8 @@ class FileMagicService {
             "/files/public-magic-metadata",
         data: params,
         options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()},),
+          headers: {"X-Auth-Token": Configuration.instance.getToken()},
+        ),
       );
       // update the state of the selected file. Same file in other collection
       // should be eventually synced after remote sync has completed
@@ -105,7 +114,9 @@ class FileMagicService {
   }
 
   Future<void> _updateMagicData(
-      List<File> files, Map<String, dynamic> newMetadataUpdate,) async {
+    List<File> files,
+    Map<String, dynamic> newMetadataUpdate,
+  ) async {
     final params = <String, dynamic>{};
     params['metadataList'] = [];
     final int ownerID = Configuration.instance.getUserID();
@@ -113,7 +124,8 @@ class FileMagicService {
       for (final file in files) {
         if (file.uploadedFileID == null) {
           throw AssertionError(
-              "operation is only supported on backed up files",);
+            "operation is only supported on backed up files",
+          );
         } else if (file.ownerID != ownerID) {
           throw AssertionError("cannot modify memories not owned by you");
         }
@@ -131,15 +143,20 @@ class FileMagicService {
 
         final fileKey = decryptFileKey(file);
         final encryptedMMd = await CryptoUtil.encryptChaCha(
-            utf8.encode(jsonEncode(jsonToUpdate)), fileKey,);
-        params['metadataList'].add(UpdateMagicMetadataRequest(
+          utf8.encode(jsonEncode(jsonToUpdate)),
+          fileKey,
+        );
+        params['metadataList'].add(
+          UpdateMagicMetadataRequest(
             id: file.uploadedFileID,
             magicMetadata: MetadataRequest(
               version: file.mMdVersion,
               count: jsonToUpdate.length,
               data: Sodium.bin2base64(encryptedMMd.encryptedData),
               header: Sodium.bin2base64(encryptedMMd.header),
-            ),),);
+            ),
+          ),
+        );
         file.mMdVersion = file.mMdVersion + 1;
       }
 
@@ -147,7 +164,8 @@ class FileMagicService {
         Configuration.instance.getHttpEndpoint() + "/files/magic-metadata",
         data: params,
         options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()},),
+          headers: {"X-Auth-Token": Configuration.instance.getToken()},
+        ),
       );
       // update the state of the selected file. Same file in other collection
       // should be eventually synced after remote sync has completed
@@ -173,10 +191,11 @@ class UpdateMagicMetadataRequest {
 
   factory UpdateMagicMetadataRequest.fromJson(dynamic json) {
     return UpdateMagicMetadataRequest(
-        id: json['id'],
-        magicMetadata: json['magicMetadata'] != null
-            ? MetadataRequest.fromJson(json['magicMetadata'])
-            : null,);
+      id: json['id'],
+      magicMetadata: json['magicMetadata'] != null
+          ? MetadataRequest.fromJson(json['magicMetadata'])
+          : null,
+    );
   }
 
   Map<String, dynamic> toJson() {

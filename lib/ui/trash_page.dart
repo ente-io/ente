@@ -18,12 +18,12 @@ class TrashPage extends StatefulWidget {
   final GalleryType appBarType;
   final GalleryType overlayType;
   final _selectedFiles = SelectedFiles();
-  TrashPage(
-      {this.tagPrefix = "trash_page",
-      this.appBarType = GalleryType.trash,
-      this.overlayType = GalleryType.trash,
-      Key key,})
-      : super(key: key);
+  TrashPage({
+    this.tagPrefix = "trash_page",
+    this.appBarType = GalleryType.trash,
+    this.overlayType = GalleryType.trash,
+    Key key,
+  }) : super(key: key);
 
   @override
   State<TrashPage> createState() => _TrashPageState();
@@ -53,14 +53,18 @@ class _TrashPageState extends State<TrashPage> {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return TrashDB.instance.getTrashedFiles(
-            creationStartTime, creationEndTime,
-            limit: limit, asc: asc,);
+          creationStartTime,
+          creationEndTime,
+          limit: limit,
+          asc: asc,
+        );
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
             (event) =>
                 event.updatedFiles.firstWhere(
-                    (element) => element.uploadedFileID != null,
-                    orElse: () => null,) !=
+                  (element) => element.uploadedFileID != null,
+                  orElse: () => null,
+                ) !=
                 null,
           ),
       forceReloadEvents: [
@@ -100,8 +104,9 @@ class _TrashPageState extends State<TrashPage> {
               child: IgnorePointer(
                 ignoring: filesAreSelected,
                 child: SafeArea(
-                    minimum: EdgeInsets.only(bottom: 6),
-                    child: BottomButtonsWidget(),),
+                  minimum: EdgeInsets.only(bottom: 6),
+                  child: BottomButtonsWidget(),
+                ),
               ),
             ),
           ),
@@ -156,7 +161,9 @@ class BottomButtonsWidget extends StatelessWidget {
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 16,),
+                      vertical: 8.0,
+                      horizontal: 16,
+                    ),
                     child: Text(
                       'Delete All',
                       style: Theme.of(context).textTheme.subtitle2.copyWith(

@@ -52,69 +52,69 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       return loadWidget;
     }
     return WillPopScope(
-        onWillPop: () async => _buildPageExitWidget(context),
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text('Subscription'),
-          ),
-          body: Column(
-            children: <Widget>[
-              (progress != 1.0)
-                  ? LinearProgressIndicator(value: progress)
-                  : Container(),
-              Expanded(
-                child: InAppWebView(
-                  initialUrlRequest: URLRequest(url: initPaymentUrl),
-                  onProgressChanged:
-                      (InAppWebViewController controller, int progress) {
-                    setState(() {
-                      this.progress = progress / 100;
-                    });
-                  },
-                  initialOptions: InAppWebViewGroupOptions(
-                    crossPlatform: InAppWebViewOptions(
-                      useShouldOverrideUrlLoading: true,
-                    ),
+      onWillPop: () async => _buildPageExitWidget(context),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Subscription'),
+        ),
+        body: Column(
+          children: <Widget>[
+            (progress != 1.0)
+                ? LinearProgressIndicator(value: progress)
+                : Container(),
+            Expanded(
+              child: InAppWebView(
+                initialUrlRequest: URLRequest(url: initPaymentUrl),
+                onProgressChanged:
+                    (InAppWebViewController controller, int progress) {
+                  setState(() {
+                    this.progress = progress / 100;
+                  });
+                },
+                initialOptions: InAppWebViewGroupOptions(
+                  crossPlatform: InAppWebViewOptions(
+                    useShouldOverrideUrlLoading: true,
                   ),
-                  shouldOverrideUrlLoading:
-                      (controller, navigationAction) async {
-                    var loadingUri = navigationAction.request.url;
-                    _logger.info("Loading url $loadingUri");
-                    // handle the payment response
-                    if (_isPaymentActionComplete(loadingUri)) {
-                      await _handlePaymentResponse(loadingUri);
-                      return NavigationActionPolicy.CANCEL;
-                    }
-                    return NavigationActionPolicy.ALLOW;
-                  },
-                  onConsoleMessage: (controller, consoleMessage) {
-                    _logger.info(consoleMessage);
-                  },
-                  onLoadStart: (controller, navigationAction) async {
-                    if (!_dialog.isShowing()) {
-                      await _dialog.show();
-                    }
-                  },
-                  onLoadError: (controller, navigationAction, code, msg) async {
-                    if (_dialog.isShowing()) {
-                      await _dialog.hide();
-                    }
-                  },
-                  onLoadHttpError:
-                      (controller, navigationAction, code, msg) async {
-                    _logger.info("onHttpError with $code and msg = $msg");
-                  },
-                  onLoadStop: (controller, navigationAction) async {
-                    _logger.info("loadStart" + navigationAction.toString());
-                    if (_dialog.isShowing()) {
-                      await _dialog.hide();
-                    }
-                  },
                 ),
+                shouldOverrideUrlLoading: (controller, navigationAction) async {
+                  var loadingUri = navigationAction.request.url;
+                  _logger.info("Loading url $loadingUri");
+                  // handle the payment response
+                  if (_isPaymentActionComplete(loadingUri)) {
+                    await _handlePaymentResponse(loadingUri);
+                    return NavigationActionPolicy.CANCEL;
+                  }
+                  return NavigationActionPolicy.ALLOW;
+                },
+                onConsoleMessage: (controller, consoleMessage) {
+                  _logger.info(consoleMessage);
+                },
+                onLoadStart: (controller, navigationAction) async {
+                  if (!_dialog.isShowing()) {
+                    await _dialog.show();
+                  }
+                },
+                onLoadError: (controller, navigationAction, code, msg) async {
+                  if (_dialog.isShowing()) {
+                    await _dialog.hide();
+                  }
+                },
+                onLoadHttpError:
+                    (controller, navigationAction, code, msg) async {
+                  _logger.info("onHttpError with $code and msg = $msg");
+                },
+                onLoadStop: (controller, navigationAction) async {
+                  _logger.info("loadStart" + navigationAction.toString());
+                  if (_dialog.isShowing()) {
+                    await _dialog.hide();
+                  }
+                },
               ),
-            ].where((Object o) => o != null).toList(),
-          ),
-        ),);
+            ),
+          ].where((Object o) => o != null).toList(),
+        ),
+      ),
+    );
   }
 
   @override
@@ -146,10 +146,12 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
         title: Text('Are you sure you want to exit?'),
         actions: <Widget>[
           TextButton(
-            child: Text('Yes',
-                style: TextStyle(
-                  color: Colors.redAccent,
-                ),),
+            child: Text(
+              'Yes',
+              style: TextStyle(
+                color: Colors.redAccent,
+              ),
+            ),
             onPressed: () => Navigator.of(context).pop(true),
           ),
           TextButton(
@@ -188,19 +190,21 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
 
   Future<void> _handlePaymentFailure(String reason) async {
     await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-                title: Text('Payment failed'),
-                content:
-                    Text("Unfortunately your payment failed due to $reason"),
-                actions: <Widget>[
-                  TextButton(
-                      child: Text('Ok'),
-                      onPressed: () {
-                        Navigator.of(context).pop('dialog');
-                      },),
-                ],),);
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text('Payment failed'),
+        content: Text("Unfortunately your payment failed due to $reason"),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Ok'),
+            onPressed: () {
+              Navigator.of(context).pop('dialog');
+            },
+          ),
+        ],
+      ),
+    );
     Navigator.of(context).pop(true);
   }
 
@@ -210,8 +214,10 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     await _dialog.show();
     try {
       var response = await billingService.verifySubscription(
-          widget.planId, checkoutSessionID,
-          paymentProvider: kStripe,);
+        widget.planId,
+        checkoutSessionID,
+        paymentProvider: kStripe,
+      );
       await _dialog.hide();
       if (response != null) {
         var content = widget.actionType == 'buy'
@@ -241,13 +247,14 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
         content: Text(content),
         actions: <Widget>[
           TextButton(
-              child: Text(
-                'Ok',
-                style: TextStyle(color: Theme.of(context).buttonColor),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop('dialog');
-              },),
+            child: Text(
+              'Ok',
+              style: TextStyle(color: Theme.of(context).buttonColor),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop('dialog');
+            },
+          ),
         ],
       ),
     ).then((val) => Navigator.pop(context, true));

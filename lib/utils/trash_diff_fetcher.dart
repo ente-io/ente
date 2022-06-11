@@ -20,7 +20,8 @@ class TrashDiffFetcher {
       final response = await _dio.get(
         Configuration.instance.getHttpEndpoint() + "/trash/v2/diff",
         options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()},),
+          headers: {"X-Auth-Token": Configuration.instance.getToken()},
+        ),
         queryParameters: {
           "sinceTime": sinceTime,
         },
@@ -66,17 +67,19 @@ class TrashDiffFetcher {
           trash.applyMetadata(metadata);
           if (item["file"]['magicMetadata'] != null) {
             final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-                Sodium.base642bin(item["file"]['magicMetadata']['data']),
-                fileDecryptionKey,
-                Sodium.base642bin(item["file"]['magicMetadata']['header']),);
+              Sodium.base642bin(item["file"]['magicMetadata']['data']),
+              fileDecryptionKey,
+              Sodium.base642bin(item["file"]['magicMetadata']['header']),
+            );
             trash.mMdEncodedJson = utf8.decode(utfEncodedMmd);
             trash.mMdVersion = item["file"]['magicMetadata']['version'];
           }
           if (item["file"]['pubMagicMetadata'] != null) {
             final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-                Sodium.base642bin(item["file"]['pubMagicMetadata']['data']),
-                fileDecryptionKey,
-                Sodium.base642bin(item["file"]['pubMagicMetadata']['header']),);
+              Sodium.base642bin(item["file"]['pubMagicMetadata']['data']),
+              fileDecryptionKey,
+              Sodium.base642bin(item["file"]['pubMagicMetadata']['header']),
+            );
             trash.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
             trash.pubMmdVersion = item["file"]['pubMagicMetadata']['version'];
             trash.pubMagicMetadata =
@@ -90,16 +93,22 @@ class TrashDiffFetcher {
         }
 
         final endTime = DateTime.now();
-        _logger.info("time for parsing " +
-            diff.length.toString() +
-            ": " +
-            Duration(
-                    microseconds: (endTime.microsecondsSinceEpoch -
-                        startTime.microsecondsSinceEpoch),)
-                .inMilliseconds
-                .toString(),);
-        return Diff(trashedFiles, restoredFiles, deletedUploadIDs, hasMore,
-            latestUpdatedAtTime,);
+        _logger.info(
+          "time for parsing " +
+              diff.length.toString() +
+              ": " +
+              Duration(
+                microseconds: (endTime.microsecondsSinceEpoch -
+                    startTime.microsecondsSinceEpoch),
+              ).inMilliseconds.toString(),
+        );
+        return Diff(
+          trashedFiles,
+          restoredFiles,
+          deletedUploadIDs,
+          hasMore,
+          latestUpdatedAtTime,
+        );
       } else {
         return Diff(<TrashFile>[], <TrashFile>[], <int>[], false, 0);
       }
@@ -117,6 +126,11 @@ class Diff {
   final bool hasMore;
   final int lastSyncedTimeStamp;
 
-  Diff(this.trashedFiles, this.restoredFiles, this.deletedUploadIDs,
-      this.hasMore, this.lastSyncedTimeStamp,);
+  Diff(
+    this.trashedFiles,
+    this.restoredFiles,
+    this.deletedUploadIDs,
+    this.hasMore,
+    this.lastSyncedTimeStamp,
+  );
 }

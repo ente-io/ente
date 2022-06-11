@@ -72,15 +72,18 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     if (_showVideo && _videoPlayerController != null) {
       content = _getVideoPlayer();
     } else {
-      content = ZoomableImage(_file,
-          tagPrefix: widget.tagPrefix,
-          shouldDisableScroll: widget.shouldDisableScroll,
-          backgroundDecoration: widget.backgroundDecoration,);
+      content = ZoomableImage(
+        _file,
+        tagPrefix: widget.tagPrefix,
+        shouldDisableScroll: widget.shouldDisableScroll,
+        backgroundDecoration: widget.backgroundDecoration,
+      );
     }
     return GestureDetector(
-        onLongPressStart: (_) => {_onLongPressEvent(true)},
-        onLongPressEnd: (_) => {_onLongPressEvent(false)},
-        child: content,);
+      onLongPressStart: (_) => {_onLongPressEvent(true)},
+      onLongPressEnd: (_) => {_onLongPressEvent(false)},
+      child: content,
+    );
   }
 
   @override
@@ -98,13 +101,14 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   Widget _getVideoPlayer() {
     _videoPlayerController.seekTo(Duration.zero);
     _chewieController = ChewieController(
-        videoPlayerController: _videoPlayerController,
-        aspectRatio: _videoPlayerController.value.aspectRatio,
-        autoPlay: true,
-        autoInitialize: true,
-        looping: true,
-        allowFullScreen: false,
-        showControls: false,);
+      videoPlayerController: _videoPlayerController,
+      aspectRatio: _videoPlayerController.value.aspectRatio,
+      autoPlay: true,
+      autoInitialize: true,
+      looping: true,
+      allowFullScreen: false,
+      showControls: false,
+    );
     return Chewie(controller: _chewieController);
   }
 

@@ -20,9 +20,9 @@ class SettingsTextItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Align(
-                alignment: Alignment.centerLeft,
-                child:
-                    Text(text, style: Theme.of(context).textTheme.subtitle1),),
+              alignment: Alignment.centerLeft,
+              child: Text(text, style: Theme.of(context).textTheme.subtitle1),
+            ),
             Icon(icon),
           ],
         ),

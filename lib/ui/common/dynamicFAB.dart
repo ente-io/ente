@@ -9,13 +9,13 @@ class DynamicFAB extends StatelessWidget {
   final String buttonText;
   final Function onPressedFunction;
 
-  DynamicFAB(
-      {Key key,
-      this.isKeypadOpen,
-      this.buttonText,
-      this.isFormValid,
-      this.onPressedFunction,})
-      : super(key: key);
+  DynamicFAB({
+    Key key,
+    this.isKeypadOpen,
+    this.buttonText,
+    this.isFormValid,
+    this.onPressedFunction,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -36,24 +36,24 @@ class DynamicFAB extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             FloatingActionButton(
-                heroTag: 'FAB',
-                backgroundColor:
-                    Theme.of(context).colorScheme.dynamicFABBackgroundColor,
-                foregroundColor:
-                    Theme.of(context).colorScheme.dynamicFABTextColor,
-                child: Transform.rotate(
-                  angle: isFormValid ? 0 : math.pi / 2,
-                  child: Icon(
-                    Icons.chevron_right,
-                    size: 36,
-                  ),
+              heroTag: 'FAB',
+              backgroundColor:
+                  Theme.of(context).colorScheme.dynamicFABBackgroundColor,
+              foregroundColor:
+                  Theme.of(context).colorScheme.dynamicFABTextColor,
+              child: Transform.rotate(
+                angle: isFormValid ? 0 : math.pi / 2,
+                child: Icon(
+                  Icons.chevron_right,
+                  size: 36,
                 ),
-                onPressed: isFormValid
-                    ? onPressedFunction
-                    : () {
-                        FocusScope.of(context).unfocus();
-                      }, //keypad down here
-                ),
+              ),
+              onPressed: isFormValid
+                  ? onPressedFunction
+                  : () {
+                      FocusScope.of(context).unfocus();
+                    }, //keypad down here
+            ),
           ],
         ),
       );

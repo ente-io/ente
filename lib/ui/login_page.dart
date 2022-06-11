@@ -75,8 +75,10 @@ class _LoginPageState extends State<LoginPage> {
               Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                child: Text('Welcome back!',
-                    style: Theme.of(context).textTheme.headline4,),
+                child: Text(
+                  'Welcome back!',
+                  style: Theme.of(context).textTheme.headline4,
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
@@ -89,8 +91,9 @@ class _LoginPageState extends State<LoginPage> {
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                     border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6),),
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     suffixIcon: _emailIsValid
                         ? Icon(
                             Icons.check,
@@ -141,7 +144,8 @@ class _LoginPageState extends State<LoginPage> {
                               .copyWith(fontSize: 12),
                           children: [
                             TextSpan(
-                                text: "By clicking log in, I agree to the ",),
+                              text: "By clicking log in, I agree to the ",
+                            ),
                             TextSpan(
                               text: "terms of service",
                               style: TextStyle(
@@ -153,7 +157,9 @@ class _LoginPageState extends State<LoginPage> {
                                     MaterialPageRoute(
                                       builder: (BuildContext context) {
                                         return WebPage(
-                                            "terms", "https://ente.io/terms",);
+                                          "terms",
+                                          "https://ente.io/terms",
+                                        );
                                       },
                                     ),
                                   );
@@ -170,8 +176,10 @@ class _LoginPageState extends State<LoginPage> {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
                                       builder: (BuildContext context) {
-                                        return WebPage("privacy",
-                                            "https://ente.io/privacy",);
+                                        return WebPage(
+                                          "privacy",
+                                          "https://ente.io/privacy",
+                                        );
                                       },
                                     ),
                                   );

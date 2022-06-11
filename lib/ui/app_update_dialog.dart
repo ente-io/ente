@@ -19,10 +19,12 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
   Widget build(BuildContext context) {
     final List<Widget> changelog = [];
     for (final log in widget.latestVersionInfo.changelog) {
-      changelog.add(Padding(
-        padding: const EdgeInsets.fromLTRB(8, 4, 0, 4),
-        child: Text("- " + log, style: Theme.of(context).textTheme.caption),
-      ),);
+      changelog.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 4, 0, 4),
+          child: Text("- " + log, style: Theme.of(context).textTheme.caption),
+        ),
+      );
     }
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,10 +38,12 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
           ),
         ),
         Padding(padding: EdgeInsets.all(8)),
-        Text("Changelog",
-            style: TextStyle(
-              fontSize: 18,
-            ),),
+        Text(
+          "Changelog",
+          style: TextStyle(
+            fontSize: 18,
+          ),
+        ),
         Padding(padding: EdgeInsets.all(4)),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,9 +83,9 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     return WillPopScope(
       onWillPop: () async => !shouldForceUpdate,
       child: AlertDialog(
-        title: Text(shouldForceUpdate
-            ? "Critical update available"
-            : "Update available",),
+        title: Text(
+          shouldForceUpdate ? "Critical update available" : "Update available",
+        ),
         content: content,
       ),
     );
@@ -134,12 +138,15 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
 
   Future<void> _downloadApk() async {
     try {
-      await Network.instance.getDio().download(widget.versionInfo.url, _saveUrl,
-          onReceiveProgress: (count, _) {
-        setState(() {
-          _downloadProgress = count / widget.versionInfo.size;
-        });
-      },);
+      await Network.instance.getDio().download(
+        widget.versionInfo.url,
+        _saveUrl,
+        onReceiveProgress: (count, _) {
+          setState(() {
+            _downloadProgress = count / widget.versionInfo.size;
+          });
+        },
+      );
       Navigator.of(context, rootNavigator: true).pop('dialog');
       OpenFile.open(_saveUrl);
     } catch (e) {

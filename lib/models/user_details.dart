@@ -40,10 +40,11 @@ class UserDetails {
 
   int getFreeStorage() {
     return max(
-        isPartOfFamily()
-            ? (familyData.storage - familyData.getTotalUsage())
-            : (subscription.storage - (usage)),
-        0,);
+      isPartOfFamily()
+          ? (familyData.storage - familyData.getTotalUsage())
+          : (subscription.storage - (usage)),
+      0,
+    );
   }
 
   int getTotalStorage() {
@@ -118,7 +119,8 @@ class FamilyData {
     }
     assert(map['members'] != null && map['members'].length >= 0);
     final members = List<FamilyMember>.from(
-        map['members'].map((x) => FamilyMember.fromMap(x)),);
+      map['members'].map((x) => FamilyMember.fromMap(x)),
+    );
     return FamilyData(
       members,
       map['storage'] as int,

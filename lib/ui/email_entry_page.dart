@@ -88,15 +88,16 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         },
       ),
       title: Material(
-          type: MaterialType.transparency,
-          child: StepProgressIndicator(
-            totalSteps: 4,
-            currentStep: 1,
-            selectedColor: Theme.of(context).buttonColor,
-            roundedEdges: Radius.circular(10),
-            unselectedColor:
-                Theme.of(context).colorScheme.stepProgressUnselectedColor,
-          ),),
+        type: MaterialType.transparency,
+        child: StepProgressIndicator(
+          totalSteps: 4,
+          currentStep: 1,
+          selectedColor: Theme.of(context).buttonColor,
+          roundedEdges: Radius.circular(10),
+          unselectedColor:
+              Theme.of(context).colorScheme.stepProgressUnselectedColor,
+        ),
+      ),
     );
     return Scaffold(
       appBar: appBar,
@@ -136,8 +137,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  child: Text('Create new account',
-                      style: Theme.of(context).textTheme.headline4,),
+                  child: Text(
+                    'Create new account',
+                    style: Theme.of(context).textTheme.headline4,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
@@ -151,8 +154,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       border: UnderlineInputBorder(
-                          borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(6),),
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                       suffixIcon: _emailIsValid
                           ? Icon(
                               Icons.check,
@@ -221,8 +225,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                 )
                               : null,
                       border: UnderlineInputBorder(
-                          borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(6),),
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                     ),
                     focusNode: _password1FocusNode,
                     onChanged: (password) {
@@ -284,8 +289,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                 )
                               : null,
                       border: UnderlineInputBorder(
-                          borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(6),),
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                     ),
                     focusNode: _password2FocusNode,
                     onChanged: (cnfPassword) {
@@ -348,13 +354,14 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       child: Row(
         children: [
           Checkbox(
-              value: _hasAgreedToTOS,
-              side: CheckboxTheme.of(context).side,
-              onChanged: (value) {
-                setState(() {
-                  _hasAgreedToTOS = value;
-                });
-              },),
+            value: _hasAgreedToTOS,
+            side: CheckboxTheme.of(context).side,
+            onChanged: (value) {
+              setState(() {
+                _hasAgreedToTOS = value;
+              });
+            },
+          ),
           Expanded(
             child: RichText(
               text: TextSpan(
@@ -390,7 +397,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           MaterialPageRoute(
                             builder: (BuildContext context) {
                               return WebPage(
-                                  "Privacy", "https://ente.io/privacy",);
+                                "Privacy",
+                                "https://ente.io/privacy",
+                              );
                             },
                           ),
                         );
@@ -448,7 +457,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           MaterialPageRoute(
                             builder: (BuildContext context) {
                               return WebPage(
-                                  "encryption", "https://ente.io/architecture",);
+                                "encryption",
+                                "https://ente.io/architecture",
+                              );
                             },
                           ),
                         );
@@ -526,12 +537,14 @@ class PricingWidget extends StatelessWidget {
               children: planWidgets,
             ),
           ),
-          Text("We offer a free trial of " +
-              convertBytesToReadableFormat(freePlan.storage) +
-              " for " +
-              freePlan.duration.toString() +
-              " " +
-              freePlan.period,),
+          Text(
+            "We offer a free trial of " +
+                convertBytesToReadableFormat(freePlan.storage) +
+                " for " +
+                freePlan.duration.toString() +
+                " " +
+                freePlan.period,
+          ),
           GestureDetector(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,

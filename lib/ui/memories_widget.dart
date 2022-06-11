@@ -95,7 +95,9 @@ class _MemoryWidgetState extends State<MemoryWidget> {
     return GestureDetector(
       onTap: () async {
         await routeToPage(
-            context, FullScreenMemory(title, widget.memories, index),);
+          context,
+          FullScreenMemory(title, widget.memories, index),
+        );
         setState(() {});
       },
       child: SizedBox(
@@ -261,9 +263,12 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 ),
                 Text(
                   getFormattedDate(
-                      DateTime.fromMicrosecondsSinceEpoch(file.creationTime),),
+                    DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
+                  ),
                   style: Theme.of(context).textTheme.subtitle1.copyWith(
-                      fontSize: 14, color: Colors.white,), //same for both themes
+                        fontSize: 14,
+                        color: Colors.white,
+                      ), //same for both themes
                 ),
               ],
             ),
@@ -271,16 +276,17 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
-              gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.black.withOpacity(0.6),
-              Colors.black.withOpacity(0.5),
-              Colors.transparent,
-            ],
-            stops: const [0, 0.6, 1],
-          ),),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withOpacity(0.6),
+                Colors.black.withOpacity(0.5),
+                Colors.transparent,
+              ],
+              stops: const [0, 0.6, 1],
+            ),
+          ),
         ),
         backgroundColor: Color(0x00000000),
         elevation: 0,
@@ -288,12 +294,15 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       extendBodyBehindAppBar: true,
       body: Container(
         color: Colors.black,
-        child: Stack(alignment: Alignment.bottomCenter, children: [
-          _buildSwiper(),
-          bottomGradient(),
-          _buildTitleText(),
-          _buildBottomIcons(),
-        ],),
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            _buildSwiper(),
+            bottomGradient(),
+            _buildTitleText(),
+            _buildBottomIcons(),
+          ],
+        ),
       ),
     );
   }
@@ -307,11 +316,13 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         child: AnimatedOpacity(
           opacity: _opacity,
           duration: Duration(milliseconds: 500),
-          child: Text(widget.title,
-              style: Theme.of(context)
-                  .textTheme
-                  .headline4
-                  .copyWith(color: Colors.white),),
+          child: Text(
+            widget.title,
+            style: Theme.of(context)
+                .textTheme
+                .headline4
+                .copyWith(color: Colors.white),
+          ),
         ),
       ),
     );
@@ -320,17 +331,18 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   Widget _buildBottomIcons() {
     final file = widget.memories[_index].file;
     return Container(
-        alignment: Alignment.bottomRight,
-        padding: EdgeInsets.fromLTRB(0, 0, 26, 20),
-        child: IconButton(
-          icon: Icon(
-            Icons.adaptive.share,
-            color: Colors.white,
-          ), //same for both themes
-          onPressed: () {
-            share(context, [file]);
-          },
-        ),);
+      alignment: Alignment.bottomRight,
+      padding: EdgeInsets.fromLTRB(0, 0, 26, 20),
+      child: IconButton(
+        icon: Icon(
+          Icons.adaptive.share,
+          color: Colors.white,
+        ), //same for both themes
+        onPressed: () {
+          share(context, [file]);
+        },
+      ),
+    );
   }
 
   Widget bottomGradient() {
@@ -338,15 +350,16 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       height: 124,
       width: double.infinity,
       decoration: BoxDecoration(
-          gradient: LinearGradient(
-        begin: Alignment.bottomCenter,
-        end: Alignment.topCenter,
-        colors: [
-          Colors.black.withOpacity(0.5), //same for both themes
-          Colors.transparent,
-        ],
-        stops: const [0, 0.8],
-      ),),
+        gradient: LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [
+            Colors.black.withOpacity(0.5), //same for both themes
+            Colors.transparent,
+          ],
+          stops: const [0, 0.8],
+        ),
+      ),
     );
   }
 

@@ -17,15 +17,18 @@ class DiffFetcher {
   final _dio = Network.instance.getDio();
 
   Future<Diff> getEncryptedFilesDiff(int collectionID, int sinceTime) async {
-    _logger.info("Fetching diff in collection " +
-        collectionID.toString() +
-        " since " +
-        sinceTime.toString(),);
+    _logger.info(
+      "Fetching diff in collection " +
+          collectionID.toString() +
+          " since " +
+          sinceTime.toString(),
+    );
     try {
       final response = await _dio.get(
         Configuration.instance.getHttpEndpoint() + "/collections/v2/diff",
         options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()},),
+          headers: {"X-Auth-Token": Configuration.instance.getToken()},
+        ),
         queryParameters: {
           "collectionID": collectionID,
           "sinceTime": sinceTime,
@@ -78,9 +81,10 @@ class DiffFetcher {
           file.applyMetadata(metadata);
           if (item['magicMetadata'] != null) {
             final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-                Sodium.base642bin(item['magicMetadata']['data']),
-                fileDecryptionKey,
-                Sodium.base642bin(item['magicMetadata']['header']),);
+              Sodium.base642bin(item['magicMetadata']['data']),
+              fileDecryptionKey,
+              Sodium.base642bin(item['magicMetadata']['header']),
+            );
             file.mMdEncodedJson = utf8.decode(utfEncodedMmd);
             file.mMdVersion = item['magicMetadata']['version'];
             file.magicMetadata =
@@ -88,9 +92,10 @@ class DiffFetcher {
           }
           if (item['pubMagicMetadata'] != null) {
             final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-                Sodium.base642bin(item['pubMagicMetadata']['data']),
-                fileDecryptionKey,
-                Sodium.base642bin(item['pubMagicMetadata']['header']),);
+              Sodium.base642bin(item['pubMagicMetadata']['data']),
+              fileDecryptionKey,
+              Sodium.base642bin(item['pubMagicMetadata']['header']),
+            );
             file.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
             file.pubMmdVersion = item['pubMagicMetadata']['version'];
             file.pubMagicMetadata =
@@ -100,16 +105,17 @@ class DiffFetcher {
         }
 
         final endTime = DateTime.now();
-        _logger.info("time for parsing " +
-            files.length.toString() +
-            " items within collection " +
-            collectionID.toString() +
-            ": " +
-            Duration(
-                    microseconds: (endTime.microsecondsSinceEpoch -
-                        startTime.microsecondsSinceEpoch),)
-                .inMilliseconds
-                .toString(),);
+        _logger.info(
+          "time for parsing " +
+              files.length.toString() +
+              " items within collection " +
+              collectionID.toString() +
+              ": " +
+              Duration(
+                microseconds: (endTime.microsecondsSinceEpoch -
+                    startTime.microsecondsSinceEpoch),
+              ).inMilliseconds.toString(),
+        );
         return Diff(files, deletedFiles, hasMore, latestUpdatedAtTime);
       } else {
         return Diff(<File>[], <File>[], false, 0);
@@ -127,6 +133,10 @@ class Diff {
   final bool hasMore;
   final int latestUpdatedAtTime;
 
-  Diff(this.updatedFiles, this.deletedFiles, this.hasMore,
-      this.latestUpdatedAtTime,);
+  Diff(
+    this.updatedFiles,
+    this.deletedFiles,
+    this.hasMore,
+    this.latestUpdatedAtTime,
+  );
 }

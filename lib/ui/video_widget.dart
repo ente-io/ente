@@ -142,29 +142,31 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   Widget _getLoadingWidget() {
-    return Stack(children: [
-      _getThumbnail(),
-      Container(
-        color: Colors.black12,
-        constraints: BoxConstraints.expand(),
-      ),
-      Center(
-        child: SizedBox.fromSize(
-          size: Size.square(30),
-          child: _progress == null || _progress == 1
-              ? CupertinoActivityIndicator(
-                  color: Colors.white,
-                )
-              : CircularProgressIndicator(
-                  backgroundColor: Colors.black,
-                  value: _progress,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Color.fromRGBO(45, 194, 98, 1.0),
-                  ),
-                ),
+    return Stack(
+      children: [
+        _getThumbnail(),
+        Container(
+          color: Colors.black12,
+          constraints: BoxConstraints.expand(),
         ),
-      ),
-    ],);
+        Center(
+          child: SizedBox.fromSize(
+            size: Size.square(30),
+            child: _progress == null || _progress == 1
+                ? CupertinoActivityIndicator(
+                    color: Colors.white,
+                  )
+                : CircularProgressIndicator(
+                    backgroundColor: Colors.black,
+                    value: _progress,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color.fromRGBO(45, 194, 98, 1.0),
+                    ),
+                  ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _getThumbnail() {

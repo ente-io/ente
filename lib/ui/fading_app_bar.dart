@@ -99,87 +99,89 @@ class FadingAppBarState extends State<FadingAppBar> {
     if (widget.file.ownerID == null || widget.file.ownerID == widget.userID) {
       actions.add(_getFavoriteButton());
     }
-    actions.add(PopupMenuButton(
-      itemBuilder: (context) {
-        final List<PopupMenuItem> items = [];
-        if (widget.file.isRemoteFile()) {
-          items.add(
-            PopupMenuItem(
-              value: 1,
-              child: Row(
-                children: [
-                  Icon(
-                    Platform.isAndroid
-                        ? Icons.download
-                        : CupertinoIcons.cloud_download,
-                    color: Theme.of(context).iconTheme.color,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text("Download"),
-                ],
-              ),
-            ),
-          );
-        }
-        // options for files owned by the user
-        if (widget.file.ownerID == null ||
-            widget.file.ownerID == widget.userID) {
-          if (widget.file.uploadedFileID != null) {
+    actions.add(
+      PopupMenuButton(
+        itemBuilder: (context) {
+          final List<PopupMenuItem> items = [];
+          if (widget.file.isRemoteFile()) {
             items.add(
               PopupMenuItem(
-                value: 2,
+                value: 1,
                 child: Row(
                   children: [
                     Icon(
                       Platform.isAndroid
-                          ? Icons.access_time_rounded
-                          : CupertinoIcons.time,
+                          ? Icons.download
+                          : CupertinoIcons.cloud_download,
                       color: Theme.of(context).iconTheme.color,
                     ),
                     Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    Text("Edit time"),
+                    Text("Download"),
                   ],
                 ),
               ),
             );
           }
+          // options for files owned by the user
+          if (widget.file.ownerID == null ||
+              widget.file.ownerID == widget.userID) {
+            if (widget.file.uploadedFileID != null) {
+              items.add(
+                PopupMenuItem(
+                  value: 2,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Platform.isAndroid
+                            ? Icons.access_time_rounded
+                            : CupertinoIcons.time,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(8),
+                      ),
+                      Text("Edit time"),
+                    ],
+                  ),
+                ),
+              );
+            }
 
-          items.add(
-            PopupMenuItem(
-              value: 3,
-              child: Row(
-                children: [
-                  Icon(
-                    Platform.isAndroid
-                        ? Icons.delete_outline
-                        : CupertinoIcons.delete,
-                    color: Theme.of(context).iconTheme.color,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text("Delete"),
-                ],
+            items.add(
+              PopupMenuItem(
+                value: 3,
+                child: Row(
+                  children: [
+                    Icon(
+                      Platform.isAndroid
+                          ? Icons.delete_outline
+                          : CupertinoIcons.delete,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(8),
+                    ),
+                    Text("Delete"),
+                  ],
+                ),
               ),
-            ),
-          );
-        }
-        return items;
-      },
-      onSelected: (value) {
-        if (value == 1) {
-          _download(widget.file);
-        } else if (value == 2) {
-          _showDateTimePicker(widget.file);
-        } else if (value == 3) {
-          _showDeleteSheet(widget.file);
-        }
-      },
-    ),);
+            );
+          }
+          return items;
+        },
+        onSelected: (value) {
+          if (value == 1) {
+            _download(widget.file);
+          } else if (value == 2) {
+            _showDateTimePicker(widget.file);
+          } else if (value == 3) {
+            _showDeleteSheet(widget.file);
+          }
+        },
+      ),
+    );
     return AppBar(
       iconTheme: IconThemeData(color: Colors.white), //same for both themes
       actions: shouldShowActions ? actions : [],
@@ -267,8 +269,11 @@ class FadingAppBarState extends State<FadingAppBar> {
       theme: Theme.of(context).colorScheme.dateTimePickertheme,
     );
     if (dateWithTimeResult != null) {
-      if (await editTime(context, List.of([widget.file]),
-          dateWithTimeResult.microsecondsSinceEpoch,)) {
+      if (await editTime(
+        context,
+        List.of([widget.file]),
+        dateWithTimeResult.microsecondsSinceEpoch,
+      )) {
         widget.file.creationTime = dateWithTimeResult.microsecondsSinceEpoch;
         setState(() {});
       }
@@ -278,48 +283,56 @@ class FadingAppBarState extends State<FadingAppBar> {
   void _showDeleteSheet(File file) {
     final List<Widget> actions = [];
     if (file.uploadedFileID == null || file.localID == null) {
-      actions.add(CupertinoActionSheetAction(
-        child: Text("Everywhere"),
-        isDestructiveAction: true,
-        onPressed: () async {
-          await deleteFilesFromEverywhere(context, [file]);
-          Navigator.of(context, rootNavigator: true).pop();
-          widget.onFileDeleted(file);
-        },
-      ),);
+      actions.add(
+        CupertinoActionSheetAction(
+          child: Text("Everywhere"),
+          isDestructiveAction: true,
+          onPressed: () async {
+            await deleteFilesFromEverywhere(context, [file]);
+            Navigator.of(context, rootNavigator: true).pop();
+            widget.onFileDeleted(file);
+          },
+        ),
+      );
     } else {
       // uploaded file which is present locally too
-      actions.add(CupertinoActionSheetAction(
-        child: Text("Device"),
-        isDestructiveAction: true,
-        onPressed: () async {
-          await deleteFilesOnDeviceOnly(context, [file]);
-          showToast(context, "File deleted from device");
-          Navigator.of(context, rootNavigator: true).pop();
-          // TODO: Fix behavior when inside a device folder
-        },
-      ),);
+      actions.add(
+        CupertinoActionSheetAction(
+          child: Text("Device"),
+          isDestructiveAction: true,
+          onPressed: () async {
+            await deleteFilesOnDeviceOnly(context, [file]);
+            showToast(context, "File deleted from device");
+            Navigator.of(context, rootNavigator: true).pop();
+            // TODO: Fix behavior when inside a device folder
+          },
+        ),
+      );
 
-      actions.add(CupertinoActionSheetAction(
-        child: Text("ente"),
-        isDestructiveAction: true,
-        onPressed: () async {
-          await deleteFilesFromRemoteOnly(context, [file]);
-          showShortToast(context, "Moved to trash");
-          Navigator.of(context, rootNavigator: true).pop();
-          // TODO: Fix behavior when inside a collection
-        },
-      ),);
+      actions.add(
+        CupertinoActionSheetAction(
+          child: Text("ente"),
+          isDestructiveAction: true,
+          onPressed: () async {
+            await deleteFilesFromRemoteOnly(context, [file]);
+            showShortToast(context, "Moved to trash");
+            Navigator.of(context, rootNavigator: true).pop();
+            // TODO: Fix behavior when inside a collection
+          },
+        ),
+      );
 
-      actions.add(CupertinoActionSheetAction(
-        child: Text("Everywhere"),
-        isDestructiveAction: true,
-        onPressed: () async {
-          await deleteFilesFromEverywhere(context, [file]);
-          Navigator.of(context, rootNavigator: true).pop();
-          widget.onFileDeleted(file);
-        },
-      ),);
+      actions.add(
+        CupertinoActionSheetAction(
+          child: Text("Everywhere"),
+          isDestructiveAction: true,
+          onPressed: () async {
+            await deleteFilesFromEverywhere(context, [file]);
+            Navigator.of(context, rootNavigator: true).pop();
+            widget.onFileDeleted(file);
+          },
+        ),
+      );
     }
     final action = CupertinoActionSheet(
       title: Text("Delete file?"),

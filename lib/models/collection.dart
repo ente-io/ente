@@ -68,22 +68,23 @@ class Collection {
     }
   }
 
-  Collection copyWith(
-      {int id,
-      User owner,
-      String encryptedKey,
-      String keyDecryptionNonce,
-      String name,
-      String encryptedName,
-      String nameDecryptionNonce,
-      CollectionType type,
-      CollectionAttributes attributes,
-      List<User> sharees,
-      List<PublicURL> publicURLs,
-      int updationTime,
-      bool isDeleted,
-      String mMdEncodedJson,
-      int mMdVersion,}) {
+  Collection copyWith({
+    int id,
+    User owner,
+    String encryptedKey,
+    String keyDecryptionNonce,
+    String name,
+    String encryptedName,
+    String nameDecryptionNonce,
+    CollectionType type,
+    CollectionAttributes attributes,
+    List<User> sharees,
+    List<PublicURL> publicURLs,
+    int updationTime,
+    bool isDeleted,
+    String mMdEncodedJson,
+    int mMdVersion,
+  }) {
     Collection result = Collection(
       id ?? this.id,
       owner ?? this.owner,
@@ -131,7 +132,8 @@ class Collection {
         (map['publicURLs'] == null || map['publicURLs'].length == 0)
             ? <PublicURL>[]
             : List<PublicURL>.from(
-                map['publicURLs'].map((x) => PublicURL.fromMap(x)),);
+                map['publicURLs'].map((x) => PublicURL.fromMap(x)),
+              );
     return Collection(
       map['id'],
       User.fromMap(map['owner']),
@@ -338,12 +340,13 @@ class PublicURL {
   bool enableDownload = true;
   bool passwordEnabled = false;
 
-  PublicURL(
-      {this.url,
-      this.deviceLimit,
-      this.validTill,
-      this.enableDownload,
-      this.passwordEnabled,});
+  PublicURL({
+    this.url,
+    this.deviceLimit,
+    this.validTill,
+    this.enableDownload,
+    this.passwordEnabled,
+  });
 
   Map<String, dynamic> toMap() {
     return {

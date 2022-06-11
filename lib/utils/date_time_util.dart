@@ -164,7 +164,10 @@ bool isLeapYear(DateTime dateTime) {
 }
 
 Widget getDayWidget(
-    BuildContext context, int timestamp, bool smallerTodayFont,) {
+  BuildContext context,
+  int timestamp,
+  bool smallerTodayFont,
+) {
   return Container(
     padding: const EdgeInsets.fromLTRB(4, 14, 0, 8),
     alignment: Alignment.centerLeft,
@@ -173,9 +176,10 @@ Widget getDayWidget(
       style: (getDayTitle(timestamp) == "Today" && !smallerTodayFont)
           ? Theme.of(context).textTheme.headline5
           : Theme.of(context).textTheme.caption.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Inter-SemiBold',),
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Inter-SemiBold',
+              ),
     ),
   );
 }

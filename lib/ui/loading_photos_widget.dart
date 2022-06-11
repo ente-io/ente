@@ -45,11 +45,12 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
           // Do nothing, let HomeWidget refresh
         } else {
           routeToPage(
-              context,
-              BackupFolderSelectionPage(
-                shouldSelectAll: true,
-                buttonText: "Start backup",
-              ),);
+            context,
+            BackupFolderSelectionPage(
+              shouldSelectAll: true,
+              buttonText: "Start backup",
+            ),
+          );
         }
       }
     });
@@ -134,23 +135,25 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                   ),
                   SizedBox(
                     height: 175,
-                    child: Stack(children: [
-                      PageView.builder(
-                        scrollDirection: Axis.vertical,
-                        controller: _pageController,
-                        itemBuilder: (context, index) {
-                          return _getMessage(_messages[index]);
-                        },
-                        itemCount: _messages.length,
-                        physics: NeverScrollableScrollPhysics(),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: BottomShadowWidget(),
-                      )
-                    ],),
+                    child: Stack(
+                      children: [
+                        PageView.builder(
+                          scrollDirection: Axis.vertical,
+                          controller: _pageController,
+                          itemBuilder: (context, index) {
+                            return _getMessage(_messages[index]);
+                          },
+                          itemCount: _messages.length,
+                          physics: NeverScrollableScrollPhysics(),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: BottomShadowWidget(),
+                        )
+                      ],
+                    ),
                   ),
                 ],
               ),

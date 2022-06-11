@@ -14,12 +14,14 @@ class FilesMigrationDB {
   static final columnLocalID = 'local_id';
 
   Future _onCreate(Database db, int version) async {
-    await db.execute('''
+    await db.execute(
+      '''
         CREATE TABLE $tableName (
         $columnLocalID TEXT NOT NULL,
           UNIQUE($columnLocalID)
         );
-      ''',);
+      ''',
+    );
   }
 
   FilesMigrationDB._privateConstructor();
@@ -73,10 +75,13 @@ class FilesMigrationDB {
     await batch.commit(noResult: true);
     final endTime = DateTime.now();
     final duration = Duration(
-        microseconds:
-            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch,);
-    _logger.info("Batch insert of ${fileLocalIDs.length} "
-        "took ${duration.inMilliseconds} ms.",);
+      microseconds:
+          endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch,
+    );
+    _logger.info(
+      "Batch insert of ${fileLocalIDs.length} "
+      "took ${duration.inMilliseconds} ms.",
+    );
   }
 
   Future<int> deleteByLocalIDs(List<String> localIDs) async {

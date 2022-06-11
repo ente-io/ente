@@ -14,12 +14,19 @@ void replacePage(BuildContext context, Widget page) {
 
 PageRouteBuilder<T> _buildPageRoute<T extends Object>(Widget page) {
   return PageRouteBuilder(
-    pageBuilder: (BuildContext context, Animation<double> animation,
-        Animation<double> secondaryAnimation,) {
+    pageBuilder: (
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+    ) {
       return page;
     },
-    transitionsBuilder: (BuildContext context, Animation<double> animation,
-        Animation<double> secondaryAnimation, Widget child,) {
+    transitionsBuilder: (
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child,
+    ) {
       return Align(
         child: FadeTransition(
           opacity: animation,

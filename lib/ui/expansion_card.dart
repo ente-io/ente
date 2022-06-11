@@ -178,21 +178,22 @@ class _ExpansionTileState extends State<ExpansionCard>
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               ListTileTheme.merge(
-                  iconColor: _iconColor.value,
-                  textColor: _headerColor.value,
-                  child: Container(
-                    margin: widget.margin,
-                    child: ListTile(
-                      onTap: _handleTap,
-                      leading: widget.leading,
-                      title: widget.title,
-                      trailing: widget.trailing ??
-                          RotationTransition(
-                            turns: _iconTurns,
-                            child: const Icon(Icons.expand_more),
-                          ),
-                    ),
-                  ),),
+                iconColor: _iconColor.value,
+                textColor: _headerColor.value,
+                child: Container(
+                  margin: widget.margin,
+                  child: ListTile(
+                    onTap: _handleTap,
+                    leading: widget.leading,
+                    title: widget.title,
+                    trailing: widget.trailing ??
+                        RotationTransition(
+                          turns: _iconTurns,
+                          child: const Icon(Icons.expand_more),
+                        ),
+                  ),
+                ),
+              ),
               ClipRect(
                 child: Align(
                   heightFactor: _heightFactor.value,

@@ -33,7 +33,8 @@ class BillingPlans {
 
     return BillingPlans(
       plans: List<BillingPlan>.from(
-          map['plans']?.map((x) => BillingPlan.fromMap(x)),),
+        map['plans']?.map((x) => BillingPlan.fromMap(x)),
+      ),
       freePlan: FreePlan.fromMap(map['freePlan']),
     );
   }

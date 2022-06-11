@@ -42,7 +42,8 @@ class TrashDB {
   static final columnPubMMdVersion = 'pub_mmd_ver';
 
   Future _onCreate(Database db, int version) async {
-    await db.execute('''
+    await db.execute(
+      '''
         CREATE TABLE $tableName (
           $columnUploadedFileID INTEGER PRIMARY KEY NOT NULL,
           $columnCollectionID INTEGER NOT NULL,
@@ -65,7 +66,8 @@ class TrashDB {
       CREATE INDEX IF NOT EXISTS creation_time_index ON $tableName($columnCreationTime); 
       CREATE INDEX IF NOT EXISTS delete_by_time_index ON $tableName($columnTrashDeleteBy);
       CREATE INDEX IF NOT EXISTS updated_at_time_index ON $tableName($columnTrashUpdatedAt);
-      ''',);
+      ''',
+    );
   }
 
   TrashDB._privateConstructor();
@@ -101,8 +103,11 @@ class TrashDB {
   // getRecentlyTrashedFile returns the file which was trashed recently
   Future<TrashFile> getRecentlyTrashedFile() async {
     final db = await instance.database;
-    var rows = await db.query(tableName,
-        orderBy: '$columnTrashDeleteBy DESC', limit: 1,);
+    var rows = await db.query(
+      tableName,
+      orderBy: '$columnTrashDeleteBy DESC',
+      limit: 1,
+    );
     if (rows == null || rows.isEmpty) {
       return null;
     }
@@ -112,7 +117,8 @@ class TrashDB {
   Future<int> count() async {
     final db = await instance.database;
     var count = Sqflite.firstIntValue(
-        await db.rawQuery('SELECT COUNT(*) FROM $tableName'),);
+      await db.rawQuery('SELECT COUNT(*) FROM $tableName'),
+    );
     return count;
   }
 
@@ -137,13 +143,16 @@ class TrashDB {
     await batch.commit(noResult: true);
     final endTime = DateTime.now();
     final duration = Duration(
-        microseconds:
-            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch,);
-    _logger.info("Batch insert of " +
-        trashFiles.length.toString() +
-        " took " +
-        duration.inMilliseconds.toString() +
-        "ms.",);
+      microseconds:
+          endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch,
+    );
+    _logger.info(
+      "Batch insert of " +
+          trashFiles.length.toString() +
+          " took " +
+          duration.inMilliseconds.toString() +
+          "ms.",
+    );
   }
 
   Future<int> insert(TrashFile trash) async {
@@ -173,8 +182,12 @@ class TrashDB {
     );
   }
 
-  Future<FileLoadResult> getTrashedFiles(int startTime, int endTime,
-      {int limit, bool asc,}) async {
+  Future<FileLoadResult> getTrashedFiles(
+    int startTime,
+    int endTime, {
+    int limit,
+    bool asc,
+  }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(

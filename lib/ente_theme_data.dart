@@ -31,10 +31,10 @@ extension CustomColorScheme on ColorScheme {
 
   // todo: use brightness == Brightness.light for changing color for dark/light theme
   ButtonStyle get optionalActionButtonStyle => buildElevatedButtonThemeData(
-          onPrimary: Color(0xFF777777),
-          primary: Color(0xFFF0F0F0),
-          elevation: 0,)
-      .style;
+        onPrimary: Color(0xFF777777),
+        primary: Color(0xFFF0F0F0),
+        elevation: 0,
+      ).style;
 
   Color get recoveryKeyBoxColor => brightness == Brightness.light
       ? Color.fromRGBO(49, 155, 86, 0.2)
@@ -65,11 +65,13 @@ extension CustomColorScheme on ColorScheme {
       ? DatePickerTheme(
           backgroundColor: Colors.white,
           itemStyle: TextStyle(color: Colors.black),
-          cancelStyle: TextStyle(color: Colors.black),)
+          cancelStyle: TextStyle(color: Colors.black),
+        )
       : DatePickerTheme(
           backgroundColor: Colors.black,
           itemStyle: TextStyle(color: Colors.white),
-          cancelStyle: TextStyle(color: Colors.white),);
+          cancelStyle: TextStyle(color: Colors.white),
+        );
 
   Color get stepProgressUnselectedColor => brightness == Brightness.light
       ? Color.fromRGBO(196, 196, 196, 0.6)
@@ -123,8 +125,12 @@ extension CustomColorScheme on ColorScheme {
       : Color.fromRGBO(100, 100, 100, 1);
 }
 
-OutlinedButtonThemeData buildOutlinedButtonThemeData(
-    {Color bgDisabled, Color bgEnabled, Color fgDisabled, Color fgEnabled,}) {
+OutlinedButtonThemeData buildOutlinedButtonThemeData({
+  Color bgDisabled,
+  Color bgEnabled,
+  Color fgDisabled,
+  Color fgEnabled,
+}) {
   return OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
       shape: RoundedRectangleBorder(
@@ -159,27 +165,28 @@ OutlinedButtonThemeData buildOutlinedButtonThemeData(
   );
 }
 
-ElevatedButtonThemeData buildElevatedButtonThemeData(
-    {@required Color onPrimary, // text button color
-    @required Color primary,
-    double elevation = 2, // background color of button
-    }) {
+ElevatedButtonThemeData buildElevatedButtonThemeData({
+  @required Color onPrimary, // text button color
+  @required Color primary,
+  double elevation = 2, // background color of button
+}) {
   return ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-    elevation: elevation,
-    onPrimary: onPrimary,
-    primary: primary,
-    alignment: Alignment.center,
-    textStyle: TextStyle(
-      fontWeight: FontWeight.w600,
-      fontFamily: 'Inter-SemiBold',
-      fontSize: 18,
+    style: ElevatedButton.styleFrom(
+      elevation: elevation,
+      onPrimary: onPrimary,
+      primary: primary,
+      alignment: Alignment.center,
+      textStyle: TextStyle(
+        fontWeight: FontWeight.w600,
+        fontFamily: 'Inter-SemiBold',
+        fontSize: 18,
+      ),
+      padding: EdgeInsets.symmetric(vertical: 18),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      ),
     ),
-    padding: EdgeInsets.symmetric(vertical: 18),
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(8)),
-    ),
-  ),);
+  );
 }
 
 TextStyle gradientButtonTextTheme() {

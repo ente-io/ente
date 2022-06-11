@@ -85,9 +85,11 @@ class SettingsPage extends StatelessWidget {
       contents.addAll([sectionDivider, DebugSectionWidget()]);
     }
     contents.add(AppVersionWidget());
-    contents.add(Padding(
-      padding: EdgeInsets.only(bottom: 60),
-    ),);
+    contents.add(
+      Padding(
+        padding: EdgeInsets.only(bottom: 60),
+      ),
+    );
 
     return SingleChildScrollView(
       child: Padding(

@@ -20,8 +20,10 @@ class NotificationService {
         InitializationSettings(
       android: initializationSettingsAndroid,
     );
-    await _flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: selectNotification,);
+    await _flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onSelectNotification: selectNotification,
+    );
   }
 
   Future selectNotification(String payload) async {}
@@ -42,6 +44,10 @@ class NotificationService {
     const NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
     await _flutterLocalNotificationsPlugin.show(
-        0, title, message, platformChannelSpecifics,);
+      0,
+      title,
+      message,
+      platformChannelSpecifics,
+    );
   }
 }

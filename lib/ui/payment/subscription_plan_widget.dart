@@ -58,9 +58,13 @@ class SubscriptionPlanWidget extends StatelessWidget {
                       .headline6
                       .copyWith(color: textColor),
                 ),
-                Text(_displayPrice(),
-                    style: Theme.of(context).textTheme.headline6.copyWith(
-                        color: textColor, fontWeight: FontWeight.normal,),),
+                Text(
+                  _displayPrice(),
+                  style: Theme.of(context).textTheme.headline6.copyWith(
+                        color: textColor,
+                        fontWeight: FontWeight.normal,
+                      ),
+                ),
               ],
             ),
           ],

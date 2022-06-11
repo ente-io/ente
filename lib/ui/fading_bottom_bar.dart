@@ -192,14 +192,16 @@ class FadingBottomBarState extends State<FadingBottomBar> {
               final selectedFiles = SelectedFiles();
               selectedFiles.toggleSelection(widget.file);
               Navigator.push(
-                  context,
-                  PageTransition(
-                      type: PageTransitionType.bottomToTop,
-                      child: CreateCollectionPage(
-                        selectedFiles,
-                        null,
-                        actionType: CollectionActionType.restoreFiles,
-                      ),),);
+                context,
+                PageTransition(
+                  type: PageTransitionType.bottomToTop,
+                  child: CreateCollectionPage(
+                    selectedFiles,
+                    null,
+                    actionType: CollectionActionType.restoreFiles,
+                  ),
+                ),
+              );
             },
           ),
         ),

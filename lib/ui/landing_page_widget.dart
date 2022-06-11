@@ -55,9 +55,11 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                     Theme.of(context).colorScheme.dotsIndicatorActiveColor,
                 color: Theme.of(context).colorScheme.dotsIndicatorInactiveColor,
                 activeShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(3),),
+                  borderRadius: BorderRadius.circular(3),
+                ),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(3),),
+                  borderRadius: BorderRadius.circular(3),
+                ),
                 size: Size(100, 5),
                 activeSize: Size(100, 5),
                 spacing: EdgeInsets.all(3),
