@@ -64,7 +64,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     _duplicates =
         DeduplicationService.instance.clubDuplicatesByTime(widget.duplicates);
     _selectAllFilesButFirst();
-    showToast("Long-press on an item to view in full-screen");
+    showToast(context, "Long-press on an item to view in full-screen");
   }
 
   void _selectAllFilesButFirst() {

@@ -73,7 +73,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         opacity: _shouldHide ? 0 : 1,
         duration: Duration(milliseconds: 150),
       ),
-      height: Platform.isAndroid ? 64 : 80,
+      height: Platform.isAndroid ? 64 : 96,
     );
   }
 
@@ -219,7 +219,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           } catch (e, s) {
             _logger.severe(e, s);
             hasError = true;
-            showToast("Sorry, could not add this to favorites!");
+            showToast(context, "Sorry, could not add this to favorites!");
           } finally {
             if (shouldBlockUser) {
               await dialog.hide();
@@ -231,7 +231,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           } catch (e, s) {
             _logger.severe(e, s);
             hasError = true;
-            showToast("Sorry, could not remove this from favorites!");
+            showToast(context, "Sorry, could not remove this from favorites!");
           }
         }
         return hasError ? oldValue : isLiked;
@@ -294,7 +294,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesOnDeviceOnly(context, [file]);
-          showToast("File deleted from device");
+          showToast(context, "File deleted from device");
           Navigator.of(context, rootNavigator: true).pop();
           // TODO: Fix behavior when inside a device folder
         },
@@ -305,7 +305,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesFromRemoteOnly(context, [file]);
-          showShortToast("Moved to trash");
+          showShortToast(context, "Moved to trash");
           Navigator.of(context, rootNavigator: true).pop();
           // TODO: Fix behavior when inside a collection
         },
@@ -364,9 +364,9 @@ class FadingAppBarState extends State<FadingAppBar> {
     Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
     await dialog.hide();
     if (file.fileType == FileType.livePhoto) {
-      showToast("Photo and video saved to gallery");
+      showToast(context, "Photo and video saved to gallery");
     } else {
-      showToast("File saved to gallery");
+      showToast(context, "File saved to gallery");
     }
   }
 }

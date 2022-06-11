@@ -75,7 +75,7 @@ class _VideoWidgetState extends State<VideoWidget> {
           setState(() {
             _progress = count / total;
             if (_progress == 1) {
-              showShortToast("decrypting video...");
+              showShortToast(context, "Decrypting video...");
             }
           });
         }

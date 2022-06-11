@@ -1,15 +1,15 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-// import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/sync_service.dart';
 
 class GrantPermissionsWidget extends StatelessWidget {
   const GrantPermissionsWidget({Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    final isLightMode =
+        MediaQuery.of(context).platformBrightness == Brightness.light;
     return Scaffold(
       body: SingleChildScrollView(
         physics: NeverScrollableScrollPhysics(),
@@ -23,10 +23,24 @@ class GrantPermissionsWidget extends StatelessWidget {
                 children: [
                   Center(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 140, 0, 50),
-                      child: Image.asset(
-                        "assets/gallery.png",
-                        height: 220,
+                      padding: const EdgeInsets.fromLTRB(0, 100, 0, 50),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          isLightMode
+                              ? Image.asset(
+                                  'assets/loading_photos_light.png',
+                                  color: Colors.white.withOpacity(0.4),
+                                  colorBlendMode: BlendMode.modulate,
+                                )
+                              : Image.asset('assets/loading_photos_dark.png'),
+                          Center(
+                            child: Image.asset(
+                              "assets/gallery.png",
+                              height: 160,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -92,10 +106,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                            child: alert,
-                          );
+                          return alert;
                         },
                         barrierColor: Colors.black12,
                       );

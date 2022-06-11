@@ -254,7 +254,7 @@ class _SharingDialogState extends State<SharingDialog> {
           GestureDetector(
             onTap: () async {
               await Clipboard.setData(ClipboardData(text: url));
-              showToast("Link copied to clipboard");
+              showToast(context, "Link copied to clipboard");
             },
             child: Container(
               padding: EdgeInsets.all(16),
@@ -406,7 +406,7 @@ class _SharingDialogState extends State<SharingDialog> {
         await CollectionsService.instance
             .share(widget.collection.id, email, publicKey);
         await dialog.hide();
-        showShortToast("Shared successfully!");
+        showShortToast(context, "Shared successfully!");
         setState(() {
           _sharees.add(User(email: email));
           _showEntryField = false;
@@ -502,7 +502,7 @@ class EmailItemWidget extends StatelessWidget {
               await CollectionsService.instance.unshare(collection.id, email);
               collection.sharees.removeWhere((user) => user.email == email);
               await dialog.hide();
-              showToast("Stopped sharing with " + email + ".");
+              showToast(context, "Stopped sharing with " + email + ".");
               Navigator.of(context).pop();
             } catch (e, s) {
               Logger("EmailItemWidget").severe(e, s);

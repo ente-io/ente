@@ -486,7 +486,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
           ),
         ),
         onTap: () async {
-          await showToast(
+          await showToast(context,
               "long press to select photos and click + to create an album",
               toastLength: Toast.LENGTH_LONG);
           Bus.instance

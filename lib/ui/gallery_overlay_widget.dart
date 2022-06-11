@@ -448,7 +448,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           await deleteFilesOnDeviceOnly(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          showToast("Files deleted from device");
+          showToast(context, "Files deleted from device");
         },
       ));
       actions.add(CupertinoActionSheetAction(
@@ -459,7 +459,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           await deleteFilesFromRemoteOnly(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          showShortToast("Moved to trash");
+          showShortToast(context, "Moved to trash");
         },
       ));
       actions.add(CupertinoActionSheetAction(

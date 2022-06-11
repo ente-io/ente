@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/common/gradientButton.dart';
@@ -31,65 +32,35 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         child: Column(
           children: [
             Padding(padding: const EdgeInsets.all(12)),
-            Text.rich(
-              TextSpan(
-                children: const <TextSpan>[
-                  TextSpan(
-                    text: "With ",
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                  TextSpan(
-                    text: "ente",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Montserrat',
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
+            Text(
+              "ente",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Montserrat',
+                fontSize: 42,
               ),
-              textAlign: TextAlign.center,
             ),
             Padding(
-              padding: EdgeInsets.all(2),
-            ),
-            Text.rich(
-              TextSpan(
-                children: const <TextSpan>[
-                  TextSpan(
-                    text: "your ",
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                  TextSpan(
-                    text: "memories",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  TextSpan(
-                    text: " are",
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            Padding(
-              padding: EdgeInsets.all(24),
+              padding: EdgeInsets.all(28),
             ),
             _getFeatureSlider(),
+            Padding(
+              padding: EdgeInsets.all(12),
+            ),
             DotsIndicator(
               dotsCount: 3,
               position: _featureIndex,
               decorator: DotsDecorator(
-                activeColor: Theme.of(context).buttonColor,
+                activeColor:
+                    Theme.of(context).colorScheme.dotsIndicatorActiveColor,
+                color: Theme.of(context).colorScheme.dotsIndicatorInactiveColor,
+                activeShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(3)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(3)),
+                size: Size(100, 5),
+                activeSize: Size(100, 5),
+                spacing: EdgeInsets.all(3),
               ),
             ),
             Padding(
@@ -106,6 +77,9 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                       Theme.of(context).colorScheme.optionalActionButtonStyle,
                   child: Text(
                     "Existing user",
+                    style: TextStyle(
+                      color: Colors.black, // same for both themes
+                    ),
                   ),
                   onPressed: _navigateToSignInPage,
                 ),
@@ -142,19 +116,27 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: 320),
       child: PageView(
-        children: const [
+        children: [
           FeatureItemWidget(
-              "assets/protected.png",
-              "Protected",
-              "End-to-end encrypted with your password,",
-              "visible only to you"),
-          FeatureItemWidget("assets/synced.png", "Synced",
-              "Available across all your devices,", "web, android and ios"),
+            "assets/protected.png",
+            "Private backups",
+            "for your memories",
+            "End-to-end encrypted by default",
+          ),
           FeatureItemWidget(
-              "assets/preserved.png",
-              "Preserved",
-              "Reliably replicated to a fallout shelter,",
-              "designed to outlive"),
+            "assets/preserved.png",
+            "Safely stored",
+            "at a fallout shelter",
+            "Designed to outlive",
+          ),
+          FeatureItemWidget(
+            "assets/synced.png",
+            "Available",
+            "everywhere",
+            Platform.isAndroid
+                ? "Android, iOS, Web, Desktop"
+                : "iOS, Android, Web, Desktop",
+          ),
         ],
         onPageChanged: (index) {
           setState(() {
@@ -219,12 +201,16 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 }
 
 class FeatureItemWidget extends StatelessWidget {
-  final String assetPath, featureTitle, firstLine, secondLine;
+  final String assetPath,
+      featureTitleFirstLine,
+      featureTitleSecondLine,
+      subText;
+
   const FeatureItemWidget(
     this.assetPath,
-    this.featureTitle,
-    this.firstLine,
-    this.secondLine, {
+    this.featureTitleFirstLine,
+    this.featureTitleSecondLine,
+    this.subText, {
     Key key,
   }) : super(key: key);
 
@@ -243,23 +229,21 @@ class FeatureItemWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
-              featureTitle,
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            Padding(padding: EdgeInsets.all(12)),
-            Text(
-              firstLine,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.9),
-              ),
+              featureTitleFirstLine,
+              style: Theme.of(context).textTheme.headline5,
             ),
             Padding(padding: EdgeInsets.all(2)),
             Text(
-              secondLine,
+              featureTitleSecondLine,
+              style: Theme.of(context).textTheme.headline5,
+            ),
+            Padding(padding: EdgeInsets.all(12)),
+            Text(
+              subText,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.9),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                fontSize: 16,
               ),
             ),
           ],

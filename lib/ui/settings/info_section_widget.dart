@@ -99,7 +99,7 @@ class InfoSectionWidget extends StatelessWidget {
                           barrierColor: Colors.black.withOpacity(0.85),
                         );
                       } else {
-                        showToast("You are on the latest version");
+                        showToast(context, "You are on the latest version");
                       }
                     },
                     child: SettingsTextItem(

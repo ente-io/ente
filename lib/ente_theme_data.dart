@@ -53,7 +53,7 @@ extension CustomColorScheme on ColorScheme {
       ? Colors.white
       : Color.fromRGBO(10, 15, 15, 1.0);
 
-  Color get greenText => Color.fromRGBO(40, 190, 92, 1);
+  Color get greenText => Color.fromARGB(255, 40, 190, 113);
 
   Color get cupertinoPickerTopColor => brightness == Brightness.light
       ? Color.fromARGB(255, 238, 238, 238)
@@ -100,6 +100,25 @@ extension CustomColorScheme on ColorScheme {
   Color get backupEnabledBgColor => brightness == Brightness.light
       ? Color.fromRGBO(230, 230, 230, 0.95)
       : Color.fromRGBO(10, 40, 40, 0.3);
+
+  Color get dotsIndicatorActiveColor => brightness == Brightness.light
+      ? Colors.black.withOpacity(0.5)
+      : Colors.white.withOpacity(0.5);
+
+  Color get dotsIndicatorInactiveColor => brightness == Brightness.light
+      ? Colors.black.withOpacity(0.12)
+      : Colors.white.withOpacity(0.12);
+
+  Color get toastTextColor =>
+      brightness == Brightness.light ? Colors.white : Colors.black;
+
+  Color get toastBackgroundColor => brightness == Brightness.light
+      ? Color.fromRGBO(24, 24, 24, 0.95)
+      : Color.fromRGBO(255, 255, 255, 0.95);
+
+  Color get subTextColor => brightness == Brightness.light
+      ? Color.fromRGBO(180, 180, 180, 1)
+      : Color.fromRGBO(100, 100, 100, 1);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(

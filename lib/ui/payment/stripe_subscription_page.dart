@@ -94,7 +94,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     try {
       await _fetchSub();
     } catch (e) {
-      showToast("Failed to refresh subscription");
+      showToast(context, "Failed to refresh subscription");
     }
     await _dialog.hide();
 
@@ -274,7 +274,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                       text: "Manage family",
                       style: TextStyle(
                         color: Colors.blue,
-                        fontFamily: 'Ubuntu',
                         fontSize: 15,
                       ),
                     ),
@@ -384,7 +383,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           : await _billingService.cancelStripeSubscription();
       await _fetchSub();
     } catch (e) {
-      showToast(isRenewCancelled ? 'failed to renew' : 'failed to cancel');
+      showToast(
+          context, isRenewCancelled ? 'failed to renew' : 'failed to cancel');
     }
     await _dialog.hide();
   }

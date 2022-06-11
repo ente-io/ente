@@ -28,10 +28,10 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     "We have preserved over 3 million memories so far",
     "All our apps are open source",
     "Our encryption protocols have been reviewed by engineers at Google, Apple, Amazon, and Facebook",
-    "You can share files and folders with your loved ones, end-to-end encrypted",
+    "You can share links to your albums with your loved ones",
     "Our mobile apps run in the background to encrypt and backup new photos you take",
     "We use Xchacha20Poly1305 to safely encrypt your data",
-    "One of our data centers is in a fall out shelter 25m underground",
+    "One of our data centers is in an underground fall out shelter in Paris",
   ];
 
   @override
@@ -79,6 +79,8 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isLightMode =
+        MediaQuery.of(context).platformBrightness == Brightness.light;
     return Scaffold(
       body: Center(
         child: Padding(
@@ -87,21 +89,44 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Stack(alignment: Alignment.center, children: [
-                Image.asset(MediaQuery.of(context).platformBrightness ==
-                        Brightness.light
-                    ? 'assets/loading_photos_light.png'
-                    : 'assets/loading_photos_dark.png'),
-                Lottie.asset('assets/loadingGalleryLottie.json', height: 300)
-              ]),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  isLightMode
+                      ? Image.asset(
+                          'assets/loading_photos_light.png',
+                          color: Colors.white.withOpacity(0.5),
+                          colorBlendMode: BlendMode.modulate,
+                        )
+                      : Image.asset(
+                          'assets/loading_photos_light.png',
+                          color: Colors.white.withOpacity(0.25),
+                          colorBlendMode: BlendMode.modulate,
+                        ),
+                  Lottie.asset(
+                    'assets/loadingGalleryLottie.json',
+                    height: 400,
+                  )
+                ],
+              ),
+              Text(
+                "Loading your photos...",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.subTextColor,
+                ),
+              ),
+              Padding(padding: EdgeInsets.all(36)),
               Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Text("Did you know?",
-                          style: Theme.of(context).textTheme.headline6.copyWith(
-                              color: Theme.of(context).colorScheme.greenText)),
+                      Text(
+                        "Did you know?",
+                        style: Theme.of(context).textTheme.headline6.copyWith(
+                              color: Theme.of(context).colorScheme.greenText,
+                            ),
+                      ),
                     ],
                   ),
                   const SizedBox(

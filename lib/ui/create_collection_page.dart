@@ -181,9 +181,11 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         ),
         onTap: () async {
           if (await _runCollectionAction(item.collection.id)) {
-            showShortToast(widget.actionType == CollectionActionType.addFiles
-                ? "Added successfully to " + item.collection.name
-                : "Moved successfully to " + item.collection.name);
+            showShortToast(
+                context,
+                widget.actionType == CollectionActionType.addFiles
+                    ? "Added successfully to " + item.collection.name
+                    : "Moved successfully to " + item.collection.name);
             _navigateToCollection(item.collection);
           }
         },
@@ -240,9 +242,11 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             if (collection != null) {
               if (await _runCollectionAction(collection.id)) {
                 if (widget.actionType == CollectionActionType.restoreFiles) {
-                  showShortToast('Restored files to album ' + _albumName);
+                  showShortToast(
+                      context, 'Restored files to album ' + _albumName);
                 } else {
-                  showShortToast("Album '" + _albumName + "' created.");
+                  showShortToast(
+                      context, "Album '" + _albumName + "' created.");
                 }
                 _navigateToCollection(collection);
               }

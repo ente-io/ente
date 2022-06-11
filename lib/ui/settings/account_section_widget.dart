@@ -62,7 +62,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             AppLock.of(context)
                 .setEnabled(Configuration.instance.shouldShowLockScreen());
             if (!result) {
-              showToast(reason);
+              showToast(context, reason);
               return;
             }
 
@@ -91,7 +91,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             AppLock.of(context)
                 .setEnabled(Configuration.instance.shouldShowLockScreen());
             if (!result) {
-              showToast(reason);
+              showToast(context, reason);
               return;
             }
             showDialog(
@@ -116,7 +116,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             AppLock.of(context)
                 .setEnabled(Configuration.instance.shouldShowLockScreen());
             if (!result) {
-              showToast(reason);
+              showToast(context, reason);
               return;
             }
             Navigator.of(context).push(
