@@ -115,15 +115,20 @@ final darkThemeData = ThemeData(
   ),
   cardColor: Color.fromRGBO(10, 15, 15, 1.0),
   dialogTheme: DialogTheme().copyWith(
-      backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
-      titleTextStyle: TextStyle(
-          color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600),
-      contentTextStyle: TextStyle(
-          fontFamily: 'Inter-Medium',
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.w500),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+    backgroundColor: Color.fromRGBO(15, 15, 15, 1.0),
+    titleTextStyle: TextStyle(
+      color: Colors.white,
+      fontSize: 24,
+      fontWeight: FontWeight.w600,
+    ),
+    contentTextStyle: TextStyle(
+      fontFamily: 'Inter-Medium',
+      color: Colors.white,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  ),
   inputDecorationTheme: InputDecorationTheme().copyWith(
     focusedBorder: UnderlineInputBorder(
       borderSide: BorderSide(
@@ -155,46 +160,51 @@ final darkThemeData = ThemeData(
 
 TextTheme _buildTextTheme(Color textColor) {
   return TextTheme().copyWith(
-      headline4: TextStyle(
-        color: textColor,
-        fontSize: 32,
-        fontWeight: FontWeight.w600,
-        fontFamily: 'Inter',
-      ),
-      headline5: TextStyle(
-        color: textColor,
-        fontSize: 24,
-        fontWeight: FontWeight.w600,
-        fontFamily: 'Inter',
-      ),
-      headline6: TextStyle(
-          color: textColor,
-          fontSize: 18,
-          fontFamily: 'Inter',
-          fontWeight: FontWeight.w600),
-      subtitle1: TextStyle(
-          color: textColor,
-          fontFamily: 'Inter',
-          fontSize: 16,
-          fontWeight: FontWeight.w500),
-      subtitle2: TextStyle(
-          color: textColor,
-          fontFamily: 'Inter',
-          fontSize: 14,
-          fontWeight: FontWeight.w500),
-      bodyText1: TextStyle(
-          fontFamily: 'Inter',
-          color: textColor,
-          fontSize: 16,
-          fontWeight: FontWeight.w400),
-      caption: TextStyle(
-        color: textColor.withOpacity(0.6),
-        fontSize: 14,
-      ),
-      overline: TextStyle(
-        color: textColor.withOpacity(0.8),
-        fontSize: 12,
-      ));
+    headline4: TextStyle(
+      color: textColor,
+      fontSize: 32,
+      fontWeight: FontWeight.w600,
+      fontFamily: 'Inter',
+    ),
+    headline5: TextStyle(
+      color: textColor,
+      fontSize: 24,
+      fontWeight: FontWeight.w600,
+      fontFamily: 'Inter',
+    ),
+    headline6: TextStyle(
+      color: textColor,
+      fontSize: 18,
+      fontFamily: 'Inter',
+      fontWeight: FontWeight.w600,
+    ),
+    subtitle1: TextStyle(
+      color: textColor,
+      fontFamily: 'Inter',
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+    ),
+    subtitle2: TextStyle(
+      color: textColor,
+      fontFamily: 'Inter',
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    ),
+    bodyText1: TextStyle(
+      fontFamily: 'Inter',
+      color: textColor,
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+    ),
+    caption: TextStyle(
+      color: textColor.withOpacity(0.6),
+      fontSize: 14,
+    ),
+    overline: TextStyle(
+      color: textColor.withOpacity(0.8),
+      fontSize: 12,
+    ),
+  );
 }
 
 class EnteApp extends StatefulWidget {
