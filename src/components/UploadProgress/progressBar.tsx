@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { LinearProgress, Divider, Box } from '@mui/material';
 import { UPLOAD_STAGES } from 'constants/upload';
+import UploadProgressContext from 'contexts/uploadProgress';
 
-export function UploadProgressBar({ uploadStage, now }) {
+export function UploadProgressBar() {
+    const { uploadStage, percentComplete } = useContext(UploadProgressContext);
     return (
         <Box>
             {(uploadStage === UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES ||
@@ -15,7 +17,7 @@ export function UploadProgressBar({ uploadStage, now }) {
                             backgroundColor: 'transparent',
                         }}
                         variant="determinate"
-                        value={now}
+                        value={percentComplete}
                     />
                     <Divider />
                 </>

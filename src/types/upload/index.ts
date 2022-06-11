@@ -1,5 +1,4 @@
 import { FILE_TYPE } from 'constants/file';
-import { UPLOAD_STAGES } from 'constants/upload';
 import { Collection } from 'types/collection';
 import { fileAttribute } from 'types/file';
 
@@ -54,21 +53,6 @@ export interface FileTypeInfo {
     mimeType?: string;
     imageType?: string;
     videoType?: string;
-}
-
-export interface ProgressUpdater {
-    setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
-    setFileCounter: React.Dispatch<
-        React.SetStateAction<{
-            finished: number;
-            total: number;
-        }>
-    >;
-    setUploadStage: React.Dispatch<React.SetStateAction<UPLOAD_STAGES>>;
-    setFileProgress: React.Dispatch<React.SetStateAction<Map<number, number>>>;
-    setUploadResult: React.Dispatch<React.SetStateAction<Map<number, number>>>;
-    setFilenames: React.Dispatch<React.SetStateAction<Map<number, string>>>;
-    setHasLivePhotos: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 /*

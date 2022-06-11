@@ -19,7 +19,6 @@ import { METADATA_FOLDER_NAME } from 'constants/export';
 import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
-import { FileUploadResults, UPLOAD_STAGES } from 'constants/upload';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import UploadTypeSelector from '../../UploadTypeSelector';
 import Router from 'next/router';
@@ -27,6 +26,13 @@ import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp } from 'utils/common';
 import DiscFullIcon from '@mui/icons-material/DiscFull';
 import { NotificationAttributes } from 'types/Notification';
+import {
+    UploadFileNames,
+    UploadCounter,
+    SegregatedFinishedUploads,
+    InProgressUpload,
+} from 'types/upload/ui';
+import { UPLOAD_STAGES } from 'constants/upload';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -74,16 +80,18 @@ const NULL_ANALYSIS_RESULT = {
 };
 
 export default function Upload(props: Props) {
-    const [progressView, setProgressView] = useState(false);
-    const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
-        UPLOAD_STAGES.START
-    );
-    const [filenames, setFilenames] = useState(new Map<number, string>());
-    const [fileCounter, setFileCounter] = useState({ finished: 0, total: 0 });
-    const [fileProgress, setFileProgress] = useState(new Map<number, number>());
-    const [uploadResult, setUploadResult] = useState(
-        new Map<number, FileUploadResults>()
-    );
+    const [uploadProgressView, setUploadProgressView] = useState(false);
+    const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>();
+    const [uploadFileNames, setUploadFileNames] = useState<UploadFileNames>();
+    const [uploadCounter, setUploadCounter] = useState<UploadCounter>({
+        finished: 0,
+        total: 0,
+    });
+    const [inProgressUploads, setInProgressUploads] = useState<
+        InProgressUpload[]
+    >([]);
+    const [finishedUploads, setFinishedUploads] =
+        useState<SegregatedFinishedUploads>(new Map());
     const [percentComplete, setPercentComplete] = useState(0);
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
 
@@ -103,11 +111,11 @@ export default function Upload(props: Props) {
         UploadManager.initUploader(
             {
                 setPercentComplete,
-                setFileCounter,
-                setFileProgress,
-                setUploadResult,
+                setUploadCounter,
+                setInProgressUploads,
+                setFinishedUploads,
                 setUploadStage,
-                setFilenames,
+                setUploadFilenames: setUploadFileNames,
                 setHasLivePhotos,
             },
             props.setFiles
@@ -171,12 +179,12 @@ export default function Upload(props: Props) {
 
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
-        setFileCounter({ finished: 0, total: 0 });
-        setFileProgress(new Map<number, number>());
-        setUploadResult(new Map<number, number>());
+        setUploadCounter({ finished: 0, total: 0 });
+        setInProgressUploads([]);
+        setFinishedUploads(new Map());
         setPercentComplete(0);
         props.closeCollectionSelector();
-        setProgressView(true);
+        setUploadProgressView(true);
     };
 
     const resumeDesktopUpload = async (
@@ -307,7 +315,7 @@ export default function Upload(props: Props) {
                     );
                 }
             } catch (e) {
-                setProgressView(false);
+                setUploadProgressView(false);
                 logError(e, 'Failed to create album');
                 appContext.setDialogMessage({
                     title: constants.ERROR,
@@ -354,7 +362,7 @@ export default function Upload(props: Props) {
             );
         } catch (err) {
             showUserFacingError(err.message);
-            setProgressView(false);
+            setUploadProgressView(false);
             throw err;
         } finally {
             props.setUploadInProgress(false);
@@ -371,7 +379,7 @@ export default function Upload(props: Props) {
         } catch (err) {
             showUserFacingError(err.message);
 
-            setProgressView(false);
+            setUploadProgressView(false);
         } finally {
             props.setUploadInProgress(false);
             props.syncWithRemote();
@@ -494,13 +502,15 @@ export default function Upload(props: Props) {
     };
 
     const cancelUploads = async () => {
-        setProgressView(false);
+        setUploadProgressView(false);
         if (isElectron()) {
             ImportService.cancelRemainingUploads();
         }
         await props.setUploadInProgress(false);
         Router.reload();
     };
+
+    const closeUploadProgress = () => setUploadProgressView(false);
 
     return (
         <>
@@ -532,16 +542,16 @@ export default function Upload(props: Props) {
                 }
             />
             <UploadProgress
-                now={percentComplete}
-                filenames={filenames}
-                fileCounter={fileCounter}
+                open={uploadProgressView}
+                onClose={closeUploadProgress}
+                percentComplete={percentComplete}
+                uploadFileNames={uploadFileNames}
+                uploadCounter={uploadCounter}
                 uploadStage={uploadStage}
-                fileProgress={fileProgress}
+                inProgressUploads={inProgressUploads}
                 hasLivePhotos={hasLivePhotos}
-                show={progressView}
-                closeModal={() => setProgressView(false)}
                 retryFailed={retryFailed}
-                uploadResult={uploadResult}
+                finishedUploads={finishedUploads}
                 cancelUploads={cancelUploads}
             />
         </>
