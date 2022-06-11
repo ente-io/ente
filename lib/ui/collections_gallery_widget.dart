@@ -150,9 +150,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         margin: const EdgeInsets.only(bottom: 50),
         child: Column(
           children: [
-            Padding(padding: EdgeInsets.all(6)),
+            const SizedBox(height: 12),
             SectionTitle("On device"),
-            Padding(padding: EdgeInsets.all(8)),
+            const SizedBox(height: 24),
             items.folders.isEmpty
                 ? Padding(
                     padding: const EdgeInsets.all(22),

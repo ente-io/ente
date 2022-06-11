@@ -150,21 +150,18 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 : _getIncomingCollectionEmptyState(),
             const SizedBox(height: 32),
             SectionTitle("Outgoing"),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             collections.outgoing.isNotEmpty
-                ? Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.only(bottom: 12),
-                      physics: NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        return OutgoingCollectionItem(
-                          collections.outgoing[index],
-                        );
-                      },
-                      itemCount: collections.outgoing.length,
-                    ),
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.only(bottom: 12),
+                    physics: NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      return OutgoingCollectionItem(
+                        collections.outgoing[index],
+                      );
+                    },
+                    itemCount: collections.outgoing.length,
                   )
                 : _getOutgoingCollectionEmptyState(),
             const SizedBox(height: 32),
