@@ -100,8 +100,10 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     for (final file in latestLocalFiles) {
       folders.add(DeviceFolder(file.deviceFolder, file.deviceFolder, file));
     }
-    folders.sort((first, second) =>
-        second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime));
+    folders.sort(
+      (first, second) =>
+          second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime),
+    );
 
     final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
     final latestCollectionFiles =
@@ -136,8 +138,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         .textTheme
         .subtitle1
         .copyWith(
-            color:
-                Theme.of(context).textTheme.subtitle1.color.withOpacity(0.5));
+          color: Theme.of(context).textTheme.subtitle1.color.withOpacity(0.5),
+        );
     Size size = MediaQuery.of(context).size;
     int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
     final double sideOfThumbnail = (size.width / 2) -
@@ -155,8 +157,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                 ? Padding(
                     padding: const EdgeInsets.all(22),
                     child: nothingToSeeHere(
-                        textColor:
-                            Theme.of(context).colorScheme.defaultTextColor),
+                      textColor: Theme.of(context).colorScheme.defaultTextColor,
+                    ),
                   )
                 : Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -168,7 +170,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                             ? nothingToSeeHere(
                                 textColor: Theme.of(context)
                                     .colorScheme
-                                    .defaultTextColor)
+                                    .defaultTextColor,
+                              )
                             : ListView.builder(
                                 shrinkWrap: true,
                                 scrollDirection: Axis.horizontal,
@@ -203,21 +206,25 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       // to disable GridView's scrolling
                       itemBuilder: (context, index) {
                         return _buildCollection(
-                            context, items.collections, index);
+                          context,
+                          items.collections,
+                          index,
+                        );
                       },
                       itemCount: items.collections.length + 1,
                       // To include the + button
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: albumsCountInOneRow,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: crossAxisSpacingOfGrid,
-                          childAspectRatio: sideOfThumbnail /
-                              (sideOfThumbnail +
-                                  24)), //24 is height of album title
+                        crossAxisCount: albumsCountInOneRow,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: crossAxisSpacingOfGrid,
+                        childAspectRatio:
+                            sideOfThumbnail / (sideOfThumbnail + 24),
+                      ), //24 is height of album title
                     ),
                   )
                 : nothingToSeeHere(
-                    textColor: Theme.of(context).colorScheme.defaultTextColor),
+                    textColor: Theme.of(context).colorScheme.defaultTextColor,
+                  ),
             const SizedBox(height: 10),
             const Divider(),
             const Padding(padding: EdgeInsets.all(8)),
@@ -258,31 +265,38 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                   builder: (context, snapshot) {
                                     if (snapshot.hasData && snapshot.data > 0) {
                                       return RichText(
-                                          text: TextSpan(
-                                              style: trashAndHiddenTextStyle,
-                                              children: [
+                                        text: TextSpan(
+                                          style: trashAndHiddenTextStyle,
+                                          children: [
                                             TextSpan(
-                                                text: "Trash",
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .subtitle1),
+                                              text: "Trash",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .subtitle1,
+                                            ),
                                             TextSpan(text: "  \u2022  "),
                                             TextSpan(
-                                                text: snapshot.data.toString()),
+                                              text: snapshot.data.toString(),
+                                            ),
                                             //need to query in db and bring this value
-                                          ]));
+                                          ],
+                                        ),
+                                      );
                                     } else {
                                       return RichText(
-                                          text: TextSpan(
-                                              style: trashAndHiddenTextStyle,
-                                              children: [
+                                        text: TextSpan(
+                                          style: trashAndHiddenTextStyle,
+                                          children: [
                                             TextSpan(
-                                                text: "Trash",
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .subtitle1),
+                                              text: "Trash",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .subtitle1,
+                                            ),
                                             //need to query in db and bring this value
-                                          ]));
+                                          ],
+                                        ),
+                                      );
                                     }
                                   },
                                 ),
@@ -333,38 +347,46 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                 ),
                                 Padding(padding: EdgeInsets.all(6)),
                                 FutureBuilder<int>(
-                                  future: FilesDB.instance
-                                      .fileCountWithVisibility(
-                                          kVisibilityArchive,
-                                          Configuration.instance.getUserID()),
+                                  future:
+                                      FilesDB.instance.fileCountWithVisibility(
+                                    kVisibilityArchive,
+                                    Configuration.instance.getUserID(),
+                                  ),
                                   builder: (context, snapshot) {
                                     if (snapshot.hasData && snapshot.data > 0) {
                                       return RichText(
-                                          text: TextSpan(
-                                              style: trashAndHiddenTextStyle,
-                                              children: [
+                                        text: TextSpan(
+                                          style: trashAndHiddenTextStyle,
+                                          children: [
                                             TextSpan(
-                                                text: "Hidden",
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .subtitle1),
+                                              text: "Hidden",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .subtitle1,
+                                            ),
                                             TextSpan(text: "  \u2022  "),
                                             TextSpan(
-                                                text: snapshot.data.toString()),
+                                              text: snapshot.data.toString(),
+                                            ),
                                             //need to query in db and bring this value
-                                          ]));
+                                          ],
+                                        ),
+                                      );
                                     } else {
                                       return RichText(
-                                          text: TextSpan(
-                                              style: trashAndHiddenTextStyle,
-                                              children: [
+                                        text: TextSpan(
+                                          style: trashAndHiddenTextStyle,
+                                          children: [
                                             TextSpan(
-                                                text: "Hidden",
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .subtitle1),
+                                              text: "Hidden",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .subtitle1,
+                                            ),
                                             //need to query in db and bring this value
-                                          ]));
+                                          ],
+                                        ),
+                                      );
                                     }
                                   },
                                 ),
@@ -408,10 +430,13 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         case AlbumSortKey.lastUpdated:
           text = "Last updated";
       }
-      return Text(text,
-          style: Theme.of(context).textTheme.subtitle1.copyWith(
+      return Text(
+        text,
+        style: Theme.of(context).textTheme.subtitle1.copyWith(
               fontSize: 14,
-              color: Theme.of(context).iconTheme.color.withOpacity(0.7)));
+              color: Theme.of(context).iconTheme.color.withOpacity(0.7),
+            ),
+      );
     }
 
     return Padding(
@@ -460,8 +485,11 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     );
   }
 
-  Widget _buildCollection(BuildContext context,
-      List<CollectionWithThumbnail> collections, int index) {
+  Widget _buildCollection(
+    BuildContext context,
+    List<CollectionWithThumbnail> collections,
+    int index,
+  ) {
     if (index < collections.length) {
       final c = collections[index];
       return CollectionItem(c);
@@ -473,10 +501,11 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             color: Theme.of(context).backgroundColor,
             boxShadow: [
               BoxShadow(
-                  blurRadius: 2,
-                  spreadRadius: 0,
-                  offset: Offset(0, 0),
-                  color: Theme.of(context).iconTheme.color.withOpacity(0.3))
+                blurRadius: 2,
+                spreadRadius: 0,
+                offset: Offset(0, 0),
+                color: Theme.of(context).iconTheme.color.withOpacity(0.3),
+              )
             ],
             borderRadius: BorderRadius.circular(4),
           ),
@@ -486,9 +515,11 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
           ),
         ),
         onTap: () async {
-          await showToast(context,
-              "long press to select photos and click + to create an album",
-              toastLength: Toast.LENGTH_LONG);
+          await showToast(
+            context,
+            "long press to select photos and click + to create an album",
+            toastLength: Toast.LENGTH_LONG,
+          );
           Bus.instance
               .fire(TabChangedEvent(0, TabChangedEventSource.collections_page));
         },
@@ -566,9 +597,11 @@ class DeviceFolderIcon extends StatelessWidget {
                         ThumbnailWidget(
                           folder.thumbnail,
                           shouldShowSyncStatus: false,
-                          key: Key("device_folder:" +
-                              folder.path +
-                              folder.thumbnail.tag()),
+                          key: Key(
+                            "device_folder:" +
+                                folder.path +
+                                folder.thumbnail.tag(),
+                          ),
                         ),
                         isBackedUp ? Container() : kUnsyncedIconOverlay,
                       ],
@@ -623,17 +656,19 @@ class CollectionItem extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: SizedBox(
-                child: Hero(
-                    tag: "collection" + c.thumbnail.tag(),
-                    child: ThumbnailWidget(
-                      c.thumbnail,
-                      shouldShowArchiveStatus: c.collection.isArchived(),
-                      key: Key(
-                        "collection" + c.thumbnail.tag(),
-                      ),
-                    )),
-                height: sideOfThumbnail,
-                width: sideOfThumbnail),
+              child: Hero(
+                tag: "collection" + c.thumbnail.tag(),
+                child: ThumbnailWidget(
+                  c.thumbnail,
+                  shouldShowArchiveStatus: c.collection.isArchived(),
+                  key: Key(
+                    "collection" + c.thumbnail.tag(),
+                  ),
+                ),
+              ),
+              height: sideOfThumbnail,
+              width: sideOfThumbnail,
+            ),
           ),
           SizedBox(height: 4),
           Row(
@@ -651,15 +686,17 @@ class CollectionItem extends StatelessWidget {
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data > 0) {
                     return RichText(
-                        text: TextSpan(
-                            style: albumTitleTextStyle.copyWith(
-                                color:
-                                    albumTitleTextStyle.color.withOpacity(0.5)),
-                            children: [
+                      text: TextSpan(
+                        style: albumTitleTextStyle.copyWith(
+                          color: albumTitleTextStyle.color.withOpacity(0.5),
+                        ),
+                        children: [
                           TextSpan(text: "  \u2022  "),
                           TextSpan(text: snapshot.data.toString()),
                           //need to query in db and bring this value
-                        ]));
+                        ],
+                      ),
+                    );
                   } else {
                     return Container();
                   }

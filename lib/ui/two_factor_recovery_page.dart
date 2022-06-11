@@ -10,9 +10,11 @@ class TwoFactorRecoveryPage extends StatefulWidget {
   final String secretDecryptionNonce;
 
   TwoFactorRecoveryPage(
-      this.sessionID, this.encryptedSecret, this.secretDecryptionNonce,
-      {Key key})
-      : super(key: key);
+    this.sessionID,
+    this.encryptedSecret,
+    this.secretDecryptionNonce, {
+    Key key,
+  }) : super(key: key);
 
   @override
   _TwoFactorRecoveryPageState createState() => _TwoFactorRecoveryPageState();
@@ -68,11 +70,12 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
               onPressed: _recoveryKey.text.isNotEmpty
                   ? () async {
                       await UserService.instance.removeTwoFactor(
-                          context,
-                          widget.sessionID,
-                          _recoveryKey.text,
-                          widget.encryptedSecret,
-                          widget.secretDecryptionNonce);
+                        context,
+                        widget.sessionID,
+                        _recoveryKey.text,
+                        widget.encryptedSecret,
+                        widget.secretDecryptionNonce,
+                      );
                     }
                   : null,
             ),

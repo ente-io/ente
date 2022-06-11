@@ -74,7 +74,8 @@ class CollectionMagicMetadata {
   factory CollectionMagicMetadata.fromEncodedJson(String encodedJson) =>
       CollectionMagicMetadata.fromJson(jsonDecode(encodedJson));
 
-  factory CollectionMagicMetadata.fromJson(dynamic json) => CollectionMagicMetadata.fromMap(json);
+  factory CollectionMagicMetadata.fromJson(dynamic json) =>
+      CollectionMagicMetadata.fromMap(json);
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};

@@ -101,21 +101,23 @@ class FeatureFlagService {
 
 class FeatureFlags {
   static FeatureFlags defaultFlags = FeatureFlags(
-      disableCFWorker: FFDefault.disableCFWorker,
-      disableUrlSharing: FFDefault.disableUrlSharing,
-      enableStripe: FFDefault.enableStripe,
-      enableMissingLocationMigration: FFDefault.enableMissingLocationMigration);
+    disableCFWorker: FFDefault.disableCFWorker,
+    disableUrlSharing: FFDefault.disableUrlSharing,
+    enableStripe: FFDefault.enableStripe,
+    enableMissingLocationMigration: FFDefault.enableMissingLocationMigration,
+  );
 
   final bool disableCFWorker;
   final bool disableUrlSharing;
   final bool enableStripe;
   final bool enableMissingLocationMigration;
 
-  FeatureFlags(
-      {@required this.disableCFWorker,
-      @required this.disableUrlSharing,
-      @required this.enableStripe,
-      @required this.enableMissingLocationMigration});
+  FeatureFlags({
+    @required this.disableCFWorker,
+    @required this.disableUrlSharing,
+    @required this.enableStripe,
+    @required this.enableMissingLocationMigration,
+  });
 
   Map<String, dynamic> toMap() {
     return {

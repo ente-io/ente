@@ -35,12 +35,14 @@ class MemoriesDB {
   }
 
   Future _onCreate(Database db, int version) async {
-    await db.execute('''
+    await db.execute(
+      '''
                 CREATE TABLE $table (
                   $columnFileID INTEGER PRIMARY KEY NOT NULL,
                   $columnSeenTime TEXT NOT NULL
                 )
-                ''');
+                ''',
+    );
   }
 
   Future<void> clearTable() async {
@@ -59,8 +61,11 @@ class MemoriesDB {
 
   Future<int> markMemoryAsSeen(Memory memory, int timestamp) async {
     final db = await instance.database;
-    return await db.insert(table, _getRowForSeenMemory(memory, timestamp),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    return await db.insert(
+      table,
+      _getRowForSeenMemory(memory, timestamp),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<Map<int, int>> getSeenTimes() async {

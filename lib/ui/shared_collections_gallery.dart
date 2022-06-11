@@ -126,7 +126,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                     physics: NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
                       return IncomingCollectionItem(
-                          collections.incoming[index]);
+                        collections.incoming[index],
+                      );
                     },
                     itemCount: collections.incoming.length,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -148,7 +149,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                       physics: NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         return OutgoingCollectionItem(
-                            collections.outgoing[index]);
+                          collections.outgoing[index],
+                        );
                       },
                       itemCount: collections.outgoing.length,
                     ),
@@ -168,8 +170,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
           Text(
             "No one is sharing with you",
             style: TextStyle(
-                color:
-                    Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            ),
           ),
           Container(
             padding: EdgeInsets.symmetric(vertical: 12, horizontal: 72),
@@ -212,8 +214,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
           Text(
             "You aren't sharing anything",
             style: TextStyle(
-                color:
-                    Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            ),
           ),
           Container(
             padding: EdgeInsets.symmetric(vertical: 12, horizontal: 72),
@@ -239,10 +241,14 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 Color(0xFF1DB954),
               ],
               onTap: () async {
-                await showToast(context, "Select an album on ente to share",
-                    toastLength: Toast.LENGTH_LONG);
+                await showToast(
+                  context,
+                  "Select an album on ente to share",
+                  toastLength: Toast.LENGTH_LONG,
+                );
                 Bus.instance.fire(
-                    TabChangedEvent(1, TabChangedEventSource.collections_page));
+                  TabChangedEvent(1, TabChangedEventSource.collections_page),
+                );
               },
             ),
           ),
@@ -286,10 +292,12 @@ class OutgoingCollectionItem extends StatelessWidget {
           // If it's the last sharee
           sharees.add(name);
         } else {
-          sharees.add("and " +
-              remaining.toString() +
-              " other" +
-              (remaining > 1 ? "s" : ""));
+          sharees.add(
+            "and " +
+                remaining.toString() +
+                " other" +
+                (remaining > 1 ? "s" : ""),
+          );
         }
         break;
       }
@@ -304,11 +312,12 @@ class OutgoingCollectionItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(3),
               child: SizedBox(
                 child: Hero(
-                    tag: "outgoing_collection" + c.thumbnail.tag(),
-                    child: ThumbnailWidget(
-                      c.thumbnail,
-                      key: Key("outgoing_collection" + c.thumbnail.tag()),
-                    )),
+                  tag: "outgoing_collection" + c.thumbnail.tag(),
+                  child: ThumbnailWidget(
+                    c.thumbnail,
+                    key: Key("outgoing_collection" + c.thumbnail.tag()),
+                  ),
+                ),
                 height: 60,
                 width: 60,
               ),
@@ -383,11 +392,12 @@ class IncomingCollectionItem extends StatelessWidget {
               child: Stack(
                 children: [
                   Hero(
-                      tag: "shared_collection" + c.thumbnail.tag(),
-                      child: ThumbnailWidget(
-                        c.thumbnail,
-                        key: Key("shared_collection" + c.thumbnail.tag()),
-                      )),
+                    tag: "shared_collection" + c.thumbnail.tag(),
+                    child: ThumbnailWidget(
+                      c.thumbnail,
+                      key: Key("shared_collection" + c.thumbnail.tag()),
+                    ),
+                  ),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: Container(
@@ -429,10 +439,13 @@ class IncomingCollectionItem extends StatelessWidget {
       ),
       onTap: () {
         routeToPage(
-            context,
-            CollectionPage(c,
-                appBarType: GalleryType.shared_collection,
-                tagPrefix: "shared_collection"));
+          context,
+          CollectionPage(
+            c,
+            appBarType: GalleryType.shared_collection,
+            tagPrefix: "shared_collection",
+          ),
+        );
       },
     );
   }

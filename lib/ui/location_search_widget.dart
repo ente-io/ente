@@ -48,7 +48,8 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
                 "query": pattern,
               },
               options: Options(
-                  headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+                headers: {"X-Auth-Token": Configuration.instance.getToken()},
+              ),
             )
             .then((response) {
           if (_searchString == pattern) {
@@ -63,21 +64,23 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
       },
       onSuggestionSelected: (suggestion) {
         Navigator.pop(context);
-        Navigator.of(context).push(MaterialPageRoute(
+        Navigator.of(context).push(
+          MaterialPageRoute(
             builder: (context) => LocationSearchResultsPage(
-                  ViewPort(
-                      Location(
-                          suggestion['geometry']['viewport']['northeast']
-                              ['lat'],
-                          suggestion['geometry']['viewport']['northeast']
-                              ['lng']),
-                      Location(
-                          suggestion['geometry']['viewport']['southwest']
-                              ['lat'],
-                          suggestion['geometry']['viewport']['southwest']
-                              ['lng'])),
-                  suggestion['name'],
-                )));
+              ViewPort(
+                Location(
+                  suggestion['geometry']['viewport']['northeast']['lat'],
+                  suggestion['geometry']['viewport']['northeast']['lng'],
+                ),
+                Location(
+                  suggestion['geometry']['viewport']['southwest']['lat'],
+                  suggestion['geometry']['viewport']['southwest']['lng'],
+                ),
+              ),
+              suggestion['name'],
+            ),
+          ),
+        );
       },
     );
   }
@@ -95,25 +98,27 @@ class LocationSearchResultWidget extends StatelessWidget {
     return Container(
       padding: new EdgeInsets.symmetric(vertical: 6.0, horizontal: 6.0),
       margin: EdgeInsets.symmetric(vertical: 6.0),
-      child: Column(children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Icon(
-              Icons.location_on,
-            ),
-            Padding(padding: EdgeInsets.only(left: 20.0)),
-            Flexible(
-              child: Container(
-                child: Text(
-                  name,
-                  overflow: TextOverflow.clip,
+      child: Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Icon(
+                Icons.location_on,
+              ),
+              Padding(padding: EdgeInsets.only(left: 20.0)),
+              Flexible(
+                child: Container(
+                  child: Text(
+                    name,
+                    overflow: TextOverflow.clip,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ]),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

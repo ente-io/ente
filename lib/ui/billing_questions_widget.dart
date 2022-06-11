@@ -26,22 +26,26 @@ class BillingQuestionsWidget extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           final faqs = <Widget>[];
-          faqs.add(Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              "FAQs",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+          faqs.add(
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                "FAQs",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ));
+          );
           for (final faq in snapshot.data) {
             faqs.add(FaqWidget(faq: faq));
           }
-          faqs.add(Padding(
-            padding: EdgeInsets.all(16),
-          ));
+          faqs.add(
+            Padding(
+              padding: EdgeInsets.all(16),
+            ),
+          );
           return SingleChildScrollView(
             child: Column(
               children: faqs,

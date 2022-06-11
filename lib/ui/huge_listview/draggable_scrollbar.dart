@@ -62,9 +62,10 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
 
     if (widget.initialScrollIndex > 0 && widget.totalCount > 1) {
       WidgetsBinding.instance?.addPostFrameCallback((_) {
-        setState(() => thumbOffset =
-            (widget.initialScrollIndex / widget.totalCount) *
-                (thumbMax - thumbMin));
+        setState(
+          () => thumbOffset = (widget.initialScrollIndex / widget.totalCount) *
+              (thumbMax - thumbMin),
+        );
       });
     }
 
@@ -121,7 +122,6 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
     } else {
       return buildThumb();
     }
-
   }
 
   Widget buildThumb() => Container(
@@ -191,25 +191,33 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
   void keyHandler(RawKeyEvent value) {
     if (value.runtimeType == RawKeyDownEvent) {
       if (value.logicalKey == LogicalKeyboardKey.arrowDown) {
-        onDragUpdate(DragUpdateDetails(
-          globalPosition: Offset.zero,
-          delta: Offset(0, 2),
-        ));
+        onDragUpdate(
+          DragUpdateDetails(
+            globalPosition: Offset.zero,
+            delta: Offset(0, 2),
+          ),
+        );
       } else if (value.logicalKey == LogicalKeyboardKey.arrowUp) {
-        onDragUpdate(DragUpdateDetails(
-          globalPosition: Offset.zero,
-          delta: Offset(0, -2),
-        ));
+        onDragUpdate(
+          DragUpdateDetails(
+            globalPosition: Offset.zero,
+            delta: Offset(0, -2),
+          ),
+        );
       } else if (value.logicalKey == LogicalKeyboardKey.pageDown) {
-        onDragUpdate(DragUpdateDetails(
-          globalPosition: Offset.zero,
-          delta: Offset(0, 25),
-        ));
+        onDragUpdate(
+          DragUpdateDetails(
+            globalPosition: Offset.zero,
+            delta: Offset(0, 25),
+          ),
+        );
       } else if (value.logicalKey == LogicalKeyboardKey.pageUp) {
-        onDragUpdate(DragUpdateDetails(
-          globalPosition: Offset.zero,
-          delta: Offset(0, -25),
-        ));
+        onDragUpdate(
+          DragUpdateDetails(
+            globalPosition: Offset.zero,
+            delta: Offset(0, -25),
+          ),
+        );
       }
     }
   }

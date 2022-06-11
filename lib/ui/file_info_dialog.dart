@@ -134,7 +134,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               Padding(padding: EdgeInsets.all(4)),
               Text(
                 getFormattedTime(
-                    DateTime.fromMicrosecondsSinceEpoch(file.updationTime)),
+                  DateTime.fromMicrosecondsSinceEpoch(file.updationTime),
+                ),
                 style: TextStyle(color: infoColor),
               ),
             ],
@@ -385,8 +386,10 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           children: [
             Icon(Icons.center_focus_strong_outlined, color: infoColor),
             Padding(padding: EdgeInsets.all(4)),
-            Text(focalLength.toString() + " mm",
-                style: TextStyle(color: infoColor)),
+            Text(
+              focalLength.toString() + " mm",
+              style: TextStyle(color: infoColor),
+            ),
           ],
         ),
         Padding(padding: EdgeInsets.all(6)),

@@ -77,65 +77,65 @@ class _GNavState extends State<GNav> {
     selectedIndex = widget.selectedIndex;
 
     return Container(
-        color: widget.backgroundColor ?? Colors.transparent,
-        // padding: EdgeInsets.all(12),
-        // alignment: Alignment.center,
-        child: Row(
-            mainAxisAlignment: widget.mainAxisAlignment,
-            children: widget.tabs
-                .map((t) => GButton(
-                      key: t.key,
-                      border: t.border ?? widget.tabBorder,
-                      activeBorder: t.activeBorder ?? widget.tabActiveBorder,
-                      borderRadius:
-                          t.borderRadius ?? widget.tabBorderRadius != null
-                              ? BorderRadius.all(
-                                  Radius.circular(widget.tabBorderRadius))
-                              : const BorderRadius.all(Radius.circular(100.0)),
-                      debug: widget.debug ?? false,
-                      margin: t.margin ?? widget.tabMargin,
-                      active: selectedIndex == widget.tabs.indexOf(t),
-                      gap: t.gap ?? widget.gap,
-                      iconActiveColor: t.iconActiveColor ?? widget.activeColor,
-                      iconColor: t.iconColor ?? widget.color,
-                      iconSize: t.iconSize ?? widget.iconSize,
-                      textColor: t.textColor ?? widget.activeColor,
-                      rippleColor: t.rippleColor ??
-                          widget.rippleColor ??
-                          Colors.transparent,
-                      hoverColor: t.hoverColor ??
-                          widget.hoverColor ??
-                          Colors.transparent,
-                      padding: t.padding ?? widget.padding,
-                      icon: t.icon,
-                      haptic: widget.haptic ?? true,
-                      leading: t.leading,
-                      curve: widget.curve ?? Curves.easeInCubic,
-                      backgroundGradient:
-                          t.backgroundGradient ?? widget.tabBackgroundGradient,
-                      backgroundColor: t.backgroundColor ??
-                          widget.tabBackgroundColor ??
-                          Colors.transparent,
-                      duration:
-                          widget.duration ?? const Duration(milliseconds: 500),
-                      onPressed: () {
-                        if (!clickable) return;
-                        setState(() {
-                          selectedIndex = widget.tabs.indexOf(t);
-                          clickable = false;
-                        });
-                        widget.onTabChange(selectedIndex);
+      color: widget.backgroundColor ?? Colors.transparent,
+      // padding: EdgeInsets.all(12),
+      // alignment: Alignment.center,
+      child: Row(
+        mainAxisAlignment: widget.mainAxisAlignment,
+        children: widget.tabs
+            .map(
+              (t) => GButton(
+                key: t.key,
+                border: t.border ?? widget.tabBorder,
+                activeBorder: t.activeBorder ?? widget.tabActiveBorder,
+                borderRadius: t.borderRadius ?? widget.tabBorderRadius != null
+                    ? BorderRadius.all(
+                        Radius.circular(widget.tabBorderRadius),
+                      )
+                    : const BorderRadius.all(Radius.circular(100.0)),
+                debug: widget.debug ?? false,
+                margin: t.margin ?? widget.tabMargin,
+                active: selectedIndex == widget.tabs.indexOf(t),
+                gap: t.gap ?? widget.gap,
+                iconActiveColor: t.iconActiveColor ?? widget.activeColor,
+                iconColor: t.iconColor ?? widget.color,
+                iconSize: t.iconSize ?? widget.iconSize,
+                textColor: t.textColor ?? widget.activeColor,
+                rippleColor:
+                    t.rippleColor ?? widget.rippleColor ?? Colors.transparent,
+                hoverColor:
+                    t.hoverColor ?? widget.hoverColor ?? Colors.transparent,
+                padding: t.padding ?? widget.padding,
+                icon: t.icon,
+                haptic: widget.haptic ?? true,
+                leading: t.leading,
+                curve: widget.curve ?? Curves.easeInCubic,
+                backgroundGradient:
+                    t.backgroundGradient ?? widget.tabBackgroundGradient,
+                backgroundColor: t.backgroundColor ??
+                    widget.tabBackgroundColor ??
+                    Colors.transparent,
+                duration: widget.duration ?? const Duration(milliseconds: 500),
+                onPressed: () {
+                  if (!clickable) return;
+                  setState(() {
+                    selectedIndex = widget.tabs.indexOf(t);
+                    clickable = false;
+                  });
+                  widget.onTabChange(selectedIndex);
 
-                        Future.delayed(
-                            widget.duration ??
-                                const Duration(milliseconds: 500), () {
-                          setState(() {
-                            clickable = true;
-                          });
-                        });
-                      },
-                    ))
-                .toList()));
+                  Future.delayed(
+                      widget.duration ?? const Duration(milliseconds: 500), () {
+                    setState(() {
+                      clickable = true;
+                    });
+                  });
+                },
+              ),
+            )
+            .toList(),
+      ),
+    );
   }
 }
 
@@ -237,31 +237,31 @@ class _GButtonState extends State<GButton> {
 }
 
 class Button extends StatefulWidget {
-  const Button(
-      {Key key,
-      this.icon,
-      this.iconSize,
-      this.leading,
-      this.iconActiveColor,
-      this.iconColor,
-      this.text,
-      this.gap = 0,
-      this.color,
-      this.rippleColor,
-      this.hoverColor,
-      this.onPressed,
-      this.duration,
-      this.curve,
-      this.padding = const EdgeInsets.all(25),
-      this.margin = const EdgeInsets.all(0),
-      this.active = false,
-      this.debug,
-      this.gradient,
-      this.borderRadius = const BorderRadius.all(Radius.circular(100.0)),
-      this.border,
-      this.activeBorder,
-      this.shadow})
-      : super(key: key);
+  const Button({
+    Key key,
+    this.icon,
+    this.iconSize,
+    this.leading,
+    this.iconActiveColor,
+    this.iconColor,
+    this.text,
+    this.gap = 0,
+    this.color,
+    this.rippleColor,
+    this.hoverColor,
+    this.onPressed,
+    this.duration,
+    this.curve,
+    this.padding = const EdgeInsets.all(25),
+    this.margin = const EdgeInsets.all(0),
+    this.active = false,
+    this.debug,
+    this.gradient,
+    this.borderRadius = const BorderRadius.all(Radius.circular(100.0)),
+    this.border,
+    this.activeBorder,
+    this.shadow,
+  }) : super(key: key);
 
   final IconData icon;
   final double iconSize;
@@ -317,7 +317,8 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     var curveValue = expandController
         .drive(
-            CurveTween(curve: _expanded ? widget.curve : widget.curve.flipped))
+          CurveTween(curve: _expanded ? widget.curve : widget.curve.flipped),
+        )
         .value;
 
     _expanded = !widget.active;
@@ -370,9 +371,11 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
             ),
             child: FittedBox(
               fit: BoxFit.fitHeight,
-              child: Stack(children: [
-                Align(alignment: Alignment.centerLeft, child: icon),
-              ]),
+              child: Stack(
+                children: [
+                  Align(alignment: Alignment.centerLeft, child: icon),
+                ],
+              ),
             ),
           ),
         ),

@@ -126,15 +126,17 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                   return Padding(
                     padding: EdgeInsets.only(top: 32),
                     child: nothingToSeeHere(
-                        textColor:
-                            Theme.of(context).colorScheme.defaultTextColor),
+                      textColor: Theme.of(context).colorScheme.defaultTextColor,
+                    ),
                   );
                 }
               }
               return Padding(
                 padding: const EdgeInsets.only(top: 10, bottom: 10),
-                child: _getGridView(_duplicates[index - kHeaderRowCount],
-                    index - kHeaderRowCount),
+                child: _getGridView(
+                  _duplicates[index - kHeaderRowCount],
+                  index - kHeaderRowCount,
+                ),
               );
             },
             itemCount: _duplicates.length + kHeaderRowCount,
@@ -153,10 +155,11 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-              "Following files were clubbed based on their sizes" +
-                  ((_shouldClubByCaptureTime ? " and capture times." : ".") +
-                      ", please review and delete the items you believe are duplicates."),
-              style: Theme.of(context).textTheme.subtitle2),
+            "Following files were clubbed based on their sizes" +
+                ((_shouldClubByCaptureTime ? " and capture times." : ".") +
+                    ", please review and delete the items you believe are duplicates."),
+            style: Theme.of(context).textTheme.subtitle2,
+          ),
           Padding(
             padding: EdgeInsets.all(12),
           ),
@@ -210,8 +213,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       return Text(
         text,
         style: Theme.of(context).textTheme.subtitle1.copyWith(
-            fontSize: 14,
-            color: Theme.of(context).iconTheme.color.withOpacity(0.7)),
+              fontSize: 14,
+              color: Theme.of(context).iconTheme.color.withOpacity(0.7),
+            ),
       );
     }
 
@@ -377,19 +381,21 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 )
               : null,
         ),
-        child: Stack(children: [
-          Hero(
-            tag: "deduplicate_" + file.tag(),
-            child: ThumbnailWidget(
-              file,
-              diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
-              serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
-              shouldShowLivePhotoOverlay: true,
-              key: Key("deduplicate_" + file.tag()),
+        child: Stack(
+          children: [
+            Hero(
+              tag: "deduplicate_" + file.tag(),
+              child: ThumbnailWidget(
+                file,
+                diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
+                serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
+                shouldShowLivePhotoOverlay: true,
+                key: Key("deduplicate_" + file.tag()),
+              ),
             ),
-          ),
-          _selectedFiles.contains(file) ? kDeleteIconOverlay : Container(),
-        ]),
+            _selectedFiles.contains(file) ? kDeleteIconOverlay : Container(),
+          ],
+        ),
       ),
     );
   }

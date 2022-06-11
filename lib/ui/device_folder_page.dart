@@ -24,8 +24,12 @@ class DeviceFolderPage extends StatelessWidget {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInPath(
-            folder.path, creationStartTime, creationEndTime,
-            limit: limit, asc: asc);
+          folder.path,
+          creationStartTime,
+          creationEndTime,
+          limit: limit,
+          asc: asc,
+        );
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       removalEventTypes: const {
@@ -96,10 +100,11 @@ class _BackupConfigurationHeaderWidgetState
               : Text(
                   "Backup disabled",
                   style: TextStyle(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .defaultTextColor
-                          .withOpacity(0.7)),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .defaultTextColor
+                        .withOpacity(0.7),
+                  ),
                 ),
           Switch(
             value: isBackedUp,

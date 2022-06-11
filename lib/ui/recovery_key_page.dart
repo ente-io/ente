@@ -22,16 +22,18 @@ class RecoveryKeyPage extends StatefulWidget {
   final String subText;
   final bool showProgressBar;
 
-  const RecoveryKeyPage(this.recoveryKey, this.doneText,
-      {Key key,
-      this.showAppBar,
-      this.onDone,
-      this.isDismissible,
-      this.title,
-      this.text,
-      this.subText,
-      this.showProgressBar = false})
-      : super(key: key);
+  const RecoveryKeyPage(
+    this.recoveryKey,
+    this.doneText, {
+    Key key,
+    this.showAppBar,
+    this.onDone,
+    this.isDismissible,
+    this.title,
+    this.text,
+    this.subText,
+    this.showProgressBar = false,
+  }) : super(key: key);
 
   @override
   _RecoveryKeyPageState createState() => _RecoveryKeyPageState();
@@ -40,14 +42,16 @@ class RecoveryKeyPage extends StatefulWidget {
 class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
   bool _hasTriedToSave = false;
   final _recoveryKeyFile = io.File(
-      Configuration.instance.getTempDirectory() + "ente-recovery-key.txt");
+    Configuration.instance.getTempDirectory() + "ente-recovery-key.txt",
+  );
 
   @override
   Widget build(BuildContext context) {
     final String recoveryKey = bip39.entropyToMnemonic(widget.recoveryKey);
     if (recoveryKey.split(' ').length != kMnemonicKeyWordCount) {
       throw AssertionError(
-          'recovery code should have $kMnemonicKeyWordCount words');
+        'recovery code should have $kMnemonicKeyWordCount words',
+      );
     }
 
     return Scaffold(
@@ -74,22 +78,25 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
               : null,
       body: Padding(
         padding: EdgeInsets.fromLTRB(
-            20,
-            widget.showAppBar
-                ? 40
-                : widget.showProgressBar
-                    ? 32
-                    : 120,
-            20,
-            20),
+          20,
+          widget.showAppBar
+              ? 40
+              : widget.showProgressBar
+                  ? 32
+                  : 120,
+          20,
+          20,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.max,
           children: [
             widget.showAppBar
                 ? const SizedBox.shrink()
-                : Text(widget.title ?? "Recovery key",
-                    style: Theme.of(context).textTheme.headline4),
+                : Text(
+                    widget.title ?? "Recovery key",
+                    style: Theme.of(context).textTheme.headline4,
+                  ),
             Padding(padding: EdgeInsets.all(widget.showAppBar ? 0 : 12)),
             Text(
               widget.text ??
@@ -116,7 +123,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                     GestureDetector(
                       onTap: () async {
                         await Clipboard.setData(
-                            ClipboardData(text: recoveryKey));
+                          ClipboardData(text: recoveryKey),
+                        );
                         showToast(context, "Recovery key copied to clipboard");
                         setState(() {
                           _hasTriedToSave = true;
@@ -150,12 +158,13 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
               height: 80,
               width: double.infinity,
               child: Padding(
-                  child: Text(
-                    widget.subText ??
-                        "We don’t store this key, please save this in a safe place.",
-                    style: Theme.of(context).textTheme.bodyText1,
-                  ),
-                  padding: EdgeInsets.symmetric(vertical: 20)),
+                child: Text(
+                  widget.subText ??
+                      "We don’t store this key, please save this in a safe place.",
+                  style: Theme.of(context).textTheme.bodyText1,
+                ),
+                padding: EdgeInsets.symmetric(vertical: 20),
+              ),
             ),
             Expanded(
               child: Container(
@@ -163,9 +172,10 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                 width: double.infinity,
                 padding: EdgeInsets.fromLTRB(10, 10, 10, 24),
                 child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: _saveOptions(context, recoveryKey)),
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: _saveOptions(context, recoveryKey),
+                ),
               ),
             )
           ],
@@ -177,37 +187,43 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
   List<Widget> _saveOptions(BuildContext context, String recoveryKey) {
     List<Widget> childrens = [];
     if (!_hasTriedToSave) {
-      childrens.add(ElevatedButton(
-        child: Text('Do this later'),
-        style: Theme.of(context).colorScheme.optionalActionButtonStyle,
-        onPressed: () async {
-          await _saveKeys();
-        },
-      ));
+      childrens.add(
+        ElevatedButton(
+          child: Text('Do this later'),
+          style: Theme.of(context).colorScheme.optionalActionButtonStyle,
+          onPressed: () async {
+            await _saveKeys();
+          },
+        ),
+      );
       childrens.add(SizedBox(height: 10));
     }
 
-    childrens.add(GradientButton(
-      child: Text(
-        'Save key',
-        style: gradientButtonTextTheme(),
+    childrens.add(
+      GradientButton(
+        child: Text(
+          'Save key',
+          style: gradientButtonTextTheme(),
+        ),
+        linearGradientColors: const [
+          Color(0xFF2CD267),
+          Color(0xFF1DB954),
+        ],
+        onTap: () async {
+          await _shareRecoveryKey(recoveryKey);
+        },
       ),
-      linearGradientColors: const [
-        Color(0xFF2CD267),
-        Color(0xFF1DB954),
-      ],
-      onTap: () async {
-        await _shareRecoveryKey(recoveryKey);
-      },
-    ));
+    );
     if (_hasTriedToSave) {
       childrens.add(SizedBox(height: 10));
-      childrens.add(ElevatedButton(
-        child: Text(widget.doneText),
-        onPressed: () async {
-          await _saveKeys();
-        },
-      ));
+      childrens.add(
+        ElevatedButton(
+          child: Text(widget.doneText),
+          onPressed: () async {
+            await _saveKeys();
+          },
+        ),
+      );
     }
     childrens.add(SizedBox(height: 12));
     return childrens;

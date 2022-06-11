@@ -137,12 +137,15 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                                   inputResult == 'ok' &&
                                   _textFieldController.text.trim().isNotEmpty) {
                                 var propToUpdate = await _getEncryptedPassword(
-                                    _textFieldController.text);
+                                  _textFieldController.text,
+                                );
                                 await _updateUrlSettings(context, propToUpdate);
                               }
                             } else {
                               await _updateUrlSettings(
-                                  context, {'disablePassword': true});
+                                context,
+                                {'disablePassword': true},
+                              );
                             }
                             setState(() {});
                           },
@@ -166,25 +169,31 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           onChanged: (value) async {
                             if (!value) {
                               final choice = await showChoiceDialog(
-                                  context,
-                                  'Disable downloads',
-                                  'Are you sure that you want to disable the download button for files?',
-                                  firstAction: 'No',
-                                  secondAction: 'Yes',
-                                  firstActionColor:
-                                      Theme.of(context).colorScheme.greenText,
-                                  secondActionColor: Theme.of(context)
-                                      .colorScheme
-                                      .inverseBackgroundColor);
+                                context,
+                                'Disable downloads',
+                                'Are you sure that you want to disable the download button for files?',
+                                firstAction: 'No',
+                                secondAction: 'Yes',
+                                firstActionColor:
+                                    Theme.of(context).colorScheme.greenText,
+                                secondActionColor: Theme.of(context)
+                                    .colorScheme
+                                    .inverseBackgroundColor,
+                              );
                               if (choice != DialogUserChoice.secondChoice) {
                                 return;
                               }
                             }
                             await _updateUrlSettings(
-                                context, {'enableDownload': value});
+                              context,
+                              {'enableDownload': value},
+                            );
                             if (!value) {
-                              showErrorDialog(context, "Please note",
-                                  "Viewers can still take screenshots or save a copy of your photos using external tools");
+                              showErrorDialog(
+                                context,
+                                "Please note",
+                                "Viewers can still take screenshots or save a copy of your photos using external tools",
+                              );
                             }
                             setState(() {});
                           },
@@ -262,7 +271,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       }
                       if (newValidTill >= 0) {
                         await _updateUrlSettings(
-                            context, {'validTill': newValidTill});
+                          context,
+                          {'validTill': newValidTill},
+                        );
                         setState(() {});
                       }
                       Navigator.of(context).pop('');
@@ -333,10 +344,11 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   Future<String> _displayLinkPasswordInput(BuildContext context) async {
     _textFieldController.clear();
     return showDialog<String>(
-        context: context,
-        builder: (context) {
-          bool _passwordVisible = false;
-          return StatefulBuilder(builder: (context, setState) {
+      context: context,
+      builder: (context) {
+        bool _passwordVisible = false;
+        return StatefulBuilder(
+          builder: (context, setState) {
             return AlertDialog(
               title: Text('Enter password'),
               content: TextFormField(
@@ -369,8 +381,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text('Cancel',
-                      style: Theme.of(context).textTheme.subtitle2),
+                  child: Text(
+                    'Cancel',
+                    style: Theme.of(context).textTheme.subtitle2,
+                  ),
                   onPressed: () {
                     Navigator.pop(context, 'cancel');
                   },
@@ -387,18 +401,26 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 ),
               ],
             );
-          });
-        });
+          },
+        );
+      },
+    );
   }
 
   Future<Map<String, dynamic>> _getEncryptedPassword(String pass) async {
-    assert(Sodium.cryptoPwhashAlgArgon2id13 == Sodium.cryptoPwhashAlgDefault,
-        "mismatch in expected default pw hashing algo");
+    assert(
+      Sodium.cryptoPwhashAlgArgon2id13 == Sodium.cryptoPwhashAlgDefault,
+      "mismatch in expected default pw hashing algo",
+    );
     int memLimit = Sodium.cryptoPwhashMemlimitInteractive;
     int opsLimit = Sodium.cryptoPwhashOpslimitInteractive;
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
     final result = await CryptoUtil.deriveKey(
-        utf8.encode(pass), kekSalt, memLimit, opsLimit);
+      utf8.encode(pass),
+      kekSalt,
+      memLimit,
+      opsLimit,
+    );
     return {
       'passHash': Sodium.bin2base64(result),
       'nonce': Sodium.bin2base64(kekSalt),
@@ -408,7 +430,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   Future<void> _updateUrlSettings(
-      BuildContext context, Map<String, dynamic> prop) async {
+    BuildContext context,
+    Map<String, dynamic> prop,
+  ) async {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
@@ -451,7 +475,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     List<Text> options = [];
     for (int i = 50; i > 0; i--) {
       options.add(
-          Text(i.toString(), style: Theme.of(context).textTheme.subtitle1));
+        Text(i.toString(), style: Theme.of(context).textTheme.subtitle1),
+      );
     }
     return showCupertinoModalPopup(
       context: context,
@@ -493,7 +518,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     onPressed: () async {
                       await _updateUrlSettings(context, {
                         'deviceLimit': int.tryParse(
-                            options[_selectedDeviceLimitIndex].data),
+                          options[_selectedDeviceLimitIndex].data,
+                        ),
                       });
                       setState(() {});
                       Navigator.of(context).pop('');

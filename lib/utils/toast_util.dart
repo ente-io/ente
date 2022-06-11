@@ -13,13 +13,14 @@ Future<void> showToast(
   if (Platform.isAndroid) {
     await Fluttertoast.cancel();
     return Fluttertoast.showToast(
-        msg: message,
-        toastLength: toastLength,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Theme.of(context).colorScheme.toastBackgroundColor,
-        textColor: Theme.of(context).colorScheme.toastTextColor,
-        fontSize: 16.0);
+      msg: message,
+      toastLength: toastLength,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Theme.of(context).colorScheme.toastBackgroundColor,
+      textColor: Theme.of(context).colorScheme.toastTextColor,
+      fontSize: 16.0,
+    );
   } else {
     EasyLoading.instance
       ..backgroundColor = Theme.of(context).colorScheme.toastBackgroundColor

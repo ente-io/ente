@@ -9,7 +9,10 @@ final _logger = Logger("FileSyncUtil");
 final ignoreSizeConstraint = SizeConstraint(ignoreSize: true);
 final assetFetchPageSize = 2000;
 Future<List<File>> getDeviceFiles(
-    int fromTime, int toTime, Computer computer) async {
+  int fromTime,
+  int toTime,
+  Computer computer,
+) async {
   final pathEntities = await _getGalleryList(fromTime, toTime);
   List<File> files = [];
   AssetPathEntity recents;
@@ -24,16 +27,21 @@ Future<List<File>> getDeviceFiles(
     files = await _computeFiles(recents, fromTime, files, computer);
   }
   files.sort(
-      (first, second) => first.creationTime.compareTo(second.creationTime));
+    (first, second) => first.creationTime.compareTo(second.creationTime),
+  );
   return files;
 }
 
 Future<List<LocalAsset>> getAllLocalAssets() async {
   final filterOptionGroup = FilterOptionGroup();
   filterOptionGroup.setOption(
-      AssetType.image, FilterOption(sizeConstraint: ignoreSizeConstraint));
+    AssetType.image,
+    FilterOption(sizeConstraint: ignoreSizeConstraint),
+  );
   filterOptionGroup.setOption(
-      AssetType.video, FilterOption(sizeConstraint: ignoreSizeConstraint));
+    AssetType.video,
+    FilterOption(sizeConstraint: ignoreSizeConstraint),
+  );
   filterOptionGroup.createTimeCond = DateTimeCond.def().copyWith(ignore: true);
   final assetPaths = await PhotoManager.getAssetPathList(
     hasAll: true,
@@ -49,8 +57,12 @@ Future<List<LocalAsset>> getAllLocalAssets() async {
   return assets;
 }
 
-Future<List<File>> getUnsyncedFiles(List<LocalAsset> assets,
-    Set<String> existingIDs, Set<String> invalidIDs, Computer computer) async {
+Future<List<File>> getUnsyncedFiles(
+  List<LocalAsset> assets,
+  Set<String> existingIDs,
+  Set<String> invalidIDs,
+  Computer computer,
+) async {
   final args = Map<String, dynamic>();
   args['assets'] = assets;
   args['existingIDs'] = existingIDs;
@@ -77,7 +89,9 @@ List<LocalAsset> _getUnsyncedAssets(Map<String, dynamic> args) {
 }
 
 Future<List<File>> _convertToFiles(
-    List<LocalAsset> assets, Computer computer) async {
+  List<LocalAsset> assets,
+  Computer computer,
+) async {
   final List<LocalAsset> recents = [];
   final List<LocalAssetEntity> entities = [];
   for (final asset in assets) {
@@ -85,7 +99,8 @@ Future<List<File>> _convertToFiles(
       recents.add(asset);
     } else {
       entities.add(
-          LocalAssetEntity(await AssetEntity.fromId(asset.id), asset.path));
+        LocalAssetEntity(await AssetEntity.fromId(asset.id), asset.path),
+      );
     }
   }
   // Ignore duplicate items in recents
@@ -99,19 +114,26 @@ Future<List<File>> _convertToFiles(
     }
     if (!presentInOthers) {
       entities.add(
-          LocalAssetEntity(await AssetEntity.fromId(recent.id), recent.path));
+        LocalAssetEntity(await AssetEntity.fromId(recent.id), recent.path),
+      );
     }
   }
   return await computer.compute(_getFilesFromAssets, param: entities);
 }
 
 Future<List<AssetPathEntity>> _getGalleryList(
-    final int fromTime, final int toTime) async {
+  final int fromTime,
+  final int toTime,
+) async {
   final filterOptionGroup = FilterOptionGroup();
-  filterOptionGroup.setOption(AssetType.image,
-      FilterOption(needTitle: true, sizeConstraint: ignoreSizeConstraint));
-  filterOptionGroup.setOption(AssetType.video,
-      FilterOption(needTitle: true, sizeConstraint: ignoreSizeConstraint));
+  filterOptionGroup.setOption(
+    AssetType.image,
+    FilterOption(needTitle: true, sizeConstraint: ignoreSizeConstraint),
+  );
+  filterOptionGroup.setOption(
+    AssetType.video,
+    FilterOption(needTitle: true, sizeConstraint: ignoreSizeConstraint),
+  );
 
   filterOptionGroup.updateTimeCond = DateTimeCond(
     min: DateTime.fromMicrosecondsSinceEpoch(fromTime),
@@ -130,8 +152,12 @@ Future<List<AssetPathEntity>> _getGalleryList(
   return galleryList;
 }
 
-Future<List<File>> _computeFiles(AssetPathEntity pathEntity, int fromTime,
-    List<File> files, Computer computer) async {
+Future<List<File>> _computeFiles(
+  AssetPathEntity pathEntity,
+  int fromTime,
+  List<File> files,
+  Computer computer,
+) async {
   final args = Map<String, dynamic>();
   args["pathEntity"] = pathEntity;
   args["assetList"] = await _getAllAssetLists(pathEntity);
@@ -146,7 +172,9 @@ Future<List<AssetEntity>> _getAllAssetLists(AssetPathEntity pathEntity) async {
   List<AssetEntity> currentPageResult = [];
   do {
     currentPageResult = await pathEntity.getAssetListPaged(
-        page: currentPage, size: assetFetchPageSize);
+      page: currentPage,
+      size: assetFetchPageSize,
+    );
     result.addAll(currentPageResult);
     currentPage = currentPage + 1;
   } while (currentPageResult.length >= assetFetchPageSize);
@@ -159,8 +187,10 @@ Future<List<File>> _getFiles(Map<String, dynamic> args) async {
   final fromTime = args["fromTime"];
   final files = args["files"];
   for (AssetEntity entity in assetList) {
-    if (max(entity.createDateTime.microsecondsSinceEpoch,
-            entity.modifiedDateTime.microsecondsSinceEpoch) >
+    if (max(
+          entity.createDateTime.microsecondsSinceEpoch,
+          entity.modifiedDateTime.microsecondsSinceEpoch,
+        ) >
         fromTime) {
       try {
         final file = await File.fromAsset(pathEntity.name, entity);
@@ -178,10 +208,12 @@ Future<List<File>> _getFiles(Map<String, dynamic> args) async {
 Future<List<File>> _getFilesFromAssets(List<LocalAssetEntity> assets) async {
   final List<File> files = [];
   for (final asset in assets) {
-    files.add(await File.fromAsset(
-      asset.path,
-      asset.entity,
-    ));
+    files.add(
+      await File.fromAsset(
+        asset.path,
+        asset.entity,
+      ),
+    );
   }
   return files;
 }

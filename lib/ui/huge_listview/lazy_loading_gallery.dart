@@ -101,8 +101,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         final dayStartTime =
             DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
         final result = await widget.asyncLoader(
-            dayStartTime.microsecondsSinceEpoch,
-            dayStartTime.microsecondsSinceEpoch + kMicroSecondsInDay - 1);
+          dayStartTime.microsecondsSinceEpoch,
+          dayStartTime.microsecondsSinceEpoch + kMicroSecondsInDay - 1,
+        );
         if (mounted) {
           setState(() {
             _files = result.files;
@@ -152,7 +153,10 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       child: Column(
         children: [
           getDayWidget(
-              context, _files[0].creationTime, widget.smallerTodayFont),
+            context,
+            _files[0].creationTime,
+            widget.smallerTodayFont,
+          ),
           _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
         ],
       ),
@@ -162,14 +166,17 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   Widget _getGallery() {
     List<Widget> childGalleries = [];
     for (int index = 0; index < _files.length; index += kSubGalleryItemLimit) {
-      childGalleries.add(LazyLoadingGridView(
-        widget.tag,
-        _files.sublist(index, min(index + kSubGalleryItemLimit, _files.length)),
-        widget.asyncLoader,
-        widget.selectedFiles,
-        index == 0,
-        _files.length > kRecycleLimit,
-      ));
+      childGalleries.add(
+        LazyLoadingGridView(
+          widget.tag,
+          _files.sublist(
+              index, min(index + kSubGalleryItemLimit, _files.length)),
+          widget.asyncLoader,
+          widget.selectedFiles,
+          index == 0,
+          _files.length > kRecycleLimit,
+        ),
+      );
     }
 
     return Column(
@@ -314,9 +321,11 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                 tag: widget.tag + file.tag(),
                 child: ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(
-                          widget.selectedFiles.files.contains(file) ? 0.4 : 0),
-                      BlendMode.darken),
+                    Colors.black.withOpacity(
+                      widget.selectedFiles.files.contains(file) ? 0.4 : 0,
+                    ),
+                    BlendMode.darken,
+                  ),
                   child: ThumbnailWidget(
                     file,
                     diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
@@ -350,12 +359,14 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   void _routeToDetailPage(File file, BuildContext context) {
-    final page = DetailPage(DetailPageConfiguration(
-      List.unmodifiable(widget.files),
-      widget.asyncLoader,
-      widget.files.indexOf(file),
-      widget.tag,
-    ));
+    final page = DetailPage(
+      DetailPageConfiguration(
+        List.unmodifiable(widget.files),
+        widget.asyncLoader,
+        widget.files.indexOf(file),
+        widget.tag,
+      ),
+    );
     routeToPage(context, page);
   }
 }

@@ -55,14 +55,18 @@ class SocialSectionWidget extends StatelessWidget {
                     onTap: () {
                       if (Platform.isAndroid) {
                         launch(
-                            "https://play.google.com/store/apps/details?id=io.ente.photos");
+                          "https://play.google.com/store/apps/details?id=io.ente.photos",
+                        );
                       } else {
                         launch(
-                            "https://apps.apple.com/in/app/ente-photos/id1542026904");
+                          "https://apps.apple.com/in/app/ente-photos/id1542026904",
+                        );
                       }
                     },
                     child: SettingsTextItem(
-                        text: "Rate us! ✨", icon: Icons.navigate_next),
+                      text: "Rate us! ✨",
+                      icon: Icons.navigate_next,
+                    ),
                   ),
                 ],
               )

@@ -187,8 +187,11 @@ class Configuration {
       Sodium.bin2base64(encryptedRecoveryKey.encryptedData),
       Sodium.bin2base64(encryptedRecoveryKey.nonce),
     );
-    final privateAttributes = PrivateKeyAttributes(Sodium.bin2base64(masterKey),
-        Sodium.bin2hex(recoveryKey), Sodium.bin2base64(keyPair.sk));
+    final privateAttributes = PrivateKeyAttributes(
+      Sodium.bin2base64(masterKey),
+      Sodium.bin2hex(recoveryKey),
+      Sodium.bin2base64(keyPair.sk),
+    );
     return KeyGenResult(attributes, privateAttributes);
   }
 
@@ -218,7 +221,9 @@ class Configuration {
   }
 
   Future<void> decryptAndSaveSecrets(
-      String password, KeyAttributes attributes) async {
+    String password,
+    KeyAttributes attributes,
+  ) async {
     final kek = await CryptoUtil.deriveKey(
       utf8.encode(password),
       Sodium.base642bin(attributes.kekSalt),
@@ -227,23 +232,29 @@ class Configuration {
     );
     Uint8List key;
     try {
-      key = CryptoUtil.decryptSync(Sodium.base642bin(attributes.encryptedKey),
-          kek, Sodium.base642bin(attributes.keyDecryptionNonce));
+      key = CryptoUtil.decryptSync(
+        Sodium.base642bin(attributes.encryptedKey),
+        kek,
+        Sodium.base642bin(attributes.keyDecryptionNonce),
+      );
     } catch (e) {
       throw Exception("Incorrect password");
     }
     await setKey(Sodium.bin2base64(key));
     final secretKey = CryptoUtil.decryptSync(
-        Sodium.base642bin(attributes.encryptedSecretKey),
-        key,
-        Sodium.base642bin(attributes.secretKeyDecryptionNonce));
+      Sodium.base642bin(attributes.encryptedSecretKey),
+      key,
+      Sodium.base642bin(attributes.secretKeyDecryptionNonce),
+    );
     await setSecretKey(Sodium.bin2base64(secretKey));
     final token = CryptoUtil.openSealSync(
-        Sodium.base642bin(getEncryptedToken()),
-        Sodium.base642bin(attributes.publicKey),
-        secretKey);
+      Sodium.base642bin(getEncryptedToken()),
+      Sodium.base642bin(attributes.publicKey),
+      secretKey,
+    );
     await setToken(
-        Sodium.bin2base64(token, variant: Sodium.base64VariantUrlsafe));
+      Sodium.bin2base64(token, variant: Sodium.base64VariantUrlsafe),
+    );
   }
 
   Future<KeyAttributes> createNewRecoveryKey() async {
@@ -272,7 +283,8 @@ class Configuration {
     if (recoveryKey.contains(' ')) {
       if (recoveryKey.split(' ').length != kMnemonicKeyWordCount) {
         throw AssertionError(
-            'recovery code should have $kMnemonicKeyWordCount words');
+          'recovery code should have $kMnemonicKeyWordCount words',
+        );
       }
       recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
     }
@@ -280,25 +292,29 @@ class Configuration {
     Uint8List masterKey;
     try {
       masterKey = await CryptoUtil.decrypt(
-          Sodium.base642bin(attributes.masterKeyEncryptedWithRecoveryKey),
-          Sodium.hex2bin(recoveryKey),
-          Sodium.base642bin(attributes.masterKeyDecryptionNonce));
+        Sodium.base642bin(attributes.masterKeyEncryptedWithRecoveryKey),
+        Sodium.hex2bin(recoveryKey),
+        Sodium.base642bin(attributes.masterKeyDecryptionNonce),
+      );
     } catch (e) {
       _logger.severe(e);
       rethrow;
     }
     await setKey(Sodium.bin2base64(masterKey));
     final secretKey = CryptoUtil.decryptSync(
-        Sodium.base642bin(attributes.encryptedSecretKey),
-        masterKey,
-        Sodium.base642bin(attributes.secretKeyDecryptionNonce));
+      Sodium.base642bin(attributes.encryptedSecretKey),
+      masterKey,
+      Sodium.base642bin(attributes.secretKeyDecryptionNonce),
+    );
     await setSecretKey(Sodium.bin2base64(secretKey));
     final token = CryptoUtil.openSealSync(
-        Sodium.base642bin(getEncryptedToken()),
-        Sodium.base642bin(attributes.publicKey),
-        secretKey);
+      Sodium.base642bin(getEncryptedToken()),
+      Sodium.base642bin(attributes.publicKey),
+      secretKey,
+    );
     await setToken(
-        Sodium.bin2base64(token, variant: Sodium.base64VariantUrlsafe));
+      Sodium.bin2base64(token, variant: Sodium.base64VariantUrlsafe),
+    );
   }
 
   String getHttpEndpoint() {
@@ -428,9 +444,10 @@ class Configuration {
   Uint8List getRecoveryKey() {
     final keyAttributes = getKeyAttributes();
     return CryptoUtil.decryptSync(
-        Sodium.base642bin(keyAttributes.recoveryKeyEncryptedWithMasterKey),
-        getKey(),
-        Sodium.base642bin(keyAttributes.recoveryKeyDecryptionNonce));
+      Sodium.base642bin(keyAttributes.recoveryKeyEncryptedWithMasterKey),
+      getKey(),
+      Sodium.base642bin(keyAttributes.recoveryKeyDecryptionNonce),
+    );
   }
 
   String getDocumentsDirectory() {
@@ -551,7 +568,9 @@ class Configuration {
         iOptions: _secureStorageOptionsIOS,
       );
       await _preferences.setBool(
-          hasMigratedSecureStorageToFirstUnlockKey, true);
+        hasMigratedSecureStorageToFirstUnlockKey,
+        true,
+      );
     }
   }
 

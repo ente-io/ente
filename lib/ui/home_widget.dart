@@ -183,7 +183,8 @@ class _HomeWidgetState extends State<HomeWidget> {
             context: context,
             builder: (BuildContext context) {
               return AppUpdateDialog(
-                  UpdateService.instance.getLatestVersionInfo());
+                UpdateService.instance.getLatestVersionInfo(),
+              );
             },
             barrierColor: Colors.black.withOpacity(0.85),
           );
@@ -209,14 +210,17 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   void _initMediaShareSubscription() {
-    _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
-        .listen((List<SharedMediaFile> value) {
-      setState(() {
-        _sharedFiles = value;
-      });
-    }, onError: (err) {
-      _logger.severe("getIntentDataStream error: $err");
-    });
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getMediaStream().listen(
+      (List<SharedMediaFile> value) {
+        setState(() {
+          _sharedFiles = value;
+        });
+      },
+      onError: (err) {
+        _logger.severe("getIntentDataStream error: $err");
+      },
+    );
     // For sharing images coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
       setState(() {
@@ -283,10 +287,12 @@ class _HomeWidgetState extends State<HomeWidget> {
             _settingsPage,
           ],
           onPageChanged: (page) {
-            Bus.instance.fire(TabChangedEvent(
-              page,
-              TabChangedEventSource.page_view,
-            ));
+            Bus.instance.fire(
+              TabChangedEvent(
+                page,
+                TabChangedEventSource.page_view,
+              ),
+            );
           },
           physics: NeverScrollableScrollPhysics(),
           controller: _pageController,
@@ -330,12 +336,15 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     // Attach a listener to the stream
-    linkStream.listen((String link) {
-      _logger.info("Link received: " + link);
-      _getCredentials(context, link);
-    }, onError: (err) {
-      _logger.severe(err);
-    });
+    linkStream.listen(
+      (String link) {
+        _logger.info("Link received: " + link);
+        _getCredentials(context, link);
+      },
+      onError: (err) {
+        _logger.severe(err);
+      },
+    );
     return false;
   }
 
@@ -362,31 +371,43 @@ class _HomeWidgetState extends State<HomeWidget> {
             CollectionsService.instance.getArchivedCollections();
         FileLoadResult result;
         if (importantPaths.isNotEmpty) {
-          result = await FilesDB.instance.getImportantFiles(creationStartTime,
-              creationEndTime, ownerID, importantPaths.toList(),
-              limit: limit,
-              asc: asc,
-              ignoredCollectionIDs: archivedCollectionIds);
+          result = await FilesDB.instance.getImportantFiles(
+            creationStartTime,
+            creationEndTime,
+            ownerID,
+            importantPaths.toList(),
+            limit: limit,
+            asc: asc,
+            ignoredCollectionIDs: archivedCollectionIds,
+          );
         } else {
           if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
             result = await FilesDB.instance.getAllLocalAndUploadedFiles(
-                creationStartTime, creationEndTime, ownerID,
-                limit: limit,
-                asc: asc,
-                ignoredCollectionIDs: archivedCollectionIds);
+              creationStartTime,
+              creationEndTime,
+              ownerID,
+              limit: limit,
+              asc: asc,
+              ignoredCollectionIDs: archivedCollectionIds,
+            );
           } else {
             result = await FilesDB.instance.getAllUploadedFiles(
-                creationStartTime, creationEndTime, ownerID,
-                limit: limit,
-                asc: asc,
-                ignoredCollectionIDs: archivedCollectionIds);
+              creationStartTime,
+              creationEndTime,
+              ownerID,
+              limit: limit,
+              asc: asc,
+              ignoredCollectionIDs: archivedCollectionIds,
+            );
           }
         }
         // hide ignored files from home page UI
         final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
-        result.files.removeWhere((f) =>
-            f.uploadedFileID == null &&
-            IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f));
+        result.files.removeWhere(
+          (f) =>
+              f.uploadedFileID == null &&
+              IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
+        );
         return result;
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
@@ -426,11 +447,13 @@ class _HomeWidgetState extends State<HomeWidget> {
             height: 206,
           ),
         ),
-        Text('No photos are being backed up right now',
-            style: Theme.of(context)
-                .textTheme
-                .caption
-                .copyWith(fontFamily: 'Inter-Medium', fontSize: 16)),
+        Text(
+          'No photos are being backed up right now',
+          style: Theme.of(context)
+              .textTheme
+              .caption
+              .copyWith(fontFamily: 'Inter-Medium', fontSize: 16),
+        ),
         Center(
           child: Hero(
             tag: "select_folders",
@@ -560,10 +583,12 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   }
 
   void _onTabChange(int index) {
-    Bus.instance.fire(TabChangedEvent(
-      index,
-      TabChangedEventSource.tab_bar,
-    ));
+    Bus.instance.fire(
+      TabChangedEvent(
+        index,
+        TabChangedEventSource.tab_bar,
+      ),
+    );
   }
 
   @override
@@ -580,111 +605,112 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
         child: IgnorePointer(
           ignoring: filesAreSelected,
           child: ListView(
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(36),
-                      child: Container(
-                        alignment: Alignment.bottomCenter,
-                        height: 52,
-                        width: 240,
-                        child: ClipRect(
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                            child: GNav(
-                              curve: Curves.easeOutExpo,
-                              backgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .gNavBackgroundColor,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              rippleColor: Colors.white.withOpacity(0.1),
-                              activeColor: Theme.of(context)
-                                  .colorScheme
-                                  .gNavBarActiveColor,
-                              iconSize: 24,
-                              padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-                              duration: Duration(milliseconds: 200),
-                              gap: 0,
-                              tabBorderRadius: 24,
-                              tabBackgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .gNavBarActiveColor,
-                              haptic: false,
-                              tabs: [
-                                GButton(
-                                  margin: EdgeInsets.fromLTRB(6, 6, 0, 6),
-                                  icon: Icons.home,
-                                  iconColor: Theme.of(context)
-                                      .colorScheme
-                                      .gNavIconColor,
-                                  iconActiveColor: Theme.of(context)
-                                      .colorScheme
-                                      .gNavActiveIconColor,
-                                  text: '',
-                                  onPressed: () {
-                                    _onTabChange(
-                                        0); // To take care of occasional missing events
-                                  },
-                                ),
-                                GButton(
-                                  margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
-                                  icon: Icons.photo_library,
-                                  iconColor: Theme.of(context)
-                                      .colorScheme
-                                      .gNavIconColor,
-                                  iconActiveColor: Theme.of(context)
-                                      .colorScheme
-                                      .gNavActiveIconColor,
-                                  text: '',
-                                  onPressed: () {
-                                    _onTabChange(
-                                        1); // To take care of occasional missing events
-                                  },
-                                ),
-                                GButton(
-                                  margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
-                                  icon: Icons.folder_shared,
-                                  iconColor: Theme.of(context)
-                                      .colorScheme
-                                      .gNavIconColor,
-                                  iconActiveColor: Theme.of(context)
-                                      .colorScheme
-                                      .gNavActiveIconColor,
-                                  text: '',
-                                  onPressed: () {
-                                    _onTabChange(
-                                        2); // To take care of occasional missing events
-                                  },
-                                ),
-                                GButton(
-                                  margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
-                                  icon: Icons.person,
-                                  iconColor: Theme.of(context)
-                                      .colorScheme
-                                      .gNavIconColor,
-                                  iconActiveColor: Theme.of(context)
-                                      .colorScheme
-                                      .gNavActiveIconColor,
-                                  text: '',
-                                  onPressed: () {
-                                    _onTabChange(
-                                        3); // To take care of occasional missing events
-                                  },
-                                )
-                              ],
-                              selectedIndex: currentTabIndex,
-                              onTabChange: _onTabChange,
-                            ),
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(36),
+                    child: Container(
+                      alignment: Alignment.bottomCenter,
+                      height: 52,
+                      width: 240,
+                      child: ClipRect(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                          child: GNav(
+                            curve: Curves.easeOutExpo,
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .gNavBackgroundColor,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            rippleColor: Colors.white.withOpacity(0.1),
+                            activeColor: Theme.of(context)
+                                .colorScheme
+                                .gNavBarActiveColor,
+                            iconSize: 24,
+                            padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            duration: Duration(milliseconds: 200),
+                            gap: 0,
+                            tabBorderRadius: 24,
+                            tabBackgroundColor: Theme.of(context)
+                                .colorScheme
+                                .gNavBarActiveColor,
+                            haptic: false,
+                            tabs: [
+                              GButton(
+                                margin: EdgeInsets.fromLTRB(6, 6, 0, 6),
+                                icon: Icons.home,
+                                iconColor:
+                                    Theme.of(context).colorScheme.gNavIconColor,
+                                iconActiveColor: Theme.of(context)
+                                    .colorScheme
+                                    .gNavActiveIconColor,
+                                text: '',
+                                onPressed: () {
+                                  _onTabChange(
+                                    0,
+                                  ); // To take care of occasional missing events
+                                },
+                              ),
+                              GButton(
+                                margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                icon: Icons.photo_library,
+                                iconColor:
+                                    Theme.of(context).colorScheme.gNavIconColor,
+                                iconActiveColor: Theme.of(context)
+                                    .colorScheme
+                                    .gNavActiveIconColor,
+                                text: '',
+                                onPressed: () {
+                                  _onTabChange(
+                                    1,
+                                  ); // To take care of occasional missing events
+                                },
+                              ),
+                              GButton(
+                                margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                icon: Icons.folder_shared,
+                                iconColor:
+                                    Theme.of(context).colorScheme.gNavIconColor,
+                                iconActiveColor: Theme.of(context)
+                                    .colorScheme
+                                    .gNavActiveIconColor,
+                                text: '',
+                                onPressed: () {
+                                  _onTabChange(
+                                    2,
+                                  ); // To take care of occasional missing events
+                                },
+                              ),
+                              GButton(
+                                margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
+                                icon: Icons.person,
+                                iconColor:
+                                    Theme.of(context).colorScheme.gNavIconColor,
+                                iconActiveColor: Theme.of(context)
+                                    .colorScheme
+                                    .gNavActiveIconColor,
+                                text: '',
+                                onPressed: () {
+                                  _onTabChange(
+                                    3,
+                                  ); // To take care of occasional missing events
+                                },
+                              )
+                            ],
+                            selectedIndex: currentTabIndex,
+                            onTabChange: _onTabChange,
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ]),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

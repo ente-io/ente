@@ -9,7 +9,8 @@ class DuplicateFilesResponse {
   factory DuplicateFilesResponse.fromMap(Map<String, dynamic> map) {
     return DuplicateFilesResponse(
       List<DuplicateItems>.from(
-          map['duplicates']?.map((x) => DuplicateItems.fromMap(x))),
+        map['duplicates']?.map((x) => DuplicateItems.fromMap(x)),
+      ),
     );
   }
 
