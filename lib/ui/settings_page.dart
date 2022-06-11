@@ -52,7 +52,7 @@ class SettingsPage extends StatelessWidget {
     );
     final sectionDivider = Divider(
       height: 20,
-      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
     );
     contents.add(Padding(padding: EdgeInsets.all(4)));
     if (hasLoggedIn) {
