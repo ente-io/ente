@@ -67,6 +67,8 @@ export default function UploadProgress({
         return finishedUploads;
     }, [props.finishedUploads]);
 
+    console.log(finishedUploads);
+
     function confirmCancelUpload() {
         appContext.setDialogMessage({
             title: constants.STOP_UPLOADS_HEADER,

@@ -83,10 +83,15 @@ export default function Upload(props: Props) {
     const [uploadProgressView, setUploadProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>();
     const [uploadFileNames, setUploadFileNames] = useState<UploadFileNames>();
-    const [uploadCounter, setUploadCounter] = useState<UploadCounter>();
+    const [uploadCounter, setUploadCounter] = useState<UploadCounter>({
+        finished: 0,
+        total: 0,
+    });
     const [inProgressUploads, setInProgressUploads] =
-        useState<InProgressUploads>();
-    const [finishedUploads, setFinishedUploads] = useState<FinishedUploads>();
+        useState<InProgressUploads>(new Map());
+    const [finishedUploads, setFinishedUploads] = useState<FinishedUploads>(
+        new Map()
+    );
     const [percentComplete, setPercentComplete] = useState(0);
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
 
