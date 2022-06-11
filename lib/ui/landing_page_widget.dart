@@ -121,21 +121,21 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
             "assets/protected.png",
             "Private backups",
             "for your memories",
-            "end-to-end encrypted by default",
+            "End-to-end encrypted by default",
           ),
           FeatureItemWidget(
             "assets/preserved.png",
             "Safely stored",
             "at a fallout shelter",
-            "designed to outlive",
+            "Designed to outlive",
           ),
           FeatureItemWidget(
             "assets/synced.png",
             "Available",
             "everywhere",
             Platform.isAndroid
-                ? "android, ios, web, desktop"
-                : "ios, android, web, desktop",
+                ? "Android, iOS, Web, Desktop"
+                : "iOS, Android, Web, Desktop",
           ),
         ],
         onPageChanged: (index) {
