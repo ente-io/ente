@@ -1,10 +1,7 @@
 import { CollectionInfo } from './CollectionInfo';
 import React from 'react';
 import { Collection, CollectionSummary } from 'types/collection';
-import {
-    CollectionSectionWrapper,
-    Hider,
-} from 'components/Collections/styledComponents';
+import { CollectionSectionWrapper } from 'components/Collections/styledComponents';
 import CollectionOptions from 'components/Collections/CollectionOptions';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
 import { SPECIAL_COLLECTION_TYPES } from 'constants/collection';
@@ -13,7 +10,6 @@ import { SpaceBetweenFlex } from 'components/Container';
 interface Iprops {
     activeCollection: Collection;
     collectionSummary: CollectionSummary;
-    isInSearchMode: boolean;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     showCollectionShareModal: () => void;
     redirectToAll: () => void;
@@ -37,15 +33,13 @@ export default function CollectionInfoWithOptions({
     const { name, type, fileCount } = collectionSummary;
 
     return (
-        <Hider hide={props.isInSearchMode}>
-            <CollectionSectionWrapper>
-                <SpaceBetweenFlex>
-                    <CollectionInfo name={name} fileCount={fileCount} />
-                    {!SPECIAL_COLLECTION_TYPES.has(type) && (
-                        <CollectionOptions {...props} />
-                    )}
-                </SpaceBetweenFlex>
-            </CollectionSectionWrapper>
-        </Hider>
+        <CollectionSectionWrapper>
+            <SpaceBetweenFlex>
+                <CollectionInfo name={name} fileCount={fileCount} />
+                {!SPECIAL_COLLECTION_TYPES.has(type) && (
+                    <CollectionOptions {...props} />
+                )}
+            </SpaceBetweenFlex>
+        </CollectionSectionWrapper>
     );
 }

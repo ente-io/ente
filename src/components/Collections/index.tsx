@@ -6,6 +6,7 @@ import CollectionInfoWithOptions from 'components/Collections/CollectionInfoWith
 import { ALL_SECTION } from 'constants/collection';
 import CollectionShare from 'components/Collections/CollectionShare';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
+
 interface Iprops {
     collections: Collection[];
     activeCollectionID?: number;
@@ -42,10 +43,13 @@ export default function Collections(props: Iprops) {
             collectionsMap.current.get(activeCollectionID);
     }, [activeCollectionID, collections]);
 
+    if (isInSearchMode || !collections?.length) {
+        return <></>;
+    }
+
     return (
         <>
             <CollectionBar
-                isInSearchMode={isInSearchMode}
                 activeCollection={activeCollectionID}
                 setActiveCollection={setActiveCollectionID}
                 collectionSummaries={collectionSummaries}
@@ -60,7 +64,6 @@ export default function Collections(props: Iprops) {
             />
 
             <CollectionInfoWithOptions
-                isInSearchMode={isInSearchMode}
                 collectionSummary={collectionSummaries.get(activeCollectionID)}
                 activeCollection={activeCollection.current}
                 setCollectionNamerAttributes={setCollectionNamerAttributes}

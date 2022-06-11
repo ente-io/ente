@@ -5,7 +5,6 @@ import constants from 'utils/strings/constants';
 import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
 import { Typography } from '@mui/material';
 import {
-    Hider,
     CollectionBarWrapper,
     ScrollContainer,
     CollectionSectionWrapper,
@@ -20,7 +19,6 @@ import { sortCollectionSummaries } from 'services/collectionService';
 interface IProps {
     activeCollection?: number;
     setActiveCollection: (id?: number) => void;
-    isInSearchMode: boolean;
     collectionSummaries: CollectionSummaries;
     showAllCollections: () => void;
 }
@@ -28,7 +26,6 @@ interface IProps {
 export default function CollectionBar(props: IProps) {
     const {
         activeCollection,
-
         setActiveCollection,
         collectionSummaries,
         showAllCollections,
@@ -76,7 +73,7 @@ export default function CollectionBar(props: IProps) {
     };
 
     return (
-        <Hider hide={props.isInSearchMode}>
+        <>
             <CollectionSectionWrapper>
                 <SpaceBetweenFlex>
                     <Typography fontWeight={'bold'}>
@@ -116,6 +113,6 @@ export default function CollectionBar(props: IProps) {
                     />
                 )}
             </CollectionBarWrapper>
-        </Hider>
+        </>
     );
 }
