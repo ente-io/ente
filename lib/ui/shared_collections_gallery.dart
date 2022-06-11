@@ -138,12 +138,12 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                       },
                       itemCount: collections.incoming.length,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: albumsCountInOneRow,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: crossAxisSpacingOfGrid,
-                          childAspectRatio: sideOfThumbnail /
-                              (sideOfThumbnail +
-                                  24)), //24 is height of album title
+                        crossAxisCount: albumsCountInOneRow,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: crossAxisSpacingOfGrid,
+                        childAspectRatio:
+                            sideOfThumbnail / (sideOfThumbnail + 24),
+                      ), //24 is height of album title
                     ),
                   )
                 : _getIncomingCollectionEmptyState(),
@@ -385,10 +385,8 @@ class IncomingCollectionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle albumTitleTextStyle = Theme.of(context)
-        .textTheme
-        .subtitle1
-        .copyWith(fontSize: 14, fontFamily: "Inter");
+    TextStyle albumTitleTextStyle =
+        Theme.of(context).textTheme.subtitle1.copyWith(fontSize: 14);
     final double sideOfThumbnail =
         (MediaQuery.of(context).size.width / 2) - 18.5;
     return GestureDetector(

@@ -585,7 +585,7 @@ class DeviceFolderIcon extends StatelessWidget {
                   style: Theme.of(context)
                       .textTheme
                       .subtitle1
-                      .copyWith(fontSize: 12, fontFamily: "Inter"),
+                      .copyWith(fontSize: 12),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -610,10 +610,8 @@ class CollectionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle albumTitleTextStyle = Theme.of(context)
-        .textTheme
-        .subtitle1
-        .copyWith(fontSize: 14, fontFamily: "Inter");
+    TextStyle albumTitleTextStyle =
+        Theme.of(context).textTheme.subtitle1.copyWith(fontSize: 14);
     final double sideOfThumbnail =
         (MediaQuery.of(context).size.width / 2) - 18.5;
     return GestureDetector(
@@ -690,9 +688,7 @@ class SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // margin: EdgeInsets.fromLTRB(24, 12, 0, 0),
-      margin: EdgeInsets.fromLTRB(
-          (title == "Incoming" || title == "Outgoing") ? 16 : 24, 12, 0, 0),
+      margin: EdgeInsets.fromLTRB(16, 12, 0, 0),
       child: Column(
         children: [
           Align(

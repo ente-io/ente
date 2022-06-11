@@ -8,7 +8,6 @@ Widget nothingToSeeHere({Color textColor}) {
       child: Text(
         "Nothing to see here! 👀",
         style: TextStyle(
-          fontFamily: "Inter",
           color: textColor.withOpacity(0.35),
         ),
       ),
