@@ -117,6 +117,10 @@ extension CustomColorScheme on ColorScheme {
   Color get toastBackgroundColor => brightness == Brightness.light
       ? Color.fromRGBO(24, 24, 24, 0.95)
       : Color.fromRGBO(255, 255, 255, 0.95);
+
+  Color get subTextColor => brightness == Brightness.light
+      ? Color.fromRGBO(180, 180, 180, 1)
+      : Color.fromRGBO(100, 100, 100, 1);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData(
