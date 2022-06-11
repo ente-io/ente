@@ -9,6 +9,9 @@ export function UploadProgressFooter() {
         UploadProgressContext
     );
 
+    const handleClose = () => {
+        onClose(null, null);
+    };
     return (
         <DialogActions>
             {uploadStage === UPLOAD_STAGES.FINISH &&
@@ -18,10 +21,7 @@ export function UploadProgressFooter() {
                         {constants.RETRY_FAILED}
                     </Button>
                 ) : (
-                    <Button
-                        variant="contained"
-                        fullWidth
-                        onClick={() => onClose.bind(null)}>
+                    <Button variant="contained" fullWidth onClick={handleClose}>
                         {constants.CLOSE}
                     </Button>
                 ))}
