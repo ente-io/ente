@@ -17,13 +17,7 @@ export default function SearchResultInfo({ searchResult }: Iprops) {
 
     return (
         <CollectionSectionWrapper>
-            <Typography
-                css={`
-                    font-size: 24px;
-                    font-weight: 600;
-                    line-height: 36px;
-                    opacity: 50%;
-                `}>
+            <Typography variant="subtitle" color="text.secondary">
                 {constants.SEARCH_RESULTS}
             </Typography>
             <CollectionInfo name={name} fileCount={fileCount} />
