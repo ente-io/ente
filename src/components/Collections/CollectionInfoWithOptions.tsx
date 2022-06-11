@@ -18,7 +18,15 @@ interface Iprops {
     showCollectionShareModal: () => void;
     redirectToAll: () => void;
 }
-export default function collectionInfoWithOptions({
+
+interface Iprops {
+    collectionSummary: CollectionSummary;
+    setCollectionNamerAttributes: SetCollectionNamerAttributes;
+    activeCollection: Collection;
+    showCollectionShareModal: () => void;
+    redirectToAll: () => void;
+}
+export default function CollectionInfoWithOptions({
     collectionSummary,
     ...props
 }: Iprops) {

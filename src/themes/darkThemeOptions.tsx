@@ -120,13 +120,6 @@ const darkThemeOptions = createTheme({
                 margin: 'dense',
             },
         },
-        MuiTypography: {
-            styleOverrides: {
-                body1: {
-                    paddingBottom: '4px',
-                },
-            },
-        },
     },
 
     palette: {
