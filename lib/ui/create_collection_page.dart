@@ -44,7 +44,7 @@ class CreateCollectionPage extends StatefulWidget {
   final CollectionActionType actionType;
 
   const CreateCollectionPage(this.selectedFiles, this.sharedFiles,
-      {Key key, this.actionType = CollectionActionType.addFiles})
+      {Key key, this.actionType = CollectionActionType.addFiles,})
       : super(key: key);
 
   @override
@@ -78,7 +78,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(
-                      top: 30, bottom: 12, left: 40, right: 40),
+                      top: 30, bottom: 12, left: 40, right: 40,),
                   child: GradientButton(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -185,7 +185,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                 context,
                 widget.actionType == CollectionActionType.addFiles
                     ? "Added successfully to " + item.collection.name
-                    : "Moved successfully to " + item.collection.name);
+                    : "Moved successfully to " + item.collection.name,);
             _navigateToCollection(item.collection);
           }
         },
@@ -243,10 +243,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
               if (await _runCollectionAction(collection.id)) {
                 if (widget.actionType == CollectionActionType.restoreFiles) {
                   showShortToast(
-                      context, 'Restored files to album ' + _albumName);
+                      context, 'Restored files to album ' + _albumName,);
                 } else {
                   showShortToast(
-                      context, "Album '" + _albumName + "' created.");
+                      context, "Album '" + _albumName + "' created.",);
                 }
                 _navigateToCollection(collection);
               }
@@ -272,7 +272,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             type: PageTransitionType.bottomToTop,
             child: CollectionPage(
               CollectionWithThumbnail(collection, null),
-            )));
+            ),),);
   }
 
   Future<bool> _runCollectionAction(int collectionID) async {
@@ -293,7 +293,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     try {
       int fromCollectionID = widget.selectedFiles.files?.first?.collectionID;
       await CollectionsService.instance.move(toCollectionID, fromCollectionID,
-          widget.selectedFiles.files?.toList());
+          widget.selectedFiles.files?.toList(),);
       RemoteSyncService.instance.sync(silently: true);
       widget.selectedFiles?.clearAll();
       await dialog.hide();
@@ -340,7 +340,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       final List<File> filesPendingUpload = [];
       if (widget.sharedFiles != null) {
         filesPendingUpload.addAll(await convertIncomingSharedMediaToFile(
-            widget.sharedFiles, collectionID));
+            widget.sharedFiles, collectionID,),);
       } else {
         final List<File> filesPendingUpload = [];
         for (final file in widget.selectedFiles.files) {

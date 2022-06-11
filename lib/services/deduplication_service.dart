@@ -56,7 +56,7 @@ class DeduplicationService {
             InvalidStateError("Could not find " +
                 missingFileIDs.length.toString() +
                 " files in local DB: " +
-                missingFileIDs.toString()));
+                missingFileIDs.toString(),),);
       }
       return result;
     } catch (e) {

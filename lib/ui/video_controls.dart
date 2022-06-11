@@ -166,7 +166,7 @@ class _VideoControlsState extends State<VideoControls> {
                   child: Icon(
                       _latestValue.isPlaying ? Icons.pause : Icons.play_arrow,
                       color: Colors.white, // same for both themes
-                      size: 64.0),
+                      size: 64.0,),
                 ),
               ),
             ),
@@ -303,7 +303,7 @@ class _VideoControlsState extends State<VideoControls> {
                   playedColor: Theme.of(context).buttonColor,
                   handleColor: Colors.white,
                   bufferedColor: Colors.white,
-                  backgroundColor: Theme.of(context).disabledColor),
+                  backgroundColor: Theme.of(context).disabledColor,),
         ),
       ),
     );

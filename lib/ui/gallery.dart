@@ -83,7 +83,7 @@ class _GalleryState extends State<Gallery> {
           _logger.info("Force reload triggered");
           final result = await _loadFiles();
           _setFilesAndReload(result.files);
-        }));
+        }),);
       }
     }
     if (widget.initialFiles != null) {
@@ -112,14 +112,14 @@ class _GalleryState extends State<Gallery> {
       final startTime = DateTime.now().microsecondsSinceEpoch;
       final result = await widget.asyncLoader(
           kGalleryLoadStartTime, DateTime.now().microsecondsSinceEpoch,
-          limit: limit);
+          limit: limit,);
       final endTime = DateTime.now().microsecondsSinceEpoch;
       final duration = Duration(microseconds: endTime - startTime);
       _logger.info("Time taken to load " +
           result.files.length.toString() +
           " files :" +
           duration.inMilliseconds.toString() +
-          "ms");
+          "ms",);
       return result;
     } catch (e, s) {
       _logger.severe("failed to load files", e, s);
@@ -180,8 +180,8 @@ class _GalleryState extends State<Gallery> {
         }
         children.add(Expanded(
           child: nothingToSeeHere(
-              textColor: Theme.of(context).colorScheme.defaultTextColor),
-        ));
+              textColor: Theme.of(context).colorScheme.defaultTextColor,),
+        ),);
         if (widget.footer != null) {
           children.add(widget.footer);
         }
@@ -216,7 +216,7 @@ class _GalleryState extends State<Gallery> {
       },
       labelTextBuilder: (int index) {
         return getMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(
-            _collatedFiles[index][0].creationTime));
+            _collatedFiles[index][0].creationTime,),);
       },
       thumbBackgroundColor:
           Theme.of(context).colorScheme.galleryThumbBackgroundColor,
@@ -234,7 +234,7 @@ class _GalleryState extends State<Gallery> {
     for (int index = 0; index < files.length; index++) {
       if (index > 0 &&
           !_areFromSameDay(
-              files[index - 1].creationTime, files[index].creationTime)) {
+              files[index - 1].creationTime, files[index].creationTime,)) {
         final List<File> collatedDailyFiles = [];
         collatedDailyFiles.addAll(dailyFiles);
         collatedFiles.add(collatedDailyFiles);

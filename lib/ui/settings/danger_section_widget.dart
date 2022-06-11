@@ -42,7 +42,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
             _onDeleteAccountTapped();
           },
           child: SettingsTextItem(
-              text: "Delete account", icon: Icons.navigate_next),
+              text: "Delete account", icon: Icons.navigate_next,),
         ),
       ],
     );

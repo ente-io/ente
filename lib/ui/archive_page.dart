@@ -20,7 +20,7 @@ class ArchivePage extends StatelessWidget {
       {this.tagPrefix = "archived_page",
       this.appBarType = GalleryType.archive,
       this.overlayType = GalleryType.archive,
-      Key key})
+      Key key,})
       : super(key: key);
 
   @override
@@ -29,13 +29,13 @@ class ArchivePage extends StatelessWidget {
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getAllUploadedFiles(creationStartTime,
             creationEndTime, Configuration.instance.getUserID(),
-            visibility: kVisibilityArchive, limit: limit, asc: asc);
+            visibility: kVisibilityArchive, limit: limit, asc: asc,);
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
             (event) =>
                 event.updatedFiles.firstWhere(
                     (element) => element.uploadedFileID != null,
-                    orElse: () => null) !=
+                    orElse: () => null,) !=
                 null,
           ),
       removalEventTypes: const {EventType.unarchived},
@@ -44,7 +44,7 @@ class ArchivePage extends StatelessWidget {
               (event) =>
                   event.updatedFiles.firstWhere(
                       (element) => element.uploadedFileID != null,
-                      orElse: () => null) !=
+                      orElse: () => null,) !=
                   null,
             ),
       ],

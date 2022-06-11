@@ -35,9 +35,9 @@ class DebugSectionWidget extends StatelessWidget {
           Network.instance.getAlice().showInspector();
         },
         child: SettingsTextItem(
-            text: "Network requests", icon: Icons.navigate_next),
+            text: "Network requests", icon: Icons.navigate_next,),
       )
-    ]);
+    ],);
   }
 
   void _showKeyAttributesDialog(BuildContext context) {
@@ -53,13 +53,13 @@ class DebugSectionWidget extends StatelessWidget {
           Text(keyAttributes.encryptedKey),
           Padding(padding: EdgeInsets.all(12)),
           Text("Key Decryption Nonce",
-              style: TextStyle(fontWeight: FontWeight.bold)),
+              style: TextStyle(fontWeight: FontWeight.bold),),
           Text(keyAttributes.keyDecryptionNonce),
           Padding(padding: EdgeInsets.all(12)),
           Text("KEK Salt", style: TextStyle(fontWeight: FontWeight.bold)),
           Text(keyAttributes.kekSalt),
           Padding(padding: EdgeInsets.all(12)),
-        ]),
+        ],),
       ),
       actions: [
         TextButton(

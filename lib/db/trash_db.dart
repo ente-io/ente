@@ -65,7 +65,7 @@ class TrashDB {
       CREATE INDEX IF NOT EXISTS creation_time_index ON $tableName($columnCreationTime); 
       CREATE INDEX IF NOT EXISTS delete_by_time_index ON $tableName($columnTrashDeleteBy);
       CREATE INDEX IF NOT EXISTS updated_at_time_index ON $tableName($columnTrashUpdatedAt);
-      ''');
+      ''',);
   }
 
   TrashDB._privateConstructor();
@@ -102,7 +102,7 @@ class TrashDB {
   Future<TrashFile> getRecentlyTrashedFile() async {
     final db = await instance.database;
     var rows = await db.query(tableName,
-        orderBy: '$columnTrashDeleteBy DESC', limit: 1);
+        orderBy: '$columnTrashDeleteBy DESC', limit: 1,);
     if (rows == null || rows.isEmpty) {
       return null;
     }
@@ -112,7 +112,7 @@ class TrashDB {
   Future<int> count() async {
     final db = await instance.database;
     var count = Sqflite.firstIntValue(
-        await db.rawQuery('SELECT COUNT(*) FROM $tableName'));
+        await db.rawQuery('SELECT COUNT(*) FROM $tableName'),);
     return count;
   }
 
@@ -138,12 +138,12 @@ class TrashDB {
     final endTime = DateTime.now();
     final duration = Duration(
         microseconds:
-            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
+            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch,);
     _logger.info("Batch insert of " +
         trashFiles.length.toString() +
         " took " +
         duration.inMilliseconds.toString() +
-        "ms.");
+        "ms.",);
   }
 
   Future<int> insert(TrashFile trash) async {
@@ -174,7 +174,7 @@ class TrashDB {
   }
 
   Future<FileLoadResult> getTrashedFiles(int startTime, int endTime,
-      {int limit, bool asc}) async {
+      {int limit, bool asc,}) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(

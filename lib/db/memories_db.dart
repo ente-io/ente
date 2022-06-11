@@ -40,7 +40,7 @@ class MemoriesDB {
                   $columnFileID INTEGER PRIMARY KEY NOT NULL,
                   $columnSeenTime TEXT NOT NULL
                 )
-                ''');
+                ''',);
   }
 
   Future<void> clearTable() async {
@@ -60,7 +60,7 @@ class MemoriesDB {
   Future<int> markMemoryAsSeen(Memory memory, int timestamp) async {
     final db = await instance.database;
     return await db.insert(table, _getRowForSeenMemory(memory, timestamp),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+        conflictAlgorithm: ConflictAlgorithm.replace,);
   }
 
   Future<Map<int, int>> getSeenTimes() async {

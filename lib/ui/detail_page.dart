@@ -97,7 +97,7 @@ class _DetailPageState extends State<DetailPage> {
         (_selectedIndex + 1).toString() +
         " / " +
         _files.length.toString() +
-        " files .");
+        " files .",);
     _appBarKey = GlobalKey<FadingAppBarState>();
     _bottomBarKey = GlobalKey<FadingBottomBarState>();
     return Scaffold(
@@ -201,7 +201,7 @@ class _DetailPageState extends State<DetailPage> {
           _files[_selectedIndex].creationTime + 1,
           DateTime.now().microsecondsSinceEpoch,
           limit: kLoadLimit,
-          asc: true);
+          asc: true,);
       setState(() {
         // Returned result could be a subtype of File
         // ignore: unnecessary_cast
@@ -219,7 +219,7 @@ class _DetailPageState extends State<DetailPage> {
     if (_selectedIndex == _files.length - 1 && !_hasLoadedTillEnd) {
       final result = await widget.config.asyncLoader(
           kGalleryLoadStartTime, _files[_selectedIndex].creationTime - 1,
-          limit: kLoadLimit);
+          limit: kLoadLimit,);
       setState(() {
         if (!result.hasMore) {
           _hasLoadedTillEnd = true;
@@ -248,13 +248,13 @@ class _DetailPageState extends State<DetailPage> {
     if (_selectedIndex == totalFiles - 1) {
       // Deleted the last file
       await _pageController.previousPage(
-          duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
+          duration: Duration(milliseconds: 200), curve: Curves.easeInOut,);
       setState(() {
         _files.remove(file);
       });
     } else {
       await _pageController.nextPage(
-          duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
+          duration: Duration(milliseconds: 200), curve: Curves.easeInOut,);
       setState(() {
         _selectedIndex--;
         _files.remove(file);
@@ -266,9 +266,9 @@ class _DetailPageState extends State<DetailPage> {
     if (file.uploadedFileID != null &&
         file.ownerID != Configuration.instance.getUserID()) {
       _logger.severe("Attempt to edit unowned file", UnauthorizedEditError(),
-          StackTrace.current);
+          StackTrace.current,);
       showErrorDialog(context, "Sorry",
-          "We don't support editing photos and albums that you don't own yet");
+          "We don't support editing photos and albums that you don't own yet",);
       return;
     }
     final dialog = createProgressDialog(context, "Please wait...");

@@ -59,7 +59,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     _volatilePassword = Configuration.instance.getVolatilePassword();
     if (_volatilePassword != null) {
       Future.delayed(
-          Duration.zero, () => _showRecoveryCodeDialog(_volatilePassword));
+          Duration.zero, () => _showRecoveryCodeDialog(_volatilePassword),);
     }
     _password1FocusNode.addListener(() {
       setState(() {
@@ -117,7 +117,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
             } else {
               _updatePassword();
             }
-          }),
+          },),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
     );
@@ -147,7 +147,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(buttonTextAndHeading,
-                      style: Theme.of(context).textTheme.headline4),
+                      style: Theme.of(context).textTheme.headline4,),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -174,14 +174,14 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                           children: [
                         TextSpan(
                             text:
-                                "We don't store this password, so if you forget, "),
+                                "We don't store this password, so if you forget, ",),
                         TextSpan(
                           text: "we cannot decrypt your data",
                           style: Theme.of(context).textTheme.subtitle1.copyWith(
                               fontSize: 14,
-                              decoration: TextDecoration.underline),
+                              decoration: TextDecoration.underline,),
                         ),
-                      ])),
+                      ],),),
                 ),
                 Padding(padding: EdgeInsets.all(12)),
                 Visibility(
@@ -210,7 +210,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       contentPadding: EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                           borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(6)),
+                          borderRadius: BorderRadius.circular(6),),
                       suffixIcon: _password1InFocus
                           ? IconButton(
                               icon: Icon(
@@ -274,7 +274,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                           filled: true,
                           hintText: "Confirm password",
                           contentPadding: EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 20),
+                              horizontal: 20, vertical: 20,),
                           suffixIcon: _password2InFocus
                               ? IconButton(
                                   icon: Icon(
@@ -302,7 +302,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                   : null,
                           border: UnderlineInputBorder(
                               borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(6)),
+                              borderRadius: BorderRadius.circular(6),),
                         ),
                         focusNode: _password2FocusNode,
                         onChanged: (cnfPassword) {
@@ -328,7 +328,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                 width: MediaQuery.of(context).size.width,
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 20),
+                                      horizontal: 20,),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       boxShadow: [
@@ -355,24 +355,24 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                         children: [
                                           Padding(
                                             padding: const EdgeInsets.fromLTRB(
-                                                4.0, 4, 4.0, 4.0),
+                                                4.0, 4, 4.0, 4.0,),
                                             child: Row(
                                               children: [
                                                 Padding(
                                                     padding:
                                                         EdgeInsets.symmetric(
                                                             horizontal: 10,
-                                                            vertical: 5),
+                                                            vertical: 5,),
                                                     child: Text(
                                                       'Password Strength: $passwordStrengthText',
                                                       style: TextStyle(
                                                           color:
-                                                              passwordStrengthColor),
-                                                    )),
+                                                              passwordStrengthColor,),
+                                                    ),),
                                               ],
                                             ),
                                           ),
-                                        ]),
+                                        ],),
                                   ),
                                 ),
                               ),
@@ -380,7 +380,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                 width: 20,
                               ),
                             ],
-                          )),
+                          ),),
                     ),
                   ],
                   clipBehavior: Clip.none,
@@ -395,7 +395,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       MaterialPageRoute(
                         builder: (BuildContext context) {
                           return WebPage(
-                              "How it works", "https://ente.io/architecture");
+                              "How it works", "https://ente.io/architecture",);
                         },
                       ),
                     );
@@ -407,7 +407,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                           text: "How it works",
                           style: Theme.of(context).textTheme.subtitle1.copyWith(
                               fontSize: 14,
-                              decoration: TextDecoration.underline)),
+                              decoration: TextDecoration.underline,),),
                     ),
                   ),
                 ),
@@ -481,13 +481,13 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
             isDismissible: false,
             onDone: onDone,
             showProgressBar: true,
-          ));
+          ),);
     } catch (e) {
       _logger.severe(e);
       await dialog.hide();
       if (e is UnsupportedError) {
         showErrorDialog(context, "Insecure device",
-            "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.");
+            "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.",);
       } else {
         showGenericErrorDialog(context);
       }

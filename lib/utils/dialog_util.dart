@@ -9,7 +9,7 @@ ProgressDialog createProgressDialog(BuildContext context, String message) {
   final dialog = ProgressDialog(context,
       type: ProgressDialogType.Normal,
       isDismissible: false,
-      barrierColor: Colors.black12);
+      barrierColor: Colors.black12,);
   dialog.style(
     message: message,
     messageTextStyle: Theme.of(context).textTheme.caption,
@@ -23,7 +23,7 @@ ProgressDialog createProgressDialog(BuildContext context, String message) {
 }
 
 Future<dynamic> showErrorDialog(
-    BuildContext context, String title, String content) {
+    BuildContext context, String title, String content,) {
   AlertDialog alert = AlertDialog(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     title: Text(

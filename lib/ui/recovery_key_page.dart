@@ -30,7 +30,7 @@ class RecoveryKeyPage extends StatefulWidget {
       this.title,
       this.text,
       this.subText,
-      this.showProgressBar = false})
+      this.showProgressBar = false,})
       : super(key: key);
 
   @override
@@ -40,14 +40,14 @@ class RecoveryKeyPage extends StatefulWidget {
 class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
   bool _hasTriedToSave = false;
   final _recoveryKeyFile = io.File(
-      Configuration.instance.getTempDirectory() + "ente-recovery-key.txt");
+      Configuration.instance.getTempDirectory() + "ente-recovery-key.txt",);
 
   @override
   Widget build(BuildContext context) {
     final String recoveryKey = bip39.entropyToMnemonic(widget.recoveryKey);
     if (recoveryKey.split(' ').length != kMnemonicKeyWordCount) {
       throw AssertionError(
-          'recovery code should have $kMnemonicKeyWordCount words');
+          'recovery code should have $kMnemonicKeyWordCount words',);
     }
 
     return Scaffold(
@@ -81,7 +81,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                     ? 32
                     : 120,
             20,
-            20),
+            20,),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.max,
@@ -89,7 +89,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
             widget.showAppBar
                 ? const SizedBox.shrink()
                 : Text(widget.title ?? "Recovery key",
-                    style: Theme.of(context).textTheme.headline4),
+                    style: Theme.of(context).textTheme.headline4,),
             Padding(padding: EdgeInsets.all(widget.showAppBar ? 0 : 12)),
             Text(
               widget.text ??
@@ -116,7 +116,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                     GestureDetector(
                       onTap: () async {
                         await Clipboard.setData(
-                            ClipboardData(text: recoveryKey));
+                            ClipboardData(text: recoveryKey),);
                         showToast(context, "Recovery key copied to clipboard");
                         setState(() {
                           _hasTriedToSave = true;
@@ -155,7 +155,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                         "We don’t store this key, please save this in a safe place.",
                     style: Theme.of(context).textTheme.bodyText1,
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 20)),
+                  padding: EdgeInsets.symmetric(vertical: 20),),
             ),
             Expanded(
               child: Container(
@@ -165,7 +165,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: _saveOptions(context, recoveryKey)),
+                    children: _saveOptions(context, recoveryKey),),
               ),
             )
           ],
@@ -183,7 +183,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         onPressed: () async {
           await _saveKeys();
         },
-      ));
+      ),);
       childrens.add(SizedBox(height: 10));
     }
 
@@ -199,7 +199,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       onTap: () async {
         await _shareRecoveryKey(recoveryKey);
       },
-    ));
+    ),);
     if (_hasTriedToSave) {
       childrens.add(SizedBox(height: 10));
       childrens.add(ElevatedButton(
@@ -207,7 +207,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         onPressed: () async {
           await _saveKeys();
         },
-      ));
+      ),);
     }
     childrens.add(SizedBox(height: 12));
     return childrens;

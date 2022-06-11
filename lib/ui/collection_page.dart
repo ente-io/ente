@@ -21,7 +21,7 @@ class CollectionPage extends StatelessWidget {
       {this.tagPrefix = "collection",
       this.appBarType = GalleryType.owned_collection,
       this.overlayType = GalleryType.owned_collection,
-      Key key})
+      Key key,})
       : super(key: key);
 
   @override
@@ -31,7 +31,7 @@ class CollectionPage extends StatelessWidget {
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInCollection(
             c.collection.id, creationStartTime, creationEndTime,
-            limit: limit, asc: asc);
+            limit: limit, asc: asc,);
       },
       reloadEvent: Bus.instance
           .on<CollectionUpdatedEvent>()

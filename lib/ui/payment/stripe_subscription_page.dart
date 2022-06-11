@@ -121,8 +121,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             BoxShadow(
                 color: Theme.of(context).backgroundColor,
                 blurRadius: 16,
-                offset: Offset(0, 8))
-          ]),
+                offset: Offset(0, 8),)
+          ],),
           child: widget.isOnboarding
               ? AppBar(
                   elevation: 0,
@@ -136,12 +136,12 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                         unselectedColor: Theme.of(context)
                             .colorScheme
                             .stepProgressUnselectedColor,
-                      )),
+                      ),),
                 )
               : AppBar(
                   elevation: 0,
                   title: Text("Subscription"),
-                )),
+                ),),
     );
     return Scaffold(
       appBar: appBar,
@@ -179,12 +179,12 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     widgets.add(SubscriptionHeaderWidget(
       isOnboarding: widget.isOnboarding,
       currentUsage: _userDetails.getFamilyOrPersonalUsage(),
-    ));
+    ),);
 
     widgets.addAll([
       Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: _getStripePlanWidgets()),
+          children: _getStripePlanWidgets(),),
       Padding(padding: EdgeInsets.all(4)),
     ]);
 
@@ -220,14 +220,14 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   launch(
                       "https://play.google.com/store/account/subscriptions?sku=" +
                           _currentSubscription.productID +
-                          "&package=io.ente.photos");
+                          "&package=io.ente.photos",);
                   break;
                 case kAppStore:
                   launch("https://apps.apple.com/account/billing");
                   break;
                 default:
                   _logger.severe(
-                      "unexpected payment provider ", _currentSubscription);
+                      "unexpected payment provider ", _currentSubscription,);
               }
             },
             child: Container(
@@ -246,7 +246,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                           decoration: _isStripeSubscriber
                               ? TextDecoration.underline
                               : TextDecoration.none,
-                        )),
+                        ),),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -318,7 +318,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       await showErrorDialog(
           context,
           "Now you can share your storage plan with your family members!",
-          "Customers on paid plans can add up to 5 family members without paying extra. Each member gets their own private space.");
+          "Customers on paid plans can add up to 5 family members without paying extra. Each member gets their own private space.",);
       return;
     }
     await _dialog.show();
@@ -328,9 +328,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       Navigator.of(context).push(MaterialPageRoute(
         builder: (BuildContext context) {
           return WebPage("Family",
-              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist');
+              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist',);
         },
-      )).then((value) => onWebPaymentGoBack);
+      ),).then((value) => onWebPaymentGoBack);
     } catch (e) {
       await _dialog.hide();
       showGenericErrorDialog(context);
@@ -358,14 +358,14 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         if (isRenewCancelled) {
           var choice = await showChoiceDialog(
               context, title, "are you sure you want to renew?",
-              firstAction: "no", secondAction: "yes");
+              firstAction: "no", secondAction: "yes",);
           confirmAction = choice == DialogUserChoice.secondChoice;
         } else {
           var choice = await showChoiceDialog(
               context, title, 'are you sure you want to cancel?',
               firstAction: 'yes, cancel',
               secondAction: 'no',
-              actionType: ActionType.critical);
+              actionType: ActionType.critical,);
           confirmAction = choice == DialogUserChoice.firstChoice;
         }
         if (confirmAction) {
@@ -384,7 +384,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       await _fetchSub();
     } catch (e) {
       showToast(
-          context, isRenewCancelled ? 'failed to renew' : 'failed to cancel');
+          context, isRenewCancelled ? 'failed to renew' : 'failed to cancel',);
     }
     await _dialog.hide();
   }
@@ -415,12 +415,12 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   _hasActiveSubscription &&
                   _currentSubscription.productID != kFreeProductID) {
                 showErrorDialog(context, "Sorry",
-                    "please cancel your existing subscription from ${_currentSubscription.paymentProvider} first");
+                    "please cancel your existing subscription from ${_currentSubscription.paymentProvider} first",);
                 return;
               }
               if (_userDetails.getFamilyOrPersonalUsage() > plan.storage) {
                 showErrorDialog(
-                    context, "Sorry", "you cannot downgrade to this plan");
+                    context, "Sorry", "you cannot downgrade to this plan",);
                 return;
               }
               String stripPurChaseAction = 'buy';
@@ -431,7 +431,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                     "Confirm plan change",
                     "Are you sure you want to change your plan?",
                     firstAction: "No",
-                    secondAction: 'Yes');
+                    secondAction: 'Yes',);
                 if (result != DialogUserChoice.secondChoice) {
                   return;
                 }

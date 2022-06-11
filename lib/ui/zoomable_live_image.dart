@@ -75,12 +75,12 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       content = ZoomableImage(_file,
           tagPrefix: widget.tagPrefix,
           shouldDisableScroll: widget.shouldDisableScroll,
-          backgroundDecoration: widget.backgroundDecoration);
+          backgroundDecoration: widget.backgroundDecoration,);
     }
     return GestureDetector(
         onLongPressStart: (_) => {_onLongPressEvent(true)},
         onLongPressEnd: (_) => {_onLongPressEvent(false)},
-        child: content);
+        child: content,);
   }
 
   @override
@@ -104,7 +104,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
         autoInitialize: true,
         looping: true,
         allowFullScreen: false,
-        showControls: false);
+        showControls: false,);
     return Chewie(controller: _chewieController);
   }
 

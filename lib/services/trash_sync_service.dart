@@ -113,7 +113,7 @@ class TrashSyncService {
   }
 
   Future<Response<dynamic>> _trashFiles(
-      Map<String, dynamic> requestData) async {
+      Map<String, dynamic> requestData,) async {
     return _dio.post(
       Configuration.instance.getHttpEndpoint() + "/files/trash",
       options: Options(

@@ -25,7 +25,7 @@ class DeviceFolderPage extends StatelessWidget {
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInPath(
             folder.path, creationStartTime, creationEndTime,
-            limit: limit, asc: asc);
+            limit: limit, asc: asc,);
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       removalEventTypes: const {
@@ -99,7 +99,7 @@ class _BackupConfigurationHeaderWidgetState
                       color: Theme.of(context)
                           .colorScheme
                           .defaultTextColor
-                          .withOpacity(0.7)),
+                          .withOpacity(0.7),),
                 ),
           Switch(
             value: isBackedUp,

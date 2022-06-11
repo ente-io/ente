@@ -101,7 +101,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       folders.add(DeviceFolder(file.deviceFolder, file.deviceFolder, file));
     }
     folders.sort((first, second) =>
-        second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime));
+        second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime),);
 
     final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
     final latestCollectionFiles =
@@ -137,7 +137,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         .subtitle1
         .copyWith(
             color:
-                Theme.of(context).textTheme.subtitle1.color.withOpacity(0.5));
+                Theme.of(context).textTheme.subtitle1.color.withOpacity(0.5),);
     Size size = MediaQuery.of(context).size;
     int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
     final double sideOfThumbnail = (size.width / 2) -
@@ -156,7 +156,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                     padding: const EdgeInsets.all(22),
                     child: nothingToSeeHere(
                         textColor:
-                            Theme.of(context).colorScheme.defaultTextColor),
+                            Theme.of(context).colorScheme.defaultTextColor,),
                   )
                 : Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -168,7 +168,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                             ? nothingToSeeHere(
                                 textColor: Theme.of(context)
                                     .colorScheme
-                                    .defaultTextColor)
+                                    .defaultTextColor,)
                             : ListView.builder(
                                 shrinkWrap: true,
                                 scrollDirection: Axis.horizontal,
@@ -203,7 +203,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       // to disable GridView's scrolling
                       itemBuilder: (context, index) {
                         return _buildCollection(
-                            context, items.collections, index);
+                            context, items.collections, index,);
                       },
                       itemCount: items.collections.length + 1,
                       // To include the + button
@@ -213,11 +213,11 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                           crossAxisSpacing: crossAxisSpacingOfGrid,
                           childAspectRatio: sideOfThumbnail /
                               (sideOfThumbnail +
-                                  24)), //24 is height of album title
+                                  24),), //24 is height of album title
                     ),
                   )
                 : nothingToSeeHere(
-                    textColor: Theme.of(context).colorScheme.defaultTextColor),
+                    textColor: Theme.of(context).colorScheme.defaultTextColor,),
             const SizedBox(height: 10),
             const Divider(),
             const Padding(padding: EdgeInsets.all(8)),
@@ -265,12 +265,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                                 text: "Trash",
                                                 style: Theme.of(context)
                                                     .textTheme
-                                                    .subtitle1),
+                                                    .subtitle1,),
                                             TextSpan(text: "  \u2022  "),
                                             TextSpan(
-                                                text: snapshot.data.toString()),
+                                                text: snapshot.data.toString(),),
                                             //need to query in db and bring this value
-                                          ]));
+                                          ],),);
                                     } else {
                                       return RichText(
                                           text: TextSpan(
@@ -280,9 +280,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                                 text: "Trash",
                                                 style: Theme.of(context)
                                                     .textTheme
-                                                    .subtitle1),
+                                                    .subtitle1,),
                                             //need to query in db and bring this value
-                                          ]));
+                                          ],),);
                                     }
                                   },
                                 ),
@@ -336,7 +336,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                   future: FilesDB.instance
                                       .fileCountWithVisibility(
                                           kVisibilityArchive,
-                                          Configuration.instance.getUserID()),
+                                          Configuration.instance.getUserID(),),
                                   builder: (context, snapshot) {
                                     if (snapshot.hasData && snapshot.data > 0) {
                                       return RichText(
@@ -347,12 +347,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                                 text: "Hidden",
                                                 style: Theme.of(context)
                                                     .textTheme
-                                                    .subtitle1),
+                                                    .subtitle1,),
                                             TextSpan(text: "  \u2022  "),
                                             TextSpan(
-                                                text: snapshot.data.toString()),
+                                                text: snapshot.data.toString(),),
                                             //need to query in db and bring this value
-                                          ]));
+                                          ],),);
                                     } else {
                                       return RichText(
                                           text: TextSpan(
@@ -362,9 +362,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                                 text: "Hidden",
                                                 style: Theme.of(context)
                                                     .textTheme
-                                                    .subtitle1),
+                                                    .subtitle1,),
                                             //need to query in db and bring this value
-                                          ]));
+                                          ],),);
                                     }
                                   },
                                 ),
@@ -411,7 +411,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       return Text(text,
           style: Theme.of(context).textTheme.subtitle1.copyWith(
               fontSize: 14,
-              color: Theme.of(context).iconTheme.color.withOpacity(0.7)));
+              color: Theme.of(context).iconTheme.color.withOpacity(0.7),),);
     }
 
     return Padding(
@@ -461,7 +461,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   }
 
   Widget _buildCollection(BuildContext context,
-      List<CollectionWithThumbnail> collections, int index) {
+      List<CollectionWithThumbnail> collections, int index,) {
     if (index < collections.length) {
       final c = collections[index];
       return CollectionItem(c);
@@ -476,7 +476,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                   blurRadius: 2,
                   spreadRadius: 0,
                   offset: Offset(0, 0),
-                  color: Theme.of(context).iconTheme.color.withOpacity(0.3))
+                  color: Theme.of(context).iconTheme.color.withOpacity(0.3),)
             ],
             borderRadius: BorderRadius.circular(4),
           ),
@@ -488,7 +488,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         onTap: () async {
           await showToast(context,
               "long press to select photos and click + to create an album",
-              toastLength: Toast.LENGTH_LONG);
+              toastLength: Toast.LENGTH_LONG,);
           Bus.instance
               .fire(TabChangedEvent(0, TabChangedEventSource.collections_page));
         },
@@ -568,7 +568,7 @@ class DeviceFolderIcon extends StatelessWidget {
                           shouldShowSyncStatus: false,
                           key: Key("device_folder:" +
                               folder.path +
-                              folder.thumbnail.tag()),
+                              folder.thumbnail.tag(),),
                         ),
                         isBackedUp ? Container() : kUnsyncedIconOverlay,
                       ],
@@ -631,9 +631,9 @@ class CollectionItem extends StatelessWidget {
                       key: Key(
                         "collection" + c.thumbnail.tag(),
                       ),
-                    )),
+                    ),),
                 height: sideOfThumbnail,
-                width: sideOfThumbnail),
+                width: sideOfThumbnail,),
           ),
           SizedBox(height: 4),
           Row(
@@ -654,12 +654,12 @@ class CollectionItem extends StatelessWidget {
                         text: TextSpan(
                             style: albumTitleTextStyle.copyWith(
                                 color:
-                                    albumTitleTextStyle.color.withOpacity(0.5)),
+                                    albumTitleTextStyle.color.withOpacity(0.5),),
                             children: [
                           TextSpan(text: "  \u2022  "),
                           TextSpan(text: snapshot.data.toString()),
                           //need to query in db and bring this value
-                        ]));
+                        ],),);
                   } else {
                     return Container();
                   }

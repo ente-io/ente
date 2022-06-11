@@ -63,7 +63,7 @@ class ScrollBarThumb extends StatelessWidget {
                 elevation: 4.0,
                 child: Container(
                     constraints:
-                        BoxConstraints.tight(Size(height * 0.6, height))),
+                        BoxConstraints.tight(Size(height * 0.6, height)),),
                 color: backgroundColor,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(height),
@@ -101,19 +101,19 @@ class _ArrowCustomPainter extends CustomPainter {
 
     canvas.drawPath(
         trianglePath(Offset(baseX - 2.0, baseY - 2.0), width, height, true),
-        paint);
+        paint,);
     canvas.drawPath(
         trianglePath(Offset(baseX - 2.0, baseY + 2.0), width, height, false),
-        paint);
+        paint,);
   }
 
   static Path trianglePath(
-      Offset offset, double width, double height, bool isUp) {
+      Offset offset, double width, double height, bool isUp,) {
     return Path()
       ..moveTo(offset.dx, offset.dy)
       ..lineTo(offset.dx + width, offset.dy)
       ..lineTo(offset.dx + (width / 2),
-          isUp ? offset.dy - height : offset.dy + height)
+          isUp ? offset.dy - height : offset.dy + height,)
       ..close();
   }
 }

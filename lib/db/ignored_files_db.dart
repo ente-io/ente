@@ -32,7 +32,7 @@ class IgnoredFilesDB {
         );
       CREATE INDEX IF NOT EXISTS local_id_index ON $tableName($columnLocalID);
       CREATE INDEX IF NOT EXISTS device_folder_index ON $tableName($columnDeviceFolder);
-      ''');
+      ''',);
   }
 
   IgnoredFilesDB._privateConstructor();
@@ -86,9 +86,9 @@ class IgnoredFilesDB {
     final endTime = DateTime.now();
     final duration = Duration(
         microseconds:
-            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
+            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch,);
     _logger.info("Batch insert of ${ignoredFiles.length} "
-        "took ${duration.inMilliseconds} ms.");
+        "took ${duration.inMilliseconds} ms.",);
   }
 
   Future<List<IgnoredFile>> getAll() async {
@@ -103,7 +103,7 @@ class IgnoredFilesDB {
 
   IgnoredFile _getIgnoredFileFromRow(Map<String, dynamic> row) {
     return IgnoredFile(row[columnLocalID], row[columnTitle],
-        row[columnDeviceFolder], row[columnReason]);
+        row[columnDeviceFolder], row[columnReason],);
   }
 
   Map<String, dynamic> _getRowForIgnoredFile(IgnoredFile ignoredFile) {

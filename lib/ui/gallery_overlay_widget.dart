@@ -28,7 +28,7 @@ class GalleryOverlayWidget extends StatefulWidget {
   final String path;
   final Collection collection;
   const GalleryOverlayWidget(this.type, this.selectedFiles,
-      {this.path, this.collection, Key key})
+      {this.path, this.collection, Key key,})
       : super(key: key);
 
   @override
@@ -222,7 +222,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             child: CreateCollectionPage(
               widget.selectedFiles,
               null,
-            )));
+            ),),);
   }
 
   Future<void> _moveFiles() async {
@@ -234,7 +234,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
               widget.selectedFiles,
               null,
               actionType: CollectionActionType.moveFiles,
-            )));
+            ),),);
   }
 
   List<Widget> _getActions(BuildContext context) {
@@ -278,7 +278,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             color: Theme.of(context).colorScheme.iconColor,
             icon: Icon(Platform.isAndroid
                 ? Icons.arrow_forward
-                : CupertinoIcons.arrow_right),
+                : CupertinoIcons.arrow_right,),
             onPressed: () {
               _moveFiles();
             },
@@ -361,10 +361,10 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           ),
           onPressed: () {
             _handleVisibilityChangeRequest(
-                context, showArchive ? kVisibilityArchive : kVisibilityVisible);
+                context, showArchive ? kVisibilityArchive : kVisibilityVisible,);
           },
         ),
-      ));
+      ),);
     }
     return actions;
   }
@@ -386,10 +386,10 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                     widget.selectedFiles,
                     null,
                     actionType: CollectionActionType.restoreFiles,
-                  )));
+                  ),),);
         },
       ),
-    ));
+    ),);
     actions.add(
       Tooltip(
         message: "Delete permanently",
@@ -400,7 +400,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           ),
           onPressed: () async {
             if (await deleteFromTrash(
-                context, widget.selectedFiles.files.toList())) {
+                context, widget.selectedFiles.files.toList(),)) {
               _clearSelectedFiles();
             }
           },
@@ -410,10 +410,10 @@ class _OverlayWidgetState extends State<OverlayWidget> {
   }
 
   Future<void> _handleVisibilityChangeRequest(
-      BuildContext context, int newVisibility) async {
+      BuildContext context, int newVisibility,) async {
     try {
       await changeVisibility(
-          context, widget.selectedFiles.files.toList(), newVisibility);
+          context, widget.selectedFiles.files.toList(), newVisibility,);
     } catch (e, s) {
       _logger.severe("failed to update file visibility", e, s);
       await showGenericErrorDialog(context);
@@ -424,7 +424,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
 
   void _shareSelected(BuildContext context) {
     share(context, widget.selectedFiles.files.toList(),
-        shareButtonKey: shareButtonKey);
+        shareButtonKey: shareButtonKey,);
   }
 
   void _showDeleteSheet(BuildContext context) {
@@ -446,32 +446,32 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         onPressed: () async {
           Navigator.of(context, rootNavigator: true).pop();
           await deleteFilesOnDeviceOnly(
-              context, widget.selectedFiles.files.toList());
+              context, widget.selectedFiles.files.toList(),);
           _clearSelectedFiles();
           showToast(context, "Files deleted from device");
         },
-      ));
+      ),);
       actions.add(CupertinoActionSheetAction(
         child: Text("ente"),
         isDestructiveAction: true,
         onPressed: () async {
           Navigator.of(context, rootNavigator: true).pop();
           await deleteFilesFromRemoteOnly(
-              context, widget.selectedFiles.files.toList());
+              context, widget.selectedFiles.files.toList(),);
           _clearSelectedFiles();
           showShortToast(context, "Moved to trash");
         },
-      ));
+      ),);
       actions.add(CupertinoActionSheetAction(
         child: Text("Everywhere"),
         isDestructiveAction: true,
         onPressed: () async {
           Navigator.of(context, rootNavigator: true).pop();
           await deleteFilesFromEverywhere(
-              context, widget.selectedFiles.files.toList());
+              context, widget.selectedFiles.files.toList(),);
           _clearSelectedFiles();
         },
-      ));
+      ),);
     } else {
       actions.add(CupertinoActionSheetAction(
         child: Text("Delete"),
@@ -479,17 +479,17 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         onPressed: () async {
           Navigator.of(context, rootNavigator: true).pop();
           await deleteFilesFromEverywhere(
-              context, widget.selectedFiles.files.toList());
+              context, widget.selectedFiles.files.toList(),);
           _clearSelectedFiles();
         },
-      ));
+      ),);
     }
     final action = CupertinoActionSheet(
       title: Text("Delete " +
           count.toString() +
           " file" +
           (count == 1 ? "" : "s") +
-          (containsUploadedFile && containsLocalFile ? " from" : "?")),
+          (containsUploadedFile && containsLocalFile ? " from" : "?"),),
       actions: actions,
       cancelButton: CupertinoActionSheetAction(
         child: Text("Cancel"),
@@ -514,7 +514,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           (count == 1 ? "" : "s") +
           " from " +
           widget.collection.name +
-          "?"),
+          "?",),
       actions: <Widget>[
         CupertinoActionSheetAction(
           child: Text("Remove"),
@@ -525,7 +525,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             await dialog.show();
             try {
               await CollectionsService.instance.removeFromCollection(
-                  widget.collection.id, widget.selectedFiles.files.toList());
+                  widget.collection.id, widget.selectedFiles.files.toList(),);
               await dialog.hide();
               widget.selectedFiles.clearAll();
             } catch (e, s) {

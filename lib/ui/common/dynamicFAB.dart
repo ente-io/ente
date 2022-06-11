@@ -14,7 +14,7 @@ class DynamicFAB extends StatelessWidget {
       this.isKeypadOpen,
       this.buttonText,
       this.isFormValid,
-      this.onPressedFunction})
+      this.onPressedFunction,})
       : super(key: key);
 
   @override
@@ -52,7 +52,7 @@ class DynamicFAB extends StatelessWidget {
                     ? onPressedFunction
                     : () {
                         FocusScope.of(context).unfocus();
-                      } //keypad down here
+                      }, //keypad down here
                 ),
           ],
         ),

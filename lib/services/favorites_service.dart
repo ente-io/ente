@@ -37,7 +37,7 @@ class FavoritesService {
       return false;
     }
     return _filesDB.doesFileExistInCollection(
-        file.uploadedFileID, collection.id);
+        file.uploadedFileID, collection.id,);
   }
 
   Future<void> addToFavorites(File file) async {
@@ -98,7 +98,7 @@ class FavoritesService {
       null,
       null,
       null,
-    ));
+    ),);
     _cachedFavoritesCollectionID = collection.id;
     return collection.id;
   }

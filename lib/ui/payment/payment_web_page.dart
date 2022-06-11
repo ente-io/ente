@@ -114,7 +114,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
               ),
             ].where((Object o) => o != null).toList(),
           ),
-        ));
+        ),);
   }
 
   @override
@@ -149,7 +149,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
             child: Text('Yes',
                 style: TextStyle(
                   color: Colors.redAccent,
-                )),
+                ),),
             onPressed: () => Navigator.of(context).pop(true),
           ),
           TextButton(
@@ -199,8 +199,8 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
                       child: Text('Ok'),
                       onPressed: () {
                         Navigator.of(context).pop('dialog');
-                      }),
-                ]));
+                      },),
+                ],),);
     Navigator.of(context).pop(true);
   }
 
@@ -211,7 +211,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     try {
       var response = await billingService.verifySubscription(
           widget.planId, checkoutSessionID,
-          paymentProvider: kStripe);
+          paymentProvider: kStripe,);
       await _dialog.hide();
       if (response != null) {
         var content = widget.actionType == 'buy'
@@ -247,7 +247,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
               ),
               onPressed: () {
                 Navigator.of(context).pop('dialog');
-              }),
+              },),
         ],
       ),
     ).then((val) => Navigator.pop(context, true));

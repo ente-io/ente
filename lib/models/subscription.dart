@@ -135,7 +135,7 @@ class Attributes {
 
   Attributes({
     this.isCancelled,
-    this.customerID});
+    this.customerID,});
 
   Attributes.fromJson(dynamic json) {
     isCancelled = json["isCancelled"];

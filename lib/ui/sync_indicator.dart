@@ -142,7 +142,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
                         },
                       ),
                     );
-                  }),
+                  },),
             ),
             Padding(padding: EdgeInsets.all(8)),
           ],
@@ -180,7 +180,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
                         },
                       ),
                     );
-                  }),
+                  },),
             ),
             Padding(padding: EdgeInsets.all(8)),
           ],

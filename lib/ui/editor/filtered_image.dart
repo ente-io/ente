@@ -21,16 +21,16 @@ class FilteredImage extends StatelessWidget {
       colorFilter:
           ColorFilter.matrix(ColorFilterGenerator.brightnessAdjustMatrix(
         value: brightness ?? 1,
-      )),
+      ),),
       child: ColorFiltered(
         colorFilter:
             ColorFilter.matrix(ColorFilterGenerator.saturationAdjustMatrix(
           value: saturation ?? 1,
-        )),
+        ),),
         child: ColorFiltered(
           colorFilter: ColorFilter.matrix(ColorFilterGenerator.hueAdjustMatrix(
             value: hue ?? 0,
-          )),
+          ),),
           child: child,
         ),
       ),

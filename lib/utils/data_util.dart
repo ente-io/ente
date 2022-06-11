@@ -2,7 +2,7 @@ import 'dart:math';
 
 double convertBytesToGBs(final int bytes, {int precision = 2}) {
   return double.parse(
-      (bytes / (1024 * 1024 * 1024)).toStringAsFixed(precision));
+      (bytes / (1024 * 1024 * 1024)).toStringAsFixed(precision),);
 }
 
 final kStorageUnits = ["bytes", "KB", "MB", "GB"];

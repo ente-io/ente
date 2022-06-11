@@ -192,7 +192,7 @@ class _ExpansionTileState extends State<ExpansionCard>
                             child: const Icon(Icons.expand_more),
                           ),
                     ),
-                  )),
+                  ),),
               ClipRect(
                 child: Align(
                   heightFactor: _heightFactor.value,

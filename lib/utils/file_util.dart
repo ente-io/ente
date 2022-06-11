@@ -119,14 +119,14 @@ Future<io.File> getFileFromServer(
   if (!fileDownloadsInProgress.containsKey(downloadID)) {
     if (file.fileType == FileType.livePhoto) {
       fileDownloadsInProgress[downloadID] = _getLivePhotoFromServer(file,
-              progressCallback: progressCallback, needLiveVideo: liveVideo)
+              progressCallback: progressCallback, needLiveVideo: liveVideo,)
           .whenComplete(() {
         fileDownloadsInProgress.remove(downloadID);
       });
     } else {
       fileDownloadsInProgress[downloadID] = _downloadAndCache(
               file, cacheManager,
-              progressCallback: progressCallback)
+              progressCallback: progressCallback,)
           .whenComplete(() {
         fileDownloadsInProgress.remove(downloadID);
       });
@@ -147,7 +147,7 @@ final Map<int, Future<_LivePhoto>> livePhotoDownloadsTracker =
     <int, Future<_LivePhoto>>{};
 
 Future<io.File> _getLivePhotoFromServer(ente.File file,
-    {ProgressCallback progressCallback, bool needLiveVideo}) async {
+    {ProgressCallback progressCallback, bool needLiveVideo,}) async {
   final downloadID = file.uploadedFileID;
   try {
     if (!livePhotoDownloadsTracker.containsKey(downloadID)) {
@@ -168,7 +168,7 @@ Future<io.File> _getLivePhotoFromServer(ente.File file,
 }
 
 Future<_LivePhoto> _downloadLivePhoto(ente.File file,
-    {ProgressCallback progressCallback}) async {
+    {ProgressCallback progressCallback,}) async {
   return downloadAndDecrypt(file, progressCallback: progressCallback)
       .then((decryptedFile) async {
     if (decryptedFile == null) {
@@ -232,7 +232,7 @@ Future<_LivePhoto> _downloadLivePhoto(ente.File file,
 }
 
 Future<io.File> _downloadAndCache(ente.File file, BaseCacheManager cacheManager,
-    {ProgressCallback progressCallback}) async {
+    {ProgressCallback progressCallback,}) async {
   return downloadAndDecrypt(file, progressCallback: progressCallback)
       .then((decryptedFile) async {
     if (decryptedFile == null) {
@@ -293,7 +293,7 @@ Future<void> clearCache(ente.File file) async {
   final cachedThumbnail = io.File(
       Configuration.instance.getThumbnailCacheDirectory() +
           "/" +
-          file.uploadedFileID.toString());
+          file.uploadedFileID.toString(),);
   if (cachedThumbnail.existsSync()) {
     await cachedThumbnail.delete();
   }

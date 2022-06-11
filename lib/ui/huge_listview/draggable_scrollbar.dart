@@ -64,7 +64,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
       WidgetsBinding.instance?.addPostFrameCallback((_) {
         setState(() => thumbOffset =
             (widget.initialScrollIndex / widget.totalCount) *
-                (thumbMax - thumbMin));
+                (thumbMax - thumbMin),);
       });
     }
 
@@ -194,22 +194,22 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
         onDragUpdate(DragUpdateDetails(
           globalPosition: Offset.zero,
           delta: Offset(0, 2),
-        ));
+        ),);
       } else if (value.logicalKey == LogicalKeyboardKey.arrowUp) {
         onDragUpdate(DragUpdateDetails(
           globalPosition: Offset.zero,
           delta: Offset(0, -2),
-        ));
+        ),);
       } else if (value.logicalKey == LogicalKeyboardKey.pageDown) {
         onDragUpdate(DragUpdateDetails(
           globalPosition: Offset.zero,
           delta: Offset(0, 25),
-        ));
+        ),);
       } else if (value.logicalKey == LogicalKeyboardKey.pageUp) {
         onDragUpdate(DragUpdateDetails(
           globalPosition: Offset.zero,
           delta: Offset(0, -25),
-        ));
+        ),);
       }
     }
   }

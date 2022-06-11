@@ -192,7 +192,7 @@ class CollectionsService {
 
   Future<void> share(int collectionID, String email, String publicKey) async {
     final encryptedKey = CryptoUtil.sealSync(
-        getCollectionKey(collectionID), Sodium.base642bin(publicKey));
+        getCollectionKey(collectionID), Sodium.base642bin(publicKey),);
     try {
       await _dio.post(
         Configuration.instance.getHttpEndpoint() + "/collections/share",
@@ -202,7 +202,7 @@ class CollectionsService {
           "encryptedKey": Sodium.bin2base64(encryptedKey),
         },
         options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+            headers: {"X-Auth-Token": Configuration.instance.getToken()},),
       );
     } on DioError catch (e) {
       if (e.response.statusCode == 402) {
@@ -222,7 +222,7 @@ class CollectionsService {
           "email": email,
         },
         options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+            headers: {"X-Auth-Token": Configuration.instance.getToken()},),
       );
       _collectionIDToCollections[collectionID]
           .sharees
@@ -254,19 +254,19 @@ class CollectionsService {
     final encryptedKey = Sodium.base642bin(collection.encryptedKey);
     if (collection.owner.id == _config.getUserID()) {
       return CryptoUtil.decryptSync(encryptedKey, _config.getKey(),
-          Sodium.base642bin(collection.keyDecryptionNonce));
+          Sodium.base642bin(collection.keyDecryptionNonce),);
     } else {
       return CryptoUtil.openSealSync(
           encryptedKey,
           Sodium.base642bin(_config.getKeyAttributes().publicKey),
-          _config.getSecretKey());
+          _config.getSecretKey(),);
     }
   }
 
   Future<void> rename(Collection collection, String newName) async {
     try {
       final encryptedName = CryptoUtil.encryptSync(
-          utf8.encode(newName), getCollectionKey(collection.id));
+          utf8.encode(newName), getCollectionKey(collection.id),);
       await _dio.post(
         Configuration.instance.getHttpEndpoint() + "/collections/rename",
         data: {
@@ -275,7 +275,7 @@ class CollectionsService {
           "nameDecryptionNonce": Sodium.bin2base64(encryptedName.nonce)
         },
         options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+            headers: {"X-Auth-Token": Configuration.instance.getToken()},),
       );
       // trigger sync to fetch the latest name from server
       sync();
@@ -286,7 +286,7 @@ class CollectionsService {
   }
 
   Future<void> updateMagicMetadata(
-      Collection collection, Map<String, dynamic> newMetadataUpdate) async {
+      Collection collection, Map<String, dynamic> newMetadataUpdate,) async {
     final int ownerID = Configuration.instance.getUserID();
     try {
       if (collection.owner.id != ownerID) {
@@ -307,7 +307,7 @@ class CollectionsService {
 
       final key = getCollectionKey(collection.id);
       final encryptedMMd = await CryptoUtil.encryptChaCha(
-          utf8.encode(jsonEncode(jsonToUpdate)), key);
+          utf8.encode(jsonEncode(jsonToUpdate)), key,);
       // for required field, the json validator on golang doesn't treat 0 as valid
       // value. Instead of changing version to ptr, decided to start version with 1.
       int currentVersion = max(collection.mMdVersion, 1);
@@ -325,7 +325,7 @@ class CollectionsService {
             "/collections/magic-metadata",
         data: params,
         options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+            headers: {"X-Auth-Token": Configuration.instance.getToken()},),
       );
       collection.mMdVersion = currentVersion + 1;
       _cacheCollectionAttributes(collection);
@@ -351,7 +351,7 @@ class CollectionsService {
           "collectionID": collection.id,
         },
         options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+            headers: {"X-Auth-Token": Configuration.instance.getToken()},),
       );
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
@@ -369,14 +369,14 @@ class CollectionsService {
   }
 
   Future<void> updateShareUrl(
-      Collection collection, Map<String, dynamic> prop) async {
+      Collection collection, Map<String, dynamic> prop,) async {
     prop.putIfAbsent('collectionID', () => collection.id);
     try {
       final response = await _dio.put(
         Configuration.instance.getHttpEndpoint() + "/collections/share-url",
         data: json.encode(prop),
         options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+            headers: {"X-Auth-Token": Configuration.instance.getToken()},),
       );
       // remove existing url information
       collection.publicURLs?.clear();
@@ -426,7 +426,7 @@ class CollectionsService {
           "source": AppLifecycleService.instance.isForeground ? "fg" : "bg",
         },
         options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+            headers: {"X-Auth-Token": Configuration.instance.getToken()},),
       );
       final List<Collection> collections = [];
       if (response != null) {
@@ -438,11 +438,11 @@ class CollectionsService {
             final utfEncodedMmd = await CryptoUtil.decryptChaCha(
                 Sodium.base642bin(collectionData['magicMetadata']['data']),
                 decryptionKey,
-                Sodium.base642bin(collectionData['magicMetadata']['header']));
+                Sodium.base642bin(collectionData['magicMetadata']['header']),);
             collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
             collection.mMdVersion = collectionData['magicMetadata']['version'];
             collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
-                collection.mMdEncodedJson);
+                collection.mMdEncodedJson,);
           }
           collections.add(collection);
         }
@@ -477,7 +477,7 @@ class CollectionsService {
       null,
       null,
       null,
-    ));
+    ),);
     return collection;
   }
 
@@ -487,7 +487,7 @@ class CollectionsService {
       final response = await _dio.get(
         Configuration.instance.getHttpEndpoint() + "/collections/$collectionID",
         options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+            headers: {"X-Auth-Token": Configuration.instance.getToken()},),
       );
       assert(response != null && response.data != null);
       final collectionData = response.data["collection"];
@@ -497,7 +497,7 @@ class CollectionsService {
         final utfEncodedMmd = await CryptoUtil.decryptChaCha(
             Sodium.base642bin(collectionData['magicMetadata']['data']),
             decryptionKey,
-            Sodium.base642bin(collectionData['magicMetadata']['header']));
+            Sodium.base642bin(collectionData['magicMetadata']['header']),);
         collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
         collection.mMdVersion = collectionData['magicMetadata']['version'];
         collection.magicMetadata =
@@ -540,21 +540,21 @@ class CollectionsService {
       null,
       null,
       null,
-    ));
+    ),);
     return collection;
   }
 
   Future<void> addToCollection(int collectionID, List<File> files) async {
     final containsUploadedFile = files.firstWhere(
             (element) => element.uploadedFileID != null,
-            orElse: () => null) !=
+            orElse: () => null,) !=
         null;
     if (containsUploadedFile) {
       final existingFileIDsInCollection =
           await FilesDB.instance.getUploadedFileIDs(collectionID);
       files.removeWhere((element) =>
           element.uploadedFileID != null &&
-          existingFileIDsInCollection.contains(element.uploadedFileID));
+          existingFileIDsInCollection.contains(element.uploadedFileID),);
     }
     if (files.isEmpty || !containsUploadedFile) {
       _logger.info("nothing to add to the collection");
@@ -575,8 +575,8 @@ class CollectionsService {
         params["files"] = [];
       }
       params["files"].add(CollectionFileItem(
-              file.uploadedFileID, file.encryptedKey, file.keyDecryptionNonce)
-          .toMap());
+              file.uploadedFileID, file.encryptedKey, file.keyDecryptionNonce,)
+          .toMap(),);
     }
 
     try {
@@ -584,7 +584,7 @@ class CollectionsService {
         Configuration.instance.getHttpEndpoint() + "/collections/add-files",
         data: params,
         options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+            headers: {"X-Auth-Token": Configuration.instance.getToken()},),
       );
       await _filesDB.insertMultiple(files);
       Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
@@ -606,15 +606,15 @@ class CollectionsService {
       file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
       file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
       params["files"].add(CollectionFileItem(
-              file.uploadedFileID, file.encryptedKey, file.keyDecryptionNonce)
-          .toMap());
+              file.uploadedFileID, file.encryptedKey, file.keyDecryptionNonce,)
+          .toMap(),);
     }
     try {
       await _dio.post(
         Configuration.instance.getHttpEndpoint() + "/collections/restore-files",
         data: params,
         options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+            headers: {"X-Auth-Token": Configuration.instance.getToken()},),
       );
       await _filesDB.insertMultiple(files);
       await TrashDB.instance
@@ -641,7 +641,7 @@ class CollectionsService {
   }
 
   Future<void> move(
-      int toCollectionID, int fromCollectionID, List<File> files) async {
+      int toCollectionID, int fromCollectionID, List<File> files,) async {
     _validateMoveRequest(toCollectionID, fromCollectionID, files);
     files.removeWhere((element) => element.uploadedFileID == null);
     if (files.isEmpty) {
@@ -661,8 +661,8 @@ class CollectionsService {
       file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
       file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
       params["files"].add(CollectionFileItem(
-              file.uploadedFileID, file.encryptedKey, file.keyDecryptionNonce)
-          .toMap());
+              file.uploadedFileID, file.encryptedKey, file.keyDecryptionNonce,)
+          .toMap(),);
     }
     await _dio.post(
       Configuration.instance.getHttpEndpoint() + "/collections/move-files",
@@ -673,20 +673,20 @@ class CollectionsService {
 
     // remove files from old collection
     await _filesDB.removeFromCollection(
-        fromCollectionID, files.map((e) => e.uploadedFileID).toList());
+        fromCollectionID, files.map((e) => e.uploadedFileID).toList(),);
     Bus.instance.fire(CollectionUpdatedEvent(fromCollectionID, files,
-        type: EventType.deletedFromRemote));
+        type: EventType.deletedFromRemote,),);
     // insert new files in the toCollection which are not part of the toCollection
     final existingUploadedIDs =
         await FilesDB.instance.getUploadedFileIDs(toCollectionID);
     files.removeWhere(
-        (element) => existingUploadedIDs.contains(element.uploadedFileID));
+        (element) => existingUploadedIDs.contains(element.uploadedFileID),);
     await _filesDB.insertMultiple(files);
     Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
   }
 
   void _validateMoveRequest(
-      int toCollectionID, int fromCollectionID, List<File> files) {
+      int toCollectionID, int fromCollectionID, List<File> files,) {
     if (toCollectionID == fromCollectionID) {
       throw AssertionError("can't move to same album");
     }
@@ -757,7 +757,7 @@ class CollectionsService {
     return utf8.decode(CryptoUtil.decryptSync(
         Sodium.base642bin(collection.attributes.encryptedPath),
         key,
-        Sodium.base642bin(collection.attributes.pathDecryptionNonce)));
+        Sodium.base642bin(collection.attributes.pathDecryptionNonce),),);
   }
 
   bool hasSyncedCollections() {
@@ -772,11 +772,11 @@ class CollectionsService {
         final result = CryptoUtil.decryptSync(
             Sodium.base642bin(collection.encryptedName),
             _getDecryptedKey(collection),
-            Sodium.base642bin(collection.nameDecryptionNonce));
+            Sodium.base642bin(collection.nameDecryptionNonce),);
         name = utf8.decode(result);
       } catch (e, s) {
         _logger.severe(
-            "failed to decrypt collection name: ${collection.id}", e, s);
+            "failed to decrypt collection name: ${collection.id}", e, s,);
         name = "Unknown Album";
       }
       return collection.copyWith(name: name);
@@ -830,7 +830,7 @@ class AddFilesRequest {
     return AddFilesRequest(
       map['collectionID'],
       List<CollectionFileItem>.from(
-          map['files']?.map((x) => CollectionFileItem.fromMap(x))),
+          map['files']?.map((x) => CollectionFileItem.fromMap(x)),),
     );
   }
 

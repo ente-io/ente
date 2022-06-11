@@ -120,7 +120,7 @@ class _SessionsPageState extends State<SessionsPage> {
       await dialog.hide();
       _logger.severe('failed to terminate', e, s);
       showErrorDialog(
-          context, 'Oops', "Something went wrong, please try again");
+          context, 'Oops', "Something went wrong, please try again",);
     }
   }
 

@@ -265,7 +265,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
             _logger.info("Deleting file " + widget.file.tag());
             FilesDB.instance.deleteLocalFile(widget.file);
             Bus.instance.fire(LocalPhotosUpdatedEvent([widget.file],
-                type: EventType.deletedFromDevice));
+                type: EventType.deletedFromDevice,),);
           }
         }
         return;
@@ -316,7 +316,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       if (e is RequestCancelledError) {
         if (mounted) {
           _logger.info(
-              "Thumbnail request was aborted although it is in view, will retry");
+              "Thumbnail request was aborted although it is in view, will retry",);
           _reset();
           setState(() {});
         }

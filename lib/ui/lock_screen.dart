@@ -35,7 +35,7 @@ class _LockScreenState extends State<LockScreen> {
                   Image.asset(MediaQuery.of(context).platformBrightness ==
                           Brightness.light
                       ? 'assets/loading_photos_light.png'
-                      : 'assets/loading_photos_dark.png'),
+                      : 'assets/loading_photos_dark.png',),
                   SizedBox(
                     width: 172,
                     child: GradientButton(
@@ -54,7 +54,7 @@ class _LockScreenState extends State<LockScreen> {
                   ),
                 ],
               ),
-            ]),
+            ],),
       ),
     );
   }
@@ -63,7 +63,7 @@ class _LockScreenState extends State<LockScreen> {
     _logger.info("Showing lockscreen");
     try {
       final result = await requestAuthentication(
-          "Please authenticate to view your memories");
+          "Please authenticate to view your memories",);
       if (result) {
         AppLock.of(context).didUnlock();
       }

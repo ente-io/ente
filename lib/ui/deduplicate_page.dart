@@ -127,14 +127,14 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                     padding: EdgeInsets.only(top: 32),
                     child: nothingToSeeHere(
                         textColor:
-                            Theme.of(context).colorScheme.defaultTextColor),
+                            Theme.of(context).colorScheme.defaultTextColor,),
                   );
                 }
               }
               return Padding(
                 padding: const EdgeInsets.only(top: 10, bottom: 10),
                 child: _getGridView(_duplicates[index - kHeaderRowCount],
-                    index - kHeaderRowCount),
+                    index - kHeaderRowCount,),
               );
             },
             itemCount: _duplicates.length + kHeaderRowCount,
@@ -156,7 +156,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               "Following files were clubbed based on their sizes" +
                   ((_shouldClubByCaptureTime ? " and capture times." : ".") +
                       ", please review and delete the items you believe are duplicates."),
-              style: Theme.of(context).textTheme.subtitle2),
+              style: Theme.of(context).textTheme.subtitle2,),
           Padding(
             padding: EdgeInsets.all(12),
           ),
@@ -211,7 +211,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         text,
         style: Theme.of(context).textTheme.subtitle1.copyWith(
             fontSize: 14,
-            color: Theme.of(context).iconTheme.color.withOpacity(0.7)),
+            color: Theme.of(context).iconTheme.color.withOpacity(0.7),),
       );
     }
 
@@ -389,7 +389,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             ),
           ),
           _selectedFiles.contains(file) ? kDeleteIconOverlay : Container(),
-        ]),
+        ],),
       ),
     );
   }

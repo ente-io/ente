@@ -21,7 +21,7 @@ class Network {
       HttpHeaders.userAgentHeader: FkUserAgent.userAgent,
       'X-Client-Version': packageInfo.version,
       'X-Client-Package': packageInfo.packageName,
-    }));
+    },),);
     _dio.interceptors.add(RequestIdInterceptor());
     _dio.interceptors.add(_alice.getDioInterceptor());
   }

@@ -308,7 +308,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
     option.addOption(ClipOption.fromRect(rect));
     option.addOption(
-        FlipOption(horizontal: flipHorizontal, vertical: flipVertical));
+        FlipOption(horizontal: flipHorizontal, vertical: flipVertical),);
     if (action.hasRotateAngle) {
       option.addOption(RotateOption(radian.toInt()));
     }
@@ -364,7 +364,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       final existingFiles = widget.detailPageConfig.files;
       final files = (await widget.detailPageConfig.asyncLoader(
               existingFiles[existingFiles.length - 1].creationTime,
-              existingFiles[0].creationTime))
+              existingFiles[0].creationTime,))
           .files;
       replacePage(
         context,

@@ -75,7 +75,7 @@ class File {
                 .replaceAll("IMG_", "")
                 .replaceAll("VID_", "")
                 .replaceAll("DCIM_", "")
-                .replaceAll("_", " "));
+                .replaceAll("_", " "),);
         file.creationTime = parsedDateTime.microsecondsSinceEpoch;
       } catch (e) {
         file.creationTime = asset.modifiedDateTime.microsecondsSinceEpoch;

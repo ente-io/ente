@@ -35,13 +35,13 @@ class BillingQuestionsWidget extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-          ));
+          ),);
           for (final faq in snapshot.data) {
             faqs.add(FaqWidget(faq: faq));
           }
           faqs.add(Padding(
             padding: EdgeInsets.all(16),
-          ));
+          ),);
           return SingleChildScrollView(
             child: Column(
               children: faqs,

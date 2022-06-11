@@ -95,7 +95,7 @@ class _MemoryWidgetState extends State<MemoryWidget> {
     return GestureDetector(
       onTap: () async {
         await routeToPage(
-            context, FullScreenMemory(title, widget.memories, index));
+            context, FullScreenMemory(title, widget.memories, index),);
         setState(() {});
       },
       child: SizedBox(
@@ -261,9 +261,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 ),
                 Text(
                   getFormattedDate(
-                      DateTime.fromMicrosecondsSinceEpoch(file.creationTime)),
+                      DateTime.fromMicrosecondsSinceEpoch(file.creationTime),),
                   style: Theme.of(context).textTheme.subtitle1.copyWith(
-                      fontSize: 14, color: Colors.white), //same for both themes
+                      fontSize: 14, color: Colors.white,), //same for both themes
                 ),
               ],
             ),
@@ -280,7 +280,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
               Colors.transparent,
             ],
             stops: const [0, 0.6, 1],
-          )),
+          ),),
         ),
         backgroundColor: Color(0x00000000),
         elevation: 0,
@@ -293,7 +293,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
           bottomGradient(),
           _buildTitleText(),
           _buildBottomIcons(),
-        ]),
+        ],),
       ),
     );
   }
@@ -311,7 +311,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
               style: Theme.of(context)
                   .textTheme
                   .headline4
-                  .copyWith(color: Colors.white)),
+                  .copyWith(color: Colors.white),),
         ),
       ),
     );
@@ -330,7 +330,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
           onPressed: () {
             share(context, [file]);
           },
-        ));
+        ),);
   }
 
   Widget bottomGradient() {
@@ -346,7 +346,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
           Colors.transparent,
         ],
         stops: const [0, 0.8],
-      )),
+      ),),
     );
   }
 

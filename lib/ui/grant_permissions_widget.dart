@@ -59,16 +59,16 @@ class GrantPermissionsWidget extends StatelessWidget {
                               style: Theme.of(context)
                                   .textTheme
                                   .headline5
-                                  .copyWith(fontWeight: FontWeight.w400)),
+                                  .copyWith(fontWeight: FontWeight.w400),),
                           TextSpan(text: 'preserve your photos')
-                        ])),
+                        ],),),
                   ),
                 ],
               ),
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.only(
-                    left: 20, right: 20, bottom: Platform.isIOS ? 84 : 60),
+                    left: 20, right: 20, bottom: Platform.isIOS ? 84 : 60,),
                 child: OutlinedButton(
                   child: Text("Grant permission"),
                   onPressed: () async {
@@ -80,7 +80,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                       AlertDialog alert = AlertDialog(
                         title: Text("Please grant permissions"),
                         content: Text(
-                            "ente can encrypt and preserve files only if you grant access to them"),
+                            "ente can encrypt and preserve files only if you grant access to them",),
                         actions: [
                           TextButton(
                             child: Text(
@@ -90,7 +90,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                                   .subtitle1
                                   .copyWith(
                                       fontSize: 14,
-                                      fontWeight: FontWeight.w700),
+                                      fontWeight: FontWeight.w700,),
                             ),
                             onPressed: () {
                               Navigator.of(context, rootNavigator: true)

@@ -133,7 +133,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                           .compareTo(second.deviceFolder.toLowerCase());
                     });
                     setState(() {});
-                  }),
+                  },),
           Expanded(child: _getFolders()),
           Hero(
             tag: "select_folders",
@@ -144,10 +144,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     color: Theme.of(context).backgroundColor,
                     blurRadius: 24,
                     offset: Offset(0, -8),
-                    spreadRadius: 4)
-              ]),
+                    spreadRadius: 4,)
+              ],),
               padding: EdgeInsets.only(
-                  left: 20, right: 20, bottom: Platform.isIOS ? 60 : 32),
+                  left: 20, right: 20, bottom: Platform.isIOS ? 60 : 32,),
               child: OutlinedButton(
                 child: Text(widget.buttonText),
                 onPressed: _selectedFolders.isEmpty
@@ -239,11 +239,11 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                 ? LinearGradient(colors: const [
                     Color(0xFF00DD4D),
                     Color(0xFF43BA6C)
-                  ]) //same for both themes
+                  ],) //same for both themes
                 : LinearGradient(colors: [
                     Theme.of(context).colorScheme.boxUnSelectColor,
                     Theme.of(context).colorScheme.boxUnSelectColor
-                  ])),
+                  ],),),
         padding: EdgeInsets.fromLTRB(8, 4, 4, 4),
         child: InkWell(
           child: Row(
@@ -356,8 +356,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       Icons.local_police,
                       color: Colors.white,
                     )
-                  : null),
-        ]),
+                  : null,),
+        ],),
         height: 88,
         width: 88,
       ),

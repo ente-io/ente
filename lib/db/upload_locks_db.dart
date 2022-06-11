@@ -40,7 +40,7 @@ class UploadLocksDB {
                   $_columnOwner TEXT NOT NULL,
                   $_columnTime TEXT NOT NULL
                 )
-                ''');
+                ''',);
   }
 
   Future<void> clearTable() async {

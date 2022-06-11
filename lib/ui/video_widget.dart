@@ -164,7 +164,7 @@ class _VideoWidgetState extends State<VideoWidget> {
                 ),
         ),
       ),
-    ]);
+    ],);
   }
 
   Widget _getThumbnail() {

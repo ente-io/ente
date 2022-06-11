@@ -22,7 +22,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
       changelog.add(Padding(
         padding: const EdgeInsets.fromLTRB(8, 4, 0, 4),
         child: Text("- " + log, style: Theme.of(context).textTheme.caption),
-      ));
+      ),);
     }
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,7 +39,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         Text("Changelog",
             style: TextStyle(
               fontSize: 18,
-            )),
+            ),),
         Padding(padding: EdgeInsets.all(4)),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,7 +81,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
       child: AlertDialog(
         title: Text(shouldForceUpdate
             ? "Critical update available"
-            : "Update available"),
+            : "Update available",),
         content: content,
       ),
     );
@@ -139,7 +139,7 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
         setState(() {
           _downloadProgress = count / widget.versionInfo.size;
         });
-      });
+      },);
       Navigator.of(context, rootNavigator: true).pop('dialog');
       OpenFile.open(_saveUrl);
     } catch (e) {

@@ -192,7 +192,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                     : Text(
                         "${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())} used",
                         style: Theme.of(context).textTheme.headline5.copyWith(
-                            color: Colors.white.withOpacity(0.7), fontSize: 14),
+                            color: Colors.white.withOpacity(0.7), fontSize: 14,),
                       ),
                 Padding(
                   padding: const EdgeInsets.only(right: 24.0),

@@ -27,6 +27,6 @@ class SettingsSectionTitle extends StatelessWidget {
         ),
       ),
       Padding(padding: EdgeInsets.all(4)),
-    ]);
+    ],);
   }
 }

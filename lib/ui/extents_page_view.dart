@@ -368,14 +368,14 @@ class _PageViewState extends State<ExtentsPageView> {
     description
         .add(EnumProperty<Axis>('scrollDirection', widget.scrollDirection));
     description.add(
-        FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'));
+        FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'),);
     description.add(DiagnosticsProperty<PageController>(
         'controller', widget.controller,
-        showName: false));
+        showName: false,),);
     description.add(DiagnosticsProperty<ScrollPhysics>(
         'physics', widget.physics,
-        showName: false));
+        showName: false,),);
     description.add(FlagProperty('pageSnapping',
-        value: widget.pageSnapping, ifFalse: 'snapping disabled'));
+        value: widget.pageSnapping, ifFalse: 'snapping disabled',),);
   }
 }

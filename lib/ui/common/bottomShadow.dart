@@ -19,7 +19,7 @@ class BottomShadowWidget extends StatelessWidget {
                   : shadowColor,
               spreadRadius: 42,
               blurRadius: 42,
-              offset: Offset(0, offsetDy) // changes position of shadow
+              offset: Offset(0, offsetDy), // changes position of shadow
               ),
         ],
       ),

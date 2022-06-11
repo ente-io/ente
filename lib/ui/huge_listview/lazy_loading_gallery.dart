@@ -102,7 +102,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
         final result = await widget.asyncLoader(
             dayStartTime.microsecondsSinceEpoch,
-            dayStartTime.microsecondsSinceEpoch + kMicroSecondsInDay - 1);
+            dayStartTime.microsecondsSinceEpoch + kMicroSecondsInDay - 1,);
         if (mounted) {
           setState(() {
             _files = result.files;
@@ -152,7 +152,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       child: Column(
         children: [
           getDayWidget(
-              context, _files[0].creationTime, widget.smallerTodayFont),
+              context, _files[0].creationTime, widget.smallerTodayFont,),
           _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
         ],
       ),
@@ -169,7 +169,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         widget.selectedFiles,
         index == 0,
         _files.length > kRecycleLimit,
-      ));
+      ),);
     }
 
     return Column(
@@ -315,8 +315,8 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                 child: ColorFiltered(
                   colorFilter: ColorFilter.mode(
                       Colors.black.withOpacity(
-                          widget.selectedFiles.files.contains(file) ? 0.4 : 0),
-                      BlendMode.darken),
+                          widget.selectedFiles.files.contains(file) ? 0.4 : 0,),
+                      BlendMode.darken,),
                   child: ThumbnailWidget(
                     file,
                     diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
@@ -355,7 +355,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       widget.asyncLoader,
       widget.files.indexOf(file),
       widget.tag,
-    ));
+    ),);
     routeToPage(context, page);
   }
 }

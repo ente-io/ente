@@ -11,7 +11,7 @@ class SubscriptionHeaderWidget extends StatefulWidget {
   final int currentUsage;
 
   const SubscriptionHeaderWidget(
-      {Key key, this.isOnboarding, this.currentUsage})
+      {Key key, this.isOnboarding, this.currentUsage,})
       : super(key: key);
 
   @override
@@ -58,7 +58,7 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
               children: [
                 TextSpan(
                     text: "Current usage is ",
-                    style: Theme.of(context).textTheme.subtitle1),
+                    style: Theme.of(context).textTheme.subtitle1,),
                 TextSpan(
                   text: formatBytes(widget.currentUsage),
                   style: Theme.of(context)
@@ -86,7 +86,7 @@ class ValidityWidget extends StatelessWidget {
       return Container();
     }
     var endDate = getDateAndMonthAndYear(
-        DateTime.fromMicrosecondsSinceEpoch(currentSubscription.expiryTime));
+        DateTime.fromMicrosecondsSinceEpoch(currentSubscription.expiryTime),);
     var message = "Renews on $endDate";
     if (currentSubscription.productID == kFreeProductID) {
       message = "Free plan valid till $endDate";

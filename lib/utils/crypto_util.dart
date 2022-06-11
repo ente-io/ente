@@ -16,7 +16,7 @@ Uint8List cryptoSecretboxEasy(Map<String, dynamic> args) {
 
 Uint8List cryptoSecretboxOpenEasy(Map<String, dynamic> args) {
   return Sodium.cryptoSecretboxOpenEasy(
-      args["cipher"], args["nonce"], args["key"]);
+      args["cipher"], args["nonce"], args["key"],);
 }
 
 Uint8List cryptoPwHash(Map<String, dynamic> args) {
@@ -59,9 +59,9 @@ EncryptionResult chachaEncryptData(Map<String, dynamic> args) {
       initPushResult.state,
       args["source"],
       null,
-      Sodium.cryptoSecretstreamXchacha20poly1305TagFinal);
+      Sodium.cryptoSecretstreamXchacha20poly1305TagFinal,);
   return EncryptionResult(
-      encryptedData: encryptedData, header: initPushResult.header);
+      encryptedData: encryptedData, header: initPushResult.header,);
 }
 
 Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
@@ -87,13 +87,13 @@ Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
     final buffer = inputFile.readSync(chunkSize);
     bytesRead += chunkSize;
     final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
-        initPushResult.state, buffer, null, tag);
+        initPushResult.state, buffer, null, tag,);
     await destinationFile.writeAsBytes(encryptedData, mode: io.FileMode.append);
   }
   inputFile.closeSync();
 
   logger.info("Encryption time: " +
-      (DateTime.now().millisecondsSinceEpoch - encryptionStartTime).toString());
+      (DateTime.now().millisecondsSinceEpoch - encryptionStartTime).toString(),);
 
   return EncryptionResult(key: key, header: initPushResult.header);
 }
@@ -108,7 +108,7 @@ Future<void> chachaDecryptFile(Map<String, dynamic> args) async {
 
   final inputFile = sourceFile.openSync(mode: io.FileMode.read);
   final pullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
-      args["header"], args["key"]);
+      args["header"], args["key"],);
 
   var bytesRead = 0;
   var tag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
@@ -127,14 +127,14 @@ Future<void> chachaDecryptFile(Map<String, dynamic> args) async {
   inputFile.closeSync();
 
   logger.info("ChaCha20 Decryption time: " +
-      (DateTime.now().millisecondsSinceEpoch - decryptionStartTime).toString());
+      (DateTime.now().millisecondsSinceEpoch - decryptionStartTime).toString(),);
 }
 
 Uint8List chachaDecryptData(Map<String, dynamic> args) {
   final pullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
-      args["header"], args["key"]);
+      args["header"], args["key"],);
   final pullResult = Sodium.cryptoSecretstreamXchacha20poly1305Pull(
-      pullState, args["source"], null);
+      pullState, args["source"], null,);
   return pullResult.m;
 }
 
@@ -155,7 +155,7 @@ class CryptoUtil {
     args["key"] = key;
     final encryptedData = cryptoSecretboxEasy(args);
     return EncryptionResult(
-        key: key, nonce: nonce, encryptedData: encryptedData);
+        key: key, nonce: nonce, encryptedData: encryptedData,);
   }
 
   static Future<Uint8List> decrypt(
@@ -183,7 +183,7 @@ class CryptoUtil {
   }
 
   static Future<EncryptionResult> encryptChaCha(
-      Uint8List source, Uint8List key) async {
+      Uint8List source, Uint8List key,) async {
     final args = <String, dynamic>{};
     args["source"] = source;
     args["key"] = key;
@@ -191,7 +191,7 @@ class CryptoUtil {
   }
 
   static Future<Uint8List> decryptChaCha(
-      Uint8List source, Uint8List key, Uint8List header) async {
+      Uint8List source, Uint8List key, Uint8List header,) async {
     final args = <String, dynamic>{};
     args["source"] = source;
     args["key"] = key;
@@ -238,7 +238,7 @@ class CryptoUtil {
   }
 
   static Uint8List openSealSync(
-      Uint8List input, Uint8List publicKey, Uint8List secretKey) {
+      Uint8List input, Uint8List publicKey, Uint8List secretKey,) {
     return Sodium.cryptoBoxSealOpen(input, publicKey, secretKey);
   }
 
@@ -247,7 +247,7 @@ class CryptoUtil {
   }
 
   static Future<DerivedKeyResult> deriveSensitiveKey(
-      Uint8List password, Uint8List salt) async {
+      Uint8List password, Uint8List salt,) async {
     final logger = Logger("pwhash");
     int memLimit = Sodium.cryptoPwhashMemlimitSensitive;
     int opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
@@ -277,13 +277,13 @@ class CryptoUtil {
       "salt": salt,
       "memLimit": memLimit,
       "opsLimit": opsLimit,
-    });
+    },);
   }
 
   static Future<Uint8List> getHash(io.File source) {
     return _computer.compute(cryptoGenericHash, param: {
       "sourceFilePath": source.path,
-    });
+    },);
   }
 }
 

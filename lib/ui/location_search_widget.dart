@@ -48,7 +48,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
                 "query": pattern,
               },
               options: Options(
-                  headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+                  headers: {"X-Auth-Token": Configuration.instance.getToken()},),
             )
             .then((response) {
           if (_searchString == pattern) {
@@ -70,14 +70,14 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
                           suggestion['geometry']['viewport']['northeast']
                               ['lat'],
                           suggestion['geometry']['viewport']['northeast']
-                              ['lng']),
+                              ['lng'],),
                       Location(
                           suggestion['geometry']['viewport']['southwest']
                               ['lat'],
                           suggestion['geometry']['viewport']['southwest']
-                              ['lng'])),
+                              ['lng'],),),
                   suggestion['name'],
-                )));
+                ),),);
       },
     );
   }
@@ -113,7 +113,7 @@ class LocationSearchResultWidget extends StatelessWidget {
             ),
           ],
         ),
-      ]),
+      ],),
     );
   }
 }

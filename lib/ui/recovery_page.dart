@@ -61,7 +61,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
               }
               showErrorDialog(context, "incorrect recovery key", errMessage);
             }
-          }),
+          },),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButtonAnimator: NoScalingAnimation(),
       body: Column(
@@ -73,7 +73,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text('Forgot password',
-                      style: Theme.of(context).textTheme.headline4),
+                      style: Theme.of(context).textTheme.headline4,),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
@@ -84,7 +84,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                       contentPadding: EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                           borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(6)),
+                          borderRadius: BorderRadius.circular(6),),
                     ),
                     style: TextStyle(
                       fontSize: 14,
@@ -127,7 +127,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                                 .subtitle1
                                 .copyWith(
                                     fontSize: 14,
-                                    decoration: TextDecoration.underline),
+                                    decoration: TextDecoration.underline,),
                           ),
                         ),
                       ),

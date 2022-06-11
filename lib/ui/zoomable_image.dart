@@ -124,7 +124,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         _onFinalImageLoaded(Image.file(
           file,
           gaplessPlayback: true,
-        ).image);
+        ).image,);
       });
     }
   }
@@ -167,7 +167,7 @@ class _ZoomableImageState extends State<ZoomableImage>
           } else {
             FilesDB.instance.deleteLocalFile(_photo);
             Bus.instance.fire(LocalPhotosUpdatedEvent([_photo],
-                type: EventType.deletedFromDevice));
+                type: EventType.deletedFromDevice,),);
           }
         }
       });
@@ -175,7 +175,7 @@ class _ZoomableImageState extends State<ZoomableImage>
   }
 
   void _onLargeThumbnailLoaded(
-      ImageProvider imageProvider, BuildContext context) {
+      ImageProvider imageProvider, BuildContext context,) {
     if (mounted && !_loadedFinalImage) {
       precacheImage(imageProvider, context).then((value) {
         if (mounted && !_loadedFinalImage) {

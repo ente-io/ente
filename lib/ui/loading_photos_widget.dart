@@ -49,7 +49,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
               BackupFolderSelectionPage(
                 shouldSelectAll: true,
                 buttonText: "Start backup",
-              ));
+              ),);
         }
       }
     });
@@ -150,7 +150,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                         right: 0,
                         child: BottomShadowWidget(),
                       )
-                    ]),
+                    ],),
                   ),
                 ],
               ),

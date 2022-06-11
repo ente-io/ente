@@ -24,7 +24,7 @@ final lightThemeData = ThemeData(
   iconTheme: IconThemeData(color: Colors.black),
   primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
   colorScheme: ColorScheme.light(
-      primary: Colors.black, secondary: Color.fromARGB(255, 163, 163, 163)),
+      primary: Colors.black, secondary: Color.fromARGB(255, 163, 163, 163),),
   accentColor: Color.fromRGBO(0, 0, 0, 0.6),
   buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
@@ -34,7 +34,7 @@ final lightThemeData = ThemeData(
     fgEnabled: Colors.white,
   ),
   elevatedButtonTheme: buildElevatedButtonThemeData(
-      onPrimary: Colors.white, primary: Colors.black),
+      onPrimary: Colors.white, primary: Colors.black,),
   toggleableActiveColor: Colors.green[400],
   scaffoldBackgroundColor: Colors.white,
   backgroundColor: Colors.white,
@@ -48,18 +48,18 @@ final lightThemeData = ThemeData(
   textTheme: _buildTextTheme(Colors.black),
   primaryTextTheme: TextTheme().copyWith(
       bodyText2: TextStyle(color: Colors.yellow),
-      bodyText1: TextStyle(color: Colors.orange)),
+      bodyText1: TextStyle(color: Colors.orange),),
   cardColor: Color.fromRGBO(250, 250, 250, 1.0),
   dialogTheme: DialogTheme().copyWith(
       backgroundColor: Color.fromRGBO(250, 250, 250, 1.0), //
       titleTextStyle: TextStyle(
-          color: Colors.black, fontSize: 24, fontWeight: FontWeight.w600),
+          color: Colors.black, fontSize: 24, fontWeight: FontWeight.w600,),
       contentTextStyle: TextStyle(
           fontFamily: 'Inter-Medium',
           color: Colors.black,
           fontSize: 16,
-          fontWeight: FontWeight.w500),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+          fontWeight: FontWeight.w500,),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),),
   inputDecorationTheme: InputDecorationTheme().copyWith(
     focusedBorder: UnderlineInputBorder(
       borderSide: BorderSide(
@@ -104,9 +104,9 @@ final darkThemeData = ThemeData(
       bgDisabled: Colors.grey.shade500,
       bgEnabled: Colors.white,
       fgDisabled: Colors.white,
-      fgEnabled: Colors.black),
+      fgEnabled: Colors.black,),
   elevatedButtonTheme: buildElevatedButtonThemeData(
-      onPrimary: Colors.black, primary: Colors.white),
+      onPrimary: Colors.black, primary: Colors.white,),
   scaffoldBackgroundColor: Colors.black,
   backgroundColor: Colors.black,
   appBarTheme: AppBarTheme().copyWith(

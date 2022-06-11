@@ -50,7 +50,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             );
           },
           child: SettingsTextItem(
-              text: "Subscription plan", icon: Icons.navigate_next),
+              text: "Subscription plan", icon: Icons.navigate_next,),
         ),
         SectionOptionDivider,
         GestureDetector(
@@ -76,7 +76,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             routeToPage(
                 context,
                 RecoveryKeyPage(recoveryKey, "OK",
-                    showAppBar: true, onDone: () {}));
+                    showAppBar: true, onDone: () {},),);
           },
           child:
               SettingsTextItem(text: "Recovery key", icon: Icons.navigate_next),
@@ -130,7 +130,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             );
           },
           child: SettingsTextItem(
-              text: "Change password", icon: Icons.navigate_next),
+              text: "Change password", icon: Icons.navigate_next,),
         ),
       ],
     );
@@ -138,6 +138,6 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
 
   Future<String> _getOrCreateRecoveryKey() async {
     return Sodium.bin2hex(
-        await UserService.instance.getOrCreateRecoveryKey(context));
+        await UserService.instance.getOrCreateRecoveryKey(context),);
   }
 }

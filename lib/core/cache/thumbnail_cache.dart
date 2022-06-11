@@ -10,7 +10,7 @@ class ThumbnailLruCache {
   static Uint8List get(File photo, [int size]) {
     return _map.get(photo.generatedID.toString() +
         "_" +
-        (size != null ? size.toString() : kThumbnailLargeSize.toString()));
+        (size != null ? size.toString() : kThumbnailLargeSize.toString()),);
   }
 
   static void put(
@@ -22,13 +22,13 @@ class ThumbnailLruCache {
         photo.generatedID.toString() +
             "_" +
             (size != null ? size.toString() : kThumbnailLargeSize.toString()),
-        imageData);
+        imageData,);
   }
 
   static void clearCache(File file) {
     _map.remove(
-        file.generatedID.toString() + "_" + kThumbnailLargeSize.toString());
+        file.generatedID.toString() + "_" + kThumbnailLargeSize.toString(),);
     _map.remove(
-        file.generatedID.toString() + "_" + kThumbnailSmallSize.toString());
+        file.generatedID.toString() + "_" + kThumbnailSmallSize.toString(),);
   }
 }

@@ -61,7 +61,7 @@ class UserService {
             builder: (BuildContext context) {
               return OTTVerificationPage(email,
                   isChangeEmail: isChangeEmail,
-                  isCreateAccountScreen: isCreateAccountScreen);
+                  isCreateAccountScreen: isCreateAccountScreen,);
             },
           ),
         );
@@ -151,7 +151,7 @@ class UserService {
           ),
           queryParameters: {
             "token": token,
-          });
+          },);
     } on DioError catch (e) {
       _logger.info(e);
       rethrow;
@@ -165,7 +165,7 @@ class UserService {
             headers: {
               "X-Auth-Token": _config.getToken(),
             },
-          ));
+          ),);
     } on DioError catch (e) {
       _logger.warning('failed to leave family plan', e);
       rethrow;
@@ -182,7 +182,7 @@ class UserService {
                 headers: {
                   "X-Auth-Token": _config.getToken(),
                 },
-              ));
+              ),);
       if (response != null && response.statusCode == 200) {
         await Configuration.instance.logout();
         await dialog.hide();
@@ -240,11 +240,11 @@ class UserService {
       await dialog.hide();
       if (e.response != null && e.response.statusCode == 410) {
         await showErrorDialog(
-            context, "Oops", "Your verification code has expired");
+            context, "Oops", "Your verification code has expired",);
         Navigator.of(context).pop();
       } else {
         showErrorDialog(context, "Incorrect code",
-            "Sorry, the code you've entered is incorrect");
+            "Sorry, the code you've entered is incorrect",);
       }
     } catch (e) {
       await dialog.hide();
@@ -288,7 +288,7 @@ class UserService {
         showErrorDialog(context, "Oops", "This email is already in use");
       } else {
         showErrorDialog(context, "Incorrect code",
-            "Authentication failed, please try again");
+            "Authentication failed, please try again",);
       }
     } catch (e) {
       await dialog.hide();
@@ -371,7 +371,7 @@ class UserService {
   }
 
   Future<void> verifyTwoFactor(
-      BuildContext context, String sessionID, String code) async {
+      BuildContext context, String sessionID, String code,) async {
     final dialog = createProgressDialog(context, "Authenticating...");
     await dialog.show();
     try {
@@ -410,13 +410,13 @@ class UserService {
         );
       } else {
         showErrorDialog(context, "Incorrect code",
-            "Authentication failed, please try again");
+            "Authentication failed, please try again",);
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       showErrorDialog(
-          context, "Oops", "Authentication failed, please try again");
+          context, "Oops", "Authentication failed, please try again",);
     }
   }
 
@@ -437,7 +437,7 @@ class UserService {
               return TwoFactorRecoveryPage(
                   sessionID,
                   response.data["encryptedSecret"],
-                  response.data["secretDecryptionNonce"]);
+                  response.data["secretDecryptionNonce"],);
             },
           ),
           (route) => route.isFirst,
@@ -457,12 +457,12 @@ class UserService {
         );
       } else {
         showErrorDialog(
-            context, "Oops", "Something went wrong, please try again");
+            context, "Oops", "Something went wrong, please try again",);
       }
     } catch (e) {
       _logger.severe(e);
       showErrorDialog(
-          context, "Oops", "Something went wrong, please try again");
+          context, "Oops", "Something went wrong, please try again",);
     } finally {
       await dialog.hide();
     }
@@ -482,11 +482,11 @@ class UserService {
       secret = Sodium.bin2base64(await CryptoUtil.decrypt(
           Sodium.base642bin(encryptedSecret),
           Sodium.hex2bin(recoveryKey.trim()),
-          Sodium.base642bin(secretDecryptionNonce)));
+          Sodium.base642bin(secretDecryptionNonce),),);
     } catch (e) {
       await dialog.hide();
       showErrorDialog(context, "Incorrect recovery key",
-          "The recovery key you entered is incorrect");
+          "The recovery key you entered is incorrect",);
       return;
     }
     try {
@@ -523,12 +523,12 @@ class UserService {
         );
       } else {
         showErrorDialog(
-            context, "Oops", "Something went wrong, please try again");
+            context, "Oops", "Something went wrong, please try again",);
       }
     } catch (e) {
       _logger.severe(e);
       showErrorDialog(
-          context, "Oops", "Something went wrong, please try again");
+          context, "Oops", "Something went wrong, please try again",);
     } finally {
       await dialog.hide();
     }
@@ -550,7 +550,7 @@ class UserService {
       routeToPage(
           context,
           TwoFactorSetupPage(
-              response.data["secretCode"], response.data["qrCode"]));
+              response.data["secretCode"], response.data["qrCode"],),);
     } catch (e, s) {
       await dialog.hide();
       _logger.severe(e, s);
@@ -559,7 +559,7 @@ class UserService {
   }
 
   Future<bool> enableTwoFactor(
-      BuildContext context, String secret, String code) async {
+      BuildContext context, String secret, String code,) async {
     Uint8List recoveryKey;
     try {
       recoveryKey = await getOrCreateRecoveryKey(context);
@@ -597,12 +597,12 @@ class UserService {
       if (e is DioError) {
         if (e.response != null && e.response.statusCode == 401) {
           showErrorDialog(context, "Incorrect code",
-              "Please verify the code you have entered");
+              "Please verify the code you have entered",);
           return false;
         }
       }
       showErrorDialog(context, "Something went wrong",
-          "Please contact support if the problem persists");
+          "Please contact support if the problem persists",);
     }
     return false;
   }
@@ -627,7 +627,7 @@ class UserService {
       await dialog.hide();
       _logger.severe(e, s);
       showErrorDialog(context, "Something went wrong",
-          "Please contact support if the problem persists");
+          "Please contact support if the problem persists",);
     }
   }
 
@@ -716,7 +716,7 @@ class UserService {
       await Configuration.instance
           .setEncryptedToken(response.data["encryptedToken"]);
       await Configuration.instance.setKeyAttributes(
-          KeyAttributes.fromMap(response.data["keyAttributes"]));
+          KeyAttributes.fromMap(response.data["keyAttributes"]),);
     } else {
       await Configuration.instance.setToken(response.data["token"]);
     }

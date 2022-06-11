@@ -183,7 +183,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             context: context,
             builder: (BuildContext context) {
               return AppUpdateDialog(
-                  UpdateService.instance.getLatestVersionInfo());
+                  UpdateService.instance.getLatestVersionInfo(),);
             },
             barrierColor: Colors.black.withOpacity(0.85),
           );
@@ -216,7 +216,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     }, onError: (err) {
       _logger.severe("getIntentDataStream error: $err");
-    });
+    },);
     // For sharing images coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
       setState(() {
@@ -286,7 +286,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             Bus.instance.fire(TabChangedEvent(
               page,
               TabChangedEventSource.page_view,
-            ));
+            ),);
           },
           physics: NeverScrollableScrollPhysics(),
           controller: _pageController,
@@ -335,7 +335,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       _getCredentials(context, link);
     }, onError: (err) {
       _logger.severe(err);
-    });
+    },);
     return false;
   }
 
@@ -366,27 +366,27 @@ class _HomeWidgetState extends State<HomeWidget> {
               creationEndTime, ownerID, importantPaths.toList(),
               limit: limit,
               asc: asc,
-              ignoredCollectionIDs: archivedCollectionIds);
+              ignoredCollectionIDs: archivedCollectionIds,);
         } else {
           if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
             result = await FilesDB.instance.getAllLocalAndUploadedFiles(
                 creationStartTime, creationEndTime, ownerID,
                 limit: limit,
                 asc: asc,
-                ignoredCollectionIDs: archivedCollectionIds);
+                ignoredCollectionIDs: archivedCollectionIds,);
           } else {
             result = await FilesDB.instance.getAllUploadedFiles(
                 creationStartTime, creationEndTime, ownerID,
                 limit: limit,
                 asc: asc,
-                ignoredCollectionIDs: archivedCollectionIds);
+                ignoredCollectionIDs: archivedCollectionIds,);
           }
         }
         // hide ignored files from home page UI
         final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
         result.files.removeWhere((f) =>
             f.uploadedFileID == null &&
-            IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f));
+            IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),);
         return result;
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
@@ -430,7 +430,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             style: Theme.of(context)
                 .textTheme
                 .caption
-                .copyWith(fontFamily: 'Inter-Medium', fontSize: 16)),
+                .copyWith(fontFamily: 'Inter-Medium', fontSize: 16),),
         Center(
           child: Hero(
             tag: "select_folders",
@@ -563,7 +563,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     Bus.instance.fire(TabChangedEvent(
       index,
       TabChangedEventSource.tab_bar,
-    ));
+    ),);
   }
 
   @override
@@ -626,7 +626,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                   text: '',
                                   onPressed: () {
                                     _onTabChange(
-                                        0); // To take care of occasional missing events
+                                        0,); // To take care of occasional missing events
                                   },
                                 ),
                                 GButton(
@@ -641,7 +641,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                   text: '',
                                   onPressed: () {
                                     _onTabChange(
-                                        1); // To take care of occasional missing events
+                                        1,); // To take care of occasional missing events
                                   },
                                 ),
                                 GButton(
@@ -656,7 +656,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                   text: '',
                                   onPressed: () {
                                     _onTabChange(
-                                        2); // To take care of occasional missing events
+                                        2,); // To take care of occasional missing events
                                   },
                                 ),
                                 GButton(
@@ -671,7 +671,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                   text: '',
                                   onPressed: () {
                                     _onTabChange(
-                                        3); // To take care of occasional missing events
+                                        3,); // To take care of occasional missing events
                                   },
                                 )
                               ],
@@ -684,7 +684,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                     ),
                   ],
                 ),
-              ]),
+              ],),
         ),
       ),
     );

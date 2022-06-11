@@ -20,7 +20,7 @@ PopupMenuButton<dynamic> reportBugPopupMenu(BuildContext context) {
     onSelected: (value) async {
       if (value == 1) {
         await sendLogs(context, "Contact support", "support@ente.io",
-            postShare: () {});
+            postShare: () {},);
       }
     },
   );

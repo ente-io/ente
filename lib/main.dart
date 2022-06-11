@@ -64,7 +64,7 @@ Future<void> _runInForeground() async {
       enabled: Configuration.instance.shouldShowLockScreen(),
       lightTheme: lightThemeData,
       darkTheme: darkThemeData,
-    ));
+    ),);
   });
 }
 
@@ -77,7 +77,7 @@ Future<void> _runBackgroundTask(String taskId) async {
     _runWithLogs(() async {
       _logger.info("run background task");
       _runInBackground(taskId);
-    }, prefix: "[bg]");
+    }, prefix: "[bg]",);
   }
 }
 
@@ -139,7 +139,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   if (Platform.isIOS) {
     PushService.instance.init().then((_) {
       FirebaseMessaging.onBackgroundMessage(
-          _firebaseMessagingBackgroundHandler);
+          _firebaseMessagingBackgroundHandler,);
     });
   }
   FeatureFlagService.instance.init();
@@ -168,14 +168,14 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
     tunnel: kSentryTunnel,
     enableInDebugMode: true,
     prefix: prefix,
-  ));
+  ),);
 }
 
 Future<void> _scheduleHeartBeat(bool isBackground) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setInt(
       isBackground ? kLastBGTaskHeartBeatTime : kLastFGTaskHeartBeatTime,
-      DateTime.now().microsecondsSinceEpoch);
+      DateTime.now().microsecondsSinceEpoch,);
   Future.delayed(kHeartBeatFrequency, () async {
     _scheduleHeartBeat(isBackground);
   });
@@ -209,7 +209,7 @@ Future<bool> _isRunningInForeground() async {
 
 Future<void> _killBGTask([String taskId]) async {
   await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
-      ProcessType.background.toString(), DateTime.now().microsecondsSinceEpoch);
+      ProcessType.background.toString(), DateTime.now().microsecondsSinceEpoch,);
   final prefs = await SharedPreferences.getInstance();
   prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
@@ -222,7 +222,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   bool isInForeground = AppLifecycleService.instance.isForeground;
   if (_isProcessRunning) {
     _logger.info(
-        "Background push received when app is alive and runningInFS: $isRunningInFG inForeground: $isInForeground");
+        "Background push received when app is alive and runningInFS: $isRunningInFG inForeground: $isInForeground",);
     if (PushService.shouldSync(message)) {
       await _sync('firebaseBgSyncActiveProcess');
     }
@@ -237,7 +237,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       if (PushService.shouldSync(message)) {
         await _sync('firebaseBgSyncNoActiveProcess');
       }
-    }, prefix: "[fbg]");
+    }, prefix: "[fbg]",);
   }
 }
 

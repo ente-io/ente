@@ -12,10 +12,10 @@ import 'package:photos/models/subscription.dart';
 
 const kWebPaymentRedirectUrl = "https://payments.ente.io/frameRedirect";
 const kWebPaymentBaseEndpoint = String.fromEnvironment("web-payment",
-    defaultValue: "https://payments.ente.io");
+    defaultValue: "https://payments.ente.io",);
 
 const kFamilyPlanManagementUrl = String.fromEnvironment("web-family",
-    defaultValue: "https://family.ente.io");
+    defaultValue: "https://family.ente.io",);
 
 class BillingService {
   BillingService._privateConstructor();
@@ -43,7 +43,7 @@ class BillingService {
       for (final purchase in purchases) {
         if (purchase.status == PurchaseStatus.purchased) {
           verifySubscription(purchase.productID,
-                  purchase.verificationData.serverVerificationData)
+                  purchase.verificationData.serverVerificationData,)
               .then((response) {
             if (response != null) {
               InAppPurchaseConnection.instance.completePurchase(purchase);
@@ -167,7 +167,7 @@ class BillingService {
   }
 
   Future<String> getStripeCustomerPortalUrl(
-      {String endpoint = kWebPaymentRedirectUrl}) async {
+      {String endpoint = kWebPaymentRedirectUrl,}) async {
     try {
       final response = await _dio.get(
         _config.getHttpEndpoint() + "/billing/stripe/customer-portal",

@@ -21,9 +21,9 @@ bool _barrierDismissible = true, _showLogs = false;
 Color _barrierColor;
 
 TextStyle _progressTextStyle = TextStyle(
-        color: Colors.black, fontSize: 12.0, fontWeight: FontWeight.w400),
+        color: Colors.black, fontSize: 12.0, fontWeight: FontWeight.w400,),
     _messageStyle = TextStyle(
-        color: Colors.black, fontSize: 18.0, fontWeight: FontWeight.w600);
+        color: Colors.black, fontSize: 18.0, fontWeight: FontWeight.w600,);
 
 double _dialogElevation = 8.0, _borderRadius = 8.0;
 Color _backgroundColor = Colors.white;
@@ -70,7 +70,7 @@ class ProgressDialog {
       double borderRadius,
       Curve insetAnimCurve,
       EdgeInsets padding,
-      Alignment progressWidgetAlignment}) {
+      Alignment progressWidgetAlignment,}) {
     if (_isShowing) return;
     if (_progressDialogType == ProgressDialogType.Download) {
       _progress = progress ?? _progress;
@@ -98,7 +98,7 @@ class ProgressDialog {
       String message,
       Widget progressWidget,
       TextStyle progressTextStyle,
-      TextStyle messageTextStyle}) {
+      TextStyle messageTextStyle,}) {
     if (_progressDialogType == ProgressDialogType.Download) {
       _progress = progress ?? _progress;
     }
@@ -153,7 +153,7 @@ class ProgressDialog {
                 elevation: _dialogElevation,
                 shape: RoundedRectangleBorder(
                     borderRadius:
-                        BorderRadius.all(Radius.circular(_borderRadius))),
+                        BorderRadius.all(Radius.circular(_borderRadius)),),
                 child: _dialog,
               ),
             );
@@ -236,7 +236,7 @@ class _BodyState extends State<_Body> {
                         _dialogMessage,
                         style: _messageStyle,
                         textDirection: _direction,
-                      )),
+                      ),),
                     ],
                   ),
                   SizedBox(height: 4.0),

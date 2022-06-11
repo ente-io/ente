@@ -90,7 +90,7 @@ class _GNavState extends State<GNav> {
                       borderRadius:
                           t.borderRadius ?? widget.tabBorderRadius != null
                               ? BorderRadius.all(
-                                  Radius.circular(widget.tabBorderRadius))
+                                  Radius.circular(widget.tabBorderRadius),)
                               : const BorderRadius.all(Radius.circular(100.0)),
                       debug: widget.debug ?? false,
                       margin: t.margin ?? widget.tabMargin,
@@ -134,8 +134,8 @@ class _GNavState extends State<GNav> {
                           });
                         });
                       },
-                    ))
-                .toList()));
+                    ),)
+                .toList(),),);
   }
 }
 
@@ -260,7 +260,7 @@ class Button extends StatefulWidget {
       this.borderRadius = const BorderRadius.all(Radius.circular(100.0)),
       this.border,
       this.activeBorder,
-      this.shadow})
+      this.shadow,})
       : super(key: key);
 
   final IconData icon;
@@ -317,7 +317,7 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     var curveValue = expandController
         .drive(
-            CurveTween(curve: _expanded ? widget.curve : widget.curve.flipped))
+            CurveTween(curve: _expanded ? widget.curve : widget.curve.flipped),)
         .value;
 
     _expanded = !widget.active;
@@ -372,7 +372,7 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
               fit: BoxFit.fitHeight,
               child: Stack(children: [
                 Align(alignment: Alignment.centerLeft, child: icon),
-              ]),
+              ],),
             ),
           ),
         ),

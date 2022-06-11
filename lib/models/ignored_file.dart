@@ -23,6 +23,6 @@ class IgnoredFile {
     }
 
     return IgnoredFile(trashFile.localID, trashFile.title,
-        trashFile.deviceFolder, kIgnoreReasonTrash);
+        trashFile.deviceFolder, kIgnoreReasonTrash,);
   }
 }

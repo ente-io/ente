@@ -13,7 +13,7 @@ class onlyOuterShadow extends BoxShadow {
             color: color,
             offset: offset,
             blurRadius: blurRadius,
-            spreadRadius: spreadRadius);
+            spreadRadius: spreadRadius,);
 
   @override
   Paint toPaint() {
@@ -23,7 +23,7 @@ class onlyOuterShadow extends BoxShadow {
     assert(() {
       if (debugDisableShadows) result.maskFilter = null;
       return true;
-    }());
+    }(),);
     return result;
   }
 }

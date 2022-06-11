@@ -81,13 +81,13 @@ class FileMigrationService {
       final eTime = DateTime.now().microsecondsSinceEpoch;
       final d = Duration(microseconds: eTime - sTime);
       _logger.info(
-          'filesWithMissingLocation migration completed in ${d.inSeconds.toString()} seconds');
+          'filesWithMissingLocation migration completed in ${d.inSeconds.toString()} seconds',);
     }
     await _markLocationMigrationAsCompleted();
   }
 
   Future<void> _checkAndMarkFilesForReUpload(
-      List<String> localIDsToProcess) async {
+      List<String> localIDsToProcess,) async {
     _logger.info("files to process ${localIDsToProcess.length}");
     var localIDsWithLocation = <String>[];
     for (var localID in localIDsToProcess) {
@@ -101,7 +101,7 @@ class FileMigrationService {
         if ((latLng.longitude ?? 0.0) != 0.0 ||
             (latLng.longitude ?? 0.0) != 0.0) {
           _logger.finest(
-              'found lat/long ${latLng.longitude}/${latLng.longitude} for  ${assetEntity.title} ${assetEntity.relativePath} with id : $localID');
+              'found lat/long ${latLng.longitude}/${latLng.longitude} for  ${assetEntity.title} ${assetEntity.relativePath} with id : $localID',);
           hasLocation = true;
         }
       } catch (e, s) {
@@ -127,7 +127,7 @@ class FileMigrationService {
     final eTime = DateTime.now().microsecondsSinceEpoch;
     final d = Duration(microseconds: eTime - sTime);
     _logger.info(
-        'importing completed, total files count ${fileLocalIDs.length} and took ${d.inSeconds.toString()} seconds');
+        'importing completed, total files count ${fileLocalIDs.length} and took ${d.inSeconds.toString()} seconds',);
     _prefs.setBool(isLocalImportDone, true);
   }
 }

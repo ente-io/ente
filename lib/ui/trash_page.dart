@@ -22,7 +22,7 @@ class TrashPage extends StatefulWidget {
       {this.tagPrefix = "trash_page",
       this.appBarType = GalleryType.trash,
       this.overlayType = GalleryType.trash,
-      Key key})
+      Key key,})
       : super(key: key);
 
   @override
@@ -54,13 +54,13 @@ class _TrashPageState extends State<TrashPage> {
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return TrashDB.instance.getTrashedFiles(
             creationStartTime, creationEndTime,
-            limit: limit, asc: asc);
+            limit: limit, asc: asc,);
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
             (event) =>
                 event.updatedFiles.firstWhere(
                     (element) => element.uploadedFileID != null,
-                    orElse: () => null) !=
+                    orElse: () => null,) !=
                 null,
           ),
       forceReloadEvents: [
@@ -101,7 +101,7 @@ class _TrashPageState extends State<TrashPage> {
                 ignoring: filesAreSelected,
                 child: SafeArea(
                     minimum: EdgeInsets.only(bottom: 6),
-                    child: BottomButtonsWidget()),
+                    child: BottomButtonsWidget(),),
               ),
             ),
           ),
@@ -156,7 +156,7 @@ class BottomButtonsWidget extends StatelessWidget {
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 16),
+                        vertical: 8.0, horizontal: 16,),
                     child: Text(
                       'Delete All',
                       style: Theme.of(context).textTheme.subtitle2.copyWith(

@@ -11,7 +11,7 @@ class TwoFactorRecoveryPage extends StatefulWidget {
 
   TwoFactorRecoveryPage(
       this.sessionID, this.encryptedSecret, this.secretDecryptionNonce,
-      {Key key})
+      {Key key,})
       : super(key: key);
 
   @override
@@ -72,7 +72,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                           widget.sessionID,
                           _recoveryKey.text,
                           widget.encryptedSecret,
-                          widget.secretDecryptionNonce);
+                          widget.secretDecryptionNonce,);
                     }
                   : null,
             ),

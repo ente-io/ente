@@ -41,7 +41,7 @@ class PublicKeysDB {
                   $columnEmail TEXT PRIMARY KEY NOT NULL,
                   $columnPublicKey TEXT NOT NULL
                 )
-                ''');
+                ''',);
   }
 
   Future<void> clearTable() async {
@@ -52,7 +52,7 @@ class PublicKeysDB {
   Future<int> setKey(PublicKey key) async {
     final db = await instance.database;
     return db.insert(table, _getRow(key),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+        conflictAlgorithm: ConflictAlgorithm.replace,);
   }
 
   Future<List<PublicKey>> searchByEmail(String email) async {
@@ -61,7 +61,7 @@ class PublicKeysDB {
       table,
       where: '$columnEmail LIKE ?',
       whereArgs: ['%$email%'],
-    ));
+    ),);
   }
 
   Map<String, dynamic> _getRow(PublicKey key) {

@@ -5,9 +5,9 @@ import 'package:photos/ui/huge_listview/draggable_scrollbar.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 typedef HugeListViewItemBuilder<T> = Widget Function(
-    BuildContext context, int index);
+    BuildContext context, int index,);
 typedef HugeListViewErrorBuilder = Widget Function(
-    BuildContext context, dynamic error);
+    BuildContext context, dynamic error,);
 
 class HugeListView<T> extends StatefulWidget {
   /// A [ScrollablePositionedList] controller for jumping or scrolling to an item.

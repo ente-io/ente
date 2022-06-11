@@ -31,7 +31,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
 
   Widget _getBody() {
     Logger("FreeSpacePage").info("Number of uploaded files: " +
-        widget.status.localIDs.length.toString());
+        widget.status.localIDs.length.toString(),);
     Logger("FreeSpacePage")
         .info("Space consumed: " + widget.status.size.toString());
     return _getWidget(widget.status);

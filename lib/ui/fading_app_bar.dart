@@ -179,7 +179,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           _showDeleteSheet(widget.file);
         }
       },
-    ));
+    ),);
     return AppBar(
       iconTheme: IconThemeData(color: Colors.white), //same for both themes
       actions: shouldShowActions ? actions : [],
@@ -268,7 +268,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     );
     if (dateWithTimeResult != null) {
       if (await editTime(context, List.of([widget.file]),
-          dateWithTimeResult.microsecondsSinceEpoch)) {
+          dateWithTimeResult.microsecondsSinceEpoch,)) {
         widget.file.creationTime = dateWithTimeResult.microsecondsSinceEpoch;
         setState(() {});
       }
@@ -286,7 +286,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           Navigator.of(context, rootNavigator: true).pop();
           widget.onFileDeleted(file);
         },
-      ));
+      ),);
     } else {
       // uploaded file which is present locally too
       actions.add(CupertinoActionSheetAction(
@@ -298,7 +298,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           Navigator.of(context, rootNavigator: true).pop();
           // TODO: Fix behavior when inside a device folder
         },
-      ));
+      ),);
 
       actions.add(CupertinoActionSheetAction(
         child: Text("ente"),
@@ -309,7 +309,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           Navigator.of(context, rootNavigator: true).pop();
           // TODO: Fix behavior when inside a collection
         },
-      ));
+      ),);
 
       actions.add(CupertinoActionSheetAction(
         child: Text("Everywhere"),
@@ -319,7 +319,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           Navigator.of(context, rootNavigator: true).pop();
           widget.onFileDeleted(file);
         },
-      ));
+      ),);
     }
     final action = CupertinoActionSheet(
       title: Text("Delete file?"),

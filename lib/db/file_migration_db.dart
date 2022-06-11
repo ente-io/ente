@@ -19,7 +19,7 @@ class FilesMigrationDB {
         $columnLocalID TEXT NOT NULL,
           UNIQUE($columnLocalID)
         );
-      ''');
+      ''',);
   }
 
   FilesMigrationDB._privateConstructor();
@@ -74,9 +74,9 @@ class FilesMigrationDB {
     final endTime = DateTime.now();
     final duration = Duration(
         microseconds:
-            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
+            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch,);
     _logger.info("Batch insert of ${fileLocalIDs.length} "
-        "took ${duration.inMilliseconds} ms.");
+        "took ${duration.inMilliseconds} ms.",);
   }
 
   Future<int> deleteByLocalIDs(List<String> localIDs) async {

@@ -22,7 +22,7 @@ class SettingsTextItem extends StatelessWidget {
             Align(
                 alignment: Alignment.centerLeft,
                 child:
-                    Text(text, style: Theme.of(context).textTheme.subtitle1)),
+                    Text(text, style: Theme.of(context).textTheme.subtitle1),),
             Icon(icon),
           ],
         ),

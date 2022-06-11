@@ -64,7 +64,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           try {
             await Configuration.instance.decryptAndSaveSecrets(
                 _passwordController.text,
-                Configuration.instance.getKeyAttributes());
+                Configuration.instance.getKeyAttributes(),);
           } catch (e) {
             Logger("PRP").warning(e);
             await dialog.hide();
@@ -91,7 +91,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                 child: Text('Welcome back!',
-                    style: Theme.of(context).textTheme.headline4),
+                    style: Theme.of(context).textTheme.headline4,),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
@@ -103,7 +103,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                     contentPadding: EdgeInsets.all(20),
                     border: UnderlineInputBorder(
                         borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6)),
+                        borderRadius: BorderRadius.circular(6),),
                     suffixIcon: _passwordInFocus
                         ? IconButton(
                             icon: Icon(
@@ -165,7 +165,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                                   .subtitle1
                                   .copyWith(
                                       fontSize: 14,
-                                      decoration: TextDecoration.underline)),
+                                      decoration: TextDecoration.underline,),),
                         ),
                       ),
                     ),
@@ -188,7 +188,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                                   .subtitle1
                                   .copyWith(
                                       fontSize: 14,
-                                      decoration: TextDecoration.underline)),
+                                      decoration: TextDecoration.underline,),),
                         ),
                       ),
                     ),

@@ -60,7 +60,7 @@ class SubscriptionPlanWidget extends StatelessWidget {
                 ),
                 Text(_displayPrice(),
                     style: Theme.of(context).textTheme.headline6.copyWith(
-                        color: textColor, fontWeight: FontWeight.normal)),
+                        color: textColor, fontWeight: FontWeight.normal,),),
               ],
             ),
           ],

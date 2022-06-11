@@ -199,7 +199,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
                         selectedFiles,
                         null,
                         actionType: CollectionActionType.restoreFiles,
-                      )));
+                      ),),);
             },
           ),
         ),

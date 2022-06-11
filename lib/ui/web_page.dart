@@ -20,7 +20,7 @@ class _WebPageState extends State<WebPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(10, 20, 20,
-            1.0), // force dark theme for appBar till website/family plans add supports for light theme
+            1.0,), // force dark theme for appBar till website/family plans add supports for light theme
         foregroundColor: Colors.white,
         iconTheme: IconThemeData(color: Colors.white),
         title: Text(widget.title),
@@ -30,7 +30,7 @@ class _WebPageState extends State<WebPage> {
       body: InAppWebView(
         initialUrlRequest: URLRequest(url: Uri.parse(widget.url)),
         initialOptions: InAppWebViewGroupOptions(
-            crossPlatform: InAppWebViewOptions(transparentBackground: true)),
+            crossPlatform: InAppWebViewOptions(transparentBackground: true),),
         onLoadStop: (c, url) {
           setState(() {
             _hasLoadedPage = true;
