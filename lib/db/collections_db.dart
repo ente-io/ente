@@ -44,7 +44,9 @@ class CollectionsDB {
   ];
 
   final dbConfig = MigrationConfig(
-      initializationScript: intitialScript, migrationScripts: migrationScripts);
+    initializationScript: intitialScript,
+    migrationScripts: migrationScripts,
+  );
 
   CollectionsDB._privateConstructor();
 
@@ -157,8 +159,11 @@ class CollectionsDB {
     final db = await instance.database;
     var batch = db.batch();
     for (final collection in collections) {
-      batch.insert(table, _getRowForCollection(collection),
-          conflictAlgorithm: ConflictAlgorithm.replace);
+      batch.insert(
+        table,
+        _getRowForCollection(collection),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
     return await batch.commit();
   }
@@ -239,12 +244,15 @@ class CollectionsDB {
         pathDecryptionNonce: row[columnPathDecryptionNonce],
         version: row[columnVersion],
       ),
-      List<User>.from((json.decode(row[columnSharees]) as List)
-          .map((x) => User.fromMap(x))),
+      List<User>.from(
+        (json.decode(row[columnSharees]) as List).map((x) => User.fromMap(x)),
+      ),
       row[columnPublicURLs] == null
           ? []
-          : List<PublicURL>.from((json.decode(row[columnPublicURLs]) as List)
-              .map((x) => PublicURL.fromMap(x))),
+          : List<PublicURL>.from(
+              (json.decode(row[columnPublicURLs]) as List)
+                  .map((x) => PublicURL.fromMap(x)),
+            ),
       int.parse(row[columnUpdationTime]),
       // default to False is columnIsDeleted is not set
       isDeleted: (row[columnIsDeleted] ?? _sqlBoolFalse) == _sqlBoolTrue,

@@ -94,7 +94,8 @@ class InfoSectionWidget extends StatelessWidget {
                           context: context,
                           builder: (BuildContext context) {
                             return AppUpdateDialog(
-                                UpdateService.instance.getLatestVersionInfo());
+                              UpdateService.instance.getLatestVersionInfo(),
+                            );
                           },
                           barrierColor: Colors.black.withOpacity(0.85),
                         );
@@ -103,7 +104,9 @@ class InfoSectionWidget extends StatelessWidget {
                       }
                     },
                     child: SettingsTextItem(
-                        text: "Check for updates", icon: Icons.navigate_next),
+                      text: "Check for updates",
+                      icon: Icons.navigate_next,
+                    ),
                   ),
                 ],
               )

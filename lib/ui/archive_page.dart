@@ -16,26 +16,32 @@ class ArchivePage extends StatelessWidget {
   final GalleryType overlayType;
   final _selectedFiles = SelectedFiles();
 
-  ArchivePage(
-      {this.tagPrefix = "archived_page",
-      this.appBarType = GalleryType.archive,
-      this.overlayType = GalleryType.archive,
-      Key key})
-      : super(key: key);
+  ArchivePage({
+    this.tagPrefix = "archived_page",
+    this.appBarType = GalleryType.archive,
+    this.overlayType = GalleryType.archive,
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(Object context) {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return FilesDB.instance.getAllUploadedFiles(creationStartTime,
-            creationEndTime, Configuration.instance.getUserID(),
-            visibility: kVisibilityArchive, limit: limit, asc: asc);
+        return FilesDB.instance.getAllUploadedFiles(
+          creationStartTime,
+          creationEndTime,
+          Configuration.instance.getUserID(),
+          visibility: kVisibilityArchive,
+          limit: limit,
+          asc: asc,
+        );
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
             (event) =>
                 event.updatedFiles.firstWhere(
-                    (element) => element.uploadedFileID != null,
-                    orElse: () => null) !=
+                  (element) => element.uploadedFileID != null,
+                  orElse: () => null,
+                ) !=
                 null,
           ),
       removalEventTypes: const {EventType.unarchived},
@@ -43,8 +49,9 @@ class ArchivePage extends StatelessWidget {
         Bus.instance.on<FilesUpdatedEvent>().where(
               (event) =>
                   event.updatedFiles.firstWhere(
-                      (element) => element.uploadedFileID != null,
-                      orElse: () => null) !=
+                    (element) => element.uploadedFileID != null,
+                    orElse: () => null,
+                  ) !=
                   null,
             ),
       ],

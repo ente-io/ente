@@ -59,7 +59,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     _volatilePassword = Configuration.instance.getVolatilePassword();
     if (_volatilePassword != null) {
       Future.delayed(
-          Duration.zero, () => _showRecoveryCodeDialog(_volatilePassword));
+        Duration.zero,
+        () => _showRecoveryCodeDialog(_volatilePassword),
+      );
     }
     _password1FocusNode.addListener(() {
       setState(() {
@@ -108,16 +110,17 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       ),
       body: _getBody(title),
       floatingActionButton: DynamicFAB(
-          isKeypadOpen: isKeypadOpen,
-          isFormValid: _passwordsMatch,
-          buttonText: title,
-          onPressedFunction: () {
-            if (widget.mode == PasswordEntryMode.set) {
-              _showRecoveryCodeDialog(_passwordController1.text);
-            } else {
-              _updatePassword();
-            }
-          }),
+        isKeypadOpen: isKeypadOpen,
+        isFormValid: _passwordsMatch,
+        buttonText: title,
+        onPressedFunction: () {
+          if (widget.mode == PasswordEntryMode.set) {
+            _showRecoveryCodeDialog(_passwordController1.text);
+          } else {
+            _updatePassword();
+          }
+        },
+      ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
     );
@@ -146,8 +149,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  child: Text(buttonTextAndHeading,
-                      style: Theme.of(context).textTheme.headline4),
+                  child: Text(
+                    buttonTextAndHeading,
+                    style: Theme.of(context).textTheme.headline4,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -166,22 +171,26 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: RichText(
-                      text: TextSpan(
-                          style: Theme.of(context)
-                              .textTheme
-                              .subtitle1
-                              .copyWith(fontSize: 14),
-                          children: [
+                    text: TextSpan(
+                      style: Theme.of(context)
+                          .textTheme
+                          .subtitle1
+                          .copyWith(fontSize: 14),
+                      children: [
                         TextSpan(
-                            text:
-                                "We don't store this password, so if you forget, "),
+                          text:
+                              "We don't store this password, so if you forget, ",
+                        ),
                         TextSpan(
                           text: "we cannot decrypt your data",
                           style: Theme.of(context).textTheme.subtitle1.copyWith(
-                              fontSize: 14,
-                              decoration: TextDecoration.underline),
+                                fontSize: 14,
+                                decoration: TextDecoration.underline,
+                              ),
                         ),
-                      ])),
+                      ],
+                    ),
+                  ),
                 ),
                 Padding(padding: EdgeInsets.all(12)),
                 Visibility(
@@ -209,8 +218,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       hintText: "Password",
                       contentPadding: EdgeInsets.all(20),
                       border: UnderlineInputBorder(
-                          borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(6)),
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                       suffixIcon: _password1InFocus
                           ? IconButton(
                               icon: Icon(
@@ -274,7 +284,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                           filled: true,
                           hintText: "Confirm password",
                           contentPadding: EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 20),
+                            horizontal: 20,
+                            vertical: 20,
+                          ),
                           suffixIcon: _password2InFocus
                               ? IconButton(
                                   icon: Icon(
@@ -301,8 +313,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                     )
                                   : null,
                           border: UnderlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(6)),
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
                         ),
                         focusNode: _password2FocusNode,
                         onChanged: (cnfPassword) {
@@ -321,66 +334,74 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       visible:
                           ((_passwordInInputBox != '') && _password1InFocus),
                       child: Positioned(
-                          bottom: 24,
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      boxShadow: [
-                                        BoxShadow(
-                                          spreadRadius: 0.5,
-                                          color: Theme.of(context).hintColor,
-                                          offset: Offset(0, -0.325),
-                                        ),
-                                      ],
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.zero,
-                                        topRight: Radius.zero,
-                                        bottomLeft: Radius.circular(5),
-                                        bottomRight: Radius.circular(5),
+                        bottom: 24,
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    boxShadow: [
+                                      BoxShadow(
+                                        spreadRadius: 0.5,
+                                        color: Theme.of(context).hintColor,
+                                        offset: Offset(0, -0.325),
                                       ),
-                                      color: Theme.of(context)
-                                          .dialogTheme
-                                          .backgroundColor,
+                                    ],
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.zero,
+                                      topRight: Radius.zero,
+                                      bottomLeft: Radius.circular(5),
+                                      bottomRight: Radius.circular(5),
                                     ),
-                                    width: double.infinity,
-                                    child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                4.0, 4, 4.0, 4.0),
-                                            child: Row(
-                                              children: [
-                                                Padding(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            horizontal: 10,
-                                                            vertical: 5),
-                                                    child: Text(
-                                                      'Password Strength: $passwordStrengthText',
-                                                      style: TextStyle(
-                                                          color:
-                                                              passwordStrengthColor),
-                                                    )),
-                                              ],
+                                    color: Theme.of(context)
+                                        .dialogTheme
+                                        .backgroundColor,
+                                  ),
+                                  width: double.infinity,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          4.0,
+                                          4,
+                                          4.0,
+                                          4.0,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                                vertical: 5,
+                                              ),
+                                              child: Text(
+                                                'Password Strength: $passwordStrengthText',
+                                                style: TextStyle(
+                                                  color: passwordStrengthColor,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ]),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
-                              SizedBox(
-                                width: 20,
-                              ),
-                            ],
-                          )),
+                            ),
+                            SizedBox(
+                              width: 20,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                   clipBehavior: Clip.none,
@@ -395,7 +416,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       MaterialPageRoute(
                         builder: (BuildContext context) {
                           return WebPage(
-                              "How it works", "https://ente.io/architecture");
+                            "How it works",
+                            "https://ente.io/architecture",
+                          );
                         },
                       ),
                     );
@@ -404,10 +427,12 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     padding: EdgeInsets.symmetric(horizontal: 20),
                     child: RichText(
                       text: TextSpan(
-                          text: "How it works",
-                          style: Theme.of(context).textTheme.subtitle1.copyWith(
+                        text: "How it works",
+                        style: Theme.of(context).textTheme.subtitle1.copyWith(
                               fontSize: 14,
-                              decoration: TextDecoration.underline)),
+                              decoration: TextDecoration.underline,
+                            ),
+                      ),
                     ),
                   ),
                 ),
@@ -473,21 +498,25 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       }
 
       routeToPage(
-          context,
-          RecoveryKeyPage(
-            result.privateKeyAttributes.recoveryKey,
-            "Continue",
-            showAppBar: false,
-            isDismissible: false,
-            onDone: onDone,
-            showProgressBar: true,
-          ));
+        context,
+        RecoveryKeyPage(
+          result.privateKeyAttributes.recoveryKey,
+          "Continue",
+          showAppBar: false,
+          isDismissible: false,
+          onDone: onDone,
+          showProgressBar: true,
+        ),
+      );
     } catch (e) {
       _logger.severe(e);
       await dialog.hide();
       if (e is UnsupportedError) {
-        showErrorDialog(context, "Insecure device",
-            "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.");
+        showErrorDialog(
+          context,
+          "Insecure device",
+          "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.",
+        );
       } else {
         showGenericErrorDialog(context);
       }

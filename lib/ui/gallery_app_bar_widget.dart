@@ -135,56 +135,59 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       );
     }
     if (widget.type == GalleryType.owned_collection) {
-      actions.add(PopupMenuButton(
-        itemBuilder: (context) {
-          final List<PopupMenuItem> items = [];
-          if (widget.collection.type == CollectionType.album) {
+      actions.add(
+        PopupMenuButton(
+          itemBuilder: (context) {
+            final List<PopupMenuItem> items = [];
+            if (widget.collection.type == CollectionType.album) {
+              items.add(
+                PopupMenuItem(
+                  value: 1,
+                  child: Row(
+                    children: const [
+                      Icon(Icons.edit),
+                      Padding(
+                        padding: EdgeInsets.all(8),
+                      ),
+                      Text("Rename"),
+                    ],
+                  ),
+                ),
+              );
+            }
+            bool isArchived = widget.collection.isArchived();
             items.add(
               PopupMenuItem(
-                value: 1,
+                value: 2,
                 child: Row(
-                  children: const [
-                    Icon(Icons.edit),
+                  children: [
+                    Icon(isArchived ? Icons.visibility : Icons.visibility_off),
                     Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    Text("Rename"),
+                    Text(isArchived ? "Unhide" : "Hide"),
                   ],
                 ),
               ),
             );
-          }
-          bool isArchived = widget.collection.isArchived();
-          items.add(
-            PopupMenuItem(
-              value: 2,
-              child: Row(
-                children: [
-                  Icon(isArchived ? Icons.visibility : Icons.visibility_off),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text(isArchived ? "Unhide" : "Hide"),
-                ],
-              ),
-            ),
-          );
-          return items;
-        },
-        onSelected: (value) async {
-          if (value == 1) {
-            await _renameAlbum(context);
-          }
-          if (value == 2) {
-            await changeCollectionVisibility(
+            return items;
+          },
+          onSelected: (value) async {
+            if (value == 1) {
+              await _renameAlbum(context);
+            }
+            if (value == 2) {
+              await changeCollectionVisibility(
                 context,
                 widget.collection,
                 widget.collection.isArchived()
                     ? kVisibilityVisible
-                    : kVisibilityArchive);
-          }
-        },
-      ));
+                    : kVisibilityArchive,
+              );
+            }
+          },
+        ),
+      );
     }
     return actions;
   }
@@ -200,7 +203,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               await CollectionsService.instance.getOrCreateForPath(widget.path);
         } else {
           throw Exception(
-              "Cannot create a collection of type" + widget.type.toString());
+            "Cannot create a collection of type" + widget.type.toString(),
+          );
         }
       } else {
         final sharees =

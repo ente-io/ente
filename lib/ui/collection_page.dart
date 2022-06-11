@@ -17,12 +17,13 @@ class CollectionPage extends StatelessWidget {
   final GalleryType overlayType;
   final _selectedFiles = SelectedFiles();
 
-  CollectionPage(this.c,
-      {this.tagPrefix = "collection",
-      this.appBarType = GalleryType.owned_collection,
-      this.overlayType = GalleryType.owned_collection,
-      Key key})
-      : super(key: key);
+  CollectionPage(
+    this.c, {
+    this.tagPrefix = "collection",
+    this.appBarType = GalleryType.owned_collection,
+    this.overlayType = GalleryType.owned_collection,
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(Object context) {
@@ -30,8 +31,12 @@ class CollectionPage extends StatelessWidget {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInCollection(
-            c.collection.id, creationStartTime, creationEndTime,
-            limit: limit, asc: asc);
+          c.collection.id,
+          creationStartTime,
+          creationEndTime,
+          limit: limit,
+          asc: asc,
+        );
       },
       reloadEvent: Bus.instance
           .on<CollectionUpdatedEvent>()

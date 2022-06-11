@@ -51,7 +51,9 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             );
           },
           child: SettingsTextItem(
-              text: "Backed up folders", icon: Icons.navigate_next),
+            text: "Backed up folders",
+            icon: Icons.navigate_next,
+          ),
         ),
         SectionOptionDivider,
         SizedBox(
@@ -110,8 +112,11 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
 
             await dialog.hide();
             if (status.localIDs.isEmpty) {
-              showErrorDialog(context, "✨ All clear",
-                  "You've no files on this device that can be deleted");
+              showErrorDialog(
+                context,
+                "✨ All clear",
+                "You've no files on this device that can be deleted",
+              );
             } else {
               bool result = await routeToPage(context, FreeSpacePage(status));
               if (result == true) {
@@ -142,8 +147,11 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
 
             await dialog.hide();
             if (duplicates.isEmpty) {
-              showErrorDialog(context, "✨ No duplicates",
-                  "You've no duplicate files that can be cleared");
+              showErrorDialog(
+                context,
+                "✨ No duplicates",
+                "You've no duplicate files that can be cleared",
+              );
             } else {
               DeduplicationResult result =
                   await routeToPage(context, DeduplicatePage(duplicates));
@@ -165,7 +173,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
     AlertDialog alert = AlertDialog(
       title: Text("Success"),
       content: Text(
-          "You have successfully freed up " + formatBytes(status.size) + "!"),
+        "You have successfully freed up " + formatBytes(status.size) + "!",
+      ),
       actions: [
         TextButton(
           child: Text(
@@ -179,7 +188,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             // TODO: Replace with https://pub.dev/packages/in_app_review
             if (Platform.isAndroid) {
               launch(
-                  "https://play.google.com/store/apps/details?id=io.ente.photos");
+                "https://play.google.com/store/apps/details?id=io.ente.photos",
+              );
             } else {
               launch("https://apps.apple.com/in/app/ente-photos/id1542026904");
             }
@@ -194,8 +204,10 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           ),
           onPressed: () {
             if (Platform.isIOS) {
-              showToast(context,
-                  "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space");
+              showToast(
+                context,
+                "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space",
+              );
             }
             Navigator.of(context, rootNavigator: true).pop('dialog');
           },
@@ -219,11 +231,13 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         (result.count == 1 ? "" : "s");
     AlertDialog alert = AlertDialog(
       title: Text("✨ Success"),
-      content: Text("You have cleaned up " +
-          countText +
-          ", saving " +
-          formatBytes(result.size) +
-          "!"),
+      content: Text(
+        "You have cleaned up " +
+            countText +
+            ", saving " +
+            formatBytes(result.size) +
+            "!",
+      ),
       actions: [
         TextButton(
           child: Text(
@@ -237,7 +251,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             // TODO: Replace with https://pub.dev/packages/in_app_review
             if (Platform.isAndroid) {
               launch(
-                  "https://play.google.com/store/apps/details?id=io.ente.photos");
+                "https://play.google.com/store/apps/details?id=io.ente.photos",
+              );
             } else {
               launch("https://apps.apple.com/in/app/ente-photos/id1542026904");
             }
@@ -251,8 +266,10 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             ),
           ),
           onPressed: () {
-            showToast(context,
-                "Also empty your \"Trash\" to claim the freed up space");
+            showToast(
+              context,
+              "Also empty your \"Trash\" to claim the freed up space",
+            );
             Navigator.of(context, rootNavigator: true).pop('dialog');
           },
         ),

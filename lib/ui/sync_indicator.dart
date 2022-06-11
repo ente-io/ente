@@ -133,16 +133,17 @@ class _SyncIndicatorState extends State<SyncIndicator> {
               height: 64,
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
               child: OutlinedButton(
-                  child: Text("Subscribe"),
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return getSubscriptionPage();
-                        },
-                      ),
-                    );
-                  }),
+                child: Text("Subscribe"),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return getSubscriptionPage();
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
             Padding(padding: EdgeInsets.all(8)),
           ],
@@ -171,16 +172,17 @@ class _SyncIndicatorState extends State<SyncIndicator> {
               height: 64,
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
               child: OutlinedButton(
-                  child: Text("Upgrade"),
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return getSubscriptionPage();
-                        },
-                      ),
-                    );
-                  }),
+                child: Text("Upgrade"),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return getSubscriptionPage();
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
             Padding(padding: EdgeInsets.all(8)),
           ],

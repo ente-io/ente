@@ -53,9 +53,11 @@ class _SharingDialogState extends State<SharingDialog> {
     if (_showEntryField) {
       children.add(_getEmailField());
     }
-    children.add(Padding(
-      padding: EdgeInsets.all(8),
-    ));
+    children.add(
+      Padding(
+        padding: EdgeInsets.all(8),
+      ),
+    );
     if (!_showEntryField) {
       children.add(
         SizedBox(
@@ -128,18 +130,21 @@ class _SharingDialogState extends State<SharingDialog> {
                   // confirm if user wants to disable the url
                   if (!enable) {
                     final choice = await showChoiceDialog(
-                        context,
-                        'Disable link',
-                        'Are you sure that you want to disable the album link?',
-                        firstAction: 'Yes, disable',
-                        secondAction: 'No',
-                        actionType: ActionType.critical);
+                      context,
+                      'Disable link',
+                      'Are you sure that you want to disable the album link?',
+                      firstAction: 'Yes, disable',
+                      secondAction: 'No',
+                      actionType: ActionType.critical,
+                    );
                     if (choice != DialogUserChoice.firstChoice) {
                       return;
                     }
                   }
-                  final dialog = createProgressDialog(context,
-                      enable ? "Creating link..." : "Disabling link...");
+                  final dialog = createProgressDialog(
+                    context,
+                    enable ? "Creating link..." : "Disabling link...",
+                  );
                   try {
                     await dialog.show();
                     enable
@@ -166,9 +171,11 @@ class _SharingDialogState extends State<SharingDialog> {
         Padding(padding: EdgeInsets.all(8)),
       ]);
       if (widget.collection.publicURLs?.isNotEmpty ?? false) {
-        children.add(Padding(
-          padding: EdgeInsets.all(2),
-        ));
+        children.add(
+          Padding(
+            padding: EdgeInsets.all(2),
+          ),
+        );
         children.add(_getShareableUrlWidget(context));
       }
     }
@@ -179,10 +186,11 @@ class _SharingDialogState extends State<SharingDialog> {
         child: ListBody(
           children: <Widget>[
             Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: Column(
-                  children: children,
-                )),
+              padding: const EdgeInsets.all(4.0),
+              child: Column(
+                children: children,
+              ),
+            ),
           ],
         ),
       ),
@@ -220,8 +228,10 @@ class _SharingDialogState extends State<SharingDialog> {
               );
             },
             onSuggestionSelected: (PublicKey suggestion) {
-              _addEmailToCollection(suggestion.email,
-                  publicKey: suggestion.publicKey);
+              _addEmailToCollection(
+                suggestion.email,
+                publicKey: suggestion.publicKey,
+              );
             },
           ),
         ),
@@ -233,7 +243,8 @@ class _SharingDialogState extends State<SharingDialog> {
           ),
           onPressed: () async {
             final emailContact = await FlutterContactPicker.pickEmailContact(
-                askForPermission: true);
+              askForPermission: true,
+            );
             _addEmailToCollection(emailContact.email.email);
           },
         ),
@@ -243,7 +254,8 @@ class _SharingDialogState extends State<SharingDialog> {
 
   Widget _getShareableUrlWidget(BuildContext parentContext) {
     String collectionKey = Base58Encode(
-        CollectionsService.instance.getCollectionKey(widget.collection.id));
+      CollectionsService.instance.getCollectionKey(widget.collection.id),
+    );
     String url = "${widget.collection.publicURLs.first.url}#$collectionKey";
     return SingleChildScrollView(
       child: Column(
@@ -340,15 +352,21 @@ class _SharingDialogState extends State<SharingDialog> {
     String publicKey,
   }) async {
     if (!isValidEmail(email)) {
-      showErrorDialog(context, "Invalid email address",
-          "Please enter a valid email address.");
+      showErrorDialog(
+        context,
+        "Invalid email address",
+        "Please enter a valid email address.",
+      );
       return;
     } else if (email == Configuration.instance.getEmail()) {
       showErrorDialog(context, "Oops", "You cannot share with yourself");
       return;
     } else if (widget.collection.sharees.any((user) => user.email == email)) {
       showErrorDialog(
-          context, "Oops", "You're already sharing this with " + email);
+        context,
+        "Oops",
+        "You're already sharing this with " + email,
+      );
       return;
     }
     if (publicKey == null) {
@@ -380,7 +398,8 @@ class _SharingDialogState extends State<SharingDialog> {
             ),
             onPressed: () {
               shareText(
-                  "Hey, I have some photos to share. Please install https://ente.io so that I can share them privately.");
+                "Hey, I have some photos to share. Please install https://ente.io so that I can share them privately.",
+              );
             },
           ),
         ],

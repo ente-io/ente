@@ -64,8 +64,11 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
           ),
           onPressed: () {
             if (!isValidEmail(_email)) {
-              showErrorDialog(context, "Invalid email address",
-                  "Please enter a valid email address.");
+              showErrorDialog(
+                context,
+                "Invalid email address",
+                "Please enter a valid email address.",
+              );
               return;
             }
             UserService.instance.getOtt(context, _email, isChangeEmail: true);

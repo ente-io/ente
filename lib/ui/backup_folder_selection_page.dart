@@ -133,21 +133,28 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                           .compareTo(second.deviceFolder.toLowerCase());
                     });
                     setState(() {});
-                  }),
+                  },
+                ),
           Expanded(child: _getFolders()),
           Hero(
             tag: "select_folders",
             child: Container(
               width: double.infinity,
-              decoration: BoxDecoration(boxShadow: [
-                BoxShadow(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
                     color: Theme.of(context).backgroundColor,
                     blurRadius: 24,
                     offset: Offset(0, -8),
-                    spreadRadius: 4)
-              ]),
+                    spreadRadius: 4,
+                  )
+                ],
+              ),
               padding: EdgeInsets.only(
-                  left: 20, right: 20, bottom: Platform.isIOS ? 60 : 32),
+                left: 20,
+                right: 20,
+                bottom: Platform.isIOS ? 60 : 32,
+              ),
               child: OutlinedButton(
                 child: Text(widget.buttonText),
                 onPressed: _selectedFolders.isEmpty
@@ -226,24 +233,26 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       padding: const EdgeInsets.only(bottom: 1, right: 1),
       child: Container(
         decoration: BoxDecoration(
-            border: Border.all(
-              color: Theme.of(context).colorScheme.boxUnSelectColor,
-            ),
-            borderRadius: BorderRadius.all(
-              Radius.circular(12),
-            ),
-            // color: isSelected
-            //     ? Theme.of(context).colorScheme.boxSelectColor
-            //     : Theme.of(context).colorScheme.boxUnSelectColor,
-            gradient: isSelected
-                ? LinearGradient(colors: const [
-                    Color(0xFF00DD4D),
-                    Color(0xFF43BA6C)
-                  ]) //same for both themes
-                : LinearGradient(colors: [
+          border: Border.all(
+            color: Theme.of(context).colorScheme.boxUnSelectColor,
+          ),
+          borderRadius: BorderRadius.all(
+            Radius.circular(12),
+          ),
+          // color: isSelected
+          //     ? Theme.of(context).colorScheme.boxSelectColor
+          //     : Theme.of(context).colorScheme.boxUnSelectColor,
+          gradient: isSelected
+              ? LinearGradient(
+                  colors: const [Color(0xFF00DD4D), Color(0xFF43BA6C)],
+                ) //same for both themes
+              : LinearGradient(
+                  colors: [
                     Theme.of(context).colorScheme.boxUnSelectColor,
                     Theme.of(context).colorScheme.boxUnSelectColor
-                  ])),
+                  ],
+                ),
+        ),
         padding: EdgeInsets.fromLTRB(8, 4, 4, 4),
         child: InkWell(
           child: Row(
@@ -343,21 +352,25 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: SizedBox(
-        child: Stack(alignment: AlignmentDirectional.bottomEnd, children: [
-          ThumbnailWidget(
-            file,
-            shouldShowSyncStatus: false,
-            key: Key("backup_selection_widget" + file.tag()),
-          ),
-          Padding(
+        child: Stack(
+          alignment: AlignmentDirectional.bottomEnd,
+          children: [
+            ThumbnailWidget(
+              file,
+              shouldShowSyncStatus: false,
+              key: Key("backup_selection_widget" + file.tag()),
+            ),
+            Padding(
               padding: const EdgeInsets.all(9),
               child: isSelected
                   ? Icon(
                       Icons.local_police,
                       color: Colors.white,
                     )
-                  : null),
-        ]),
+                  : null,
+            ),
+          ],
+        ),
         height: 88,
         width: 88,
       ),

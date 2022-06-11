@@ -37,7 +37,9 @@ class FavoritesService {
       return false;
     }
     return _filesDB.doesFileExistInCollection(
-        file.uploadedFileID, collection.id);
+      file.uploadedFileID,
+      collection.id,
+    );
   }
 
   Future<void> addToFavorites(File file) async {
@@ -84,21 +86,22 @@ class FavoritesService {
     final key = CryptoUtil.generateKey();
     final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey());
     final encryptedName = CryptoUtil.encryptSync(utf8.encode("Favorites"), key);
-    final collection =
-        await _collectionsService.createAndCacheCollection(Collection(
-      null,
-      null,
-      Sodium.bin2base64(encryptedKeyData.encryptedData),
-      Sodium.bin2base64(encryptedKeyData.nonce),
-      null,
-      Sodium.bin2base64(encryptedName.encryptedData),
-      Sodium.bin2base64(encryptedName.nonce),
-      CollectionType.favorites,
-      CollectionAttributes(),
-      null,
-      null,
-      null,
-    ));
+    final collection = await _collectionsService.createAndCacheCollection(
+      Collection(
+        null,
+        null,
+        Sodium.bin2base64(encryptedKeyData.encryptedData),
+        Sodium.bin2base64(encryptedKeyData.nonce),
+        null,
+        Sodium.bin2base64(encryptedName.encryptedData),
+        Sodium.bin2base64(encryptedName.nonce),
+        CollectionType.favorites,
+        CollectionAttributes(),
+        null,
+        null,
+        null,
+      ),
+    );
     _cachedFavoritesCollectionID = collection.id;
     return collection.id;
   }

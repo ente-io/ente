@@ -34,7 +34,8 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
                 createProgressDialog(context, "Starting network inspector...");
             await dialog.show();
             await Future.delayed(
-                Duration(milliseconds: kDummyDelayDurationInMilliseconds));
+              Duration(milliseconds: kDummyDelayDurationInMilliseconds),
+            );
             await dialog.hide();
             Network.instance.getAlice().showInspector();
           }

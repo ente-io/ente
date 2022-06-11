@@ -74,7 +74,9 @@ class SupportSectionWidget extends StatelessWidget {
             await shareLogs(context, "bug@ente.io", zipFilePath);
           },
           child: SettingsTextItem(
-              text: "Report bug 🐞", icon: Icons.navigate_next),
+            text: "Report bug 🐞",
+            icon: Icons.navigate_next,
+          ),
         ),
       ],
     );

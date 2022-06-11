@@ -87,7 +87,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                               "Please authenticate to configure two-factor authentication";
                           final result = await requestAuthentication(reason);
                           AppLock.of(context).setEnabled(
-                              Configuration.instance.shouldShowLockScreen());
+                            Configuration.instance.shouldShowLockScreen(),
+                          );
                           if (!result) {
                             showToast(context, reason);
                             return;
@@ -130,7 +131,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               onChanged: (value) async {
                 AppLock.of(context).disable();
                 final result = await requestAuthentication(
-                    "Please authenticate to change lockscreen setting");
+                  "Please authenticate to change lockscreen setting",
+                );
                 if (result) {
                   AppLock.of(context).setEnabled(value);
                   _config.setShouldShowLockScreen(value);
@@ -154,8 +156,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Hide from recents",
-                    style: Theme.of(context).textTheme.subtitle1),
+                Text(
+                  "Hide from recents",
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
                 Switch.adaptive(
                   value: _config.shouldHideFromRecents(),
                   onChanged: (value) async {
@@ -188,9 +192,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                             child: Text(
                               "No",
                               style: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .defaultTextColor),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .defaultTextColor,
+                              ),
                             ),
                             onPressed: () {
                               Navigator.of(context, rootNavigator: true)
@@ -211,7 +216,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                                   .pop('dialog');
                               await _config.setShouldHideFromRecents(true);
                               await FlutterWindowManager.addFlags(
-                                  FlutterWindowManager.FLAG_SECURE);
+                                FlutterWindowManager.FLAG_SECURE,
+                              );
                               setState(() {});
                             },
                           ),
@@ -227,7 +233,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                     } else {
                       await _config.setShouldHideFromRecents(false);
                       await FlutterWindowManager.clearFlags(
-                          FlutterWindowManager.FLAG_SECURE);
+                        FlutterWindowManager.FLAG_SECURE,
+                      );
                       setState(() {});
                     }
                   },
@@ -260,7 +267,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           );
         },
         child: SettingsTextItem(
-            text: "Active sessions", icon: Icons.navigate_next),
+          text: "Active sessions",
+          icon: Icons.navigate_next,
+        ),
       ),
     ]);
     return Column(

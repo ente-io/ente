@@ -22,7 +22,11 @@ class IgnoredFile {
       return null;
     }
 
-    return IgnoredFile(trashFile.localID, trashFile.title,
-        trashFile.deviceFolder, kIgnoreReasonTrash);
+    return IgnoredFile(
+      trashFile.localID,
+      trashFile.title,
+      trashFile.deviceFolder,
+      kIgnoreReasonTrash,
+    );
   }
 }

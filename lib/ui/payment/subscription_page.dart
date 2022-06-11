@@ -99,11 +99,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             _logger.warning("Could not complete payment ", e);
             await _dialog.hide();
             showErrorDialog(
-                context,
-                "payment failed",
-                "please talk to " +
-                    (Platform.isAndroid ? "PlayStore" : "AppStore") +
-                    " support if you were charged");
+              context,
+              "payment failed",
+              "please talk to " +
+                  (Platform.isAndroid ? "PlayStore" : "AppStore") +
+                  " support if you were charged",
+            );
             return;
           }
         } else if (Platform.isIOS && purchase.pendingCompletePurchase) {
@@ -175,10 +176,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   Widget _buildPlans() {
     final widgets = <Widget>[];
-    widgets.add(SubscriptionHeaderWidget(
-      isOnboarding: widget.isOnboarding,
-      currentUsage: _userDetails.getFamilyOrPersonalUsage(),
-    ));
+    widgets.add(
+      SubscriptionHeaderWidget(
+        isOnboarding: widget.isOnboarding,
+        currentUsage: _userDetails.getFamilyOrPersonalUsage(),
+      ),
+    );
 
     widgets.addAll([
       Column(
@@ -213,9 +216,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               }
               if (Platform.isAndroid) {
                 launch(
-                    "https://play.google.com/store/account/subscriptions?sku=" +
-                        _currentSubscription.productID +
-                        "&package=io.ente.photos");
+                  "https://play.google.com/store/account/subscriptions?sku=" +
+                      _currentSubscription.productID +
+                      "&package=io.ente.photos",
+                );
               } else {
                 launch("https://apps.apple.com/account/billing");
               }
@@ -307,8 +311,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               if (isActive) {
                 return;
               }
-              showErrorDialog(context, "Sorry",
-                  "Please visit web.ente.io to manage your subscription");
+              showErrorDialog(
+                context,
+                "Sorry",
+                "Please visit web.ente.io to manage your subscription",
+              );
             },
             child: SubscriptionPlanWidget(
               storage: plan.storage,
@@ -357,7 +364,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               }
               if (_userDetails.getFamilyOrPersonalUsage() > plan.storage) {
                 showErrorDialog(
-                    context, "Sorry", "you cannot downgrade to this plan");
+                  context,
+                  "Sorry",
+                  "you cannot downgrade to this plan",
+                );
                 return;
               }
               await _dialog.show();
@@ -365,8 +375,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   await InAppPurchaseConnection.instance
                       .queryProductDetails({productID});
               if (response.notFoundIDs.isNotEmpty) {
-                _logger.severe("Could not find products: " +
-                    response.notFoundIDs.toString());
+                _logger.severe(
+                  "Could not find products: " + response.notFoundIDs.toString(),
+                );
                 await _dialog.hide();
                 showGenericErrorDialog(context);
                 return;
@@ -380,8 +391,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     await InAppPurchaseConnection.instance
                         .queryProductDetails({_currentSubscription.productID});
                 if (existingProductDetailsResponse.notFoundIDs.isNotEmpty) {
-                  _logger.severe("Could not find existing products: " +
-                      response.notFoundIDs.toString());
+                  _logger.severe(
+                    "Could not find existing products: " +
+                        response.notFoundIDs.toString(),
+                  );
                   await _dialog.hide();
                   showGenericErrorDialog(context);
                   return;
@@ -451,21 +464,26 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   Future<void> _launchFamilyPortal() async {
     if (_userDetails.subscription.productID == kFreeProductID) {
       await showErrorDialog(
-          context,
-          "Now you can share your storage plan with your family members!",
-          "Customers on paid plans can add up to 5 family members without paying extra. Each member gets their own private space.");
+        context,
+        "Now you can share your storage plan with your family members!",
+        "Customers on paid plans can add up to 5 family members without paying extra. Each member gets their own private space.",
+      );
       return;
     }
     await _dialog.show();
     try {
       final String jwtToken = await _userService.getFamiliesToken();
       final bool familyExist = _userDetails.isPartOfFamily();
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (BuildContext context) {
-          return WebPage("Family",
-              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist');
-        },
-      ));
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return WebPage(
+              "Family",
+              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist',
+            );
+          },
+        ),
+      );
     } catch (e) {
       await _dialog.hide();
       showGenericErrorDialog(context);
