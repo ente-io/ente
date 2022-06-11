@@ -90,11 +90,7 @@ import DeleteBtn from 'components/DeleteBtn';
 import FixCreationTime, {
     FixCreationTimeAttributes,
 } from 'components/FixCreationTime';
-import {
-    Collection,
-    CollectionSummaries,
-    CollectionSummary,
-} from 'types/collection';
+import { Collection, CollectionSummaries } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { GalleryContextType, SelectedState } from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
@@ -103,7 +99,7 @@ import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
-import { Search } from 'types/search';
+import { Search, SearchResultSummary } from 'types/search';
 import SearchResultInfo from 'components/Search/SearchResultInfo';
 import { NotificationAttributes } from 'types/Notification';
 
@@ -173,7 +169,7 @@ export default function Gallery() {
 
     const [isInSearchMode, setIsInSearchMode] = useState(false);
     const [searchResultSummary, setSetSearchResultSummary] =
-        useState<CollectionSummary>(null);
+        useState<SearchResultSummary>(null);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
     const [deleted, setDeleted] = useState<number[]>([]);
@@ -635,7 +631,7 @@ export default function Gallery() {
                     files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}
                     updateSearch={updateSearch}
-                    setSearchResultInfo={setSetSearchResultSummary}
+                    setSearchResultSummary={setSetSearchResultSummary}
                 />
 
                 <Collections
@@ -647,7 +643,9 @@ export default function Gallery() {
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                 />
                 {isInSearchMode && (
-                    <SearchResultInfo searchResult={searchResultSummary} />
+                    <SearchResultInfo
+                        searchResultSummary={searchResultSummary}
+                    />
                 )}
 
                 <Upload

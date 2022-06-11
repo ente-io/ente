@@ -14,7 +14,7 @@ interface Props {
     isFirstFetch: boolean;
     setOpen: (value: boolean) => void;
     setSearch: (search: Search) => void;
-    setSearchResultInfo: SetSearchResultSummary;
+    setSearchResultSummary: SetSearchResultSummary;
     collections: Collection[];
     setActiveCollection: (id: number) => void;
     files: EnteFile[];

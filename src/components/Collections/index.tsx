@@ -60,6 +60,7 @@ export default function Collections(props: Iprops) {
             />
 
             <CollectionInfoWithOptions
+                isInSearchMode={isInSearchMode}
                 collectionSummary={collectionSummaries.get(activeCollectionID)}
                 activeCollection={activeCollection.current}
                 setCollectionNamerAttributes={setCollectionNamerAttributes}

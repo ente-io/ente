@@ -6,7 +6,22 @@ import { getNonTrashedUniqueUserFiles } from 'utils/file';
 import SearchBar from 'components/Search';
 import { FluidContainer } from 'components/Container';
 import { EnteLogo } from 'components/EnteLogo';
+import { Collection } from 'types/collection';
+import { EnteFile } from 'types/file';
+import { Search, SearchResultSummary } from 'types/search';
 
+interface Iprops {
+    openSidebar: () => void;
+    isFirstFetch: boolean;
+    openUploader: () => void;
+    isInSearchMode: boolean;
+    setIsInSearchMode: (value: boolean) => void;
+    collections: Collection[];
+    files: EnteFile[];
+    setActiveCollection: (id: number) => void;
+    updateSearch: (search: Search) => void;
+    setSearchResultSummary: (info: SearchResultSummary) => void;
+}
 export function GalleryNavbar({
     openSidebar,
     isFirstFetch,
@@ -17,8 +32,8 @@ export function GalleryNavbar({
     files,
     setActiveCollection,
     updateSearch,
-    setSearchResultInfo,
-}) {
+    setSearchResultSummary,
+}: Iprops) {
     return (
         <NavbarBase>
             {!isInSearchMode && <SidebarToggler openSidebar={openSidebar} />}
@@ -36,7 +51,7 @@ export function GalleryNavbar({
                     files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}
                     setSearch={updateSearch}
-                    setSearchResultInfo={setSearchResultInfo}
+                    setSearchResultSummary={setSearchResultSummary}
                 />
             )}
             {!isInSearchMode && (

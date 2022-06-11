@@ -12,7 +12,12 @@ const Wrapper = styled.div<{ isDisabled: boolean }>`
     cursor: pointer;
     opacity: ${(props) => (props.isDisabled ? 0 : 1)};
 `;
-function UploadButton({ isFirstFetch, openUploader }) {
+
+interface Iprops {
+    isFirstFetch: boolean;
+    openUploader: () => void;
+}
+function UploadButton({ isFirstFetch, openUploader }: Iprops) {
     return (
         <Wrapper onClick={openUploader} isDisabled={isFirstFetch}>
             <Button
