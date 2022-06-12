@@ -1,6 +1,6 @@
 import React from 'react';
 
-import NavigationSection from './NavigationSection';
+import ShortcutSection from './ShortcutSection';
 import UtilitySection from './UtilitySection';
 import HelpSection from './HelpSection';
 import ExitSection from './ExitSection';
@@ -29,7 +29,7 @@ export default function Sidebar({
                 closeSidebar={closeSidebar}
             />
             <PaddedDivider invisible />
-            <NavigationSection
+            <ShortcutSection
                 closeSidebar={closeSidebar}
                 collectionSummaries={collectionSummaries}
             />

@@ -12,11 +12,18 @@ const Wrapper = styled.div<{ isDisabled: boolean }>`
     cursor: pointer;
     opacity: ${(props) => (props.isDisabled ? 0 : 1)};
 `;
-function UploadButton({ isFirstFetch, openUploader }) {
+
+interface Iprops {
+    isFirstFetch: boolean;
+    openUploader: () => void;
+}
+function UploadButton({ isFirstFetch, openUploader }: Iprops) {
     return (
         <Wrapper onClick={openUploader} isDisabled={isFirstFetch}>
-            <Button variant="contained">
-                <FileUploadOutlinedIcon sx={{ mr: 1 }} />
+            <Button
+                color="secondary"
+                sx={{ borderRadius: '2px' }}
+                startIcon={<FileUploadOutlinedIcon />}>
                 {constants.UPLOAD}
             </Button>
         </Wrapper>

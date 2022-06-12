@@ -1,4 +1,3 @@
-import LogoImg from 'components/LogoImg';
 import React, { useContext, useEffect, useState } from 'react';
 import { enableTwoFactor, setupTwoFactor } from 'services/userService';
 import constants from 'utils/strings/constants';
@@ -11,7 +10,7 @@ import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import { TwoFactorSecret } from 'types/user';
 import Card from '@mui/material/Card';
-import { Box, CardContent } from '@mui/material';
+import { Box, CardContent, Typography } from '@mui/material';
 import { TwoFactorSetup } from 'components/TwoFactor/Setup';
 import LinkButton from 'components/pages/gallery/LinkButton';
 
@@ -67,8 +66,9 @@ export default function SetupTwoFactor() {
                 <CardContent>
                     <VerticallyCentered sx={{ p: 3 }}>
                         <Box mb={4}>
-                            <LogoImg src="/icon.svg" />
-                            {constants.TWO_FACTOR}
+                            <Typography variant="title">
+                                {constants.TWO_FACTOR}
+                            </Typography>
                         </Box>
                         <TwoFactorSetup twoFactorSecret={twoFactorSecret} />
                         <VerifyTwoFactor

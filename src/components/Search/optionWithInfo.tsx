@@ -29,7 +29,9 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => (
             <SpaceBetweenFlex>
                 <Box mr={1}>
                     <FreeFlowText>
-                        <Typography>{data.label}</Typography>
+                        <Typography fontWeight={'bold'}>
+                            {data.label}
+                        </Typography>
                     </FreeFlowText>
                     <Typography color="text.secondary">
                         {constants.PHOTO_COUNT(data.fileCount)}

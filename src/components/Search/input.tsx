@@ -22,7 +22,7 @@ interface Iprops {
     files: EnteFile[];
     collections: Collection[];
     setActiveCollection: (id: number) => void;
-    setSearchResultInfo: SetSearchResultSummary;
+    setSearchResultSummary: SetSearchResultSummary;
 }
 
 export default function SearchInput(props: Iprops) {
@@ -78,7 +78,7 @@ export default function SearchInput(props: Iprops) {
                 setValue(null);
                 break;
         }
-        props.setSearchResultInfo({
+        props.setSearchResultSummary({
             optionName: selectedOption.label,
             fileCount: selectedOption.fileCount,
         });

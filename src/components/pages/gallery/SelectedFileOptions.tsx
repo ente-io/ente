@@ -1,30 +1,30 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
-import DeleteIcon from 'components/icons/DeleteIcon';
-import CloseIcon from '@mui/icons-material/Close';
-import AddIcon from 'components/icons/AddIcon';
-import { FluidContainer, IconButton } from 'components/Container';
+import { FluidContainer } from 'components/Container';
 import constants from 'utils/strings/constants';
-import Archive from 'components/icons/Archive';
-import MoveIcon from 'components/icons/MoveIcon';
 import { COLLECTION_OPS_TYPE } from 'utils/collection';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
-import UnArchive from 'components/icons/UnArchive';
 import { Collection } from 'types/collection';
-import RemoveIcon from 'components/icons/RemoveIcon';
-import RestoreIcon from 'components/icons/RestoreIcon';
-import ClockIcon from 'components/icons/ClockIcon';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { FIX_CREATION_TIME_VISIBLE_TO_USER_IDS } from 'constants/user';
-import DownloadIcon from 'components/icons/DownloadIcon';
 import { User } from 'types/user';
-import { IconWithMessage } from 'components/IconWithMessage';
 import { SelectionBar } from '../../Navbar/SelectionBar';
 import { AppContext } from 'pages/_app';
+import { IconButton, Stack, Tooltip } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import RestoreIcon from '@mui/icons-material/Restore';
+import AddIcon from 'components/icons/AddIcon';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ClockIcon from '@mui/icons-material/AccessTime';
+import DownloadIcon from '@mui/icons-material/Download';
+import UnArchiveIcon from '@mui/icons-material/Visibility';
+import ArchiveIcon from '@mui/icons-material/VisibilityOff';
+import MoveIcon from '@mui/icons-material/ArrowForward';
+import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
@@ -142,78 +142,82 @@ const SelectedFileOptions = ({
                     {count} {constants.SELECTED}
                 </div>
             </FluidContainer>
-            {activeCollection === TRASH_SECTION ? (
-                <>
-                    <IconWithMessage message={constants.RESTORE}>
-                        <IconButton onClick={restoreHandler}>
-                            <RestoreIcon />
-                        </IconButton>
-                    </IconWithMessage>
-                    <IconWithMessage message={constants.DELETE_PERMANENTLY}>
-                        <IconButton onClick={permanentlyDeleteHandler}>
-                            <DeleteIcon />
-                        </IconButton>
-                    </IconWithMessage>
-                </>
-            ) : (
-                <>
-                    {showFixCreationTime && (
-                        <IconWithMessage message={constants.FIX_CREATION_TIME}>
-                            <IconButton onClick={fixTimeHelper}>
-                                <ClockIcon />
+            <Stack spacing={2} direction="row" mr={2}>
+                {activeCollection === TRASH_SECTION ? (
+                    <>
+                        <Tooltip title={constants.RESTORE}>
+                            <IconButton onClick={restoreHandler}>
+                                <RestoreIcon />
                             </IconButton>
-                        </IconWithMessage>
-                    )}
-                    <IconWithMessage message={constants.DOWNLOAD}>
-                        <IconButton onClick={downloadHelper}>
-                            <DownloadIcon />
-                        </IconButton>
-                    </IconWithMessage>
-                    <IconWithMessage message={constants.ADD}>
-                        <IconButton onClick={addToCollection}>
-                            <AddIcon />
-                        </IconButton>
-                    </IconWithMessage>
-                    {activeCollection === ARCHIVE_SECTION && (
-                        <IconWithMessage message={constants.UNARCHIVE}>
-                            <IconButton onClick={unArchiveFilesHelper}>
-                                <UnArchive />
+                        </Tooltip>
+                        <Tooltip title={constants.DELETE_PERMANENTLY}>
+                            <IconButton onClick={permanentlyDeleteHandler}>
+                                <DeleteIcon />
                             </IconButton>
-                        </IconWithMessage>
-                    )}
-                    {activeCollection === ALL_SECTION && (
-                        <IconWithMessage message={constants.ARCHIVE}>
-                            <IconButton onClick={archiveFilesHelper}>
-                                <Archive />
-                            </IconButton>
-                        </IconWithMessage>
-                    )}
-
-                    {activeCollection !== ALL_SECTION &&
-                        activeCollection !== ARCHIVE_SECTION &&
-                        !isFavoriteCollection && (
-                            <>
-                                <IconWithMessage message={constants.MOVE}>
-                                    <IconButton onClick={moveToCollection}>
-                                        <MoveIcon />
-                                    </IconButton>
-                                </IconWithMessage>
-
-                                <IconWithMessage message={constants.REMOVE}>
-                                    <IconButton
-                                        onClick={removeFromCollectionHandler}>
-                                        <RemoveIcon />
-                                    </IconButton>
-                                </IconWithMessage>
-                            </>
+                        </Tooltip>
+                    </>
+                ) : (
+                    <>
+                        {showFixCreationTime && (
+                            <Tooltip title={constants.FIX_CREATION_TIME}>
+                                <IconButton onClick={fixTimeHelper}>
+                                    <ClockIcon />
+                                </IconButton>
+                            </Tooltip>
                         )}
-                    <IconWithMessage message={constants.DELETE}>
-                        <IconButton onClick={trashHandler}>
-                            <DeleteIcon />
-                        </IconButton>
-                    </IconWithMessage>
-                </>
-            )}
+                        <Tooltip title={constants.DOWNLOAD}>
+                            <IconButton onClick={downloadHelper}>
+                                <DownloadIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={constants.ADD}>
+                            <IconButton onClick={addToCollection}>
+                                <AddIcon />
+                            </IconButton>
+                        </Tooltip>
+                        {activeCollection === ARCHIVE_SECTION && (
+                            <Tooltip title={constants.UNARCHIVE}>
+                                <IconButton onClick={unArchiveFilesHelper}>
+                                    <UnArchiveIcon />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+                        {activeCollection === ALL_SECTION && (
+                            <Tooltip title={constants.ARCHIVE}>
+                                <IconButton onClick={archiveFilesHelper}>
+                                    <ArchiveIcon />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+
+                        {activeCollection !== ALL_SECTION &&
+                            activeCollection !== ARCHIVE_SECTION &&
+                            !isFavoriteCollection && (
+                                <>
+                                    <Tooltip title={constants.MOVE}>
+                                        <IconButton onClick={moveToCollection}>
+                                            <MoveIcon />
+                                        </IconButton>
+                                    </Tooltip>
+
+                                    <Tooltip title={constants.REMOVE}>
+                                        <IconButton
+                                            onClick={
+                                                removeFromCollectionHandler
+                                            }>
+                                            <RemoveIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                </>
+                            )}
+                        <Tooltip title={constants.DELETE}>
+                            <IconButton onClick={trashHandler}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </>
+                )}
+            </Stack>
         </SelectionBar>
     );
 };

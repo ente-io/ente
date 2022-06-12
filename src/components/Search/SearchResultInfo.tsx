@@ -1,32 +1,27 @@
 import React from 'react';
-import { CollectionSummary } from 'types/collection';
 import { CollectionInfo } from 'components/Collections/CollectionInfo';
 import constants from 'utils/strings/constants';
 import { Typography } from '@mui/material';
 import { CollectionSectionWrapper } from 'components/Collections/styledComponents';
+import { SearchResultSummary } from 'types/search';
 
 interface Iprops {
-    searchResult: CollectionSummary;
+    searchResultSummary: SearchResultSummary;
 }
-export default function SearchResultInfo({ searchResult }: Iprops) {
-    if (!searchResult) {
+export default function SearchResultInfo({ searchResultSummary }: Iprops) {
+    if (!searchResultSummary) {
         return <></>;
     }
 
-    const { name, fileCount } = searchResult;
+    const { optionName, fileCount } = searchResultSummary;
 
+    console.log(optionName, fileCount);
     return (
         <CollectionSectionWrapper>
-            <Typography
-                css={`
-                    font-size: 24px;
-                    font-weight: 600;
-                    line-height: 36px;
-                    opacity: 50%;
-                `}>
+            <Typography variant="subtitle" color="text.secondary">
                 {constants.SEARCH_RESULTS}
             </Typography>
-            <CollectionInfo name={name} fileCount={fileCount} />
+            <CollectionInfo name={optionName} fileCount={fileCount} />
         </CollectionSectionWrapper>
     );
 }

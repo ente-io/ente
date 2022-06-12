@@ -79,7 +79,9 @@ export default function CollectionBar(props: IProps) {
         <Hider hide={props.isInSearchMode}>
             <CollectionSectionWrapper>
                 <SpaceBetweenFlex>
-                    <Typography>{constants.ALBUMS}</Typography>
+                    <Typography fontWeight={'bold'}>
+                        {constants.ALBUMS}
+                    </Typography>
                     {hasScrollBar && (
                         <LinkButton onClick={showAllCollections}>
                             {constants.VIEW_ALL_ALBUMS}

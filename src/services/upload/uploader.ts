@@ -10,7 +10,7 @@ import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
 import UploadService from './uploadService';
 import { FILE_TYPE } from 'constants/file';
-import { FileUploadResults, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
+import { UPLOAD_RESULT, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
 import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
 import { logUploadInfo } from 'utils/upload';
 import { convertBytesToHumanReadable } from 'utils/billing';
@@ -18,7 +18,7 @@ import { sleep } from 'utils/common';
 import { addToCollection } from 'services/collectionService';
 
 interface UploadResponse {
-    fileUploadResult: FileUploadResults;
+    fileUploadResult: UPLOAD_RESULT;
     uploadedFile?: EnteFile;
     skipDecryption?: boolean;
 }
@@ -41,7 +41,7 @@ export default async function uploader(
     try {
         const fileSize = UploadService.getAssetSize(uploadAsset);
         if (fileSize >= MAX_FILE_SIZE_SUPPORTED) {
-            return { fileUploadResult: FileUploadResults.TOO_LARGE };
+            return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
         }
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
@@ -57,7 +57,7 @@ export default async function uploader(
         if (sameFileInSameCollection) {
             logUploadInfo(`skipped upload for  ${fileNameSize}`);
             return {
-                fileUploadResult: FileUploadResults.ALREADY_UPLOADED,
+                fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED,
                 uploadedFile: sameFileInSameCollection,
             };
         }
@@ -75,7 +75,7 @@ export default async function uploader(
             resultFile.collectionID = collection.id;
             await addToCollection(collection, [resultFile]);
             return {
-                fileUploadResult: FileUploadResults.UPLOADED,
+                fileUploadResult: UPLOAD_RESULT.UPLOADED,
                 uploadedFile: resultFile,
                 skipDecryption: true,
             };
@@ -92,7 +92,7 @@ export default async function uploader(
             );
             if (sameFileInOtherCollection) {
                 return {
-                    fileUploadResult: FileUploadResults.ALREADY_UPLOADED,
+                    fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED,
                     uploadedFile: sameFileInOtherCollection,
                 };
             }
@@ -138,8 +138,8 @@ export default async function uploader(
 
         return {
             fileUploadResult: metadata.hasStaticThumbnail
-                ? FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL
-                : FileUploadResults.UPLOADED,
+                ? UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
+                : UPLOAD_RESULT.UPLOADED,
             uploadedFile: uploadedFile,
         };
     } catch (e) {
@@ -153,16 +153,16 @@ export default async function uploader(
         const error = handleUploadError(e);
         switch (error.message) {
             case CustomError.ETAG_MISSING:
-                return { fileUploadResult: FileUploadResults.BLOCKED };
+                return { fileUploadResult: UPLOAD_RESULT.BLOCKED };
             case CustomError.UNSUPPORTED_FILE_FORMAT:
-                return { fileUploadResult: FileUploadResults.UNSUPPORTED };
+                return { fileUploadResult: UPLOAD_RESULT.UNSUPPORTED };
             case CustomError.FILE_TOO_LARGE:
                 return {
                     fileUploadResult:
-                        FileUploadResults.LARGER_THAN_AVAILABLE_STORAGE,
+                        UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE,
                 };
             default:
-                return { fileUploadResult: FileUploadResults.FAILED };
+                return { fileUploadResult: UPLOAD_RESULT.FAILED };
         }
     }
 }

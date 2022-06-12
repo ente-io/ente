@@ -31,7 +31,7 @@ export enum UPLOAD_STAGES {
     FINISH,
 }
 
-export enum FileUploadResults {
+export enum UPLOAD_RESULT {
     FAILED,
     ALREADY_UPLOADED,
     UNSUPPORTED,

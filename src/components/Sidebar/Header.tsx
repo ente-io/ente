@@ -1,8 +1,8 @@
-import { Typography, IconButton } from '@mui/material';
+import { IconButton } from '@mui/material';
 import React from 'react';
-import constants from 'utils/strings/constants';
 import CloseIcon from '@mui/icons-material/Close';
 import { SpaceBetweenFlex } from 'components/Container';
+import { EnteLogo } from 'components/EnteLogo';
 
 interface IProps {
     closeSidebar: () => void;
@@ -11,14 +11,7 @@ interface IProps {
 export default function HeaderSection({ closeSidebar }: IProps) {
     return (
         <SpaceBetweenFlex>
-            <Typography
-                css={`
-                    font-size: 18px;
-                    font-weight: 600;
-                    line-height: 24px;
-                `}>
-                {constants.ENTE}
-            </Typography>
+            <EnteLogo />
             <IconButton aria-label="close" onClick={closeSidebar}>
                 <CloseIcon fontSize="small" />
             </IconButton>

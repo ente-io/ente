@@ -250,7 +250,6 @@ export default function PublicCollectionGallery() {
                     <Card style={{ maxWidth: '332px' }} className="text-center">
                         <Card.Body style={{ padding: '40px 30px' }}>
                             <Card.Subtitle style={{ marginBottom: '2rem' }}>
-                                {/* <LogoImg src="/icon.svg" /> */}
                                 {constants.LINK_PASSWORD}
                             </Card.Subtitle>
                             <SingleInputForm

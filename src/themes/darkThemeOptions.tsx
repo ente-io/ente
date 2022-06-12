@@ -94,12 +94,13 @@ const darkThemeOptions = createTheme({
             styleOverrides: {
                 root: {
                     textTransform: 'none',
-                    borderRadius: '8px',
+                    padding: '12px 16px',
+                },
+                startIcon: {
+                    marginRight: '12px',
                 },
                 sizeLarge: {
-                    fontSize: '18px',
-                    lineHeight: '21.78px',
-                    padding: '16px',
+                    width: '100%',
                 },
             },
         },
@@ -119,13 +120,6 @@ const darkThemeOptions = createTheme({
                 margin: 'dense',
             },
         },
-        MuiTypography: {
-            styleOverrides: {
-                body1: {
-                    paddingBottom: '4px',
-                },
-            },
-        },
     },
 
     palette: {
@@ -134,7 +128,7 @@ const darkThemeOptions = createTheme({
             main: '#f0f0f0',
         },
         secondary: {
-            main: 'rgba(256, 256, 256, 0.12)',
+            main: 'rgba(256, 256, 256, 0.2)',
             contrastText: '#fff',
         },
         accent: {
@@ -156,7 +150,7 @@ const darkThemeOptions = createTheme({
         divider: 'rgba(256, 256, 256, 0.12)',
     },
     shape: {
-        borderRadius: 8,
+        borderRadius: 4,
     },
     typography: {
         body1: {
@@ -166,6 +160,11 @@ const darkThemeOptions = createTheme({
         body2: {
             fontSize: '14px',
             lineHeight: '20px',
+        },
+        button: {
+            fontSize: '16px',
+            lineHeight: '19.63px',
+            fontWeight: 600,
         },
         title: {
             fontSize: '32px',
