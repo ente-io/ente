@@ -53,7 +53,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
       return Container();
     }
     if (_event.status == SyncStatus.error) {
-      return _getErrorWidget();
+      return HeaderErrorWidget(event: _event);
     }
     if (_event.status == SyncStatus.completed_first_gallery_import ||
         _event.status == SyncStatus.completed_backup) {
@@ -109,7 +109,47 @@ class _SyncIndicatorState extends State<SyncIndicator> {
     );
   }
 
-  Widget _getErrorWidget() {
+  String _getRefreshingText() {
+    if (_event.status == SyncStatus.started_first_gallery_import ||
+        _event.status == SyncStatus.completed_first_gallery_import) {
+      return "Loading gallery...";
+    }
+    if (_event.status == SyncStatus.applying_remote_diff) {
+      return "Syncing...";
+    }
+    if (_event.status == SyncStatus.preparing_for_upload) {
+      return "Encrypting backup...";
+    }
+    if (_event.status == SyncStatus.in_progress) {
+      return _event.completed.toString() +
+          "/" +
+          _event.total.toString() +
+          " Memories preserved";
+    }
+    if (_event.status == SyncStatus.paused) {
+      return _event.reason;
+    }
+    if (_event.status == SyncStatus.completed_backup) {
+      if (_event.wasStopped) {
+        return "Sync stopped";
+      } else {
+        return "All memories preserved";
+      }
+    }
+    // _event.status == SyncStatus.error
+    return _event.reason ?? "Upload failed";
+  }
+}
+
+class HeaderErrorWidget extends StatelessWidget {
+  const HeaderErrorWidget({Key key, @required SyncStatusUpdate event})
+      : _event = event,
+        super(key: key);
+
+  final SyncStatusUpdate _event;
+
+  @override
+  Widget build(BuildContext context) {
     if (_event.error is NoActiveSubscriptionError) {
       return Container(
         margin: EdgeInsets.only(top: 8),
@@ -244,36 +284,5 @@ class _SyncIndicatorState extends State<SyncIndicator> {
         ),
       );
     }
-  }
-
-  String _getRefreshingText() {
-    if (_event.status == SyncStatus.started_first_gallery_import ||
-        _event.status == SyncStatus.completed_first_gallery_import) {
-      return "Loading gallery...";
-    }
-    if (_event.status == SyncStatus.applying_remote_diff) {
-      return "Syncing...";
-    }
-    if (_event.status == SyncStatus.preparing_for_upload) {
-      return "Encrypting backup...";
-    }
-    if (_event.status == SyncStatus.in_progress) {
-      return _event.completed.toString() +
-          "/" +
-          _event.total.toString() +
-          " Memories preserved";
-    }
-    if (_event.status == SyncStatus.paused) {
-      return _event.reason;
-    }
-    if (_event.status == SyncStatus.completed_backup) {
-      if (_event.wasStopped) {
-        return "Sync stopped";
-      } else {
-        return "All memories preserved";
-      }
-    }
-    // _event.status == SyncStatus.error
-    return _event.reason ?? "Upload failed";
   }
 }
