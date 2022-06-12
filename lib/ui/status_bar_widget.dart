@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/sync_service.dart';
-import 'package:photos/ui/header/header_error_widget.dart';
+import 'package:photos/ui/header_error_widget.dart';
 
 const double kContainerHeight = 48;
 
