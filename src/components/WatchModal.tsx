@@ -163,12 +163,6 @@ function WatchModal({
         setMappings(watchService.getWatchMappings());
     };
 
-    // const handleSyncProgressClick = () => {
-    //     if (watchService.isUploadRunning()) {
-    //         watchService.showProgressView();
-    //     }
-    // };
-
     const handleClose = () => {
         setWatchModalView(false);
     };

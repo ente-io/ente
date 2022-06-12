@@ -38,7 +38,6 @@ export class WatchService {
         setElectronFiles: (files: ElectronFile[]) => void,
         setCollectionName: (collectionName: string) => void,
         syncWithRemote: () => void,
-        showProgressView: () => void,
         setWatchServiceIsRunning: (isRunning: boolean) => void
     ) {
         if (this.allElectronAPIsExist) {
@@ -46,7 +45,6 @@ export class WatchService {
                 this.setElectronFiles = setElectronFiles;
                 this.setCollectionName = setCollectionName;
                 this.syncWithRemote = syncWithRemote;
-                this.showProgressView = showProgressView;
                 this.setWatchServiceIsRunning = setWatchServiceIsRunning;
 
                 let mappings = this.getWatchMappings();
@@ -409,7 +407,7 @@ export class WatchService {
             const mappings = this.getWatchMappings();
 
             const collectionName = mappings.find((mapping) =>
-                filePath.startsWith(mapping.folderPath)
+                filePath.startsWith(mapping.folderPath + '/')
             )?.collectionName;
 
             if (!collectionName) {

@@ -1,10 +1,12 @@
 import { Snackbar, Paper } from '@mui/material';
-import React from 'react';
+import UploadProgressContext from 'contexts/uploadProgress';
+import React, { useContext } from 'react';
 import { UploadProgressHeader } from './header';
 export function MinimizedUploadProgress(props) {
+    const { open } = useContext(UploadProgressContext);
     return (
         <Snackbar
-            open={!props.expanded}
+            open={!props.expanded && open}
             anchorOrigin={{
                 horizontal: 'right',
                 vertical: 'bottom',
