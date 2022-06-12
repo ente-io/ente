@@ -779,6 +779,7 @@ class EnteSectionTitle extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Montserrat',
                       fontSize: 22,
+                      color: Theme.of(context).colorScheme.defaultTextColor,
                     ),
                   ),
                 ],
