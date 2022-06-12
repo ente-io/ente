@@ -21,16 +21,16 @@ class HeaderErrorWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+              children: const [
                 Icon(
                   Icons.error_outline,
-                  color: Theme.of(context).buttonColor,
+                  color: Colors.orange,
                 ),
                 Padding(padding: EdgeInsets.all(4)),
                 Text("Your subscription has expired"),
               ],
             ),
-            Padding(padding: EdgeInsets.all(6)),
+            Padding(padding: EdgeInsets.all(8)),
             Container(
               width: 400,
               height: 52,
@@ -48,7 +48,12 @@ class HeaderErrorWidget extends StatelessWidget {
                 },
               ),
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            Padding(padding: EdgeInsets.all(12)),
+            Divider(
+              thickness: 2,
+              height: 0,
+            ),
+            Padding(padding: EdgeInsets.all(12)),
           ],
         ),
       );
@@ -60,16 +65,16 @@ class HeaderErrorWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+              children: const [
                 Icon(
                   Icons.error_outline,
-                  color: Theme.of(context).buttonColor,
+                  color: Colors.orange,
                 ),
                 Padding(padding: EdgeInsets.all(4)),
                 Text("Storage limit exceeded"),
               ],
             ),
-            Padding(padding: EdgeInsets.all(6)),
+            Padding(padding: EdgeInsets.all(8)),
             Container(
               width: 400,
               height: 52,
@@ -87,7 +92,12 @@ class HeaderErrorWidget extends StatelessWidget {
                 },
               ),
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            Padding(padding: EdgeInsets.all(12)),
+            Divider(
+              thickness: 2,
+              height: 0,
+            ),
+            Padding(padding: EdgeInsets.all(12)),
           ],
         ),
       );
