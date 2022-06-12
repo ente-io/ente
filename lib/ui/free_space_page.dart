@@ -35,7 +35,9 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     );
     Logger("FreeSpacePage")
         .info("Space consumed: " + widget.status.size.toString());
-    return _getWidget(widget.status);
+    return SingleChildScrollView(
+      child: _getWidget(widget.status),
+    );
   }
 
   Widget _getWidget(BackupStatus status) {
