@@ -134,7 +134,7 @@ export const GalleryContext = createContext<GalleryContextType>(
 
 export default function Gallery() {
     const router = useRouter();
-    const [collections, setCollections] = useState<Collection[]>([]);
+    const [collections, setCollections] = useState<Collection[]>(null);
 
     const [files, setFiles] = useState<EnteFile[]>(null);
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
@@ -176,7 +176,7 @@ export default function Gallery() {
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
         useContext(AppContext);
     const [collectionSummaries, setCollectionSummaries] =
-        useState<CollectionSummaries>(new Map());
+        useState<CollectionSummaries>();
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
     const [trash, setTrash] = useState<Trash>([]);
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
@@ -347,18 +347,17 @@ export default function Gallery() {
         collections: Collection[],
         files: EnteFile[]
     ) => {
-        files = files || [];
+        if (!collections || !files) {
+            return;
+        }
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
-
-        setCollections(nonEmptyCollections);
 
         const collectionSummaries = getCollectionSummaries(
             nonEmptyCollections,
             files
         );
-
         setCollectionSummaries(collectionSummaries);
 
         const archivedCollections = getArchivedCollections(nonEmptyCollections);
@@ -369,7 +368,7 @@ export default function Gallery() {
         setSelected({ count: 0, collectionID: 0 });
     };
 
-    if (!files) {
+    if (!files || !collectionSummaries) {
         return <div />;
     }
     const collectionOpsHelper =
