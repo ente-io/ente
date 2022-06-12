@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -133,7 +132,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
 
   Widget _getCollectionsGalleryWidget(CollectionItems items) {
     const double horizontalPaddingOfGridRow = 16;
-    const double crossAxisSpacingOfGrid = 5;
+    const double crossAxisSpacingOfGrid = 9;
     final TextStyle trashAndHiddenTextStyle = Theme.of(context)
         .textTheme
         .subtitle1
@@ -644,7 +643,7 @@ class CollectionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double horizontalPaddingOfGridRow = 16;
-    const double crossAxisSpacingOfGrid = 5;
+    const double crossAxisSpacingOfGrid = 9;
     Size size = MediaQuery.of(context).size;
     int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
     double totalWhiteSpaceOfRow = (horizontalPaddingOfGridRow * 2) +

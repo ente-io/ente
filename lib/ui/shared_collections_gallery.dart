@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -112,7 +111,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
 
   Widget _getSharedCollectionsGallery(SharedCollections collections) {
     const double horizontalPaddingOfGridRow = 16;
-    const double crossAxisSpacingOfGrid = 5;
+    const double crossAxisSpacingOfGrid = 9;
     Size size = MediaQuery.of(context).size;
     int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
     double totalWhiteSpaceOfRow = (horizontalPaddingOfGridRow * 2) +
@@ -393,7 +392,7 @@ class IncomingCollectionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double horizontalPaddingOfGridRow = 16;
-    const double crossAxisSpacingOfGrid = 5;
+    const double crossAxisSpacingOfGrid = 9;
     TextStyle albumTitleTextStyle =
         Theme.of(context).textTheme.subtitle1.copyWith(fontSize: 14);
     Size size = MediaQuery.of(context).size;
