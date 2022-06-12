@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
     Button,
     CircularProgress,
@@ -20,6 +20,7 @@ import DoNotDisturbOutlinedIcon from '@mui/icons-material/DoNotDisturbOutlined';
 import { default as MuiStyled } from '@mui/styled-engine';
 import { Box } from '@mui/system';
 import DialogBox from './DialogBox';
+import { GalleryContext } from 'pages/gallery';
 
 const ModalHeading = MuiStyled('h3')({
     fontSize: '28px',
@@ -134,10 +135,52 @@ function WatchModal({
     setWatchModalView: (watchModalView: boolean) => void;
 }) {
     const [mappings, setMappings] = useState<WatchMapping[]>([]);
+    const { setDropZoneActive } = useContext(GalleryContext);
 
     useEffect(() => {
         setMappings(watchService.getWatchMappings());
     }, []);
+
+    useEffect(() => {
+        if (watchModalView) {
+            setDropZoneActive(false);
+
+            const handleDrag = (e: DragEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+            };
+            const handleDrop = (e: DragEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFolderDrop(files);
+                }
+            };
+            addEventListener('dragover', handleDrag);
+            addEventListener('drop', handleDrop);
+
+            return () => {
+                setDropZoneActive(true);
+                removeEventListener('dragover', handleDrag);
+                removeEventListener('drop', handleDrop);
+            };
+        }
+    }, [watchModalView]);
+
+    const handleFolderDrop = async (folders: FileList) => {
+        if (folders.length === 0) {
+            return;
+        }
+        for (let i = 0; i < folders.length; i++) {
+            const folder: any = folders[i];
+            const path = (folder.path as string).replace(/\\/g, '/');
+            if (await watchService.isFolder(path)) {
+                await handleAddWatchMapping(path);
+            }
+        }
+    };
 
     const handleAddFolderClick = async () => {
         await handleFolderSelection();

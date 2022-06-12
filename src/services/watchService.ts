@@ -443,6 +443,17 @@ export class WatchService {
         }
         return event;
     }
+
+    async isFolder(folderPath: string) {
+        try {
+            const isFolder = await this.ElectronAPIs.doesFolderExists(
+                folderPath
+            );
+            return isFolder;
+        } catch (e) {
+            logError(e, 'error while checking if folder exists');
+        }
+    }
 }
 
 async function diskFileAddedCallback(
