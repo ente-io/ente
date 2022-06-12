@@ -97,17 +97,6 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.topRight,
-      child: Container(
-        height: kContainerHeight,
-        color: Colors.transparent,
-        child: _getContents(),
-      ),
-    );
-  }
-
-  Widget _getContents() {
     bool isNotOutdatedEvent = _event != null &&
         (_event.status == SyncStatus.completed_backup ||
             _event.status == SyncStatus.completed_first_gallery_import) &&
@@ -233,32 +222,35 @@ class SyncStatusCompletedWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.all(2),
-              width: 22,
-              height: 22,
-              child: Icon(
-                Icons.cloud_done_outlined,
-                color: Theme.of(context).buttonColor,
+    return SizedBox(
+      height: kContainerHeight,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all(2),
+                width: 22,
+                height: 22,
+                child: Icon(
+                  Icons.cloud_done_outlined,
+                  color: Theme.of(context).buttonColor,
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 4, 0, 0),
-              child: Text("All memories preserved"),
-            ),
-          ],
-        ),
-        Padding(padding: EdgeInsets.all(4)),
-        Divider(),
-      ],
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 4, 0, 0),
+                child: Text("All memories preserved"),
+              ),
+            ],
+          ),
+          Padding(padding: EdgeInsets.all(4)),
+          Divider(),
+        ],
+      ),
     );
   }
 }

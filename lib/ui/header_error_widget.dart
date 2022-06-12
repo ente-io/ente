@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/errors.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/email_util.dart';
 
 class HeaderErrorWidget extends StatelessWidget {
   final Error _error;
-  
+
   const HeaderErrorWidget({Key key, @required Error error})
       : _error = error,
         super(key: key);
@@ -31,8 +32,8 @@ class HeaderErrorWidget extends StatelessWidget {
             ),
             Padding(padding: EdgeInsets.all(6)),
             Container(
-              width: double.infinity,
-              height: 64,
+              width: 400,
+              height: 52,
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
               child: OutlinedButton(
                 child: Text("Subscribe"),
@@ -70,8 +71,8 @@ class HeaderErrorWidget extends StatelessWidget {
             ),
             Padding(padding: EdgeInsets.all(6)),
             Container(
-              width: double.infinity,
-              height: 64,
+              width: 400,
+              height: 52,
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
               child: OutlinedButton(
                 child: Text("Upgrade"),
@@ -100,7 +101,7 @@ class HeaderErrorWidget extends StatelessWidget {
             ),
             Padding(padding: EdgeInsets.all(4)),
             Text(
-              "We could not backup your data\nwe will retry later",
+              "We could not backup your data.\nWe will retry later.",
               style: TextStyle(height: 1.4),
               textAlign: TextAlign.center,
             ),
@@ -108,13 +109,15 @@ class HeaderErrorWidget extends StatelessWidget {
             InkWell(
               child: OutlinedButton(
                 style: OutlinedButton.styleFrom(
+                  backgroundColor:
+                      Theme.of(context).colorScheme.inverseTextColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
                   side: BorderSide(
-                    width: 1,
-                    color: Colors.orange[300],
+                    width: 2,
+                    color: Colors.orange[600],
                   ),
                 ),
                 child: Text(
@@ -122,7 +125,7 @@ class HeaderErrorWidget extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
-                    color: Colors.orange[300],
+                    color: Colors.orange[600],
                   ),
                   textAlign: TextAlign.center,
                 ),
