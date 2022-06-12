@@ -21,6 +21,7 @@ import { default as MuiStyled } from '@mui/styled-engine';
 import { Box } from '@mui/system';
 import DialogBox from './DialogBox';
 import { GalleryContext } from 'pages/gallery';
+import constants from 'utils/strings/constants';
 
 const ModalHeading = MuiStyled('h3')({
     fontSize: '28px',
@@ -219,7 +220,7 @@ function WatchModal({
             <PaddedContainer>
                 <FixedHeightContainer>
                     <SpaceBetweenFlex>
-                        <ModalHeading>Watched folders</ModalHeading>
+                        <ModalHeading>{constants.WATCHED_FOLDERS}</ModalHeading>
                         <IconButton
                             onClick={handleClose}
                             sx={{
@@ -235,16 +236,17 @@ function WatchModal({
                                 justifyContent: 'center',
                             }}>
                             <NoFoldersTitleText>
-                                No folders added yet!
+                                {constants.NO_FOLDERS_ADDED}
                             </NoFoldersTitleText>
-                            The folders you add here will monitored to
-                            automatically
+                            {constants.FOLDERS_AUTOMATICALLY_MONITORED}
                             <BottomMarginSpacer />
                             <span>
-                                <CheckmarkIcon /> Upload new files to ente
+                                <CheckmarkIcon />{' '}
+                                {constants.UPLOAD_NEW_FILES_TO_ENTE}
                             </span>
                             <span>
-                                <CheckmarkIcon /> Remove deleted files from ente
+                                <CheckmarkIcon />{' '}
+                                {constants.REMOVE_DELETED_FILES_FROM_ENTE}
                             </span>
                         </FullHeightVerticallyCentered>
                     ) : (
@@ -272,7 +274,7 @@ function WatchModal({
                                 style={{
                                     marginLeft: '8px',
                                 }}></span>
-                            Add folder
+                            {constants.ADD_FOLDER}
                         </FullWidthButtonWithTopMargin>
                     </CenteredFlex>
                 </FixedHeightContainer>
@@ -363,7 +365,7 @@ function MappingEntry({
                         }}>
                         <DoNotDisturbOutlinedIcon />
                     </span>{' '}
-                    Stop watching
+                    {constants.STOP_WATCHING}
                 </MenuItem>
             </Menu>
             <DialogBox
@@ -376,20 +378,20 @@ function MappingEntry({
                 open={dialogBoxOpen}
                 onClose={() => setDialogBoxOpen(false)}
                 attributes={{}}>
-                <DialogBoxHeading>Stop watching folder?</DialogBoxHeading>
+                <DialogBoxHeading>
+                    {constants.STOP_WATCHING_FOLDER}
+                </DialogBoxHeading>
                 <DialogBoxText>
-                    Your existing files will not be deleted, but ente will stop
-                    automatically updating the linked ente album on changes in
-                    this folder.
+                    {constants.STOP_WATCHING_DIALOG_MESSAGE}
                 </DialogBoxText>
                 <HorizontalFlex>
                     <DialogBoxButton onClick={() => setDialogBoxOpen(false)}>
-                        Cancel
+                        {constants.CANCEL}
                     </DialogBoxButton>
                     <DialogBoxButton
                         color="danger"
                         onClick={() => handleRemoveMapping(mapping)}>
-                        Yes, stop
+                        {constants.YES_STOP}
                     </DialogBoxButton>
                 </HorizontalFlex>
             </DialogBox>

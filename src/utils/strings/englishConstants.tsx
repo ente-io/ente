@@ -772,6 +772,18 @@ const englishConstants = {
     FAMILY: 'Family',
     FREE: 'free',
     OF: 'of',
+    WATCHED_FOLDERS: 'Watched Folders',
+    NO_FOLDERS_ADDED: 'No folders added yet!',
+    FOLDERS_AUTOMATICALLY_MONITORED:
+        'The folders you add here will monitored to automatically',
+    UPLOAD_NEW_FILES_TO_ENTE: 'Upload new files to ente',
+    REMOVE_DELETED_FILES_FROM_ENTE: 'Remove deleted files from ente',
+    ADD_FOLDER: 'Add folder',
+    STOP_WATCHING: 'Stop watching',
+    STOP_WATCHING_FOLDER: 'Stop watching folder?',
+    STOP_WATCHING_DIALOG_MESSAGE:
+        'Your existing files will not be deleted, but ente will stop automatically updating the linked ente album on changes in this folder.',
+    YES_STOP: 'Yes, stop',
 };
 
 export default englishConstants;
