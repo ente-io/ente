@@ -43,7 +43,7 @@ export default function Collections(props: Iprops) {
             collectionsMap.current.get(activeCollectionID);
     }, [activeCollectionID, collections]);
 
-    if (isInSearchMode || !collections?.length) {
+    if (isInSearchMode || collectionSummaries?.size <= 3) {
         return <></>;
     }
 

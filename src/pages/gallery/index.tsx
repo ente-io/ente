@@ -240,7 +240,6 @@ export default function Gallery() {
             setFiles(sortFiles(files));
             setCollections(collections);
             setTrash(trash);
-            await setDerivativeState(collections, files);
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -248,6 +247,10 @@ export default function Gallery() {
         };
         main();
     }, []);
+
+    useEffect(() => {
+        setDerivativeState(collections, files);
+    }, [collections, files]);
 
     useEffect(
         () => collectionSelectorAttributes && setCollectionSelectorView(true),
@@ -319,7 +322,6 @@ export default function Gallery() {
             const trash = await syncTrash(collections, setFiles, files);
             setTrash(trash);
             files.push(...getTrashedFiles(trash));
-            await setDerivativeState(collections, files);
         } catch (e) {
             logError(e, 'syncWithRemote failed');
             switch (e.message) {
@@ -345,6 +347,7 @@ export default function Gallery() {
         collections: Collection[],
         files: EnteFile[]
     ) => {
+        files = files || [];
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
