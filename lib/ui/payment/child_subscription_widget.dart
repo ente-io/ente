@@ -127,7 +127,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
       firstAction: 'No',
       secondAction: 'Yes',
       firstActionColor: Theme.of(context).buttonColor,
-      secondActionColor: Colors.white,
+      secondActionColor: Theme.of(context).colorScheme.onSurface,
     );
     if (choice != DialogUserChoice.secondChoice) {
       return;

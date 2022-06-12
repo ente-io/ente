@@ -198,9 +198,6 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         TextButton(
           child: Text(
             "Ok",
-            style: TextStyle(
-              color: Colors.white,
-            ),
           ),
           onPressed: () {
             if (Platform.isIOS) {
