@@ -1,12 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/sync_service.dart';
-import 'package:photos/ui/payment/subscription.dart';
-import 'package:photos/utils/email_util.dart';
+import 'package:photos/ui/header/header_error_widget.dart';
 
 class SyncIndicator extends StatefulWidget {
   const SyncIndicator({Key key}) : super(key: key);
@@ -138,151 +136,5 @@ class _SyncIndicatorState extends State<SyncIndicator> {
     }
     // _event.status == SyncStatus.error
     return _event.reason ?? "Upload failed";
-  }
-}
-
-class HeaderErrorWidget extends StatelessWidget {
-  final Error _error;
-  
-  const HeaderErrorWidget({Key key, @required Error error})
-      : _error = error,
-        super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    if (_error is NoActiveSubscriptionError) {
-      return Container(
-        margin: EdgeInsets.only(top: 8),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  color: Theme.of(context).buttonColor,
-                ),
-                Padding(padding: EdgeInsets.all(4)),
-                Text("Your subscription has expired"),
-              ],
-            ),
-            Padding(padding: EdgeInsets.all(6)),
-            Container(
-              width: double.infinity,
-              height: 64,
-              padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-              child: OutlinedButton(
-                child: Text("Subscribe"),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (BuildContext context) {
-                        return getSubscriptionPage();
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(8)),
-          ],
-        ),
-      );
-    } else if (_error is StorageLimitExceededError) {
-      return Container(
-        margin: EdgeInsets.only(top: 8),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  color: Theme.of(context).buttonColor,
-                ),
-                Padding(padding: EdgeInsets.all(4)),
-                Text("Storage limit exceeded"),
-              ],
-            ),
-            Padding(padding: EdgeInsets.all(6)),
-            Container(
-              width: double.infinity,
-              height: 64,
-              padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-              child: OutlinedButton(
-                child: Text("Upgrade"),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (BuildContext context) {
-                        return getSubscriptionPage();
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(8)),
-          ],
-        ),
-      );
-    } else {
-      return Center(
-        child: Column(
-          children: [
-            Icon(
-              Icons.error_outline,
-              color: Colors.red[400],
-            ),
-            Padding(padding: EdgeInsets.all(4)),
-            Text(
-              "We could not backup your data\nwe will retry later",
-              style: TextStyle(height: 1.4),
-              textAlign: TextAlign.center,
-            ),
-            Padding(padding: EdgeInsets.all(8)),
-            InkWell(
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
-                  side: BorderSide(
-                    width: 1,
-                    color: Colors.orange[300],
-                  ),
-                ),
-                child: Text(
-                  "Raise ticket",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Colors.orange[300],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                onPressed: () {
-                  sendLogs(
-                    context,
-                    "Raise ticket",
-                    "support@ente.io",
-                    subject: "Backup failed",
-                  );
-                },
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(16)),
-            Divider(
-              thickness: 2,
-              height: 0,
-            ),
-            Padding(padding: EdgeInsets.all(12)),
-          ],
-        ),
-      );
-    }
   }
 }
