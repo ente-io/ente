@@ -142,7 +142,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         );
     Size size = MediaQuery.of(context).size;
     int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
-    final double sideOfThumbnail = (size.width / 2) -
+    final double sideOfThumbnail = (size.width / albumsCountInOneRow) -
         horizontalPaddingOfGridRow -
         ((crossAxisSpacingOfGrid / 2) * (albumsCountInOneRow - 1));
     return SingleChildScrollView(
@@ -643,10 +643,16 @@ class CollectionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const double horizontalPaddingOfGridRow = 16;
+    const double crossAxisSpacingOfGrid = 5;
+    Size size = MediaQuery.of(context).size;
+    int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
+    double totalWhiteSpaceOfRow = (horizontalPaddingOfGridRow * 2) +
+        (albumsCountInOneRow - 1) * crossAxisSpacingOfGrid;
     TextStyle albumTitleTextStyle =
         Theme.of(context).textTheme.subtitle1.copyWith(fontSize: 14);
-    final double sideOfThumbnail =
-        (MediaQuery.of(context).size.width / 2) - 18.5;
+    final double sideOfThumbnail = (size.width / albumsCountInOneRow) -
+        (totalWhiteSpaceOfRow / albumsCountInOneRow);
     return GestureDetector(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

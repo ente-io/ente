@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Android Prod",
             "request": "launch",
@@ -46,5 +47,35 @@
                 "endpoint=http://localhost:8080",
             ]
         },
+        {
+            "name": "Tab",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "emulator-5554",
+            "flutterMode": "debug",
+            "program": "lib/main.dart",
+            "args": [
+                "--flavor",
+                "independent"
+            ]
+        },
+        {
+            "name": "Phone",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "emulator-5556",
+            "flutterMode": "debug",
+            "program": "lib/main.dart",
+            "args": [
+                "--flavor",
+                "independent"
+            ]
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Tab and Phone",
+            "configurations": ["Tab", "Phone"]
+        }
     ]
 }
