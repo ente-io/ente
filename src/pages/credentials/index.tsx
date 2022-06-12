@@ -19,6 +19,7 @@ import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
 import { KeyAttributes } from 'types/user';
+import { CustomError } from 'utils/error';
 
 export default function Credentials() {
     const router = useRouter();
@@ -59,7 +60,7 @@ export default function Credentials() {
                 );
             } catch (e) {
                 logError(e, 'failed to derive key');
-                throw e;
+                throw Error(CustomError.WEAK_DEVICE);
             }
             try {
                 const key: string = await cryptoWorker.decryptB64(
@@ -82,20 +83,29 @@ export default function Credentials() {
                 router.push(redirectURL ?? PAGES.GALLERY);
             } catch (e) {
                 logError(e, 'user entered a wrong password');
-                setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
+                throw Error(CustomError.INCORRECT_PASSWORD);
             }
         } catch (e) {
-            setFieldError(
-                'passphrase',
-                `${constants.UNKNOWN_ERROR} ${e.message}`
-            );
+            switch (e.message) {
+                case CustomError.WEAK_DEVICE:
+                    setFieldError('passphrase', constants.WEAK_DEVICE);
+                    break;
+                case CustomError.INCORRECT_PASSWORD:
+                    setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
+                    break;
+                default:
+                    setFieldError(
+                        'passphrase',
+                        `${constants.UNKNOWN_ERROR} ${e.message}`
+                    );
+            }
         }
     };
 
     return (
         <>
             <Container>
-                <Card style={{ minWidth: '320px' }} className="text-center">
+                <Card style={{ maxWidth: '333px' }} className="text-center">
                     <Card.Body style={{ padding: '40px 30px' }}>
                         <Card.Title style={{ marginBottom: '32px' }}>
                             <LogoImg src="/icon.svg" />
