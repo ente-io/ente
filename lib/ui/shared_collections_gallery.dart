@@ -125,7 +125,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
           children: [
             const SizedBox(height: 12),
             SectionTitle("Incoming"),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
             collections.incoming.isNotEmpty
                 ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -150,7 +150,6 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 : _getIncomingCollectionEmptyState(),
             const SizedBox(height: 32),
             SectionTitle("Outgoing"),
-            const SizedBox(height: 12),
             collections.outgoing.isNotEmpty
                 ? ListView.builder(
                     shrinkWrap: true,

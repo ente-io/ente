@@ -151,7 +151,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
           children: [
             const SizedBox(height: 12),
             SectionTitle("On device"),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
             items.folders.isEmpty
                 ? Padding(
                     padding: const EdgeInsets.all(22),
@@ -195,7 +195,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                 _sortMenu(),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
             Configuration.instance.hasConfiguredAccount()
                 ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
