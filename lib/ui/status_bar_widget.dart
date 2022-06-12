@@ -74,10 +74,6 @@ class SyncStatusWidget extends StatefulWidget {
 
 class _SyncStatusWidgetState extends State<SyncStatusWidget> {
   static const Duration kSleepDuration = Duration(milliseconds: 3000);
-  static const _inProgressIcon = CircularProgressIndicator(
-    strokeWidth: 2,
-    valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(45, 194, 98, 1.0)),
-  );
 
   SyncStatusUpdate _event;
   StreamSubscription<SyncStatusUpdate> _subscription;
@@ -126,6 +122,22 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
     if (_event.status == SyncStatus.completed_backup) {
       return SyncStatusCompletedWidget();
     }
+    return RefreshIndicatorWidget(_event);
+  }
+}
+
+class RefreshIndicatorWidget extends StatelessWidget {
+  static const _inProgressIcon = CircularProgressIndicator(
+    strokeWidth: 2,
+    valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(45, 194, 98, 1.0)),
+  );
+
+  final SyncStatusUpdate event;
+
+  const RefreshIndicatorWidget(this.event, {Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       height: kContainerHeight,
       width: double.infinity,
@@ -161,30 +173,30 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
   }
 
   String _getRefreshingText() {
-    if (_event.status == SyncStatus.started_first_gallery_import ||
-        _event.status == SyncStatus.completed_first_gallery_import) {
+    if (event.status == SyncStatus.started_first_gallery_import ||
+        event.status == SyncStatus.completed_first_gallery_import) {
       return "Loading gallery...";
     }
-    if (_event.status == SyncStatus.applying_remote_diff) {
+    if (event.status == SyncStatus.applying_remote_diff) {
       return "Syncing...";
     }
-    if (_event.status == SyncStatus.preparing_for_upload) {
+    if (event.status == SyncStatus.preparing_for_upload) {
       return "Encrypting backup...";
     }
-    if (_event.status == SyncStatus.in_progress) {
-      return _event.completed.toString() +
+    if (event.status == SyncStatus.in_progress) {
+      return event.completed.toString() +
           "/" +
-          _event.total.toString() +
+          event.total.toString() +
           " Memories preserved";
     }
-    if (_event.status == SyncStatus.paused) {
-      return _event.reason;
+    if (event.status == SyncStatus.paused) {
+      return event.reason;
     }
-    if (_event.status == SyncStatus.error) {
-      return _event.reason ?? "Upload failed";
+    if (event.status == SyncStatus.error) {
+      return event.reason ?? "Upload failed";
     }
-    if (_event.status == SyncStatus.completed_backup) {
-      if (_event.wasStopped) {
+    if (event.status == SyncStatus.completed_backup) {
+      if (event.wasStopped) {
         return "Sync stopped";
       }
     }
