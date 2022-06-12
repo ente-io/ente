@@ -180,15 +180,15 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
     if (_event.status == SyncStatus.paused) {
       return _event.reason;
     }
+    if (_event.status == SyncStatus.error) {
+      return _event.reason ?? "Upload failed";
+    }
     if (_event.status == SyncStatus.completed_backup) {
       if (_event.wasStopped) {
         return "Sync stopped";
-      } else {
-        return "All memories preserved";
       }
     }
-    // _event.status == SyncStatus.error
-    return _event.reason ?? "Upload failed";
+    return "All memories preserved";
   }
 }
 
