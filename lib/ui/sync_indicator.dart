@@ -53,7 +53,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
       return Container();
     }
     if (_event.status == SyncStatus.error) {
-      return HeaderErrorWidget(event: _event);
+      return HeaderErrorWidget(error: _event.error);
     }
     if (_event.status == SyncStatus.completed_first_gallery_import ||
         _event.status == SyncStatus.completed_backup) {
@@ -142,15 +142,15 @@ class _SyncIndicatorState extends State<SyncIndicator> {
 }
 
 class HeaderErrorWidget extends StatelessWidget {
-  const HeaderErrorWidget({Key key, @required SyncStatusUpdate event})
-      : _event = event,
+  final Error _error;
+  
+  const HeaderErrorWidget({Key key, @required Error error})
+      : _error = error,
         super(key: key);
-
-  final SyncStatusUpdate _event;
 
   @override
   Widget build(BuildContext context) {
-    if (_event.error is NoActiveSubscriptionError) {
+    if (_error is NoActiveSubscriptionError) {
       return Container(
         margin: EdgeInsets.only(top: 8),
         child: Column(
@@ -189,7 +189,7 @@ class HeaderErrorWidget extends StatelessWidget {
           ],
         ),
       );
-    } else if (_event.error is StorageLimitExceededError) {
+    } else if (_error is StorageLimitExceededError) {
       return Container(
         margin: EdgeInsets.only(top: 8),
         child: Column(
