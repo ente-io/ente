@@ -48,7 +48,7 @@ import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/ui/nav_bar.dart';
 import 'package:photos/ui/settings_page.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
-import 'package:photos/ui/sync_indicator.dart';
+import 'package:photos/ui/status_bar_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -719,7 +719,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
 
 class HeaderWidget extends StatelessWidget {
   static const _memoriesWidget = MemoriesWidget();
-  static const _syncIndicator = SyncIndicator();
+  static const _statusBarWidget = StatusBarWidget();
 
   const HeaderWidget({
     Key key,
@@ -729,7 +729,7 @@ class HeaderWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     Logger("Header").info("Building header widget");
     const list = [
-      _syncIndicator,
+      _statusBarWidget,
       _memoriesWidget,
     ];
     return Column(

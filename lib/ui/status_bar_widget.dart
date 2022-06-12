@@ -6,14 +6,14 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/header/header_error_widget.dart';
 
-class SyncIndicator extends StatefulWidget {
-  const SyncIndicator({Key key}) : super(key: key);
+class StatusBarWidget extends StatefulWidget {
+  const StatusBarWidget({Key key}) : super(key: key);
 
   @override
-  _SyncIndicatorState createState() => _SyncIndicatorState();
+  _StatusBarWidgetState createState() => _StatusBarWidgetState();
 }
 
-class _SyncIndicatorState extends State<SyncIndicator> {
+class _StatusBarWidgetState extends State<StatusBarWidget> {
   static const kSleepDuration = Duration(milliseconds: 3000);
   SyncStatusUpdate _event;
   double _containerHeight = 48;
