@@ -6,7 +6,7 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/header_error_widget.dart';
 
-const double kContainerHeight = 48;
+const double kContainerHeight = 36;
 
 class StatusBarWidget extends StatefulWidget {
   const StatusBarWidget({Key key}) : super(key: key);
@@ -48,19 +48,31 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        AnimatedOpacity(
-          opacity: _showStatus ? 0 : 1,
-          duration: Duration(milliseconds: 1000),
-          child: StatusBarBrandingWidget(),
-        ),
-        AnimatedOpacity(
-          opacity: _showStatus ? 1 : 0,
-          duration: Duration(milliseconds: 1000),
-          child: SyncStatusWidget(),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 0),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              AnimatedOpacity(
+                opacity: _showStatus ? 0 : 1,
+                duration: Duration(milliseconds: 1000),
+                child: StatusBarBrandingWidget(),
+              ),
+              AnimatedOpacity(
+                opacity: _showStatus ? 1 : 0,
+                duration: Duration(milliseconds: 1000),
+                child: SyncStatusWidget(),
+              ),
+            ],
+          ),
+          AnimatedOpacity(
+            opacity: _showStatus ? 1 : 0,
+            duration: Duration(milliseconds: 1000),
+            child: Divider(),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -153,8 +165,6 @@ class RefreshIndicatorWidget extends StatelessWidget {
                 ),
               ],
             ),
-            Padding(padding: EdgeInsets.all(4)),
-            Divider(),
           ],
         ),
       ),
@@ -202,7 +212,7 @@ class StatusBarBrandingWidget extends StatelessWidget {
       height: kContainerHeight,
       padding: EdgeInsets.only(left: 12),
       child: Align(
-        alignment: Alignment.topLeft,
+        alignment: Alignment.centerLeft,
         child: Text(
           "ente",
           style: TextStyle(
@@ -224,32 +234,29 @@ class SyncStatusCompletedWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: kContainerHeight,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                padding: EdgeInsets.all(2),
-                width: 22,
-                height: 22,
-                child: Icon(
+      child: Align(
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
                   Icons.cloud_done_outlined,
                   color: Theme.of(context).buttonColor,
+                  size: 22,
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 4, 0, 0),
-                child: Text("All memories preserved"),
-              ),
-            ],
-          ),
-          Padding(padding: EdgeInsets.all(4)),
-          Divider(),
-        ],
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Text("All memories preserved"),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
