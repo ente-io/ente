@@ -83,81 +83,82 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     final isLightMode =
         MediaQuery.of(context).platformBrightness == Brightness.light;
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  isLightMode
-                      ? Image.asset(
-                          'assets/loading_photos_light.png',
-                          color: Colors.white.withOpacity(0.5),
-                          colorBlendMode: BlendMode.modulate,
-                        )
-                      : Image.asset(
-                          'assets/loading_photos_light.png',
-                          color: Colors.white.withOpacity(0.25),
-                          colorBlendMode: BlendMode.modulate,
-                        ),
-                  Lottie.asset(
-                    'assets/loadingGalleryLottie.json',
-                    height: 400,
-                  )
-                ],
-              ),
-              Text(
-                "Loading your photos...",
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.subTextColor,
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    isLightMode
+                        ? Image.asset(
+                            'assets/loading_photos_light.png',
+                            color: Colors.white.withOpacity(0.5),
+                            colorBlendMode: BlendMode.modulate,
+                          )
+                        : Image.asset(
+                            'assets/loading_photos_light.png',
+                            color: Colors.white.withOpacity(0.25),
+                            colorBlendMode: BlendMode.modulate,
+                          ),
+                    Lottie.asset(
+                      'assets/loadingGalleryLottie.json',
+                      height: 400,
+                    )
+                  ],
                 ),
-              ),
-              Padding(padding: EdgeInsets.all(36)),
-              Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Did you know?",
-                        style: Theme.of(context).textTheme.headline6.copyWith(
-                              color: Theme.of(context).colorScheme.greenText,
-                            ),
-                      ),
-                    ],
+                Text(
+                  "Loading your photos...",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.subTextColor,
                   ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  SizedBox(
-                    height: 175,
-                    child: Stack(
+                ),
+                const SizedBox(height: 54),
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        PageView.builder(
-                          scrollDirection: Axis.vertical,
-                          controller: _pageController,
-                          itemBuilder: (context, index) {
-                            return _getMessage(_messages[index]);
-                          },
-                          itemCount: _messages.length,
-                          physics: NeverScrollableScrollPhysics(),
+                        Text(
+                          "Did you know?",
+                          style: Theme.of(context).textTheme.headline6.copyWith(
+                                color: Theme.of(context).colorScheme.greenText,
+                              ),
                         ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: BottomShadowWidget(),
-                        )
                       ],
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    SizedBox(
+                      height: 175,
+                      child: Stack(
+                        children: [
+                          PageView.builder(
+                            scrollDirection: Axis.vertical,
+                            controller: _pageController,
+                            itemBuilder: (context, index) {
+                              return _getMessage(_messages[index]);
+                            },
+                            itemCount: _messages.length,
+                            physics: NeverScrollableScrollPhysics(),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: BottomShadowWidget(),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
