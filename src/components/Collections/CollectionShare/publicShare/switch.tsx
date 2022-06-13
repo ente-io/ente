@@ -1,6 +1,7 @@
 import React from 'react';
 import { SwitchProps, Switch } from '@mui/material';
-import { styled } from '@mui/material';
+import styled from 'styled-components';
+
 const PublicShareSwitch = styled((props: SwitchProps) => (
     <Switch
         focusVisibleClassName=".Mui-focusVisible"

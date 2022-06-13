@@ -1,5 +1,6 @@
-import { styled } from '@mui/material';
-export default styled('img')`
+import styled from 'styled-components';
+
+export default styled.img`
     height: 25px;
     vertical-align: bottom;
     padding-right: 15px;

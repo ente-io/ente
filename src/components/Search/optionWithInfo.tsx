@@ -18,7 +18,12 @@ export const OptionWithInfo = (props) => (
 const LabelWithInfo = ({ data }: { data: SearchOption }) => (
     <>
         <Box className="main" px={2} py={1}>
-            <Typography variant="caption" mb={1}>
+            <Typography
+                css={`
+                    font-size: 12px;
+                    line-height: 16px;
+                `}
+                mb={1}>
                 {constants.SEARCH_TYPE(data.type)}
             </Typography>
             <SpaceBetweenFlex>

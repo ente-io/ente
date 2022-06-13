@@ -45,11 +45,11 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
                 component={Button}
                 color={attributes.variant}
                 onClick={handleClick}
-                sx={{
-                    textAlign: 'left',
-                    width: '320px',
-                    padding: '12px 16px',
-                }}>
+                css={`
+                    width: 320px;
+                    padding: 12px 16px;
+                `}
+                sx={{ textAlign: 'left' }}>
                 <Stack
                     flex={'1'}
                     spacing={2}
@@ -68,8 +68,11 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
                         {attributes?.action && (
                             <Typography
                                 mb={0.5}
-                                variant="button"
-                                fontWeight={'bold'}>
+                                css={`
+                                    font-size: 16px;
+                                    font-weight: 600;
+                                    line-height: 19px;
+                                `}>
                                 {attributes?.action.text}
                             </Typography>
                         )}

@@ -1,7 +1,8 @@
 import Tooltip from '@mui/material/Tooltip';
 import React from 'react';
-import { styled } from '@mui/material';
-export const EllipseText = styled('div')`
+import styled from 'styled-components';
+
+export const EllipseText = styled.div`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

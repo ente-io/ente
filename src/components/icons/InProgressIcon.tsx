@@ -1,6 +1,7 @@
 import React from 'react';
-import { styled } from '@mui/material';
-const Rotate = styled('div')<{ disabled }>`
+import styled from 'styled-components';
+
+const Rotate = styled.div<{ disabled }>`
     width: 24px;
     height: 27px;
     ${(props) =>

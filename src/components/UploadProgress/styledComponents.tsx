@@ -1,5 +1,6 @@
-import { styled } from '@mui/material';
-export const NotUploadSectionHeader = styled('div')(
+import styled from 'styled-components';
+
+export const NotUploadSectionHeader = styled.div(
     ({ theme }) => `
     text-align: center;
     color: ${theme.palette.danger.main};
@@ -8,7 +9,7 @@ export const NotUploadSectionHeader = styled('div')(
 `
 );
 
-export const InProgressItemContainer = styled('div')`
+export const InProgressItemContainer = styled.div`
     display: inline-block;
     & > span {
         display: inline-block;
@@ -26,7 +27,7 @@ export const InProgressItemContainer = styled('div')`
     }
 `;
 
-export const ResultItemContainer = styled('div')`
+export const ResultItemContainer = styled.div`
     position: relative;
     top: 5px;
     display: inline-block;

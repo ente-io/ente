@@ -20,7 +20,16 @@ const IconButtonWithBG = styled(IconButton)(({ theme }) => ({
 }));
 
 const UploadProgressTitleText = ({ expanded }) => (
-    <Typography variant={expanded ? 'title' : 'subtitle'}>
+    <Typography
+        {...(expanded ? { variant: 'title' } : {})}
+        css={
+            !expanded &&
+            `
+font-size: 24px;
+font-weight: 600;
+line-height: 36px;
+`
+        }>
         {constants.FILE_UPLOAD}
     </Typography>
 );

@@ -1,6 +1,6 @@
 import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
-import { styled } from '@mui/material';
+import styled from 'styled-components';
 import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
 import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
@@ -28,7 +28,7 @@ interface IProps {
     isInsSelectRange?: boolean;
 }
 
-const Check = styled('input')<{ active: boolean }>`
+const Check = styled.input<{ active: boolean }>`
     appearance: none;
     position: absolute;
     z-index: 10;
@@ -87,7 +87,7 @@ const Check = styled('input')<{ active: boolean }>`
     }
 `;
 
-export const HoverOverlay = styled('div')<{ checked: boolean }>`
+export const HoverOverlay = styled.div<{ checked: boolean }>`
     opacity: 0;
     left: 0;
     top: 0;
@@ -100,7 +100,7 @@ export const HoverOverlay = styled('div')<{ checked: boolean }>`
         'background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))'};
 `;
 
-export const InSelectRangeOverLay = styled('div')<{ active: boolean }>`
+export const InSelectRangeOverLay = styled.div<{ active: boolean }>`
     opacity: ${(props) => (!props.active ? 0 : 1)};
     left: 0;
     top: 0;
@@ -111,7 +111,7 @@ export const InSelectRangeOverLay = styled('div')<{ active: boolean }>`
     ${(props) => props.active && 'background:rgba(81, 205, 124, 0.25)'};
 `;
 
-export const FileAndCollectionNameOverlay = styled('div')`
+export const FileAndCollectionNameOverlay = styled.div`
     width: 100%;
     bottom: 0;
     left: 0;
@@ -135,7 +135,7 @@ export const FileAndCollectionNameOverlay = styled('div')`
     position: absolute;
 `;
 
-export const SelectedOverlay = styled('div')<{ selected: boolean }>`
+export const SelectedOverlay = styled.div<{ selected: boolean }>`
     z-index: 5;
     position: absolute;
     left: 0;
@@ -146,7 +146,7 @@ export const SelectedOverlay = styled('div')<{ selected: boolean }>`
     border-radius: 4px;
 `;
 
-const Cont = styled('div')<{ disabled: boolean }>`
+const Cont = styled.div<{ disabled: boolean }>`
     background: #222;
     display: flex;
     width: fit-content;

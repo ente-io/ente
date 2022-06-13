@@ -1,5 +1,6 @@
 import { FlexWrapper } from 'components/Container';
-import { styled } from '@mui/material';
+import styled from 'styled-components';
+
 const NavbarBase = styled(FlexWrapper)`
     padding: 0 20px;
     min-height: 64px;

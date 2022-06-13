@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import { PaddedContainer } from 'components/Container';
-import { styled } from '@mui/material';
+import styled from 'styled-components';
+
 export const CollectionListWrapper = styled(Box)`
     position: relative;
     overflow: hidden;
@@ -18,7 +19,7 @@ export const CollectionInfoBarWrapper = styled(Box)`
     margin-bottom: 24px;
 `;
 
-export const ScrollContainer = styled('div')`
+export const ScrollContainer = styled.div`
     width: 100%;
     height: 100px;
     overflow: auto;
@@ -26,33 +27,34 @@ export const ScrollContainer = styled('div')`
     display: flex;
 `;
 
-export const CollectionTile = styled('div')`
+export const CollectionTile = styled.div`
     display: flex;
     position: relative;
     border-radius: 4px;
     user-select: none;
     cursor: pointer;
+    background-size: cover;
     & > img {
         object-fit: cover;
-        width: 100%;
-        height: 100%;
+        max-width: 100%;
+        min-height: 100%;
         flex: 1;
         pointer-events: none;
     }
 `;
 
-export const CollectionTileWrapper = styled('div')`
+export const CollectionTileWrapper = styled.div`
     margin-right: 4px;
 `;
 
-export const ActiveIndicator = styled('div')`
+export const ActiveIndicator = styled.div`
     height: 3px;
     background-color: ${({ theme }) => theme.palette.text.primary};
     margin-top: 18px;
     border-radius: 2px;
 `;
 
-export const Hider = styled('div')<{ hide: boolean }>`
+export const Hider = styled.div<{ hide: boolean }>`
     display: ${(props) => (props.hide ? 'none' : 'block')};
 `;
 
@@ -84,7 +86,7 @@ export const ResultPreviewTile = styled(AllCollectionTile)`
     border-radius: 4px;
 `;
 
-export const CollectionTileTextOverlay = styled('div')`
+export const CollectionTileTextOverlay = styled.div`
     height: 100%;
     width: 100%;
     position: absolute;

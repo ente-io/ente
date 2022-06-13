@@ -1,5 +1,6 @@
-import { styled } from '@mui/material';
-export const LoadingOverlay = styled('div')`
+import styled from 'styled-components';
+
+export const LoadingOverlay = styled.div`
     left: 0;
     top: 0;
     outline: none;

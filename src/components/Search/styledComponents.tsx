@@ -3,7 +3,7 @@ import {
     FlexWrapper,
     FluidContainer,
 } from 'components/Container';
-import { styled, css } from '@mui/material';
+import styled, { css } from 'styled-components';
 
 export const SearchBarWrapper = styled(CenteredFlex)<{ isOpen: boolean }>`
     ${(props) =>
