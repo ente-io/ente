@@ -7,7 +7,6 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/app_lock.dart';
 import 'package:photos/ui/change_email_dialog.dart';
 import 'package:photos/ui/password_entry_page.dart';
-import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/recovery_key_page.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
@@ -38,23 +37,6 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
   Column _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () async {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return getSubscriptionPage();
-                },
-              ),
-            );
-          },
-          child: SettingsTextItem(
-            text: "Subscription plan",
-            icon: Icons.navigate_next,
-          ),
-        ),
-        SectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
