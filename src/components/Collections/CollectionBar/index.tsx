@@ -5,9 +5,9 @@ import constants from 'utils/strings/constants';
 import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
 import { Typography } from '@mui/material';
 import {
-    CollectionBarWrapper,
+    CollectionListBarWrapper,
     ScrollContainer,
-    CollectionSectionWrapper,
+    CollectionListWrapper,
 } from 'components/Collections/styledComponents';
 import CollectionCardWithActiveIndicator from 'components/Collections/CollectionBar/CollectionCardWithActiveIndicator';
 import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
@@ -73,21 +73,17 @@ export default function CollectionBar(props: IProps) {
     };
 
     return (
-        <>
-            <CollectionSectionWrapper>
-                <SpaceBetweenFlex>
-                    <Typography fontWeight={'bold'}>
-                        {constants.ALBUMS}
-                    </Typography>
-                    {hasScrollBar && (
-                        <LinkButton onClick={showAllCollections}>
-                            {constants.VIEW_ALL_ALBUMS}
-                        </LinkButton>
-                    )}
-                </SpaceBetweenFlex>
-            </CollectionSectionWrapper>
+        <CollectionListBarWrapper>
+            <SpaceBetweenFlex mb={1}>
+                <Typography>{constants.ALBUMS}</Typography>
+                {hasScrollBar && (
+                    <LinkButton onClick={showAllCollections}>
+                        {constants.VIEW_ALL_ALBUMS}
+                    </LinkButton>
+                )}
+            </SpaceBetweenFlex>
 
-            <CollectionBarWrapper>
+            <CollectionListWrapper>
                 {!onFarLeft && (
                     <ScrollButton
                         scrollDirection={SCROLL_DIRECTION.LEFT}
@@ -112,7 +108,7 @@ export default function CollectionBar(props: IProps) {
                         onClick={scrollComponent(SCROLL_DIRECTION.RIGHT)}
                     />
                 )}
-            </CollectionBarWrapper>
-        </>
+            </CollectionListWrapper>
+        </CollectionListBarWrapper>
     );
 }

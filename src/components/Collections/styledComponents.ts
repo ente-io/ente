@@ -1,26 +1,28 @@
+import { Box } from '@mui/material';
 import { PaddedContainer } from 'components/Container';
 import styled from 'styled-components';
 
-export const CollectionBarWrapper = styled(PaddedContainer)`
-    display: flex;
+export const CollectionListWrapper = styled(Box)`
     position: relative;
     overflow: hidden;
     height: 86px;
     width: 100%;
-    margin: 10px auto;
+`;
+
+export const CollectionListBarWrapper = styled(PaddedContainer)`
+    width: 100%;
+    margin: 16px auto;
     border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
 `;
 
-export const CollectionSectionWrapper = styled(PaddedContainer)`
-    margin-bottom: 8px;
-    margin-top: 16px;
+export const CollectionInfoBarWrapper = styled(Box)`
+    margin-bottom: 24px;
 `;
 
 export const ScrollContainer = styled.div`
     width: 100%;
     height: 100px;
     overflow: auto;
-    max-width: 100%;
     scroll-behavior: smooth;
     display: flex;
 `;
