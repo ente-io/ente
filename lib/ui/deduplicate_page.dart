@@ -152,12 +152,18 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             "Following files were clubbed based on their sizes" +
-                ((_shouldClubByCaptureTime ? " and capture times." : ".") +
-                    ", please review and delete the items you believe are duplicates."),
+                ((_shouldClubByCaptureTime ? " and capture times." : ".")),
+            style: Theme.of(context).textTheme.subtitle2,
+          ),
+          Padding(
+            padding: EdgeInsets.all(2),
+          ),
+          Text(
+            "Please review and delete the items you believe are duplicates.",
             style: Theme.of(context).textTheme.subtitle2,
           ),
           Padding(
@@ -230,14 +236,14 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 6, 24, 6),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 sortOptionText(sortKey),
-                Padding(padding: EdgeInsets.only(left: 5.0)),
+                Padding(padding: EdgeInsets.only(left: 4)),
                 Icon(
                   Icons.sort,
-                  color: Theme.of(context).buttonColor,
+                  color: Theme.of(context).colorScheme.iconColor,
                   size: 20,
                 ),
               ],
@@ -253,7 +259,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               return PopupMenuItem(
                 value: index,
                 child: Align(
-                  alignment: Alignment.topRight,
+                  alignment: Alignment.centerLeft,
                   child: sortOptionText(SortKey.values[index]),
                 ),
               );
@@ -267,7 +273,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   Widget _getDeleteButton() {
     String text;
     if (_selectedFiles.length == 1) {
-      text = "delete 1 item";
+      text = "Delete 1 item";
     } else {
       text = "Delete " + _selectedFiles.length.toString() + " items";
     }
@@ -278,42 +284,40 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     return SizedBox(
       width: double.infinity,
       child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: TextButton(
-            style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.red[700],
-            ),
-            child: Column(
-              children: [
-                Padding(padding: EdgeInsets.all(2)),
-                Text(
-                  text,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Colors.white,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                Padding(padding: EdgeInsets.all(2)),
-                Text(
-                  formatBytes(size),
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
-                    fontSize: 12,
-                  ),
-                ),
-                Padding(padding: EdgeInsets.all(2)),
-              ],
-            ),
-            onPressed: () async {
-              await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
-              Bus.instance.fire(UserDetailsChangedEvent());
-              Navigator.of(context)
-                  .pop(DeduplicationResult(_selectedFiles.length, size));
-            },
+        child: TextButton(
+          style: OutlinedButton.styleFrom(
+            backgroundColor: Colors.red[700],
           ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Padding(padding: EdgeInsets.all(2)),
+              Text(
+                text,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              Padding(padding: EdgeInsets.all(2)),
+              Text(
+                formatBytes(size),
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.7),
+                  fontSize: 12,
+                ),
+              ),
+              Padding(padding: EdgeInsets.all(2)),
+            ],
+          ),
+          onPressed: () async {
+            await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
+            Bus.instance.fire(UserDetailsChangedEvent());
+            Navigator.of(context)
+                .pop(DeduplicationResult(_selectedFiles.length, size));
+          },
         ),
       ),
     );
