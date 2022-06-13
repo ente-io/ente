@@ -749,7 +749,7 @@ const englishConstants = {
         </>
     ),
     WEAK_DEVICE:
-        "The device you're using is not powerful enough for the encryption of your photos. Please try to log in on desktop, or download the ente mobile app.",
+        "The web browser you're using is not powerful enough to encrypt your photos. Please try to log in to ente on your computer, or download the ente mobile/desktop app.",
 };
 
 export default englishConstants;
