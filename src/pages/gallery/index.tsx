@@ -102,6 +102,7 @@ import { GalleryNavbar } from 'components/pages/gallery/Navbar';
 import { Search, SearchResultSummary } from 'types/search';
 import SearchResultInfo from 'components/Search/SearchResultInfo';
 import { NotificationAttributes } from 'types/Notification';
+import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -126,6 +127,7 @@ const defaultGalleryContext: GalleryContextType = {
     syncWithRemote: () => null,
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
+    photoListHeader: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -134,7 +136,7 @@ export const GalleryContext = createContext<GalleryContextType>(
 
 export default function Gallery() {
     const router = useRouter();
-    const [collections, setCollections] = useState<Collection[]>([]);
+    const [collections, setCollections] = useState<Collection[]>(null);
 
     const [files, setFiles] = useState<EnteFile[]>(null);
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
@@ -176,7 +178,7 @@ export default function Gallery() {
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
         useContext(AppContext);
     const [collectionSummaries, setCollectionSummaries] =
-        useState<CollectionSummaries>(new Map());
+        useState<CollectionSummaries>();
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
     const [trash, setTrash] = useState<Trash>([]);
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
@@ -203,6 +205,8 @@ export default function Gallery() {
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
     const [droppedFiles, setDroppedFiles] = useState([]);
+    const [photoListHeader, setPhotoListHeader] =
+        useState<TimeStampListItem>(null);
 
     const showSessionExpiredMessage = () =>
         setDialogMessage({
@@ -240,7 +244,6 @@ export default function Gallery() {
             setFiles(sortFiles(files));
             setCollections(collections);
             setTrash(trash);
-            await setDerivativeState(collections, files);
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -248,6 +251,10 @@ export default function Gallery() {
         };
         main();
     }, []);
+
+    useEffect(() => {
+        setDerivativeState(collections, files);
+    }, [collections, files]);
 
     useEffect(
         () => collectionSelectorAttributes && setCollectionSelectorView(true),
@@ -300,6 +307,20 @@ export default function Gallery() {
         }
     }, [router.isReady]);
 
+    useEffect(() => {
+        if (isInSearchMode) {
+            setPhotoListHeader({
+                height: 116,
+                item: (
+                    <SearchResultInfo
+                        searchResultSummary={searchResultSummary}
+                    />
+                ),
+                itemType: ITEM_TYPE.STATIC,
+            });
+        }
+    }, [isInSearchMode, searchResultSummary]);
+
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
             resync.current = true;
@@ -319,7 +340,6 @@ export default function Gallery() {
             const trash = await syncTrash(collections, setFiles, files);
             setTrash(trash);
             files.push(...getTrashedFiles(trash));
-            await setDerivativeState(collections, files);
         } catch (e) {
             logError(e, 'syncWithRemote failed');
             switch (e.message) {
@@ -345,17 +365,17 @@ export default function Gallery() {
         collections: Collection[],
         files: EnteFile[]
     ) => {
+        if (!collections || !files) {
+            return;
+        }
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
-
-        setCollections(nonEmptyCollections);
 
         const collectionSummaries = getCollectionSummaries(
             nonEmptyCollections,
             files
         );
-
         setCollectionSummaries(collectionSummaries);
 
         const archivedCollections = getArchivedCollections(nonEmptyCollections);
@@ -366,7 +386,7 @@ export default function Gallery() {
         setSelected({ count: 0, collectionID: 0 });
     };
 
-    if (!files) {
+    if (!files || !collectionSummaries) {
         return <div />;
     }
     const collectionOpsHelper =
@@ -578,6 +598,7 @@ export default function Gallery() {
                 syncWithRemote,
                 setNotificationAttributes,
                 setBlockingLoad,
+                photoListHeader: photoListHeader,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
@@ -641,12 +662,8 @@ export default function Gallery() {
                     setActiveCollectionID={setActiveCollection}
                     collectionSummaries={collectionSummaries}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
+                    setPhotoListHeader={setPhotoListHeader}
                 />
-                {isInSearchMode && (
-                    <SearchResultInfo
-                        searchResultSummary={searchResultSummary}
-                    />
-                )}
 
                 <Upload
                     syncWithRemote={syncWithRemote}

@@ -2,8 +2,8 @@ import React from 'react';
 import { CollectionInfo } from 'components/Collections/CollectionInfo';
 import constants from 'utils/strings/constants';
 import { Typography } from '@mui/material';
-import { CollectionSectionWrapper } from 'components/Collections/styledComponents';
 import { SearchResultSummary } from 'types/search';
+import { CollectionInfoBarWrapper } from 'components/Collections/styledComponents';
 
 interface Iprops {
     searchResultSummary: SearchResultSummary;
@@ -17,11 +17,11 @@ export default function SearchResultInfo({ searchResultSummary }: Iprops) {
 
     console.log(optionName, fileCount);
     return (
-        <CollectionSectionWrapper>
+        <CollectionInfoBarWrapper>
             <Typography variant="subtitle" color="text.secondary">
                 {constants.SEARCH_RESULTS}
             </Typography>
             <CollectionInfo name={optionName} fileCount={fileCount} />
-        </CollectionSectionWrapper>
+        </CollectionInfoBarWrapper>
     );
 }
