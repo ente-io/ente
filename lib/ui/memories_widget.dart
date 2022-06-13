@@ -25,9 +25,7 @@ class MemoriesWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildMemories(snapshot.data),
-              Divider(
-                thickness: 1,
-              )
+              Divider(),
             ],
           );
         }
