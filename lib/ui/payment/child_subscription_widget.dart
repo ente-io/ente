@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
@@ -26,15 +26,14 @@ class ChildSubscriptionWidget extends StatelessWidget {
           Center(
             child: Text(
               "You are on a family plan!",
-              style:
-                  Theme.of(context).textTheme.bodyText1.copyWith(fontSize: 14),
+              style: Theme.of(context).textTheme.bodyText1,
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(horizontal: 16),
             child: RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
@@ -47,13 +46,10 @@ class ChildSubscriptionWidget extends StatelessWidget {
                     style: TextStyle(color: Color.fromRGBO(29, 185, 84, 1)),
                   ),
                   TextSpan(
-                    text: " to manage your family subscription",
+                    text: " to manage your subscription",
                   ),
                 ],
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1
-                    .copyWith(fontSize: 14),
+                style: Theme.of(context).textTheme.bodyText1,
               ),
             ),
           ),
@@ -78,9 +74,11 @@ class ChildSubscriptionWidget extends StatelessWidget {
                   width: 2,
                   color: Color.fromRGBO(255, 52, 52, 1),
                 ),
+                backgroundColor:
+                    Theme.of(context).colorScheme.defaultBackgroundColor,
               ),
               child: Text(
-                "leave family",
+                "Leave Family",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,

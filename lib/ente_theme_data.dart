@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
 extension CustomColorScheme on ColorScheme {
+  Color get defaultBackgroundColor =>
+      brightness == Brightness.light ? Colors.white : Colors.black;
+
   Color get defaultTextColor =>
       brightness == Brightness.light ? Colors.black : Colors.white;
 
