@@ -167,7 +167,11 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                             style: Theme.of(context)
                                 .textTheme
                                 .subtitle2
-                                .copyWith(fontWeight: FontWeight.w600),
+                                .copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      Theme.of(context).colorScheme.iconColor,
+                                ),
                           ),
                         ),
                         Row(
@@ -195,11 +199,14 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                       width: 86,
                       color: Theme.of(context)
                           .colorScheme
-                          .cancelSelectedButtonColor,
+                          .frostyBlurBackdropFilterColor,
                       child: Center(
                         child: Text(
                           'Cancel',
-                          style: Theme.of(context).textTheme.subtitle2,
+                          style: Theme.of(context).textTheme.subtitle2.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.iconColor,
+                              ),
                         ),
                       ),
                     ),
