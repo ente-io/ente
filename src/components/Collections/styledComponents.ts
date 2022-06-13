@@ -33,11 +33,10 @@ export const CollectionTile = styled.div`
     border-radius: 4px;
     user-select: none;
     cursor: pointer;
-    background-size: cover;
     & > img {
         object-fit: cover;
-        max-width: 100%;
-        min-height: 100%;
+        width: 100%;
+        height: 100%;
         flex: 1;
         pointer-events: none;
     }
