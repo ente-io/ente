@@ -22,13 +22,13 @@ import DeduplicateOptions from 'components/pages/dedupe/SelectedFileOptions';
 import { PAGES } from 'constants/pages';
 import router from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { styled } from '@mui/material';
+import styled from 'styled-components';
 import { syncCollections } from 'services/collectionService';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext
 );
-export const Info = styled('div')`
+export const Info = styled.div`
     padding: 24px;
     font-size: 18px;
 `;

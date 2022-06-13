@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { styled } from '@mui/material';
+import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 import CloseIcon from '@mui/icons-material/Close';
 
-const CloseButtonWrapper = styled('div')`
+const CloseButtonWrapper = styled.div`
     position: absolute;
     top: 10px;
     right: 10px;
     cursor: pointer;
 `;
-const DropDiv = styled('div')`
+const DropDiv = styled.div`
     flex: 1;
     display: flex;
     flex-direction: column;
 `;
-const Overlay = styled('div')`
+const Overlay = styled.div`
     border-width: 8px;
     left: 0;
     top: 0;

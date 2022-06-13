@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Carousel from 'react-bootstrap/Carousel';
 import Button from 'react-bootstrap/Button';
-import { styled } from '@mui/material';
+import styled from 'styled-components';
 import { AppContext } from './_app';
 import Login from 'components/Login';
 import { useRouter } from 'next/router';
@@ -13,7 +13,7 @@ import localForage from 'utils/storage/localForage';
 import { logError } from 'utils/sentry';
 import { getAlbumSiteHost, PAGES } from 'constants/pages';
 
-const Container = styled('div')`
+const Container = styled.div`
     display: flex;
     flex: 1;
     align-items: center;
@@ -25,7 +25,7 @@ const Container = styled('div')`
     }
 `;
 
-const SlideContainer = styled('div')`
+const SlideContainer = styled.div`
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -38,7 +38,7 @@ const SlideContainer = styled('div')`
     }
 `;
 
-const DesktopBox = styled('div')`
+const DesktopBox = styled.div`
     flex: 1;
     height: 100%;
     padding: 10px;
@@ -52,7 +52,7 @@ const DesktopBox = styled('div')`
     }
 `;
 
-const MobileBox = styled('div')`
+const MobileBox = styled.div`
     display: none;
 
     @media (max-width: 1024px) {
@@ -62,13 +62,13 @@ const MobileBox = styled('div')`
     }
 `;
 
-const SideBox = styled('div')`
+const SideBox = styled.div`
     display: flex;
     flex-direction: column;
     min-width: 320px;
 `;
 
-const TextContainer = styled('div')`
+const TextContainer = styled.div`
     padding: 20px;
     max-width: 300px;
     margin: 0 auto;
@@ -80,14 +80,14 @@ const UpperText = styled(TextContainer)`
     margin-bottom: 20px;
 `;
 
-const FeatureText = styled('div')`
+const FeatureText = styled.div`
     color: #51cd7c;
     font-weight: bold;
     padding-top: 20px;
     font-size: 24px;
 `;
 
-const Img = styled('img')`
+const Img = styled.img`
     height: 250px;
     object-fit: contain;
 

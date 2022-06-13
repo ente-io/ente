@@ -1,4 +1,5 @@
 import React, { createContext, useEffect, useRef, useState } from 'react';
+import styled, { ThemeProvider as SThemeProvider } from 'styled-components';
 import AppNavbar from 'components/Navbar/app';
 import constants from 'utils/strings/constants';
 import { useRouter } from 'next/router';
@@ -16,21 +17,19 @@ import Head from 'next/head';
 import { logUploadInfo } from 'utils/upload';
 import LoadingBar from 'react-top-loading-bar';
 import DialogBox from 'components/DialogBox';
-import { styled, ThemeProvider } from '@mui/material/styles';
-import { CacheProvider, EmotionCache } from '@emotion/react';
-import createEmotionCache from '../createEmotionCache';
+import { ThemeProvider as MThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'themes/darkThemeOptions';
 import { CssBaseline } from '@mui/material';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as types from 'styled-components/cssprop'; // need to css prop on styled component
 import { SetDialogBoxAttributes, DialogBoxAttributes } from 'types/dialogBox';
 import {
     getFamilyPortalRedirectURL,
     getRoadmapRedirectURL,
 } from 'services/userService';
 import { CustomError } from 'utils/error';
-import PropTypes from 'prop-types';
-import { AppProps } from 'next/app';
 
-export const MessageContainer = styled('div')`
+export const MessageContainer = styled.div`
     background-color: #111;
     padding: 0;
     font-size: 14px;
@@ -73,19 +72,7 @@ const redirectMap = new Map([
     ['families', getFamilyPortalRedirectURL],
 ]);
 
-// Client-side cache, shared for the whole session of the user in the browser.
-const clientSideEmotionCache = createEmotionCache();
-
-interface MyAppProps extends AppProps {
-    emotionCache?: EmotionCache;
-}
-
-export default function MyApp(props: MyAppProps) {
-    const {
-        Component,
-        emotionCache = clientSideEmotionCache,
-        pageProps,
-    } = props;
+export default function App({ Component, err }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [offline, setOffline] = useState(
@@ -236,7 +223,7 @@ export default function MyApp(props: MyAppProps) {
     const closeMessageDialog = () => setMessageDialogView(false);
 
     return (
-        <CacheProvider value={emotionCache}>
+        <>
             <Head>
                 <title>{constants.TITLE}</title>
                 <meta
@@ -245,68 +232,66 @@ export default function MyApp(props: MyAppProps) {
                 />
             </Head>
 
-            <ThemeProvider theme={darkThemeOptions}>
-                <CssBaseline />
-                {showNavbar && <AppNavbar />}
-                <MessageContainer>
-                    {offline && constants.OFFLINE_MSG}
-                </MessageContainer>
-                {sharedFiles &&
-                    (router.pathname === '/gallery' ? (
-                        <MessageContainer>
-                            {constants.FILES_TO_BE_UPLOADED(sharedFiles.length)}
-                        </MessageContainer>
-                    ) : (
-                        <MessageContainer>
-                            {constants.LOGIN_TO_UPLOAD_FILES(
-                                sharedFiles.length
-                            )}
-                        </MessageContainer>
-                    ))}
-                {flashMessage && (
-                    <FlashMessageBar
-                        flashMessage={flashMessage}
-                        onClose={() => setFlashMessage(null)}
-                    />
-                )}
-                <LoadingBar color="#51cd7c" ref={loadingBar} />
-
-                <DialogBox
-                    open={messageDialogView}
-                    onClose={closeMessageDialog}
-                    attributes={dialogMessage}
-                />
-
-                <AppContext.Provider
-                    value={{
-                        showNavBar,
-                        sharedFiles,
-                        resetSharedFiles,
-                        setDisappearingFlashMessage,
-                        redirectURL,
-                        setRedirectURL,
-                        startLoading,
-                        finishLoading,
-                        closeMessageDialog,
-                        setDialogMessage,
-                    }}>
-                    {loading ? (
-                        <VerticallyCentered>
-                            <EnteSpinner>
-                                <span className="sr-only">Loading...</span>
-                            </EnteSpinner>
-                        </VerticallyCentered>
-                    ) : (
-                        <Component {...pageProps} />
+            <MThemeProvider theme={darkThemeOptions}>
+                <SThemeProvider theme={darkThemeOptions}>
+                    <CssBaseline />
+                    {showNavbar && <AppNavbar />}
+                    <MessageContainer>
+                        {offline && constants.OFFLINE_MSG}
+                    </MessageContainer>
+                    {sharedFiles &&
+                        (router.pathname === '/gallery' ? (
+                            <MessageContainer>
+                                {constants.FILES_TO_BE_UPLOADED(
+                                    sharedFiles.length
+                                )}
+                            </MessageContainer>
+                        ) : (
+                            <MessageContainer>
+                                {constants.LOGIN_TO_UPLOAD_FILES(
+                                    sharedFiles.length
+                                )}
+                            </MessageContainer>
+                        ))}
+                    {flashMessage && (
+                        <FlashMessageBar
+                            flashMessage={flashMessage}
+                            onClose={() => setFlashMessage(null)}
+                        />
                     )}
-                </AppContext.Provider>
-            </ThemeProvider>
-        </CacheProvider>
+                    <LoadingBar color="#51cd7c" ref={loadingBar} />
+
+                    <DialogBox
+                        open={messageDialogView}
+                        onClose={closeMessageDialog}
+                        attributes={dialogMessage}
+                    />
+
+                    <AppContext.Provider
+                        value={{
+                            showNavBar,
+                            sharedFiles,
+                            resetSharedFiles,
+                            setDisappearingFlashMessage,
+                            redirectURL,
+                            setRedirectURL,
+                            startLoading,
+                            finishLoading,
+                            closeMessageDialog,
+                            setDialogMessage,
+                        }}>
+                        {loading ? (
+                            <VerticallyCentered>
+                                <EnteSpinner>
+                                    <span className="sr-only">Loading...</span>
+                                </EnteSpinner>
+                            </VerticallyCentered>
+                        ) : (
+                            <Component err={err} setLoading={setLoading} />
+                        )}
+                    </AppContext.Provider>
+                </SThemeProvider>
+            </MThemeProvider>
+        </>
     );
 }
-
-MyApp.propTypes = {
-    Component: PropTypes.elementType.isRequired,
-    emotionCache: PropTypes.object,
-    pageProps: PropTypes.object.isRequired,
-};

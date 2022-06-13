@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useContext } from 'react';
 import { VariableSizeList as List } from 'react-window';
-import { styled } from '@mui/material';
+import styled from 'styled-components';
 import { EnteFile } from 'types/file';
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
@@ -49,7 +49,7 @@ export interface TimeStampListItem {
     fileCount?: number;
 }
 
-const ListItem = styled('div')`
+const ListItem = styled.div`
     display: flex;
     justify-content: center;
 `;

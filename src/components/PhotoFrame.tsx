@@ -2,7 +2,7 @@ import { GalleryContext } from 'pages/gallery';
 import PreviewCard from './pages/gallery/PreviewCard';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
-import { styled } from '@mui/material';
+import styled from 'styled-components';
 import DownloadManager from 'services/downloadManager';
 import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -30,7 +30,7 @@ import { Search } from 'types/search';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
 
-const Container = styled('div')`
+const Container = styled.div`
     display: block;
     flex: 1;
     width: 100%;
