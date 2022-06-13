@@ -220,10 +220,6 @@ TextTheme _buildTextTheme(Color textColor) {
       fontSize: 14,
       fontWeight: FontWeight.w500,
     ),
-    overline: TextStyle(
-      color: textColor.withOpacity(0.8),
-      fontSize: 12,
-    ),
   );
 }
 

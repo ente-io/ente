@@ -109,7 +109,6 @@ class ChildSubscriptionWidget extends StatelessWidget {
                       text: " for help",
                     ),
                   ],
-                  style: Theme.of(context).textTheme.overline,
                 ),
               ),
             ),
