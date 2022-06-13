@@ -1,15 +1,15 @@
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { Overlay } from 'components/Container';
+import { FlexWrapper, Overlay } from 'components/Container';
 import React from 'react';
-export function ClickOverlay(openPlanSelector) {
+export function ClickOverlay({ onClick }) {
     return (
-        <Overlay
-            onClick={openPlanSelector}
-            zIndex={2}
-            justifyContent={'flex-end'}
-            alignItems="center"
-            sx={{ cursor: 'pointer' }}>
-            <ChevronRightIcon />
+        <Overlay style={{ zIndex: 2 }}>
+            <FlexWrapper
+                onClick={onClick}
+                justifyContent={'flex-end'}
+                sx={{ cursor: 'pointer' }}>
+                <ChevronRightIcon />
+            </FlexWrapper>
         </Overlay>
     );
 }

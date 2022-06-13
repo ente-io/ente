@@ -29,10 +29,7 @@ export function SubscriptionCardContentOverlay({
 
     return (
         <Overlay>
-            <SpaceBetweenFlex
-                flex={1}
-                flexDirection={'column'}
-                padding={'20px 16px'}>
+            <SpaceBetweenFlex flexDirection={'column'} padding={'20px 16px'}>
                 <StorageSection
                     totalStorage={totalStorage}
                     totalUsage={totalUsage}
