@@ -70,7 +70,8 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         );
       },
       child: SizedBox(
-        height: 172,
+        width: 390,
+        height: 195,
         child: _userDetails == null ? loadWidget : getContainer(),
       ),
     );
@@ -78,6 +79,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
 
   Container getContainer() {
     return Container(
+      width: 390,
+      height: 195,
+      // constraints: BoxConstraints(maxWidth: 390, maxHeight: 195),
       decoration: BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.only(
@@ -92,7 +96,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.only(top: 24, bottom: 24, left: 20, right: 0),
+        padding: EdgeInsets.only(top: 20, bottom: 20, left: 16, right: 0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,10 +105,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
               "Storage",
               style: Theme.of(context)
                   .textTheme
-                  .subtitle1
+                  .subtitle2
                   .copyWith(color: Colors.white.withOpacity(0.7)),
             ),
-            Padding(padding: EdgeInsets.symmetric(vertical: 3)),
             Text(
               "${convertBytesToReadableFormat(_userDetails.getFreeStorage())} of ${convertBytesToReadableFormat(_userDetails.getTotalStorage())} free",
               style: Theme.of(context)
@@ -112,7 +115,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                   .headline5
                   .copyWith(color: Colors.white),
             ),
-            // Padding(padding: EdgeInsets.symmetric(vertical: 7)),
+            Padding(padding: EdgeInsets.symmetric(vertical: 12)),
             Align(
               alignment: Alignment.centerRight,
               child: Icon(
@@ -121,9 +124,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                 size: 24,
               ),
             ),
-            // Padding(padding: EdgeInsets.symmetric(vertical: 8)),
+            Padding(padding: EdgeInsets.symmetric(vertical: 12)),
             Padding(
-              padding: const EdgeInsets.only(right: 24.0),
+              padding: const EdgeInsets.only(right: 16.0),
               child: Stack(
                 children: <Widget>[
                   Container(
@@ -147,7 +150,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                 ],
               ),
             ),
-            Padding(padding: EdgeInsets.symmetric(vertical: 6)),
+            Padding(padding: EdgeInsets.symmetric(vertical: 8)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -155,8 +158,8 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                     ? Row(
                         children: [
                           Container(
-                            width: 10,
-                            height: 10,
+                            width: 8.71,
+                            height: 8.99,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.white,
@@ -168,12 +171,12 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyText1
-                                .copyWith(color: Colors.white),
+                                .copyWith(color: Colors.white, fontSize: 12),
                           ),
                           Padding(padding: EdgeInsets.only(right: 12)),
                           Container(
-                            width: 10,
-                            height: 10,
+                            width: 8.71,
+                            height: 8.99,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.white.withOpacity(0.75),
@@ -185,25 +188,25 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyText1
-                                .copyWith(color: Colors.white),
+                                .copyWith(color: Colors.white, fontSize: 12),
                           ),
                         ],
                       )
                     : Text(
                         "${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())} used",
-                        style: Theme.of(context).textTheme.headline5.copyWith(
-                              color: Colors.white.withOpacity(0.7),
-                              fontSize: 14,
-                            ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyText1
+                            .copyWith(color: Colors.white, fontSize: 12),
                       ),
                 Padding(
-                  padding: const EdgeInsets.only(right: 24.0),
+                  padding: const EdgeInsets.only(right: 16.0),
                   child: Text(
                     "${NumberFormat().format(_userDetails.fileCount)} Memories",
                     style: Theme.of(context)
                         .textTheme
-                        .headline5
-                        .copyWith(color: Colors.white, fontSize: 14),
+                        .bodyText1
+                        .copyWith(color: Colors.white, fontSize: 12),
                   ),
                 )
               ],
