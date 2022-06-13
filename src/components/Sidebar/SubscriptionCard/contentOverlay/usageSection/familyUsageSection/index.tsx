@@ -1,6 +1,6 @@
 import { Legend } from './legend';
 import { FamilyUsageProgressBar } from './progressBar';
-import { Box, Stack, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { SpaceBetweenFlex } from 'components/Container';
 import React, { useMemo } from 'react';
 import { UserDetails } from 'types/user';
@@ -21,7 +21,7 @@ export function FamilyUsageSection({
     );
 
     return (
-        <Box height={64} padding={2}>
+        <>
             <FamilyUsageProgressBar
                 totalUsage={totalUsage}
                 userDetails={userDetails}
@@ -38,6 +38,6 @@ export function FamilyUsageSection({
                     {constants.PHOTO_COUNT(userDetails.fileCount)}
                 </Typography>
             </SpaceBetweenFlex>
-        </Box>
+        </>
     );
 }

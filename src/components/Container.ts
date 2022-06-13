@@ -80,6 +80,16 @@ export const FluidContainer = styled(FlexWrapper)`
     flex: 1;
 `;
 
+export const Overlay = styled(Box)`
+    display: flex;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1; ;
+`;
+
 export const InvertedIconButton = styled(IconButton)`
     background-color: ${({ theme }) => theme.palette.primary.main};
     color: ${({ theme }) => theme.palette.background.default};
