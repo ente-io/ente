@@ -89,16 +89,21 @@ class ChildSubscriptionWidget extends StatelessWidget {
               child: RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
-                  children: const [
+                  children: [
                     TextSpan(
                       text: "Please contact ",
+                      style: Theme.of(context).textTheme.bodyText2,
                     ),
                     TextSpan(
                       text: "support@ente.io",
-                      style: TextStyle(color: Color.fromRGBO(29, 185, 84, 1)),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyText2
+                          .copyWith(color: Color.fromRGBO(29, 185, 84, 1)),
                     ),
                     TextSpan(
                       text: " for help",
+                      style: Theme.of(context).textTheme.bodyText2,
                     ),
                   ],
                 ),
