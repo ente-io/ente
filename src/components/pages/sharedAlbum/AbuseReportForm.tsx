@@ -8,7 +8,7 @@ import { Col, Form, FormControl, Row } from 'react-bootstrap';
 import { reportAbuse } from 'services/publicCollectionService';
 import constants from 'utils/strings/constants';
 import * as Yup from 'yup';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import { AbuseReportDetails, AbuseReportRequest } from 'types/publicCollection';
 import { AppContext } from 'pages/_app';
 
@@ -52,7 +52,7 @@ const defaultInitialValues: FormValues = {
     },
 };
 
-const Wrapper = styled.div`
+const Wrapper = styled('div')`
     padding: 5px 20px;
 `;
 
