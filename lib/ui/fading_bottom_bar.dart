@@ -151,32 +151,34 @@ class FadingBottomBarState extends State<FadingBottomBar> {
         ),
       );
     }
-    return SafeArea(
-      child: AnimatedOpacity(
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.6),
-                  Colors.black.withOpacity(0.72),
-                ],
-                stops: const [0, 0.8, 1],
-              ),
+    var safeAreaBottomPadding = MediaQuery.of(context).padding.bottom * .5;
+    return AnimatedOpacity(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.transparent,
+                Colors.black.withOpacity(0.6),
+                Colors.black.withOpacity(0.72),
+              ],
+              stops: const [0, 0.8, 1],
             ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: safeAreaBottomPadding),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: children,
             ),
           ),
         ),
-        opacity: _shouldHide ? 0 : 1,
-        duration: Duration(milliseconds: 150),
       ),
+      opacity: _shouldHide ? 0 : 1,
+      duration: Duration(milliseconds: 150),
     );
   }
 
