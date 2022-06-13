@@ -1,8 +1,6 @@
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamicFAB.dart';
@@ -201,25 +199,6 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         Padding(padding: EdgeInsets.all(8)),
-        // Container(
-        //   width: double.infinity,
-        //   height: 64,
-        //   padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-        //   child: ElevatedButton(
-        //     child: Text("log in"),
-        //     onPressed: _email != null && _email.isNotEmpty
-        //         ? () {
-        //             if (!isValidEmail(_email)) {
-        //               showErrorDialog(context, "invalid email address",
-        //                   "please enter a valid email address.");
-        //               return;
-        //             }
-        //             _config.setEmail(_email);
-        //             UserService.instance.getOtt(context, _email);
-        //           }
-        //         : null,
-        //   ),
-        // ),
       ],
     );
   }
