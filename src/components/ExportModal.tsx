@@ -5,7 +5,7 @@ import exportService from 'services/exportService';
 import { ExportProgress, ExportStats } from 'types/export';
 import { getLocalFiles } from 'services/fileService';
 import { User } from 'types/user';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import { sleep } from 'utils/common';
 import { getExportRecordFileUID } from 'utils/export';
 import { logError } from 'utils/sentry';
@@ -20,7 +20,7 @@ import InProgressIcon from './icons/InProgressIcon';
 import DialogBox from './DialogBox';
 import { ExportStage, ExportType } from 'constants/export';
 
-const FolderIconWrapper = styled.div`
+const FolderIconWrapper = styled('div')`
     width: 15%;
     margin-left: 10px;
     cursor: pointer;
@@ -32,7 +32,7 @@ const FolderIconWrapper = styled.div`
     }
 `;
 
-const ExportFolderPathContainer = styled.span`
+const ExportFolderPathContainer = styled('span')`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import { default as MuiStyled } from '@mui/styled-engine';
 import { IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
 
@@ -15,13 +15,13 @@ const VerticallyCentered = MuiStyled(Box)`
 
 export default VerticallyCentered;
 
-export const DisclaimerContainer = styled.div`
+export const DisclaimerContainer = styled('div')`
     margin: 16px 0;
     color: rgb(158, 150, 137);
     font-size: 14px;
 `;
 
-export const IconButton = styled.button`
+export const IconButton = styled('button')`
     background: none;
     border: none;
     border-radius: 50%;
@@ -38,18 +38,18 @@ export const IconButton = styled.button`
     }
 `;
 
-export const Row = styled.div`
+export const Row = styled('div')`
     display: flex;
     align-items: center;
     margin-bottom: ${({ theme }) => theme.spacing(2)};
     flex: 1;
 `;
 
-export const Label = styled.div<{ width?: string }>`
+export const Label = styled('div')<{ width?: string }>`
     width: ${(props) => props.width ?? '70%'};
     color: ${(props) => props.theme.palette.text.secondary};
 `;
-export const Value = styled.div<{ width?: string }>`
+export const Value = styled('div')<{ width?: string }>`
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -62,7 +62,7 @@ export const FlexWrapper = styled(Box)`
     align-items: center;
 `;
 
-export const FreeFlowText = styled.div`
+export const FreeFlowText = styled('div')`
     word-break: break-word;
     min-width: 30%;
     text-align: left;

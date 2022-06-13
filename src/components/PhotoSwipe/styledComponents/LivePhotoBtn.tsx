@@ -1,6 +1,5 @@
-import styled from 'styled-components';
-
-export const LivePhotoBtn = styled.button`
+import { styled } from '@mui/material';
+export const LivePhotoBtn = styled('button')`
     position: absolute;
     bottom: 6vh;
     right: 6vh;

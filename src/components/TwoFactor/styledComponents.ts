@@ -1,7 +1,6 @@
 import VerticallyCentered from 'components/Container';
-import styled from 'styled-components';
-
-export const QRCode = styled.img(
+import { styled } from '@mui/material';
+export const QRCode = styled('img')(
     ({ theme }) => `
     height: 200px;
     width: 200px;

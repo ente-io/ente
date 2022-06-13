@@ -1,7 +1,6 @@
 import React from 'react';
-import styled from 'styled-components';
-
-const HeartUI = styled.button<{
+import { styled } from '@mui/material';
+const HeartUI = styled('button')<{
     isClick: boolean;
     size: number;
 }>`

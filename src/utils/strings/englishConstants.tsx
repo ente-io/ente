@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material';
 import Link from '@mui/material/Link';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import React from 'react';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import { SuggestionType } from 'types/search';
 import { formatNumberWithCommas } from '.';
 
@@ -18,11 +18,11 @@ const dateString = function (date) {
     });
 };
 
-const Strong = styled.strong`
+const Strong = styled('strong')`
     color: #ddd;
 `;
 
-const Logo = styled.img`
+const Logo = styled('img')`
     height: 18px;
     vertical-align: middle;
     margin-top: -3px;
