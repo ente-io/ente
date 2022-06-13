@@ -237,7 +237,7 @@ const englishConstants = {
     DOWNLOAD_APP_MESSAGE: () => (
         <>
             <p>
-                Sorry, this operation is currently only supported on our desktop
+                Sorry, this feature is currently only supported on our desktop
                 app
             </p>
         </>

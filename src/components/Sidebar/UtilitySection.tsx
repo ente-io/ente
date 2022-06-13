@@ -8,6 +8,8 @@ import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
 import WatchModal from '../WatchModal';
+import isElectron from 'is-electron';
+import { downloadApp } from 'utils/common';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
@@ -24,7 +26,25 @@ export default function UtilitySection({ closeSidebar }) {
     const openTwoFactorModalView = () => setTwoFactorModalView(true);
     const closeTwoFactorModalView = () => setTwoFactorModalView(false);
 
-    const openWatchModalView = () => setWatchModalView(true);
+    const openWatchModalView = () => {
+        if (isElectron()) {
+            setWatchModalView(true);
+        } else {
+            setDialogMessage({
+                title: constants.DOWNLOAD_APP,
+                content: constants.DOWNLOAD_APP_MESSAGE(),
+
+                proceed: {
+                    text: constants.DOWNLOAD,
+                    action: downloadApp,
+                    variant: 'success',
+                },
+                close: {
+                    text: constants.CLOSE,
+                },
+            });
+        }
+    };
 
     const redirectToChangePasswordPage = () => {
         closeSidebar();
