@@ -14,6 +14,7 @@ interface Iprops {
     isInSearchMode: boolean;
     collectionSummaries: CollectionSummaries;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
+    setPhotoListHeader: (value: JSX.Element) => void;
 }
 
 export default function Collections(props: Iprops) {
@@ -24,6 +25,7 @@ export default function Collections(props: Iprops) {
         setActiveCollectionID,
         collectionSummaries,
         setCollectionNamerAttributes,
+        setPhotoListHeader,
     } = props;
 
     const [allCollectionView, setAllCollectionView] = useState(false);
@@ -47,6 +49,24 @@ export default function Collections(props: Iprops) {
         return <></>;
     }
 
+    useEffect(
+        () =>
+            setPhotoListHeader(
+                <CollectionInfoWithOptions
+                    collectionSummary={collectionSummaries.get(
+                        activeCollectionID
+                    )}
+                    activeCollection={activeCollection.current}
+                    setCollectionNamerAttributes={setCollectionNamerAttributes}
+                    redirectToAll={() => setActiveCollectionID(ALL_SECTION)}
+                    showCollectionShareModal={() =>
+                        setCollectionShareModalView(true)
+                    }
+                />
+            ),
+        [collectionSummaries, activeCollectionID]
+    );
+
     return (
         <>
             <CollectionBar
@@ -63,15 +83,6 @@ export default function Collections(props: Iprops) {
                 setActiveCollection={setActiveCollectionID}
             />
 
-            <CollectionInfoWithOptions
-                collectionSummary={collectionSummaries.get(activeCollectionID)}
-                activeCollection={activeCollection.current}
-                setCollectionNamerAttributes={setCollectionNamerAttributes}
-                redirectToAll={() => setActiveCollectionID(ALL_SECTION)}
-                showCollectionShareModal={() =>
-                    setCollectionShareModalView(true)
-                }
-            />
             <CollectionShare
                 show={collectionShareModalView}
                 onHide={() => setCollectionShareModalView(false)}

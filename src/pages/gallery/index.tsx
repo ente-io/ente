@@ -126,6 +126,7 @@ const defaultGalleryContext: GalleryContextType = {
     syncWithRemote: () => null,
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
+    photoListHeader: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -203,6 +204,7 @@ export default function Gallery() {
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
     const [droppedFiles, setDroppedFiles] = useState([]);
+    const [photoListHeader, setPhotoListHeader] = useState(null);
 
     const showSessionExpiredMessage = () =>
         setDialogMessage({
@@ -580,6 +582,7 @@ export default function Gallery() {
                 syncWithRemote,
                 setNotificationAttributes,
                 setBlockingLoad,
+                photoListHeader: photoListHeader,
             }}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
@@ -643,6 +646,7 @@ export default function Gallery() {
                     setActiveCollectionID={setActiveCollection}
                     collectionSummaries={collectionSummaries}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
+                    setPhotoListHeader={setPhotoListHeader}
                 />
                 {isInSearchMode && (
                     <SearchResultInfo

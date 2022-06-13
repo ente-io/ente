@@ -19,10 +19,12 @@ import { convertBytesToHumanReadable } from 'utils/billing';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { FlexWrapper, PaddedContainer } from './Container';
 import { Typography } from '@mui/material';
+import { GalleryContext } from 'pages/gallery';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const NO_OF_PAGES = 2;
 const FOOTER_HEIGHT = 90;
+const HEADER_HEIGHT = 64;
 
 enum ITEM_TYPE {
     TIME = 'TIME',
@@ -135,6 +137,7 @@ export function PhotoList({
     activeCollection,
     resetFetching,
 }: Props) {
+    const galleryContext = useContext(GalleryContext);
     const timeStampListRef = useRef([]);
     const timeStampList = timeStampListRef?.current ?? [];
     const filteredDataCopyRef = useRef([]);
@@ -161,7 +164,7 @@ export function PhotoList({
     };
 
     useEffect(() => {
-        let timeStampList: TimeStampListItem[] = [];
+        let timeStampList: TimeStampListItem[] = [getPhotoListHeader()];
         if (deduplicateContext.isOnDeduplicatePage) {
             skipMerge = true;
             groupByFileSize(timeStampList);
@@ -293,6 +296,14 @@ export function PhotoList({
         first.getMonth() === second.getMonth() &&
         first.getDate() === second.getDate();
 
+    const getPhotoListHeader = () => {
+        return {
+            itemType: ITEM_TYPE.STATIC,
+            height: HEADER_HEIGHT,
+            item: galleryContext.photoListHeader,
+        };
+    };
+
     const getEmptyListItem = () => {
         return {
             itemType: ITEM_TYPE.STATIC,
@@ -323,6 +334,7 @@ export function PhotoList({
             height: Math.max(height - photoFrameHeight - FOOTER_HEIGHT, 0),
         };
     };
+
     const getAppDownloadFooter = () => {
         return {
             itemType: ITEM_TYPE.STATIC,
