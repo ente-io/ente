@@ -5,10 +5,9 @@ import constants from 'utils/strings/constants';
 import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
 import { Typography } from '@mui/material';
 import {
-    Hider,
-    CollectionBarWrapper,
+    CollectionListBarWrapper,
     ScrollContainer,
-    CollectionSectionWrapper,
+    CollectionListWrapper,
 } from 'components/Collections/styledComponents';
 import CollectionCardWithActiveIndicator from 'components/Collections/CollectionBar/CollectionCardWithActiveIndicator';
 import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
@@ -20,15 +19,13 @@ import { sortCollectionSummaries } from 'services/collectionService';
 interface IProps {
     activeCollection?: number;
     setActiveCollection: (id?: number) => void;
-    isInSearchMode: boolean;
     collectionSummaries: CollectionSummaries;
     showAllCollections: () => void;
 }
 
-export default function CollectionBar(props: IProps) {
+export default function CollectionListBar(props: IProps) {
     const {
         activeCollection,
-
         setActiveCollection,
         collectionSummaries,
         showAllCollections,
@@ -76,21 +73,17 @@ export default function CollectionBar(props: IProps) {
     };
 
     return (
-        <Hider hide={props.isInSearchMode}>
-            <CollectionSectionWrapper>
-                <SpaceBetweenFlex>
-                    <Typography fontWeight={'bold'}>
-                        {constants.ALBUMS}
-                    </Typography>
-                    {hasScrollBar && (
-                        <LinkButton onClick={showAllCollections}>
-                            {constants.VIEW_ALL_ALBUMS}
-                        </LinkButton>
-                    )}
-                </SpaceBetweenFlex>
-            </CollectionSectionWrapper>
+        <CollectionListBarWrapper>
+            <SpaceBetweenFlex mb={1}>
+                <Typography>{constants.ALBUMS}</Typography>
+                {hasScrollBar && (
+                    <LinkButton onClick={showAllCollections}>
+                        {constants.VIEW_ALL_ALBUMS}
+                    </LinkButton>
+                )}
+            </SpaceBetweenFlex>
 
-            <CollectionBarWrapper>
+            <CollectionListWrapper>
                 {!onFarLeft && (
                     <ScrollButton
                         scrollDirection={SCROLL_DIRECTION.LEFT}
@@ -115,7 +108,7 @@ export default function CollectionBar(props: IProps) {
                         onClick={scrollComponent(SCROLL_DIRECTION.RIGHT)}
                     />
                 )}
-            </CollectionBarWrapper>
-        </Hider>
+            </CollectionListWrapper>
+        </CollectionListBarWrapper>
     );
 }

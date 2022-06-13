@@ -1,3 +1,4 @@
+import { TimeStampListItem } from 'components/PhotoList';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { NotificationAttributes } from 'types/Notification';
@@ -25,4 +26,5 @@ export type GalleryContextType = {
     setNotificationAttributes: (attributes: NotificationAttributes) => void;
     setBlockingLoad: (value: boolean) => void;
     setDropZoneActive: (value: boolean) => void;
+    photoListHeader: TimeStampListItem;
 };

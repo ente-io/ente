@@ -5,6 +5,7 @@ import { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
 
 const Wrapper = styled.button<{ direction: SCROLL_DIRECTION }>`
     position: absolute;
+    z-index: 2;
     top: 7px;
     height: 50px;
     width: 50px;

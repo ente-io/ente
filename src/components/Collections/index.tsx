@@ -1,11 +1,13 @@
 import { Collection, CollectionSummaries } from 'types/collection';
-import CollectionBar from 'components/Collections/CollectionBar';
+import CollectionListBar from 'components/Collections/CollectionBar';
 import React, { useEffect, useRef, useState } from 'react';
 import AllCollections from 'components/Collections/AllCollections';
 import CollectionInfoWithOptions from 'components/Collections/CollectionInfoWithOptions';
 import { ALL_SECTION } from 'constants/collection';
 import CollectionShare from 'components/Collections/CollectionShare';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
+import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
+
 interface Iprops {
     collections: Collection[];
     activeCollectionID?: number;
@@ -13,6 +15,7 @@ interface Iprops {
     isInSearchMode: boolean;
     collectionSummaries: CollectionSummaries;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
+    setPhotoListHeader: (value: TimeStampListItem) => void;
 }
 
 export default function Collections(props: Iprops) {
@@ -23,6 +26,7 @@ export default function Collections(props: Iprops) {
         setActiveCollectionID,
         collectionSummaries,
         setCollectionNamerAttributes,
+        setPhotoListHeader,
     } = props;
 
     const [allCollectionView, setAllCollectionView] = useState(false);
@@ -30,6 +34,8 @@ export default function Collections(props: Iprops) {
         useState(false);
     const collectionsMap = useRef<Map<number, Collection>>(new Map());
     const activeCollection = useRef<Collection>(null);
+
+    const shouldBeHidden = isInSearchMode || collectionSummaries?.size <= 3;
 
     useEffect(() => {
         collectionsMap.current = new Map(
@@ -42,10 +48,38 @@ export default function Collections(props: Iprops) {
             collectionsMap.current.get(activeCollectionID);
     }, [activeCollectionID, collections]);
 
+    useEffect(
+        () =>
+            !shouldBeHidden &&
+            setPhotoListHeader({
+                item: (
+                    <CollectionInfoWithOptions
+                        collectionSummary={collectionSummaries.get(
+                            activeCollectionID
+                        )}
+                        activeCollection={activeCollection.current}
+                        setCollectionNamerAttributes={
+                            setCollectionNamerAttributes
+                        }
+                        redirectToAll={() => setActiveCollectionID(ALL_SECTION)}
+                        showCollectionShareModal={() =>
+                            setCollectionShareModalView(true)
+                        }
+                    />
+                ),
+                itemType: ITEM_TYPE.STATIC,
+                height: 80,
+            }),
+        [collectionSummaries, activeCollectionID, shouldBeHidden]
+    );
+
+    if (shouldBeHidden) {
+        return <></>;
+    }
+
     return (
         <>
-            <CollectionBar
-                isInSearchMode={isInSearchMode}
+            <CollectionListBar
                 activeCollection={activeCollectionID}
                 setActiveCollection={setActiveCollectionID}
                 collectionSummaries={collectionSummaries}
@@ -59,16 +93,6 @@ export default function Collections(props: Iprops) {
                 setActiveCollection={setActiveCollectionID}
             />
 
-            <CollectionInfoWithOptions
-                isInSearchMode={isInSearchMode}
-                collectionSummary={collectionSummaries.get(activeCollectionID)}
-                activeCollection={activeCollection.current}
-                setCollectionNamerAttributes={setCollectionNamerAttributes}
-                redirectToAll={() => setActiveCollectionID(ALL_SECTION)}
-                showCollectionShareModal={() =>
-                    setCollectionShareModalView(true)
-                }
-            />
             <CollectionShare
                 show={collectionShareModalView}
                 onHide={() => setCollectionShareModalView(false)}
