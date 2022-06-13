@@ -124,15 +124,15 @@ dev_dependencies:
 
 flutter_icons:
   android: true
-  image_path_android: "assets/ente-dark-curved.png"
+  image_path_android: "assets/icon-light-curved.png"
   ios: true
-  image_path_ios: "assets/ente-dark.png"
+  image_path_ios: "assets/icon-light.png"
 
 flutter_native_splash:
   color: "#ffffff"
   color_dark: "#000000"
-  image: assets/ente-light.png
-  image_dark: assets/ente-dark.png
+  image: assets/splash-screen-light.png
+  image_dark: assets/splash-screen-dark.png
   android_fullscreen: true
   android_gravity: center
   ios_content_mode: center
