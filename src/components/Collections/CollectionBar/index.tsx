@@ -23,7 +23,7 @@ interface IProps {
     showAllCollections: () => void;
 }
 
-export default function CollectionBar(props: IProps) {
+export default function CollectionListBar(props: IProps) {
     const {
         activeCollection,
         setActiveCollection,

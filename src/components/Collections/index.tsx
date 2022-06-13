@@ -1,5 +1,5 @@
 import { Collection, CollectionSummaries } from 'types/collection';
-import CollectionBar from 'components/Collections/CollectionBar';
+import CollectionListBar from 'components/Collections/CollectionBar';
 import React, { useEffect, useRef, useState } from 'react';
 import AllCollections from 'components/Collections/AllCollections';
 import CollectionInfoWithOptions from 'components/Collections/CollectionInfoWithOptions';
@@ -79,7 +79,7 @@ export default function Collections(props: Iprops) {
 
     return (
         <>
-            <CollectionBar
+            <CollectionListBar
                 activeCollection={activeCollectionID}
                 setActiveCollection={setActiveCollectionID}
                 collectionSummaries={collectionSummaries}
