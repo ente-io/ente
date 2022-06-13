@@ -20,8 +20,7 @@ export const PaddedDivider = MuiStyled(Divider)<{
 }));
 
 export const DotSeparator = styled(CircleIcon)`
-    height: 4px;
-    width: 4px;
+    font-size: 4px;
     margin: 0 ${({ theme }) => theme.spacing(1)};
-    color: ${({ theme }) => theme.palette.text.secondary};
+    color: inherit;
 `;

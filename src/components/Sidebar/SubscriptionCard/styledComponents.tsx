@@ -14,8 +14,7 @@ Progressbar.defaultProps = {
 };
 
 export const LegendIndicator = styled(DotSeparator)`
-    width: 8.71px;
-    height: 8.71px;
+    font-size: 8.71px;
     margin: 0;
     margin-right: 4px;
     color: inherit;
