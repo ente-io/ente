@@ -3,14 +3,14 @@ import { SelectionBar } from '../../Navbar/SelectionBar';
 import constants from 'utils/strings/constants';
 import DeleteIcon from 'components/icons/DeleteIcon';
 import React, { useContext } from 'react';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { IconWithMessage } from 'components/IconWithMessage';
 import { AppContext } from 'pages/_app';
 import CloseIcon from '@mui/icons-material/Close';
 import BackButton from '@mui/icons-material/ArrowBackOutlined';
 
-const VerticalLine = styled.div`
+const VerticalLine = styled('div')`
     position: absolute;
     width: 1px;
     top: 0;
@@ -18,7 +18,7 @@ const VerticalLine = styled.div`
     background: #303030;
 `;
 
-const CheckboxText = styled.div`
+const CheckboxText = styled('div')`
     margin-left: 0.5em;
     font-size: 16px;
     margin-right: 0.8em;

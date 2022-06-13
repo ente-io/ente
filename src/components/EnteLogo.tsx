@@ -1,7 +1,6 @@
 import React from 'react';
-import styled from 'styled-components';
-
-const LogoImage = styled.img`
+import { styled } from '@mui/material';
+const LogoImage = styled('img')`
     height: 18px;
     padding: 0 3px;
 `;

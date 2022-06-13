@@ -1,9 +1,9 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
+import { css, styled } from '@mui/material';
 
-const Wrapper = styled.button<{ direction: SCROLL_DIRECTION }>`
+const Wrapper = styled('button')<{ direction: SCROLL_DIRECTION }>`
     position: absolute;
     z-index: 2;
     top: 7px;
