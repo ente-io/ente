@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
@@ -70,19 +69,14 @@ class ChildSubscriptionWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 padding: EdgeInsets.symmetric(vertical: 18, horizontal: 100),
-                side: BorderSide(
-                  width: 2,
-                  color: Color.fromRGBO(255, 52, 52, 1),
-                ),
-                backgroundColor:
-                    Theme.of(context).colorScheme.defaultBackgroundColor,
+                backgroundColor: Colors.red[500],
               ),
               child: Text(
                 "Leave Family",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
-                  color: Color.fromRGBO(255, 52, 52, 1),
+                  color: Colors.white, // same for both themes
                 ),
                 textAlign: TextAlign.center,
               ),
