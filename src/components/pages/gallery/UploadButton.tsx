@@ -1,10 +1,10 @@
 import React from 'react';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import { Button } from '@mui/material';
 import constants from 'utils/strings/constants';
 
-const Wrapper = styled.div<{ isDisabled: boolean }>`
+const Wrapper = styled('div')<{ isDisabled: boolean }>`
     display: flex;
     align-items: center;
     justify-content: center;

@@ -2,10 +2,10 @@ import { Typography } from '@mui/material';
 import CollectionCard from 'components/Collections/CollectionCard';
 import { CollectionSelectorTile } from 'components/Collections/styledComponents';
 import React from 'react';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import constants from 'utils/strings/constants';
 
-const ImageContainer = styled.div`
+const ImageContainer = styled('div')`
     position: absolute;
     width: 100%;
     height: 100%;
@@ -25,12 +25,7 @@ export default function AddCollectionButton({
             collectionTile={CollectionSelectorTile}
             onClick={() => showNextModal()}
             latestFile={null}>
-            <Typography
-                css={`
-                    font-size: 14px;
-                    font-weight: 600;
-                    line-height: 20px;
-                `}>
+            <Typography variant="body2" fontWeight={'bold'}>
                 {constants.CREATE_COLLECTION}
             </Typography>
             <ImageContainer>+</ImageContainer>

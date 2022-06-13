@@ -34,7 +34,7 @@ function UploadStrategyChoiceModal({
                 </CenteredFlex>
                 <SpaceBetweenFlex>
                     <Button
-                        size="large"
+                        size="medium"
                         color="accent"
                         onClick={() => {
                             props.onClose();
@@ -46,7 +46,7 @@ function UploadStrategyChoiceModal({
                     <strong>{constants.OR}</strong>
 
                     <Button
-                        size="large"
+                        size="medium"
                         color="accent"
                         onClick={() => {
                             props.onClose();

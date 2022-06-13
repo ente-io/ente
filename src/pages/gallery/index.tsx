@@ -14,7 +14,7 @@ import {
     trashFiles,
     deleteFromTrash,
 } from 'services/fileService';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import {
     syncCollections,
     getFavItemIds,
@@ -104,7 +104,7 @@ import SearchResultInfo from 'components/Search/SearchResultInfo';
 import { NotificationAttributes } from 'types/Notification';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 
-export const DeadCenter = styled.div`
+export const DeadCenter = styled('div')`
     flex: 1;
     display: flex;
     justify-content: center;
@@ -112,7 +112,7 @@ export const DeadCenter = styled.div`
     text-align: center;
     flex-direction: column;
 `;
-const AlertContainer = styled.div`
+const AlertContainer = styled('div')`
     background-color: #111;
     padding: 5px 0;
     font-size: 14px;

@@ -1,6 +1,6 @@
-import styled, { css } from 'styled-components';
+import { css, styled } from '@mui/material';
 
-export const PlanTile = styled.div<{ currentlySubscribed: boolean }>`
+export const PlanTile = styled('div')<{ currentlySubscribed: boolean }>`
     border-radius: 20px;
     width: 220px;
     border: 2px solid #333;

@@ -1,11 +1,11 @@
 import React from 'react';
 import { Button, ProgressBar } from 'react-bootstrap';
 import { ExportProgress } from 'types/export';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import constants from 'utils/strings/constants';
 import { ExportStage } from 'constants/export';
 
-export const ComfySpan = styled.span`
+export const ComfySpan = styled('span')`
     word-spacing: 1rem;
     color: #ddd;
 `;
