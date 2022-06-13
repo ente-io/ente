@@ -269,7 +269,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     if (_selectedFiles.length == 1) {
       text = "delete 1 item";
     } else {
-      text = "delete " + _selectedFiles.length.toString() + " items";
+      text = "Delete " + _selectedFiles.length.toString() + " items";
     }
     int size = 0;
     for (final file in _selectedFiles) {
@@ -277,39 +277,44 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     }
     return SizedBox(
       width: double.infinity,
-      child: TextButton(
-        style: OutlinedButton.styleFrom(
-          backgroundColor: Colors.red[700],
-        ),
-        child: Column(
-          children: [
-            Padding(padding: EdgeInsets.all(2)),
-            Text(
-              text,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: Colors.white,
-              ),
-              textAlign: TextAlign.center,
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: TextButton(
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.red[700],
             ),
-            Padding(padding: EdgeInsets.all(2)),
-            Text(
-              formatBytes(size),
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 12,
-              ),
+            child: Column(
+              children: [
+                Padding(padding: EdgeInsets.all(2)),
+                Text(
+                  text,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                Padding(padding: EdgeInsets.all(2)),
+                Text(
+                  formatBytes(size),
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 12,
+                  ),
+                ),
+                Padding(padding: EdgeInsets.all(2)),
+              ],
             ),
-            Padding(padding: EdgeInsets.all(2)),
-          ],
+            onPressed: () async {
+              await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
+              Bus.instance.fire(UserDetailsChangedEvent());
+              Navigator.of(context)
+                  .pop(DeduplicationResult(_selectedFiles.length, size));
+            },
+          ),
         ),
-        onPressed: () async {
-          await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
-          Bus.instance.fire(UserDetailsChangedEvent());
-          Navigator.of(context)
-              .pop(DeduplicationResult(_selectedFiles.length, size));
-        },
       ),
     );
   }
