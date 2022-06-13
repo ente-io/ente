@@ -102,6 +102,7 @@ import { GalleryNavbar } from 'components/pages/gallery/Navbar';
 import { Search, SearchResultSummary } from 'types/search';
 import SearchResultInfo from 'components/Search/SearchResultInfo';
 import { NotificationAttributes } from 'types/Notification';
+import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -204,7 +205,8 @@ export default function Gallery() {
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
     const [droppedFiles, setDroppedFiles] = useState([]);
-    const [photoListHeader, setPhotoListHeader] = useState(null);
+    const [photoListHeader, setPhotoListHeader] =
+        useState<TimeStampListItem>(null);
 
     const showSessionExpiredMessage = () =>
         setDialogMessage({
@@ -304,6 +306,20 @@ export default function Gallery() {
             );
         }
     }, [router.isReady]);
+
+    useEffect(() => {
+        if (isInSearchMode) {
+            setPhotoListHeader({
+                height: 116,
+                item: (
+                    <SearchResultInfo
+                        searchResultSummary={searchResultSummary}
+                    />
+                ),
+                itemType: ITEM_TYPE.STATIC,
+            });
+        }
+    }, [isInSearchMode, searchResultSummary]);
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
@@ -648,11 +664,6 @@ export default function Gallery() {
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setPhotoListHeader={setPhotoListHeader}
                 />
-                {isInSearchMode && (
-                    <SearchResultInfo
-                        searchResultSummary={searchResultSummary}
-                    />
-                )}
 
                 <Upload
                     syncWithRemote={syncWithRemote}

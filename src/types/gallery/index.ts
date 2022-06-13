@@ -1,3 +1,4 @@
+import { TimeStampListItem } from 'components/PhotoList';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { NotificationAttributes } from 'types/Notification';
@@ -24,5 +25,5 @@ export type GalleryContextType = {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setNotificationAttributes: (attributes: NotificationAttributes) => void;
     setBlockingLoad: (value: boolean) => void;
-    photoListHeader: JSX.Element;
+    photoListHeader: TimeStampListItem;
 };

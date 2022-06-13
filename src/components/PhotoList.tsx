@@ -24,16 +24,15 @@ import { GalleryContext } from 'pages/gallery';
 const A_DAY = 24 * 60 * 60 * 1000;
 const NO_OF_PAGES = 2;
 const FOOTER_HEIGHT = 90;
-const HEADER_HEIGHT = 64;
 
-enum ITEM_TYPE {
+export enum ITEM_TYPE {
     TIME = 'TIME',
     FILE = 'FILE',
     SIZE_AND_COUNT = 'SIZE_AND_COUNT',
     STATIC = 'static',
 }
 
-interface TimeStampListItem {
+export interface TimeStampListItem {
     itemType: ITEM_TYPE;
     items?: EnteFile[];
     itemStartIndex?: number;
@@ -298,9 +297,12 @@ export function PhotoList({
 
     const getPhotoListHeader = () => {
         return {
-            itemType: ITEM_TYPE.STATIC,
-            height: HEADER_HEIGHT,
-            item: galleryContext.photoListHeader,
+            ...galleryContext.photoListHeader,
+            item: (
+                <ListItemContainer span={columns}>
+                    {galleryContext.photoListHeader.item}
+                </ListItemContainer>
+            ),
         };
     };
 

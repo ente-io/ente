@@ -6,6 +6,7 @@ import CollectionInfoWithOptions from 'components/Collections/CollectionInfoWith
 import { ALL_SECTION } from 'constants/collection';
 import CollectionShare from 'components/Collections/CollectionShare';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
+import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 
 interface Iprops {
     collections: Collection[];
@@ -14,7 +15,7 @@ interface Iprops {
     isInSearchMode: boolean;
     collectionSummaries: CollectionSummaries;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
-    setPhotoListHeader: (value: JSX.Element) => void;
+    setPhotoListHeader: (value: TimeStampListItem) => void;
 }
 
 export default function Collections(props: Iprops) {
@@ -34,6 +35,8 @@ export default function Collections(props: Iprops) {
     const collectionsMap = useRef<Map<number, Collection>>(new Map());
     const activeCollection = useRef<Collection>(null);
 
+    const shouldBeHidden = isInSearchMode || collectionSummaries?.size <= 3;
+
     useEffect(() => {
         collectionsMap.current = new Map(
             props.collections.map((collection) => [collection.id, collection])
@@ -45,27 +48,34 @@ export default function Collections(props: Iprops) {
             collectionsMap.current.get(activeCollectionID);
     }, [activeCollectionID, collections]);
 
-    if (isInSearchMode || collectionSummaries?.size <= 3) {
-        return <></>;
-    }
-
     useEffect(
         () =>
-            setPhotoListHeader(
-                <CollectionInfoWithOptions
-                    collectionSummary={collectionSummaries.get(
-                        activeCollectionID
-                    )}
-                    activeCollection={activeCollection.current}
-                    setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    redirectToAll={() => setActiveCollectionID(ALL_SECTION)}
-                    showCollectionShareModal={() =>
-                        setCollectionShareModalView(true)
-                    }
-                />
-            ),
-        [collectionSummaries, activeCollectionID]
+            !shouldBeHidden &&
+            setPhotoListHeader({
+                item: (
+                    <CollectionInfoWithOptions
+                        collectionSummary={collectionSummaries.get(
+                            activeCollectionID
+                        )}
+                        activeCollection={activeCollection.current}
+                        setCollectionNamerAttributes={
+                            setCollectionNamerAttributes
+                        }
+                        redirectToAll={() => setActiveCollectionID(ALL_SECTION)}
+                        showCollectionShareModal={() =>
+                            setCollectionShareModalView(true)
+                        }
+                    />
+                ),
+                itemType: ITEM_TYPE.STATIC,
+                height: 80,
+            }),
+        [collectionSummaries, activeCollectionID, shouldBeHidden]
     );
+
+    if (shouldBeHidden) {
+        return <></>;
+    }
 
     return (
         <>
