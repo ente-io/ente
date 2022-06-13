@@ -171,9 +171,6 @@ function WatchModal({
     }, [watchModalView]);
 
     const handleFolderDrop = async (folders: FileList) => {
-        if (folders.length === 0) {
-            return;
-        }
         for (let i = 0; i < folders.length; i++) {
             const folder: any = folders[i];
             const path = (folder.path as string).replace(/\\/g, '/');
