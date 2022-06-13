@@ -207,15 +207,18 @@ TextTheme _buildTextTheme(Color textColor) {
       fontFamily: 'Inter',
       color: textColor,
       fontSize: 16,
-      fontWeight: FontWeight.w400,
+      fontWeight: FontWeight.w500,
+    ),
+    bodyText2: TextStyle(
+      fontFamily: 'Inter',
+      color: textColor,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
     ),
     caption: TextStyle(
       color: textColor.withOpacity(0.6),
       fontSize: 14,
-    ),
-    overline: TextStyle(
-      color: textColor.withOpacity(0.8),
-      fontSize: 12,
+      fontWeight: FontWeight.w500,
     ),
   );
 }
