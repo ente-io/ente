@@ -208,7 +208,7 @@ class StatusBarBrandingWidget extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontFamily: 'Montserrat',
-            fontSize: 28,
+            fontSize: 24,
             height: 1,
           ),
         ),
