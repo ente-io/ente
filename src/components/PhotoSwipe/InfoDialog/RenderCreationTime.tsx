@@ -12,8 +12,8 @@ import { IconButton, Label, Row, Value } from 'components/Container';
 import { logError } from 'utils/sentry';
 import CloseIcon from '@mui/icons-material/Close';
 import TickIcon from '@mui/icons-material/Done';
-import EnteDateTimePicker from 'components/EnteDateTimePicker';
 import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
+import EnteDateTimePicker from 'components/EnteDateTimePicker';
 
 export function RenderCreationTime({
     shouldDisableEdits,
@@ -81,12 +81,13 @@ export function RenderCreationTime({
                             : '70%'
                     }>
                     {isInEditMode ? (
-                        <EnteDateTimePicker
-                            loading={loading}
-                            isInEditMode={isInEditMode}
-                            pickedTime={pickedTime}
-                            handleChange={handleChange}
-                        />
+                        <>
+                            <EnteDateTimePicker
+                                loading={loading}
+                                value={pickedTime}
+                                onChange={handleChange}
+                            />
+                        </>
                     ) : (
                         formatDateTime(pickedTime)
                     )}

@@ -1,50 +1,37 @@
 import React from 'react';
 
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import {
     MIN_EDITED_CREATION_TIME,
     MAX_EDITED_CREATION_TIME,
-    ALL_TIME,
 } from 'constants/file';
-
-const isSameDay = (first, second) =>
-    first.getFullYear() === second.getFullYear() &&
-    first.getMonth() === second.getMonth() &&
-    first.getDate() === second.getDate();
+import { TextField } from '@mui/material';
+import {
+    LocalizationProvider,
+    DesktopDateTimePicker,
+} from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 interface Props {
     loading?: boolean;
-    isInEditMode: boolean;
-    pickedTime: Date;
-    handleChange: (date: Date) => void;
+    value: Date;
+    label?: string;
+    onChange: (date: Date) => void;
 }
 
-const EnteDateTimePicker = ({
-    loading,
-    isInEditMode,
-    pickedTime,
-    handleChange,
-}: Props) => (
-    <DatePicker
-        disabled={loading}
-        open={isInEditMode}
-        selected={pickedTime}
-        onChange={handleChange}
-        timeInputLabel="Time:"
-        dateFormat="dd/MM/yyyy h:mm aa"
-        showTimeSelect
-        autoFocus
-        minDate={MIN_EDITED_CREATION_TIME}
-        maxDate={MAX_EDITED_CREATION_TIME}
-        maxTime={
-            isSameDay(pickedTime, new Date())
-                ? MAX_EDITED_CREATION_TIME
-                : ALL_TIME
-        }
-        minTime={MIN_EDITED_CREATION_TIME}
-        fixedHeight
-        withPortal></DatePicker>
+const EnteDateTimePicker = ({ loading, value, onChange }: Props) => (
+    <>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DesktopDateTimePicker
+                maxDateTime={MAX_EDITED_CREATION_TIME}
+                minDateTime={MIN_EDITED_CREATION_TIME}
+                disabled={loading}
+                PopperProps={{ sx: { zIndex: '1502' } }}
+                value={value}
+                onChange={onChange}
+                renderInput={(params) => <TextField {...params} />}
+            />
+        </LocalizationProvider>
+    </>
 );
 
 export default EnteDateTimePicker;

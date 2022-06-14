@@ -202,7 +202,7 @@ export function formatDateTime(date: number | Date) {
         day: 'numeric',
     });
     const timeFormat = new Intl.DateTimeFormat('en-IN', {
-        timeStyle: 'medium',
+        timeStyle: 'short',
     });
     return `${dateTimeFormat.format(date)} ${timeFormat.format(date)}`;
 }
