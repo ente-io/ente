@@ -12,30 +12,38 @@ import {
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 interface Props {
-    loading?: boolean;
-    value: Date;
+    initialValue?: Date;
+    disabled?: boolean;
     label?: string;
-    onChange: (date: Date) => void;
+    onSubmit: (date: Date) => void;
+    onClose?: () => void;
 }
 
-const EnteDateTimePicker = ({ loading, value, onChange }: Props) => {
+const EnteDateTimePicker = ({
+    initialValue,
+    disabled,
+    onSubmit,
+    onClose,
+}: Props) => {
     const [open, setOpen] = useState(true);
+    const [value, setValue] = useState(initialValue ?? new Date());
 
-    const handleChange = (newDate: Date) => {
-        if (!isNaN(newDate?.getTime())) {
-            onChange(newDate);
-        }
+    const handleClose = () => {
+        setOpen(false);
+        onClose?.();
     };
-
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <MobileDateTimePicker
+                value={value}
+                onChange={setValue}
                 open={open}
-                onClose={() => setOpen(false)}
+                onClose={handleClose}
                 onOpen={() => setOpen(true)}
                 maxDateTime={MAX_EDITED_CREATION_TIME}
                 minDateTime={MIN_EDITED_CREATION_TIME}
-                disabled={loading}
+                disabled={disabled}
+                onAccept={onSubmit}
                 DialogProps={{
                     sx: {
                         zIndex: '1502',
@@ -44,8 +52,6 @@ const EnteDateTimePicker = ({ loading, value, onChange }: Props) => {
                         },
                     },
                 }}
-                value={value}
-                onChange={handleChange}
                 renderInput={(params) => (
                     <TextField
                         {...params}
