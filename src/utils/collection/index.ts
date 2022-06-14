@@ -14,7 +14,11 @@ import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { logError } from 'utils/sentry';
 import constants from 'utils/strings/constants';
-import { Collection, CollectionMagicMetadataProps } from 'types/collection';
+import {
+    Collection,
+    CollectionMagicMetadataProps,
+    CollectionSummaries,
+} from 'types/collection';
 import { CollectionType } from 'constants/collection';
 import { getAlbumSiteHost } from 'constants/pages';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
@@ -188,4 +192,10 @@ export const changeCollectionVisibility = async (
 
 export const getArchivedCollections = (collections: Collection[]) => {
     return collections.filter(IsArchived).map((collection) => collection.id);
+};
+
+export const hasNonEmptyCollections = (
+    collectionSummaries: CollectionSummaries
+) => {
+    return collectionSummaries?.size <= 3;
 };

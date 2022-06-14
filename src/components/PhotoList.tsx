@@ -163,7 +163,11 @@ export function PhotoList({
     };
 
     useEffect(() => {
-        let timeStampList: TimeStampListItem[] = [getPhotoListHeader()];
+        let timeStampList: TimeStampListItem[] = [];
+
+        if (galleryContext.photoListHeader) {
+            timeStampList.push(getPhotoListHeader());
+        }
         if (deduplicateContext.isOnDeduplicatePage) {
             skipMerge = true;
             groupByFileSize(timeStampList);
