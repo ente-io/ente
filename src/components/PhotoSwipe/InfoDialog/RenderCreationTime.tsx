@@ -64,7 +64,7 @@ export function RenderCreationTime({
         closeEditMode();
     };
     const handleChange = (newDate: Date) => {
-        if (newDate instanceof Date) {
+        if (!isNaN(newDate?.getTime())) {
             setPickedTime(newDate);
         }
     };

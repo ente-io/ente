@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
     MIN_EDITED_CREATION_TIME,
@@ -18,10 +18,14 @@ interface Props {
     onChange: (date: Date) => void;
 }
 
-const EnteDateTimePicker = ({ loading, value, onChange }: Props) => (
-    <>
+const EnteDateTimePicker = ({ loading, value, onChange }: Props) => {
+    const [open, setOpen] = useState(true);
+    return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DesktopDateTimePicker
+                open={open}
+                onClose={() => setOpen(false)}
+                onOpen={() => setOpen(true)}
                 maxDateTime={MAX_EDITED_CREATION_TIME}
                 minDateTime={MIN_EDITED_CREATION_TIME}
                 disabled={loading}
@@ -38,7 +42,7 @@ const EnteDateTimePicker = ({ loading, value, onChange }: Props) => (
                 )}
             />
         </LocalizationProvider>
-    </>
-);
+    );
+};
 
 export default EnteDateTimePicker;
