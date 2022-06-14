@@ -10,10 +10,8 @@ import {
 import EditIcon from 'components/icons/EditIcon';
 import { IconButton, Label, Row, Value } from 'components/Container';
 import { logError } from 'utils/sentry';
-import CloseIcon from '@mui/icons-material/Close';
-import TickIcon from '@mui/icons-material/Done';
-import EnteDateTimePicker from 'components/EnteDateTimePicker';
 import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
+import EnteDateTimePicker from 'components/EnteDateTimePicker';
 
 export function RenderCreationTime({
     shouldDisableEdits,
@@ -28,12 +26,10 @@ export function RenderCreationTime({
     const originalCreationTime = new Date(file?.metadata.creationTime / 1000);
     const [isInEditMode, setIsInEditMode] = useState(false);
 
-    const [pickedTime, setPickedTime] = useState(originalCreationTime);
-
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
 
-    const saveEdits = async () => {
+    const saveEdits = async (pickedTime: Date) => {
         try {
             setLoading(true);
             if (isInEditMode && file) {
@@ -59,59 +55,38 @@ export function RenderCreationTime({
             setLoading(false);
         }
     };
-    const discardEdits = () => {
-        setPickedTime(originalCreationTime);
-        closeEditMode();
-    };
-    const handleChange = (newDate: Date) => {
-        if (newDate instanceof Date) {
-            setPickedTime(newDate);
-        }
-    };
+
     return (
         <>
             <Row>
                 <Label width="30%">{constants.CREATION_TIME}</Label>
                 <Value
                     width={
-                        !shouldDisableEdits
-                            ? isInEditMode
-                                ? '50%'
-                                : '60%'
-                            : '70%'
+                        !shouldDisableEdits ? !isInEditMode && '60%' : '70%'
                     }>
                     {isInEditMode ? (
                         <EnteDateTimePicker
-                            loading={loading}
-                            isInEditMode={isInEditMode}
-                            pickedTime={pickedTime}
-                            handleChange={handleChange}
+                            initialValue={originalCreationTime}
+                            disabled={loading}
+                            onSubmit={saveEdits}
+                            onClose={closeEditMode}
                         />
                     ) : (
-                        formatDateTime(pickedTime)
+                        formatDateTime(originalCreationTime)
                     )}
                 </Value>
-                {!shouldDisableEdits && (
+                {!shouldDisableEdits && !isInEditMode && (
                     <Value
-                        width={isInEditMode ? '20%' : '10%'}
+                        width={'10%'}
                         style={{ cursor: 'pointer', marginLeft: '10px' }}>
-                        {!isInEditMode ? (
+                        {loading ? (
+                            <IconButton>
+                                <SmallLoadingSpinner />
+                            </IconButton>
+                        ) : (
                             <IconButton onClick={openEditMode}>
                                 <EditIcon />
                             </IconButton>
-                        ) : (
-                            <>
-                                <IconButton onClick={saveEdits}>
-                                    {loading ? (
-                                        <SmallLoadingSpinner />
-                                    ) : (
-                                        <TickIcon />
-                                    )}
-                                </IconButton>
-                                <IconButton onClick={discardEdits}>
-                                    <CloseIcon />
-                                </IconButton>
-                            </>
                         )}
                     </Value>
                 )}

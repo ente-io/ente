@@ -75,6 +75,7 @@ import {
     getSelectedCollection,
     isFavoriteCollection,
     getArchivedCollections,
+    hasNonEmptyCollections,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 import {
@@ -687,7 +688,7 @@ export default function Gallery() {
                     setUploadInProgress={setUploadInProgress}
                     fileRejections={fileRejections}
                     setFiles={setFiles}
-                    isFirstUpload={collectionSummaries?.size === 0}
+                    isFirstUpload={hasNonEmptyCollections(collectionSummaries)}
                     electronFiles={electronFiles}
                     setElectronFiles={setElectronFiles}
                     uploadTypeSelectorView={uploadTypeSelectorView}

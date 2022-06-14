@@ -107,6 +107,7 @@ const FooterContainer = styled(ListItemContainer)`
     }
     color: #979797;
     text-align: center;
+    justify-content: center;
     align-items: flex-end;
     margin-top: calc(2rem + 20px);
 `;
@@ -163,7 +164,11 @@ export function PhotoList({
     };
 
     useEffect(() => {
-        let timeStampList: TimeStampListItem[] = [getPhotoListHeader()];
+        let timeStampList: TimeStampListItem[] = [];
+
+        if (galleryContext.photoListHeader) {
+            timeStampList.push(getPhotoListHeader());
+        }
         if (deduplicateContext.isOnDeduplicatePage) {
             skipMerge = true;
             groupByFileSize(timeStampList);
