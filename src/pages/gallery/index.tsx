@@ -373,14 +373,15 @@ export default function Gallery() {
         setFavItemIds(favItemIds);
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
 
-        const collectionSummaries = getCollectionSummaries(
-            nonEmptyCollections,
-            files
-        );
-        setCollectionSummaries(collectionSummaries);
-
         const archivedCollections = getArchivedCollections(nonEmptyCollections);
         setArchivedCollections(new Set(archivedCollections));
+
+        const collectionSummaries = getCollectionSummaries(
+            nonEmptyCollections,
+            files,
+            archivedCollections
+        );
+        setCollectionSummaries(collectionSummaries);
     };
 
     const clearSelection = function () {
