@@ -353,7 +353,7 @@ class OutgoingCollectionItem extends StatelessWidget {
                       : Padding(
                           padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
                           child: Text(
-                            "shared with " + sharees.join(", "),
+                            "Shared with " + sharees.join(", "),
                             style: TextStyle(
                               fontSize: 14,
                               color: Theme.of(context).primaryColorLight,
