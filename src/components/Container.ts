@@ -39,6 +39,7 @@ export const IconButton = styled('button')`
 `;
 
 export const Row = styled('div')`
+    height: 32px;
     display: flex;
     align-items: center;
     margin-bottom: ${({ theme }) => theme.spacing(2)};

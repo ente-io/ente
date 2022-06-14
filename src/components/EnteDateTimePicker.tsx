@@ -28,7 +28,14 @@ const EnteDateTimePicker = ({ loading, value, onChange }: Props) => (
                 PopperProps={{ sx: { zIndex: '1502' } }}
                 value={value}
                 onChange={onChange}
-                renderInput={(params) => <TextField {...params} />}
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        hiddenLabel
+                        margin="none"
+                        variant="standard"
+                    />
+                )}
             />
         </LocalizationProvider>
     </>
