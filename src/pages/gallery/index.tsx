@@ -591,6 +591,8 @@ export default function Gallery() {
         }
     };
 
+    const resetSearch = () => setSearch({});
+
     return (
         <GalleryContext.Provider
             value={{
@@ -721,6 +723,7 @@ export default function Gallery() {
                         collections
                     )}
                     enableDownload={true}
+                    resetSearch={resetSearch}
                 />
                 {selected.count > 0 &&
                     selected.collectionID === activeCollection && (

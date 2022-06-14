@@ -64,6 +64,7 @@ interface Props {
     isSharedCollection?: boolean;
     enableDownload?: boolean;
     isDeduplicating?: boolean;
+    resetSearch?: () => void;
 }
 
 type SourceURL = {
@@ -83,6 +84,7 @@ const PhotoFrame = ({
     openUploader,
     isInSearchMode,
     search,
+    resetSearch,
     deleted,
     activeCollection,
     isSharedCollection,
@@ -144,6 +146,7 @@ const PhotoFrame = ({
             if (!isNaN(filteredDataIdx)) {
                 onThumbnailClick(filteredDataIdx)();
             }
+            resetSearch();
         }
     }, [search, filteredData]);
 
