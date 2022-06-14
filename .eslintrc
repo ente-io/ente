@@ -6,7 +6,6 @@
         "node": true
     },
     "extends": [
-        "plugin:react/recommended",
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
         "google",
@@ -20,7 +19,7 @@
         "ecmaVersion": 12,
         "sourceType": "module"
     },
-    "plugins": ["react", "@typescript-eslint"],
+    "plugins": ["@typescript-eslint"],
     "rules": {
         "indent": "off",
         "class-methods-use-this": "off",
