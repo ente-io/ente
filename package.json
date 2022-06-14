@@ -35,22 +35,28 @@
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
+    "prebuild": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
     "build": "tsc",
     "watch": "tsc -w",
     "lint": "eslint -c .eslintrc --ext .ts ./src",
     "start": "yarn build && electron ./app/main.js",
-    "test-release": "yarn build && electron-builder"
+    "test-release": "yarn build && electron-builder",
+    "prepare": "husky install"
   },
   "author": "ente <code@ente.io>",
   "devDependencies": {
     "@sentry/cli": "^1.68.0",
-    "@typescript-eslint/eslint-plugin": "^4.20.0",
-    "@typescript-eslint/parser": "^4.20.0",
+    "@typescript-eslint/eslint-plugin": "^5.28.0",
+    "@typescript-eslint/parser": "^5.28.0",
     "electron": "^15.3.0",
     "electron-builder": "^23.0.3",
     "electron-builder-notarize": "^1.2.0",
     "electron-download": "^4.1.1",
     "eslint": "^7.23.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^8.5.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.1",
     "prettier": "2.5.1",
     "typescript": "^4.2.3"
   },
@@ -64,5 +70,14 @@
     "electron-updater": "^4.3.8",
     "node-stream-zip": "^1.15.0",
     "promise-fs": "^2.1.1"
+  },
+  "standard": {
+    "parser": "babel-eslint"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write --ignore-unknown"
+    ]
   }
 }

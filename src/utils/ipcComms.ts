@@ -19,18 +19,18 @@ export default function setupIpcComs(
         return dir;
     });
 
-    ipcMain.on('update-tray', (event, args) => {
+    ipcMain.on('update-tray', (_, args) => {
         tray.setContextMenu(buildContextMenu(mainWindow, args));
     });
 
-    ipcMain.on('send-notification', (event, args) => {
+    ipcMain.on('send-notification', (_, args) => {
         const notification = {
             title: 'ente',
             body: args,
         };
         new Notification(notification).show();
     });
-    ipcMain.on('reload-window', (event, args) => {
+    ipcMain.on('reload-window', () => {
         const secondWindow = createWindow();
         mainWindow.destroy();
         mainWindow = secondWindow;
@@ -43,7 +43,7 @@ export default function setupIpcComs(
         return files.filePaths;
     });
 
-    ipcMain.handle('show-upload-zip-dialog', async (event) => {
+    ipcMain.handle('show-upload-zip-dialog', async () => {
         const files = await dialog.showOpenDialog({
             properties: ['openFile', 'multiSelections'],
             filters: [{ name: 'Zip File', extensions: ['zip'] }],
@@ -64,7 +64,7 @@ export default function setupIpcComs(
         return files;
     });
 
-    ipcMain.handle('log-error', (event, err, msg, info?) => {
+    ipcMain.handle('log-error', (_, err, msg, info?) => {
         logErrorSentry(err, msg, info);
     });
 }

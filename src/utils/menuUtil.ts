@@ -14,7 +14,12 @@ export function buildContextMenu(
     mainWindow: BrowserWindow,
     args: any = {}
 ): Menu {
-    const { export_progress, retry_export, paused } = args;
+    // eslint-disable-next-line camelcase
+    const {
+        export_progress: exportProgress,
+        retry_export: retryExport,
+        paused,
+    } = args;
     const contextMenu = Menu.buildFromTemplate([
         ...(isUpdateAvailable()
             ? [
@@ -25,10 +30,10 @@ export function buildContextMenu(
               ]
             : []),
         { type: 'separator' },
-        ...(export_progress
+        ...(exportProgress
             ? [
                   {
-                      label: export_progress,
+                      label: exportProgress,
                       click: () => mainWindow.show(),
                   },
                   ...(paused
@@ -55,7 +60,7 @@ export function buildContextMenu(
                         ]),
               ]
             : []),
-        ...(retry_export
+        ...(retryExport
             ? [
                   {
                       label: 'export failed',
