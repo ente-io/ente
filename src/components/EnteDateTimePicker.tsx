@@ -5,7 +5,10 @@ import {
     MAX_EDITED_CREATION_TIME,
 } from 'constants/file';
 import { TextField } from '@mui/material';
-import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
+import {
+    LocalizationProvider,
+    MobileDateTimePicker,
+} from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 interface Props {
@@ -26,15 +29,21 @@ const EnteDateTimePicker = ({ loading, value, onChange }: Props) => {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DateTimePicker
+            <MobileDateTimePicker
                 open={open}
                 onClose={() => setOpen(false)}
                 onOpen={() => setOpen(true)}
                 maxDateTime={MAX_EDITED_CREATION_TIME}
                 minDateTime={MIN_EDITED_CREATION_TIME}
                 disabled={loading}
-                DialogProps={{ sx: { zIndex: '1502' } }}
-                PopperProps={{ sx: { zIndex: '1502' } }}
+                DialogProps={{
+                    sx: {
+                        zIndex: '1502',
+                        '.MuiPickersToolbar-penIconButton': {
+                            display: 'none',
+                        },
+                    },
+                }}
                 value={value}
                 onChange={handleChange}
                 renderInput={(params) => (
