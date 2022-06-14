@@ -63,11 +63,7 @@ export function RenderCreationTime({
         setPickedTime(originalCreationTime);
         closeEditMode();
     };
-    const handleChange = (newDate: Date) => {
-        if (!isNaN(newDate?.getTime())) {
-            setPickedTime(newDate);
-        }
-    };
+
     return (
         <>
             <Row>
@@ -85,7 +81,7 @@ export function RenderCreationTime({
                             <EnteDateTimePicker
                                 loading={loading}
                                 value={pickedTime}
-                                onChange={handleChange}
+                                onChange={setPickedTime}
                             />
                         </>
                     ) : (

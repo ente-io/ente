@@ -20,6 +20,13 @@ interface Props {
 
 const EnteDateTimePicker = ({ loading, value, onChange }: Props) => {
     const [open, setOpen] = useState(true);
+
+    const handleChange = (newDate: Date) => {
+        if (!isNaN(newDate?.getTime())) {
+            onChange(newDate);
+        }
+    };
+
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DesktopDateTimePicker
@@ -31,7 +38,7 @@ const EnteDateTimePicker = ({ loading, value, onChange }: Props) => {
                 disabled={loading}
                 PopperProps={{ sx: { zIndex: '1502' } }}
                 value={value}
-                onChange={onChange}
+                onChange={handleChange}
                 renderInput={(params) => (
                     <TextField
                         {...params}
