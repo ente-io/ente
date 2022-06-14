@@ -69,150 +69,168 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
           ),
         );
       },
-      child: SizedBox(
-        width: 390,
-        height: 195,
-        child: _userDetails == null ? loadWidget : getContainer(),
-      ),
+      child: _userDetails == null ? loadWidget : getContainer(),
     );
   }
 
-  Container getContainer() {
-    return Container(
-      width: 390,
-      height: 195,
+  Widget getContainer() {
+    return SizedBox(
+      width: 350,
+      height: 175,
       // constraints: BoxConstraints(maxWidth: 390, maxHeight: 195),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(16),
-          bottomLeft: Radius.circular(16),
-          topLeft: Radius.circular(2),
-          bottomRight: Radius.circular(2),
-        ),
-        image: DecorationImage(
-          fit: BoxFit.fill,
-          image: AssetImage("assets/card_background.png"),
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.only(top: 20, bottom: 20, left: 16, right: 0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Storage",
-              style: Theme.of(context)
-                  .textTheme
-                  .subtitle2
-                  .copyWith(color: Colors.white.withOpacity(0.7)),
-            ),
-            Text(
-              "${convertBytesToReadableFormat(_userDetails.getFreeStorage())} of ${convertBytesToReadableFormat(_userDetails.getTotalStorage())} free",
-              style: Theme.of(context)
-                  .textTheme
-                  .headline5
-                  .copyWith(color: Colors.white),
-            ),
-            Padding(padding: EdgeInsets.symmetric(vertical: 12)),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Icon(
-                Icons.chevron_right,
-                color: Colors.white,
-                size: 24,
+      child: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            color: Colors.transparent,
+            child: AspectRatio(
+              aspectRatio: 2 / 1,
+              child: Image(
+                image: AssetImage("assets/card_background.png"),
+                fit: BoxFit.fill, // use this
               ),
             ),
-            Padding(padding: EdgeInsets.symmetric(vertical: 12)),
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: Stack(
-                children: <Widget>[
-                  Container(
-                    color: Colors.white.withOpacity(0.2),
-                    width: MediaQuery.of(context).size.width,
-                    height: 4,
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 20, bottom: 20, left: 16, right: 16),
+            child: Container(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Storage",
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle2
+                              .copyWith(color: Colors.white.withOpacity(0.7)),
+                        ),
+                        Text(
+                          "${convertBytesToReadableFormat(_userDetails.getFreeStorage())} of ${convertBytesToReadableFormat(_userDetails.getTotalStorage())} free",
+                          style: Theme.of(context)
+                              .textTheme
+                              .headline5
+                              .copyWith(color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
-                  Container(
-                    color: Colors.white.withOpacity(0.75),
-                    width: MediaQuery.of(context).size.width *
-                        ((_userDetails.getFamilyOrPersonalUsage()) /
-                            _userDetails.getTotalStorage()),
-                    height: 4,
-                  ),
-                  Container(
-                    color: Colors.white,
-                    width: MediaQuery.of(context).size.width *
-                        (_userDetails.usage / _userDetails.getTotalStorage()),
-                    height: 4,
-                  ),
+                  Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Stack(
+                        children: <Widget>[
+                          Container(
+                            color: Colors.white.withOpacity(0.2),
+                            width: MediaQuery.of(context).size.width,
+                            height: 4,
+                          ),
+                          Container(
+                            color: Colors.white.withOpacity(0.75),
+                            width: MediaQuery.of(context).size.width *
+                                ((_userDetails.getFamilyOrPersonalUsage()) /
+                                    _userDetails.getTotalStorage()),
+                            height: 4,
+                          ),
+                          Container(
+                            color: Colors.white,
+                            width: MediaQuery.of(context).size.width *
+                                (_userDetails.usage /
+                                    _userDetails.getTotalStorage()),
+                            height: 4,
+                          ),
+                        ],
+                      ),
+                      Padding(padding: EdgeInsets.symmetric(vertical: 8)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _userDetails.isPartOfFamily()
+                              ? Row(
+                                  children: [
+                                    Container(
+                                      width: 8.71,
+                                      height: 8.99,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Padding(padding: EdgeInsets.only(right: 4)),
+                                    Text(
+                                      "You",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          .copyWith(
+                                              color: Colors.white,
+                                              fontSize: 12),
+                                    ),
+                                    Padding(
+                                        padding: EdgeInsets.only(right: 12)),
+                                    Container(
+                                      width: 8.71,
+                                      height: 8.99,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white.withOpacity(0.75),
+                                      ),
+                                    ),
+                                    Padding(padding: EdgeInsets.only(right: 4)),
+                                    Text(
+                                      "Family",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          .copyWith(
+                                              color: Colors.white,
+                                              fontSize: 12),
+                                    ),
+                                  ],
+                                )
+                              : Text(
+                                  "${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())} used",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyText1
+                                      .copyWith(
+                                          color: Colors.white, fontSize: 12),
+                                ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 16.0),
+                            child: Text(
+                              "${NumberFormat().format(_userDetails.fileCount)} Memories",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyText1
+                                  .copyWith(color: Colors.white, fontSize: 12),
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),
-            Padding(padding: EdgeInsets.symmetric(vertical: 8)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _userDetails.isPartOfFamily()
-                    ? Row(
-                        children: [
-                          Container(
-                            width: 8.71,
-                            height: 8.99,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Padding(padding: EdgeInsets.only(right: 4)),
-                          Text(
-                            "You",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyText1
-                                .copyWith(color: Colors.white, fontSize: 12),
-                          ),
-                          Padding(padding: EdgeInsets.only(right: 12)),
-                          Container(
-                            width: 8.71,
-                            height: 8.99,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.75),
-                            ),
-                          ),
-                          Padding(padding: EdgeInsets.only(right: 4)),
-                          Text(
-                            "Family",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyText1
-                                .copyWith(color: Colors.white, fontSize: 12),
-                          ),
-                        ],
-                      )
-                    : Text(
-                        "${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())} used",
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyText1
-                            .copyWith(color: Colors.white, fontSize: 12),
-                      ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: Text(
-                    "${NumberFormat().format(_userDetails.fileCount)} Memories",
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyText1
-                        .copyWith(color: Colors.white, fontSize: 12),
-                  ),
-                )
-              ],
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Icon(
+              Icons.chevron_right,
+              color: Colors.white,
+              size: 24,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
