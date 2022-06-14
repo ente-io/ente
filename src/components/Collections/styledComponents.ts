@@ -15,6 +15,7 @@ export const CollectionListBarWrapper = styled(PaddedContainer)`
 `;
 
 export const CollectionInfoBarWrapper = styled(Box)`
+    width: 100%;
     margin-bottom: 24px;
 `;
 
