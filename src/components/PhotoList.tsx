@@ -107,6 +107,7 @@ const FooterContainer = styled(ListItemContainer)`
     }
     color: #979797;
     text-align: center;
+    justify-content: center;
     align-items: flex-end;
     margin-top: calc(2rem + 20px);
 `;
