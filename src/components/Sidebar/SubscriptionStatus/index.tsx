@@ -19,19 +19,20 @@ export default function SubscriptionStatus({
 }) {
     const { showPlanSelectorModal } = useContext(GalleryContext);
 
-    if (!userDetails) {
-        return <></>;
-    }
-
     const hasAMessage = useMemo(
         () =>
-            !isSubscriptionActive(userDetails.subscription) ||
-            isOnFreePlan(userDetails.subscription) ||
-            isSubscriptionCancelled(userDetails.subscription),
+            userDetails &&
+            (!isSubscriptionActive(userDetails.subscription) ||
+                isOnFreePlan(userDetails.subscription) ||
+                isSubscriptionCancelled(userDetails.subscription)),
         [userDetails]
     );
 
-    return hasAMessage ? (
+    if (!hasAMessage) {
+        return <></>;
+    }
+
+    return (
         <Box px={1}>
             {!hasNonAdminFamilyMembers(userDetails.familyData) ||
             isFamilyAdmin(userDetails.familyData) ? (
@@ -43,7 +44,5 @@ export default function SubscriptionStatus({
                 <MemberSubscriptionStatus userDetails={userDetails} />
             )}
         </Box>
-    ) : (
-        <></>
     );
 }
