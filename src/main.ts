@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, Tray, dialog, nativeImage } from 'electron';
+import { app, BrowserWindow, Menu, Tray, nativeImage } from 'electron';
 import * as path from 'path';
 import AppUpdater from './utils/appUpdater';
 import { createWindow } from './utils/createWindow';
