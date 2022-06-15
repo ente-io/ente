@@ -1,123 +1,11 @@
+import { getZipFileStream } from './../services/fs';
+import { getElectronFile, getValidPaths } from './../services/fs';
 import path from 'path';
 import StreamZip from 'node-stream-zip';
-import * as fs from 'promise-fs';
-import { FILE_STREAM_CHUNK_SIZE } from '../config';
 import { uploadStatusStore } from '../services/store';
 import { ElectronFile, FILE_PATH_KEYS, FILE_PATH_TYPE } from '../types';
 import { logError } from '../utils/logging';
 import { ipcRenderer } from 'electron';
-
-// https://stackoverflow.com/a/63111390
-export const getFilesFromDir = async (dirPath: string) => {
-    if (!(await fs.stat(dirPath)).isDirectory()) {
-        return [dirPath];
-    }
-
-    let files: string[] = [];
-    const filePaths = await fs.readdir(dirPath);
-
-    for (const filePath of filePaths) {
-        const absolute = path.join(dirPath, filePath);
-        files = files.concat(await getFilesFromDir(absolute));
-    }
-
-    return files;
-};
-
-const getFileStream = async (filePath: string) => {
-    const file = await fs.open(filePath, 'r');
-    let offset = 0;
-    const readableStream = new ReadableStream<Uint8Array>({
-        async pull(controller) {
-            try {
-                const buff = new Uint8Array(FILE_STREAM_CHUNK_SIZE);
-
-                // original types were not working correctly
-                const bytesRead = (await fs.read(
-                    file,
-                    buff,
-                    0,
-                    FILE_STREAM_CHUNK_SIZE,
-                    offset
-                )) as unknown as number;
-                offset += bytesRead;
-                if (bytesRead === 0) {
-                    controller.close();
-                    await fs.close(file);
-                } else {
-                    controller.enqueue(buff);
-                }
-            } catch (e) {
-                logError(e, 'stream pull failed');
-                await fs.close(file);
-            }
-        },
-    });
-    return readableStream;
-};
-
-const getZipFileStream = async (
-    zip: StreamZip.StreamZipAsync,
-    filePath: string
-) => {
-    const stream = await zip.stream(filePath);
-    const done = { current: false };
-
-    let resolveObj: (value?: any) => void = null;
-    let rejectObj: (reason?: any) => void = null;
-
-    stream.on('readable', () => {
-        if (resolveObj) {
-            const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
-            if (chunk) {
-                resolveObj(new Uint8Array(chunk));
-                resolveObj = null;
-            }
-        }
-    });
-
-    stream.on('end', () => {
-        done.current = true;
-    });
-
-    stream.on('error', (e) => {
-        done.current = true;
-        if (rejectObj) {
-            rejectObj(e);
-            rejectObj = null;
-        }
-    });
-
-    const readStreamData = () => {
-        return new Promise<Uint8Array>((resolve, reject) => {
-            const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
-            if (chunk || done.current) {
-                resolve(chunk);
-            } else {
-                resolveObj = resolve;
-                rejectObj = reject;
-            }
-        });
-    };
-
-    const readableStream = new ReadableStream<Uint8Array>({
-        async pull(controller) {
-            try {
-                const data = await readStreamData();
-                if (data) {
-                    controller.enqueue(data);
-                } else {
-                    controller.close();
-                }
-            } catch (e) {
-                logError(e, 'stream reading failed');
-                controller.close();
-            }
-        },
-    });
-
-    return readableStream;
-};
 
 async function getZipEntryAsElectronFile(
     zip: StreamZip.StreamZipAsync,
@@ -142,27 +30,6 @@ async function getZipEntryAsElectronFile(
     };
 }
 
-export async function getElectronFile(filePath: string): Promise<ElectronFile> {
-    const fileStats = await fs.stat(filePath);
-    return {
-        path: filePath.split(path.sep).join(path.posix.sep),
-        name: path.basename(filePath),
-        size: fileStats.size,
-        lastModified: fileStats.mtime.valueOf(),
-        stream: async () => {
-            return await getFileStream(filePath);
-        },
-        blob: async () => {
-            const blob = await fs.readFile(filePath);
-            return new Blob([new Uint8Array(blob)]);
-        },
-        arrayBuffer: async () => {
-            const blob = await fs.readFile(filePath);
-            return new Uint8Array(blob);
-        },
-    };
-}
-
 export const setToUploadFiles = (type: FILE_PATH_TYPE, filePaths: string[]) => {
     const key = FILE_PATH_KEYS[type];
     if (filePaths) {
@@ -182,17 +49,12 @@ export const setToUploadCollection = (collectionName: string) => {
 
 export const getSavedPaths = (type: FILE_PATH_TYPE) => {
     const paths =
-        (uploadStatusStore.get(FILE_PATH_KEYS[type]) as string[]) ?? [];
+        getValidPaths(
+            uploadStatusStore.get(FILE_PATH_KEYS[type]) as string[]
+        ) ?? [];
 
-    const validPaths = paths.filter(async (path) => {
-        try {
-            await fs.stat(path).then((stat) => stat.isFile());
-        } catch (e) {
-            return false;
-        }
-    });
-    setToUploadFiles(type, validPaths);
-    return validPaths;
+    setToUploadFiles(type, paths);
+    return paths;
 };
 
 export const getPendingUploads = async () => {
