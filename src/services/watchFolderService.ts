@@ -6,7 +6,7 @@ import { removeFromCollection, syncCollections } from './collectionService';
 import { syncFiles } from './fileService';
 import debounce from 'debounce-promise';
 import { logError } from 'utils/sentry';
-import { EventQueueItem, WatchMapping } from 'types/watch';
+import { EventQueueItem, WatchMapping } from 'types/watchFolder';
 import { ElectronAPIsInterface } from 'types/electron';
 
 export class WatchService {

@@ -38,7 +38,7 @@ import uiService from './uiService';
 import { logUploadInfo } from 'utils/upload';
 import isElectron from 'is-electron';
 import ImportService from 'services/importService';
-import watchService from 'services/watchService';
+import watchService from 'services/watchFolderService';
 import { ProgressUpdater } from 'types/upload/ui';
 
 const MAX_CONCURRENT_UPLOADS = 4;

@@ -9,10 +9,10 @@ import {
 } from './styledComponents';
 import React, { useContext, useEffect, useState } from 'react';
 import { Dialog, IconButton } from '@mui/material';
-import watchService from 'services/watchService';
+import watchService from 'services/watchFolderService';
 import Close from '@mui/icons-material/Close';
 import { CenteredFlex, SpaceBetweenFlex } from 'components/Container';
-import { WatchMapping } from 'types/watch';
+import { WatchMapping } from 'types/watchFolder';
 import { GalleryContext } from 'pages/gallery';
 import constants from 'utils/strings/constants';
 import { CheckmarkIcon } from './checkmarkIcon';

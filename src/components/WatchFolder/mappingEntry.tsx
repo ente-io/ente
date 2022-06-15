@@ -9,9 +9,9 @@ import {
 } from './styledComponents';
 import React, { useEffect, useState } from 'react';
 import { CircularProgress, IconButton, Menu, MenuItem } from '@mui/material';
-import watchService from 'services/watchService';
+import watchService from 'services/watchFolderService';
 import { SpaceBetweenFlex } from 'components/Container';
-import { WatchMapping } from 'types/watch';
+import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';

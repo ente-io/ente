@@ -13,7 +13,7 @@ import {
     InProgressUpload,
 } from 'types/upload/ui';
 import UploadProgressContext from 'contexts/uploadProgress';
-import watchService from 'services/watchService';
+import watchService from 'services/watchFolderService';
 
 interface Props {
     open: boolean;

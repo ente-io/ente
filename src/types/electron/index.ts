@@ -1,6 +1,6 @@
-import { WatchService } from 'services/watchService';
+import { WatchService } from 'services/watchFolderService';
 import { ElectronFile } from 'types/upload';
-import { WatchMapping } from 'types/watch';
+import { WatchMapping } from 'types/watchFolder';
 
 export interface ElectronAPIsInterface {
     exists: (path: string) => boolean;
