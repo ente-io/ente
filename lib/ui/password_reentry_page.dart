@@ -60,6 +60,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         isFormValid: _passwordController.text.isNotEmpty,
         buttonText: 'Log in',
         onPressedFunction: () async {
+          FocusScope.of(context).unfocus();
           final dialog = createProgressDialog(context, "Please wait...");
           await dialog.show();
           try {

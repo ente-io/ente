@@ -110,6 +110,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           _config.setEmail(_email);
           UserService.instance
               .getOtt(context, _email, isCreateAccountScreen: true);
+          FocusScope.of(context).unfocus();
         },
       ),
       floatingActionButtonLocation: fabLocation(),
