@@ -438,7 +438,11 @@ export class WatchService {
             event.collectionName === this.eventQueue[0].collectionName &&
             event.type === this.eventQueue[0].type
         ) {
-            event.paths = [...event.paths, ...this.eventQueue[0].paths];
+            if (event.type === 'trash') {
+                event.paths = [...event.paths, ...this.eventQueue[0].paths];
+            } else {
+                event.files = [...event.files, ...this.eventQueue[0].files];
+            }
             this.eventQueue.shift();
         }
         return event;
