@@ -1,14 +1,8 @@
-import {
-    reloadWindow,
-    sendNotification,
-    showOnTray,
-    doesFolderExists,
-} from './api/common';
+import { reloadWindow, sendNotification, showOnTray } from './api/system';
 import {
     showUploadDirsDialog,
     showUploadFilesDialog,
     showUploadZipDialog,
-    getElectronFile,
     getPendingUploads,
     setToUploadFiles,
     getElectronFilesFromGoogleZip,
@@ -34,8 +28,9 @@ import {
     getExportRecord,
     setExportRecord,
     exists,
-    selectRootDirectory,
 } from './api/export';
+import { selectRootDirectory } from './api/common';
+import { getElectronFile, doesFolderExists } from './services/fs';
 
 const windowObject: any = window;
 

@@ -47,16 +47,6 @@ export const setToUploadCollection = (collectionName: string) => {
     }
 };
 
-export const getSavedPaths = (type: FILE_PATH_TYPE) => {
-    const paths =
-        getValidPaths(
-            uploadStatusStore.get(FILE_PATH_KEYS[type]) as string[]
-        ) ?? [];
-
-    setToUploadFiles(type, paths);
-    return paths;
-};
-
 export const getPendingUploads = async () => {
     const filePaths = getSavedPaths(FILE_PATH_TYPE.FILES);
     const zipPaths = getSavedPaths(FILE_PATH_TYPE.ZIPS);
@@ -142,4 +132,14 @@ export const showUploadZipDialog = async () => {
     } catch (e) {
         logError(e, 'error while selecting zips');
     }
+};
+
+const getSavedPaths = (type: FILE_PATH_TYPE) => {
+    const paths =
+        getValidPaths(
+            uploadStatusStore.get(FILE_PATH_KEYS[type]) as string[]
+        ) ?? [];
+
+    setToUploadFiles(type, paths);
+    return paths;
 };

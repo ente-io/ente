@@ -2,9 +2,9 @@ import { BrowserWindow, dialog, ipcMain, Tray, Notification } from 'electron';
 import { createWindow } from './createWindow';
 import { buildContextMenu } from './menuUtil';
 import { logErrorSentry } from './sentry';
-import { getFilesFromDir } from '../api/upload';
 import chokidar from 'chokidar';
 import path from 'path';
+import { getFilesFromDir } from '../services/fs';
 
 export default function setupIpcComs(
     tray: Tray,

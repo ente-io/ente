@@ -2,7 +2,7 @@ import path from 'path';
 import { watchStore } from '../services/store';
 import { ipcRenderer } from 'electron';
 import { ElectronFile, WatchStoreType } from '../types';
-import { getElectronFile, getFilesFromDir } from './upload';
+import { getElectronFile, getFilesFromDir } from '../services/fs';
 
 export async function addWatchMapping(
     collectionName: string,
@@ -65,13 +65,8 @@ export function setWatchMappings(watchMappings: WatchStoreType['mappings']) {
 }
 
 export async function getAllFilesFromDir(dirPath: string) {
-    let files = await getFilesFromDir(dirPath);
-    files = files.map((file) => file.split(path.sep).join(path.posix.sep));
-    const electronFiles = await Promise.all(
-        files.map(async (filePath) => {
-            return await getElectronFile(filePath);
-        })
-    );
+    const files = await getFilesFromDir(dirPath);
+    const electronFiles = await Promise.all(files.map(getElectronFile));
     return electronFiles;
 }
 

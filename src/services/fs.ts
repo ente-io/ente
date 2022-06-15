@@ -4,6 +4,7 @@ import * as fs from 'promise-fs';
 import { ElectronFile } from '../types';
 import { logError } from '../utils/logging';
 import StreamZip from 'node-stream-zip';
+import { Readable } from 'stream';
 
 // https://stackoverflow.com/a/63111390
 export const getFilesFromDir = async (dirPath: string) => {
@@ -149,4 +150,53 @@ export async function doesFolderExists(dirPath: string) {
             return stats.isDirectory();
         })
         .catch(() => false);
+}
+
+export async function doesFileExists(dirPath: string) {
+    return await fs
+        .stat(dirPath)
+        .then((stats) => {
+            return stats.isFile();
+        })
+        .catch(() => false);
+}
+
+export const convertBrowserStreamToNode = (fileStream: any) => {
+    const reader = fileStream.getReader();
+    const rs = new Readable();
+
+    rs._read = async () => {
+        const result = await reader.read();
+
+        if (!result.done) {
+            rs.push(Buffer.from(result.value));
+        } else {
+            rs.push(null);
+            return;
+        }
+    };
+
+    return rs;
+};
+
+export async function createDirectory(dirPath: string) {
+    await fs.mkdir(dirPath);
+}
+
+export async function renameDirectory(oldDirPath: string, newDirPath: string) {
+    await fs.rename(oldDirPath, newDirPath);
+}
+
+export async function writeFile(filePath: string, fileData: any) {
+    await fs.writeFile(filePath, fileData);
+}
+
+export function writeStream(filePath: string, fileStream: any) {
+    const writeable = fs.createWriteStream(filePath);
+    const readable = convertBrowserStreamToNode(fileStream);
+    readable.pipe(writeable);
+}
+
+export async function readTextFile(filePath: string) {
+    await fs.readFile(filePath, 'utf-8');
 }

@@ -1,30 +1,22 @@
+import {} from './common';
+import {
+    createDirectory,
+    doesFileExists,
+    readTextFile,
+    renameDirectory,
+    writeFile,
+    writeStream,
+} from './../services/fs';
 import { ipcRenderer } from 'electron';
-import * as fs from 'promise-fs';
-import { Readable } from 'stream';
 import { logError } from '../utils/logging';
 
-export const responseToReadable = (fileStream: any) => {
-    const reader = fileStream.getReader();
-    const rs = new Readable();
-    rs._read = async () => {
-        const result = await reader.read();
-        if (!result.done) {
-            rs.push(Buffer.from(result.value));
-        } else {
-            rs.push(null);
-            return;
-        }
-    };
-    return rs;
-};
-
 export const exists = (path: string) => {
-    return fs.existsSync(path);
+    return doesFileExists(path);
 };
 
 export const checkExistsAndCreateCollectionDir = async (dirPath: string) => {
-    if (!fs.existsSync(dirPath)) {
-        await fs.mkdir(dirPath);
+    if (!doesFileExists(dirPath)) {
+        await createDirectory(dirPath);
     }
 };
 
@@ -32,22 +24,37 @@ export const checkExistsAndRename = async (
     oldDirPath: string,
     newDirPath: string
 ) => {
-    if (fs.existsSync(oldDirPath)) {
-        await fs.rename(oldDirPath, newDirPath);
+    if (doesFileExists(oldDirPath)) {
+        await renameDirectory(oldDirPath, newDirPath);
     }
 };
 
 export const saveStreamToDisk = (
-    path: string,
+    filePath: string,
     fileStream: ReadableStream<any>
 ) => {
-    const writeable = fs.createWriteStream(path);
-    const readable = responseToReadable(fileStream);
-    readable.pipe(writeable);
+    writeStream(filePath, fileStream);
 };
 
-export const saveFileToDisk = async (path: string, file: any) => {
-    await fs.writeFile(path, file);
+export const saveFileToDisk = async (path: string, fileData: any) => {
+    await writeFile(path, fileData);
+};
+
+export const getExportRecord = async (filePath: string) => {
+    try {
+        if (!(await doesFileExists(filePath))) {
+            return null;
+        }
+        const recordFile = await readTextFile(filePath);
+        return recordFile;
+    } catch (e) {
+        // ignore exportFile missing
+        logError(e, 'error while selecting files');
+    }
+};
+
+export const setExportRecord = async (filePath: string, data: string) => {
+    await writeFile(filePath, data);
 };
 
 export const registerResumeExportListener = (resumeExport: () => void) => {
@@ -70,31 +77,4 @@ export const registerRetryFailedExportListener = (
 ) => {
     ipcRenderer.removeAllListeners('retry-export');
     ipcRenderer.on('retry-export', () => retryFailedExport());
-};
-
-export const getExportRecord = async (filePath: string) => {
-    try {
-        const filepath = `${filePath}`;
-        if (!(await fs.stat(filePath)).isFile()) {
-            return null;
-        }
-        const recordFile = await fs.readFile(filepath, 'utf-8');
-        return recordFile;
-    } catch (e) {
-        // ignore exportFile missing
-        logError(e, 'error while selecting files');
-    }
-};
-
-export const setExportRecord = async (filePath: string, data: string) => {
-    const filepath = `${filePath}`;
-    await fs.writeFile(filepath, data);
-};
-
-export const selectRootDirectory = async () => {
-    try {
-        return await ipcRenderer.invoke('select-dir');
-    } catch (e) {
-        logError(e, 'error while selecting root directory');
-    }
 };
