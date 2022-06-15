@@ -37,7 +37,7 @@ export default function UtilitySection({ closeSidebar }) {
                 proceed: {
                     text: constants.DOWNLOAD,
                     action: downloadApp,
-                    variant: 'success',
+                    variant: 'accent',
                 },
                 close: {
                     text: constants.CLOSE,
