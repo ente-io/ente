@@ -77,7 +77,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 125;
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
     FloatingActionButtonLocation fabLocation() {
       if (isKeypadOpen) {
@@ -96,6 +96,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       title = "Encryption keys";
     }
     return Scaffold(
+      resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         leading: widget.mode == PasswordEntryMode.reset
             ? Container()

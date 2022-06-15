@@ -66,7 +66,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 125;
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
     FloatingActionButtonLocation fabLocation() {
       if (isKeypadOpen) {
@@ -98,6 +98,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       ),
     );
     return Scaffold(
+      resizeToAvoidBottomInset: isKeypadOpen,
       appBar: appBar,
       body: _getBody(),
       floatingActionButton: DynamicFAB(
@@ -320,7 +321,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 const Divider(thickness: 1),
                 const SizedBox(height: 12),
                 _getAgreement(),
-                Padding(padding: EdgeInsets.all(20)),
+                const SizedBox(height: 40),
               ],
             ),
           ),

@@ -19,7 +19,17 @@ class _RecoveryPageState extends State<RecoveryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    FloatingActionButtonLocation fabLocation() {
+      if (isKeypadOpen) {
+        return null;
+      } else {
+        return FloatingActionButtonLocation.centerFloat;
+      }
+    }
+
     return Scaffold(
+      resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
@@ -31,7 +41,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
         ),
       ),
       floatingActionButton: DynamicFAB(
-        isKeypadOpen: false,
+        isKeypadOpen: isKeypadOpen,
         isFormValid: _recoveryKey.text.isNotEmpty,
         buttonText: 'Recover',
         onPressedFunction: () async {
@@ -63,7 +73,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
           }
         },
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
       body: Column(
         children: [
