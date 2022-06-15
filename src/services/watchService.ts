@@ -6,14 +6,14 @@ import { removeFromCollection, syncCollections } from './collectionService';
 import { syncFiles } from './fileService';
 import debounce from 'debounce-promise';
 import { logError } from 'utils/sentry';
-import { EventQueueType, WatchMapping } from 'types/watch';
+import { EventQueueItem, WatchMapping } from 'types/watch';
 import { ElectronAPIsInterface } from 'types/electron';
 
 export class WatchService {
     ElectronAPIs: ElectronAPIsInterface;
     allElectronAPIsExist: boolean = false;
-    eventQueue: EventQueueType[] = [];
-    currentEvent: EventQueueType;
+    eventQueue: EventQueueItem[] = [];
+    currentEvent: EventQueueItem;
     trashingDirQueue: string[] = [];
     isEventRunning: boolean = false;
     uploadRunning: boolean = false;
@@ -86,7 +86,7 @@ export class WatchService {
         });
 
         if (filesToUpload.length > 0) {
-            const event: EventQueueType = {
+            const event: EventQueueItem = {
                 type: 'upload',
                 collectionName: mapping.collectionName,
                 files: filesToUpload,
@@ -106,7 +106,7 @@ export class WatchService {
         });
 
         if (filesToRemove.length > 0) {
-            const event: EventQueueType = {
+            const event: EventQueueItem = {
                 type: 'trash',
                 collectionName: mapping.collectionName,
                 paths: filesToRemove.map((file) => file.path),
@@ -431,7 +431,7 @@ export class WatchService {
 
     // Batches all the files to be uploaded (or trashed) from the
     // event queue of same collection as the next event
-    private clubSameCollectionEvents(): EventQueueType {
+    private clubSameCollectionEvents(): EventQueueItem {
         const event = this.eventQueue.shift();
         while (
             this.eventQueue.length > 0 &&
@@ -469,7 +469,7 @@ async function diskFileAddedCallback(
 
         console.log('added (upload) to event queue', collectionName, file);
 
-        const event: EventQueueType = {
+        const event: EventQueueItem = {
             type: 'upload',
             collectionName,
             files: [file],
@@ -494,7 +494,7 @@ async function diskFileRemovedCallback(
             return;
         }
 
-        const event: EventQueueType = {
+        const event: EventQueueItem = {
             type: 'trash',
             collectionName,
             paths: [filePath],

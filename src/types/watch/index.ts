@@ -9,7 +9,7 @@ export interface WatchMapping {
     }[];
 }
 
-export interface EventQueueType {
+export interface EventQueueItem {
     type: 'upload' | 'trash';
     collectionName: string;
     paths?: string[];
