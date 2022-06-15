@@ -31,6 +31,7 @@ export const CollectionTile = styled('div')`
     display: flex;
     position: relative;
     border-radius: 4px;
+    overflow: hidden;
     user-select: none;
     cursor: pointer;
     & > img {
