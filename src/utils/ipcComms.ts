@@ -69,21 +69,15 @@ export default function setupIpcComs(
         return files;
     });
 
-    ipcMain.handle(
-        'add-watcher',
-        async (_: Electron.IpcMainEvent, args: { dir: string }) => {
-            watcher.add(args.dir);
-        }
-    );
+    ipcMain.handle('add-watcher', async (_, args: { dir: string }) => {
+        watcher.add(args.dir);
+    });
 
-    ipcMain.handle(
-        'remove-watcher',
-        async (_: Electron.IpcMainEvent, args: { dir: string }) => {
-            watcher.unwatch(args.dir);
-        }
-    );
+    ipcMain.handle('remove-watcher', async (_, args: { dir: string }) => {
+        watcher.unwatch(args.dir);
+    });
 
-    ipcMain.handle('log-error', (event, err, msg, info?) => {
+    ipcMain.handle('log-error', (_, err, msg, info?) => {
         logErrorSentry(err, msg, info);
     });
 }
