@@ -90,3 +90,11 @@ export const setExportRecord = async (filePath: string, data: string) => {
     const filepath = `${filePath}`;
     await fs.writeFile(filepath, data);
 };
+
+export const selectRootDirectory = async () => {
+    try {
+        return await ipcRenderer.invoke('select-dir');
+    } catch (e) {
+        logError(e, 'error while selecting root directory');
+    }
+};
