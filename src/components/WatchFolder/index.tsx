@@ -18,12 +18,12 @@ import constants from 'utils/strings/constants';
 import { CheckmarkIcon } from './checkmarkIcon';
 import { MappingEntry } from './mappingEntry';
 
-interface NewType {
+interface Iprops {
     open: boolean;
     onClose: () => void;
 }
 
-export default function WatchFolderModal({ open, onClose }: NewType) {
+export default function WatchFolderModal({ open, onClose }: Iprops) {
     const [mappings, setMappings] = useState<WatchMapping[]>([]);
     const appContext = useContext(AppContext);
 
