@@ -111,7 +111,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       body: _getBody(title),
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
-        isFormValid: _passwordsMatch,
+        isFormValid: _passwordsMatch && _isPasswordValid,
         buttonText: title,
         onPressedFunction: () {
           if (widget.mode == PasswordEntryMode.set) {

@@ -1,11 +1,9 @@
 import 'dart:io';
 
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:password_strength/password_strength.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -484,7 +482,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     return _emailIsValid &&
         _passwordsMatch &&
         _hasAgreedToTOS &&
-        _hasAgreedToE2E;
+        _hasAgreedToE2E &&
+        _passwordIsValid;
   }
 }
 
