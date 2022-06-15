@@ -39,7 +39,7 @@ export function ManageSubscription({ subscription, ...props }) {
                                                     props.closeModal,
                                                     props.setLoading
                                                 ),
-                                                variant: 'success',
+                                                variant: 'accent',
                                             },
                                             close: {
                                                 text: constants.CANCEL,

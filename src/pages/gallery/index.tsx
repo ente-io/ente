@@ -221,7 +221,7 @@ export default function Gallery() {
             proceed: {
                 text: constants.LOGIN,
                 action: logoutUser,
-                variant: 'success',
+                variant: 'accent',
             },
         });
 

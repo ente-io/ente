@@ -190,7 +190,7 @@ export async function cancelSubscription(
         setDialogMessage({
             title: constants.SUCCESS,
             content: constants.SUBSCRIPTION_CANCEL_SUCCESS,
-            close: { variant: 'success' },
+            close: { variant: 'accent' },
         });
     } catch (e) {
         setDialogMessage({
@@ -215,7 +215,7 @@ export async function activateSubscription(
         setDialogMessage({
             title: constants.SUCCESS,
             content: constants.SUBSCRIPTION_ACTIVATE_SUCCESS,
-            close: { variant: 'success' },
+            close: { variant: 'accent' },
         });
     } catch (e) {
         setDialogMessage({
@@ -281,7 +281,7 @@ export async function checkSubscriptionPurchase(
                 );
                 setDialogMessage({
                     title: constants.SUBSCRIPTION_PURCHASE_SUCCESS_TITLE,
-                    close: { variant: 'success' },
+                    close: { variant: 'accent' },
                     content: constants.SUBSCRIPTION_PURCHASE_SUCCESS(
                         subscription?.expiryTime
                     ),
@@ -320,7 +320,7 @@ function handleFailureReason(
 
                 proceed: {
                     text: constants.UPDATE_PAYMENT_METHOD,
-                    variant: 'success',
+                    variant: 'accent',
                     action: updatePaymentMethod.bind(
                         null,
 
@@ -339,7 +339,7 @@ function handleFailureReason(
 
                 proceed: {
                     text: constants.UPDATE_PAYMENT_METHOD,
-                    variant: 'success',
+                    variant: 'accent',
                     action: updatePaymentMethod.bind(
                         null,
 

@@ -83,7 +83,7 @@ function PlanSelector(props: Props) {
                     close: { text: 'close', variant: 'danger' },
                     proceed: {
                         text: constants.REOPEN_PLAN_SELECTOR_MODAL,
-                        variant: 'success',
+                        variant: 'accent',
                         action: onReopenClick,
                     },
                 });
@@ -128,7 +128,7 @@ function PlanSelector(props: Props) {
                         props.setLoading,
                         props.closeModal
                     ),
-                    variant: 'success',
+                    variant: 'accent',
                 },
                 close: { text: constants.CANCEL },
             });

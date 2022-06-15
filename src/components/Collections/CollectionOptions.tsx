@@ -146,7 +146,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             proceed: {
                 text: constants.DOWNLOAD,
                 action: handleCollectionAction(CollectionActions.DOWNLOAD),
-                variant: 'success',
+                variant: 'accent',
             },
             close: {
                 text: constants.CANCEL,
