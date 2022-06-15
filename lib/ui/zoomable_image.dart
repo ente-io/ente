@@ -121,10 +121,12 @@ class _ZoomableImageState extends State<ZoomableImage>
     }
     if (!_loadedFinalImage) {
       getFileFromServer(_photo).then((file) {
-        _onFinalImageLoaded(Image.file(
-          file,
-          gaplessPlayback: true,
-        ).image);
+        _onFinalImageLoaded(
+          Image.file(
+            file,
+            gaplessPlayback: true,
+          ).image,
+        );
       });
     }
   }
@@ -166,8 +168,12 @@ class _ZoomableImageState extends State<ZoomableImage>
             _loadNetworkImage();
           } else {
             FilesDB.instance.deleteLocalFile(_photo);
-            Bus.instance.fire(LocalPhotosUpdatedEvent([_photo],
-                type: EventType.deletedFromDevice));
+            Bus.instance.fire(
+              LocalPhotosUpdatedEvent(
+                [_photo],
+                type: EventType.deletedFromDevice,
+              ),
+            );
           }
         }
       });
@@ -175,7 +181,9 @@ class _ZoomableImageState extends State<ZoomableImage>
   }
 
   void _onLargeThumbnailLoaded(
-      ImageProvider imageProvider, BuildContext context) {
+    ImageProvider imageProvider,
+    BuildContext context,
+  ) {
     if (mounted && !_loadedFinalImage) {
       precacheImage(imageProvider, context).then((value) {
         if (mounted && !_loadedFinalImage) {

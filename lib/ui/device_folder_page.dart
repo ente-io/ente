@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/device_folder.dart';
+import 'package:photos/models/galleryType.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
+import 'package:photos/ui/gallery_overlay_widget.dart';
 
 class DeviceFolderPage extends StatelessWidget {
   final DeviceFolder folder;
@@ -21,8 +24,12 @@ class DeviceFolderPage extends StatelessWidget {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInPath(
-            folder.path, creationStartTime, creationEndTime,
-            limit: limit, asc: asc);
+          folder.path,
+          creationStartTime,
+          creationEndTime,
+          limit: limit,
+          asc: asc,
+        );
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       removalEventTypes: const {
@@ -35,18 +42,28 @@ class DeviceFolderPage extends StatelessWidget {
           ? _getHeaderWidget()
           : Container(),
       initialFiles: [folder.thumbnail],
+      footer: SizedBox(height: 32),
     );
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
-          GalleryAppBarType.local_folder,
+          GalleryType.local_folder,
           folder.name,
           _selectedFiles,
           path: folder.thumbnail.deviceFolder,
         ),
       ),
-      body: gallery,
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          gallery,
+          GalleryOverlayWidget(
+            GalleryType.local_folder,
+            _selectedFiles,
+          )
+        ],
+      ),
     );
   }
 
@@ -74,15 +91,20 @@ class _BackupConfigurationHeaderWidgetState
     return Container(
       padding: EdgeInsets.only(left: 20, right: 12, top: 4, bottom: 4),
       margin: EdgeInsets.only(bottom: 12),
-      color: Color.fromRGBO(10, 40, 40, 0.3),
+      color: Theme.of(context).colorScheme.backupEnabledBgColor,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           isBackedUp
-              ? Text("backup enabled")
+              ? Text("Backup enabled")
               : Text(
-                  "backup disabled",
-                  style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                  "Backup disabled",
+                  style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .defaultTextColor
+                        .withOpacity(0.7),
+                  ),
                 ),
           Switch(
             value: isBackedUp,

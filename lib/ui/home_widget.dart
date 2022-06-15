@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -23,6 +23,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/file_load_result.dart';
+import 'package:photos/models/galleryType.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
@@ -32,20 +33,22 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/app_update_dialog.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
-import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/common/bottomShadow.dart';
+import 'package:photos/ui/common/gradientButton.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/gallery_footer_widget.dart';
+import 'package:photos/ui/gallery_overlay_widget.dart';
 import 'package:photos/ui/grant_permissions_widget.dart';
 import 'package:photos/ui/landing_page_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/ui/nav_bar.dart';
-import 'package:photos/ui/settings_button.dart';
+import 'package:photos/ui/settings_page.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
-import 'package:photos/ui/sync_indicator.dart';
+import 'package:photos/ui/status_bar_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -61,11 +64,13 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static const _deviceFolderGalleryWidget = CollectionsGalleryWidget();
   static const _sharedCollectionGallery = SharedCollectionGallery();
+  static const _settingsPage = SettingsPage();
   static const _headerWidget = HeaderWidget();
 
   final _logger = Logger("HomeWidgetState");
   final _selectedFiles = SelectedFiles();
-  final _settingsButton = SettingsButton();
+
+  // final _settingsButton = SettingsButton();
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
   Widget _headerWidgetWithSettingsButton;
@@ -89,23 +94,18 @@ class _HomeWidgetState extends State<HomeWidget> {
     _headerWidgetWithSettingsButton = Container(
       margin: const EdgeInsets.only(top: 12),
       child: Stack(
-        children: [
+        children: const [
           _headerWidget,
-          _settingsButton,
         ],
       ),
     );
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
-      if (event.source != TabChangedEventSource.tab_bar) {
-        setState(() {
-          _selectedTabIndex = event.selectedIndex;
-        });
-      }
       if (event.source != TabChangedEventSource.page_view) {
+        _selectedTabIndex = event.selectedIndex;
         _pageController.animateToPage(
           event.selectedIndex,
-          duration: Duration(milliseconds: 150),
+          duration: Duration(milliseconds: 100),
           curve: Curves.easeIn,
         );
       }
@@ -121,19 +121,19 @@ class _HomeWidgetState extends State<HomeWidget> {
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       AlertDialog alert = AlertDialog(
-        title: Text("session expired"),
-        content: Text("please login again"),
+        title: Text("Session expired"),
+        content: Text("Please login again"),
         actions: [
           TextButton(
             child: Text(
-              "ok",
+              "Ok",
               style: TextStyle(
                 color: Theme.of(context).buttonColor,
               ),
             ),
             onPressed: () async {
               Navigator.of(context, rootNavigator: true).pop('dialog');
-              final dialog = createProgressDialog(context, "logging out...");
+              final dialog = createProgressDialog(context, "Logging out...");
               await dialog.show();
               await Configuration.instance.logout();
               await dialog.hide();
@@ -150,7 +150,11 @@ class _HomeWidgetState extends State<HomeWidget> {
       );
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
-      setState(() {});
+      _logger.info('logged out, selectTab index to 0');
+      _selectedTabIndex = 0;
+      if (mounted) {
+        setState(() {});
+      }
     });
     _permissionGrantedEvent =
         Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
@@ -179,7 +183,8 @@ class _HomeWidgetState extends State<HomeWidget> {
             context: context,
             builder: (BuildContext context) {
               return AppUpdateDialog(
-                  UpdateService.instance.getLatestVersionInfo());
+                UpdateService.instance.getLatestVersionInfo(),
+              );
             },
             barrierColor: Colors.black.withOpacity(0.85),
           );
@@ -205,14 +210,17 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   void _initMediaShareSubscription() {
-    _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
-        .listen((List<SharedMediaFile> value) {
-      setState(() {
-        _sharedFiles = value;
-      });
-    }, onError: (err) {
-      _logger.severe("getIntentDataStream error: $err");
-    });
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getMediaStream().listen(
+      (List<SharedMediaFile> value) {
+        setState(() {
+          _sharedFiles = value;
+        });
+      },
+      onError: (err) {
+        _logger.severe("getIntentDataStream error: $err");
+      },
+    );
     // For sharing images coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
       setState(() {
@@ -223,7 +231,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.info("Building home_Widget");
+    _logger.info("Building home_Widget with tab $_selectedTabIndex");
 
     return WillPopScope(
       child: Scaffold(
@@ -276,19 +284,33 @@ class _HomeWidgetState extends State<HomeWidget> {
                 : _getMainGalleryWidget(),
             _deviceFolderGalleryWidget,
             _sharedCollectionGallery,
+            _settingsPage,
           ],
           onPageChanged: (page) {
-            Bus.instance.fire(TabChangedEvent(
-              page,
-              TabChangedEventSource.page_view,
-            ));
+            Bus.instance.fire(
+              TabChangedEvent(
+                page,
+                TabChangedEventSource.page_view,
+              ),
+            );
           },
           physics: NeverScrollableScrollPhysics(),
           controller: _pageController,
         ),
+        Align(alignment: Alignment.bottomCenter, child: BottomShadowWidget()),
         Align(
           alignment: Alignment.bottomCenter,
-          child: _buildBottomNavigationBar(),
+          child: SafeArea(
+            minimum: EdgeInsets.only(bottom: 8),
+            child: HomeBottomNavigationBar(
+              _selectedFiles,
+              selectedTabIndex: _selectedTabIndex,
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: GalleryOverlayWidget(GalleryType.homepage, _selectedFiles),
         ),
       ],
     );
@@ -314,12 +336,15 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     // Attach a listener to the stream
-    linkStream.listen((String link) {
-      _logger.info("Link received: " + link);
-      _getCredentials(context, link);
-    }, onError: (err) {
-      _logger.severe(err);
-    });
+    linkStream.listen(
+      (String link) {
+        _logger.info("Link received: " + link);
+        _getCredentials(context, link);
+      },
+      onError: (err) {
+        _logger.severe(err);
+      },
+    );
     return false;
   }
 
@@ -343,34 +368,46 @@ class _HomeWidgetState extends State<HomeWidget> {
         final importantPaths = Configuration.instance.getPathsToBackUp();
         final ownerID = Configuration.instance.getUserID();
         final archivedCollectionIds =
-        CollectionsService.instance.getArchivedCollections();
+            CollectionsService.instance.getArchivedCollections();
         FileLoadResult result;
         if (importantPaths.isNotEmpty) {
-          result = await FilesDB.instance.getImportantFiles(creationStartTime,
-              creationEndTime, ownerID, importantPaths.toList(),
-              limit: limit,
-              asc: asc,
-              ignoredCollectionIDs: archivedCollectionIds);
+          result = await FilesDB.instance.getImportantFiles(
+            creationStartTime,
+            creationEndTime,
+            ownerID,
+            importantPaths.toList(),
+            limit: limit,
+            asc: asc,
+            ignoredCollectionIDs: archivedCollectionIds,
+          );
         } else {
           if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
             result = await FilesDB.instance.getAllLocalAndUploadedFiles(
-                creationStartTime, creationEndTime, ownerID,
-                limit: limit,
-                asc: asc,
-                ignoredCollectionIDs: archivedCollectionIds);
+              creationStartTime,
+              creationEndTime,
+              ownerID,
+              limit: limit,
+              asc: asc,
+              ignoredCollectionIDs: archivedCollectionIds,
+            );
           } else {
             result = await FilesDB.instance.getAllUploadedFiles(
-                creationStartTime, creationEndTime, ownerID,
-                limit: limit,
-                asc: asc,
-                ignoredCollectionIDs: archivedCollectionIds);
+              creationStartTime,
+              creationEndTime,
+              ownerID,
+              limit: limit,
+              asc: asc,
+              ignoredCollectionIDs: archivedCollectionIds,
+            );
           }
         }
         // hide ignored files from home page UI
         final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
-        result.files.removeWhere((f) =>
-            f.uploadedFileID == null &&
-            IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f));
+        result.files.removeWhere(
+          (f) =>
+              f.uploadedFileID == null &&
+              IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
+        );
         return result;
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
@@ -391,7 +428,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     return Stack(
       children: [
         Container(
-          margin: const EdgeInsets.only(bottom: 80),
           child: gallery,
         ),
         HomePageAppBar(_selectedFiles),
@@ -404,9 +440,19 @@ class _HomeWidgetState extends State<HomeWidget> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _headerWidgetWithSettingsButton,
-        Image.asset(
-          "assets/preserved.png",
-          height: 160,
+        Padding(
+          padding: const EdgeInsets.only(top: 64),
+          child: Image.asset(
+            "assets/preserved.png",
+            height: 206,
+          ),
+        ),
+        Text(
+          'No photos are being backed up right now',
+          style: Theme.of(context)
+              .textTheme
+              .caption
+              .copyWith(fontFamily: 'Inter-Medium', fontSize: 16),
         ),
         Center(
           child: Hero(
@@ -416,13 +462,17 @@ class _HomeWidgetState extends State<HomeWidget> {
               child: Container(
                 width: double.infinity,
                 height: 64,
-                padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
-                child: button(
-                  "start backup",
-                  fontSize: 16,
-                  lineHeight: 1.5,
-                  padding: EdgeInsets.only(bottom: 4),
-                  onPressed: () async {
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                child: GradientButton(
+                  child: Text(
+                    'Start backup',
+                    style: gradientButtonTextTheme(),
+                  ),
+                  linearGradientColors: const [
+                    Color(0xFF2CD267),
+                    Color(0xFF1DB954),
+                  ],
+                  onTap: () async {
                     if (LocalSyncService.instance
                         .hasGrantedLimitedPermissions()) {
                       PhotoManager.presentLimited();
@@ -431,7 +481,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                         context,
                         BackupFolderSelectionPage(
                           shouldSelectAll: true,
-                          buttonText: "start backup",
+                          buttonText: "Start backup",
                         ),
                       );
                     }
@@ -444,63 +494,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         Padding(padding: EdgeInsets.all(50)),
       ],
     );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.90),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
-          child: GNav(
-            rippleColor: Theme.of(context).buttonColor.withOpacity(0.20),
-            hoverColor: Theme.of(context).buttonColor.withOpacity(0.20),
-            gap: 8,
-            activeColor: Theme.of(context).buttonColor.withOpacity(0.75),
-            iconSize: 24,
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            duration: Duration(milliseconds: 400),
-            tabMargin: EdgeInsets.only(left: 8, right: 8),
-            tabBackgroundColor: Color.fromRGBO(15, 25, 25, 0.7),
-            haptic: false,
-            tabs: [
-              GButton(
-                icon: Icons.photo_library_outlined,
-                text: 'photos',
-                onPressed: () {
-                  _onTabChange(0); // To take care of occasional missing events
-                },
-              ),
-              GButton(
-                icon: Icons.folder_special_outlined,
-                text: 'albums',
-                onPressed: () {
-                  _onTabChange(1); // To take care of occasional missing events
-                },
-              ),
-              GButton(
-                icon: Icons.folder_shared_outlined,
-                text: 'shared',
-                onPressed: () {
-                  _onTabChange(2); // To take care of occasional missing events
-                },
-              ),
-            ],
-            selectedIndex: _selectedTabIndex,
-            onTabChange: _onTabChange,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _onTabChange(int index) {
-    Bus.instance.fire(TabChangedEvent(
-      index,
-      TabChangedEventSource.tab_bar,
-    ));
   }
 }
 
@@ -530,7 +523,7 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
     final appBar = SizedBox(
       height: 60,
       child: GalleryAppBarWidget(
-        GalleryAppBarType.homepage,
+        GalleryType.homepage,
         null,
         widget.selectedFiles,
       ),
@@ -543,9 +536,190 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
   }
 }
 
+class HomeBottomNavigationBar extends StatefulWidget {
+  const HomeBottomNavigationBar(
+    this.selectedFiles, {
+    this.selectedTabIndex,
+    Key key,
+  }) : super(key: key);
+
+  final SelectedFiles selectedFiles;
+  final int selectedTabIndex;
+
+  @override
+  _HomeBottomNavigationBarState createState() =>
+      _HomeBottomNavigationBarState();
+}
+
+class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
+  StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
+  final _logger = Logger((_HomeBottomNavigationBarState).toString());
+  int currentTabIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    currentTabIndex = widget.selectedTabIndex;
+    widget.selectedFiles.addListener(() {
+      setState(() {});
+    });
+    _tabChangedEventSubscription =
+        Bus.instance.on<TabChangedEvent>().listen((event) {
+      if (event.source != TabChangedEventSource.tab_bar) {
+        _logger.fine('index changed to ${event.selectedIndex}');
+        if (mounted) {
+          setState(() {
+            currentTabIndex = event.selectedIndex;
+          });
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabChangedEventSubscription.cancel();
+    super.dispose();
+  }
+
+  void _onTabChange(int index) {
+    Bus.instance.fire(
+      TabChangedEvent(
+        index,
+        TabChangedEventSource.tab_bar,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      height: filesAreSelected ? 0 : 52,
+      child: AnimatedOpacity(
+        duration: Duration(milliseconds: 100),
+        opacity: filesAreSelected ? 0.0 : 1.0,
+        curve: Curves.easeIn,
+        child: IgnorePointer(
+          ignoring: filesAreSelected,
+          child: ListView(
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(36),
+                    child: Container(
+                      alignment: Alignment.bottomCenter,
+                      height: 52,
+                      width: 240,
+                      child: ClipRect(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                          child: GNav(
+                            curve: Curves.easeOutExpo,
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .gNavBackgroundColor,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            rippleColor: Colors.white.withOpacity(0.1),
+                            activeColor: Theme.of(context)
+                                .colorScheme
+                                .gNavBarActiveColor,
+                            iconSize: 24,
+                            padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            duration: Duration(milliseconds: 200),
+                            gap: 0,
+                            tabBorderRadius: 24,
+                            tabBackgroundColor: Theme.of(context)
+                                .colorScheme
+                                .gNavBarActiveColor,
+                            haptic: false,
+                            tabs: [
+                              GButton(
+                                margin: EdgeInsets.fromLTRB(6, 6, 0, 6),
+                                icon: Icons.home,
+                                iconColor:
+                                    Theme.of(context).colorScheme.gNavIconColor,
+                                iconActiveColor: Theme.of(context)
+                                    .colorScheme
+                                    .gNavActiveIconColor,
+                                text: '',
+                                onPressed: () {
+                                  _onTabChange(
+                                    0,
+                                  ); // To take care of occasional missing events
+                                },
+                              ),
+                              GButton(
+                                margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                icon: Icons.photo_library,
+                                iconColor:
+                                    Theme.of(context).colorScheme.gNavIconColor,
+                                iconActiveColor: Theme.of(context)
+                                    .colorScheme
+                                    .gNavActiveIconColor,
+                                text: '',
+                                onPressed: () {
+                                  _onTabChange(
+                                    1,
+                                  ); // To take care of occasional missing events
+                                },
+                              ),
+                              GButton(
+                                margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                icon: Icons.folder_shared,
+                                iconColor:
+                                    Theme.of(context).colorScheme.gNavIconColor,
+                                iconActiveColor: Theme.of(context)
+                                    .colorScheme
+                                    .gNavActiveIconColor,
+                                text: '',
+                                onPressed: () {
+                                  _onTabChange(
+                                    2,
+                                  ); // To take care of occasional missing events
+                                },
+                              ),
+                              GButton(
+                                margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
+                                icon: Icons.person,
+                                iconColor:
+                                    Theme.of(context).colorScheme.gNavIconColor,
+                                iconActiveColor: Theme.of(context)
+                                    .colorScheme
+                                    .gNavActiveIconColor,
+                                text: '',
+                                onPressed: () {
+                                  _onTabChange(
+                                    3,
+                                  ); // To take care of occasional missing events
+                                },
+                              )
+                            ],
+                            selectedIndex: currentTabIndex,
+                            onTabChange: _onTabChange,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class HeaderWidget extends StatelessWidget {
   static const _memoriesWidget = MemoriesWidget();
-  static const _syncIndicator = SyncIndicator();
+  static const _statusBarWidget = StatusBarWidget();
 
   const HeaderWidget({
     Key key,
@@ -555,7 +729,7 @@ class HeaderWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     Logger("Header").info("Building header widget");
     const list = [
-      _syncIndicator,
+      _statusBarWidget,
       _memoriesWidget,
     ];
     return Column(

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final String tag;
   final Stream<int> currentIndexStream;
+  final bool smallerTodayFont;
 
   LazyLoadingGallery(
     this.files,
@@ -36,6 +38,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.selectedFiles,
     this.tag,
     this.currentIndexStream, {
+    this.smallerTodayFont,
     Key key,
   }) : super(key: key ?? UniqueKey());
 
@@ -89,15 +92,18 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           fileDate.day == galleryDate.day;
     });
     if (filesUpdatedThisDay.isNotEmpty) {
-      _logger.info(filesUpdatedThisDay.length.toString() +
-          " files were updated on " +
-          getDayTitle(galleryDate.microsecondsSinceEpoch));
+      _logger.info(
+        filesUpdatedThisDay.length.toString() +
+            " files were updated on " +
+            getDayTitle(galleryDate.microsecondsSinceEpoch),
+      );
       if (event.type == EventType.addedOrUpdated) {
         final dayStartTime =
             DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
         final result = await widget.asyncLoader(
-            dayStartTime.microsecondsSinceEpoch,
-            dayStartTime.microsecondsSinceEpoch + kMicroSecondsInDay - 1);
+          dayStartTime.microsecondsSinceEpoch,
+          dayStartTime.microsecondsSinceEpoch + kMicroSecondsInDay - 1,
+        );
         if (mounted) {
           setState(() {
             _files = result.files;
@@ -146,7 +152,11 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
         children: [
-          getDayWidget(_files[0].creationTime),
+          getDayWidget(
+            context,
+            _files[0].creationTime,
+            widget.smallerTodayFont,
+          ),
           _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
         ],
       ),
@@ -156,14 +166,17 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   Widget _getGallery() {
     List<Widget> childGalleries = [];
     for (int index = 0; index < _files.length; index += kSubGalleryItemLimit) {
-      childGalleries.add(LazyLoadingGridView(
-        widget.tag,
-        _files.sublist(index, min(index + kSubGalleryItemLimit, _files.length)),
-        widget.asyncLoader,
-        widget.selectedFiles,
-        index == 0,
-        _files.length > kRecycleLimit,
-      ));
+      childGalleries.add(
+        LazyLoadingGridView(
+          widget.tag,
+          _files.sublist(
+              index, min(index + kSubGalleryItemLimit, _files.length)),
+          widget.asyncLoader,
+          widget.selectedFiles,
+          index == 0,
+          _files.length > kRecycleLimit,
+        ),
+      );
     }
 
     return Column(
@@ -296,23 +309,45 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         _selectFile(file);
       },
       child: Container(
-        margin: const EdgeInsets.all(2.0),
+        margin: const EdgeInsets.all(1.5),
         decoration: BoxDecoration(
-          border: widget.selectedFiles.files.contains(file)
-              ? Border.all(
-                  width: 4.0,
-                  color: Theme.of(context).buttonColor,
-                )
-              : null,
+          borderRadius: BorderRadius.circular(3),
         ),
-        child: Hero(
-          tag: widget.tag + file.tag(),
-          child: ThumbnailWidget(
-            file,
-            diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
-            serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
-            shouldShowLivePhotoOverlay: true,
-            key: Key(widget.tag + file.tag()),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(3),
+          child: Stack(
+            children: [
+              Hero(
+                tag: widget.tag + file.tag(),
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(
+                      widget.selectedFiles.files.contains(file) ? 0.4 : 0,
+                    ),
+                    BlendMode.darken,
+                  ),
+                  child: ThumbnailWidget(
+                    file,
+                    diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
+                    serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
+                    shouldShowLivePhotoOverlay: true,
+                    key: Key(widget.tag + file.tag()),
+                  ),
+                ),
+              ),
+              Visibility(
+                visible: widget.selectedFiles.files.contains(file),
+                child: Positioned(
+                  right: 4,
+                  top: 4,
+                  child: Icon(
+                    Icons.check_circle_rounded,
+                    size: 20,
+                    color: Colors.white, //same for both themes
+                  ),
+                ),
+              )
+            ],
           ),
         ),
       ),
@@ -324,12 +359,14 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   void _routeToDetailPage(File file, BuildContext context) {
-    final page = DetailPage(DetailPageConfiguration(
-      List.unmodifiable(widget.files),
-      widget.asyncLoader,
-      widget.files.indexOf(file),
-      widget.tag,
-    ));
+    final page = DetailPage(
+      DetailPageConfiguration(
+        List.unmodifiable(widget.files),
+        widget.asyncLoader,
+        widget.files.indexOf(file),
+        widget.tag,
+      ),
+    );
     routeToPage(context, page);
   }
 }

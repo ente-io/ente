@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
@@ -30,6 +31,8 @@ class Gallery extends StatefulWidget {
   final String tagPrefix;
   final Widget header;
   final Widget footer;
+  final bool smallerTodayFont;
+  final String albumName;
 
   Gallery({
     @required this.asyncLoader,
@@ -41,6 +44,8 @@ class Gallery extends StatefulWidget {
     this.removalEventTypes = const {},
     this.header,
     this.footer,
+    this.smallerTodayFont = false,
+    this.albumName = '',
     Key key,
   }) : super(key: key);
 
@@ -74,11 +79,13 @@ class _GalleryState extends State<Gallery> {
     }
     if (widget.forceReloadEvents != null) {
       for (final event in widget.forceReloadEvents) {
-        _forceReloadEventSubscriptions.add(event.listen((event) async {
-          _logger.info("Force reload triggered");
-          final result = await _loadFiles();
-          _setFilesAndReload(result.files);
-        }));
+        _forceReloadEventSubscriptions.add(
+          event.listen((event) async {
+            _logger.info("Force reload triggered");
+            final result = await _loadFiles();
+            _setFilesAndReload(result.files);
+          }),
+        );
       }
     }
     if (widget.initialFiles != null) {
@@ -106,15 +113,19 @@ class _GalleryState extends State<Gallery> {
     try {
       final startTime = DateTime.now().microsecondsSinceEpoch;
       final result = await widget.asyncLoader(
-          kGalleryLoadStartTime, DateTime.now().microsecondsSinceEpoch,
-          limit: limit);
+        kGalleryLoadStartTime,
+        DateTime.now().microsecondsSinceEpoch,
+        limit: limit,
+      );
       final endTime = DateTime.now().microsecondsSinceEpoch;
       final duration = Duration(microseconds: endTime - startTime);
-      _logger.info("Time taken to load " +
-          result.files.length.toString() +
-          " files :" +
-          duration.inMilliseconds.toString() +
-          "ms");
+      _logger.info(
+        "Time taken to load " +
+            result.files.length.toString() +
+            " files :" +
+            duration.inMilliseconds.toString() +
+            "ms",
+      );
       return result;
     } catch (e, s) {
       _logger.severe("failed to load files", e, s);
@@ -173,7 +184,13 @@ class _GalleryState extends State<Gallery> {
         if (widget.header != null) {
           children.add(widget.header);
         }
-        children.add(Expanded(child: nothingToSeeHere));
+        children.add(
+          Expanded(
+            child: nothingToSeeHere(
+              textColor: Theme.of(context).colorScheme.defaultTextColor,
+            ),
+          ),
+        );
         if (widget.footer != null) {
           children.add(widget.footer);
         }
@@ -196,6 +213,7 @@ class _GalleryState extends State<Gallery> {
               .on<GalleryIndexUpdatedEvent>()
               .where((event) => event.tag == widget.tagPrefix)
               .map((event) => event.index),
+          smallerTodayFont: widget.smallerTodayFont,
         );
         if (widget.header != null && index == 0) {
           gallery = Column(children: [widget.header, gallery]);
@@ -206,11 +224,15 @@ class _GalleryState extends State<Gallery> {
         return gallery;
       },
       labelTextBuilder: (int index) {
-        return getMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(
-            _collatedFiles[index][0].creationTime));
+        return getMonthAndYear(
+          DateTime.fromMicrosecondsSinceEpoch(
+            _collatedFiles[index][0].creationTime,
+          ),
+        );
       },
-      thumbBackgroundColor: Color(0xFF151515),
-      thumbDrawColor: Colors.white.withOpacity(0.5),
+      thumbBackgroundColor:
+          Theme.of(context).colorScheme.galleryThumbBackgroundColor,
+      thumbDrawColor: Theme.of(context).colorScheme.galleryThumbDrawColor,
       firstShown: (int firstIndex) {
         Bus.instance
             .fire(GalleryIndexUpdatedEvent(widget.tagPrefix, firstIndex));
@@ -224,7 +246,9 @@ class _GalleryState extends State<Gallery> {
     for (int index = 0; index < files.length; index++) {
       if (index > 0 &&
           !_areFromSameDay(
-              files[index - 1].creationTime, files[index].creationTime)) {
+            files[index - 1].creationTime,
+            files[index].creationTime,
+          )) {
         final List<File> collatedDailyFiles = [];
         collatedDailyFiles.addAll(dailyFiles);
         collatedFiles.add(collatedDailyFiles);

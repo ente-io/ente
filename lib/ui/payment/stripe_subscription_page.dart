@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/common/bottomShadow.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/payment/child_subscription_widget.dart';
@@ -19,6 +21,7 @@ import 'package:photos/ui/progress_dialog.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
+import 'package:step_progress_indicator/step_progress_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StripeSubscriptionPage extends StatefulWidget {
@@ -46,18 +49,19 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   FreePlan _freePlan;
   List<BillingPlan> _plans = [];
   bool _hasLoadedData = false;
+  bool _isLoading = false;
   bool _isStripeSubscriber = false;
   bool _showYearlyPlan = false;
 
   @override
   void initState() {
-    _fetchSub();
-    _dialog = createProgressDialog(context, "please wait...");
     super.initState();
   }
 
   Future<void> _fetchSub() async {
-    return _userService.getUserDetailsV2().then((userDetails) async {
+    return _userService
+        .getUserDetailsV2(memoryCount: false)
+        .then((userDetails) async {
       _userDetails = userDetails;
       _currentSubscription = userDetails.subscription;
       _showYearlyPlan = _currentSubscription.isYearlyPlan();
@@ -90,7 +94,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     try {
       await _fetchSub();
     } catch (e) {
-      showToast("failed to refresh subscription");
+      showToast(context, "Failed to refresh subscription");
     }
     await _dialog.hide();
 
@@ -110,16 +114,60 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final appBar = AppBar(
-      title: Text("subscription"),
+    final appBar = PreferredSize(
+      preferredSize: Size(double.infinity, 60),
+      child: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).backgroundColor,
+              blurRadius: 16,
+              offset: Offset(0, 8),
+            )
+          ],
+        ),
+        child: widget.isOnboarding
+            ? AppBar(
+                elevation: 0,
+                title: Hero(
+                  tag: "subscription",
+                  child: StepProgressIndicator(
+                    totalSteps: 4,
+                    currentStep: 4,
+                    selectedColor: Theme.of(context).buttonColor,
+                    roundedEdges: Radius.circular(10),
+                    unselectedColor: Theme.of(context)
+                        .colorScheme
+                        .stepProgressUnselectedColor,
+                  ),
+                ),
+              )
+            : AppBar(
+                elevation: 0,
+                title: Text("Subscription"),
+              ),
+      ),
     );
     return Scaffold(
       appBar: appBar,
-      body: _getBody(),
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          _getBody(),
+          BottomShadowWidget(
+            offsetDy: 40,
+          )
+        ],
+      ),
     );
   }
 
   Widget _getBody() {
+    if (!_isLoading) {
+      _isLoading = true;
+      _dialog = createProgressDialog(context, "Please wait...");
+      _fetchSub();
+    }
     if (_hasLoadedData) {
       if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
         return ChildSubscriptionWidget(userDetails: _userDetails);
@@ -133,15 +181,18 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Widget _buildPlans() {
     final widgets = <Widget>[];
 
-    widgets.add(SubscriptionHeaderWidget(
-      isOnboarding: widget.isOnboarding,
-      currentUsage: _userDetails.getFamilyOrPersonalUsage(),
-    ));
+    widgets.add(
+      SubscriptionHeaderWidget(
+        isOnboarding: widget.isOnboarding,
+        currentUsage: _userDetails.getFamilyOrPersonalUsage(),
+      ),
+    );
 
     widgets.addAll([
       Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: _getStripePlanWidgets()),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: _getStripePlanWidgets(),
+      ),
       Padding(padding: EdgeInsets.all(4)),
     ]);
 
@@ -175,16 +226,19 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   break;
                 case kPlayStore:
                   launch(
-                      "https://play.google.com/store/account/subscriptions?sku=" +
-                          _currentSubscription.productID +
-                          "&package=io.ente.photos");
+                    "https://play.google.com/store/account/subscriptions?sku=" +
+                        _currentSubscription.productID +
+                        "&package=io.ente.photos",
+                  );
                   break;
                 case kAppStore:
                   launch("https://apps.apple.com/account/billing");
                   break;
                 default:
                   _logger.severe(
-                      "unexpected payment provider ", _currentSubscription);
+                    "unexpected payment provider ",
+                    _currentSubscription,
+                  );
               }
             },
             child: Container(
@@ -195,11 +249,14 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                     text: TextSpan(
                       text: !_isStripeSubscriber
                           ? "visit ${_currentSubscription.paymentProvider} to manage your subscription"
-                          : "payment details",
+                          : "Payment details",
                       style: TextStyle(
-                        color: _isStripeSubscriber ? Colors.blue : Colors.white,
-                        fontFamily: 'Ubuntu',
-                        fontSize: 15,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontFamily: 'Inter-Medium',
+                        fontSize: 14,
+                        decoration: _isStripeSubscriber
+                            ? TextDecoration.underline
+                            : TextDecoration.none,
                       ),
                     ),
                     textAlign: TextAlign.center,
@@ -226,10 +283,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 children: [
                   RichText(
                     text: TextSpan(
-                      text: "manage family",
+                      text: "Manage family",
                       style: TextStyle(
                         color: Colors.blue,
-                        fontFamily: 'Ubuntu',
                         fontSize: 15,
                       ),
                     ),
@@ -258,7 +314,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
-            return WebPage("payment details", url);
+            return WebPage("Payment details", url);
           },
         ),
       ).then((value) => onWebPaymentGoBack);
@@ -272,21 +328,26 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Future<void> _launchFamilyPortal() async {
     if (_userDetails.subscription.productID == kFreeProductID) {
       await showErrorDialog(
-          context,
-          "Now you can share your storage plan with your family members!",
-          "Customers on paid plans can add up to 5 family members without paying extra. Each member gets their own private space.");
+        context,
+        "Now you can share your storage plan with your family members!",
+        "Customers on paid plans can add up to 5 family members without paying extra. Each member gets their own private space.",
+      );
       return;
     }
     await _dialog.show();
     try {
       final String jwtToken = await _userService.getFamiliesToken();
       final bool familyExist = _userDetails.isPartOfFamily();
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (BuildContext context) {
-          return WebPage("family",
-              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist');
-        },
-      )).then((value) => onWebPaymentGoBack);
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return WebPage(
+              "Family",
+              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist',
+            );
+          },
+        ),
+      ).then((value) => onWebPaymentGoBack);
     } catch (e) {
       await _dialog.hide();
       showGenericErrorDialog(context);
@@ -298,28 +359,37 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     bool isRenewCancelled =
         _currentSubscription.attributes?.isCancelled ?? false;
     String title =
-        isRenewCancelled ? "renew subscription" : "cancel subscription";
+        isRenewCancelled ? "Renew subscription" : "Cancel subscription";
     return TextButton(
       child: Text(
         title,
         style: TextStyle(
-          color: (isRenewCancelled ? Colors.greenAccent : Colors.white)
-              .withOpacity(isRenewCancelled ? 1.0 : 0.4),
+          color: (isRenewCancelled
+                  ? Colors.greenAccent
+                  : Theme.of(context).colorScheme.onSurface)
+              .withOpacity(isRenewCancelled ? 1.0 : 0.2),
         ),
       ),
       onPressed: () async {
         bool confirmAction = false;
         if (isRenewCancelled) {
           var choice = await showChoiceDialog(
-              context, title, "are you sure you want to renew?",
-              firstAction: "no", secondAction: "yes");
+            context,
+            title,
+            "are you sure you want to renew?",
+            firstAction: "no",
+            secondAction: "yes",
+          );
           confirmAction = choice == DialogUserChoice.secondChoice;
         } else {
           var choice = await showChoiceDialog(
-              context, title, 'are you sure you want to cancel?',
-              firstAction: 'yes, cancel',
-              secondAction: 'no',
-              actionType: ActionType.critical);
+            context,
+            title,
+            'are you sure you want to cancel?',
+            firstAction: 'yes, cancel',
+            secondAction: 'no',
+            actionType: ActionType.critical,
+          );
           confirmAction = choice == DialogUserChoice.firstChoice;
         }
         if (confirmAction) {
@@ -337,7 +407,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           : await _billingService.cancelStripeSubscription();
       await _fetchSub();
     } catch (e) {
-      showToast(isRenewCancelled ? 'failed to renew' : 'failed to cancel');
+      showToast(
+        context,
+        isRenewCancelled ? 'failed to renew' : 'failed to cancel',
+      );
     }
     await _dialog.hide();
   }
@@ -367,24 +440,31 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               if (!_isStripeSubscriber &&
                   _hasActiveSubscription &&
                   _currentSubscription.productID != kFreeProductID) {
-                showErrorDialog(context, "sorry",
-                    "please cancel your existing subscription from ${_currentSubscription.paymentProvider} first");
+                showErrorDialog(
+                  context,
+                  "Sorry",
+                  "please cancel your existing subscription from ${_currentSubscription.paymentProvider} first",
+                );
                 return;
               }
               if (_userDetails.getFamilyOrPersonalUsage() > plan.storage) {
                 showErrorDialog(
-                    context, "sorry", "you cannot downgrade to this plan");
+                  context,
+                  "Sorry",
+                  "you cannot downgrade to this plan",
+                );
                 return;
               }
               String stripPurChaseAction = 'buy';
               if (_isStripeSubscriber && _hasActiveSubscription) {
                 // confirm if user wants to change plan or not
                 var result = await showChoiceDialog(
-                    context,
-                    "confirm plan change",
-                    "are you sure you want to change your plan?",
-                    firstAction: "no",
-                    secondAction: 'yes');
+                  context,
+                  "Confirm plan change",
+                  "Are you sure you want to change your plan?",
+                  firstAction: "No",
+                  secondAction: 'Yes',
+                );
                 if (result != DialogUserChoice.secondChoice) {
                   return;
                 }
@@ -425,7 +505,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         child: Text(
           title,
           style: TextStyle(
-            color: Colors.white.withOpacity(reduceOpacity ? 0.5 : 1.0),
+            color: Theme.of(context)
+                .colorScheme
+                .onSurface
+                .withOpacity(reduceOpacity ? 0.5 : 1.0),
           ),
         ),
       );
@@ -438,7 +521,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _planText("monthly", _showYearlyPlan),
+          _planText("Monthly", _showYearlyPlan),
           Switch(
             value: _showYearlyPlan,
             activeColor: Colors.white,
@@ -448,7 +531,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               await _filterStripeForUI();
             },
           ),
-          _planText("yearly", !_showYearlyPlan)
+          _planText("Yearly", !_showYearlyPlan)
         ],
       ),
     );

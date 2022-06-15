@@ -24,7 +24,7 @@ class _VideoControlsState extends State<VideoControls> {
   bool _dragging = false;
   bool _displayTapped = false;
 
-  final barHeight = 48.0;
+  final barHeight = 120.0;
   final marginSize = 5.0;
 
   VideoPlayerController controller;
@@ -41,7 +41,7 @@ class _VideoControlsState extends State<VideoControls> {
           : Center(
               child: Icon(
                 Icons.error,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 size: 42,
               ),
             );
@@ -64,7 +64,7 @@ class _VideoControlsState extends State<VideoControls> {
                               _latestValue.duration == null ||
                           _latestValue.isBuffering
                       ? const Center(
-                          child: const CircularProgressIndicator(),
+                          child: CircularProgressIndicator(),
                         )
                       : _buildHitArea(),
                 ],
@@ -164,8 +164,10 @@ class _VideoControlsState extends State<VideoControls> {
                 child: Padding(
                   padding: EdgeInsets.all(12.0),
                   child: Icon(
-                      _latestValue.isPlaying ? Icons.pause : Icons.play_arrow,
-                      size: 64.0),
+                    _latestValue.isPlaying ? Icons.pause : Icons.play_arrow,
+                    color: Colors.white, // same for both themes
+                    size: 64.0,
+                  ),
                 ),
               ),
             ),
@@ -183,9 +185,10 @@ class _VideoControlsState extends State<VideoControls> {
     return Container(
       margin: EdgeInsets.only(left: 20.0, right: 16.0),
       child: Text(
-        '${formatDuration(position)}',
+        formatDuration(position),
         style: TextStyle(
           fontSize: 12.0,
+          color: Colors.white,
         ),
       ),
     );
@@ -199,9 +202,10 @@ class _VideoControlsState extends State<VideoControls> {
     return Padding(
       padding: EdgeInsets.only(right: 20.0),
       child: Text(
-        '${formatDuration(duration)}',
+        formatDuration(duration),
         style: TextStyle(
           fontSize: 12.0,
+          color: Colors.white,
         ),
       ),
     );
@@ -297,10 +301,11 @@ class _VideoControlsState extends State<VideoControls> {
           },
           colors: chewieController.materialProgressColors ??
               ChewieProgressColors(
-                  playedColor: Theme.of(context).buttonColor,
-                  handleColor: Colors.white,
-                  bufferedColor: Colors.white,
-                  backgroundColor: Theme.of(context).disabledColor),
+                playedColor: Theme.of(context).buttonColor,
+                handleColor: Colors.white,
+                bufferedColor: Colors.white,
+                backgroundColor: Theme.of(context).disabledColor,
+              ),
         ),
       ),
     );

@@ -1,15 +1,15 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/data_util.dart';
-import 'package:photos/utils/toast_util.dart';
-import 'package:pie_chart/pie_chart.dart';
 
 class DetailsSectionWidget extends StatefulWidget {
   DetailsSectionWidget({Key key}) : super(key: key);
@@ -21,6 +21,7 @@ class DetailsSectionWidget extends StatefulWidget {
 class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   UserDetails _userDetails;
   StreamSubscription<UserDetailsChangedEvent> _userDetailsChangedEvent;
+  StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
 
   @override
   void initState() {
@@ -30,123 +31,203 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         Bus.instance.on<UserDetailsChangedEvent>().listen((event) {
       _fetchUserDetails();
     });
+    _tabChangedEventSubscription =
+        Bus.instance.on<TabChangedEvent>().listen((event) {
+      if (event.selectedIndex == 3) {
+        _fetchUserDetails();
+      }
+    });
   }
 
   void _fetchUserDetails() {
-    UserService.instance.getUserDetailsV2(memberCount: true).then((details) {
-      setState(() {
-        _userDetails = details;
-      });
+    UserService.instance.getUserDetailsV2(memoryCount: true).then((details) {
+      if (mounted) {
+        setState(() {
+          _userDetails = details;
+        });
+      }
     });
   }
 
   @override
   void dispose() {
     _userDetailsChangedEvent.cancel();
+    _tabChangedEventSubscription.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 140,
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () async {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return getSubscriptionPage();
+            },
+          ),
+        );
+      },
       child: _userDetails == null ? loadWidget : getContainer(),
     );
   }
 
-  Container getContainer() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.withBlue(210).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-      margin: EdgeInsets.fromLTRB(12, 8, 12, 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.center,
+  Widget getContainer() {
+    return SizedBox(
+      width: 350,
+      height: 175,
+      // constraints: BoxConstraints(maxWidth: 390, maxHeight: 195),
+      child: Stack(
         children: [
-          GestureDetector(
-            onTap: () {
-              int totalStorage = _userDetails.isPartOfFamily()
-                  ? _userDetails.familyData.storage
-                  : _userDetails.subscription.storage;
-              String usageText = formatBytes(_userDetails.getFreeStorage()) +
-                  " / " +
-                  convertBytesToReadableFormat(totalStorage) +
-                  " free";
-              if (_userDetails.isPartOfFamily()) {
-                usageText +=
-                    "\npersonal usage: ${convertBytesToReadableFormat(_userDetails.getPersonalUsage())}\n"
-                    "family usage: ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage() - _userDetails.getPersonalUsage())}";
-              }
-              showToast(usageText);
-            },
-            child: PieChart(
-              dataMap: {
-                "used": _userDetails.getPersonalUsage().toDouble(),
-                "family_usage": (_userDetails.getFamilyOrPersonalUsage() -
-                        _userDetails.getPersonalUsage())
-                    .toDouble(),
-                "free": _userDetails.getFreeStorage().toDouble(),
-              },
-              colorList: const [
-                Colors.redAccent,
-                Colors.blueGrey,
-                Color.fromRGBO(50, 194, 100, 1.0),
-              ],
-              legendOptions: LegendOptions(
-                showLegends: false,
+          Container(
+            width: double.infinity,
+            color: Colors.transparent,
+            child: AspectRatio(
+              aspectRatio: 2 / 1,
+              child: Image(
+                image: AssetImage("assets/card_background.png"),
+                fit: BoxFit.fill, // use this
               ),
-              chartValuesOptions: ChartValuesOptions(
-                showChartValues: false,
-                showChartValueBackground: false,
-              ),
-              chartRadius: 80,
-              ringStrokeWidth: 4,
-              chartType: ChartType.ring,
-              centerText: convertBytesToReadableFormat(
-                      _userDetails.getPersonalUsage()) +
-                  "\nused",
-              centerTextStyle: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-              ),
-              initialAngleInDegree: 270,
             ),
           ),
-          Padding(padding: EdgeInsets.all(4)),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _userDetails.email,
-                  style: TextStyle(
-                    fontSize: 16,
+          Padding(
+            padding: EdgeInsets.only(top: 20, bottom: 20, left: 16, right: 16),
+            child: Container(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Storage",
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle2
+                              .copyWith(color: Colors.white.withOpacity(0.7)),
+                        ),
+                        Text(
+                          "${convertBytesToReadableFormat(_userDetails.getFreeStorage())} of ${convertBytesToReadableFormat(_userDetails.getTotalStorage())} free",
+                          style: Theme.of(context)
+                              .textTheme
+                              .headline5
+                              .copyWith(color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Padding(padding: EdgeInsets.all(6)),
-                Text(
-                  _userDetails.fileCount.toString() + " memories preserved",
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 14,
-                  ),
-                ),
-                Padding(padding: EdgeInsets.all(3)),
-                Text(
-                  _userDetails.sharedCollectionsCount.toString() +
-                      " albums shared",
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
+                  Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Stack(
+                        children: <Widget>[
+                          Container(
+                            color: Colors.white.withOpacity(0.2),
+                            width: MediaQuery.of(context).size.width,
+                            height: 4,
+                          ),
+                          Container(
+                            color: Colors.white.withOpacity(0.75),
+                            width: MediaQuery.of(context).size.width *
+                                ((_userDetails.getFamilyOrPersonalUsage()) /
+                                    _userDetails.getTotalStorage()),
+                            height: 4,
+                          ),
+                          Container(
+                            color: Colors.white,
+                            width: MediaQuery.of(context).size.width *
+                                (_userDetails.usage /
+                                    _userDetails.getTotalStorage()),
+                            height: 4,
+                          ),
+                        ],
+                      ),
+                      Padding(padding: EdgeInsets.symmetric(vertical: 8)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _userDetails.isPartOfFamily()
+                              ? Row(
+                                  children: [
+                                    Container(
+                                      width: 8.71,
+                                      height: 8.99,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Padding(padding: EdgeInsets.only(right: 4)),
+                                    Text(
+                                      "You",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          .copyWith(
+                                              color: Colors.white,
+                                              fontSize: 12),
+                                    ),
+                                    Padding(
+                                        padding: EdgeInsets.only(right: 12)),
+                                    Container(
+                                      width: 8.71,
+                                      height: 8.99,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white.withOpacity(0.75),
+                                      ),
+                                    ),
+                                    Padding(padding: EdgeInsets.only(right: 4)),
+                                    Text(
+                                      "Family",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          .copyWith(
+                                              color: Colors.white,
+                                              fontSize: 12),
+                                    ),
+                                  ],
+                                )
+                              : Text(
+                                  "${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())} used",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyText1
+                                      .copyWith(
+                                          color: Colors.white, fontSize: 12),
+                                ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 16.0),
+                            child: Text(
+                              "${NumberFormat().format(_userDetails.fileCount)} Memories",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyText1
+                                  .copyWith(color: Colors.white, fontSize: 12),
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Icon(
+              Icons.chevron_right,
+              color: Colors.white,
+              size: 24,
             ),
           ),
         ],

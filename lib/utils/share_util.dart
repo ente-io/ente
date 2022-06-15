@@ -11,15 +11,17 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/toast_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:share_plus/share_plus.dart';
 
 final _logger = Logger("ShareUtil");
 // share is used to share media/files from ente to other apps
-Future<void> share(BuildContext context, List<File> files,
-    {GlobalKey shareButtonKey}) async {
-  final dialog = createProgressDialog(context, "preparing...");
+Future<void> share(
+  BuildContext context,
+  List<File> files, {
+  GlobalKey shareButtonKey,
+}) async {
+  final dialog = createProgressDialog(context, "Preparing...");
   await dialog.show();
   final List<Future<String>> pathFutures = [];
   for (File file in files) {
@@ -60,13 +62,16 @@ Future<void> shareText(String text) async {
 }
 
 Future<List<File>> convertIncomingSharedMediaToFile(
-    List<SharedMediaFile> sharedMedia, int collectionID) async {
+  List<SharedMediaFile> sharedMedia,
+  int collectionID,
+) async {
   List<File> localFiles = [];
   for (var media in sharedMedia) {
     if (!(media.type == SharedMediaType.IMAGE ||
         media.type == SharedMediaType.VIDEO)) {
       _logger.warning(
-          "ignore unsupported file type ${media.type.toString()} path: ${media.path}");
+        "ignore unsupported file type ${media.type.toString()} path: ${media.path}",
+      );
       continue;
     }
     var enteFile = File();
@@ -74,9 +79,10 @@ Future<List<File>> convertIncomingSharedMediaToFile(
     enteFile.title = basename(media.path);
     var ioFile = dartio.File(media.path);
     ioFile = ioFile.renameSync(
-        Configuration.instance.getSharedMediaCacheDirectory() +
-            "/" +
-            enteFile.title);
+      Configuration.instance.getSharedMediaCacheDirectory() +
+          "/" +
+          enteFile.title,
+    );
     enteFile.localID = kSharedMediaIdentifier + enteFile.title;
     enteFile.collectionID = collectionID;
     enteFile.fileType =
@@ -111,12 +117,15 @@ DateTime parseDateFromFileName(String fileName) {
   } else if (fileName.startsWith("Screenshot_")) {
     // Screenshots on droid
     return DateTime.tryParse(
-        (fileName).replaceAll('Screenshot_', '').replaceAll('-', 'T'));
+      (fileName).replaceAll('Screenshot_', '').replaceAll('-', 'T'),
+    );
   } else {
-    return DateTime.tryParse((fileName)
-        .replaceAll("IMG_", "")
-        .replaceAll("VID_", "")
-        .replaceAll("DCIM_", "")
-        .replaceAll("_", " "));
+    return DateTime.tryParse(
+      (fileName)
+          .replaceAll("IMG_", "")
+          .replaceAll("VID_", "")
+          .replaceAll("DCIM_", "")
+          .replaceAll("_", " "),
+    );
   }
 }

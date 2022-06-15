@@ -71,11 +71,12 @@ class File {
     if (file.creationTime == 0) {
       try {
         final parsedDateTime = DateTime.parse(
-            basenameWithoutExtension(file.title)
-                .replaceAll("IMG_", "")
-                .replaceAll("VID_", "")
-                .replaceAll("DCIM_", "")
-                .replaceAll("_", " "));
+          basenameWithoutExtension(file.title)
+              .replaceAll("IMG_", "")
+              .replaceAll("VID_", "")
+              .replaceAll("DCIM_", "")
+              .replaceAll("_", " "),
+        );
         file.creationTime = parsedDateTime.microsecondsSinceEpoch;
       } catch (e) {
         file.creationTime = asset.modifiedDateTime.microsecondsSinceEpoch;

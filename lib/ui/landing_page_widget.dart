@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/ente_theme_data.dart';
+import 'package:photos/ui/common/gradientButton.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/login_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
@@ -29,99 +32,60 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         child: Column(
           children: [
             Padding(padding: const EdgeInsets.all(12)),
-            Text.rich(
-              TextSpan(
-                children: const <TextSpan>[
-                  TextSpan(
-                    text: "with ",
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                  TextSpan(
-                    text: "ente",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Montserrat',
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
+            Text(
+              "ente",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Montserrat',
+                fontSize: 42,
               ),
-              textAlign: TextAlign.center,
             ),
             Padding(
-              padding: EdgeInsets.all(2),
-            ),
-            Text.rich(
-              TextSpan(
-                children: const <TextSpan>[
-                  TextSpan(
-                    text: "your ",
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                  TextSpan(
-                    text: "memories",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  TextSpan(
-                    text: " are",
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            Padding(
-              padding: EdgeInsets.all(24),
+              padding: EdgeInsets.all(28),
             ),
             _getFeatureSlider(),
+            Padding(
+              padding: EdgeInsets.all(12),
+            ),
             DotsIndicator(
               dotsCount: 3,
               position: _featureIndex,
               decorator: DotsDecorator(
-                color: Colors.white24, // Inactive color
-                activeColor: Theme.of(context).buttonColor,
+                activeColor:
+                    Theme.of(context).colorScheme.dotsIndicatorActiveColor,
+                color: Theme.of(context).colorScheme.dotsIndicatorInactiveColor,
+                activeShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                size: Size(100, 5),
+                activeSize: Size(100, 5),
+                spacing: EdgeInsets.all(3),
               ),
             ),
             Padding(
               padding: EdgeInsets.all(28),
             ),
             _getSignUpButton(context),
-            Padding(
-              padding: EdgeInsets.all(4),
-            ),
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(28),
-                child: Center(
-                  child: Hero(
-                    tag: "log_in",
-                    child: Material(
-                      type: MaterialType.transparency,
-                      child: Text(
-                        "log in",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          letterSpacing: 0.6,
-                          color: Colors.white.withOpacity(0.95),
-                        ),
-                      ),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.fromLTRB(20, 12, 20, 28),
+              child: Hero(
+                tag: "log_in",
+                child: ElevatedButton(
+                  style:
+                      Theme.of(context).colorScheme.optionalActionButtonStyle,
+                  child: Text(
+                    "Existing user",
+                    style: TextStyle(
+                      color: Colors.black, // same for both themes
                     ),
                   ),
+                  onPressed: _navigateToSignInPage,
                 ),
               ),
-              onTap: _navigateToSignInPage,
             ),
             Padding(
               padding: EdgeInsets.all(20),
@@ -133,35 +97,19 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   }
 
   Widget _getSignUpButton(BuildContext context) {
-    return SizedBox(
-      width: 200,
-      height: 64,
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
-          side: BorderSide(
-            width: 2,
-            color: Theme.of(context).buttonColor,
-          ),
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      child: GradientButton(
+        child: Text(
+          "New to ente",
+          style: gradientButtonTextTheme(),
         ),
-        child: Hero(
-          tag: "sign_up",
-          child: Material(
-            type: MaterialType.transparency,
-            child: Text(
-              "sign up",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                letterSpacing: 0.6,
-              ),
-            ),
-          ),
-        ),
-        onPressed: _navigateToSignUpPage,
+        linearGradientColors: const [
+          Color(0xFF2CD267),
+          Color(0xFF1DB954),
+        ],
+        onTap: _navigateToSignUpPage,
       ),
     );
   }
@@ -170,19 +118,27 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: 320),
       child: PageView(
-        children: const [
+        children: [
           FeatureItemWidget(
-              "assets/protected.png",
-              "protected",
-              "end-to-end encrypted with your password,",
-              "visible only to you"),
-          FeatureItemWidget("assets/synced.png", "synced",
-              "available across all your devices,", "web, android and ios"),
+            "assets/protected.png",
+            "Private backups",
+            "for your memories",
+            "End-to-end encrypted by default",
+          ),
           FeatureItemWidget(
-              "assets/preserved.png",
-              "preserved",
-              "reliably replicated to a fallout shelter,",
-              "designed to outlive"),
+            "assets/preserved.png",
+            "Safely stored",
+            "at a fallout shelter",
+            "Designed to outlive",
+          ),
+          FeatureItemWidget(
+            "assets/synced.png",
+            "Available",
+            "everywhere",
+            Platform.isAndroid
+                ? "Android, iOS, Web, Desktop"
+                : "iOS, Android, Web, Desktop",
+          ),
         ],
         onPageChanged: (index) {
           setState(() {
@@ -247,12 +203,16 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 }
 
 class FeatureItemWidget extends StatelessWidget {
-  final String assetPath, featureTitle, firstLine, secondLine;
+  final String assetPath,
+      featureTitleFirstLine,
+      featureTitleSecondLine,
+      subText;
+
   const FeatureItemWidget(
     this.assetPath,
-    this.featureTitle,
-    this.firstLine,
-    this.secondLine, {
+    this.featureTitleFirstLine,
+    this.featureTitleSecondLine,
+    this.subText, {
     Key key,
   }) : super(key: key);
 
@@ -271,27 +231,21 @@ class FeatureItemWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
-              featureTitle,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).buttonColor,
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(12)),
-            Text(
-              firstLine,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
-              ),
+              featureTitleFirstLine,
+              style: Theme.of(context).textTheme.headline5,
             ),
             Padding(padding: EdgeInsets.all(2)),
             Text(
-              secondLine,
+              featureTitleSecondLine,
+              style: Theme.of(context).textTheme.headline5,
+            ),
+            Padding(padding: EdgeInsets.all(12)),
+            Text(
+              subText,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                fontSize: 16,
               ),
             ),
           ],

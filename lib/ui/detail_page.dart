@@ -1,5 +1,4 @@
 import 'package:extended_image/extended_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
@@ -92,13 +91,15 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.info("Opening " +
-        _files[_selectedIndex].toString() +
-        ". " +
-        (_selectedIndex + 1).toString() +
-        " / " +
-        _files.length.toString() +
-        " files .");
+    _logger.info(
+      "Opening " +
+          _files[_selectedIndex].toString() +
+          ". " +
+          (_selectedIndex + 1).toString() +
+          " / " +
+          _files.length.toString() +
+          " files .",
+    );
     _appBarKey = GlobalKey<FadingAppBarState>();
     _bottomBarKey = GlobalKey<FadingBottomBarState>();
     return Scaffold(
@@ -124,7 +125,8 @@ class _DetailPageState extends State<DetailPage> {
           ],
         ),
       ),
-      backgroundColor: Colors.black,
+
+      // backgroundColor: Theme.of(context).colorScheme.onPrimary,
     );
   }
 
@@ -149,6 +151,7 @@ class _DetailPageState extends State<DetailPage> {
               _toggleFullScreen();
             });
           },
+          backgroundDecoration: BoxDecoration(color: Colors.black),
         );
         _preloadFiles(index);
         return GestureDetector(
@@ -185,6 +188,7 @@ class _DetailPageState extends State<DetailPage> {
     }
     Future.delayed(Duration.zero, () {
       SystemChrome.setEnabledSystemUIOverlays(
+        //to hide status bar?
         _shouldHideAppBar ? [] : SystemUiOverlay.values,
       );
     });
@@ -196,10 +200,11 @@ class _DetailPageState extends State<DetailPage> {
     }
     if (_selectedIndex == 0 && !_hasLoadedTillStart) {
       final result = await widget.config.asyncLoader(
-          _files[_selectedIndex].creationTime + 1,
-          DateTime.now().microsecondsSinceEpoch,
-          limit: kLoadLimit,
-          asc: true);
+        _files[_selectedIndex].creationTime + 1,
+        DateTime.now().microsecondsSinceEpoch,
+        limit: kLoadLimit,
+        asc: true,
+      );
       setState(() {
         // Returned result could be a subtype of File
         // ignore: unnecessary_cast
@@ -216,8 +221,10 @@ class _DetailPageState extends State<DetailPage> {
     }
     if (_selectedIndex == _files.length - 1 && !_hasLoadedTillEnd) {
       final result = await widget.config.asyncLoader(
-          kGalleryLoadStartTime, _files[_selectedIndex].creationTime - 1,
-          limit: kLoadLimit);
+        kGalleryLoadStartTime,
+        _files[_selectedIndex].creationTime - 1,
+        limit: kLoadLimit,
+      );
       setState(() {
         if (!result.hasMore) {
           _hasLoadedTillEnd = true;
@@ -246,13 +253,17 @@ class _DetailPageState extends State<DetailPage> {
     if (_selectedIndex == totalFiles - 1) {
       // Deleted the last file
       await _pageController.previousPage(
-          duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
+        duration: Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+      );
       setState(() {
         _files.remove(file);
       });
     } else {
       await _pageController.nextPage(
-          duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
+        duration: Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+      );
       setState(() {
         _selectedIndex--;
         _files.remove(file);
@@ -263,13 +274,19 @@ class _DetailPageState extends State<DetailPage> {
   Future<void> _onEditFileRequested(File file) async {
     if (file.uploadedFileID != null &&
         file.ownerID != Configuration.instance.getUserID()) {
-      _logger.severe("Attempt to edit unowned file", UnauthorizedEditError(),
-          StackTrace.current);
-      showErrorDialog(context, "sorry",
-          "we don't support editing photos and albums that you don't own yet");
+      _logger.severe(
+        "Attempt to edit unowned file",
+        UnauthorizedEditError(),
+        StackTrace.current,
+      );
+      showErrorDialog(
+        context,
+        "Sorry",
+        "We don't support editing photos and albums that you don't own yet",
+      );
       return;
     }
-    final dialog = createProgressDialog(context, "please wait...");
+    final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     final imageProvider =
         ExtendedFileImageProvider(await getFile(file), cacheRawData: true);

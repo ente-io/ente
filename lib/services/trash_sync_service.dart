@@ -4,6 +4,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/trash_db.dart';
+import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/ignored_file.dart';
@@ -56,6 +57,10 @@ class TrashSyncService {
     }
     if (diff.hasMore) {
       return await syncTrash();
+    } else if (diff.trashedFiles.isNotEmpty ||
+        diff.deletedUploadIDs.isNotEmpty) {
+      _logger.fine('refresh gallery');
+      Bus.instance.fire(CollectionUpdatedEvent(0, <File>[]));
     }
   }
 
@@ -108,7 +113,8 @@ class TrashSyncService {
   }
 
   Future<Response<dynamic>> _trashFiles(
-      Map<String, dynamic> requestData) async {
+    Map<String, dynamic> requestData,
+  ) async {
     return _dio.post(
       Configuration.instance.getHttpEndpoint() + "/files/trash",
       options: Options(
@@ -138,6 +144,7 @@ class TrashSyncService {
         data: params,
       );
       _trashDB.delete(uniqueFileIds);
+      syncTrash();
     } catch (e, s) {
       _logger.severe("failed to delete from trash", e, s);
       rethrow;

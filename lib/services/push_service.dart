@@ -61,7 +61,9 @@ class PushService {
         await _setPushTokenOnServer(fcmToken, apnsToken);
         await _prefs.setString(kFCMPushToken, fcmToken);
         await _prefs.setInt(
-            kLastFCMTokenUpdationTime, DateTime.now().microsecondsSinceEpoch);
+          kLastFCMTokenUpdationTime,
+          DateTime.now().microsecondsSinceEpoch,
+        );
         _logger.info("Push token updated on server");
       } catch (e) {
         _logger.severe("Could not set push token", e, StackTrace.current);
@@ -88,7 +90,8 @@ class PushService {
     _logger.info("Message data: ${message.data}");
     if (message.notification != null) {
       _logger.info(
-          "Message also contained a notification: ${message.notification}");
+        "Message also contained a notification: ${message.notification}",
+      );
     }
     if (shouldSync(message)) {
       SyncService.instance.sync();

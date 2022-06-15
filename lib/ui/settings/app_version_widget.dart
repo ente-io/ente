@@ -31,10 +31,11 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
           _consecutiveTaps++;
           if (_consecutiveTaps == kTapThresholdForInspector) {
             final dialog =
-                createProgressDialog(context, "starting network inspector...");
+                createProgressDialog(context, "Starting network inspector...");
             await dialog.show();
             await Future.delayed(
-                Duration(milliseconds: kDummyDelayDurationInMilliseconds));
+              Duration(milliseconds: kDummyDelayDurationInMilliseconds),
+            );
             await dialog.hide();
             Network.instance.getAlice().showInspector();
           }
@@ -50,11 +51,8 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
             return Padding(
               padding: const EdgeInsets.all(20),
               child: Text(
-                "app version: " + snapshot.data,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.white.withOpacity(0.6),
-                ),
+                "Version: " + snapshot.data,
+                style: Theme.of(context).textTheme.caption,
               ),
             );
           }

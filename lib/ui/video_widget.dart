@@ -75,7 +75,7 @@ class _VideoWidgetState extends State<VideoWidget> {
           setState(() {
             _progress = count / total;
             if (_progress == 1) {
-              showShortToast("decrypting video...");
+              showShortToast(context, "Decrypting video...");
             }
           });
         }
@@ -142,30 +142,36 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   Widget _getLoadingWidget() {
-    return Stack(children: [
-      _getThumbnail(),
-      Container(
-        color: Colors.black12,
-        constraints: BoxConstraints.expand(),
-      ),
-      Center(
-        child: SizedBox.fromSize(
-          size: Size.square(30),
-          child: _progress == null || _progress == 1
-              ? CupertinoActivityIndicator()
-              : CircularProgressIndicator(
-                  value: _progress,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Color.fromRGBO(45, 194, 98, 1.0),
-                  ),
-                ),
+    return Stack(
+      children: [
+        _getThumbnail(),
+        Container(
+          color: Colors.black12,
+          constraints: BoxConstraints.expand(),
         ),
-      ),
-    ]);
+        Center(
+          child: SizedBox.fromSize(
+            size: Size.square(30),
+            child: _progress == null || _progress == 1
+                ? CupertinoActivityIndicator(
+                    color: Colors.white,
+                  )
+                : CircularProgressIndicator(
+                    backgroundColor: Colors.black,
+                    value: _progress,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color.fromRGBO(45, 194, 98, 1.0),
+                    ),
+                  ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _getThumbnail() {
     return Container(
+      color: Colors.black,
       child: ThumbnailWidget(
         widget.file,
         fit: BoxFit.contain,
@@ -189,9 +195,13 @@ class _VideoWidgetState extends State<VideoWidget> {
       autoPlay: widget.autoPlay,
       autoInitialize: true,
       looping: true,
+      allowMuting: true,
       allowFullScreen: false,
       customControls: VideoControls(),
     );
-    return Chewie(controller: _chewieController);
+    return Container(
+      child: Chewie(controller: _chewieController),
+      color: Colors.black,
+    );
   }
 }

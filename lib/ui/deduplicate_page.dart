@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file.dart';
@@ -63,7 +64,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     _duplicates =
         DeduplicationService.instance.clubDuplicatesByTime(widget.duplicates);
     _selectAllFilesButFirst();
-    showToast("long-press on an item to view in full-screen");
+    showToast(context, "Long-press on an item to view in full-screen");
   }
 
   void _selectAllFilesButFirst() {
@@ -85,18 +86,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     _sortDuplicates();
     return Scaffold(
       appBar: AppBar(
-        title: Hero(
-          tag: "deduplicate",
-          child: Material(
-            type: MaterialType.transparency,
-            child: Text(
-              "deduplicate files",
-              style: TextStyle(
-                fontSize: 18,
-              ),
-            ),
-          ),
-        ),
+        elevation: 0,
+        title: Text("Deduplicate Files"),
       ),
       body: _getBody(),
     );
@@ -134,14 +125,18 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 } else {
                   return Padding(
                     padding: EdgeInsets.only(top: 32),
-                    child: nothingToSeeHere,
+                    child: nothingToSeeHere(
+                      textColor: Theme.of(context).colorScheme.defaultTextColor,
+                    ),
                   );
                 }
               }
               return Padding(
                 padding: const EdgeInsets.only(top: 10, bottom: 10),
-                child: _getGridView(_duplicates[index - kHeaderRowCount],
-                    index - kHeaderRowCount),
+                child: _getGridView(
+                  _duplicates[index - kHeaderRowCount],
+                  index - kHeaderRowCount,
+                ),
               );
             },
             itemCount: _duplicates.length + kHeaderRowCount,
@@ -155,26 +150,21 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   Padding _getHeader() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 12, 20, 12),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "the following files were clubbed based on their sizes" +
-                (_shouldClubByCaptureTime ? " and capture times" : ""),
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              height: 1.2,
-            ),
+            "Following files were clubbed based on their sizes" +
+                ((_shouldClubByCaptureTime ? " and capture times." : ".")),
+            style: Theme.of(context).textTheme.subtitle2,
           ),
           Padding(
-            padding: EdgeInsets.all(4),
+            padding: EdgeInsets.all(2),
           ),
           Text(
-            "please review and delete the items you believe are duplicates",
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              height: 1.2,
-            ),
+            "Please review and delete the items you believe are duplicates.",
+            style: Theme.of(context).textTheme.subtitle2,
           ),
           Padding(
             padding: EdgeInsets.all(12),
@@ -189,7 +179,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   Widget _getClubbingConfig() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 4),
+      padding: EdgeInsets.fromLTRB(12, 0, 12, 4),
       child: CheckboxListTile(
         value: _shouldClubByCaptureTime,
         onChanged: (value) {
@@ -197,7 +187,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           _resetEntriesAndSelection();
           setState(() {});
         },
-        title: Text("club by capture time"),
+        title: Text("Club by capture time"),
       ),
     );
   }
@@ -217,22 +207,21 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       String text = key.toString();
       switch (key) {
         case SortKey.count:
-          text = "count";
+          text = "Count";
           break;
         case SortKey.size:
-          text = "total size";
+          text = "Total size";
           break;
         case SortKey.time:
-          text = "time";
+          text = "Time";
           break;
       }
       return Text(
         text,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 13,
-          color: Colors.white.withOpacity(0.6),
-        ),
+        style: Theme.of(context).textTheme.subtitle1.copyWith(
+              fontSize: 14,
+              color: Theme.of(context).iconTheme.color.withOpacity(0.7),
+            ),
       );
     }
 
@@ -247,14 +236,14 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 6, 24, 6),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 sortOptionText(sortKey),
-                Padding(padding: EdgeInsets.only(left: 5.0)),
+                Padding(padding: EdgeInsets.only(left: 4)),
                 Icon(
                   Icons.sort,
-                  color: Theme.of(context).buttonColor,
+                  color: Theme.of(context).colorScheme.iconColor,
                   size: 20,
                 ),
               ],
@@ -270,7 +259,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               return PopupMenuItem(
                 value: index,
                 child: Align(
-                  alignment: Alignment.topRight,
+                  alignment: Alignment.centerLeft,
                   child: sortOptionText(SortKey.values[index]),
                 ),
               );
@@ -284,9 +273,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   Widget _getDeleteButton() {
     String text;
     if (_selectedFiles.length == 1) {
-      text = "delete 1 item";
+      text = "Delete 1 item";
     } else {
-      text = "delete " + _selectedFiles.length.toString() + " items";
+      text = "Delete " + _selectedFiles.length.toString() + " items";
     }
     int size = 0;
     for (final file in _selectedFiles) {
@@ -294,45 +283,49 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     }
     return SizedBox(
       width: double.infinity,
-      child: TextButton(
-        style: OutlinedButton.styleFrom(
-          backgroundColor: Colors.red[700],
-        ),
-        child: Column(
-          children: [
-            Padding(padding: EdgeInsets.all(2)),
-            Text(
-              text,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: Colors.white,
+      child: SafeArea(
+        child: TextButton(
+          style: OutlinedButton.styleFrom(
+            backgroundColor: Colors.red[700],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Padding(padding: EdgeInsets.all(2)),
+              Text(
+                text,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            Padding(padding: EdgeInsets.all(2)),
-            Text(
-              formatBytes(size),
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 12,
+              Padding(padding: EdgeInsets.all(2)),
+              Text(
+                formatBytes(size),
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.7),
+                  fontSize: 12,
+                ),
               ),
-            ),
-            Padding(padding: EdgeInsets.all(2)),
-          ],
+              Padding(padding: EdgeInsets.all(2)),
+            ],
+          ),
+          onPressed: () async {
+            await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
+            Bus.instance.fire(UserDetailsChangedEvent());
+            Navigator.of(context)
+                .pop(DeduplicationResult(_selectedFiles.length, size));
+          },
         ),
-        onPressed: () async {
-          await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
-          Bus.instance.fire(UserDetailsChangedEvent());
-          Navigator.of(context)
-              .pop(DeduplicationResult(_selectedFiles.length, size));
-        },
       ),
     );
   }
 
   Widget _getGridView(DuplicateFiles duplicates, int itemIndex) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 4, 4),
@@ -341,9 +334,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 " files, " +
                 formatBytes(duplicates.size) +
                 " each",
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-            ),
+            style: Theme.of(context).textTheme.subtitle2,
           ),
         ),
         GridView.builder(
@@ -399,19 +390,21 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 )
               : null,
         ),
-        child: Stack(children: [
-          Hero(
-            tag: "deduplicate_" + file.tag(),
-            child: ThumbnailWidget(
-              file,
-              diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
-              serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
-              shouldShowLivePhotoOverlay: true,
-              key: Key("deduplicate_" + file.tag()),
+        child: Stack(
+          children: [
+            Hero(
+              tag: "deduplicate_" + file.tag(),
+              child: ThumbnailWidget(
+                file,
+                diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
+                serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
+                shouldShowLivePhotoOverlay: true,
+                key: Key("deduplicate_" + file.tag()),
+              ),
             ),
-          ),
-          _selectedFiles.contains(file) ? kDeleteIconOverlay : Container(),
-        ]),
+            _selectedFiles.contains(file) ? kDeleteIconOverlay : Container(),
+          ],
+        ),
       ),
     );
   }

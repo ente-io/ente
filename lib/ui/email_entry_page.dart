@@ -1,22 +1,20 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_password_strength/flutter_password_strength.dart';
+import 'package:password_strength/password_strength.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/report_bug_popup.dart';
-import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/common/dynamicFAB.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/data_util.dart';
-import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/email_util.dart';
+import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class EmailEntryPage extends StatefulWidget {
   EmailEntryPage({Key key}) : super(key: key);
@@ -26,22 +24,29 @@ class EmailEntryPage extends StatefulWidget {
 }
 
 class _EmailEntryPageState extends State<EmailEntryPage> {
-  static const kPasswordStrengthThreshold = 0.4;
+  static const kMildPasswordStrengthThreshold = 0.4;
+  static const kStrongPasswordStrengthThreshold = 0.7;
 
   final _config = Configuration.instance;
-  final _passwordController1 = TextEditingController(),
-      _passwordController2 = TextEditingController();
+  final _passwordController1 = TextEditingController();
+  final _passwordController2 = TextEditingController();
+  final Color _validFieldValueColor = Color.fromRGBO(45, 194, 98, 0.2);
 
   String _email;
-  double _passwordStrength = 0;
+  String _password;
+  double _passwordStrength = 0.0;
+  bool _emailIsValid = false;
   bool _hasAgreedToTOS = true;
   bool _hasAgreedToE2E = false;
   bool _password1Visible = false;
   bool _password2Visible = false;
+  bool _passwordsMatch = false;
+
   final _password1FocusNode = FocusNode();
   final _password2FocusNode = FocusNode();
   bool _password1InFocus = false;
   bool _password2InFocus = false;
+  bool _passwordIsValid = false;
 
   @override
   void initState() {
@@ -61,89 +66,145 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+
+    FloatingActionButtonLocation fabLocation() {
+      if (isKeypadOpen) {
+        return null;
+      } else {
+        return FloatingActionButtonLocation.centerFloat;
+      }
+    }
+
     final appBar = AppBar(
-      title: Hero(
-        tag: "sign_up",
-        child: Material(
-          type: MaterialType.transparency,
-          child: Text(
-            "sign up",
-            style: TextStyle(
-              fontSize: 18,
-              letterSpacing: 0.6,
-            ),
-          ),
+      elevation: 0,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back),
+        color: Theme.of(context).iconTheme.color,
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
+      title: Material(
+        type: MaterialType.transparency,
+        child: StepProgressIndicator(
+          totalSteps: 4,
+          currentStep: 1,
+          selectedColor: Theme.of(context).buttonColor,
+          roundedEdges: Radius.circular(10),
+          unselectedColor:
+              Theme.of(context).colorScheme.stepProgressUnselectedColor,
         ),
       ),
-      actions: <Widget>[reportBugPopupMenu(context)],
     );
     return Scaffold(
+      resizeToAvoidBottomInset: isKeypadOpen,
       appBar: appBar,
       body: _getBody(),
-      // resizeToAvoidBottomInset: false,
+      floatingActionButton: DynamicFAB(
+        isKeypadOpen: isKeypadOpen,
+        isFormValid: _isFormValid(),
+        buttonText: 'Create account',
+        onPressedFunction: () {
+          _config.setVolatilePassword(_passwordController1.text);
+          _config.setEmail(_email);
+          UserService.instance
+              .getOtt(context, _email, isCreateAccountScreen: true);
+        },
+      ),
+      floatingActionButtonLocation: fabLocation(),
+      floatingActionButtonAnimator: NoScalingAnimation(),
     );
   }
 
   Widget _getBody() {
+    var passwordStrengthText = 'Weak';
+    var passwordStrengthColor = Colors.redAccent;
+    if (_passwordStrength > kStrongPasswordStrengthThreshold) {
+      passwordStrengthText = 'Strong';
+      passwordStrengthColor = Colors.greenAccent;
+    } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
+      passwordStrengthText = 'Moderate';
+      passwordStrengthColor = Colors.orangeAccent;
+    }
     return Column(
       children: [
-        FlutterPasswordStrength(
-          password: _passwordController1.text,
-          backgroundColor: Colors.white.withOpacity(0.1),
-          strengthCallback: (strength) {
-            _passwordStrength = strength;
-          },
-          strengthColors: passwordStrengthColors,
-        ),
         Expanded(
           child: AutofillGroup(
             child: ListView(
               children: [
-                Padding(padding: EdgeInsets.all(40)),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                  child: Text(
+                    'Create new account',
+                    style: Theme.of(context).textTheme.headline4,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: TextFormField(
-                    autofillHints: [AutofillHints.email],
+                    style: Theme.of(context).textTheme.subtitle1,
+                    autofillHints: const [AutofillHints.email],
                     decoration: InputDecoration(
-                      hintText: 'email',
-                      hintStyle: TextStyle(
-                        color: Colors.white30,
+                      fillColor: _emailIsValid ? _validFieldValueColor : null,
+                      filled: true,
+                      hintText: 'Email',
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      border: UnderlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(6),
                       ),
-                      contentPadding: EdgeInsets.all(12),
+                      suffixIcon: _emailIsValid
+                          ? Icon(
+                              Icons.check,
+                              size: 20,
+                              color: Theme.of(context)
+                                  .inputDecorationTheme
+                                  .focusedBorder
+                                  .borderSide
+                                  .color,
+                            )
+                          : null,
                     ),
                     onChanged: (value) {
-                      setState(() {
-                        _email = value.trim();
-                      });
+                      _email = value.trim();
+                      if (_emailIsValid != EmailValidator.validate(_email)) {
+                        setState(() {
+                          _emailIsValid = EmailValidator.validate(_email);
+                        });
+                      }
                     },
                     autocorrect: false,
                     keyboardType: TextInputType.emailAddress,
-                    initialValue: _email,
+                    //initialValue: _email,
                     textInputAction: TextInputAction.next,
                   ),
                 ),
-                Padding(padding: EdgeInsets.all(8)),
+                Padding(padding: EdgeInsets.all(4)),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: TextFormField(
                     keyboardType: TextInputType.text,
                     controller: _passwordController1,
                     obscureText: !_password1Visible,
                     enableSuggestions: true,
-                    autofillHints: [AutofillHints.newPassword],
+                    autofillHints: const [AutofillHints.newPassword],
                     decoration: InputDecoration(
-                      hintText: "password",
-                      hintStyle: TextStyle(
-                        color: Colors.white30,
-                      ),
-                      contentPadding: EdgeInsets.all(12),
+                      fillColor:
+                          _passwordIsValid ? _validFieldValueColor : null,
+                      filled: true,
+                      hintText: "Password",
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       suffixIcon: _password1InFocus
                           ? IconButton(
                               icon: Icon(
                                 _password1Visible
                                     ? Icons.visibility
                                     : Icons.visibility_off,
-                                color: Colors.white.withOpacity(0.5),
+                                color: Theme.of(context).iconTheme.color,
                                 size: 20,
                               ),
                               onPressed: () {
@@ -152,11 +213,32 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                 });
                               },
                             )
-                          : null,
+                          : _passwordIsValid
+                              ? Icon(
+                                  Icons.check,
+                                  color: Theme.of(context)
+                                      .inputDecorationTheme
+                                      .focusedBorder
+                                      .borderSide
+                                      .color,
+                                )
+                              : null,
+                      border: UnderlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                     ),
                     focusNode: _password1FocusNode,
-                    onChanged: (_) {
-                      setState(() {});
+                    onChanged: (password) {
+                      if (password != _password) {
+                        setState(() {
+                          _password = password;
+                          _passwordStrength =
+                              estimatePasswordStrength(password);
+                          _passwordIsValid = _passwordStrength >=
+                              kMildPasswordStrengthThreshold;
+                        });
+                      }
                     },
                     onEditingComplete: () {
                       _password1FocusNode.unfocus();
@@ -165,28 +247,28 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     },
                   ),
                 ),
-                Padding(padding: EdgeInsets.all(8)),
+                Padding(padding: EdgeInsets.all(4)),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: TextFormField(
                     keyboardType: TextInputType.visiblePassword,
                     controller: _passwordController2,
                     obscureText: !_password2Visible,
-                    autofillHints: [AutofillHints.newPassword],
+                    autofillHints: const [AutofillHints.newPassword],
                     onEditingComplete: () => TextInput.finishAutofillContext(),
                     decoration: InputDecoration(
-                      hintText: "confirm password",
-                      hintStyle: TextStyle(
-                        color: Colors.white30,
-                      ),
-                      contentPadding: EdgeInsets.all(12),
+                      fillColor: _passwordsMatch ? _validFieldValueColor : null,
+                      filled: true,
+                      hintText: "Confirm password",
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       suffixIcon: _password2InFocus
                           ? IconButton(
                               icon: Icon(
                                 _password2Visible
                                     ? Icons.visibility
                                     : Icons.visibility_off,
-                                color: Colors.white.withOpacity(0.5),
+                                color: Theme.of(context).iconTheme.color,
                                 size: 20,
                               ),
                               onPressed: () {
@@ -195,46 +277,51 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                 });
                               },
                             )
-                          : null,
+                          : _passwordsMatch
+                              ? Icon(
+                                  Icons.check,
+                                  color: Theme.of(context)
+                                      .inputDecorationTheme
+                                      .focusedBorder
+                                      .borderSide
+                                      .color,
+                                )
+                              : null,
+                      border: UnderlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                     ),
                     focusNode: _password2FocusNode,
+                    onChanged: (cnfPassword) {
+                      setState(() {
+                        if (_password != null || _password != '') {
+                          _passwordsMatch = _password == cnfPassword;
+                        }
+                      });
+                    },
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(20),
+                Opacity(
+                  opacity: (_password != '') && _password1InFocus ? 1 : 0,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    child: Text(
+                      'Password strength: $passwordStrengthText',
+                      style: TextStyle(
+                        color: passwordStrengthColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
                 ),
+                const SizedBox(height: 4),
+                const Divider(thickness: 1),
+                const SizedBox(height: 12),
                 _getAgreement(),
-                Padding(padding: EdgeInsets.all(20)),
-                Container(
-                  width: double.infinity,
-                  height: 64,
-                  padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-                  child: button(
-                    "sign up",
-                    onPressed: _isFormValid()
-                        ? () {
-                            if (!isValidEmail(_email)) {
-                              showErrorDialog(context, "invalid email",
-                                  "please enter a valid email address.");
-                            } else if (_passwordController1.text !=
-                                _passwordController2.text) {
-                              showErrorDialog(context, "uhm...",
-                                  "the passwords you entered don't match");
-                            } else if (_passwordStrength <
-                                kPasswordStrengthThreshold) {
-                              showErrorDialog(context, "weak password",
-                                  "the password you have chosen is too simple, please choose another one");
-                            } else {
-                              _config.setVolatilePassword(
-                                  _passwordController1.text);
-                              _config.setEmail(_email);
-                              UserService.instance.getOtt(context, _email);
-                            }
-                          }
-                        : null,
-                    fontSize: 18,
-                  ),
-                ),
+                const SizedBox(height: 40),
               ],
             ),
           ),
@@ -245,7 +332,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   Container _getAgreement() {
     return Container(
-      padding: const EdgeInsets.only(left: 20, right: 20),
+      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
       child: Column(
         children: [
           _getTOSAgreement(),
@@ -266,12 +353,14 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       child: Row(
         children: [
           Checkbox(
-              value: _hasAgreedToTOS,
-              onChanged: (value) {
-                setState(() {
-                  _hasAgreedToTOS = value;
-                });
-              }),
+            value: _hasAgreedToTOS,
+            side: CheckboxTheme.of(context).side,
+            onChanged: (value) {
+              setState(() {
+                _hasAgreedToTOS = value;
+              });
+            },
+          ),
           Expanded(
             child: RichText(
               text: TextSpan(
@@ -282,15 +371,14 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   TextSpan(
                     text: "terms of service",
                     style: TextStyle(
-                      color: Colors.blue,
-                      fontFamily: 'Ubuntu',
+                      decoration: TextDecoration.underline,
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (BuildContext context) {
-                              return WebPage("terms", "https://ente.io/terms");
+                              return WebPage("Terms", "https://ente.io/terms");
                             },
                           ),
                         );
@@ -300,8 +388,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   TextSpan(
                     text: "privacy policy",
                     style: TextStyle(
-                      color: Colors.blue,
-                      fontFamily: 'Ubuntu',
+                      decoration: TextDecoration.underline,
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
@@ -309,19 +396,19 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           MaterialPageRoute(
                             builder: (BuildContext context) {
                               return WebPage(
-                                  "privacy", "https://ente.io/privacy");
+                                "Privacy",
+                                "https://ente.io/privacy",
+                              );
                             },
                           ),
                         );
                       },
                   ),
                 ],
-                style: TextStyle(
-                  height: 1.25,
-                  fontSize: 12,
-                  fontFamily: 'Ubuntu',
-                  color: Colors.white70,
-                ),
+                style: Theme.of(context)
+                    .textTheme
+                    .subtitle1
+                    .copyWith(fontSize: 12),
               ),
               textAlign: TextAlign.left,
             ),
@@ -342,12 +429,14 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       child: Row(
         children: [
           Checkbox(
-              value: _hasAgreedToE2E,
-              onChanged: (value) {
-                setState(() {
-                  _hasAgreedToE2E = value;
-                });
-              }),
+            value: _hasAgreedToE2E,
+            side: CheckboxTheme.of(context).side,
+            onChanged: (value) {
+              setState(() {
+                _hasAgreedToE2E = value;
+              });
+            },
+          ),
           Expanded(
             child: RichText(
               text: TextSpan(
@@ -359,8 +448,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   TextSpan(
                     text: "end-to-end encrypted",
                     style: TextStyle(
-                      color: Colors.blue,
-                      fontFamily: 'Ubuntu',
+                      decoration: TextDecoration.underline,
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
@@ -368,7 +456,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           MaterialPageRoute(
                             builder: (BuildContext context) {
                               return WebPage(
-                                  "encryption", "https://ente.io/architecture");
+                                "encryption",
+                                "https://ente.io/architecture",
+                              );
                             },
                           ),
                         );
@@ -376,12 +466,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   ),
                   TextSpan(text: " with ente"),
                 ],
-                style: TextStyle(
-                  height: 1.5,
-                  fontSize: 12,
-                  fontFamily: 'Ubuntu',
-                  color: Colors.white70,
-                ),
+                style: Theme.of(context)
+                    .textTheme
+                    .subtitle1
+                    .copyWith(fontSize: 12),
               ),
               textAlign: TextAlign.left,
             ),
@@ -392,10 +480,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   }
 
   bool _isFormValid() {
-    return _email != null &&
-        _email.isNotEmpty &&
-        _passwordController1.text.isNotEmpty &&
-        _passwordController2.text.isNotEmpty &&
+    return _emailIsValid &&
+        _passwordsMatch &&
         _hasAgreedToTOS &&
         _hasAgreedToE2E;
   }
@@ -414,7 +500,7 @@ class PricingWidget extends StatelessWidget {
         if (snapshot.hasData) {
           return _buildPlans(context, snapshot.data);
         } else if (snapshot.hasError) {
-          return Text("Oops, something went wrong.");
+          return Text("Oops, Something went wrong.");
         }
         return loadWidget;
       },
@@ -450,12 +536,14 @@ class PricingWidget extends StatelessWidget {
               children: planWidgets,
             ),
           ),
-          Text("we offer a free trial of " +
-              convertBytesToReadableFormat(freePlan.storage) +
-              " for " +
-              freePlan.duration.toString() +
-              " " +
-              freePlan.period),
+          Text(
+            "We offer a free trial of " +
+                convertBytesToReadableFormat(freePlan.storage) +
+                " for " +
+                freePlan.duration.toString() +
+                " " +
+                freePlan.period,
+          ),
           GestureDetector(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,

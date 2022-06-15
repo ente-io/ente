@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/app_version_widget.dart';
@@ -12,6 +13,7 @@ import 'package:photos/ui/settings/info_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
+import 'package:photos/ui/settings/theme_switch_widget.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key key}) : super(key: key);
@@ -19,52 +21,87 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("settings"),
-      ),
-      body: _getBody(),
+      body: _getBody(context),
     );
   }
 
-  Widget _getBody() {
+  Widget _getBody(BuildContext context) {
     final hasLoggedIn = Configuration.instance.getToken() != null;
+    final String email = Configuration.instance.getEmail();
     final List<Widget> contents = [];
+    contents.add(
+      Container(
+        padding: EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              email,
+              style: Theme.of(context)
+                  .textTheme
+                  .subtitle1
+                  .copyWith(overflow: TextOverflow.ellipsis),
+            ),
+            (kDebugMode && Platform.isAndroid)
+                ? ThemeSwitchWidget()
+                : const SizedBox.shrink(),
+          ],
+        ),
+      ),
+    );
+    final sectionDivider = Divider(
+      height: 20,
+      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+    );
+    contents.add(Padding(padding: EdgeInsets.all(4)));
     if (hasLoggedIn) {
       contents.addAll([
         DetailsSectionWidget(),
-        Padding(padding: EdgeInsets.all(12)),
+        Padding(padding: EdgeInsets.only(bottom: 24)),
         BackupSectionWidget(),
-        Padding(padding: EdgeInsets.all(12)),
+        sectionDivider,
         AccountSectionWidget(),
-        Padding(padding: EdgeInsets.all(12)),
+        sectionDivider,
       ]);
     }
     contents.addAll([
       SecuritySectionWidget(),
-      Padding(padding: EdgeInsets.all(12)),
+      sectionDivider,
       SupportSectionWidget(),
-      Padding(padding: EdgeInsets.all(12)),
+      sectionDivider,
       SocialSectionWidget(),
-      Padding(padding: EdgeInsets.all(12)),
+      sectionDivider,
       InfoSectionWidget(),
     ]);
     if (hasLoggedIn) {
       contents.addAll([
-        Padding(padding: EdgeInsets.all(12)),
+        sectionDivider,
         DangerSectionWidget(),
       ]);
     }
-    contents.add(AppVersionWidget());
+
     if (kDebugMode && hasLoggedIn) {
-      contents.add(DebugSectionWidget());
+      contents.addAll([sectionDivider, DebugSectionWidget()]);
     }
+    contents.add(AppVersionWidget());
+    contents.add(
+      Padding(
+        padding: EdgeInsets.only(bottom: 60),
+      ),
+    );
+
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          children: contents,
-        ),
-      ),
+          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 350),
+              child: Column(
+                children: contents,
+              ),
+            ),
+          )),
     );
   }
 }

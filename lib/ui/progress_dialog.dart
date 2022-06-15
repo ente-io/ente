@@ -21,9 +21,15 @@ bool _barrierDismissible = true, _showLogs = false;
 Color _barrierColor;
 
 TextStyle _progressTextStyle = TextStyle(
-        color: Colors.black, fontSize: 12.0, fontWeight: FontWeight.w400),
+      color: Colors.black,
+      fontSize: 12.0,
+      fontWeight: FontWeight.w400,
+    ),
     _messageStyle = TextStyle(
-        color: Colors.black, fontSize: 18.0, fontWeight: FontWeight.w600);
+      color: Colors.black,
+      fontSize: 18.0,
+      fontWeight: FontWeight.w600,
+    );
 
 double _dialogElevation = 8.0, _borderRadius = 8.0;
 Color _backgroundColor = Colors.white;
@@ -56,21 +62,22 @@ class ProgressDialog {
     _barrierColor = barrierColor ?? barrierColor;
   }
 
-  void style(
-      {Widget child,
-      double progress,
-      double maxProgress,
-      String message,
-      Widget progressWidget,
-      Color backgroundColor,
-      TextStyle progressTextStyle,
-      TextStyle messageTextStyle,
-      double elevation,
-      TextAlign textAlign,
-      double borderRadius,
-      Curve insetAnimCurve,
-      EdgeInsets padding,
-      Alignment progressWidgetAlignment}) {
+  void style({
+    Widget child,
+    double progress,
+    double maxProgress,
+    String message,
+    Widget progressWidget,
+    Color backgroundColor,
+    TextStyle progressTextStyle,
+    TextStyle messageTextStyle,
+    double elevation,
+    TextAlign textAlign,
+    double borderRadius,
+    Curve insetAnimCurve,
+    EdgeInsets padding,
+    Alignment progressWidgetAlignment,
+  }) {
     if (_isShowing) return;
     if (_progressDialogType == ProgressDialogType.Download) {
       _progress = progress ?? _progress;
@@ -92,13 +99,14 @@ class ProgressDialog {
         progressWidgetAlignment ?? _progressWidgetAlignment;
   }
 
-  void update(
-      {double progress,
-      double maxProgress,
-      String message,
-      Widget progressWidget,
-      TextStyle progressTextStyle,
-      TextStyle messageTextStyle}) {
+  void update({
+    double progress,
+    double maxProgress,
+    String message,
+    Widget progressWidget,
+    TextStyle progressTextStyle,
+    TextStyle messageTextStyle,
+  }) {
     if (_progressDialogType == ProgressDialogType.Download) {
       _progress = progress ?? _progress;
     }
@@ -152,8 +160,9 @@ class ProgressDialog {
                 insetAnimationDuration: Duration(milliseconds: 100),
                 elevation: _dialogElevation,
                 shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.all(Radius.circular(_borderRadius))),
+                  borderRadius:
+                      BorderRadius.all(Radius.circular(_borderRadius)),
+                ),
                 child: _dialog,
               ),
             );
@@ -232,11 +241,12 @@ class _BodyState extends State<_Body> {
                   Row(
                     children: <Widget>[
                       Expanded(
-                          child: Text(
-                        _dialogMessage,
-                        style: _messageStyle,
-                        textDirection: _direction,
-                      )),
+                        child: Text(
+                          _dialogMessage,
+                          style: _messageStyle,
+                          textDirection: _direction,
+                        ),
+                      ),
                     ],
                   ),
                   SizedBox(height: 4.0),

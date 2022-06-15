@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -26,7 +25,7 @@ class _RenameDialogState extends State<RenameDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("enter a new name"),
+      title: Text("Enter a new name"),
       content: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -56,7 +55,7 @@ class _RenameDialogState extends State<RenameDialog> {
       actions: [
         TextButton(
           child: Text(
-            "cancel",
+            "Cancel",
             style: TextStyle(
               color: Colors.redAccent,
             ),
@@ -67,20 +66,26 @@ class _RenameDialogState extends State<RenameDialog> {
         ),
         TextButton(
           child: Text(
-            "rename",
+            "Rename",
             style: TextStyle(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           onPressed: () {
             if (_newName.trim().isEmpty) {
               showErrorDialog(
-                  context, "empty name", "${widget.type} name cannot be empty");
+                context,
+                "Empty name",
+                "${widget.type} name cannot be empty",
+              );
               return;
             }
             if (_newName.trim().length > widget.maxLength) {
-              showErrorDialog(context, "name too large",
-                  "${widget.type} name should be less than ${widget.maxLength} characters");
+              showErrorDialog(
+                context,
+                "Name too large",
+                "${widget.type} name should be less than ${widget.maxLength} characters",
+              );
               return;
             }
             Navigator.of(context).pop(_newName.trim());

@@ -62,12 +62,14 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     List<Widget> children = [];
     children.add(
       Tooltip(
-        message: "info",
+        message: "Info",
         child: Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(
             icon: Icon(
-                Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info),
+              Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
+              color: Colors.white,
+            ),
             onPressed: () {
               _displayInfo(widget.file);
             },
@@ -83,11 +85,14 @@ class FadingBottomBarState extends State<FadingBottomBar> {
           widget.file.fileType == FileType.livePhoto) {
         children.add(
           Tooltip(
-            message: "edit",
+            message: "Edit",
             child: Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 12),
               child: IconButton(
-                icon: Icon(Icons.tune_outlined),
+                icon: Icon(
+                  Icons.tune_outlined,
+                  color: Colors.white,
+                ),
                 onPressed: () {
                   widget.onEditRequested(widget.file);
                 },
@@ -102,17 +107,16 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             widget.file.magicMetadata.visibility == kVisibilityArchive;
         children.add(
           Tooltip(
-            message: isArchived ? "unarchive" : "archive",
+            message: isArchived ? "Unhide" : "Hide",
             child: Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 12),
               child: IconButton(
-                icon: Icon(Platform.isAndroid
-                    ? (isArchived
-                        ? Icons.unarchive_outlined
-                        : Icons.archive_outlined)
-                    : (isArchived
-                        ? CupertinoIcons.archivebox_fill
-                        : CupertinoIcons.archivebox)),
+                icon: Icon(
+                  isArchived
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: Colors.white,
+                ),
                 onPressed: () async {
                   await changeVisibility(
                     context,
@@ -128,14 +132,17 @@ class FadingBottomBarState extends State<FadingBottomBar> {
       }
       children.add(
         Tooltip(
-          message: "share",
+          message: "Share",
           child: Padding(
             padding: const EdgeInsets.only(top: 12, bottom: 12),
             child: IconButton(
               key: shareButtonKey,
-              icon: Icon(Platform.isAndroid
-                  ? Icons.share_outlined
-                  : CupertinoIcons.share),
+              icon: Icon(
+                Platform.isAndroid
+                    ? Icons.share_outlined
+                    : CupertinoIcons.share,
+                color: Colors.white,
+              ),
               onPressed: () {
                 share(context, [widget.file], shareButtonKey: shareButtonKey);
               },
@@ -144,6 +151,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
         ),
       );
     }
+    var safeAreaBottomPadding = MediaQuery.of(context).padding.bottom * .5;
     return AnimatedOpacity(
       child: Align(
         alignment: Alignment.bottomCenter,
@@ -154,15 +162,18 @@ class FadingBottomBarState extends State<FadingBottomBar> {
               end: Alignment.bottomCenter,
               colors: [
                 Colors.transparent,
-                Colors.black.withOpacity(0.5),
-                Colors.black.withOpacity(0.64),
+                Colors.black.withOpacity(0.6),
+                Colors.black.withOpacity(0.72),
               ],
               stops: const [0, 0.8, 1],
             ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: children,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: safeAreaBottomPadding),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: children,
+            ),
           ),
         ),
       ),
@@ -174,7 +185,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
   void _addTrashOptions(List<Widget> children) {
     children.add(
       Tooltip(
-        message: "restore",
+        message: "Restore",
         child: Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(
@@ -183,14 +194,16 @@ class FadingBottomBarState extends State<FadingBottomBar> {
               final selectedFiles = SelectedFiles();
               selectedFiles.toggleSelection(widget.file);
               Navigator.push(
-                  context,
-                  PageTransition(
-                      type: PageTransitionType.bottomToTop,
-                      child: CreateCollectionPage(
-                        selectedFiles,
-                        null,
-                        actionType: CollectionActionType.restoreFiles,
-                      )));
+                context,
+                PageTransition(
+                  type: PageTransitionType.bottomToTop,
+                  child: CreateCollectionPage(
+                    selectedFiles,
+                    null,
+                    actionType: CollectionActionType.restoreFiles,
+                  ),
+                ),
+              );
             },
           ),
         ),
@@ -199,7 +212,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
 
     children.add(
       Tooltip(
-        message: "delete",
+        message: "Delete",
         child: Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(

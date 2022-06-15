@@ -4,10 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
-import 'package:photos/ui/common/widget_theme.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -26,14 +26,14 @@ class ManageSharedLinkWidget extends StatefulWidget {
 class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   // index, title, milliseconds in future post which link should expire (when >0)
   final List<Tuple3<int, String, int>> _expiryOptions = [
-    Tuple3(0, "never", 0),
-    Tuple3(1, "after 1 hour", Duration(hours: 1).inMicroseconds),
-    Tuple3(2, "after 1 day", Duration(days: 1).inMicroseconds),
-    Tuple3(3, "after 1 week", Duration(days: 7).inMicroseconds),
+    Tuple3(0, "Never", 0),
+    Tuple3(1, "After 1 hour", Duration(hours: 1).inMicroseconds),
+    Tuple3(2, "After 1 day", Duration(days: 1).inMicroseconds),
+    Tuple3(3, "After 1 week", Duration(days: 7).inMicroseconds),
     // todo: make this time calculation perfect
-    Tuple3(4, "after 1 month", Duration(days: 30).inMicroseconds),
-    Tuple3(5, "after 1 year", Duration(days: 365).inMicroseconds),
-    Tuple3(6, "custom", -1),
+    Tuple3(4, "After 1 month", Duration(days: 30).inMicroseconds),
+    Tuple3(5, "After 1 year", Duration(days: 365).inMicroseconds),
+    Tuple3(6, "Custom", -1),
   ];
 
   Tuple3<int, String, int> _selectedExpiry;
@@ -48,12 +48,11 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
+        elevation: 0,
         title: Text(
-          "manage link",
-          style: TextStyle(
-            fontSize: 18,
-          ),
+          "Manage link",
         ),
       ),
       body: SingleChildScrollView(
@@ -77,7 +76,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("link expiry"),
+                            Text("Link expiry"),
                             Padding(padding: EdgeInsets.all(4)),
                             _getLinkExpiryTimeWidget(),
                           ],
@@ -102,7 +101,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("device limit"),
+                            Text("Device limit"),
                             Padding(padding: EdgeInsets.all(4)),
                             Text(
                               widget.collection.publicURLs.first.deviceLimit
@@ -125,7 +124,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("password lock"),
+                        Text("Password lock"),
                         Switch.adaptive(
                           value: widget.collection.publicURLs?.first
                                   ?.passwordEnabled ??
@@ -138,12 +137,15 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                                   inputResult == 'ok' &&
                                   _textFieldController.text.trim().isNotEmpty) {
                                 var propToUpdate = await _getEncryptedPassword(
-                                    _textFieldController.text);
+                                  _textFieldController.text,
+                                );
                                 await _updateUrlSettings(context, propToUpdate);
                               }
                             } else {
                               await _updateUrlSettings(
-                                  context, {'disablePassword': true});
+                                context,
+                                {'disablePassword': true},
+                              );
                             }
                             setState(() {});
                           },
@@ -159,7 +161,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("file download"),
+                        Text("File download"),
                         Switch.adaptive(
                           value: widget.collection.publicURLs?.first
                                   ?.enableDownload ??
@@ -168,22 +170,30 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                             if (!value) {
                               final choice = await showChoiceDialog(
                                 context,
-                                'disable downloads',
-                                'are you sure that you want to disable the download button for files?',
-                                firstAction: 'no',
-                                secondAction: 'yes',
-                                firstActionColor: Theme.of(context).buttonColor,
-                                secondActionColor: Colors.white,
+                                'Disable downloads',
+                                'Are you sure that you want to disable the download button for files?',
+                                firstAction: 'No',
+                                secondAction: 'Yes',
+                                firstActionColor:
+                                    Theme.of(context).colorScheme.greenText,
+                                secondActionColor: Theme.of(context)
+                                    .colorScheme
+                                    .inverseBackgroundColor,
                               );
                               if (choice != DialogUserChoice.secondChoice) {
                                 return;
                               }
                             }
                             await _updateUrlSettings(
-                                context, {'enableDownload': value});
+                              context,
+                              {'enableDownload': value},
+                            );
                             if (!value) {
-                              showErrorDialog(context, "please note",
-                                  "viewers can still take screenshots or save a copy of your photos using external tools");
+                              showErrorDialog(
+                                context,
+                                "Please note",
+                                "Viewers can still take screenshots or save a copy of your photos using external tools",
+                              );
                             }
                             setState(() {});
                           },
@@ -202,7 +212,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
 
   Future<void> showPicker() async {
     Widget getOptionText(String text) {
-      return Text(text, style: TextStyle(color: Colors.white));
+      return Text(text, style: Theme.of(context).textTheme.subtitle1);
     }
 
     return showCupertinoModalPopup(
@@ -213,7 +223,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
           children: <Widget>[
             Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.cupertinoPickerTopColor,
                 border: Border(
                   bottom: BorderSide(
                     color: Color(0xff999999),
@@ -225,10 +235,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   CupertinoButton(
-                    child: Text('cancel',
-                        style: TextStyle(
-                          color: Colors.white,
-                        )),
+                    child: Text(
+                      'Cancel',
+                      style: Theme.of(context).textTheme.subtitle1,
+                    ),
                     onPressed: () {
                       Navigator.of(context).pop('cancel');
                     },
@@ -238,10 +248,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                   ),
                   CupertinoButton(
-                    child: Text('confirm',
-                        style: TextStyle(
-                          color: Colors.white,
-                        )),
+                    child: Text(
+                      'Confirm',
+                      style: Theme.of(context).textTheme.subtitle1,
+                    ),
                     onPressed: () async {
                       int newValidTill = -1;
                       int expireAfterInMicroseconds = _selectedExpiry.item3;
@@ -261,7 +271,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       }
                       if (newValidTill >= 0) {
                         await _updateUrlSettings(
-                            context, {'validTill': newValidTill});
+                          context,
+                          {'validTill': newValidTill},
+                        );
                         setState(() {});
                       }
                       Navigator.of(context).pop('');
@@ -278,7 +290,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               height: 220.0,
               color: Color(0xfff7f7f7),
               child: CupertinoPicker(
-                backgroundColor: Colors.black.withOpacity(0.95),
+                backgroundColor:
+                    Theme.of(context).backgroundColor.withOpacity(0.95),
                 children:
                     _expiryOptions.map((e) => getOptionText(e.item2)).toList(),
                 onSelectedItemChanged: (value) {
@@ -307,7 +320,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       minTime: DateTime.now(),
       currentTime: DateTime.now(),
       locale: LocaleType.en,
-      theme: kDatePickerTheme,
+      theme: Theme.of(context).colorScheme.dateTimePickertheme,
     );
     if (dateResult == null) {
       return null;
@@ -317,7 +330,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       showTitleActions: true,
       currentTime: dateResult,
       locale: LocaleType.en,
-      theme: kDatePickerTheme,
+      theme: Theme.of(context).colorScheme.dateTimePickertheme,
     );
     if (dateWithTimeResult == null) {
       return null;
@@ -331,16 +344,17 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   Future<String> _displayLinkPasswordInput(BuildContext context) async {
     _textFieldController.clear();
     return showDialog<String>(
-        context: context,
-        builder: (context) {
-          bool _passwordVisible = false;
-          return StatefulBuilder(builder: (context, setState) {
+      context: context,
+      builder: (context) {
+        bool _passwordVisible = false;
+        return StatefulBuilder(
+          builder: (context, setState) {
             return AlertDialog(
-              title: Text('enter password'),
+              title: Text('Enter password'),
               content: TextFormField(
                 autofillHints: const [AutofillHints.newPassword],
                 decoration: InputDecoration(
-                  hintText: "password",
+                  hintText: "Password",
                   contentPadding: EdgeInsets.all(12),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -368,22 +382,16 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               actions: <Widget>[
                 TextButton(
                   child: Text(
-                    'cancel',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
+                    'Cancel',
+                    style: Theme.of(context).textTheme.subtitle2,
                   ),
                   onPressed: () {
                     Navigator.pop(context, 'cancel');
                   },
                 ),
                 TextButton(
-                  child: Text(
-                    'ok',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
+                  child:
+                      Text('Ok', style: Theme.of(context).textTheme.subtitle2),
                   onPressed: () {
                     if (_textFieldController.text.trim().isEmpty) {
                       return;
@@ -393,18 +401,26 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 ),
               ],
             );
-          });
-        });
+          },
+        );
+      },
+    );
   }
 
   Future<Map<String, dynamic>> _getEncryptedPassword(String pass) async {
-    assert(Sodium.cryptoPwhashAlgArgon2id13 == Sodium.cryptoPwhashAlgDefault,
-        "mismatch in expected default pw hashing algo");
+    assert(
+      Sodium.cryptoPwhashAlgArgon2id13 == Sodium.cryptoPwhashAlgDefault,
+      "mismatch in expected default pw hashing algo",
+    );
     int memLimit = Sodium.cryptoPwhashMemlimitInteractive;
     int opsLimit = Sodium.cryptoPwhashOpslimitInteractive;
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
     final result = await CryptoUtil.deriveKey(
-        utf8.encode(pass), kekSalt, memLimit, opsLimit);
+      utf8.encode(pass),
+      kekSalt,
+      memLimit,
+      opsLimit,
+    );
     return {
       'passHash': Sodium.bin2base64(result),
       'nonce': Sodium.bin2base64(kekSalt),
@@ -414,13 +430,15 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   Future<void> _updateUrlSettings(
-      BuildContext context, Map<String, dynamic> prop) async {
-    final dialog = createProgressDialog(context, "please wait...");
+    BuildContext context,
+    Map<String, dynamic> prop,
+  ) async {
+    final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
       await CollectionsService.instance.updateShareUrl(widget.collection, prop);
       await dialog.hide();
-      showToast("album updated");
+      showToast(context, "Album updated");
     } catch (e) {
       await dialog.hide();
       await showGenericErrorDialog(context);
@@ -431,7 +449,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     int validTill = widget.collection.publicURLs?.first?.validTill ?? 0;
     if (validTill == 0) {
       return Text(
-        'never',
+        'Never',
         style: TextStyle(
           color: Colors.grey,
         ),
@@ -439,7 +457,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     }
     if (validTill < DateTime.now().microsecondsSinceEpoch) {
       return Text(
-        'expired',
+        'Expired',
         style: TextStyle(
           color: Colors.orange[300],
         ),
@@ -456,7 +474,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   Future<void> _showDeviceLimitPicker() async {
     List<Text> options = [];
     for (int i = 50; i > 0; i--) {
-      options.add(Text(i.toString(), style: TextStyle(color: Colors.white)));
+      options.add(
+        Text(i.toString(), style: Theme.of(context).textTheme.subtitle1),
+      );
     }
     return showCupertinoModalPopup(
       context: context,
@@ -466,7 +486,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
           children: <Widget>[
             Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.cupertinoPickerTopColor,
                 border: Border(
                   bottom: BorderSide(
                     color: Color(0xff999999),
@@ -478,10 +498,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   CupertinoButton(
-                    child: Text('cancel',
-                        style: TextStyle(
-                          color: Colors.white,
-                        )),
+                    child: Text(
+                      'Cancel',
+                      style: Theme.of(context).textTheme.subtitle1,
+                    ),
                     onPressed: () {
                       Navigator.of(context).pop('cancel');
                     },
@@ -491,14 +511,15 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                   ),
                   CupertinoButton(
-                    child: Text('confirm',
-                        style: TextStyle(
-                          color: Colors.white,
-                        )),
+                    child: Text(
+                      'Confirm',
+                      style: Theme.of(context).textTheme.subtitle1,
+                    ),
                     onPressed: () async {
                       await _updateUrlSettings(context, {
                         'deviceLimit': int.tryParse(
-                            options[_selectedDeviceLimitIndex].data),
+                          options[_selectedDeviceLimitIndex].data,
+                        ),
                       });
                       setState(() {});
                       Navigator.of(context).pop('');
@@ -515,7 +536,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               height: 220.0,
               color: Color(0xfff7f7f7),
               child: CupertinoPicker(
-                backgroundColor: Colors.black.withOpacity(0.95),
+                backgroundColor:
+                    Theme.of(context).backgroundColor.withOpacity(0.95),
                 children: options,
                 onSelectedItemChanged: (value) {
                   _selectedDeviceLimitIndex = value;

@@ -21,13 +21,13 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
   @override
   Widget build(BuildContext context) {
     final alert = AlertDialog(
-      title: Text("set wallpaper"),
+      title: Text("Set wallpaper"),
       content: Container(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             RadioListTile(
-              title: const Text("homescreen"),
+              title: const Text("Homescreen"),
               value: WallpaperManagerFlutter.HOME_SCREEN,
               groupValue: _lockscreenValue,
               onChanged: (v) {
@@ -37,7 +37,7 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
               },
             ),
             RadioListTile(
-              title: const Text("lockscreen"),
+              title: const Text("Lockscreen"),
               value: WallpaperManagerFlutter.LOCK_SCREEN,
               groupValue: _lockscreenValue,
               onChanged: (v) {
@@ -47,7 +47,7 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
               },
             ),
             RadioListTile(
-              title: const Text("both"),
+              title: const Text("Both"),
               value: WallpaperManagerFlutter.BOTH_SCREENS,
               groupValue: _lockscreenValue,
               onChanged: (v) {
@@ -62,24 +62,26 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
       actions: [
         TextButton(
           child: Text(
-            "ok",
+            "Ok",
             style: TextStyle(
               color: Colors.white,
             ),
           ),
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop('dialog');
-            final dialog = createProgressDialog(context, "setting wallpaper");
+            final dialog = createProgressDialog(context, "Setting wallpaper");
             await dialog.show();
             try {
               await WallpaperManagerFlutter().setwallpaperfromFile(
-                  await getFile(widget.file), _lockscreenValue);
+                await getFile(widget.file),
+                _lockscreenValue,
+              );
               await dialog.hide();
-              showToast("wallpaper set successfully");
+              showToast(context, "Wallpaper set successfully");
             } catch (e, s) {
               await dialog.hide();
               Logger("SetWallpaperDialog").severe(e, s);
-              showToast("something went wrong");
+              showToast(context, "Something went wrong");
               return;
             }
           },

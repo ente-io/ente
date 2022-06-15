@@ -26,8 +26,13 @@ class MemoriesService extends ChangeNotifier {
     addListener(() {
       _cachedMemories = null;
     });
-    await _memoriesDB.clearMemoriesSeenBeforeTime(
-        DateTime.now().microsecondsSinceEpoch - (7 * kMicroSecondsInDay));
+    // Clear memory after a delay, in async manner.
+    // Intention of delay is to give more CPU cycles to other tasks
+    Future.delayed(const Duration(seconds: 5), () {
+      _memoriesDB.clearMemoriesSeenBeforeTime(
+        DateTime.now().microsecondsSinceEpoch - (7 * kMicroSecondsInDay),
+      );
+    });
   }
 
   void clearCache() {
@@ -49,10 +54,13 @@ class MemoriesService extends ChangeNotifier {
   Future<List<Memory>> _fetchMemories() async {
     _logger.info("Fetching memories");
     final presentTime = DateTime.now();
-    final present = presentTime.subtract(Duration(
+    final present = presentTime.subtract(
+      Duration(
         hours: presentTime.hour,
         minutes: presentTime.minute,
-        seconds: presentTime.second));
+        seconds: presentTime.second,
+      ),
+    );
     final List<List<int>> durations = [];
     for (var yearAgo = 1; yearAgo <= yearsBefore; yearAgo++) {
       final date = _getDate(present, yearAgo);
@@ -90,7 +98,9 @@ class MemoriesService extends ChangeNotifier {
   Future markMemoryAsSeen(Memory memory) async {
     memory.markSeen();
     await _memoriesDB.markMemoryAsSeen(
-        memory, DateTime.now().microsecondsSinceEpoch);
+      memory,
+      DateTime.now().microsecondsSinceEpoch,
+    );
     notifyListeners();
   }
 }

@@ -4,8 +4,6 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
-import 'package:photos/ui/common_elements.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class SkipSubscriptionWidget extends StatelessWidget {
   const SkipSubscriptionWidget({
@@ -20,13 +18,18 @@ class SkipSubscriptionWidget extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: 64,
-      margin: const EdgeInsets.fromLTRB(0, 30, 0, 30),
-      padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
-      child: button(
-        "continue on free plan",
-        fontSize: 16,
+      margin: const EdgeInsets.fromLTRB(0, 30, 0, 0),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+      child: OutlinedButton(
+        child: Text("Continue on free plan"),
+        style: Theme.of(context).outlinedButtonTheme.style.copyWith(
+          textStyle: MaterialStateProperty.resolveWith<TextStyle>(
+            (Set<MaterialState> states) {
+              return Theme.of(context).textTheme.subtitle1;
+            },
+          ),
+        ),
         onPressed: () async {
-          showToast("thank you for signing up!");
           Bus.instance.fire(SubscriptionPurchasedEvent());
           Navigator.of(context).popUntil((route) => route.isFirst);
           BillingService.instance

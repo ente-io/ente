@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:open_file/open_file.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/services/update_service.dart';
-import 'package:photos/ui/common_elements.dart';
 
 class AppUpdateDialog extends StatefulWidget {
   final LatestVersionInfo latestVersionInfo;
@@ -21,14 +19,12 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
   Widget build(BuildContext context) {
     final List<Widget> changelog = [];
     for (final log in widget.latestVersionInfo.changelog) {
-      changelog.add(Padding(
-        padding: const EdgeInsets.fromLTRB(8, 4, 0, 4),
-        child: Text("- " + log,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.white.withOpacity(0.7),
-            )),
-      ));
+      changelog.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 4, 0, 4),
+          child: Text("- " + log, style: Theme.of(context).textTheme.caption),
+        ),
+      );
     }
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,10 +38,12 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
           ),
         ),
         Padding(padding: EdgeInsets.all(8)),
-        Text("changelog",
-            style: TextStyle(
-              fontSize: 18,
-            )),
+        Text(
+          "Changelog",
+          style: TextStyle(
+            fontSize: 18,
+          ),
+        ),
         Padding(padding: EdgeInsets.all(4)),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,10 +53,17 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         Container(
           width: double.infinity,
           height: 64,
-          padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
-          child: button(
-            "update",
-            fontSize: 16,
+          child: OutlinedButton(
+            child: Text(
+              "Update",
+            ),
+            style: Theme.of(context).outlinedButtonTheme.style.copyWith(
+              textStyle: MaterialStateProperty.resolveWith<TextStyle>(
+                (Set<MaterialState> states) {
+                  return Theme.of(context).textTheme.subtitle1;
+                },
+              ),
+            ),
             onPressed: () async {
               Navigator.pop(context);
               showDialog(
@@ -78,7 +83,9 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     return WillPopScope(
       onWillPop: () async => !shouldForceUpdate,
       child: AlertDialog(
-        title: Text(shouldForceUpdate? "critical update available" : "update available"),
+        title: Text(
+          shouldForceUpdate ? "Critical update available" : "Update available",
+        ),
         content: content,
       ),
     );
@@ -114,7 +121,7 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
       onWillPop: () async => false,
       child: AlertDialog(
         title: Text(
-          "downloading...",
+          "Downloading...",
           style: TextStyle(
             fontSize: 16,
           ),
@@ -131,19 +138,22 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
 
   Future<void> _downloadApk() async {
     try {
-      await Network.instance.getDio().download(widget.versionInfo.url, _saveUrl,
-          onReceiveProgress: (count, _) {
-        setState(() {
-          _downloadProgress = count / widget.versionInfo.size;
-        });
-      });
+      await Network.instance.getDio().download(
+        widget.versionInfo.url,
+        _saveUrl,
+        onReceiveProgress: (count, _) {
+          setState(() {
+            _downloadProgress = count / widget.versionInfo.size;
+          });
+        },
+      );
       Navigator.of(context, rootNavigator: true).pop('dialog');
       OpenFile.open(_saveUrl);
     } catch (e) {
       Logger("ApkDownloader").severe(e);
       AlertDialog alert = AlertDialog(
-        title: Text("sorry"),
-        content: Text("the download could not be completed"),
+        title: Text("Sorry"),
+        content: Text("The download could not be completed"),
         actions: [
           TextButton(
             child: Text(

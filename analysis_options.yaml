@@ -14,6 +14,7 @@ linter:
     - prefer_const_constructors_in_immutables
     - prefer_const_declarations
     - prefer_const_literals_to_create_immutables
+    - require_trailing_commas
     - sized_box_for_whitespace
     - use_full_hex_values_for_flutter_colors
     - use_key_in_widget_constructors

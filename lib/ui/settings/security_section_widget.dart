@@ -1,15 +1,18 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/app_lock.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/sessions_page.dart';
+import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/auth_util.dart';
@@ -24,7 +27,7 @@ class SecuritySectionWidget extends StatefulWidget {
 
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   static const kAuthToViewSessions =
-      "please authenticate to view your active sessions";
+      "Please authenticate to view your active sessions";
 
   final _config = Configuration.instance;
 
@@ -49,35 +52,45 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    return ExpandablePanel(
+      header: SettingsSectionTitle("Security"),
+      collapsed: Container(),
+      expanded: _getSectionOptions(context),
+      theme: getExpandableTheme(context),
+    );
+  }
+
+  Widget _getSectionOptions(BuildContext context) {
     final List<Widget> children = [];
-    children.addAll([
-      SettingsSectionTitle("security"),
-    ]);
     if (_config.hasConfiguredAccount()) {
       children.addAll(
         [
-          Padding(padding: EdgeInsets.all(6)),
+          Padding(padding: EdgeInsets.all(2)),
           SizedBox(
-            height: 36,
+            height: 48,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("two-factor"),
+                Text(
+                  "Two-factor",
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
                 FutureBuilder(
                   future: UserService.instance.fetchTwoFactorStatus(),
                   builder: (_, snapshot) {
                     if (snapshot.hasData) {
-                      return Switch(
+                      return Switch.adaptive(
                         value: snapshot.data,
                         onChanged: (value) async {
                           AppLock.of(context).setEnabled(false);
                           String reason =
-                              "please authenticate to configure two-factor authentication";
+                              "Please authenticate to configure two-factor authentication";
                           final result = await requestAuthentication(reason);
                           AppLock.of(context).setEnabled(
-                              Configuration.instance.shouldShowLockScreen());
+                            Configuration.instance.shouldShowLockScreen(),
+                          );
                           if (!result) {
-                            showToast(reason);
+                            showToast(context, reason);
                             return;
                           }
                           if (value) {
@@ -103,23 +116,23 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       );
     }
     children.addAll([
-      Padding(padding: EdgeInsets.all(2)),
-      Divider(height: 4),
-      Platform.isIOS
-          ? Padding(padding: EdgeInsets.all(2))
-          : Padding(padding: EdgeInsets.all(4)),
+      SectionOptionDivider,
       SizedBox(
-        height: 36,
+        height: 48,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("lockscreen"),
-            Switch(
+            Text(
+              "Lockscreen",
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
+            Switch.adaptive(
               value: _config.shouldShowLockScreen(),
               onChanged: (value) async {
                 AppLock.of(context).disable();
                 final result = await requestAuthentication(
-                    "please authenticate to change lockscreen setting");
+                  "Please authenticate to change lockscreen setting",
+                );
                 if (result) {
                   AppLock.of(context).setEnabled(value);
                   _config.setShouldShowLockScreen(value);
@@ -137,35 +150,36 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     if (Platform.isAndroid) {
       children.addAll(
         [
-          Padding(padding: EdgeInsets.all(4)),
-          Divider(height: 4),
-          Padding(padding: EdgeInsets.all(4)),
+          SectionOptionDivider,
           SizedBox(
-            height: 36,
+            height: 48,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("hide from recents"),
-                Switch(
+                Text(
+                  "Hide from recents",
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
+                Switch.adaptive(
                   value: _config.shouldHideFromRecents(),
                   onChanged: (value) async {
                     if (value) {
                       AlertDialog alert = AlertDialog(
-                        title: Text("hide from recents?"),
+                        title: Text("Hide from recents?"),
                         content: SingleChildScrollView(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: const [
                               Text(
-                                "hiding from the task switcher will prevent you from taking screenshots in this app.",
+                                "Hiding from the task switcher will prevent you from taking screenshots in this app.",
                                 style: TextStyle(
                                   height: 1.5,
                                 ),
                               ),
                               Padding(padding: EdgeInsets.all(8)),
                               Text(
-                                "are you sure?",
+                                "Are you sure?",
                                 style: TextStyle(
                                   height: 1.5,
                                 ),
@@ -175,23 +189,35 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                         ),
                         actions: [
                           TextButton(
-                            child: Text("no",
-                                style: TextStyle(color: Colors.white)),
+                            child: Text(
+                              "No",
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .defaultTextColor,
+                              ),
+                            ),
                             onPressed: () {
                               Navigator.of(context, rootNavigator: true)
                                   .pop('dialog');
                             },
                           ),
                           TextButton(
-                            child: Text("yes",
-                                style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8))),
+                            child: Text(
+                              "Yes",
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .defaultTextColor,
+                              ),
+                            ),
                             onPressed: () async {
                               Navigator.of(context, rootNavigator: true)
                                   .pop('dialog');
                               await _config.setShouldHideFromRecents(true);
                               await FlutterWindowManager.addFlags(
-                                  FlutterWindowManager.FLAG_SECURE);
+                                FlutterWindowManager.FLAG_SECURE,
+                              );
                               setState(() {});
                             },
                           ),
@@ -207,7 +233,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                     } else {
                       await _config.setShouldHideFromRecents(false);
                       await FlutterWindowManager.clearFlags(
-                          FlutterWindowManager.FLAG_SECURE);
+                        FlutterWindowManager.FLAG_SECURE,
+                      );
                       setState(() {});
                     }
                   },
@@ -219,9 +246,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       );
     }
     children.addAll([
-      Padding(padding: EdgeInsets.all(4)),
-      Divider(height: 4),
-      Padding(padding: EdgeInsets.all(2)),
+      SectionOptionDivider,
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () async {
@@ -230,7 +255,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           AppLock.of(context)
               .setEnabled(Configuration.instance.shouldShowLockScreen());
           if (!result) {
-            showToast(kAuthToViewSessions);
+            showToast(context, kAuthToViewSessions);
             return;
           }
           Navigator.of(context).push(
@@ -242,7 +267,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           );
         },
         child: SettingsTextItem(
-            text: "active sessions", icon: Icons.navigate_next),
+          text: "Active sessions",
+          icon: Icons.navigate_next,
+        ),
       ),
     ]);
     return Column(
@@ -252,9 +279,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   void _disableTwoFactor() {
     AlertDialog alert = AlertDialog(
-      title: Text("disable two-factor"),
+      title: Text("Disable two-factor"),
       content:
-          Text("are you sure you want to disable two-factor authentication?"),
+          Text("Are you sure you want to disable two-factor authentication?"),
       actions: [
         TextButton(
           child: Text(

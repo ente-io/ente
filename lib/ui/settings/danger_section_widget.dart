@@ -1,8 +1,8 @@
-import 'dart:io';
-
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -17,30 +17,34 @@ class DangerSectionWidget extends StatefulWidget {
 class _DangerSectionWidgetState extends State<DangerSectionWidget> {
   @override
   Widget build(BuildContext context) {
+    return ExpandablePanel(
+      header: SettingsSectionTitle("Exit", color: Colors.red),
+      collapsed: Container(),
+      expanded: _getSectionOptions(context),
+      theme: getExpandableTheme(context),
+    );
+  }
+
+  Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        SettingsSectionTitle("exit", color: Colors.red),
-        Padding(
-          padding: EdgeInsets.all(4),
-        ),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
             _onLogoutTapped();
           },
-          child: SettingsTextItem(text: "logout", icon: Icons.navigate_next),
+          child: SettingsTextItem(text: "Logout", icon: Icons.navigate_next),
         ),
-        Platform.isIOS
-            ? Padding(padding: EdgeInsets.all(2))
-            : Padding(padding: EdgeInsets.all(2)),
-        Divider(height: 4),
+        SectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
             _onDeleteAccountTapped();
           },
           child: SettingsTextItem(
-              text: "delete account", icon: Icons.navigate_next),
+            text: "Delete account",
+            icon: Icons.navigate_next,
+          ),
         ),
       ],
     );
@@ -49,7 +53,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
   Future<void> _onDeleteAccountTapped() async {
     AlertDialog alert = AlertDialog(
       title: Text(
-        "delete account",
+        "Delete account",
         style: TextStyle(
           color: Colors.red,
         ),
@@ -58,7 +62,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
         text: TextSpan(
           children: [
             TextSpan(
-              text: "please send an email to ",
+              text: "Please send an email to ",
             ),
             TextSpan(
               text: "account-deletion@ente.io",
@@ -68,12 +72,12 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
             ),
             TextSpan(
               text:
-                  " from your registered email address.\n\nyour request will be processed within 72 hours.",
+                  " from your registered email address.\n\nYour request will be processed within 72 hours.",
             ),
           ],
           style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             height: 1.5,
-            fontFamily: 'Ubuntu',
             fontSize: 16,
           ),
         ),
@@ -81,7 +85,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
       actions: [
         TextButton(
           child: Text(
-            "send email",
+            "Send email",
             style: TextStyle(
               color: Colors.red,
             ),
@@ -101,9 +105,9 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
         ),
         TextButton(
           child: Text(
-            "ok",
+            "Ok",
             style: TextStyle(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           onPressed: () {
@@ -124,16 +128,16 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
   Future<void> _onLogoutTapped() async {
     AlertDialog alert = AlertDialog(
       title: Text(
-        "logout",
+        "Logout",
         style: TextStyle(
           color: Colors.red,
         ),
       ),
-      content: Text("are you sure you want to logout?"),
+      content: Text("Are you sure you want to logout?"),
       actions: [
         TextButton(
           child: Text(
-            "yes, logout",
+            "Yes, logout",
             style: TextStyle(
               color: Colors.red,
             ),
@@ -145,7 +149,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
         ),
         TextButton(
           child: Text(
-            "no",
+            "No",
             style: TextStyle(
               color: Theme.of(context).buttonColor,
             ),

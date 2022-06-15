@@ -12,8 +12,10 @@ import 'package:photos/utils/crypto_util.dart';
 
 final _logger = Logger("file_download_util");
 
-Future<io.File> downloadAndDecrypt(ente.File file,
-    {ProgressCallback progressCallback}) {
+Future<io.File> downloadAndDecrypt(
+  ente.File file, {
+  ProgressCallback progressCallback,
+}) {
   _logger.info("Downloading file " + file.uploadedFileID.toString());
   final encryptedFilePath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
@@ -39,17 +41,23 @@ Future<io.File> downloadAndDecrypt(ente.File file,
       return null;
     }
     _logger.info("File downloaded: " + file.uploadedFileID.toString());
-    _logger.info("Download speed: " +
-        (await io.File(encryptedFilePath).length() /
-                (DateTime.now().millisecondsSinceEpoch - startTime))
-            .toString() +
-        "kBps");
+    _logger.info(
+      "Download speed: " +
+          (await io.File(encryptedFilePath).length() /
+                  (DateTime.now().millisecondsSinceEpoch - startTime))
+              .toString() +
+          "kBps",
+    );
     final decryptedFilePath = Configuration.instance.getTempDirectory() +
         file.generatedID.toString() +
         ".decrypted";
     final decryptedFile = io.File(decryptedFilePath);
-    await CryptoUtil.decryptFile(encryptedFilePath, decryptedFilePath,
-        Sodium.base642bin(file.fileDecryptionHeader), decryptFileKey(file));
+    await CryptoUtil.decryptFile(
+      encryptedFilePath,
+      decryptedFilePath,
+      Sodium.base642bin(file.fileDecryptionHeader),
+      decryptFileKey(file),
+    );
     _logger.info("File decrypted: " + file.uploadedFileID.toString());
     await encryptedFile.delete();
     return decryptedFile;

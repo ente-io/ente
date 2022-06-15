@@ -28,7 +28,8 @@ class _LogFileViewerState extends State<LogFileViewer> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("today's logs"),
+        elevation: 0,
+        title: Text("Today's logs"),
       ),
       body: _getBody(),
     );
@@ -47,7 +48,6 @@ class _LogFileViewerState extends State<LogFileViewer> {
             fontFeatures: const [
               FontFeature.tabularFigures(),
             ],
-            color: Colors.white.withOpacity(0.7),
             height: 1.2,
           ),
         ),

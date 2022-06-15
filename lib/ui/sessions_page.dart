@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/sessions.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -30,7 +31,8 @@ class _SessionsPageState extends State<SessionsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("active sessions"),
+        elevation: 0,
+        title: Text("Active sessions"),
       ),
       body: _getBody(),
     );
@@ -75,7 +77,10 @@ class _SessionsPageState extends State<SessionsPage> {
                       child: Text(
                         session.ip,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.8),
                           fontSize: 14,
                         ),
                       ),
@@ -85,7 +90,10 @@ class _SessionsPageState extends State<SessionsPage> {
                       child: Text(
                         getFormattedTime(lastUsedTime),
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.8),
                           fontSize: 12,
                         ),
                       ),
@@ -102,7 +110,7 @@ class _SessionsPageState extends State<SessionsPage> {
   }
 
   Future<void> _terminateSession(Session session) async {
-    final dialog = createProgressDialog(context, "please wait...");
+    final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
       await UserService.instance.terminateSession(session.token);
@@ -112,7 +120,10 @@ class _SessionsPageState extends State<SessionsPage> {
       await dialog.hide();
       _logger.severe('failed to terminate', e, s);
       showErrorDialog(
-          context, 'oops', "something went wrong, please try again");
+        context,
+        'Oops',
+        "Something went wrong, please try again",
+      );
     }
   }
 
@@ -120,7 +131,7 @@ class _SessionsPageState extends State<SessionsPage> {
     _sessions = await UserService.instance
         .getActiveSessions()
         .onError((error, stackTrace) {
-      showToast("failed to fetch active sessions");
+      showToast(context, "Failed to fetch active sessions");
       throw error;
     });
     _sessions.sessions.sort((first, second) {
@@ -135,34 +146,31 @@ class _SessionsPageState extends State<SessionsPage> {
     Widget text;
     if (isLoggingOutFromThisDevice) {
       text = Text(
-        "this will log you out of this device!",
+        "This will log you out of this device!",
       );
     } else {
       text = SingleChildScrollView(
         child: Column(
           children: [
             Text(
-              "this will log you out of the following device:",
+              "This will log you out of the following device:",
             ),
             Padding(padding: EdgeInsets.all(8)),
             Text(
               session.ua,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 14,
-              ),
+              style: Theme.of(context).textTheme.caption,
             ),
           ],
         ),
       );
     }
     AlertDialog alert = AlertDialog(
-      title: Text("terminate session?"),
+      title: Text("Terminate session?"),
       content: text,
       actions: [
         TextButton(
           child: Text(
-            "terminate",
+            "Terminate",
             style: TextStyle(
               color: Colors.red,
             ),
@@ -178,11 +186,11 @@ class _SessionsPageState extends State<SessionsPage> {
         ),
         TextButton(
           child: Text(
-            "cancel",
+            "Cancel",
             style: TextStyle(
               color: isLoggingOutFromThisDevice
                   ? Theme.of(context).buttonColor
-                  : Colors.white,
+                  : Theme.of(context).colorScheme.defaultTextColor,
             ),
           ),
           onPressed: () {
@@ -203,7 +211,7 @@ class _SessionsPageState extends State<SessionsPage> {
   Widget _getUAWidget(Session session) {
     if (session.token == Configuration.instance.getToken()) {
       return Text(
-        "this device",
+        "This device",
         style: TextStyle(
           fontWeight: FontWeight.bold,
           color: Theme.of(context).buttonColor,

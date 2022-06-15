@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
@@ -10,6 +11,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/ui/collection_page.dart';
+import 'package:photos/ui/common/gradientButton.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -24,13 +26,13 @@ String _actionName(CollectionActionType type, bool plural) {
   String text = "";
   switch (type) {
     case CollectionActionType.addFiles:
-      text = "add file";
+      text = "Add file";
       break;
     case CollectionActionType.moveFiles:
-      text = "move file";
+      text = "Move file";
       break;
     case CollectionActionType.restoreFiles:
-      text = "restore file";
+      text = "Restore file";
       break;
   }
   return text + titleSuffix;
@@ -41,16 +43,19 @@ class CreateCollectionPage extends StatefulWidget {
   final List<SharedMediaFile> sharedFiles;
   final CollectionActionType actionType;
 
-  const CreateCollectionPage(this.selectedFiles, this.sharedFiles,
-      {Key key, this.actionType = CollectionActionType.addFiles})
-      : super(key: key);
+  const CreateCollectionPage(
+    this.selectedFiles,
+    this.sharedFiles, {
+    Key key,
+    this.actionType = CollectionActionType.addFiles,
+  }) : super(key: key);
 
   @override
   _CreateCollectionPageState createState() => _CreateCollectionPageState();
 }
 
 class _CreateCollectionPageState extends State<CreateCollectionPage> {
-  final _logger = Logger("CreateCollectionPage");
+  final _logger = Logger((_CreateCollectionPageState).toString());
   String _albumName;
 
   @override
@@ -76,22 +81,33 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(
-                      top: 30, bottom: 12, left: 40, right: 40),
-                  child: OutlinedButton.icon(
-                    style: ButtonStyle(
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                        EdgeInsets.all(20),
-                      ),
+                    top: 30,
+                    bottom: 12,
+                    left: 40,
+                    right: 40,
+                  ),
+                  child: GradientButton(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      //mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.create_new_folder_outlined,
+                          color: Colors.white,
+                        ),
+                        Padding(padding: EdgeInsets.all(6)),
+                        Text(
+                          "To a new album",
+                          style: gradientButtonTextTheme(),
+                        ),
+                      ],
                     ),
-                    icon: Icon(
-                      Icons.create_new_folder_outlined,
-                      color: Theme.of(context).buttonColor,
-                    ),
-                    label: Text(
-                      "to a new album",
-                      style: Theme.of(context).textTheme.bodyText1,
-                    ),
-                    onPressed: () {
+                    linearGradientColors: const [
+                      Color(0xFF2CD267),
+                      Color(0xFF1DB954),
+                    ],
+                    onTap: () async {
                       _showNameAlbumDialog();
                     },
                   ),
@@ -104,10 +120,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "to an existing album",
+                "To an existing album",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColorLight.withOpacity(0.8),
+                  // color: Theme.of(context).primaryColorLight.withOpacity(0.8),
                 ),
               ),
             ),
@@ -172,9 +188,12 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         ),
         onTap: () async {
           if (await _runCollectionAction(item.collection.id)) {
-            showToast(widget.actionType == CollectionActionType.addFiles
-                ? "added successfully to " + item.collection.name
-                : "moved successfully to " + item.collection.name);
+            showShortToast(
+              context,
+              widget.actionType == CollectionActionType.addFiles
+                  ? "Added successfully to " + item.collection.name
+                  : "Moved successfully to " + item.collection.name,
+            );
             _navigateToCollection(item.collection);
           }
         },
@@ -202,7 +221,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   void _showNameAlbumDialog() async {
     AlertDialog alert = AlertDialog(
-      title: Text("album title"),
+      title: Text("Album title"),
       content: TextFormField(
         decoration: InputDecoration(
           hintText: "Christmas 2020 / Dinner at Alice's",
@@ -220,7 +239,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       actions: [
         TextButton(
           child: Text(
-            "ok",
+            "Ok",
             style: TextStyle(
               color: Theme.of(context).buttonColor,
             ),
@@ -231,9 +250,15 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             if (collection != null) {
               if (await _runCollectionAction(collection.id)) {
                 if (widget.actionType == CollectionActionType.restoreFiles) {
-                  showToast('restored files to album ' + _albumName);
+                  showShortToast(
+                    context,
+                    'Restored files to album ' + _albumName,
+                  );
                 } else {
-                  showToast("album '" + _albumName + "' created.");
+                  showShortToast(
+                    context,
+                    "Album '" + _albumName + "' created.",
+                  );
                 }
                 _navigateToCollection(collection);
               }
@@ -254,12 +279,14 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   void _navigateToCollection(Collection collection) {
     Navigator.pop(context);
     Navigator.push(
-        context,
-        PageTransition(
-            type: PageTransitionType.bottomToTop,
-            child: CollectionPage(
-              CollectionWithThumbnail(collection, null),
-            )));
+      context,
+      PageTransition(
+        type: PageTransitionType.bottomToTop,
+        child: CollectionPage(
+          CollectionWithThumbnail(collection, null),
+        ),
+      ),
+    );
   }
 
   Future<bool> _runCollectionAction(int collectionID) async {
@@ -275,19 +302,22 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   Future<bool> _moveFilesToCollection(int toCollectionID) async {
-    final dialog = createProgressDialog(context, "moving files to album...");
+    final dialog = createProgressDialog(context, "Moving files to album...");
     await dialog.show();
     try {
       int fromCollectionID = widget.selectedFiles.files?.first?.collectionID;
-      await CollectionsService.instance.move(toCollectionID, fromCollectionID,
-          widget.selectedFiles.files?.toList());
+      await CollectionsService.instance.move(
+        toCollectionID,
+        fromCollectionID,
+        widget.selectedFiles.files?.toList(),
+      );
       RemoteSyncService.instance.sync(silently: true);
       widget.selectedFiles?.clearAll();
       await dialog.hide();
       return true;
     } on AssertionError catch (e, s) {
       await dialog.hide();
-      showErrorDialog(context, "oops", e.message);
+      showErrorDialog(context, "Oops", e.message);
       return false;
     } catch (e, s) {
       _logger.severe("Could not move to album", e, s);
@@ -298,7 +328,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   Future<bool> _restoreFilesToCollection(int toCollectionID) async {
-    final dialog = createProgressDialog(context, "restoring files...");
+    final dialog = createProgressDialog(context, "Restoring files...");
     await dialog.show();
     try {
       await CollectionsService.instance
@@ -309,7 +339,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       return true;
     } on AssertionError catch (e, s) {
       await dialog.hide();
-      showErrorDialog(context, "oops", e.message);
+      showErrorDialog(context, "Oops", e.message);
       return false;
     } catch (e, s) {
       _logger.severe("Could not move to album", e, s);
@@ -320,14 +350,18 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   Future<bool> _addToCollection(int collectionID) async {
-    final dialog = createProgressDialog(context, "uploading files to album...");
+    final dialog = createProgressDialog(context, "Uploading files to album...");
     await dialog.show();
     try {
       final List<File> files = [];
       final List<File> filesPendingUpload = [];
       if (widget.sharedFiles != null) {
-        filesPendingUpload.addAll(await convertIncomingSharedMediaToFile(
-            widget.sharedFiles, collectionID));
+        filesPendingUpload.addAll(
+          await convertIncomingSharedMediaToFile(
+            widget.sharedFiles,
+            collectionID,
+          ),
+        );
       } else {
         final List<File> filesPendingUpload = [];
         for (final file in widget.selectedFiles.files) {
@@ -356,7 +390,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   Future<Collection> _createAlbum(String albumName) async {
     Collection collection;
-    final dialog = createProgressDialog(context, "creating album...");
+    final dialog = createProgressDialog(context, "Creating album...");
     await dialog.show();
     try {
       collection = await CollectionsService.instance.createAlbum(albumName);

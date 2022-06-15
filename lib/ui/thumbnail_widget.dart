@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/constants.dart';
@@ -41,12 +40,25 @@ class ThumbnailWidget extends StatefulWidget {
   _ThumbnailWidgetState createState() => _ThumbnailWidgetState();
 }
 
-Widget getFileInfoContainer(File file) {
+Widget getFileInfoContainer(BuildContext context, File file) {
   if (file is TrashFile) {
     return Container(
-      child: Text(daysLeft(file.deleteBy)),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [Colors.black.withOpacity(0.33), Colors.transparent],
+        ),
+      ),
+      child: Text(
+        daysLeft(file.deleteBy),
+        style: Theme.of(context)
+            .textTheme
+            .subtitle2
+            .copyWith(color: Colors.white), //same for both themes
+      ),
       alignment: Alignment.bottomCenter,
-      padding: EdgeInsets.fromLTRB(0, 0, 0, 5),
+      padding: EdgeInsets.only(bottom: 5),
     );
   }
   return emptyContainer;
@@ -81,7 +93,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     child: Padding(
       padding: const EdgeInsets.only(right: 8, bottom: 8),
       child: Icon(
-        Icons.archive_outlined,
+        Icons.visibility_off,
         size: 24,
         color: Colors.white.withOpacity(0.9),
       ),
@@ -113,9 +125,14 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     ),
   );
 
-  static final Widget loadingWidget = Container(
+  static final Widget lightLoadWidget = Container(
     alignment: Alignment.center,
-    color: Colors.grey[900],
+    color: Color.fromRGBO(240, 240, 240, 1),
+  );
+
+  static final Widget darkLoadWidget = Container(
+    alignment: Alignment.center,
+    color: Color.fromRGBO(20, 20, 20, 1),
   );
 
   bool _hasLoadedThumbnail = false;
@@ -188,7 +205,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       }
     }
     List<Widget> viewChildrens = [
-      loadingWidget,
+      _getLoadingWidget(),
       AnimatedOpacity(
         opacity: content == null ? 0 : 1.0,
         duration: Duration(milliseconds: 200),
@@ -196,7 +213,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       ),
       widget.shouldShowSyncStatus && widget.file.uploadedFileID == null
           ? kUnsyncedIconOverlay
-          : getFileInfoContainer(widget.file),
+          : getFileInfoContainer(context, widget.file),
     ];
     if (widget.shouldShowArchiveStatus) {
       viewChildrens.add(kArchiveIconOverlay);
@@ -247,8 +264,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           if (await doesLocalFileExist(widget.file) == false) {
             _logger.info("Deleting file " + widget.file.tag());
             FilesDB.instance.deleteLocalFile(widget.file);
-            Bus.instance.fire(LocalPhotosUpdatedEvent([widget.file],
-                type: EventType.deletedFromDevice));
+            Bus.instance.fire(
+              LocalPhotosUpdatedEvent(
+                [widget.file],
+                type: EventType.deletedFromDevice,
+              ),
+            );
           }
         }
         return;
@@ -299,7 +320,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       if (e is RequestCancelledError) {
         if (mounted) {
           _logger.info(
-              "Thumbnail request was aborted although it is in view, will retry");
+            "Thumbnail request was aborted although it is in view, will retry",
+          );
           _reset();
           setState(() {});
         }
@@ -333,5 +355,11 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     _errorLoadingLocalThumbnail = false;
     _errorLoadingRemoteThumbnail = false;
     _imageProvider = null;
+  }
+
+  Widget _getLoadingWidget() {
+    return Theme.of(context).brightness == Brightness.light
+        ? lightLoadWidget
+        : darkLoadWidget;
   }
 }

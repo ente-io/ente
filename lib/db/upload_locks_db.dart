@@ -34,13 +34,15 @@ class UploadLocksDB {
   }
 
   Future _onCreate(Database db, int version) async {
-    await db.execute('''
+    await db.execute(
+      '''
                 CREATE TABLE $_table (
                   $_columnID TEXT PRIMARY KEY NOT NULL,
                   $_columnOwner TEXT NOT NULL,
                   $_columnTime TEXT NOT NULL
                 )
-                ''');
+                ''',
+    );
   }
 
   Future<void> clearTable() async {

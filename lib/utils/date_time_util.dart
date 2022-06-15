@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 Map<int, String> _months = {
   1: "Jan",
   2: "Feb",
@@ -71,6 +72,10 @@ String getFullMonth(DateTime dateTime) {
   return _fullMonths[dateTime.month];
 }
 
+String getAbbreviationOfYear(DateTime dateTime) {
+  return (dateTime.year % 100).toString();
+}
+
 String getTime(DateTime dateTime) {
   final hours = dateTime.hour > 9
       ? dateTime.hour.toString()
@@ -94,13 +99,11 @@ String getFormattedTime(DateTime dateTime) {
 }
 
 String getFormattedDate(DateTime dateTime) {
-  return getDay(dateTime) +
-      ", " +
-      getMonth(dateTime) +
+  return dateTime.day.toString() +
       " " +
-      dateTime.day.toString() +
-      ", " +
-      dateTime.year.toString();
+      getMonth(dateTime) +
+      "'" +
+      getAbbreviationOfYear(dateTime);
 }
 
 String daysLeft(int futureTime) {
@@ -160,16 +163,23 @@ bool isLeapYear(DateTime dateTime) {
   }
 }
 
-Widget getDayWidget(int timestamp) {
+Widget getDayWidget(
+  BuildContext context,
+  int timestamp,
+  bool smallerTodayFont,
+) {
   return Container(
-    padding: const EdgeInsets.fromLTRB(10, 8, 0, 10),
+    padding: const EdgeInsets.fromLTRB(4, 14, 0, 8),
     alignment: Alignment.centerLeft,
     child: Text(
       getDayTitle(timestamp),
-      style: TextStyle(
-        fontSize: 14,
-        color: Colors.white.withOpacity(0.85),
-      ),
+      style: (getDayTitle(timestamp) == "Today" && !smallerTodayFont)
+          ? Theme.of(context).textTheme.headline5
+          : Theme.of(context).textTheme.caption.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Inter-SemiBold',
+              ),
     ),
   );
 }

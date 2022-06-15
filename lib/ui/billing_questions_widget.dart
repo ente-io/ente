@@ -26,22 +26,26 @@ class BillingQuestionsWidget extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           final faqs = <Widget>[];
-          faqs.add(Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              "faqs",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+          faqs.add(
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                "FAQs",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ));
+          );
           for (final faq in snapshot.data) {
             faqs.add(FaqWidget(faq: faq));
           }
-          faqs.add(Padding(
-            padding: EdgeInsets.all(16),
-          ));
+          faqs.add(
+            Padding(
+              padding: EdgeInsets.all(16),
+            ),
+          );
           return SingleChildScrollView(
             child: Column(
               children: faqs,
@@ -66,6 +70,8 @@ class FaqWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpansionTileCard(
+      borderRadius: BorderRadius.all(Radius.circular(0)),
+      elevation: 0,
       title: Text(faq.q),
       expandedTextColor: Theme.of(context).buttonColor,
       baseColor: Theme.of(context).cardColor,

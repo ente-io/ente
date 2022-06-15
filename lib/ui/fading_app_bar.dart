@@ -9,6 +9,7 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
@@ -17,7 +18,6 @@ import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/custom_app_bar.dart';
 import 'package:photos/ui/progress_dialog.dart';
-import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -61,8 +61,8 @@ class FadingAppBarState extends State<FadingAppBar> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.64),
-                Colors.black.withOpacity(0.5),
+                Colors.black.withOpacity(0.72),
+                Colors.black.withOpacity(0.6),
                 Colors.transparent,
               ],
               stops: const [0, 0.2, 1],
@@ -73,7 +73,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         opacity: _shouldHide ? 0 : 1,
         duration: Duration(milliseconds: 150),
       ),
-      height: 100,
+      height: Platform.isAndroid ? 64 : 96,
     );
   }
 
@@ -99,88 +99,94 @@ class FadingAppBarState extends State<FadingAppBar> {
     if (widget.file.ownerID == null || widget.file.ownerID == widget.userID) {
       actions.add(_getFavoriteButton());
     }
-    actions.add(PopupMenuButton(
-      itemBuilder: (context) {
-        final List<PopupMenuItem> items = [];
-        if (widget.file.isRemoteFile()) {
-          items.add(
-            PopupMenuItem(
-              value: 1,
-              child: Row(
-                children: [
-                  Icon(Platform.isAndroid
-                      ? Icons.download
-                      : CupertinoIcons.cloud_download),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text("download"),
-                ],
-              ),
-            ),
-          );
-        }
-        // options for files owned by the user
-        if (widget.file.ownerID == null ||
-            widget.file.ownerID == widget.userID) {
-          if (widget.file.uploadedFileID != null) {
+    actions.add(
+      PopupMenuButton(
+        itemBuilder: (context) {
+          final List<PopupMenuItem> items = [];
+          if (widget.file.isRemoteFile()) {
             items.add(
               PopupMenuItem(
-                value: 2,
+                value: 1,
                 child: Row(
                   children: [
-                    Icon(Platform.isAndroid
-                        ? Icons.access_time_rounded
-                        : CupertinoIcons.time),
+                    Icon(
+                      Platform.isAndroid
+                          ? Icons.download
+                          : CupertinoIcons.cloud_download,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
                     Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    Text("edit time"),
+                    Text("Download"),
                   ],
                 ),
               ),
             );
           }
-
-          items.add(
-            PopupMenuItem(
-              value: 3,
-              child: Row(
-                children: [
-                  Icon(Platform.isAndroid
-                      ? Icons.delete_outline
-                      : CupertinoIcons.delete),
-                  Padding(
-                    padding: EdgeInsets.all(8),
+          // options for files owned by the user
+          if (widget.file.ownerID == null ||
+              widget.file.ownerID == widget.userID) {
+            if (widget.file.uploadedFileID != null) {
+              items.add(
+                PopupMenuItem(
+                  value: 2,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Platform.isAndroid
+                            ? Icons.access_time_rounded
+                            : CupertinoIcons.time,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(8),
+                      ),
+                      Text("Edit time"),
+                    ],
                   ),
-                  Text("delete"),
-                ],
+                ),
+              );
+            }
+
+            items.add(
+              PopupMenuItem(
+                value: 3,
+                child: Row(
+                  children: [
+                    Icon(
+                      Platform.isAndroid
+                          ? Icons.delete_outline
+                          : CupertinoIcons.delete,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(8),
+                    ),
+                    Text("Delete"),
+                  ],
+                ),
               ),
-            ),
-          );
-        }
-        return items;
-      },
-      onSelected: (value) {
-        if (value == 1) {
-          _download(widget.file);
-        } else if (value == 2) {
-          _showDateTimePicker(widget.file);
-        } else if (value == 3) {
-          _showDeleteSheet(widget.file);
-        }
-      },
-    ));
-    return AppBar(
-      title: Text(
-        getDayTitle(widget.file.creationTime),
-        style: TextStyle(
-          fontSize: 14,
-        ),
+            );
+          }
+          return items;
+        },
+        onSelected: (value) {
+          if (value == 1) {
+            _download(widget.file);
+          } else if (value == 2) {
+            _showDateTimePicker(widget.file);
+          } else if (value == 3) {
+            _showDeleteSheet(widget.file);
+          }
+        },
       ),
+    );
+    return AppBar(
+      iconTheme: IconThemeData(color: Colors.white), //same for both themes
       actions: shouldShowActions ? actions : [],
-      backgroundColor: Color(0x00000000),
       elevation: 0,
+      backgroundColor: Color(0x00000000),
     );
   }
 
@@ -207,7 +213,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           final shouldBlockUser = file.uploadedFileID == null;
           ProgressDialog dialog;
           if (shouldBlockUser) {
-            dialog = createProgressDialog(context, "adding to favorites...");
+            dialog = createProgressDialog(context, "Ddding to favorites...");
             await dialog.show();
           }
           try {
@@ -215,7 +221,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           } catch (e, s) {
             _logger.severe(e, s);
             hasError = true;
-            showToast("sorry, could not add this to favorites!");
+            showToast(context, "Sorry, could not add this to favorites!");
           } finally {
             if (shouldBlockUser) {
               await dialog.hide();
@@ -227,15 +233,16 @@ class FadingAppBarState extends State<FadingAppBar> {
           } catch (e, s) {
             _logger.severe(e, s);
             hasError = true;
-            showToast("sorry, could not remove this from favorites!");
+            showToast(context, "Sorry, could not remove this from favorites!");
           }
         }
         return hasError ? oldValue : isLiked;
       },
       likeBuilder: (isLiked) {
         return Icon(
-          Icons.favorite_border,
-          color: isLiked ? Colors.pinkAccent : Colors.white,
+          isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+          color:
+              isLiked ? Colors.pinkAccent : Colors.white, //same for both themes
           size: 24,
         );
       },
@@ -249,7 +256,7 @@ class FadingAppBarState extends State<FadingAppBar> {
       maxTime: DateTime.now(),
       currentTime: DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
       locale: LocaleType.en,
-      theme: kDatePickerTheme,
+      theme: Theme.of(context).colorScheme.dateTimePickertheme,
     );
     if (dateResult == null) {
       return;
@@ -259,11 +266,14 @@ class FadingAppBarState extends State<FadingAppBar> {
       showTitleActions: true,
       currentTime: dateResult,
       locale: LocaleType.en,
-      theme: kDatePickerTheme,
+      theme: Theme.of(context).colorScheme.dateTimePickertheme,
     );
     if (dateWithTimeResult != null) {
-      if (await editTime(context, List.of([widget.file]),
-          dateWithTimeResult.microsecondsSinceEpoch)) {
+      if (await editTime(
+        context,
+        List.of([widget.file]),
+        dateWithTimeResult.microsecondsSinceEpoch,
+      )) {
         widget.file.creationTime = dateWithTimeResult.microsecondsSinceEpoch;
         setState(() {});
       }
@@ -273,54 +283,62 @@ class FadingAppBarState extends State<FadingAppBar> {
   void _showDeleteSheet(File file) {
     final List<Widget> actions = [];
     if (file.uploadedFileID == null || file.localID == null) {
-      actions.add(CupertinoActionSheetAction(
-        child: Text("everywhere"),
-        isDestructiveAction: true,
-        onPressed: () async {
-          await deleteFilesFromEverywhere(context, [file]);
-          Navigator.of(context, rootNavigator: true).pop();
-          widget.onFileDeleted(file);
-        },
-      ));
+      actions.add(
+        CupertinoActionSheetAction(
+          child: Text("Everywhere"),
+          isDestructiveAction: true,
+          onPressed: () async {
+            await deleteFilesFromEverywhere(context, [file]);
+            Navigator.of(context, rootNavigator: true).pop();
+            widget.onFileDeleted(file);
+          },
+        ),
+      );
     } else {
       // uploaded file which is present locally too
-      actions.add(CupertinoActionSheetAction(
-        child: Text("device"),
-        isDestructiveAction: true,
-        onPressed: () async {
-          await deleteFilesOnDeviceOnly(context, [file]);
-          showToast("file deleted from device");
-          Navigator.of(context, rootNavigator: true).pop();
-          // TODO: Fix behavior when inside a device folder
-        },
-      ));
+      actions.add(
+        CupertinoActionSheetAction(
+          child: Text("Device"),
+          isDestructiveAction: true,
+          onPressed: () async {
+            await deleteFilesOnDeviceOnly(context, [file]);
+            showToast(context, "File deleted from device");
+            Navigator.of(context, rootNavigator: true).pop();
+            // TODO: Fix behavior when inside a device folder
+          },
+        ),
+      );
 
-      actions.add(CupertinoActionSheetAction(
-        child: Text("ente"),
-        isDestructiveAction: true,
-        onPressed: () async {
-          await deleteFilesFromRemoteOnly(context, [file]);
-          showShortToast("moved to trash");
-          Navigator.of(context, rootNavigator: true).pop();
-          // TODO: Fix behavior when inside a collection
-        },
-      ));
+      actions.add(
+        CupertinoActionSheetAction(
+          child: Text("ente"),
+          isDestructiveAction: true,
+          onPressed: () async {
+            await deleteFilesFromRemoteOnly(context, [file]);
+            showShortToast(context, "Moved to trash");
+            Navigator.of(context, rootNavigator: true).pop();
+            // TODO: Fix behavior when inside a collection
+          },
+        ),
+      );
 
-      actions.add(CupertinoActionSheetAction(
-        child: Text("everywhere"),
-        isDestructiveAction: true,
-        onPressed: () async {
-          await deleteFilesFromEverywhere(context, [file]);
-          Navigator.of(context, rootNavigator: true).pop();
-          widget.onFileDeleted(file);
-        },
-      ));
+      actions.add(
+        CupertinoActionSheetAction(
+          child: Text("Everywhere"),
+          isDestructiveAction: true,
+          onPressed: () async {
+            await deleteFilesFromEverywhere(context, [file]);
+            Navigator.of(context, rootNavigator: true).pop();
+            widget.onFileDeleted(file);
+          },
+        ),
+      );
     }
     final action = CupertinoActionSheet(
-      title: Text("delete file?"),
+      title: Text("Delete file?"),
       actions: actions,
       cancelButton: CupertinoActionSheetAction(
-        child: Text("cancel"),
+        child: Text("Cancel"),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop();
         },
@@ -330,7 +348,7 @@ class FadingAppBarState extends State<FadingAppBar> {
   }
 
   Future<void> _download(File file) async {
-    final dialog = createProgressDialog(context, "downloading...");
+    final dialog = createProgressDialog(context, "Downloading...");
     await dialog.show();
     FileType type = file.fileType;
     // save and track image for livePhoto/image and video for FileType.video
@@ -359,19 +377,9 @@ class FadingAppBarState extends State<FadingAppBar> {
     Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
     await dialog.hide();
     if (file.fileType == FileType.livePhoto) {
-      showToast("photo and video saved to gallery");
+      showToast(context, "Photo and video saved to gallery");
     } else {
-      showToast("file saved to gallery");
+      showToast(context, "File saved to gallery");
     }
   }
 }
-
-const kDatePickerTheme = DatePickerTheme(
-  backgroundColor: Colors.black,
-  itemStyle: TextStyle(
-    color: Colors.white,
-  ),
-  cancelStyle: TextStyle(
-    color: Colors.white,
-  ),
-);

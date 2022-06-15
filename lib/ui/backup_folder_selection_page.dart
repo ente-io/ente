@@ -7,9 +7,9 @@ import 'package:implicitly_animated_reorderable_list/transitions.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 
@@ -61,23 +61,38 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("select folders to backup")),
+      appBar: widget.shouldSelectAll
+          ? null
+          : AppBar(
+              elevation: 0,
+              title: Text(""),
+            ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Padding(
-            padding: EdgeInsets.all(12),
+          SizedBox(
+            height: 0,
+          ),
+          SafeArea(
+            child: Container(
+              padding: EdgeInsets.fromLTRB(24, 32, 24, 8),
+              child: Text(
+                'Select folders for backup',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontFamily: 'Inter-Bold',
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 32, right: 32),
+            padding: const EdgeInsets.only(left: 24, right: 48),
             child: Text(
-              "the selected folders will be end-to-end encrypted and backed up",
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.4),
-                fontSize: 14,
-                height: 1.3,
-              ),
-              textAlign: TextAlign.center,
+              "Selected folders will be encrypted and backed up",
+              style: Theme.of(context).textTheme.caption.copyWith(height: 1.3),
             ),
           ),
           Padding(
@@ -88,17 +103,17 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               : GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(6, 6, 64, 6),
+                    padding: const EdgeInsets.fromLTRB(24, 6, 64, 12),
                     child: Align(
-                      alignment: Alignment.centerRight,
+                      alignment: Alignment.centerLeft,
                       child: Text(
                         _selectedFolders.length == _allFolders.length
-                            ? "unselect all"
-                            : "select all",
+                            ? "Unselect all"
+                            : "Select all",
                         textAlign: TextAlign.right,
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white.withOpacity(0.8),
+                          decoration: TextDecoration.underline,
+                          fontSize: 16,
                         ),
                       ),
                     ),
@@ -118,19 +133,30 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                           .compareTo(second.deviceFolder.toLowerCase());
                     });
                     setState(() {});
-                  }),
+                  },
+                ),
           Expanded(child: _getFolders()),
-          Padding(
-            padding: EdgeInsets.all(20),
-          ),
           Hero(
             tag: "select_folders",
             child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(context).backgroundColor,
+                    blurRadius: 24,
+                    offset: Offset(0, -8),
+                    spreadRadius: 4,
+                  )
+                ],
+              ),
               padding: EdgeInsets.only(
-                  left: 60, right: 60, bottom: Platform.isIOS ? 60 : 32),
-              child: button(
-                widget.buttonText,
-                fontSize: 18,
+                left: 20,
+                right: 20,
+                bottom: Platform.isIOS ? 60 : 32,
+              ),
+              child: OutlinedButton(
+                child: Text(widget.buttonText),
                 onPressed: _selectedFolders.isEmpty
                     ? null
                     : () async {
@@ -139,7 +165,6 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                         Bus.instance.fire(BackupFoldersUpdatedEvent());
                         Navigator.of(context).pop();
                       },
-                padding: EdgeInsets.fromLTRB(60, 20, 60, 20),
               ),
             ),
           ),
@@ -155,10 +180,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     _sortFiles();
     final scrollController = ScrollController();
     return Container(
-      padding: EdgeInsets.only(left: 40, right: 40),
+      padding: EdgeInsets.symmetric(horizontal: 20),
       child: Scrollbar(
         controller: scrollController,
-        isAlwaysShown: true,
+        thumbVisibility: true,
         child: Padding(
           padding: const EdgeInsets.only(right: 4),
           child: ImplicitlyAnimatedReorderableList<File>(
@@ -179,8 +204,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                 builder: (context, dragAnimation, inDrag) {
                   final t = dragAnimation.value;
                   final elevation = lerpDouble(0, 8, t);
-                  final color = Color.lerp(
-                      Colors.white, Colors.white.withOpacity(0.8), t);
+                  final themeColor = Theme.of(context).colorScheme.onSurface;
+                  final color =
+                      Color.lerp(themeColor, themeColor.withOpacity(0.8), t);
                   return SizeFadeTransition(
                     sizeFraction: 0.7,
                     curve: Curves.easeInOut,
@@ -204,47 +230,73 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   Widget _getFileItem(File file) {
     final isSelected = _selectedFolders.contains(file.deviceFolder);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 1, right: 4),
+      padding: const EdgeInsets.only(bottom: 1, right: 1),
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.black,
+            color: Theme.of(context).colorScheme.boxUnSelectColor,
           ),
           borderRadius: BorderRadius.all(
-            Radius.circular(10),
+            Radius.circular(12),
           ),
-          color: isSelected
-              ? Color.fromRGBO(16, 32, 32, 1)
-              : Color.fromRGBO(8, 18, 18, 0.4),
+          // color: isSelected
+          //     ? Theme.of(context).colorScheme.boxSelectColor
+          //     : Theme.of(context).colorScheme.boxUnSelectColor,
+          gradient: isSelected
+              ? LinearGradient(
+                  colors: const [Color(0xFF00DD4D), Color(0xFF43BA6C)],
+                ) //same for both themes
+              : LinearGradient(
+                  colors: [
+                    Theme.of(context).colorScheme.boxUnSelectColor,
+                    Theme.of(context).colorScheme.boxUnSelectColor
+                  ],
+                ),
         ),
-        padding: EdgeInsets.fromLTRB(20, 16, 20, 16),
+        padding: EdgeInsets.fromLTRB(8, 4, 4, 4),
         child: InkWell(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
-                  _getThumbnail(file),
-                  Padding(padding: EdgeInsets.all(10)),
+                  Checkbox(
+                    checkColor: Colors.green,
+                    activeColor: Colors.white,
+                    value: isSelected,
+                    onChanged: (value) {
+                      if (value) {
+                        _selectedFolders.add(file.deviceFolder);
+                      } else {
+                        _selectedFolders.remove(file.deviceFolder);
+                      }
+                      setState(() {});
+                    },
+                  ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        constraints: BoxConstraints(maxWidth: 140),
+                        constraints: BoxConstraints(maxWidth: 180),
                         child: Text(
                           file.deviceFolder,
+                          textAlign: TextAlign.left,
                           style: TextStyle(
-                            fontSize: 14,
-                            height: 1.5,
+                            fontFamily: 'Inter-Medium',
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
                             color: isSelected
                                 ? Colors.white
-                                : Colors.white.withOpacity(0.7),
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.7),
                           ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 2,
                         ),
                       ),
-                      Padding(padding: EdgeInsets.all(2)),
+                      Padding(padding: EdgeInsets.only(top: 2)),
                       Text(
                         _itemCount[file.deviceFolder].toString() +
                             " item" +
@@ -253,25 +305,15 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                         style: TextStyle(
                           fontSize: 12,
                           color: isSelected
-                              ? Colors.white.withOpacity(0.65)
-                              : Colors.white.withOpacity(0.4),
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
                   ),
                 ],
               ),
-              Checkbox(
-                value: isSelected,
-                onChanged: (value) {
-                  if (value) {
-                    _selectedFolders.add(file.deviceFolder);
-                  } else {
-                    _selectedFolders.remove(file.deviceFolder);
-                  }
-                  setState(() {});
-                },
-              ),
+              _getThumbnail(file, isSelected),
             ],
           ),
           onTap: () {
@@ -306,17 +348,31 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     });
   }
 
-  Widget _getThumbnail(File file) {
+  Widget _getThumbnail(File file, bool isSelected) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(4.0),
+      borderRadius: BorderRadius.circular(8),
       child: SizedBox(
-        child: ThumbnailWidget(
-          file,
-          shouldShowSyncStatus: false,
-          key: Key("backup_selection_widget" + file.tag()),
+        child: Stack(
+          alignment: AlignmentDirectional.bottomEnd,
+          children: [
+            ThumbnailWidget(
+              file,
+              shouldShowSyncStatus: false,
+              key: Key("backup_selection_widget" + file.tag()),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(9),
+              child: isSelected
+                  ? Icon(
+                      Icons.local_police,
+                      color: Colors.white,
+                    )
+                  : null,
+            ),
+          ],
         ),
-        height: 60,
-        width: 60,
+        height: 88,
+        width: 88,
       ),
     );
   }

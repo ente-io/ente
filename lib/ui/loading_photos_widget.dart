@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:loading_animations/loading_animations.dart';
+import 'package:lottie/lottie.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
+import 'package:photos/ui/common/bottomShadow.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class LoadingPhotosWidget extends StatefulWidget {
@@ -23,13 +25,13 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   );
   final List<String> _messages = [
     "web.ente.io has a slick uploader",
-    "we have preserved over a million memories so far",
-    "all our apps are open source",
-    "our encryption protocols have been reviewed by engineers at Google, Apple, Amazon, and Facebook",
-    "you can share files and folders with your loved ones, end-to-end encrypted",
-    "our mobile apps run in the background to encrypt and backup new photos you take",
-    "we use Xchacha20Poly1305 to safely encrypt your data",
-    "one of our data centers is in a fall out shelter 25m underground",
+    "We have preserved over 3 million memories so far",
+    "All our apps are open source",
+    "Our encryption protocols have been reviewed by engineers at Google, Apple, Amazon, and Facebook",
+    "You can share links to your albums with your loved ones",
+    "Our mobile apps run in the background to encrypt and backup new photos you take",
+    "We use Xchacha20Poly1305 to safely encrypt your data",
+    "One of our data centers is in an underground fall out shelter in Paris",
   ];
 
   @override
@@ -43,15 +45,15 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
           // Do nothing, let HomeWidget refresh
         } else {
           routeToPage(
-              context,
-              BackupFolderSelectionPage(
-                shouldSelectAll: true,
-                buttonText: "start backup",
-              ));
+            context,
+            BackupFolderSelectionPage(
+              shouldSelectAll: true,
+              buttonText: "Start backup",
+            ),
+          );
         }
       }
     });
-
     Timer.periodic(Duration(seconds: 5), (Timer timer) {
       if (!mounted) {
         return;
@@ -78,67 +80,99 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isLightMode =
+        MediaQuery.of(context).platformBrightness == Brightness.light;
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            LoadingBouncingGrid.square(
-              inverted: true,
-              backgroundColor: Theme.of(context).buttonColor,
-              size: 64,
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    isLightMode
+                        ? Image.asset(
+                            'assets/loading_photos_light.png',
+                            color: Colors.white.withOpacity(0.5),
+                            colorBlendMode: BlendMode.modulate,
+                          )
+                        : Image.asset(
+                            'assets/loading_photos_light.png',
+                            color: Colors.white.withOpacity(0.25),
+                            colorBlendMode: BlendMode.modulate,
+                          ),
+                    Lottie.asset(
+                      'assets/loadingGalleryLottie.json',
+                      height: 400,
+                    )
+                  ],
+                ),
+                Text(
+                  "Loading your photos...",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.subTextColor,
+                  ),
+                ),
+                const SizedBox(height: 54),
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Did you know?",
+                          style: Theme.of(context).textTheme.headline6.copyWith(
+                                color: Theme.of(context).colorScheme.greenText,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    SizedBox(
+                      height: 175,
+                      child: Stack(
+                        children: [
+                          PageView.builder(
+                            scrollDirection: Axis.vertical,
+                            controller: _pageController,
+                            itemBuilder: (context, index) {
+                              return _getMessage(_messages[index]);
+                            },
+                            itemCount: _messages.length,
+                            physics: NeverScrollableScrollPhysics(),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: BottomShadowWidget(),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            Padding(padding: const EdgeInsets.all(20.0)),
-            Text(
-              "loading your gallery...",
-              style: TextStyle(
-                fontSize: 16,
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(10)),
-            Text(
-              "this might take upto 30 seconds 🐣",
-              style: TextStyle(color: Colors.white.withOpacity(0.3)),
-            ),
-            Padding(padding: const EdgeInsets.all(70)),
-            Text(
-              "did you know?",
-              style: TextStyle(
-                fontSize: 16,
-                color: Theme.of(context).buttonColor,
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(8)),
-            SizedBox(
-              height: 80,
-              child: PageView.builder(
-                scrollDirection: Axis.vertical,
-                controller: _pageController,
-                itemBuilder: (context, index) {
-                  return _getMessage(_messages[index]);
-                },
-                itemCount: _messages.length,
-                physics: NeverScrollableScrollPhysics(),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   Widget _getMessage(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 24, right: 24),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Colors.white.withOpacity(0.7),
-          height: 1.5,
-        ),
-      ),
+    return Text(
+      text,
+      textAlign: TextAlign.start,
+      style: Theme.of(context)
+          .textTheme
+          .headline5
+          .copyWith(color: Theme.of(context).colorScheme.defaultTextColor),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/ui/billing_questions_widget.dart';
 import 'package:photos/utils/data_util.dart';
@@ -9,9 +10,11 @@ class SubscriptionHeaderWidget extends StatefulWidget {
   final bool isOnboarding;
   final int currentUsage;
 
-  const SubscriptionHeaderWidget(
-      {Key key, this.isOnboarding, this.currentUsage})
-      : super(key: key);
+  const SubscriptionHeaderWidget({
+    Key key,
+    this.isOnboarding,
+    this.currentUsage,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -25,20 +28,50 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
     if (widget.isOnboarding) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        child: Text(
-          "ente preserves your memories, so they're always available to you, even if you lose your device",
-          style: TextStyle(
-            color: Colors.white54,
-            height: 1.2,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  "Select your plan",
+                  style: Theme.of(context).textTheme.headline4,
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Text(
+              "Ente preserves your memories, so they're always available to you, even if you lose your device ",
+              style: Theme.of(context).textTheme.caption,
+            ),
+          ],
         ),
       );
     } else {
       return SizedBox(
-        height: 50,
+        height: 72,
+        width: double.infinity,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text("current usage is " + formatBytes(widget.currentUsage)),
+          padding: const EdgeInsets.all(24.0),
+          child: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: "Current usage is ",
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
+                TextSpan(
+                  text: formatBytes(widget.currentUsage),
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle1
+                      .copyWith(fontWeight: FontWeight.bold),
+                )
+              ],
+            ),
+          ),
         ),
       );
     }
@@ -56,21 +89,19 @@ class ValidityWidget extends StatelessWidget {
       return Container();
     }
     var endDate = getDateAndMonthAndYear(
-        DateTime.fromMicrosecondsSinceEpoch(currentSubscription.expiryTime));
-    var message = "renews on $endDate";
+      DateTime.fromMicrosecondsSinceEpoch(currentSubscription.expiryTime),
+    );
+    var message = "Renews on $endDate";
     if (currentSubscription.productID == kFreeProductID) {
-      message = "free plan valid till $endDate";
+      message = "Free plan valid till $endDate";
     } else if (currentSubscription.attributes?.isCancelled ?? false) {
-      message = "your subscription will be cancelled on $endDate";
+      message = "Your subscription will be cancelled on $endDate";
     }
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Text(
         message,
-        style: TextStyle(
-          color: Colors.white.withOpacity(0.6),
-          fontSize: 14,
-        ),
+        style: Theme.of(context).textTheme.caption,
       ),
     );
   }
@@ -85,7 +116,7 @@ class SubFaqWidget extends StatelessWidget {
         behavior: HitTestBehavior.translucent,
         onTap: () {
           showModalBottomSheet<void>(
-            backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
+            backgroundColor: Theme.of(context).colorScheme.bgColorForQuestions,
             barrierColor: Colors.black87,
             context: context,
             builder: (context) {
@@ -97,10 +128,10 @@ class SubFaqWidget extends StatelessWidget {
           padding: EdgeInsets.all(40),
           child: RichText(
             text: TextSpan(
-              text: "questions?",
+              text: "Questions?",
               style: TextStyle(
                 color: Colors.blue,
-                fontFamily: 'Ubuntu',
+                fontFamily: 'Inter',
               ),
             ),
           ),

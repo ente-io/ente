@@ -8,9 +8,11 @@ class ThumbnailLruCache {
   static final LRUMap<String, Uint8List> _map = LRUMap(1000);
 
   static Uint8List get(File photo, [int size]) {
-    return _map.get(photo.generatedID.toString() +
-        "_" +
-        (size != null ? size.toString() : kThumbnailLargeSize.toString()));
+    return _map.get(
+      photo.generatedID.toString() +
+          "_" +
+          (size != null ? size.toString() : kThumbnailLargeSize.toString()),
+    );
   }
 
   static void put(
@@ -19,16 +21,19 @@ class ThumbnailLruCache {
     int size,
   ]) {
     _map.put(
-        photo.generatedID.toString() +
-            "_" +
-            (size != null ? size.toString() : kThumbnailLargeSize.toString()),
-        imageData);
+      photo.generatedID.toString() +
+          "_" +
+          (size != null ? size.toString() : kThumbnailLargeSize.toString()),
+      imageData,
+    );
   }
 
   static void clearCache(File file) {
     _map.remove(
-        file.generatedID.toString() + "_" + kThumbnailLargeSize.toString());
+      file.generatedID.toString() + "_" + kThumbnailLargeSize.toString(),
+    );
     _map.remove(
-        file.generatedID.toString() + "_" + kThumbnailSmallSize.toString());
+      file.generatedID.toString() + "_" + kThumbnailSmallSize.toString(),
+    );
   }
 }

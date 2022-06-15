@@ -11,12 +11,13 @@ description: ente photos application
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.5.37+317
+version: 0.5.43+323
 
 environment:
   sdk: ">=2.10.0 <3.0.0"
 
 dependencies:
+  adaptive_theme: ^2.3.0
   alice:
     git: "https://github.com/jhomlala/alice.git"
   animate_do: ^2.0.0
@@ -33,9 +34,11 @@ dependencies:
   device_info: ^2.0.2
   dio: ^4.0.0
   dots_indicator: ^2.0.0
+  dotted_border: ^2.0.0+2
   email_validator: ^2.0.1
   event_bus: ^2.0.0
   exif: ^3.0.0
+  expandable: ^5.0.1
   expansion_tile_card: ^2.0.0
   extended_image: ^6.2.1
   fast_base58: ^0.2.1
@@ -51,8 +54,11 @@ dependencies:
   flutter_email_sender: ^5.1.0
   flutter_image_compress: ^1.1.0
   flutter_inappwebview: ^5.3.2
+  flutter_launcher_icons: ^0.9.3
   flutter_local_notifications: ^9.5.3+1
+  flutter_native_splash: ^2.2.0+1
   flutter_password_strength: ^0.1.6
+  password_strength: ^0.2.0
   flutter_secure_storage: ^4.2.0
   flutter_sodium: ^0.2.0
   flutter_typeahead: ^4.0.0
@@ -82,8 +88,6 @@ dependencies:
   pedantic: ^1.9.2
   photo_manager: ^2.0.8
   photo_view: ^0.14.0
-  pie_chart:
-    git: "https://github.com/apgapg/pie_chart.git"
   pinput: ^1.2.2
   provider: ^6.0.0
   quiver: ^3.0.1
@@ -114,24 +118,24 @@ dependency_overrides:
   provider: ^6.0.1 # for chewie 1.2.2 https://github.com/brianegan/chewie/issues/530
 
 dev_dependencies:
-  flutter_launcher_icons: "0.9.0"
-  flutter_native_splash: ^1.1.8+4
   flutter_test:
     sdk: flutter
   lints: ^1.0.1
 
 flutter_icons:
   android: true
-  image_path_android: "assets/android_icon.png"
+  image_path_android: "assets/icon-light-curved.png"
   ios: true
-  image_path_ios: "assets/ios_icon.png"
+  image_path_ios: "assets/icon-light.png"
 
 flutter_native_splash:
-  color: "#000000"
-  image: assets/ios_icon.png
+  color: "#ffffff"
+  color_dark: "#000000"
+  image: assets/splash-screen-light.png
+  image_dark: assets/splash-screen-dark.png
+  android_fullscreen: true
   android_gravity: center
   ios_content_mode: center
-  android_fullscreen: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -141,17 +145,16 @@ flutter:
   assets:
     - assets/
   fonts:
-  - family: NunitoSans
+  - family: Inter
     fonts:
-      - asset: fonts/NunitoSans-Regular.ttf
-      - asset: fonts/NunitoSans-Bold.ttf
-  - family: Ubuntu
-    fonts:
-      - asset: fonts/Ubuntu-Regular.ttf
-      - asset: fonts/Ubuntu-Light.ttf
+      - asset: fonts/Inter-Regular.ttf
+      - asset: fonts/Inter-Medium.ttf
+      - asset: fonts/Inter-Light.ttf
+      - asset: fonts/Inter-SemiBold.ttf
+      - asset: fonts/Inter-Bold.ttf
   - family: Montserrat
     fonts:
-      - asset: fonts/Montserrat-Medium.ttf
+      - asset: fonts/Montserrat-Bold.ttf
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

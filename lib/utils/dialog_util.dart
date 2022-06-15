@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/progress_dialog.dart';
 
@@ -11,14 +10,14 @@ ProgressDialog createProgressDialog(BuildContext context, String message) {
     context,
     type: ProgressDialogType.Normal,
     isDismissible: false,
-    barrierColor: Colors.black.withOpacity(0.85),
+    barrierColor: Colors.black12,
   );
   dialog.style(
     message: message,
-    messageTextStyle: TextStyle(color: Colors.white),
-    backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
+    messageTextStyle: Theme.of(context).textTheme.caption,
+    backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
     progressWidget: loadWidget,
-    borderRadius: 4.0,
+    borderRadius: 10,
     elevation: 10.0,
     insetAnimCurve: Curves.easeInOut,
   );
@@ -26,16 +25,23 @@ ProgressDialog createProgressDialog(BuildContext context, String message) {
 }
 
 Future<dynamic> showErrorDialog(
-    BuildContext context, String title, String content) {
+  BuildContext context,
+  String title,
+  String content,
+) {
   AlertDialog alert = AlertDialog(
-    title: Text(title),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    title: Text(
+      title,
+      style: Theme.of(context).textTheme.headline6,
+    ),
     content: Text(content),
     actions: [
       TextButton(
         child: Text(
-          "ok",
+          "Ok",
           style: TextStyle(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         onPressed: () {
@@ -50,12 +56,12 @@ Future<dynamic> showErrorDialog(
     builder: (BuildContext context) {
       return alert;
     },
-    barrierColor: Colors.black87,
+    barrierColor: Colors.black12,
   );
 }
 
 Future<dynamic> showGenericErrorDialog(BuildContext context) {
-  return showErrorDialog(context, "something went wrong", "please try again.");
+  return showErrorDialog(context, "Something went wrong", "Please try again.");
 }
 
 Future<T> showConfettiDialog<T>({
@@ -86,7 +92,8 @@ Future<T> showConfettiDialog<T>({
               confettiController: _confettiController,
               blastDirection: pi / 2,
               emissionFrequency: 0,
-              numberOfParticles: 100, // a lot of particles at once
+              numberOfParticles: 100,
+              // a lot of particles at once
               gravity: 1,
               blastDirectionality: BlastDirectionality.explosive,
             ),

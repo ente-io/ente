@@ -18,10 +18,10 @@ PODS:
   - Firebase/Messaging (8.15.0):
     - Firebase/CoreOnly
     - FirebaseMessaging (~> 8.15.0)
-  - firebase_core (1.17.0):
+  - firebase_core (1.17.1):
     - Firebase/CoreOnly (= 8.15.0)
     - Flutter
-  - firebase_messaging (11.4.0):
+  - firebase_messaging (11.4.1):
     - Firebase/Messaging (= 8.15.0)
     - firebase_core
     - Flutter
@@ -68,6 +68,8 @@ PODS:
   - flutter_keyboard_visibility (0.0.1):
     - Flutter
   - flutter_local_notifications (0.0.1):
+    - Flutter
+  - flutter_native_splash (0.0.1):
     - Flutter
   - flutter_secure_storage (3.3.1):
     - Flutter
@@ -210,6 +212,7 @@ DEPENDENCIES:
   - flutter_inappwebview (from `.symlinks/plugins/flutter_inappwebview/ios`)
   - flutter_keyboard_visibility (from `.symlinks/plugins/flutter_keyboard_visibility/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
+  - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - flutter_sodium (from `.symlinks/plugins/flutter_sodium/ios`)
   - fluttercontactpicker (from `.symlinks/plugins/fluttercontactpicker/ios`)
@@ -290,6 +293,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_keyboard_visibility/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
+  flutter_native_splash:
+    :path: ".symlinks/plugins/flutter_native_splash/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   flutter_sodium:
@@ -350,8 +355,8 @@ SPEC CHECKSUMS:
   connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   Firebase: 5f8193dff4b5b7c5d5ef72ae54bb76c08e2b841d
-  firebase_core: aa1b92020533f5c23955e388c347c58fd64f8627
-  firebase_messaging: 8957bf304b47daf8bf12d0b111fdecc5b33e77a3
+  firebase_core: 318de541b0e61d3f24262982a3f0b54afe72439b
+  firebase_messaging: 943cfe65e0b3f457240489ce67655e40da1d270c
   FirebaseCore: 5743c5785c074a794d35f2fff7ecc254a91e08b1
   FirebaseCoreDiagnostics: 92e07a649aeb66352b319d43bdd2ee3942af84cb
   FirebaseInstallations: 40bd9054049b2eae9a2c38ef1c3dd213df3605cd
@@ -363,6 +368,7 @@ SPEC CHECKSUMS:
   flutter_inappwebview: bfd58618f49dc62f2676de690fc6dcda1d6c3721
   flutter_keyboard_visibility: 0339d06371254c3eb25eeb90ba8d17dca8f9c069
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
+  flutter_native_splash: 52501b97d1c0a5f898d687f1646226c1f93c56ef
   flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
   flutter_sodium: c84426b4de738514b5b66cfdeb8a06634e72fe0b
   fluttercontactpicker: d582836dea6b5d489f3d259f35d7817ae82ee5e6

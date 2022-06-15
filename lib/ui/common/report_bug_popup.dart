@@ -10,7 +10,7 @@ PopupMenuButton<dynamic> reportBugPopupMenu(BuildContext context) {
           value: 1,
           child: Row(
             children: const [
-              Text("contact support"),
+              Text("Contact support"),
             ],
           ),
         ),
@@ -19,8 +19,12 @@ PopupMenuButton<dynamic> reportBugPopupMenu(BuildContext context) {
     },
     onSelected: (value) async {
       if (value == 1) {
-        await sendLogs(context, "contact support", "support@ente.io",
-            postShare: () {});
+        await sendLogs(
+          context,
+          "Contact support",
+          "support@ente.io",
+          postShare: () {},
+        );
       }
     },
   );

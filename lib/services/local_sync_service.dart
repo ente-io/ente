@@ -55,8 +55,10 @@ class LocalSyncService {
     if (Platform.isAndroid && AppLifecycleService.instance.isForeground) {
       final permissionState = await PhotoManager.requestPermissionExtend();
       if (permissionState != PermissionState.authorized) {
-        _logger.severe("sync requested with invalid permission",
-            permissionState.toString());
+        _logger.severe(
+          "sync requested with invalid permission",
+          permissionState.toString(),
+        );
         return;
       }
     }
@@ -67,7 +69,8 @@ class LocalSyncService {
     _existingSync = Completer<void>();
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
     _logger.info(
-        existingLocalFileIDs.length.toString() + " localIDs were discovered");
+      existingLocalFileIDs.length.toString() + " localIDs were discovered",
+    );
     final editedFileIDs = getEditedFileIDs().toSet();
     final downloadedFileIDs = getDownloadedFileIDs().toSet();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
@@ -127,11 +130,13 @@ class LocalSyncService {
     final localAssets = await getAllLocalAssets();
     final eTime = DateTime.now().microsecondsSinceEpoch;
     final d = Duration(microseconds: eTime - sTime);
-    _logger.info("Loading from the beginning returned " +
-        localAssets.length.toString() +
-        " assets and took " +
-        d.inMilliseconds.toString() +
-        "ms");
+    _logger.info(
+      "Loading from the beginning returned " +
+          localAssets.length.toString() +
+          " assets and took " +
+          d.inMilliseconds.toString() +
+          "ms",
+    );
     final existingIDs = await _db.getExistingLocalFileIDs();
     final invalidIDs = getInvalidFileIDs().toSet();
     final unsyncedFiles =
@@ -139,7 +144,8 @@ class LocalSyncService {
     if (unsyncedFiles.isNotEmpty) {
       await _db.insertMultiple(unsyncedFiles);
       _logger.info(
-          "Inserted " + unsyncedFiles.length.toString() + " unsynced files.");
+        "Inserted " + unsyncedFiles.length.toString() + " unsynced files.",
+      );
       _updatePathsToBackup(unsyncedFiles);
       Bus.instance.fire(LocalPhotosUpdatedEvent(unsyncedFiles));
       return true;
@@ -218,10 +224,12 @@ class LocalSyncService {
     Set<String> editedFileIDs,
     Set<String> downloadedFileIDs,
   ) async {
-    _logger.info("Loading photos from " +
-        DateTime.fromMicrosecondsSinceEpoch(fromTime).toString() +
-        " to " +
-        DateTime.fromMicrosecondsSinceEpoch(toTime).toString());
+    _logger.info(
+      "Loading photos from " +
+          DateTime.fromMicrosecondsSinceEpoch(fromTime).toString() +
+          " to " +
+          DateTime.fromMicrosecondsSinceEpoch(toTime).toString(),
+    );
     final files = await getDeviceFiles(fromTime, toTime, _computer);
     if (files.isNotEmpty) {
       _logger.info("Fetched " + files.length.toString() + " files.");
@@ -233,7 +241,8 @@ class LocalSyncService {
           .removeWhere((file) => downloadedFileIDs.contains(file.localID));
       if (updatedFiles.isNotEmpty) {
         _logger.info(
-            updatedFiles.length.toString() + " local files were updated.");
+          updatedFiles.length.toString() + " local files were updated.",
+        );
       }
       for (final file in updatedFiles) {
         await _db.updateUploadedFile(
