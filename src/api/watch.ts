@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'promise-fs';
-import { watchStore } from './store';
+import { watchStore } from '../services/store';
 import { ipcRenderer } from 'electron';
 import { ElectronFile, WatchStoreType } from '../types';
 import { getElectronFile, getFilesFromDir } from './upload';
