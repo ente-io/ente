@@ -248,7 +248,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     },
                   ),
                 ),
-                Padding(padding: EdgeInsets.all(4)),
+                const SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: TextFormField(
