@@ -1,11 +1,9 @@
 import 'dart:io';
 
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:password_strength/password_strength.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -68,7 +66,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 125;
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
     FloatingActionButtonLocation fabLocation() {
       if (isKeypadOpen) {
@@ -100,6 +98,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       ),
     );
     return Scaffold(
+      resizeToAvoidBottomInset: isKeypadOpen,
       appBar: appBar,
       body: _getBody(),
       floatingActionButton: DynamicFAB(
@@ -322,7 +321,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 const Divider(thickness: 1),
                 const SizedBox(height: 12),
                 _getAgreement(),
-                Padding(padding: EdgeInsets.all(20)),
+                const SizedBox(height: 40),
               ],
             ),
           ),

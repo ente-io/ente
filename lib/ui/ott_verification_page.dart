@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/user_service.dart';
@@ -26,7 +25,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 125;
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
     FloatingActionButtonLocation fabLocation() {
       if (isKeypadOpen) {
@@ -37,6 +36,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
