@@ -10,7 +10,7 @@ import {
 import { createWindow } from './createWindow';
 import { buildContextMenu } from './menu';
 import { logErrorSentry } from './sentry';
-import { getFilesFromDir } from '../services/upload';
+import { getFilesFromDir } from '../api/upload';
 
 export default function setupIpcComs(
     tray: Tray,

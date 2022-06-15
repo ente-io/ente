@@ -2,9 +2,10 @@ import path from 'path';
 import StreamZip from 'node-stream-zip';
 import * as fs from 'promise-fs';
 import { FILE_STREAM_CHUNK_SIZE } from '../config';
-import { uploadStatusStore } from './store';
+import { uploadStatusStore } from '../services/store';
 import { ElectronFile, FILE_PATH_KEYS, FILE_PATH_TYPE } from '../types';
 import { logError } from '../utils/logging';
+import { ipcRenderer } from 'electron';
 
 // https://stackoverflow.com/a/63111390
 export const getFilesFromDir = async (dirPath: string) => {
@@ -235,4 +236,48 @@ export const getElectronFilesFromGoogleZip = async (filePath: string) => {
     }
 
     return files;
+};
+
+export const showUploadDirsDialog = async () => {
+    try {
+        const filePaths: string[] = await ipcRenderer.invoke(
+            'show-upload-dirs-dialog'
+        );
+        const files = await Promise.all(filePaths.map(getElectronFile));
+        return files;
+    } catch (e) {
+        logError(e, 'error while selecting folders');
+    }
+};
+
+export const showUploadFilesDialog = async () => {
+    try {
+        const filePaths: string[] = await ipcRenderer.invoke(
+            'show-upload-files-dialog'
+        );
+        const files = await Promise.all(filePaths.map(getElectronFile));
+        return files;
+    } catch (e) {
+        logError(e, 'error while selecting files');
+    }
+};
+
+export const showUploadZipDialog = async () => {
+    try {
+        const filePaths: string[] = await ipcRenderer.invoke(
+            'show-upload-zip-dialog'
+        );
+        const files: ElectronFile[] = [];
+
+        for (const filePath of filePaths) {
+            files.push(...(await getElectronFilesFromGoogleZip(filePath)));
+        }
+
+        return {
+            zipPaths: filePaths,
+            files,
+        };
+    } catch (e) {
+        logError(e, 'error while selecting zips');
+    }
 };
