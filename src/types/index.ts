@@ -20,15 +20,19 @@ export interface KeysStoreType {
     };
 }
 
+type FileMapping = {
+    path: string;
+    id: number;
+};
+
+interface Mapping {
+    collectionName: string;
+    folderPath: string;
+    files: FileMapping[];
+}
+
 export interface WatchStoreType {
-    mappings: {
-        collectionName: string;
-        folderPath: string;
-        files: {
-            path: string;
-            id: number;
-        }[];
-    }[];
+    mappings: Mapping[];
 }
 
 export enum FILE_PATH_TYPE {
