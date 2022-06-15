@@ -1,9 +1,8 @@
-import { reloadWindow, sendNotification, showOnTray } from './api/common';
+import { reloadWindow, sendNotification, showOnTray } from './api/system';
 import {
     showUploadDirsDialog,
     showUploadFilesDialog,
     showUploadZipDialog,
-    getElectronFile,
     getPendingUploads,
     setToUploadFiles,
     getElectronFilesFromGoogleZip,
@@ -24,11 +23,12 @@ import {
     getExportRecord,
     setExportRecord,
     exists,
-    selectRootDirectory,
 } from './api/export';
 import { fixHotReloadNext12 } from './utils/preload';
 
 fixHotReloadNext12();
+import { selectRootDirectory } from './api/common';
+import { getElectronFile } from './services/fs';
 
 const windowObject: any = window;
 

@@ -1,11 +1,10 @@
-import { ipcRenderer } from 'electron';
+import { ipcRenderer } from 'electron/renderer';
+import { logError } from '../utils/logging';
 
-export const sendNotification = (content: string) => {
-    ipcRenderer.send('send-notification', content);
-};
-export const showOnTray = (content: string) => {
-    ipcRenderer.send('update-tray', content);
-};
-export const reloadWindow = () => {
-    ipcRenderer.send('reload-window');
+export const selectRootDirectory = async () => {
+    try {
+        return await ipcRenderer.invoke('select-dir');
+    } catch (e) {
+        logError(e, 'error while selecting root directory');
+    }
 };
