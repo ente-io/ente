@@ -1,3 +1,5 @@
+import { ipcRenderer } from 'electron';
+
 export const sendNotification = (content: string) => {
     ipcRenderer.send('send-notification', content);
 };
