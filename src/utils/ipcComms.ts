@@ -10,7 +10,7 @@ import {
 import { createWindow } from './createWindow';
 import { buildContextMenu } from './menu';
 import { logErrorSentry } from './sentry';
-import { getFilesFromDir } from './upload';
+import { getFilesFromDir } from '../services/upload';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -38,6 +38,7 @@ export default function setupIpcComs(
         };
         new Notification(notification).show();
     });
+
     ipcMain.on('reload-window', () => {
         const secondWindow = createWindow();
         mainWindow.destroy();

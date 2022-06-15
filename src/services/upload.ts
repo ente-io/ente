@@ -2,9 +2,9 @@ import path from 'path';
 import StreamZip from 'node-stream-zip';
 import * as fs from 'promise-fs';
 import { FILE_STREAM_CHUNK_SIZE } from '../config';
-import { uploadStatusStore } from '../services/store';
+import { uploadStatusStore } from './store';
 import { ElectronFile, FILE_PATH_KEYS, FILE_PATH_TYPE } from '../types';
-import { logError } from './logging';
+import { logError } from '../utils/logging';
 
 // https://stackoverflow.com/a/63111390
 export const getFilesFromDir = async (dirPath: string) => {
