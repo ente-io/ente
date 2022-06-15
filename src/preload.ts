@@ -5,7 +5,7 @@ import {
     setToUploadFiles,
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
-} from './utils/upload';
+} from './services/upload';
 import { logError } from './utils/logging';
 import { ElectronFile } from './types';
 import {
@@ -16,7 +16,7 @@ import {
     addWatchMapping,
     removeWatchMapping,
     doesFolderExists,
-} from './utils/watch';
+} from './services/watch';
 import {
     checkExistsAndCreateCollectionDir,
     checkExistsAndRename,
@@ -29,7 +29,7 @@ import {
     getExportRecord,
     setExportRecord,
     exists,
-} from './utils/export';
+} from './services/export';
 const { ipcRenderer } = electron;
 
 const selectRootDirectory = async () => {

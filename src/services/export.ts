@@ -1,7 +1,7 @@
 import { ipcRenderer } from 'electron';
 import * as fs from 'promise-fs';
 import { Readable } from 'stream';
-import { logError } from './logging';
+import { logError } from '../utils/logging';
 
 export const responseToReadable = (fileStream: any) => {
     const reader = fileStream.getReader();

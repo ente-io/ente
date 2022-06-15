@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'promise-fs';
-import { watchStore } from '../services/store';
-import { BrowserWindow, ipcRenderer } from 'electron';
+import { watchStore } from './store';
+import { ipcRenderer } from 'electron';
 import { ElectronFile, WatchStoreType } from '../types';
 import { getElectronFile, getFilesFromDir } from './upload';
 

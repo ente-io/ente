@@ -2,7 +2,7 @@ import { BrowserWindow, dialog, ipcMain, Tray, Notification } from 'electron';
 import { createWindow } from './createWindow';
 import { buildContextMenu } from './menuUtil';
 import { logErrorSentry } from './sentry';
-import { getFilesFromDir } from './upload';
+import { getFilesFromDir } from '../services/upload';
 import chokidar from 'chokidar';
 import path from 'path';
 
@@ -34,6 +34,7 @@ export default function setupIpcComs(
         };
         new Notification(notification).show();
     });
+
     ipcMain.on('reload-window', () => {
         const secondWindow = createWindow();
         mainWindow.destroy();
