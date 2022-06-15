@@ -1,5 +1,4 @@
 import path from 'path';
-import fs from 'promise-fs';
 import { watchStore } from '../services/store';
 import { ipcRenderer } from 'electron';
 import { ElectronFile, WatchStoreType } from '../types';
@@ -74,15 +73,6 @@ export async function getAllFilesFromDir(dirPath: string) {
         })
     );
     return electronFiles;
-}
-
-export async function doesFolderExists(dirPath: string) {
-    return await fs
-        .stat(dirPath)
-        .then((stats) => {
-            return stats.isDirectory();
-        })
-        .catch(() => false);
 }
 
 export function registerWatcherFunctions(

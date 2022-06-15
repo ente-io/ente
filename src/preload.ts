@@ -1,4 +1,9 @@
-import { reloadWindow, sendNotification, showOnTray } from './api/common';
+import {
+    reloadWindow,
+    sendNotification,
+    showOnTray,
+    doesFolderExists,
+} from './api/common';
 import {
     showUploadDirsDialog,
     showUploadFilesDialog,
@@ -16,7 +21,6 @@ import {
     setWatchMappings,
     addWatchMapping,
     removeWatchMapping,
-    doesFolderExists,
 } from './api/watch';
 import {
     checkExistsAndCreateCollectionDir,
