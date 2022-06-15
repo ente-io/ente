@@ -120,6 +120,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           } else {
             _updatePassword();
           }
+          FocusScope.of(context).unfocus();
         },
       ),
       floatingActionButtonLocation: fabLocation(),

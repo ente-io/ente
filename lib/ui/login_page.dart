@@ -58,6 +58,7 @@ class _LoginPageState extends State<LoginPage> {
           _config.setEmail(_email);
           UserService.instance
               .getOtt(context, _email, isCreateAccountScreen: false);
+          FocusScope.of(context).unfocus();
         },
       ),
       floatingActionButtonLocation: fabLocation(),

@@ -77,6 +77,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             UserService.instance
                 .verifyEmail(context, _verificationCodeController.text);
           }
+          FocusScope.of(context).unfocus();
         },
       ),
       floatingActionButtonLocation: fabLocation(),

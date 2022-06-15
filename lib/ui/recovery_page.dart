@@ -45,6 +45,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
         isFormValid: _recoveryKey.text.isNotEmpty,
         buttonText: 'Recover',
         onPressedFunction: () async {
+          FocusScope.of(context).unfocus();
           final dialog = createProgressDialog(context, "Decrypting...");
           await dialog.show();
           try {
