@@ -19,12 +19,7 @@ const SortByOptionCreator =
             <MenuItem onClick={handleClick} style={{ paddingLeft: '5px' }}>
                 <ListItemIcon style={{ minWidth: '25px' }}>
                     {activeSortBy === props.sortBy && (
-                        <TickIcon
-                            css={`
-                                height: 16px;
-                                width: 16px;
-                            `}
-                        />
+                        <TickIcon sx={{ fontSize: 16 }} />
                     )}
                 </ListItemIcon>
                 <ListItemText>{props.children}</ListItemText>

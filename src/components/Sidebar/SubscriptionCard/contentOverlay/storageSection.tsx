@@ -9,7 +9,7 @@ interface Iprops {
 }
 export default function StorageSection({ totalUsage, totalStorage }: Iprops) {
     return (
-        <Box padding={2}>
+        <Box width="100%">
             <Typography variant="body2" color={'text.secondary'}>
                 {constants.STORAGE}
             </Typography>

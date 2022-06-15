@@ -14,7 +14,7 @@ import {
     trashFiles,
     deleteFromTrash,
 } from 'services/fileService';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import {
     syncCollections,
     getFavItemIds,
@@ -75,6 +75,7 @@ import {
     getSelectedCollection,
     isFavoriteCollection,
     getArchivedCollections,
+    hasNonEmptyCollections,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 import {
@@ -104,7 +105,7 @@ import SearchResultInfo from 'components/Search/SearchResultInfo';
 import { NotificationAttributes } from 'types/Notification';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 
-export const DeadCenter = styled.div`
+export const DeadCenter = styled('div')`
     flex: 1;
     display: flex;
     justify-content: center;
@@ -112,7 +113,7 @@ export const DeadCenter = styled.div`
     text-align: center;
     flex-direction: column;
 `;
-const AlertContainer = styled.div`
+const AlertContainer = styled('div')`
     background-color: #111;
     padding: 5px 0;
     font-size: 14px;
@@ -375,14 +376,15 @@ export default function Gallery() {
         setFavItemIds(favItemIds);
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
 
-        const collectionSummaries = getCollectionSummaries(
-            nonEmptyCollections,
-            files
-        );
-        setCollectionSummaries(collectionSummaries);
-
         const archivedCollections = getArchivedCollections(nonEmptyCollections);
         setArchivedCollections(new Set(archivedCollections));
+
+        const collectionSummaries = getCollectionSummaries(
+            nonEmptyCollections,
+            files,
+            archivedCollections
+        );
+        setCollectionSummaries(collectionSummaries);
     };
 
     const clearSelection = function () {
@@ -596,6 +598,8 @@ export default function Gallery() {
         }
     };
 
+    const resetSearch = () => setSearch({});
+
     return (
         <GalleryContext.Provider
             value={{
@@ -695,7 +699,7 @@ export default function Gallery() {
                     setUploadInProgress={setUploadInProgress}
                     fileRejections={fileRejections}
                     setFiles={setFiles}
-                    isFirstUpload={collectionSummaries?.size === 0}
+                    isFirstUpload={hasNonEmptyCollections(collectionSummaries)}
                     electronFiles={electronFiles}
                     setElectronFiles={setElectronFiles}
                     uploadTypeSelectorView={uploadTypeSelectorView}
@@ -727,6 +731,7 @@ export default function Gallery() {
                         collections
                     )}
                     enableDownload={true}
+                    resetSearch={resetSearch}
                 />
                 {selected.count > 0 &&
                     selected.collectionID === activeCollection && (

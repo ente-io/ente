@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
 import { Button } from 'react-bootstrap';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import constants from 'utils/strings/constants';
 import { DeduplicateContext } from 'pages/deduplicate';
 
-const Wrapper = styled.div`
+const Wrapper = styled('div')`
     display: flex;
     justify-content: center;
     align-items: center;

@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material';
 import { FlexWrapper } from 'components/Container';
 import React from 'react';
-import { LegendIndicator } from '../styledComponents';
+import { LegendIndicator } from '../../../styledComponents';
 
 interface Iprops {
     label: string;

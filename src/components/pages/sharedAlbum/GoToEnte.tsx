@@ -1,16 +1,16 @@
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
 import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import GetDeviceOS, { OS } from 'utils/common/deviceDetection';
 import constants from 'utils/strings/constants';
 
-const Wrapper = styled.div`
+const Wrapper = styled('div')`
     position: fixed;
     right: 20px;
 `;
 
-const NoStyleAnchor = styled.a`
+const NoStyleAnchor = styled('a')`
     color: inherit;
     text-decoration: none !important;
     &:hover {

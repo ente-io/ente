@@ -1,7 +1,6 @@
 import React from 'react';
-import styled from 'styled-components';
-
-const Wrapper = styled.div`
+import { styled } from '@mui/material';
+const Wrapper = styled('div')`
     font-size: 10px;
     position: absolute;
     padding: 2px;

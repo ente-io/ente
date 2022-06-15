@@ -202,7 +202,7 @@ export function formatDateTime(date: number | Date) {
         day: 'numeric',
     });
     const timeFormat = new Intl.DateTimeFormat('en-IN', {
-        timeStyle: 'medium',
+        timeStyle: 'short',
     });
     return `${dateTimeFormat.format(date)} ${timeFormat.format(date)}`;
 }
@@ -528,3 +528,15 @@ export const isImageOrVideo = (fileType: FILE_TYPE) =>
 export const getArchivedFiles = (files: EnteFile[]) => {
     return files.filter(IsArchived).map((file) => file.id);
 };
+
+export const getNonArchivedFiles = (
+    files: EnteFile[],
+    archivedCollections: number[]
+) =>
+    files.filter(
+        (file) =>
+            !(
+                IsArchived(file) ||
+                archivedCollections.includes(file.collectionID)
+            )
+    );

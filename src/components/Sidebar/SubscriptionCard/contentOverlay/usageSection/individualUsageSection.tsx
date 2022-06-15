@@ -1,13 +1,13 @@
-import { Box, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
 import { convertBytesToHumanReadable } from 'utils/billing';
 import constants from 'utils/strings/constants';
-import { Progressbar } from './styledComponents';
+import { Progressbar } from '../../styledComponents';
 
 export function IndividualUsageSection({ userDetails }) {
     return (
-        <Box height={64} padding={2}>
+        <>
             <Progressbar
                 value={
                     (userDetails.usage * 100) / userDetails.subscription.storage
@@ -25,6 +25,6 @@ export function IndividualUsageSection({ userDetails }) {
                     {constants.PHOTO_COUNT(userDetails.fileCount)}
                 </Typography>
             </SpaceBetweenFlex>
-        </Box>
+        </>
     );
 }

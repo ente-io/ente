@@ -1,8 +1,7 @@
 import { Drawer, Divider, styled } from '@mui/material';
-import { default as MuiStyled } from '@mui/styled-engine';
 import CircleIcon from '@mui/icons-material/Circle';
 
-export const DrawerSidebar = MuiStyled(Drawer)(({ theme }) => ({
+export const DrawerSidebar = styled(Drawer)(({ theme }) => ({
     '& .MuiPaper-root': {
         width: '320px',
         padding: theme.spacing(2, 1, 4, 1),
@@ -11,7 +10,7 @@ export const DrawerSidebar = MuiStyled(Drawer)(({ theme }) => ({
 
 DrawerSidebar.defaultProps = { anchor: 'left' };
 
-export const PaddedDivider = MuiStyled(Divider)<{
+export const PaddedDivider = styled(Divider)<{
     invisible?: boolean;
     spaced?: boolean;
 }>(({ theme, invisible, spaced }) => ({
@@ -20,11 +19,7 @@ export const PaddedDivider = MuiStyled(Divider)<{
 }));
 
 export const DotSeparator = styled(CircleIcon)`
-    height: 4px;
-    width: 4px;
-    left: 86px;
-    top: 18px;
-    border-radius: 0px;
+    font-size: 4px;
     margin: 0 ${({ theme }) => theme.spacing(1)};
-    color: ${({ theme }) => theme.palette.text.secondary};
+    color: inherit;
 `;

@@ -10,7 +10,11 @@ import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
-import { sortFiles, sortFilesIntoCollections } from 'utils/file';
+import {
+    getNonArchivedFiles,
+    sortFiles,
+    sortFilesIntoCollections,
+} from 'utils/file';
 import {
     Collection,
     CollectionLatestFiles,
@@ -753,7 +757,8 @@ function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
 
 export function getCollectionSummaries(
     collections: Collection[],
-    files: EnteFile[]
+    files: EnteFile[],
+    archivedCollections: number[]
 ): CollectionSummaries {
     const collectionSummaries: CollectionSummaries = new Map();
     const collectionLatestFiles = getCollectionLatestFiles(files);
@@ -775,7 +780,10 @@ export function getCollectionSummaries(
     }
     collectionSummaries.set(
         ALL_SECTION,
-        getAllCollectionSummaries(files.length, files[0])
+        getAllCollectionSummaries(
+            files.length,
+            getNonArchivedFiles(files, archivedCollections)[0]
+        )
     );
     collectionSummaries.set(
         ARCHIVE_SECTION,

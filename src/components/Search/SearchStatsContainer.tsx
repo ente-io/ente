@@ -1,6 +1,5 @@
-import styled from 'styled-components';
-
-const SearchStatsContainer = styled.div(
+import { styled } from '@mui/material';
+const SearchStatsContainer = styled('div')(
     ({ theme }) => `
     display: flex;
     justify-content: center;

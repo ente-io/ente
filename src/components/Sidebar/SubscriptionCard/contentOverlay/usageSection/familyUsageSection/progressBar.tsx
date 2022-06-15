@@ -1,9 +1,9 @@
 import { Box } from '@mui/material';
 import React from 'react';
-import { Progressbar } from '../styledComponents';
+import { Progressbar } from '../../../styledComponents';
 export function FamilyUsageProgressBar({ totalUsage, userDetails }) {
     return (
-        <Box position={'relative'}>
+        <Box position={'relative'} width="100%">
             <Progressbar
                 sx={{ backgroundColor: 'transparent' }}
                 value={
