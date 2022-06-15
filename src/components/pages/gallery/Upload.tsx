@@ -148,7 +148,7 @@ export default function Upload(props: Props) {
                     proceed: {
                         text: constants.DOWNLOAD_APP,
                         action: downloadApp,
-                        variant: 'success',
+                        variant: 'accent',
                     },
                 });
             } else {

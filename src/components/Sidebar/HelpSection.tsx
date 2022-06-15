@@ -41,7 +41,7 @@ export default function HelpSection() {
                 proceed: {
                     text: constants.DOWNLOAD,
                     action: downloadApp,
-                    variant: 'success',
+                    variant: 'accent',
                 },
                 close: {
                     text: constants.CLOSE,
