@@ -7,9 +7,9 @@ import TwoFactorModal from 'components/TwoFactor/Modal';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
-import WatchModal from '../WatchModal';
 import isElectron from 'is-electron';
 import { downloadApp } from 'utils/common';
+import WatchFolderModal from 'components/WatchFolder';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
@@ -17,7 +17,7 @@ export default function UtilitySection({ closeSidebar }) {
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
-    const [watchModalView, setWatchModalView] = useState(false);
+    const [watchFolderModalView, setWatchFolderModalView] = useState(false);
     // const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
 
     const openRecoveryKeyModal = () => setRecoveryModalView(true);
@@ -28,7 +28,7 @@ export default function UtilitySection({ closeSidebar }) {
 
     const openWatchModalView = () => {
         if (isElectron()) {
-            setWatchModalView(true);
+            setWatchFolderModalView(true);
         } else {
             setDialogMessage({
                 title: constants.DOWNLOAD_APP,
@@ -67,6 +67,7 @@ export default function UtilitySection({ closeSidebar }) {
             close: { variant: 'danger' },
         });
 
+    const closeWatchFolderModal = () => setWatchFolderModalView(false);
     return (
         <>
             <SidebarButton onClick={openRecoveryKeyModal}>
@@ -103,9 +104,9 @@ export default function UtilitySection({ closeSidebar }) {
                 closeSidebar={closeSidebar}
                 setLoading={startLoading}
             />
-            <WatchModal
-                watchModalView={watchModalView}
-                setWatchModalView={setWatchModalView}
+            <WatchFolderModal
+                open={watchFolderModalView}
+                onClose={closeWatchFolderModal}
             />
 
             {/* <FixLargeThumbnails
