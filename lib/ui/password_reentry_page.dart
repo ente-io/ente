@@ -32,7 +32,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 125;
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
     FloatingActionButtonLocation fabLocation() {
       if (isKeypadOpen) {
@@ -43,6 +43,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
