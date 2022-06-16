@@ -10,11 +10,7 @@ import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
-import {
-    getNonArchivedFiles,
-    sortFiles,
-    sortFilesIntoCollections,
-} from 'utils/file';
+import { sortFiles, sortFilesIntoCollections } from 'utils/file';
 import {
     Collection,
     CollectionLatestFiles,
@@ -213,12 +209,13 @@ export const getCollection = async (
 };
 
 export const getCollectionLatestFiles = (
-    files: EnteFile[]
+    files: EnteFile[],
+    archivedCollections: Set<number>
 ): CollectionLatestFiles => {
     const latestFiles = new Map<number, EnteFile>();
 
     files.forEach((file) => {
-        if (!latestFiles.has(file.collectionID)) {
+        if (!latestFiles.has(file.collectionID) && !file.isTrashed) {
             latestFiles.set(file.collectionID, file);
         }
         if (!latestFiles.has(ARCHIVE_SECTION) && IsArchived(file)) {
@@ -226,6 +223,14 @@ export const getCollectionLatestFiles = (
         }
         if (!latestFiles.has(TRASH_SECTION) && file.isTrashed) {
             latestFiles.set(TRASH_SECTION, file);
+        }
+        if (
+            !latestFiles.has(ALL_SECTION) &&
+            !IsArchived(file) &&
+            !file.isTrashed &&
+            !archivedCollections.has(file.collectionID)
+        ) {
+            latestFiles.set(ALL_SECTION, file);
         }
     });
     return latestFiles;
@@ -758,11 +763,15 @@ function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
 export function getCollectionSummaries(
     collections: Collection[],
     files: EnteFile[],
-    archivedCollections: number[]
+    archivedCollections: Set<number>
 ): CollectionSummaries {
     const collectionSummaries: CollectionSummaries = new Map();
-    const collectionLatestFiles = getCollectionLatestFiles(files);
+    const collectionLatestFiles = getCollectionLatestFiles(
+        files,
+        archivedCollections
+    );
     const collectionFilesCount = getCollectionsFileCount(files);
+    const uniqueFileCount = new Set(files.map((file) => file.id)).size;
     const user: User = getData(LS_KEYS.USER);
 
     for (const collection of collections) {
@@ -781,8 +790,10 @@ export function getCollectionSummaries(
     collectionSummaries.set(
         ALL_SECTION,
         getAllCollectionSummaries(
-            files.length,
-            getNonArchivedFiles(files, archivedCollections)[0]
+            collectionFilesCount,
+            collectionLatestFiles,
+            uniqueFileCount,
+            archivedCollections
         )
     );
     collectionSummaries.set(
@@ -812,16 +823,35 @@ function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
 }
 
 function getAllCollectionSummaries(
-    allFilesCount: number,
-    latestFile: EnteFile
+    collectionFilesCount: CollectionFilesCount,
+    collectionsLatestFile: CollectionLatestFiles,
+    uniqueFileCount: number,
+    archivedCollections: Set<number>
 ): CollectionSummary {
+    const archivedSectionFileCount =
+        collectionFilesCount.get(ARCHIVE_SECTION) ?? 0;
+    const trashSectionFileCount = collectionFilesCount.get(TRASH_SECTION) ?? 0;
+
+    const archivedCollectionsFileCount = 0;
+    for (const [id, fileCount] of collectionFilesCount.entries()) {
+        if (archivedCollections.has(id)) {
+            archivedCollectionsFileCount + fileCount;
+        }
+    }
+
+    const allSectionFileCount =
+        uniqueFileCount -
+        (archivedSectionFileCount +
+            trashSectionFileCount +
+            archivedCollectionsFileCount);
+
     return {
         id: ALL_SECTION,
         name: constants.ALL_SECTION_NAME,
         type: CollectionType.all,
-        latestFile: latestFile,
-        fileCount: allFilesCount,
-        updationTime: latestFile?.updationTime,
+        latestFile: collectionsLatestFile.get(ALL_SECTION),
+        fileCount: allSectionFileCount,
+        updationTime: collectionsLatestFile.get(ALL_SECTION)?.updationTime,
     };
 }
 

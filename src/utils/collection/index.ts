@@ -191,7 +191,9 @@ export const changeCollectionVisibility = async (
 };
 
 export const getArchivedCollections = (collections: Collection[]) => {
-    return collections.filter(IsArchived).map((collection) => collection.id);
+    return new Set<number>(
+        collections.filter(IsArchived).map((collection) => collection.id)
+    );
 };
 
 export const hasNonEmptyCollections = (

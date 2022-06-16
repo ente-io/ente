@@ -374,7 +374,7 @@ export default function Gallery() {
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
 
         const archivedCollections = getArchivedCollections(nonEmptyCollections);
-        setArchivedCollections(new Set(archivedCollections));
+        setArchivedCollections(archivedCollections);
 
         const collectionSummaries = getCollectionSummaries(
             nonEmptyCollections,

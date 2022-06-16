@@ -528,15 +528,3 @@ export const isImageOrVideo = (fileType: FILE_TYPE) =>
 export const getArchivedFiles = (files: EnteFile[]) => {
     return files.filter(IsArchived).map((file) => file.id);
 };
-
-export const getNonArchivedFiles = (
-    files: EnteFile[],
-    archivedCollections: number[]
-) =>
-    files.filter(
-        (file) =>
-            !(
-                IsArchived(file) ||
-                archivedCollections.includes(file.collectionID)
-            )
-    );
