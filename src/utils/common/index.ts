@@ -69,3 +69,13 @@ export const promiseWithTimeout = async (
         rejectOnTimeout,
     ]);
 };
+
+export function openLink(href: string, newTab?: boolean) {
+    const a = document.createElement('a');
+    a.href = href;
+    if (newTab) {
+        a.target = '_blank';
+    }
+    a.rel = 'noreferrer noopener';
+    a.click();
+}
