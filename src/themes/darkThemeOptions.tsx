@@ -162,7 +162,7 @@ const darkThemeOptions = createTheme({
         },
         button: {
             fontSize: '16px',
-            lineHeight: '19.63px',
+            lineHeight: '20px',
             fontWeight: 600,
         },
         title: {
