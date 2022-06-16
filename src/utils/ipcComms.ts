@@ -10,6 +10,7 @@ import {
 import { createWindow } from './createWindow';
 import { buildContextMenu } from './menu';
 import { logErrorSentry } from './sentry';
+import path from 'path';
 import { getFilesFromDir } from '../services/fs';
 
 export default function setupIpcComs(
@@ -20,10 +21,11 @@ export default function setupIpcComs(
         const result = await dialog.showOpenDialog({
             properties: ['openDirectory'],
         });
-        const dir =
+        let dir =
             result.filePaths &&
             result.filePaths.length > 0 &&
             result.filePaths[0];
+        dir = dir?.split(path.sep)?.join(path.posix.sep);
         return dir;
     });
 
