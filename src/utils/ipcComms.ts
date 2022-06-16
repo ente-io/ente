@@ -19,7 +19,7 @@ export default function setupIpcComs(
             result.filePaths &&
             result.filePaths.length > 0 &&
             result.filePaths[0];
-        dir = dir.split(path.sep).join(path.posix.sep);
+        dir = dir?.split(path.sep)?.join(path.posix.sep);
         return dir;
     });
 
