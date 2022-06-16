@@ -13,11 +13,15 @@ import WatchFolderModal from 'components/WatchFolder';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
-    const { setDialogMessage, startLoading } = useContext(AppContext);
+    const {
+        setDialogMessage,
+        startLoading,
+        watchModalView,
+        setWatchModalView,
+    } = useContext(AppContext);
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
-    const [watchFolderModalView, setWatchFolderModalView] = useState(false);
     // const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
 
     const openRecoveryKeyModal = () => setRecoveryModalView(true);
@@ -28,7 +32,7 @@ export default function UtilitySection({ closeSidebar }) {
 
     const openWatchModalView = () => {
         if (isElectron()) {
-            setWatchFolderModalView(true);
+            setWatchModalView(true);
         } else {
             setDialogMessage({
                 title: constants.DOWNLOAD_APP,
@@ -67,7 +71,7 @@ export default function UtilitySection({ closeSidebar }) {
             close: { variant: 'danger' },
         });
 
-    const closeWatchFolderModal = () => setWatchFolderModalView(false);
+    const closeWatchFolderModal = () => setWatchModalView(false);
     return (
         <>
             <SidebarButton onClick={openRecoveryKeyModal}>
@@ -105,7 +109,7 @@ export default function UtilitySection({ closeSidebar }) {
                 setLoading={startLoading}
             />
             <WatchFolderModal
-                open={watchFolderModalView}
+                open={watchModalView}
                 onClose={closeWatchFolderModal}
             />
 

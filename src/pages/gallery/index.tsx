@@ -279,7 +279,11 @@ export default function Gallery() {
         [notificationAttributes]
     );
 
-    useEffect(() => setDroppedFiles(acceptedFiles), [acceptedFiles]);
+    useEffect(() => {
+        if (!appContext.watchModalView) {
+            setDroppedFiles(acceptedFiles);
+        }
+    }, [acceptedFiles]);
 
     useEffect(() => {
         if (typeof activeCollection === 'undefined') {

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { styled } from '@mui/material';
 import constants from 'utils/strings/constants';
 import CloseIcon from '@mui/icons-material/Close';
+import { AppContext } from 'pages/_app';
 
 const CloseButtonWrapper = styled('div')`
     position: absolute;
@@ -42,6 +43,8 @@ type Props = React.PropsWithChildren<{
 }>;
 
 export default function FullScreenDropZone(props: Props) {
+    const appContext = useContext(AppContext);
+
     const [isDragActive, setIsDragActive] = useState(false);
     const onDragEnter = () => setIsDragActive(true);
     const onDragLeave = () => setIsDragActive(false);
@@ -53,18 +56,43 @@ export default function FullScreenDropZone(props: Props) {
             }
         });
     }, []);
+
+    useEffect(() => {
+        const handleWatchFolderDrop = (e: DragEvent) => {
+            if (!appContext.watchModalView) {
+                return;
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                appContext.setWatchModalFiles(files);
+            }
+        };
+
+        addEventListener('drop', handleWatchFolderDrop);
+        return () => {
+            removeEventListener('drop', handleWatchFolderDrop);
+        };
+    }, [appContext.watchModalView]);
+
     return (
         <DropDiv
             {...props.getRootProps({
                 onDragEnter,
             })}>
-            <input {...props.getInputProps()} />
+            {!appContext.watchModalView ? (
+                <input {...props.getInputProps()} />
+            ) : null}
             {isDragActive && (
                 <Overlay onDrop={onDragLeave} onDragLeave={onDragLeave}>
                     <CloseButtonWrapper onClick={onDragLeave}>
                         <CloseIcon />
                     </CloseButtonWrapper>
-                    {constants.UPLOAD_DROPZONE_MESSAGE}
+                    {appContext.watchModalView
+                        ? constants.WATCH_FOLDER_DROPZONE_MESSAGE
+                        : constants.UPLOAD_DROPZONE_MESSAGE}
                 </Overlay>
             )}
             {props.children}

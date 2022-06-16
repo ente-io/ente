@@ -144,6 +144,7 @@ const englishConstants = {
     UPLOAD_FIRST_PHOTO_DESCRIPTION: 'preserve your first memory with ente',
     UPLOAD_FIRST_PHOTO: 'Preserve',
     UPLOAD_DROPZONE_MESSAGE: 'Drop to backup your files',
+    WATCH_FOLDER_DROPZONE_MESSAGE: 'Drop to add watched folder',
     CONFIRM_DELETE: 'Confirm deletion',
     DELETE_MESSAGE: `The selected files will be permanently deleted and can't be restored `,
     DELETE_FILE: 'Delete files',

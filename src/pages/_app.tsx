@@ -20,8 +20,8 @@ import { styled, ThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'themes/darkThemeOptions';
 import { CssBaseline } from '@mui/material';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import * as types from 'styled-components/cssprop'; // need to css prop on styled component
-import { SetDialogBoxAttributes, DialogBoxAttributes } from 'types/dialogBox';
+// import * as types from 'styled-components/cssprop'; // need to css prop on styled component
+import { DialogBoxAttributes, SetDialogBoxAttributes } from 'types/dialogBox';
 import {
     getFamilyPortalRedirectURL,
     getRoadmapRedirectURL,
@@ -54,6 +54,10 @@ type AppContextType = {
     setDialogMessage: SetDialogBoxAttributes;
     watchServiceIsRunning: boolean;
     setWatchServiceIsRunning: (isRunning: boolean) => void;
+    watchModalView: boolean;
+    setWatchModalView: (isOpen: boolean) => void;
+    watchModalFiles: FileList;
+    setWatchModalFiles: (files: FileList) => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -89,6 +93,10 @@ export default function App({ Component, err }) {
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [watchServiceIsRunning, setWatchServiceIsRunning] = useState(false);
+    const [watchModalView, setWatchModalView] = useState(false);
+    const [watchModalFiles, setWatchModalFiles] = useState<FileList>(
+        new FileList()
+    );
 
     useEffect(() => {
         if (
@@ -148,8 +156,7 @@ export default function App({ Component, err }) {
                 typeof redirectMap.get(redirect) === 'function'
             ) {
                 const redirectAction = redirectMap.get(redirect);
-                const url = await redirectAction();
-                window.location.href = url;
+                window.location.href = await redirectAction();
             } else {
                 logError(CustomError.BAD_REQUEST, 'invalid redirection', {
                     redirect,
@@ -280,6 +287,10 @@ export default function App({ Component, err }) {
                         setDialogMessage,
                         watchServiceIsRunning,
                         setWatchServiceIsRunning,
+                        watchModalView,
+                        setWatchModalView,
+                        watchModalFiles,
+                        setWatchModalFiles,
                     }}>
                     {loading ? (
                         <VerticallyCentered>

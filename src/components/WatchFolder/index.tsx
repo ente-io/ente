@@ -13,7 +13,7 @@ import watchService from 'services/watchFolderService';
 import Close from '@mui/icons-material/Close';
 import { CenteredFlex, SpaceBetweenFlex } from 'components/Container';
 import { WatchMapping } from 'types/watchFolder';
-import { GalleryContext } from 'pages/gallery';
+import { AppContext } from 'pages/_app';
 import constants from 'utils/strings/constants';
 import { CheckmarkIcon } from './checkmarkIcon';
 import { MappingEntry } from './mappingEntry';
@@ -25,39 +25,17 @@ interface NewType {
 
 export default function WatchFolderModal({ open, onClose }: NewType) {
     const [mappings, setMappings] = useState<WatchMapping[]>([]);
-    const { setDropZoneActive } = useContext(GalleryContext);
+    const appContext = useContext(AppContext);
 
     useEffect(() => {
         setMappings(watchService.getWatchMappings());
     }, []);
 
     useEffect(() => {
-        if (open) {
-            setDropZoneActive(false);
-
-            const handleDrag = (e: DragEvent) => {
-                e.preventDefault();
-                e.stopPropagation();
-            };
-            const handleDrop = (e: DragEvent) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleFolderDrop(files);
-                }
-            };
-            addEventListener('dragover', handleDrag);
-            addEventListener('drop', handleDrop);
-
-            return () => {
-                setDropZoneActive(true);
-                removeEventListener('dragover', handleDrag);
-                removeEventListener('drop', handleDrop);
-            };
+        if (appContext.watchModalFiles.length > 0) {
+            handleFolderDrop(appContext.watchModalFiles);
         }
-    }, [open]);
+    }, [appContext.watchModalFiles]);
 
     const handleFolderDrop = async (folders: FileList) => {
         for (let i = 0; i < folders.length; i++) {
