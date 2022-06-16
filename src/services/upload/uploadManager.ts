@@ -235,8 +235,8 @@ class UploadManager {
                         file,
                         collectionID
                     );
-                    fileTypeInfo = result?.fileTypeInfo;
-                    metadata = result?.metadata;
+                    fileTypeInfo = result.fileTypeInfo;
+                    metadata = result.metadata;
                     logUploadInfo(
                         `metadata extraction successful${getFileNameSize(
                             file
