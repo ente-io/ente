@@ -141,7 +141,11 @@ const englishConstants = {
     NO_INTERNET_CONNECTION:
         'Please check your internet connection and try again',
     TITLE: 'ente.io | encrypted photo storage',
-    UPLOAD_FIRST_PHOTO_DESCRIPTION: 'preserve your first memory with ente',
+    UPLOAD_FIRST_PHOTO_DESCRIPTION: () => (
+        <Typography>
+            preserve your first memory with <strong> ente </strong>
+        </Typography>
+    ),
     UPLOAD_FIRST_PHOTO: 'Preserve',
     UPLOAD_DROPZONE_MESSAGE: 'Drop to backup your files',
     CONFIRM_DELETE: 'Confirm deletion',

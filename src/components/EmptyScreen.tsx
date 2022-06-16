@@ -33,7 +33,7 @@ export default function EmptyScreen({ openUploader }) {
                 <>
                     <img height={150} src="/images/gallery.png" />
                     <div style={{ color: '#a6a6a6', marginTop: '16px' }}>
-                        {constants.UPLOAD_FIRST_PHOTO_DESCRIPTION}
+                        {constants.UPLOAD_FIRST_PHOTO_DESCRIPTION()}
                     </div>
                     <Button
                         variant="outline-success"
