@@ -59,7 +59,7 @@ const englishConstants = {
     VERIFY_EMAIL: 'Verify email',
     EMAIL_SENT: ({ email }) => (
         <span>
-            Verification code sent to you on{' '}
+            Verification code sent to{' '}
             <Typography
                 component={'span'}
                 fontSize="inherit"
@@ -68,7 +68,7 @@ const englishConstants = {
             </Typography>
         </span>
     ),
-    CHECK_INBOX: 'please check your inbox (and spam) to complete verification',
+    CHECK_INBOX: 'Please check your inbox (and spam) to complete verification',
     ENTER_OTT: 'Verification code',
     RESEND_MAIL: 'Resend code',
     VERIFY: 'Verify',
@@ -533,7 +533,7 @@ const englishConstants = {
     LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE:
         'Your browser or an addon is blocking ente from saving data into local storage. please try loading this page after switching your browsing mode.',
     RETRY: 'Retry',
-    SEND_OTT: 'Send otp',
+    SEND_OTT: 'Send OTP',
     EMAIl_ALREADY_OWNED: 'Email already taken',
     EMAIL_UDPATE_SUCCESSFUL: 'Your email has been udpated successfully',
     UPLOAD_FAILED: 'Upload failed',
