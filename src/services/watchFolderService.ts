@@ -261,10 +261,11 @@ export class WatchService {
                             mapping.collectionName ===
                             this.currentEvent.collectionName
                     );
-                    mapping.files = [...mapping.files, ...uploadedFiles];
-
-                    this.ElectronAPIs.setWatchMappings(mappings);
-                    this.syncWithRemote();
+                    if (mapping) {
+                        mapping.files = [...mapping.files, ...uploadedFiles];
+                        this.ElectronAPIs.setWatchMappings(mappings);
+                        this.syncWithRemote();
+                    }
                 }
 
                 this.setIsEventRunning(false);

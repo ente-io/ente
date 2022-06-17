@@ -94,9 +94,7 @@ export default function App({ Component, err }) {
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [watchServiceIsRunning, setWatchServiceIsRunning] = useState(false);
     const [watchModalView, setWatchModalView] = useState(false);
-    const [watchModalFiles, setWatchModalFiles] = useState<FileList>(
-        new FileList()
-    );
+    const [watchModalFiles, setWatchModalFiles] = useState<FileList>(null);
 
     useEffect(() => {
         if (

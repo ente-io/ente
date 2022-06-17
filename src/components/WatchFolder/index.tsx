@@ -32,7 +32,10 @@ export default function WatchFolderModal({ open, onClose }: NewType) {
     }, []);
 
     useEffect(() => {
-        if (appContext.watchModalFiles.length > 0) {
+        if (
+            appContext.watchModalFiles &&
+            appContext.watchModalFiles.length > 0
+        ) {
             handleFolderDrop(appContext.watchModalFiles);
         }
     }, [appContext.watchModalFiles]);
