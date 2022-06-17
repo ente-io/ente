@@ -19,6 +19,9 @@ import {
 } from 'types/user';
 import { getFamilyData, isPartOfFamily } from 'utils/billing';
 import { ServerErrorCodes } from 'utils/error';
+import isElectron from 'is-electron';
+import { runningInBrowser } from '../utils/common';
+import { ElectronAPIsInterface } from '../types/electron';
 
 const ENDPOINT = getEndpoint();
 
@@ -121,6 +124,14 @@ export const logoutUser = async () => {
             // ignore
         }
         await clearFiles();
+
+        if (isElectron()) {
+            const ElectronAPIs = (runningInBrowser() &&
+                window['ElectronAPIs']) as ElectronAPIsInterface;
+            if (ElectronAPIs && ElectronAPIs.clearElectronStore) {
+                ElectronAPIs.clearElectronStore();
+            }
+        }
         router.push(PAGES.ROOT);
     } catch (e) {
         logError(e, 'logoutUser failed');

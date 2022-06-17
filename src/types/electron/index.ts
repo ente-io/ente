@@ -62,4 +62,5 @@ export interface ElectronAPIsInterface {
         ) => Promise<void>
     ) => void;
     doesFolderExists: (dirPath: string) => Promise<boolean>;
+    clearElectronStore: () => void;
 }
