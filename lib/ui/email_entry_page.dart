@@ -34,6 +34,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   String _email;
   String _password;
+  String _cnfPassword = '';
   double _passwordStrength = 0.0;
   bool _emailIsValid = false;
   bool _hasAgreedToTOS = true;
@@ -238,6 +239,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                               estimatePasswordStrength(password);
                           _passwordIsValid = _passwordStrength >=
                               kMildPasswordStrengthThreshold;
+                          _passwordsMatch = _password == _cnfPassword;
                         });
                       }
                     },
@@ -296,8 +298,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     focusNode: _password2FocusNode,
                     onChanged: (cnfPassword) {
                       setState(() {
+                        _cnfPassword = cnfPassword;
                         if (_password != null || _password != '') {
-                          _passwordsMatch = _password == cnfPassword;
+                          _passwordsMatch = _password == _cnfPassword;
                         }
                       });
                     },
