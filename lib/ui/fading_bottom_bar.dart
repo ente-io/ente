@@ -189,7 +189,10 @@ class FadingBottomBarState extends State<FadingBottomBar> {
         child: Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(
-            icon: Icon(Icons.restore_outlined),
+            icon: Icon(
+              Icons.restore_outlined,
+              color: Colors.white,
+            ),
             onPressed: () {
               final selectedFiles = SelectedFiles();
               selectedFiles.toggleSelection(widget.file);
@@ -216,7 +219,10 @@ class FadingBottomBarState extends State<FadingBottomBar> {
         child: Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(
-            icon: Icon(Icons.delete_forever_outlined),
+            icon: Icon(
+              Icons.delete_forever_outlined,
+              color: Colors.white,
+            ),
             onPressed: () async {
               final trashedFile = <TrashFile>[];
               trashedFile.add(widget.file);
