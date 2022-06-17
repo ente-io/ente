@@ -48,27 +48,29 @@ class SocialSectionWidget extends StatelessWidget {
       ),
     ];
     if (!UpdateService.instance.isIndependent()) {
-      options.addAll([
-        SectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
-            if (Platform.isAndroid) {
-              launch(
-                "https://play.google.com/store/apps/details?id=io.ente.photos",
-              );
-            } else {
-              launch(
-                "https://apps.apple.com/in/app/ente-photos/id1542026904",
-              );
-            }
-          },
-          child: SettingsTextItem(
-            text: "Rate us! ✨",
-            icon: Icons.navigate_next,
-          ),
-        )
-      ]);
+      options.addAll(
+        [
+          SectionOptionDivider,
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () {
+              if (Platform.isAndroid) {
+                launch(
+                  "https://play.google.com/store/apps/details?id=io.ente.photos",
+                );
+              } else {
+                launch(
+                  "https://apps.apple.com/in/app/ente-photos/id1542026904",
+                );
+              }
+            },
+            child: SettingsTextItem(
+              text: "Rate us! ✨",
+              icon: Icons.navigate_next,
+            ),
+          )
+        ],
+      );
     }
     return Column(children: options);
   }

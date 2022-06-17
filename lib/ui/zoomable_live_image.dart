@@ -109,7 +109,10 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       allowFullScreen: false,
       showControls: false,
     );
-    return Chewie(controller: _chewieController);
+    return Container(
+      child: Chewie(controller: _chewieController),
+      color: Colors.black, // same for both theme
+    );
   }
 
   Future<void> _loadLiveVideo() async {
@@ -142,7 +145,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     if (videoFile != null && videoFile.existsSync()) {
       _setVideoPlayerController(file: videoFile);
     } else {
-      showShortToast(context, "download failed");
+      showShortToast(context, "Download failed");
     }
     _isLoadingVideoPlayer = false;
   }
