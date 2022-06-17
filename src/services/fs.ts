@@ -70,15 +70,18 @@ export async function getElectronFile(filePath: string): Promise<ElectronFile> {
     };
 }
 
-export const getValidPaths = (paths: string[]) =>
-    paths.filter(async (path) => {
+export const getValidPaths = (paths: string[]) => {
+    if (!paths) {
+        return [] as string[];
+    }
+    return paths.filter(async (path) => {
         try {
             await fs.stat(path).then((stat) => stat.isFile());
         } catch (e) {
             return false;
         }
     });
-
+};
 export const getZipFileStream = async (
     zip: StreamZip.StreamZipAsync,
     filePath: string
