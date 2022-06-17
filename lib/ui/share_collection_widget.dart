@@ -7,7 +7,9 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/public_keys_db.dart';
+import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
@@ -151,6 +153,7 @@ class _SharingDialogState extends State<SharingDialog> {
                           .contains(path)) {
                         await Configuration.instance
                             .addPathToFoldersToBeBackedUp(path);
+                        Bus.instance.fire(BackupFoldersUpdatedEvent());
                       }
                     }
                   }
