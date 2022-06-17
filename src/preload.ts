@@ -29,7 +29,7 @@ import {
     setExportRecord,
     exists,
 } from './api/export';
-import { selectRootDirectory } from './api/common';
+import { selectRootDirectory, clearElectronStore } from './api/common';
 import { getElectronFile, doesFolderExists } from './services/fs';
 
 const windowObject: any = window;
@@ -41,6 +41,7 @@ windowObject['ElectronAPIs'] = {
     saveStreamToDisk,
     saveFileToDisk,
     selectRootDirectory,
+    clearElectronStore,
     sendNotification,
     showOnTray,
     reloadWindow,
