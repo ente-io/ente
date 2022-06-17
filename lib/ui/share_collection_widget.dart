@@ -140,6 +140,19 @@ class _SharingDialogState extends State<SharingDialog> {
                     if (choice != DialogUserChoice.firstChoice) {
                       return;
                     }
+                  } else {
+                    // Add local folder in backup patch before creating
+                    // sharable link
+                    if (widget.collection.type == CollectionType.folder) {
+                      final path = CollectionsService.instance
+                          .decryptCollectionPath(widget.collection);
+                      if (!Configuration.instance
+                          .getPathsToBackUp()
+                          .contains(path)) {
+                        await Configuration.instance
+                            .addPathToFoldersToBeBackedUp(path);
+                      }
+                    }
                   }
                   final dialog = createProgressDialog(
                     context,
