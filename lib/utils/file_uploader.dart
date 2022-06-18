@@ -22,6 +22,7 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/main.dart';
 import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/models/upload_url.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/local_sync_service.dart';
@@ -33,6 +34,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class FileUploader {
   static const kMaximumConcurrentUploads = 4;
+  static const kMaximumConcurrentVideoUploads = 1;
   static const kMaximumThumbnailCompressionAttempts = 2;
   static const kMaximumUploadAttempts = 4;
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
@@ -50,6 +52,7 @@ class FileUploader {
   // Upload session is the period between the first entry into the _queue and last entry out of the _queue
   int _totalCountInUploadSession = 0;
   int _currentlyUploading = 0;
+  int _currentlyVideoUploading = 0;
   ProcessType _processType;
   bool _isBackground;
   SharedPreferences _prefs;
@@ -229,17 +232,34 @@ class FileUploader {
       return;
     }
     if (_currentlyUploading < kMaximumConcurrentUploads) {
-      final firstPendingEntry = _queue.entries
+      var pendingEntry = _queue.entries
           .firstWhere(
             (entry) => entry.value.status == UploadStatus.not_started,
             orElse: () => null,
           )
           ?.value;
-      if (firstPendingEntry != null) {
-        firstPendingEntry.status = UploadStatus.in_progress;
+
+      if (pendingEntry == null) {
+        return;
+      }
+
+      if (pendingEntry.file.fileType == FileType.video &&
+          _currentlyVideoUploading < kMaximumConcurrentVideoUploads) {
+        // check if there's any non-video entry which can be queued for upload
+        pendingEntry = _queue.entries
+            .firstWhere(
+              (entry) =>
+                  entry.value.status == UploadStatus.not_started &&
+                  entry.value.file.fileType != FileType.video,
+              orElse: () => null,
+            )
+            ?.value;
+      }
+      if (pendingEntry != null) {
+        pendingEntry.status = UploadStatus.in_progress;
         _encryptAndUploadFileToCollection(
-          firstPendingEntry.file,
-          firstPendingEntry.collectionID,
+          pendingEntry.file,
+          pendingEntry.collectionID,
         );
       }
     }
@@ -251,6 +271,9 @@ class FileUploader {
     bool forcedUpload = false,
   }) async {
     _currentlyUploading++;
+    if (file.fileType == FileType.video) {
+      _currentlyVideoUploading++;
+    }
     final localID = file.localID;
     try {
       final uploadedFile =
@@ -274,6 +297,9 @@ class FileUploader {
       }
     } finally {
       _currentlyUploading--;
+      if (file.fileType == FileType.video) {
+        _currentlyVideoUploading--;
+      }
       _pollQueue();
     }
   }
