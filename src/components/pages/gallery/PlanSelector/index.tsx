@@ -148,7 +148,7 @@ function PlanSelector(props: Props) {
     }
 
     const planSelectorAttributes: DialogBoxAttributes = {
-        staticBackdrop: !hasPaidSubscription(subscription),
+        nonClosable: !hasPaidSubscription(subscription),
         title: hasPaidSubscription(subscription)
             ? constants.MANAGE_PLAN
             : constants.CHOOSE_PLAN,

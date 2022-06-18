@@ -30,7 +30,7 @@ enum RESPONSE_STATUS {
 }
 
 export function convertBytesToGBs(bytes, precision?): string {
-    return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2);
+    return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2) + ' GB';
 }
 
 export function convertBytesToHumanReadable(
