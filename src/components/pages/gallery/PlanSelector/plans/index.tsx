@@ -5,8 +5,6 @@ const Plans = ({ plans, planPeriod, subscription, onPlanSelect }) => (
     <div
         style={{
             display: 'flex',
-            justifyContent: 'space-around',
-            flexWrap: 'wrap',
             minHeight: '230px',
             marginTop: '32px',
         }}>
