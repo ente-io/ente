@@ -103,7 +103,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Wakelock",
+                "Keep device awake",
                 style: Theme.of(context).textTheme.subtitle1,
               ),
               Switch.adaptive(
@@ -112,18 +112,22 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
                   if (value) {
                     var choice = await showChoiceDialog(
                       context,
-                      "Enable Wakelock?",
-                      "This will ensure faster uploads by keeping your device awake while uploads are in progress.",
-                      firstAction: "Cancel",
-                      secondAction: "Enable",
+                      "Keep device awake?",
+                      "This will ensure faster uploads by keeping your display on while uploads are in progress.",
+                      firstAction: "No",
+                      secondAction: "Yes",
                     );
                     if (choice != DialogUserChoice.secondChoice) {
                       return;
                     }
                   }
                   await Configuration.instance.setShouldKeepDeviceAwake(value);
-                  showShortToast(context,
-                      value ? "Wakelock enabled" : "Wakelock disabled");
+                  showShortToast(
+                    context,
+                    value
+                        ? "Device will stay awake during uploads"
+                        : "Device will not stay awake during uploads",
+                  );
                   setState(() {});
                 },
               ),
