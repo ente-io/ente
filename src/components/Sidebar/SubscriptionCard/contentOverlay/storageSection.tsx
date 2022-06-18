@@ -16,9 +16,7 @@ export default function StorageSection({ totalUsage, totalStorage }: Iprops) {
 
             <Typography
                 fontWeight={'bold'}
-                sx={{
-                    fontSize: '24px',
-                }}>
+                sx={{ fontSize: '24px', lineHeight: '30px' }}>
                 {`${convertBytesToHumanReadable(
                     totalStorage - totalUsage,
                     1
