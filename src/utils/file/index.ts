@@ -147,13 +147,13 @@ export function sortFilesIntoCollections(files: EnteFile[]) {
         if (!collectionWiseFiles.has(file.collectionID)) {
             collectionWiseFiles.set(file.collectionID, []);
         }
-
-        collectionWiseFiles.get(file.collectionID).push(file);
-        if (IsArchived(file)) {
-            collectionWiseFiles.get(ARCHIVE_SECTION).push(file);
-        }
         if (file.isTrashed) {
             collectionWiseFiles.get(TRASH_SECTION).push(file);
+        } else {
+            collectionWiseFiles.get(file.collectionID).push(file);
+            if (IsArchived(file)) {
+                collectionWiseFiles.get(ARCHIVE_SECTION).push(file);
+            }
         }
     }
     return collectionWiseFiles;

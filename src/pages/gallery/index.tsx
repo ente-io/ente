@@ -19,7 +19,6 @@ import {
     syncCollections,
     getFavItemIds,
     getLocalCollections,
-    getNonEmptyCollections,
     createCollection,
     getCollectionSummaries,
 } from 'services/collectionService';
@@ -371,13 +370,11 @@ export default function Gallery() {
         }
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
-        const nonEmptyCollections = getNonEmptyCollections(collections, files);
-
-        const archivedCollections = getArchivedCollections(nonEmptyCollections);
+        const archivedCollections = getArchivedCollections(collections);
         setArchivedCollections(archivedCollections);
 
         const collectionSummaries = getCollectionSummaries(
-            nonEmptyCollections,
+            collections,
             files,
             archivedCollections
         );

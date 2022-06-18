@@ -714,7 +714,9 @@ export const getNonEmptyCollections = (
 ) => {
     const nonEmptyCollectionsIds = new Set<number>();
     for (const file of files) {
-        nonEmptyCollectionsIds.add(file.collectionID);
+        if (!file.isTrashed) {
+            nonEmptyCollectionsIds.add(file.collectionID);
+        }
     }
     return collections.filter((collection) =>
         nonEmptyCollectionsIds.has(collection.id)
@@ -810,7 +812,8 @@ export function getCollectionSummaries(
             collectionLatestFiles
         )
     );
-    return collectionSummaries;
+
+    return filterOutEmptyCollectionSummary(collectionSummaries);
 }
 
 function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
@@ -881,4 +884,13 @@ function getTrashedCollectionSummaries(
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(TRASH_SECTION)?.updationTime,
     };
+}
+
+function filterOutEmptyCollectionSummary(
+    collectionSummaries: CollectionSummaries
+) {
+    return new Map(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        [...collectionSummaries.entries()].filter(([_, v]) => v.fileCount > 0)
+    ) as CollectionSummaries;
 }
