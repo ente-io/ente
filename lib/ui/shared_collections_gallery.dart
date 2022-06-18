@@ -251,7 +251,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
               onTap: () async {
                 await showToast(
                   context,
-                  "Select an album on ente to share",
+                  "Select an album and tap the share button on the top right to share.",
                   toastLength: Toast.LENGTH_LONG,
                 );
                 Bus.instance.fire(
