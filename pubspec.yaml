@@ -112,10 +112,12 @@ dependencies:
     path: thirdparty/plugins/packages/video_player/video_player
   video_thumbnail: ^0.4.3
   visibility_detector: ^0.2.2
+  wakelock: ^0.6.1+2
   wallpaper_manager_flutter: ^0.0.2
 
 dependency_overrides:
   provider: ^6.0.1 # for chewie 1.2.2 https://github.com/brianegan/chewie/issues/530
+  wakelock: ^0.6.1+2
 
 dev_dependencies:
   flutter_test:

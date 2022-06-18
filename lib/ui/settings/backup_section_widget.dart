@@ -96,6 +96,26 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           ),
         ),
         SectionOptionDivider,
+        SizedBox(
+          height: 48,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Keep device awake",
+                style: Theme.of(context).textTheme.subtitle1,
+              ),
+              Switch.adaptive(
+                value: Configuration.instance.shouldKeepDeviceAwake(),
+                onChanged: (value) async {
+                  Configuration.instance.setShouldKeepDeviceAwake(value);
+                  setState(() {});
+                },
+              ),
+            ],
+          ),
+        ),
+        SectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
