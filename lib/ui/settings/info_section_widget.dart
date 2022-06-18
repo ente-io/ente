@@ -84,7 +84,7 @@ class InfoSectionWidget extends StatelessWidget {
                     behavior: HitTestBehavior.translucent,
                     onTap: () async {
                       final dialog =
-                          createProgressDialog(context, "checking...");
+                          createProgressDialog(context, "Checking...");
                       await dialog.show();
                       final shouldUpdate =
                           await UpdateService.instance.shouldUpdate();

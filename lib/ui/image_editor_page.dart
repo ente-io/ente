@@ -403,7 +403,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           SizedBox(
             width: 40,
             child: Text(
-              "color",
+              "Color",
               style: subtitle2.copyWith(
                 color: subtitle2.color.withOpacity(0.8),
               ),

@@ -157,7 +157,7 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
         actions: [
           TextButton(
             child: Text(
-              "ignore",
+              "Ignore",
               style: TextStyle(
                 color: Colors.white,
               ),
@@ -169,7 +169,7 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
           ),
           TextButton(
             child: Text(
-              "retry",
+              "Retry",
               style: TextStyle(
                 color: Theme.of(context).buttonColor,
               ),

@@ -460,7 +460,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           MaterialPageRoute(
                             builder: (BuildContext context) {
                               return WebPage(
-                                "encryption",
+                                "Encryption",
                                 "https://ente.io/architecture",
                               );
                             },
@@ -528,7 +528,7 @@ class PricingWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Text(
-            "pricing",
+            "Pricing",
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 18,
@@ -561,7 +561,7 @@ class PricingWidget extends StatelessWidget {
                 ),
                 Padding(padding: EdgeInsets.all(1)),
                 Text(
-                  "close",
+                  "Close",
                   style: TextStyle(
                     color: Colors.white38,
                   ),

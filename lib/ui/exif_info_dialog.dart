@@ -34,7 +34,7 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
       actions: [
         TextButton(
           child: Text(
-            "close",
+            "Close",
             style: Theme.of(context).textTheme.bodyText1,
           ),
           onPressed: () {
