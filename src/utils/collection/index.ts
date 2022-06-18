@@ -19,7 +19,7 @@ import {
     CollectionMagicMetadataProps,
     CollectionSummaries,
 } from 'types/collection';
-import { CollectionType } from 'constants/collection';
+import { CollectionType, SYSTEM_COLLECTION_TYPES } from 'constants/collection';
 import { getAlbumSiteHost } from 'constants/pages';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import {
@@ -200,4 +200,8 @@ export const hasNonEmptyCollections = (
     collectionSummaries: CollectionSummaries
 ) => {
     return collectionSummaries?.size <= 3;
+};
+
+export const isSystemCollection = (type: CollectionType) => {
+    return SYSTEM_COLLECTION_TYPES.has(type);
 };

@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo } from 'react';
 import AddCollectionButton from './AddCollectionButton';
 import { Collection, CollectionSummaries } from 'types/collection';
-import { SPECIAL_COLLECTION_TYPES } from 'constants/collection';
 import DialogBoxBase from 'components/DialogBox/base';
 import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
 import { DialogContent } from '@mui/material';
 import { FlexWrapper } from 'components/Container';
 import { CollectionSelectorTile } from 'components/Collections/styledComponents';
 import AllCollectionCard from 'components/Collections/AllCollections/CollectionCard';
+import { isSystemCollection } from 'utils/collection';
 
 export interface CollectionSelectorAttributes {
     callback: (collection: Collection) => void;
@@ -37,8 +37,7 @@ function CollectionSelector({
             ...collectionSummaries.values(),
         ]?.filter(
             ({ type, id }) =>
-                id !== attributes?.fromCollection &&
-                !SPECIAL_COLLECTION_TYPES.has(type)
+                id !== attributes?.fromCollection && !isSystemCollection(type)
         );
         return personalCollectionsOtherThanFrom;
     }, [collectionSummaries, attributes]);
