@@ -35,7 +35,7 @@ export function FamilyUsageSection({
                     <Legend label={constants.FAMILY} color="text.secondary" />
                 </Stack>
                 <Typography variant="caption" fontWeight={'bold'}>
-                    {constants.PHOTO_COUNT(userDetails.fileCount)}
+                    {constants.PHOTO_COUNT(userDetails.fileCount ?? 0)}
                 </Typography>
             </SpaceBetweenFlex>
         </>

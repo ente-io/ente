@@ -22,7 +22,7 @@ export function IndividualUsageSection({ userDetails }) {
                     1
                 )} ${constants.USED}`}</Typography>
                 <Typography variant="caption" fontWeight={'bold'}>
-                    {constants.PHOTO_COUNT(userDetails.fileCount)}
+                    {constants.PHOTO_COUNT(userDetails.fileCount ?? 0)}
                 </Typography>
             </SpaceBetweenFlex>
         </>
