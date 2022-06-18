@@ -505,7 +505,7 @@ class Configuration {
 
   Future<void> setShouldKeepDeviceAwake(bool value) async {
     await _preferences.setBool(keyShouldKeepDeviceAwake, value);
-    Wakelock.toggle(enable: value);
+    await Wakelock.toggle(enable: value);
   }
 
   Future<void> setShouldBackupVideos(bool value) async {
