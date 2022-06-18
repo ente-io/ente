@@ -3653,9 +3653,9 @@ jest-worker@^24.9.0:
     supports-color "^6.1.0"
 
 jpeg-js@^0.4.1:
-  version "0.4.3"
-  resolved "https://registry.npmjs.org/jpeg-js/-/jpeg-js-0.4.3.tgz"
-  integrity sha512-ru1HWKek8octvUHFHvE5ZzQ1yAsJmIvRdGWvSoKV52XKyuyYA437QWDttXT8eZXDSbuMpHlLzPDZUPd6idIz+Q==
+  version "0.4.4"
+  resolved "https://registry.yarnpkg.com/jpeg-js/-/jpeg-js-0.4.4.tgz#a9f1c6f1f9f0fa80cdb3484ed9635054d28936aa"
+  integrity sha512-WZzeDOEtTOBK4Mdsar0IqEU5sMr3vSV2RqkAIzUEV2BHnUfKGyswWFPFwK5EeDo93K3FohSHbLAjj0s1Wzd+dg==
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
@@ -4363,7 +4363,7 @@ peek-readable@^4.0.1:
   integrity sha512-7qmhptnR0WMSpxT5rMHG9bW/mYSR1uqaPFj2MHvT+y/aOUu6msJijpKt5SkTDKySwg65OWG2JwTMBlgcbwMHrQ==
 
 "photoswipe@file:./thirdparty/photoswipe":
-  version "4.1.5"
+  version "4.1.6"
 
 picocolors@^1.0.0:
   version "1.0.0"
