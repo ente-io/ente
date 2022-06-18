@@ -194,7 +194,7 @@ const englishConstants = {
     REQUEST_FEATURE: 'Request Feature',
     SUPPORT: 'Support',
     CONFIRM: 'Confirm',
-    SKIP: 'Skip',
+    SKIP_SUBSCRIPTION_PURCHASE: 'Continue with free plan',
     CANCEL: 'Cancel',
     LOGOUT: 'Logout',
     DELETE_ACCOUNT: 'Delete Account',
@@ -262,7 +262,6 @@ const englishConstants = {
     LEAVE_FAMILY_CONFIRM: 'Are you sure that you want to leave family?',
     CHOOSE_PLAN: 'Choose your subscription plan',
     MANAGE_PLAN: 'Manage your subscription',
-    CHOOSE_PLAN_BTN: 'Choose plan',
     ACTIVE: 'Active',
 
     OFFLINE_MSG: 'You are offline, cached memories are being shown',

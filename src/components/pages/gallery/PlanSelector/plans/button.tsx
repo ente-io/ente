@@ -52,7 +52,7 @@ function EnabledPlanTileButton({ onClick }) {
             onClick={onClick}
             variant={'contained'}>
             <SpaceBetweenFlex>
-                {constants.CHOOSE_PLAN_BTN}
+                {constants.SUBSCRIBE}
                 <ChevronRight />
             </SpaceBetweenFlex>
         </Button>

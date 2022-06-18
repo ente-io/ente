@@ -8,7 +8,6 @@ import {
     manageFamilyMethod,
     hasPaidSubscription,
     hasStripeSubscription,
-    isOnFreePlan,
     isSubscriptionCancelled,
 } from 'utils/billing';
 import constants from 'utils/strings/constants';
@@ -141,13 +140,10 @@ function PaidSubscriptionOptions({
     );
 }
 
-function FreeSubscriptionOptions({
-    subscription,
-    closeModal,
-}: Omit<Iprops, 'setLoading'>) {
+function FreeSubscriptionOptions({ closeModal }: Omit<Iprops, 'setLoading'>) {
     return (
-        <ManageSubscriptionButton onClick={closeModal}>
-            {isOnFreePlan(subscription) ? constants.SKIP : constants.CLOSE}
+        <ManageSubscriptionButton color="accent" onClick={closeModal}>
+            {constants.SKIP_SUBSCRIPTION_PURCHASE}
         </ManageSubscriptionButton>
     );
 }
