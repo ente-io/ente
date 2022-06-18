@@ -8,6 +8,7 @@ import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
+import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/deduplicate_page.dart';
 import 'package:photos/ui/free_space_page.dart';
 import 'package:photos/ui/settings/common_settings.dart';
@@ -102,13 +103,27 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Keep device awake",
+                "Wakelock",
                 style: Theme.of(context).textTheme.subtitle1,
               ),
               Switch.adaptive(
                 value: Configuration.instance.shouldKeepDeviceAwake(),
                 onChanged: (value) async {
-                  Configuration.instance.setShouldKeepDeviceAwake(value);
+                  if (value) {
+                    var choice = await showChoiceDialog(
+                      context,
+                      "Enable Wakelock?",
+                      "This will ensure faster uploads by keeping your device awake while uploads are in progress.",
+                      firstAction: "Cancel",
+                      secondAction: "Enable",
+                    );
+                    if (choice != DialogUserChoice.secondChoice) {
+                      return;
+                    }
+                  }
+                  await Configuration.instance.setShouldKeepDeviceAwake(value);
+                  showShortToast(context,
+                      value ? "Wakelock enabled" : "Wakelock disabled");
                   setState(() {});
                 },
               ),
