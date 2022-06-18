@@ -34,7 +34,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class FileUploader {
   static const kMaximumConcurrentUploads = 4;
-  static const kMaximumConcurrentVideoUploads = 1;
+  static const kMaximumConcurrentVideoUploads = 2;
   static const kMaximumThumbnailCompressionAttempts = 2;
   static const kMaximumUploadAttempts = 4;
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
