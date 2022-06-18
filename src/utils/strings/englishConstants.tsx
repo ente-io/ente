@@ -263,6 +263,7 @@ const englishConstants = {
     CHOOSE_PLAN: 'Choose your subscription plan',
     MANAGE_PLAN: 'Manage your subscription',
     CHOOSE_PLAN_BTN: 'Choose plan',
+    ACTIVE: 'Active',
 
     OFFLINE_MSG: 'You are offline, cached memories are being shown',
 
@@ -775,6 +776,8 @@ const englishConstants = {
     FAMILY: 'Family',
     FREE: 'free',
     OF: 'of',
+    MONTH_SHORT: 'mo',
+    YEAR_SHORT: 'yr',
 };
 
 export default englishConstants;

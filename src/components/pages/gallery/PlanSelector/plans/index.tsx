@@ -1,5 +1,4 @@
 import React from 'react';
-import { isUserSubscribedPlan, convertBytesToGBs } from 'utils/billing';
 import { PlanCard } from './planCard';
 
 const Plans = ({ plans, planPeriod, subscription, onPlanSelect }) => (
@@ -8,19 +7,17 @@ const Plans = ({ plans, planPeriod, subscription, onPlanSelect }) => (
             display: 'flex',
             justifyContent: 'space-around',
             flexWrap: 'wrap',
-            minHeight: '212px',
-            margin: '5px 0',
+            minHeight: '230px',
+            marginTop: '32px',
         }}>
         {plans
             ?.filter((plan) => plan.period === planPeriod)
             ?.map((plan) => (
                 <PlanCard
                     key={plan.stripeID}
-                    isUserSubscribedPlan={isUserSubscribedPlan}
                     plan={plan}
                     subscription={subscription}
                     onPlanSelect={onPlanSelect}
-                    convertBytesToGBs={convertBytesToGBs}
                 />
             ))}
     </div>
