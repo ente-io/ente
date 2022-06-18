@@ -149,7 +149,7 @@ const darkThemeOptions = createTheme({
         divider: 'rgba(256, 256, 256, 0.12)',
     },
     shape: {
-        borderRadius: 4,
+        borderRadius: 8,
     },
     typography: {
         body1: {
