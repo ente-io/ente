@@ -376,18 +376,18 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           var choice = await showChoiceDialog(
             context,
             title,
-            "are you sure you want to renew?",
-            firstAction: "no",
-            secondAction: "yes",
+            "Are you sure you want to renew?",
+            firstAction: "No",
+            secondAction: "Yes",
           );
           confirmAction = choice == DialogUserChoice.secondChoice;
         } else {
           var choice = await showChoiceDialog(
             context,
             title,
-            'are you sure you want to cancel?',
-            firstAction: 'yes, cancel',
-            secondAction: 'no',
+            'Are you sure you want to cancel?',
+            firstAction: 'Yes, cancel',
+            secondAction: 'No',
             actionType: ActionType.critical,
           );
           confirmAction = choice == DialogUserChoice.firstChoice;

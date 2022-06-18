@@ -70,7 +70,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
             if (e is AssertionError) {
               errMessage = '$errMessage : ${e.message}';
             }
-            showErrorDialog(context, "incorrect recovery key", errMessage);
+            showErrorDialog(context, "Incorrect recovery key", errMessage);
           }
         },
       ),

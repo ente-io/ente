@@ -285,7 +285,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       actions: [
         TextButton(
           child: Text(
-            "no",
+            "No",
             style: TextStyle(
               color: Theme.of(context).buttonColor,
             ),
@@ -296,7 +296,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         ),
         TextButton(
           child: Text(
-            "yes",
+            "Yes",
             style: TextStyle(
               color: Colors.red,
             ),
