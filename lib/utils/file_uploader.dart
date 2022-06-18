@@ -51,8 +51,9 @@ class FileUploader {
   // Maintains the count of files in the current upload session.
   // Upload session is the period between the first entry into the _queue and last entry out of the _queue
   int _totalCountInUploadSession = 0;
-  int _currentlyUploading = 0;
-  int _currentlyVideoUploading = 0;
+  // _uploadCounter indicates number of uploads which are currently in progress
+  int _uploadCounter = 0;
+  int _videoUploadCounter = 0;
   ProcessType _processType;
   bool _isBackground;
   SharedPreferences _prefs;
@@ -231,7 +232,7 @@ class FileUploader {
       _totalCountInUploadSession = 0;
       return;
     }
-    if (_currentlyUploading < kMaximumConcurrentUploads) {
+    if (_uploadCounter < kMaximumConcurrentUploads) {
       var pendingEntry = _queue.entries
           .firstWhere(
             (entry) => entry.value.status == UploadStatus.not_started,
@@ -241,7 +242,7 @@ class FileUploader {
 
       if (pendingEntry != null &&
           pendingEntry.file.fileType == FileType.video &&
-          _currentlyVideoUploading > kMaximumConcurrentVideoUploads) {
+          _videoUploadCounter >= kMaximumConcurrentVideoUploads) {
         // check if there's any non-video entry which can be queued for upload
         pendingEntry = _queue.entries
             .firstWhere(
@@ -267,9 +268,9 @@ class FileUploader {
     int collectionID, {
     bool forcedUpload = false,
   }) async {
-    _currentlyUploading++;
+    _uploadCounter++;
     if (file.fileType == FileType.video) {
-      _currentlyVideoUploading++;
+      _videoUploadCounter++;
     }
     final localID = file.localID;
     try {
@@ -293,9 +294,9 @@ class FileUploader {
         return null;
       }
     } finally {
-      _currentlyUploading--;
+      _uploadCounter--;
       if (file.fileType == FileType.video) {
-        _currentlyVideoUploading--;
+        _videoUploadCounter--;
       }
       _pollQueue();
     }
