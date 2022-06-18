@@ -239,7 +239,7 @@ class FileUploader {
           )
           ?.value;
 
-      if (pendingEntry == null &&
+      if (pendingEntry != null &&
           pendingEntry.file.fileType == FileType.video &&
           _currentlyVideoUploading < kMaximumConcurrentVideoUploads) {
         // check if there's any non-video entry which can be queued for upload
