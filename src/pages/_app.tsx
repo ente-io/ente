@@ -19,8 +19,6 @@ import DialogBox from 'components/DialogBox';
 import { styled, ThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'themes/darkThemeOptions';
 import { CssBaseline } from '@mui/material';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-// import * as types from 'styled-components/cssprop'; // need to css prop on styled component
 import { DialogBoxAttributes, SetDialogBoxAttributes } from 'types/dialogBox';
 import {
     getFamilyPortalRedirectURL,
