@@ -1,22 +1,13 @@
-import {
-    BottomMarginSpacer,
-    FixedHeightContainer,
-    FullHeightVerticallyCentered,
-    FullWidthButtonWithTopMargin,
-    ModalHeading,
-    NoFoldersTitleText,
-    PaddedContainer,
-} from './styledComponents';
+import { MappingList } from './mappingList';
+import { NoMappingsContent } from './noMappingsContent';
 import React, { useContext, useEffect, useState } from 'react';
-import { Dialog, IconButton } from '@mui/material';
+import { Button, DialogActions, DialogContent } from '@mui/material';
 import watchService from 'services/watchFolderService';
-import Close from '@mui/icons-material/Close';
-import { CenteredFlex, SpaceBetweenFlex } from 'components/Container';
 import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
 import constants from 'utils/strings/constants';
-import { CheckmarkIcon } from './checkmarkIcon';
-import { MappingEntry } from './mappingEntry';
+import DialogBoxBase from 'components/DialogBox/base';
+import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
 
 interface Iprops {
     open: boolean;
@@ -75,69 +66,35 @@ export default function WatchFolderModal({ open, onClose }: Iprops) {
     };
 
     return (
-        <Dialog maxWidth="xs" fullWidth={true} open={open} onClose={onClose}>
-            <PaddedContainer>
-                <FixedHeightContainer>
-                    <SpaceBetweenFlex>
-                        <ModalHeading>{constants.WATCHED_FOLDERS}</ModalHeading>
-                        <IconButton
-                            onClick={onClose}
-                            sx={{
-                                marginBottom: 'auto',
-                            }}>
-                            <Close />
-                        </IconButton>
-                    </SpaceBetweenFlex>
+        <DialogBoxBase maxWidth="xs" open={open} onClose={onClose}>
+            <DialogTitleWithCloseButton onClose={onClose}>
+                {constants.WATCHED_FOLDERS}
+            </DialogTitleWithCloseButton>
+            <DialogContent>
+                {mappings.length !== 0 ? (
+                    <NoMappingsContent />
+                ) : (
+                    <MappingList
+                        mappings={mappings}
+                        handleRemoveWatchMapping={handleRemoveWatchMapping}
+                    />
+                )}
+            </DialogContent>
 
-                    {mappings.length === 0 ? (
-                        <FullHeightVerticallyCentered
-                            sx={{
-                                justifyContent: 'center',
-                            }}>
-                            <NoFoldersTitleText>
-                                {constants.NO_FOLDERS_ADDED}
-                            </NoFoldersTitleText>
-                            {constants.FOLDERS_AUTOMATICALLY_MONITORED}
-                            <BottomMarginSpacer />
-                            <span>
-                                <CheckmarkIcon />{' '}
-                                {constants.UPLOAD_NEW_FILES_TO_ENTE}
-                            </span>
-                            <span>
-                                <CheckmarkIcon />{' '}
-                                {constants.REMOVE_DELETED_FILES_FROM_ENTE}
-                            </span>
-                        </FullHeightVerticallyCentered>
-                    ) : (
-                        <FullHeightVerticallyCentered>
-                            {mappings.map((mapping: WatchMapping) => {
-                                return (
-                                    <MappingEntry
-                                        key={mapping.collectionName}
-                                        mapping={mapping}
-                                        handleRemoveMapping={
-                                            handleRemoveWatchMapping
-                                        }
-                                    />
-                                );
-                            })}
-                        </FullHeightVerticallyCentered>
-                    )}
-
-                    <CenteredFlex>
-                        <FullWidthButtonWithTopMargin
-                            color="accent"
-                            onClick={handleAddFolderClick}>
-                            +
-                            <span
-                                style={{
-                                    marginLeft: '8px',
-                                }}></span>
-                            {constants.ADD_FOLDER}
-                        </FullWidthButtonWithTopMargin>
-                    </CenteredFlex>
-                </FixedHeightContainer>
-            </PaddedContainer>
-        </Dialog>
+            <DialogActions>
+                <Button
+                    sx={{ mt: 2 }}
+                    fullWidth
+                    color="accent"
+                    onClick={handleAddFolderClick}>
+                    +
+                    <span
+                        style={{
+                            marginLeft: '8px',
+                        }}></span>
+                    {constants.ADD_FOLDER}
+                </Button>
+            </DialogActions>
+        </DialogBoxBase>
     );
 }
