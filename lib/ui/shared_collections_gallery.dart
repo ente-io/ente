@@ -126,7 +126,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             const SizedBox(height: 12),
             SectionTitle("Incoming"),
             const SizedBox(height: 12),
-            collections.incoming.isNotEmpty
+            !collections.incoming.isNotEmpty
                 ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: GridView.builder(
@@ -148,10 +148,9 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                     ),
                   )
                 : _getIncomingCollectionEmptyState(),
-            const SizedBox(height: 52),
             SectionTitle("Outgoing"),
             const SizedBox(height: 12),
-            collections.outgoing.isNotEmpty
+            !collections.outgoing.isNotEmpty
                 ? ListView.builder(
                     shrinkWrap: true,
                     padding: EdgeInsets.only(bottom: 12),
@@ -173,7 +172,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
 
   Widget _getIncomingCollectionEmptyState() {
     return SizedBox(
-      height: 180,
+      height: 220,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -210,6 +209,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
               },
             ),
           ),
+          const SizedBox(height: 60),
         ],
       ),
     );
@@ -217,7 +217,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
 
   Widget _getOutgoingCollectionEmptyState() {
     return SizedBox(
-      height: 180,
+      height: 200,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -262,6 +262,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
               },
             ),
           ),
+          const SizedBox(height: 60),
         ],
       ),
     );
