@@ -39,63 +39,65 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    return Column(
-      children: [
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () async {
-            routeToPage(
-              context,
-              BackupFolderSelectionPage(
-                buttonText: "Backup",
-              ),
-            );
-          },
-          child: SettingsTextItem(
-            text: "Backed up folders",
-            icon: Icons.navigate_next,
-          ),
+    final List<Widget> sectionOptions = [
+      GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () async {
+          routeToPage(
+            context,
+            BackupFolderSelectionPage(
+              buttonText: "Backup",
+            ),
+          );
+        },
+        child: SettingsTextItem(
+          text: "Backed up folders",
+          icon: Icons.navigate_next,
         ),
-        SectionOptionDivider,
-        SizedBox(
-          height: 48,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Backup over mobile data",
-                style: Theme.of(context).textTheme.subtitle1,
-              ),
-              Switch.adaptive(
-                value: Configuration.instance.shouldBackupOverMobileData(),
-                onChanged: (value) async {
-                  Configuration.instance.setBackupOverMobileData(value);
-                  setState(() {});
-                },
-              ),
-            ],
-          ),
+      ),
+      SectionOptionDivider,
+      SizedBox(
+        height: 48,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Backup over mobile data",
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
+            Switch.adaptive(
+              value: Configuration.instance.shouldBackupOverMobileData(),
+              onChanged: (value) async {
+                Configuration.instance.setBackupOverMobileData(value);
+                setState(() {});
+              },
+            ),
+          ],
         ),
-        SectionOptionDivider,
-        SizedBox(
-          height: 48,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Backup videos",
-                style: Theme.of(context).textTheme.subtitle1,
-              ),
-              Switch.adaptive(
-                value: Configuration.instance.shouldBackupVideos(),
-                onChanged: (value) async {
-                  Configuration.instance.setShouldBackupVideos(value);
-                  setState(() {});
-                },
-              ),
-            ],
-          ),
+      ),
+      SectionOptionDivider,
+      SizedBox(
+        height: 48,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Backup videos",
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
+            Switch.adaptive(
+              value: Configuration.instance.shouldBackupVideos(),
+              onChanged: (value) async {
+                Configuration.instance.setShouldBackupVideos(value);
+                setState(() {});
+              },
+            ),
+          ],
         ),
+      ),
+    ];
+    if (Platform.isIOS) {
+      sectionOptions.addAll([
         SectionOptionDivider,
         SizedBox(
           height: 48,
@@ -134,6 +136,10 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             ],
           ),
         ),
+      ]);
+    }
+    sectionOptions.addAll(
+      [
         SectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -205,6 +211,9 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           ),
         ),
       ],
+    );
+    return Column(
+      children: sectionOptions,
     );
   }
 
