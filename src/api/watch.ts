@@ -36,10 +36,10 @@ export async function addWatchMapping(
     setWatchMappings(watchMappings);
 }
 
-export async function removeWatchMapping(collectionName: string) {
-    const watchMappings = getWatchMappings();
+export async function removeWatchMapping(folderPath: string) {
+    let watchMappings = getWatchMappings();
     const watchMapping = watchMappings.find(
-        (mapping) => mapping.collectionName === collectionName
+        (mapping) => mapping.folderPath === folderPath
     );
 
     if (!watchMapping) {
@@ -50,7 +50,9 @@ export async function removeWatchMapping(collectionName: string) {
         dir: watchMapping.folderPath,
     });
 
-    watchMappings.splice(watchMappings.indexOf(watchMapping), 1);
+    watchMappings = watchMappings.filter(
+        (mapping) => mapping.folderPath !== watchMapping.folderPath
+    );
 
     setWatchMappings(watchMappings);
 }
