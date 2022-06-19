@@ -22,7 +22,7 @@ export class watchFolderService {
     setCollectionName: (collectionName: string) => void;
     syncWithRemote: () => void;
     showProgressView: () => void;
-    setwatchFolderServiceIsRunning: (isRunning: boolean) => void;
+    setWatchFolderServiceIsRunning: (isRunning: boolean) => void;
 
     constructor() {
         this.ElectronAPIs = (runningInBrowser() &&
@@ -38,15 +38,15 @@ export class watchFolderService {
         setElectronFiles: (files: ElectronFile[]) => void,
         setCollectionName: (collectionName: string) => void,
         syncWithRemote: () => void,
-        setwatchFolderServiceIsRunning: (isRunning: boolean) => void
+        setWatchFolderServiceIsRunning: (isRunning: boolean) => void
     ) {
         if (this.allElectronAPIsExist) {
             try {
                 this.setElectronFiles = setElectronFiles;
                 this.setCollectionName = setCollectionName;
                 this.syncWithRemote = syncWithRemote;
-                this.setwatchFolderServiceIsRunning =
-                    setwatchFolderServiceIsRunning;
+                this.setWatchFolderServiceIsRunning =
+                    setWatchFolderServiceIsRunning;
 
                 let mappings = this.getWatchMappings();
 
@@ -180,7 +180,7 @@ export class watchFolderService {
 
     setIsEventRunning(isEventRunning: boolean) {
         this.isEventRunning = isEventRunning;
-        this.setwatchFolderServiceIsRunning(isEventRunning);
+        this.setWatchFolderServiceIsRunning(isEventRunning);
     }
 
     async runNextEvent() {
