@@ -71,34 +71,30 @@ export async function getAllFilesFromDir(dirPath: string) {
 }
 
 export function registerWatcherFunctions(
-    WatchServiceInstance: any,
-    addFile: (WatchServiceInstance: any, file: ElectronFile) => Promise<void>,
-    removeFile: (WatchServiceInstance: any, path: string) => Promise<void>,
-    removeFolder: (
-        WatchServiceInstance: any,
-        folderPath: string
-    ) => Promise<void>
+    addFile: (file: ElectronFile) => Promise<void>,
+    removeFile: (path: string) => Promise<void>,
+    removeFolder: (folderPath: string) => Promise<void>
 ) {
     ipcRenderer.removeAllListeners('watch-add');
     ipcRenderer.removeAllListeners('watch-change');
     ipcRenderer.removeAllListeners('watch-unlink');
     ipcRenderer.on('watch-add', async (_, filePath: string) => {
         filePath = filePath.split(path.sep).join(path.posix.sep);
-        await addFile(WatchServiceInstance, await getElectronFile(filePath));
+        await addFile(await getElectronFile(filePath));
     });
     ipcRenderer.on('watch-change', async (_, filePath: string) => {
         filePath = filePath.split(path.sep).join(path.posix.sep);
-        await removeFile(WatchServiceInstance, filePath);
-        await addFile(WatchServiceInstance, await getElectronFile(filePath));
+        await removeFile(filePath);
+        await addFile(await getElectronFile(filePath));
     });
     ipcRenderer.on(
         'watch-unlink',
         async (_, filePath: string, isDir?: boolean) => {
             filePath = filePath.split(path.sep).join(path.posix.sep);
             if (isDir) {
-                await removeFolder(WatchServiceInstance, filePath);
+                await removeFolder(filePath);
             } else {
-                await removeFile(WatchServiceInstance, filePath);
+                await removeFile(filePath);
             }
         }
     );
