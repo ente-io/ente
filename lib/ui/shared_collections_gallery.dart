@@ -177,7 +177,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "No one is sharing with you :(",
+            "Ask your loved ones to share",
             style: Theme.of(context).textTheme.caption,
           ),
           Padding(padding: EdgeInsets.only(top: 14)),
@@ -222,7 +222,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "Share your first album!",
+            "Share your first album",
             style: Theme.of(context).textTheme.caption,
           ),
           Padding(padding: EdgeInsets.only(top: 14)),
