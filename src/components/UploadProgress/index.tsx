@@ -45,13 +45,10 @@ export default function UploadProgress({
     const [expanded, setExpanded] = useState(true);
 
     useEffect(() => {
-        if (
-            appContext.watchServiceIsRunning &&
-            watchService.isUploadRunning()
-        ) {
+        if (appContext.isFolderSyncRunning && watchService.isUploadRunning()) {
             setExpanded(false);
         }
-    }, [appContext.watchServiceIsRunning]);
+    }, [appContext.isFolderSyncRunning]);
 
     function confirmCancelUpload() {
         appContext.setDialogMessage({

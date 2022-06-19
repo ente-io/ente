@@ -14,7 +14,7 @@ interface Iprops {
     onClose: () => void;
 }
 
-export default function WatchFolderModal({ open, onClose }: Iprops) {
+export default function WatchFolder({ open, onClose }: Iprops) {
     const [mappings, setMappings] = useState<WatchMapping[]>([]);
     const appContext = useContext(AppContext);
 
@@ -24,12 +24,12 @@ export default function WatchFolderModal({ open, onClose }: Iprops) {
 
     useEffect(() => {
         if (
-            appContext.watchModalFiles &&
-            appContext.watchModalFiles.length > 0
+            appContext.watchModalFolderFiles &&
+            appContext.watchModalFolderFiles.length > 0
         ) {
-            handleFolderDrop(appContext.watchModalFiles);
+            handleFolderDrop(appContext.watchModalFolderFiles);
         }
-    }, [appContext.watchModalFiles]);
+    }, [appContext.watchModalFolderFiles]);
 
     const handleFolderDrop = async (folders: FileList) => {
         for (let i = 0; i < folders.length; i++) {

@@ -15,7 +15,7 @@ export function EntryHeading({ mapping }) {
             }}>
             <>
                 {mapping.collectionName}
-                {appContext.watchServiceIsRunning &&
+                {appContext.isFolderSyncRunning &&
                     watchService.currentEvent?.collectionName ===
                         mapping.collectionName && <SyncProgressIcon />}
             </>

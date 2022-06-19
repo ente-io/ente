@@ -9,15 +9,15 @@ import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
 import isElectron from 'is-electron';
 import { downloadApp } from 'utils/common';
-import WatchFolderModal from 'components/WatchFolder';
+import WatchFolder from 'components/WatchFolder';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
     const {
         setDialogMessage,
         startLoading,
-        watchModalView,
-        setWatchModalView,
+        watchFolderView: watchModalView,
+        setWatchFolderView: setWatchModalView,
     } = useContext(AppContext);
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
@@ -71,7 +71,7 @@ export default function UtilitySection({ closeSidebar }) {
             close: { variant: 'danger' },
         });
 
-    const closeWatchFolderModal = () => setWatchModalView(false);
+    const closeWatchFolder = () => setWatchModalView(false);
     return (
         <>
             <SidebarButton onClick={openRecoveryKeyModal}>
@@ -108,10 +108,7 @@ export default function UtilitySection({ closeSidebar }) {
                 closeSidebar={closeSidebar}
                 setLoading={startLoading}
             />
-            <WatchFolderModal
-                open={watchModalView}
-                onClose={closeWatchFolderModal}
-            />
+            <WatchFolder open={watchModalView} onClose={closeWatchFolder} />
 
             {/* <FixLargeThumbnails
                 isOpen={fixLargeThumbsView}

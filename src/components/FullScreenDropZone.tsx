@@ -59,7 +59,7 @@ export default function FullScreenDropZone(props: Props) {
 
     useEffect(() => {
         const handleWatchFolderDrop = (e: DragEvent) => {
-            if (!appContext.watchModalView) {
+            if (!appContext.watchFolderView) {
                 return;
             }
 
@@ -67,7 +67,7 @@ export default function FullScreenDropZone(props: Props) {
             e.stopPropagation();
             const files = e.dataTransfer.files;
             if (files.length > 0) {
-                appContext.setWatchModalFiles(files);
+                appContext.setWatchFolderFiles(files);
             }
         };
 
@@ -75,14 +75,14 @@ export default function FullScreenDropZone(props: Props) {
         return () => {
             removeEventListener('drop', handleWatchFolderDrop);
         };
-    }, [appContext.watchModalView]);
+    }, [appContext.watchFolderView]);
 
     return (
         <DropDiv
             {...props.getRootProps({
                 onDragEnter,
             })}>
-            {!appContext.watchModalView ? (
+            {!appContext.watchFolderView ? (
                 <input {...props.getInputProps()} />
             ) : null}
             {isDragActive && (
@@ -90,7 +90,7 @@ export default function FullScreenDropZone(props: Props) {
                     <CloseButtonWrapper onClick={onDragLeave}>
                         <CloseIcon />
                     </CloseButtonWrapper>
-                    {appContext.watchModalView
+                    {appContext.watchFolderView
                         ? constants.WATCH_FOLDER_DROPZONE_MESSAGE
                         : constants.UPLOAD_DROPZONE_MESSAGE}
                 </Overlay>

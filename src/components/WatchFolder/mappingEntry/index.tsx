@@ -19,8 +19,8 @@ export function MappingEntry({
     const appContext = React.useContext(AppContext);
 
     useEffect(() => {
-        console.log(appContext.watchServiceIsRunning);
-    }, [appContext.watchServiceIsRunning]);
+        console.log(appContext.isFolderSyncRunning);
+    }, [appContext.isFolderSyncRunning]);
 
     const confirmStopWatching = () => {
         appContext.setDialogMessage({

@@ -280,7 +280,7 @@ export default function Gallery() {
     );
 
     useEffect(() => {
-        if (!appContext.watchModalView) {
+        if (!appContext.watchFolderView) {
             setDroppedFiles(acceptedFiles);
         }
     }, [acceptedFiles]);

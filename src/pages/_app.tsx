@@ -52,12 +52,12 @@ type AppContextType = {
     finishLoading: () => void;
     closeMessageDialog: () => void;
     setDialogMessage: SetDialogBoxAttributes;
-    watchServiceIsRunning: boolean;
-    setWatchServiceIsRunning: (isRunning: boolean) => void;
-    watchModalView: boolean;
-    setWatchModalView: (isOpen: boolean) => void;
-    watchModalFiles: FileList;
-    setWatchModalFiles: (files: FileList) => void;
+    isFolderSyncRunning: boolean;
+    setIsFolderSyncRunning: (isRunning: boolean) => void;
+    watchFolderView: boolean;
+    setWatchFolderView: (isOpen: boolean) => void;
+    watchModalFolderFiles: FileList;
+    setWatchFolderFiles: (files: FileList) => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -92,9 +92,9 @@ export default function App({ Component, err }) {
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
-    const [watchServiceIsRunning, setWatchServiceIsRunning] = useState(false);
-    const [watchModalView, setWatchModalView] = useState(false);
-    const [watchModalFiles, setWatchModalFiles] = useState<FileList>(null);
+    const [isFolderSyncRunning, setIsFolderSyncRunning] = useState(false);
+    const [watchFolderView, setWatchFolderView] = useState(false);
+    const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
 
     useEffect(() => {
         if (
@@ -283,12 +283,12 @@ export default function App({ Component, err }) {
                         finishLoading,
                         closeMessageDialog,
                         setDialogMessage,
-                        watchServiceIsRunning,
-                        setWatchServiceIsRunning,
-                        watchModalView,
-                        setWatchModalView,
-                        watchModalFiles,
-                        setWatchModalFiles,
+                        isFolderSyncRunning: isFolderSyncRunning,
+                        setIsFolderSyncRunning: setIsFolderSyncRunning,
+                        watchFolderView: watchFolderView,
+                        setWatchFolderView: setWatchFolderView,
+                        watchModalFolderFiles: watchFolderFiles,
+                        setWatchFolderFiles: setWatchFolderFiles,
                     }}>
                     {loading ? (
                         <VerticallyCentered>
