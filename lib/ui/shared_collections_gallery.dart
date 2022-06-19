@@ -433,7 +433,9 @@ class IncomingCollectionItem extends StatelessWidget {
                       margin: EdgeInsets.fromLTRB(0, 0, 4, 0),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Theme.of(context).buttonColor,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .defaultBackgroundColor,
                       ),
                     ),
                   ),
