@@ -16,8 +16,8 @@ export default function UtilitySection({ closeSidebar }) {
     const {
         setDialogMessage,
         startLoading,
-        watchFolderView: watchModalView,
-        setWatchFolderView: setWatchModalView,
+        watchFolderView,
+        setWatchFolderView,
     } = useContext(AppContext);
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
@@ -30,9 +30,9 @@ export default function UtilitySection({ closeSidebar }) {
     const openTwoFactorModalView = () => setTwoFactorModalView(true);
     const closeTwoFactorModalView = () => setTwoFactorModalView(false);
 
-    const openWatchModalView = () => {
+    const openWatchFolderView = () => {
         if (isElectron()) {
-            setWatchModalView(true);
+            setWatchFolderView(true);
         } else {
             setDialogMessage({
                 title: constants.DOWNLOAD_APP,
@@ -71,7 +71,7 @@ export default function UtilitySection({ closeSidebar }) {
             close: { variant: 'danger' },
         });
 
-    const closeWatchFolder = () => setWatchModalView(false);
+    const closeWatchFolder = () => setWatchFolderView(false);
     return (
         <>
             <SidebarButton onClick={openRecoveryKeyModal}>
@@ -89,7 +89,7 @@ export default function UtilitySection({ closeSidebar }) {
             <SidebarButton onClick={redirectToDeduplicatePage}>
                 {constants.DEDUPLICATE_FILES}
             </SidebarButton>
-            <SidebarButton onClick={openWatchModalView}>
+            <SidebarButton onClick={openWatchFolderView}>
                 {constants.WATCH_FOLDERS}
             </SidebarButton>
 
@@ -108,7 +108,7 @@ export default function UtilitySection({ closeSidebar }) {
                 closeSidebar={closeSidebar}
                 setLoading={startLoading}
             />
-            <WatchFolder open={watchModalView} onClose={closeWatchFolder} />
+            <WatchFolder open={watchFolderView} onClose={closeWatchFolder} />
 
             {/* <FixLargeThumbnails
                 isOpen={fixLargeThumbsView}

@@ -24,12 +24,12 @@ export default function WatchFolder({ open, onClose }: Iprops) {
 
     useEffect(() => {
         if (
-            appContext.watchModalFolderFiles &&
-            appContext.watchModalFolderFiles.length > 0
+            appContext.watchFolderFiles &&
+            appContext.watchFolderFiles.length > 0
         ) {
-            handleFolderDrop(appContext.watchModalFolderFiles);
+            handleFolderDrop(appContext.watchFolderFiles);
         }
-    }, [appContext.watchModalFolderFiles]);
+    }, [appContext.watchFolderFiles]);
 
     const handleFolderDrop = async (folders: FileList) => {
         for (let i = 0; i < folders.length; i++) {

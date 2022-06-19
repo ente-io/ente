@@ -56,7 +56,7 @@ type AppContextType = {
     setIsFolderSyncRunning: (isRunning: boolean) => void;
     watchFolderView: boolean;
     setWatchFolderView: (isOpen: boolean) => void;
-    watchModalFolderFiles: FileList;
+    watchFolderFiles: FileList;
     setWatchFolderFiles: (files: FileList) => void;
 };
 
@@ -287,7 +287,7 @@ export default function App({ Component, err }) {
                         setIsFolderSyncRunning: setIsFolderSyncRunning,
                         watchFolderView: watchFolderView,
                         setWatchFolderView: setWatchFolderView,
-                        watchModalFolderFiles: watchFolderFiles,
+                        watchFolderFiles: watchFolderFiles,
                         setWatchFolderFiles: setWatchFolderFiles,
                     }}>
                     {loading ? (
