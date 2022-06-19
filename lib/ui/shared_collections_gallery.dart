@@ -148,7 +148,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                     ),
                   )
                 : _getIncomingCollectionEmptyState(),
-            const SizedBox(height: 32),
+            const SizedBox(height: 52),
             SectionTitle("Outgoing"),
             const SizedBox(height: 12),
             collections.outgoing.isNotEmpty
@@ -172,18 +172,19 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
   }
 
   Widget _getIncomingCollectionEmptyState() {
-    return Container(
-      padding: EdgeInsets.only(top: 10),
+    return SizedBox(
+      height: 180,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "No one is sharing with you",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-            ),
+            "No one is sharing with you :(",
+            style: Theme.of(context).textTheme.caption,
           ),
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 72),
+          Padding(padding: EdgeInsets.only(top: 14)),
+          SizedBox(
+            width: 200,
+            height: 50,
             child: GradientButton(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -196,7 +197,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                   Padding(padding: EdgeInsets.all(2)),
                   Text(
                     "Invite",
-                    style: gradientButtonTextTheme(),
+                    style: gradientButtonTextTheme().copyWith(fontSize: 16),
                   ),
                 ],
               ),
@@ -215,18 +216,19 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
   }
 
   Widget _getOutgoingCollectionEmptyState() {
-    return Container(
-      padding: EdgeInsets.only(top: 10),
+    return SizedBox(
+      height: 180,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "You aren't sharing anything",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-            ),
+            "Share your first album!",
+            style: Theme.of(context).textTheme.caption,
           ),
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 72),
+          Padding(padding: EdgeInsets.only(top: 14)),
+          SizedBox(
+            width: 200,
+            height: 50,
             child: GradientButton(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -240,7 +242,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                   Padding(padding: EdgeInsets.all(2)),
                   Text(
                     "Share",
-                    style: gradientButtonTextTheme(),
+                    style: gradientButtonTextTheme().copyWith(fontSize: 16),
                   ),
                 ],
               ),
