@@ -266,12 +266,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   RichText(
                     text: TextSpan(
                       text: "Manage family",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontFamily: 'Inter-Medium',
-                        fontSize: 14,
-                        decoration: TextDecoration.underline,
-                      ),
+                      style: Theme.of(context).textTheme.overline,
                     ),
                     textAlign: TextAlign.center,
                   ),

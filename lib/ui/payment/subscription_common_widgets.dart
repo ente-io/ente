@@ -128,10 +128,7 @@ class SubFaqWidget extends StatelessWidget {
           child: RichText(
             text: TextSpan(
               text: "Questions?",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyText2
-                  .copyWith(decoration: TextDecoration.underline),
+              style: Theme.of(context).textTheme.overline,
             ),
           ),
         ),

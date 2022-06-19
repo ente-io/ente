@@ -284,10 +284,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   RichText(
                     text: TextSpan(
                       text: "Manage family",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontSize: 15,
-                      ),
+                      style: Theme.of(context).textTheme.overline,
                     ),
                     textAlign: TextAlign.center,
                   ),
