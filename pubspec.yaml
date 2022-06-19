@@ -11,7 +11,7 @@ description: ente photos application
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.5.45+325
+version: 0.5.46+326
 
 environment:
   sdk: ">=2.10.0 <3.0.0"
@@ -112,10 +112,12 @@ dependencies:
     path: thirdparty/plugins/packages/video_player/video_player
   video_thumbnail: ^0.4.3
   visibility_detector: ^0.2.2
+  wakelock: ^0.6.1+2
   wallpaper_manager_flutter: ^0.0.2
 
 dependency_overrides:
   provider: ^6.0.1 # for chewie 1.2.2 https://github.com/brianegan/chewie/issues/530
+  wakelock: ^0.6.1+2
 
 dev_dependencies:
   flutter_test:

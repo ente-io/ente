@@ -8,6 +8,7 @@ import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
+import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/deduplicate_page.dart';
 import 'package:photos/ui/free_space_page.dart';
 import 'package:photos/ui/settings/common_settings.dart';
@@ -38,23 +39,65 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    return Column(
-      children: [
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () async {
-            routeToPage(
-              context,
-              BackupFolderSelectionPage(
-                buttonText: "Backup",
-              ),
-            );
-          },
-          child: SettingsTextItem(
-            text: "Backed up folders",
-            icon: Icons.navigate_next,
-          ),
+    final List<Widget> sectionOptions = [
+      GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () async {
+          routeToPage(
+            context,
+            BackupFolderSelectionPage(
+              buttonText: "Backup",
+            ),
+          );
+        },
+        child: SettingsTextItem(
+          text: "Backed up folders",
+          icon: Icons.navigate_next,
         ),
+      ),
+      SectionOptionDivider,
+      SizedBox(
+        height: 48,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Backup over mobile data",
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
+            Switch.adaptive(
+              value: Configuration.instance.shouldBackupOverMobileData(),
+              onChanged: (value) async {
+                Configuration.instance.setBackupOverMobileData(value);
+                setState(() {});
+              },
+            ),
+          ],
+        ),
+      ),
+      SectionOptionDivider,
+      SizedBox(
+        height: 48,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Backup videos",
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
+            Switch.adaptive(
+              value: Configuration.instance.shouldBackupVideos(),
+              onChanged: (value) async {
+                Configuration.instance.setShouldBackupVideos(value);
+                setState(() {});
+              },
+            ),
+          ],
+        ),
+      ),
+    ];
+    if (Platform.isIOS) {
+      sectionOptions.addAll([
         SectionOptionDivider,
         SizedBox(
           height: 48,
@@ -62,39 +105,35 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Backup over mobile data",
+                "Disable auto lock",
                 style: Theme.of(context).textTheme.subtitle1,
               ),
               Switch.adaptive(
-                value: Configuration.instance.shouldBackupOverMobileData(),
+                value: Configuration.instance.shouldKeepDeviceAwake(),
                 onChanged: (value) async {
-                  Configuration.instance.setBackupOverMobileData(value);
+                  if (value) {
+                    var choice = await showChoiceDialog(
+                      context,
+                      "Disable automatic screen lock when ente is running?",
+                      "This will ensure faster uploads by ensuring your device does not sleep when uploads are in progress.",
+                      firstAction: "No",
+                      secondAction: "Yes",
+                    );
+                    if (choice != DialogUserChoice.secondChoice) {
+                      return;
+                    }
+                  }
+                  await Configuration.instance.setShouldKeepDeviceAwake(value);
                   setState(() {});
                 },
               ),
             ],
           ),
         ),
-        SectionOptionDivider,
-        SizedBox(
-          height: 48,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Backup videos",
-                style: Theme.of(context).textTheme.subtitle1,
-              ),
-              Switch.adaptive(
-                value: Configuration.instance.shouldBackupVideos(),
-                onChanged: (value) async {
-                  Configuration.instance.setShouldBackupVideos(value);
-                  setState(() {});
-                },
-              ),
-            ],
-          ),
-        ),
+      ]);
+    }
+    sectionOptions.addAll(
+      [
         SectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -166,6 +205,9 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           ),
         ),
       ],
+    );
+    return Column(
+      children: sectionOptions,
     );
   }
 

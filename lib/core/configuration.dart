@@ -30,6 +30,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+import 'package:wakelock/wakelock.dart';
 
 class Configuration {
   Configuration._privateConstructor();
@@ -43,6 +44,10 @@ class Configuration {
   static const keyKey = "key";
   static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
   static const keyShouldBackupVideos = "should_backup_videos";
+
+  // keyShouldKeepDeviceAwake is used to determine whether the device screen
+  // should be kept on while the app is in foreground.
+  static const keyShouldKeepDeviceAwake = "should_keep_device_awake";
   static const keyShouldHideFromRecents = "should_hide_from_recents";
   static const keyShouldShowLockScreen = "should_show_lock_screen";
   static const keyHasSkippedBackupFolderSelection =
@@ -492,6 +497,15 @@ class Configuration {
     } else {
       return true;
     }
+  }
+
+  bool shouldKeepDeviceAwake() {
+    return _preferences.get(keyShouldKeepDeviceAwake) ?? false;
+  }
+
+  Future<void> setShouldKeepDeviceAwake(bool value) async {
+    await _preferences.setBool(keyShouldKeepDeviceAwake, value);
+    await Wakelock.toggle(enable: value);
   }
 
   Future<void> setShouldBackupVideos(bool value) async {
