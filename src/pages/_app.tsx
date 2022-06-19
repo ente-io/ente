@@ -281,12 +281,12 @@ export default function App({ Component, err }) {
                         finishLoading,
                         closeMessageDialog,
                         setDialogMessage,
-                        isFolderSyncRunning: isFolderSyncRunning,
-                        setIsFolderSyncRunning: setIsFolderSyncRunning,
-                        watchFolderView: watchFolderView,
-                        setWatchFolderView: setWatchFolderView,
-                        watchFolderFiles: watchFolderFiles,
-                        setWatchFolderFiles: setWatchFolderFiles,
+                        isFolderSyncRunning,
+                        setIsFolderSyncRunning,
+                        watchFolderView,
+                        setWatchFolderView,
+                        watchFolderFiles,
+                        setWatchFolderFiles,
                     }}>
                     {loading ? (
                         <VerticallyCentered>
