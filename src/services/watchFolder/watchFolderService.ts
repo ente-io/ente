@@ -2,8 +2,11 @@ import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
-import { removeFromCollection, syncCollections } from '../collectionService';
-import { syncFiles } from '../fileService';
+import {
+    getLocalCollections,
+    removeFromCollection,
+} from '../collectionService';
+import { getLocalFiles } from '../fileService';
 import { logError } from 'utils/sentry';
 import { EventQueueItem, WatchMapping } from 'types/watchFolder';
 import { ElectronAPIsInterface } from 'types/electron';
@@ -173,10 +176,10 @@ class watchFolderService {
         }
     }
 
-    async removeWatchMapping(collectionName: string) {
+    async removeWatchMapping(folderPath: string) {
         if (this.allElectronAPIsExist) {
             try {
-                await this.ElectronAPIs.removeWatchMapping(collectionName);
+                await this.ElectronAPIs.removeWatchMapping(folderPath);
             } catch (e) {
                 logError(e, 'error while removing watch mapping');
             }
@@ -213,7 +216,9 @@ class watchFolderService {
         if (event.type === 'upload') {
             this.processUploadEvent();
         } else {
-            this.processTrashEvent();
+            await this.processTrashEvent();
+            this.setIsEventRunning(false);
+            this.runNextEvent();
         }
     }
 
@@ -282,17 +287,20 @@ class watchFolderService {
                     if (mapping) {
                         mapping.files = [...mapping.files, ...uploadedFiles];
                         this.ElectronAPIs.setWatchMappings(mappings);
-                        this.syncWithRemote();
                     }
                 }
 
-                this.setIsEventRunning(false);
-                this.uploadRunning = false;
-                this.runNextEvent();
+                this.runPostUploadsAction();
             } catch (e) {
                 logError(e, 'error while running all file uploads done');
             }
         }
+    }
+
+    private runPostUploadsAction() {
+        this.setIsEventRunning(false);
+        this.uploadRunning = false;
+        this.runNextEvent();
     }
 
     private handleUploadedFile(
@@ -340,7 +348,6 @@ class watchFolderService {
     private async processTrashEvent() {
         try {
             if (this.checkAndIgnoreIfFileEventsFromTrashedDir()) {
-                this.runNextEvent();
                 return;
             }
 
@@ -365,10 +372,6 @@ class watchFolderService {
                 (file) => !filePathsToRemove.has(file.path)
             );
             this.ElectronAPIs.setWatchMappings(mappings);
-            this.syncWithRemote();
-
-            this.setIsEventRunning(false);
-            this.runNextEvent();
         } catch (e) {
             logError(e, 'error while running next trash');
         }
@@ -379,14 +382,14 @@ class watchFolderService {
         collectionName: string
     ) {
         try {
-            const collections = await syncCollections();
+            const collections = await getLocalCollections();
             const collection = collections.find(
                 (collection) => collection.name === collectionName
             );
             if (!collection) {
                 return;
             }
-            const files = await syncFiles(collections, () => {});
+            const files = await getLocalFiles();
 
             const idSet = new Set<number>();
             for (const file of toTrashFiles) {
@@ -400,6 +403,7 @@ class watchFolderService {
             });
 
             await removeFromCollection(collection.id, filesToTrash);
+            this.syncWithRemote();
         } catch (e) {
             logError(e, 'error while trashing by IDs');
         }
@@ -409,7 +413,6 @@ class watchFolderService {
         if (this.trashingDirQueue.length !== 0) {
             this.ignoreFileEventsFromTrashedDir(this.trashingDirQueue[0]);
             this.trashingDirQueue.shift();
-            this.setIsEventRunning(false);
             return true;
         }
         return false;

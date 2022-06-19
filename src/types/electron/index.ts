@@ -44,7 +44,7 @@ export interface ElectronAPIsInterface {
         collectionName: string,
         folderPath: string
     ) => Promise<void>;
-    removeWatchMapping: (collectionName: string) => Promise<void>;
+    removeWatchMapping: (folderPath: string) => Promise<void>;
     registerWatcherFunctions: (
         addFile: (file: ElectronFile) => Promise<void>,
         removeFile: (path: string) => Promise<void>,

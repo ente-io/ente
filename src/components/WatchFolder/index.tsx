@@ -61,7 +61,7 @@ export default function WatchFolder({ open, onClose }: Iprops) {
     };
 
     const handleRemoveWatchMapping = async (mapping: WatchMapping) => {
-        await watchFolderService.removeWatchMapping(mapping.collectionName);
+        await watchFolderService.removeWatchMapping(mapping.folderPath);
         setMappings(watchFolderService.getWatchMappings());
     };
 
