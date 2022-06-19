@@ -45,7 +45,10 @@ export default function UploadProgress({
     const [expanded, setExpanded] = useState(true);
 
     useEffect(() => {
-        if (appContext.watchServiceIsRunning && watchService.isUploadRunning) {
+        if (
+            appContext.watchServiceIsRunning &&
+            watchService.isUploadRunning()
+        ) {
             setExpanded(false);
         }
     }, [appContext.watchServiceIsRunning]);
