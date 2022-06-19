@@ -2,7 +2,7 @@ import { MappingList } from './mappingList';
 import { NoMappingsContent } from './noMappingsContent';
 import React, { useContext, useEffect, useState } from 'react';
 import { Button, DialogActions, DialogContent } from '@mui/material';
-import watchFolderService from 'services/watchFolderService';
+import watchFolderService from 'services/watchFolder/watchFolderService';
 import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
 import constants from 'utils/strings/constants';

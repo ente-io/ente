@@ -2,27 +2,32 @@ import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
-import { removeFromCollection, syncCollections } from './collectionService';
-import { syncFiles } from './fileService';
-import debounce from 'debounce-promise';
+import { removeFromCollection, syncCollections } from '../collectionService';
+import { syncFiles } from '../fileService';
 import { logError } from 'utils/sentry';
 import { EventQueueItem, WatchMapping } from 'types/watchFolder';
 import { ElectronAPIsInterface } from 'types/electron';
+import debounce from 'debounce-promise';
+import {
+    diskFileAddedCallback,
+    diskFileRemovedCallback,
+    diskFolderRemovedCallback,
+} from './watchFolderEventHandlers';
 
-export class watchFolderService {
-    ElectronAPIs: ElectronAPIsInterface;
-    allElectronAPIsExist: boolean = false;
-    eventQueue: EventQueueItem[] = [];
-    currentEvent: EventQueueItem;
-    trashingDirQueue: string[] = [];
-    isEventRunning: boolean = false;
-    uploadRunning: boolean = false;
-    pathToIDMap = new Map<string, number>();
-    setElectronFiles: (files: ElectronFile[]) => void;
-    setCollectionName: (collectionName: string) => void;
-    syncWithRemote: () => void;
-    showProgressView: () => void;
-    setWatchFolderServiceIsRunning: (isRunning: boolean) => void;
+class watchFolderService {
+    private ElectronAPIs: ElectronAPIsInterface;
+    private allElectronAPIsExist: boolean = false;
+    private eventQueue: EventQueueItem[] = [];
+    private currentEvent: EventQueueItem;
+    private trashingDirQueue: string[] = [];
+    private isEventRunning: boolean = false;
+    private uploadRunning: boolean = false;
+    private pathToIDMap = new Map<string, number>();
+    private setElectronFiles: (files: ElectronFile[]) => void;
+    private setCollectionName: (collectionName: string) => void;
+    private syncWithRemote: () => void;
+    private showProgressView: () => void;
+    private setWatchFolderServiceIsRunning: (isRunning: boolean) => void;
 
     constructor() {
         this.ElectronAPIs = (runningInBrowser() &&
@@ -76,6 +81,10 @@ export class watchFolderService {
         }
     }
 
+    isMappingSyncing(mapping: WatchMapping) {
+        return this.currentEvent?.collectionName === mapping.collectionName;
+    }
+
     private uploadDiffOfFiles(
         mapping: WatchMapping,
         filesOnDisk: ElectronFile[]
@@ -116,7 +125,7 @@ export class watchFolderService {
         }
     }
 
-    async filterOutDeletedMappings(
+    private async filterOutDeletedMappings(
         mappings: WatchMapping[]
     ): Promise<WatchMapping[]> {
         const notDeletedMappings = [];
@@ -132,10 +141,18 @@ export class watchFolderService {
         return notDeletedMappings;
     }
 
-    setWatchFunctions() {
+    async pushEvent(event: EventQueueItem) {
+        this.eventQueue.push(event);
+        debounce(this.runNextEvent, 300);
+    }
+
+    async pushTrashedDir(path: string) {
+        this.trashingDirQueue.push(path);
+    }
+
+    private setWatchFunctions() {
         if (this.allElectronAPIsExist) {
             this.ElectronAPIs.registerWatcherFunctions(
-                this,
                 diskFileAddedCallback,
                 diskFileRemovedCallback,
                 diskFolderRemovedCallback
@@ -178,12 +195,12 @@ export class watchFolderService {
         return [];
     }
 
-    setIsEventRunning(isEventRunning: boolean) {
+    private setIsEventRunning(isEventRunning: boolean) {
         this.isEventRunning = isEventRunning;
         this.setWatchFolderServiceIsRunning(isEventRunning);
     }
 
-    async runNextEvent() {
+    private async runNextEvent() {
         console.log('runNextEvent mappings', this.getWatchMappings());
 
         if (this.eventQueue.length === 0 || this.isEventRunning) {
@@ -388,7 +405,7 @@ export class watchFolderService {
         }
     }
 
-    checkAndIgnoreIfFileEventsFromTrashedDir() {
+    private checkAndIgnoreIfFileEventsFromTrashedDir() {
         if (this.trashingDirQueue.length !== 0) {
             this.ignoreFileEventsFromTrashedDir(this.trashingDirQueue[0]);
             this.trashingDirQueue.shift();
@@ -398,7 +415,7 @@ export class watchFolderService {
         return false;
     }
 
-    ignoreFileEventsFromTrashedDir(trashingDir: string) {
+    private ignoreFileEventsFromTrashedDir(trashingDir: string) {
         this.eventQueue = this.eventQueue.filter((event) =>
             event.paths.every((path) => !path.startsWith(trashingDir))
         );
@@ -461,89 +478,5 @@ export class watchFolderService {
         }
     }
 }
-
-async function diskFileAddedCallback(
-    instance: watchFolderService,
-    file: ElectronFile
-) {
-    try {
-        const collectionName = await instance.getCollectionName(file.path);
-
-        if (!collectionName) {
-            return;
-        }
-
-        console.log('added (upload) to event queue', collectionName, file);
-
-        const event: EventQueueItem = {
-            type: 'upload',
-            collectionName,
-            files: [file],
-        };
-        instance.eventQueue.push(event);
-        await debounce(runNextEventByInstance, 300)(instance);
-    } catch (e) {
-        logError(e, 'error while calling diskFileAddedCallback');
-    }
-}
-
-async function diskFileRemovedCallback(
-    instance: watchFolderService,
-    filePath: string
-) {
-    try {
-        const collectionName = await instance.getCollectionName(filePath);
-
-        console.log('added (trash) to event queue', collectionName, filePath);
-
-        if (!collectionName) {
-            return;
-        }
-
-        const event: EventQueueItem = {
-            type: 'trash',
-            collectionName,
-            paths: [filePath],
-        };
-        instance.eventQueue.push(event);
-        await debounce(runNextEventByInstance, 300)(instance);
-    } catch (e) {
-        logError(e, 'error while calling diskFileRemovedCallback');
-    }
-}
-
-async function diskFolderRemovedCallback(
-    instance: watchFolderService,
-    folderPath: string
-) {
-    try {
-        const collectionName = await instance.getCollectionName(folderPath);
-        if (!collectionName) {
-            return;
-        }
-
-        if (hasMappingSameFolderPath(instance, collectionName, folderPath)) {
-            instance.trashingDirQueue.push(folderPath);
-        }
-    } catch (e) {
-        logError(e, 'error while calling diskFolderRemovedCallback');
-    }
-}
-
-const runNextEventByInstance = async (w: watchFolderService) => {
-    await w.runNextEvent();
-};
-
-const hasMappingSameFolderPath = (
-    w: watchFolderService,
-    collectionName: string,
-    folderPath: string
-) => {
-    const mappings = w.getWatchMappings();
-    const mapping = mappings.find(
-        (mapping) => mapping.collectionName === collectionName
-    );
-    return mapping.folderPath === folderPath;
-};
 
 export default new watchFolderService();

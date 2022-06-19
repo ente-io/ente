@@ -24,7 +24,7 @@ import UploadTypeSelector from '../../UploadTypeSelector';
 import Router from 'next/router';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp } from 'utils/common';
-import watchFolderService from 'services/watchFolderService';
+import watchFolderService from 'services/watchFolder/watchFolderService';
 import DiscFullIcon from '@mui/icons-material/DiscFull';
 import { NotificationAttributes } from 'types/Notification';
 import {
