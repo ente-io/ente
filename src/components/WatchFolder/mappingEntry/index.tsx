@@ -1,5 +1,5 @@
 import { EntryContainer, HorizontalFlex } from '../styledComponents';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Typography } from '@mui/material';
 import { SpaceBetweenFlex } from 'components/Container';
 import { WatchMapping } from 'types/watchFolder';
@@ -9,18 +9,13 @@ import constants from 'utils/strings/constants';
 import MappingEntryOptions from '../mappingEntryOptions';
 import { EntryHeading } from './entryHeading';
 
-export function MappingEntry({
-    mapping,
-    handleRemoveMapping,
-}: {
+interface Iprops {
     mapping: WatchMapping;
     handleRemoveMapping: (mapping: WatchMapping) => void;
-}) {
-    const appContext = React.useContext(AppContext);
+}
 
-    useEffect(() => {
-        console.log(appContext.isFolderSyncRunning);
-    }, [appContext.isFolderSyncRunning]);
+export function MappingEntry({ mapping, handleRemoveMapping }: Iprops) {
+    const appContext = React.useContext(AppContext);
 
     const confirmStopWatching = () => {
         appContext.setDialogMessage({

@@ -4,8 +4,13 @@ import watchService from 'services/watchFolderService';
 import { AppContext } from 'pages/_app';
 import { SyncProgressIcon } from './syncProgressIcon';
 import { FlexWrapper } from 'components/Container';
+import { WatchMapping } from 'types/watchFolder';
 
-export function EntryHeading({ mapping }) {
+interface Iprops {
+    mapping: WatchMapping;
+}
+
+export function EntryHeading({ mapping }: Iprops) {
     const appContext = useContext(AppContext);
     return (
         <FlexWrapper sx={{ marginBottom: '4px' }}>
