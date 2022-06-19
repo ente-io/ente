@@ -143,7 +143,7 @@ class watchFolderService {
 
     async pushEvent(event: EventQueueItem) {
         this.eventQueue.push(event);
-        debounce(this.runNextEvent, 300);
+        debounce(this.runNextEvent.bind(this), 300)();
     }
 
     async pushTrashedDir(path: string) {
