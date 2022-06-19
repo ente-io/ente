@@ -22,6 +22,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   UserDetails _userDetails;
   StreamSubscription<UserDetailsChangedEvent> _userDetailsChangedEvent;
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
+  Image _background;
 
   @override
   void initState() {
@@ -37,6 +38,18 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         _fetchUserDetails();
       }
     });
+    _background = Image(
+      image: AssetImage("assets/card_background.png"),
+      fit: BoxFit.fill,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // precache background image to avoid flicker
+    // https://stackoverflow.com/questions/51343735/flutter-image-preload
+    precacheImage(_background.image, context);
   }
 
   void _fetchUserDetails() {
@@ -85,10 +98,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
             color: Colors.transparent,
             child: AspectRatio(
               aspectRatio: 2 / 1,
-              child: Image(
-                image: AssetImage("assets/card_background.png"),
-                fit: BoxFit.fill, // use this
-              ),
+              child: _background,
             ),
           ),
           Padding(
