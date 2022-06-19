@@ -399,7 +399,7 @@ class watchFolderService {
                 );
             });
 
-            await removeFromCollection(collection, filesToTrash);
+            await removeFromCollection(collection.id, filesToTrash);
         } catch (e) {
             logError(e, 'error while trashing by IDs');
         }

@@ -56,7 +56,7 @@ export async function handleCollectionOps(
             );
             break;
         case COLLECTION_OPS_TYPE.REMOVE:
-            await removeFromCollection(collection, selectedFiles);
+            await removeFromCollection(collection.id, selectedFiles);
             break;
         case COLLECTION_OPS_TYPE.RESTORE:
             await restoreToCollection(collection, selectedFiles);
