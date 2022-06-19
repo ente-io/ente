@@ -132,7 +132,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
     _dialog = createProgressDialog(context, "Please wait...");
     final appBar = AppBar(
-      title: Text("Subscription"),
+      title: widget.isOnboarding ? null : Text("Subscription"),
     );
     return Scaffold(
       appBar: appBar,
