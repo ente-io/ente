@@ -126,7 +126,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             const SizedBox(height: 12),
             SectionTitle("Shared with me"),
             const SizedBox(height: 12),
-            !collections.incoming.isNotEmpty
+            collections.incoming.isNotEmpty
                 ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: GridView.builder(
@@ -150,7 +150,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 : _getIncomingCollectionEmptyState(),
             SectionTitle("Shared by me"),
             const SizedBox(height: 12),
-            !collections.outgoing.isNotEmpty
+            collections.outgoing.isNotEmpty
                 ? ListView.builder(
                     shrinkWrap: true,
                     padding: EdgeInsets.only(bottom: 12),
