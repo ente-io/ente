@@ -132,7 +132,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
     _dialog = createProgressDialog(context, "Please wait...");
     final appBar = AppBar(
-      title: Text("Subscription"),
+      title: widget.isOnboarding ? null : Text("Subscription"),
     );
     return Scaffold(
       appBar: appBar,
@@ -266,12 +266,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   RichText(
                     text: TextSpan(
                       text: "Manage family",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontFamily: 'Inter-Medium',
-                        fontSize: 14,
-                        decoration: TextDecoration.underline,
-                      ),
+                      style: Theme.of(context).textTheme.overline,
                     ),
                     textAlign: TextAlign.center,
                   ),

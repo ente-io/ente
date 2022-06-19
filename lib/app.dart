@@ -220,6 +220,13 @@ TextTheme _buildTextTheme(Color textColor) {
       fontSize: 14,
       fontWeight: FontWeight.w500,
     ),
+    overline: TextStyle(
+      fontFamily: 'Inter',
+      color: textColor,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      decoration: TextDecoration.underline,
+    ),
   );
 }
 

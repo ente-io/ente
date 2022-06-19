@@ -47,7 +47,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
           routeToPage(
             context,
             BackupFolderSelectionPage(
-              shouldSelectAll: true,
+              isOnboarding: true,
               buttonText: "Start backup",
             ),
           );

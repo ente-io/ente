@@ -14,12 +14,12 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 
 class BackupFolderSelectionPage extends StatefulWidget {
-  final bool shouldSelectAll;
+  final bool isOnboarding;
   final String buttonText;
 
   const BackupFolderSelectionPage({
     @required this.buttonText,
-    this.shouldSelectAll = false,
+    this.isOnboarding = false,
     Key key,
   }) : super(key: key);
 
@@ -49,7 +49,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         for (final file in _latestFiles) {
           _allFolders.add(file.deviceFolder);
         }
-        if (widget.shouldSelectAll) {
+        if (widget.isOnboarding) {
           _selectedFolders.addAll(_allFolders);
         }
         _selectedFolders.removeWhere((folder) => !_allFolders.contains(folder));
@@ -61,7 +61,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.shouldSelectAll
+      appBar: widget.isOnboarding
           ? null
           : AppBar(
               elevation: 0,
@@ -136,37 +136,63 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                   },
                 ),
           Expanded(child: _getFolders()),
-          Hero(
-            tag: "select_folders",
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).backgroundColor,
-                    blurRadius: 24,
-                    offset: Offset(0, -8),
-                    spreadRadius: 4,
-                  )
-                ],
+          Column(
+            children: [
+              Hero(
+                tag: "select_folders",
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(context).backgroundColor,
+                        blurRadius: 24,
+                        offset: Offset(0, -8),
+                        spreadRadius: 4,
+                      )
+                    ],
+                  ),
+                  padding: widget.isOnboarding
+                      ? EdgeInsets.only(left: 20, right: 20)
+                      : EdgeInsets.only(
+                          top: 16,
+                          left: 20,
+                          right: 20,
+                          bottom: Platform.isIOS ? 60 : 32,
+                        ),
+                  child: OutlinedButton(
+                    child: Text(widget.buttonText),
+                    onPressed: _selectedFolders.isEmpty
+                        ? null
+                        : () async {
+                            await Configuration.instance
+                                .setPathsToBackUp(_selectedFolders);
+                            Bus.instance.fire(BackupFoldersUpdatedEvent());
+                            Navigator.of(context).pop();
+                          },
+                  ),
+                ),
               ),
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                bottom: Platform.isIOS ? 60 : 32,
-              ),
-              child: OutlinedButton(
-                child: Text(widget.buttonText),
-                onPressed: _selectedFolders.isEmpty
-                    ? null
-                    : () async {
-                        await Configuration.instance
-                            .setPathsToBackUp(_selectedFolders);
-                        Bus.instance.fire(BackupFoldersUpdatedEvent());
-                        Navigator.of(context).pop();
-                      },
-              ),
-            ),
+              widget.isOnboarding
+                  ? Padding(
+                      padding: EdgeInsets.only(
+                        top: 16,
+                        bottom: Platform.isIOS ? 48 : 32,
+                      ),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(
+                          "Skip",
+                          style: Theme.of(context).textTheme.caption.copyWith(
+                                decoration: TextDecoration.underline,
+                              ),
+                        ),
+                      ),
+                    )
+                  : Container(),
+            ],
           ),
         ],
       ),

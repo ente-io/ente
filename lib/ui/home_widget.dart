@@ -480,7 +480,6 @@ class _HomeWidgetState extends State<HomeWidget> {
                       routeToPage(
                         context,
                         BackupFolderSelectionPage(
-                          shouldSelectAll: true,
                           buttonText: "Start backup",
                         ),
                       );

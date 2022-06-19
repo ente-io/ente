@@ -107,13 +107,13 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
+                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
                           child: RichText(
                             text: TextSpan(
                               style: Theme.of(context)
                                   .textTheme
                                   .subtitle1
-                                  .copyWith(fontSize: 12),
+                                  .copyWith(fontSize: 14),
                               children: [
                                 TextSpan(text: "We've sent a mail to "),
                                 TextSpan(
@@ -131,20 +131,20 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                           style: Theme.of(context)
                               .textTheme
                               .subtitle1
-                              .copyWith(fontSize: 12),
+                              .copyWith(fontSize: 14),
                         ),
                       ],
                     ),
                   ),
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.3,
+                    width: MediaQuery.of(context).size.width * 0.2,
                     height: 1,
                   )
                 ],
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 15),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               child: TextFormField(
                 style: Theme.of(context).textTheme.subtitle1,
                 decoration: InputDecoration(
@@ -166,7 +166,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               ),
             ),
             Divider(
-              thickness: 1.5,
+              thickness: 1,
             ),
             Padding(
               padding: const EdgeInsets.all(20),

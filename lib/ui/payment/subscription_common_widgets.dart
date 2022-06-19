@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/ui/billing_questions_widget.dart';
@@ -129,10 +128,7 @@ class SubFaqWidget extends StatelessWidget {
           child: RichText(
             text: TextSpan(
               text: "Questions?",
-              style: TextStyle(
-                color: Colors.blue,
-                fontFamily: 'Inter',
-              ),
+              style: Theme.of(context).textTheme.overline,
             ),
           ),
         ),
