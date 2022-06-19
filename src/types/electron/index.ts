@@ -1,4 +1,4 @@
-import { WatchService } from 'services/watchFolderService';
+import { watchFolderService } from 'services/watchFolderService';
 import { ElectronFile } from 'types/upload';
 import { WatchMapping } from 'types/watchFolder';
 
@@ -47,17 +47,17 @@ export interface ElectronAPIsInterface {
     ) => Promise<void>;
     removeWatchMapping: (collectionName: string) => Promise<void>;
     registerWatcherFunctions: (
-        WatchServiceInstance: WatchService,
+        watchFolderServiceInstance: watchFolderService,
         addFile: (
-            WatchServiceInstance: WatchService,
+            watchFolderServiceInstance: watchFolderService,
             file: ElectronFile
         ) => Promise<void>,
         removeFile: (
-            WatchServiceInstance: WatchService,
+            watchFolderServiceInstance: watchFolderService,
             path: string
         ) => Promise<void>,
         removeFolder: (
-            WatchServiceInstance: WatchService,
+            watchFolderServiceInstance: watchFolderService,
             folderPath: string
         ) => Promise<void>
     ) => void;

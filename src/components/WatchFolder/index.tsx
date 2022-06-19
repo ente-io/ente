@@ -2,7 +2,7 @@ import { MappingList } from './mappingList';
 import { NoMappingsContent } from './noMappingsContent';
 import React, { useContext, useEffect, useState } from 'react';
 import { Button, DialogActions, DialogContent } from '@mui/material';
-import watchService from 'services/watchFolderService';
+import watchFolderService from 'services/watchFolderService';
 import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
 import constants from 'utils/strings/constants';
@@ -19,7 +19,7 @@ export default function WatchFolder({ open, onClose }: Iprops) {
     const appContext = useContext(AppContext);
 
     useEffect(() => {
-        setMappings(watchService.getWatchMappings());
+        setMappings(watchFolderService.getWatchMappings());
     }, []);
 
     useEffect(() => {
@@ -35,7 +35,7 @@ export default function WatchFolder({ open, onClose }: Iprops) {
         for (let i = 0; i < folders.length; i++) {
             const folder: any = folders[i];
             const path = (folder.path as string).replace(/\\/g, '/');
-            if (await watchService.isFolder(path)) {
+            if (await watchFolderService.isFolder(path)) {
                 await handleAddWatchMapping(path);
             }
         }
@@ -46,23 +46,23 @@ export default function WatchFolder({ open, onClose }: Iprops) {
     };
 
     const handleFolderSelection = async () => {
-        const folderPath = await watchService.selectFolder();
+        const folderPath = await watchFolderService.selectFolder();
         await handleAddWatchMapping(folderPath);
     };
 
     const handleAddWatchMapping = async (inputFolderPath: string) => {
         if (inputFolderPath?.length > 0) {
-            await watchService.addWatchMapping(
+            await watchFolderService.addWatchMapping(
                 inputFolderPath.substring(inputFolderPath.lastIndexOf('/') + 1),
                 inputFolderPath
             );
-            setMappings(watchService.getWatchMappings());
+            setMappings(watchFolderService.getWatchMappings());
         }
     };
 
     const handleRemoveWatchMapping = async (mapping: WatchMapping) => {
-        await watchService.removeWatchMapping(mapping.collectionName);
-        setMappings(watchService.getWatchMappings());
+        await watchFolderService.removeWatchMapping(mapping.collectionName);
+        setMappings(watchFolderService.getWatchMappings());
     };
 
     return (

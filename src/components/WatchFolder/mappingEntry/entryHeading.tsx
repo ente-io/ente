@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Typography } from '@mui/material';
-import watchService from 'services/watchFolderService';
+import watchFolderService from 'services/watchFolderService';
 import { AppContext } from 'pages/_app';
 import { SyncProgressIcon } from './syncProgressIcon';
 import { FlexWrapper } from 'components/Container';
@@ -22,7 +22,7 @@ export function EntryHeading({ mapping }: Iprops) {
                 {mapping.collectionName}
             </Typography>
             {appContext.isFolderSyncRunning &&
-                watchService.currentEvent?.collectionName ===
+                watchFolderService.currentEvent?.collectionName ===
                     mapping.collectionName && <SyncProgressIcon />}
         </FlexWrapper>
     );

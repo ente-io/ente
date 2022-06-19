@@ -24,7 +24,7 @@ import UploadTypeSelector from '../../UploadTypeSelector';
 import Router from 'next/router';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp } from 'utils/common';
-import watchService from 'services/watchFolderService';
+import watchFolderService from 'services/watchFolderService';
 import DiscFullIcon from '@mui/icons-material/DiscFull';
 import { NotificationAttributes } from 'types/Notification';
 import {
@@ -128,7 +128,7 @@ export default function Upload(props: Props) {
                     resumeDesktopUpload(type, electronFiles, collectionName);
                 }
             );
-            watchService.init(
+            watchFolderService.init(
                 props.setElectronFiles,
                 setCollectionName,
                 props.syncWithRemote,
@@ -380,7 +380,7 @@ export default function Upload(props: Props) {
             props.setUploadInProgress(false);
             props.syncWithRemote();
             if (isElectron()) {
-                await watchService.allFileUploadsDone(
+                await watchFolderService.allFileUploadsDone(
                     filesWithCollectionToUpload,
                     collections
                 );

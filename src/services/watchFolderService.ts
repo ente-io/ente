@@ -9,7 +9,7 @@ import { logError } from 'utils/sentry';
 import { EventQueueItem, WatchMapping } from 'types/watchFolder';
 import { ElectronAPIsInterface } from 'types/electron';
 
-export class WatchService {
+export class watchFolderService {
     ElectronAPIs: ElectronAPIsInterface;
     allElectronAPIsExist: boolean = false;
     eventQueue: EventQueueItem[] = [];
@@ -22,7 +22,7 @@ export class WatchService {
     setCollectionName: (collectionName: string) => void;
     syncWithRemote: () => void;
     showProgressView: () => void;
-    setWatchServiceIsRunning: (isRunning: boolean) => void;
+    setwatchFolderServiceIsRunning: (isRunning: boolean) => void;
 
     constructor() {
         this.ElectronAPIs = (runningInBrowser() &&
@@ -38,14 +38,15 @@ export class WatchService {
         setElectronFiles: (files: ElectronFile[]) => void,
         setCollectionName: (collectionName: string) => void,
         syncWithRemote: () => void,
-        setWatchServiceIsRunning: (isRunning: boolean) => void
+        setwatchFolderServiceIsRunning: (isRunning: boolean) => void
     ) {
         if (this.allElectronAPIsExist) {
             try {
                 this.setElectronFiles = setElectronFiles;
                 this.setCollectionName = setCollectionName;
                 this.syncWithRemote = syncWithRemote;
-                this.setWatchServiceIsRunning = setWatchServiceIsRunning;
+                this.setwatchFolderServiceIsRunning =
+                    setwatchFolderServiceIsRunning;
 
                 let mappings = this.getWatchMappings();
 
@@ -179,7 +180,7 @@ export class WatchService {
 
     setIsEventRunning(isEventRunning: boolean) {
         this.isEventRunning = isEventRunning;
-        this.setWatchServiceIsRunning(isEventRunning);
+        this.setwatchFolderServiceIsRunning(isEventRunning);
     }
 
     async runNextEvent() {
@@ -462,7 +463,7 @@ export class WatchService {
 }
 
 async function diskFileAddedCallback(
-    instance: WatchService,
+    instance: watchFolderService,
     file: ElectronFile
 ) {
     try {
@@ -487,7 +488,7 @@ async function diskFileAddedCallback(
 }
 
 async function diskFileRemovedCallback(
-    instance: WatchService,
+    instance: watchFolderService,
     filePath: string
 ) {
     try {
@@ -512,7 +513,7 @@ async function diskFileRemovedCallback(
 }
 
 async function diskFolderRemovedCallback(
-    instance: WatchService,
+    instance: watchFolderService,
     folderPath: string
 ) {
     try {
@@ -529,12 +530,12 @@ async function diskFolderRemovedCallback(
     }
 }
 
-const runNextEventByInstance = async (w: WatchService) => {
+const runNextEventByInstance = async (w: watchFolderService) => {
     await w.runNextEvent();
 };
 
 const hasMappingSameFolderPath = (
-    w: WatchService,
+    w: watchFolderService,
     collectionName: string,
     folderPath: string
 ) => {
@@ -545,4 +546,4 @@ const hasMappingSameFolderPath = (
     return mapping.folderPath === folderPath;
 };
 
-export default new WatchService();
+export default new watchFolderService();

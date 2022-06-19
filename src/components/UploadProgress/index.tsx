@@ -13,7 +13,7 @@ import {
     InProgressUpload,
 } from 'types/upload/ui';
 import UploadProgressContext from 'contexts/uploadProgress';
-import watchService from 'services/watchFolderService';
+import watchFolderService from 'services/watchFolderService';
 
 interface Props {
     open: boolean;
@@ -45,7 +45,10 @@ export default function UploadProgress({
     const [expanded, setExpanded] = useState(true);
 
     useEffect(() => {
-        if (appContext.isFolderSyncRunning && watchService.isUploadRunning()) {
+        if (
+            appContext.isFolderSyncRunning &&
+            watchFolderService.isUploadRunning()
+        ) {
             setExpanded(false);
         }
     }, [appContext.isFolderSyncRunning]);
