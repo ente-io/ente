@@ -105,7 +105,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Keep device awake",
+                "Disable auto lock",
                 style: Theme.of(context).textTheme.subtitle1,
               ),
               Switch.adaptive(
@@ -114,8 +114,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
                   if (value) {
                     var choice = await showChoiceDialog(
                       context,
-                      "Keep device awake?",
-                      "This will ensure faster uploads by keeping your display on while uploads are in progress.",
+                      "Disable automatic screen lock when ente is running?",
+                      "This will ensure faster uploads by ensuring your device does not sleep when uploads are in progress.",
                       firstAction: "No",
                       secondAction: "Yes",
                     );
@@ -124,12 +124,6 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
                     }
                   }
                   await Configuration.instance.setShouldKeepDeviceAwake(value);
-                  showShortToast(
-                    context,
-                    value
-                        ? "Device will stay awake during uploads"
-                        : "Device will not stay awake during uploads",
-                  );
                   setState(() {});
                 },
               ),
