@@ -71,7 +71,7 @@ export default function WatchFolderModal({ open, onClose }: Iprops) {
                 {constants.WATCHED_FOLDERS}
             </DialogTitleWithCloseButton>
             <DialogContent>
-                {mappings.length !== 0 ? (
+                {mappings.length === 0 ? (
                     <NoMappingsContent />
                 ) : (
                     <MappingList
