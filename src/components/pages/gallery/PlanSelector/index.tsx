@@ -148,7 +148,6 @@ function PlanSelector(props: Props) {
     }
 
     const planSelectorAttributes: DialogBoxAttributes = {
-        nonClosable: !hasPaidSubscription(subscription),
         title: hasPaidSubscription(subscription)
             ? constants.MANAGE_PLAN
             : constants.CHOOSE_PLAN,
