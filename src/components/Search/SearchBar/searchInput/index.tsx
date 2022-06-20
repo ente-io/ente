@@ -5,7 +5,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { getAutoCompleteSuggestions } from 'services/searchService';
 import { Bbox, DateValue, SearchOption, SuggestionType } from 'types/search';
 import constants from 'utils/strings/constants';
-import { ValueContainerWithIcon } from './controlWithIcon';
+import { ValueContainerWithIcon } from './valueContainerWithIcon';
 import { SearchInputWrapper } from './styledComponents';
 import { SelectStyles } from '../../../../styles/search';
 import AsyncSelect from 'react-select/async';
