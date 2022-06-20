@@ -4,7 +4,11 @@ import { Box, Skeleton } from '@mui/material';
 import { UserDetails } from 'types/user';
 
 import { GalleryContext } from 'pages/gallery';
-import { hasNonAdminFamilyMembers } from 'utils/billing';
+import {
+    hasNonAdminFamilyMembers,
+    isFamilyAdmin,
+    isPartOfFamily,
+} from 'utils/billing';
 import { SubscriptionCardContentOverlay } from './contentOverlay';
 interface Iprops {
     userDetails: UserDetails;
@@ -26,6 +30,10 @@ export default function SubscriptionCard({ userDetails }: Iprops) {
         );
     }
 
+    const allowClick =
+        !isPartOfFamily(userDetails.familyData) ||
+        isFamilyAdmin(userDetails.familyData);
+
     return (
         <Box position="relative">
             <img
@@ -35,7 +43,7 @@ export default function SubscriptionCard({ userDetails }: Iprops) {
                 }}
                 src="/images/subscription-card-background.png"
             />
-            <ClickOverlay onClick={showPlanSelectorModal} />
+            {allowClick && <ClickOverlay onClick={showPlanSelectorModal} />}
             <SubscriptionCardContentOverlay
                 hasNonAdminFamilyMembers={hasNonAdminFamilyMembers}
                 userDetails={userDetails}
