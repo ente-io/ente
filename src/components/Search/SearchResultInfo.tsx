@@ -16,7 +16,7 @@ export default function SearchResultInfo({ searchResultSummary }: Iprops) {
     const { optionName, fileCount } = searchResultSummary;
 
     return (
-        <CollectionInfoBarWrapper mt={2}>
+        <CollectionInfoBarWrapper>
             <Typography variant="subtitle" color="text.secondary">
                 {constants.SEARCH_RESULTS}
             </Typography>

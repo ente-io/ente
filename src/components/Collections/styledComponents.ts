@@ -10,7 +10,7 @@ export const CollectionListWrapper = styled(Box)`
 
 export const CollectionListBarWrapper = styled(PaddedContainer)`
     width: 100%;
-    margin: 16px auto;
+    margin-bottom: 16px;
     border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
 `;
 

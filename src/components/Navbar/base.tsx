@@ -9,6 +9,7 @@ const NavbarBase = styled(FlexWrapper)`
     z-index: 1;
     border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
     background-color: ${({ theme }) => theme.palette.background.default};
+    margin-bottom: 16px;
 `;
 
 export default NavbarBase;
