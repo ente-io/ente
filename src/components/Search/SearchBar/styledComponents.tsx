@@ -1,8 +1,4 @@
-import {
-    CenteredFlex,
-    FlexWrapper,
-    FluidContainer,
-} from 'components/Container';
+import { CenteredFlex, FluidContainer } from 'components/Container';
 import { styled, css } from '@mui/material';
 
 export const SearchBarWrapper = styled(CenteredFlex)<{ isOpen: boolean }>`
@@ -25,9 +21,4 @@ export const SearchButtonWrapper = styled(FluidContainer)`
     @media (min-width: 624px) {
         display: none;
     }
-`;
-
-export const SearchInputWrapper = styled(FlexWrapper)`
-    max-width: 484px;
-    margin: auto;
 `;

@@ -7,7 +7,7 @@ import { Bbox, DateValue, SearchOption, SuggestionType } from 'types/search';
 import constants from 'utils/strings/constants';
 import { ControlWithIcon } from './controlWithIcon';
 import { SearchInputWrapper } from './styledComponents';
-import { SelectStyles } from './styles';
+import { SelectStyles } from '../../../../styles/search';
 import AsyncSelect from 'react-select/async';
 import CloseIcon from '@mui/icons-material/Close';
 import { SetSearch, SetSearchResultSummary } from 'types/gallery';

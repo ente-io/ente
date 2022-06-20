@@ -2,12 +2,12 @@ import React from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 import { Collection } from 'types/collection';
 
-import { IconButton } from '../Container';
 import { EnteFile } from 'types/file';
 import { SearchBarWrapper, SearchButtonWrapper } from './styledComponents';
-import SearchInput from './input';
+import SearchInput from './searchInput';
 import { Search } from 'types/search';
 import { SetSearchResultSummary } from 'types/gallery';
+import { IconButton } from '@mui/material';
 
 interface Props {
     isOpen: boolean;

@@ -1,4 +1,4 @@
-import { SelectStyles } from 'components/Search/styles';
+import { SelectStyles } from './search';
 
 export const DropdownStyle = {
     ...SelectStyles,

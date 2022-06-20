@@ -1,9 +1,9 @@
 import { Box, Typography } from '@mui/material';
 import React from 'react';
 import Select from 'react-select';
+import { DropdownStyle } from 'styles/dropdown';
 import { getDeviceLimitOptions } from 'utils/collection';
 import constants from 'utils/strings/constants';
-import { DropdownStyle } from '../../styles';
 import { OptionWithDivider } from '../customSelectComponents';
 export function ManageDeviceLimit({
     publicShareProp,
