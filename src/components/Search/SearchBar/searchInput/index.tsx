@@ -5,7 +5,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { getAutoCompleteSuggestions } from 'services/searchService';
 import { Bbox, DateValue, SearchOption, SuggestionType } from 'types/search';
 import constants from 'utils/strings/constants';
-import { ControlWithIcon } from './controlWithIcon';
+import { ValueContainerWithIcon } from './controlWithIcon';
 import { SearchInputWrapper } from './styledComponents';
 import { SelectStyles } from '../../../../styles/search';
 import AsyncSelect from 'react-select/async';
@@ -90,7 +90,7 @@ export default function SearchInput(props: Iprops) {
                 value={value}
                 components={{
                     Option: OptionWithInfo,
-                    Control: ControlWithIcon,
+                    ValueContainer: ValueContainerWithIcon,
                 }}
                 placeholder={constants.SEARCH_HINT()}
                 loadOptions={getOptions}

@@ -7,12 +7,12 @@ export const SelectStyles = {
         ...style,
         backgroundColor: '#282828',
 
-        borderColor: isFocused ? '#51cd7c' : '#444',
+        borderColor: isFocused ? '#1dba54' : 'transparent',
         boxShadow: 'none',
         ':hover': {
-            borderColor: '#51cd7c',
+            borderColor: '#1dba54',
             cursor: 'text',
-            '&>.icon': { color: '#51cd7c' },
+            '&>.icon': { color: '#1dba54' },
         },
     }),
     input: (style) => ({
@@ -58,8 +58,9 @@ export const SelectStyles = {
     }),
     placeholder: (style) => ({
         ...style,
-        color: '#686868',
+        color: 'rgba(255, 255, 255, 0.7)',
         wordSpacing: '2px',
         whiteSpace: 'nowrap',
+        marginLeft: '36px',
     }),
 };
