@@ -1,11 +1,10 @@
+import { SearchButton } from './searchButton';
 import React from 'react';
-import SearchIcon from '@mui/icons-material/Search';
 import { Collection } from 'types/collection';
 
 import { EnteFile } from 'types/file';
-import { SearchBarWrapper, SearchButtonWrapper } from './styledComponents';
+import { SearchBarWrapper } from './styledComponents';
 import SearchInput from './searchInput';
-import { IconButton } from '@mui/material';
 import { UpdateSearch } from 'types/search';
 
 interface Props {
@@ -18,19 +17,15 @@ interface Props {
     files: EnteFile[];
 }
 export default function SearchBar({ isFirstFetch, ...props }: Props) {
+    const showSearchInput = () => props.setOpen(true);
     return (
-        <>
-            <SearchBarWrapper isOpen={props.isOpen}>
-                <SearchInput {...props} />
-            </SearchBarWrapper>
-            {!props.isOpen && (
-                <SearchButtonWrapper>
-                    <IconButton
-                        onClick={() => !isFirstFetch && props.setOpen(true)}>
-                        <SearchIcon />
-                    </IconButton>
-                </SearchButtonWrapper>
-            )}
-        </>
+        <SearchBarWrapper>
+            <SearchInput {...props} />
+            <SearchButton
+                isFirstFetch={isFirstFetch}
+                show={!props.isOpen}
+                openSearchInput={showSearchInput}
+            />
+        </SearchBarWrapper>
     );
 }

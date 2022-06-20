@@ -91,7 +91,7 @@ export default function SearchInput(props: Iprops) {
     };
 
     return (
-        <SearchInputWrapper>
+        <SearchInputWrapper isOpen={props.isOpen}>
             <AsyncSelect
                 value={value}
                 components={{
