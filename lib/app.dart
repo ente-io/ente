@@ -259,7 +259,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    if (kDebugMode && Platform.isAndroid) {
+    if (Platform.isAndroid) {
       return AdaptiveTheme(
         light: lightThemeData,
         dark: darkThemeData,
