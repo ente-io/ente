@@ -29,6 +29,10 @@ enum RESPONSE_STATUS {
     fail = 'fail',
 }
 
+const StorageUnits = ['B', 'KB', 'MB', 'GB', 'TB'];
+
+const TEN_GB = 10 * 1024 * 1024 * 1024;
+
 export function convertBytesToGBs(bytes, precision?): string {
     return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2) + ' GB';
 }
@@ -44,6 +48,34 @@ export function convertBytesToHumanReadable(
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
     return (bytes / Math.pow(1024, i)).toFixed(precision) + ' ' + sizes[i];
+}
+
+export function makeHumanReadableStorage(
+    bytes: number,
+
+    round: 'round-up' | 'round-down' = 'round-down'
+): string {
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+
+    let quantity = bytes / Math.pow(1024, i);
+    let unit = StorageUnits[i];
+
+    if (quantity > 100 && unit !== 'GB') {
+        quantity /= 1024;
+        unit = StorageUnits[i + 1];
+    }
+
+    quantity = Number(quantity.toFixed(1));
+
+    if (bytes >= TEN_GB) {
+        if (round === 'round-up') {
+            quantity = Math.round(quantity + 1);
+        } else {
+            quantity = Math.round(quantity);
+        }
+    }
+
+    return `${quantity} ${unit}`;
 }
 
 export function hasPaidSubscription(subscription: Subscription) {

@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import React from 'react';
-import { convertBytesToHumanReadable } from 'utils/billing';
+import { makeHumanReadableStorage } from 'utils/billing';
 import constants from 'utils/strings/constants';
 
 interface Iprops {
@@ -17,13 +17,9 @@ export default function StorageSection({ totalUsage, totalStorage }: Iprops) {
             <Typography
                 fontWeight={'bold'}
                 sx={{ fontSize: '24px', lineHeight: '30px' }}>
-                {`${convertBytesToHumanReadable(
-                    totalStorage - totalUsage,
-                    1
-                )} ${constants.OF} ${convertBytesToHumanReadable(
-                    totalStorage,
-                    0
-                )} ${constants.FREE}`}
+                {`${makeHumanReadableStorage(totalStorage - totalUsage)} ${
+                    constants.OF
+                } ${makeHumanReadableStorage(totalStorage)} ${constants.FREE}`}
             </Typography>
         </Box>
     );
