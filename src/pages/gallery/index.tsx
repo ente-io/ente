@@ -524,6 +524,7 @@ export default function Gallery() {
         setActiveCollection(ALL_SECTION);
         setSearch(newSearch);
         setSetSearchResultSummary(summary);
+        setIsInSearchMode(!!newSearch);
     };
 
     const closeCollectionSelector = (closeBtnClick?: boolean) => {
@@ -652,7 +653,6 @@ export default function Gallery() {
                     isFirstFetch={isFirstFetch}
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
-                    setIsInSearchMode={setIsInSearchMode}
                     collections={collections}
                     files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}
