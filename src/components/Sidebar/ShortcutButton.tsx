@@ -24,10 +24,12 @@ const ShortcutButton: FC<ButtonProps<'button', IProps>> = ({
             <Typography variant="body2" display={'flex'} alignItems="center">
                 <Box mr={'12px'}>{icon}</Box>
                 {label}
-                <Box sx={{ color: 'text.secondary' }}>
-                    <DotSeparator />
-                    {count}
-                </Box>
+                {count > 0 && (
+                    <Box sx={{ color: 'text.secondary' }}>
+                        <DotSeparator />
+                        {count}
+                    </Box>
+                )}
             </Typography>
         </SidebarButton>
     );
