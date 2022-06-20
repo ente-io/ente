@@ -273,13 +273,15 @@ class _HomeWidgetState extends State<HomeWidget> {
       return CreateCollectionPage(null, _sharedFiles);
     }
 
+    final bool showBackupFolderHook =
+        Configuration.instance.getPathsToBackUp().isEmpty &&
+            !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
+            CollectionsService.instance.getActiveCollections().isEmpty;
     return Stack(
       children: [
         ExtentsPageView(
           children: [
-            (Configuration.instance.getPathsToBackUp().isEmpty &&
-                    !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
-                    CollectionsService.instance.getActiveCollections().isEmpty)
+            showBackupFolderHook
                 ? _getBackupFolderSelectionHook()
                 : _getMainGalleryWidget(),
             _deviceFolderGalleryWidget,
