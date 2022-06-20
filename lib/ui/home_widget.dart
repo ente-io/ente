@@ -296,7 +296,9 @@ class _HomeWidgetState extends State<HomeWidget> {
               ),
             );
           },
-          physics: NeverScrollableScrollPhysics(),
+          physics: showBackupFolderHook
+              ? NeverScrollableScrollPhysics()
+              : PageScrollPhysics(),
           controller: _pageController,
         ),
         Align(alignment: Alignment.bottomCenter, child: BottomShadowWidget()),
