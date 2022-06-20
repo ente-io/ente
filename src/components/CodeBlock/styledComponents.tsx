@@ -15,6 +15,6 @@ export const CopyButtonWrapper = styled(IconButton)`
 `;
 
 export const CodeWrapper = styled('div')`
-    padding: 36px 36px 16px 16px;
+    padding: 16px 36px 16px 16px;
     border-radius: ${({ theme }) => theme.shape.borderRadius}px;
 `;
