@@ -5,7 +5,7 @@ export const SelectStyles = {
     }),
     control: (style, { isFocused }) => ({
         ...style,
-        backgroundColor: '#282828',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
 
         borderColor: isFocused ? '#1dba54' : 'transparent',
         boxShadow: 'none',
