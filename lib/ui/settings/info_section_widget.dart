@@ -79,7 +79,6 @@ class InfoSectionWidget extends StatelessWidget {
         UpdateService.instance.isIndependent()
             ? Column(
                 children: [
-                  Divider(height: 4),
                   GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTap: () async {
