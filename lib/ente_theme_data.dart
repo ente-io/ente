@@ -121,6 +121,17 @@ extension CustomColorScheme on ColorScheme {
   Color get subTextColor => brightness == Brightness.light
       ? Color.fromRGBO(180, 180, 180, 1)
       : Color.fromRGBO(100, 100, 100, 1);
+
+  Color get themeSwitchIndicatorColor => brightness == Brightness.light
+      ? Colors.black.withOpacity(0.75)
+      : Colors.white;
+
+  Color get themeSwitchActiveIconColor =>
+      brightness == Brightness.light ? Colors.white : Colors.black;
+
+  Color get themeSwitchInactiveIconColor => brightness == Brightness.light
+      ? Colors.black.withOpacity(0.5)
+      : Colors.white.withOpacity(0.5);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData({
