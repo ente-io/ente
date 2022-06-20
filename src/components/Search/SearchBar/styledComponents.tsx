@@ -1,14 +1,9 @@
-import { CenteredFlex, FluidContainer } from 'components/Container';
-import { styled, css } from '@mui/material';
+import { FlexWrapper, FluidContainer } from 'components/Container';
+import { styled } from '@mui/material';
+import { SpecialPadding } from 'styles/SpecialPadding';
 
-export const SearchBarWrapper = styled(CenteredFlex)<{ isOpen: boolean }>`
-    ${(props) =>
-        !props.isOpen &&
-        css`
-            @media (max-width: 624px) {
-                display: none;
-            }
-        `}
+export const SearchBarWrapper = styled(FlexWrapper)`
+    ${SpecialPadding}
 `;
 
 export const SearchButtonWrapper = styled(FluidContainer)`
@@ -17,7 +12,6 @@ export const SearchButtonWrapper = styled(FluidContainer)`
     align-items: center;
     justify-content: flex-end;
     min-height: 64px;
-    padding: 0 20px;
     @media (min-width: 624px) {
         display: none;
     }

@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
 import { styled } from '@mui/material';
-import { IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
 
 const VerticallyCentered = styled(Box)`
     flex: 1;
@@ -98,12 +97,5 @@ export const InvertedIconButton = styled(IconButton)`
     }
     &:focus {
         background-color: ${({ theme }) => theme.palette.primary.main};
-    }
-`;
-
-export const PaddedContainer = styled(Box)`
-    padding: 0 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * 4}px) {
-        padding: 0 4px;
     }
 `;
