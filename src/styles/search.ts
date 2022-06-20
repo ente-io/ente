@@ -52,9 +52,10 @@ export const SelectStyles = {
     }),
     singleValue: (style, state) => ({
         ...style,
-        backgroundColor: '#282828',
+        backgroundColor: 'transparent',
         color: '#d1d1d1',
         display: state.selectProps.menuIsOpen ? 'none' : 'block',
+        marginLeft: '36px',
     }),
     placeholder: (style) => ({
         ...style,
