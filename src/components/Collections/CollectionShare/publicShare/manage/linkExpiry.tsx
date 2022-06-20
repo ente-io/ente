@@ -5,7 +5,7 @@ import { linkExpiryStyle } from 'styles/linkExpiry';
 import { shareExpiryOptions } from 'utils/collection';
 import constants from 'utils/strings/constants';
 import { dateStringWithMMH } from 'utils/time';
-import { OptionWithDivider } from '../customSelectComponents';
+import { OptionWithDivider } from './selectComponents/OptionWithDivider';
 
 export function ManageLinkExpiry({
     publicShareProp,

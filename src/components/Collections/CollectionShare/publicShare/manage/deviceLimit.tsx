@@ -4,7 +4,8 @@ import Select from 'react-select';
 import { DropdownStyle } from 'styles/dropdown';
 import { getDeviceLimitOptions } from 'utils/collection';
 import constants from 'utils/strings/constants';
-import { OptionWithDivider } from '../customSelectComponents';
+import { OptionWithDivider } from './selectComponents/OptionWithDivider';
+
 export function ManageDeviceLimit({
     publicShareProp,
     collection,
