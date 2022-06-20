@@ -43,7 +43,7 @@ class SettingsPage extends StatelessWidget {
                   .subtitle1
                   .copyWith(overflow: TextOverflow.ellipsis),
             ),
-            (kDebugMode && Platform.isAndroid)
+            (Platform.isAndroid)
                 ? ThemeSwitchWidget()
                 : const SizedBox.shrink(),
           ],
