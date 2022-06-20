@@ -33,7 +33,7 @@ export default function SubscriptionCard({ userDetails }: Iprops) {
                     width: '100%',
                     aspectRatio: '2/1',
                 }}
-                src="/subscription-card-background.png"
+                src="/images/subscription-card-background.png"
             />
             <ClickOverlay onClick={showPlanSelectorModal} />
             <SubscriptionCardContentOverlay
