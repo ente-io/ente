@@ -99,7 +99,7 @@ import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
-import { Search, SearchResultSummary } from 'types/search';
+import { Search, SearchResultSummary, UpdateSearch } from 'types/search';
 import SearchResultInfo from 'components/Search/SearchResultInfo';
 import { NotificationAttributes } from 'types/Notification';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
@@ -308,7 +308,7 @@ export default function Gallery() {
     }, [router.isReady]);
 
     useEffect(() => {
-        if (isInSearchMode) {
+        if (isInSearchMode && searchResultSummary) {
             setPhotoListHeader({
                 height: 116,
                 item: (
@@ -520,9 +520,10 @@ export default function Gallery() {
         }
     };
 
-    const updateSearch = (newSearch: Search) => {
+    const updateSearch: UpdateSearch = (newSearch, summary) => {
         setActiveCollection(ALL_SECTION);
         setSearch(newSearch);
+        setSetSearchResultSummary(summary);
     };
 
     const closeCollectionSelector = (closeBtnClick?: boolean) => {
@@ -588,7 +589,10 @@ export default function Gallery() {
         }
     };
 
-    const resetSearch = () => setSearch({});
+    const resetSearch = () => {
+        setSearch(null);
+        setSetSearchResultSummary(null);
+    };
 
     return (
         <GalleryContext.Provider
@@ -653,7 +657,6 @@ export default function Gallery() {
                     files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}
                     updateSearch={updateSearch}
-                    setSearchResultSummary={setSetSearchResultSummary}
                 />
 
                 <Collections

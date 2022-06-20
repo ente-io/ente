@@ -8,7 +8,7 @@ import { FluidContainer } from 'components/Container';
 import { EnteLogo } from 'components/EnteLogo';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { Search, SearchResultSummary } from 'types/search';
+import { UpdateSearch } from 'types/search';
 
 interface Iprops {
     openSidebar: () => void;
@@ -19,8 +19,7 @@ interface Iprops {
     collections: Collection[];
     files: EnteFile[];
     setActiveCollection: (id: number) => void;
-    updateSearch: (search: Search) => void;
-    setSearchResultSummary: (info: SearchResultSummary) => void;
+    updateSearch: UpdateSearch;
 }
 export function GalleryNavbar({
     openSidebar,
@@ -32,7 +31,6 @@ export function GalleryNavbar({
     files,
     setActiveCollection,
     updateSearch,
-    setSearchResultSummary,
 }: Iprops) {
     return (
         <NavbarBase>
@@ -50,8 +48,7 @@ export function GalleryNavbar({
                     collections={collections}
                     files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}
-                    setSearch={updateSearch}
-                    setSearchResultSummary={setSearchResultSummary}
+                    updateSearch={updateSearch}
                 />
             )}
             {!isInSearchMode && (

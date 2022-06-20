@@ -5,16 +5,14 @@ import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { SearchBarWrapper, SearchButtonWrapper } from './styledComponents';
 import SearchInput from './searchInput';
-import { Search } from 'types/search';
-import { SetSearchResultSummary } from 'types/gallery';
 import { IconButton } from '@mui/material';
+import { UpdateSearch } from 'types/search';
 
 interface Props {
     isOpen: boolean;
     isFirstFetch: boolean;
     setOpen: (value: boolean) => void;
-    setSearch: (search: Search) => void;
-    setSearchResultSummary: SetSearchResultSummary;
+    updateSearch: UpdateSearch;
     collections: Collection[];
     setActiveCollection: (id: number) => void;
     files: EnteFile[];

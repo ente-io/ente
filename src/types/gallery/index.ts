@@ -2,7 +2,6 @@ import { TimeStampListItem } from 'components/PhotoList';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { NotificationAttributes } from 'types/Notification';
-import { Search, SearchResultSummary } from 'types/search';
 
 export type SelectedState = {
     [k: number]: boolean;
@@ -12,10 +11,6 @@ export type SelectedState = {
 export type SetFiles = React.Dispatch<React.SetStateAction<EnteFile[]>>;
 export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
-export type SetSearchResultSummary = React.Dispatch<
-    React.SetStateAction<SearchResultSummary>
->;
-export type SetSearch = React.Dispatch<React.SetStateAction<Search>>;
 
 export type GalleryContextType = {
     thumbs: Map<number, string>;

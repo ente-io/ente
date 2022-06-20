@@ -43,3 +43,8 @@ export interface SearchOption extends Suggestion {
     fileCount: number;
     previewFiles: EnteFile[];
 }
+
+export type UpdateSearch = (
+    search: Search,
+    summary: SearchResultSummary
+) => void;

@@ -3,26 +3,31 @@ import debounce from 'debounce-promise';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useEffect, useState } from 'react';
 import { getAutoCompleteSuggestions } from 'services/searchService';
-import { Bbox, DateValue, SearchOption, SuggestionType } from 'types/search';
+import {
+    Bbox,
+    DateValue,
+    Search,
+    SearchOption,
+    SuggestionType,
+} from 'types/search';
 import constants from 'utils/strings/constants';
 import { ValueContainerWithIcon } from './valueContainerWithIcon';
 import { SearchInputWrapper } from './styledComponents';
 import { SelectStyles } from '../../../../styles/search';
 import AsyncSelect from 'react-select/async';
 import CloseIcon from '@mui/icons-material/Close';
-import { SetSearch, SetSearchResultSummary } from 'types/gallery';
+import { UpdateSearch } from 'types/search';
 import { EnteFile } from 'types/file';
 import { Collection } from 'types/collection';
 import { OptionWithInfo } from './optionWithInfo';
 
 interface Iprops {
     isOpen: boolean;
-    setSearch: SetSearch;
+    updateSearch: UpdateSearch;
     setOpen: (value: boolean) => void;
     files: EnteFile[];
     collections: Collection[];
     setActiveCollection: (id: number) => void;
-    setSearchResultSummary: SetSearchResultSummary;
 }
 
 export default function SearchInput(props: Iprops) {
@@ -37,7 +42,7 @@ export default function SearchInput(props: Iprops) {
     const resetSearch = () => {
         if (props.isOpen) {
             appContext.startLoading();
-            props.setSearch({});
+            props.updateSearch(null, null);
             setTimeout(() => {
                 appContext.finishLoading();
             }, 10);
@@ -55,17 +60,18 @@ export default function SearchInput(props: Iprops) {
         if (!selectedOption) {
             return;
         }
+        let search: Search;
         switch (selectedOption.type) {
             case SuggestionType.DATE:
-                props.setSearch({
+                search = {
                     date: selectedOption.value as DateValue,
-                });
+                };
                 props.setOpen(true);
                 break;
             case SuggestionType.LOCATION:
-                props.setSearch({
+                search = {
                     location: selectedOption.value as Bbox,
-                });
+                };
                 props.setOpen(true);
                 break;
             case SuggestionType.COLLECTION:
@@ -74,11 +80,11 @@ export default function SearchInput(props: Iprops) {
                 break;
             case SuggestionType.IMAGE:
             case SuggestionType.VIDEO:
-                props.setSearch({ file: selectedOption.value as number });
+                search = { file: selectedOption.value as number };
                 setValue(null);
                 break;
         }
-        props.setSearchResultSummary({
+        props.updateSearch(search, {
             optionName: selectedOption.label,
             fileCount: selectedOption.fileCount,
         });
