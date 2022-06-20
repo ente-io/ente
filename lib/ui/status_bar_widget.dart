@@ -186,7 +186,7 @@ class RefreshIndicatorWidget extends StatelessWidget {
       return event.completed.toString() +
           "/" +
           event.total.toString() +
-          " Memories preserved";
+          " memories preserved";
     }
     if (event.status == SyncStatus.paused) {
       return event.reason;
