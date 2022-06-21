@@ -77,15 +77,6 @@ const darkThemeOptions = createTheme({
                 },
             },
         },
-        MuiMenu: {
-            styleOverrides: {
-                paper: { margin: '10px' },
-                list: {
-                    padding: 0,
-                    border: 'none',
-                },
-            },
-        },
 
         MuiButton: {
             defaultProps: {
