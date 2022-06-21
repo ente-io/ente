@@ -13,7 +13,7 @@ export default function CollectionSort(props: CollectionSortProps) {
     return (
         <OverflowMenu
             ariaControls="collection-sort"
-            menuTriggerIcon={<SortIcon />}>
+            triggerButtonIcon={<SortIcon />}>
             <CollectionSortOptions {...props} />
         </OverflowMenu>
     );

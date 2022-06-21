@@ -8,7 +8,6 @@ import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import { Collection } from 'types/collection';
 import { IsArchived } from 'utils/magicMetadata';
-import { IconButton } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { logError } from 'utils/sentry';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
@@ -152,14 +151,12 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     return (
         <OverflowMenu
             ariaControls={`collection-options-${props.activeCollection.id}`}
-            menuTriggerIcon={
-                <IconButton
-                    sx={{
-                        background: (theme) => theme.palette.background.paper,
-                    }}>
-                    <MoreVertIcon />
-                </IconButton>
-            }>
+            triggerButtonIcon={<MoreVertIcon />}
+            triggerButtonProps={{
+                sx: {
+                    background: (theme) => theme.palette.background.paper,
+                },
+            }}>
             <OverflowMenuOption onClick={showRenameCollectionModal}>
                 {constants.RENAME}
             </OverflowMenuOption>
