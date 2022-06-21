@@ -11,7 +11,7 @@ description: ente photos application
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.6.1+331
+version: 0.6.3+333
 
 environment:
   sdk: ">=2.10.0 <3.0.0"
@@ -21,6 +21,7 @@ dependencies:
   alice:
     git: "https://github.com/jhomlala/alice.git"
   animate_do: ^2.0.0
+  animated_toggle_switch: ^0.5.2
   archive: ^3.1.2
   background_fetch: ^1.0.1
   bip39: ^1.0.6
