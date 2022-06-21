@@ -17,7 +17,7 @@ export const CollectionListBarWrapper = styled(Box)`
 
 export const CollectionInfoBarWrapper = styled(Box)`
     width: 100%;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
 `;
 
 export const ScrollContainer = styled('div')`

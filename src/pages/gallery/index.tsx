@@ -310,7 +310,7 @@ export default function Gallery() {
     useEffect(() => {
         if (isInSearchMode && searchResultSummary) {
             setPhotoListHeader({
-                height: 116,
+                height: 104,
                 item: (
                     <SearchResultInfo
                         searchResultSummary={searchResultSummary}
