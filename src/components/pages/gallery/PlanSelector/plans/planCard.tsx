@@ -16,11 +16,11 @@ export function PlanCard({ plan, subscription, onPlanSelect }) {
             key={plan.stripeID}
             current={isUserSubscribedPlan(plan, subscription)}
             onClick={handleClick}>
-            <Typography variant="title" fontWeight={900}>
+            <Typography variant="title" fontWeight={'bold'}>
                 {convertBytesToGBs(plan.storage, 0)}
             </Typography>
 
-            <Typography color="text.secondary" variant="title" fontWeight={500}>
+            <Typography color="text.secondary" variant="title">
                 {`${plan.price} / ${
                     plan.period === PLAN_PERIOD.MONTH
                         ? constants.MONTH_SHORT
