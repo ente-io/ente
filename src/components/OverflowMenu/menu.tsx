@@ -4,7 +4,8 @@ import { IconButton, styled } from '@mui/material';
 import { OverflowMenuContext } from 'contexts/overflowMenu';
 
 export interface Iprops {
-    menuTriggerIcon: React.ReactNode;
+    triggerButtonIcon: React.ReactNode;
+    triggerButtonProps?: any;
     children?: React.ReactNode;
     ariaControls: string;
 }
@@ -23,7 +24,8 @@ const StyledMenu = styled(Menu)`
 export default function OverflowMenu({
     children,
     ariaControls,
-    menuTriggerIcon,
+    triggerButtonIcon,
+    triggerButtonProps,
 }: Iprops) {
     const [sortByEl, setSortByEl] = useState(null);
     const handleClose = () => setSortByEl(null);
@@ -33,8 +35,9 @@ export default function OverflowMenu({
                 onClick={(event) => setSortByEl(event.currentTarget)}
                 aria-controls={sortByEl ? ariaControls : undefined}
                 aria-haspopup="true"
-                aria-expanded={sortByEl ? 'true' : undefined}>
-                {menuTriggerIcon}
+                aria-expanded={sortByEl ? 'true' : undefined}
+                {...triggerButtonProps}>
+                {triggerButtonIcon}
             </IconButton>
             <StyledMenu
                 id={ariaControls}
