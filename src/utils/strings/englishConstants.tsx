@@ -252,6 +252,7 @@ const englishConstants = {
     // ========================
     // Subscription
     // ========================
+    SUBSCRIPTION: 'Subscription',
     SUBSCRIBE: 'Subscribe',
     SUBSCRIPTION_PLAN: 'Subscription plan',
     USAGE_DETAILS: 'Usage',
@@ -273,10 +274,9 @@ const englishConstants = {
         </>
     ),
 
-    FAMILY_PLAN_MANAGE_ADMIN_ONLY: (adminEmail) => (
+    FAMILY_SUBSCRIPTION_INFO: (adminEmail) => (
         <>
-            Only your family plan admin <strong>{adminEmail}</strong> can change
-            the plan
+            You are on a family plan managed by <strong>{adminEmail}</strong>
         </>
     ),
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
@@ -777,6 +777,7 @@ const englishConstants = {
     OF: 'of',
     MONTH_SHORT: 'mo',
     YEAR_SHORT: 'yr',
+    FAMILY_PLAN: 'Family plan',
 };
 
 export default englishConstants;

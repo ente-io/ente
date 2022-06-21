@@ -12,10 +12,13 @@ import {
 import { SubscriptionCardContentOverlay } from './contentOverlay';
 interface Iprops {
     userDetails: UserDetails;
-    closeSidebar: () => void;
+    openMemberSubscriptionDialog: () => void;
 }
 
-export default function SubscriptionCard({ userDetails }: Iprops) {
+export default function SubscriptionCard({
+    userDetails,
+    openMemberSubscriptionDialog,
+}: Iprops) {
     const { showPlanSelectorModal } = useContext(GalleryContext);
 
     if (!userDetails) {
@@ -30,9 +33,9 @@ export default function SubscriptionCard({ userDetails }: Iprops) {
         );
     }
 
-    const allowClick =
-        !isPartOfFamily(userDetails.familyData) ||
-        isFamilyAdmin(userDetails.familyData);
+    const isMemberSubscription =
+        isPartOfFamily(userDetails.familyData) &&
+        !isFamilyAdmin(userDetails.familyData);
 
     return (
         <Box position="relative">
@@ -43,7 +46,13 @@ export default function SubscriptionCard({ userDetails }: Iprops) {
                 }}
                 src="/images/subscription-card-background.png"
             />
-            {allowClick && <ClickOverlay onClick={showPlanSelectorModal} />}
+            <ClickOverlay
+                onClick={
+                    isMemberSubscription
+                        ? openMemberSubscriptionDialog
+                        : showPlanSelectorModal
+                }
+            />
             <SubscriptionCardContentOverlay
                 hasNonAdminFamilyMembers={hasNonAdminFamilyMembers}
                 userDetails={userDetails}

@@ -84,7 +84,6 @@ const darkThemeOptions = createTheme({
             },
             styleOverrides: {
                 root: {
-                    textTransform: 'none',
                     padding: '12px 16px',
                     borderRadius: '4px',
                 },
@@ -171,9 +170,27 @@ const darkThemeOptions = createTheme({
             display: 'block',
         },
         caption: {
+            display: 'block',
             fontSize: '12px',
             lineHeight: '15px',
         },
+        h1: {
+            fontSize: '36px',
+            lineHeight: '44px',
+        },
+        h2: {
+            fontSize: '30px',
+            lineHeight: '36px',
+        },
+        h3: {
+            fontSize: '24px',
+            lineHeight: '29px',
+        },
+        h4: {
+            fontSize: '18px',
+            lineHeight: '22px',
+        },
+
         fontFamily: ['Inter', 'sans-serif'].join(','),
     },
 });

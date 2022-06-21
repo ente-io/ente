@@ -24,10 +24,7 @@ export default function Sidebar({
         <DrawerSidebar open={sidebarView} onClose={closeSidebar}>
             <HeaderSection closeSidebar={closeSidebar} />
             <PaddedDivider spaced />
-            <UserDetailsSection
-                sidebarView={sidebarView}
-                closeSidebar={closeSidebar}
-            />
+            <UserDetailsSection sidebarView={sidebarView} />
             <PaddedDivider invisible />
             <ShortcutSection
                 closeSidebar={closeSidebar}
