@@ -19,7 +19,7 @@ import UIService from './uiService';
 import UploadService from './uploadService';
 import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
-import { EnteFile } from 'types/file';
+import { EnteFile, FileMagicMetadata } from 'types/file';
 import {
     FileWithCollection,
     MetadataAndFileTypeInfo,
@@ -40,6 +40,7 @@ import isElectron from 'is-electron';
 import ImportService from 'services/importService';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { ProgressUpdater } from 'types/upload/ui';
+import { NEW_FILE_MAGIC_METADATA } from 'types/magicMetadata';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -229,38 +230,44 @@ class UploadManager {
             UIService.reset(mediaFiles.length);
             for (const { file, localID, collectionID } of mediaFiles) {
                 try {
-                    const { fileTypeInfo, metadata } = await (async () => {
-                        if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
-                            logUploadInfo(
-                                `${getFileNameSize(
-                                    file
-                                )} rejected  because of large size`
-                            );
+                    const { fileTypeInfo, metadata, magicMetadata } =
+                        await (async () => {
+                            if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
+                                logUploadInfo(
+                                    `${getFileNameSize(
+                                        file
+                                    )} rejected  because of large size`
+                                );
 
-                            return { fileTypeInfo: null, metadata: null };
-                        }
-                        const fileTypeInfo = await UploadService.getFileType(
-                            file
-                        );
-                        if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
+                                return { fileTypeInfo: null, metadata: null };
+                            }
+                            const fileTypeInfo =
+                                await UploadService.getFileType(file);
+                            if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
+                                logUploadInfo(
+                                    `${getFileNameSize(
+                                        file
+                                    )} rejected  because of unknown file format`
+                                );
+                                return { fileTypeInfo, metadata: null };
+                            }
                             logUploadInfo(
-                                `${getFileNameSize(
-                                    file
-                                )} rejected  because of unknown file format`
+                                ` extracting ${getFileNameSize(file)} metadata`
                             );
-                            return { fileTypeInfo, metadata: null };
-                        }
-                        logUploadInfo(
-                            ` extracting ${getFileNameSize(file)} metadata`
-                        );
-                        const metadata =
-                            (await UploadService.extractFileMetadata(
-                                file,
-                                collectionID,
-                                fileTypeInfo
-                            )) || null;
-                        return { fileTypeInfo, metadata };
-                    })();
+                            const metadata =
+                                (await UploadService.extractFileMetadata(
+                                    file,
+                                    collectionID,
+                                    fileTypeInfo
+                                )) || null;
+                            const magicMetadata = {
+                                ...NEW_FILE_MAGIC_METADATA,
+                                data: {
+                                    filePaths: [(file as any).path as string],
+                                },
+                            } as FileMagicMetadata;
+                            return { fileTypeInfo, metadata, magicMetadata };
+                        })();
 
                     logUploadInfo(
                         `metadata extraction successful${getFileNameSize(
@@ -270,6 +277,7 @@ class UploadManager {
                     this.metadataAndFileTypeInfoMap.set(localID, {
                         fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
                         metadata: metadata && { ...metadata },
+                        magicMetadata: magicMetadata && { ...magicMetadata },
                     });
                     UIService.increaseFileUploaded();
                 } catch (e) {

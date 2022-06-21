@@ -9,6 +9,7 @@ export interface fileAttribute {
 
 export interface FileMagicMetadataProps {
     visibility?: VISIBILITY_STATE;
+    filePaths?: string[];
 }
 
 export interface FileMagicMetadata extends Omit<MagicMetadataCore, 'data'> {

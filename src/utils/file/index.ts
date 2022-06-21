@@ -274,14 +274,20 @@ export async function decryptFile(file: EnteFile, collectionKey: string) {
             encryptedMetadata.decryptionHeader,
             file.key
         );
-        if (file.magicMetadata?.data) {
+        if (
+            file.magicMetadata?.data &&
+            typeof file.magicMetadata.data === 'string'
+        ) {
             file.magicMetadata.data = await worker.decryptMetadata(
                 file.magicMetadata.data,
                 file.magicMetadata.header,
                 file.key
             );
         }
-        if (file.pubMagicMetadata?.data) {
+        if (
+            file.pubMagicMetadata?.data &&
+            typeof file.pubMagicMetadata.data === 'string'
+        ) {
             file.pubMagicMetadata.data = await worker.decryptMetadata(
                 file.pubMagicMetadata.data,
                 file.pubMagicMetadata.header,
@@ -291,6 +297,21 @@ export async function decryptFile(file: EnteFile, collectionKey: string) {
         return file;
     } catch (e) {
         logError(e, 'file decryption failed');
+        throw e;
+    }
+}
+
+export async function getFileKey(file: EnteFile, collectionKey: string) {
+    try {
+        const worker = await new CryptoWorker();
+        file.key = await worker.decryptB64(
+            file.encryptedKey,
+            file.keyDecryptionNonce,
+            collectionKey
+        );
+        return file.key;
+    } catch (e) {
+        logError(e, 'get file key failed');
         throw e;
     }
 }
