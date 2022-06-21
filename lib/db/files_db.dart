@@ -580,6 +580,7 @@ class FilesDB {
 
   Future<List<File>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
+      Set<int> ignoredCollectionIDs,
   ) async {
     final db = await instance.database;
     String whereClause = "";
@@ -598,7 +599,8 @@ class FilesDB {
       where: whereClause,
       orderBy: '$columnCreationTime ASC',
     );
-    return _convertToFiles(results);
+    final files = _convertToFiles(results);
+    return _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs)
   }
 
   Future<List<File>> getFilesToBeUploadedWithinFolders(
