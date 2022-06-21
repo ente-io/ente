@@ -12,6 +12,7 @@ export interface Iprops {
 
 const StyledMenu = styled(Menu)`
     & .MuiPaper-root {
+        margin: 16px auto;
         box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.16),
             0px 3px 6px rgba(0, 0, 0, 0.12);
     }
@@ -50,10 +51,10 @@ export default function OverflowMenu({
                 }}
                 anchorOrigin={{
                     vertical: 'bottom',
-                    horizontal: 'center',
+                    horizontal: 'right',
                 }}
                 transformOrigin={{
-                    vertical: 'center',
+                    vertical: 'top',
                     horizontal: 'right',
                 }}>
                 {children}
