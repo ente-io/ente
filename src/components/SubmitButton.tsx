@@ -25,7 +25,7 @@ const SubmitButton: FC<ButtonProps<'button', SubmitButtonProps>> = ({
             disabled={loading || disabled}
             sx={{ my: 4, ...sx }}
             {...props}>
-            {loading ? <CircularProgress size={25} /> : buttonText}
+            {loading ? <CircularProgress size={20} /> : buttonText}
         </Button>
     );
 };

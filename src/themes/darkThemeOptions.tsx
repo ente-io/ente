@@ -95,6 +95,7 @@ const darkThemeOptions = createTheme({
                 root: {
                     textTransform: 'none',
                     padding: '12px 16px',
+                    borderRadius: '4px',
                 },
                 startIcon: {
                     marginRight: '12px',
@@ -162,7 +163,7 @@ const darkThemeOptions = createTheme({
         },
         button: {
             fontSize: '16px',
-            lineHeight: '20px',
+            lineHeight: '19.36px',
             fontWeight: 600,
         },
         title: {
