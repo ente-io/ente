@@ -1,16 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { MenuItem, ListItemIcon, ListItemText } from '@mui/material';
 import { COLLECTION_SORT_BY } from 'constants/collection';
 import TickIcon from '@mui/icons-material/Done';
 import { CollectionSortProps } from '.';
-
-export interface SortOptionProps extends CollectionSortProps {
-    close: () => void;
-}
+import { OverflowMenuContext } from 'contexts/overflowMenu';
 
 const SortByOptionCreator =
-    ({ setCollectionSortBy, activeSortBy, close }: SortOptionProps) =>
+    ({ setCollectionSortBy, activeSortBy }: CollectionSortProps) =>
     (props: { sortBy: COLLECTION_SORT_BY; children: any }) => {
+        const { close } = useContext(OverflowMenuContext);
+
         const handleClick = () => {
             setCollectionSortBy(props.sortBy);
             close();
