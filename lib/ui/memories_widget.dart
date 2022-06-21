@@ -334,8 +334,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       child: IconButton(
         icon: Icon(
           Icons.adaptive.share,
-          color: Colors.white,
-        ), //same for both themes
+          color: Colors.white, //same for both themes
+        ),
         onPressed: () {
           share(context, [file]);
         },
