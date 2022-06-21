@@ -164,17 +164,17 @@ const darkThemeOptions = createTheme({
         button: {
             fontSize: '16px',
             lineHeight: '19.36px',
-            fontWeight: 600,
+            fontWeight: 'bold',
         },
         title: {
             fontSize: '32px',
             lineHeight: '40px',
-            fontWeight: 600,
+            fontWeight: 'bold',
             display: 'block',
         },
         subtitle: {
             fontSize: '24px',
-            fontWeight: 600,
+            fontWeight: 'bold',
             lineHeight: '36px',
             display: 'block',
         },
