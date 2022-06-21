@@ -20,7 +20,10 @@ export function PlanCard({ plan, subscription, onPlanSelect }) {
                 {convertBytesToGBs(plan.storage, 0)}
             </Typography>
 
-            <Typography color="text.secondary" variant="title">
+            <Typography
+                color="text.secondary"
+                variant="title"
+                fontWeight={'normal'}>
                 {`${plan.price} / ${
                     plan.period === PLAN_PERIOD.MONTH
                         ? constants.MONTH_SHORT
