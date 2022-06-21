@@ -165,6 +165,7 @@ const darkThemeOptions = createTheme({
             fontSize: '16px',
             lineHeight: '20px',
             fontWeight: 'bold',
+            textTransform: 'none',
         },
         title: {
             fontSize: '32px',
