@@ -40,6 +40,14 @@ export default function OverflowMenu({
                 MenuListProps={{
                     disablePadding: true,
                     'aria-labelledby': ariaControls,
+                }}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'center',
+                }}
+                transformOrigin={{
+                    vertical: 'center',
+                    horizontal: 'right',
                 }}>
                 {children}
             </StyledMenu>
