@@ -580,10 +580,10 @@ class FilesDB {
 
   Future<List<File>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
-      Set<int> ignoredCollectionIDs,
+    Set<int> ignoredCollectionIDs,
   ) async {
     final db = await instance.database;
-    String whereClause = "";
+    String whereClause = "( ";
     for (int index = 0; index < durations.length; index++) {
       whereClause += "($columnCreationTime > " +
           durations[index][0].toString() +
@@ -594,13 +594,14 @@ class FilesDB {
         whereClause += " OR ";
       }
     }
+    whereClause += ") AND $columnMMdVisibility = $kVisibilityVisible";
     final results = await db.query(
       table,
       where: whereClause,
       orderBy: '$columnCreationTime ASC',
     );
     final files = _convertToFiles(results);
-    return _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs)
+    return _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
   }
 
   Future<List<File>> getFilesToBeUploadedWithinFolders(
