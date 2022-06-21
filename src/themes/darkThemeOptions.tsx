@@ -155,15 +155,15 @@ const darkThemeOptions = createTheme({
     typography: {
         body1: {
             fontSize: '16px',
-            lineHeight: '24px',
+            lineHeight: '20px',
         },
         body2: {
             fontSize: '14px',
-            lineHeight: '20px',
+            lineHeight: '17px',
         },
         button: {
             fontSize: '16px',
-            lineHeight: '19.36px',
+            lineHeight: '20px',
             fontWeight: 'bold',
         },
         title: {
