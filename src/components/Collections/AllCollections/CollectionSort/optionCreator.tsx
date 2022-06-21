@@ -18,9 +18,9 @@ const SortByOptionCreator =
         return (
             <OverflowMenuOption
                 onClick={handleClick}
-                startIcon={activeSortBy === props.sortBy && <TickIcon />}
-                label={props.children}
-            />
+                startIcon={activeSortBy === props.sortBy && <TickIcon />}>
+                {props.children}
+            </OverflowMenuOption>
         );
     };
 

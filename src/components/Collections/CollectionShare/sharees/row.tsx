@@ -23,9 +23,9 @@ const ShareeRow = ({ sharee, collectionUnshare }: IProps) => {
                 <OverflowMenuOption
                     color="danger"
                     onClick={handleClick}
-                    startIcon={<NotInterestedIcon />}
-                    label={constants.REMOVE}
-                />
+                    startIcon={<NotInterestedIcon />}>
+                    {constants.REMOVE}
+                </OverflowMenuOption>
             </OverflowMenu>
         </SpaceBetweenFlex>
     );

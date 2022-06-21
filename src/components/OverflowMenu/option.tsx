@@ -5,13 +5,13 @@ interface Iprops {
     onClick: () => void;
     color?: ButtonProps['color'];
     startIcon?: React.ReactNode;
-    label: any;
+    children?: any;
 }
 export function OverflowMenuOption({
     onClick,
     color = 'primary',
     startIcon,
-    label,
+    children,
 }: Iprops) {
     return (
         <MenuItem
@@ -31,7 +31,7 @@ export function OverflowMenuOption({
                     {startIcon}
                 </ListItemIcon>
             )}
-            <Typography variant="button">{label}</Typography>
+            <Typography variant="button">{children}</Typography>
         </MenuItem>
     );
 }
