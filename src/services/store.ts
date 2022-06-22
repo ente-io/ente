@@ -49,6 +49,9 @@ export const watchStoreSchema: Schema<WatchStoreType> = {
                 collectionName: {
                     type: 'string',
                 },
+                hasMultipleFolders: {
+                    type: 'boolean',
+                },
                 folderPath: {
                     type: 'string',
                 },

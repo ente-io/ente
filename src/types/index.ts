@@ -27,6 +27,7 @@ type FileMapping = {
 
 interface Mapping {
     collectionName: string;
+    hasMultipleFolders: boolean;
     folderPath: string;
     files: FileMapping[];
 }

@@ -6,7 +6,8 @@ import { getElectronFile, getFilesFromDir } from '../services/fs';
 
 export async function addWatchMapping(
     collectionName: string,
-    folderPath: string
+    folderPath: string,
+    hasMultipleFolders: boolean
 ) {
     let watchMappings = getWatchMappings();
     if (!watchMappings) {
@@ -14,9 +15,7 @@ export async function addWatchMapping(
     }
 
     const watchMapping = watchMappings?.find(
-        (mapping) =>
-            mapping.collectionName === collectionName ||
-            mapping.folderPath === folderPath
+        (mapping) => mapping.folderPath === folderPath
     );
 
     if (watchMapping) {
@@ -29,6 +28,7 @@ export async function addWatchMapping(
 
     watchMappings.push({
         collectionName,
+        hasMultipleFolders,
         folderPath,
         files: [],
     });
