@@ -1,6 +1,7 @@
 import { FILE_TYPE } from 'constants/file';
 import { LIVE_PHOTO_ASSET_SIZE_LIMIT } from 'constants/upload';
 import { encodeMotionPhoto } from 'services/motionPhotoService';
+import { NEW_FILE_MAGIC_METADATA } from 'types/magicMetadata';
 import {
     ElectronFile,
     FileTypeInfo,
@@ -192,6 +193,15 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                 uploadService.setFileMetadataAndFileTypeInfo(livePhotoLocalID, {
                     fileTypeInfo: { ...livePhotoFileTypeInfo },
                     metadata: { ...livePhotoMetadata },
+                    magicMetadata: {
+                        ...NEW_FILE_MAGIC_METADATA,
+                        data: {
+                            filePaths: [
+                                (firstMediaFile.file as any).path as string,
+                                (secondMediaFile.file as any).path as string,
+                            ],
+                        },
+                    },
                 });
                 index += 2;
             } else {
