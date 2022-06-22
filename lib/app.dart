@@ -113,11 +113,11 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
           stopOnTerminate: false,
           startOnBoot: true,
           enableHeadless: true,
-          requiresBatteryNotLow: false,
+          requiresBatteryNotLow: true,
           requiresCharging: false,
           requiresStorageNotLow: false,
           requiresDeviceIdle: false,
-          requiredNetworkType: NetworkType.NONE,
+          requiredNetworkType: NetworkType.ANY,
         ), (String taskId) async {
       await widget.runBackgroundTask(taskId);
     }, (taskId) {

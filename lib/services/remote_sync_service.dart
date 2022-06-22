@@ -105,7 +105,6 @@ class RemoteSyncService {
         _existingSync = null;
       }
     } catch (e, s) {
-      _logger.severe("Error executing remote sync ", e, s);
       _existingSync.complete();
       _existingSync = null;
       // rethrow whitelisted error so that UI status can be updated correctly.
@@ -114,7 +113,10 @@ class RemoteSyncService {
           e is WiFiUnavailableError ||
           e is StorageLimitExceededError ||
           e is SyncStopRequestedError) {
+        _logger.warning("Error executing remote sync", e);
         rethrow;
+      } else {
+        _logger.severe("Error executing remote sync ", e, s);
       }
     }
   }
@@ -268,6 +270,10 @@ class RemoteSyncService {
 
     if (toBeUploaded > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparing_for_upload));
+      // verify if files upload is allowed based on their subscription plan and
+      // storage limit. To avoid creating new endpoint, we are using
+      // fetchUploadUrls as alternative method.
+      await _uploader.fetchUploadURLs(toBeUploaded);
     }
     final List<Future> futures = [];
     for (final uploadedFileID in updatedFileIDs) {
