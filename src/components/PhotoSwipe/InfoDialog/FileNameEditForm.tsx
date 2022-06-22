@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import constants from 'utils/strings/constants';
 import { Col, Form, FormControl } from 'react-bootstrap';
-import { FlexWrapper, IconButton, Value } from 'components/Container';
+import { FlexWrapper, Value } from 'components/Container';
 import CloseIcon from '@mui/icons-material/Close';
 import TickIcon from '@mui/icons-material/Done';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
 import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
+import { IconButton } from '@mui/material';
 
 export interface formValues {
     filename: string;
@@ -48,7 +49,7 @@ export const FileNameEditForm = ({
                         <Form.Group
                             bsPrefix="ente-form-group"
                             as={Col}
-                            xs={extension ? 7 : 8}>
+                            xs={extension ? 8 : 9}>
                             <Form.Control
                                 as="textarea"
                                 placeholder={constants.FILE_NAME}
@@ -75,7 +76,7 @@ export const FileNameEditForm = ({
                                 </FlexWrapper>
                             </Form.Group>
                         )}
-                        <Form.Group bsPrefix="ente-form-group" as={Col} xs={2}>
+                        <Form.Group bsPrefix="ente-form-group" as={Col} xs={3}>
                             <Value width={'16.67%'}>
                                 <IconButton type="submit" disabled={loading}>
                                     {loading ? (

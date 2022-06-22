@@ -8,15 +8,10 @@ import {
     updateExistingFilePubMetadata,
 } from 'utils/file';
 import EditIcon from 'components/icons/EditIcon';
-import {
-    FreeFlowText,
-    IconButton,
-    Label,
-    Row,
-    Value,
-} from 'components/Container';
+import { FreeFlowText, Label, Row, Value } from 'components/Container';
 import { logError } from 'utils/sentry';
 import { FileNameEditForm } from './FileNameEditForm';
+import { IconButton } from '@mui/material';
 
 export const getFileTitle = (filename, extension) => {
     if (extension) {

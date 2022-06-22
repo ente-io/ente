@@ -1,9 +1,9 @@
-import { FluidContainer, IconButton } from 'components/Container';
+import { FluidContainer } from 'components/Container';
 import { SelectionBar } from '../../Navbar/SelectionBar';
 import constants from 'utils/strings/constants';
 import DeleteIcon from 'components/icons/DeleteIcon';
 import React, { useContext } from 'react';
-import { styled } from '@mui/material';
+import { Box, IconButton, styled } from '@mui/material';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { IconWithMessage } from 'components/IconWithMessage';
 import { AppContext } from 'pages/_app';
@@ -64,9 +64,9 @@ export default function DeduplicateOptions({
                         <BackButton />
                     </IconButton>
                 )}
-                <div>
+                <Box ml={'12px'}>
                     {count} {constants.SELECTED}
-                </div>
+                </Box>
             </FluidContainer>
             <input
                 type="checkbox"

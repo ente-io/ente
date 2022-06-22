@@ -121,12 +121,55 @@ const darkThemeOptions = createTheme({
                 },
             },
         },
+        MuiSvgIcon: {
+            styleOverrides: {
+                root: ({ ownerState }) => {
+                    switch (ownerState.color) {
+                        case 'primary':
+                            return {
+                                color: '#ffffff',
+                            };
+                        case 'secondary':
+                            return {
+                                color: 'rgba(256,256,256,0.24)',
+                            };
+                        case 'disabled':
+                            return {
+                                color: 'rgba(255, 255, 255, 0.12)',
+                            };
+                    }
+                },
+            },
+        },
+
+        MuiIconButton: {
+            styleOverrides: {
+                root: ({ ownerState }) => {
+                    switch (ownerState.color) {
+                        case 'primary':
+                            return {
+                                color: '#ffffff',
+                            };
+                        case 'secondary':
+                            return {
+                                color: 'rgba(256,256,256,0.24)',
+                            };
+                    }
+                    if (ownerState.disabled) {
+                        return {
+                            color: 'rgba(255, 255, 255, 0.12)',
+                        };
+                    }
+                },
+            },
+        },
     },
 
     palette: {
         mode: 'dark',
         primary: {
-            main: '#f0f0f0',
+            main: '#fff',
+            contrastText: '#000',
         },
         secondary: {
             main: 'rgba(256, 256, 256, 0.1)',
@@ -136,6 +179,11 @@ const darkThemeOptions = createTheme({
             main: '#1dba54',
             dark: '#248546',
             light: '#2cd366',
+        },
+        text: {
+            primary: '#fff',
+            secondary: 'rgba(255, 255, 255, 0.7)',
+            disabled: 'rgba(255, 255, 255, 0.5)',
         },
 
         danger: {

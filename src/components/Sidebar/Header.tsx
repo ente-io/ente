@@ -15,7 +15,7 @@ export default function HeaderSection({ closeSidebar }: IProps) {
             <IconButton
                 aria-label="close"
                 onClick={closeSidebar}
-                sx={{ color: 'stroke.secondary' }}>
+                color="secondary">
                 <CloseIcon fontSize="small" />
             </IconButton>
         </SpaceBetweenFlex>
