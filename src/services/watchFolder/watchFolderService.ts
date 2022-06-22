@@ -29,7 +29,6 @@ class watchFolderService {
     private setElectronFiles: (files: ElectronFile[]) => void;
     private setCollectionName: (collectionName: string) => void;
     private syncWithRemote: () => void;
-    private showProgressView: () => void;
     private setWatchFolderServiceIsRunning: (isRunning: boolean) => void;
 
     constructor() {
@@ -85,7 +84,7 @@ class watchFolderService {
     }
 
     isMappingSyncing(mapping: WatchMapping) {
-        return this.currentEvent?.collectionName === mapping.collectionName;
+        return this.currentEvent?.folderPath === mapping.folderPath;
     }
 
     private uploadDiffOfFiles(
@@ -99,12 +98,17 @@ class watchFolderService {
         });
 
         if (filesToUpload.length > 0) {
-            const event: EventQueueItem = {
-                type: 'upload',
-                collectionName: mapping.collectionName,
-                files: filesToUpload,
-            };
-            this.eventQueue.push(event);
+            for (const file of filesToUpload) {
+                const event: EventQueueItem = {
+                    type: 'upload',
+                    collectionName: mapping.hasMultipleFolders
+                        ? this.getParentFolderName(file.path)
+                        : mapping.collectionName,
+                    folderPath: mapping.folderPath,
+                    files: [file],
+                };
+                this.eventQueue.push(event);
+            }
         }
     }
 
@@ -119,12 +123,17 @@ class watchFolderService {
         });
 
         if (filesToRemove.length > 0) {
-            const event: EventQueueItem = {
-                type: 'trash',
-                collectionName: mapping.collectionName,
-                paths: filesToRemove.map((file) => file.path),
-            };
-            this.eventQueue.push(event);
+            for (const file of filesToRemove) {
+                const event: EventQueueItem = {
+                    type: 'trash',
+                    collectionName: mapping.hasMultipleFolders
+                        ? this.getParentFolderName(file.path)
+                        : mapping.collectionName,
+                    folderPath: mapping.folderPath,
+                    paths: [file.path],
+                };
+                this.eventQueue.push(event);
+            }
         }
     }
 
@@ -163,12 +172,17 @@ class watchFolderService {
         }
     }
 
-    async addWatchMapping(collectionName: string, folderPath: string) {
+    async addWatchMapping(
+        collectionName: string,
+        folderPath: string,
+        hasMultipleFolders: boolean
+    ) {
         if (this.allElectronAPIsExist) {
             try {
                 await this.ElectronAPIs.addWatchMapping(
                     collectionName,
-                    folderPath
+                    folderPath,
+                    hasMultipleFolders
                 );
             } catch (e) {
                 logError(e, 'error while adding watch mapping');
@@ -204,7 +218,7 @@ class watchFolderService {
     }
 
     private async runNextEvent() {
-        console.log('runNextEvent mappings', this.getWatchMappings());
+        console.log('mappings', this.getWatchMappings());
 
         if (this.eventQueue.length === 0 || this.isEventRunning) {
             return;
@@ -213,6 +227,7 @@ class watchFolderService {
         this.setIsEventRunning(true);
         const event = this.clubSameCollectionEvents();
         this.currentEvent = event;
+        console.log('running event', event);
         if (event.type === 'upload') {
             this.processUploadEvent();
         } else {
@@ -281,8 +296,7 @@ class watchFolderService {
                     const mappings = this.getWatchMappings();
                     const mapping = mappings.find(
                         (mapping) =>
-                            mapping.collectionName ===
-                            this.currentEvent.collectionName
+                            mapping.folderPath === this.currentEvent.folderPath
                     );
                     if (mapping) {
                         mapping.files = [...mapping.files, ...uploadedFiles];
@@ -351,12 +365,12 @@ class watchFolderService {
                 return;
             }
 
-            const { collectionName, paths } = this.currentEvent;
+            const { collectionName, folderPath, paths } = this.currentEvent;
             const filePathsToRemove = new Set(paths);
 
             const mappings = this.getWatchMappings();
             const mappingIdx = mappings.findIndex(
-                (mapping) => mapping.collectionName === collectionName
+                (mapping) => mapping.folderPath === folderPath
             );
             if (mappingIdx === -1) {
                 return;
@@ -424,22 +438,35 @@ class watchFolderService {
         );
     }
 
-    async getCollectionName(filePath: string) {
+    async getCollectionNameAndFolderPath(filePath: string) {
         try {
             const mappings = this.getWatchMappings();
 
-            const collectionName = mappings.find((mapping) =>
+            const mapping = mappings.find((mapping) =>
                 filePath.startsWith(mapping.folderPath + '/')
-            )?.collectionName;
+            );
 
-            if (!collectionName) {
+            if (!mapping) {
                 return null;
             }
 
-            return collectionName;
+            return {
+                collectionName: mapping.hasMultipleFolders
+                    ? this.getParentFolderName(filePath)
+                    : mapping.collectionName,
+                folderPath: mapping.folderPath,
+            };
         } catch (e) {
             logError(e, 'error while getting collection name');
         }
+    }
+
+    private getParentFolderName(filePath: string) {
+        const folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
+        const folderName = folderPath.substring(
+            folderPath.lastIndexOf('/') + 1
+        );
+        return folderName;
     }
 
     async selectFolder(): Promise<string> {

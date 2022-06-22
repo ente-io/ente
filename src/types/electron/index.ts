@@ -42,7 +42,8 @@ export interface ElectronAPIsInterface {
     setWatchMappings: (watchMappings: WatchMapping[]) => void;
     addWatchMapping: (
         collectionName: string,
-        folderPath: string
+        folderPath: string,
+        hasMultipleFolders: boolean
     ) => Promise<void>;
     removeWatchMapping: (folderPath: string) => Promise<void>;
     registerWatcherFunctions: (

@@ -54,7 +54,8 @@ export default function WatchFolder({ open, onClose }: Iprops) {
         if (inputFolderPath?.length > 0) {
             await watchFolderService.addWatchMapping(
                 inputFolderPath.substring(inputFolderPath.lastIndexOf('/') + 1),
-                inputFolderPath
+                inputFolderPath,
+                true
             );
             setMappings(watchFolderService.getWatchMappings());
         }

@@ -5,11 +5,12 @@ import watchFolderService from './watchFolderService';
 
 export async function diskFileAddedCallback(file: ElectronFile) {
     try {
-        const collectionName = await watchFolderService.getCollectionName(
-            file.path
-        );
+        const { collectionName, folderPath } =
+            (await watchFolderService.getCollectionNameAndFolderPath(
+                file.path
+            )) ?? {};
 
-        if (!collectionName) {
+        if (!folderPath) {
             return;
         }
 
@@ -18,6 +19,7 @@ export async function diskFileAddedCallback(file: ElectronFile) {
         const event: EventQueueItem = {
             type: 'upload',
             collectionName,
+            folderPath,
             files: [file],
         };
         watchFolderService.pushEvent(event);
@@ -28,19 +30,20 @@ export async function diskFileAddedCallback(file: ElectronFile) {
 
 export async function diskFileRemovedCallback(filePath: string) {
     try {
-        const collectionName = await watchFolderService.getCollectionName(
-            filePath
-        );
-
+        const { collectionName, folderPath } =
+            (await watchFolderService.getCollectionNameAndFolderPath(
+                filePath
+            )) ?? {};
         console.log('added (trash) to event queue', collectionName, filePath);
 
-        if (!collectionName) {
+        if (!folderPath) {
             return;
         }
 
         const event: EventQueueItem = {
             type: 'trash',
             collectionName,
+            folderPath,
             paths: [filePath],
         };
         watchFolderService.pushEvent(event);
@@ -51,28 +54,18 @@ export async function diskFileRemovedCallback(filePath: string) {
 
 export async function diskFolderRemovedCallback(folderPath: string) {
     try {
-        const collectionName = await watchFolderService.getCollectionName(
-            folderPath
-        );
-        if (!collectionName) {
+        const { folderPath: mappedFolderPath } =
+            (await watchFolderService.getCollectionNameAndFolderPath(
+                folderPath
+            )) ?? {};
+        if (!mappedFolderPath) {
             return;
         }
 
-        if (hasMappingSameFolderPath(collectionName, folderPath)) {
+        if (mappedFolderPath === folderPath) {
             watchFolderService.pushTrashedDir(folderPath);
         }
     } catch (e) {
         logError(e, 'error while calling diskFolderRemovedCallback');
     }
 }
-
-const hasMappingSameFolderPath = (
-    collectionName: string,
-    folderPath: string
-) => {
-    const mappings = watchFolderService.getWatchMappings();
-    const mapping = mappings.find(
-        (mapping) => mapping.collectionName === collectionName
-    );
-    return mapping.folderPath === folderPath;
-};
