@@ -165,7 +165,7 @@ function PlanSelector(props: Props) {
             onClose={props.closeModal}
             maxWidth={'xl'}
             fullWidth={false}>
-            <DialogTitleWithCloseButton>
+            <DialogTitleWithCloseButton onClose={props.closeModal}>
                 {hasPaidSubscription(subscription)
                     ? constants.MANAGE_PLAN
                     : constants.CHOOSE_PLAN}
