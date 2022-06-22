@@ -259,8 +259,8 @@ const englishConstants = {
     MANAGE: 'Manage',
     MANAGEMENT_PORTAL: 'Manage payment method',
     MANAGE_FAMILY_PORTAL: 'Manage family',
-    LEAVE_FAMILY: 'Leave family',
-    LEAVE_FAMILY_CONFIRM: 'Are you sure that you want to leave family?',
+    LEAVE_FAMILY_PLAN: 'Leave family plan',
+    LEAVE_FAMILY_CONFIRM: 'Are you sure that you want to leave family plan?',
     CHOOSE_PLAN: 'Choose your subscription plan',
     MANAGE_PLAN: 'Manage your subscription',
     ACTIVE: 'Active',
@@ -274,11 +274,8 @@ const englishConstants = {
         </>
     ),
 
-    FAMILY_SUBSCRIPTION_INFO: (adminEmail) => (
-        <>
-            You are on a family plan managed by <strong>{adminEmail}</strong>
-        </>
-    ),
+    FAMILY_SUBSCRIPTION_INFO: 'You are on a family plan managed by',
+
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>Your subscription will renew on {dateString(expiryTime)}</>
     ),
