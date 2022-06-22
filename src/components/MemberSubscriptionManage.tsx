@@ -55,8 +55,8 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
                         )}
                     </Typography>
                     <img
-                        height="312px"
-                        width="232px"
+                        height="267px"
+                        width="256px"
                         src="/images/family_plan_leave@3x.png"
                     />
                     <Button
