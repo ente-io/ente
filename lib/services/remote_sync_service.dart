@@ -86,8 +86,6 @@ class RemoteSyncService {
       await TrashSyncService.instance
           .syncTrash()
           .onError((e, s) => _logger.severe('trash sync failed', e, s));
-      // check if user can upload new files
-      await _uploader.canUpload();
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
       if (hasUploadedFiles) {
@@ -272,6 +270,8 @@ class RemoteSyncService {
 
     if (toBeUploaded > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparing_for_upload));
+      // verify if the files can b uploaded before initiating actual upload.
+      await _uploader.canUpload(toBeUploaded);
     }
     final List<Future> futures = [];
     for (final uploadedFileID in updatedFileIDs) {
