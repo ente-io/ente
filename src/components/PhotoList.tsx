@@ -93,6 +93,7 @@ const DateContainer = styled(ListItemContainer)`
     overflow: hidden;
     text-overflow: ellipsis;
     height: ${DATE_CONTAINER_HEIGHT}px;
+    color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
 const SizeAndCountContainer = styled(DateContainer)`
