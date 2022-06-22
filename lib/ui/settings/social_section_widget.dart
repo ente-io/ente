@@ -30,7 +30,7 @@ class SocialSectionWidget extends StatelessWidget {
         },
         child: SettingsTextItem(text: "Twitter", icon: Icons.navigate_next),
       ),
-      SectionOptionDivider,
+      sectionOptionDivider,
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
@@ -38,7 +38,7 @@ class SocialSectionWidget extends StatelessWidget {
         },
         child: SettingsTextItem(text: "Discord", icon: Icons.navigate_next),
       ),
-      SectionOptionDivider,
+      sectionOptionDivider,
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
@@ -50,7 +50,7 @@ class SocialSectionWidget extends StatelessWidget {
     if (!UpdateService.instance.isIndependent()) {
       options.addAll(
         [
-          SectionOptionDivider,
+          sectionOptionDivider,
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () {
