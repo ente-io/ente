@@ -55,7 +55,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           icon: Icons.navigate_next,
         ),
       ),
-      SectionOptionDivider,
+      sectionOptionDivider,
       SizedBox(
         height: 48,
         child: Row(
@@ -75,7 +75,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           ],
         ),
       ),
-      SectionOptionDivider,
+      sectionOptionDivider,
       SizedBox(
         height: 48,
         child: Row(
@@ -98,7 +98,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
     ];
     if (Platform.isIOS) {
       sectionOptions.addAll([
-        SectionOptionDivider,
+        sectionOptionDivider,
         SizedBox(
           height: 48,
           child: Row(
@@ -134,7 +134,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
     }
     sectionOptions.addAll(
       [
-        SectionOptionDivider,
+        sectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -168,7 +168,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             icon: Icons.navigate_next,
           ),
         ),
-        SectionOptionDivider,
+        sectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {

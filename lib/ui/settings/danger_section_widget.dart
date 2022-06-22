@@ -35,7 +35,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
           },
           child: SettingsTextItem(text: "Logout", icon: Icons.navigate_next),
         ),
-        SectionOptionDivider,
+        sectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {

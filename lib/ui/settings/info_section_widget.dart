@@ -39,7 +39,7 @@ class InfoSectionWidget extends StatelessWidget {
           },
           child: SettingsTextItem(text: "FAQ", icon: Icons.navigate_next),
         ),
-        SectionOptionDivider,
+        sectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
@@ -53,7 +53,7 @@ class InfoSectionWidget extends StatelessWidget {
           },
           child: SettingsTextItem(text: "Terms", icon: Icons.navigate_next),
         ),
-        SectionOptionDivider,
+        sectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
@@ -67,15 +67,16 @@ class InfoSectionWidget extends StatelessWidget {
           },
           child: SettingsTextItem(text: "Privacy", icon: Icons.navigate_next),
         ),
-        SectionOptionDivider,
+        sectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            launch("https://github.com/ente-io/frame");
+            launchUrl(Uri.parse("https://github.com/ente-io/frame"));
           },
           child:
               SettingsTextItem(text: "Source code", icon: Icons.navigate_next),
         ),
+        sectionOptionDivider,
         UpdateService.instance.isIndependent()
             ? Column(
                 children: [
@@ -109,7 +110,7 @@ class InfoSectionWidget extends StatelessWidget {
                   ),
                 ],
               )
-            : Container(),
+            : const SizedBox.shrink(),
       ],
     );
   }

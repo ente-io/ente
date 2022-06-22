@@ -116,7 +116,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       );
     }
     children.addAll([
-      SectionOptionDivider,
+      sectionOptionDivider,
       SizedBox(
         height: 48,
         child: Row(
@@ -150,7 +150,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     if (Platform.isAndroid) {
       children.addAll(
         [
-          SectionOptionDivider,
+          sectionOptionDivider,
           SizedBox(
             height: 48,
             child: Row(
@@ -246,7 +246,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       );
     }
     children.addAll([
-      SectionOptionDivider,
+      sectionOptionDivider,
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () async {
