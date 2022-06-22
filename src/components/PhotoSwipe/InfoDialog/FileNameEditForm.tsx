@@ -49,7 +49,7 @@ export const FileNameEditForm = ({
                         <Form.Group
                             bsPrefix="ente-form-group"
                             as={Col}
-                            xs={extension ? 7 : 8}>
+                            xs={extension ? 8 : 9}>
                             <Form.Control
                                 as="textarea"
                                 placeholder={constants.FILE_NAME}
@@ -76,7 +76,7 @@ export const FileNameEditForm = ({
                                 </FlexWrapper>
                             </Form.Group>
                         )}
-                        <Form.Group bsPrefix="ente-form-group" as={Col} xs={2}>
+                        <Form.Group bsPrefix="ente-form-group" as={Col} xs={3}>
                             <Value width={'16.67%'}>
                                 <IconButton type="submit" disabled={loading}>
                                     {loading ? (
