@@ -113,6 +113,13 @@ const darkThemeOptions = createTheme({
                 variant: 'filled',
                 margin: 'dense',
             },
+            styleOverrides: {
+                root: {
+                    '& .MuiInputAdornment-root': {
+                        marginRight: '8px',
+                    },
+                },
+            },
         },
     },
 
