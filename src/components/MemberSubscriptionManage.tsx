@@ -23,10 +23,10 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
     }
     const confirmLeaveFamily = () =>
         setDialogMessage({
-            title: `${constants.LEAVE_FAMILY}`,
+            title: `${constants.LEAVE_FAMILY_PLAN}`,
             content: constants.LEAVE_FAMILY_CONFIRM,
             proceed: {
-                text: constants.LEAVE_FAMILY,
+                text: constants.LEAVE_FAMILY_PLAN,
                 action: onLeaveFamilyClick,
                 variant: 'danger',
             },
@@ -49,10 +49,11 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <VerticallyCentered>
-                    <Typography color="text.secondary ">
-                        {constants.FAMILY_SUBSCRIPTION_INFO(
-                            getFamilyPlanAdmin(userDetails.familyData)?.email
-                        )}
+                    <Typography color="text.secondary">
+                        {constants.FAMILY_SUBSCRIPTION_INFO}
+                    </Typography>
+                    <Typography>
+                        {getFamilyPlanAdmin(userDetails.familyData)?.email}
                     </Typography>
                     <img
                         height="267px"
@@ -64,7 +65,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
                         variant="outlined"
                         color="danger"
                         onClick={confirmLeaveFamily}>
-                        {constants.LEAVE_FAMILY}
+                        {constants.LEAVE_FAMILY_PLAN}
                     </Button>
                 </VerticallyCentered>
             </DialogContent>
