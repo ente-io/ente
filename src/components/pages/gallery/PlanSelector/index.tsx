@@ -21,9 +21,11 @@ import billingService from 'services/billingService';
 import { SetLoading } from 'types/gallery';
 import { logError } from 'utils/sentry';
 import { AppContext } from 'pages/_app';
-import DialogBox from 'components/DialogBox';
 import Plans from './plans';
-import { DialogBoxAttributes } from 'types/dialogBox';
+import { Box, DialogContent, styled } from '@mui/material';
+import { CenteredFlex } from 'components/Container';
+import DialogBoxBase from 'components/DialogBox/base';
+import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
 
 interface Props {
     modalView: boolean;
@@ -35,6 +37,15 @@ export enum PLAN_PERIOD {
     MONTH = 'month',
     YEAR = 'year',
 }
+
+const BreakPointWrapper = styled(Box)`
+    @media (max-width: 1151px) {
+        width: 520px;
+    }
+    @media (max-width: 551px) {
+        width: 260px;
+    }
+`;
 function PlanSelector(props: Props) {
     const subscription: Subscription = getUserSubscription();
     const [plans, setPlans] = useState<Plan[]>(null);
@@ -147,36 +158,41 @@ function PlanSelector(props: Props) {
         }
     }
 
-    const planSelectorAttributes: DialogBoxAttributes = {
-        title: hasPaidSubscription(subscription)
-            ? constants.MANAGE_PLAN
-            : constants.CHOOSE_PLAN,
-    };
-
     return (
-        <DialogBox
+        <DialogBoxBase
+            fullScreen={appContext.isSmallDisplay}
             open={props.modalView}
-            titleCloseButton
             onClose={props.closeModal}
-            size={'xl'}
-            attributes={planSelectorAttributes}
+            maxWidth={'xl'}
             fullWidth={false}>
-            <PeriodToggler
-                planPeriod={planPeriod}
-                togglePeriod={togglePeriod}
-            />
-            <Plans
-                plans={plans}
-                planPeriod={planPeriod}
-                onPlanSelect={onPlanSelect}
-                subscription={subscription}
-            />
-            <ManageSubscription
-                subscription={subscription}
-                closeModal={props.closeModal}
-                setLoading={props.setLoading}
-            />
-        </DialogBox>
+            <DialogTitleWithCloseButton>
+                {hasPaidSubscription(subscription)
+                    ? constants.MANAGE_PLAN
+                    : constants.CHOOSE_PLAN}
+            </DialogTitleWithCloseButton>
+            <DialogContent sx={{ '&&&': { px: 2 } }}>
+                <PeriodToggler
+                    planPeriod={planPeriod}
+                    togglePeriod={togglePeriod}
+                />
+
+                <CenteredFlex>
+                    <BreakPointWrapper>
+                        <Plans
+                            plans={plans}
+                            planPeriod={planPeriod}
+                            onPlanSelect={onPlanSelect}
+                            subscription={subscription}
+                        />
+                        <ManageSubscription
+                            subscription={subscription}
+                            closeModal={props.closeModal}
+                            setLoading={props.setLoading}
+                        />
+                    </BreakPointWrapper>
+                </CenteredFlex>
+            </DialogContent>
+        </DialogBoxBase>
     );
 }
 

@@ -1,12 +1,13 @@
+import { CenteredFlex } from 'components/Container';
 import React from 'react';
 import { PlanCard } from './planCard';
 
 const Plans = ({ plans, planPeriod, subscription, onPlanSelect }) => (
-    <div
-        style={{
-            display: 'flex',
-            minHeight: '230px',
-            marginTop: '32px',
+    <CenteredFlex
+        mt={4}
+        sx={{
+            flexWrap: 'wrap',
+            minHeight: '228px',
         }}>
         {plans
             ?.filter((plan) => plan.period === planPeriod)
@@ -18,7 +19,7 @@ const Plans = ({ plans, planPeriod, subscription, onPlanSelect }) => (
                     onPlanSelect={onPlanSelect}
                 />
             ))}
-    </div>
+    </CenteredFlex>
 );
 
 export default Plans;

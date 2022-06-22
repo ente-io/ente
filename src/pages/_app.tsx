@@ -18,7 +18,7 @@ import LoadingBar from 'react-top-loading-bar';
 import DialogBox from 'components/DialogBox';
 import { styled, ThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'themes/darkThemeOptions';
-import { CssBaseline } from '@mui/material';
+import { CssBaseline, useMediaQuery } from '@mui/material';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as types from 'styled-components/cssprop'; // need to css prop on styled component
 import { SetDialogBoxAttributes, DialogBoxAttributes } from 'types/dialogBox';
@@ -52,6 +52,7 @@ type AppContextType = {
     finishLoading: () => void;
     closeMessageDialog: () => void;
     setDialogMessage: SetDialogBoxAttributes;
+    isSmallDisplay: boolean;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -86,6 +87,7 @@ export default function App({ Component, err }) {
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
+    const isSmallDisplay = useMediaQuery('(max-width:620px)');
 
     useEffect(() => {
         if (
@@ -275,6 +277,7 @@ export default function App({ Component, err }) {
                         finishLoading,
                         closeMessageDialog,
                         setDialogMessage,
+                        isSmallDisplay,
                     }}>
                     {loading ? (
                         <VerticallyCentered>

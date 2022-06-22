@@ -1,6 +1,6 @@
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import Done from '@mui/icons-material/Done';
-import { Button } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
 import constants from 'utils/strings/constants';
@@ -11,20 +11,23 @@ export function PlanIconButton({
     current: boolean;
     onClick: () => void;
 }) {
-    return current ? (
-        <DisabledPlanTileButton />
-    ) : (
-        <EnabledPlanTileButton onClick={onClick} />
+    return (
+        <Box mt={6}>
+            {current ? (
+                <CurrentPlanTileButton />
+            ) : (
+                <NormalPlanTileButton onClick={onClick} />
+            )}
+        </Box>
     );
 }
 
-function DisabledPlanTileButton() {
+function CurrentPlanTileButton() {
     return (
         <Button
             color="accent"
             disabled={true}
             sx={(theme) => ({
-                mt: 6,
                 '&&': {
                     color: theme.palette.accent.main,
                     borderColor: theme.palette.accent.main,
@@ -41,13 +44,13 @@ function DisabledPlanTileButton() {
     );
 }
 
-function EnabledPlanTileButton({ onClick }) {
+function NormalPlanTileButton({ onClick }) {
     return (
         <Button
             color="accent"
-            sx={{
-                mt: 6,
-            }}
+            sx={(theme) => ({
+                border: `1px solid ${theme.palette.accent.main}`,
+            })}
             fullWidth
             onClick={onClick}
             variant={'contained'}>

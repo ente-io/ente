@@ -10,13 +10,14 @@ const ManageSubscriptionButtonBase = styled(Box)<{
     padding: '20px 24px',
     width: '100%',
     border: `1px solid ${theme.palette.divider}`,
-    borderTop: '0.5px',
+    borderBottomWidth: '0px',
     cursor: 'pointer',
     '&:hover .children': {
         color: theme.palette[color].main,
     },
     '&:last-of-type': {
         borderRadius: '0 0 8px 8px',
+        borderBottomWidth: '1px',
     },
 }));
 
