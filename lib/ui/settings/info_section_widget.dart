@@ -71,7 +71,7 @@ class InfoSectionWidget extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            launch("https://github.com/ente-io/frame");
+            launchUrl(Uri.parse("https://github.com/ente-io/frame"));
           },
           child:
               SettingsTextItem(text: "Source code", icon: Icons.navigate_next),
