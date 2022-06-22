@@ -126,7 +126,8 @@ const darkThemeOptions = createTheme({
     palette: {
         mode: 'dark',
         primary: {
-            main: '#f0f0f0',
+            main: '#fff',
+            contrastText: '#000',
         },
         secondary: {
             main: 'rgba(256, 256, 256, 0.1)',
@@ -136,6 +137,11 @@ const darkThemeOptions = createTheme({
             main: '#1dba54',
             dark: '#248546',
             light: '#2cd366',
+        },
+        text: {
+            primary: '#fff',
+            secondary: 'rgba(255, 255, 255, 0.7)',
+            disabled: 'rgba(255, 255, 255, 0.5)',
         },
 
         danger: {
