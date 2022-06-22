@@ -86,6 +86,8 @@ class RemoteSyncService {
       await TrashSyncService.instance
           .syncTrash()
           .onError((e, s) => _logger.severe('trash sync failed', e, s));
+      // check if user can upload new files
+      await _uploader.canUpload();
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
       if (hasUploadedFiles) {
@@ -254,6 +256,7 @@ class RemoteSyncService {
     );
     return filesToBeUploaded;
   }
+
 
   Future<bool> _uploadFiles(List<File> filesToBeUploaded) async {
     final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated();

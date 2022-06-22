@@ -650,20 +650,28 @@ class FileUploader {
 
   Future<UploadURL> _getUploadURL() async {
     if (_uploadURLs.isEmpty) {
-      await _fetchUploadURLs();
+      await _fetchUploadURLs(2 * _queue.length);
     }
     return _uploadURLs.removeFirst();
   }
 
+  // can upload is a helper method to verify that user can actually upload
+  // new files or not based on their subscription plan and storage limit.
+  // To avoid creating new endpoint, we are using fetchUploadUrls as alternative
+  // method.
+  Future<void> canUpload() async {
+    return await _fetchUploadURLs(2);
+  }
+
   Future<void> _uploadURLFetchInProgress;
 
-  Future<void> _fetchUploadURLs() async {
+  Future<void> _fetchUploadURLs(int urlCount) async {
     _uploadURLFetchInProgress ??= Future<void>(() async {
       try {
         final response = await _dio.get(
           Configuration.instance.getHttpEndpoint() + "/files/upload-urls",
           queryParameters: {
-            "count": min(42, 2 * _queue.length), // m4gic number
+            "count": min(42, urlCount), // m4gic number
           },
           options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()},
