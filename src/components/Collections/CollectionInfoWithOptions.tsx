@@ -3,9 +3,9 @@ import React from 'react';
 import { Collection, CollectionSummary } from 'types/collection';
 import CollectionOptions from 'components/Collections/CollectionOptions';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
-import { SPECIAL_COLLECTION_TYPES } from 'constants/collection';
 import { SpaceBetweenFlex } from 'components/Container';
 import { CollectionInfoBarWrapper } from './styledComponents';
+import { isSystemCollection } from 'utils/collection';
 
 interface Iprops {
     activeCollection: Collection;
@@ -36,9 +36,7 @@ export default function CollectionInfoWithOptions({
         <CollectionInfoBarWrapper>
             <SpaceBetweenFlex>
                 <CollectionInfo name={name} fileCount={fileCount} />
-                {!SPECIAL_COLLECTION_TYPES.has(type) && (
-                    <CollectionOptions {...props} />
-                )}
+                {!isSystemCollection(type) && <CollectionOptions {...props} />}
             </SpaceBetweenFlex>
         </CollectionInfoBarWrapper>
     );

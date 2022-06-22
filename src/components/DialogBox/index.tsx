@@ -48,7 +48,11 @@ export default function DialogBox({
             {...props}>
             {attributes.title && (
                 <DialogTitleWithCloseButton
-                    onClose={titleCloseButton && handleClose}>
+                    onClose={
+                        titleCloseButton &&
+                        !attributes.nonClosable &&
+                        handleClose
+                    }>
                     {attributes.title}
                 </DialogTitleWithCloseButton>
             )}

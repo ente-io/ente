@@ -33,7 +33,7 @@ export const COLLECTION_SORT_ORDER = new Map([
     [CollectionType.trash, 4],
 ]);
 
-export const SPECIAL_COLLECTION_TYPES = new Set([
+export const SYSTEM_COLLECTION_TYPES = new Set([
     CollectionType.all,
     CollectionType.archive,
     CollectionType.trash,

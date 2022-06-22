@@ -50,6 +50,7 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
                 fieldType="text"
                 buttonText={attributes.buttonText}
                 placeholder={constants.ENTER_ALBUM_NAME}
+                initialValue={attributes.autoFilledName}
             />
         </DialogBox>
     );

@@ -1,15 +1,13 @@
 import { Box } from '@mui/material';
 import { styled } from '@mui/material';
-import { default as MuiStyled } from '@mui/styled-engine';
-import { IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
 
-const VerticallyCentered = MuiStyled(Box)`
+const VerticallyCentered = styled(Box)`
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    text-align:center;
+    text-align: center;
     overflow: auto;
 `;
 
@@ -99,12 +97,5 @@ export const InvertedIconButton = styled(IconButton)`
     }
     &:focus {
         background-color: ${({ theme }) => theme.palette.primary.main};
-    }
-`;
-
-export const PaddedContainer = styled(Box)`
-    padding: 0 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * 4}px) {
-        padding: 0 4px;
     }
 `;

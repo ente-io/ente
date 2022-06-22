@@ -19,7 +19,6 @@ import {
     syncCollections,
     getFavItemIds,
     getLocalCollections,
-    getNonEmptyCollections,
     createCollection,
     getCollectionSummaries,
 } from 'services/collectionService';
@@ -100,7 +99,7 @@ import { ElectronFile } from 'types/upload';
 import importService from 'services/importService';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
-import { Search, SearchResultSummary } from 'types/search';
+import { Search, SearchResultSummary, UpdateSearch } from 'types/search';
 import SearchResultInfo from 'components/Search/SearchResultInfo';
 import { NotificationAttributes } from 'types/Notification';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
@@ -316,9 +315,9 @@ export default function Gallery() {
     }, [router.isReady]);
 
     useEffect(() => {
-        if (isInSearchMode) {
+        if (isInSearchMode && searchResultSummary) {
             setPhotoListHeader({
-                height: 116,
+                height: 104,
                 item: (
                     <SearchResultInfo
                         searchResultSummary={searchResultSummary}
@@ -378,13 +377,11 @@ export default function Gallery() {
         }
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
-        const nonEmptyCollections = getNonEmptyCollections(collections, files);
-
-        const archivedCollections = getArchivedCollections(nonEmptyCollections);
-        setArchivedCollections(new Set(archivedCollections));
+        const archivedCollections = getArchivedCollections(collections);
+        setArchivedCollections(archivedCollections);
 
         const collectionSummaries = getCollectionSummaries(
-            nonEmptyCollections,
+            collections,
             files,
             archivedCollections
         );
@@ -530,9 +527,11 @@ export default function Gallery() {
         }
     };
 
-    const updateSearch = (newSearch: Search) => {
+    const updateSearch: UpdateSearch = (newSearch, summary) => {
         setActiveCollection(ALL_SECTION);
         setSearch(newSearch);
+        setSetSearchResultSummary(summary);
+        setIsInSearchMode(!!newSearch);
     };
 
     const closeCollectionSelector = (closeBtnClick?: boolean) => {
@@ -602,7 +601,10 @@ export default function Gallery() {
         }
     };
 
-    const resetSearch = () => setSearch({});
+    const resetSearch = () => {
+        setSearch(null);
+        setSetSearchResultSummary(null);
+    };
 
     return (
         <GalleryContext.Provider
@@ -663,12 +665,10 @@ export default function Gallery() {
                     isFirstFetch={isFirstFetch}
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
-                    setIsInSearchMode={setIsInSearchMode}
                     collections={collections}
                     files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}
                     updateSearch={updateSearch}
-                    setSearchResultSummary={setSetSearchResultSummary}
                 />
 
                 <Collections

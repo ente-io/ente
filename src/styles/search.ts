@@ -5,14 +5,13 @@ export const SelectStyles = {
     }),
     control: (style, { isFocused }) => ({
         ...style,
-        backgroundColor: '#282828',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
 
-        borderColor: isFocused ? '#51cd7c' : '#444',
+        borderColor: isFocused ? '#1dba54' : 'transparent',
         boxShadow: 'none',
         ':hover': {
-            borderColor: '#51cd7c',
+            borderColor: '#1dba54',
             cursor: 'text',
-            '&>.icon': { color: '#51cd7c' },
         },
     }),
     input: (style) => ({
@@ -52,14 +51,16 @@ export const SelectStyles = {
     }),
     singleValue: (style, state) => ({
         ...style,
-        backgroundColor: '#282828',
+        backgroundColor: 'transparent',
         color: '#d1d1d1',
         display: state.selectProps.menuIsOpen ? 'none' : 'block',
+        marginLeft: '36px',
     }),
     placeholder: (style) => ({
         ...style,
-        color: '#686868',
+        color: 'rgba(255, 255, 255, 0.7)',
         wordSpacing: '2px',
         whiteSpace: 'nowrap',
+        marginLeft: '36px',
     }),
 };

@@ -5,6 +5,7 @@ export const DrawerSidebar = styled(Drawer)(({ theme }) => ({
     '& .MuiPaper-root': {
         width: '320px',
         padding: theme.spacing(2, 1, 4, 1),
+        scrollbarWidth: 'thin',
     },
 }));
 

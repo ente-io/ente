@@ -4,14 +4,21 @@ import { Box, Skeleton } from '@mui/material';
 import { UserDetails } from 'types/user';
 
 import { GalleryContext } from 'pages/gallery';
-import { hasNonAdminFamilyMembers } from 'utils/billing';
+import {
+    hasNonAdminFamilyMembers,
+    isFamilyAdmin,
+    isPartOfFamily,
+} from 'utils/billing';
 import { SubscriptionCardContentOverlay } from './contentOverlay';
 interface Iprops {
     userDetails: UserDetails;
-    closeSidebar: () => void;
+    openMemberSubscriptionDialog: () => void;
 }
 
-export default function SubscriptionCard({ userDetails }: Iprops) {
+export default function SubscriptionCard({
+    userDetails,
+    openMemberSubscriptionDialog,
+}: Iprops) {
     const { showPlanSelectorModal } = useContext(GalleryContext);
 
     if (!userDetails) {
@@ -26,6 +33,10 @@ export default function SubscriptionCard({ userDetails }: Iprops) {
         );
     }
 
+    const isMemberSubscription =
+        isPartOfFamily(userDetails.familyData) &&
+        !isFamilyAdmin(userDetails.familyData);
+
     return (
         <Box position="relative">
             <img
@@ -33,9 +44,15 @@ export default function SubscriptionCard({ userDetails }: Iprops) {
                     width: '100%',
                     aspectRatio: '2/1',
                 }}
-                src="/subscription-card-background.png"
+                src="/images/subscription-card-background.png"
             />
-            <ClickOverlay onClick={showPlanSelectorModal} />
+            <ClickOverlay
+                onClick={
+                    isMemberSubscription
+                        ? openMemberSubscriptionDialog
+                        : showPlanSelectorModal
+                }
+            />
             <SubscriptionCardContentOverlay
                 hasNonAdminFamilyMembers={hasNonAdminFamilyMembers}
                 userDetails={userDetails}

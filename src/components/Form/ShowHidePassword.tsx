@@ -21,7 +21,8 @@ const ShowHidePassword = ({
             aria-label="toggle password visibility"
             onClick={handleClickShowPassword}
             onMouseDown={handleMouseDownPassword}
-            edge="end">
+            edge="end"
+            sx={{ color: 'stroke.secondary' }}>
             {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
         </IconButton>
     </InputAdornment>

@@ -15,7 +15,8 @@ export function AdminSubscriptionStatus({
         <Typography
             variant="body2"
             color={'text.secondary'}
-            onClick={showPlanSelectorModal}>
+            onClick={showPlanSelectorModal}
+            sx={{ cursor: 'pointer' }}>
             {isSubscriptionActive(userDetails.subscription)
                 ? isOnFreePlan(userDetails.subscription)
                     ? constants.FREE_SUBSCRIPTION_INFO(

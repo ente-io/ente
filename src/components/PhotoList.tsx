@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useContext } from 'react';
 import { VariableSizeList as List } from 'react-window';
-import { styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { EnteFile } from 'types/file';
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
@@ -17,9 +17,10 @@ import { ENTE_WEBSITE_LINK } from 'constants/urls';
 import { getVariantColor, ButtonVariant } from './pages/gallery/LinkButton';
 import { convertBytesToHumanReadable } from 'utils/billing';
 import { DeduplicateContext } from 'pages/deduplicate';
-import { FlexWrapper, PaddedContainer } from './Container';
+import { FlexWrapper } from './Container';
 import { Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
+import { SpecialPadding } from 'styles/SpecialPadding';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const NO_OF_PAGES = 2;
@@ -68,7 +69,7 @@ const getTemplateColumns = (columns: number, groups?: number[]): string => {
     }
 };
 
-const ListContainer = styled(PaddedContainer)<{
+const ListContainer = styled(Box)<{
     columns: number;
     groups?: number[];
 }>`
@@ -79,6 +80,7 @@ const ListContainer = styled(PaddedContainer)<{
     grid-column-gap: ${GAP_BTW_TILES}px;
     width: 100%;
     color: #fff;
+    ${SpecialPadding}
 `;
 
 const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
@@ -91,6 +93,7 @@ const DateContainer = styled(ListItemContainer)`
     overflow: hidden;
     text-overflow: ellipsis;
     height: ${DATE_CONTAINER_HEIGHT}px;
+    color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
 const SizeAndCountContainer = styled(DateContainer)`

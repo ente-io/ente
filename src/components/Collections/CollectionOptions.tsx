@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import * as CollectionAPI from 'services/collectionService';
 import {
     changeCollectionVisibility,
@@ -8,15 +8,13 @@ import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import { Collection } from 'types/collection';
 import { IsArchived } from 'utils/magicMetadata';
-import { InvertedIconButton } from 'components/Container';
-import OptionIcon from 'components/icons/OptionIcon-2';
-import Paper from '@mui/material/Paper';
-import MenuList from '@mui/material/MenuList';
-import { ListItem, Menu, MenuItem } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { logError } from 'utils/sentry';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { AppContext } from 'pages/_app';
+import OverflowMenu from 'components/OverflowMenu/menu';
+import { OverflowMenuOption } from 'components/OverflowMenu/option';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -43,9 +41,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const { startLoading, finishLoading, setDialogMessage } =
         useContext(AppContext);
     const { syncWithRemote } = useContext(GalleryContext);
-
-    const [optionEl, setOptionEl] = useState(null);
-    const handleClose = () => setOptionEl(null);
 
     const handleCollectionAction = (action: CollectionActions) => {
         let callback;
@@ -78,7 +73,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             startLoading();
             try {
                 await callback(...args);
-                handleClose();
             } catch (e) {
                 setDialogMessage({
                     title: constants.ERROR,
@@ -155,71 +149,42 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     return (
-        <>
-            <InvertedIconButton
-                style={{
-                    transform: 'rotate(90deg)',
-                }}
-                onClick={(event) => setOptionEl(event.currentTarget)}
-                aria-controls={optionEl ? 'collection-options' : undefined}
-                aria-haspopup="true"
-                aria-expanded={optionEl ? 'true' : undefined}>
-                <OptionIcon />
-            </InvertedIconButton>
-            <Menu
-                id="collection-options"
-                anchorEl={optionEl}
-                open={Boolean(optionEl)}
-                onClose={handleClose}
-                MenuListProps={{
-                    disablePadding: true,
-                    'aria-labelledby': 'collection-options',
-                }}>
-                <Paper>
-                    <MenuList>
-                        <MenuItem>
-                            <ListItem onClick={showRenameCollectionModal}>
-                                {constants.RENAME}
-                            </ListItem>
-                        </MenuItem>
-                        <MenuItem>
-                            <ListItem onClick={showCollectionShareModal}>
-                                {constants.SHARE}
-                            </ListItem>
-                        </MenuItem>
-                        <MenuItem>
-                            <ListItem onClick={confirmDownloadCollection}>
-                                {constants.DOWNLOAD}
-                            </ListItem>
-                        </MenuItem>
-                        <MenuItem>
-                            {IsArchived(activeCollection) ? (
-                                <ListItem
-                                    onClick={handleCollectionAction(
-                                        CollectionActions.UNARCHIVE
-                                    )}>
-                                    {constants.UNARCHIVE}
-                                </ListItem>
-                            ) : (
-                                <ListItem
-                                    onClick={handleCollectionAction(
-                                        CollectionActions.ARCHIVE
-                                    )}>
-                                    {constants.ARCHIVE}
-                                </ListItem>
-                            )}
-                        </MenuItem>
-                        <MenuItem>
-                            <ListItem
-                                color="danger"
-                                onClick={confirmDeleteCollection}>
-                                {constants.DELETE}
-                            </ListItem>
-                        </MenuItem>
-                    </MenuList>
-                </Paper>
-            </Menu>
-        </>
+        <OverflowMenu
+            ariaControls={`collection-options-${props.activeCollection.id}`}
+            triggerButtonIcon={<MoreVertIcon />}
+            triggerButtonProps={{
+                sx: {
+                    background: (theme) => theme.palette.background.paper,
+                },
+            }}>
+            <OverflowMenuOption onClick={showRenameCollectionModal}>
+                {constants.RENAME}
+            </OverflowMenuOption>
+            <OverflowMenuOption onClick={showCollectionShareModal}>
+                {constants.SHARE}
+            </OverflowMenuOption>
+            <OverflowMenuOption onClick={confirmDownloadCollection}>
+                {constants.DOWNLOAD}
+            </OverflowMenuOption>
+            {IsArchived(activeCollection) ? (
+                <OverflowMenuOption
+                    onClick={handleCollectionAction(
+                        CollectionActions.UNARCHIVE
+                    )}>
+                    {constants.UNARCHIVE}
+                </OverflowMenuOption>
+            ) : (
+                <OverflowMenuOption
+                    onClick={handleCollectionAction(CollectionActions.ARCHIVE)}>
+                    {constants.ARCHIVE}
+                </OverflowMenuOption>
+            )}
+            <OverflowMenuOption
+                color="danger"
+                onClick={confirmDeleteCollection}>
+                {constants.DELETE}
+            </OverflowMenuOption>
+        </OverflowMenu>
     );
 };
 

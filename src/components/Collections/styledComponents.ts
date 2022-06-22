@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
-import { PaddedContainer } from 'components/Container';
 import { styled } from '@mui/material';
+import { SpecialPadding } from 'styles/SpecialPadding';
 export const CollectionListWrapper = styled(Box)`
     position: relative;
     overflow: hidden;
@@ -8,15 +8,16 @@ export const CollectionListWrapper = styled(Box)`
     width: 100%;
 `;
 
-export const CollectionListBarWrapper = styled(PaddedContainer)`
+export const CollectionListBarWrapper = styled(Box)`
     width: 100%;
-    margin: 16px auto;
+    margin-bottom: 16px;
     border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
+    ${SpecialPadding}
 `;
 
 export const CollectionInfoBarWrapper = styled(Box)`
     width: 100%;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
 `;
 
 export const ScrollContainer = styled('div')`

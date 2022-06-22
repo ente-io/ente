@@ -19,6 +19,7 @@ export interface SingleInputFormProps {
     placeholder: string;
     buttonText: string;
     customSubmitButton?: any;
+    initialValue?: string;
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
@@ -67,7 +68,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
 
     return (
         <Formik<formValues>
-            initialValues={{ inputValue: '' }}
+            initialValues={{ inputValue: props.initialValue ?? '' }}
             onSubmit={submitForm}
             validationSchema={validationSchema}
             validateOnChange={false}

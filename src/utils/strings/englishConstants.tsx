@@ -59,7 +59,7 @@ const englishConstants = {
     VERIFY_EMAIL: 'Verify email',
     EMAIL_SENT: ({ email }) => (
         <span>
-            Verification code sent to you on{' '}
+            Verification code sent to{' '}
             <Typography
                 component={'span'}
                 fontSize="inherit"
@@ -68,7 +68,7 @@ const englishConstants = {
             </Typography>
         </span>
     ),
-    CHECK_INBOX: 'please check your inbox (and spam) to complete verification',
+    CHECK_INBOX: 'Please check your inbox (and spam) to complete verification',
     ENTER_OTT: 'Verification code',
     RESEND_MAIL: 'Resend code',
     VERIFY: 'Verify',
@@ -141,7 +141,11 @@ const englishConstants = {
     NO_INTERNET_CONNECTION:
         'Please check your internet connection and try again',
     TITLE: 'ente.io | encrypted photo storage',
-    UPLOAD_FIRST_PHOTO_DESCRIPTION: 'preserve your first memory with ente',
+    UPLOAD_FIRST_PHOTO_DESCRIPTION: () => (
+        <>
+            preserve your first memory with <strong> ente </strong>
+        </>
+    ),
     UPLOAD_FIRST_PHOTO: 'Preserve',
     UPLOAD_DROPZONE_MESSAGE: 'Drop to backup your files',
     WATCH_FOLDER_DROPZONE_MESSAGE: 'Drop to add watched folder',
@@ -191,7 +195,7 @@ const englishConstants = {
     REQUEST_FEATURE: 'Request Feature',
     SUPPORT: 'Support',
     CONFIRM: 'Confirm',
-    SKIP: 'Skip',
+    SKIP_SUBSCRIPTION_PURCHASE: 'Continue with free plan',
     CANCEL: 'Cancel',
     LOGOUT: 'Logout',
     DELETE_ACCOUNT: 'Delete Account',
@@ -249,17 +253,18 @@ const englishConstants = {
     // ========================
     // Subscription
     // ========================
+    SUBSCRIPTION: 'Subscription',
     SUBSCRIBE: 'Subscribe',
     SUBSCRIPTION_PLAN: 'Subscription plan',
     USAGE_DETAILS: 'Usage',
     MANAGE: 'Manage',
     MANAGEMENT_PORTAL: 'Manage payment method',
     MANAGE_FAMILY_PORTAL: 'Manage family',
-    LEAVE_FAMILY: 'Leave family',
-    LEAVE_FAMILY_CONFIRM: 'Are you sure that you want to leave family?',
+    LEAVE_FAMILY_PLAN: 'Leave family plan',
+    LEAVE_FAMILY_CONFIRM: 'Are you sure that you want to leave family plan?',
     CHOOSE_PLAN: 'Choose your subscription plan',
     MANAGE_PLAN: 'Manage your subscription',
-    CHOOSE_PLAN_BTN: 'Choose plan',
+    ACTIVE: 'Active',
 
     OFFLINE_MSG: 'You are offline, cached memories are being shown',
 
@@ -270,12 +275,8 @@ const englishConstants = {
         </>
     ),
 
-    FAMILY_PLAN_MANAGE_ADMIN_ONLY: (adminEmail) => (
-        <>
-            Only your family plan admin <strong>{adminEmail}</strong> can change
-            the plan
-        </>
-    ),
+    FAMILY_SUBSCRIPTION_INFO: 'You are on a family plan managed by',
+
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>Your subscription will renew on {dateString(expiryTime)}</>
     ),
@@ -398,7 +399,7 @@ const englishConstants = {
     CREATE_ALBUM_FAILED: 'Failed to create album , please try again',
 
     SEARCH_RESULTS: 'Search results',
-    SEARCH_HINT: () => <span>Search for location, dates, themes</span>,
+    SEARCH_HINT: () => <span>Search for location, dates, occasions ...</span>,
     SEARCH_TYPE: (type: SuggestionType) => {
         switch (type) {
             case SuggestionType.COLLECTION:
@@ -534,7 +535,7 @@ const englishConstants = {
     LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE:
         'Your browser or an addon is blocking ente from saving data into local storage. please try loading this page after switching your browsing mode.',
     RETRY: 'Retry',
-    SEND_OTT: 'Send otp',
+    SEND_OTT: 'Send OTP',
     EMAIl_ALREADY_OWNED: 'Email already taken',
     EMAIL_UDPATE_SUCCESSFUL: 'Your email has been udpated successfully',
     UPLOAD_FAILED: 'Upload failed',
@@ -785,6 +786,9 @@ const englishConstants = {
     STOP_WATCHING_DIALOG_MESSAGE:
         'Your existing files will not be deleted, but ente will stop automatically updating the linked ente album on changes in this folder.',
     YES_STOP: 'Yes, stop',
+    MONTH_SHORT: 'mo',
+    YEAR_SHORT: 'yr',
+    FAMILY_PLAN: 'Family plan',
 };
 
 export default englishConstants;

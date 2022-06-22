@@ -1,21 +1,11 @@
 import { Box, Typography } from '@mui/material';
-import { DropdownStyle } from 'components/Collections/CollectionShare/styles';
 import React from 'react';
 import Select from 'react-select';
+import { linkExpiryStyle } from 'styles/linkExpiry';
 import { shareExpiryOptions } from 'utils/collection';
 import constants from 'utils/strings/constants';
 import { dateStringWithMMH } from 'utils/time';
-import { OptionWithDivider } from '../customSelectComponents';
-
-const linkExpiryStyle = {
-    ...DropdownStyle,
-    placeholder: (style) => ({
-        ...style,
-        color: '#d1d1d1',
-        width: '100%',
-        textAlign: 'center',
-    }),
-};
+import { OptionWithDivider } from './selectComponents/OptionWithDivider';
 
 export function ManageLinkExpiry({
     publicShareProp,

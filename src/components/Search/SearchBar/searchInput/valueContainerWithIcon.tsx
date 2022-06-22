@@ -6,10 +6,12 @@ import LocationIcon from '@mui/icons-material/LocationOn';
 import VideoFileIcon from '@mui/icons-material/VideoFile';
 import { components } from 'react-select';
 import { SearchOption, SuggestionType } from 'types/search';
-import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from '@mui/icons-material/SearchOutlined';
 import { SelectComponents } from 'react-select/src/components';
+import { FlexWrapper } from 'components/Container';
+import { Box } from '@mui/material';
 
-const { Control } = components;
+const { ValueContainer } = components;
 
 const getIconByType = (type: SuggestionType) => {
     switch (type) {
@@ -28,17 +30,16 @@ const getIconByType = (type: SuggestionType) => {
     }
 };
 
-export const ControlWithIcon: SelectComponents<SearchOption, false>['Control'] =
-    (props) => (
-        <Control {...props}>
-            <span
-                className="icon"
-                style={{
-                    paddingLeft: '10px',
-                    paddingBottom: '4px',
-                }}>
+export const ValueContainerWithIcon: SelectComponents<
+    SearchOption,
+    false
+>['ValueContainer'] = (props) => (
+    <ValueContainer {...props}>
+        <FlexWrapper>
+            <Box className="icon" mr={'12px'} color="stroke.secondary">
                 {getIconByType(props.getValue()[0]?.type)}
-            </span>
+            </Box>
             {props.children}
-        </Control>
-    );
+        </FlexWrapper>
+    </ValueContainer>
+);
