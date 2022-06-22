@@ -19,23 +19,6 @@ export const DisclaimerContainer = styled('div')`
     font-size: 14px;
 `;
 
-export const IconButton = styled('button')`
-    background: none;
-    border: none;
-    border-radius: 50%;
-    padding: 5px;
-    color: inherit;
-    margin: 0 10px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    &:focus,
-    &:hover {
-        background-color: rgba(255, 255, 255, 0.2);
-    }
-`;
-
 export const Row = styled('div')`
     min-height: 32px;
     display: flex;
@@ -87,15 +70,4 @@ export const Overlay = styled(Box)`
     top: 0;
     left: 0;
     z-index: 1; ;
-`;
-
-export const InvertedIconButton = styled(IconButton)`
-    background-color: ${({ theme }) => theme.palette.primary.main};
-    color: ${({ theme }) => theme.palette.background.default};
-    &:hover {
-        background-color: ${({ theme }) => theme.palette.grey.A100};
-    }
-    &:focus {
-        background-color: ${({ theme }) => theme.palette.primary.main};
-    }
 `;

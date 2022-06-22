@@ -14,7 +14,7 @@ import { FIX_CREATION_TIME_VISIBLE_TO_USER_IDS } from 'constants/user';
 import { User } from 'types/user';
 import { SelectionBar } from '../../Navbar/SelectionBar';
 import { AppContext } from 'pages/_app';
-import { IconButton, Stack, Tooltip } from '@mui/material';
+import { Box, IconButton, Stack, Tooltip } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import RestoreIcon from '@mui/icons-material/Restore';
 import AddIcon from 'components/icons/AddIcon';
@@ -138,9 +138,9 @@ const SelectedFileOptions = ({
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
                 </IconButton>
-                <div>
+                <Box ml={'12px'}>
                     {count} {constants.SELECTED}
-                </div>
+                </Box>
             </FluidContainer>
             <Stack spacing={2} direction="row" mr={2}>
                 {activeCollection === TRASH_SECTION ? (

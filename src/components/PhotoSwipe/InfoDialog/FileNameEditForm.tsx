@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import constants from 'utils/strings/constants';
 import { Col, Form, FormControl } from 'react-bootstrap';
-import { FlexWrapper, IconButton, Value } from 'components/Container';
+import { FlexWrapper, Value } from 'components/Container';
 import CloseIcon from '@mui/icons-material/Close';
 import TickIcon from '@mui/icons-material/Done';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { MAX_EDITED_FILE_NAME_LENGTH } from 'constants/file';
 import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
+import { IconButton } from '@mui/material';
 
 export interface formValues {
     filename: string;
