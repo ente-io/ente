@@ -8,7 +8,7 @@ import { InProgressSection } from './inProgressSection';
 import { ResultSection } from './resultSection';
 import { NotUploadSectionHeader } from './styledComponents';
 import { getOSSpecificDesktopAppDownloadLink } from 'utils/common';
-import DialogBoxBase from 'components/DialogBox/base';
+import DialogBoxBase, { dialogCloseHandler } from 'components/DialogBox/base';
 import UploadProgressContext from 'contexts/uploadProgress';
 
 export function UploadProgressDialog() {
@@ -35,8 +35,10 @@ export function UploadProgressDialog() {
         }
     }, [finishedUploads]);
 
+    const handleClose = dialogCloseHandler({ staticBackdrop: true, onClose });
+
     return (
-        <DialogBoxBase maxWidth="xs" open={open} onClose={onClose}>
+        <DialogBoxBase maxWidth="xs" open={open} onClose={handleClose}>
             <UploadProgressHeader />
             {(uploadStage === UPLOAD_STAGES.UPLOADING ||
                 uploadStage === UPLOAD_STAGES.FINISH) && (

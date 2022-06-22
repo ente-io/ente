@@ -42,9 +42,6 @@ export function UploadProgressTitle() {
         UploadProgressContext
     );
     const toggleExpanded = () => setExpanded((expanded) => !expanded);
-    const handleClose = () => {
-        onClose(null, null);
-    };
 
     return (
         <DialogTitle>
@@ -58,7 +55,7 @@ export function UploadProgressTitle() {
                         <IconButtonWithBG onClick={toggleExpanded}>
                             {expanded ? <MinimizeIcon /> : <MaximizeIcon />}
                         </IconButtonWithBG>
-                        <IconButtonWithBG onClick={handleClose}>
+                        <IconButtonWithBG onClick={onClose}>
                             <Close />
                         </IconButtonWithBG>
                     </Stack>

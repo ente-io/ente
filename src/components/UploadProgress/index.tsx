@@ -5,7 +5,6 @@ import React, { useContext, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { UPLOAD_STAGES } from 'constants/upload';
 import { AppContext } from 'pages/_app';
-import { dialogCloseHandler } from 'components/DialogBox/base';
 import {
     UploadFileNames,
     UploadCounter,
@@ -68,15 +67,15 @@ export default function UploadProgress({
         }
     }
 
-    const handleClose = dialogCloseHandler({
-        onClose: onClose,
-    });
+    if (open) {
+        return <></>;
+    }
 
     return (
         <UploadProgressContext.Provider
             value={{
                 open,
-                onClose: handleClose,
+                onClose,
                 uploadCounter,
                 uploadStage,
                 percentComplete,

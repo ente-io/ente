@@ -1,4 +1,3 @@
-import { DialogProps } from '@mui/material';
 import { UPLOAD_STAGES } from 'constants/upload';
 import { createContext } from 'react';
 import {
@@ -10,7 +9,7 @@ import {
 
 interface UploadProgressContextType {
     open: boolean;
-    onClose: DialogProps['onClose'];
+    onClose: () => void;
     uploadCounter: UploadCounter;
     uploadStage: UPLOAD_STAGES;
     percentComplete: number;
