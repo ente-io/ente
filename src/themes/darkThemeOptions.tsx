@@ -119,7 +119,7 @@ const darkThemeOptions = createTheme({
             main: '#f0f0f0',
         },
         secondary: {
-            main: 'rgba(256, 256, 256, 0.2)',
+            main: 'rgba(256, 256, 256, 0.1)',
             contrastText: '#fff',
         },
         accent: {
