@@ -121,6 +121,48 @@ const darkThemeOptions = createTheme({
                 },
             },
         },
+        MuiSvgIcon: {
+            styleOverrides: {
+                root: ({ ownerState }) => {
+                    switch (ownerState.color) {
+                        case 'primary':
+                            return {
+                                color: '#ffffff',
+                            };
+                        case 'secondary':
+                            return {
+                                color: 'rgba(256,256,256,0.24)',
+                            };
+                        case 'disabled':
+                            return {
+                                color: 'rgba(255, 255, 255, 0.12)',
+                            };
+                    }
+                },
+            },
+        },
+
+        MuiIconButton: {
+            styleOverrides: {
+                root: ({ ownerState }) => {
+                    switch (ownerState.color) {
+                        case 'primary':
+                            return {
+                                color: '#ffffff',
+                            };
+                        case 'secondary':
+                            return {
+                                color: 'rgba(256,256,256,0.24)',
+                            };
+                    }
+                    if (ownerState.disabled) {
+                        return {
+                            color: 'rgba(255, 255, 255, 0.12)',
+                        };
+                    }
+                },
+            },
+        },
     },
 
     palette: {
