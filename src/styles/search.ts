@@ -12,7 +12,6 @@ export const SelectStyles = {
         ':hover': {
             borderColor: '#1dba54',
             cursor: 'text',
-            '&>.icon': { color: '#1dba54' },
         },
     }),
     input: (style) => ({
