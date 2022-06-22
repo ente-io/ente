@@ -8,6 +8,7 @@ import { AppContext } from 'pages/_app';
 import constants from 'utils/strings/constants';
 import DialogBoxBase from 'components/DialogBox/base';
 import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
+import UploadStrategyChoiceModal from 'components/pages/gallery/UploadStrategyChoiceModal';
 
 interface Iprops {
     open: boolean;
@@ -16,6 +17,8 @@ interface Iprops {
 
 export default function WatchFolder({ open, onClose }: Iprops) {
     const [mappings, setMappings] = useState<WatchMapping[]>([]);
+    const [inputFolderPath, setInputFolderPath] = useState('');
+    const [choicModalOpen, setChoiceModalOpen] = useState(false);
     const appContext = useContext(AppContext);
 
     useEffect(() => {
@@ -36,7 +39,8 @@ export default function WatchFolder({ open, onClose }: Iprops) {
             const folder: any = folders[i];
             const path = (folder.path as string).replace(/\\/g, '/');
             if (await watchFolderService.isFolder(path)) {
-                await handleAddWatchMapping(path);
+                setInputFolderPath(path);
+                setChoiceModalOpen(true);
             }
         }
     };
@@ -47,16 +51,20 @@ export default function WatchFolder({ open, onClose }: Iprops) {
 
     const handleFolderSelection = async () => {
         const folderPath = await watchFolderService.selectFolder();
-        await handleAddWatchMapping(folderPath);
+        if (folderPath?.length > 0) {
+            setInputFolderPath(folderPath);
+            setChoiceModalOpen(true);
+        }
     };
 
-    const handleAddWatchMapping = async (inputFolderPath: string) => {
+    const handleAddWatchMapping = async (hasMultipleFolders: boolean) => {
         if (inputFolderPath?.length > 0) {
             await watchFolderService.addWatchMapping(
                 inputFolderPath.substring(inputFolderPath.lastIndexOf('/') + 1),
                 inputFolderPath,
-                true
+                hasMultipleFolders
             );
+            setInputFolderPath('');
             setMappings(watchFolderService.getWatchMappings());
         }
     };
@@ -66,36 +74,56 @@ export default function WatchFolder({ open, onClose }: Iprops) {
         setMappings(watchFolderService.getWatchMappings());
     };
 
-    return (
-        <DialogBoxBase maxWidth="xs" open={open} onClose={onClose}>
-            <DialogTitleWithCloseButton onClose={onClose}>
-                {constants.WATCHED_FOLDERS}
-            </DialogTitleWithCloseButton>
-            <DialogContent>
-                {mappings.length === 0 ? (
-                    <NoMappingsContent />
-                ) : (
-                    <MappingList
-                        mappings={mappings}
-                        handleRemoveWatchMapping={handleRemoveWatchMapping}
-                    />
-                )}
-            </DialogContent>
+    const onChoiceModalClose = () => setChoiceModalOpen(false);
 
-            <DialogActions>
-                <Button
-                    sx={{ mt: 2 }}
-                    fullWidth
-                    color="accent"
-                    onClick={handleAddFolderClick}>
-                    +
-                    <span
-                        style={{
-                            marginLeft: '8px',
-                        }}></span>
-                    {constants.ADD_FOLDER}
-                </Button>
-            </DialogActions>
-        </DialogBoxBase>
+    const uploadToSingleCollection = () => {
+        setChoiceModalOpen(false);
+        handleAddWatchMapping(false);
+    };
+
+    const uploadToMultipleCollection = () => {
+        setChoiceModalOpen(false);
+        handleAddWatchMapping(true);
+    };
+
+    return (
+        <>
+            <DialogBoxBase maxWidth="xs" open={open} onClose={onClose}>
+                <DialogTitleWithCloseButton onClose={onClose}>
+                    {constants.WATCHED_FOLDERS}
+                </DialogTitleWithCloseButton>
+                <DialogContent>
+                    {mappings.length === 0 ? (
+                        <NoMappingsContent />
+                    ) : (
+                        <MappingList
+                            mappings={mappings}
+                            handleRemoveWatchMapping={handleRemoveWatchMapping}
+                        />
+                    )}
+                </DialogContent>
+
+                <DialogActions>
+                    <Button
+                        sx={{ mt: 2 }}
+                        fullWidth
+                        color="accent"
+                        onClick={handleAddFolderClick}>
+                        +
+                        <span
+                            style={{
+                                marginLeft: '8px',
+                            }}></span>
+                        {constants.ADD_FOLDER}
+                    </Button>
+                </DialogActions>
+            </DialogBoxBase>
+            <UploadStrategyChoiceModal
+                open={choicModalOpen}
+                onClose={onChoiceModalClose}
+                uploadToSingleCollection={uploadToSingleCollection}
+                uploadToMultipleCollection={uploadToMultipleCollection}
+            />
+        </>
     );
 }
