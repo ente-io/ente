@@ -2,16 +2,19 @@ import {
     createTheme,
     PaletteColor,
     PaletteColorOptions,
+    TypeText,
 } from '@mui/material/styles';
 
 declare module '@mui/material/styles' {
     interface Palette {
         accent: PaletteColor;
         danger: PaletteColor;
+        stroke: TypeText;
     }
     interface PaletteOptions {
         accent?: PaletteColorOptions;
         danger?: PaletteColorOptions;
+        stroke?: Partial<TypeText>;
     }
 
     interface TypographyVariants {
@@ -110,6 +113,13 @@ const darkThemeOptions = createTheme({
                 variant: 'filled',
                 margin: 'dense',
             },
+            styleOverrides: {
+                root: {
+                    '& .MuiInputAdornment-root': {
+                        marginRight: '8px',
+                    },
+                },
+            },
         },
     },
 
@@ -130,6 +140,11 @@ const darkThemeOptions = createTheme({
 
         danger: {
             main: '#c93f3f',
+        },
+        stroke: {
+            primary: '#ffffff',
+            secondary: 'rgba(256,256,256,0.24)',
+            disabled: 'rgba(256,256,256,0.12)',
         },
         background: { default: '#000000', paper: '#1b1b1b' },
         grey: {
