@@ -127,7 +127,6 @@ const defaultGalleryContext: GalleryContextType = {
     syncWithRemote: () => null,
     setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
-    setDropZoneActive: () => null,
     photoListHeader: null,
 };
 
@@ -158,7 +157,6 @@ export default function Gallery() {
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [search, setSearch] = useState<Search>(null);
     const [uploadInProgress, setUploadInProgress] = useState(false);
-    const [dropZoneDisabled, setDropZoneDisabled] = useState(false);
 
     const {
         getRootProps,
@@ -169,7 +167,7 @@ export default function Gallery() {
     } = useDropzone({
         noClick: true,
         noKeyboard: true,
-        disabled: uploadInProgress || dropZoneDisabled,
+        disabled: uploadInProgress,
     });
 
     const [isInSearchMode, setIsInSearchMode] = useState(false);
@@ -589,10 +587,6 @@ export default function Gallery() {
         finishLoading();
     };
 
-    const setDropZoneActive = (active: boolean) => {
-        setDropZoneDisabled(!active);
-    };
-
     const openUploader = () => {
         if (importService.checkAllElectronAPIsExists()) {
             setUploadTypeSelectorView(true);
@@ -615,7 +609,6 @@ export default function Gallery() {
                 syncWithRemote,
                 setNotificationAttributes,
                 setBlockingLoad,
-                setDropZoneActive,
                 photoListHeader: photoListHeader,
             }}>
             <FullScreenDropZone

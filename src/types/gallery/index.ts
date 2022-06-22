@@ -20,6 +20,5 @@ export type GalleryContextType = {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setNotificationAttributes: (attributes: NotificationAttributes) => void;
     setBlockingLoad: (value: boolean) => void;
-    setDropZoneActive: (value: boolean) => void;
     photoListHeader: TimeStampListItem;
 };
