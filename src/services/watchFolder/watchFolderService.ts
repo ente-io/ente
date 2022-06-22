@@ -443,7 +443,7 @@ class watchFolderService {
             const mappings = this.getWatchMappings();
 
             const mapping = mappings.find((mapping) =>
-                filePath.startsWith(mapping.folderPath + '/')
+                filePath.startsWith(mapping.folderPath)
             );
 
             if (!mapping) {
