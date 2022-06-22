@@ -67,7 +67,7 @@ export default function UploadProgress({
         }
     }
 
-    if (open) {
+    if (!open) {
         return <></>;
     }
 
