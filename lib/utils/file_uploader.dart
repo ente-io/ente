@@ -650,22 +650,14 @@ class FileUploader {
 
   Future<UploadURL> _getUploadURL() async {
     if (_uploadURLs.isEmpty) {
-      await _fetchUploadURLs(_queue.length);
+      await fetchUploadURLs(_queue.length);
     }
     return _uploadURLs.removeFirst();
   }
 
-  // can upload is a helper method to verify that user can actually upload
-  // new files or not based on their subscription plan and storage limit.
-  // To avoid creating new endpoint, we are using fetchUploadUrls as alternative
-  // method.
-  Future<void> canUpload(int fileCount) async {
-    return await _fetchUploadURLs(fileCount);
-  }
-
   Future<void> _uploadURLFetchInProgress;
 
-  Future<void> _fetchUploadURLs(int fileCount) async {
+  Future<void> fetchUploadURLs(int fileCount) async {
     _uploadURLFetchInProgress ??= Future<void>(() async {
       try {
         final response = await _dio.get(

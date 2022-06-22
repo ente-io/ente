@@ -270,8 +270,10 @@ class RemoteSyncService {
 
     if (toBeUploaded > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparing_for_upload));
-      // verify if the files can b uploaded before initiating actual upload.
-      await _uploader.canUpload(toBeUploaded);
+      // verify if files upload is allowed based on their subscription plan and
+      // storage limit. To avoid creating new endpoint, we are using
+      // fetchUploadUrls as alternative method.
+      await _uploader.fetchUploadURLs(toBeUploaded);
     }
     final List<Future> futures = [];
     for (final uploadedFileID in updatedFileIDs) {
