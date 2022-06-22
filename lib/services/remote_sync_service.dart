@@ -107,7 +107,6 @@ class RemoteSyncService {
         _existingSync = null;
       }
     } catch (e, s) {
-      _logger.severe("Error executing remote sync ", e, s);
       _existingSync.complete();
       _existingSync = null;
       // rethrow whitelisted error so that UI status can be updated correctly.
@@ -116,7 +115,10 @@ class RemoteSyncService {
           e is WiFiUnavailableError ||
           e is StorageLimitExceededError ||
           e is SyncStopRequestedError) {
+        _logger.warning("Error executing remote sync", e);
         rethrow;
+      } else {
+        _logger.severe("Error executing remote sync ", e, s);
       }
     }
   }
@@ -256,7 +258,6 @@ class RemoteSyncService {
     );
     return filesToBeUploaded;
   }
-
 
   Future<bool> _uploadFiles(List<File> filesToBeUploaded) async {
     final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated();
