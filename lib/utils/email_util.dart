@@ -80,7 +80,7 @@ Future<void> sendLogs(
   content.addAll(
     [
       Text(
-        "This will send across logs to help us debug your issue. Note that logs include file names - these are needed to track issues with specific files.",
+        "This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files.",
         style: TextStyle(
           height: 1.5,
           fontSize: 16,
