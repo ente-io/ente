@@ -59,7 +59,7 @@ interface Props {
     showSessionExpiredMessage: () => void;
 }
 
-enum UPLOAD_STRATEGY {
+export enum UPLOAD_STRATEGY {
     SINGLE_COLLECTION,
     COLLECTION_PER_FOLDER,
 }

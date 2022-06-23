@@ -16,6 +16,8 @@ import {
     diskFileRemovedCallback,
     diskFolderRemovedCallback,
 } from './watchFolderEventHandlers';
+import { UPLOAD_STRATEGY } from 'components/pages/gallery/Upload';
+import { getParentFolderName } from './utils';
 
 class watchFolderService {
     private ElectronAPIs: ElectronAPIsInterface;
@@ -101,9 +103,10 @@ class watchFolderService {
             for (const file of filesToUpload) {
                 const event: EventQueueItem = {
                     type: 'upload',
-                    collectionName: mapping.hasMultipleFolders
-                        ? this.getParentFolderName(file.path)
-                        : mapping.collectionName,
+                    collectionName: this.getCollectionNameForMapping(
+                        mapping,
+                        file.path
+                    ),
                     folderPath: mapping.folderPath,
                     files: [file],
                 };
@@ -126,9 +129,10 @@ class watchFolderService {
             for (const file of filesToRemove) {
                 const event: EventQueueItem = {
                     type: 'trash',
-                    collectionName: mapping.hasMultipleFolders
-                        ? this.getParentFolderName(file.path)
-                        : mapping.collectionName,
+                    collectionName: this.getCollectionNameForMapping(
+                        mapping,
+                        file.path
+                    ),
                     folderPath: mapping.folderPath,
                     paths: [file.path],
                 };
@@ -173,16 +177,16 @@ class watchFolderService {
     }
 
     async addWatchMapping(
-        collectionName: string,
+        rootFolderName: string,
         folderPath: string,
-        hasMultipleFolders: boolean
+        uploadStrategy: UPLOAD_STRATEGY
     ) {
         if (this.allElectronAPIsExist) {
             try {
                 await this.ElectronAPIs.addWatchMapping(
-                    collectionName,
+                    rootFolderName,
                     folderPath,
-                    hasMultipleFolders
+                    uploadStrategy === UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
                 );
             } catch (e) {
                 logError(e, 'error while adding watch mapping');
@@ -451,9 +455,10 @@ class watchFolderService {
             }
 
             return {
-                collectionName: mapping.hasMultipleFolders
-                    ? this.getParentFolderName(filePath)
-                    : mapping.collectionName,
+                collectionName: this.getCollectionNameForMapping(
+                    mapping,
+                    filePath
+                ),
                 folderPath: mapping.folderPath,
             };
         } catch (e) {
@@ -461,12 +466,13 @@ class watchFolderService {
         }
     }
 
-    private getParentFolderName(filePath: string) {
-        const folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
-        const folderName = folderPath.substring(
-            folderPath.lastIndexOf('/') + 1
-        );
-        return folderName;
+    private getCollectionNameForMapping(
+        mapping: WatchMapping,
+        filePath: string
+    ) {
+        return mapping.uploadStrategy === UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
+            ? getParentFolderName(filePath)
+            : mapping.rootFolderName;
     }
 
     async selectFolder(): Promise<string> {

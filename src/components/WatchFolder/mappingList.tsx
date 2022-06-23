@@ -13,7 +13,7 @@ export function MappingList({ mappings, handleRemoveWatchMapping }: Iprops) {
             {mappings.map((mapping) => {
                 return (
                     <MappingEntry
-                        key={mapping.collectionName}
+                        key={mapping.rootFolderName}
                         mapping={mapping}
                         handleRemoveMapping={handleRemoveWatchMapping}
                     />

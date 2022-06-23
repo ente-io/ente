@@ -5,14 +5,14 @@ import watchFolderService from './watchFolderService';
 
 export async function diskFileAddedCallback(file: ElectronFile) {
     try {
-        const { collectionName, folderPath } =
-            (await watchFolderService.getCollectionNameAndFolderPath(
-                file.path
-            )) ?? {};
+        const collectionNameAndFolderPath =
+            await watchFolderService.getCollectionNameAndFolderPath(file.path);
 
-        if (!folderPath) {
+        if (!collectionNameAndFolderPath) {
             return;
         }
+
+        const { collectionName, folderPath } = collectionNameAndFolderPath;
 
         console.log('added (upload) to event queue', collectionName, file);
 
@@ -30,15 +30,16 @@ export async function diskFileAddedCallback(file: ElectronFile) {
 
 export async function diskFileRemovedCallback(filePath: string) {
     try {
-        const { collectionName, folderPath } =
-            (await watchFolderService.getCollectionNameAndFolderPath(
-                filePath
-            )) ?? {};
-        console.log('added (trash) to event queue', collectionName, filePath);
+        const collectionNameAndFolderPath =
+            await watchFolderService.getCollectionNameAndFolderPath(filePath);
 
-        if (!folderPath) {
+        if (!collectionNameAndFolderPath) {
             return;
         }
+
+        const { collectionName, folderPath } = collectionNameAndFolderPath;
+
+        console.log('added (trash) to event queue', collectionName, filePath);
 
         const event: EventQueueItem = {
             type: 'trash',
@@ -54,13 +55,13 @@ export async function diskFileRemovedCallback(filePath: string) {
 
 export async function diskFolderRemovedCallback(folderPath: string) {
     try {
-        const { folderPath: mappedFolderPath } =
-            (await watchFolderService.getCollectionNameAndFolderPath(
-                folderPath
-            )) ?? {};
-        if (!mappedFolderPath) {
+        const collectionNameAndFolderPath =
+            await watchFolderService.getCollectionNameAndFolderPath(folderPath);
+        if (!collectionNameAndFolderPath) {
             return;
         }
+
+        const { folderPath: mappedFolderPath } = collectionNameAndFolderPath;
 
         if (mappedFolderPath === folderPath) {
             watchFolderService.pushTrashedDir(folderPath);

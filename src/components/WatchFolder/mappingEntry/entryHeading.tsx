@@ -19,7 +19,7 @@ export function EntryHeading({ mapping }: Iprops) {
                     fontSize: '16px',
                     lineHeight: '20px',
                 }}>
-                {mapping.collectionName}
+                {mapping.rootFolderName}
             </Typography>
             {appContext.isFolderSyncRunning &&
                 watchFolderService.isMappingSyncing(mapping) && (

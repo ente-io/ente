@@ -1,9 +1,10 @@
+import { UPLOAD_STRATEGY } from 'components/pages/gallery/Upload';
 import { ElectronFile } from 'types/upload';
 
 export interface WatchMapping {
-    collectionName: string;
+    rootFolderName: string;
     folderPath: string;
-    hasMultipleFolders: boolean;
+    uploadStrategy: UPLOAD_STRATEGY;
     files: {
         path: string;
         id: number;

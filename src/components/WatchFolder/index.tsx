@@ -9,6 +9,7 @@ import constants from 'utils/strings/constants';
 import DialogBoxBase from 'components/DialogBox/base';
 import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
 import UploadStrategyChoiceModal from 'components/pages/gallery/UploadStrategyChoiceModal';
+import { UPLOAD_STRATEGY } from 'components/pages/gallery/Upload';
 
 interface Iprops {
     open: boolean;
@@ -57,16 +58,14 @@ export default function WatchFolder({ open, onClose }: Iprops) {
         }
     };
 
-    const handleAddWatchMapping = async (hasMultipleFolders: boolean) => {
-        if (inputFolderPath?.length > 0) {
-            await watchFolderService.addWatchMapping(
-                inputFolderPath.substring(inputFolderPath.lastIndexOf('/') + 1),
-                inputFolderPath,
-                hasMultipleFolders
-            );
-            setInputFolderPath('');
-            setMappings(watchFolderService.getWatchMappings());
-        }
+    const handleAddWatchMapping = async (uploadStrategy: UPLOAD_STRATEGY) => {
+        await watchFolderService.addWatchMapping(
+            inputFolderPath.substring(inputFolderPath.lastIndexOf('/') + 1),
+            inputFolderPath,
+            uploadStrategy
+        );
+        setInputFolderPath('');
+        setMappings(watchFolderService.getWatchMappings());
     };
 
     const handleRemoveWatchMapping = async (mapping: WatchMapping) => {
@@ -74,16 +73,16 @@ export default function WatchFolder({ open, onClose }: Iprops) {
         setMappings(watchFolderService.getWatchMappings());
     };
 
-    const onChoiceModalClose = () => setChoiceModalOpen(false);
+    const closeChoiceModal = () => setChoiceModalOpen(false);
 
     const uploadToSingleCollection = () => {
         setChoiceModalOpen(false);
-        handleAddWatchMapping(false);
+        handleAddWatchMapping(UPLOAD_STRATEGY.SINGLE_COLLECTION);
     };
 
     const uploadToMultipleCollection = () => {
         setChoiceModalOpen(false);
-        handleAddWatchMapping(true);
+        handleAddWatchMapping(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
     };
 
     return (
@@ -120,7 +119,7 @@ export default function WatchFolder({ open, onClose }: Iprops) {
             </DialogBoxBase>
             <UploadStrategyChoiceModal
                 open={choicModalOpen}
-                onClose={onChoiceModalClose}
+                onClose={closeChoiceModal}
                 uploadToSingleCollection={uploadToSingleCollection}
                 uploadToMultipleCollection={uploadToMultipleCollection}
             />
