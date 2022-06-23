@@ -5,9 +5,9 @@ import { ElectronFile, WatchStoreType } from '../types';
 import { getElectronFile, getFilesFromDir } from '../services/fs';
 
 export async function addWatchMapping(
-    collectionName: string,
+    rootFolderName: string,
     folderPath: string,
-    hasMultipleFolders: boolean
+    uploadStrategy: number
 ) {
     let watchMappings = getWatchMappings();
     if (!watchMappings) {
@@ -27,8 +27,8 @@ export async function addWatchMapping(
     });
 
     watchMappings.push({
-        collectionName,
-        hasMultipleFolders,
+        rootFolderName,
+        uploadStrategy,
         folderPath,
         files: [],
     });
