@@ -139,7 +139,7 @@ Future<void> _sendLogs(
 Future<String> getZippedLogsFile(BuildContext context) async {
   final dialog = createProgressDialog(context, "Preparing logs...");
   await dialog.show();
-  final tempPath = (await getTemporaryDirectory()).path;
+  final tempPath = (await getApplicationSupportDirectory()).path;
   final zipFilePath = tempPath + "/logs.zip";
   final logsDirectory = Directory(tempPath + "/logs");
   var encoder = ZipFileEncoder();
