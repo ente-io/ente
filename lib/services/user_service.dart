@@ -33,11 +33,15 @@ class UserService {
   final _dio = Network.instance.getDio();
   final _logger = Logger((UserService).toString());
   final _config = Configuration.instance;
-  final ValueNotifier<String> emailValueNotifier =
-      ValueNotifier<String>(Configuration.instance.getEmail());
+  ValueNotifier<String> emailValueNotifier;
 
   UserService._privateConstructor();
   static final UserService instance = UserService._privateConstructor();
+
+  Future<void> init() async {
+    emailValueNotifier =
+        ValueNotifier<String>(Configuration.instance.getEmail());
+  }
 
   Future<void> getOtt(
     BuildContext context,
