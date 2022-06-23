@@ -170,7 +170,7 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
   await SuperLogging.main(
     LogConfig(
       body: function,
-      logDirPath: (await getTemporaryDirectory()).path + "/logs",
+      logDirPath: (await getApplicationSupportDirectory()).path + "/logs",
       maxLogFiles: 5,
       sentryDsn: kDebugMode ? kSentryDebugDSN : kSentryDSN,
       tunnel: kSentryTunnel,
