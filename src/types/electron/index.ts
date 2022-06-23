@@ -43,7 +43,7 @@ export interface ElectronAPIsInterface {
     addWatchMapping: (
         collectionName: string,
         folderPath: string,
-        uploadStrategy: boolean
+        uploadStrategy: number
     ) => Promise<void>;
     removeWatchMapping: (folderPath: string) => Promise<void>;
     registerWatcherFunctions: (

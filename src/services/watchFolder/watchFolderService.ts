@@ -186,7 +186,7 @@ class watchFolderService {
                 await this.ElectronAPIs.addWatchMapping(
                     rootFolderName,
                     folderPath,
-                    uploadStrategy === UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
+                    uploadStrategy
                 );
             } catch (e) {
                 logError(e, 'error while adding watch mapping');
