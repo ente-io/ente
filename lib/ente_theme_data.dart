@@ -1,6 +1,221 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
+final lightThemeData = ThemeData(
+  fontFamily: 'Inter',
+  brightness: Brightness.light,
+  hintColor: Colors.grey,
+  primaryColor: Colors.deepOrangeAccent,
+  primaryColorLight: Colors.black54,
+  iconTheme: IconThemeData(color: Colors.black),
+  primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
+  colorScheme: ColorScheme.light(
+    primary: Colors.black,
+    secondary: Color.fromARGB(255, 163, 163, 163),
+  ),
+  accentColor: Color.fromRGBO(0, 0, 0, 0.6),
+  buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
+  outlinedButtonTheme: buildOutlinedButtonThemeData(
+    bgDisabled: Colors.grey.shade500,
+    bgEnabled: Colors.black,
+    fgDisabled: Colors.white,
+    fgEnabled: Colors.white,
+  ),
+  elevatedButtonTheme: buildElevatedButtonThemeData(
+    onPrimary: Colors.white,
+    primary: Colors.black,
+  ),
+  toggleableActiveColor: Colors.green[400],
+  scaffoldBackgroundColor: Colors.white,
+  backgroundColor: Colors.white,
+  appBarTheme: AppBarTheme().copyWith(
+    backgroundColor: Colors.white,
+    foregroundColor: Colors.black,
+    iconTheme: IconThemeData(color: Colors.black),
+    elevation: 0,
+  ),
+  //https://api.flutter.dev/flutter/material/TextTheme-class.html
+  textTheme: _buildTextTheme(Colors.black),
+  primaryTextTheme: TextTheme().copyWith(
+    bodyText2: TextStyle(color: Colors.yellow),
+    bodyText1: TextStyle(color: Colors.orange),
+  ),
+  cardColor: Color.fromRGBO(250, 250, 250, 1.0),
+  dialogTheme: DialogTheme().copyWith(
+    backgroundColor: Color.fromRGBO(250, 250, 250, 1.0), //
+    titleTextStyle: TextStyle(
+      color: Colors.black,
+      fontSize: 24,
+      fontWeight: FontWeight.w600,
+    ),
+    contentTextStyle: TextStyle(
+      fontFamily: 'Inter-Medium',
+      color: Colors.black,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  ),
+  inputDecorationTheme: InputDecorationTheme().copyWith(
+    focusedBorder: UnderlineInputBorder(
+      borderSide: BorderSide(
+        color: Color.fromRGBO(45, 194, 98, 1.0),
+      ),
+    ),
+  ),
+  checkboxTheme: CheckboxThemeData(
+    side: BorderSide(
+      color: Colors.black,
+      width: 2,
+    ),
+    fillColor: MaterialStateProperty.resolveWith((states) {
+      return states.contains(MaterialState.selected)
+          ? Colors.black
+          : Colors.white;
+    }),
+    checkColor: MaterialStateProperty.resolveWith((states) {
+      return states.contains(MaterialState.selected)
+          ? Colors.white
+          : Colors.black;
+    }),
+  ),
+);
+
+final darkThemeData = ThemeData(
+  fontFamily: 'Inter',
+  brightness: Brightness.dark,
+  primaryColorLight: Colors.white70,
+  iconTheme: IconThemeData(color: Colors.white),
+  primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
+  hintColor: Colors.grey,
+  colorScheme: ColorScheme.dark(primary: Colors.white),
+  accentColor: Color.fromRGBO(45, 194, 98, 0.2),
+  buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
+  buttonTheme: ButtonThemeData().copyWith(
+    buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
+  ),
+  textTheme: _buildTextTheme(Colors.white),
+  toggleableActiveColor: Colors.green[400],
+  outlinedButtonTheme: buildOutlinedButtonThemeData(
+    bgDisabled: Colors.grey.shade500,
+    bgEnabled: Colors.white,
+    fgDisabled: Colors.white,
+    fgEnabled: Colors.black,
+  ),
+  elevatedButtonTheme: buildElevatedButtonThemeData(
+    onPrimary: Colors.black,
+    primary: Colors.white,
+  ),
+  scaffoldBackgroundColor: Colors.black,
+  backgroundColor: Colors.black,
+  appBarTheme: AppBarTheme().copyWith(
+    color: Colors.black,
+    elevation: 0,
+  ),
+  cardColor: Color.fromRGBO(10, 15, 15, 1.0),
+  dialogTheme: DialogTheme().copyWith(
+    backgroundColor: Color.fromRGBO(15, 15, 15, 1.0),
+    titleTextStyle: TextStyle(
+      color: Colors.white,
+      fontSize: 24,
+      fontWeight: FontWeight.w600,
+    ),
+    contentTextStyle: TextStyle(
+      fontFamily: 'Inter-Medium',
+      color: Colors.white,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  ),
+  inputDecorationTheme: InputDecorationTheme().copyWith(
+    focusedBorder: UnderlineInputBorder(
+      borderSide: BorderSide(
+        color: Color.fromRGBO(45, 194, 98, 1.0),
+      ),
+    ),
+  ),
+  checkboxTheme: CheckboxThemeData(
+    side: BorderSide(
+      color: Colors.grey,
+      width: 2,
+    ),
+    fillColor: MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.selected)) {
+        return Colors.grey;
+      } else {
+        return Colors.black;
+      }
+    }),
+    checkColor: MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.selected)) {
+        return Colors.black;
+      } else {
+        return Colors.grey;
+      }
+    }),
+  ),
+);
+
+TextTheme _buildTextTheme(Color textColor) {
+  return TextTheme().copyWith(
+    headline4: TextStyle(
+      color: textColor,
+      fontSize: 32,
+      fontWeight: FontWeight.w600,
+      fontFamily: 'Inter',
+    ),
+    headline5: TextStyle(
+      color: textColor,
+      fontSize: 24,
+      fontWeight: FontWeight.w600,
+      fontFamily: 'Inter',
+    ),
+    headline6: TextStyle(
+      color: textColor,
+      fontSize: 18,
+      fontFamily: 'Inter',
+      fontWeight: FontWeight.w600,
+    ),
+    subtitle1: TextStyle(
+      color: textColor,
+      fontFamily: 'Inter',
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+    ),
+    subtitle2: TextStyle(
+      color: textColor,
+      fontFamily: 'Inter',
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    ),
+    bodyText1: TextStyle(
+      fontFamily: 'Inter',
+      color: textColor,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+    ),
+    bodyText2: TextStyle(
+      fontFamily: 'Inter',
+      color: textColor,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    ),
+    caption: TextStyle(
+      color: textColor.withOpacity(0.6),
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    ),
+    overline: TextStyle(
+      fontFamily: 'Inter',
+      color: textColor,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      decoration: TextDecoration.underline,
+    ),
+  );
+}
+
 extension CustomColorScheme on ColorScheme {
   Color get defaultBackgroundColor =>
       brightness == Brightness.light ? Colors.white : Colors.black;
@@ -121,6 +336,17 @@ extension CustomColorScheme on ColorScheme {
   Color get subTextColor => brightness == Brightness.light
       ? Color.fromRGBO(180, 180, 180, 1)
       : Color.fromRGBO(100, 100, 100, 1);
+
+  Color get themeSwitchIndicatorColor => brightness == Brightness.light
+      ? Colors.black.withOpacity(0.75)
+      : Colors.white;
+
+  Color get themeSwitchActiveIconColor =>
+      brightness == Brightness.light ? Colors.white : Colors.black;
+
+  Color get themeSwitchInactiveIconColor => brightness == Brightness.light
+      ? Colors.black.withOpacity(0.5)
+      : Colors.white.withOpacity(0.5);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData({

@@ -15,6 +15,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
@@ -28,6 +29,7 @@ import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/services/update_service.dart';
+import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/app_lock.dart';
 import 'package:photos/ui/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -130,6 +132,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   await NotificationService.instance.init();
   await Network.instance.init();
   await Configuration.instance.init();
+  await UserService.instance.init();
   await UpdateService.instance.init();
   await BillingService.instance.init();
   await CollectionsService.instance.init();
@@ -169,7 +172,7 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
   await SuperLogging.main(
     LogConfig(
       body: function,
-      logDirPath: (await getTemporaryDirectory()).path + "/logs",
+      logDirPath: (await getApplicationSupportDirectory()).path + "/logs",
       maxLogFiles: 5,
       sentryDsn: kDebugMode ? kSentryDebugDSN : kSentryDSN,
       tunnel: kSentryTunnel,

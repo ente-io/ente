@@ -467,6 +467,8 @@ class FileUploader {
     } catch (e, s) {
       if (!(e is NoActiveSubscriptionError ||
           e is StorageLimitExceededError ||
+          e is WiFiUnavailableError ||
+          e is SilentlyCancelUploadsError ||
           e is FileTooLargeForPlanError)) {
         _logger.severe("File upload failed for " + file.toString(), e, s);
       }
@@ -650,20 +652,20 @@ class FileUploader {
 
   Future<UploadURL> _getUploadURL() async {
     if (_uploadURLs.isEmpty) {
-      await _fetchUploadURLs();
+      await fetchUploadURLs(_queue.length);
     }
     return _uploadURLs.removeFirst();
   }
 
   Future<void> _uploadURLFetchInProgress;
 
-  Future<void> _fetchUploadURLs() async {
+  Future<void> fetchUploadURLs(int fileCount) async {
     _uploadURLFetchInProgress ??= Future<void>(() async {
       try {
         final response = await _dio.get(
           Configuration.instance.getHttpEndpoint() + "/files/upload-urls",
           queryParameters: {
-            "count": min(42, 2 * _queue.length), // m4gic number
+            "count": min(42, fileCount * 2), // m4gic number
           },
           options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()},

@@ -24,6 +24,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
+  animated_toggle_switch:
+    dependency: "direct main"
+    description:
+      name: animated_toggle_switch
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.2"
   archive:
     dependency: "direct main"
     description:

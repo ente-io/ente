@@ -5,6 +5,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memories_db.dart';
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/memory.dart';
+import 'package:photos/services/collections_service.dart';
 
 class MemoriesService extends ChangeNotifier {
   final _logger = Logger("MemoryService");
@@ -70,7 +71,10 @@ class MemoriesService extends ChangeNotifier {
           date.add(Duration(days: daysAfter)).microsecondsSinceEpoch;
       durations.add([startCreationTime, endCreationTime]);
     }
-    final files = await _filesDB.getFilesCreatedWithinDurations(durations);
+    final archivedCollectionIds =
+        CollectionsService.instance.getArchivedCollections();
+    final files = await _filesDB.getFilesCreatedWithinDurations(
+        durations, archivedCollectionIds);
     final seenTimes = await _memoriesDB.getSeenTimes();
     final List<Memory> memories = [];
     final filter = ImportantItemsFilter();

@@ -1,30 +1,52 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:photos/ente_theme_data.dart';
 
 class ThemeSwitchWidget extends StatelessWidget {
   const ThemeSwitchWidget({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Switch.adaptive(
-      value: Theme.of(context).colorScheme.onSurface == Colors.black,
-      activeColor: Theme.of(context).colorScheme.onSurface,
-      activeTrackColor: Theme.of(context).colorScheme.onBackground,
-      inactiveTrackColor: Theme.of(context).colorScheme.onSurface,
-      inactiveThumbColor: Theme.of(context).colorScheme.primary,
-      hoverColor: Theme.of(context).colorScheme.onSurface,
-      onChanged: (bool value) {
-        if (value) {
+    var selectedTheme = 0;
+    if (Theme.of(context).brightness == Brightness.dark) {
+      selectedTheme = 1;
+    }
+    return AnimatedToggleSwitch<int>.rolling(
+      current: selectedTheme,
+      values: const [0, 1],
+      onChanged: (i) {
+        print("Changed to ${i}, selectedTheme is ${selectedTheme} ");
+        if (i == 0) {
           AdaptiveTheme.of(context).setLight();
         } else {
           AdaptiveTheme.of(context).setDark();
         }
       },
-      // activeThumbImage: new NetworkImage(
-      //     'https://cdn0.iconfinder.com/data/icons/multimedia-solid-30px/30/moon_dark_mode_night-512.png'),
-      // inactiveThumbImage: new NetworkImage(
-      //     'https://cdn0.iconfinder.com/data/icons/multimedia-solid-30px/30/moon_dark_mode_night-512.png'),
+      iconBuilder: (i, size, foreground) {
+        final color = selectedTheme == i
+            ? Theme.of(context).colorScheme.themeSwitchActiveIconColor
+            : Theme.of(context).colorScheme.themeSwitchInactiveIconColor;
+        if (i == 0) {
+          return Icon(
+            Icons.light_mode,
+            color: color,
+          );
+        } else {
+          return Icon(
+            Icons.dark_mode,
+            color: color,
+          );
+        }
+      },
+      height: 36,
+      indicatorSize: Size(36, 36),
+      indicatorColor: Theme.of(context).colorScheme.themeSwitchIndicatorColor,
+      borderColor: Theme.of(context)
+          .colorScheme
+          .themeSwitchInactiveIconColor
+          .withOpacity(0.1),
+      borderWidth: 1,
     );
   }
 }

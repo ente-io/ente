@@ -70,7 +70,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           child:
               SettingsTextItem(text: "Recovery key", icon: Icons.navigate_next),
         ),
-        SectionOptionDivider,
+        sectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -95,7 +95,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           child:
               SettingsTextItem(text: "Change email", icon: Icons.navigate_next),
         ),
-        SectionOptionDivider,
+        sectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {

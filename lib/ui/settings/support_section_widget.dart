@@ -43,7 +43,7 @@ class SupportSectionWidget extends StatelessWidget {
           },
           child: SettingsTextItem(text: "Email", icon: Icons.navigate_next),
         ),
-        SectionOptionDivider,
+        sectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
@@ -63,7 +63,7 @@ class SupportSectionWidget extends StatelessWidget {
           },
           child: SettingsTextItem(text: "Roadmap", icon: Icons.navigate_next),
         ),
-        SectionOptionDivider,
+        sectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {

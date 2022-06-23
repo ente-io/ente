@@ -10,25 +10,17 @@ class ImportantItemsFilter implements GalleryItemsFilter {
 
   @override
   bool shouldInclude(File file) {
-    if (_importantPaths.isEmpty) {
-      if (Platform.isAndroid) {
-        if (file.uploadedFileID != null) {
-          return true;
-        }
-        final String folder = basename(file.deviceFolder);
-        return folder == "Camera" ||
-            folder == "Recents" ||
-            folder == "DCIM" ||
-            folder == "Download" ||
-            folder == "Screenshot";
-      } else {
-        return true;
-      }
-    }
     if (file.uploadedFileID != null) {
       return true;
     }
-    final folder = basename(file.deviceFolder);
+    final String folder = basename(file.deviceFolder);
+    if (_importantPaths.isEmpty && Platform.isAndroid) {
+      return folder == "Camera" ||
+          folder == "Recents" ||
+          folder == "DCIM" ||
+          folder == "Download" ||
+          folder == "Screenshot";
+    }
     return _importantPaths.contains(folder);
   }
 }
