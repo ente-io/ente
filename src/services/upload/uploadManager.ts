@@ -357,36 +357,38 @@ class UploadManager {
             let decryptedFile: EnteFile;
             logUploadInfo(`uploadedFile ${JSON.stringify(uploadedFile)}`);
             this.updateElectronRemainingFiles(fileWithCollection);
-            if (
-                fileUploadResult ===
-                    UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE ||
-                fileUploadResult === UPLOAD_RESULT.TOO_LARGE ||
-                fileUploadResult === UPLOAD_RESULT.UNSUPPORTED
-            ) {
-                // no-op
-            } else if (
-                fileUploadResult === UPLOAD_RESULT.FAILED ||
-                fileUploadResult === UPLOAD_RESULT.BLOCKED
-            ) {
-                this.failedFiles.push(fileWithCollection);
-            } else if (fileUploadResult === UPLOAD_RESULT.ALREADY_UPLOADED) {
-                if (isElectron()) {
-                    await watchFolderService.onFileUpload(
-                        fileWithCollection,
-                        uploadedFile
-                    );
+            switch (fileUploadResult) {
+                case UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE:
+                case UPLOAD_RESULT.TOO_LARGE:
+                case UPLOAD_RESULT.UNSUPPORTED:
+                    // no-op
+                    return;
+                case UPLOAD_RESULT.FAILED:
+                case UPLOAD_RESULT.BLOCKED:
+                    this.failedFiles.push(fileWithCollection);
+                    return;
+                case UPLOAD_RESULT.ALREADY_UPLOADED: {
+                    if (isElectron()) {
+                        await watchFolderService.onFileUpload(
+                            fileWithCollection,
+                            uploadedFile
+                        );
+                    }
+                    return;
                 }
-            } else if (
-                fileUploadResult === UPLOAD_RESULT.UPLOADED ||
-                fileUploadResult ===
-                    UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
-            ) {
-                decryptedFile = await decryptFile(
-                    uploadedFile,
-                    fileWithCollection.collection.key
-                );
-            } else {
-                decryptedFile = uploadedFile;
+                case UPLOAD_RESULT.UPLOADED:
+                case UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL: {
+                    decryptedFile = await decryptFile(
+                        uploadedFile,
+                        fileWithCollection.collection.key
+                    );
+                    break;
+                }
+                case UPLOAD_RESULT.ADDED_SYMLINK:
+                    decryptedFile = uploadedFile;
+                    break;
+                default:
+                    throw Error('invalid result');
             }
             await this.updateExistingFiles(decryptedFile);
             this.updateExistingCollections(decryptedFile);
