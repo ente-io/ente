@@ -132,7 +132,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   await NotificationService.instance.init();
   await Network.instance.init();
   await Configuration.instance.init();
-  UserService.instance.init();
+  await UserService.instance.init();
   await UpdateService.instance.init();
   await BillingService.instance.init();
   await CollectionsService.instance.init();
