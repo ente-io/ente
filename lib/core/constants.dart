@@ -12,6 +12,7 @@ const String kRoadmapURL = "https://roadmap.ente.io";
 const int kMicroSecondsInDay = 86400000000;
 const int kAndroid11SDKINT = 30;
 const int kGalleryLoadStartTime = -8000000000000000; // Wednesday, March 6, 1748
+const int kGalleryLoadEndTime = 9223372036854775807; // 2^63 -1
 
 // used to identify which ente file are available in app cache
 const String kSharedMediaIdentifier = 'ente-shared://';
