@@ -358,41 +358,39 @@ class UploadManager {
             logUploadInfo(`uploadedFile ${JSON.stringify(uploadedFile)}`);
             this.updateElectronRemainingFiles(fileWithCollection);
             switch (fileUploadResult) {
-                case UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE:
-                case UPLOAD_RESULT.TOO_LARGE:
-                case UPLOAD_RESULT.UNSUPPORTED:
-                    // no-op
-                    return;
                 case UPLOAD_RESULT.FAILED:
                 case UPLOAD_RESULT.BLOCKED:
                     this.failedFiles.push(fileWithCollection);
-                    return;
-                case UPLOAD_RESULT.ALREADY_UPLOADED: {
+                    break;
+                case UPLOAD_RESULT.ALREADY_UPLOADED:
                     if (isElectron()) {
                         await watchFolderService.onFileUpload(
                             fileWithCollection,
                             uploadedFile
                         );
                     }
-                    return;
-                }
+                    break;
+                case UPLOAD_RESULT.ADDED_SYMLINK:
+                    decryptedFile = uploadedFile;
+                    break;
                 case UPLOAD_RESULT.UPLOADED:
-                case UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL: {
+                case UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL:
                     decryptedFile = await decryptFile(
                         uploadedFile,
                         fileWithCollection.collection.key
                     );
                     break;
-                }
-                case UPLOAD_RESULT.ADDED_SYMLINK:
-                    decryptedFile = uploadedFile;
-                    break;
                 default:
-                    throw Error('invalid result');
+                // no-op
             }
-            await this.updateExistingFiles(decryptedFile);
-            this.updateExistingCollections(decryptedFile);
-            await this.watchFolderCallback(fileWithCollection, uploadedFile);
+            if (decryptedFile) {
+                await this.updateExistingFiles(decryptedFile);
+                this.updateExistingCollections(decryptedFile);
+                await this.watchFolderCallback(
+                    fileWithCollection,
+                    uploadedFile
+                );
+            }
         } catch (e) {
             logError(e, 'failed to do post file upload action');
             logUploadInfo(
