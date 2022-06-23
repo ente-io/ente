@@ -108,7 +108,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         buttonText: 'Create account',
         onPressedFunction: () {
           _config.setVolatilePassword(_passwordController1.text);
-          _config.setEmail(_email);
+          UserService.instance.setEmail(_email);
           UserService.instance
               .getOtt(context, _email, isCreateAccountScreen: true);
           FocusScope.of(context).unfocus();
