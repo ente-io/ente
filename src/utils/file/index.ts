@@ -454,7 +454,7 @@ export async function changeFileName(file: EnteFile, editedName: string) {
     return file;
 }
 
-export const changeMagicMetadataFilePaths = async (
+export const changeFilePaths = async (
     fileUploadResult: UPLOAD_RESULT,
     file: EnteFile,
     collectionKey: string,

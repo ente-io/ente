@@ -6,7 +6,7 @@ import {
     sortFiles,
     preservePhotoswipeProps,
     decryptFile,
-    changeMagicMetadataFilePaths,
+    changeFilePaths,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
@@ -344,7 +344,7 @@ class UploadManager {
             const filePaths = UploadService.getFileMetadataAndFileTypeInfo(
                 fileWithCollection.localID
             ).magicMetadata.filePaths;
-            await changeMagicMetadataFilePaths(
+            await changeFilePaths(
                 fileUploadResult,
                 uploadedFile,
                 fileWithCollection.collection.key,
