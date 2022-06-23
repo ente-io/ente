@@ -1,7 +1,7 @@
 import {} from './common';
 import {
     createDirectory,
-    doesFileExists,
+    doesPathExists,
     readTextFile,
     renameDirectory,
     writeFile,
@@ -11,11 +11,11 @@ import { ipcRenderer } from 'electron';
 import { logError } from '../utils/logging';
 
 export const exists = (path: string) => {
-    return doesFileExists(path);
+    return doesPathExists(path);
 };
 
 export const checkExistsAndCreateCollectionDir = async (dirPath: string) => {
-    if (!doesFileExists(dirPath)) {
+    if (!doesPathExists(dirPath)) {
         await createDirectory(dirPath);
     }
 };
@@ -24,7 +24,7 @@ export const checkExistsAndRename = async (
     oldDirPath: string,
     newDirPath: string
 ) => {
-    if (doesFileExists(oldDirPath)) {
+    if (doesPathExists(oldDirPath)) {
         await renameDirectory(oldDirPath, newDirPath);
     }
 };
@@ -42,7 +42,7 @@ export const saveFileToDisk = async (path: string, fileData: any) => {
 
 export const getExportRecord = async (filePath: string) => {
     try {
-        if (!(await doesFileExists(filePath))) {
+        if (!(await doesPathExists(filePath))) {
             return null;
         }
         const recordFile = await readTextFile(filePath);
