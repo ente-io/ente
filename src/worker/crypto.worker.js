@@ -76,6 +76,18 @@ export class Crypto {
         return libsodium.verifyHash(hash, input);
     }
 
+    async initChunkHashing() {
+        return libsodium.initChunkHashing();
+    }
+
+    async hashFileChunk(hashState, chunk) {
+        return libsodium.hashFileChunk(hashState, chunk);
+    }
+
+    async completeChunkHashing(hashState) {
+        return libsodium.completeChunkHashing(hashState);
+    }
+
     async deriveKey(passphrase, salt, opsLimit, memLimit) {
         return libsodium.deriveKey(passphrase, salt, opsLimit, memLimit);
     }
