@@ -16,7 +16,7 @@ import {
     getUnixTimeInMicroSeconds,
     tryToParseDateTime,
 } from 'utils/time';
-import { getFileHash } from 'utils/crypto';
+import { getFileHash } from './hashService';
 
 interface ParsedMetadataJSONWithTitle {
     title: string;
@@ -39,7 +39,6 @@ export async function extractMetadata(
     } else if (fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
         extractedMetadata = await getVideoMetadata(receivedFile);
     }
-
     const fileHash = await getFileHash(receivedFile);
 
     const metadata: Metadata = {
