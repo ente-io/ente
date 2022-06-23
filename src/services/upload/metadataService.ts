@@ -11,8 +11,6 @@ import {
 } from 'types/upload';
 import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
 import { getVideoMetadata } from './videoMetadataService';
-import { getFileNameSize } from 'utils/upload';
-import { logUploadInfo } from 'utils/upload';
 import {
     parseDateFromFusedDateString,
     getUnixTimeInMicroSeconds,
@@ -39,15 +37,7 @@ export async function extractMetadata(
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
         extractedMetadata = await getExifData(receivedFile, fileTypeInfo);
     } else if (fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
-        logUploadInfo(
-            `getVideoMetadata called for ${getFileNameSize(receivedFile)}`
-        );
         extractedMetadata = await getVideoMetadata(receivedFile);
-        logUploadInfo(
-            `videoMetadata successfully extracted ${getFileNameSize(
-                receivedFile
-            )}`
-        );
     }
 
     const fileHash = await getFileHash(receivedFile);

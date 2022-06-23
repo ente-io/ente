@@ -231,6 +231,9 @@ class UploadManager {
                 let fileTypeInfo = null;
                 let metadata = null;
                 try {
+                    logUploadInfo(
+                        `metadata extraction started ${getFileNameSize(file)} `
+                    );
                     const result = await this.extractFileTypeAndMetadata(
                         file,
                         collectionID
