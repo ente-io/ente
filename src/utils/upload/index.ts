@@ -1,5 +1,5 @@
 import { ElectronFile, FileWithCollection, Metadata } from 'types/upload';
-import { EnteFile, FileMagicMetadata } from 'types/file';
+import { EnteFile } from 'types/file';
 import { convertBytesToHumanReadable } from 'utils/billing';
 import { formatDateTime } from 'utils/file';
 import { getLogs, saveLogLine } from 'utils/storage';
@@ -140,20 +140,4 @@ export function areFileWithCollectionsSame(
     secondFile: FileWithCollection
 ): boolean {
     return firstFile.localID === secondFile.localID;
-}
-
-export function getMergedMagicMetadataFilePaths(
-    oldMetadata: FileMagicMetadata,
-    newMetadata: FileMagicMetadata
-): string[] {
-    if (!oldMetadata || !oldMetadata.data.filePaths) {
-        return newMetadata.data.filePaths;
-    }
-    const mergedMetadataFilePaths = [...oldMetadata.data.filePaths];
-    newMetadata.data.filePaths.forEach((newMetadataFilePath) => {
-        if (!mergedMetadataFilePaths.includes(newMetadataFilePath)) {
-            mergedMetadataFilePaths.push(newMetadataFilePath);
-        }
-    });
-    return mergedMetadataFilePaths;
 }

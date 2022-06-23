@@ -1,7 +1,7 @@
 import { FILE_TYPE } from 'constants/file';
 import { LIVE_PHOTO_ASSET_SIZE_LIMIT } from 'constants/upload';
 import { encodeMotionPhoto } from 'services/motionPhotoService';
-import { NEW_FILE_MAGIC_METADATA } from 'types/magicMetadata';
+import { FileMagicMetadata } from 'types/file';
 import {
     ElectronFile,
     FileTypeInfo,
@@ -59,6 +59,14 @@ export function getLivePhotoMetadata(
         imageHash: imageMetadata.hash,
         videoHash: videoMetadata.hash,
         hash: undefined,
+    };
+}
+
+export function getLivePhotoMagicMetadata(
+    imageFile: FileWithCollection
+): FileMagicMetadata['data'] {
+    return {
+        filePaths: [getLivePhotoName((imageFile.file as any).path as string)],
     };
 }
 
@@ -190,18 +198,12 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                     imageAsset.metadata,
                     videoAsset.metadata
                 );
+                const livePhotoMagicMetadata: FileMagicMetadata['data'] =
+                    getLivePhotoMagicMetadata(firstMediaFile);
                 uploadService.setFileMetadataAndFileTypeInfo(livePhotoLocalID, {
                     fileTypeInfo: { ...livePhotoFileTypeInfo },
                     metadata: { ...livePhotoMetadata },
-                    magicMetadata: {
-                        ...NEW_FILE_MAGIC_METADATA,
-                        data: {
-                            filePaths: [
-                                (firstMediaFile.file as any).path as string,
-                                (secondMediaFile.file as any).path as string,
-                            ],
-                        },
-                    },
+                    magicMetadata: { ...livePhotoMagicMetadata },
                 });
                 index += 2;
             } else {

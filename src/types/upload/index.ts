@@ -92,7 +92,7 @@ export interface FileWithCollection extends UploadAsset {
 export interface MetadataAndFileTypeInfo {
     metadata: Metadata;
     fileTypeInfo: FileTypeInfo;
-    magicMetadata: FileMagicMetadata;
+    magicMetadata: FileMagicMetadata['data'];
 }
 
 export type MetadataAndFileTypeInfoMap = Map<number, MetadataAndFileTypeInfo>;

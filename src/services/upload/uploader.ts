@@ -1,10 +1,9 @@
-import { EnteFile, FileMagicMetadata } from 'types/file';
+import { EnteFile } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import {
     findSameFileInCollection,
     findSameFileInOtherCollection,
-    getMergedMagicMetadataFilePaths,
     shouldDedupeAcrossCollection,
 } from 'utils/upload';
 import UploadHttpClient from './uploadHttpClient';
@@ -17,35 +16,12 @@ import { logUploadInfo } from 'utils/upload';
 import { convertBytesToHumanReadable } from 'utils/billing';
 import { sleep } from 'utils/common';
 import { addToCollection } from 'services/collectionService';
-import { updateMagicMetadataProps } from 'utils/magicMetadata';
-import { updateFileMagicMetadata } from 'services/fileService';
-import { NEW_FILE_MAGIC_METADATA } from 'types/magicMetadata';
-import { getFileKey } from 'utils/file';
 
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;
     uploadedFile?: EnteFile;
     skipDecryption?: boolean;
 }
-
-const updateMagicMetadata = async (
-    file: EnteFile,
-    magicMetadata: FileMagicMetadata,
-    collectionKey: string
-) => {
-    magicMetadata.data.filePaths = getMergedMagicMetadataFilePaths(
-        file.magicMetadata,
-        magicMetadata
-    );
-    file.key = await getFileKey(file, collectionKey);
-    const updatedMagicMetadata = await updateMagicMetadataProps(
-        file.magicMetadata ?? NEW_FILE_MAGIC_METADATA,
-        file.key,
-        { filePaths: magicMetadata.data.filePaths }
-    );
-    file.magicMetadata = updatedMagicMetadata;
-    await updateFileMagicMetadata([file]);
-};
 
 export default async function uploader(
     worker: any,
@@ -61,7 +37,7 @@ export default async function uploader(
     logUploadInfo(`uploader called for  ${fileNameSize}`);
     UIService.setFileProgress(localID, 0);
     await sleep(0);
-    const { fileTypeInfo, metadata, magicMetadata } =
+    const { fileTypeInfo, metadata } =
         UploadService.getFileMetadataAndFileTypeInfo(localID);
     try {
         const fileSize = UploadService.getAssetSize(uploadAsset);
@@ -81,11 +57,6 @@ export default async function uploader(
         );
         if (sameFileInSameCollection) {
             logUploadInfo(`skipped upload for  ${fileNameSize}`);
-            await updateMagicMetadata(
-                sameFileInSameCollection,
-                magicMetadata,
-                fileWithCollection.collection.key
-            );
             return {
                 fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED,
                 uploadedFile: sameFileInSameCollection,
@@ -104,11 +75,6 @@ export default async function uploader(
             const resultFile = Object.assign({}, sameFileInOtherCollection);
             resultFile.collectionID = collection.id;
             await addToCollection(collection, [resultFile]);
-            await updateMagicMetadata(
-                resultFile,
-                magicMetadata,
-                fileWithCollection.collection.key
-            );
             return {
                 fileUploadResult: UPLOAD_RESULT.UPLOADED,
                 uploadedFile: resultFile,
@@ -126,11 +92,6 @@ export default async function uploader(
                 metadata
             );
             if (sameFileInOtherCollection) {
-                await updateMagicMetadata(
-                    sameFileInOtherCollection,
-                    magicMetadata,
-                    fileWithCollection.collection.key
-                );
                 return {
                     fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED,
                     uploadedFile: sameFileInOtherCollection,
@@ -176,11 +137,6 @@ export default async function uploader(
         UIService.increaseFileUploaded();
         logUploadInfo(`${fileNameSize} successfully uploaded`);
 
-        await updateMagicMetadata(
-            uploadedFile,
-            magicMetadata,
-            fileWithCollection.collection.key
-        );
         return {
             fileUploadResult: metadata.hasStaticThumbnail
                 ? UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL

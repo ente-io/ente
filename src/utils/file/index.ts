@@ -26,6 +26,8 @@ import ffmpegService from 'services/ffmpeg/ffmpegService';
 import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
+import { UPLOAD_RESULT } from 'constants/upload';
+import { updateFileMagicMetadata } from 'services/fileService';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -451,6 +453,37 @@ export async function changeFileName(file: EnteFile, editedName: string) {
     );
     return file;
 }
+
+export const changeMagicMetadataFilePaths = async (
+    fileUploadResult: UPLOAD_RESULT,
+    file: EnteFile,
+    collectionKey: string,
+    filePaths: string[]
+) => {
+    if (
+        fileUploadResult === UPLOAD_RESULT.UPLOADED ||
+        fileUploadResult === UPLOAD_RESULT.ALREADY_UPLOADED ||
+        fileUploadResult === UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
+    ) {
+        let mergedMetadataFilePaths = [...filePaths];
+        if (file.magicMetadata?.data.filePaths?.length > 0) {
+            mergedMetadataFilePaths = [
+                ...new Set([
+                    ...file.magicMetadata.data.filePaths,
+                    ...filePaths,
+                ]),
+            ];
+        }
+        file.key = await getFileKey(file, collectionKey);
+        const updatedMagicMetadata = await updateMagicMetadataProps(
+            file.magicMetadata ?? NEW_FILE_MAGIC_METADATA,
+            file.key,
+            { filePaths: mergedMetadataFilePaths }
+        );
+        file.magicMetadata = updatedMagicMetadata;
+        await updateFileMagicMetadata([file]);
+    }
+};
 
 export function isSharedFile(file: EnteFile) {
     const user: User = getData(LS_KEYS.USER);

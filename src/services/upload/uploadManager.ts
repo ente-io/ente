@@ -6,6 +6,7 @@ import {
     sortFiles,
     preservePhotoswipeProps,
     decryptFile,
+    changeMagicMetadataFilePaths,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
@@ -40,7 +41,6 @@ import isElectron from 'is-electron';
 import ImportService from 'services/importService';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { ProgressUpdater } from 'types/upload/ui';
-import { NEW_FILE_MAGIC_METADATA } from 'types/magicMetadata';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -261,11 +261,8 @@ class UploadManager {
                                     fileTypeInfo
                                 )) || null;
                             const magicMetadata = {
-                                ...NEW_FILE_MAGIC_METADATA,
-                                data: {
-                                    filePaths: [(file as any).path as string],
-                                },
-                            } as FileMagicMetadata;
+                                filePaths: [(file as any).path as string],
+                            } as FileMagicMetadata['data'];
                             return { fileTypeInfo, metadata, magicMetadata };
                         })();
 
@@ -344,6 +341,15 @@ class UploadManager {
                     this.existingFiles,
                     fileWithCollection
                 );
+            const filePaths = UploadService.getFileMetadataAndFileTypeInfo(
+                fileWithCollection.localID
+            ).magicMetadata.filePaths;
+            await changeMagicMetadataFilePaths(
+                fileUploadResult,
+                uploadedFile,
+                fileWithCollection.collection.key,
+                filePaths
+            );
             UIService.moveFileToResultList(
                 fileWithCollection.localID,
                 fileUploadResult
