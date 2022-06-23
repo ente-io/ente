@@ -33,9 +33,10 @@ class UserService {
   final _dio = Network.instance.getDio();
   final _logger = Logger((UserService).toString());
   final _config = Configuration.instance;
+  final ValueNotifier<String> emailValueNotifier =
+      ValueNotifier<String>(Configuration.instance.getEmail());
 
   UserService._privateConstructor();
-
   static final UserService instance = UserService._privateConstructor();
 
   Future<void> getOtt(
@@ -266,6 +267,11 @@ class UserService {
     }
   }
 
+  Future<void> setEmail(String email) async {
+    await _config.setEmail(email);
+    emailValueNotifier.value = email ?? "";
+  }
+
   Future<void> changeEmail(
     BuildContext context,
     String email,
@@ -289,7 +295,7 @@ class UserService {
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
         showToast(context, "Email changed to " + email);
-        _config.setEmail(email);
+        await setEmail(email);
         Navigator.of(context).popUntil((route) => route.isFirst);
         Bus.instance.fire(UserDetailsChangedEvent());
         return;

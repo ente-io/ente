@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
         isFormValid: _emailIsValid,
         buttonText: 'Log in',
         onPressedFunction: () {
-          _config.setEmail(_email);
+          UserService.instance.setEmail(_email);
           UserService.instance
               .getOtt(context, _email, isCreateAccountScreen: false);
           FocusScope.of(context).unfocus();
