@@ -155,11 +155,11 @@ export async function doesFolderExists(dirPath: string) {
         .catch(() => false);
 }
 
-export async function doesFileExists(dirPath: string) {
+export async function doesPathExists(dirPath: string) {
     return await fs
         .stat(dirPath)
-        .then((stats) => {
-            return stats.isFile();
+        .then((stats: fs.Stats) => {
+            return stats.isFile() || stats.isDirectory();
         })
         .catch(() => false);
 }
