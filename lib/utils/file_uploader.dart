@@ -467,6 +467,8 @@ class FileUploader {
     } catch (e, s) {
       if (!(e is NoActiveSubscriptionError ||
           e is StorageLimitExceededError ||
+          e is WiFiUnavailableError ||
+          e is NoActiveSubscriptionError ||
           e is FileTooLargeForPlanError)) {
         _logger.severe("File upload failed for " + file.toString(), e, s);
       }
