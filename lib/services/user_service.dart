@@ -42,7 +42,7 @@ class UserService {
     BuildContext context,
     String email, {
     bool isChangeEmail = false,
-    bool isCreateAccountScreen,
+    bool isCreateAccountScreen = false,
   }) async {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();

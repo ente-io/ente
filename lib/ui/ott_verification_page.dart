@@ -12,7 +12,7 @@ class OTTVerificationPage extends StatefulWidget {
   OTTVerificationPage(
     this.email, {
     this.isChangeEmail = false,
-    this.isCreateAccountScreen,
+    this.isCreateAccountScreen = false,
     Key key,
   }) : super(key: key);
 
