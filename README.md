@@ -26,6 +26,8 @@ This repository contains the code for our mobile apps, built with a lot of ❤�
 - Lockscreen
 - Zero third-party tracking / analytics
 
+<br/>
+
 ## 📲 Installation
 
 ### Android
@@ -41,13 +43,14 @@ You can alternatively install the build from PlayStore or F-Droid.
   <img width="197" alt="Get it on F-Droid" src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png">
 </a>
 
-
 ### iOS
 
 <a href="https://apps.apple.com/in/app/ente-photos/id1542026904">
   <img width="197" alt="Download on AppStore" src="https://user-images.githubusercontent.com/1161789/154795157-c4468ff9-97fd-46f3-87fe-dca789d8733a.png">
 </a>
 
+<br/>
+<br/>
 
 ## 🧑‍💻 Building from source
 
@@ -57,19 +60,27 @@ You can alternatively install the build from PlayStore or F-Droid.
 4. For Android, run `flutter build apk --release --flavor independent`
 5. For iOS, run `flutter build ios` 
 
+<br/>
+
 ## 🙋 Help
 
 We provide human support to our customers. Please write to [support@ente.io](mailto:support@ente.io) sharing as many details as possible about whatever it is that you need help with, and we will get back to you as soon as possible.
 
+<br/>
+
 ## 🧭 Roadmap
 
 We maintain a public roadmap, that's driven by our community @ [roadmap.ente.io](https://roadmap.ente.io).
+
+<br/>
 
 ## 🤗 Support
 
 If you like this project, please consider upgrading to a paid subscription.
 
 If you would like to motivate us to keep building, you can do so by [starring](https://github.com/ente-io/frame/stargazers) this project.
+
+<br/>
 
 ## ❤️ Join the Community
 
