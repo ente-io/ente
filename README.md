@@ -14,6 +14,7 @@ This repository contains the code for our mobile apps, built with a lot of ‚ù§Ô∏
 
 - Client side encryption (only you can view your photos and videos)
 - Background sync
+- Family plans
 - Shareable links for albums
 - Highlights of memories from previous years
 - Ability to detect and delete duplicate files
@@ -21,6 +22,7 @@ This repository contains the code for our mobile apps, built with a lot of ‚ù§Ô∏
 - Image editor
 - EXIF viewer
 - Ability to free up disk space by deleting backed up photos
+- Support for Live Photos
 - Recycle bin
 - 2FA
 - Lockscreen
