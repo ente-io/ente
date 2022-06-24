@@ -26,14 +26,15 @@ class GrantPermissionsWidget extends StatelessWidget {
                       children: [
                         isLightMode
                             ? Image.asset(
-                                'assets/loading_photos_light.png',
+                                'assets/loading_photos_background.png',
                                 color: Colors.white.withOpacity(0.4),
                                 colorBlendMode: BlendMode.modulate,
                               )
-                            : Image.asset('assets/loading_photos_dark.png'),
+                            : Image.asset(
+                                'assets/loading_photos_background_dark.png'),
                         Center(
                           child: Image.asset(
-                            "assets/gallery.png",
+                            "assets/gallery_locked.png",
                             height: 160,
                           ),
                         ),

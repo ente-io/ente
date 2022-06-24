@@ -60,11 +60,11 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
           children: [
             isLightMode
                 ? Image.asset(
-                    'assets/loading_photos_light.png',
+                    'assets/loading_photos_background.png',
                     color: Colors.white.withOpacity(0.4),
                     colorBlendMode: BlendMode.modulate,
                   )
-                : Image.asset('assets/loading_photos_dark.png'),
+                : Image.asset('assets/loading_photos_background_dark.png'),
             Image.asset(
               "assets/backed_up_gallery.png",
               height: 160,

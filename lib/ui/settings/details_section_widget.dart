@@ -39,7 +39,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
       }
     });
     _background = Image(
-      image: AssetImage("assets/card_background.png"),
+      image: AssetImage("assets/storage_card_background.png"),
       fit: BoxFit.fill,
     );
   }
