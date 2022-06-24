@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import StorageSection from './storageSection';
 import { isPartOfFamily } from 'utils/billing';
-import { Overlay, SpaceBetweenFlex } from 'components/Container';
+import { SpaceBetweenFlex } from 'components/Container';
 import { UsageSection } from './usageSection';
 
-export function SubscriptionCardContentOverlay({
+export function SubscriptionCardContent({
     hasNonAdminFamilyMembers,
     userDetails,
 }) {
@@ -28,17 +28,18 @@ export function SubscriptionCardContentOverlay({
     }, [userDetails]);
 
     return (
-        <Overlay>
-            <SpaceBetweenFlex flexDirection={'column'} padding={'20px 16px'}>
-                <StorageSection
-                    totalStorage={totalStorage}
-                    totalUsage={totalUsage}
-                />
-                <UsageSection
-                    hasNonAdminFamilyMembers={hasNonAdminFamilyMembers}
-                    userDetails={userDetails}
-                />
-            </SpaceBetweenFlex>
-        </Overlay>
+        <SpaceBetweenFlex
+            flex={1}
+            flexDirection={'column'}
+            padding={'20px 16px'}>
+            <StorageSection
+                totalStorage={totalStorage}
+                totalUsage={totalUsage}
+            />
+            <UsageSection
+                hasNonAdminFamilyMembers={hasNonAdminFamilyMembers}
+                userDetails={userDetails}
+            />
+        </SpaceBetweenFlex>
     );
 }

@@ -3,7 +3,7 @@ import { FlexWrapper, Overlay } from 'components/Container';
 import React from 'react';
 export function ClickOverlay({ onClick }) {
     return (
-        <Overlay style={{ zIndex: 2 }}>
+        <Overlay zIndex={2}>
             <FlexWrapper
                 onClick={onClick}
                 justifyContent={'flex-end'}

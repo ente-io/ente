@@ -1,6 +1,7 @@
+import { BackgroundOverlay } from './backgroundOverlay';
 import { ClickOverlay } from './clickOverlay';
 import React, { useContext } from 'react';
-import { Box, Skeleton } from '@mui/material';
+import { Skeleton } from '@mui/material';
 import { UserDetails } from 'types/user';
 
 import { GalleryContext } from 'pages/gallery';
@@ -9,7 +10,8 @@ import {
     isFamilyAdmin,
     isPartOfFamily,
 } from 'utils/billing';
-import { SubscriptionCardContentOverlay } from './contentOverlay';
+import { SubscriptionCardContent } from './contentOverlay';
+import { FlexWrapper } from 'components/Container';
 interface Iprops {
     userDetails: UserDetails;
     openMemberSubscriptionDialog: () => void;
@@ -26,7 +28,6 @@ export default function SubscriptionCard({
             <Skeleton
                 animation="wave"
                 variant="rectangular"
-                width={'100%'}
                 height={148}
                 sx={{ borderRadius: '8px' }}
             />
@@ -38,14 +39,12 @@ export default function SubscriptionCard({
         !isFamilyAdmin(userDetails.familyData);
 
     return (
-        <Box position="relative">
-            <img
-                style={{
-                    width: '100%',
-                    aspectRatio: '2/1',
-                }}
-                src="/images/subscription-card-background.png"
+        <FlexWrapper flexDirection={'column'} position="relative" height={148}>
+            <SubscriptionCardContent
+                hasNonAdminFamilyMembers={hasNonAdminFamilyMembers}
+                userDetails={userDetails}
             />
+            <BackgroundOverlay />
             <ClickOverlay
                 onClick={
                     isMemberSubscription
@@ -53,10 +52,6 @@ export default function SubscriptionCard({
                         : showPlanSelectorModal
                 }
             />
-            <SubscriptionCardContentOverlay
-                hasNonAdminFamilyMembers={hasNonAdminFamilyMembers}
-                userDetails={userDetails}
-            />
-        </Box>
+        </FlexWrapper>
     );
 }
