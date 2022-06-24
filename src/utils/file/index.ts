@@ -513,3 +513,8 @@ export const isLivePhoto = (file: EnteFile) =>
 
 export const isImageOrVideo = (fileType: FILE_TYPE) =>
     [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);
+
+export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
+    const type = await getFileType(new File([blob], fileName));
+    return URL.createObjectURL(new Blob([blob], { type: type.mimeType }));
+};
