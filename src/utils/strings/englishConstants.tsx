@@ -2,9 +2,9 @@ import { Box, Typography } from '@mui/material';
 import Link from '@mui/material/Link';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import React from 'react';
-import { styled } from '@mui/material';
 import { SuggestionType } from 'types/search';
 import { formatNumberWithCommas } from '.';
+import { EnteLogo } from 'components/EnteLogo';
 
 /**
  * Global English constants.
@@ -18,23 +18,13 @@ const dateString = function (date) {
     });
 };
 
-const Strong = styled('strong')`
-    color: #ddd;
-`;
-
-const Logo = styled('img')`
-    height: 18px;
-    vertical-align: middle;
-    margin-top: -3px;
-`;
-
 const englishConstants = {
     ENTE: 'ente',
     HERO_HEADER: () => (
         <div>
-            with <Logo src="/icon.svg" />
+            with <EnteLogo />
             <br />
-            your <Strong>memories</Strong> are
+            your <strong>memories</strong> are
         </div>
     ),
     HERO_SLIDE_1_TITLE: 'protected',
