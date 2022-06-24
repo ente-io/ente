@@ -334,13 +334,12 @@ class UploadManager {
                 this.existingFilesCollectionWise.get(collectionID) ?? [];
             const collection = this.collections.get(collectionID);
             fileWithCollection = { ...fileWithCollection, collection };
-            const { fileUploadResult, uploadedFile, skipDecryption } =
-                await uploader(
-                    worker,
-                    existingFilesInCollection,
-                    this.existingFiles,
-                    fileWithCollection
-                );
+            const { fileUploadResult, uploadedFile } = await uploader(
+                worker,
+                existingFilesInCollection,
+                this.existingFiles,
+                fileWithCollection
+            );
             const filePaths = UploadService.getFileMetadataAndFileTypeInfo(
                 fileWithCollection.localID
             ).magicMetadata.filePaths;
@@ -358,7 +357,6 @@ class UploadManager {
             await this.postUploadTask(
                 fileUploadResult,
                 uploadedFile,
-                skipDecryption,
                 fileWithCollection
             );
         }
@@ -367,65 +365,45 @@ class UploadManager {
     async postUploadTask(
         fileUploadResult: UPLOAD_RESULT,
         uploadedFile: EnteFile,
-        skipDecryption: boolean,
         fileWithCollection: FileWithCollection
     ) {
         try {
+            let decryptedFile: EnteFile;
             logUploadInfo(`uploadedFile ${JSON.stringify(uploadedFile)}`);
-
-            if (
-                (fileUploadResult === UPLOAD_RESULT.UPLOADED ||
-                    fileUploadResult ===
-                        UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL) &&
-                !skipDecryption
-            ) {
-                const decryptedFile = await decryptFile(
-                    uploadedFile,
-                    fileWithCollection.collection.key
-                );
-                this.existingFiles.push(decryptedFile);
-                this.existingFiles = sortFiles(this.existingFiles);
-                await setLocalFiles(this.existingFiles);
-                this.setFiles(preservePhotoswipeProps(this.existingFiles));
-                if (
-                    !this.existingFilesCollectionWise.has(
-                        decryptedFile.collectionID
-                    )
-                ) {
-                    this.existingFilesCollectionWise.set(
-                        decryptedFile.collectionID,
-                        []
+            this.updateElectronRemainingFiles(fileWithCollection);
+            switch (fileUploadResult) {
+                case UPLOAD_RESULT.FAILED:
+                case UPLOAD_RESULT.BLOCKED:
+                    this.failedFiles.push(fileWithCollection);
+                    break;
+                case UPLOAD_RESULT.ALREADY_UPLOADED:
+                    if (isElectron()) {
+                        await watchFolderService.onFileUpload(
+                            fileWithCollection,
+                            uploadedFile
+                        );
+                    }
+                    break;
+                case UPLOAD_RESULT.ADDED_SYMLINK:
+                    decryptedFile = uploadedFile;
+                    break;
+                case UPLOAD_RESULT.UPLOADED:
+                case UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL:
+                    decryptedFile = await decryptFile(
+                        uploadedFile,
+                        fileWithCollection.collection.key
                     );
-                }
-                this.existingFilesCollectionWise
-                    .get(decryptedFile.collectionID)
-                    .push(decryptedFile);
+                    break;
+                default:
+                // no-op
             }
-            if (
-                fileUploadResult === UPLOAD_RESULT.FAILED ||
-                fileUploadResult === UPLOAD_RESULT.BLOCKED
-            ) {
-                this.failedFiles.push(fileWithCollection);
-            }
-
-            if (isElectron()) {
-                this.remainingFiles = this.remainingFiles.filter(
-                    (file) =>
-                        !areFileWithCollectionsSame(file, fileWithCollection)
+            if (decryptedFile) {
+                await this.updateExistingFiles(decryptedFile);
+                this.updateExistingCollections(decryptedFile);
+                await this.watchFolderCallback(
+                    fileWithCollection,
+                    uploadedFile
                 );
-                ImportService.updatePendingUploads(this.remainingFiles);
-
-                if (
-                    fileUploadResult === UPLOAD_RESULT.UPLOADED ||
-                    fileUploadResult ===
-                        UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL ||
-                    fileUploadResult === UPLOAD_RESULT.ALREADY_UPLOADED
-                ) {
-                    await watchFolderService.onFileUpload(
-                        fileWithCollection,
-                        uploadedFile
-                    );
-                }
             }
         } catch (e) {
             logError(e, 'failed to do post file upload action');
@@ -434,6 +412,48 @@ class UploadManager {
                 ${(e as Error).stack}`
             );
             throw e;
+        }
+    }
+
+    private async watchFolderCallback(
+        fileWithCollection: FileWithCollection,
+        uploadedFile: EnteFile
+    ) {
+        if (isElectron()) {
+            await watchFolderService.onFileUpload(
+                fileWithCollection,
+                uploadedFile
+            );
+        }
+    }
+
+    private updateExistingCollections(decryptedFile: EnteFile) {
+        if (!this.existingFilesCollectionWise.has(decryptedFile.collectionID)) {
+            this.existingFilesCollectionWise.set(
+                decryptedFile.collectionID,
+                []
+            );
+        }
+        this.existingFilesCollectionWise
+            .get(decryptedFile.collectionID)
+            .push(decryptedFile);
+    }
+
+    private async updateExistingFiles(decryptedFile: EnteFile) {
+        this.existingFiles.push(decryptedFile);
+        this.existingFiles = sortFiles(this.existingFiles);
+        await setLocalFiles(this.existingFiles);
+        this.setFiles(preservePhotoswipeProps(this.existingFiles));
+    }
+
+    private updateElectronRemainingFiles(
+        fileWithCollection: FileWithCollection
+    ) {
+        if (isElectron()) {
+            this.remainingFiles = this.remainingFiles.filter(
+                (file) => !areFileWithCollectionsSame(file, fileWithCollection)
+            );
+            ImportService.updatePendingUploads(this.remainingFiles);
         }
     }
 

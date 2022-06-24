@@ -20,7 +20,6 @@ import { addToCollection } from 'services/collectionService';
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;
     uploadedFile?: EnteFile;
-    skipDecryption?: boolean;
 }
 
 export default async function uploader(
@@ -76,9 +75,8 @@ export default async function uploader(
             resultFile.collectionID = collection.id;
             await addToCollection(collection, [resultFile]);
             return {
-                fileUploadResult: UPLOAD_RESULT.UPLOADED,
+                fileUploadResult: UPLOAD_RESULT.ADDED_SYMLINK,
                 uploadedFile: resultFile,
-                skipDecryption: true,
             };
         }
 
