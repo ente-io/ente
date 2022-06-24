@@ -24,7 +24,12 @@ export default function EmptyScreen({ openUploader }) {
                 </div>
             ) : (
                 <>
-                    <img height={150} src="/images/gallery.png" />
+                    <img
+                        height={150}
+                        src="/images/gallery-locked/1x.png"
+                        srcSet="/images/gallery-locked/2x.png 2x,
+                                /images/gallery-locked/3x.png 3x"
+                    />
                     <Typography color="text.secondary" mt={2}>
                         {constants.UPLOAD_FIRST_PHOTO_DESCRIPTION()}
                     </Typography>
