@@ -654,7 +654,16 @@ class FileUploader {
     if (_uploadURLs.isEmpty) {
       await fetchUploadURLs(_queue.length);
     }
-    return _uploadURLs.removeFirst();
+    try {
+      return _uploadURLs.removeFirst();
+    } catch (e, s) {
+      if (e is StateError && e.message == 'No element' && _queue.isNotEmpty) {
+        _logger.warning("Oops, uploadUrls has no element now, fetching again");
+        return _getUploadURL();
+      } else {
+        rethrow;
+      }
+    }
   }
 
   Future<void> _uploadURLFetchInProgress;
