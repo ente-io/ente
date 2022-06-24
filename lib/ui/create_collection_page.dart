@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -15,6 +14,7 @@ import 'package:photos/ui/common/gradientButton.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -213,8 +213,8 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       }
     }
     collectionsWithThumbnail.sort((first, second) {
-      return second.collection.updationTime
-          .compareTo(first.collection.updationTime);
+      return (first.collection.name ?? "")
+          .compareTo((second.collection.name ?? ""));
     });
     return collectionsWithThumbnail;
   }
@@ -278,13 +278,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   void _navigateToCollection(Collection collection) {
     Navigator.pop(context);
-    Navigator.push(
+    routeToPage(
       context,
-      PageTransition(
-        type: PageTransitionType.bottomToTop,
-        child: CollectionPage(
-          CollectionWithThumbnail(collection, null),
-        ),
+      CollectionPage(
+        CollectionWithThumbnail(collection, null),
       ),
     );
   }
@@ -311,9 +308,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         fromCollectionID,
         widget.selectedFiles.files?.toList(),
       );
+      await dialog.hide();
       RemoteSyncService.instance.sync(silently: true);
       widget.selectedFiles?.clearAll();
-      await dialog.hide();
+
       return true;
     } on AssertionError catch (e, s) {
       await dialog.hide();

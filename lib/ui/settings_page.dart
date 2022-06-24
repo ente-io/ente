@@ -16,7 +16,8 @@ import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({Key key}) : super(key: key);
+  final ValueNotifier<String> emailNotifier;
+  const SettingsPage({Key key, @required this.emailNotifier}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +28,6 @@ class SettingsPage extends StatelessWidget {
 
   Widget _getBody(BuildContext context) {
     final hasLoggedIn = Configuration.instance.getToken() != null;
-    final String email = Configuration.instance.getEmail();
     final List<Widget> contents = [];
     contents.add(
       Container(
@@ -36,13 +36,23 @@ class SettingsPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              email,
-              style: Theme.of(context)
-                  .textTheme
-                  .subtitle1
-                  .copyWith(overflow: TextOverflow.ellipsis),
+            // // Thanks to the [AnimatedBuilder], only the widget displaying the
+            // // current email is rebuilt when `emailNotifier` notifies its
+            // // listeners.
+            AnimatedBuilder(
+              // [AnimatedBuilder] accepts any [Listenable] subtype.
+              animation: emailNotifier,
+              builder: (BuildContext context, Widget child) {
+                return Text(
+                  emailNotifier.value,
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle1
+                      .copyWith(overflow: TextOverflow.ellipsis),
+                );
+              },
             ),
+
             (Platform.isAndroid)
                 ? ThemeSwitchWidget()
                 : const SizedBox.shrink(),

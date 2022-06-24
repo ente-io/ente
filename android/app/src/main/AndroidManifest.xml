@@ -45,6 +45,7 @@
         <meta-data android:name="flutterEmbedding" android:value="2" />
         <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
         <meta-data android:name="io.sentry.dsn" android:value="https://2235e5c99219488ea93da34b9ac1cb68@sentry.ente.io/4" />
+        <meta-data android:name="firebase_analytics_collection_deactivated" android:value="true" />
     </application>
 
     <!-- Android 11: https://developer.android.com/preview/privacy/package-visibility -->

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/common/dialogs.dart';
@@ -80,7 +81,7 @@ Future<void> sendLogs(
   content.addAll(
     [
       Text(
-        "This will send across logs and metrics that will help us debug your issue better",
+        "This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files.",
         style: TextStyle(
           height: 1.5,
           fontSize: 16,
@@ -139,9 +140,11 @@ Future<void> _sendLogs(
 Future<String> getZippedLogsFile(BuildContext context) async {
   final dialog = createProgressDialog(context, "Preparing logs...");
   await dialog.show();
+  final logsPath = (await getApplicationSupportDirectory()).path;
+  final logsDirectory = Directory(logsPath + "/logs");
   final tempPath = (await getTemporaryDirectory()).path;
-  final zipFilePath = tempPath + "/logs.zip";
-  final logsDirectory = Directory(tempPath + "/logs");
+  final zipFilePath =
+      tempPath + "/logs-${Configuration.instance.getUserID() ?? 0}.zip";
   var encoder = ZipFileEncoder();
   encoder.create(zipFilePath);
   encoder.addDirectory(logsDirectory);

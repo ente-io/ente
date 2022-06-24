@@ -21,6 +21,7 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
+import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/galleryType.dart';
@@ -64,7 +65,9 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static const _deviceFolderGalleryWidget = CollectionsGalleryWidget();
   static const _sharedCollectionGallery = SharedCollectionGallery();
-  static const _settingsPage = SettingsPage();
+  static final _settingsPage = SettingsPage(
+    emailNotifier: UserService.instance.emailValueNotifier,
+  );
   static const _headerWidget = HeaderWidget();
 
   final _logger = Logger("HomeWidgetState");
@@ -566,7 +569,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.source != TabChangedEventSource.tab_bar) {
-        _logger.fine('index changed to ${event.selectedIndex}');
+        debugPrint('index changed to ${event.selectedIndex}');
         if (mounted) {
           setState(() {
             currentTabIndex = event.selectedIndex;
