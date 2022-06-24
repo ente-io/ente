@@ -207,6 +207,9 @@ class FullScreenMemory extends StatefulWidget {
 class _FullScreenMemoryState extends State<FullScreenMemory> {
   int _index = 0;
   double _opacity = 1;
+  // shows memory counter as index+1/totalFiles for large number of memories
+  // when the top step indicator isn't visible.
+  bool _showCounter = false;
   PageController _pageController;
   bool _shouldDisableScroll = false;
   final GlobalKey shareButtonKey = GlobalKey();
@@ -219,6 +222,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       if (mounted) {
         setState(() {
           _opacity = 0;
+          _showCounter = widget.memories.length > 60;
         });
       }
     });
@@ -297,7 +301,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
           children: [
             _buildSwiper(),
             bottomGradient(),
-            _buildTitleText(),
+            _buildInfoText(),
             _buildBottomIcons(),
           ],
         ),
@@ -305,23 +309,31 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     );
   }
 
-  Hero _buildTitleText() {
+  Hero _buildInfoText() {
     return Hero(
       tag: widget.title,
       child: Container(
         alignment: Alignment.bottomCenter,
         padding: EdgeInsets.fromLTRB(0, 0, 0, 28),
-        child: AnimatedOpacity(
-          opacity: _opacity,
-          duration: Duration(milliseconds: 500),
-          child: Text(
-            widget.title,
-            style: Theme.of(context)
-                .textTheme
-                .headline4
-                .copyWith(color: Colors.white),
-          ),
-        ),
+        child: _showCounter
+            ? Text(
+                '${_index + 1}/${widget.memories.length}',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyText1
+                    .copyWith(color: Colors.white.withOpacity(0.4)),
+              )
+            : AnimatedOpacity(
+                opacity: _opacity,
+                duration: Duration(milliseconds: 500),
+                child: Text(
+                  widget.title,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headline4
+                      .copyWith(color: Colors.white),
+                ),
+              ),
       ),
     );
   }
