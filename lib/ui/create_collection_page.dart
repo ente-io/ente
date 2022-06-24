@@ -213,8 +213,8 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       }
     }
     collectionsWithThumbnail.sort((first, second) {
-      return second.collection.updationTime
-          .compareTo(first.collection.updationTime);
+      return (first.collection.name ?? "")
+          .compareTo((second.collection.name ?? ""));
     });
     return collectionsWithThumbnail;
   }
@@ -311,9 +311,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         fromCollectionID,
         widget.selectedFiles.files?.toList(),
       );
+      await dialog.hide();
       RemoteSyncService.instance.sync(silently: true);
       widget.selectedFiles?.clearAll();
-      await dialog.hide();
+
       return true;
     } on AssertionError catch (e, s) {
       await dialog.hide();
