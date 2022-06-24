@@ -33,7 +33,7 @@ import {
     SegregatedFinishedUploads,
     InProgressUpload,
 } from 'types/upload/ui';
-import { UPLOAD_STAGES } from 'constants/upload';
+import { UPLOAD_STAGES, UPLOAD_STRATEGY } from 'constants/upload';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -57,11 +57,6 @@ interface Props {
     uploadTypeSelectorView: boolean;
     setUploadTypeSelectorView: (open: boolean) => void;
     showSessionExpiredMessage: () => void;
-}
-
-export enum UPLOAD_STRATEGY {
-    SINGLE_COLLECTION,
-    COLLECTION_PER_FOLDER,
 }
 
 export enum DESKTOP_UPLOAD_TYPE {

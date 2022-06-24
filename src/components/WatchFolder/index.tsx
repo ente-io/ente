@@ -9,7 +9,7 @@ import constants from 'utils/strings/constants';
 import DialogBoxBase from 'components/DialogBox/base';
 import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
 import UploadStrategyChoiceModal from 'components/pages/gallery/UploadStrategyChoiceModal';
-import { UPLOAD_STRATEGY } from 'components/pages/gallery/Upload';
+import { UPLOAD_STRATEGY } from 'constants/upload';
 
 interface Iprops {
     open: boolean;

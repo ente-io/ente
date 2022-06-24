@@ -16,8 +16,8 @@ import {
     diskFileRemovedCallback,
     diskFolderRemovedCallback,
 } from './watchFolderEventHandlers';
-import { UPLOAD_STRATEGY } from 'components/pages/gallery/Upload';
 import { getParentFolderName } from './utils';
+import { UPLOAD_STRATEGY } from 'constants/upload';
 
 class watchFolderService {
     private ElectronAPIs: ElectronAPIsInterface;

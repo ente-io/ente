@@ -1,4 +1,4 @@
-import { UPLOAD_STRATEGY } from 'components/pages/gallery/Upload';
+import { UPLOAD_STRATEGY } from 'constants/upload';
 import { ElectronFile } from 'types/upload';
 
 export interface WatchMapping {
