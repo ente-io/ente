@@ -56,9 +56,10 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
                         {getFamilyPlanAdmin(userDetails.familyData)?.email}
                     </Typography>
                     <img
-                        height="267px"
                         width="256px"
-                        src="/images/family_plan_leave@3x.png"
+                        src="/images/family-plan.png"
+                        srcSet="/images/family-plan/2x.png 2x,
+                                /images/family-plan/3x.png 3x"
                     />
                     <Button
                         size="large"

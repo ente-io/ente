@@ -12,6 +12,9 @@ import {
 } from 'utils/billing';
 import { SubscriptionCardContent } from './contentOverlay';
 import { FlexWrapper } from 'components/Container';
+
+const SUBSCRIPTION_CARD_SIZE = 152;
+
 interface Iprops {
     userDetails: UserDetails;
     openMemberSubscriptionDialog: () => void;
@@ -28,7 +31,7 @@ export default function SubscriptionCard({
             <Skeleton
                 animation="wave"
                 variant="rectangular"
-                height={148}
+                height={SUBSCRIPTION_CARD_SIZE}
                 sx={{ borderRadius: '8px' }}
             />
         );
@@ -39,7 +42,10 @@ export default function SubscriptionCard({
         !isFamilyAdmin(userDetails.familyData);
 
     return (
-        <FlexWrapper flexDirection={'column'} position="relative" height={148}>
+        <FlexWrapper
+            flexDirection={'column'}
+            position="relative"
+            height={SUBSCRIPTION_CARD_SIZE}>
             <SubscriptionCardContent
                 hasNonAdminFamilyMembers={hasNonAdminFamilyMembers}
                 userDetails={userDetails}
