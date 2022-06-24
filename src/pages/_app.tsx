@@ -52,7 +52,7 @@ type AppContextType = {
     finishLoading: () => void;
     closeMessageDialog: () => void;
     setDialogMessage: SetDialogBoxAttributes;
-    isSmallDisplay: boolean;
+    isMobile: boolean;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -87,7 +87,7 @@ export default function App({ Component, err }) {
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
-    const isSmallDisplay = useMediaQuery('(max-width:480px)');
+    const isMobile = useMediaQuery('(max-width:480px)');
 
     useEffect(() => {
         if (
@@ -277,7 +277,7 @@ export default function App({ Component, err }) {
                         finishLoading,
                         closeMessageDialog,
                         setDialogMessage,
-                        isSmallDisplay,
+                        isMobile,
                     }}>
                     {loading ? (
                         <VerticallyCentered>

@@ -8,7 +8,7 @@ import billingService from 'services/billingService';
 import { getFamilyPlanAdmin } from 'utils/billing';
 import constants from 'utils/strings/constants';
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {
-    const { setDialogMessage, isSmallDisplay } = useContext(AppContext);
+    const { setDialogMessage, isMobile } = useContext(AppContext);
 
     async function onLeaveFamilyClick() {
         try {
@@ -44,7 +44,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
             open={open}
             onClose={onClose}
             maxWidth="xs"
-            fullScreen={isSmallDisplay}>
+            fullScreen={isMobile}>
             <DialogTitleWithCloseButton onClose={onClose}>
                 <Typography variant="h3">{constants.SUBSCRIPTION}</Typography>
                 <Typography color={'text.secondary'}>
