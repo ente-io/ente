@@ -56,7 +56,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8),
           ),
           Image.asset(
-            "assets/family sharing.png",
+            "assets/family_plan_leave.png",
             height: 256,
           ),
           Padding(

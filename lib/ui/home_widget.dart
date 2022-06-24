@@ -21,7 +21,6 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
-import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/galleryType.dart';
@@ -447,7 +446,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         Padding(
           padding: const EdgeInsets.only(top: 64),
           child: Image.asset(
-            "assets/preserved.png",
+            "assets/onboarding_safe.png",
             height: 206,
           ),
         ),
