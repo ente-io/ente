@@ -378,6 +378,10 @@ class UploadManager {
                             uploadedFile
                         );
                     }
+                    await this.updateFilePaths(
+                        uploadedFile,
+                        fileWithCollection
+                    );
                     break;
                 case UPLOAD_RESULT.ADDED_SYMLINK:
                     decryptedFile = uploadedFile;
