@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import constants from 'utils/strings/constants';
 import { formatDateTime } from 'utils/file';
 import { RenderFileName } from './RenderFileName';
@@ -8,6 +8,7 @@ import { RenderInfoItem } from './RenderInfoItem';
 import DialogBoxBase from 'components/DialogBox/base';
 import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
 import { DialogContent, Link, Typography } from '@mui/material';
+import { AppContext } from 'pages/_app';
 
 export function InfoModal({
     shouldDisableEdits,
@@ -19,6 +20,7 @@ export function InfoModal({
     exif,
     scheduleUpdate,
 }) {
+    const appContext = useContext(AppContext);
     return (
         <DialogBoxBase
             sx={{
@@ -28,7 +30,8 @@ export function InfoModal({
                 },
             }}
             open={showInfo}
-            onClose={handleCloseInfo}>
+            onClose={handleCloseInfo}
+            fullScreen={appContext.isMobile}>
             <DialogTitleWithCloseButton onClose={handleCloseInfo}>
                 {constants.INFO}
             </DialogTitleWithCloseButton>
