@@ -26,7 +26,7 @@ import ffmpegService from 'services/ffmpeg/ffmpegService';
 import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
-import { updateFileMagicMetadata } from 'services/fileService';
+
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -469,7 +469,8 @@ export const appendNewFilePath = async (file: EnteFile, filePath: string) => {
         { filePaths: mergedMetadataFilePaths }
     );
     file.magicMetadata = updatedMagicMetadata;
-    await updateFileMagicMetadata([file]);
+
+    return file;
 };
 
 export function isSharedFile(file: EnteFile) {

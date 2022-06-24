@@ -1,4 +1,8 @@
-import { getLocalFiles, setLocalFiles } from '../fileService';
+import {
+    getLocalFiles,
+    setLocalFiles,
+    updateFileMagicMetadata,
+} from '../fileService';
 import { SetFiles } from 'types/gallery';
 import { getDedicatedCryptoWorker } from 'utils/crypto';
 import {
@@ -458,7 +462,8 @@ class UploadManager {
             fileWithCollection.localID
         ).filePath;
 
-        await appendNewFilePath(decryptedFile, filePath);
+        const updatedFile = await appendNewFilePath(decryptedFile, filePath);
+        await updateFileMagicMetadata([updatedFile]);
     }
 
     async retryFailedFiles() {
