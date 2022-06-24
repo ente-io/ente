@@ -6,7 +6,7 @@ export const CollectionShareContainer = styled(Dialog)(({ theme }) => ({
         justifyContent: 'flex-end',
     },
     '& .MuiPaper-root': {
-        maxWidth: '414px',
+        width: '414px',
     },
     '& .MuiDialog-paperFullScreen': {
         maxWidth: '100%',

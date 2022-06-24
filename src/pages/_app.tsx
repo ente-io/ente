@@ -87,7 +87,7 @@ export default function App({ Component, err }) {
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
-    const isMobile = useMediaQuery('(max-width:480px)');
+    const isMobile = useMediaQuery('(max-width:428px)');
 
     useEffect(() => {
         if (
