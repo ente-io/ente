@@ -1,6 +1,6 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
-import { fileAttribute, FileMagicMetadata } from 'types/file';
+import { fileAttribute } from 'types/file';
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
@@ -92,7 +92,7 @@ export interface FileWithCollection extends UploadAsset {
 export interface MetadataAndFileTypeInfo {
     metadata: Metadata;
     fileTypeInfo: FileTypeInfo;
-    magicMetadata: FileMagicMetadata['data'];
+    filePath: string;
 }
 
 export type MetadataAndFileTypeInfoMap = Map<number, MetadataAndFileTypeInfo>;

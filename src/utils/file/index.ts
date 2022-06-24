@@ -454,23 +454,23 @@ export async function changeFileName(file: EnteFile, editedName: string) {
     return file;
 }
 
-export const changeFilePaths = async (
+export const appendFilePath = async (
     fileUploadResult: UPLOAD_RESULT,
     file: EnteFile,
     collectionKey: string,
-    filePaths: string[]
+    filePath: string
 ) => {
     if (
         fileUploadResult === UPLOAD_RESULT.UPLOADED ||
         fileUploadResult === UPLOAD_RESULT.ALREADY_UPLOADED ||
         fileUploadResult === UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
     ) {
-        let mergedMetadataFilePaths = [...filePaths];
+        let mergedMetadataFilePaths = [filePath];
         if (file.magicMetadata?.data.filePaths?.length > 0) {
             mergedMetadataFilePaths = [
                 ...new Set([
                     ...file.magicMetadata.data.filePaths,
-                    ...filePaths,
+                    ...mergedMetadataFilePaths,
                 ]),
             ];
         }

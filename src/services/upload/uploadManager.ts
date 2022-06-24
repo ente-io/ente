@@ -6,7 +6,7 @@ import {
     sortFiles,
     preservePhotoswipeProps,
     decryptFile,
-    changeFilePaths,
+    appendFilePath,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
@@ -20,7 +20,7 @@ import UIService from './uiService';
 import UploadService from './uploadService';
 import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
-import { EnteFile, FileMagicMetadata } from 'types/file';
+import { EnteFile } from 'types/file';
 import {
     FileWithCollection,
     MetadataAndFileTypeInfo,
@@ -230,7 +230,7 @@ class UploadManager {
             UIService.reset(mediaFiles.length);
             for (const { file, localID, collectionID } of mediaFiles) {
                 try {
-                    const { fileTypeInfo, metadata, magicMetadata } =
+                    const { fileTypeInfo, metadata, filePath } =
                         await (async () => {
                             if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
                                 logUploadInfo(
@@ -260,10 +260,8 @@ class UploadManager {
                                     collectionID,
                                     fileTypeInfo
                                 )) || null;
-                            const magicMetadata = {
-                                filePaths: [(file as any).path as string],
-                            } as FileMagicMetadata['data'];
-                            return { fileTypeInfo, metadata, magicMetadata };
+                            const filePath = (file as any).path as string;
+                            return { fileTypeInfo, metadata, filePath };
                         })();
 
                     logUploadInfo(
@@ -274,7 +272,7 @@ class UploadManager {
                     this.metadataAndFileTypeInfoMap.set(localID, {
                         fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
                         metadata: metadata && { ...metadata },
-                        magicMetadata: magicMetadata && { ...magicMetadata },
+                        filePath: filePath,
                     });
                     UIService.increaseFileUploaded();
                 } catch (e) {
@@ -341,14 +339,15 @@ class UploadManager {
                     this.existingFiles,
                     fileWithCollection
                 );
-            const filePaths = UploadService.getFileMetadataAndFileTypeInfo(
+            const filePath = UploadService.getFileMetadataAndFileTypeInfo(
                 fileWithCollection.localID
-            ).magicMetadata.filePaths;
-            await changeFilePaths(
+            ).filePath;
+
+            await appendFilePath(
                 fileUploadResult,
                 uploadedFile,
                 fileWithCollection.collection.key,
-                filePaths
+                filePath
             );
             UIService.moveFileToResultList(
                 fileWithCollection.localID,
