@@ -66,7 +66,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                   )
                 : Image.asset('assets/loading_photos_background_dark.png'),
             Image.asset(
-              "assets/backed_up_gallery.png",
+              "assets/gallery_locked.png",
               height: 160,
             ),
           ],
