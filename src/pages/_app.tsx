@@ -87,7 +87,7 @@ export default function App({ Component, err }) {
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
-    const isSmallDisplay = useMediaQuery('(max-width:620px)');
+    const isSmallDisplay = useMediaQuery('(max-width:480px)');
 
     useEffect(() => {
         if (
