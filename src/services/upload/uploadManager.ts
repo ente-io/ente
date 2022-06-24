@@ -6,7 +6,7 @@ import {
     sortFiles,
     preservePhotoswipeProps,
     decryptFile,
-    appendFilePath,
+    appendNewFilePath,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
@@ -338,26 +338,18 @@ class UploadManager {
                 this.existingFiles,
                 fileWithCollection
             );
-            const filePath = UploadService.getFileMetadataAndFileTypeInfo(
-                fileWithCollection.localID
-            ).filePath;
 
-            await appendFilePath(
-                fileUploadResult,
-                uploadedFile,
-                fileWithCollection.collection.key,
-                filePath
-            );
-            UIService.moveFileToResultList(
-                fileWithCollection.localID,
-                fileUploadResult
-            );
-            UploadService.reducePendingUploadCount();
-            await this.postUploadTask(
+            const finalUploadResult = await this.postUploadTask(
                 fileUploadResult,
                 uploadedFile,
                 fileWithCollection
             );
+
+            UIService.moveFileToResultList(
+                fileWithCollection.localID,
+                finalUploadResult
+            );
+            UploadService.reducePendingUploadCount();
         }
     }
 
@@ -403,14 +395,16 @@ class UploadManager {
                     fileWithCollection,
                     uploadedFile
                 );
+                await this.updateFilePaths(decryptedFile, fileWithCollection);
             }
+            return fileUploadResult;
         } catch (e) {
             logError(e, 'failed to do post file upload action');
             logUploadInfo(
                 `failed to do post file upload action -> ${e.message}
                 ${(e as Error).stack}`
             );
-            throw e;
+            return UPLOAD_RESULT.FAILED;
         }
     }
 
@@ -454,6 +448,17 @@ class UploadManager {
             );
             ImportService.updatePendingUploads(this.remainingFiles);
         }
+    }
+
+    private async updateFilePaths(
+        decryptedFile: EnteFile,
+        fileWithCollection: FileWithCollection
+    ) {
+        const filePath = UploadService.getFileMetadataAndFileTypeInfo(
+            fileWithCollection.localID
+        ).filePath;
+
+        await appendNewFilePath(decryptedFile, filePath);
     }
 
     async retryFailedFiles() {

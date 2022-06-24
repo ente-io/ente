@@ -26,7 +26,6 @@ import ffmpegService from 'services/ffmpeg/ffmpegService';
 import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
-import { UPLOAD_RESULT } from 'constants/upload';
 import { updateFileMagicMetadata } from 'services/fileService';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
@@ -454,35 +453,23 @@ export async function changeFileName(file: EnteFile, editedName: string) {
     return file;
 }
 
-export const appendFilePath = async (
-    fileUploadResult: UPLOAD_RESULT,
-    file: EnteFile,
-    collectionKey: string,
-    filePath: string
-) => {
-    if (
-        fileUploadResult === UPLOAD_RESULT.UPLOADED ||
-        fileUploadResult === UPLOAD_RESULT.ALREADY_UPLOADED ||
-        fileUploadResult === UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
-    ) {
-        let mergedMetadataFilePaths = [filePath];
-        if (file.magicMetadata?.data.filePaths?.length > 0) {
-            mergedMetadataFilePaths = [
-                ...new Set([
-                    ...file.magicMetadata.data.filePaths,
-                    ...mergedMetadataFilePaths,
-                ]),
-            ];
-        }
-        file.key = await getFileKey(file, collectionKey);
-        const updatedMagicMetadata = await updateMagicMetadataProps(
-            file.magicMetadata ?? NEW_FILE_MAGIC_METADATA,
-            file.key,
-            { filePaths: mergedMetadataFilePaths }
-        );
-        file.magicMetadata = updatedMagicMetadata;
-        await updateFileMagicMetadata([file]);
+export const appendNewFilePath = async (file: EnteFile, filePath: string) => {
+    let mergedMetadataFilePaths = [filePath];
+    if (file.magicMetadata?.data.filePaths?.length > 0) {
+        mergedMetadataFilePaths = [
+            ...new Set([
+                ...file.magicMetadata.data.filePaths,
+                ...mergedMetadataFilePaths,
+            ]),
+        ];
     }
+    const updatedMagicMetadata = await updateMagicMetadataProps(
+        file.magicMetadata ?? NEW_FILE_MAGIC_METADATA,
+        file.key,
+        { filePaths: mergedMetadataFilePaths }
+    );
+    file.magicMetadata = updatedMagicMetadata;
+    await updateFileMagicMetadata([file]);
 };
 
 export function isSharedFile(file: EnteFile) {
