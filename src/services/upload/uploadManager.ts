@@ -1,4 +1,8 @@
-import { getLocalFiles, setLocalFiles } from '../fileService';
+import {
+    getLocalFiles,
+    setLocalFiles,
+    updateFileMagicMetadata,
+} from '../fileService';
 import { SetFiles } from 'types/gallery';
 import { getDedicatedCryptoWorker } from 'utils/crypto';
 import {
@@ -6,7 +10,7 @@ import {
     sortFiles,
     preservePhotoswipeProps,
     decryptFile,
-    changeFilePaths,
+    appendNewFilePath,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
@@ -20,7 +24,7 @@ import UIService from './uiService';
 import UploadService from './uploadService';
 import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
-import { EnteFile, FileMagicMetadata } from 'types/file';
+import { EnteFile } from 'types/file';
 import {
     FileWithCollection,
     MetadataAndFileTypeInfo,
@@ -230,7 +234,7 @@ class UploadManager {
             UIService.reset(mediaFiles.length);
             for (const { file, localID, collectionID } of mediaFiles) {
                 try {
-                    const { fileTypeInfo, metadata, magicMetadata } =
+                    const { fileTypeInfo, metadata, filePath } =
                         await (async () => {
                             if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
                                 logUploadInfo(
@@ -260,10 +264,8 @@ class UploadManager {
                                     collectionID,
                                     fileTypeInfo
                                 )) || null;
-                            const magicMetadata = {
-                                filePaths: [(file as any).path as string],
-                            } as FileMagicMetadata['data'];
-                            return { fileTypeInfo, metadata, magicMetadata };
+                            const filePath = (file as any).path as string;
+                            return { fileTypeInfo, metadata, filePath };
                         })();
 
                     logUploadInfo(
@@ -274,7 +276,7 @@ class UploadManager {
                     this.metadataAndFileTypeInfoMap.set(localID, {
                         fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
                         metadata: metadata && { ...metadata },
-                        magicMetadata: magicMetadata && { ...magicMetadata },
+                        filePath: filePath,
                     });
                     UIService.increaseFileUploaded();
                 } catch (e) {
@@ -340,25 +342,18 @@ class UploadManager {
                 this.existingFiles,
                 fileWithCollection
             );
-            const filePaths = UploadService.getFileMetadataAndFileTypeInfo(
-                fileWithCollection.localID
-            ).magicMetadata.filePaths;
-            await changeFilePaths(
-                fileUploadResult,
-                uploadedFile,
-                fileWithCollection.collection.key,
-                filePaths
-            );
-            UIService.moveFileToResultList(
-                fileWithCollection.localID,
-                fileUploadResult
-            );
-            UploadService.reducePendingUploadCount();
-            await this.postUploadTask(
+
+            const finalUploadResult = await this.postUploadTask(
                 fileUploadResult,
                 uploadedFile,
                 fileWithCollection
             );
+
+            UIService.moveFileToResultList(
+                fileWithCollection.localID,
+                finalUploadResult
+            );
+            UploadService.reducePendingUploadCount();
         }
     }
 
@@ -383,6 +378,10 @@ class UploadManager {
                             uploadedFile
                         );
                     }
+                    await this.updateFilePaths(
+                        uploadedFile,
+                        fileWithCollection
+                    );
                     break;
                 case UPLOAD_RESULT.ADDED_SYMLINK:
                     decryptedFile = uploadedFile;
@@ -404,14 +403,16 @@ class UploadManager {
                     fileWithCollection,
                     uploadedFile
                 );
+                await this.updateFilePaths(decryptedFile, fileWithCollection);
             }
+            return fileUploadResult;
         } catch (e) {
             logError(e, 'failed to do post file upload action');
             logUploadInfo(
                 `failed to do post file upload action -> ${e.message}
                 ${(e as Error).stack}`
             );
-            throw e;
+            return UPLOAD_RESULT.FAILED;
         }
     }
 
@@ -455,6 +456,18 @@ class UploadManager {
             );
             ImportService.updatePendingUploads(this.remainingFiles);
         }
+    }
+
+    private async updateFilePaths(
+        decryptedFile: EnteFile,
+        fileWithCollection: FileWithCollection
+    ) {
+        const filePath = UploadService.getFileMetadataAndFileTypeInfo(
+            fileWithCollection.localID
+        ).filePath;
+
+        const updatedFile = await appendNewFilePath(decryptedFile, filePath);
+        await updateFileMagicMetadata([updatedFile]);
     }
 
     async retryFailedFiles() {
