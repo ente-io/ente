@@ -6,10 +6,12 @@ import {
     DialogActions,
     DialogContent,
     DialogProps,
+    Typography,
 } from '@mui/material';
-import DialogTitleWithCloseButton from './titleWithCloseButton';
-import MessageText from './messageText';
-import DialogBoxBase, { dialogCloseHandler } from './base';
+import DialogTitleWithCloseButton, {
+    dialogCloseHandler,
+} from './TitleWithCloseButton';
+import DialogBoxBase from './base';
 import { DialogBoxAttributes } from 'types/dialogBox';
 
 type IProps = React.PropsWithChildren<
@@ -59,7 +61,9 @@ export default function DialogBox({
             {(children || attributes?.content) && (
                 <DialogContent>
                     {children || (
-                        <MessageText>{attributes.content}</MessageText>
+                        <Typography color="text.secondary">
+                            {attributes.content}
+                        </Typography>
                     )}
                 </DialogContent>
             )}
@@ -68,6 +72,7 @@ export default function DialogBox({
                     <>
                         {attributes.close && (
                             <Button
+                                size="large"
                                 color={attributes.close?.variant ?? 'secondary'}
                                 onClick={() => {
                                     attributes.close.action &&
@@ -79,6 +84,7 @@ export default function DialogBox({
                         )}
                         {attributes.proceed && (
                             <Button
+                                size="large"
                                 color={attributes.proceed?.variant}
                                 onClick={() => {
                                     attributes.proceed.action();

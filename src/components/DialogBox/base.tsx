@@ -1,49 +1,19 @@
-import { Dialog, DialogProps, styled } from '@mui/material';
+import { Dialog, styled } from '@mui/material';
 
-const DialogBoxBase = styled(Dialog)(({ fullScreen, theme }) => ({
-    '& .MuiDialogActions-root button': {
-        width: '100%',
+const DialogBoxBase = styled(Dialog)(({ theme }) => ({
+    '& .MuiDialog-paper': {
+        padding: 0,
     },
-    ...(fullScreen
-        ? {
-              '& .MuiDialogActions-root': {
-                  padding: theme.spacing(2, 3),
-                  flexDirection: 'column-reverse',
-              },
-              '& .MuiDialogActions-root button:not(:first-child)': {
-                  margin: 0,
-                  marginBottom: theme.spacing(1),
-              },
-          }
-        : {
-              '& .MuiDialogActions-root': {
-                  padding: theme.spacing(2, 3),
-              },
-              '& .MuiDialogActions-root button:not(:first-child)': {
-                  margin: 0,
-                  marginLeft: theme.spacing(2),
-              },
-          }),
+    '& .MuiDialogTitle-root': {
+        padding: theme.spacing(2),
+        paddingBottom: theme.spacing(1),
+    },
+    '& .MuiDialogContent-root': {
+        padding: theme.spacing(2),
+    },
+    '.MuiDialogTitle-root + .MuiDialogContent-root': {
+        paddingTop: 0,
+    },
 }));
-
-export const dialogCloseHandler =
-    ({
-        staticBackdrop,
-        nonClosable,
-        onClose,
-    }: {
-        staticBackdrop?: boolean;
-        nonClosable?: boolean;
-        onClose: () => void;
-    }): DialogProps['onClose'] =>
-    (_, reason) => {
-        if (nonClosable) {
-            // no-op
-        } else if (staticBackdrop && reason === 'backdropClick') {
-            // no-op
-        } else {
-            onClose();
-        }
-    };
 
 export default DialogBoxBase;
