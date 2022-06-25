@@ -1,13 +1,13 @@
-import React, { useEffect, useMemo } from 'react';
-import AddCollectionButton from './AddCollectionButton';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { Collection, CollectionSummaries } from 'types/collection';
-import DialogBoxBase from 'components/DialogBox/base';
 import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
+import { isSystemCollection } from 'utils/collection';
+import { AppContext } from 'pages/_app';
+import { AllCollectionDialog } from 'components/Collections/AllCollections/dialog';
 import { DialogContent } from '@mui/material';
 import { FlexWrapper } from 'components/Container';
-import { CollectionSelectorTile } from 'components/Collections/styledComponents';
-import AllCollectionCard from 'components/Collections/AllCollections/CollectionCard';
-import { isSystemCollection } from 'utils/collection';
+import CollectionSelectorCard from './CollectionCard';
+import AddCollectionButton from './AddCollectionButton';
 
 export interface CollectionSelectorAttributes {
     callback: (collection: Collection) => void;
@@ -15,9 +15,6 @@ export interface CollectionSelectorAttributes {
     title: string;
     fromCollection?: number;
 }
-export type SetCollectionSelectorAttributes = React.Dispatch<
-    React.SetStateAction<CollectionSelectorAttributes>
->;
 
 interface Props {
     open: boolean;
@@ -32,6 +29,7 @@ function CollectionSelector({
     collections,
     ...props
 }: Props) {
+    const appContext = useContext(AppContext);
     const collectionToShow = useMemo(() => {
         const personalCollectionsOtherThanFrom = [
             ...collectionSummaries.values(),
@@ -62,27 +60,27 @@ function CollectionSelector({
         props.onClose();
     };
 
+    const onCloseButtonClick = () => props.onClose(true);
+
     return (
-        <DialogBoxBase
-            {...props}
-            maxWidth="md"
-            PaperProps={{ sx: { maxWidth: '848px' } }}>
-            <DialogTitleWithCloseButton onClose={() => props.onClose(true)}>
+        <AllCollectionDialog
+            onClose={props.onClose}
+            open={props.open}
+            position="center"
+            fullScreen={appContext.isMobile}>
+            <DialogTitleWithCloseButton onClose={onCloseButtonClick}>
                 {attributes.title}
             </DialogTitleWithCloseButton>
-            <DialogContent
-                sx={{
-                    '&&&': {
-                        px: 0,
-                    },
-                }}>
-                <FlexWrapper style={{ flexWrap: 'wrap' }}>
+            <DialogContent>
+                <FlexWrapper
+                    style={{
+                        flexWrap: 'wrap',
+                    }}>
                     <AddCollectionButton
                         showNextModal={attributes.showNextModal}
                     />
                     {collectionToShow.map((collectionSummary) => (
-                        <AllCollectionCard
-                            collectionTile={CollectionSelectorTile}
+                        <CollectionSelectorCard
                             onCollectionClick={handleCollectionClick}
                             collectionSummary={collectionSummary}
                             key={collectionSummary.id}
@@ -90,7 +88,7 @@ function CollectionSelector({
                     ))}
                 </FlexWrapper>
             </DialogContent>
-        </DialogBoxBase>
+        </AllCollectionDialog>
     );
 }
 
