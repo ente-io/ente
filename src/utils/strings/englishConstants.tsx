@@ -197,7 +197,7 @@ const englishConstants = {
                 </Link>{' '}
                 from your registered email address.{' '}
             </p>
-            Your request will be processed within 72 hours.
+            <p>Your request will be processed within 72 hours.</p>
         </>
     ),
     LOGOUT_MESSAGE: 'Sure you want to logout?',
@@ -228,14 +228,8 @@ const englishConstants = {
             to automatically backup all your photos
         </>
     ),
-    DOWNLOAD_APP_MESSAGE: () => (
-        <>
-            <p>
-                Sorry, this operation is currently only supported on our desktop
-                app
-            </p>
-        </>
-    ),
+    DOWNLOAD_APP_MESSAGE:
+        'Sorry, this operation is currently only supported on our desktop app',
     DOWNLOAD_APP: 'Download desktop app',
     EXPORT: 'Export Data',
 
@@ -274,23 +268,13 @@ const englishConstants = {
         <>Your subscription will be cancelled on {dateString(expiryTime)}</>
     ),
 
-    USAGE_INFO: (usage, quota) => (
-        <p>
-            You have used {usage} out of your {quota} quota
-        </p>
-    ),
-
-    FAMILY_USAGE_INFO: (usage, quota) => (
-        <p>
-            You have used {usage} out of your family's {quota} quota
-        </p>
-    ),
-
     SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
         <>
             <p>We've received your payment</p>
-            your subscription is valid till{' '}
-            <strong>{dateString(expiryTime)}</strong>
+            <p>
+                your subscription is valid till{' '}
+                <strong>{dateString(expiryTime)}</strong>
+            </p>
         </>
     ),
     SUBSCRIPTION_PURCHASE_CANCELLED:
@@ -359,16 +343,6 @@ const englishConstants = {
     SHARE_COLLECTION: 'Share album',
     SHARE_WITH_PEOPLE: 'Share with your loved ones',
     SHAREES: 'Shared with',
-    ZERO_SHAREES: () => (
-        <>
-            <h6>Currently shared with no one 😔</h6>
-            <div style={{ marginTop: '16px' }}>
-                <em style={{ color: '#3c3c3c' }}>
-                    memories are fonder when shared
-                </em>
-            </div>
-        </>
-    ),
     PUBLIC_URL: 'Public link',
     SHARE_WITH_SELF: 'Oops, you cannot share with yourself',
     ALREADY_SHARED: (email) =>
@@ -378,8 +352,8 @@ const englishConstants = {
     CONFIRM_DOWNLOAD_COLLECTION: 'Download album',
     DOWNLOAD_COLLECTION_MESSAGE: () => (
         <>
-            <div>Are you sure you want to download the complete album?</div>
-            <div>All files will be queued for download sequentially</div>
+            <p>Are you sure you want to download the complete album?</p>
+            <p>All files will be queued for download sequentially</p>
         </>
     ),
     ARCHIVED_ALBUM: 'Archived album',
@@ -434,13 +408,6 @@ const englishConstants = {
             </a>{' '}
             with ente
         </p>
-    ),
-    SEARCH_STATS: ({ resultCount, timeTaken }) => (
-        <div>
-            found <span style={{ color: '#51cd7c' }}>{resultCount}</span>{' '}
-            memories ( <span style={{ color: '#51cd7c' }}> {timeTaken}</span>{' '}
-            seconds )
-        </div>
     ),
     NOT_FILE_OWNER: 'You cannot delete files in a shared album',
     ADD_TO_COLLECTION: 'Add to album',
