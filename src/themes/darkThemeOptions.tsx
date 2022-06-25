@@ -56,9 +56,6 @@ declare module '@mui/material/Switch' {
 // Create a theme instance.
 const darkThemeOptions = createTheme({
     components: {
-        MuiPaper: {
-            styleOverrides: { root: { backgroundImage: 'none' } },
-        },
         MuiCssBaseline: {
             styleOverrides: {
                 body: {
@@ -67,6 +64,27 @@ const darkThemeOptions = createTheme({
                 },
                 strong: { fontWeight: 900 },
             },
+        },
+        MuiDialog: {
+            styleOverrides: {
+                root: {
+                    '& .MuiDialog-paper': {
+                        padding: '16px 0',
+                    },
+                    '& .MuiDialogTitle-root': {
+                        padding: '16px',
+                    },
+                    '& .MuiDialogContent-root': {
+                        padding: '16px',
+                    },
+                    '.MuiDialogTitle-root + .MuiDialogContent-root': {
+                        paddingTop: '16px',
+                    },
+                },
+            },
+        },
+        MuiPaper: {
+            styleOverrides: { root: { backgroundImage: 'none' } },
         },
         MuiLink: {
             defaultProps: {
