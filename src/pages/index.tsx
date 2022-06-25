@@ -166,7 +166,11 @@ export default function LandingPage() {
                         <UpperText>{constants.HERO_HEADER()}</UpperText>
                         <Carousel controls={false}>
                             <Carousel.Item>
-                                <Img src="/images/slide-1.png" />
+                                <Img
+                                    src="/images/onboarding-safe/1x.png"
+                                    srcSet="/images/onboarding-safe/2x.png 2x,
+                                        /images/onboarding-safe/3x.png 3x"
+                                />
                                 <FeatureText>
                                     {constants.HERO_SLIDE_1_TITLE}
                                 </FeatureText>
@@ -175,7 +179,11 @@ export default function LandingPage() {
                                 </TextContainer>
                             </Carousel.Item>
                             <Carousel.Item>
-                                <Img src="/images/slide-2.png" />
+                                <Img
+                                    src="/images/onboarding-sync/1x.png"
+                                    srcSet="/images/onboarding-sync/2x.png 2x,
+                                        /images/onboarding-sync/3x.png 3x"
+                                />
                                 <FeatureText>
                                     {constants.HERO_SLIDE_2_TITLE}
                                 </FeatureText>
@@ -184,7 +192,11 @@ export default function LandingPage() {
                                 </TextContainer>
                             </Carousel.Item>
                             <Carousel.Item>
-                                <Img src="/images/slide-3.png" />
+                                <Img
+                                    src="/images/onboarding-lock/1x.png"
+                                    srcSet="/images/onboarding-lock/2x.png 2x,
+                                        /images/onboarding-lock/3x.png 3x"
+                                />
                                 <FeatureText>
                                     {constants.HERO_SLIDE_3_TITLE}
                                 </FeatureText>
