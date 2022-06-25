@@ -62,7 +62,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
                         </Typography>
                     </Box>
                     <img
-                        width="256px"
+                        width={256}
                         src="/images/family-plan/1x.png"
                         srcSet="/images/family-plan/2x.png 2x,
                                 /images/family-plan/3x.png 3x"
