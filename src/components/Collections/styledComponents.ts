@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
 import { styled } from '@mui/material';
+import { Overlay } from 'components/Container';
 import { SpecialPadding } from 'styles/SpecialPadding';
 export const CollectionListWrapper = styled(Box)`
     position: relative;
@@ -39,7 +40,6 @@ export const CollectionTile = styled('div')`
         object-fit: cover;
         width: 100%;
         height: 100%;
-        flex: 1;
         pointer-events: none;
     }
 `;
@@ -67,7 +67,6 @@ export const CollectionBarTile = styled(CollectionTile)`
 export const AllCollectionTile = styled(CollectionTile)`
     width: 150px;
     height: 150px;
-    align-items: flex-start;
     margin: 2px;
 `;
 
@@ -75,22 +74,13 @@ export const CollectionTitleWithDashedBorder = styled(CollectionTile)`
     border: 1px dashed ${({ theme }) => theme.palette.grey.A200};
 `;
 
-export const CollectionSelectorTile = styled(AllCollectionTile)`
-    height: 192px;
-    width: 192px;
-    margin: 10px;
-`;
-
-export const ResultPreviewTile = styled(AllCollectionTile)`
+export const ResultPreviewTile = styled(CollectionTile)`
     width: 48px;
     height: 48px;
     border-radius: 4px;
 `;
 
-export const CollectionTileTextOverlay = styled('div')`
-    height: 100%;
-    width: 100%;
-    position: absolute;
+export const CollectionTileTextOverlay = styled(Overlay)`
     font-size: 14px;
     line-height: 20px;
     padding: 4px 6px;
