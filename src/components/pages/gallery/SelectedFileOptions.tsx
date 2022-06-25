@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { SetCollectionSelectorAttributes } from './CollectionSelector';
+import { SetCollectionSelectorAttributes } from 'types/gallery';
 import { FluidContainer } from 'components/Container';
 import constants from 'utils/strings/constants';
 import { COLLECTION_OPS_TYPE } from 'utils/collection';

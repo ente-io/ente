@@ -1,5 +1,5 @@
 import { Collection, CollectionSummaries } from 'types/collection';
-import CollectionListBar from 'components/Collections/CollectionBar';
+import CollectionListBar from 'components/Collections/CollectionListBar';
 import React, { useEffect, useRef, useState } from 'react';
 import AllCollections from 'components/Collections/AllCollections';
 import CollectionInfoWithOptions from 'components/Collections/CollectionInfoWithOptions';
@@ -79,25 +79,29 @@ export default function Collections(props: Iprops) {
         return <></>;
     }
 
+    const closeAllCollections = () => setAllCollectionView(false);
+    const openAllCollections = () => setAllCollectionView(true);
+    const closeCollectionShare = () => setCollectionShareModalView(false);
+
     return (
         <>
             <CollectionListBar
                 activeCollection={activeCollectionID}
                 setActiveCollection={setActiveCollectionID}
                 collectionSummaries={collectionSummaries}
-                showAllCollections={() => setAllCollectionView(true)}
+                showAllCollections={openAllCollections}
             />
 
             <AllCollections
                 open={allCollectionView}
-                onClose={() => setAllCollectionView(false)}
+                onClose={closeAllCollections}
                 collectionSummaries={collectionSummaries}
                 setActiveCollection={setActiveCollectionID}
             />
 
             <CollectionShare
-                show={collectionShareModalView}
-                onHide={() => setCollectionShareModalView(false)}
+                open={collectionShareModalView}
+                onClose={closeCollectionShare}
                 collection={activeCollection.current}
             />
         </>

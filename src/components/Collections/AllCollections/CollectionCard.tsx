@@ -1,29 +1,29 @@
-import { Box } from '@mui/material';
+import { Typography } from '@mui/material';
 import constants from 'utils/strings/constants';
 import React from 'react';
 import CollectionCard from '../CollectionCard';
 import { CollectionSummary } from 'types/collection';
-import { AllCollectionTileText } from '../styledComponents';
+import { AllCollectionTile, AllCollectionTileText } from '../styledComponents';
 
 interface Iprops {
-    collectionTile: any;
     collectionSummary: CollectionSummary;
     onCollectionClick: (collectionID: number) => void;
 }
 
 export default function AllCollectionCard({
-    collectionTile,
     onCollectionClick,
     collectionSummary,
 }: Iprops) {
     return (
         <CollectionCard
-            collectionTile={collectionTile}
+            collectionTile={AllCollectionTile}
             latestFile={collectionSummary.latestFile}
             onClick={() => onCollectionClick(collectionSummary.id)}>
             <AllCollectionTileText zIndex={1}>
-                <Box fontWeight={'bold'}>{collectionSummary.name}</Box>
-                <Box>{constants.PHOTO_COUNT(collectionSummary.fileCount)}</Box>
+                <Typography>{collectionSummary.name}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                    {constants.PHOTO_COUNT(collectionSummary.fileCount)}
+                </Typography>
             </AllCollectionTileText>
         </CollectionCard>
     );

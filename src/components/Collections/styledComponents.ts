@@ -27,6 +27,9 @@ export const ScrollContainer = styled('div')`
     overflow: auto;
     scroll-behavior: smooth;
     display: flex;
+    & > *:not(:last-child) {
+        margin-right: 4px;
+    }
 `;
 
 export const CollectionTile = styled('div')`
@@ -44,13 +47,9 @@ export const CollectionTile = styled('div')`
     }
 `;
 
-export const CollectionTileWrapper = styled('div')`
-    margin-right: 4px;
-`;
-
 export const ActiveIndicator = styled('div')`
     height: 3px;
-    background-color: ${({ theme }) => theme.palette.text.primary};
+    background-color: ${({ theme }) => theme.palette.primary.main};
     margin-top: 18px;
     border-radius: 2px;
 `;
@@ -81,9 +80,7 @@ export const ResultPreviewTile = styled(CollectionTile)`
 `;
 
 export const CollectionTileTextOverlay = styled(Overlay)`
-    font-size: 14px;
-    line-height: 20px;
-    padding: 4px 6px;
+    padding: 8px;
 `;
 
 export const CollectionBarTileText = styled(CollectionTileTextOverlay)`

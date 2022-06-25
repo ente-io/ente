@@ -1,4 +1,4 @@
-import ScrollButton from 'components/Collections/CollectionBar/ScrollButton';
+import ScrollButton from 'components/Collections/CollectionListBar/ScrollButton';
 import React, { useEffect, useMemo } from 'react';
 import { CollectionSummaries } from 'types/collection';
 import constants from 'utils/strings/constants';
@@ -9,7 +9,7 @@ import {
     ScrollContainer,
     CollectionListWrapper,
 } from 'components/Collections/styledComponents';
-import CollectionCardWithActiveIndicator from 'components/Collections/CollectionBar/CollectionCardWithActiveIndicator';
+import CollectionListBarCard from 'components/Collections/CollectionListBar/CollectionCard';
 import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
 import useWindowSize from 'hooks/useWindowSize';
 import LinkButton from 'components/pages/gallery/LinkButton';
@@ -92,7 +92,7 @@ export default function CollectionListBar(props: IProps) {
                 )}
                 <ScrollContainer ref={componentRef}>
                     {sortedCollectionSummary.map((item) => (
-                        <CollectionCardWithActiveIndicator
+                        <CollectionListBarCard
                             key={item.id}
                             latestFile={item.latestFile}
                             ref={collectionChipsRef[item.id]}

@@ -12,15 +12,15 @@ import PublicShare from './publicShare';
 import { AppContext } from 'pages/_app';
 
 interface Props {
-    show: boolean;
-    onHide: () => void;
+    open: boolean;
+    onClose: () => void;
     collection: Collection;
 }
 
 function CollectionShare(props: Props) {
     const { isMobile } = useContext(AppContext);
     const handleClose = dialogCloseHandler({
-        onClose: props.onHide,
+        onClose: props.onClose,
     });
 
     if (!props.collection) {
@@ -30,7 +30,7 @@ function CollectionShare(props: Props) {
     return (
         <>
             <CollectionShareContainer
-                open={props.show}
+                open={props.open}
                 onClose={handleClose}
                 fullScreen={isMobile}>
                 <DialogTitleWithCloseButton onClose={handleClose}>

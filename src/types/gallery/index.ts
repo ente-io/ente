@@ -1,3 +1,4 @@
+import { CollectionSelectorAttributes } from 'components/Collections/CollectionSelector';
 import { TimeStampListItem } from 'components/PhotoList';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
@@ -11,6 +12,9 @@ export type SelectedState = {
 export type SetFiles = React.Dispatch<React.SetStateAction<EnteFile[]>>;
 export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
+export type SetCollectionSelectorAttributes = React.Dispatch<
+    React.SetStateAction<CollectionSelectorAttributes>
+>;
 
 export type GalleryContextType = {
     thumbs: Map<number, string>;

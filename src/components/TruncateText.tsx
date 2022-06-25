@@ -1,7 +1,7 @@
 import Tooltip from '@mui/material/Tooltip';
 import React from 'react';
-import { styled } from '@mui/material';
-export const EllipseText = styled('div')`
+import { styled, Typography } from '@mui/material';
+export const EllipseText = styled(Typography)`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -10,7 +10,7 @@ export const EllipseText = styled('div')`
 export default function TruncateText({ text }) {
     return (
         <Tooltip title={text}>
-            <EllipseText>{text}</EllipseText>
+            <EllipseText variant="body2">{text}</EllipseText>
         </Tooltip>
     );
 }
