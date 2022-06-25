@@ -72,15 +72,22 @@ const darkThemeOptions = createTheme({
                         padding: '16px 0',
                     },
                     '& .MuiDialogTitle-root': {
-                        padding: '16px',
+                        padding: '16px 24px',
                     },
                     '& .MuiDialogContent-root': {
-                        padding: '16px',
+                        padding: '16px 24px',
+                    },
+                    '& .MuiDialogActions-root': {
+                        padding: '16px 24px',
                     },
                     '.MuiDialogTitle-root + .MuiDialogContent-root': {
                         paddingTop: '16px',
                     },
                 },
+            },
+            defaultProps: {
+                fullWidth: true,
+                maxWidth: 'sm',
             },
         },
         MuiPaper: {

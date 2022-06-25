@@ -26,11 +26,6 @@ const DialogBoxBase = styled(Dialog)(({ fullScreen, theme }) => ({
           }),
 }));
 
-DialogBoxBase.defaultProps = {
-    fullWidth: true,
-    maxWidth: 'sm',
-};
-
 export const dialogCloseHandler =
     ({
         staticBackdrop,
