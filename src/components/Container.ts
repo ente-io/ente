@@ -63,7 +63,6 @@ export const FluidContainer = styled(FlexWrapper)`
 `;
 
 export const Overlay = styled(Box)<{ zIndex: number }>`
-    display: flex;
     position: absolute;
     width: 100%;
     height: 100%;
