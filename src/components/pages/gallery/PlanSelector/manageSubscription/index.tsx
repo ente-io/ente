@@ -70,7 +70,7 @@ function StripeSubscriptionOptions({
         });
     const confirmCancel = () =>
         appContext.setDialogMessage({
-            title: constants.CONFIRM_CANCEL_SUBSCRIPTION,
+            title: constants.CANCEL_SUBSCRIPTION,
             content: constants.CANCEL_SUBSCRIPTION_MESSAGE(),
             proceed: {
                 text: constants.CANCEL_SUBSCRIPTION,

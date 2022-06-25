@@ -311,7 +311,6 @@ const englishConstants = {
     UPDATE_SUBSCRIPTION_MESSAGE: 'Are you sure you want to change your plan?',
     UPDATE_SUBSCRIPTION: 'Change plan',
 
-    CONFIRM_CANCEL_SUBSCRIPTION: 'cancel subscription',
     CANCEL_SUBSCRIPTION: 'Cancel subscription',
     CANCEL_SUBSCRIPTION_MESSAGE: () => (
         <>
