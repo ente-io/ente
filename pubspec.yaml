@@ -126,10 +126,11 @@ dev_dependencies:
   lints: ^1.0.1
 
 flutter_icons:
-  android: true
-  image_path_android: "assets/icon-light-curved.png"
+  android: "launcher_icon"
+  adaptive_icon_foreground: "assets/launcher_icon/ente-foreground.png"
+  adaptive_icon_background: "#ffffff"
   ios: true
-  image_path_ios: "assets/icon-light.png"
+  image_path: "assets/icon-light.png"
 
 flutter_native_splash:
   color: "#ffffff"
