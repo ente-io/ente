@@ -1,6 +1,6 @@
-import { Button, DialogContent } from '@mui/material';
+import { Button, Dialog, DialogContent } from '@mui/material';
 import { CenteredFlex, SpaceBetweenFlex } from 'components/Container';
-import DialogBoxBase, { dialogCloseHandler } from 'components/DialogBox/base';
+import { dialogCloseHandler } from 'components/DialogBox/base';
 import MessageText from 'components/DialogBox/messageText';
 import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
 import React from 'react';
@@ -22,7 +22,7 @@ function UploadStrategyChoiceModal({
     });
 
     return (
-        <DialogBoxBase open={props.open} onClose={handleClose}>
+        <Dialog open={props.open} onClose={handleClose}>
             <DialogTitleWithCloseButton onClose={handleClose}>
                 {constants.MULTI_FOLDER_UPLOAD}
             </DialogTitleWithCloseButton>
@@ -32,7 +32,7 @@ function UploadStrategyChoiceModal({
                         {constants.UPLOAD_STRATEGY_CHOICE}
                     </MessageText>
                 </CenteredFlex>
-                <SpaceBetweenFlex>
+                <SpaceBetweenFlex px={2}>
                     <Button
                         size="medium"
                         color="accent"
@@ -56,7 +56,7 @@ function UploadStrategyChoiceModal({
                     </Button>
                 </SpaceBetweenFlex>
             </DialogContent>
-        </DialogBoxBase>
+        </Dialog>
     );
 }
 export default UploadStrategyChoiceModal;

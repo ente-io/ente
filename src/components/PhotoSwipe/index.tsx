@@ -21,7 +21,7 @@ import { sleep } from 'utils/common';
 import { playVideo, pauseVideo } from 'utils/photoFrame';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { AppContext } from 'pages/_app';
-import { InfoModal } from './InfoDialog';
+import { FileInfo } from './InfoDialog';
 import { defaultLivePhotoDefaultOptions } from 'constants/photoswipe';
 import { LivePhotoBtn } from './styledComponents/LivePhotoBtn';
 
@@ -416,7 +416,7 @@ function PhotoSwipe(props: Iprops) {
                     </div>
                 </div>
             </div>
-            <InfoModal
+            <FileInfo
                 shouldDisableEdits={props.isSharedCollection}
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}

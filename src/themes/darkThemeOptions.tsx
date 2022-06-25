@@ -72,13 +72,13 @@ const darkThemeOptions = createTheme({
                         padding: '16px 0',
                     },
                     '& .MuiDialogTitle-root': {
-                        padding: '16px 24px',
+                        padding: '16px',
                     },
                     '& .MuiDialogContent-root': {
-                        padding: '16px 24px',
+                        padding: '16px',
                     },
                     '& .MuiDialogActions-root': {
-                        padding: '16px 24px',
+                        padding: '16px',
                     },
                     '.MuiDialogTitle-root + .MuiDialogContent-root': {
                         paddingTop: '16px',

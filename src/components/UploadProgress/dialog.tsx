@@ -1,4 +1,4 @@
-import { DialogContent } from '@mui/material';
+import { Dialog, DialogContent } from '@mui/material';
 import constants from 'utils/strings/constants';
 import { UPLOAD_STAGES, UPLOAD_RESULT } from 'constants/upload';
 import React, { useContext, useEffect, useState } from 'react';
@@ -8,7 +8,7 @@ import { InProgressSection } from './inProgressSection';
 import { ResultSection } from './resultSection';
 import { NotUploadSectionHeader } from './styledComponents';
 import { getOSSpecificDesktopAppDownloadLink } from 'utils/common';
-import DialogBoxBase, { dialogCloseHandler } from 'components/DialogBox/base';
+import { dialogCloseHandler } from 'components/DialogBox/base';
 import UploadProgressContext from 'contexts/uploadProgress';
 
 export function UploadProgressDialog() {
@@ -38,7 +38,7 @@ export function UploadProgressDialog() {
     const handleClose = dialogCloseHandler({ staticBackdrop: true, onClose });
 
     return (
-        <DialogBoxBase maxWidth="xs" open={open} onClose={handleClose}>
+        <Dialog maxWidth="xs" open={open} onClose={handleClose}>
             <UploadProgressHeader />
             {(uploadStage === UPLOAD_STAGES.UPLOADING ||
                 uploadStage === UPLOAD_STAGES.FINISH) && (
@@ -108,6 +108,6 @@ export function UploadProgressDialog() {
                 </DialogContent>
             )}
             {uploadStage === UPLOAD_STAGES.FINISH && <UploadProgressFooter />}
-        </DialogBoxBase>
+        </Dialog>
     );
 }

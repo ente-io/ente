@@ -22,9 +22,8 @@ import { SetLoading } from 'types/gallery';
 import { logError } from 'utils/sentry';
 import { AppContext } from 'pages/_app';
 import Plans from './plans';
-import { Box, DialogContent, styled } from '@mui/material';
+import { Box, Dialog, DialogContent, styled } from '@mui/material';
 import { CenteredFlex } from 'components/Container';
-import DialogBoxBase from 'components/DialogBox/base';
 import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
 
 interface Props {
@@ -159,7 +158,7 @@ function PlanSelector(props: Props) {
     }
 
     return (
-        <DialogBoxBase
+        <Dialog
             fullScreen={appContext.isMobile}
             open={props.modalView}
             onClose={props.closeModal}
@@ -170,7 +169,7 @@ function PlanSelector(props: Props) {
                     ? constants.MANAGE_PLAN
                     : constants.CHOOSE_PLAN}
             </DialogTitleWithCloseButton>
-            <DialogContent sx={{ '&&&': { px: 2 } }}>
+            <DialogContent>
                 <PeriodToggler
                     planPeriod={planPeriod}
                     togglePeriod={togglePeriod}
@@ -192,7 +191,7 @@ function PlanSelector(props: Props) {
                     </BreakPointWrapper>
                 </CenteredFlex>
             </DialogContent>
-        </DialogBoxBase>
+        </Dialog>
     );
 }
 
