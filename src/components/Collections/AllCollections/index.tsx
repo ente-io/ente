@@ -1,18 +1,18 @@
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import Divider from '@mui/material/Divider';
 import { COLLECTION_SORT_BY } from 'constants/collection';
 import { sortCollectionSummaries } from 'services/collectionService';
 import {
     Transition,
     AllCollectionDialog,
-} from 'components/Collections/AllCollections/Container';
+} from 'components/Collections/AllCollections/dialog';
 import { useLocalState } from 'hooks/useLocalState';
 import { LS_KEYS } from 'utils/storage/localStorage';
 import AllCollectionsHeader from './header';
 import { CollectionSummaries } from 'types/collection';
 import AllCollectionContent from './content';
-import { AllCollectionTile } from '../styledComponents';
 import { isSystemCollection } from 'utils/collection';
+import { AppContext } from 'pages/_app';
 
 interface Iprops {
     open: boolean;
@@ -25,7 +25,7 @@ const LeftSlideTransition = Transition('up');
 
 export default function AllCollections(props: Iprops) {
     const { collectionSummaries, open, onClose, setActiveCollection } = props;
-
+    const { isMobile } = useContext(AppContext);
     const [collectionSortBy, setCollectionSortBy] =
         useLocalState<COLLECTION_SORT_BY>(
             LS_KEYS.COLLECTION_SORT_BY,
@@ -50,18 +50,19 @@ export default function AllCollections(props: Iprops) {
 
     return (
         <AllCollectionDialog
+            position="flex-end"
             TransitionComponent={LeftSlideTransition}
             onClose={onClose}
-            open={open}>
+            open={open}
+            fullScreen={isMobile}>
             <AllCollectionsHeader
-                onClose={close}
+                onClose={onClose}
                 collectionCount={props.collectionSummaries.size}
                 collectionSortBy={collectionSortBy}
                 setCollectionSortBy={setCollectionSortBy}
             />
             <Divider />
             <AllCollectionContent
-                collectionTile={AllCollectionTile}
                 collectionSummaries={sortedCollectionSummaries}
                 onCollectionClick={onCollectionClick}
             />

@@ -2,22 +2,33 @@ import { Dialog, Slide, styled } from '@mui/material';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export const AllCollectionContainer = styled(Dialog)(({ theme }) => ({
+export const AllCollectionDialog = styled(Dialog)<{
+    position: 'flex-start' | 'center' | 'flex-end';
+}>(({ theme, position }) => ({
     '& .MuiDialog-container': {
-        justifyContent: 'flex-end',
+        justifyContent: position,
     },
     '& .MuiPaper-root': {
-        maxWidth: '498px',
+        maxWidth: '494px',
     },
     '& .MuiDialogTitle-root': {
-        padding: theme.spacing(3, 2),
+        padding: theme.spacing(2),
+        paddingRight: theme.spacing(1),
     },
     '& .MuiDialogContent-root': {
         padding: theme.spacing(2),
     },
+    [theme.breakpoints.down(559)]: {
+        '& .MuiPaper-root': {
+            width: '324px',
+        },
+        '& .MuiDialogContent-root': {
+            padding: 6,
+        },
+    },
 }));
 
-AllCollectionContainer.propTypes = {
+AllCollectionDialog.propTypes = {
     children: PropTypes.node,
     onClose: PropTypes.func.isRequired,
 };
