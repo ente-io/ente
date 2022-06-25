@@ -120,19 +120,19 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       child: PageView(
         children: [
           FeatureItemWidget(
-            "assets/protected.png",
+            "assets/onboarding_lock.png",
             "Private backups",
             "for your memories",
             "End-to-end encrypted by default",
           ),
           FeatureItemWidget(
-            "assets/preserved.png",
+            "assets/onboarding_safe.png",
             "Safely stored",
             "at a fallout shelter",
             "Designed to outlive",
           ),
           FeatureItemWidget(
-            "assets/synced.png",
+            "assets/onboarding_lock.png",
             "Available",
             "everywhere",
             Platform.isAndroid

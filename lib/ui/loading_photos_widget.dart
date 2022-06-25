@@ -95,12 +95,12 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                   children: [
                     isLightMode
                         ? Image.asset(
-                            'assets/loading_photos_light.png',
+                            'assets/loading_photos_background.png',
                             color: Colors.white.withOpacity(0.5),
                             colorBlendMode: BlendMode.modulate,
                           )
                         : Image.asset(
-                            'assets/loading_photos_light.png',
+                            'assets/loading_photos_background_dark.png',
                             color: Colors.white.withOpacity(0.25),
                             colorBlendMode: BlendMode.modulate,
                           ),

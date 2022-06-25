@@ -34,8 +34,8 @@ class _LockScreenState extends State<LockScreen> {
               children: [
                 Image.asset(
                   MediaQuery.of(context).platformBrightness == Brightness.light
-                      ? 'assets/loading_photos_light.png'
-                      : 'assets/loading_photos_dark.png',
+                      ? 'assets/loading_photos_background.png'
+                      : 'assets/loading_photos_background_dark.png',
                 ),
                 SizedBox(
                   width: 172,
