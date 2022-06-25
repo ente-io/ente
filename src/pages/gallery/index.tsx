@@ -51,7 +51,8 @@ import {
 import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
 import CollectionSelector, {
     CollectionSelectorAttributes,
-} from 'components/pages/gallery/CollectionSelector';
+} from 'components/Collections/CollectionSelector';
+
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from 'components/Collections/CollectionNamer';

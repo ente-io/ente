@@ -29,7 +29,7 @@ export function SubscriptionCardContent({
 
     return (
         <SpaceBetweenFlex
-            flex={1}
+            height={'100%'}
             flexDirection={'column'}
             padding={'20px 16px'}>
             <StorageSection

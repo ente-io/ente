@@ -1,7 +1,7 @@
 import { BackgroundOverlay } from './backgroundOverlay';
 import { ClickOverlay } from './clickOverlay';
 import React, { useContext } from 'react';
-import { Skeleton } from '@mui/material';
+import { Box, Skeleton } from '@mui/material';
 import { UserDetails } from 'types/user';
 
 import { GalleryContext } from 'pages/gallery';
@@ -11,7 +11,6 @@ import {
     isPartOfFamily,
 } from 'utils/billing';
 import { SubscriptionCardContent } from './contentOverlay';
-import { FlexWrapper } from 'components/Container';
 
 const SUBSCRIPTION_CARD_SIZE = 152;
 
@@ -42,10 +41,7 @@ export default function SubscriptionCard({
         !isFamilyAdmin(userDetails.familyData);
 
     return (
-        <FlexWrapper
-            flexDirection={'column'}
-            position="relative"
-            height={SUBSCRIPTION_CARD_SIZE}>
+        <Box position="relative" height={SUBSCRIPTION_CARD_SIZE}>
             <SubscriptionCardContent
                 hasNonAdminFamilyMembers={hasNonAdminFamilyMembers}
                 userDetails={userDetails}
@@ -58,6 +54,6 @@ export default function SubscriptionCard({
                         : showPlanSelectorModal
                 }
             />
-        </FlexWrapper>
+        </Box>
     );
 }
