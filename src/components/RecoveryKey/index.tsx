@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { downloadAsFile } from 'utils/file';
 import { getRecoveryKey } from 'utils/crypto';
 import constants from 'utils/strings/constants';
@@ -8,6 +8,7 @@ import { ButtonProps, Typography } from '@mui/material';
 import * as bip39 from 'bip39';
 import { DashedBorderWrapper } from './styledComponents';
 import { DialogBoxAttributes } from 'types/dialogBox';
+import { AppContext } from 'pages/_app';
 
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
@@ -21,7 +22,9 @@ interface Props {
 }
 
 function RecoveryKey({ somethingWentWrong, ...props }: Props) {
+    const appContext = useContext(AppContext);
     const [recoveryKey, setRecoveryKey] = useState(null);
+
     useEffect(() => {
         if (!props.show) {
             return;
@@ -59,6 +62,8 @@ function RecoveryKey({ somethingWentWrong, ...props }: Props) {
 
     return (
         <DialogBox
+            titleCloseButton
+            fullScreen={appContext.isMobile}
             open={props.show}
             onClose={props.onHide}
             size="sm"

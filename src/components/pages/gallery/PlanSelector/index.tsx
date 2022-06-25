@@ -160,7 +160,7 @@ function PlanSelector(props: Props) {
 
     return (
         <DialogBoxBase
-            fullScreen={appContext.isSmallDisplay}
+            fullScreen={appContext.isMobile}
             open={props.modalView}
             onClose={props.closeModal}
             maxWidth={'xl'}
