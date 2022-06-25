@@ -777,17 +777,19 @@ export function getCollectionSummaries(
     const user: User = getData(LS_KEYS.USER);
 
     for (const collection of collections) {
-        collectionSummaries.set(collection.id, {
-            id: collection.id,
-            name: collection.name,
-            latestFile: collectionLatestFiles.get(collection.id),
-            fileCount: collectionFilesCount.get(collection.id) ?? 0,
-            updationTime: collection.updationTime,
-            type:
-                collection.owner.id !== user.id
-                    ? CollectionType.shared
-                    : collection.type,
-        });
+        if (collectionFilesCount.get(collection.id)) {
+            collectionSummaries.set(collection.id, {
+                id: collection.id,
+                name: collection.name,
+                latestFile: collectionLatestFiles.get(collection.id),
+                fileCount: collectionFilesCount.get(collection.id),
+                updationTime: collection.updationTime,
+                type:
+                    collection.owner.id !== user.id
+                        ? CollectionType.shared
+                        : collection.type,
+            });
+        }
     }
     collectionSummaries.set(
         ALL_SECTION,
@@ -813,7 +815,7 @@ export function getCollectionSummaries(
         )
     );
 
-    return filterOutEmptyCollectionSummary(collectionSummaries);
+    return collectionSummaries;
 }
 
 function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
@@ -884,13 +886,4 @@ function getTrashedCollectionSummaries(
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(TRASH_SECTION)?.updationTime,
     };
-}
-
-function filterOutEmptyCollectionSummary(
-    collectionSummaries: CollectionSummaries
-) {
-    return new Map(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        [...collectionSummaries.entries()].filter(([_, v]) => v.fileCount > 0)
-    ) as CollectionSummaries;
 }

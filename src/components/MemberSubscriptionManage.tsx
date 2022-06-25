@@ -1,4 +1,4 @@
-import { Button, DialogContent, Typography } from '@mui/material';
+import { Box, Button, DialogContent, Typography } from '@mui/material';
 import VerticallyCentered from 'components/Container';
 import DialogBoxBase from 'components/DialogBox/base';
 import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
@@ -8,7 +8,7 @@ import billingService from 'services/billingService';
 import { getFamilyPlanAdmin } from 'utils/billing';
 import constants from 'utils/strings/constants';
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {
-    const { setDialogMessage } = useContext(AppContext);
+    const { setDialogMessage, isMobile } = useContext(AppContext);
 
     async function onLeaveFamilyClick() {
         try {
@@ -40,7 +40,11 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
     }
 
     return (
-        <DialogBoxBase open={open} onClose={onClose} maxWidth="xs">
+        <DialogBoxBase
+            open={open}
+            onClose={onClose}
+            maxWidth="xs"
+            fullScreen={isMobile}>
             <DialogTitleWithCloseButton onClose={onClose}>
                 <Typography variant="h3">{constants.SUBSCRIPTION}</Typography>
                 <Typography color={'text.secondary'}>
@@ -49,12 +53,14 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <VerticallyCentered>
-                    <Typography color="text.secondary">
-                        {constants.FAMILY_SUBSCRIPTION_INFO}
-                    </Typography>
-                    <Typography>
-                        {getFamilyPlanAdmin(userDetails.familyData)?.email}
-                    </Typography>
+                    <Box mb={4}>
+                        <Typography color="text.secondary">
+                            {constants.FAMILY_SUBSCRIPTION_INFO}
+                        </Typography>
+                        <Typography>
+                            {getFamilyPlanAdmin(userDetails.familyData)?.email}
+                        </Typography>
+                    </Box>
                     <img
                         width="256px"
                         src="/images/family-plan/1x.png"
