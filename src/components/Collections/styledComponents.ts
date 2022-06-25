@@ -79,11 +79,8 @@ export const ResultPreviewTile = styled(CollectionTile)`
     border-radius: 4px;
 `;
 
-export const CollectionTileText = styled(Overlay)`
-    padding: 8px;
-`;
-
-export const CollectionBarTileText = styled(CollectionTileText)`
+export const CollectionBarTileText = styled(Overlay)`
+    padding: 4px;
     background: linear-gradient(
         180deg,
         rgba(0, 0, 0, 0.1) 0%,
@@ -93,7 +90,8 @@ export const CollectionBarTileText = styled(CollectionTileText)`
     align-items: flex-end;
 `;
 
-export const AllCollectionTileText = styled(CollectionTileText)`
+export const AllCollectionTileText = styled(Overlay)`
+    padding: 8px;
     background: linear-gradient(
         0deg,
         rgba(0, 0, 0, 0.1) 0%,
