@@ -89,8 +89,8 @@ export default function Collections(props: Iprops) {
             />
 
             <AllCollections
-                isOpen={allCollectionView}
-                close={() => setAllCollectionView(false)}
+                open={allCollectionView}
+                onClose={() => setAllCollectionView(false)}
                 collectionSummaries={collectionSummaries}
                 setActiveCollection={setActiveCollectionID}
             />

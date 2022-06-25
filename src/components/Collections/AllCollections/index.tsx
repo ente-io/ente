@@ -4,7 +4,7 @@ import { COLLECTION_SORT_BY } from 'constants/collection';
 import { sortCollectionSummaries } from 'services/collectionService';
 import {
     Transition,
-    AllCollectionContainer,
+    AllCollectionDialog,
 } from 'components/Collections/AllCollections/Container';
 import { useLocalState } from 'hooks/useLocalState';
 import { LS_KEYS } from 'utils/storage/localStorage';
@@ -15,8 +15,8 @@ import { AllCollectionTile } from '../styledComponents';
 import { isSystemCollection } from 'utils/collection';
 
 interface Iprops {
-    isOpen: boolean;
-    close: () => void;
+    open: boolean;
+    onClose: () => void;
     collectionSummaries: CollectionSummaries;
     setActiveCollection: (id?: number) => void;
 }
@@ -24,7 +24,7 @@ interface Iprops {
 const LeftSlideTransition = Transition('up');
 
 export default function AllCollections(props: Iprops) {
-    const { collectionSummaries, isOpen, close, setActiveCollection } = props;
+    const { collectionSummaries, open, onClose, setActiveCollection } = props;
 
     const [collectionSortBy, setCollectionSortBy] =
         useLocalState<COLLECTION_SORT_BY>(
@@ -45,14 +45,14 @@ export default function AllCollections(props: Iprops) {
 
     const onCollectionClick = (collectionID: number) => {
         setActiveCollection(collectionID);
-        close();
+        onClose();
     };
 
     return (
-        <AllCollectionContainer
+        <AllCollectionDialog
             TransitionComponent={LeftSlideTransition}
-            onClose={close}
-            open={isOpen}>
+            onClose={onClose}
+            open={open}>
             <AllCollectionsHeader
                 onClose={close}
                 collectionCount={props.collectionSummaries.size}
@@ -65,6 +65,6 @@ export default function AllCollections(props: Iprops) {
                 collectionSummaries={sortedCollectionSummaries}
                 onCollectionClick={onCollectionClick}
             />
-        </AllCollectionContainer>
+        </AllCollectionDialog>
     );
 }
