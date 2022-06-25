@@ -2,7 +2,7 @@ import { ManageLinkPassword } from './linkPassword';
 import { ManageDeviceLimit } from './deviceLimit';
 import { ManageLinkExpiry } from './linkExpiry';
 import { PublicLinkSetPassword } from '../setPassword';
-import { Stack } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import React, { useContext, useState } from 'react';
 import { updateShareableURL } from 'services/collectionService';
@@ -20,11 +20,11 @@ export default function PublicShareManage({
     publicShareProp,
     collection,
     setPublicShareProp,
-    setSharableLinkError,
 }) {
     const galleryContext = useContext(GalleryContext);
 
     const [changePasswordView, setChangePasswordView] = useState(false);
+    const [sharableLinkError, setSharableLinkError] = useState(null);
 
     const closeConfigurePassword = () => setChangePasswordView(false);
 
@@ -58,6 +58,16 @@ export default function PublicShareManage({
                 <ManageSectionLabel onClick={scrollToEnd}>
                     {constants.MANAGE_LINK}
                 </ManageSectionLabel>
+                {sharableLinkError && (
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            color: (theme) => theme.palette.danger.main,
+                            mt: 0.5,
+                        }}>
+                        {sharableLinkError}
+                    </Typography>
+                )}
                 <ManageSectionOptions>
                     <Stack spacing={1}>
                         <ManageLinkExpiry

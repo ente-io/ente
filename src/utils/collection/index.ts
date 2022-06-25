@@ -111,7 +111,7 @@ export async function downloadAllCollectionFiles(collectionID: number) {
     }
 }
 
-export async function appendCollectionKeyToShareURL(
+export function appendCollectionKeyToShareURL(
     url: string,
     collectionKey: string
 ) {
