@@ -1,6 +1,6 @@
 import { Dialog, DialogProps, styled } from '@mui/material';
 
-const DialogBoxBase = styled(Dialog)(({ theme }) => ({
+const DialogBoxBase = styled(Dialog)(({ fullScreen, theme }) => ({
     '& .MuiDialog-paper': {
         padding: theme.spacing(2, 0),
     },
@@ -10,17 +10,33 @@ const DialogBoxBase = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
         padding: theme.spacing(2, 3),
     },
-    '& .MuiDialogActions-root': {
-        padding: theme.spacing(2, 3),
-    },
+
     '& .MuiDialogActions-root button': {
+        width: '100%',
         fontSize: '18px',
         lineHeight: '21.78px',
         padding: theme.spacing(2),
     },
-    '& .MuiDialogActions-root button:not(:first-child)': {
-        marginLeft: theme.spacing(2),
-    },
+    ...(fullScreen
+        ? {
+              '& .MuiDialogActions-root': {
+                  padding: theme.spacing(2, 3),
+                  flexDirection: 'column-reverse',
+              },
+              '& .MuiDialogActions-root button:not(:first-child)': {
+                  margin: 0,
+                  marginBottom: theme.spacing(1),
+              },
+          }
+        : {
+              '& .MuiDialogActions-root': {
+                  padding: theme.spacing(2, 3),
+              },
+              '& .MuiDialogActions-root button:not(:first-child)': {
+                  margin: 0,
+                  marginLeft: theme.spacing(2),
+              },
+          }),
 }));
 
 DialogBoxBase.defaultProps = {

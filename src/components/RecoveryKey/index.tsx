@@ -62,6 +62,7 @@ function RecoveryKey({ somethingWentWrong, ...props }: Props) {
 
     return (
         <DialogBox
+            titleCloseButton
             fullScreen={appContext.isMobile}
             open={props.show}
             onClose={props.onHide}
