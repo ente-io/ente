@@ -2,8 +2,9 @@ import EmailShare from './emailShare';
 import React, { useContext } from 'react';
 import constants from 'utils/strings/constants';
 import { Collection } from 'types/collection';
-import { dialogCloseHandler } from 'components/DialogBox/base';
-import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
+import DialogTitleWithCloseButton, {
+    dialogCloseHandler,
+} from 'components/DialogBox/TitleWithCloseButton';
 import DialogContent from '@mui/material/DialogContent';
 import { Divider } from '@mui/material';
 

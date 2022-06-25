@@ -5,7 +5,7 @@ import React, { useContext } from 'react';
 import billingService from 'services/billingService';
 import { getFamilyPlanAdmin } from 'utils/billing';
 import constants from 'utils/strings/constants';
-import DialogTitleWithCloseButton from './DialogBox/titleWithCloseButton';
+import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {
     const { setDialogMessage, isMobile } = useContext(AppContext);
 

@@ -233,7 +233,7 @@ const darkThemeOptions = createTheme({
     typography: {
         body1: {
             fontSize: '16px',
-            lineHeight: '20px',
+            lineHeight: '19px',
         },
         body2: {
             fontSize: '14px',

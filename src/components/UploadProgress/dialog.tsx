@@ -8,8 +8,8 @@ import { InProgressSection } from './inProgressSection';
 import { ResultSection } from './resultSection';
 import { NotUploadSectionHeader } from './styledComponents';
 import { getOSSpecificDesktopAppDownloadLink } from 'utils/common';
-import { dialogCloseHandler } from 'components/DialogBox/base';
 import UploadProgressContext from 'contexts/uploadProgress';
+import { dialogCloseHandler } from 'components/DialogBox/TitleWithCloseButton';
 
 export function UploadProgressDialog() {
     const { open, onClose, uploadStage, finishedUploads } = useContext(

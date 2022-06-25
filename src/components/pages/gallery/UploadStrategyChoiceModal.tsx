@@ -1,8 +1,8 @@
-import { Button, Dialog, DialogContent } from '@mui/material';
+import { Button, Dialog, DialogContent, Typography } from '@mui/material';
 import { CenteredFlex, SpaceBetweenFlex } from 'components/Container';
-import { dialogCloseHandler } from 'components/DialogBox/base';
-import MessageText from 'components/DialogBox/messageText';
-import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
+import DialogTitleWithCloseButton, {
+    dialogCloseHandler,
+} from 'components/DialogBox/TitleWithCloseButton';
 import React from 'react';
 import constants from 'utils/strings/constants';
 
@@ -28,9 +28,9 @@ function UploadStrategyChoiceModal({
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <CenteredFlex mb={1}>
-                    <MessageText>
+                    <Typography color="text.secondary">
                         {constants.UPLOAD_STRATEGY_CHOICE}
-                    </MessageText>
+                    </Typography>
                 </CenteredFlex>
                 <SpaceBetweenFlex px={2}>
                     <Button

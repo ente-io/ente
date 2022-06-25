@@ -24,7 +24,7 @@ import { AppContext } from 'pages/_app';
 import Plans from './plans';
 import { Box, Dialog, DialogContent, styled } from '@mui/material';
 import { CenteredFlex } from 'components/Container';
-import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
+import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 
 interface Props {
     modalView: boolean;

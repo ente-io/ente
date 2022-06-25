@@ -5,7 +5,7 @@ import { RenderFileName } from './RenderFileName';
 import { ExifData } from './ExifData';
 import { RenderCreationTime } from './RenderCreationTime';
 import { RenderInfoItem } from './RenderInfoItem';
-import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
+import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 import { Dialog, DialogContent, Link, styled, Typography } from '@mui/material';
 import { AppContext } from 'pages/_app';
 
