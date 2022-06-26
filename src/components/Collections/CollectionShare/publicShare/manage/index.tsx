@@ -14,7 +14,7 @@ import {
     ManageSectionLabel,
     ManageSectionOptions,
 } from '../../styledComponents';
-import { ManageDownloadAccess } from './downloadAcess';
+import { ManageDownloadAccess } from './downloadAccess';
 
 export default function PublicShareManage({
     publicShareProp,
