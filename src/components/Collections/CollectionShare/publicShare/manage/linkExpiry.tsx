@@ -20,7 +20,7 @@ export function ManageLinkExpiry({
     };
     return (
         <Box>
-            <Typography>{constants.LINK_EXPIRY}</Typography>
+            <Typography mb={0.5}>{constants.LINK_EXPIRY}</Typography>
             <Select
                 menuPosition="fixed"
                 options={shareExpiryOptions}

@@ -1,37 +1,36 @@
 import { Box, Typography } from '@mui/material';
 import { FlexWrapper } from 'components/Container';
 import { ButtonVariant } from 'components/pages/gallery/LinkButton';
-import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
     createShareableURL,
     deleteShareableURL,
 } from 'services/collectionService';
-import { appendCollectionKeyToShareURL } from 'utils/collection';
+import { Collection, PublicURL } from 'types/collection';
 import { handleSharingErrors } from 'utils/error';
 import constants from 'utils/strings/constants';
 import PublicShareSwitch from './switch';
+interface Iprops {
+    collection: Collection;
+    publicShareActive: boolean;
+    setPublicShareProp: (value: PublicURL) => void;
+}
+
 export default function PublicShareControl({
-    publicShareUrl,
-    sharableLinkError,
     collection,
-    setPublicShareUrl,
-    setSharableLinkError,
-}) {
+    publicShareActive,
+    setPublicShareProp,
+}: Iprops) {
     const appContext = useContext(AppContext);
-    const galleryContext = useContext(GalleryContext);
+
+    const [sharableLinkError, setSharableLinkError] = useState(null);
 
     const createSharableURLHelper = async () => {
         try {
             appContext.startLoading();
             const publicURL = await createShareableURL(collection);
-            const sharableURL = await appendCollectionKeyToShareURL(
-                publicURL.url,
-                collection.key
-            );
-            setPublicShareUrl(sharableURL);
-            galleryContext.syncWithRemote(false, true);
+            setPublicShareProp(publicURL);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
             setSharableLinkError(errorMessage);
@@ -44,8 +43,7 @@ export default function PublicShareControl({
         try {
             appContext.startLoading();
             await deleteShareableURL(collection);
-            setPublicShareUrl(null);
-            galleryContext.syncWithRemote(false, true);
+            setPublicShareProp(null);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
             setSharableLinkError(errorMessage);
@@ -69,8 +67,7 @@ export default function PublicShareControl({
 
     const handleCollectionPublicSharing = () => {
         setSharableLinkError(null);
-
-        if (publicShareUrl) {
+        if (publicShareActive) {
             confirmDisablePublicSharing();
         } else {
             createSharableURLHelper();
@@ -86,7 +83,7 @@ export default function PublicShareControl({
                     sx={{
                         ml: 2,
                     }}
-                    checked={!!publicShareUrl}
+                    checked={publicShareActive}
                     onChange={handleCollectionPublicSharing}
                 />
             </FlexWrapper>
