@@ -70,15 +70,18 @@ class _ZoomableImageState extends State<ZoomableImage>
     Widget content;
 
     if (_imageProvider != null) {
-      content = PhotoView(
-        imageProvider: _imageProvider,
-        scaleStateChangedCallback: _scaleStateChangedCallback,
-        minScale: PhotoViewComputedScale.contained,
-        gaplessPlayback: true,
-        heroAttributes: PhotoViewHeroAttributes(
-          tag: widget.tagPrefix + _photo.tag(),
+      content = PhotoViewGestureDetectorScope(
+        axis: Axis.vertical,
+        child: PhotoView(
+          imageProvider: _imageProvider,
+          scaleStateChangedCallback: _scaleStateChangedCallback,
+          minScale: PhotoViewComputedScale.contained,
+          gaplessPlayback: true,
+          heroAttributes: PhotoViewHeroAttributes(
+            tag: widget.tagPrefix + _photo.tag(),
+          ),
+          backgroundDecoration: widget.backgroundDecoration,
         ),
-        backgroundDecoration: widget.backgroundDecoration,
       );
     } else {
       content = loadWidget;
