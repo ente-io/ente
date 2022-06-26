@@ -75,7 +75,7 @@ export default function SearchInput(props: Iprops) {
                 props.setOpen(true);
                 break;
             case SuggestionType.COLLECTION:
-                props.setActiveCollection(selectedOption.value as number);
+                search = { collection: selectedOption.value as number };
                 setValue(null);
                 break;
             case SuggestionType.IMAGE:

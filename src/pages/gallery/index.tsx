@@ -521,10 +521,15 @@ export default function Gallery() {
     };
 
     const updateSearch: UpdateSearch = (newSearch, summary) => {
-        setActiveCollection(ALL_SECTION);
-        setSearch(newSearch);
-        setSetSearchResultSummary(summary);
-        setIsInSearchMode(!!newSearch);
+        if (newSearch?.collection) {
+            setActiveCollection(newSearch?.collection);
+        } else {
+            setSearch(newSearch);
+            setSetSearchResultSummary(summary);
+        }
+        if (!newSearch?.collection && !search?.file) {
+            setIsInSearchMode(!!newSearch);
+        }
     };
 
     const closeCollectionSelector = (closeBtnClick?: boolean) => {
