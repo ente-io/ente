@@ -38,7 +38,6 @@ const FIRST_ALBUM_NAME = 'My First Album';
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
-    setBannerMessage: (message: string | JSX.Element) => void;
     droppedFiles: File[];
     clearDroppedFiles: () => void;
     closeCollectionSelector: () => void;

@@ -56,7 +56,6 @@ import CollectionSelector, {
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from 'components/Collections/CollectionNamer';
-import AlertBanner from 'components/pages/gallery/AlertBanner';
 import PlanSelector from 'components/pages/gallery/PlanSelector';
 import Upload from 'components/pages/gallery/Upload';
 import {
@@ -141,7 +140,7 @@ export default function Gallery() {
 
     const [files, setFiles] = useState<EnteFile[]>(null);
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
-    const [bannerMessage, setBannerMessage] = useState<JSX.Element | string>();
+
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
@@ -625,7 +624,6 @@ export default function Gallery() {
                     closeModal={() => setPlanModalView(false)}
                     setLoading={setBlockingLoad}
                 />
-                <AlertBanner bannerMessage={bannerMessage} />
                 <Notification
                     open={notificationView}
                     onClose={closeNotification}
@@ -672,7 +670,6 @@ export default function Gallery() {
 
                 <Upload
                     syncWithRemote={syncWithRemote}
-                    setBannerMessage={setBannerMessage}
                     droppedFiles={droppedFiles}
                     clearDroppedFiles={() => setDroppedFiles([])}
                     showCollectionSelector={setCollectionSelectorView.bind(
