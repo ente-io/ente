@@ -8,7 +8,7 @@ import { GalleryContext } from 'pages/gallery';
 import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
-import LivePhotoIndicatorOverlay from 'components/icons/LivePhotoIndicatorOverlay';
+import LivePhotoIndicatorOverlay from '@mui/icons-material/LightMode';
 import { isLivePhoto } from 'utils/file';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { logError } from 'utils/sentry';

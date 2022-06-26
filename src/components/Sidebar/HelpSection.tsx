@@ -2,7 +2,6 @@ import React, { useContext, useState } from 'react';
 import SidebarButton from './Button';
 import constants from 'utils/strings/constants';
 import ExportModal from 'components/ExportModal';
-import InProgressIcon from 'components/icons/InProgressIcon';
 import exportService from 'services/exportService';
 import { convertBytesToHumanReadable } from 'utils/billing';
 import { getEndpoint } from 'utils/common/apiUtil';
@@ -13,6 +12,7 @@ import { AppContext } from 'pages/_app';
 import { useLocalState } from 'hooks/useLocalState';
 import { LS_KEYS } from 'utils/storage/localStorage';
 import { UserDetails } from 'types/user';
+import EnteSpinner from 'components/EnteSpinner';
 
 export default function HelpSection() {
     const [userDetails] = useLocalState<UserDetails>(LS_KEYS.USER_DETAILS);
@@ -36,7 +36,7 @@ export default function HelpSection() {
         } else {
             setDialogMessage({
                 title: constants.DOWNLOAD_APP,
-                content: constants.DOWNLOAD_APP_MESSAGE(),
+                content: constants.DOWNLOAD_APP_MESSAGE,
 
                 proceed: {
                     text: constants.DOWNLOAD,
@@ -66,7 +66,7 @@ export default function HelpSection() {
                 <div style={{ display: 'flex' }}>
                     {constants.EXPORT}
                     <div style={{ width: '20px' }} />
-                    {exportService.isExportInProgress() && <InProgressIcon />}
+                    {exportService.isExportInProgress() && <EnteSpinner />}
                 </div>
             </SidebarButton>
             <ExportModal

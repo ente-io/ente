@@ -7,7 +7,7 @@ import {
     formatDateTime,
     updateExistingFilePubMetadata,
 } from 'utils/file';
-import EditIcon from 'components/icons/EditIcon';
+import EditIcon from '@mui/icons-material/Edit';
 import { Label, Row, Value } from 'components/Container';
 import { logError } from 'utils/sentry';
 import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';

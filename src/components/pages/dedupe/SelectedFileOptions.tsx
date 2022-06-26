@@ -1,7 +1,6 @@
 import { FluidContainer } from 'components/Container';
 import { SelectionBar } from '../../Navbar/SelectionBar';
 import constants from 'utils/strings/constants';
-import DeleteIcon from 'components/icons/DeleteIcon';
 import React, { useContext } from 'react';
 import { Box, IconButton, styled } from '@mui/material';
 import { DeduplicateContext } from 'pages/deduplicate';
@@ -9,6 +8,7 @@ import { IconWithMessage } from 'components/IconWithMessage';
 import { AppContext } from 'pages/_app';
 import CloseIcon from '@mui/icons-material/Close';
 import BackButton from '@mui/icons-material/ArrowBackOutlined';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const VerticalLine = styled('div')`
     position: absolute;
@@ -64,7 +64,7 @@ export default function DeduplicateOptions({
                         <BackButton />
                     </IconButton>
                 )}
-                <Box ml={'12px'}>
+                <Box ml={1.5}>
                     {count} {constants.SELECTED}
                 </Box>
             </FluidContainer>

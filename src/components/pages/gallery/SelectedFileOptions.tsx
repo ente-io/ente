@@ -17,7 +17,7 @@ import { AppContext } from 'pages/_app';
 import { Box, IconButton, Stack, Tooltip } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import RestoreIcon from '@mui/icons-material/Restore';
-import AddIcon from 'components/icons/AddIcon';
+import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ClockIcon from '@mui/icons-material/AccessTime';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -138,7 +138,7 @@ const SelectedFileOptions = ({
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
                 </IconButton>
-                <Box ml={'12px'}>
+                <Box ml={1.5}>
                     {count} {constants.SELECTED}
                 </Box>
             </FluidContainer>

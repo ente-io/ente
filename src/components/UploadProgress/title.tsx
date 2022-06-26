@@ -11,9 +11,9 @@ import {
 import { SpaceBetweenFlex } from 'components/Container';
 import { UPLOAD_STAGES } from 'constants/upload';
 import constants from 'utils/strings/constants';
-import { MaximizeIcon } from 'components/icons/Maximize';
-import { MinimizeIcon } from 'components/icons/Minimize';
 import UploadProgressContext from 'contexts/uploadProgress';
+import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
+import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 
 const IconButtonWithBG = styled(IconButton)(({ theme }) => ({
     backgroundColor: theme.palette.secondary.main,
@@ -53,7 +53,7 @@ export function UploadProgressTitle() {
                 <Box>
                     <Stack direction={'row'} spacing={1}>
                         <IconButtonWithBG onClick={toggleExpanded}>
-                            {expanded ? <MinimizeIcon /> : <MaximizeIcon />}
+                            {expanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
                         </IconButtonWithBG>
                         <IconButtonWithBG onClick={onClose}>
                             <Close />

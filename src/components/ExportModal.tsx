@@ -15,10 +15,10 @@ import { Label, Row, Value } from './Container';
 import ExportFinished from './ExportFinished';
 import ExportInit from './ExportInit';
 import ExportInProgress from './ExportInProgress';
-import FolderIcon from './icons/FolderIcon';
-import InProgressIcon from './icons/InProgressIcon';
+import FolderIcon from '@mui/icons-material/Folder';
 import DialogBox from './DialogBox';
 import { ExportStage, ExportType } from 'constants/export';
+import EnteSpinner from './EnteSpinner';
 
 const FolderIconWrapper = styled('div')`
     width: 15%;
@@ -354,7 +354,7 @@ export default function ExportModal(props: Props) {
                 <Row>
                     <Label width="40%">{constants.TOTAL_EXPORT_SIZE} </Label>
                     <Value width="60%">
-                        {exportSize ? `${exportSize}` : <InProgressIcon />}
+                        {exportSize ? `${exportSize}` : <EnteSpinner />}
                     </Value>
                 </Row>
             </div>
