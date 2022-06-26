@@ -141,9 +141,11 @@ class _DetailPageState extends State<DetailPage> {
           autoPlay: !_hasPageChanged,
           tagPrefix: widget.config.tagPrefix,
           shouldDisableScroll: (value) {
-            setState(() {
-              _shouldDisableScroll = value;
-            });
+            if (_shouldDisableScroll != value) {
+              setState(() {
+                _shouldDisableScroll = value;
+              });
+            }
           },
           playbackCallback: (isPlaying) {
             _shouldHideAppBar = isPlaying;
