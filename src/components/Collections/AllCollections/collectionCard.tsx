@@ -19,7 +19,7 @@ export default function AllCollectionCard({
             collectionTile={AllCollectionTile}
             latestFile={collectionSummary.latestFile}
             onClick={() => onCollectionClick(collectionSummary.id)}>
-            <AllCollectionTileText zIndex={1}>
+            <AllCollectionTileText>
                 <Typography>{collectionSummary.name}</Typography>
                 <Typography variant="body2" color="text.secondary">
                     {constants.PHOTO_COUNT(collectionSummary.fileCount)}

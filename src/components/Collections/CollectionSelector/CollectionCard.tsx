@@ -18,7 +18,7 @@ export default function CollectionSelectorCard({
             collectionTile={AllCollectionTile}
             latestFile={collectionSummary.latestFile}
             onClick={() => onCollectionClick(collectionSummary.id)}>
-            <AllCollectionTileText zIndex={1}>
+            <AllCollectionTileText>
                 <Typography>{collectionSummary.name}</Typography>
             </AllCollectionTileText>
         </CollectionCard>

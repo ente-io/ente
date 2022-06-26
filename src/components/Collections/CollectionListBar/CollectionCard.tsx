@@ -22,7 +22,7 @@ const CollectionListBarCard = React.forwardRef((props: Iprops, ref: any) => {
     return (
         <Box ref={ref}>
             <CollectionCard collectionTile={CollectionBarTile} {...others}>
-                <CollectionBarTileText zIndex={1}>
+                <CollectionBarTileText>
                     <TruncateText text={collectionName} />
                 </CollectionBarTileText>
             </CollectionCard>

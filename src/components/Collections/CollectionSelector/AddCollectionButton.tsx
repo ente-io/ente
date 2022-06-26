@@ -24,12 +24,12 @@ export default function AddCollectionButton({ showNextModal }: Iprops) {
             collectionTile={AllCollectionTile}
             onClick={() => showNextModal()}
             latestFile={null}>
-            <AllCollectionTileText zIndex={1}>
+            <AllCollectionTileText>
                 <Typography variant="body2" fontWeight={'bold'}>
                     {constants.CREATE_COLLECTION}
                 </Typography>
             </AllCollectionTileText>
-            <ImageContainer zIndex={0}>
+            <ImageContainer>
                 <CenteredFlex>+</CenteredFlex>
             </ImageContainer>
         </CollectionCard>
