@@ -58,7 +58,7 @@ export default function PublicShareManage({
                     {constants.MANAGE_LINK}
                 </ManageSectionLabel>
                 <ManageSectionOptions>
-                    <Stack spacing={'12px'}>
+                    <Stack spacing={1.5}>
                         <ManageLinkExpiry
                             collection={collection}
                             publicShareProp={publicShareProp}

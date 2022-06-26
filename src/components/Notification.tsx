@@ -48,7 +48,7 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
                 sx={{
                     textAlign: 'left',
                     width: '320px',
-                    padding: '12px 16px',
+                    padding: (theme) => theme.spacing(1.5, 2),
                 }}>
                 <Stack
                     flex={'1'}

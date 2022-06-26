@@ -19,10 +19,10 @@ const ShortcutButton: FC<ButtonProps<'button', IProps>> = ({
         <SidebarButton
             variant="contained"
             color="secondary"
-            sx={{ px: '12px' }}
+            sx={{ px: 1.5 }}
             {...props}>
             <Typography variant="body2" display={'flex'} alignItems="center">
-                <Box mr={'12px'}>{icon}</Box>
+                <Box mr={1.5}>{icon}</Box>
                 {label}
                 {count > 0 && (
                     <Box sx={{ color: 'text.secondary' }}>
