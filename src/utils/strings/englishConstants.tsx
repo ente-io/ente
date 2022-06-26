@@ -741,6 +741,19 @@ const englishConstants = {
     MONTH_SHORT: 'mo',
     YEAR_SHORT: 'yr',
     FAMILY_PLAN: 'Family plan',
+    DOWNLOAD_LOGS: 'Download logs',
+    DOWNLOAD_LOGS_MESSAGE: () => (
+        <>
+            <p>
+                This will download debug logs, which you can email to us to help
+                debug your issue.
+            </p>
+            <p>
+                Please note that file names will be included to help track
+                issues with specific files."
+            </p>
+        </>
+    ),
 };
 
 export default englishConstants;
