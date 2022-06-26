@@ -14,7 +14,7 @@ export function IndividualUsageSection({ userDetails }) {
                 }
             />
             <SpaceBetweenFlex
-                style={{
+                sx={{
                     marginTop: 1.5,
                 }}>
                 <Typography variant="caption">{`${makeHumanReadableStorage(

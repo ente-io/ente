@@ -27,7 +27,7 @@ export function FamilyUsageSection({
                 userDetails={userDetails}
             />
             <SpaceBetweenFlex
-                style={{
+                sx={{
                     marginTop: 1.5,
                 }}>
                 <Stack direction={'row'} spacing={1.5}>
