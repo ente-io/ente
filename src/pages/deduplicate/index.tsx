@@ -52,7 +52,7 @@ export default function Deduplicate() {
         collectionID: 0,
     });
     const closeDeduplication = function () {
-        Router.back();
+        Router.push(PAGES.GALLERY);
     };
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
